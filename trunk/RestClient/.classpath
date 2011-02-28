@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="com/kalicinscy/web/restclient/config/|com/kalicinscy/web/restclient/server/|com/kalicinscy/web/restclient/shared/" kind="src" path="src"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/jarrod/Documents/sdk/gwt-html5-database-1.5.2/gwt-html5-database.jar" sourcepath="C:/Users/jarrod/Documents/sdk/gwt-db/gwt-mobile-webkit-read-only/gwt-mobile-webkit/database/database">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Users/jarrod/Documents/sdk/gwt-html5-database-1.5.2/doc/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="C:/Users/jarrod/Documents/sdk/gwt-logger/gwt-log-3.1.0.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/jarrod/Documents/sdk/gwt-logger/gwt-log-3.1.0-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="C:/Users/jarrod/Documents/eclipse-workspace/XMLHttpRequest2/build/jar/gwt-xmlhttp-request-l2-library.jar" sourcepath="/XMLHttpRequest2"/>
+	<classpathentry kind="output" path="war/WEB-INF/classes"/>
+</classpath>
