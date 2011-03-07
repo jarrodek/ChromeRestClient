@@ -8,6 +8,7 @@ import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -116,7 +117,7 @@ public class ResponseView extends Composite {
 		verticalPanel.add(responsePanel);
 		verticalPanel.setCellWidth(responsePanel, "100%");
 		
-		mainGrid = new Grid(gridRows, gridCols);
+		mainGrid = new Grid(5, gridCols);
 		mainGrid.setCellSpacing(gridSpacing);
 		mainGrid.setCellPadding(gridSpacing);
 		responsePanel.setContent(mainGrid);
@@ -333,11 +334,26 @@ public class ResponseView extends Composite {
 			mainGrid.getRowFormatter().setVisible(bodyRowNo, false);
 			return;
 		}
+		
+		VerticalPanel vp = new VerticalPanel();
+		vp.setSize("100%", "auto");
+		
+		Anchor newWindow = new Anchor("Open HTML output in new window");
+		newWindow.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				writeRawBody(body);
+			}
+		});
+		vp.add(newWindow);
 		TextArea bodyArea = new TextArea();
 		bodyArea.setText(body);
 		bodyArea.getElement().setId("bodyArea");
 		bodyArea.setStylePrimaryName("response-body-area");
-		mainGrid.setWidget(bodyRowNo, 1, bodyArea);
+		vp.add(bodyArea);
+		HTML lblNewLabel = new HTML("Code highlighting thanks to <a href=\"http://codemirror.net/\">Code Mirror</a>");
+		vp.add(lblNewLabel);
+		mainGrid.setWidget(bodyRowNo, 1, vp);
 		initCodeMirror(bodyArea.getElement());
 	}
 	/**
@@ -359,10 +375,6 @@ public class ResponseView extends Composite {
 		minHeight: 600
 		});
 	}-*/;
-
-//	public void reset() {
-//		
-//	}
 	
 	/**
 	 * Sets errorView flag.
@@ -371,6 +383,10 @@ public class ResponseView extends Composite {
 	 */
 	public void setErrorView() {
 		mainGrid.getRowFormatter().setVisible(bodyRowNo, false);
-		
 	}
+	
+	private final native void writeRawBody(String body)/*-{
+		var wnd = $wnd.open();
+		wnd.document.body.innerHTML = body;
+	}-*/;
 }

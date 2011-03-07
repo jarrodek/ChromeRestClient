@@ -3,6 +3,7 @@ package com.kalicinscy.web.restclient.client;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -28,6 +29,7 @@ import com.kalicinscy.web.restclient.client.events.SaveAndRestoreFormHandler;
 import com.kalicinscy.web.restclient.client.request.RequestDataFormatter;
 import com.kalicinscy.web.restclient.client.request.RequestParameters;
 import com.kalicinscy.web.restclient.client.request.ViewParameters;
+import com.kalicinscy.web.restclient.client.ui.FilesForm.FilesObject;
 import com.kalicinscy.web.restclient.client.ui.MainForm;
 import com.kalicinscy.web.restclient.client.ui.ResponseView;
 
@@ -131,7 +133,7 @@ public class RestClient implements EntryPoint {
 		boolean useFormData = false;
 		
 		String data = REST_PARAMS.getData();
-		FileList files = REST_PARAMS.getFormFiles();
+		List<FilesObject> files = REST_PARAMS.getFilesList();
 		if( files != null && files.size() > 0 ){ //FormData only with files to handle correct data body and headers!!
 			useFormData = true;
 		}
@@ -162,22 +164,27 @@ public class RestClient implements EntryPoint {
 		}
 		
 		if( useFormData && files != null && files.size() > 0 ){
-			String fileName = RestClient.REST_PARAMS.getFileFieldName();
-			int len = files.size();
-			for( int i = 0; i < len; i++ ){
-				File f = files.get(i);
-				//Log.debug( f.getName() );
-				fd.append(fileName, f);
-				isEmptyFormData = false;
-				hasFile = true;
+			
+			Iterator<FilesObject> fit = files.iterator();
+			while( fit.hasNext() ){
+				FilesObject fobj = fit.next();
+				FileList fls = fobj.getFiles();
+				String fieldName = fobj.getName();
+				int len = fls.size();
+				for( int i = 0; i < len; i++ ){
+					File f = fls.get(i);
+					fd.append(fieldName, f);
+					isEmptyFormData = false;
+					hasFile = true;
+				}
 			}
 		}
 		
 		if( !isEmptyFormData ){
 			builder.setRequestFormData(fd);
 		}
-		builder.setTimeoutMillis(500);
-		builder.setWithCredentials(true);
+		//builder.setTimeoutMillis(500);
+		//builder.setWithCredentials(true);
 		
 		LinkedHashMap<String, String> headers = REST_PARAMS.getHeaders();
 		if( method.equals("POST") || method.equals("PUT") ){
@@ -235,7 +242,7 @@ public class RestClient implements EntryPoint {
 			@Override
 			public void onProgress(ProgressEvent event) {
 				//Log.debug("XMLHttpRequest2 callback","onProgress");
-				requestInProgress = false;
+				//requestInProgress = false;
 			}
 		});
 		builder.setTimeoutHandler(new TimeoutHandler() {
@@ -278,6 +285,39 @@ public class RestClient implements EntryPoint {
 		root.add(responseView);
 		
 		responseView.setResponseBody(response.getResponseText());
+		
+//		
+//		NOT SUPPORTED BY BROWSER YET :(
+//		
+//		Blob a = response.getResponseBlob();
+//		FileReader reader = FileReader.create();
+//		reader.addProgressHandler( new FileReaderProgressEvent() {
+//			
+//			@Override
+//			public void onProgress(File file, Double loaded, Double total) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//			
+//			@Override
+//			public void onLoad(File file) {
+//				// TODO Auto-generated method stub
+//				String res = file.getResult();
+//				Log.debug(res);
+//			}
+//			
+//			@Override
+//			public void onError(File file, FileError error) {
+//				Log.debug("Error :(");
+//			}
+//			
+//			@Override
+//			public void onAbort(File file) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//		});
+//		reader.readAsDataURL(a);
 	}
 	
 	private void onFailureRequest(Response response){

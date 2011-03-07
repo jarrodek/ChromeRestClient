@@ -2,6 +2,7 @@ package com.kalicinscy.web.restclient.client.request;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
@@ -11,7 +12,6 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.xhr2.client.FileList;
 import com.kalicinscy.web.restclient.client.events.FormEncodingChangeHandler;
 import com.kalicinscy.web.restclient.client.events.HeadersChangedEvent;
 import com.kalicinscy.web.restclient.client.events.HeadersChangedEventHandler;
@@ -23,6 +23,7 @@ import com.kalicinscy.web.restclient.client.events.UrlChangedEvent;
 import com.kalicinscy.web.restclient.client.events.UrlChangedEventHandler;
 import com.kalicinscy.web.restclient.client.storage.LocalStorage;
 import com.kalicinscy.web.restclient.client.storage.RestForm;
+import com.kalicinscy.web.restclient.client.ui.FilesForm.FilesObject;
 
 public class RequestParameters {
 	
@@ -45,8 +46,6 @@ public class RequestParameters {
 		data.put("post", post);
 		JSONString method = this.method == null ? new JSONString("null"): new JSONString(this.method);
 		data.put("method", method);
-		JSONString fileName = this.fileFieldName == null ? new JSONString("null"): new JSONString(this.fileFieldName);
-		data.put("fileName", fileName);
 		data.put("formEncoding", new JSONString(this.formEncoding));
 		JSONArray headersArray = new JSONArray();
 		if( this.headers != null ){
@@ -127,10 +126,6 @@ public class RequestParameters {
 		if( method != null ){
 			this.setMethod(method);
 		}
-		String fileName = getJsonStringData(obj, "fileName");
-		if( fileName != null ){
-			this.setFileFieldName(fileName);
-		}
 		
 		JSONArray headersArray = obj.get("headers").isArray();
 		if(headersArray != null) {
@@ -193,13 +188,9 @@ public class RequestParameters {
 	/**
 	 * NOT PERSISTANT VALUE!
 	 * This data will not be stored in Storage!
-	 * It is a file objects from input file.
+	 * It is a file objects from input file form.
 	 */
-	private FileList formFiles = null;
-	/**
-	 * form field name for File Input.
-	 */
-	private String fileFieldName = null;
+	private List<FilesObject> filesList = null;
 	
 	/**
 	 * Set new POST data.
@@ -333,26 +324,8 @@ public class RequestParameters {
 		this.postData = null;
 		this.method = "GET"; //default
 		this.headers = new LinkedHashMap<String, String>();
-		this.formFiles = null;
-		this.fileFieldName = "fileUpload";
 		this.formEncoding = "application/x-www-form-urlencoded";
 	}
-	/**
-	 * @param list the formFiles to set
-	 */
-	public void setFormFiles(FileList list) {
-		this.formFiles = list;
-	}
-
-
-	/**
-	 * @return the formFiles
-	 */
-	public FileList getFormFiles() {
-		return formFiles;
-	}
-
-
 	/**
 	 * Adds a {@link com.kalicinscy.web.restclient.client.events.UrlChangedEvent} handler
 	 * to be informed of changes to the Request URL parameter.
@@ -411,17 +384,16 @@ public class RequestParameters {
 	}
 
 	/**
-	 * @param fileFieldName the fileFieldName to set
+	 * @param filesList the filesList to set
 	 */
-	public void setFileFieldName(String fileFieldName) {
-		this.fileFieldName = fileFieldName;
+	public void setFilesList(List<FilesObject> filesList) {
+		this.filesList = filesList;
 	}
 
-
 	/**
-	 * @return the fileFieldName
+	 * @return the filesList
 	 */
-	public String getFileFieldName() {
-		return fileFieldName;
+	public List<FilesObject> getFilesList() {
+		return filesList;
 	}
 }
