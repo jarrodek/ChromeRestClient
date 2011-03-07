@@ -22,9 +22,7 @@
 		<mkdir dir="${extension.src}" />
 		<copy todir="${extension.src}">
 			<fileset dir="war/">
-				<exclude name="**/restconfig/"/>
 				<exclude name="**/WEB-INF/"/>
-				<exclude name="**/Config.*"/>
 			</fileset>
 		</copy>
 		<copy todir="${extension.src}">
