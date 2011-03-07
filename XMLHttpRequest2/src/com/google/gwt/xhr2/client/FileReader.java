@@ -35,7 +35,11 @@ public class FileReader extends JavaScriptObject {
 	 */
 	public final native void addProgressHandler(FileReaderProgressEvent handler)/*-{
 		this.onload = $entry(function(e) {
+			//$wnd.console.log(e);
 			handler.@com.google.gwt.xhr2.client.FileReaderProgressEvent::onLoad(Lcom/google/gwt/xhr2/client/File;)(e.target);
+		});
+		this.onloadend = $entry(function(e) {
+			//$wnd.console.log('loadEnd',e);
 		});
 		this.abort = $entry(function(e) {
 			handler.@com.google.gwt.xhr2.client.FileReaderProgressEvent::onAbort(Lcom/google/gwt/xhr2/client/File;)(e.target);
@@ -46,12 +50,14 @@ public class FileReader extends JavaScriptObject {
 				loaded = e.loaded;
 				total = e.total;
 			}
+			//$wnd.console.log("progress",loaded,total);
 			handler.@com.google.gwt.xhr2.client.FileReaderProgressEvent::onProgress(Lcom/google/gwt/xhr2/client/File;Ljava/lang/Double;Ljava/lang/Double;)(e.target,loaded,total);
 		});
 		this.onerror = $entry(function(e) {
-			//var error = @com.kalicinscy.web.restclient.client.api.FileReader::generateError(Ljava/lang/Integer;)(e.code);
+			//$wnd.console.log("error",e);
 			handler.@com.google.gwt.xhr2.client.FileReaderProgressEvent::onError(Lcom/google/gwt/xhr2/client/File;Lcom/google/gwt/xhr2/client/FileError;)(e.target,e);
 		});
+		//$wnd.console.log("callbacks");
 	}-*/;
 
 //	public static FileError generateError(Integer code) {
@@ -66,21 +72,22 @@ public class FileReader extends JavaScriptObject {
 		this.abort();
 	}-*/;
 
-	public final native void readAsArrayBuffer(File file)/*-{
+	public final native void readAsArrayBuffer(Blob file)/*-{
 		this.readAsArrayBuffer(file);
 	}-*/;
 
-	public final native void readAsBinaryString(File file)/*-{
+	public final native void readAsBinaryString(Blob file)/*-{
 		this.readAsBinaryString(file);
 	}-*/;
 
-	public final native void readAsText(File file)/*-{
+	public final native void readAsText(Blob file)/*-{
 		this.readAsText(file);
 	}-*/;
-	public final native void readAsText(File file, String encoding)/*-{
+	public final native void readAsText(Blob file, String encoding)/*-{
 		this.readAsText(file, encoding);
 	}-*/;
-	public final native void readAsDataURL(File file)/*-{
+	public final native void readAsDataURL(Blob file)/*-{
 		this.readAsDataURL(file);
+		//$wnd.console.log(this,file);
 	}-*/;
 }

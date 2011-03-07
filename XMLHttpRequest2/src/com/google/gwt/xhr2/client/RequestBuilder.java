@@ -493,7 +493,7 @@ public class RequestBuilder {
 		}
 
 		setHeaders(xmlHttpRequest);
-		
+		//xmlHttpRequest.setAsBlob(true);
 		final Request request = new Request(xmlHttpRequest);
 		
 		if (this.abortHandler != null) {

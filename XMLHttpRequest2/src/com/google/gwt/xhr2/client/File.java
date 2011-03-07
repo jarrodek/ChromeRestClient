@@ -10,30 +10,40 @@ import com.google.gwt.user.client.Element;
  * See <a href="http://dev.w3.org/2006/webapi/FileAPI/#dfn-File"
  * >http://dev.w3.org/2006/webapi/FileAPI/#dfn-File</a>
  * </p>
+ * 
  * @author jarrod
  * 
  */
 public class File extends Blob {
 	protected File() {
 	}
-	
-	public static File create( Element element, int i ) throws IllegalArgumentException {
-		if( !(element.getNodeName().toLowerCase().equals("input") &&
-				element.getAttribute("type").equals("file")
-				) ){
-			throw new IllegalArgumentException("Input element is not form file object.");
+
+	public static File create(Element element, int i)
+			throws IllegalArgumentException {
+		if (!(element.getNodeName().toLowerCase().equals("input") && element
+				.getAttribute("type").equals("file"))) {
+			throw new IllegalArgumentException(
+					"Input element is not form file object.");
 		}
 		return _create(element, i);
 	}
-	
+
 	private static native File _create(Element element, int i)/*-{
 		return element.files[i];
 	}-*/;
 
-	public static File create(Element element)  throws IllegalArgumentException  {
+	public static File create(Element element) throws IllegalArgumentException {
 		return create(element, 0);
 	};
 
+	/**
+	 * On getting, the result attribute returns a Blob's data as a DOMString, or
+	 * as an ArrayBuffer [TypedArrays], or null, depending on the read method
+	 * that has been called on the FileReader, and any errors that may have
+	 * occurred. It can also return partial Blob data.
+	 * 
+	 * @return
+	 */
 	public final native String getResult()/*-{
 		return this.result;
 	}-*/;

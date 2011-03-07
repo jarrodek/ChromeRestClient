@@ -416,6 +416,7 @@ public class XMLHttpRequest2 extends JavaScriptObject {
 	public final native void setOnLoad(
 			XHRLoadHandler handler) /*-{
 		var _this = this;
+		//$wnd.console.log(this);
 		this.onload = $entry(function(e) {
 			ProgressEvent = @com.google.gwt.xhr2.client.ProgressEvent::initProgressEvent(ZDD);
 			var event = ProgressEvent(e.lengthComputable,e.loaded,e.total);
