@@ -16,13 +16,13 @@ import com.kalicinscy.web.restclient.client.request.RequestDataFormatter;
 
 public class PostDataRow extends Composite {
 	private TextArea autoResizeTextBox;
-
+	final DecoratedTabPanel decoratedTabPanel;
 	public PostDataRow() {
 		
 		String currentData = RestClient.REST_PARAMS.getData();
 		LinkedHashMap<String, String> hashData = RequestDataFormatter.parseDataToHashMap(currentData);
 		
-		DecoratedTabPanel decoratedTabPanel = new DecoratedTabPanel();
+		decoratedTabPanel = new DecoratedTabPanel();
 		initWidget(decoratedTabPanel);
 		decoratedTabPanel.setSize("100%", "");
 		
@@ -104,6 +104,10 @@ public class PostDataRow extends Composite {
 	
 	public void setPostData(String postData){
 		autoResizeTextBox.setText( postData );
+	}
+	
+	public void addTabChangeHandler(SelectionHandler<Integer> handler){
+		decoratedTabPanel.addSelectionHandler(handler);
 	}
 	
 }

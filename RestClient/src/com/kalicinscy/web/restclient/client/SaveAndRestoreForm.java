@@ -30,15 +30,17 @@ public class SaveAndRestoreForm implements SaveAndRestoreFormHandler {
 			@Override
 			public void onClose(CloseEvent<PopupPanel> event) {
 				String value = dialog.getNameValue();
-				String config = RestClient.REST_PARAMS.toString();
-				ConfigInit.FORM_SERVICE.insertData(value, url, config, new Date(), new RowIdListCallback() {
-					@Override
-					public void onFailure(DataServiceException error) {
-						Window.alert("An error occured :( \nCurrent state has not been saved.");
-					}
-					@Override
-					public void onSuccess(List<Integer> rowIds) {}
-				});
+				if( !value.trim().equals("") ){
+					String config = RestClient.REST_PARAMS.toString();
+					ConfigInit.FORM_SERVICE.insertData(value, url, config, new Date(), new RowIdListCallback() {
+						@Override
+						public void onFailure(DataServiceException error) {
+							Window.alert("An error occured :( \nCurrent state has not been saved.");
+						}
+						@Override
+						public void onSuccess(List<Integer> rowIds) {}
+					});
+				}
 			}
 		});
 	}
@@ -48,6 +50,7 @@ public class SaveAndRestoreForm implements SaveAndRestoreFormHandler {
 		final RestoreFormDialog dialog = new RestoreFormDialog();
 		dialog.center();
 		dialog.show();
+		
 		RestoreTableAsync form = new RestoreTableAsync();
 		dialog.addTable( form );
 		dialog.setAutoHideEnabled(false);

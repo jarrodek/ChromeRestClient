@@ -41,4 +41,7 @@ public interface RestFormService extends AppDatabase {
 	  
 	  @Update("UPDATE rest_forms SET name = {name} WHERE ID = {id}")
 	  void updateItemName(int id, String name,VoidCallback callback);
+	  
+	  @Update("DELETE FROM rest_forms WHERE ID = {id}")
+	  void deleteItem(int id, VoidCallback callback);
 }

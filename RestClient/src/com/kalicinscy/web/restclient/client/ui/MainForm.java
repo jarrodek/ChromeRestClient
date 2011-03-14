@@ -8,6 +8,8 @@ import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.code.gwt.database.client.service.RowIdListCallback;
 import com.google.code.gwt.database.client.service.VoidCallback;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.Composite;
@@ -111,8 +113,8 @@ public class MainForm extends Composite implements FormStateEventHandler,
 		requestTable.setWidget(POST_DATA_ROW, 0, lblData);
 		postDataRow = new PostDataRow();
 		requestTable.setWidget(POST_DATA_ROW, 1, postDataRow);
-
-		Label lblEncoding = new Label("Encoding");
+		
+		Label lblEncoding = new Label("Content-Type");
 		lblEncoding.addStyleName("formRowLabel");
 		requestTable.setWidget(ENCODING_ROW, 0, lblEncoding);
 		encodingRow = new FormEncodingRow();
@@ -129,9 +131,31 @@ public class MainForm extends Composite implements FormStateEventHandler,
 		formatter.setVerticalAlignment(2, 1, HasVerticalAlignment.ALIGN_TOP);
 		formatter.setWidth(0, 0, "120px");
 
+		postDataRow.addTabChangeHandler(new SelectionHandler<Integer>() {
+			@Override
+			public void onSelection(SelectionEvent<Integer> event) {
+				int tab = event.getSelectedItem();
+				if( tab == 2 ){ //hide encoding
+					if( requestTable.getRowFormatter().isVisible( ENCODING_ROW ) ){
+						requestTable.getRowFormatter().setVisible(ENCODING_ROW,false);
+					}
+				} else {
+					if( !requestTable.getRowFormatter().isVisible( ENCODING_ROW ) ){
+						requestTable.getRowFormatter().setVisible(ENCODING_ROW,true);
+					}
+				}
+			}
+		});
+		
 		if (!isFormRequest()) {
 			requestTable.getRowFormatter().setVisible(POST_DATA_ROW, false);
 			requestTable.getRowFormatter().setVisible(ENCODING_ROW, false);
+		}
+		int postDataTabOpened = RestClient.VIEW_PARAMS.getDataOpenedTab();
+		if( postDataTabOpened == 2 ){
+			if( requestTable.getRowFormatter().isVisible( ENCODING_ROW ) ){
+				requestTable.getRowFormatter().setVisible(ENCODING_ROW, false);
+			}
 		}
 		// Log.debug(" end of main module");
 	}

@@ -25,10 +25,12 @@ import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.HasKeyboardPagingPolicy.KeyboardPagingPolicy;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
@@ -86,12 +88,22 @@ public class RestoreTableAsync extends Composite {
 					row.setUrl(data.getUrl());
 					list.add(row);
 				}
-				createTable(list);
+				if( list.size() > 0 ){
+					createTable(list);
+				} else {
+					emptyInfo();
+				}
 			}
 		});
 
 	}
-
+	
+	private void emptyInfo(){
+		HTML info = new HTML("<p style=\"text-align:center;\"><em>You do not have any saved configs.</em></p>");
+		wrapper.clear();
+		wrapper.add(info);
+	}
+	
 	private void createTable(List<RestForm> list) {
 		dataProvider = new ListDataProvider<RestForm>(list);
 		cellTable = new CellTable<RestForm>(dataProvider.getKeyProvider());
@@ -113,6 +125,7 @@ public class RestoreTableAsync extends Composite {
 		SimplePager pager = new SimplePager(TextLocation.CENTER,
 				pagerResources, false, 0, true);
 		pager.setDisplay(cellTable);
+		cellTable.setKeyboardPagingPolicy(KeyboardPagingPolicy.CHANGE_PAGE);
 		wrapper.clear();
 		wrapper.add(cellTable);
 		wrapper.add(pager);
@@ -122,6 +135,7 @@ public class RestoreTableAsync extends Composite {
 
 	private void initTableColumns(SelectionModel<RestForm> selectionModel,
 			ListHandler<RestForm> sortHandler) {
+		
 		// name
 		Column<RestForm, String> nameColumn = new Column<RestForm, String>(
 				new EditTextCell()) {
@@ -248,6 +262,38 @@ public class RestoreTableAsync extends Composite {
 			}
 		});
 		cellTable.setColumnWidth(selectColumn, 85, Unit.PX);
+		
+		//delete row
+		Column<RestForm, String> deleteColumn = new Column<RestForm, String>(new ButtonCell()){
+			@Override
+			public String getValue(RestForm object) {
+				return "delete";
+			}
+		};
+		deleteColumn.setSortable(false);
+		cellTable.addColumn(deleteColumn, "Actions");
+		deleteColumn.setFieldUpdater(new FieldUpdater<RestForm, String>() {
+			@Override
+			public void update(final int index, final RestForm object, final String value) {
+				
+				if(Window.confirm("Do you really want to remove this item?")){
+					
+					ConfigInit.FORM_SERVICE.deleteItem(object.getId(), new VoidCallback() {
+						
+						@Override
+						public void onFailure(DataServiceException error) {
+							Window.alert("Error to remove :( \n"+error.getMessage());
+						}
+						
+						@Override
+						public void onSuccess() {
+							dataProvider.getList().remove(index);
+						}
+					});
+				}
+			}
+		});
+		cellTable.setColumnWidth(deleteColumn, 90, Unit.PX);
 	}
 	
 	public void addSelectionHandler( SelectionHandler handler ){

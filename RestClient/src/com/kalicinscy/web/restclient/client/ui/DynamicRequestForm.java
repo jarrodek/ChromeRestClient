@@ -33,6 +33,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.kalicinscy.web.restclient.client.ConfigInit;
+import com.kalicinscy.web.restclient.client.HeadersFillSupport;
 import com.kalicinscy.web.restclient.client.storage.HeaderRow;
 
 
@@ -100,7 +101,7 @@ public class DynamicRequestForm extends FlexTable implements HasHandlers, HasVal
 		explLabel.setStylePrimaryName("headers-hint-label");
 		textBox.setWidth("200px");
 		textBox.addSelectionHandler(requestHeaderSuggestionHandler);
-		textBox.addValueChangeHandler(requestHeaderChengeHandler);
+		textBox.addValueChangeHandler(requestHeaderChangeHandler);
 		textBox.setAutoSelectEnabled(true);
 		textBox.setLimit(20);
 		if( key != null ){
@@ -120,11 +121,18 @@ public class DynamicRequestForm extends FlexTable implements HasHandlers, HasVal
 		}
 		Button btnRemove = new Button("Remove");
 		btnRemove.addClickHandler(requestHeaderRemoveRowHandler);
-
+		
 		setWidget(numRows, 0, vp);
 		setWidget(numRows, 1, valueBox);
 		setWidget(numRows, 2, btnRemove);
-
+		
+		getCellFormatter().setWidth(numRows, 2, "70px");
+		
+		if( HeadersFillSupport.isSupported(key) ){
+			HeadersFillSupport headersSupport = new HeadersFillSupport(key, valueBox);
+			headersSupport.addSupport();
+		}
+		
 		FlexCellFormatter formatter = getFlexCellFormatter();
 
 		formatter.setVerticalAlignment(numRows, 1,HasVerticalAlignment.ALIGN_TOP);
@@ -253,6 +261,20 @@ public class DynamicRequestForm extends FlexTable implements HasHandlers, HasVal
 	}
 	
 	
+	private void createHeaderGUI(String header, VerticalPanel widget){
+		
+		if( HeadersFillSupport.isSupported(header) ){
+			int i = getRowIndexForWidget(widget);
+			Widget w = getWidget(i, 1);
+			if( !(w instanceof TextBox ) ) return;
+			TextBox valueBox =  (TextBox) w;
+			HeadersFillSupport headersSupport = new HeadersFillSupport(header, valueBox);
+			headersSupport.addSupport();
+			//Widget newWidget = headersSupport.construct();
+			//clearCell(i, 1);
+			//setWidget(i, 1, newWidget);
+		}
+	}
 	
 	
 	/**
@@ -269,18 +291,21 @@ public class DynamicRequestForm extends FlexTable implements HasHandlers, HasVal
 			final HTML explLabel = (HTML) vp.getWidget(1);
 			setHeaderHintInfo(explLabel,txt);
 			revalidateRequestHeadersForm();
+			createHeaderGUI(txt,vp);
 		}
 	};
 
-	ValueChangeHandler<String> requestHeaderChengeHandler = new ValueChangeHandler<String>() {
+	ValueChangeHandler<String> requestHeaderChangeHandler = new ValueChangeHandler<String>() {
 		@Override
 		public void onValueChange(ValueChangeEvent<String> event) {
+			//Log.debug("onValueChange");
 			String txt = event.getValue();
 			SuggestBox w = (SuggestBox) event.getSource();
 			VerticalPanel vp = (VerticalPanel) w.getParent();
 			final HTML explLabel = (HTML) vp.getWidget(1);
 			setHeaderHintInfo(explLabel,txt);
 			revalidateRequestHeadersForm();
+			createHeaderGUI(txt,vp);
 		}
 	};
 	ClickHandler requestHeaderRemoveRowHandler = new ClickHandler() {

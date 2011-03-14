@@ -18,7 +18,6 @@ public class RestoreFormDialog extends DialogBox {
 		setGlassEnabled(true);
 		setAutoHideEnabled(true);
 		
-		
 		setHTML("Select saved config to restore");
 		
 		VerticalPanel verticalPanel = new VerticalPanel();
