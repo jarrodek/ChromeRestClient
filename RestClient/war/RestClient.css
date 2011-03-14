@@ -90,7 +90,8 @@ textarea.response-body-area {
 	margin-top: 5px;
 }
 .headers-hint-label{
-	height: 21px;
+	height: 1.5em;
+	line-height: 1.5em;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
@@ -257,4 +258,20 @@ span.help-desc-item{
 	margin-bottom: 1em;
 	padding: 0 0.5em;
 	padding-bottom: 0.5em;
+}
+
+html button:focus, 
+html input:focus,
+html textarea:focus,
+html input[type="submit"]:focus, 
+html select:focus {
+    outline-color: rgba(170, 170, 153, 0.95);
+}
+html textarea,
+html input{
+    -webkit-border-radius: 2px;
+    border: 1px solid rgb(170,170,170);
+}
+.noActive-Label {
+	color: Gray;
 }
