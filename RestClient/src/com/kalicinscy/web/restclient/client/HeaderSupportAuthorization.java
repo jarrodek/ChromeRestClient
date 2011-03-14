@@ -32,6 +32,7 @@ public class HeaderSupportAuthorization implements HeaderSupport, HasHandlers, H
 	public HeaderSupportAuthorization(){
 		this.value = null;
 		this.baseParams = null;
+		this.oauthParams = null;
 	}
 	
 	

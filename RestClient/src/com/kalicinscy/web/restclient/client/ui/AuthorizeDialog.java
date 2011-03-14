@@ -464,7 +464,7 @@ public class AuthorizeDialog extends DialogBox {
 
 	private void setBasicValue() {
 		String toEncode = loginTextBox.getText() + ":" + passBox.getText();
-		result = Base64Coder.encodeString(toEncode);
+		result = "Basic " + Base64Coder.encodeString(toEncode);
 	}
 
 	public String getResult() {
