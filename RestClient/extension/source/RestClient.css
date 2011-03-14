@@ -90,7 +90,8 @@ textarea.response-body-area {
 	margin-top: 5px;
 }
 .headers-hint-label{
-	height: 21px;
+	height: 1.5em;
+	line-height: 1.5em;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
@@ -116,7 +117,9 @@ button.gwt-Button..action-button-reset{
 	display: inline-block;
 	padding: 3px 4px;
 	border-radius: 3px;
+	margin-left: 10px;
 }
+.hd-example:before{content: "eg. ";}
 .hd-name{
 	display: block;
 	font-weight: bold;
@@ -225,6 +228,50 @@ button.gwt-Button.cancel-button-margin{
 }
 div.url-column-restore{
 	overflow: hidden;
-text-overflow: ellipsis;
-white-space: nowrap;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+#footer-container {
+	margin-top: 25px;
+	width: 100%;
+	background: rgba(152, 152, 152, 0.5);
+	height: 40px;
+	display: -webkit-box;
+	-webkit-box-pack: center;
+	-webkit-box-align: center;
+	-webkit-box-orient: horizontal;
+}
+div#footer-container > div{
+	margin-left: 25px;
+}
+.file-add-row-table {
+	margin-bottom: 15px;
+}
+span.help-desc-item{
+	border: 1px solid #90B8DE;
+	border-left: none;
+	border-right: none;
+	background: #F0F6FF;
+	margin: 2em;
+	display: block;
+	margin-top: 1em;
+	margin-bottom: 1em;
+	padding: 0 0.5em;
+	padding-bottom: 0.5em;
+}
+
+html button:focus, 
+html input:focus,
+html textarea:focus,
+html input[type="submit"]:focus, 
+html select:focus {
+    outline-color: rgba(170, 170, 153, 0.95);
+}
+html textarea,
+html input{
+    -webkit-border-radius: 2px;
+    border: 1px solid rgb(170,170,170);
+}
+.noActive-Label {
+	color: Gray;
 }
