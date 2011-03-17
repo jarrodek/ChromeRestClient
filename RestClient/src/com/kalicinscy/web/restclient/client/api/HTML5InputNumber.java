@@ -1,5 +1,7 @@
 package com.kalicinscy.web.restclient.client.api;
 
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.TextBox;
 
 public class HTML5InputNumber extends TextBox {
@@ -21,6 +23,32 @@ public class HTML5InputNumber extends TextBox {
 		setMax(max);
 		setStep(step);
 	}
+	
+	/**
+	 * Force widget to check on change if value is
+	 * less than getMax() and grater than getMin().
+	 * Otherwise set min or max value.
+	 */
+	public void setValueBoundCheckerActive(){
+		ValueChangeHandler<String> numberFieldValueChange = new ValueChangeHandler<String>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				String value = event.getValue();
+				int v = 0;
+				try{
+					v = Integer.parseInt(value);
+				} catch( NumberFormatException e ){}
+				HTML5InputNumber el = (HTML5InputNumber) event.getSource();
+				if( v > el.getMax() ){
+					el.setValue( el.getMax()+"" );
+				} else if( v < el.getMin() ){
+					el.setValue( el.getMin()+"" );
+				}
+			}
+		};
+		addValueChangeHandler(numberFieldValueChange);
+	}
+	
 	
 	/**
 	 * Specifies whether the element represents an input control for which a UA
@@ -74,7 +102,7 @@ public class HTML5InputNumber extends TextBox {
 	 * @return The expected upper bound for the element’s value
 	 */
 	public float getMax(){
-		String max = getElement().getAttribute("man");
+		String max = getElement().getAttribute("max");
 		if( max.equals("") ){
 			return 999999999;
 		}

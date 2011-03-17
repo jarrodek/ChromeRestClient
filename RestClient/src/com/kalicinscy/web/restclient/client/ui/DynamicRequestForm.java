@@ -262,12 +262,12 @@ public class DynamicRequestForm extends FlexTable implements HasHandlers, HasVal
 	
 	
 	private void createHeaderGUI(String header, VerticalPanel widget){
-		
+		int i = getRowIndexForWidget(widget);
+		Widget w = getWidget(i, 1);
+		if( !(w instanceof TextBox ) ) return;
+		final TextBox valueBox =  (TextBox) w;
+		HeadersFillSupport.removeSupport(valueBox);
 		if( HeadersFillSupport.isSupported(header) ){
-			int i = getRowIndexForWidget(widget);
-			Widget w = getWidget(i, 1);
-			if( !(w instanceof TextBox ) ) return;
-			TextBox valueBox =  (TextBox) w;
 			HeadersFillSupport headersSupport = new HeadersFillSupport(header, valueBox);
 			headersSupport.addSupport();
 			//Widget newWidget = headersSupport.construct();
