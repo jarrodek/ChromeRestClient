@@ -2,6 +2,7 @@ package com.kalicinscy.web.restclient.client.ui;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -60,5 +61,14 @@ public class AddEncodigDialog extends DialogBox {
 	public String getValue(){
 		return this.valueBox.getText();
 	}
-	
+	@Override
+	protected void onPreviewNativeEvent(NativePreviewEvent event) {
+		int keyCode = event.getNativeEvent().getKeyCode();
+		if( keyCode == 27 ){ //escape
+			event.cancel();
+			hide();
+			return;
+		}
+		super.onPreviewNativeEvent(event);
+	}
 }

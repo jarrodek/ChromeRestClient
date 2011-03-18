@@ -122,7 +122,6 @@ public class MainForm extends Composite implements FormStateEventHandler,
 
 		buttonsBar = new ActionButtons();
 		requestTable.setWidget(BUTTONS_ROW, 1, buttonsBar);
-
 		buttonsBar.addFormStateHandler(this);
 
 		CellFormatter formatter = requestTable.getCellFormatter();
@@ -195,6 +194,10 @@ public class MainForm extends Composite implements FormStateEventHandler,
 
 	public void disableButtons() {
 		buttonsBar.disableButtons();
+	}
+	
+	public ActionButtons getButtons(){
+		return buttonsBar;
 	}
 
 	@Override

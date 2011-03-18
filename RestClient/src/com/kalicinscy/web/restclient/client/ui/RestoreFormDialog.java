@@ -2,6 +2,7 @@ package com.kalicinscy.web.restclient.client.ui;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -54,4 +55,14 @@ public class RestoreFormDialog extends DialogBox {
 		tablePanel.add(form);
 	}
 	
+	@Override
+	protected void onPreviewNativeEvent(NativePreviewEvent event) {
+		int keyCode = event.getNativeEvent().getKeyCode();
+		if( keyCode == 27 ){ //escape
+			event.cancel();
+			hide();
+			return;
+		}
+		super.onPreviewNativeEvent(event);
+	}
 }

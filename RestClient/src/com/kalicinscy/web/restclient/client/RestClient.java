@@ -20,15 +20,18 @@ import com.google.gwt.xhr2.client.FileList;
 import com.google.gwt.xhr2.client.FormData;
 import com.google.gwt.xhr2.client.Header;
 import com.google.gwt.xhr2.client.LoadHandler;
+import com.google.gwt.xhr2.client.LoadStartHandler;
 import com.google.gwt.xhr2.client.ProgressEvent;
 import com.google.gwt.xhr2.client.ProgressHandler;
 import com.google.gwt.xhr2.client.RequestBuilder;
 import com.google.gwt.xhr2.client.Response;
 import com.google.gwt.xhr2.client.TimeoutHandler;
+import com.google.gwt.xhr2.client.UploadLoadHandler;
 import com.kalicinscy.web.restclient.client.events.SaveAndRestoreFormHandler;
 import com.kalicinscy.web.restclient.client.request.RequestDataFormatter;
 import com.kalicinscy.web.restclient.client.request.RequestParameters;
 import com.kalicinscy.web.restclient.client.request.ViewParameters;
+import com.kalicinscy.web.restclient.client.ui.ActionButtons;
 import com.kalicinscy.web.restclient.client.ui.FilesForm.FilesObject;
 import com.kalicinscy.web.restclient.client.ui.MainForm;
 import com.kalicinscy.web.restclient.client.ui.ResponseView;
@@ -206,7 +209,8 @@ public class RestClient implements EntryPoint {
 		if( headers != null ){
 			builder.setHeaders(headers);
 		}
-		//Log.debug(RequestDataFormatter.headersToString(headers));
+		
+		//builder.setUploadAbortHandler( )
 		
 		builder.setAbortHandler(new AbortHandler() {
 			@Override
@@ -224,7 +228,6 @@ public class RestClient implements EntryPoint {
 				onFailureRequest(response);
 			}
 		});
-//		builder.setLoadEndHandler(new LoadEndHandler() {});
 		builder.setLoadHandler(new LoadHandler() {
 						@Override
 			public void onLoaded(Response response,ProgressEvent event) {
@@ -237,14 +240,45 @@ public class RestClient implements EntryPoint {
 				onFailureRequest(response);
 			}
 		});
-//		builder.setLoadStartHandler(new LoadStartHandler() {});
-		builder.setProgressHandler(new ProgressHandler() {
+		builder.setUploadProgressHandler( new ProgressHandler() {
 			@Override
 			public void onProgress(ProgressEvent event) {
-				//Log.debug("XMLHttpRequest2 callback","onProgress");
-				//requestInProgress = false;
+				if( event.isLengthComputable() ){
+					requestView.getButtons().setUploadMax( (long) event.getTotal() );
+					requestView.getButtons().setUploadCurrent( (long) event.getLoaded() );
+				}
 			}
 		});
+		builder.setUploadLoadStartHandler( new LoadStartHandler() {
+			@Override
+			public void onLoadStart(ProgressEvent event) {
+				ActionButtons buttons = requestView.getButtons();
+				if( event.isLengthComputable() ){
+					buttons.setUploadMax( (long) event.getTotal() );
+				}
+				buttons.setUploadCurrent(0);
+				buttons.showUpload();
+			}
+		});
+		builder.setUploadLoadHandler( new UploadLoadHandler() {
+			
+			@Override
+			public void onLoaded(ProgressEvent event) {
+				ActionButtons buttons = requestView.getButtons();
+				buttons.hideUpload();
+				buttons.showProgress();
+			}
+		});
+		
+		
+		
+//		builder.setProgressHandler(new ProgressHandler() {
+//			@Override
+//			public void onProgress(ProgressEvent event) {
+//				//Log.debug("XMLHttpRequest2 callback","onProgress");
+//				//requestInProgress = false;
+//			}
+//		});
 		builder.setTimeoutHandler(new TimeoutHandler() {
 						@Override
 			public void onTimeout(Response response, ProgressEvent event,
@@ -254,6 +288,8 @@ public class RestClient implements EntryPoint {
 				onFailureRequest(response);
 			}
 		});
+		
+		
 		
 		try {
 			startTime.setTime(new Date().getTime());
@@ -270,12 +306,20 @@ public class RestClient implements EntryPoint {
 	
 
 	private void onSuccesRequest(Response response){
+		
+		if( response == null ){
+			Window.alert("Something goes wrong :(\nResponse is null!");
+			return;
+		}
+		
 		long dimm = new Date().getTime() - startTime.getTime();
 		
 		requestInProgress = false;
 		requestView.restoreButtonsState();
 		
 		initResponseView();
+		
+		
 		responseView.setStatusCode(response.getStatus(), response.getStatusText());
 		
 		Header[] headers = response.getHeaders();
