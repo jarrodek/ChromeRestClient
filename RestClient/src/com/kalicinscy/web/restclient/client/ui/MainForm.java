@@ -220,6 +220,7 @@ public class MainForm extends Composite implements FormStateEventHandler,
 			@Override
 			public void onSuccess(List<UrlRow> result) {
 				// Log.debug( result.size()+"" );
+				if( result == null ) return;
 				if (result.size() == 0) {
 					ConfigInit.URLS_SERVICE.insertLink(url, new Date(),
 							new RowIdListCallback() {

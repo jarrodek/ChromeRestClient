@@ -20,7 +20,7 @@ public class SaveAndRestoreForm implements SaveAndRestoreFormHandler {
 	@Override
 	public void onSaveAction() {
 		final String url = RestClient.REST_PARAMS.getUrl();
-		if(url.length() == 0){
+		if(url == null || url.length() == 0){
 			return;
 		}
 		final SaveFormStateDialog dialog = new SaveFormStateDialog();
