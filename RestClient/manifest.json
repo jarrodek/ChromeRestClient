@@ -1,18 +1,18 @@
 {
   "name": "Advanced REST client",
   "description": "Helper for web developers for creating custom HTTP requests.",
-  "version": "1.0.9",
+  "version": "1.0.15",
   "icons": {
     "16": "img/view-refresh-7_16.png",
     "48": "img/view-refresh-7_48.png",
     "128": "img/view-refresh-7_128.png"
   },
-  "minimum_chrome_version": "6.0.0",
-  "browser_action": {
-    "default_icon": "img/view-refresh-7_16.png",
-    "default_title": "REST client"
+  "app": {
+    "launch": {
+      "local_path": "RestClient.html"
+    }
   },
-  "background_page": "Background.html",
+  "minimum_chrome_version": "6.0.0",
   "permissions": [
     "tabs", "http://*/*", "https://*/*"
   ],

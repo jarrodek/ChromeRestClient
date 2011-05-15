@@ -13,16 +13,16 @@
 				<div class="time-selector">
 					<span class="set-time-legend">Set time</span>
 					<div class="time-fields">
-						<p1:HTML5InputNumber text="23" visibleLength="2"
+						<p1:HTML5InputNumber text="23" visibleLength="3"
 							required="true" maxLength="2" ui:field="hrsValue" alignment="RIGHT"
 							autocomplete="true" autofocus="true" />
 						<span class="time-separator">:</span>
-						<p1:HTML5InputNumber text="23" visibleLength="2"
+						<p1:HTML5InputNumber text="23" visibleLength="3"
 							required="true" maxLength="2" ui:field="minValue" autocomplete="true"
 							textAlignment="ALIGN_RIGHT" />
 
 						<span class="time-separator">:</span>
-						<p1:HTML5InputNumber text="23" visibleLength="2"
+						<p1:HTML5InputNumber text="23" visibleLength="3"
 							required="true" maxLength="2" ui:field="secValue" autocomplete="true"
 							textAlignment="ALIGN_RIGHT" />
 					</div>

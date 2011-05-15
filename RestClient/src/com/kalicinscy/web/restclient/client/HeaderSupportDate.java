@@ -49,7 +49,9 @@ public class HeaderSupportDate implements HeaderSupport, HasHandlers,
 				}
 			}
 		});
-		
+		dialog.setAnimationEnabled(true);
+		dialog.setGlassEnabled(true);
+		dialog.setModal(true);
 		dialog.setWidget( view );
 		dialog.center();
 		dialog.show();

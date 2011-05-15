@@ -181,7 +181,7 @@ public class ConfigInit {
 			HEADERS_SERVICE.insertHeaders(toSave, new RowIdListCallback() {
 				@Override
 				public void onFailure(DataServiceException error) {
-					Window.alert(error.getMessage());
+					Window.alert("error: "+error.getMessage());
 				}
 
 				@Override
@@ -217,7 +217,7 @@ public class ConfigInit {
 			STATUSES_SERVICE.insertCodes(toSave, new RowIdListCallback() {
 				@Override
 				public void onFailure(DataServiceException error) {
-					Window.alert(error.getMessage());
+					Window.alert("error: "+error.getMessage());
 				}
 
 				@Override
