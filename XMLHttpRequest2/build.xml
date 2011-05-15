@@ -7,8 +7,8 @@
 
 	<property environment="env" />
 	<condition property="gwt.home" value="${env.GWT_HOME}">
-			<isset property="env.GWT_HOME" />
-		</condition>
+		<isset property="env.GWT_HOME" />
+	</condition>
 	<condition property="gwt.home" value="${GWT_HOME}">
 		<isset property="GWT_HOME" />
 	</condition>
@@ -76,15 +76,19 @@
 	</target>
 
 	<target name="clean">
-		<delete dir="${classes.dir}" />
-		<delete dir="${build.dir}" />
+		<delete>
+			<fileset dir="${classes.dir}" includes="**/*"/>
+		</delete>
+		<delete>
+			<fileset dir="${jar.dir}" includes="**/*" />
+		</delete>
 	</target>
 
 	<target name="compile">
 		<mkdir dir="${classes.dir}" />
 		<javac srcdir="${src.dir}" destdir="${classes.dir}" classpath="${GWT_HOME}/gwt-user.jar" />
 	</target>
-
+	<!-- Creates temp dir to collect all files and create jar file. -->
 	<target name="createtemp">
 		<mkdir dir="${tmp.dir}" />
 
