@@ -9,7 +9,7 @@
 
 	<target name="clean">
 		<delete>
-			<fileset dir="${extension.dir}" includes="**/*"/>
+			<fileset dir="${extension.src}" includes="**/*"/>
 		</delete>
 	</target>
 
