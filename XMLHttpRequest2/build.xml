@@ -1,0 +1,55 @@
+<project name="gwt-xmlhttp-request-l2-library" default="dist" basedir=".">
+	<property name="package" value="com.google.gwt.xhr2"></property>
+	<property name="src.dir" value="src" />
+	<property name="src.dir" value="src" />
+	<property name="module.path" value="com/google/gwt/xhr2" />
+	<property name="module.name" value="XMLHttpRequest2.gwt.xml" />
+	<property name="build.dir" value="build" />
+	<property name="classes.dir" value="${build.dir}/classes" />
+	<property name="jar.dir" value="${build.dir}/jar" />
+	<property name="tmp.dir" value="${build.dir}/tmp" />
+	<property name="GWT_HOME" value="C:\Users\jarrod\Documents\sdk\gwt-2.2.0" />
+
+	<target name="dist" depends="clean, jar"></target>
+	
+	
+	<target name="clean">
+		<delete dir="${classes.dir}" />
+		<delete dir="${build.dir}" />
+	</target>
+
+	<target name="compile">
+		<mkdir dir="${classes.dir}" />
+		<javac 
+			srcdir="${src.dir}" 
+			destdir="${classes.dir}" 
+			classpath="${GWT_HOME}/gwt-user.jar"/>
+	</target>
+
+	<target name="createtemp">
+		<mkdir dir="${tmp.dir}" />
+		
+		<copy todir="${tmp.dir}">
+			<fileset dir="${classes.dir}"/>
+		</copy>
+		
+		<copy todir="${tmp.dir}/${module.path}/">
+			<fileset file="${src.dir}/${module.path}/${module.name}"/>
+		</copy>
+		
+		<copy todir="${tmp.dir}/${module.path}/client">
+			<fileset dir="${src.dir}/${module.path}/client">
+				<include name="**/*.java"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="jar" depends="compile, createtemp">
+		<mkdir dir="${jar.dir}" />
+		<jar destfile="${jar.dir}/${ant.project.name}.jar" index="true">
+			<fileset dir="${tmp.dir}"/>
+		</jar>
+		<delete dir="${tmp.dir}" />
+	</target>
+	
+</project>
