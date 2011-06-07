@@ -11,7 +11,9 @@ h1 {
 	margin: 10px 0;
 	text-align: center;
 }
-
+table{
+	position: relative;
+}
 label {
 	cursor: pointer;
 }
@@ -432,4 +434,48 @@ span.size-counter {
 .gwt-DialogBox tr.dialogMiddle>td.dialogMiddleRight,.gwt-DialogBox tr.dialogMiddle>td.dialogMiddleLeft,.gwt-DialogBox tr.dialogTop>td.dialogTopRight,.gwt-DialogBox tr.dialogTop>td.dialogTopLeft,.gwt-DialogBox tr.dialogBottom
 	{
 	display: none;
+}
+.raw-body .gwt-TextArea {
+	width: 100%;
+	min-height: 400px;
+	font-family: "courier new", courier;
+	font-size: small;
+	white-space: pre;
+	border: none;
+	-webkit-appearance: none;
+}
+
+.xml-body-panel {
+	font-family: monospace;
+	font-size: 10pt;
+	color: black;
+	cursor: text;
+}
+.xml-body-panel div.node{
+	
+}
+.xml-body-panel span.xml-comment {
+/* 	color: #A70; */
+	color: #236E25
+}
+.xml-body-panel span.xml-punctuation {
+	color: black;
+}
+.xml-body-panel span.xml-tagname {
+/* 	color: #A0B; */
+	color: #881280;
+}
+.xml-body-panel span.xml-attname {
+/* 	color: blue; */
+	color: #994500;
+}
+.xml-body-panel span.xml-attribute {
+/* 	color: #281; */
+	color: #1A1AA6;
+}
+.xml-body-panel span.xml-cdata {
+	color: #48A;
+}
+.xml-body-panel span.xml-processing{
+	color: #999;
 }
