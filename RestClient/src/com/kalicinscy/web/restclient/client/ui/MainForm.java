@@ -58,9 +58,10 @@ public class MainForm extends Composite implements FormStateEventHandler,
 
 	public MainForm() {
 
-		VerticalPanel verticalPanel = new VerticalPanel();
+		final VerticalPanel verticalPanel = new VerticalPanel();
 		initWidget(verticalPanel);
-		verticalPanel.setSize("100%", "auto");
+		verticalPanel.setSize("100%", "100%");
+		
 
 		DisclosurePanel requestPanel = new DisclosurePanel("Request");
 		requestPanel.addStyleName("panels-border");
@@ -99,6 +100,7 @@ public class MainForm extends Composite implements FormStateEventHandler,
 				RestClient.REST_PARAMS.setMethod(method);
 				RestClient.REST_PARAMS.store();
 				setOpenedTab(method);
+				verticalPanel.setSize("100%", "100%");
 			}
 		});
 
@@ -301,6 +303,7 @@ public class MainForm extends Composite implements FormStateEventHandler,
 		//
 		// Hide/Show POST rows.
 		//
+		
 		if (method.equals("POST") || method.equals("PUT")) {
 			requestTable.getRowFormatter().setVisible(POST_DATA_ROW,true);
 			requestTable.getRowFormatter().setVisible(ENCODING_ROW,true);

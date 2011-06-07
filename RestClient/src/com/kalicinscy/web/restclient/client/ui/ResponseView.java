@@ -6,10 +6,12 @@ import java.util.List;
 
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DecoratedTabPanel;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
@@ -18,10 +20,12 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.xhr2.client.Header;
 import com.kalicinscy.web.restclient.client.ConfigInit;
+import com.kalicinscy.web.restclient.client.XMLviewer;
 import com.kalicinscy.web.restclient.client.storage.HeaderRow;
 import com.kalicinscy.web.restclient.client.storage.StatusCodeRow;
 
@@ -42,10 +46,7 @@ public class ResponseView extends Composite {
 	 * image for status code hint.
 	 */
 	private Image statusCodeHint;
-	/**
-	 * to remove.
-	 */
-	private Label dummyBodyLabel;
+	
 	/**
 	 * Request response code.
 	 */
@@ -108,8 +109,10 @@ public class ResponseView extends Composite {
 					});
 		}
 	};
+	private DecoratedTabPanel decoratedTabPanel;
 
 	public ResponseView() {
+		
 		VerticalPanel verticalPanel = new VerticalPanel();
 		verticalPanel.setSize("100%", "auto");
 		DisclosurePanel responsePanel = new DisclosurePanel("Response");
@@ -176,9 +179,19 @@ public class ResponseView extends Composite {
 		Label lblBody = new Label("Body");
 		lblBody.setStyleName("response-panel-label");
 		mainGrid.setWidget(bodyRowNo, 0, lblBody);
-
-		dummyBodyLabel = new Label("Empty");
-		mainGrid.setWidget(bodyRowNo, 1, dummyBodyLabel);
+		
+		decoratedTabPanel = new DecoratedTabPanel();
+		decoratedTabPanel.setSize("100%", "");
+		VerticalPanel parsedBodyPanel = new VerticalPanel();
+		parsedBodyPanel.setSize("100%", "auto");
+		decoratedTabPanel.add(parsedBodyPanel, "Parsed response", false);
+		decoratedTabPanel.selectTab(0);
+		
+		VerticalPanel rawBodyPanel = new VerticalPanel();
+		rawBodyPanel.setSize("100%", "auto");
+		decoratedTabPanel.add(rawBodyPanel, "Raw response body", false);
+		
+		mainGrid.setWidget(bodyRowNo, 1, decoratedTabPanel);
 		mainGrid.getCellFormatter().setVerticalAlignment(bodyRowNo, 1,
 				HasVerticalAlignment.ALIGN_TOP);
 		mainGrid.getCellFormatter().setVerticalAlignment(bodyRowNo, 0,
@@ -329,15 +342,20 @@ public class ResponseView extends Composite {
 	 *            returned body
 	 */
 	public final void setResponseBody(final String body) {
-		dummyBodyLabel.removeFromParent();
 		if( responseCode == 0 ){
 			mainGrid.getRowFormatter().setVisible(bodyRowNo, false);
 			return;
 		}
-		
-		VerticalPanel vp = new VerticalPanel();
-		vp.setSize("100%", "auto");
-		
+		//raw body
+		VerticalPanel rawResponse = (VerticalPanel) decoratedTabPanel.getWidget(1);
+		rawResponse.addStyleName("raw-body");
+		//rawResponse.getElement().setInnerHTML("");
+		TextArea rawBodyArea = new TextArea();
+		rawBodyArea.setValue(body);
+		rawResponse.add(rawBodyArea);
+		decoratedTabPanel.selectTab(1);
+		//parsed body
+		VerticalPanel vp = (VerticalPanel) decoratedTabPanel.getWidget(0);
 		Anchor newWindow = new Anchor("Open HTML output in new window");
 		newWindow.addClickHandler(new ClickHandler() {
 			@Override
@@ -353,7 +371,6 @@ public class ResponseView extends Composite {
 		vp.add(bodyArea);
 		HTML lblNewLabel = new HTML("Code highlighting thanks to <a href=\"http://codemirror.net/\">Code Mirror</a>");
 		vp.add(lblNewLabel);
-		mainGrid.setWidget(bodyRowNo, 1, vp);
 		initCodeMirror(bodyArea.getElement());
 	}
 	/**
@@ -389,4 +406,17 @@ public class ResponseView extends Composite {
 		var wnd = $wnd.open();
 		wnd.document.body.innerHTML = body;
 	}-*/;
+
+	public void setResponseXml(Document xml) {
+		
+		SimplePanel xmlBodyPanel = new SimplePanel();
+		xmlBodyPanel.setStylePrimaryName("xml-body-panel");
+		xmlBodyPanel.setSize("100%", "auto");
+		decoratedTabPanel.add(xmlBodyPanel, "XML response", false);
+		decoratedTabPanel.selectTab(2);
+		
+		HTML body = new XMLviewer(xml).getHTML();
+		xmlBodyPanel.add(body);
+		
+	}
 }

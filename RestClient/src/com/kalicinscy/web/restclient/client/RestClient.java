@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.http.client.RequestException;
@@ -312,6 +313,8 @@ public class RestClient implements EntryPoint {
 			return;
 		}
 		
+		
+		
 		long dimm = new Date().getTime() - startTime.getTime();
 		
 		requestInProgress = false;
@@ -329,6 +332,13 @@ public class RestClient implements EntryPoint {
 		root.add(responseView);
 		
 		responseView.setResponseBody(response.getResponseText());
+		
+		Document xml = response.getResponseXML();
+		if( xml != null ){
+			responseView.setResponseXml( xml );
+		}
+		
+		responseView.setSize("100%", "100%");
 		
 //		
 //		NOT SUPPORTED BY BROWSER YET :(
@@ -388,7 +398,14 @@ public class RestClient implements EntryPoint {
 	}
 	
 	private final native void observeSaveAndRestore(SaveAndRestoreFormHandler handler)/*-{
+		
 		if( $wnd.ctrlSinited ){return;}
+		
+		$wnd.addEventListener("load", function(){
+			$doc.querySelector("#container > table").style.height = "100%";
+			$doc.querySelector("#container > table").style.width = "100%";
+		}, false);
+		
 		$wnd.ctrlSinited = true;
 		$doc.addEventListener('keydown',$entry(function(e) {
 			if(!e.ctrlKey){return;}
