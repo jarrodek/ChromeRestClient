@@ -1,5 +1,6 @@
 package com.google.gwt.xhr2.client;
 
+import com.google.gwt.dom.client.Document;
 
 /**
  * {@link XMLHttpRequest2} response object
@@ -156,7 +157,7 @@ public class Response {
 	 * 
 	 * @return the text response entity body.
 	 */
-	public String getResponseXML() {
+	public Document getResponseXML() {
 		return xhr2.getResponseXML();
 	};
 

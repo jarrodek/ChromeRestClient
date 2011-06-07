@@ -1,6 +1,7 @@
 package com.google.gwt.xhr2.client;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Document;
 /**
  * The native XMLHttpRequest (Level 2) object. 
  * 
@@ -183,7 +184,7 @@ public class XMLHttpRequest2 extends JavaScriptObject {
 	 * >http://www.w3.org/TR/XMLHttpRequest2/#text-response-entity-body</a>
 	 * @return the text response entity body.
 	 */
-	public final native String getResponseXML() /*-{
+	public final native Document getResponseXML() /*-{
 		return this.responseXML;
 	}-*/;
 
