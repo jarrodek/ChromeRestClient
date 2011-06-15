@@ -18,6 +18,9 @@ public class XMLviewer {
 	private static final String ATTR_NAME_CLASS = "xml-attname";
 	private static final String ATTR_VALUE_CLASS = "xml-attribute";
 	private static final String CDATA_CLASS = "xml-cdata";
+	private static final String INLINE_CLASS = "xml-inline";
+	private static final String ARROW_CLASS_EXPANDED = "xml-arrow-expanded";
+	private static final String ARROW_CLASS_EMPTY = "xml-arrow-empty";
 	
 	
 	
@@ -29,8 +32,7 @@ public class XMLviewer {
 	}
 	
 	
-	public HTML getHTML(){
-		
+	public void setHTML(HTML body){
 		String data = "<div class=\"pretty-print\">";
 		NodeList<Node> nodes = this.data.getChildNodes();
 		XMLDocument doc = (XMLDocument)this.data;
@@ -45,8 +47,8 @@ public class XMLviewer {
 			data += parse(nodes.getItem(i), 0);
 		}
 		data += "</div>";
-		HTML body = new HTML(data);
-		return body;
+		//HTML body = new HTML(data);
+		body.setHTML(data);
 	}
 	
 	private String parse(Node node, int indent){
@@ -58,13 +60,23 @@ public class XMLviewer {
 		String name = node.getNodeName();
 		int type = node.getNodeType();
 		boolean hasChildren = node.hasChildNodes();
-		
+		int childrenCount = 0;
+		if( hasChildren ){
+			childrenCount = node.getChildCount();
+		}
 		XMLNode nodeElement = ((XMLNode) node);
-		
 		
 		JsArray<NodeAttribute> attr;
 		switch(type){
 			case Document.ELEMENT_NODE: //ELEMENT_NODE, value null
+				boolean showArrows = false;
+				
+				if ( childrenCount > 1 ){
+					parsed += "<span class=\""+XMLviewer.ARROW_CLASS_EXPANDED+"\">&nbsp;</span>";
+					indent++;
+					showArrows = true;
+				}
+				
 				parsed += "<span class=\""+XMLviewer.PUNCTUATION_CLASS+"\">&lt;</span>";
 				parsed += "<span class=\""+XMLviewer.TAG_NAME_CLASS+"\">"+name+"</span>";
 				attr = nodeElement.getAttributes();
@@ -76,10 +88,33 @@ public class XMLviewer {
 				if( hasChildren ){
 					parsed += "<span class=\""+XMLviewer.PUNCTUATION_CLASS+"\">&gt;</span>";
 					NodeList<Node> children = node.getChildNodes();
-					int childrenCount = node.getChildCount();
-					for(int i=0; i<childrenCount; i++){
-						parsed += this.parse( children.getItem(i), indent+1 );
+					
+					boolean showInline = false;
+					if( childrenCount == 1 && Document.TEXT_NODE == children.getItem(0).getNodeType() ){
+						//simple: only one child - text - show response inline.
+						showInline = true;
 					}
+					
+					int nextIndent = indent;
+					if( showInline ){
+						parsed += "<div class=\""+XMLviewer.INLINE_CLASS+"\">";
+						nextIndent = 0;
+					} else {
+						nextIndent++;
+					}
+					
+					for(int i=0; i<childrenCount; i++){
+						parsed += this.parse( children.getItem(i), nextIndent );
+					}
+					
+					if( showInline ){
+						parsed += "</div>";
+					}
+					
+					if( showArrows ){
+						parsed += "<span class=\""+XMLviewer.ARROW_CLASS_EMPTY+"\">&nbsp;</span>";						
+					}
+					
 					parsed += "<span class=\""+XMLviewer.PUNCTUATION_CLASS+"\">&lt;/</span>";
 					parsed += "<span class=\""+XMLviewer.TAG_NAME_CLASS+"\">"+name+"</span>";
 					parsed += "<span class=\""+XMLviewer.PUNCTUATION_CLASS+"\">&gt;</span>";
@@ -153,4 +188,5 @@ public class XMLviewer {
 		data += "&quot;</span>";
 		return data;
 	}
+	
 }

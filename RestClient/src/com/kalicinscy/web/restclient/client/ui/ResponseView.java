@@ -9,6 +9,7 @@ import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DecoratedTabPanel;
@@ -407,16 +408,30 @@ public class ResponseView extends Composite {
 		wnd.document.body.innerHTML = body;
 	}-*/;
 
-	public void setResponseXml(Document xml) {
+	public void setResponseXml(final Document xml) {
 		
-		SimplePanel xmlBodyPanel = new SimplePanel();
+		final SimplePanel xmlBodyPanel = new SimplePanel();
 		xmlBodyPanel.setStylePrimaryName("xml-body-panel");
 		xmlBodyPanel.setSize("100%", "auto");
-		decoratedTabPanel.add(xmlBodyPanel, "XML response", false);
+		decoratedTabPanel.add(xmlBodyPanel, "XML response <img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAQAAABuvaSwAAAAAmJLR0QAAKqNIzIAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAJdnBBZwAAABYAAAAWANzF6VgAAABzSURBVCjPtZJRDoAgDEPd4o08IPHk+EHUwdoNYuSDj9KV5aVybPNHkVhqqZPmZkR2zdKsrj7tlPfuf9lRWjPSNWyaH7t1+YwuNDMSIxGNuI6kVtdgJDyRn2lERJJuYBJ0jaTPrGk9qad1DJ3VlT2j4SXOFzsROl9v3RpsAAAAJXRFWHRjcmVhdGUtZGF0ZQAyMDA5LTExLTE1VDE3OjAzOjA0LTA3OjAw16rizwAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxMC0wMS0xMVQwOToyNToxNS0wNzowMGiZCbUAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTAtMDEtMTFUMDk6MjU6MTUtMDc6MDAZxLEJAAAAZ3RFWHRMaWNlbnNlAGh0dHA6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL2xpY2Vuc2VzL2J5LXNhLzMuMC8gb3IgaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbGljZW5zZXMvTEdQTC8yLjEvW488YwAAACV0RVh0bW9kaWZ5LWRhdGUAMjAwOS0wMy0xOVQxMDo1Mjo0NC0wNjowMOH60j8AAAATdEVYdFNvdXJjZQBPeHlnZW4gSWNvbnPsGK7oAAAAJ3RFWHRTb3VyY2VfVVJMAGh0dHA6Ly93d3cub3h5Z2VuLWljb25zLm9yZy/vN6rLAAAAAElFTkSuQmCC\" class=\"process-idle\"/>", true);
 		decoratedTabPanel.selectTab(2);
-		
-		HTML body = new XMLviewer(xml).getHTML();
+		final HTML body = new HTML();
 		xmlBodyPanel.add(body);
 		
+		Timer t = new Timer() {
+			
+			@Override
+			public void run() {
+				decoratedTabPanel.getTabBar().setTabText(2, "XML response");
+				new XMLviewer(xml).setHTML(body);
+				addXMLArrowsSupport(xmlBodyPanel.getElement());
+			}
+		};
+		t.schedule(250);
+		
 	}
+	
+	public final native void addXMLArrowsSupport(final com.google.gwt.user.client.Element element)/*-{
+		$wnd.addXMLArrowSupport(element);
+	}-*/;
 }
