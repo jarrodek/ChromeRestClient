@@ -25,7 +25,7 @@
 				<exclude name="**/WEB-INF/" />
 			</fileset>
 		</copy>
-		<exec executable="./manifestversion.sh"/>
+		<!-- <exec executable="./manifestversion.sh"/> -->
 		<copy todir="${extension.src}">
 			<fileset file="manifest.json"></fileset>
 		</copy>
