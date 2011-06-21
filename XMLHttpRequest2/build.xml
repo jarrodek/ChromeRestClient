@@ -77,29 +77,40 @@
 
 	<target name="clean">
 		<delete>
-			<fileset dir="${classes.dir}" includes="**/*"/>
+			<!-- clean up alle .class files -->
+			<fileset dir="${classes.dir}" includes="**/*">
+				<exclude name="**/.svn" />
+				<exclude name="**/.svn/**" />
+			</fileset>
 		</delete>
 		<delete>
-			<fileset dir="${jar.dir}" includes="**/*" />
+			<!-- clean previous builded jar files -->
+			<fileset dir="${jar.dir}" includes="**/*">
+				<exclude name="**/.svn" />
+				<exclude name="**/.svn/**" />
+			</fileset>
 		</delete>
 	</target>
 
 	<target name="compile">
+		<!-- create classes dir if nessesery -->
 		<mkdir dir="${classes.dir}" />
+		<!-- compile java files -->
 		<javac srcdir="${src.dir}" destdir="${classes.dir}" classpath="${GWT_HOME}/gwt-user.jar" />
 	</target>
+	
 	<!-- Creates temp dir to collect all files and create jar file. -->
 	<target name="createtemp">
 		<mkdir dir="${tmp.dir}" />
-
+		<!-- copy all *.class files to temp dir -->
 		<copy todir="${tmp.dir}">
 			<fileset dir="${classes.dir}" />
 		</copy>
-
+		<!-- copy GWT module name to tmp dir -->
 		<copy todir="${tmp.dir}/${module.path}/">
 			<fileset file="${src.dir}/${module.path}/${module.name}" />
 		</copy>
-
+		<!-- copy all source files from client dir (required for include to another project) -->
 		<copy todir="${tmp.dir}/${module.path}/client">
 			<fileset dir="${src.dir}/${module.path}/client">
 				<include name="**/*.java" />
@@ -109,9 +120,11 @@
 
 	<target name="jar" depends="compile, createtemp">
 		<mkdir dir="${jar.dir}" />
+		<!-- create jar file from all files in tmp dir -->
 		<jar destfile="${jar.dir}/${ant.project.name}-${GWT_VERSION}.jar" index="true">
 			<fileset dir="${tmp.dir}" />
 		</jar>
+		<!-- now you can delete tmp dir -->
 		<delete dir="${tmp.dir}" />
 	</target>
 
