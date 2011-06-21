@@ -82,16 +82,21 @@ public class ActionButtons extends Composite implements HasHandlers {
 	}
 	
 	public void showUpload(){
-		sendingDiv.removeClassName( "hidden" );
+		if(sendingDiv.getClassName().contains( "hidden" ))
+			sendingDiv.removeClassName( "hidden" );
 	}
 	public void hideUpload(){
-		sendingDiv.addClassName( "hidden" );
+		if(!sendingDiv.getClassName().contains( "hidden" )){
+			sendingDiv.addClassName( "hidden" );
+		}
 	}
 	public void hideProgress(){
-		receivingDiv.addClassName( "hidden" );
+		if(!receivingDiv.getClassName().contains( "hidden" ))
+			receivingDiv.addClassName( "hidden" );
 	}
 	public void showProgress(){
-		receivingDiv.removeClassName( "hidden" );
+		if(receivingDiv.getClassName().contains( "hidden" ))
+			receivingDiv.removeClassName( "hidden" );
 	}
 	
 	@UiHandler("sendRequest")

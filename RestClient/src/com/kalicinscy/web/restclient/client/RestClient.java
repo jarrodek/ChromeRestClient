@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -216,7 +217,7 @@ public class RestClient implements EntryPoint {
 		builder.setAbortHandler(new AbortHandler() {
 			@Override
 			public void onAbort(ProgressEvent event) {
-				//Log.debug("XMLHttpRequest2 callback","onAbort");
+//				Log.debug("XMLHttpRequest2 callback","onAbort");
 				requestInProgress = false;
 				requestView.restoreButtonsState();
 			}
@@ -224,7 +225,8 @@ public class RestClient implements EntryPoint {
 		builder.setErrorHandler(new ErrorHandler() {
 			@Override
 			public void onError(Response response, RuntimeException exception) {
-				//Log.debug("XMLHttpRequest2 callback","onError",exception);
+				Log.debug("XMLHttpRequest2 callback","onError",exception);
+				
 				requestInProgress = false;
 				onFailureRequest(response);
 			}
@@ -232,6 +234,7 @@ public class RestClient implements EntryPoint {
 		builder.setLoadHandler(new LoadHandler() {
 						@Override
 			public void onLoaded(Response response,ProgressEvent event) {
+//				Log.debug("setLoadHandler: onLoaded");
 				onSuccesRequest(response);
 			}
 
@@ -244,6 +247,7 @@ public class RestClient implements EntryPoint {
 		builder.setUploadProgressHandler( new ProgressHandler() {
 			@Override
 			public void onProgress(ProgressEvent event) {
+//				Log.debug("onProgress");
 				if( event.isLengthComputable() ){
 					requestView.getButtons().setUploadMax( (long) event.getTotal() );
 					requestView.getButtons().setUploadCurrent( (long) event.getLoaded() );
@@ -253,6 +257,7 @@ public class RestClient implements EntryPoint {
 		builder.setUploadLoadStartHandler( new LoadStartHandler() {
 			@Override
 			public void onLoadStart(ProgressEvent event) {
+//				Log.debug("onLoadStart");
 				ActionButtons buttons = requestView.getButtons();
 				if( event.isLengthComputable() ){
 					buttons.setUploadMax( (long) event.getTotal() );
@@ -265,21 +270,29 @@ public class RestClient implements EntryPoint {
 			
 			@Override
 			public void onLoaded(ProgressEvent event) {
+//				Log.debug("onLoaded");
 				ActionButtons buttons = requestView.getButtons();
 				buttons.hideUpload();
 				buttons.showProgress();
 			}
 		});
 		
+		//download data progress
+		builder.setProgressHandler(new ProgressHandler() {
+			@Override
+			public void onProgress(ProgressEvent event) {
+//				Log.debug("setProgressHandler: "+event.getLoaded()+", "+event.getTotal()+", "+event.isLengthComputable() );
+				ActionButtons buttons = requestView.getButtons();
+				buttons.hideUpload();
+//				if( event.isLengthComputable() ){
+//					buttons.setUploadMax( (long) event.getTotal() );
+//					Log.debug("Download: "+event.getTotal());
+//				}
+//				buttons.setUploadCurrent(0);
+				buttons.showProgress();
+			}
+		});
 		
-		
-//		builder.setProgressHandler(new ProgressHandler() {
-//			@Override
-//			public void onProgress(ProgressEvent event) {
-//				//Log.debug("XMLHttpRequest2 callback","onProgress");
-//				//requestInProgress = false;
-//			}
-//		});
 		builder.setTimeoutHandler(new TimeoutHandler() {
 						@Override
 			public void onTimeout(Response response, ProgressEvent event,
