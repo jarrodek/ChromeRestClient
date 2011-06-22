@@ -343,8 +343,8 @@ public class RestClient implements EntryPoint {
 		responseView.setHeaders(headers);
 		RootPanel root = RootPanel.get(CONTAINER_ID);
 		root.add(responseView);
-		
-		responseView.setResponseBody(response.getResponseText());
+		String body = response.getResponseText();
+		responseView.setResponseBody( body );
 		
 		Document xml = response.getResponseXML();
 		if( xml != null ){
@@ -352,6 +352,26 @@ public class RestClient implements EntryPoint {
 		}
 		
 		responseView.setSize("100%", "100%");
+		
+		//check if response has JSON header:
+		boolean isJSON = false;
+		for (Header header : headers) {
+			if (header == null) {
+				continue;
+			}
+			String name = header.getName();
+			if( name.toLowerCase().equals("content-type") ){
+				String value = header.getValue().toLowerCase();
+				if( value.contains("application/json") //RFC 4627
+					|| value.contains("text/json") //historical
+						)
+				isJSON = true;
+				break;
+			}
+		}
+		if( isJSON ){
+			responseView.setResponseJSON(body);
+		}
 		
 //		
 //		NOT SUPPORTED BY BROWSER YET :(

@@ -26,10 +26,17 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.xhr2.client.Header;
 import com.kalicinscy.web.restclient.client.ConfigInit;
+import com.kalicinscy.web.restclient.client.JSONViewer;
 import com.kalicinscy.web.restclient.client.XMLviewer;
 import com.kalicinscy.web.restclient.client.storage.HeaderRow;
 import com.kalicinscy.web.restclient.client.storage.StatusCodeRow;
-
+/**
+ * @TODO:
+ * 	- check if response is JSON (eg by headers: Content-type: application/json)
+ * 		and set new tab (JSON) in response body tabs.
+ * @author jarrod
+ *
+ */
 public class ResponseView extends Composite {
 	/**
 	 * Label for response code.
@@ -431,7 +438,31 @@ public class ResponseView extends Composite {
 		
 	}
 	
+	public void setResponseJSON(final String body){
+		final SimplePanel jsonBodyPanel = new SimplePanel();
+		jsonBodyPanel.setStylePrimaryName("json-body-panel");
+		jsonBodyPanel.setSize("100%", "auto");
+		decoratedTabPanel.add(jsonBodyPanel, "JSON response <img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAQAAABuvaSwAAAAAmJLR0QAAKqNIzIAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAJdnBBZwAAABYAAAAWANzF6VgAAABzSURBVCjPtZJRDoAgDEPd4o08IPHk+EHUwdoNYuSDj9KV5aVybPNHkVhqqZPmZkR2zdKsrj7tlPfuf9lRWjPSNWyaH7t1+YwuNDMSIxGNuI6kVtdgJDyRn2lERJJuYBJ0jaTPrGk9qad1DJ3VlT2j4SXOFzsROl9v3RpsAAAAJXRFWHRjcmVhdGUtZGF0ZQAyMDA5LTExLTE1VDE3OjAzOjA0LTA3OjAw16rizwAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxMC0wMS0xMVQwOToyNToxNS0wNzowMGiZCbUAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTAtMDEtMTFUMDk6MjU6MTUtMDc6MDAZxLEJAAAAZ3RFWHRMaWNlbnNlAGh0dHA6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL2xpY2Vuc2VzL2J5LXNhLzMuMC8gb3IgaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbGljZW5zZXMvTEdQTC8yLjEvW488YwAAACV0RVh0bW9kaWZ5LWRhdGUAMjAwOS0wMy0xOVQxMDo1Mjo0NC0wNjowMOH60j8AAAATdEVYdFNvdXJjZQBPeHlnZW4gSWNvbnPsGK7oAAAAJ3RFWHRTb3VyY2VfVVJMAGh0dHA6Ly93d3cub3h5Z2VuLWljb25zLm9yZy/vN6rLAAAAAElFTkSuQmCC\" class=\"process-idle\"/>", true);
+		decoratedTabPanel.selectTab(2);
+		final HTML parsedBody = new HTML();
+		jsonBodyPanel.add(parsedBody);
+		
+		Timer t = new Timer() {
+			
+			@Override
+			public void run() {
+				decoratedTabPanel.getTabBar().setTabText(2, "JSON response");
+				new JSONViewer(body).setHTML(parsedBody);
+			}
+		};
+		t.schedule(250);
+	}
+	
 	public final native void addXMLArrowsSupport(final com.google.gwt.user.client.Element element)/*-{
 		$wnd.addXMLArrowSupport(element);
 	}-*/;
+	
+//	public final native boolean isJSONresponse()/*-{
+//		
+//	}-*/;
 }
