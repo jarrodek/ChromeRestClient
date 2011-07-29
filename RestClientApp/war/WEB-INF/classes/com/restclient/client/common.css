@@ -1,0 +1,66 @@
+@def fieldWidth 30em;
+.editField {
+	display: inline;
+	width: fieldWidth;
+}
+
+.note {
+	text-align: left;
+	padding: 10px 20px;
+	background: rgba(255, 0, 0, 0.05);
+	-webkit-border-radius: 8px;
+	-khtml-border-radius: 8px;
+	-moz-border-radius: 8px;
+	border-radius: 8px;
+	border: 1px solid rgba(255, 0, 0, 0.2);
+	text-shadow: rgba(0, 0, 0, 0.2) 0 2px 5px;
+	display: inline-block;
+}
+.formRow{
+	display: -webkit-box;
+	margin: 15px 0;
+}
+.rowLabel{
+	text-shadow: #bbcee9 0 1px 1px;
+	display: block;
+	outline: none;
+	padding: 7px 0;
+	text-align: end;
+	-webkit-padding-end: 24px;
+	width: 94px;
+}
+
+.italic {
+	font-style: italic;
+}
+
+.dialog-buttons {
+	-webkit-box-align: center;
+	-webkit-box-orient: horizontal;
+	-webkit-box-pack: end;
+	display: -webkit-box;
+	padding: 10px;
+}
+
+.button {
+	margin-left: 10px;
+	cursor: pointer;
+}
+
+body {
+	background-color: white;
+	color: black;
+	font-family: Arial, sans-serif;
+	font-size: small;
+	margin: 8px;
+	margin-top: 3px;
+}
+
+.boxed {
+	border: thin solid black;
+	margin: 2px;
+	overflow: hidden;
+	padding: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+}

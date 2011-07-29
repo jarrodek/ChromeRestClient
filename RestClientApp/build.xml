@@ -1,0 +1,37 @@
+<project name="rest_client_app" default="dist" basedir=".">
+
+	<property name="extension.dir" value="extension" />
+	<property name="extension.src" value="${extension.dir}/source" />
+
+	<target name="createRequiredDirectories" description="Create extenstions directory set.">
+		<mkdir dir="${extension.dir}" />
+		<mkdir dir="${extension.src}" />
+	</target>
+
+	<target name="dist" depends="createRequiredDirectories, clean, sources, extension" description="Run the distributions">
+	</target>
+
+	<target name="clean">
+		<delete includeemptydirs="true">
+			<fileset dir="${extension.src}" includes="**/*" />
+		</delete>
+	</target>
+
+	<target name="extension">
+		<zip destfile="${extension.dir}/restclient.zip" basedir="${extension.src}" />
+	</target>
+
+	<target name="sources">
+		<copy todir="${extension.src}">
+			<fileset dir="war/">
+				<exclude name="**/WEB-INF/" />
+			</fileset>
+		</copy>
+		<!-- <exec executable="./manifestversion.sh"/> -->
+		<copy todir="${extension.src}">
+			<fileset file="manifest.json">
+			</fileset>
+		</copy>
+	</target>
+
+</project>
