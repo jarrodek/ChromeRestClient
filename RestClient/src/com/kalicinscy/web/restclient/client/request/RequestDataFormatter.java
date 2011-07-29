@@ -88,11 +88,13 @@ public class RequestDataFormatter {
         String[] list = input.split("&");
         for( String param : list ){
             String[] _tmp = param.split("=");
+            if( _tmp.length == 2 ){
             String value = _tmp[1];
-            try{
-                value = URL.encode(value.trim());
-                result.put(_tmp[0].trim(), value);
-            } catch(Exception e){}
+	            try{
+	                value = URL.encode(value.trim());
+	                result.put(_tmp[0].trim(), value);
+	            } catch(Exception e){}
+            }
         }
 
         return result;

@@ -552,3 +552,12 @@ img.process-idle{
 .json-body-panel span.json-boolean{
 	color: #708;
 }
+.version-note{
+	width: 660px;
+	margin: 0px auto;
+	background-color: yellow;
+	padding: 7px;
+	font-weight: bold;
+	border-bottom-left-radius: 9px;
+	border-bottom-right-radius: 9px;
+}
