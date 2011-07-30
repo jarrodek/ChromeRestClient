@@ -1,7 +1,7 @@
 {
   "name": "Advanced REST client Application",
   "description": "Helper for web developers for creating custom HTTP requests.",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "icons": {
     "16": "img/view-refresh-7_16.png",
     "128": "img/view-refresh-7_128.png"
