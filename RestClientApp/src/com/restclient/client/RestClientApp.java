@@ -105,7 +105,7 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 		RootPanel.get().add(
 		        GWT.<Binder> create(Binder.class).createAndBindUi(this));
 		
-		plusButton.setHTML("<g:plusone href=\"https://chrome.google.com/webstore/detail/ahdjpgllmllekelefacdedbjnjaplfjn\"></g:plusone>");
+		plusButton.setHTML("<g:plusone href=\"https://chrome.google.com/webstore/detail/hgmloofddffdnphfgcellkdfbfbjeloo\"></g:plusone>");
 		
 		savedPanel.getParent().getElement().setAttribute("hidden", "");
 		Window.addResizeHandler(this);
