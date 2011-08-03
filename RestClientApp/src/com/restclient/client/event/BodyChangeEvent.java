@@ -1,7 +1,5 @@
 package com.restclient.client.event;
 
-import java.util.LinkedHashMap;
-
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
@@ -29,13 +27,13 @@ public class BodyChangeEvent extends GwtEvent<BodyChangeEvent.Handler> {
 	 * Handles {@link BodyChangeEvent}.
 	 */
 	public interface Handler extends EventHandler {
-		void onChange(LinkedHashMap<String, String> body, Object source);
+		void onChange(String body, Object source);
 	}
 
-	private final LinkedHashMap<String, String> body;
+	private final String body;
 
-	public BodyChangeEvent(LinkedHashMap<String, String> body) {
-		if( body == null) body = new LinkedHashMap<String, String>();
+	public BodyChangeEvent(String body) {
+		if( body == null) body = "";
 		this.body = body;
 	}
 

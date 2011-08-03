@@ -1,7 +1,11 @@
 package com.restclient.client.widgets;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -24,6 +28,23 @@ public class AddEncodingDialog {
 	public AddEncodingDialog(EventBus eventBus) {
 		this.eventBus = eventBus;
 		Binder.BINDER.createAndBindUi(this);
+		Scheduler.get().scheduleDeferred( new Scheduler.ScheduledCommand() {
+			@Override
+			public void execute() {
+				encoding.getElement().focus();
+			}
+		});
+		dialog.addDomHandler(new KeyDownHandler() {
+			@Override
+			public void onKeyDown(KeyDownEvent event) {
+				int keyCode = event.getNativeKeyCode();
+				if(keyCode == KeyCodes.KEY_ENTER){
+					onSave(null);
+				} else if( keyCode == KeyCodes.KEY_ESCAPE ){
+					onDismiss(null);
+				}
+			}
+		}, KeyDownEvent.getType());
 	}
 
 	public void show() {
@@ -36,9 +57,14 @@ public class AddEncodingDialog {
 		eventBus.fireEvent(ev);
 		dialog.hide();
 	}
+	
 	@UiHandler("save")
 	void onSave(ClickEvent event) {
-		EncodingAddEvent ev = new EncodingAddEvent( encoding.getValue() );
+		String currentValue = encoding.getValue();
+		if( currentValue.equals("") ){
+			return;
+		}
+		EncodingAddEvent ev = new EncodingAddEvent( currentValue );
 		eventBus.fireEvent(ev);
 		dialog.hide();
 	}

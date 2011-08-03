@@ -33,12 +33,14 @@ import com.google.gwt.user.cellview.client.HasKeyboardPagingPolicy.KeyboardPagin
 import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.restclient.client.RestApp;
+import com.restclient.client.event.DatabasesLoadedEvent;
 import com.restclient.client.event.RestoreRequestEvent;
 import com.restclient.client.storage.RestForm;
 import com.restclient.client.storage.RestFormJS;
@@ -55,30 +57,43 @@ public class RestoreStateWidget extends Composite {
 	
 	public RestoreStateWidget(EventBus eventBus) {
 		this.eventBus = eventBus;
+		SimplePager.Resources pagerResources = GWT.create(SimplePager.Resources.class);
 		provider = new ListDataProvider<RestForm>();
 		table = new CellTable<RestForm>( provider.getKeyProvider() );
-		
-		SimplePager.Resources pagerResources = GWT.create(SimplePager.Resources.class);
 		pager = new SimplePager(TextLocation.CENTER,pagerResources, false, 0, true);
+		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
+		
+		String data = "<p class=\"note\">";
+		data += "You do not have saved requests.<br/>";
+		data += "When ready press CTRL + S to save current request state. Press CTRL + O to restore.";
+		data += "</p>";
+		HTML info = new HTML(data);
+		
+		table.setEmptyTableWidget( info );
 		pager.setDisplay(table);
 		table.setKeyboardPagingPolicy(KeyboardPagingPolicy.CHANGE_PAGE);
 		
-		selectionModel = new SingleSelectionModel<RestForm>(
-				provider.getKeyProvider());
-		table.setSelectionModel(selectionModel,
-				DefaultSelectionEventManager.<RestForm> createDefaultManager());
+		selectionModel = new SingleSelectionModel<RestForm>(provider.getKeyProvider());
+		table.setSelectionModel(selectionModel, DefaultSelectionEventManager.<RestForm> createDefaultManager());
 		provider.addDataDisplay(table);
 		
-		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
-		getDataAndSetTable();
+		DatabasesLoadedEvent.register(eventBus, new DatabasesLoadedEvent.Handler() {
+			@Override
+			public void onChange(DatabasesLoadedEvent event) {
+				getDataAndSetTable();
+			}
+		});
+		
 	}
 	
 	public void addRow(RestForm row){
 		List<RestForm> list = provider.getList();
 		list.add(row);
+		provider.setList(list);
+		table.redraw();
 	}
 	
-	private void getDataAndSetTable(){
+	public void getDataAndSetTable(){
 		RestApp.FORM_SERVICE.getAllData(new ListCallback<RestFormJS>() {
 			@Override
 			public void onFailure(DataServiceException error) {
@@ -98,17 +113,11 @@ public class RestoreStateWidget extends Composite {
 				}
 				if( list.size() > 0 ){
 					fillTable(list);
-				} else {
-					setEmptyMessage();
 				}
 			}
 		});
 	}
 	
-	protected void setEmptyMessage() {
-		
-	}
-
 	private void fillTable(List<RestForm> list){
 		provider.setList(list);
 		table.setRowCount(list.size(), true);

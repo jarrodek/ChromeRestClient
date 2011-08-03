@@ -111,9 +111,9 @@ public class RequestParameters {
 		});
 		BodyChangeEvent.register(eb, new BodyChangeEvent.Handler() {
 			@Override
-			public void onChange(LinkedHashMap<String, String> body, Object source) {
+			public void onChange(String body, Object source) {
 //				Log.debug("Body change");
-				instance.postData = RequestDataFormatter.parseData(body);
+				instance.postData = body;
 			}
 		});
 		FilesChangeEvent.register(eb, new FilesChangeEvent.Handler() {
@@ -241,7 +241,7 @@ public class RequestParameters {
 			ins.postData = post;
 		}
 		if (fireEvents) {				
-			ins.eventBus.fireEventFromSource(new BodyChangeEvent(RequestDataFormatter.parseDataToHashMap(post)), RequestParameters.class);
+			ins.eventBus.fireEventFromSource(new BodyChangeEvent(post), RequestParameters.class);
 		}
 		String method = getJsonStringData(obj, "method");
 		if (method != null) {

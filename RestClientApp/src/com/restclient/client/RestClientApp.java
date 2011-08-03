@@ -68,7 +68,10 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 	private static final Logger log = Logger.getLogger(RestClientApp.class
 			.getName());
 
-	EventBus eventBus = new SimpleEventBus();
+	private static EventBus eventBus = new SimpleEventBus();
+	public static EventBus getAppMainEventBus(){
+		return eventBus;
+	}
 	
 	@UiField(provided = true)
 	RequestWidget requestWidget;

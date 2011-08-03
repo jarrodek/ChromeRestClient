@@ -3,8 +3,7 @@ package com.restclient.client.widgets;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.shared.EventBus;
@@ -30,30 +29,27 @@ public class SaveStateDialog {
 	public SaveStateDialog(EventBus eventBus) {
 		this.eventBus = eventBus;
 		Binder.BINDER.createAndBindUi(this);
-		stateName.addKeyDownHandler(new KeyDownHandler() {
-			public void onKeyDown(KeyDownEvent event) {
-				
-				int keyCode = event.getNativeKeyCode();
-				if( keyCode == 13 && save.isEnabled() ){
-					event.preventDefault();
-					onSave(null);
-					return;
-				}
-				
-				checkButtonState();
-			}
-		});
+		
 		stateName.addKeyUpHandler( new KeyUpHandler() {
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
-				checkButtonState();
+				int keyCode = event.getNativeKeyCode();
+				if(keyCode == KeyCodes.KEY_ENTER){
+					event.preventDefault();
+					onSave(null);
+				} else if( keyCode == KeyCodes.KEY_ESCAPE ){
+					event.preventDefault();
+					onDismiss(null);
+				} else {
+					checkButtonState();
+				}
 			}
 		});
 		
 		Scheduler.get().scheduleDeferred( new Scheduler.ScheduledCommand() {
 			@Override
 			public void execute() {
-				stateName.setFocus(true);
+				stateName.getElement().focus();
 			}
 		});
 	}
@@ -78,9 +74,14 @@ public class SaveStateDialog {
 	void onDismiss(ClickEvent event) {
 		dialog.hide();
 	}
+
 	@UiHandler("save")
 	void onSave(ClickEvent event) {
-		eventBus.fireEventFromSource(new FormStateSaveEvent(stateName.getValue()), SaveStateDialog.class);
+		String currentValue = stateName.getValue();
+		if( currentValue.equals("") ){
+			return;
+		}
+		eventBus.fireEventFromSource(new FormStateSaveEvent(currentValue), SaveStateDialog.class);
 		dialog.hide();
 	}
 }

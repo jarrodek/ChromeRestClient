@@ -17,7 +17,7 @@ import com.google.appengine.repackaged.org.json.JSONObject;
 public class TestDataServlet extends HttpServlet {
 
 	private Object monitor = new Object();
-	
+
 	/**
 	 * 
 	 */
@@ -26,19 +26,19 @@ public class TestDataServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-//		synchronized (monitor) {
-//			try {
-//				monitor.wait(100);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-//		}
-		
+		// synchronized (monitor) {
+		// try {
+		// monitor.wait(100);
+		// } catch (InterruptedException e) {
+		// e.printStackTrace();
+		// }
+		// }
+
 		String payload = req.getParameter("p");
-		if( payload == null || payload.equals("") ){
+		if (payload == null || payload.equals("")) {
 			resp.addHeader("Location", "/RestClientApp.html");
 			resp.setStatus(307);
-		} else if( payload.equals("json") ){
+		} else if (payload.equals("json")) {
 			JSONObject resp_obj = new JSONObject();
 			List<String> testArray = new ArrayList<String>();
 			testArray.add("apple");
@@ -50,7 +50,7 @@ public class TestDataServlet extends HttpServlet {
 			arr[0] = "string1";
 			arr[1] = "string2";
 			arr[2] = "string3";
-			try { 
+			try {
 				resp_obj.put("fruits", testArray);
 				resp_obj.put("ok", true);
 				resp_obj.put("count", 5);
@@ -62,35 +62,52 @@ public class TestDataServlet extends HttpServlet {
 				e.printStackTrace();
 			}
 			resp.setContentType("application/json");
-            resp.setStatus(200);
+			resp.setStatus(200);
 			resp.getWriter().println(resp_obj.toString());
-		} else if( payload.equals("xml") ){
+		} else if (payload.equals("xml")) {
 			String file = req.getParameter("f");
-			if( file == null || file.equals("") ){
+			if (file == null || file.equals("")) {
 				file = "file.xml";
 			}
-			
+
 			StringBuffer fileData = new StringBuffer(1000);
-	        BufferedReader reader = new BufferedReader(
-	                new FileReader("WEB-INF/res/"+file));
-	        char[] buf = new char[1024];
-	        int numRead=0;
-	        while((numRead=reader.read(buf)) != -1){
-	            String readData = String.valueOf(buf, 0, numRead);
-	            fileData.append(readData);
-	            buf = new char[1024];
-	        }
-	        reader.close();
-	        resp.getWriter().println(fileData.toString());
+			BufferedReader reader = new BufferedReader(new FileReader(
+					"WEB-INF/res/" + file));
+			char[] buf = new char[1024];
+			int numRead = 0;
+			while ((numRead = reader.read(buf)) != -1) {
+				String readData = String.valueOf(buf, 0, numRead);
+				fileData.append(readData);
+				buf = new char[1024];
+			}
+			reader.close();
+			resp.getWriter().println(fileData.toString());
 		}
-		
-		
+
 	}
-	
+
+	@Override
+	protected void doPut(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		StringBuffer jb = new StringBuffer();
+		String line = null;
+		try {
+			BufferedReader reader = req.getReader();
+			while ((line = reader.readLine()) != null){
+				
+				jb.append(line);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		resp.getWriter().println("RESPONSE:");
+		resp.getWriter().println(jb.toString());
+	}
+
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		
+
 		synchronized (monitor) {
 			try {
 				monitor.wait(2000);
@@ -98,7 +115,7 @@ public class TestDataServlet extends HttpServlet {
 				e.printStackTrace();
 			}
 		}
-		
+
 		resp.getWriter().println("OK");
 	}
 }

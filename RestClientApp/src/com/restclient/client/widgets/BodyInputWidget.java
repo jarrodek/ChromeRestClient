@@ -83,9 +83,12 @@ public class BodyInputWidget extends Composite {
 		rawInput.addValueChangeHandler(new ValueChangeHandler<String>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
-				LinkedHashMap<String, String> data = RequestDataFormatter.parseQueryString(event.getValue());
+				
+				String currentValue = event.getValue();
+				
+				LinkedHashMap<String, String> data = RequestDataFormatter.parseQueryString( currentValue );
 				form.setBodyList(data, false);
-				BodyInputWidget.this.eventBus.fireEventFromSource(new BodyChangeEvent(data), BodyInputWidget.this);
+				BodyInputWidget.this.eventBus.fireEventFromSource(new BodyChangeEvent( currentValue ), BodyInputWidget.this);
 			}
 		});
 		BodyFormRowChangeEvent.register(eventBus, new BodyFormRowChangeEvent.Handler() {
@@ -94,7 +97,7 @@ public class BodyInputWidget extends Composite {
 				LinkedHashMap<String, String> list = form.getBodyList();
 				String data = RequestDataFormatter.parseData(list);
 				rawInput.setValue(data);
-				BodyChangeEvent e = new BodyChangeEvent(list);
+				BodyChangeEvent e = new BodyChangeEvent(data);
 				BodyInputWidget.this.eventBus.fireEventFromSource(e, BodyInputWidget.class);
 			}
 		});
@@ -108,10 +111,11 @@ public class BodyInputWidget extends Composite {
 		});
 		BodyChangeEvent.register(eventBus, new BodyChangeEvent.Handler() {
 			@Override
-			public void onChange(LinkedHashMap<String, String> body, Object source) {
+			public void onChange(String body, Object source) {
 				if( source != null && source.equals(RequestParameters.class) ){
-					rawInput.setValue( RequestDataFormatter.parseData(body) );
-					form.setBodyList(body, false);
+					rawInput.setValue( body );
+					LinkedHashMap<String, String> list = RequestDataFormatter.parseDataToHashMap(body);
+					form.setBodyList(list, false);
 				}
 			}
 		});

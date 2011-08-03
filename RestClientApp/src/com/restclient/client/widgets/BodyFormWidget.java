@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.restclient.client.event.BodyChangeEvent;
 import com.restclient.client.event.BodyFormRowRemovedEvent;
+import com.restclient.client.request.RequestDataFormatter;
 
 public class BodyFormWidget extends Composite {
 
@@ -48,7 +49,7 @@ public class BodyFormWidget extends Composite {
 			public void onRemove(BodyFormRow row, Object source) {
 				body.remove(row);
 				row = null;
-				BodyChangeEvent e = new BodyChangeEvent(getBodyList());
+				BodyChangeEvent e = new BodyChangeEvent( RequestDataFormatter.parseData( getBodyList() ));
 				BodyFormWidget.this.eventBus.fireEventFromSource(e, BodyFormWidget.class);
 			}
 		});
@@ -90,7 +91,8 @@ public class BodyFormWidget extends Composite {
 			appendRow(null, null, false);
 		}
 		if( fireEvents ){
-			eventBus.fireEventFromSource(new BodyChangeEvent(list), BodyFormWidget.class);
+			BodyChangeEvent e = new BodyChangeEvent( RequestDataFormatter.parseData( list ));
+			eventBus.fireEventFromSource(e, BodyFormWidget.class);
 		}
 	}
 	public LinkedHashMap<String, String> getBodyList(){

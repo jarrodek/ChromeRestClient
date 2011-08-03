@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.http.client.URL;
 
 /**
@@ -45,6 +46,7 @@ public class RequestDataFormatter {
     }
 
     public static String parseData(LinkedHashMap<String, String> input){
+    	if( input == null ) return "";
     	String result = "";
     	Set<String> keys = input.keySet();
         Iterator<String> it = keys.iterator();
@@ -54,8 +56,12 @@ public class RequestDataFormatter {
             }
             String key = it.next();
             String value = input.get(key);
-            if( !(key.trim().equals("") && value.trim().equals("")) )
-            	result += key.trim()+"="+value.trim();
+            if( !(key.trim().equals("") && value.trim().equals("")) ){
+            	result += URL.encodeQueryString(key.trim());
+            	result += "=";
+            	result += URL.encodeQueryString( value.trim() );
+            	//result += key.trim()+"="+value.trim();
+            }
         }
         return result;
     }
@@ -74,6 +80,7 @@ public class RequestDataFormatter {
     }
     
     public static String parseData(String input){
+    	Log.debug("parseData: "+input);
         if (input.equals("")) {
             return "";
         }
@@ -85,18 +92,28 @@ public class RequestDataFormatter {
         result = parseData(_tmpResult);
         return result;
     }
-
+    /**
+     * Parse application/x-www-form-urlencoded form entity body to key => value pairs.
+     * 
+     * @param input
+     * @return
+     */
     public static LinkedHashMap<String, String> parseQueryString(String input){
     	LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
 
         String[] list = input.split("&");
         for( String param : list ){
             String[] _tmp = param.split("=");
+            if( _tmp.length != 2 ){
+            	continue;
+            }
             
-            String value = _tmp.length > 1 ? _tmp[1] : "";
             try{
-                value = URL.encode(value.trim());
-                result.put(_tmp[0].trim(), value);
+            	
+            	String key = URL.decodeQueryString(_tmp[0].trim());
+                String value = URL.decodeQueryString(_tmp[1].trim());
+                result.put(key, value);
+            	
             } catch(Exception e){}
         }
 
@@ -109,11 +126,41 @@ public class RequestDataFormatter {
             String[] _tmp = dataLine.split("[=|\r\n]", 2);
             if (_tmp.length == 2) {
                 try{
-                    String value = URL.encode(_tmp[1].trim());
-                    result.put(_tmp[0].trim(), value);
+                	String key = URL.decodeQueryString(_tmp[0].trim());
+                    String value = URL.decodeQueryString(_tmp[1].trim());
+                    result.put(key, value);
                 } catch(Exception e){}
             }
         }
         return result;
     }
+    /**
+     * Parse raw body data to decoded entiti body string for application/x-www-form-urlencoded encoding.
+     * @param data
+     * @return
+     */
+    public static String parseUrlencodedEntiti(String data){
+    	if( data == null || data.equals("") ) return "";
+    	
+    	LinkedHashMap<String, String> list = parseQueryString(data.split("&"));
+    	String result = "";
+    	Set<String> set = list.keySet();
+		Iterator<String> it = set.iterator();
+		while(it.hasNext()){
+            String key = it.next();
+            String value = list.get(key);
+            
+            if( !result.isEmpty() ){
+                result += "&";
+            }
+            
+            if( !(key.trim().equals("") && value.trim().equals("")) ){
+            	result += URL.decodeQueryString(key.trim());
+            	result += "=";
+            	result += URL.decodeQueryString( value.trim() );
+            }
+		}
+		return result;
+    }
+    
 }

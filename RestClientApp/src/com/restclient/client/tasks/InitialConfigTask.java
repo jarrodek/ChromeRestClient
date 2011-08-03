@@ -20,6 +20,8 @@ import com.google.gwt.resources.client.TextResource;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Cookies;
 import com.restclient.client.RestApp;
+import com.restclient.client.RestClientApp;
+import com.restclient.client.event.DatabasesLoadedEvent;
 import com.restclient.client.resources.AppResources;
 import com.restclient.client.storage.HeaderInsertRow;
 import com.restclient.client.storage.StatusCodesInsertRow;
@@ -27,16 +29,16 @@ import com.restclient.client.storage.StatusCodesInsertRow;
 public class InitialConfigTask implements LoadTask {
 	
 	TasksCallback callback;
+	private int dbLoaded = 0;
+	private int dbLoadError = 0;
 	
 	@Override
 	public void run(TasksCallback callback, boolean lastRun) {
 		this.callback = callback;
-		createAndInitTablesTables();
+		initTables();
 	}
 	
 	private void createAndInitTablesTables(){
-		
-		initTables();
 		callback.onInnerTaskFinished();
 		
 		final Storage storage = Storage.getLocalStorageIfSupported();
@@ -71,31 +73,65 @@ public class InitialConfigTask implements LoadTask {
 	}
 	
 	private void initTables() {
+		
 		RestApp.HEADERS_SERVICE.initTable(new VoidCallback() {
 			@Override
-			public void onFailure(DataServiceException error) {}
+			public void onFailure(DataServiceException error) {
+				dbLoadError++;
+				dbLoadCallback();
+			}
 			@Override
-			public void onSuccess() {}
+			public void onSuccess() {
+				dbLoaded++;
+				dbLoadCallback();
+			}
 		});
 		RestApp.STATUSES_SERVICE.initTable(new VoidCallback() {
 			@Override
-			public void onFailure(DataServiceException error) {}
+			public void onFailure(DataServiceException error) {
+				dbLoadError++;
+				dbLoadCallback();
+			}
 			@Override
-			public void onSuccess() {}
+			public void onSuccess() {
+				dbLoaded++;
+				dbLoadCallback();
+			}
 		});
 		RestApp.URLS_SERVICE.initTable(new VoidCallback() {
 			@Override
-			public void onFailure(DataServiceException error) {}
+			public void onFailure(DataServiceException error) {
+				dbLoadError++;
+				dbLoadCallback();
+			}
 			@Override
-			public void onSuccess() {}
+			public void onSuccess() {
+				dbLoaded++;
+				dbLoadCallback();
+			}
 		});
 		RestApp.FORM_SERVICE.initTable(new VoidCallback() {
 			@Override
-			public void onFailure(DataServiceException error) {}
+			public void onFailure(DataServiceException error) {
+				dbLoadError++;
+				dbLoadCallback();
+			}
 			@Override
-			public void onSuccess() {}
+			public void onSuccess() {
+				dbLoaded++;
+				dbLoadCallback();
+			}
 		});
 	}
+	
+	private void dbLoadCallback(){
+		if( dbLoadError + dbLoaded >= 4 ){ // all loaded (or not)
+			createAndInitTablesTables();
+			DatabasesLoadedEvent event = new DatabasesLoadedEvent( dbLoadError == 0 );
+			RestClientApp.getAppMainEventBus().fireEventFromSource(event, InitialConfigTask.class);
+		}
+	}
+	
 	public void createSupportData() {
 		try {
 			loadHeaders();

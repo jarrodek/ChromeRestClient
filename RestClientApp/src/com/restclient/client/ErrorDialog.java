@@ -66,6 +66,7 @@ class ErrorDialog {
       public void publish(LogRecord record) {
         if (isLoggable(record)) {
           errorMessage.setText(record.getMessage());
+          errorDialog.getElement().getStyle().setZIndex(10);
           errorDialog.center();
         }
       }

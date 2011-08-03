@@ -77,6 +77,7 @@ public class AppRequestFactory {
 		String requestUrl = RequestParameters.getUrl();
 		List<FilesObject> files = RequestParameters.getFilesList();
 		LinkedHashMap<String, String> headers = RequestParameters.getHeaders();
+		String enc = RequestParameters.getFormEncoding();
 		FormData fd = null;
 		boolean isEmptyFormData = true;
 		boolean hasFile = false;
@@ -115,6 +116,16 @@ public class AppRequestFactory {
 					}
 				}
 			} else {
+				//
+				// OK, lets user decide how to send data in request: as encoded string or not.
+				//
+//				if( enc.contains("x-www-form-urlencoded") ){
+//					Log.debug("Before parse: "+data);
+//					Log.debug("After parse: "+RequestDataFormatter.parseUrlencodedEntiti(data));
+//					builder.setRequestData( RequestDataFormatter.parseUrlencodedEntiti(data) );
+//				} else {
+//					builder.setRequestData(data);
+//				}
 				builder.setRequestData(data);
 			}
 		}
@@ -142,7 +153,6 @@ public class AppRequestFactory {
 		if (method.equals("POST") || method.equals("PUT")
 				|| method.equals("DELETE")) {
 			if (!hasFile) {
-				String enc = RequestParameters.getFormEncoding();
 				if (headers == null) {
 					headers = new LinkedHashMap<String, String>();
 				}

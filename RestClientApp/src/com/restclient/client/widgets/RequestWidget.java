@@ -95,7 +95,7 @@ public class RequestWidget extends Composite {
 
 	private DefaultSuggestionDisplay suggestionsDisplay;
 
-	public RequestWidget(EventBus eventBus) {
+	public RequestWidget(final EventBus eventBus) {
 		this.eventBus = eventBus;
 
 		DatabaseSuggestOracle oracle = new DatabaseSuggestOracle(
@@ -131,13 +131,12 @@ public class RequestWidget extends Composite {
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
 		sendRequest.setEnabled(false);
 		
-		
-		final AddEncodingDialog dialog = new AddEncodingDialog(eventBus);
 		contentType.addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
 				int index = contentType.getSelectedIndex();
 				if (index == 0) { // add new
+					AddEncodingDialog dialog = new AddEncodingDialog(eventBus);
 					dialog.show();
 				} else {
 					String v = contentType.getItemText(index);
@@ -161,6 +160,9 @@ public class RequestWidget extends Composite {
 					contentType.setSelectedIndex(selectedItem);
 					contentType.getElement().setPropertyInt("position",
 							selectedItem);
+					
+					RequestWidget.this.eventBus.fireEventFromSource(
+							new EncodingChangeEvent(encoding), RequestWidget.class);
 					storeEncoding();
 				}
 			}
@@ -400,9 +402,14 @@ public class RequestWidget extends Composite {
 
 		}
 	}
-
+	/**
+	 * Store user encoding list
+	 * 
+	 * changed to getLocalStorageIfSupported() from getSessionStorageIfSupported()
+	 * 
+	 */
 	private void storeEncoding() {
-		Storage storage = Storage.getSessionStorageIfSupported();
+		Storage storage = Storage.getLocalStorageIfSupported();
 		if (storage == null) {
 			return;
 		}
