@@ -51,12 +51,15 @@ public class TestDataServlet extends HttpServlet {
 			arr[1] = "string2";
 			arr[2] = "string3";
 			try {
+				
 				resp_obj.put("fruits", testArray);
 				resp_obj.put("ok", true);
 				resp_obj.put("count", 5);
 				resp_obj.put("array", arr);
 				resp_obj.put("nullValue", "null");
 				resp_obj.append("aaa", null);
+				resp_obj.put("long", "18014398509481984419");
+				
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -82,6 +85,15 @@ public class TestDataServlet extends HttpServlet {
 			}
 			reader.close();
 			resp.getWriter().println(fileData.toString());
+		} else if ( payload.equals("auth") ){
+			resp.setStatus(401);
+			resp.setHeader("WWW-Authenticate", "Basic realm=\"Secure Area\"");
+			resp.setContentType("text/html");
+		} else if ( payload.equals("json2") ){
+			String response = "{\"aaa\":[null],\"count\":5,\"fruits\":[\"apple\",\"banana\",\"orange\",\"lemon\",\"grapes\"],\"nullValue\":\"null\",\"ok\":true,\"long\":18014398509481984419,\"array\":[\"string1\",\"string2\",\"string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 \"]}";
+			resp.setContentType("application/json");
+			resp.setStatus(200);
+			resp.getWriter().println(response);
 		}
 
 	}

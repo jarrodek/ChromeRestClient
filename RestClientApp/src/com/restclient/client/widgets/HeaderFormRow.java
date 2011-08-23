@@ -55,12 +55,9 @@ public class HeaderFormRow extends Composite {
 	
 	private final EventBus eventBus;
 
-	@UiField(provided = true)
-	SuggestBox headerName;
-	@UiField
-	TextBox headerValue;
-	@UiField
-	Button removeBtn;
+	@UiField(provided = true) SuggestBox headerName;
+	@UiField TextBox headerValue;
+	@UiField Button removeBtn;
 	@UiField HTML hintHandler;
 	@UiField HeaderStyle style;
 	
@@ -135,7 +132,9 @@ public class HeaderFormRow extends Composite {
 		HeaderFormRow.this.eventBus.fireEventFromSource(new HeaderChangeEvent(HeaderFormRow.this), HeaderFormRow.class);
 		provideHeaderSupport();
 	}
-	
+	/**
+	 * Add fill headers support if current header is supported.
+	 */
 	private void provideHeaderSupport(){
 		String value = headerName.getValue();
 		hintRow = null;

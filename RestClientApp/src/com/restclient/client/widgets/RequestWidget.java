@@ -11,6 +11,7 @@ import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -29,6 +30,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SuggestBox;
@@ -60,35 +62,21 @@ public class RequestWidget extends Composite {
 
 	private final EventBus eventBus;
 
-	@UiField(provided = true)
-	SuggestBox urlField;
-	@UiField(provided = true)
-	MethodsWidget methodsWidget;
-	@UiField(provided = true)
-	HeaderInputWidget headersWidget;
-	@UiField(provided = true)
-	BodyInputWidget bodyWidget;
-	@UiField
-	HTMLPanel requestPanel;
-	@UiField
-	DivElement requestBodyControls;
-	@UiField(provided = true)
-	ListBox contentType;
-
-	@UiField
-	HTML5Progress requestProgress;
-	@UiField
-	Button clearForm;
-	@UiField
-	Button sendRequest;
-	@UiField
-	HTML5Progress uploadProgress;
-	@UiField
-	DivElement sendingDiv;
-	@UiField
-	DivElement receivingDiv;
-	@UiField
-	SpanElement sizeCounter;
+	@UiField(provided = true) SuggestBox urlField;
+	@UiField(provided = true) MethodsWidget methodsWidget;
+	@UiField(provided = true) HeaderInputWidget headersWidget;
+	@UiField(provided = true) BodyInputWidget bodyWidget;
+	@UiField HTMLPanel requestPanel;
+	@UiField DivElement requestBodyControls;
+	@UiField(provided = true) ListBox contentType;
+	@UiField HTML5Progress requestProgress;
+	@UiField Button clearForm;
+	@UiField Button sendRequest;
+	@UiField HTML5Progress uploadProgress;
+	@UiField DivElement sendingDiv;
+	@UiField DivElement receivingDiv;
+	@UiField SpanElement sizeCounter;
+	@UiField HTML urlParamsSupport;
 
 	private final List<String> encodings;
 	private Date lastEnterTime;
@@ -194,7 +182,7 @@ public class RequestWidget extends Composite {
 				if (url == null) {
 					url = "";
 				}
-				if (source != null && source.equals(RequestParameters.class)) {
+				if (source != null && ( source.equals(RequestParameters.class ) || source.equals(GETParamsEditorDialog.class) )) {
 					RequestWidget.this.urlField.setValue(url);
 				}
 				if( url.trim().equals("") ){
@@ -343,6 +331,15 @@ public class RequestWidget extends Composite {
 			}
 		});
 
+		
+		urlParamsSupport.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				GETParamsEditorDialog dialog = new GETParamsEditorDialog(eventBus, urlField.getValue());
+				dialog.show();
+			}
+		});
+		
 	}
 
 	private void suggestionCallback() {

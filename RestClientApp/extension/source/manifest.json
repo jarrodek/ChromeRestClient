@@ -1,14 +1,14 @@
 {
   "name": "Advanced REST client Application",
   "description": "Helper for web developers for creating custom HTTP requests.",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "icons": {
-    "16": "img/view-refresh-7_16.png",
-    "128": "img/view-refresh-7_128.png"
+    "16": "img/arc_icon_16.png",
+    "128": "img/arc_icon_128.png"
   },
   "minimum_chrome_version": "10.0.0",
   "permissions": [
-    "tabs", "http://*/*", "https://*/*"
+    "http://*/*", "https://*/*"
   ],
   "app": {
     "launch": {

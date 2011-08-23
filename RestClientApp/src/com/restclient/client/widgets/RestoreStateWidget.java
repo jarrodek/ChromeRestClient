@@ -111,9 +111,7 @@ public class RestoreStateWidget extends Composite {
 					row.setUrl(data.getUrl());
 					list.add(row);
 				}
-				if( list.size() > 0 ){
-					fillTable(list);
-				}
+				fillTable(list);
 			}
 		});
 	}

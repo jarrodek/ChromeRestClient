@@ -1,4 +1,4 @@
-html textarea,html input {
+html textarea, html input {
 	-webkit-border-radius: 2px;
 	border: 1px solid rgb(170, 170, 170);
 }
@@ -215,4 +215,7 @@ input.w3c-error {
 }
 .gwt-SuggestBoxPopup{
 	z-index: 10;
+}
+div.gwt-TabLayoutPanel .gwt-TabLayoutPanelTab{
+	padding: 5px 8px 5px 9px;
 }

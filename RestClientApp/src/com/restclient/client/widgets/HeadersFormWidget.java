@@ -84,12 +84,17 @@ public class HeadersFormWidget extends Composite {
 		for( HeaderFormRow r : headers ){
 			r.removeFromParent();
 		}
-		headers = new ArrayList<HeaderFormRow>();
-		if( list.size() > 0 ){
-			Set<String> set = list.keySet();
-			for( String key : set ){
-				String value = list.get(key);
-				appendRow(key, value, false);
+		//null check
+		if( list != null ){
+			headers = new ArrayList<HeaderFormRow>();
+			if( list.size() > 0 ){
+				Set<String> set = list.keySet();
+				for( String key : set ){
+					String value = list.get(key);
+					appendRow(key, value, false);
+				}
+			} else {
+				appendRow(null, null, false);
 			}
 		} else {
 			appendRow(null, null, false);

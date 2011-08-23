@@ -19,6 +19,7 @@
 		}
 		.suggestBox{
 			padding: 0 1em 0 0.5em;
+			position: relative;
 		}
 		.gwt-SuggestBox{
 			padding: 2px;
@@ -48,6 +49,21 @@
 		.tabPanelFix{
 			margin-bottom: 20px;
 		}
+		.urlParamsSupport{
+			position: absolute;
+			top: 5px;
+			right: 10px;
+			background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBIWXMAAA3XAAAN1wFCKJt4AAAACXZwQWcAAAAQAAAAEABcxq3DAAABpklEQVQ4y5WTMYtTQRSFv3n7Iq+wUAJmGy0WCzsrxc5akS2sBdFC/AE2WihYaC2WFmJhsY3YWCgWi1aylVrabCG4WdgyybyZuedaJCab3QTMgYGBufNd7pkzwd05qoevL+5J6sHsrKqq/vM7P9aP1tYsUCq5d/fGMxwHd4Tx5sOT3qLahQAzUZTYPfgKBM6evoyZ+H+AhCliSkCY7FcAFIliLUUJgGwtZRng/svzE8NmOtHpxGSxKTYGFIusVWvx3ouNOcerqurXuZTe7WsPcAQ4jnDU5NyS8hjQ5sjm1VuNZJgXXEJuvN/e6tXFRCqRX3vbhBCmiwCBAMDu/s7kRcDdcXe6JzcwE7VJpEm3w4B/lw/L8SmgTUNMojYTKUXOdS/hLtwFCCF+H3wHYP3UBeSGS5gKcqNNkWKilnv/7edXcyZ26jpev7LZ5JTHHrQjPu18jLmUZs7EEPr11qM/x+J58+kZb1OcmhjTiNim5t3j/WNzLc1BTENSmgDa4fIcLEtijENyno2wUhLNxKAd0XS6yMUgDlb8C+79Lz+/zRkbQugvqv0LNTYj0j7OYGEAAAAldEVYdGRhdGU6Y3JlYXRlADIwMTAtMDEtMTFUMDk6MTI6NDQtMDc6MDD9MHEdAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDEwLTAxLTExVDA5OjEyOjQ0LTA3OjAwjG3JoQAAADR0RVh0TGljZW5zZQBodHRwOi8vY3JlYXRpdmVjb21tb25zLm9yZy9saWNlbnNlcy9HUEwvMi4wL2xqBqgAAAAZdEVYdFNvZnR3YXJlAHd3dy5pbmtzY2FwZS5vcmeb7jwaAAAAE3RFWHRTb3VyY2UAR05PTUUtQ29sb3JzqplE4gAAADF0RVh0U291cmNlX1VSTABodHRwOi8vY29kZS5nb29nbGUuY29tL3AvZ25vbWUtY29sb3JzL1AdtesAAAAASUVORK5CYII=);
+			width: 14px;
+			height: 14px;
+			cursor: pointer;
+			-webkit-transition: opacity 0.25s ease;
+			opacity: 0.3;
+			background-size: contain;
+		}
+		.urlParamsSupport:hover{
+			opacity: 1;
+		}
 	</ui:style>
 	<g:HTMLPanel ui:field="requestPanel">
 		<section class="{style.section}">
@@ -56,6 +72,7 @@
 					<div class="{style.rowLabel}">URL</div>
 					<div class="{style.rowInput} {style.suggestBox}">
 						<g:SuggestBox styleName="{style.gwt-SuggestBox}" ui:field="urlField"></g:SuggestBox>
+						<g:HTML styleName="{style.urlParamsSupport}" ui:field="urlParamsSupport" title="Set GET params"></g:HTML>
 					</div>
 				</div>
 				<div class="{style.formRow}">
