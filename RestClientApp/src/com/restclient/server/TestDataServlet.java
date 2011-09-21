@@ -57,6 +57,7 @@ public class TestDataServlet extends HttpServlet {
 				resp_obj.put("count", 5);
 				resp_obj.put("array", arr);
 				resp_obj.put("nullValue", "null");
+				resp_obj.put("htmlvalue", "<a href=\"#\">test link</a>");
 				resp_obj.append("aaa", null);
 				resp_obj.put("long", "18014398509481984419");
 				
