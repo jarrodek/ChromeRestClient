@@ -97,6 +97,10 @@ div.gwt-DialogBox {
 	margin: 0;
 }
 
+.gwt-DialogBox.dialog-error .Caption{
+	color: red;
+}
+
 .gwt-DialogBox .dialogContent {
 	padding: 10px;
 }
