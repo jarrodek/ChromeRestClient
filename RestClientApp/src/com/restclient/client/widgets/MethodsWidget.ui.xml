@@ -21,6 +21,9 @@
 			<g:RadioButton name="method" text="PUT" ui:field="radioPut"></g:RadioButton>
 		</div>
 		<div class="{style.radioBox}">
+			<g:RadioButton name="method" text="PATCH" ui:field="radioPatch"></g:RadioButton>
+		</div>
+		<div class="{style.radioBox}">
 			<g:RadioButton name="method" text="DELETE" ui:field="radioDelete"></g:RadioButton>
 		</div>
 		<div class="{style.radioBox}">
@@ -29,5 +32,12 @@
 		<div class="{style.radioBox}">
 			<g:RadioButton name="method" text="OPTIONS" ui:field="radioOptions"></g:RadioButton>
 		</div>
+		<div class="{style.radioBox}">
+			<g:RadioButton name="method" text="TRACE" ui:field="radioTrace"></g:RadioButton>
+		</div>
+		<div class="{style.radioBox}">
+			<g:RadioButton name="method" text="CONNECT" ui:field="radioConnect"></g:RadioButton>
+		</div>
+		
 	</g:HTMLPanel>
 </ui:UiBinder> 

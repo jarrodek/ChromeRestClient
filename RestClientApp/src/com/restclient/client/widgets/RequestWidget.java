@@ -360,7 +360,7 @@ public class RequestWidget extends Composite {
 	 */
 	public static boolean isBodyRequest(String requestMethod) {
 		return (requestMethod.equals("POST") || requestMethod.equals("PUT") || requestMethod
-				.equals("DELETE"));
+				.equals("DELETE")|| requestMethod.equals("PATCH"));
 	}
 
 	/**

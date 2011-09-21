@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import com.google.code.gwt.database.client.service.DataServiceException;
@@ -175,10 +176,15 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 				final Date current = new Date();
 				RestApp.FORM_SERVICE.insertData(formName, url, config, current, new RowIdListCallback() {
 					@Override
-					public void onFailure(DataServiceException error) {}
+					public void onFailure(DataServiceException error) {
+						ErrorDialog dialog = new ErrorDialog();
+						dialog.getHandler().publish(new LogRecord(dialog.getHandler().getLevel(), error.getMessage()));
+					}
 					@Override
 					public void onSuccess(List<Integer> rowIds) {
 						if( rowIds.size() == 0 ){
+							ErrorDialog dialog = new ErrorDialog();
+							dialog.getHandler().publish(new LogRecord(dialog.getHandler().getLevel(), "Something went wrong while saveing form state. Undefined error."));
 							return;
 						}
 						int ID = rowIds.get(0).intValue();

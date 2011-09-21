@@ -1,85 +1,105 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui"
-	xmlns:rc="urn:import:com.restclient.client.widgets">
-	<ui:style src="../common.css" type="com.restclient.client.widgets.ResponseWidget.ResponseStyle">
-		.section {
-			margin: 7px;
-		}
-		.response-row {
-			display: -webkit-box;
-			margin: 15px 0;
-		}
-		.rowOutput{
-			-webkit-box-flex: 1;
-			padding-right: 10px;
-		}
-		
-		.status-code {
-			font-size: 24px;
-			color: green;
-			text-shadow: rgba(0, 0, 0, 0.14) 0px 2px 1px;
-		}
-		.error{}
-		.warning{}
-		.status-code.error {
-			color: red;
-		}
-		.status-code.warning {
-			color: yellow;
-		}
-		.hint-image {
-			cursor: pointer;
-			-webkit-transition: opacity 0.15s ease-in-out;
-			opacity: 0.4;
-		}
-		.hint-image:hover {
-			opacity: 1;
-		}
-		.panelMargin{
-			margin-bottom: 40px;
-			padding-bottom: 30px;
-			padding-top: 10px;
-		}
-		.requestError{
-			box-shadow: inset 3px 3px 21px rgba(255, 0, 0, 0.25);
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:rc="urn:import:com.restclient.client.widgets">
+	<ui:style src="../common.css"
+		type="com.restclient.client.widgets.ResponseWidget.ResponseStyle">
+			.section {
+				margin: 7px;
+			}
 			
-		}
-	</ui:style>
-	<g:HTMLPanel ui:field="responsePanel" visible="false" styleName="{style.panelMargin}">
-			<div class="{style.response-row}">
-				<div class="{style.rowLabel}">
-					<span>Status code</span>
-				</div>
-				<div class="{style.rowOutput}">
-					<span ui:field="codeContainer" class="{style.status-code}">loading</span>
-					<g:Image url="img/help-3.png" altText="Show explanation"
-						styleName="{style.hint-image}" ui:field="codeImage" width="24px" height="24px"></g:Image>
-				</div>
+			.response-row {
+				display: -webkit-box;
+				margin: 15px 0;
+			}
+			
+			.rowOutput {
+				-webkit-box-flex: 1;
+				padding-right: 10px;
+			}
+			
+			.status-code {
+				font-size: 24px;
+				color: green;
+				text-shadow: rgba(0, 0, 0, 0.14) 0px 2px 1px;
+			}
+			
+			.error {
+				
+			}
+			
+			.warning {
+				
+			}
+			
+			.status-code.error {
+				color: red;
+			}
+			
+			.status-code.warning {
+				color: yellow;
+			}
+			
+			.hint-image {
+				cursor: pointer;
+				-webkit-transition: opacity 0.15s ease-in-out;
+				opacity: 0.4;
+			}
+			
+			.hint-image:hover {
+				opacity: 1;
+			}
+			
+			.panelMargin {
+				margin-bottom: 40px;
+				padding-bottom: 30px;
+				padding-top: 10px;
+			}
+			
+			.requestError {
+				box-shadow: inset 3px 3px 21px rgba(255, 0, 0, 0.25);
+			}
+			
+			.time {
+				padding-top: 7px;
+			}
+		</ui:style>
+	<g:HTMLPanel ui:field="responsePanel" visible="false"
+		styleName="{style.panelMargin}">
+		
+		<div class="{style.response-row}">
+			<div class="{style.rowLabel}">
+				<span>Status code</span>
 			</div>
-			<div class="{style.response-row}">
-				<div class="{style.rowLabel}">
-					<span>Time</span>
-				</div>
-				<div class="{style.rowOutput}">
-					<span ui:field="loadingTime">---</span>
-					ms
-				</div>
+			<div class="{style.rowOutput}">
+				<span ui:field="codeContainer" class="{style.status-code}">loading</span>
+				<g:Image url="img/help-3.png" altText="Show explanation"
+					styleName="{style.hint-image}" ui:field="codeImage" width="24px"
+					height="24px"></g:Image>
 			</div>
-			<div class="{style.response-row}">
-				<div class="{style.rowLabel}">
-					<span>Headers</span>
-				</div>
-				<g:HTMLPanel ui:field="headersPanel" styleName="{style.rowOutput}"></g:HTMLPanel>
+		</div>
+		<div class="{style.response-row}">
+			<div class="{style.rowLabel}">
+				<span>Time</span>
 			</div>
-			<div class="{style.response-row}">
-				<div class="{style.rowLabel}">
-					<span>Body</span>
-				</div>
-				<div ui:field="bodyContainer" class="{style.rowOutput}">
-					<rc:ResponseBody ui:field="bodyResponse"></rc:ResponseBody>
-				</div>
+			<div class="{style.rowOutput} {style.time}">
+				<span ui:field="loadingTime">---</span>
+				ms
 			</div>
+		</div>
+		<div class="{style.response-row}">
+			<div class="{style.rowLabel}">
+				<span>Headers</span>
+			</div>
+			<g:HTMLPanel ui:field="headersPanel" styleName="{style.rowOutput}"></g:HTMLPanel>
+		</div>
+		<div class="{style.response-row}">
+			<div class="{style.rowLabel}">
+				<span>Body</span>
+			</div>
+			<div ui:field="bodyContainer" class="{style.rowOutput}">
+				<rc:ResponseBody ui:field="bodyResponse"></rc:ResponseBody>
+			</div>
+		</div>
 
 	</g:HTMLPanel>
 </ui:UiBinder> 

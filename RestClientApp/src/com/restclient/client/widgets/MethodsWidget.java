@@ -23,12 +23,14 @@ public class MethodsWidget extends Composite implements ValueChangeHandler<Boole
 	@UiField RadioButton radioDelete;
 	@UiField RadioButton radioHead;
 	@UiField RadioButton radioOptions;
+	@UiField RadioButton radioTrace;
+	@UiField RadioButton radioConnect;
+	@UiField RadioButton radioPatch;
 	
 	private String currentSelected = "GET";
 	
 	public MethodsWidget(EventBus eventBus) {
 		this.eventBus = eventBus;
-		
 		
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
 		
@@ -38,6 +40,9 @@ public class MethodsWidget extends Composite implements ValueChangeHandler<Boole
 		radioDelete.addValueChangeHandler(this);
 		radioHead.addValueChangeHandler(this);
 		radioOptions.addValueChangeHandler(this);
+		radioTrace.addValueChangeHandler(this);
+		radioConnect.addValueChangeHandler(this);
+		radioPatch.addValueChangeHandler(this);
 	}
 
 	@Override
@@ -78,6 +83,12 @@ public class MethodsWidget extends Composite implements ValueChangeHandler<Boole
 			radioHead.setValue(true, fireEvents);
 		} else if ( value.equals("OPTIONS") ){
 			radioOptions.setValue(true, fireEvents);
+		} else if ( value.equals("TRACE") ){
+			radioTrace.setValue(true, fireEvents);
+		} else if ( value.equals("CONNECT") ){
+			radioConnect.setValue(true, fireEvents);
+		} else if ( value.equals("PATCH") ){
+			radioPatch.setValue(true, fireEvents);
 		}
 	}
 	

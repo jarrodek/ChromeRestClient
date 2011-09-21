@@ -167,10 +167,6 @@
 							<div class="source">
 								Source code at <a href="http://code.google.com/p/chrome-rest-client/">Google Code Hosting</a> under Apache License.
 							</div>
-							<div class="icons">
-								Icons from <a href="http://openiconlibrary.sourceforge.net/">Open
-									Icon Library</a>
-							</div>
 							<div>
 								Some parts of UI has been taken from Chromium Browsers UI (like menu panel on left).
 							</div>

@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.LogRecord;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.shared.EventBus;
@@ -261,8 +262,10 @@ public class AppRequestFactory {
 			builder.send();
 		} catch (RequestException e) {
 			requestInProgress = false;
-			Window.alert("An error occured: " + e.getMessage());
-			// requestView.restoreButtonsState();
+			ErrorDialog dialog = new ErrorDialog();
+			dialog.getHandler().publish(new LogRecord(dialog.getHandler().getLevel(), e.getMessage())  );
+			eventBus.fireEvent(new RequestUiChangeEvent(
+					RequestUiChangeEvent.ACTION_ENABLE_BUTTONS, null));
 		}
 
 	}

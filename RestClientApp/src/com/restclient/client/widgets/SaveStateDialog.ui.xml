@@ -5,6 +5,9 @@
 			width: 498px;
 			height: 108px;
 		}
+		.error{
+			color: red;
+		}
 	</ui:style>
 	<g:DialogBox ui:field="dialog" modal="true"
 		animationEnabled="true" glassEnabled="true">
@@ -14,6 +17,7 @@
 				Enter record name<br/>
 				<g:TextBox width="493px" ui:field="stateName"></g:TextBox>
 			</p>
+			<g:Label ui:field="errorLabel" styleName="{style.error}" visible="false"></g:Label>
 			<div class="{style.dialog-buttons}">
 				<g:Button styleName="{style.button}" ui:field="save" enabled="false">Save</g:Button>
 				<g:Button styleName="{style.button}" ui:field="cancel">Cancel</g:Button>

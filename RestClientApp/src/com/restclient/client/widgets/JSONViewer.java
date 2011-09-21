@@ -13,6 +13,7 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -127,7 +128,7 @@ public class JSONViewer extends Composite {
 		result += "<span class=\""+style.punctuation()+"\">&quot;</span>";
 		result += "<span class=\""+style.stringValue()+"\">";
 		if( str != null )
-			result += str.stringValue();
+			result += SafeHtmlUtils.htmlEscape(str.stringValue());
 		else
 			result += "null";
 		result += "</span>";
