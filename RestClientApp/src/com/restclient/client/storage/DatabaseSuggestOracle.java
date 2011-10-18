@@ -49,6 +49,8 @@ public class DatabaseSuggestOracle extends SuggestOracle {
 
 	/**
 	 * Local database suggestion oracle.
+	 * @param urlsService 
+	 * @param requestType 
 	 */
 	public DatabaseSuggestOracle(Object urlsService, String requestType) {
 		databaseService = urlsService;

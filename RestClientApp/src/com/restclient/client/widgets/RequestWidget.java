@@ -54,7 +54,11 @@ import com.restclient.client.html5.HTML5Progress;
 import com.restclient.client.request.RequestParameters;
 import com.restclient.client.request.ViewParameters;
 import com.restclient.client.storage.DatabaseSuggestOracle;
-
+/**
+ * Request controls.
+ * @author jarrod
+ *
+ */
 public class RequestWidget extends Composite {
 
 	interface Binder extends UiBinder<Widget, RequestWidget> {
@@ -82,7 +86,10 @@ public class RequestWidget extends Composite {
 	private Date lastEnterTime;
 
 	private DefaultSuggestionDisplay suggestionsDisplay;
-
+	/**
+	 * Whole request form.
+	 * @param eventBus
+	 */
 	public RequestWidget(final EventBus eventBus) {
 		this.eventBus = eventBus;
 
@@ -354,7 +361,8 @@ public class RequestWidget extends Composite {
 	}
 
 	/**
-	 * If current request is PUT, POST or DELETE
+	 * Check if request method allows transport body
+	 * @param requestMethod 
 	 * 
 	 * @return
 	 */
@@ -440,16 +448,25 @@ public class RequestWidget extends Composite {
 		eventBus.fireEventFromSource(e, RequestWidget.class);
 	}
 
+	/**
+	 * Disable form buttons (clear/send)
+	 */
 	public void disableButtons() {
 		clearForm.setEnabled(false);
 		sendRequest.setEnabled(false);
 	}
-
+	/**
+	 * Enable form buttons (clear/send)
+	 */
 	public void enableButtons() {
 		clearForm.setEnabled(true);
 		sendRequest.setEnabled(true);
 	}
-
+	/**
+	 * Round size units into highest possible value 
+	 * @param value
+	 * @return
+	 */
 	private String roundUnits(long value /* bytes */) {
 		float parse = (float) value;
 		String[] units = new String[5];
@@ -475,23 +492,31 @@ public class RequestWidget extends Composite {
 		}
 		return result;
 	}
-
+	/**
+	 * Show "upload" progress bar
+	 */
 	public void showUpload() {
 		if (sendingDiv.getClassName().contains("hidden"))
 			sendingDiv.removeClassName("hidden");
 	}
-
+	/**
+	 * Hidde "upload" progress bar
+	 */
 	public void hideUpload() {
 		if (!sendingDiv.getClassName().contains("hidden")) {
 			sendingDiv.addClassName("hidden");
 		}
 	}
-
+	/**
+	 * Hide "download" progress bar
+	 */
 	public void hideProgress() {
 		if (!receivingDiv.getClassName().contains("hidden"))
 			receivingDiv.addClassName("hidden");
 	}
-
+	/**
+	 * Show "download" progress bar
+	 */
 	public void showProgress() {
 		if (receivingDiv.getClassName().contains("hidden"))
 			receivingDiv.removeClassName("hidden");

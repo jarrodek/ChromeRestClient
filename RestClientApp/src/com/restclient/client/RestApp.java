@@ -21,7 +21,12 @@ import com.restclient.client.storage.StatusCodesService;
 import com.restclient.client.storage.UrlRow;
 import com.restclient.client.storage.UrlsService;
 
+/**
+ * @author jarrod
+ *
+ */
 public class RestApp {
+	
 	public static final HeadersService HEADERS_SERVICE = GWT
 			.create(HeadersService.class);
 	public static final StatusCodesService STATUSES_SERVICE = GWT

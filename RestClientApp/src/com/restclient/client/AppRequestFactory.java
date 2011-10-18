@@ -72,7 +72,15 @@ public class AppRequestFactory {
 		requestInProgress = true;
 		eventBus.fireEvent(new RequestUiChangeEvent(
 				RequestUiChangeEvent.ACTION_DISABLE_BUTTONS, null));
-		RequestParameters.store();
+		try{
+			RequestParameters.store();
+			RequestHistory.addCurentParametersMap();
+			RequestHistory.store();
+		}catch(Exception e){
+			e.printStackTrace();
+			Log.error("Error save form state or history list. ", e);
+			
+		}
 		String method = RequestParameters.getMethod();
 		String data = RequestParameters.getData();
 		String requestUrl = RequestParameters.getUrl();

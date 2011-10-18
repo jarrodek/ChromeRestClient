@@ -19,8 +19,7 @@ public class AddEncodingDialog {
 		Binder BINDER = GWT.create(Binder.class);
 	}
 
-	@UiField
-	DialogBox dialog;
+	@UiField DialogBox dialog;
 	@UiField TextBox encoding;
 	
 	private final EventBus eventBus;

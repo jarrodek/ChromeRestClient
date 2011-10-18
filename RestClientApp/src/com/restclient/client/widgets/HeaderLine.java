@@ -19,24 +19,20 @@ public class HeaderLine extends Composite {
 		String opened();
 	}
 	
-	@UiField
-	Anchor title;
-	
-	@UiField 
-	SpanElement desc;
-	
-	@UiField
-	SpanElement example;
-	
-	@UiField
-	SpanElement headerName;
-	
-	@UiField
-	DivElement hintParent;
-	
+	@UiField Anchor title;
+	@UiField SpanElement desc;
+	@UiField SpanElement example;
+	@UiField SpanElement headerName;
+	@UiField DivElement hintParent;
 	@UiField LineStyle style;
 	
-	
+	/**
+	 * 
+	 * @param title
+	 * @param name
+	 * @param desc
+	 * @param example
+	 */
 	public HeaderLine(String title, String name, String desc, String example){
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
 		if( title != null){

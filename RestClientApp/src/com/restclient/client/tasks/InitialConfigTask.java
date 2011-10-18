@@ -26,6 +26,11 @@ import com.restclient.client.resources.AppResources;
 import com.restclient.client.storage.HeaderInsertRow;
 import com.restclient.client.storage.StatusCodesInsertRow;
 
+/**
+ * Task to perform initial app config.
+ * @author jarrod
+ *
+ */
 public class InitialConfigTask implements LoadTask {
 	
 	TasksCallback callback;

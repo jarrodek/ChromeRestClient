@@ -143,6 +143,7 @@
 			<ul role="tablist" class="{style.mainNav}">
 				<li page="request" class="{style.navBarItem}" role="tab" tabindex="0" aria-selected="true">Current Request</li>
 				<li page="saved" class="{style.navBarItem}" role="tab" tabindex="-1" aria-selected="false">Saved Requests</li>
+				<li page="history" class="{style.navBarItem}" role="tab" tabindex="-1" aria-selected="false">History</li>
 				<li page="about" class="{style.navBarItem}" role="tab" tabindex="-1" aria-selected="false">About</li>
 			</ul>
 		</div>
@@ -157,6 +158,9 @@
 				<g:HTMLPanel styleName="{style.subpageContainer} {style.restoreWidget} transparent">
 					<g:HTMLPanel ui:field="savedPanel" styleName="{style.subpage} hidden">
 						<rc:RestoreStateWidget ui:field="restoreWidget"></rc:RestoreStateWidget>
+					</g:HTMLPanel>
+					<g:HTMLPanel ui:field="historyPanel" styleName="{style.subpage} hidden">
+						<rc:HistoryListWidget ui:field="historyList"></rc:HistoryListWidget>
 					</g:HTMLPanel>
 					<g:HTMLPanel ui:field="aboutPanel" styleName="{style.subpage} hidden">
 						<h1 class="{style.contentTitle} {style.about}">Advanced Rest Client App</h1>

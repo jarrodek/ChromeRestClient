@@ -10,6 +10,9 @@ import com.google.gwt.event.shared.HandlerRegistration;
  * 
  */
 public class RequestStartEvent extends GwtEvent<RequestStartEvent.Handler> {
+	/**
+	 * 
+	 */
 	public static final Type<Handler> TYPE = new Type<Handler>();
 	
 	/**
@@ -27,10 +30,16 @@ public class RequestStartEvent extends GwtEvent<RequestStartEvent.Handler> {
 	 * Handles {@link RequestStartEvent}.
 	 */
 	public interface Handler extends EventHandler {
+		/**
+		 * 
+		 */
 		void onRequestStart();
 	}
 
 
+	/**
+	 * 
+	 */
 	public RequestStartEvent() {}
 
 	@Override

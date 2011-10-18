@@ -15,6 +15,12 @@ import com.google.gwt.user.client.ui.Widget;
 import com.restclient.client.event.BodyFormRowChangeEvent;
 import com.restclient.client.event.BodyFormRowRemovedEvent;
 
+/**
+ * Request POST/PUT entity body form row.
+ * 
+ * @author jarrod
+ *
+ */
 public class BodyFormRow extends Composite {
 
 	interface Binder extends UiBinder<Widget, BodyFormRow> {

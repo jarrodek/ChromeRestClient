@@ -40,7 +40,14 @@ import com.restclient.client.RestApp;
 import com.restclient.client.event.HeaderChangeEvent;
 import com.restclient.client.event.HeaderRowRemovedEvent;
 import com.restclient.client.storage.HeaderRow;
-
+/**
+ * Representing single headers form row.
+ * Contain input for header name and input for header value.
+ * Header name can have explanation (if supported) 
+ * Header value can have fill support (if created for header).
+ * @author Paweł Psztyć
+ *
+ */
 public class HeaderFormRow extends Composite {
 
 	interface Binder extends UiBinder<Widget, HeaderFormRow> {
@@ -74,6 +81,15 @@ public class HeaderFormRow extends Composite {
 	private boolean isHintShown = false;
 	private HandlerRegistration handlerReg = null;
 	
+	/**
+	 * Constructor.
+	 * Representing single headers form row.
+	 * Contain input for header name and input for header value.
+	 * Header name can have explanation (if supported) 
+	 * Header value can have fill support (if created for header).
+	 * @param eventBus
+	 * @param oracle
+	 */
 	public HeaderFormRow(EventBus eventBus, SuggestOracle oracle) {
 		this.eventBus = eventBus;
 		suggestionsDisplay = new DefaultSuggestionDisplay();

@@ -15,6 +15,8 @@ import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.ClosingEvent;
 import com.google.gwt.user.client.Window.ClosingHandler;
+import com.restclient.client.RequestHistoryItem;
+import com.restclient.client.Utils;
 import com.restclient.client.event.BodyChangeEvent;
 import com.restclient.client.event.EncodingChangeEvent;
 import com.restclient.client.event.FilesChangeEvent;
@@ -24,6 +26,10 @@ import com.restclient.client.event.UrlChangeEvent;
 import com.restclient.client.storage.FilesObject;
 import com.restclient.client.storage.RestForm;
 
+/**
+ * @author jarrod
+ *
+ */
 public class RequestParameters {
 
 	private static final Storage store = Storage.getLocalStorageIfSupported();
@@ -57,6 +63,9 @@ public class RequestParameters {
 
 	private static RequestParameters INSTANCE = null;
 
+	/**
+	 * @return
+	 */
 	public static RequestParameters getInstance() {
 		if (INSTANCE == null) {
 			INSTANCE = new RequestParameters();
@@ -81,7 +90,6 @@ public class RequestParameters {
 		Window.addWindowClosingHandler(new ClosingHandler() {
 			@Override
 			public void onWindowClosing(ClosingEvent event) {
-//				Log.debug("Store");
 				store();
 			}
 		});
@@ -89,7 +97,6 @@ public class RequestParameters {
 			@Override
 			public void onChange(String url, Object source) {
 				instance.requestUrl = url;
-//				Log.debug("URL change: "+url);
 			}
 		});
 		MethodChangeEvent.register(eb, new MethodChangeEvent.Handler() {
@@ -98,35 +105,30 @@ public class RequestParameters {
 				if( oldMethod == null ){
 					return;
 				}
-//				Log.debug("Method change");
 				instance.method = newMethod;
 			}
 		});
 		HeadersChangeEvent.register(eb, new HeadersChangeEvent.Handler() {
 			@Override
 			public void onChange(LinkedHashMap<String, String> headers, Object source) {
-//				Log.debug("Headers change");
 				instance.headers = headers;
 			}
 		});
 		BodyChangeEvent.register(eb, new BodyChangeEvent.Handler() {
 			@Override
 			public void onChange(String body, Object source) {
-//				Log.debug("Body change");
 				instance.postData = body;
 			}
 		});
 		FilesChangeEvent.register(eb, new FilesChangeEvent.Handler() {
 			@Override
 			public void onChange(List<FilesObject> files, Object source) {
-//				Log.debug("File liest change");
 				instance.filesList = files;
 			}
 		});
 		EncodingChangeEvent.register(eb, new EncodingChangeEvent.Handler() {
 			@Override
 			public void onChange(String enc, Object source) {
-//				Log.debug("Form encoding change.");
 				instance.formEncoding = enc;
 			}
 		});
@@ -136,13 +138,39 @@ public class RequestParameters {
 	 * Store request parameters to local storage
 	 */
 	public static void store() {
-
-		if (store != null)
+		//String value = getInstance().toString();
+		if (store != null){
 			store.setItem("latestRequest", getInstance().toString());
+		}
 	}
-
+	/**
+	 * Store request parameters to local storage and in history list 
+	 * @param saveInHistory true if request should be stored in history list as well.
+	 */
+	public static void store(boolean saveInHistory){
+		if (store != null){
+			String data = getInstance().toString();
+			store.setItem("latestRequest", data);
+		}
+	}
+	
 	@Override
 	public String toString() {
+		JSONObject data = this._toJSON();
+		return data.toString();
+	}
+	/**
+	 * Create JSON object from request parameters class fields values.
+	 * @return JSON object, never null.
+	 */
+	public static JSONObject toJSON(){
+		
+		RequestParameters instance = getInstance();
+		return instance._toJSON();
+		
+	}
+	
+	private JSONObject _toJSON(){
 		JSONObject data = new JSONObject();
 		JSONString url = this.requestUrl == null ? new JSONString("null")
 				: new JSONString(requestUrl);
@@ -170,25 +198,12 @@ public class RequestParameters {
 			}
 		}
 		data.put("headers", headersArray);
-		return data.toString();
+		return data;
 	}
 
-	private static String getJsonStringData(JSONObject obj, String key) {
-		JSONValue keyObj = obj.get(key);
-		if (keyObj == null) {
-			return null;
-		}
-		JSONString keyJS = keyObj.isString();
-		if (keyJS == null) {
-			return null;
-		}
-		String value = keyJS.stringValue();
-		if (!value.equals("null")) {
-			return value;
-		}
-		return null;
-	}
-
+	/**
+	 * 
+	 */
 	public static void restoreFromStorage() {
 		if (store != null) {
 			String data = store.getItem("latestRequest");
@@ -196,12 +211,42 @@ public class RequestParameters {
 		}
 	}
 
+	/**
+	 * @param data
+	 */
 	public static void restoreFromSavedState(RestForm data) {
 		String json = data.getData();
 		restore(json, true);
 		store();
 	}
 
+	/**
+	 * Restore state from history
+	 * @param item
+	 */
+	public static void restoreHistory(RequestHistoryItem item){
+		RequestParameters ins = getInstance();
+		
+		ins.requestUrl = item.getRequestUrl();
+		ins.formEncoding = item.getFormEncoding();
+		ins.postData = item.getPostData();
+		ins.method = item.getMethod();
+		LinkedHashMap<String, String> headersValue = item.getHeaders();
+		if( headersValue == null ){
+			headersValue = new LinkedHashMap<String, String>();
+		}
+		ins.headers = headersValue;
+		//
+		// Events
+		//
+		ins.eventBus.fireEventFromSource(new UrlChangeEvent(ins.requestUrl), RequestParameters.class);
+		ins.eventBus.fireEventFromSource(new EncodingChangeEvent(ins.formEncoding), RequestParameters.class);
+		ins.eventBus.fireEventFromSource(new BodyChangeEvent(ins.postData), RequestParameters.class);
+		ins.eventBus.fireEventFromSource(new MethodChangeEvent(null, ins.method),RequestParameters.class);
+		ins.eventBus.fireEventFromSource(new HeadersChangeEvent(ins.headers), RequestParameters.class);
+	}
+	
+	
 	/**
 	 * Restore parameters from local storage.
 	 */
@@ -220,7 +265,7 @@ public class RequestParameters {
 		}
 		RequestParameters ins = getInstance();
 
-		String url = getJsonStringData(obj, "url");
+		String url = Utils.getJsonString(obj, "url");
 		if (url != null) {
 			ins.requestUrl = url;
 		}
@@ -229,21 +274,21 @@ public class RequestParameters {
 					RequestParameters.class);
 		}
 		
-		String formEncoding = getJsonStringData(obj, "formEncoding");
+		String formEncoding = Utils.getJsonString(obj, "formEncoding");
 		if (formEncoding != null) {
 			ins.formEncoding = formEncoding;
 			if (fireEvents) {
 				ins.eventBus.fireEventFromSource(new EncodingChangeEvent(formEncoding), RequestParameters.class);
 			}
 		}
-		String post = getJsonStringData(obj, "post");
+		String post = Utils.getJsonString(obj, "post");
 		if (post != null) {
 			ins.postData = post;
 		}
 		if (fireEvents) {				
 			ins.eventBus.fireEventFromSource(new BodyChangeEvent(post), RequestParameters.class);
 		}
-		String method = getJsonStringData(obj, "method");
+		String method = Utils.getJsonString(obj, "method");
 		if (method != null) {
 			ins.method = method;
 			if (fireEvents) {
@@ -289,6 +334,7 @@ public class RequestParameters {
 	 * Set new POST data. It's must be URLencoded string eg: a=b&c=My%20data
 	 * 
 	 * @param data
+	 * @param fireEvent 
 	 */
 	public static void setData(String data, boolean fireEvent) {
 		RequestParameters ins = getInstance();
@@ -382,12 +428,13 @@ public class RequestParameters {
 	 * 
 	 * @param map
 	 *            new headers map.
+	 * @param notifyChanges 
 	 */
 	public void setHeaders(LinkedHashMap<String, String> map,
-			boolean notyfiChanges) {
+			boolean notifyChanges) {
 		RequestParameters ins = getInstance();
 		ins.headers = map;
-		if (notyfiChanges) {
+		if (notifyChanges) {
 			// HeadersChangedEvent event = new HeadersChangedEvent(map);
 			// impl.fireEvent(event);
 			// eventBus.fireEventFromSource(event, RequestParameters.class);
@@ -396,6 +443,7 @@ public class RequestParameters {
 
 	/**
 	 * Returns request headers as string eg. for text inputs
+	 * @return 
 	 */
 	public static String headersAsString() {
 		RequestParameters ins = getInstance();
@@ -405,6 +453,9 @@ public class RequestParameters {
 		return RequestDataFormatter.headersToString(ins.headers);
 	}
 
+	/**
+	 * @return
+	 */
 	public static String getFormEncoding() {
 		return getInstance().formEncoding;
 	}
@@ -434,6 +485,9 @@ public class RequestParameters {
 		return getInstance().headers.size() > 0;
 	}
 
+	/**
+	 * @return
+	 */
 	public static LinkedHashMap<String, String> getHeaders() {
 		return getInstance().headers;
 	}

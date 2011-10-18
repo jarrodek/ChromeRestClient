@@ -23,7 +23,11 @@ import com.restclient.client.event.HeadersTabOpenEvent;
 import com.restclient.client.request.RequestDataFormatter;
 import com.restclient.client.request.RequestParameters;
 import com.restclient.client.request.ViewParameters;
-
+/**
+ * Widget with HEADERS inputs.
+ * @author jarrod
+ *
+ */
 public class HeaderInputWidget extends Composite {
 
 	interface Binder extends UiBinder<Widget, HeaderInputWidget> {
@@ -31,13 +35,13 @@ public class HeaderInputWidget extends Composite {
 
 	private final EventBus eventBus;
 
-	@UiField
-	TextArea rawInput;
-	@UiField(provided=true)
-	HeadersFormWidget form;
-	@UiField
-	TabLayoutPanel tabPanel;
-	
+	@UiField TextArea rawInput;
+	@UiField(provided=true) HeadersFormWidget form;
+	@UiField TabLayoutPanel tabPanel;
+	/**
+	 * Constructor.
+	 * @param eventBus
+	 */
 	public HeaderInputWidget(EventBus eventBus) {
 		this.eventBus = eventBus;
 		

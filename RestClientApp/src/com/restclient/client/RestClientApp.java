@@ -33,6 +33,7 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.restclient.client.event.FormStateSaveEvent;
+import com.restclient.client.event.HistoryRestoreEvent;
 import com.restclient.client.event.OpenRequestEvent;
 import com.restclient.client.event.RestoreRequestEvent;
 import com.restclient.client.event.SaveRequestEvent;
@@ -42,7 +43,9 @@ import com.restclient.client.request.ViewParameters;
 import com.restclient.client.storage.RestForm;
 import com.restclient.client.tasks.InitialConfigTask;
 import com.restclient.client.tasks.StateRestoreTask;
+import com.restclient.client.tasks.UpdateTask;
 import com.restclient.client.widgets.ElementWrapper;
+import com.restclient.client.widgets.HistoryListWidget;
 import com.restclient.client.widgets.RequestWidget;
 import com.restclient.client.widgets.ResponseWidget;
 import com.restclient.client.widgets.RestoreStateWidget;
@@ -70,24 +73,28 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 			.getName());
 
 	private static EventBus eventBus = new SimpleEventBus();
+	/**
+	 * @return app wide event bus.
+	 */
 	public static EventBus getAppMainEventBus(){
 		return eventBus;
 	}
 	
-	@UiField(provided = true)
-	RequestWidget requestWidget;
-	
-	@UiField(provided = true)
-	ResponseWidget responseWidget;
+	@UiField(provided = true) RequestWidget requestWidget;
+	@UiField(provided = true) ResponseWidget responseWidget;
+	@UiField(provided = true) HistoryListWidget historyList;
+	@UiField(provided = true) RestoreStateWidget restoreWidget;
 	
 	@UiField HTMLPanel mainPanel;
 	@UiField HTMLPanel bodyPanel;
 	@UiField HTMLPanel requestPanel;
 	@UiField HTMLPanel savedPanel;
 	@UiField HTMLPanel aboutPanel;
+	@UiField HTMLPanel historyPanel;
+	
 	@UiField HTML plusButton;
 	@UiField AppStyle style;
-	@UiField(provided=true) RestoreStateWidget restoreWidget;
+	
 	private SaveStateDialog saveStateDialog;
 	
 	/**
@@ -104,6 +111,7 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 		requestWidget = new RequestWidget(eventBus);
 		responseWidget = new ResponseWidget(eventBus);
 		restoreWidget = new RestoreStateWidget(eventBus);
+		historyList = new HistoryListWidget(eventBus);
 		
 		//RootLayoutPanel.get().
 		RootPanel.get().add(
@@ -122,8 +130,10 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 	private void startTasks() {
 		InitialConfigTask init = new InitialConfigTask();
 		StateRestoreTask restore = new StateRestoreTask();
+		UpdateTask update = new UpdateTask();
 		
 		TasksLoader.addTask(init);
+		TasksLoader.addTask(update);
 		TasksLoader.addTask(restore);
 		
 		TasksLoader.runTasks(new Callback<Void, Void>() {
@@ -207,6 +217,13 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 				History.newItem("request");
 			}
 		});
+		HistoryRestoreEvent.register(eventBus, new HistoryRestoreEvent.Handler() {
+			@Override
+			public void onRestoreAction(RequestHistoryItem form, Object source) {
+				RequestParameters.restoreHistory(form);
+				History.newItem("request");
+			}
+		});
 	}
 	
 	
@@ -252,6 +269,15 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 			aboutPanel.setHeight(windowHeight+"px");
 		} else {
 			aboutPanel.setHeight("100%");
+		}
+		//
+		// History panel
+		//
+		int history = historyPanel.getOffsetHeight();
+		if( history > 0 && windowHeight >= history ){
+			historyPanel.setHeight(windowHeight+"px");
+		} else {
+			historyPanel.setHeight("100%");
 		}
 	}
 	/**
@@ -371,6 +397,19 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 					current.getParentElement().setAttribute("hidden","");
 				}
 			}.schedule(time);
+		} else if( token.equals("history") ){
+			showBackDrop(root);
+			hideMainPanel();
+			historyPanel.getElement().removeClassName("hidden");
+			historyPanel.getParent().getElement().removeAttribute("hidden");
+			historyList.onShow();
+			onResize(null);
+			new Timer() {
+				@Override
+				public void run() {
+					historyPanel.getParent().getElement().removeClassName("transparent");
+				}
+			}.schedule(10);
 		}
 	}
 	
