@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.regexp.shared.RegExp;
 
 /**
  *
@@ -100,20 +101,40 @@ public class RequestDataFormatter {
      */
     public static LinkedHashMap<String, String> parseQueryString(String input){
     	LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
-
+    	/**
+    	 * Chrome inspector has FormData output like:
+    	 * key:value
+    	 * key:value
+    	 * and so on.
+    	 * When copying from inspector parse data to create proper form data.
+    	 * 
+    	 * But first check if it is not regular form data input.
+    	 * 
+    	 * @TODO: check other inputs that contain ":" in it.
+    	 */
+    	RegExp htmlInputCheck = RegExp.compile("^([^\\=]{1,})=(.*)$","m");
+    	if( !htmlInputCheck.test(input) ){
+	    	RegExp r = RegExp.compile("^([^\\:]{1,}):(.*)$", "gm");
+	    	input = r.replace(input, "$1=$2&");
+//	    	Log.debug(input);
+	    	if(input.endsWith("&")){
+	    		input = input.substring(0, input.length()-1);
+	    	}
+    	}
+//    	Log.debug(input);
         String[] list = input.split("&");
         for( String param : list ){
-            String[] _tmp = param.split("=");
+            String[] _tmp = param.split("=",2);
+            
+//            Log.debug("parsed: key="+_tmp[0]+", value="+_tmp[1]);
             if( _tmp.length != 2 ){
             	continue;
             }
             
             try{
-            	
             	String key = URL.decodeQueryString(_tmp[0].trim());
                 String value = URL.decodeQueryString(_tmp[1].trim());
                 result.put(key, value);
-            	
             } catch(Exception e){}
         }
 

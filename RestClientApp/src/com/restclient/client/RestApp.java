@@ -47,6 +47,8 @@ public class RestApp {
 	 * @param url
 	 */
 	public static void addOracleURL(final String requestUrl) {
+		if(requestUrl==null||requestUrl.isEmpty()) return;
+		
 		URLS_SERVICE.getUrls(requestUrl, new ListCallback<UrlRow>() {
 			@Override
 			public void onFailure(DataServiceException error) {

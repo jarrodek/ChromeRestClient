@@ -5,7 +5,10 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.shared.EventBus;
@@ -57,7 +60,17 @@ public class AppRequestFactory {
 		RequestStartEvent.register(eventBus, new RequestStartEvent.Handler() {
 			@Override
 			public void onRequestStart() {
-				getInstance().startHttpRequest();
+				try{
+					getInstance().startHttpRequest();
+				}catch(Exception e) {
+					Handler[] handlers = Logger.getLogger("").getHandlers();
+					if (handlers != null) {
+						for (Handler h : handlers) {
+							String msg = e.getMessage();
+							h.publish(new LogRecord(Level.SEVERE, msg));
+						}
+					}
+				}
 			}
 		});
 

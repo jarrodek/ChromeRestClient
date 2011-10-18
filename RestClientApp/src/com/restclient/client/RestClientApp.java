@@ -107,6 +107,7 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 			}
 		});
 	    Logger.getLogger("").addHandler(new ErrorDialog().getHandler());
+	    Logger.getLogger("").setLevel(Level.SEVERE);
 		
 		requestWidget = new RequestWidget(eventBus);
 		responseWidget = new ResponseWidget(eventBus);
