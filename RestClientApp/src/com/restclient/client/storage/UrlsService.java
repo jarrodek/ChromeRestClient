@@ -8,8 +8,8 @@ import com.google.code.gwt.database.client.service.Select;
 import com.google.code.gwt.database.client.service.Update;
 import com.google.code.gwt.database.client.service.VoidCallback;
 /**
- * Web database sevise for Urls table.
- * @author jarrod
+ * Web database service for Urls table.
+ * @author Paweł Psztyć
  *
  */
 public interface UrlsService extends AppDatabase {
@@ -32,7 +32,7 @@ public interface UrlsService extends AppDatabase {
   void insertLink(String url, Date upd, RowIdListCallback callback);
   /**
    * Update timestamp when URL has been used.
-   * @param url to update
+   * @param id 
    * @param upd {@link Date} object
    * @param callback
    */
@@ -46,6 +46,7 @@ public interface UrlsService extends AppDatabase {
   void getUrls(ListCallback<UrlRow> callback);
   /**
    * Returns all urls.
+   * @param input 
    * @param callback callback function
    */
   @Select("SELECT ID, url FROM urls WHERE url LIKE {input} ORDER BY time DESC")

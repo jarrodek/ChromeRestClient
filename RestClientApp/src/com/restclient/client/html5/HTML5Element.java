@@ -1,13 +1,22 @@
 package com.restclient.client.html5;
 
 import java.util.ArrayList;
-
+/**
+ * GWT wrapper to basics properties available in HTML5 element.
+ * @author Paweł Psztyć
+ *
+ */
 public class HTML5Element extends com.google.gwt.user.client.Element {
 	
 	
 	protected HTML5Element() {
 	}
 
+	/**
+	 * Query DOM object and find children matched given selector.
+	 * @param selector to match elements eg. div.current:not(:disabled)
+	 * @param out output array list of found elements. can have no elements if none found.
+	 */
 	public final native void querySelectorAll(String selector, ArrayList<HTML5Element> out) /*-{
 		var nodes = this.querySelectorAll(selector);
 		var nodesCnt = nodes.length;
@@ -16,19 +25,53 @@ public class HTML5Element extends com.google.gwt.user.client.Element {
 		}
 	}-*/;
 	
+	/**
+	 * Query element to find other element for given selector query.
+	 * It returns first matched element.
+	 * @param selector
+	 * @return element or NULL if none found.
+	 */
 	public final native HTML5Element querySelector(String selector) /*-{
 		return this.querySelector(selector);
 	}-*/;
 	
+	/**
+	 * Add data to "dataset" property. It's create data-"key" attribute in element.
+	 * <pre>
+	 * 	element.putData("url","www.google.com");
+	 *  --> data-url="www.google.com"
+	 * </pre>
+	 * @param key
+	 * @param data
+	 */
 	public final native void putData(String key, String data) /*-{
 		this.dataset[key] = data;
 	}-*/;
+	/**
+	 * Add data to "dataset" property. It's create data-"key" attribute in element.
+	 * <pre>
+	 * 	element.putData("order",1);
+	 *  --> data-order="1"
+	 * </pre>
+	 * @param key
+	 * @param data
+	 */
 	public final native void putData(String key, int data) /*-{
 		this.dataset[key] = data;
 	}-*/;
+	/**
+	 * Get value from dataset property 
+	 * @param key
+	 * @return
+	 */
 	public final native String getDataString(String key) /*-{
 		return this.dataset[key];
 	}-*/;
+	/**
+	 * Get value from dataset property
+	 * @param key
+	 * @return
+	 */
 	public final native int getDataInt(String key) /*-{
 		var value = this.dataset[key];
 		try{

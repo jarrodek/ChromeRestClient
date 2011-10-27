@@ -10,6 +10,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasValue;
 
+@SuppressWarnings("javadoc")
 public class HTML5Progress extends FocusWidget implements HasValue<Integer>,
 		HasValueChangeHandlers<Integer> {
 

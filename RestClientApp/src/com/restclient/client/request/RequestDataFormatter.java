@@ -7,6 +7,7 @@ import java.util.Set;
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.regexp.shared.RegExp;
+import com.restclient.client.RestApp;
 
 /**
  *
@@ -14,7 +15,8 @@ import com.google.gwt.regexp.shared.RegExp;
  */
 public class RequestDataFormatter {
 
-    public static LinkedHashMap<String, String> parseHeaders(String input){
+    @SuppressWarnings("javadoc")
+	public static LinkedHashMap<String, String> parseHeaders(String input){
         if (input.equals("")) {
             return null;
         }
@@ -29,7 +31,8 @@ public class RequestDataFormatter {
         return result;
     }
     
-    public static String headersToString(LinkedHashMap<String, String> headers){
+    @SuppressWarnings("javadoc")
+	public static String headersToString(LinkedHashMap<String, String> headers){
     	String result = "";
     	Set<String> set = headers.keySet();
 		Iterator<String> it = set.iterator();
@@ -46,7 +49,8 @@ public class RequestDataFormatter {
 		return result;
     }
 
-    public static String parseData(LinkedHashMap<String, String> input){
+    @SuppressWarnings("javadoc")
+	public static String parseData(LinkedHashMap<String, String> input){
     	if( input == null ) return "";
     	String result = "";
     	Set<String> keys = input.keySet();
@@ -66,7 +70,8 @@ public class RequestDataFormatter {
         }
         return result;
     }
-    public static LinkedHashMap<String, String> parseDataToHashMap(String input){
+    @SuppressWarnings("javadoc")
+	public static LinkedHashMap<String, String> parseDataToHashMap(String input){
     	if( input == null ){
     		return null;
     	}
@@ -80,8 +85,11 @@ public class RequestDataFormatter {
     	return _tmpResult;
     }
     
-    public static String parseData(String input){
-    	Log.debug("parseData: "+input);
+    @SuppressWarnings("javadoc")
+	public static String parseData(String input){
+    	if( RestApp.isDebug() ){
+    		Log.debug("parseData: "+input);
+    	}
         if (input.equals("")) {
             return "";
         }
@@ -141,7 +149,8 @@ public class RequestDataFormatter {
         return result;
     }
 
-    public static LinkedHashMap<String, String> parseQueryString(String[] input){
+    @SuppressWarnings("javadoc")
+	public static LinkedHashMap<String, String> parseQueryString(String[] input){
     	LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
         for (String dataLine : input) {
             String[] _tmp = dataLine.split("[=|\r\n]", 2);

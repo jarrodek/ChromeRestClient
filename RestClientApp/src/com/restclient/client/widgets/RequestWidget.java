@@ -378,7 +378,9 @@ public class RequestWidget extends Composite {
 	private void restoreEncoding() {
 		Storage storage = Storage.getLocalStorageIfSupported();
 		if (storage == null) {
-			Log.error("No storage found");
+			if( RestApp.isDebug() ){
+				Log.error("No storage found");
+			}
 			return;
 		}
 		String data = storage.getItem("user-encodings");

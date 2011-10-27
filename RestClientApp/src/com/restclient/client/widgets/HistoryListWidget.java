@@ -145,7 +145,6 @@ public class HistoryListWidget extends Composite {
 					if( !isSelected ){
 						selectionModel.setSelected(value, true);
 					}
-//					Log.debug("Button clicked");
 					fireHistoryEvent(value);
 					return;
 				}
@@ -337,7 +336,6 @@ public class HistoryListWidget extends Composite {
 	
 	
 	protected void getHistoryValues(final int start, int limit) {
-//		Log.debug("historyList: start="+start+", limit="+limit);
 		List<RequestHistoryItem> response = RequestHistory.getHistory(start, limit);
 		historyList.setRowData(start, response);
 		historyList.setVisibleRange(start, limit);

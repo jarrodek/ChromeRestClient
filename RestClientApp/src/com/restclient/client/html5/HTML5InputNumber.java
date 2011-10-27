@@ -4,18 +4,36 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.TextBox;
 
+/**
+ * Numeric type input widger
+ * @author Paweł Psztyć
+ *
+ */
 public class HTML5InputNumber extends TextBox {
-
+	/**
+	 * Creates new input element type number.
+	 */
 	public HTML5InputNumber() {
 		super();
 		getElement().setAttribute("type", "number");
 	}
+	/**
+	 * Creates new input element type number with defined min and max values
+	 * @param min minimal range
+	 * @param max maximal range
+	 */
 	public HTML5InputNumber(float min, float max) {
 		super();
 		getElement().setAttribute("type", "number");
 		setMin(min);
 		setMax(max);
 	}
+	/**
+	 * Creates new input element type number with defined min, max and step values
+	 * @param min minimal range
+	 * @param max maximal range
+	 * @param step step on value change
+	 */
 	public HTML5InputNumber(float min, float max, float step) {
 		super();
 		getElement().setAttribute("type", "number");
@@ -138,6 +156,9 @@ public class HTML5InputNumber extends TextBox {
 		}
 	}
 	
+	/**
+	 * @return true if this field is mark as required
+	 */
 	public boolean isRequired(){
 		String required = getElement().getAttribute("required");
 		if( required.equals("") ){

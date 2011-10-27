@@ -5,6 +5,7 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.xhr2.client.FileList;
 
+@SuppressWarnings("javadoc")
 public class HTML5FileUpload extends FileUpload {
 	
 	public HTML5FileUpload(){

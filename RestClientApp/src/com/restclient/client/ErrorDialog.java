@@ -29,57 +29,56 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 /**
- * A simple glasspanel popup that terminates interaction with the application.
+ * A simple glass panel popup that terminates interaction with the application.
  */
 class ErrorDialog {
-  interface Binder extends UiBinder<DialogBox, ErrorDialog> {
-  }
+	interface Binder extends UiBinder<DialogBox, ErrorDialog> {
+	}
 
-  @UiField
-  DialogBox errorDialog;
+	@UiField DialogBox errorDialog;
 
-  @UiField
-  TextArea errorMessage;
+	@UiField TextArea errorMessage;
 
-  public ErrorDialog() {
-    GWT.<Binder> create(Binder.class).createAndBindUi(this);
-  }
+	public ErrorDialog() {
+		GWT.<Binder> create(Binder.class).createAndBindUi(this);
+	}
 
-  /**
-   * @return
-   */
-  public Handler getHandler() {
-    return new Handler() {
-      {
-        setLevel(Level.SEVERE);
-      }
+	/**
+	 * @return
+	 */
+	public Handler getHandler() {
+		return new Handler() {
+			{
+				setLevel(Level.SEVERE);
+			}
 
-      @Override
-      public void close() {
-      }
+			@Override
+			public void close() {
+			}
 
-      @Override
-      public void flush() {
-      }
+			@Override
+			public void flush() {
+			}
 
-      @Override
-      public void publish(LogRecord record) {
-        if (isLoggable(record)) {
-          errorMessage.setText(record.getMessage());
-          errorDialog.getElement().getStyle().setZIndex(10);
-          errorDialog.center();
-        }
-      }
-    };
-  }
+			@Override
+			public void publish(LogRecord record) {
+//				if (isLoggable(record)) {
+					errorMessage.setText(record.getMessage());
+					errorDialog.getElement().getStyle().setZIndex(1000);
+					errorDialog.center();
+					errorDialog.show();
+//				}
+			}
+		};
+	}
 
-  @UiHandler("dismiss")
-  void onDismiss(ClickEvent event) {
-    errorDialog.hide();
-  }
+	@UiHandler("dismiss")
+	void onDismiss(ClickEvent event) {
+		errorDialog.hide();
+	}
 
-  @UiHandler("reload")
-  void onReload(ClickEvent event) {
-    Window.Location.reload();
-  }
+	@UiHandler("reload")
+	void onReload(ClickEvent event) {
+		Window.Location.reload();
+	}
 }

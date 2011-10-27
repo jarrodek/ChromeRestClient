@@ -3,6 +3,7 @@ package com.restclient.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
@@ -59,6 +60,9 @@ public class TasksLoader {
 		tasks.remove(task);
 	}
 	
+	/**
+	 * @param callback
+	 */
 	public static void runTasks(Callback<Void, Void> callback){
 		Void v = GWT.create(Void.class);
 		if( !hasMoreTasks() ){
@@ -122,7 +126,9 @@ public class TasksLoader {
 			return;
 		}
 		int percent = taskFinished*100/initialTasksCount;
-		//Log.debug( initialTasksCount-taskFinished+" tasks left to do of: "+initialTasksCount );
+		if( RestApp.isDebug() ){
+			Log.debug( initialTasksCount-taskFinished+" tasks left to do of: "+initialTasksCount );
+		}
 		widget.setProgress(percent);
 		
 	}

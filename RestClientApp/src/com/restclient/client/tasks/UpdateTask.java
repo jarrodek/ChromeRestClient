@@ -60,7 +60,9 @@ public class UpdateTask implements LoadTask {
 		RestApp.HEADERS_SERVICE.insertHeaders(updHxvalues, new RowIdListCallback() {
 			@Override
 			public void onFailure(DataServiceException error) {
-				Log.error("Error save headers data to database.", error);
+				if( RestApp.isDebug() ){
+					Log.error("Error save headers data to database.", error);
+				}
 				callback.onFailure(0);
 			}
 

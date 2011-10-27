@@ -3,6 +3,7 @@ package com.restclient.client.tasks;
 import com.restclient.client.request.RequestParameters;
 import com.restclient.client.request.ViewParameters;
 
+@SuppressWarnings("javadoc")
 public class StateRestoreTask implements LoadTask {
 	
 	TasksCallback callback;

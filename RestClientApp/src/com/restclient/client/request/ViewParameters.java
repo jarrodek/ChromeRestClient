@@ -1,5 +1,6 @@
 package com.restclient.client.request;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
@@ -9,6 +10,7 @@ import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.ClosingEvent;
 import com.google.gwt.user.client.Window.ClosingHandler;
+import com.restclient.client.RestApp;
 import com.restclient.client.event.BodyTabOpenEvent;
 import com.restclient.client.event.HeadersTabOpenEvent;
 /**
@@ -29,7 +31,9 @@ public class ViewParameters {
 		Storage store = Storage.getLocalStorageIfSupported();
 		if( store != null ){
 			store.setItem("viewParams", data.toString());
-//			Log.debug("Saved state: "+data.toString());
+			if( RestApp.isDebug() ){
+				Log.debug("Saved state: "+data.toString());
+			}
 		}
 	}
 	/**
@@ -81,6 +85,7 @@ public class ViewParameters {
 	 * Sets opened tab in HEADERS form field.
 	 * It's can be 0 - for raw data input or 1 for form inputs.
 	 * @param opened Tab number 
+	 * @param storeData 
 	 */
 	public static void setHeadersOpenedTab(int opened, boolean storeData){
 		headersOpenedTab = opened;
@@ -92,6 +97,7 @@ public class ViewParameters {
 	 * Sets opened tab in DATA form field.
 	 * It's can be 0 - for raw data input, 1 for form inputs, 2 for file field.
 	 * @param opened Tab number 
+	 * @param storeData 
 	 */
 	public static void setDataOpenedTab(int opened, boolean storeData){
 		dataOpenedTab = opened;
@@ -115,16 +121,20 @@ public class ViewParameters {
 	}
 	
 	
+	@SuppressWarnings("javadoc")
 	public static void setRestoredState(EventBus eventBus) {
 		eventBus.fireEventFromSource(new BodyTabOpenEvent(dataOpenedTab), ViewParameters.class);
 		eventBus.fireEventFromSource(new HeadersTabOpenEvent(headersOpenedTab), ViewParameters.class);
 	}
 	
+	@SuppressWarnings("javadoc")
 	public static void observeChanges(EventBus eventBus){
 		Window.addWindowClosingHandler(new ClosingHandler() {
 			@Override
 			public void onWindowClosing(ClosingEvent event) {
-//				Log.debug("Saving UI state.");
+				if( RestApp.isDebug() ){
+					Log.debug("Saving UI state.");
+				}
 				store();
 			}
 		});

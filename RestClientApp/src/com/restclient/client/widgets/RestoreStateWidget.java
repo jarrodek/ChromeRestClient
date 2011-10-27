@@ -45,12 +45,14 @@ import com.restclient.client.event.RestoreRequestEvent;
 import com.restclient.client.storage.RestForm;
 import com.restclient.client.storage.RestFormJS;
 
+@SuppressWarnings("javadoc")
 public class RestoreStateWidget extends Composite {
 
 	interface Binder extends UiBinder<Widget, RestoreStateWidget> {}
 	
 	@UiField(provided=true) CellTable<RestForm> table;
 	@UiField(provided=true) SimplePager pager;
+	
 	private ListDataProvider<RestForm> provider;
 	private SelectionModel<RestForm> selectionModel = null;
 	private EventBus eventBus;
@@ -97,7 +99,9 @@ public class RestoreStateWidget extends Composite {
 		RestApp.FORM_SERVICE.getAllData(new ListCallback<RestFormJS>() {
 			@Override
 			public void onFailure(DataServiceException error) {
-				Log.error("error get data from form service (getAllData)", error);
+				if( RestApp.isDebug() ){
+					Log.error("error get data from form service (getAllData)", error);
+				}
 			}
 			@Override
 			public void onSuccess(List<RestFormJS> result) {

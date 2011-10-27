@@ -29,6 +29,7 @@ import com.restclient.client.headersupport.OAuth.OauthParam;
 import com.restclient.client.html5.HTML5InputNumber;
 import com.restclient.client.request.RequestParameters;
 
+@SuppressWarnings("javadoc")
 public class AuthorizeDialog extends DialogBox {
 	final DecoratedTabPanel formPanel;
 	private int selectedTab = 0;

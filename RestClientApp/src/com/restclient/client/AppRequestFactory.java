@@ -34,6 +34,7 @@ import com.restclient.client.request.RequestDataFormatter;
 import com.restclient.client.request.RequestParameters;
 import com.restclient.client.storage.FilesObject;
 
+@SuppressWarnings("javadoc")
 public class AppRequestFactory {
 
 	private static AppRequestFactory INSTANCE;
@@ -47,15 +48,23 @@ public class AppRequestFactory {
 	private static EventBus eventBus;
 	private static boolean requestInProgress = false;
 	
+	/**
+	 * @return true if some request is already in progress.
+	 */
 	public static boolean isRequestInProgress(){
 		return requestInProgress;
 	}
-	
+	/**
+	 * Initialize class.
+	 * @param ev
+	 */
 	public static void initialize(EventBus ev) {
 		eventBus = ev;
 		startObservers();
 	}
-
+	/**
+	 * Add handlers to events.
+	 */
 	private static void startObservers() {
 		RequestStartEvent.register(eventBus, new RequestStartEvent.Handler() {
 			@Override
@@ -79,20 +88,44 @@ public class AppRequestFactory {
 	private Date startTime = new Date();
 
 	private void startHttpRequest() {
+		
+		if( RestApp.isDebug() ){
+			Log.debug("Start new request");
+		}
+		
 		if( requestInProgress ){
+			if( RestApp.isDebug() ){
+				Log.warn("Request already in progress. Wait until end.");
+			}
 			return;
 		}
 		requestInProgress = true;
+		if( RestApp.isDebug() ){
+			Log.debug("Change controls state.");
+		}
 		eventBus.fireEvent(new RequestUiChangeEvent(
 				RequestUiChangeEvent.ACTION_DISABLE_BUTTONS, null));
 		try{
+			if( RestApp.isDebug() ){
+				Log.debug("Request form state snapshot.");
+			}
 			RequestParameters.store();
-			RequestHistory.addCurentParametersMap();
-			RequestHistory.store();
+			
+			if( RestApp.isHistoryEabled() ){
+				if( RestApp.isDebug() ){
+					Log.debug("Adding state to history.");
+				}
+				RequestHistory.addCurentParametersMap();
+				RequestHistory.store();
+			}
 		}catch(Exception e){
 			e.printStackTrace();
-			Log.error("Error save form state or history list. ", e);
-			
+			if( RestApp.isDebug() ){
+				Log.error("Error save form state or history list. ", e);
+			}
+		}
+		if( RestApp.isDebug() ){
+			Log.debug("Prepare variables.");
 		}
 		String method = RequestParameters.getMethod();
 		String data = RequestParameters.getData();
@@ -107,6 +140,9 @@ public class AppRequestFactory {
 		//
 		//save URL for suggestion oracle
 		//
+		if( RestApp.isDebug() ){
+			Log.debug("Save URL value into suggestions.");
+		}
 		RestApp.addOracleURL(requestUrl);
 		
 		if (files != null && files.size() > 0) {
@@ -118,12 +154,30 @@ public class AppRequestFactory {
 		}
 		if (useFormData) {
 			fd = FormData.create();
+			if( RestApp.isDebug() ){
+				Log.debug("Request will use FormData class in order to handle files.");
+			}
+		} else {
+			if( RestApp.isDebug() ){
+				Log.debug("Request will not use FormData class. Sendind traditional form");
+			}
 		}
-
+		
+		if( RestApp.isDebug() ){
+			Log.debug("Createing builder object for URL: " + requestUrl + " and method: " + method);
+		}
+		
 		RequestBuilder builder = new RequestBuilder(requestUrl, method);
 		builder.setFollowRedirects(true);
 
 		if (data != null && !data.equals("")) {
+			
+			if( RestApp.isDebug() ){
+				Log.debug("Set request data:");
+				Log.debug(data);
+				Log.debug("=============================");
+			}
+			
 			if (useFormData) {
 				LinkedHashMap<String, String> map = RequestDataFormatter
 						.parseDataToHashMap(data);
@@ -152,6 +206,11 @@ public class AppRequestFactory {
 			}
 		}
 		if (useFormData && files != null && files.size() > 0) {
+			
+			if( RestApp.isDebug() ){
+				Log.debug("Set " + files.size() + " file(s) in request.");
+			}
+			
 			Iterator<FilesObject> fit = files.iterator();
 			while (fit.hasNext()) {
 				FilesObject fobj = fit.next();
@@ -179,6 +238,9 @@ public class AppRequestFactory {
 					headers = new LinkedHashMap<String, String>();
 				}
 				headers.put("Content-Type", enc);
+				if( RestApp.isDebug() ){
+					Log.debug("Set \"Content-Type\" header with value="+enc);
+				}
 			}
 		}
 
@@ -186,13 +248,30 @@ public class AppRequestFactory {
 			// remove Content-Type header for file upload.
 			if (headers.containsKey("Content-Type")) {
 				headers.remove("Content-Type");
+				if( RestApp.isDebug() ){
+					Log.debug("Remove \"Content-Type\" header in order to handle files.");
+				}
 			}
 		}
 
 		if (headers != null) {
 			builder.setHeaders(headers);
+			
+			if( RestApp.isDebug() ){
+				Log.debug("Set request headers:");
+				Iterator<String> it = headers.keySet().iterator();
+				while( it.hasNext() ){
+					String key = it.next();
+					String value = headers.get(key);
+					Log.debug(key+": "+value);
+				}
+			}
 		}
-
+		
+		if( RestApp.isDebug() ){
+			Log.debug("Set request handlers.");
+		}
+		
 		builder.setAbortHandler(new AbortHandler() {
 			@Override
 			public void onAbort(ProgressEvent event) {
@@ -204,7 +283,9 @@ public class AppRequestFactory {
 		builder.setErrorHandler(new ErrorHandler() {
 			@Override
 			public void onError(Response response, RuntimeException exception) {
-				Log.error("XMLHttpRequest2 callback", "onError", exception);
+				if( RestApp.isDebug() ){
+					Log.error("XMLHttpRequest2 callback", "onError", exception);
+				}
 				onFailureRequest(response);
 			}
 		});
@@ -278,20 +359,30 @@ public class AppRequestFactory {
 			}
 		});
 
+		if( RestApp.isDebug() ){
+			Log.debug("All set. Sending...");
+		}
+		
 		try {
 			startTime.setTime(new Date().getTime());
 			builder.send();
 		} catch (RequestException e) {
+			if( RestApp.isDebug() ){
+				Log.error("Request send failure.", e);
+			}
+			eventBus.fireEvent(new RequestUiChangeEvent(
+					RequestUiChangeEvent.ACTION_ENABLE_BUTTONS, null));
 			requestInProgress = false;
 			ErrorDialog dialog = new ErrorDialog();
 			dialog.getHandler().publish(new LogRecord(dialog.getHandler().getLevel(), e.getMessage())  );
-			eventBus.fireEvent(new RequestUiChangeEvent(
-					RequestUiChangeEvent.ACTION_ENABLE_BUTTONS, null));
 		}
 
 	}
 
 	protected void onSuccesRequest(Response response) {
+		if( RestApp.isDebug() ){
+			Log.debug("Request sent successfully. Building response view.");
+		}
 		requestInProgress = false;
 		eventBus.fireEvent(new RequestUiChangeEvent(
 				RequestUiChangeEvent.ACTION_ENABLE_BUTTONS, null));

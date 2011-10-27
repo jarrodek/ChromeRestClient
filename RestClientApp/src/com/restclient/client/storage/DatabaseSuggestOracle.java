@@ -4,6 +4,7 @@ import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.gwt.user.client.ui.SuggestOracle;
+import com.restclient.client.RestApp;
 import com.restclient.client.storage.oracle.DatabaseHeadersResponse;
 import com.restclient.client.storage.oracle.DatabaseResponse;
 import com.restclient.client.storage.oracle.DatabaseUrlResponse;
@@ -159,9 +160,11 @@ public class DatabaseSuggestOracle extends SuggestOracle {
 					@Override
 					public void onFailure(DataServiceException error) {
 						requestInProgress = false;
-						Log.error(
-								"DatabaseSuggestOracle - databaseService error:",
-								error);
+						if( RestApp.isDebug() ){
+							Log.error(
+									"DatabaseSuggestOracle - databaseService error:",
+									error);
+						}
 					}
 
 					@Override

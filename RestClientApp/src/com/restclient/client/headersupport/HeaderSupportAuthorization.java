@@ -13,6 +13,7 @@ import com.restclient.client.HeaderSupport;
 import com.restclient.client.event.HeaderSupportSubmitEvent;
 import com.restclient.client.headersupport.OAuth.OauthParam;
 
+@SuppressWarnings("javadoc")
 public class HeaderSupportAuthorization implements HeaderSupport {
 	
 	AuthorizeDialog dialog = new AuthorizeDialog();

@@ -22,6 +22,8 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.storage.client.Storage;
+import com.google.gwt.storage.client.StorageEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.History;
@@ -46,6 +48,7 @@ import com.restclient.client.tasks.StateRestoreTask;
 import com.restclient.client.tasks.UpdateTask;
 import com.restclient.client.widgets.ElementWrapper;
 import com.restclient.client.widgets.HistoryListWidget;
+import com.restclient.client.widgets.OptionsWidget;
 import com.restclient.client.widgets.RequestWidget;
 import com.restclient.client.widgets.ResponseWidget;
 import com.restclient.client.widgets.RestoreStateWidget;
@@ -84,6 +87,7 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 	@UiField(provided = true) ResponseWidget responseWidget;
 	@UiField(provided = true) HistoryListWidget historyList;
 	@UiField(provided = true) RestoreStateWidget restoreWidget;
+	@UiField(provided = true) OptionsWidget optionsWidget;
 	
 	@UiField HTMLPanel mainPanel;
 	@UiField HTMLPanel bodyPanel;
@@ -91,6 +95,7 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 	@UiField HTMLPanel savedPanel;
 	@UiField HTMLPanel aboutPanel;
 	@UiField HTMLPanel historyPanel;
+	@UiField HTMLPanel optionsPanel;
 	
 	@UiField HTML plusButton;
 	@UiField AppStyle style;
@@ -113,14 +118,16 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 		responseWidget = new ResponseWidget(eventBus);
 		restoreWidget = new RestoreStateWidget(eventBus);
 		historyList = new HistoryListWidget(eventBus);
+		optionsWidget = new OptionsWidget(eventBus);
 		
-		//RootLayoutPanel.get().
 		RootPanel.get().add(
 		        GWT.<Binder> create(Binder.class).createAndBindUi(this));
 		
 		plusButton.setHTML("<g:plusone href=\"https://chrome.google.com/webstore/detail/hgmloofddffdnphfgcellkdfbfbjeloo\"></g:plusone>");
 		
 		savedPanel.getParent().getElement().setAttribute("hidden", "");
+		setHistoryMenuItemVisible(RestApp.isHistoryEabled());
+		
 		Window.addResizeHandler(this);
 		History.addValueChangeHandler(this);
 		handleMenuItems();
@@ -225,6 +232,37 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 				History.newItem("request");
 			}
 		});
+		
+		Storage storage = Storage.getLocalStorageIfSupported();
+		if(storage == null) return;
+		Storage.addStorageEventHandler( new StorageEvent.Handler() {
+			@Override
+			public void onStorageChange(StorageEvent event) {
+				String k = event.getKey();
+				if( k.equals(RestApp.StorageKeys.HISTORY_KEY) ){
+					String historyValue = event.getNewValue();
+					if( historyValue == null || historyValue.isEmpty() ){
+						historyValue = "true";
+					}
+					setHistoryMenuItemVisible(historyValue.equals("true"));
+				}
+			}
+		});
+	}
+	
+	/**
+	 * History menu item can be turned off. This method access this item visible state.
+	 * @param visible
+	 */
+	private void setHistoryMenuItemVisible(boolean visible){
+		HTML5Element root = (HTML5Element) mainPanel.getElement();
+		HTML5Element historyMenuItem = root.querySelector("ul."+style.mainNav()+" > li[page=\"history\"]");
+		
+		if( visible ){
+			historyMenuItem.getClassList().remove("hidden");
+		} else {
+			historyMenuItem.getClassList().add("hidden");
+		}
 	}
 	
 	
@@ -279,6 +317,15 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 			historyPanel.setHeight(windowHeight+"px");
 		} else {
 			historyPanel.setHeight("100%");
+		}
+		//
+		// Options panel
+		//
+		int options = optionsPanel.getOffsetHeight();
+		if( options > 0 && windowHeight >= options ){
+			optionsPanel.setHeight(windowHeight+"px");
+		} else {
+			optionsPanel.setHeight("100%");
 		}
 	}
 	/**
@@ -409,6 +456,18 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 				@Override
 				public void run() {
 					historyPanel.getParent().getElement().removeClassName("transparent");
+				}
+			}.schedule(10);
+		} else if( token.equals( "options" ) ){
+			showBackDrop(root);
+			hideMainPanel();
+			optionsPanel.getElement().removeClassName("hidden");
+			optionsPanel.getParent().getElement().removeAttribute("hidden");
+			onResize(null);
+			new Timer() {
+				@Override
+				public void run() {
+					optionsPanel.getParent().getElement().removeClassName("transparent");
 				}
 			}.schedule(10);
 		}

@@ -89,7 +89,9 @@ public class RequestHistory {
 			JSONValue values = arr.get(i);
 			items.add( new RequestHistoryItem(values) );
 		}
-		Log.debug("Restored history from local storge. List has: "+items.size()+" elements.");
+		if( RestApp.isDebug() ){
+			Log.debug("Restored history from local storge. List has: "+items.size()+" elements.");
+		}
 	}
 	
 	
@@ -126,11 +128,15 @@ public class RequestHistory {
 		RequestHistoryItem listItem = getEqual(item);
 		long time = new Date().getTime();
 		if( listItem == null ){
-			Log.debug("Adding new item to history.");
-			Log.debug(items.size() +" : "+ MAX_HISTORY_ITEMS);
+			if( RestApp.isDebug() ){
+				Log.debug("Adding new item to history.");
+				Log.debug(items.size() +" : "+ MAX_HISTORY_ITEMS);
+			}
 			if(items.size() > MAX_HISTORY_ITEMS){
 				items.remove(MAX_HISTORY_ITEMS-1); // remove oldest one
-				Log.debug("Remove oldest history item.");
+				if( RestApp.isDebug() ){
+					Log.debug("Remove oldest history item.");
+				}
 			}
 			item.setUpdated( time );
 			items.add( item );
@@ -226,7 +232,9 @@ public class RequestHistory {
 		int listSize = items.size();
 		int end = start + limit;
 		if(start>listSize-1){
-			Log.warn("Requested elemets out of list box. From: "+start+", to: "+end);
+			if( RestApp.isDebug() ){
+				Log.warn("Requested elemets out of list box. From: "+start+", to: "+end);
+			}
 			return result;
 		}
 		

@@ -11,6 +11,8 @@ import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.storage.client.Storage;
+import com.google.gwt.storage.client.StorageEvent;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.restclient.client.event.OpenRequestEvent;
@@ -27,15 +29,41 @@ import com.restclient.client.storage.UrlsService;
  */
 public class RestApp {
 	
+	@SuppressWarnings("javadoc")
 	public static final HeadersService HEADERS_SERVICE = GWT
 			.create(HeadersService.class);
+	@SuppressWarnings("javadoc")
 	public static final StatusCodesService STATUSES_SERVICE = GWT
 			.create(StatusCodesService.class);
+	@SuppressWarnings("javadoc")
 	public static final UrlsService URLS_SERVICE = GWT
 			.create(UrlsService.class);
+	@SuppressWarnings("javadoc")
 	public static final RestFormService FORM_SERVICE = GWT
 			.create(RestFormService.class);
 
+	/**
+	 * Class - holder for local storage keys
+	 * 
+	 */
+	public static class StorageKeys{
+		private StorageKeys(){}
+		
+		/**
+		 * Key for debug enabled.
+		 */
+		public static final String DEBUG_KEY = "DEBUG_ENABLED";
+		/**
+		 * Key for history list enabled value
+		 */
+		public static final String HISTORY_KEY = "HISTORY_ENABLED";
+		/**
+		 * Key for amount of history list
+		 */
+		public static final String HISTORY_AMOUNT = "HISTORY_AMOUNT";
+	}
+	
+	
 	/**
 	 * Add an URL value to list of past URLs for suggestions oracle.
 	 * <p>
@@ -43,8 +71,8 @@ public class RestApp {
 	 * time. In oracle rows are ordered by last use time. If not exists it's
 	 * insert new URL value.
 	 * </p>
+	 * @param requestUrl 
 	 * 
-	 * @param url
 	 */
 	public static void addOracleURL(final String requestUrl) {
 		if(requestUrl==null||requestUrl.isEmpty()) return;
@@ -58,7 +86,9 @@ public class RestApp {
 			public void onSuccess(List<UrlRow> result) {
 				if (result == null) {
 					// error?
-					Log.error("Some undefined error during storage request. RestApp.addOracleURL(String)");
+					if( RestApp.isDebug() ){
+						Log.error("Some undefined error during storage request. RestApp.addOracleURL(String)");
+					}
 					return;
 				}
 				if (result.size() == 0) { // no such URL yet
@@ -88,7 +118,10 @@ public class RestApp {
 			}
 		});
 	}
-
+	/**
+	 * Add keyboard shortcuts handlers.
+	 * @param eventBus
+	 */
 	public static void setupKeyboardShortcuts(final EventBus eventBus) {
 		Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
 			@Override
@@ -132,5 +165,56 @@ public class RestApp {
 		default:
 			return;
 		}
+	}
+	/**
+	 * Check if requests history is enabled.
+	 * @return true if is enabled (default).
+	 */
+	public static final boolean isHistoryEabled(){
+		boolean result = true;
+		Storage storage = Storage.getLocalStorageIfSupported();
+		if(storage != null){
+			String historyValue = storage.getItem( RestApp.StorageKeys.HISTORY_KEY );
+			if( historyValue == null || historyValue.isEmpty() ){
+				historyValue = "true";
+			}
+			result = historyValue.equals("true");
+		}
+		return result;
+	}
+	
+	private static Boolean isDebug = null;
+	
+	/**
+	 * Check if debug is enabled.
+	 * @return true if is enabled (default is false).
+	 */
+	public static final boolean isDebug(){
+		if( isDebug == null ){
+			setIsDebugState();
+		}
+		return isDebug.booleanValue();
+	}
+	
+	private static void setIsDebugState(){
+		boolean result = false;
+		Storage storage = Storage.getLocalStorageIfSupported();
+		if(storage != null){
+			String debugValue = storage.getItem( RestApp.StorageKeys.DEBUG_KEY );
+			if( debugValue == null || debugValue.isEmpty() ){
+				debugValue = "true";
+			}
+			result = debugValue.equals("true");
+			Storage.addStorageEventHandler( new StorageEvent.Handler() {
+				@Override
+				public void onStorageChange(StorageEvent event) {
+					String key = event.getKey();
+					if( RestApp.StorageKeys.DEBUG_KEY.equals( key ) ){
+						isDebug = event.getNewValue().equals( "true" );
+					}
+				}
+			});
+		}
+		isDebug = result;
 	}
 }

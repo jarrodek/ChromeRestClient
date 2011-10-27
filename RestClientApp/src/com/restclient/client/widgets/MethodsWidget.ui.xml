@@ -9,6 +9,11 @@
 		.methodsWidget{
 			display: -webkit-box; -webkit-box-orient: horizontal;
 		}
+		.otherInput{
+			font-size: 11px;
+			width: 150px;
+			vertical-align: top;
+		}
 	</ui:style>
 	<g:HTMLPanel styleName="{style.methodsWidget}">
 		<div class="{style.radioBox}">
@@ -33,10 +38,8 @@
 			<g:RadioButton name="method" text="OPTIONS" ui:field="radioOptions"></g:RadioButton>
 		</div>
 		<div class="{style.radioBox}">
-			<g:RadioButton name="method" text="TRACE" ui:field="radioTrace"></g:RadioButton>
-		</div>
-		<div class="{style.radioBox}">
-			<g:RadioButton name="method" text="CONNECT" ui:field="radioConnect"></g:RadioButton>
+			<g:RadioButton name="method" text="Other" ui:field="radioOther"></g:RadioButton>
+			<g:TextBox ui:field="otherMethodValue" enabled="false" addStyleNames="{style.otherInput}"></g:TextBox>
 		</div>
 		
 	</g:HTMLPanel>

@@ -1,7 +1,13 @@
 package com.restclient.client.html5;
 
 import com.google.gwt.core.client.JavaScriptObject;
-
+/**
+ * Class list is new elements attribute in HTML5.
+ * Via classList property can access to element class property and manipulate them.
+ * This class is GWT wrapper to HTML5 classList property.
+ * @author Paweł Psztyć
+ *
+ */
 public class ClassList extends JavaScriptObject {
 	protected ClassList() {
 	}

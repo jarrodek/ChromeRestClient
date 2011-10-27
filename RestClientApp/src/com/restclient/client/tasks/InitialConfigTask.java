@@ -137,6 +137,7 @@ public class InitialConfigTask implements LoadTask {
 		}
 	}
 	
+	@SuppressWarnings("javadoc")
 	public void createSupportData() {
 		try {
 			loadHeaders();
@@ -238,7 +239,9 @@ public class InitialConfigTask implements LoadTask {
 			RestApp.STATUSES_SERVICE.insertCodes(toSave, new RowIdListCallback() {
 				@Override
 				public void onFailure(DataServiceException error) {
-					Log.error("Error save statuses to database.", error);
+					if( RestApp.isDebug() ){
+						Log.error("Error save statuses to database.", error);
+					}
 				}
 				@Override
 				public void onSuccess(List<Integer> rowIds) {}
@@ -281,7 +284,9 @@ public class InitialConfigTask implements LoadTask {
 			RestApp.HEADERS_SERVICE.insertHeaders(toSave, new RowIdListCallback() {
 				@Override
 				public void onFailure(DataServiceException error) {
-					Log.error("Error save headers data to database.", error);
+					if( RestApp.isDebug() ){
+						Log.error("Error save headers data to database.", error);
+					}
 				}
 
 				@Override

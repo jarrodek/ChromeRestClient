@@ -8,9 +8,15 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.restclient.client.event.MethodChangeEvent;
 
+/**
+ * Request method selector
+ * @author jarrod
+ *
+ */
 public class MethodsWidget extends Composite implements ValueChangeHandler<Boolean> {
 
 	interface Binder extends UiBinder<Widget, MethodsWidget> {
@@ -23,13 +29,16 @@ public class MethodsWidget extends Composite implements ValueChangeHandler<Boole
 	@UiField RadioButton radioDelete;
 	@UiField RadioButton radioHead;
 	@UiField RadioButton radioOptions;
-	@UiField RadioButton radioTrace;
-	@UiField RadioButton radioConnect;
 	@UiField RadioButton radioPatch;
+	@UiField RadioButton radioOther;
+	@UiField TextBox otherMethodValue;
 	
 	private String currentSelected = "GET";
 	
-	public MethodsWidget(EventBus eventBus) {
+	/**
+	 * @param eventBus
+	 */
+	public MethodsWidget(final EventBus eventBus) {
 		this.eventBus = eventBus;
 		
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
@@ -40,9 +49,19 @@ public class MethodsWidget extends Composite implements ValueChangeHandler<Boole
 		radioDelete.addValueChangeHandler(this);
 		radioHead.addValueChangeHandler(this);
 		radioOptions.addValueChangeHandler(this);
-		radioTrace.addValueChangeHandler(this);
-		radioConnect.addValueChangeHandler(this);
 		radioPatch.addValueChangeHandler(this);
+		radioOther.addValueChangeHandler(this);
+		
+		otherMethodValue.addValueChangeHandler( new ValueChangeHandler<String>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				String old = currentSelected;
+				currentSelected = event.getValue();
+				MethodChangeEvent ev = new MethodChangeEvent(old, currentSelected);
+				eventBus.fireEvent(ev);
+			}
+		});
+		
 	}
 
 	@Override
@@ -53,22 +72,40 @@ public class MethodsWidget extends Composite implements ValueChangeHandler<Boole
 		
 		RadioButton obj = (RadioButton) event.getSource();
 		String old = currentSelected;
-		currentSelected = obj.getText();
+		String newValue = obj.getText();
+		if( newValue.equals("Other") ){
+			otherMethodValue.setEnabled(true);
+			currentSelected = otherMethodValue.getValue();
+		} else {
+			otherMethodValue.setEnabled(false);
+			currentSelected = newValue;
+		}
+		
 		MethodChangeEvent ev = new MethodChangeEvent(old, currentSelected);
 		eventBus.fireEvent(ev);
 	}
 
 
+	/**
+	 * @return
+	 */
 	public String getValue() {
 		return currentSelected;
 	}
 
 	
+	/**
+	 * @param value
+	 */
 	public void setValue(String value) {
 		setValue(value, false);
 	}
 
 
+	/**
+	 * @param value
+	 * @param fireEvents
+	 */
 	public void setValue(String value, boolean fireEvents) {
 		this.currentSelected = value;
 		if( value.equals("GET") ){
@@ -83,12 +120,12 @@ public class MethodsWidget extends Composite implements ValueChangeHandler<Boole
 			radioHead.setValue(true, fireEvents);
 		} else if ( value.equals("OPTIONS") ){
 			radioOptions.setValue(true, fireEvents);
-		} else if ( value.equals("TRACE") ){
-			radioTrace.setValue(true, fireEvents);
-		} else if ( value.equals("CONNECT") ){
-			radioConnect.setValue(true, fireEvents);
 		} else if ( value.equals("PATCH") ){
 			radioPatch.setValue(true, fireEvents);
+		} else {
+			otherMethodValue.setEnabled(true);
+			otherMethodValue.setValue( value );
+			radioOther.setValue(true, fireEvents);
 		}
 	}
 	
