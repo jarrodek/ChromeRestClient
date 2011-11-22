@@ -61,6 +61,10 @@ public class RestApp {
 		 * Key for amount of history list
 		 */
 		public static final String HISTORY_AMOUNT = "HISTORY_AMOUNT";
+		/**
+		 * Key for cookies capture
+		 */
+		public static final String COOKIES_CAPTURE = "COOKIES_CAPTURE";
 	}
 	
 	

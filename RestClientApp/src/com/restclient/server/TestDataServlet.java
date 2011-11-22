@@ -4,9 +4,11 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -95,6 +97,20 @@ public class TestDataServlet extends HttpServlet {
 			resp.setContentType("application/json");
 			resp.setStatus(200);
 			resp.getWriter().println(response);
+		} else if (payload.equals("cookie")){
+//			Cookie c = new Cookie("cookieName", "cookie value");
+//			c.setDomain("127.0.0.1");
+//			c.setMaxAge(100000);
+//			resp.addCookie(c);
+			
+			long t = new Date().getTime();
+			
+			Cookie c2 = new Cookie("testcookie_"+t, "another value : " + t);
+			resp.addCookie(c2);
+			
+			resp.setContentType("text/plain");
+			resp.setStatus(200);
+			resp.getWriter().println("Cookie set.");
 		}
 
 	}

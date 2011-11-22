@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.restclient.client.CookieCapture;
 import com.restclient.client.RestApp;
 import com.restclient.client.html5.HTML5InputNumber;
 
@@ -37,6 +38,7 @@ public class OptionsWidget extends Composite {
 	
 	@UiField CheckBox debug;
 	@UiField CheckBox history;
+	@UiField CheckBox cookie;
 	
 	@UiField HTMLPanel mainWidget;
 	@UiField(provided=true) HTML5InputNumber historyCount;
@@ -123,6 +125,27 @@ public class OptionsWidget extends Composite {
 				storage.setItem( RestApp.StorageKeys.HISTORY_AMOUNT, event.getValue() );
 				if( RestApp.isDebug() ){
 					Log.debug( "History ammount value changed. Current value is: " + event.getValue() );
+				}
+			}
+		});
+		String cookiesValue = storage.getItem( RestApp.StorageKeys.COOKIES_CAPTURE );
+		if( cookiesValue == null || cookiesValue.isEmpty() ){
+			cookiesValue = "false";
+		}
+		if( cookiesValue.equals("true") ){
+			cookie.setValue(true);
+		}
+		
+		cookie.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				boolean value = event.getValue();
+				storage.setItem( RestApp.StorageKeys.COOKIES_CAPTURE, String.valueOf(value) );
+				if( value ){
+					CookieCapture.initialize();
+				}
+				if( RestApp.isDebug() ){
+					Log.debug( "Cookies capture value changed. Current value is: " + value );
 				}
 			}
 		});

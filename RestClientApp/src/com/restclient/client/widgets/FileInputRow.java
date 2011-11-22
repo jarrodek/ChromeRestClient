@@ -13,8 +13,13 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xhr2.client.FileList;
 import com.restclient.client.event.FileRowChangeEvent;
 import com.restclient.client.html5.HTML5FileUpload;
-
-public class FileInputRow extends Composite implements HasText {
+/**
+ * Single input file field.
+ * Each change to file or name filed will fire {@link FileRowChangeEvent} to notify about change.
+ * @author Paweł Psztyć
+ *
+ */
+public class FileInputRow extends Composite implements HasText, ChangeHandler {
 
 	private static FileInputRowUiBinder uiBinder = GWT
 			.create(FileInputRowUiBinder.class);
@@ -26,23 +31,28 @@ public class FileInputRow extends Composite implements HasText {
 	@UiField HTML5FileUpload fileObject;
 	
 	private final EventBus eventBus;
-	
+	/**
+	 * Construct file form control.
+	 * @param eventBus
+	 */
 	public FileInputRow(EventBus eventBus) {
 		this.eventBus = eventBus;
 		initWidget(uiBinder.createAndBindUi(this));
 		this.setText(null);
-		fileObject.addChangeHandler(new ChangeHandler() {
-			@Override
-			public void onChange(ChangeEvent event) {
-				FileInputRow.this.eventBus.fireEvent(new FileRowChangeEvent(FileInputRow.this));
-			}
-		});
+		fileObject.addChangeHandler(this);
+		formName.addChangeHandler(this);
 	}
-	
+	/**
+	 * Get files list from this filed
+	 * @return
+	 */
 	public FileList getFiles(){
 		return fileObject.getFiles();
 	}
-	
+	/**
+	 * Get file form name (entered by user)
+	 * @return
+	 */
 	public String getFileName(){
 		return formName.getValue();
 	}
@@ -63,5 +73,9 @@ public class FileInputRow extends Composite implements HasText {
 	@Override
 	public boolean equals(Object obj) {
 		return formName.equals( ( (FileInputRow)obj ).getFileName() );
+	}
+	@Override
+	public void onChange(ChangeEvent event) {
+		eventBus.fireEvent(new FileRowChangeEvent(FileInputRow.this));
 	}
 }

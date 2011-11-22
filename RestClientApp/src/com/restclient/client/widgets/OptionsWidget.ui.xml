@@ -37,5 +37,15 @@
 				</p>
 			</div>
 		</section>
+		<section class="{style.optionsSection}">
+			<p>Cookie capture enabled</p>
+			<g:CheckBox ui:field="cookie" value="false" text="Enable cookie capture during request"></g:CheckBox>
+			<br/>
+			<div class="note">
+				This logs all cookie changes during request. <br/>
+				It is not possible to explicitly read cookies from the request. Chrome API only lets you read cookies from the browser session.<br/>
+				For more information read <a href="http://restforchrome.blogspot.com/2011/11/cookies-capture-experimental-feature.html">this blog post</a>.
+			</div>
+		</section>
 	</g:HTMLPanel>
 </ui:UiBinder> 

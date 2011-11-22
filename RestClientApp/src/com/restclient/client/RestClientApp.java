@@ -106,13 +106,13 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 	 * This is the entry point method.
 	 */
 	public void onModuleLoad() {
-		GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-			public void onUncaughtException(Throwable e) {
-				log.log(Level.SEVERE, e.getMessage(), e);
-			}
-		});
-	    Logger.getLogger("").addHandler(new ErrorDialog().getHandler());
-	    Logger.getLogger("").setLevel(Level.SEVERE);
+//		GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+//			public void onUncaughtException(Throwable e) {
+//				log.log(Level.SEVERE, e.getMessage(), e);
+//			}
+//		});
+//	    Logger.getLogger("").addHandler(new ErrorDialog().getHandler());
+//	    Logger.getLogger("").setLevel(Level.SEVERE);
 		
 		requestWidget = new RequestWidget(eventBus);
 		responseWidget = new ResponseWidget(eventBus);
@@ -248,6 +248,13 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 				}
 			}
 		});
+		String cookiesValue = storage.getItem( RestApp.StorageKeys.COOKIES_CAPTURE );
+		if( cookiesValue == null || cookiesValue.isEmpty() ){
+			cookiesValue = "false";
+		}
+		if( cookiesValue.equals("true") ){
+			CookieCapture.initialize();
+		}
 	}
 	
 	/**

@@ -1,5 +1,6 @@
 package com.restclient.client.widgets;
 
+import java.util.Date;
 import java.util.List;
 
 import com.google.code.gwt.database.client.service.DataServiceException;
@@ -13,8 +14,10 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -22,7 +25,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xhr2.client.Header;
 import com.google.gwt.xhr2.client.Response;
+import com.restclient.client.CookieCapture;
 import com.restclient.client.RestApp;
+import com.restclient.client.chrome.ChromeCookie;
 import com.restclient.client.event.RequestEndEvent;
 import com.restclient.client.event.RequestStartEvent;
 import com.restclient.client.storage.HeaderRow;
@@ -45,9 +50,12 @@ public class ResponseWidget extends Composite {
 	@UiField SpanElement loadingTime;
 	@UiField DivElement bodyContainer;
 	@UiField HTMLPanel headersPanel;
+	@UiField HTMLPanel cookiesWrapper;
+	@UiField HTMLPanel cookiesPanel;
 	@UiField ResponseBody bodyResponse;
 	@UiField ResponseStyle style;
 	private HandlerRegistration codeTipImageHandler;
+	private CookiesTable cookiesTable = null;
 	
 	public ResponseWidget(EventBus eventBus) {
 		
@@ -82,6 +90,10 @@ public class ResponseWidget extends Composite {
 		}
 		loadingTime.setInnerText("---");
 		bodyResponse.clearData();
+		cookiesWrapper.setVisible(false);
+		if(cookiesTable != null){
+			cookiesTable.clearTable();
+		}
 	}
 	
 	private void loadResponse(){
@@ -157,6 +169,64 @@ public class ResponseWidget extends Composite {
 			}
 		}
 		bodyResponse.createResponse();
+		
+		
+		//
+		// cookies (if enabled)
+		//
+		Storage storage = Storage.getLocalStorageIfSupported();
+		if( storage != null ){
+			String cookiesValue = storage.getItem( RestApp.StorageKeys.COOKIES_CAPTURE );
+			if( cookiesValue == null || cookiesValue.isEmpty() ){
+				cookiesValue = "false";
+			}
+			if( cookiesValue.equals("true") ){
+				Timer t = new Timer() {
+					@Override
+					public void run() {
+						loadCapturedCookiesDelayed();
+					}
+				};
+				t.schedule(200);
+			} else {
+				cookiesWrapper.setVisible(false);
+			}
+		}
+	}
+	
+	/**
+	 * allow browser to handle request cookies (for 0.2 sec ?).
+	 * After that time get captured cookies and display it.
+	 */
+	private void loadCapturedCookiesDelayed(){
+		CookieCapture.stop();
+		//
+		// TODO: get cookies only for current domain.
+		//
+		List<ChromeCookie> cookies = CookieCapture.getCookies();
+		CookieCapture.clear();
+		
+
+//		cookies.add( ChromeCookie.testCreate("NID", "53=Ax4X37W6H0YcEp2GP6c5l2F4-siyksr13x54wE0hLGd0TqHIMf_DvDnKICpZ5D_wkIZMd-rGTVcrzXaQ2rWkPc1TPFvPqElaYIbghag2yA_Z7CLJEaqckyklbvnwBVao", null, ".google.com", false, false, "/", "0") );
+//		cookies.add( ChromeCookie.testCreate("test2", "val2", new Date().getTime(), "a.local.com", true, false, "/test", "0") );
+//		cookies.add( ChromeCookie.testCreate("test3", "val3", new Date().getTime()+2345678, "local.com", false, true, "/test", "0") );
+//		cookies.add( ChromeCookie.testCreate("test4", "val4", null, "google.com", true, true, "/a", "1") );
+		
+		
+		if( cookies.size() == 0 ){
+			//hide cookies panel
+			cookiesWrapper.setVisible(false);
+		} else {
+			if( cookiesTable == null ){
+				cookiesTable = new CookiesTable(cookies);
+				cookiesPanel.add(cookiesTable);
+			} else {
+				cookiesTable.clearTable();
+				cookiesTable.loadTableData(cookies);
+			}
+			cookiesWrapper.setVisible(true);
+		}
+		
 	}
 	
 	private boolean isJSONHeader(Header[] headers){
@@ -243,4 +313,5 @@ public class ResponseWidget extends Composite {
 					});
 		}
 	};
+	
 }

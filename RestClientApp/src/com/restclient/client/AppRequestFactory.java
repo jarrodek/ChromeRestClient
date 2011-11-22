@@ -99,6 +99,7 @@ public class AppRequestFactory {
 			}
 			return;
 		}
+		
 		requestInProgress = true;
 		if( RestApp.isDebug() ){
 			Log.debug("Change controls state.");
@@ -275,6 +276,8 @@ public class AppRequestFactory {
 		builder.setAbortHandler(new AbortHandler() {
 			@Override
 			public void onAbort(ProgressEvent event) {
+				CookieCapture.stop();
+				CookieCapture.clear();
 				requestInProgress = false;
 				eventBus.fireEvent(new RequestUiChangeEvent(
 						RequestUiChangeEvent.ACTION_ENABLE_BUTTONS, null));
@@ -286,12 +289,14 @@ public class AppRequestFactory {
 				if( RestApp.isDebug() ){
 					Log.error("XMLHttpRequest2 callback", "onError", exception);
 				}
+				
 				onFailureRequest(response);
 			}
 		});
 		builder.setLoadHandler(new LoadHandler() {
 			@Override
 			public void onLoaded(Response response, ProgressEvent event) {
+				
 				onSuccesRequest(response);
 			}
 
@@ -355,10 +360,16 @@ public class AppRequestFactory {
 			@Override
 			public void onTimeout(Response response, ProgressEvent event,
 					RuntimeException exception) {
+				
 				onFailureRequest(response);
 			}
 		});
 
+		if( RestApp.isDebug() ){
+			Log.debug("Starting cookie cature (if enabled)");
+		}
+		CookieCapture.start();
+		
 		if( RestApp.isDebug() ){
 			Log.debug("All set. Sending...");
 		}
@@ -370,6 +381,8 @@ public class AppRequestFactory {
 			if( RestApp.isDebug() ){
 				Log.error("Request send failure.", e);
 			}
+			CookieCapture.stop();
+			CookieCapture.clear();
 			eventBus.fireEvent(new RequestUiChangeEvent(
 					RequestUiChangeEvent.ACTION_ENABLE_BUTTONS, null));
 			requestInProgress = false;
@@ -380,6 +393,7 @@ public class AppRequestFactory {
 	}
 
 	protected void onSuccesRequest(Response response) {
+		
 		if( RestApp.isDebug() ){
 			Log.debug("Request sent successfully. Building response view.");
 		}
@@ -398,6 +412,9 @@ public class AppRequestFactory {
 	}
 
 	protected void onFailureRequest(Response response) {
+		CookieCapture.stop();
+		CookieCapture.clear();
+		
 		requestInProgress = false;
 		eventBus.fireEvent(new RequestUiChangeEvent(
 				RequestUiChangeEvent.ACTION_ENABLE_BUTTONS, null));

@@ -62,6 +62,9 @@
 			.time {
 				padding-top: 7px;
 			}
+			.summary{ cursor: pointer; text-decoration: underline; }
+			.details[open] .summary{text-decoration: none;}
+			.details{ padding: 7px; }
 		</ui:style>
 	<g:HTMLPanel ui:field="responsePanel" visible="false"
 		styleName="{style.panelMargin}">
@@ -92,6 +95,15 @@
 			</div>
 			<g:HTMLPanel ui:field="headersPanel" styleName="{style.rowOutput}"></g:HTMLPanel>
 		</div>
+		<g:HTMLPanel ui:field="cookiesWrapper" styleName="{style.response-row}">
+			<div class="{style.rowLabel}">
+				<span>Cookies</span>
+			</div>
+			<details class="{style.rowOutput} {style.details}">
+			<summary class="{style.summary}">See cookies captured during request</summary>
+				<g:HTMLPanel ui:field="cookiesPanel"></g:HTMLPanel>
+			</details>
+		</g:HTMLPanel>
 		<div class="{style.response-row}">
 			<div class="{style.rowLabel}">
 				<span>Body</span>

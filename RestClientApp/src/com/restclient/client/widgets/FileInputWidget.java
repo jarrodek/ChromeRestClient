@@ -16,7 +16,11 @@ import com.google.gwt.user.client.ui.Widget;
 import com.restclient.client.event.FileRowChangeEvent;
 import com.restclient.client.event.FilesChangeEvent;
 import com.restclient.client.storage.FilesObject;
-
+/**
+ * Request file input form.
+ * @author Paweł Psztyć
+ *
+ */
 public class FileInputWidget extends Composite {
 
 	interface Binder extends UiBinder<Widget, FileInputWidget> {
