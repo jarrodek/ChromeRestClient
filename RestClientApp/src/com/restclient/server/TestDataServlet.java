@@ -111,6 +111,15 @@ public class TestDataServlet extends HttpServlet {
 			resp.setContentType("text/plain");
 			resp.setStatus(200);
 			resp.getWriter().println("Cookie set.");
+		} else if( payload.equals("links") ){
+			
+			resp.setHeader("X-debug-url1", "http://127.0.1.1:8888/ChromeSMS.html?gwt.codesvr=127.0.1.1:9997#send-sms");
+			resp.setHeader("X-debug-url2", "http://127.0.1.1:8888/ChromeSMS.html?gwt.codesvr=127.0.1.1:9997");
+			resp.setHeader("X-debug-url3", "http://www.127.0.1.1:8888/ChromeSMS.html");
+			
+			resp.setContentType("text/plain");
+			resp.setStatus(200);
+			resp.getWriter().println("OK");
 		}
 
 	}

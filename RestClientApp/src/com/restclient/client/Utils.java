@@ -1,8 +1,10 @@
 package com.restclient.client;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.regexp.shared.RegExp;
 
 /**
  * Utility class for app.
@@ -31,5 +33,13 @@ public class Utils {
 		}
 		return null;
 	}
-	
+	/**
+	 * Find urls from input and replace it into HTML anchor.
+	 * @param input
+	 * @return
+	 */
+	public static String autoLinkUrls(String input){
+		RegExp r = RegExp.compile("(https?:\\/\\/(\\w|\\.)+(\\S+))","gim");
+		return r.replace(input, "<a target=\"_blank\" href=\"$1\">$1</a>");
+	}
 }

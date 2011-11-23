@@ -11,57 +11,68 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-
+import com.google.gwt.xhr2.client.Header;
+import com.restclient.client.Utils;
+/**
+ * Object representing sigle header line.
+ * @author Paweł Psztyć
+ *
+ */
 public class HeaderLine extends Composite {
 	interface Binder extends UiBinder<Widget, HeaderLine> {}
 	
 	interface LineStyle extends CssResource {
 		String opened();
 	}
-	
-	@UiField Anchor title;
+	@UiField Anchor hintHandler;
+	@UiField SpanElement headerNameTitle;
+	@UiField SpanElement headerValueTitle;
 	@UiField SpanElement desc;
 	@UiField SpanElement example;
 	@UiField SpanElement headerName;
 	@UiField DivElement hintParent;
 	@UiField LineStyle style;
-	
 	/**
 	 * 
-	 * @param title
-	 * @param name
-	 * @param desc
-	 * @param example
+	 * @param header
 	 */
-	public HeaderLine(String title, String name, String desc, String example){
+	public HeaderLine(Header header) {
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
-		if( title != null){
-			this.title.setText( title );
+		String name = header.getName();
+		if( name != null ){
+			headerNameTitle.setInnerText(name);
 		}
-		if( name != null && !name.equals("") ){
-			this.headerName.setInnerHTML(name);
-			this.headerName.removeClassName("hidden");
+		String value = header.getValue();
+		if( value != null ){
+			headerValueTitle.setInnerHTML( Utils.autoLinkUrls(value) );
 		}
-		if( desc != null ){
-			this.desc.setInnerHTML( desc );
-		}
-		if( example != null && !example.equals("") ){
-			this.example.setInnerHTML(example);
-			this.example.removeClassName("hidden");
-		}
+		hintHandler.setVisible(false);
 	}
-	
+	/**
+	 * Update header name value.
+	 * @param name
+	 */
 	public void updateName(String name){
 		if( name != null && !name.equals("") ){
 			this.headerName.setInnerHTML(name);
 			this.headerName.removeClassName("hidden");
+			this.headerNameTitle.setInnerHTML(name);
 		}
 	}
+	/**
+	 * 
+	 * @param desc
+	 */
 	public void updateDesc(String desc){
 		if( desc != null ){
 			this.desc.setInnerHTML( desc );
+			hintHandler.setVisible(true);
 		}
 	}
+	/**
+	 * 
+	 * @param example
+	 */
 	public void updateExample(String example){
 		if( example != null && !example.equals("") ){
 			this.example.setInnerHTML(example);
@@ -70,7 +81,7 @@ public class HeaderLine extends Composite {
 	}
 	
 	
-	@UiHandler("title")
+	@UiHandler("hintHandler")
 	void handleClick(ClickEvent e) {
 		Element parent = hintParent.getParentElement();
 		String currentClass = parent.getClassName();

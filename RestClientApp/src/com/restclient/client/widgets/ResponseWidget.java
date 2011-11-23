@@ -1,6 +1,5 @@
 package com.restclient.client.widgets;
 
-import java.util.Date;
 import java.util.List;
 
 import com.google.code.gwt.database.client.service.DataServiceException;
@@ -32,7 +31,11 @@ import com.restclient.client.event.RequestEndEvent;
 import com.restclient.client.event.RequestStartEvent;
 import com.restclient.client.storage.HeaderRow;
 import com.restclient.client.storage.StatusCodeRow;
-
+/**
+ * 
+ * @author Paweł Psztyć
+ *
+ */
 public class ResponseWidget extends Composite {
 
 	interface Binder extends UiBinder<Widget, ResponseWidget> {}
@@ -56,7 +59,10 @@ public class ResponseWidget extends Composite {
 	@UiField ResponseStyle style;
 	private HandlerRegistration codeTipImageHandler;
 	private CookiesTable cookiesTable = null;
-	
+	/**
+	 * 
+	 * @param eventBus
+	 */
 	public ResponseWidget(EventBus eventBus) {
 		
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
@@ -207,7 +213,7 @@ public class ResponseWidget extends Composite {
 		CookieCapture.clear();
 		
 
-//		cookies.add( ChromeCookie.testCreate("NID", "53=Ax4X37W6H0YcEp2GP6c5l2F4-siyksr13x54wE0hLGd0TqHIMf_DvDnKICpZ5D_wkIZMd-rGTVcrzXaQ2rWkPc1TPFvPqElaYIbghag2yA_Z7CLJEaqckyklbvnwBVao", null, ".google.com", false, false, "/", "0") );
+//		cookies.add( ChromeCookie.testCreate("NID", "53=Ax4X37W6H0YcE2GP6c5l2F4-siyksr13x54w0hLGd0TqHIMf_DvDnKICpZ5D_wIZMd-rGTVcrzXaQ2rWkPc1TPFvPqElaYIbghag2yA_Z7CLJEaqckyklbvnwBVao", null, ".google.com", false, false, "/", "0") );
 //		cookies.add( ChromeCookie.testCreate("test2", "val2", new Date().getTime(), "a.local.com", true, false, "/test", "0") );
 //		cookies.add( ChromeCookie.testCreate("test3", "val3", new Date().getTime()+2345678, "local.com", false, true, "/test", "0") );
 //		cookies.add( ChromeCookie.testCreate("test4", "val4", null, "google.com", true, true, "/a", "1") );
@@ -251,17 +257,8 @@ public class ResponseWidget extends Composite {
 			if (header == null) {
 				continue;
 			}
-			String head = "", desc = "";
 			
-			if (header.getName() != null) {
-				head += header.getName();
-			}
-			if (header.getValue() != null) {
-				head += ": " + header.getValue();
-			}
-			
-			desc = "<i>no info</i>";
-			final HeaderLine line = new HeaderLine(head, null, desc, null);
+			final HeaderLine line = new HeaderLine(header);
 			headersPanel.add(line);
 			
 			RestApp.HEADERS_SERVICE.getHeader(header.getName(), new ListCallback<HeaderRow>() {
