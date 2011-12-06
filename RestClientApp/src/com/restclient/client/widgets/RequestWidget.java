@@ -176,7 +176,7 @@ public class RequestWidget extends Composite {
 				boolean currentIsBody = isBodyRequest(newMethod);
 
 				if (oldRequestIsBody == currentIsBody) {
-					// nothing actually change in UI
+					// nothing actually changed in UI
 					return;
 				}
 				HTMLPanel.setVisible(requestBodyControls, currentIsBody);

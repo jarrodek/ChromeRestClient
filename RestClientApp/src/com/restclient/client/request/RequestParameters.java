@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
@@ -16,6 +17,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.ClosingEvent;
 import com.google.gwt.user.client.Window.ClosingHandler;
 import com.restclient.client.RequestHistoryItem;
+import com.restclient.client.RestApp;
 import com.restclient.client.Utils;
 import com.restclient.client.event.BodyChangeEvent;
 import com.restclient.client.event.EncodingChangeEvent;
@@ -106,12 +108,24 @@ public class RequestParameters {
 					return;
 				}
 				instance.method = newMethod;
+				if( RestApp.isDebug() ){
+					Log.debug("Request method has changed from " + oldMethod + " to " + newMethod);
+				}
 			}
 		});
 		HeadersChangeEvent.register(eb, new HeadersChangeEvent.Handler() {
 			@Override
 			public void onChange(LinkedHashMap<String, String> headers, Object source) {
 				instance.headers = headers;
+				if( RestApp.isDebug() ){
+					Log.debug( "Change in headers list. Current set:" );
+					Iterator<String> it = headers.keySet().iterator();
+					while(it.hasNext()){
+						String key = it.next();
+						String value = headers.get(key);
+						Log.debug( key + ": " + value );
+					}
+				}
 			}
 		});
 		BodyChangeEvent.register(eb, new BodyChangeEvent.Handler() {
@@ -138,21 +152,24 @@ public class RequestParameters {
 	 * Store request parameters to local storage
 	 */
 	public static void store() {
-		//String value = getInstance().toString();
 		if (store != null){
-			store.setItem("latestRequest", getInstance().toString());
+			String value = getInstance().toString();
+			store.setItem("latestRequest", value);
+			if( RestApp.isDebug() ){
+				Log.debug("Current state saved: " + value);
+			}
 		}
 	}
-	/**
-	 * Store request parameters to local storage and in history list 
-	 * @param saveInHistory true if request should be stored in history list as well.
-	 */
-	public static void store(boolean saveInHistory){
-		if (store != null){
-			String data = getInstance().toString();
-			store.setItem("latestRequest", data);
-		}
-	}
+//	/**
+//	 * Store request parameters to local storage and in history list 
+//	 * @param saveInHistory true if request should be stored in history list as well.
+//	 */
+//	public static void store(boolean saveInHistory){
+//		if (store != null){
+//			String data = getInstance().toString();
+//			store.setItem("latestRequest", data);
+//		}
+//	}
 	
 	@Override
 	public String toString() {
@@ -188,10 +205,6 @@ public class RequestParameters {
 			Iterator<String> it = keys.iterator();
 			while (it.hasNext()) {
 				String k = it.next();
-				if (k.toLowerCase().equals("content-type")) { // never store
-																// this value!
-					continue;
-				}
 				JSONObject header = new JSONObject();
 				header.put(k, new JSONString(this.headers.get(k)));
 				headersArray.set(headersArray.size(), header);

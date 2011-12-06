@@ -110,6 +110,9 @@ public class AppRequestFactory {
 			if( RestApp.isDebug() ){
 				Log.debug("Request form state snapshot.");
 			}
+			//
+			// Store current state
+			//
 			RequestParameters.store();
 			
 			if( RestApp.isHistoryEabled() ){
@@ -231,16 +234,32 @@ public class AppRequestFactory {
 		}
 		// builder.setTimeoutMillis(500);
 		// builder.setWithCredentials(true);
-
+		
 		if (method.equals("POST") || method.equals("PUT")
 				|| method.equals("DELETE")) {
+			
 			if (!hasFile) {
 				if (headers == null) {
 					headers = new LinkedHashMap<String, String>();
 				}
-				headers.put("Content-Type", enc);
+				
+				//check if headers list already contains content-type header.
+				//if not set one from form.
+				boolean hasContentTypeHeader = false;
+				Iterator<String> it = headers.keySet().iterator();
+				while(it.hasNext()){
+					String key = it.next();
+					if(key.toLowerCase().equals("content-type")){
+						enc = headers.get(key);
+						hasContentTypeHeader = true;
+						break;
+					}
+				}
+				if(!hasContentTypeHeader){
+					headers.put("Content-Type", enc);
+				}
 				if( RestApp.isDebug() ){
-					Log.debug("Set \"Content-Type\" header with value="+enc);
+					Log.debug("Add \"Content-Type\" header to headers list with value="+enc);
 				}
 			}
 		}

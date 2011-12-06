@@ -20,7 +20,7 @@ import com.restclient.client.headersupport.W3CSetHeadersError;
 
 /**
  * 
- * Headers that not going to be set:
+ * Headers that are not going to be set:
  * 
  * <pre>
  * Accept-Charset
@@ -34,6 +34,7 @@ import com.restclient.client.headersupport.W3CSetHeadersError;
  * Expect
  * Host
  * Keep-Alive
+ * Origin
  * Referer
  * TE
  * Trailer
@@ -96,6 +97,7 @@ public class HeadersFillSupport implements ClickHandler, FocusHandler {
 		NOT_SUPPORTED_W3C.add("upgrade");
 		NOT_SUPPORTED_W3C.add("user-agent");
 		NOT_SUPPORTED_W3C.add("via");
+		NOT_SUPPORTED_W3C.add("origin");
 	}
 	
 	/**
