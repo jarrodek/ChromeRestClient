@@ -1,8 +1,8 @@
 package com.google.gwt.xhr2.client;
 
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.http.client.RequestException;
@@ -54,7 +54,7 @@ public class RequestBuilder {
 	 * Map of header name to value that will be added to the JavaScript
 	 * XmlHttpRequest object before sending a request.
 	 */
-	private LinkedHashMap<String, String> headers;
+	private List<RequestHeader> headers;
 	/**
 	 * HTTP method to use when opening a JavaScript XmlHttpRequest object.
 	 */
@@ -167,7 +167,7 @@ public class RequestBuilder {
 	 * 
 	 * @return
 	 */
-	public LinkedHashMap<String, String> getHeaders() {
+	public List<RequestHeader> getHeaders() {
 		return headers;
 	}
 
@@ -187,19 +187,29 @@ public class RequestBuilder {
 	 * @throws IllegalArgumentException
 	 *             if header token is null or empty.
 	 */
-	public void setHeader(String key, String value)
+	public void setHeader(final String key, String value)
 			throws IllegalArgumentException {
 		if (key == null || key.equals("")) {
 			throw new IllegalArgumentException("Header token cannot be null.");
 		}
 		if (this.headers == null) {
-			this.headers = new LinkedHashMap<String, String>();
+			this.headers = new ArrayList<RequestHeader>();
 		}
-		if (this.headers.containsKey(key)) { // RFC 2616
-			String currentValue = this.headers.get(key);
+		
+		Collections.sort(headers, new RequestHeader.HeadersComparator());
+		RequestHeader found = null;
+		for(RequestHeader item : headers){
+			if(item.getName().toLowerCase().equals(key.toLowerCase())){
+				found = item;
+				break;
+			}
+		}
+		if(found != null){ // RFC 2616
+			String currentValue = found.getValue();
 			value = currentValue + ", " + value;
+			headers.remove(found);
 		}
-		this.headers.put(key, value);
+		this.headers.add(new RequestHeader(key, value));
 	}
 
 	/**
@@ -226,7 +236,7 @@ public class RequestBuilder {
 	 * @param map
 	 *            of headers.
 	 */
-	public void setHeaders(LinkedHashMap<String, String> headers) {
+	public void setHeaders(List<RequestHeader> headers) {
 		this.headers = headers;
 	}
 
@@ -658,14 +668,12 @@ public class RequestBuilder {
 						"text/plain; charset=utf-8");
 			}
 		} else {
-			Set<String> tokens = headers.keySet();
-			Iterator<String> it = tokens.iterator();
-			while (it.hasNext()) {
-				String token = it.next();
-				if (token.equals("")) {
-					continue;
-				}
-				String value = headers.get(token);
+			
+			for(RequestHeader item : headers){
+				if(item == null) continue;
+				String token = item.getName();
+				if (token.equals("")) continue;
+				String value = item.getValue();
 				try {
 					xmlHttpRequest.setRequestHeader(token, value);
 				} catch (JavaScriptException e) {
