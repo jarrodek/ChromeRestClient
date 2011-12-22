@@ -1,9 +1,8 @@
 package com.restclient.client;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -12,6 +11,7 @@ import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.xhr2.client.RequestHeader;
 import com.restclient.client.request.RequestParameters;
 import com.restclient.client.storage.FilesObject;
 
@@ -48,7 +48,7 @@ public class RequestHistoryItem implements Serializable {
 	/**
 	 * Headers to send;
 	 */
-	private LinkedHashMap<String, String> headers = null;
+	private List<RequestHeader> headers = null;
 	/**
 	 * Request method name. Default it's always GET
 	 */
@@ -102,7 +102,8 @@ public class RequestHistoryItem implements Serializable {
 		}
 		JSONArray headersArray = obj.get("headers").isArray();
 		if (headersArray != null) {
-			LinkedHashMap<String, String> headers = new LinkedHashMap<String, String>();
+			List<RequestHeader> headers = new ArrayList<RequestHeader>();
+			
 			int cnt = headersArray.size();
 			for (int i = 0; i < cnt; i++) {
 				JSONValue _tmp = headersArray.get(i);
@@ -122,9 +123,10 @@ public class RequestHistoryItem implements Serializable {
 					}
 					JSONString _headerValueJS = headerValueJs.isString();
 					String headerValue = _headerValueJS.stringValue();
-					headers.put(headerName, headerValue);
+					headers.add(new RequestHeader(headerName, headerValue));
 				}
 			}
+			
 			this.headers = headers;
 		}
 		JSONValue updatedValue = obj.get("updated");
@@ -171,7 +173,7 @@ public class RequestHistoryItem implements Serializable {
 	/**
 	 * @return the headers
 	 */
-	public LinkedHashMap<String, String> getHeaders() {
+	public List<RequestHeader> getHeaders() {
 		return headers;
 	}
 
@@ -179,7 +181,7 @@ public class RequestHistoryItem implements Serializable {
 	/**
 	 * @param headers the headers to set
 	 */
-	public void setHeaders(LinkedHashMap<String, String> headers) {
+	public void setHeaders(List<RequestHeader> headers) {
 		this.headers = headers;
 	}
 
@@ -270,18 +272,12 @@ public class RequestHistoryItem implements Serializable {
 		data.put("method", method);
 		data.put("formEncoding", new JSONString(this.formEncoding));
 		JSONArray headersArray = new JSONArray();
-		if (this.headers != null) {
-			Set<String> keys = this.headers.keySet();
-			Iterator<String> it = keys.iterator();
-			while (it.hasNext()) {
-				String k = it.next();
-				if (k.toLowerCase().equals("content-type")) { // never store
-															// this value!
-					continue;
-				}
-				JSONObject header = new JSONObject();
-				header.put(k, new JSONString(this.headers.get(k)));
-				headersArray.set(headersArray.size(), header);
+		if (headers != null) {
+			for( RequestHeader header : headers){
+				if(header == null) continue;
+				JSONObject headerObject = new JSONObject();
+				headerObject.put(header.getName(), new JSONString(header.getValue()));
+				headersArray.set(headersArray.size(), headerObject);
 			}
 		}
 		data.put("headers", headersArray);

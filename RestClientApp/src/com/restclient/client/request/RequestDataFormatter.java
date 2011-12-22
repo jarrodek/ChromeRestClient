@@ -1,13 +1,13 @@
 package com.restclient.client.request;
 
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.regexp.shared.RegExp;
-import com.restclient.client.RestApp;
+import com.google.gwt.xhr2.client.RequestHeader;
+import com.restclient.client.widgets.BodyFormWidget;
+import com.restclient.client.widgets.BodyFormWidget.BodyFormValue;
 
 /**
  *
@@ -15,100 +15,93 @@ import com.restclient.client.RestApp;
  */
 public class RequestDataFormatter {
 
-    @SuppressWarnings("javadoc")
-	public static LinkedHashMap<String, String> parseHeaders(String input){
+    /**
+     * Parse HTTP headers string into list of {@link RestHeader}
+     * @param input headers string either from request as all headers response or from saved string
+     * @return list of headers as {@link RestHeader}
+     */
+	public static List<RequestHeader> parseHeaders(String input){
         if (input.equals("")) {
             return null;
         }
-        LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
+        List<RequestHeader> result = new ArrayList<RequestHeader>();
+        
         String[] headers = input.split("[\r\n]");
         for (String h : headers) {
             String[] _tmp = h.split("[:|\r\n]", 2);
             if (_tmp.length == 2) {
-                result.put( _tmp[0].trim(), _tmp[1].trim());
+            	result.add(new RequestHeader(_tmp[0].trim(), _tmp[1].trim()));
             }
         }
         return result;
     }
     
-    @SuppressWarnings("javadoc")
-	public static String headersToString(LinkedHashMap<String, String> headers){
-    	String result = "";
-    	Set<String> set = headers.keySet();
-		Iterator<String> it = set.iterator();
-		while(it.hasNext()){
-			if( !result.equals("") ){
+    /**
+     * Parse headers list into HTTP ready to send string
+     * @param list List of {@link RestHeader} objects
+     * @return
+     */
+	public static String headersToString(List<RequestHeader> list){
+		String result = "";
+    	for( RequestHeader header : list ){
+    		if( !result.equals("") ){
 				result += "\n";
 			}
-			String item = it.next();
-			String value = headers.get(item);
+    		String item = header.getName();
+			String value = header.getValue();
 			if( !(item.trim().equals("") && value.trim().equals("")) ){
-				result += item+": "+headers.get(item);
+				result += item+": "+value;
 			}
-		}
+    	}
 		return result;
     }
 
-    @SuppressWarnings("javadoc")
-	public static String parseData(LinkedHashMap<String, String> input){
+    /**
+     * Parse list of BODY form values into BODY string
+     * @param input
+     * @return Request BODY value
+     */
+	public static String parseData(List<BodyFormWidget.BodyFormValue> input){
     	if( input == null ) return "";
     	String result = "";
-    	Set<String> keys = input.keySet();
-        Iterator<String> it = keys.iterator();
-        while(it.hasNext()){
-            if( !result.isEmpty() ){
+    	for(BodyFormValue item : input){
+    		if( !result.isEmpty() ){
                 result += "&";
             }
-            String key = it.next();
-            String value = input.get(key);
+    		String key = item.getName();
+            String value = item.getValue();
             if( !(key.trim().equals("") && value.trim().equals("")) ){
             	result += URL.encodeQueryString(key.trim());
             	result += "=";
-            	result += URL.encodeQueryString( value.trim() );
-            	//result += key.trim()+"="+value.trim();
+            	result += URL.encodeQueryString(value.trim());
             }
-        }
-        return result;
-    }
-    @SuppressWarnings("javadoc")
-	public static LinkedHashMap<String, String> parseDataToHashMap(String input){
-    	if( input == null ){
-    		return null;
     	}
-    	String[] dataList = input.split("[\r\n]");
-    	LinkedHashMap<String, String> _tmpResult = null;
-    	if( dataList.length == 1 ){
-            _tmpResult = parseQueryString(dataList[0]);
-        } else {
-            _tmpResult = parseQueryString(dataList);
-        }
-    	return _tmpResult;
-    }
-    
-    @SuppressWarnings("javadoc")
-	public static String parseData(String input){
-    	if( RestApp.isDebug() ){
-    		Log.debug("parseData: "+input);
-    	}
-        if (input.equals("")) {
-            return "";
-        }
-        String result = "";
-        LinkedHashMap<String, String> _tmpResult = parseDataToHashMap(input);        
-        if( _tmpResult.isEmpty() ){
-            return "";
-        }
-        result = parseData(_tmpResult);
         return result;
     }
     /**
-     * Parse application/x-www-form-urlencoded form entity body to key => value pairs.
-     * 
+     * Parse string value to list of form params.
      * @param input
      * @return
      */
-    public static LinkedHashMap<String, String> parseQueryString(String input){
-    	LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
+	public static List<BodyFormWidget.BodyFormValue> bodyToListValues(String input){
+		List<BodyFormWidget.BodyFormValue> result = new ArrayList<BodyFormWidget.BodyFormValue>();
+		if( input == null ){
+    		return result;
+    	}
+		String[] dataList = input.split("[\r\n]");
+		int len = dataList.length;
+		for(int i = 0; i < len; i++){
+			result.addAll(parseBodyData(dataList[i]));
+		}
+		return result;
+	}
+	/**
+	 * Parse application/x-www-form-urlencoded form entity body to {@link BodyFormWidget.BodyFormValue} object
+	 * @param data
+	 * @return
+	 */
+	public static List<BodyFormWidget.BodyFormValue> parseBodyData(String input){
+		List<BodyFormWidget.BodyFormValue> result = new ArrayList<BodyFormWidget.BodyFormValue>();
     	/**
     	 * Chrome inspector has FormData output like:
     	 * key:value
@@ -124,66 +117,47 @@ public class RequestDataFormatter {
     	if( !htmlInputCheck.test(input) ){
 	    	RegExp r = RegExp.compile("^([^\\:]{1,}):(.*)$", "gm");
 	    	input = r.replace(input, "$1=$2&");
-//	    	Log.debug(input);
 	    	if(input.endsWith("&")){
 	    		input = input.substring(0, input.length()-1);
 	    	}
     	}
-//    	Log.debug(input);
         String[] list = input.split("&");
         for( String param : list ){
             String[] _tmp = param.split("=",2);
-            
-//            Log.debug("parsed: key="+_tmp[0]+", value="+_tmp[1]);
             if( _tmp.length != 2 ){
             	continue;
             }
             
             try{
-            	String key = URL.decodeQueryString(_tmp[0].trim());
+            	String name = URL.decodeQueryString(_tmp[0].trim());
                 String value = URL.decodeQueryString(_tmp[1].trim());
-                result.put(key, value);
+                result.add(new BodyFormWidget.BodyFormValue(name, value));
             } catch(Exception e){}
         }
-
         return result;
-    }
-
-    @SuppressWarnings("javadoc")
-	public static LinkedHashMap<String, String> parseQueryString(String[] input){
-    	LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
-        for (String dataLine : input) {
-            String[] _tmp = dataLine.split("[=|\r\n]", 2);
-            if (_tmp.length == 2) {
-                try{
-                	String key = URL.decodeQueryString(_tmp[0].trim());
-                    String value = URL.decodeQueryString(_tmp[1].trim());
-                    result.put(key, value);
-                } catch(Exception e){}
-            }
-        }
-        return result;
-    }
+	}
+    
     /**
-     * Parse raw body data to decoded entiti body string for application/x-www-form-urlencoded encoding.
+     * Parse raw body data to decoded entity body string for application/x-www-form-urlencoded encoding.
      * @param data
      * @return
      */
     public static String parseUrlencodedEntiti(String data){
     	if( data == null || data.equals("") ) return "";
     	
-    	LinkedHashMap<String, String> list = parseQueryString(data.split("&"));
-    	String result = "";
-    	Set<String> set = list.keySet();
-		Iterator<String> it = set.iterator();
-		while(it.hasNext()){
-            String key = it.next();
-            String value = list.get(key);
-            
+    	List<BodyFormWidget.BodyFormValue> list = new ArrayList<BodyFormWidget.BodyFormValue>(); 
+    	String[] spl = data.split("&");
+    	int len = spl.length;
+		for(int i = 0; i < len; i++){
+			list.addAll(parseBodyData(spl[i]));
+		}
+		String result = "";
+		for(BodyFormWidget.BodyFormValue item : list){
+			String key = item.getName();
+            String value = item.getValue();
             if( !result.isEmpty() ){
                 result += "&";
             }
-            
             if( !(key.trim().equals("") && value.trim().equals("")) ){
             	result += URL.decodeQueryString(key.trim());
             	result += "=";
@@ -192,5 +166,4 @@ public class RequestDataFormatter {
 		}
 		return result;
     }
-    
 }

@@ -1,9 +1,7 @@
 package com.restclient.client.widgets;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -20,7 +18,46 @@ import com.restclient.client.event.BodyFormRowRemovedEvent;
 import com.restclient.client.request.RequestDataFormatter;
 
 public class BodyFormWidget extends Composite {
-
+	
+	/**
+	 * Class representing single row from body form.
+	 * @author Paweł Psztyć
+	 *
+	 */
+	public static class BodyFormValue {
+		private String name;
+		private String value;
+		
+		public BodyFormValue(String name, String value){
+			this.name = name;
+			this.value = value;
+		}
+		/**
+		 * @return BODY parameter name
+		 */
+		public String getName() {
+			return name;
+		}
+		/**
+		 * @param name BODY parameter name
+		 */
+		public void setName(String name) {
+			this.name = name;
+		}
+		/**
+		 * @return BODY field value
+		 */
+		public String getValue() {
+			return value;
+		}
+		/**
+		 * @param BODY field value
+		 */
+		public void setValue(String value) {
+			this.value = value;
+		}
+	}
+	
 	interface Binder extends UiBinder<Widget, BodyFormWidget> {
 	}
 
@@ -76,16 +113,15 @@ public class BodyFormWidget extends Composite {
 		}
 	}
 
-	public void setBodyList(LinkedHashMap<String, String> list, boolean fireEvents) {
+	public void setBodyList(List<BodyFormValue> list, boolean fireEvents) {
 		for( BodyFormRow row : body ){
 			row.removeFromParent();
 		}
 		body = new ArrayList<BodyFormRow>();
-		if( list.size() > 0 ){
-			Set<String> set = list.keySet();
-			for( String key : set ){
-				String value = list.get(key);
-				appendRow(key, value, false);
+		if(list != null && list.size() > 0 ){
+			for(BodyFormValue item : list){
+				if(item == null) continue;
+				appendRow(item.getName(), item.getValue(), false);
 			}
 		} else {
 			appendRow(null, null, false);
@@ -95,12 +131,12 @@ public class BodyFormWidget extends Composite {
 			eventBus.fireEventFromSource(e, BodyFormWidget.class);
 		}
 	}
-	public LinkedHashMap<String, String> getBodyList(){
-		LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
+	public List<BodyFormValue> getBodyList(){
+		List<BodyFormValue> result = new ArrayList<BodyFormWidget.BodyFormValue>();
 		int size = body.size();
 		for( int i = 0; i < size; i++ ){
 			BodyFormRow item = body.get(i);
-			result.put(item.getName(), item.getValue());
+			result.add( new BodyFormValue(item.getName(), item.getValue()));
 		}
 		return result;
 	}

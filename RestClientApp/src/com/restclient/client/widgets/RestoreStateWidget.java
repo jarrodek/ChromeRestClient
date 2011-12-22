@@ -16,6 +16,8 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -34,6 +36,7 @@ import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
@@ -52,12 +55,15 @@ public class RestoreStateWidget extends Composite {
 	
 	@UiField(provided=true) CellTable<RestForm> table;
 	@UiField(provided=true) SimplePager pager;
+	@UiField HTMLPanel tableContainer;
 	
 	private ListDataProvider<RestForm> provider;
 	private SelectionModel<RestForm> selectionModel = null;
 	private EventBus eventBus;
 	
 	public RestoreStateWidget(EventBus eventBus) {
+		
+		
 		this.eventBus = eventBus;
 		SimplePager.Resources pagerResources = GWT.create(SimplePager.Resources.class);
 		provider = new ListDataProvider<RestForm>();
@@ -83,6 +89,14 @@ public class RestoreStateWidget extends Composite {
 			@Override
 			public void onChange(DatabasesLoadedEvent event) {
 				getDataAndSetTable();
+			}
+		});
+		
+		Window.addResizeHandler(new ResizeHandler() {
+			
+			@Override
+			public void onResize(ResizeEvent event) {
+				
 			}
 		});
 		
@@ -204,7 +218,7 @@ public class RestoreStateWidget extends Composite {
 		});
 
 		table.addColumn(urlColumn, "URL");
-		table.setColumnWidth(urlColumn, 230, Unit.PX);
+		table.setColumnWidth(urlColumn, 40, Unit.PCT);
 
 		// time
 		DateTimeFormat format = DateTimeFormat

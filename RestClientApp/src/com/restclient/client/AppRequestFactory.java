@@ -1,10 +1,10 @@
 package com.restclient.client;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -24,15 +24,17 @@ import com.google.gwt.xhr2.client.LoadStartHandler;
 import com.google.gwt.xhr2.client.ProgressEvent;
 import com.google.gwt.xhr2.client.ProgressHandler;
 import com.google.gwt.xhr2.client.RequestBuilder;
+import com.google.gwt.xhr2.client.RequestHeader;
 import com.google.gwt.xhr2.client.Response;
 import com.google.gwt.xhr2.client.TimeoutHandler;
 import com.google.gwt.xhr2.client.UploadLoadHandler;
 import com.restclient.client.event.RequestEndEvent;
-import com.restclient.client.event.RequestUiChangeEvent;
 import com.restclient.client.event.RequestStartEvent;
+import com.restclient.client.event.RequestUiChangeEvent;
 import com.restclient.client.request.RequestDataFormatter;
 import com.restclient.client.request.RequestParameters;
 import com.restclient.client.storage.FilesObject;
+import com.restclient.client.widgets.BodyFormWidget;
 
 @SuppressWarnings("javadoc")
 public class AppRequestFactory {
@@ -135,7 +137,7 @@ public class AppRequestFactory {
 		String data = RequestParameters.getData();
 		String requestUrl = RequestParameters.getUrl();
 		List<FilesObject> files = RequestParameters.getFilesList();
-		LinkedHashMap<String, String> headers = RequestParameters.getHeaders();
+		List<RequestHeader> headers = RequestParameters.getHeaders();
 		String enc = RequestParameters.getFormEncoding();
 		FormData fd = null;
 		boolean isEmptyFormData = true;
@@ -183,14 +185,12 @@ public class AppRequestFactory {
 			}
 			
 			if (useFormData) {
-				LinkedHashMap<String, String> map = RequestDataFormatter
-						.parseDataToHashMap(data);
+				List<BodyFormWidget.BodyFormValue> map = RequestDataFormatter
+						.bodyToListValues(data);
 				if (map.size() > 0) {
-					Set<String> keys = map.keySet();
-					Iterator<String> it = keys.iterator();
-					while (it.hasNext()) {
-						String key = it.next();
-						String value = map.get(key);
+					for(BodyFormWidget.BodyFormValue item : map){
+						String key = item.getName();
+						String value = item.getValue();
 						fd.append(key, value);
 						isEmptyFormData = false;
 					}
@@ -240,23 +240,23 @@ public class AppRequestFactory {
 			
 			if (!hasFile) {
 				if (headers == null) {
-					headers = new LinkedHashMap<String, String>();
+					headers = new ArrayList<RequestHeader>();
 				}
 				
 				//check if headers list already contains content-type header.
 				//if not set one from form.
 				boolean hasContentTypeHeader = false;
-				Iterator<String> it = headers.keySet().iterator();
-				while(it.hasNext()){
-					String key = it.next();
+				for(RequestHeader item : headers){
+					String key = item.getName();
 					if(key.toLowerCase().equals("content-type")){
-						enc = headers.get(key);
+						enc = item.getValue();
 						hasContentTypeHeader = true;
 						break;
 					}
 				}
+				
 				if(!hasContentTypeHeader){
-					headers.put("Content-Type", enc);
+					headers.add(new RequestHeader("Content-Type", enc));
 				}
 				if( RestApp.isDebug() ){
 					Log.debug("Add \"Content-Type\" header to headers list with value="+enc);
@@ -265,9 +265,17 @@ public class AppRequestFactory {
 		}
 
 		if (hasFile) {
-			// remove Content-Type header for file upload.
-			if (headers.containsKey("Content-Type")) {
-				headers.remove("Content-Type");
+			Collections.sort(headers, new RequestHeader.HeadersComparator());
+			RequestHeader found = null;
+			for(RequestHeader item : headers){
+				if(item.getName().toLowerCase().equals("content-type")){
+					found = item;
+					break;
+				}
+			}
+			
+			if(found != null){
+				headers.remove(found);
 				if( RestApp.isDebug() ){
 					Log.debug("Remove \"Content-Type\" header in order to handle files.");
 				}
@@ -276,14 +284,10 @@ public class AppRequestFactory {
 
 		if (headers != null) {
 			builder.setHeaders(headers);
-			
 			if( RestApp.isDebug() ){
 				Log.debug("Set request headers:");
-				Iterator<String> it = headers.keySet().iterator();
-				while( it.hasNext() ){
-					String key = it.next();
-					String value = headers.get(key);
-					Log.debug(key+": "+value);
+				for(RequestHeader item : headers){
+					Log.debug(item.getName()+": "+item.getValue());
 				}
 			}
 		}

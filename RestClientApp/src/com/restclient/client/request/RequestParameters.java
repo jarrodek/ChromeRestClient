@@ -1,7 +1,6 @@
 package com.restclient.client.request;
 
-import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -16,6 +15,7 @@ import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.ClosingEvent;
 import com.google.gwt.user.client.Window.ClosingHandler;
+import com.google.gwt.xhr2.client.RequestHeader;
 import com.restclient.client.RequestHistoryItem;
 import com.restclient.client.RestApp;
 import com.restclient.client.Utils;
@@ -48,7 +48,7 @@ public class RequestParameters {
 	/**
 	 * Headers to send;
 	 */
-	private LinkedHashMap<String, String> headers = null;
+	private List<RequestHeader> headers = null;
 	/**
 	 * Request method name. Default it's always GET
 	 */
@@ -115,15 +115,13 @@ public class RequestParameters {
 		});
 		HeadersChangeEvent.register(eb, new HeadersChangeEvent.Handler() {
 			@Override
-			public void onChange(LinkedHashMap<String, String> headers, Object source) {
+			public void onChange(List<RequestHeader> headers, Object source) {
 				instance.headers = headers;
 				if( RestApp.isDebug() ){
 					Log.debug( "Change in headers list. Current set:" );
-					Iterator<String> it = headers.keySet().iterator();
-					while(it.hasNext()){
-						String key = it.next();
-						String value = headers.get(key);
-						Log.debug( key + ": " + value );
+					
+					for( RequestHeader header : headers){
+						Log.debug( header.getName() + ": " + header.getValue() );
 					}
 				}
 			}
@@ -201,13 +199,11 @@ public class RequestParameters {
 		data.put("formEncoding", new JSONString(this.formEncoding));
 		JSONArray headersArray = new JSONArray();
 		if (this.headers != null) {
-			Set<String> keys = this.headers.keySet();
-			Iterator<String> it = keys.iterator();
-			while (it.hasNext()) {
-				String k = it.next();
-				JSONObject header = new JSONObject();
-				header.put(k, new JSONString(this.headers.get(k)));
-				headersArray.set(headersArray.size(), header);
+			for( RequestHeader header : headers){
+				if(header == null) continue;
+				JSONObject headerObject = new JSONObject();
+				headerObject.put(header.getName(), new JSONString(header.getValue()));
+				headersArray.set(headersArray.size(), headerObject);
 			}
 		}
 		data.put("headers", headersArray);
@@ -244,9 +240,9 @@ public class RequestParameters {
 		ins.formEncoding = item.getFormEncoding();
 		ins.postData = item.getPostData();
 		ins.method = item.getMethod();
-		LinkedHashMap<String, String> headersValue = item.getHeaders();
+		List<RequestHeader> headersValue = item.getHeaders();
 		if( headersValue == null ){
-			headersValue = new LinkedHashMap<String, String>();
+			headersValue = new ArrayList<RequestHeader>();
 		}
 		ins.headers = headersValue;
 		//
@@ -311,7 +307,7 @@ public class RequestParameters {
 
 		JSONArray headersArray = obj.get("headers").isArray();
 		if (headersArray != null) {
-			LinkedHashMap<String, String> headers = new LinkedHashMap<String, String>();
+			List<RequestHeader> headers = new ArrayList<RequestHeader>();
 			int cnt = headersArray.size();
 			for (int i = 0; i < cnt; i++) {
 				JSONValue _tmp = headersArray.get(i);
@@ -331,7 +327,7 @@ public class RequestParameters {
 					}
 					JSONString _headerValueJS = headerValueJs.isString();
 					String headerValue = _headerValueJS.stringValue();
-					headers.put(headerName, headerValue);
+					headers.add(new RequestHeader(headerName, headerValue));
 				}
 			}
 			ins.headers = headers;
@@ -428,12 +424,9 @@ public class RequestParameters {
 	public static void addHeader(String key, String value) {
 		RequestParameters ins = getInstance();
 		if (ins.headers == null) {
-			ins.headers = new LinkedHashMap<String, String>();
+			ins.headers = new ArrayList<RequestHeader>();
 		}
-		ins.headers.put(key, value);
-		// HeadersChangedEvent event = new HeadersChangedEvent(this.headers);
-		// impl.fireEvent(event);
-		// eventBus.fireEventFromSource(event, RequestParameters.class);
+		ins.headers.add(new RequestHeader(key, value));
 	}
 
 	/**
@@ -443,7 +436,7 @@ public class RequestParameters {
 	 *            new headers map.
 	 * @param notifyChanges 
 	 */
-	public void setHeaders(LinkedHashMap<String, String> map,
+	public void setHeaders(List<RequestHeader> map,
 			boolean notifyChanges) {
 		RequestParameters ins = getInstance();
 		ins.headers = map;
@@ -501,7 +494,7 @@ public class RequestParameters {
 	/**
 	 * @return
 	 */
-	public static LinkedHashMap<String, String> getHeaders() {
+	public static List<RequestHeader> getHeaders() {
 		return getInstance().headers;
 	}
 
@@ -513,7 +506,7 @@ public class RequestParameters {
 		ins.requestUrl = null;
 		ins.postData = null;
 		ins.method = "GET"; // default
-		ins.headers = new LinkedHashMap<String, String>();
+		ins.headers = new ArrayList<RequestHeader>();
 		ins.formEncoding = "application/x-www-form-urlencoded";
 	}
 

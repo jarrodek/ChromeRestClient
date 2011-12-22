@@ -1,6 +1,6 @@
 package com.restclient.client.widgets;
 
-import java.util.LinkedHashMap;
+import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -23,6 +23,7 @@ import com.restclient.client.event.BodyTabOpenEvent;
 import com.restclient.client.request.RequestDataFormatter;
 import com.restclient.client.request.RequestParameters;
 import com.restclient.client.request.ViewParameters;
+import com.restclient.client.widgets.BodyFormWidget.BodyFormValue;
 
 public class BodyInputWidget extends Composite {
 
@@ -66,7 +67,7 @@ public class BodyInputWidget extends Composite {
 			@Override
 			public void onOpen(int tabPosition, Object source) {
 				//
-				// Change from localstorage saved state
+				// Change from local storage saved state
 				//
 				if( source != null && source.equals(ViewParameters.class) ){
 					tabPanel.selectTab(tabPosition);
@@ -77,16 +78,14 @@ public class BodyInputWidget extends Composite {
 		tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
 			@Override
 			public void onSelection(SelectionEvent<Integer> event) {
-				BodyInputWidget.this.eventBus.fireEvent( new BodyTabOpenEvent(event.getSelectedItem()) );
+				BodyInputWidget.this.eventBus.fireEvent(new BodyTabOpenEvent(event.getSelectedItem()));
 			}
 		});
 		rawInput.addValueChangeHandler(new ValueChangeHandler<String>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
-				
 				String currentValue = event.getValue();
-				
-				LinkedHashMap<String, String> data = RequestDataFormatter.parseQueryString( currentValue );
+				List<BodyFormValue> data = RequestDataFormatter.parseBodyData( currentValue );
 				form.setBodyList(data, false);
 				BodyInputWidget.this.eventBus.fireEventFromSource(new BodyChangeEvent( currentValue ), BodyInputWidget.this);
 			}
@@ -94,7 +93,7 @@ public class BodyInputWidget extends Composite {
 		BodyFormRowChangeEvent.register(eventBus, new BodyFormRowChangeEvent.Handler() {
 			@Override
 			public void onChange(BodyFormRow row, Object source) {
-				LinkedHashMap<String, String> list = form.getBodyList();
+				List<BodyFormValue> list = form.getBodyList();
 				String data = RequestDataFormatter.parseData(list);
 				rawInput.setValue(data);
 				BodyChangeEvent e = new BodyChangeEvent(data);
@@ -104,7 +103,7 @@ public class BodyInputWidget extends Composite {
 		BodyFormRowRemovedEvent.register(eventBus, new BodyFormRowRemovedEvent.Handler() {
 			@Override
 			public void onRemove(BodyFormRow row, Object source) {
-				LinkedHashMap<String, String> list = form.getBodyList();
+				List<BodyFormValue> list = form.getBodyList();
 				String data = RequestDataFormatter.parseData(list);
 				rawInput.setValue(data);
 			}
@@ -114,7 +113,7 @@ public class BodyInputWidget extends Composite {
 			public void onChange(String body, Object source) {
 				if( source != null && source.equals(RequestParameters.class) ){
 					rawInput.setValue( body );
-					LinkedHashMap<String, String> list = RequestDataFormatter.parseDataToHashMap(body);
+					List<BodyFormValue> list = RequestDataFormatter.parseBodyData(body);
 					form.setBodyList(list, false);
 				}
 			}

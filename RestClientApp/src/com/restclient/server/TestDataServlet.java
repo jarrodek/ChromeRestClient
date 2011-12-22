@@ -3,9 +3,9 @@ package com.restclient.server;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.PrintWriter;
 import java.util.Date;
-import java.util.List;
+import java.util.Enumeration;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -13,12 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.appengine.repackaged.org.json.JSONException;
-import com.google.appengine.repackaged.org.json.JSONObject;
-
 public class TestDataServlet extends HttpServlet {
-
-	private Object monitor = new Object();
 
 	/**
 	 * 
@@ -41,35 +36,34 @@ public class TestDataServlet extends HttpServlet {
 			resp.addHeader("Location", "/RestClientApp.html");
 			resp.setStatus(307);
 		} else if (payload.equals("json")) {
-			JSONObject resp_obj = new JSONObject();
-			List<String> testArray = new ArrayList<String>();
-			testArray.add("apple");
-			testArray.add("banana");
-			testArray.add("orange");
-			testArray.add("lemon");
-			testArray.add("grapes");
-			String[] arr = new String[3];
-			arr[0] = "string1";
-			arr[1] = "string2";
-			arr[2] = "string3";
-			try {
-				
-				resp_obj.put("fruits", testArray);
-				resp_obj.put("ok", true);
-				resp_obj.put("count", 5);
-				resp_obj.put("array", arr);
-				resp_obj.put("nullValue", "null");
-				resp_obj.put("htmlvalue", "<a href=\"#\">test link</a>");
-				resp_obj.append("aaa", null);
-				resp_obj.put("long", "18014398509481984419");
-				
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+//			JSONObject resp_obj = new JSONObject();
+//			List<String> testArray = new ArrayList<String>();
+//			testArray.add("apple");
+//			testArray.add("banana");
+//			testArray.add("orange");
+//			testArray.add("lemon");
+//			testArray.add("grapes");
+//			String[] arr = new String[3];
+//			arr[0] = "string1";
+//			arr[1] = "string2";
+//			arr[2] = "string3";
+//			try {
+//				
+//				resp_obj.put("fruits", testArray);
+//				resp_obj.put("ok", true);
+//				resp_obj.put("count", 5);
+//				resp_obj.put("array", arr);
+//				resp_obj.put("nullValue", "null");
+//				resp_obj.put("htmlvalue", "<a href=\"#\">test link</a>");
+//				resp_obj.append("aaa", null);
+//				resp_obj.put("long", "18014398509481984419");
+//				
+//			} catch (JSONException e) {
+//				e.printStackTrace();
+//			}
 			resp.setContentType("application/json");
 			resp.setStatus(200);
-			resp.getWriter().println(resp_obj.toString());
+//			resp.getWriter().println(resp_obj.toString());
 		} else if (payload.equals("xml")) {
 			String file = req.getParameter("f");
 			if (file == null || file.equals("")) {
@@ -145,15 +139,15 @@ public class TestDataServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-
-		synchronized (monitor) {
-			try {
-				monitor.wait(2000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+		PrintWriter writer = resp.getWriter();
+		@SuppressWarnings("unchecked")
+		Enumeration<String> names = req.getParameterNames();
+		writer.println("=====PARAMS====");
+		while(names.hasMoreElements()){
+			String key = names.nextElement();
+			String value = req.getParameter(key);
+			writer.println("key="+key+", value="+value);
 		}
-
-		resp.getWriter().println("OK");
+		writer.println("===============");
 	}
 }

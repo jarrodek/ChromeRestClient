@@ -24,7 +24,7 @@
 				<g:Button text="Add row" ui:field="addRow" title="Add new row to form"></g:Button>
 			</g:HTMLPanel>
 			<div class="{style.dialog-buttons}">
-				<div style="{style.additionalButtons}">
+				<div class="{style.additionalButtons}">
 					<g:Button styleName="{style.button}" ui:field="decode">Decode all values</g:Button>
 					<g:Button styleName="{style.button}" ui:field="encode">Encode all values</g:Button>
 				</div>

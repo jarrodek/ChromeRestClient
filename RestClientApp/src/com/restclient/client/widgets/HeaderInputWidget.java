@@ -1,6 +1,6 @@
 package com.restclient.client.widgets;
 
-import java.util.LinkedHashMap;
+import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.xhr2.client.RequestHeader;
 import com.restclient.client.event.HeaderChangeEvent;
 import com.restclient.client.event.HeaderRowRemovedEvent;
 import com.restclient.client.event.HeadersChangeEvent;
@@ -85,7 +86,7 @@ public class HeaderInputWidget extends Composite {
 		rawInput.addValueChangeHandler(new ValueChangeHandler<String>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
-				LinkedHashMap<String, String> data = RequestDataFormatter.parseHeaders( event.getValue() );
+				List<RequestHeader> data = RequestDataFormatter.parseHeaders( event.getValue() );
 				form.setHeadersList(data, false);
 				HeadersChangeEvent e = new HeadersChangeEvent(data);
 				HeaderInputWidget.this.eventBus.fireEventFromSource(e, HeaderInputWidget.class);
@@ -94,7 +95,7 @@ public class HeaderInputWidget extends Composite {
 		HeaderChangeEvent.register(eventBus, new HeaderChangeEvent.Handler() {
 			@Override
 			public void onChange(HeaderFormRow row, Object source) {
-				LinkedHashMap<String, String> list = form.getHeadersList();
+				List<RequestHeader> list = form.getHeaders();
 				rawInput.setValue( RequestDataFormatter.headersToString(list) );
 				HeadersChangeEvent e = new HeadersChangeEvent(list);
 				HeaderInputWidget.this.eventBus.fireEventFromSource(e, HeaderInputWidget.class);
@@ -103,13 +104,13 @@ public class HeaderInputWidget extends Composite {
 		HeaderRowRemovedEvent.register(eventBus, new HeaderRowRemovedEvent.Handler() {			
 			@Override
 			public void onRemove(HeaderFormRow row, Object source) {
-				LinkedHashMap<String, String> list = form.getHeadersList();
+				List<RequestHeader> list = form.getHeaders();
 				rawInput.setValue( RequestDataFormatter.headersToString(list) );
 			}
 		});
 		HeadersChangeEvent.register(eventBus, new HeadersChangeEvent.Handler() {
 			@Override
-			public void onChange(LinkedHashMap<String, String> headers, Object source) {
+			public void onChange(List<RequestHeader> headers, Object source) {
 				if( source != null && source.equals(RequestParameters.class) ){
 					rawInput.setValue( RequestDataFormatter.headersToString(headers) );
 					form.setHeadersList(headers, false);

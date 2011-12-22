@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.json.client.JSONArray;
@@ -15,6 +12,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.storage.client.Storage;
+import com.google.gwt.xhr2.client.RequestHeader;
 import com.restclient.client.request.RequestParameters;
 
 /**
@@ -197,21 +195,26 @@ public class RequestHistory {
 		if(!source.getPostData().equals( item.getPostData() )){
 			return false;
 		}
-		LinkedHashMap<String, String> sourceHeaders = source.getHeaders();
-		LinkedHashMap<String, String> itemHeaders = item.getHeaders();
+		List<RequestHeader> sourceHeaders = source.getHeaders();
+		List<RequestHeader> itemHeaders = item.getHeaders();
 //		Log.debug(sourceHeaders.size()+" : "+itemHeaders.size());
 		if( sourceHeaders.size() != itemHeaders.size() ){
 			return false;
 		}
-		Set<String> keys = sourceHeaders.keySet();
-		Iterator<String> keysIt = keys.iterator();
-		while(keysIt.hasNext()){
-			String key = keysIt.next();
-			if(!itemHeaders.containsKey( key )){
-				return false;
+		Collections.sort(sourceHeaders, new RequestHeader.HeadersComparator());
+		Collections.sort(itemHeaders, new RequestHeader.HeadersComparator());
+		
+		for(RequestHeader headerItem : sourceHeaders){
+			String headerName = headerItem.getName();
+			RequestHeader found = null;
+			for(RequestHeader _item : itemHeaders){
+				if(_item.getName().toLowerCase().equals(headerName)){
+					found = _item;
+					break;
+				}
 			}
-			String headerValue = sourceHeaders.get( key );
-			if( !headerValue.equals( itemHeaders.get(key) ) ){
+			if(found == null) return false;
+			if(!found.getValue().equals(headerItem.getValue())){
 				return false;
 			}
 		}

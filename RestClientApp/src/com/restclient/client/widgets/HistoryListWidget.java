@@ -1,8 +1,6 @@
 package com.restclient.client.widgets;
 
 import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -39,6 +37,7 @@ import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.Range;
+import com.google.gwt.xhr2.client.RequestHeader;
 import com.restclient.client.RequestHistory;
 import com.restclient.client.RequestHistoryItem;
 import com.restclient.client.event.HistoryRestoreEvent;
@@ -217,7 +216,7 @@ public class HistoryListWidget extends Composite {
 			sb.appendHtmlConstant("<div class=\"" + rowClass + " " + ( isSelected ? style.descRowOpened() : style.descRow() ) + "\" data-for=\""+itemKey+"\">");
 			
 			String enc = value.getFormEncoding();
-			LinkedHashMap<String, String> headers = value.getHeaders();
+			List<RequestHeader> headers = value.getHeaders();
 			String post = value.getPostData();
 			if(post == null){
 				post = "";
@@ -232,10 +231,14 @@ public class HistoryListWidget extends Composite {
 			SafeHtml postCell = TEMPLATE.div(style.bodyCell() + " " + cellClass, SafeHtmlUtils.fromString(post));
 			SafeHtmlBuilder headersBuilder = new SafeHtmlBuilder();
 			int headersMin = Math.min(headers.size(), 4);
-			Iterator<String> it = headers.keySet().iterator();
+			
+			
+			
 			for( int i = 0; i<headersMin; i++ ){
-				String keaderKey = it.next();
-				String headerValue = headers.get(keaderKey);
+				RequestHeader item = headers.get(i);
+				String keaderKey = item.getName();
+				String headerValue = item.getValue();
+				
 				headersBuilder.appendHtmlConstant("<span class=\"" + style.headerInnerRow() + "\">");
 				SafeHtml headersHtml = SafeHtmlUtils.fromString( keaderKey + ": "+ headerValue );
 				headersBuilder.append(headersHtml);

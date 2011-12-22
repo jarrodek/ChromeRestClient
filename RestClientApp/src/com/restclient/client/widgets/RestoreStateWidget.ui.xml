@@ -13,9 +13,10 @@
 			-moz-box-align: center;
 			-moz-box-orient: horizontal;
 		}
+		.mainTable{table-layout: fixed;}
 	</ui:style>
-	<g:HTMLPanel>
-		<c:CellTable width="100%" ui:field="table" pageSize="12"></c:CellTable>
+	<g:HTMLPanel ui:field="tableContainer">
+		<c:CellTable addStyleNames="{style.mainTable}" width="100%" ui:field="table" pageSize="12"></c:CellTable>
 		<div class="{style.pager}">
 			<c:SimplePager ui:field="pager"/>
 		</div>

@@ -1,11 +1,12 @@
 package com.restclient.client.event;
 
-import java.util.LinkedHashMap;
+import java.util.List;
 
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.xhr2.client.RequestHeader;
 
 /**
  * Change in headers input form
@@ -29,12 +30,12 @@ public class HeadersChangeEvent extends GwtEvent<HeadersChangeEvent.Handler> {
 	 * Handles {@link HeadersChangeEvent}.
 	 */
 	public interface Handler extends EventHandler {
-		void onChange(LinkedHashMap<String, String> headers, Object source);
+		void onChange(List<RequestHeader> headers, Object source);
 	}
 
-	private final LinkedHashMap<String, String> headers;
+	private final List<RequestHeader> headers;
 
-	public HeadersChangeEvent(LinkedHashMap<String, String> headers) {
+	public HeadersChangeEvent(List<RequestHeader> headers) {
 		this.headers = headers;
 	}
 

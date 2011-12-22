@@ -258,7 +258,7 @@ public class ResponseWidget extends Composite {
 				continue;
 			}
 			
-			final HeaderLine line = new HeaderLine(header);
+			final ResponseHeaderLine line = new ResponseHeaderLine(header);
 			headersPanel.add(line);
 			
 			RestApp.HEADERS_SERVICE.getHeader(header.getName(), new ListCallback<HeaderRow>() {

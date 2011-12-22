@@ -64,7 +64,7 @@ public class JSONViewer extends Composite {
 				String parsedData = "<div class=\""+style.prettyPrint()+"\">";
 				parsedData += html;
 				parsedData += "</div>";
-				result.setHTML(html);
+				result.setHTML(parsedData);
 				jsonPanel.add(this);
 			}
 		}
