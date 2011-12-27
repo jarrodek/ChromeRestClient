@@ -71,7 +71,7 @@ public abstract class ShortcutHandlers {
 			if(item.isCtrl()){
 				hasCtrl = true;
 			}
-			if(item.isAlt()){
+			if(item.isShift()){
 				hasShift = true;
 			}
 			codes.add(item.getCharCode());
@@ -193,15 +193,26 @@ public abstract class ShortcutHandlers {
 				final boolean shift = event.getShiftKey();
 				final boolean alt = event.getAltKey();
 				
-				if( !(alt && hasAlt) && !(ctrl && hasCtrl) && !(shift && hasShift) && !codes.contains(keycode) ){
+				if(alt && !hasAlt){
 					return;
 				}
-				handleKeycode(keycode, alt, ctrl, shift);
-				preview.cancel();
+				if(ctrl && !hasCtrl){
+					return;
+				}
+				if(shift && !hasShift){
+					return;
+				}
+				if(!codes.contains(keycode)){
+					return;
+				}
+				
+				if(handleKeycode(keycode, alt, ctrl, shift)){
+					preview.cancel();
+				}
 			}
 		});
 	}
-	private static void handleKeycode(final int keyCode, final boolean alt, final boolean ctrl, final boolean shift){
+	private static boolean handleKeycode(final int keyCode, final boolean alt, final boolean ctrl, final boolean shift){
 		Shortcut sc = null;
 		for (Shortcut item : ShortcutHandlers.shortcuts) {
 			if(item.getCharCode() != keyCode) continue;
@@ -211,8 +222,9 @@ public abstract class ShortcutHandlers {
 			sc = item;
 			break;
 		}
-		if(sc == null) return;
+		if(sc == null) return false;
 		handleShortcut(sc);
+		return true;
 	}
 	private static void handleShortcut(final Shortcut sc){
 		ShortcutType type = sc.getType();

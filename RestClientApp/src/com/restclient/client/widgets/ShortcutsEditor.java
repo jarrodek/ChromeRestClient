@@ -105,7 +105,6 @@ public class ShortcutsEditor {
 				sendRequestAltToggle.setValue(item.isAlt());
 				sendRequestShiftToggle.setValue(item.isShift());
 			} else if(type.equals(ShortcutType.HISTORY_TAB)){
-				Log.debug("History set. charIdentifier="+charIdentifier+", cc="+item.getCharCode());
 				historyLetter.setValue(charIdentifier);
 				historyKeyCode = item.getCharCode();
 				historyCtrlToggle.setValue(item.isCtrl());
