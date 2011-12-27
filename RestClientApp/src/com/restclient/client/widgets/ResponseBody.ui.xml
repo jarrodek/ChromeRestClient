@@ -11,6 +11,7 @@
 			font-family: monospace;
 			overflow: auto;
 		}
+		
 	</ui:style>
 	
 	<g:TabLayoutPanel ui:field="bodyPanel" barHeight="2" barUnit="EM" width="100%">

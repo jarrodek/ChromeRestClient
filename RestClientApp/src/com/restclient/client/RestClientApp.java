@@ -156,7 +156,7 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 				ViewParameters.observeChanges(eventBus);
 				
 				AppRequestFactory.initialize(eventBus);
-				RestApp.setupKeyboardShortcuts(eventBus);
+				//RestApp.setupKeyboardShortcuts(eventBus);
 				
 				registerHandlers();
 				

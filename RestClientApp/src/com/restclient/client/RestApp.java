@@ -65,6 +65,8 @@ public class RestApp {
 		 * Key for cookies capture
 		 */
 		public static final String COOKIES_CAPTURE = "COOKIES_CAPTURE";
+		
+		public static final String SHORTCUTS_VALUES = "SHORTCUTS";
 	}
 	
 	
@@ -122,8 +124,10 @@ public class RestApp {
 			}
 		});
 	}
+	
 	/**
 	 * Add keyboard shortcuts handlers.
+	 * @deprecated
 	 * @param eventBus
 	 */
 	public static void setupKeyboardShortcuts(final EventBus eventBus) {
@@ -148,7 +152,11 @@ public class RestApp {
 			}
 		});
 	}
-
+	/**
+	 * @deprecated
+	 * @param keyCode
+	 * @return
+	 */
 	private static boolean isHandlersKeycode(final int keyCode) {
 		switch (keyCode) {
 		case 83:// s
@@ -157,7 +165,11 @@ public class RestApp {
 		}
 		return false;
 	}
-
+	/**
+	 * @deprecated
+	 * @param keyCode
+	 * @param eventBus
+	 */
 	private static void handleKeycode(final int keyCode, final EventBus eventBus) {
 		switch (keyCode) {
 		case 83:// save action

@@ -114,6 +114,10 @@ public class TestDataServlet extends HttpServlet {
 			resp.setContentType("text/plain");
 			resp.setStatus(200);
 			resp.getWriter().println("OK");
+		} else if( payload.equals("oneline") ){
+			resp.setContentType("text/plain");
+			resp.setStatus(200);
+			resp.getWriter().println("OK");
 		}
 
 	}

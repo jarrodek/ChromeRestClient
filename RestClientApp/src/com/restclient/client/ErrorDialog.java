@@ -15,6 +15,7 @@
  */
 package com.restclient.client;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -62,12 +63,11 @@ class ErrorDialog {
 
 			@Override
 			public void publish(LogRecord record) {
-//				if (isLoggable(record)) {
-					errorMessage.setText(record.getMessage());
-					errorDialog.getElement().getStyle().setZIndex(1000);
-					errorDialog.center();
-					errorDialog.show();
-//				}
+				Log.warn(record.getMessage(), record.getThrown());
+				errorMessage.setText(record.getMessage());
+				errorDialog.getElement().getStyle().setZIndex(1000);
+				errorDialog.center();
+				errorDialog.show();
 			}
 		};
 	}

@@ -25,6 +25,7 @@
 		<copy todir="${extension.src}">
 			<fileset dir="war/">
 				<exclude name="**/WEB-INF/" />
+				<exclude name="**/ext/CodeMirror-2.12/" />
 			</fileset>
 		</copy>
 		<exec executable="./manifestversion.sh"/>

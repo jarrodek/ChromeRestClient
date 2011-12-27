@@ -47,5 +47,9 @@
 				For more information read <a href="http://restforchrome.blogspot.com/2011/11/cookies-capture-experimental-feature.html">this blog post</a>.
 			</div>
 		</section>
+		<section class="{style.optionsSection}">
+			<p>Shortcuts</p>
+			<g:Button ui:field="shortCutsButton" text="Edit shortcuts"></g:Button>
+		</section>
 	</g:HTMLPanel>
 </ui:UiBinder> 

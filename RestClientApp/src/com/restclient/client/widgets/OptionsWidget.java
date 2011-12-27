@@ -6,6 +6,7 @@ package com.restclient.client.widgets;
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
@@ -13,6 +14,7 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -151,4 +153,9 @@ public class OptionsWidget extends Composite {
 		});
 	}
 	
+	@UiHandler("shortCutsButton")
+	void onShortcutsButton(ClickEvent e){
+		ShortcutsEditor dialog = new ShortcutsEditor();
+		dialog.show();
+	}
 }

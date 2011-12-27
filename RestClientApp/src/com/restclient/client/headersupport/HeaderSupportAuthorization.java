@@ -3,6 +3,7 @@ package com.restclient.client.headersupport;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.shared.EventBus;
@@ -33,15 +34,21 @@ public class HeaderSupportAuthorization implements HeaderSupport {
 	@Override
 	public void setValue(String value) {
 		this.value = value;
-		try{
-			String basicValue = Base64Coder.decodeString(value);
-			String[] params = basicValue.split(":");
-			if( params.length == 2 ){
-				baseParams = params;
-			}
-		} catch( IllegalArgumentException e ){} //it's not base64 string
 		
-		oauthParams = createOAuthParamsFromHeader(value);
+		if(value.toLowerCase().startsWith("basic")){
+			String basicValue = value.substring(6);
+			try{
+				String encoded = Base64Coder.decodeString(basicValue);
+				String[] params = encoded.split(":");
+				if( params.length == 2 ){
+					baseParams = params;
+				}
+			} catch( IllegalArgumentException e ){
+				Log.warn("IllegalArgumentException "+e.getMessage());
+			}
+		} else {
+			oauthParams = createOAuthParamsFromHeader(value);
+		}
 	}
 	
 	private List<OauthParam> createOAuthParamsFromHeader(String value){

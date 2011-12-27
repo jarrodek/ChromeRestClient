@@ -12,9 +12,11 @@
 			top: 0;
 			bottom: 0;
 		}
+		
 		.clear {
 			clear: both;
 		}
+		
 		.bodyPanel {
 			-webkit-box-align: stretch;
 			-webkit-padding-start: menuWidth;
@@ -32,7 +34,8 @@
 		}
 		
 		.subpageContainer {
-			-webkit-transition: animationsTime opacity, 0.1s padding-left, 0.1s padding-right;
+			-webkit-transition: animationsTime opacity, 0.1s padding-left, 0.1s
+				padding-right;
 			box-sizing: border-box;
 			min-height: 100%;
 			position: absolute;
@@ -61,7 +64,7 @@
 			position: fixed;
 		}
 		
-		.aboutContent{
+		.aboutContent {
 			-webkit-padding-start: 24px;
 			text-align: start;
 			text-shadow: white 0 1px 2px;
@@ -69,16 +72,19 @@
 			margin-top: 17px;
 			padding-bottom: 20px;
 		}
-		.aboutContent > div {
+		
+		.aboutContent>div {
 			margin-bottom: 7px;
 		}
+		
 		.mainNav {
 			-webkit-user-select: none;
 			list-style-type: none;
 			margin: 0;
 			padding: 0;
 		}
-		.navBarItem{
+		
+		.navBarItem {
 			border-bottom: 1px solid transparent;
 			border-top: 1px solid transparent;
 			color: black;
@@ -91,7 +97,8 @@
 			text-shadow: white 0 1px 1px;
 			-webkit-padding-end: 24px;
 		}
-		.menu{
+		
+		.menu {
 			-webkit-border-end: 1px solid #c6c9ce;
 			position: fixed;
 			bottom: 0;
@@ -101,12 +108,14 @@
 			width: menuWidth;
 			z-index: 2;
 		}
+		
 		.mainViewContent {
 			position: relative;
 		}
-		.subpageBackdrop{
-			z-index: 4; 
-			top: 0px; 
+		
+		.subpageBackdrop {
+			z-index: 4;
+			top: 0px;
 			left: menuWidth;
 			-webkit-transition: animationsTime opacity;
 			background-color: rgba(233, 238, 242, .5);
@@ -114,7 +123,8 @@
 			position: fixed;
 			width: 100%;
 		}
-		.donateTitle{
+		
+		.donateTitle {
 			font-weight: bold;
 			font-size: 130%;
 		}
@@ -124,11 +134,16 @@
 		<div class="menu {style.menu}">
 			<h1 class="{style.contentTitle}">Advanced Rest Client</h1>
 			<ul role="tablist" class="{style.mainNav}">
-				<li page="request" class="{style.navBarItem}" role="tab" tabindex="0" aria-selected="true">Current Request</li>
-				<li page="saved" class="{style.navBarItem}" role="tab" tabindex="-1" aria-selected="false">Saved Requests</li>
-				<li page="history" class="{style.navBarItem}" role="tab" tabindex="-1" aria-selected="false">History</li>
-				<li page="options" class="{style.navBarItem}" role="tab" tabindex="-1" aria-selected="false">Options</li>
-				<li page="about" class="{style.navBarItem}" role="tab" tabindex="-1" aria-selected="false">About</li>
+				<li page="request" class="{style.navBarItem}" role="tab"
+					tabindex="0" aria-selected="true">Current Request</li>
+				<li page="saved" class="{style.navBarItem}" role="tab" tabindex="-1"
+					aria-selected="false">Saved Requests</li>
+				<li page="history" class="{style.navBarItem}" role="tab"
+					tabindex="-1" aria-selected="false">History</li>
+				<li page="options" class="{style.navBarItem}" role="tab"
+					tabindex="-1" aria-selected="false">Options</li>
+				<li page="about" class="{style.navBarItem}" role="tab" tabindex="-1"
+					aria-selected="false">About</li>
 			</ul>
 		</div>
 		<g:HTMLPanel ui:field="bodyPanel" styleName="{style.bodyPanel}">
@@ -139,7 +154,8 @@
 					<rc:ResponseWidget ui:field="responseWidget"
 						width="100%"></rc:ResponseWidget>
 				</g:HTMLPanel>
-				<g:HTMLPanel styleName="{style.subpageContainer} {style.restoreWidget} transparent">
+				<g:HTMLPanel
+					styleName="{style.subpageContainer} {style.restoreWidget} transparent">
 					<g:HTMLPanel ui:field="savedPanel" styleName="{style.subpage} hidden">
 						<rc:RestoreStateWidget ui:field="restoreWidget"></rc:RestoreStateWidget>
 					</g:HTMLPanel>
@@ -156,10 +172,13 @@
 								Copyright © 2011 Paweł Psztyć (Poland)
 							</div>
 							<div class="source">
-								Source code at <a href="http://code.google.com/p/chrome-rest-client/">Google Code Hosting</a> under Apache License.
+								Source code at
+								<a href="http://code.google.com/p/chrome-rest-client/">Google Code Hosting</a>
+								under Apache License.
 							</div>
 							<div>
-								Some parts of UI has been taken from Chromium Browsers UI (like menu panel on left).
+								Some parts of UI has been taken from Chromium Browsers UI
+								(like menu panel on left).
 							</div>
 						</section>
 						<section class="{style.aboutContent}">
@@ -169,21 +188,51 @@
 						<section class="{style.aboutContent}">
 							<h3 class="{style.donateTitle}">If you like my work, please donate :)</h3>
 							<p>
-								Did you know that I spent about 1.5 months to write this application?<br/>
-								It's quite a lot of my free time. I would be grateful if You donate my work and give me a reason to write more :)
+								Did you know that I spent about 1.5 months to write this
+								application?
+								<br />
+								It's quite a lot of my free time. I would be grateful if You
+								donate my work and give me a reason to write more :)
 							</p>
 							<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
-								<input type="hidden" name="cmd" value="_s-xclick"/>
-								<input type="hidden" name="hosted_button_id" value="9NA4P36M7C22L"/>
-								<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!"/>
-								<img alt="" border="0" src="https://www.paypalobjects.com/pl_PL/i/scr/pixel.gif" width="1" height="1"/>
+								<input type="hidden" name="cmd" value="_s-xclick" />
+								<input type="hidden" name="hosted_button_id" value="9NA4P36M7C22L" />
+								<input type="image"
+									src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif"
+									border="0" name="submit" alt="PayPal - The safer, easier way to pay online!" />
+								<img alt="" border="0"
+									src="https://www.paypalobjects.com/pl_PL/i/scr/pixel.gif"
+									width="1" height="1" />
 							</form>
 						</section>
 						<section class="{style.aboutContent}">
 							<h3>Changelog</h3>
+							<p>12/27/2011</p>
+							<ul>
+								<li>Fixed "Authorization" header support (restore basic params in wizard)</li>
+								<li>Added shortcuts editor. Now you can define Your own shortcuts for some actions.</li>
+								<li>Updated CodeMirror to version 2.2</li>
+							</ul>
+							<p>12/22/2011</p>
+							<ul>
+								<li>Fixed many headers with same name support</li>
+								<li>
+									Fixed long URL overflow in saved requests page (
+									<a
+										href="http://code.google.com/p/chrome-rest-client/issues/detail?id=32">Issue 32</a>
+									)
+								</li>
+								<li>Fixed BODY form array values (<a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=31">Issue 31</a>)</li>
+							</ul>
 							<p>12/6/2011</p>
 							<ul>
-								<li>Fixed file transport using headers and raw body (instead of file form) <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=28" target="_blank">Issue 28</a></li>
+								<li>
+									Fixed file transport using headers and raw body (instead of
+									file form)
+									<a
+										href="http://code.google.com/p/chrome-rest-client/issues/detail?id=28"
+										target="_blank">Issue 28</a>
+								</li>
 							</ul>
 						</section>
 					</g:HTMLPanel>

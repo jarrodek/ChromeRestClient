@@ -95,6 +95,13 @@ public class AppRequestFactory {
 			Log.debug("Start new request");
 		}
 		
+		String requestUrl = RequestParameters.getUrl();
+		
+		if(requestUrl == null || requestUrl.isEmpty()){
+			Log.warn("You must provide request URL.");
+			return;
+		}
+		
 		if( requestInProgress ){
 			if( RestApp.isDebug() ){
 				Log.warn("Request already in progress. Wait until end.");
@@ -133,9 +140,9 @@ public class AppRequestFactory {
 		if( RestApp.isDebug() ){
 			Log.debug("Prepare variables.");
 		}
+		
 		String method = RequestParameters.getMethod();
 		String data = RequestParameters.getData();
-		String requestUrl = RequestParameters.getUrl();
 		List<FilesObject> files = RequestParameters.getFilesList();
 		List<RequestHeader> headers = RequestParameters.getHeaders();
 		String enc = RequestParameters.getFormEncoding();
