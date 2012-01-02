@@ -1,55 +1,90 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui"
-	xmlns:h5="urn:import:com.restclient.client.html5">
-	<ui:style src="../common.css" type="com.restclient.client.widgets.OptionsWidget.Style">
-		.optionsSection{
-			-webkit-padding-start: 24px;
-			border-bottom: 1px solid #EEE;
-			margin-top: 17px;
-			padding-bottom: 20px;
-		}
-		.optionsWidget{
-			position: relative;
-		}
-		.noLocalStorageLabel{
-			position: fixed;
-			top: 50px;
-			left: 300px;
-			border: 1px red solid;
-			background-color: white;
-			padding: 30px;
-			font-weight: bold;
-		}
-	</ui:style>
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:h5="urn:import:com.restclient.client.html5">
+	<ui:style src="../common.css"
+		type="com.restclient.client.widgets.OptionsWidget.Style">
+			.optionsSection {
+				-webkit-padding-start: 24px;
+				border-bottom: 1px solid #EEE;
+				margin-top: 17px;
+				padding-bottom: 20px;
+			}
+			
+			.optionsWidget {
+				position: relative;
+			}
+			
+			.noLocalStorageLabel {
+				position: fixed;
+				top: 50px;
+				left: 300px;
+				border: 1px red solid;
+				background-color: white;
+				padding: 30px;
+				font-weight: bold;
+			}
+			
+			.historyAmount {
+				display: inline-block;
+			}
+			.jsonHeaderCaption{
+				font-weight:bold;
+			}
+		</ui:style>
 	<g:HTMLPanel ui:field="mainWidget" addStyleNames="{style.optionsWidget}">
 		<h1 class="{style.contentTitle} {style.about}">Advanced configuration and experimental features</h1>
 		<section class="{style.optionsSection}">
 			<p>Debug options</p>
-			<g:CheckBox ui:field="debug" value="false" text="Enable debug messages in console output"></g:CheckBox>
+			<g:CheckBox ui:field="debug" value="false"
+				text="Enable debug messages in console output"></g:CheckBox>
 		</section>
 		<section class="{style.optionsSection}">
 			<p>History enabled</p>
-			<g:CheckBox ui:field="history" value="true" text="Enable requests history list"></g:CheckBox>
-			<div class="{style.hidden}" ui:field="historyAmount">
-				<p>Remember last 
-				<h5:HTML5InputNumber ui:field="historyCount"></h5:HTML5InputNumber> requests
+			<g:CheckBox ui:field="history" value="true"
+				text="Enable requests history list"></g:CheckBox>
+			<div class="{style.hidden} {style.historyAmount}" ui:field="historyAmount">
+				<p>
+					Remember last
+					<h5:HTML5InputNumber ui:field="historyCount"></h5:HTML5InputNumber>
+					requests
 				</p>
 			</div>
 		</section>
 		<section class="{style.optionsSection}">
 			<p>Cookie capture enabled</p>
-			<g:CheckBox ui:field="cookie" value="false" text="Enable cookie capture during request"></g:CheckBox>
-			<br/>
+			<g:CheckBox ui:field="cookie" value="false"
+				text="Enable cookie capture during request"></g:CheckBox>
+			<br />
 			<div class="note">
-				This logs all cookie changes during request. <br/>
-				It is not possible to explicitly read cookies from the request. Chrome API only lets you read cookies from the browser session.<br/>
-				For more information read <a href="http://restforchrome.blogspot.com/2011/11/cookies-capture-experimental-feature.html">this blog post</a>.
+				This logs all cookie changes during request.
+				<br />
+				It is not possible to explicitly read cookies from the request.
+				Chrome API only lets you read cookies from the browser session.
+				<br />
+				For more information read
+				<a
+					href="http://restforchrome.blogspot.com/2011/11/cookies-capture-experimental-feature.html">this blog post</a>
+				.
 			</div>
 		</section>
 		<section class="{style.optionsSection}">
 			<p>Shortcuts</p>
 			<g:Button ui:field="shortCutsButton" text="Edit shortcuts"></g:Button>
+		</section>
+		<section class="{style.optionsSection}">
+			<h3>JSON headers</h3>
+			<p>List of JSON headers recognized by application as JSON data</p>
+			<g:Grid ui:field="jsonHeadersList" width="300">
+				<g:row>
+					<g:customCell styleName="{style.jsonHeaderCaption}">
+						<g:Label>Header name</g:Label>
+					</g:customCell>
+					<g:customCell>
+						<g:HTML>&nbsp;</g:HTML>
+					</g:customCell>
+				</g:row>
+			</g:Grid>
+			<g:Button ui:field="addJSONHeader" text="Add new"></g:Button>
 		</section>
 	</g:HTMLPanel>
 </ui:UiBinder> 

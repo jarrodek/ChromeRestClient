@@ -207,6 +207,10 @@
 						</section>
 						<section class="{style.aboutContent}">
 							<h3>Changelog</h3>
+							<p>1/2/2012</p>
+							<ul>
+								<li>Added JSON headers definitions in options panel. Now user can define custom JSON headers.</li>
+							</ul>
 							<p>12/27/2011</p>
 							<ul>
 								<li>Fixed "Authorization" header support (restore basic params in wizard)</li>

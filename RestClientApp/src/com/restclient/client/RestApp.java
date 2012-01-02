@@ -67,6 +67,10 @@ public class RestApp {
 		public static final String COOKIES_CAPTURE = "COOKIES_CAPTURE";
 		
 		public static final String SHORTCUTS_VALUES = "SHORTCUTS";
+		/**
+		 * Key for JSON headers list.
+		 */
+		public static final String JSON_HEADERS = "JSONHEADERS";
 	}
 	
 	

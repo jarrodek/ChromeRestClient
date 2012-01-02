@@ -26,6 +26,7 @@ import com.google.gwt.xhr2.client.Header;
 import com.google.gwt.xhr2.client.Response;
 import com.restclient.client.CookieCapture;
 import com.restclient.client.RestApp;
+import com.restclient.client.Utils;
 import com.restclient.client.chrome.ChromeCookie;
 import com.restclient.client.event.RequestEndEvent;
 import com.restclient.client.event.RequestStartEvent;
@@ -234,19 +235,26 @@ public class ResponseWidget extends Composite {
 		}
 		
 	}
-	
+	/**
+	 * Check if in response headers is some header defined as JSON header.
+	 * @param headers
+	 * @return
+	 */
 	private boolean isJSONHeader(Header[] headers){
+		final List<String> jsonHeadersDefinitions = Utils.getJSONHeadersList();
 		for (Header header : headers) {
 			if (header == null) {
 				continue;
 			}
-			String name = header.getName();
-			if( name.toLowerCase().equals("content-type") ){
+			String name = header.getName().toLowerCase();
+			if( name.equals("content-type") ){
 				String value = header.getValue().toLowerCase();
-				if( value.contains("application/json") //RFC 4627
-					|| value.contains("text/json") //historical
-						)
-				return true;
+				
+				for(String headerDef : jsonHeadersDefinitions){
+					if(value.contains(headerDef)){
+						return true;
+					}
+				}
 			}
 		}
 		return false;
