@@ -72,8 +72,10 @@ public class RequestHistory {
 		if( stringData == null || stringData.isEmpty() ){
 			return;
 		}
-		
-		JSONValue value = JSONParser.parseLenient(stringData);
+		JSONValue value = null;
+		try{
+			value = JSONParser.parseLenient(stringData);
+		} catch(Exception e){}
 		if (value == null) {
 			return;
 		}
@@ -110,7 +112,11 @@ public class RequestHistory {
 		for (RequestHistoryItem listItem : items){
 			array.set(array.size(), listItem.toJSON());
 		}
-		storage.setItem(HISTORY_LIST_STORAGE_KEY, array.toString());
+		try{
+			storage.setItem(HISTORY_LIST_STORAGE_KEY, array.toString());
+		} catch(Exception e){
+			Log.error("Unable to save history state. ",e);
+		}
 	}
 	
 	/**

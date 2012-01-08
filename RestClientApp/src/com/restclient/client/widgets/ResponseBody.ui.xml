@@ -11,9 +11,7 @@
 			font-family: monospace;
 			overflow: auto;
 		}
-		
 	</ui:style>
-	
 	<g:TabLayoutPanel ui:field="bodyPanel" barHeight="2" barUnit="EM" width="100%">
 		<g:tab>
 			<g:header size='7'>Raw response</g:header>
@@ -24,9 +22,12 @@
 		<g:tab>
 			<g:header>Parsed response</g:header>
 			<g:HTMLPanel width="100%" height="100%" ui:field="parsedPanel">
-				<g:Anchor ui:field="parsedOpen" href="#">Open HTML output in new window</g:Anchor>
+				<g:Anchor ui:field="parsedOpen" href="#">Open output in new window</g:Anchor>
 				<br />
-				<g:TextArea ui:field="bodyArea" width="100%" visibleLines="4" />
+				<span class="CodeMirror">
+					<div class="lines"></div>
+					<pre ui:field="parsedBody" class="cm-s-default"></pre>
+				</span>
 				<div>
 					Code highlighting thanks to
 					<a href="http://codemirror.net/">Code Mirror</a>

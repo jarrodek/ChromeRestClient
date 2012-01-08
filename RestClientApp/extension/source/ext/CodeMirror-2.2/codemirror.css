@@ -1,5 +1,5 @@
 .CodeMirror {
-  line-height: 1em;
+/*   line-height: 1em; */
   font-family: monospace;
 }
 
@@ -102,3 +102,4 @@ span.cm-link {text-decoration: underline;}
 
 div.CodeMirror span.CodeMirror-matchingbracket {color: #0f0;}
 div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
+pre.cm-s-default {overflow: auto;}
