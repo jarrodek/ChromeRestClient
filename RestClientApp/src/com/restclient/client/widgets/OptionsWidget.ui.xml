@@ -73,7 +73,7 @@
 		</section>
 		<section class="{style.optionsSection}">
 			<h3>JSON headers</h3>
-			<p>List of JSON headers recognized by application as JSON data</p>
+			<p>List of JSON headers recognized by application</p>
 			<g:Grid ui:field="jsonHeadersList" width="300">
 				<g:row>
 					<g:customCell styleName="{style.jsonHeaderCaption}">

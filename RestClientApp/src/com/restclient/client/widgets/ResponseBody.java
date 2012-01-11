@@ -1,9 +1,12 @@
 package com.restclient.client.widgets;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptException;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.PreElement;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -25,6 +28,8 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.restclient.client.RestApp;
 import com.restclient.client.html5.HTML5Element;
 import com.restclient.client.request.RequestParameters;
+import com.restclient.client.utils.CodeMirrorElement;
+import com.restclient.client.utils.CodeMirrorHelper;
 
 public class ResponseBody extends Composite {
 
@@ -44,13 +49,15 @@ public class ResponseBody extends Composite {
 	private Document xml = null;
 	private boolean showJsonPanel = false;
 	static String codeMirrorParsed = "";
+	private CodeMirrorHelper codeMirrorHelper = null;
+	static final int WORK_CHUNK = 10;
 	
 	interface ResponseBodyUiBinder extends UiBinder<Widget, ResponseBody> {
 	}
 
 	public ResponseBody() {
 		initWidget(uiBinder.createAndBindUi(this));
-		
+		codeMirrorHelper = new CodeMirrorHelper();
 		for (int i = 0; i < bodyPanel.getWidgetCount(); i++) {
 	        final Widget widget = bodyPanel.getWidget(i);
 	        DOM.setStyleAttribute(widget.getElement(), "position", "relative");
@@ -70,8 +77,9 @@ public class ResponseBody extends Composite {
 		if(RestApp.isDebug()){
 			Log.debug("Restore response panel state to initial");
 		}
-		parsedBody.setInnerHTML(null);
+		parsedBody.setInnerText("loading...");
 		codeMirrorParsed = "";
+		codeMirrorHelper.clear();
 		this.isError = false;
 		this.body = "";
 		this.useCodeMirror = false;
@@ -131,11 +139,12 @@ public class ResponseBody extends Composite {
 			if(RestApp.isDebug()){
 				Log.debug("Initialize code mirror...");
 			}
-			loadCodeMirror(body, parsedBody);
+			try{
+			loadCodeMirror(body);
+			} catch(Exception e){}
 			if(RestApp.isDebug()){
 				Log.debug("Parsing anchors in response body...");
 			}
-			parseVisibleAnchors();
 		}
 		
 		if( this.showJsonPanel ){
@@ -169,40 +178,58 @@ public class ResponseBody extends Composite {
 		this.isError = true;
 	}
 	
-	private void parseVisibleAnchors(){
+	
+	private void setResponseLinks(){
 		final String domainAndPath = getRequestDomainAndPath();
-		String domain = domainAndPath;
+		String _domain = domainAndPath;
 		int domainSlashPos = domainAndPath.indexOf("/", domainAndPath.indexOf("://")+3);
 		if(domainSlashPos > 0){
-			domain = domainAndPath.substring(0,domainSlashPos);
+			_domain = domainAndPath.substring(0,domainSlashPos);
 		}
+		final String domain = _domain;
+		final RegExp r = RegExp.compile("<span class=\"cm-attribute\">(href|src)+</span>=<span class=\"cm-string\">[\\&quot;]*([^<\"\\&]+)[\\&quot;]*</span>", "gim");
 		
-		RegExp r = RegExp.compile("<span class=\"cm-attribute\">(href|src)+</span>=<span class=\"cm-string\">\"?([^<\"]+)\"?</span>", "gim");
-		String input = parsedBody.getInnerHTML();
-		MatchResult matcher = null;
-		while((matcher = r.exec(input)) != null){
-			int cnt = matcher.getGroupCount();
-			if(cnt != 3) continue;
-			String wholeLine = matcher.getGroup(0);
-			String attrName = matcher.getGroup(1);
-			String url = matcher.getGroup(2);
-			String fullHref = "";
-			if(url.contains("://")){
-				fullHref = url;
-			} else if(url.startsWith("/")){
-				fullHref = domain + url;
-			} else {
-				fullHref = domainAndPath + url;
+		Scheduler.RepeatingCommand rc = new Scheduler.RepeatingCommand() {
+			@Override
+			public boolean execute() {
+				int loopCount = 0;
+				MatchResult matcher = null;
+				while((matcher = r.exec(codeMirrorParsed)) != null){
+					loopCount++;
+					
+					int cnt = matcher.getGroupCount();
+					if(cnt != 3) continue;
+					String wholeLine = matcher.getGroup(0);
+					String attrName = matcher.getGroup(1);
+					String url = matcher.getGroup(2);
+					String fullHref = "";
+					if(url.contains("://")){
+						fullHref = url;
+					} else if(url.startsWith("/")){
+						fullHref = domain + url;
+					} else {
+						fullHref = domainAndPath + url;
+					}
+					
+					String replacement = "<span class=\"cm-attribute\">";
+					replacement += attrName + "</span>=<span class=\"cm-string\">";
+					replacement += "\"<a target=\"_blank\" href=\""+fullHref+"\">"+url+"</a>\"</span>";
+					
+					codeMirrorParsed = codeMirrorParsed.replace(wholeLine, replacement);
+					if(loopCount >= WORK_CHUNK){
+						return true;
+					}
+				}
+				parsedBody.setInnerHTML(codeMirrorParsed);
+				//clean up
+				codeMirrorParsed = null;
+				codeMirrorHelper.clear();
+				return false;
 			}
-			
-			String replacement = "<span class=\"cm-attribute\">";
-			replacement += attrName + "</span>=<span class=\"cm-string\">";
-			replacement += "\"<a target=\"_blank\" href=\""+fullHref+"\">"+url+"</a>\"</span>";
-			
-			input = input.replace(wholeLine, replacement);
-		}
-		parsedBody.setInnerHTML(input);
+		};
+		Scheduler.get().scheduleIncremental(rc);
 	}
+	
 	
 	private String getRequestDomainAndPath(){
 		String url = RequestParameters.getUrl();
@@ -235,25 +262,50 @@ public class ResponseBody extends Composite {
 		return url;
 	}
 	
-	final native void loadCodeMirror(String text, com.google.gwt.dom.client.Element output)/*-{
-		var htmlEsc = $wnd.CodeMirror.htmlEscape;
-		var callback = $entry(function(string, style, line, chr) {
-			if (string == "\n"){
-				//just new line in document
-				@com.restclient.client.widgets.ResponseBody::codeMirrorParsed += "<br>";
-			} else if (style) {
-				//has parser style
-				@com.restclient.client.widgets.ResponseBody::codeMirrorParsed += "<span class=\"cm-" + htmlEsc(style) + "\">" + htmlEsc(string) + "</span>" 
-			} else {
-				//text node
-	        	@com.restclient.client.widgets.ResponseBody::codeMirrorParsed += htmlEsc(string);
+	public void codeMirrorParseCallback(String str, String style){
+		CodeMirrorElement element = new CodeMirrorElement(str, style);
+		codeMirrorHelper.add(element);
+	}
+	
+	/**
+	 * First, after CodeMirror finish work via RepeatingCommand parse collected elements.
+	 * Next call {@link #setResponseLinks()} to parse anchors.
+	 */
+	void codeMirrorParsedCallback(){
+		Scheduler.RepeatingCommand rc = new Scheduler.RepeatingCommand() {
+			@Override
+			public boolean execute() {
+				Iterator<CodeMirrorElement> it = codeMirrorHelper.iterator();
+				int loopCount = 0;
+				while(it.hasNext()){
+					loopCount++;
+					codeMirrorParsed += it.next().parse();
+					if(loopCount >= WORK_CHUNK){
+						return true;
+					}
+				}
+				setResponseLinks();
+				return false;
 			}
+		};
+		Scheduler.get().scheduleIncremental(rc);
+	}
+	
+	/**
+	 * Load code mirror library.
+	 * @param text
+	 * @throws JavaScriptException
+	 */
+	final native void loadCodeMirror(String text) throws JavaScriptException /*-{
+		var context = this;
+		var clb = $entry(function(a,b) {
+			context.@com.restclient.client.widgets.ResponseBody::codeMirrorParseCallback(Ljava/lang/String;Ljava/lang/String;)(a,b);
 		});
 		var ready = $entry(function() {
-			output.innerHTML = @com.restclient.client.widgets.ResponseBody::codeMirrorParsed;
+			context.@com.restclient.client.widgets.ResponseBody::codeMirrorParsedCallback()();
 		});
 		try{
-			$wnd.CodeMirror.runMode(text, "text/html", callback, ready);
+			$wnd.CodeMirror.runMode(text, "text/html", clb, ready);
 		} catch(e){
 			$wnd.alert("Unable to initialize CodeMirror :( " + e.message);
 		}

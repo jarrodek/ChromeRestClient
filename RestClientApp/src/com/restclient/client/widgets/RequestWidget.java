@@ -53,7 +53,7 @@ import com.restclient.client.event.UrlChangeEvent;
 import com.restclient.client.html5.HTML5Progress;
 import com.restclient.client.request.RequestParameters;
 import com.restclient.client.request.ViewParameters;
-import com.restclient.client.storage.DatabaseSuggestOracle;
+import com.restclient.client.storage.UrlsSuggestOracle;
 /**
  * Request controls.
  * @author jarrod
@@ -93,8 +93,7 @@ public class RequestWidget extends Composite {
 	public RequestWidget(final EventBus eventBus) {
 		this.eventBus = eventBus;
 
-		DatabaseSuggestOracle oracle = new DatabaseSuggestOracle(
-				RestApp.URLS_SERVICE, "URLindex");
+		UrlsSuggestOracle oracle = new UrlsSuggestOracle(RestApp.URLS_SERVICE);
 		suggestionsDisplay = new DefaultSuggestionDisplay();
 		suggestionsDisplay.setAnimationEnabled(true);
 

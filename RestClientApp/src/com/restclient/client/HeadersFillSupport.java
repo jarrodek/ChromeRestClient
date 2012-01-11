@@ -113,7 +113,19 @@ public class HeadersFillSupport implements ClickHandler, FocusHandler {
 		}
 		header = header.toLowerCase();
 		//for here even if not supported by w3c spec will pass to show error dialog dialog
-		return (SUPPORTED.contains(header) || NOT_SUPPORTED_W3C.contains(header) || DATE_TIME_HEADERS.contains( header ) );
+		return (SUPPORTED.contains(header) || isNotSupportedW3C(header) || DATE_TIME_HEADERS.contains(header) );
+	}
+	/**
+	 * Returns true if this header is not allowed to set via XMLHttpRequest by spec.
+	 * @param header
+	 * @return
+	 */
+	public final static boolean isNotSupportedW3C(String header){
+		if( header == null ){
+			return false;
+		}
+		header = header.toLowerCase();
+		return NOT_SUPPORTED_W3C.contains(header);
 	}
 	
 	public HeadersFillSupport(String header, TextBox box){
@@ -122,7 +134,7 @@ public class HeadersFillSupport implements ClickHandler, FocusHandler {
 		}
 		currentHeader = header;
 		textBox = box;
-		isW3CError = NOT_SUPPORTED_W3C.contains( this.currentHeader.toLowerCase() );
+		isW3CError = NOT_SUPPORTED_W3C.contains(this.currentHeader.toLowerCase());
 	}
 	
 	public static void removeSupport(TextBox textBox){
@@ -183,12 +195,13 @@ public class HeadersFillSupport implements ClickHandler, FocusHandler {
 	public void onClick(ClickEvent event) {
 		HeaderSupport helper = null;
 		String head = currentHeader.toLowerCase();
+		
 		if( head.equals("authorization") ){
 			helper = new HeaderSupportAuthorization( eventBus );
-		} else if( NOT_SUPPORTED_W3C.contains( this.currentHeader.toLowerCase() ) ){
+		} else if( NOT_SUPPORTED_W3C.contains(head) ){
 			helper = new W3CSetHeadersError();
-		} else if( DATE_TIME_HEADERS.contains( currentHeader.toLowerCase() ) ){
-			helper = new HeaderSupportDate( this.eventBus );
+		} else if( DATE_TIME_HEADERS.contains(head)){
+			helper = new HeaderSupportDate(this.eventBus);
 		}
 		
 		if(helper == null){
@@ -201,8 +214,9 @@ public class HeadersFillSupport implements ClickHandler, FocusHandler {
 		HeaderSupportSubmitEvent.register(eventBus, new HeaderSupportSubmitEvent.Handler() {
 			@Override
 			public void onSubmit(String value, Object source) {
-				if( source.equals(dialogCompare) )
+				if(source.equals(dialogCompare)){
 					textBox.setValue(value, true);
+				}
 			}
 		});
 		

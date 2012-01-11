@@ -51,11 +51,4 @@ public interface UrlsService extends AppDatabase {
    */
   @Select("SELECT ID, url FROM urls WHERE url LIKE {input} ORDER BY time DESC")
   void getUrls(String input, ListCallback<UrlRow> callback);
-//  /**
-//   * Get count rows for given url.
-//   * @param url url to check
-//   * @param callback callback function
-//   */
-//  @Select("SELECT COUNT(*) FROM urls WHERE url LIKE {url}")
-//  void getCountByUrl(String url, ScalarCallback<Integer> callback);
 }

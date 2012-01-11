@@ -27,7 +27,6 @@ public class Cookies {
 	 * @return true if API is available.
 	 */
 	private static final native boolean isSupported()/*-{
-		$wnd.console.log('Check is cookie api is supported');
 		return !!(chrome && chrome.cookies);
 	}-*/;
 

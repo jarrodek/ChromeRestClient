@@ -269,7 +269,7 @@ public class ResponseWidget extends Composite {
 			final ResponseHeaderLine line = new ResponseHeaderLine(header);
 			headersPanel.add(line);
 			
-			RestApp.HEADERS_SERVICE.getHeader(header.getName(), new ListCallback<HeaderRow>() {
+			RestApp.HEADERS_SERVICE.getHeader(header.getName(), "response" , new ListCallback<HeaderRow>() {
 				@Override
 				public void onFailure(DataServiceException error) {}
 				

@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Class to hold a response from database urls request.
  */
-public class DatabaseHeadersResponse implements DatabaseResponse {
+public class DatabaseRequestResponse<K extends Suggestion> implements DatabaseResponse {
 
 	/**
 	 * Request made by the SuggestBox.
@@ -22,10 +22,10 @@ public class DatabaseHeadersResponse implements DatabaseResponse {
 	/**
 	 * Suggestions returned by the server in response to the request.
 	 */
-	private List<HeaderSuggestion> suggestions = null;
+	private List<K> suggestions = null;
 
-	public DatabaseHeadersResponse(Request req, int dbSuggestionsLimit,
-			List<HeaderSuggestion> suggestions) {
+	public DatabaseRequestResponse(Request req, int dbSuggestionsLimit,
+			List<K> suggestions) {
 		this.request = req;
 		this.databaseQueryLimit = dbSuggestionsLimit;
 		this.suggestions = suggestions;

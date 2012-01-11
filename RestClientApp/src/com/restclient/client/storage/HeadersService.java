@@ -49,7 +49,16 @@ public interface HeadersService extends AppDatabase {
 	 */
 	@Select("SELECT name FROM headers WHERE name LIKE {input}")
 	void getNames(String input, ListCallback<HeaderRow> callback);
-
+	/**
+	 * Returns all header names for request.
+	 * @param input 
+	 * 
+	 * @param callback
+	 *            callback function
+	 */
+	@Select("SELECT name FROM headers WHERE name LIKE {input} AND type='request'")
+	void getRequestNames(String input, ListCallback<HeaderRow> callback);
+	
 	/**
 	 * @param headersList
 	 * @param callback
@@ -59,8 +68,9 @@ public interface HeadersService extends AppDatabase {
 
 	/**
 	 * @param headersList
+	 * @param type
 	 * @param callback
 	 */
-	@Select("SELECT * FROM headers WHERE name LIKE {headersList}")
-	void getHeader(String headersList, ListCallback<HeaderRow> callback);
+	@Select("SELECT * FROM headers WHERE name LIKE {headersList} AND type LIKE {type}")
+	void getHeader(String headersList, String type, ListCallback<HeaderRow> callback);
 }

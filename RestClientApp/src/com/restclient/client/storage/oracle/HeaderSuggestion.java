@@ -1,6 +1,7 @@
 package com.restclient.client.storage.oracle;
 
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
+import com.restclient.client.HeadersFillSupport;
 
 public class HeaderSuggestion implements Suggestion {
 
@@ -9,7 +10,7 @@ public class HeaderSuggestion implements Suggestion {
    */
   private String name;
   /**
-   * Suggestion cass.
+   * Suggestion class.
    * @param url
    */
   public HeaderSuggestion(String name) {
@@ -25,7 +26,11 @@ public class HeaderSuggestion implements Suggestion {
    */
   @Override
   public String getDisplayString() {
-    return name;
+	  String display = name;
+	  if(HeadersFillSupport.isNotSupportedW3C(name)){
+		  display += "<span class=\"suggestion-header-not-supported\">(not supported)</span>";
+	  }
+	  return display;
   }
   /**
    * Gets the replacement string associated with this suggestion. When

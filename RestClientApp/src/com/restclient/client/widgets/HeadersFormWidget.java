@@ -17,7 +17,7 @@ import com.google.gwt.xhr2.client.RequestHeader;
 import com.restclient.client.RestApp;
 import com.restclient.client.event.HeaderRowRemovedEvent;
 import com.restclient.client.event.HeadersChangeEvent;
-import com.restclient.client.storage.DatabaseSuggestOracle;
+import com.restclient.client.storage.HeadersSuggestOracle;
 
 public class HeadersFormWidget extends Composite {
 
@@ -59,7 +59,7 @@ public class HeadersFormWidget extends Composite {
 	}
 	
 	private void appendRow(String key, String value, boolean focus){
-		DatabaseSuggestOracle oracle = new DatabaseSuggestOracle(RestApp.HEADERS_SERVICE,"HeadersNames");
+		HeadersSuggestOracle oracle = new HeadersSuggestOracle(RestApp.HEADERS_SERVICE);
 		HeaderFormRow row = new HeaderFormRow(eventBus, oracle);
 		if( key != null ){
 			row.setHeaderName(key);
@@ -86,8 +86,6 @@ public class HeadersFormWidget extends Composite {
 		//null check
 		if( list != null ){
 			headers = new ArrayList<HeaderFormRow>();
-			
-			
 			if( list.size() > 0 ){
 				for( RequestHeader head : list ){
 					if(head == null) continue;

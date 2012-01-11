@@ -2,6 +2,7 @@ package com.restclient.client.widgets;
 
 import java.util.List;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.gwt.core.client.GWT;
@@ -154,18 +155,19 @@ public class HeaderFormRow extends Composite {
 	private void provideHeaderSupport(){
 		String value = headerName.getValue();
 		hintRow = null;
-		RestApp.HEADERS_SERVICE.getHeader(value, new ListCallback<HeaderRow>() {
+		RestApp.HEADERS_SERVICE.getHeader(value, "request" , new ListCallback<HeaderRow>() {
 			@Override
 			public void onFailure(DataServiceException error) {
-				headerName.getElement().getParentElement().addClassName( style.hasNoSupport() );
+				Log.error("Database error for header service::getHeader: " + error.getMessage() + ", SQL: "+error.getSql());
+				headerName.getElement().getParentElement().addClassName(style.hasNoSupport());
 			}
 			@Override
 			public void onSuccess(List<HeaderRow> result) {
 				if( result.size() == 0 ){
-					headerName.getElement().getParentElement().addClassName( style.hasNoSupport() );
+					headerName.getElement().getParentElement().addClassName(style.hasNoSupport());
 				} else {
 					hintRow = result.get(0);
-					headerName.getElement().getParentElement().removeClassName( style.hasNoSupport() );
+					headerName.getElement().getParentElement().removeClassName(style.hasNoSupport());
 					addHintClickHandler();
 				}
 			}

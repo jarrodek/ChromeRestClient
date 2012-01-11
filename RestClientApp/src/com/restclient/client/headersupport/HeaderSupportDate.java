@@ -53,27 +53,28 @@ public class HeaderSupportDate implements HeaderSupport {
 	
 	@Override
 	public void setValue(String value) {
-		
-		if( value == null ){
-			return;
-		}
+		DateTimeFormat tmpFormat = DateTimeFormat.getFormat("HH");
 		String manualFormat = "EEE, dd MMM yyyy HH:mm:ss z";
-		DateTimeFormat format = DateTimeFormat.getFormat( manualFormat );//PredefinedFormat.DATE_TIME_FULL
-		try{
-			Date d = format.parse(value);
-			DateTimeFormat tmpFormat = DateTimeFormat.getFormat("HH");
-			picker.setValue(d);
-			picker.setCurrentMonth(d);
-			
-			String hrs = tmpFormat.format(d);
-			hrsValue.setValue( hrs );
-			tmpFormat = DateTimeFormat.getFormat("mm");
-			minValue.setValue( tmpFormat.format(d) );
-			tmpFormat = DateTimeFormat.getFormat("ss");
-			secValue.setValue( tmpFormat.format(d) );
-		} catch(IllegalArgumentException e){
-			//e.printStackTrace();
+		DateTimeFormat format = DateTimeFormat.getFormat(manualFormat);//PredefinedFormat.DATE_TIME_FULL
+		Date d = null;
+		if( value == null ){
+			d = new Date();
+		} else {
+			try{
+				d = format.parse(value);
+			} catch(IllegalArgumentException e){
+				d = new Date();
+			}
 		}
+		
+		picker.setValue(d);
+		picker.setCurrentMonth(d);
+		String hrs = tmpFormat.format(d);
+		hrsValue.setValue( hrs );
+		tmpFormat = DateTimeFormat.getFormat("mm");
+		minValue.setValue( tmpFormat.format(d) );
+		tmpFormat = DateTimeFormat.getFormat("ss");
+		secValue.setValue( tmpFormat.format(d) );
 	}
 
 	@Override
@@ -86,23 +87,65 @@ public class HeaderSupportDate implements HeaderSupport {
 	void onDismiss(ClickEvent event) {
 		dialog.hide();
 	}
+	
 	@SuppressWarnings("deprecation")
 	@UiHandler("okButton")
 	void onAccept(ClickEvent event) {
 		dialog.hide();
 		
-		
 		Date d = picker.getValue();
 		if( d == null ){
 			return;
 		}
+		d.setSeconds(getSecondsValue());
+		d.setHours(getHoursValue());
+		d.setMinutes(getMinutesValue());
+
 		DateTimeFormat tmpFormat = DateTimeFormat.getFormat("EEE, dd MMM yyyy HH:mm:ss z");
-		d.setHours( Integer.parseInt(hrsValue.getValue()) );
-		d.setMinutes( Integer.parseInt(minValue.getValue()) );
-		d.setSeconds( Integer.parseInt(secValue.getValue()) );
-		
-		eventBus.fireEventFromSource( new HeaderSupportSubmitEvent( tmpFormat.format(d) ), HeaderSupportDate.this );
+		eventBus.fireEventFromSource(new HeaderSupportSubmitEvent(tmpFormat.format(d)), HeaderSupportDate.this);
 	}
+	
+	private int getSecondsValue(){
+		String _secValue = secValue.getValue();
+		if(_secValue == null || _secValue.equals("")){
+			_secValue = "0";
+		}
+		int seconds;
+		try{
+			seconds = Integer.parseInt(_secValue);
+		} catch (NumberFormatException e) {
+			seconds = 0;
+		}
+		return seconds;
+	}
+	private int getMinutesValue(){
+		String _minValue = minValue.getValue();
+		if(_minValue == null || _minValue.equals("")){
+			_minValue = "0";
+		}
+		int minutes;
+		try{
+			minutes = Integer.parseInt(_minValue);
+		} catch (NumberFormatException e) {
+			minutes = 0;
+		}
+		return minutes;
+	}
+	private int getHoursValue(){
+		String _hrsValue = hrsValue.getValue();
+		if(_hrsValue == null || _hrsValue.equals("")){
+			_hrsValue = "0";
+		}
+		int hours;
+		try{
+			hours = Integer.parseInt(_hrsValue);
+		} catch (NumberFormatException e) {
+			hours = 0;
+		}
+		return hours;
+	}
+	
+	
 	@UiHandler("setCurrent")
 	void onSetCurrent(ClickEvent event) {
 		DateTimeFormat tmpFormat = DateTimeFormat.getFormat("HH");

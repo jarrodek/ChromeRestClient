@@ -13,7 +13,7 @@
 	-moz-border-radius: 8px;
 	border-radius: 8px;
 	border: 1px solid rgba(255, 0, 0, 0.2);
-	text-shadow: rgba(0, 0, 0, 0.2) 0 2px 5px;
+/* 	text-shadow: rgba(0, 0, 0, 0.2) 0 2px 5px; */
 	display: inline-block;
 }
 .formRow{
@@ -21,7 +21,7 @@
 	margin: 15px 0;
 }
 .rowLabel{
-	text-shadow: #bbcee9 0 1px 1px;
+/* 	text-shadow: #bbcee9 0 1px 1px; */
 	display: block;
 	outline: none;
 	padding: 7px 0;
@@ -74,7 +74,7 @@ body {
 	padding-bottom: 14px;
 	padding-top: 13px;
 	text-align: end;
-	text-shadow: white 0 1px 2px;
+/* 	text-shadow: white 0 1px 2px; */
 	cursor: pointer;
 }
 .contentTitle.about{

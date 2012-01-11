@@ -112,6 +112,14 @@ public class HeaderInputWidget extends Composite {
 			@Override
 			public void onChange(List<RequestHeader> headers, Object source) {
 				if( source != null && source.equals(RequestParameters.class) ){
+					
+					for(RequestHeader fromList : headers){
+						if(fromList.getName().toLowerCase().equals("content-type")){
+							headers.remove(fromList);
+							break;
+						}
+					}
+					
 					rawInput.setValue( RequestDataFormatter.headersToString(headers) );
 					form.setHeadersList(headers, false);
 				}

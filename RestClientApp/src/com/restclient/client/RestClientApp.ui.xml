@@ -207,6 +207,13 @@
 						</section>
 						<section class="{style.aboutContent}">
 							<h3>Changelog</h3>
+							<p>1/11/2012</p>
+							<ul>
+								<li>Speed up code highlighting (I hope :).</li>
+								<li>Added permission "History" to provide request url suggestions from browser history</li>
+								<li>Fixed date-type header support (time now sets correctly)</li>
+								<li>Reorganized database suggest oracle</li>
+							</ul>
 							<p>1/8/2012</p>
 							<ul>
 								<li>Improvements in CodeMirror load. Fixed non visible CodeMirror output.</li>
