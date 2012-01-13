@@ -1,0 +1,31 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+	<ui:style>
+		.dialog-buttons{
+			-webkit-box-align: center;
+			-webkit-box-orient: horizontal;
+			-webkit-box-pack: end;
+			display: -webkit-box;
+			padding: 10px;
+		}
+		.button{
+			margin-left: 10px;
+		}
+		.mainPanel{
+			min-width: 250px;
+			margin: 20px;
+		}
+	</ui:style>
+	<g:DialogBox ui:field="dialog" modal="true"
+		animationEnabled="false" glassEnabled="true">
+		<g:caption>File is ready</g:caption>
+		<g:HTMLPanel ui:field="contents" styleName="{style.mainPanel}">
+			<div>
+				<g:Anchor ui:field="anchorHandler" text="Download"></g:Anchor>
+			</div>
+			<div class="{style.dialog-buttons}">
+				<g:Button styleName="{style.button}" ui:field="cancel">Dismiss</g:Button>
+			</div>
+		</g:HTMLPanel>
+	</g:DialogBox>
+</ui:UiBinder>

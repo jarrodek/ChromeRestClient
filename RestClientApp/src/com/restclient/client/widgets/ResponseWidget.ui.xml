@@ -36,7 +36,8 @@
 			}
 			
 			.status-code.warning {
-				color: yellow;
+				color: black;
+				font-weight: bold;
 			}
 			
 			.hint-image {

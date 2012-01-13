@@ -29,9 +29,9 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.HasKeyboardPagingPolicy.KeyboardPagingPolicy;
+import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
@@ -56,6 +56,7 @@ public class RestoreStateWidget extends Composite {
 	@UiField(provided=true) CellTable<RestForm> table;
 	@UiField(provided=true) SimplePager pager;
 	@UiField HTMLPanel tableContainer;
+//	@UiField Button exportButton;
 	
 	private ListDataProvider<RestForm> provider;
 	private SelectionModel<RestForm> selectionModel = null;
@@ -296,4 +297,59 @@ public class RestoreStateWidget extends Composite {
 		});
 		table.setColumnWidth(deleteColumn, 90, Unit.PX);
 	}
+//	@UiHandler("exportButton")
+//	void onExportButton(ClickEvent e){
+//		exportRequestsToFile();
+//	}
+//	/**
+//	 * Create a link to download JSON file with requests data. 
+//	 */
+//	private void exportRequestsToFile(){
+//		exportButton.setEnabled(false);
+//		RestApp.FORM_SERVICE.getAllData(new ListCallback<RestFormJS>() {
+//			@Override
+//			public void onFailure(DataServiceException error) {
+//				exportButton.setEnabled(true);
+//				if( RestApp.isDebug() ){
+//					Log.error("error get data from form service (getAllData)", error);
+//				}
+//			}
+//			@Override
+//			public void onSuccess(List<RestFormJS> result) {
+//				JSONArray arr = new JSONArray();
+//				for (RestFormJS data : result) {
+//					String strictData = data.getData();
+//					JSONValue v = null;
+//					try{
+//					 v = JSONParser.parseStrict(strictData);
+//					} catch(Exception e){
+//						continue;
+//					}
+//					JSONObject o = new JSONObject();
+//					o.put("name", new JSONString(data.getName()));
+//					o.put("data", v);
+//					arr.set(arr.size(), o);
+//				}
+//				String value = null;
+//				try{
+//					value = arr.toString();
+//				} catch(Exception e){
+//					exportButton.setEnabled(true);
+//					//TODO error notification
+//					return;
+//				}
+//				
+//				BlobBuilder bb = BlobBuilder.create();
+//				bb.append(value,"native");
+//				Blob blob = bb.getBlob("application/json");
+//				_test(blob);
+//				exportButton.setEnabled(true);
+//			}
+//		});
+//	}
+//	private final native void _test(Blob data)/*-{
+//		window.URL = window.URL || window.webkitURL;
+//		var blobURLref = window.URL.createObjectURL(data);
+//		$wnd.chrome.tabs.create({'url': blobURLref, 'selected': false});
+//	}-*/;
 }
