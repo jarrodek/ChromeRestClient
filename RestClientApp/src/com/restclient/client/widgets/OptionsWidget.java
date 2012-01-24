@@ -3,13 +3,10 @@
  */
 package com.restclient.client.widgets;
 
-import java.util.List;
-
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
@@ -18,18 +15,15 @@ import com.google.gwt.storage.client.Storage;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.restclient.client.CookieCapture;
 import com.restclient.client.RestApp;
-import com.restclient.client.Utils;
+import com.restclient.client.event.ImportExternalDataAction;
+import com.restclient.client.event.ImportItemsSelectedEvent;
 import com.restclient.client.html5.HTML5InputNumber;
 
 /**
@@ -37,7 +31,7 @@ import com.restclient.client.html5.HTML5InputNumber;
  * @author Paweł Psztyć
  *
  */
-public class OptionsWidget extends Composite {
+public class OptionsWidget extends Composite implements SubpageWidget {
 	
 	private static final Binder binder = GWT.create(Binder.class);
 	interface Binder extends UiBinder<Widget, OptionsWidget>{}
@@ -52,15 +46,15 @@ public class OptionsWidget extends Composite {
 	
 	@UiField HTMLPanel mainWidget;
 	@UiField(provided=true) HTML5InputNumber historyCount;
+	@UiField(provided=true) JSONHeadersOptions jsonHeadersOptions;
+	@UiField(provided=true) ImportExportOptions importExportOptions;
 	
 	@UiField DivElement historyAmount;
+	@UiField DivElement headersWrapper;
+	@UiField DivElement importExportWrapper;
 	
 	@UiField Style style;
 	
-	@UiField Grid jsonHeadersList;
-	
-	@UiField Button addJSONHeader;
-
 	/**
 	 * Constructor.
 	 * @param eventBus 
@@ -68,6 +62,9 @@ public class OptionsWidget extends Composite {
 	public OptionsWidget(EventBus eventBus) {
 		
 		historyCount = new HTML5InputNumber(0, 500, 1);
+		jsonHeadersOptions = new JSONHeadersOptions(eventBus);
+		importExportOptions = new ImportExportOptions(eventBus);
+		
 		initWidget(binder.createAndBindUi(this));
 		
 		final Storage storage = Storage.getLocalStorageIfSupported();
@@ -164,65 +161,50 @@ public class OptionsWidget extends Composite {
 			}
 		});
 		
-		
-		List<String> headers = Utils.getJSONHeadersList();
-		jsonHeadersList.resizeColumns(2);
-		jsonHeadersList.getCellFormatter().setWidth(0, 0, "200px");
-		
-		for(final String header : headers){
-			addJsonHeader(header);
-		}
-	}
-	
-	private void addJsonHeader(final String header){
-		int i = jsonHeadersList.getRowCount();
-		jsonHeadersList.resizeRows(i+1);
-		
-		Label headerLabel = new Label(header);
-		Anchor a = new Anchor("remove");
-		headerLabel.getElement().setAttribute("data-header", header);
-		
-		jsonHeadersList.setWidget(i, 0, headerLabel);
-		jsonHeadersList.setWidget(i, 1, a);
-		a.addClickHandler(new ClickHandler() {
+		JSONHeadersOptions.CloseJsonHeadersOptionsWidgetEvent.register(eventBus, 
+				new JSONHeadersOptions.CloseJsonHeadersOptionsWidgetEvent.Handler() {
 			@Override
-			public void onClick(ClickEvent event) {
-				removeJsonHeader(header);
+			public void onClose() {
+				headersWrapper.addClassName(style.hidden());
+			}});
+		ImportExportOptions.CloseImportExportOptionsEvent.register(eventBus, new ImportExportOptions.CloseImportExportOptionsEvent.Handler() {
+			@Override
+			public void onClose() {
+				importExportWrapper.addClassName(style.hidden());
+			}
+		});
+		ImportExternalDataAction.register(eventBus, new ImportExternalDataAction.Handler() {
+			@Override
+			public void onAction(String uid) {
+				importExportOptions.onShow(uid);
+				importExportWrapper.removeClassName(style.hidden());
+			}
+		});
+		ImportItemsSelectedEvent.register(eventBus, new ImportItemsSelectedEvent.Handler() {
+			@Override
+			public void onChange(final String[] keys) {
+				importExportOptions.onShow(null);
+				importExportOptions.importSelectedData(keys);
+				importExportWrapper.removeClassName(style.hidden());
 			}
 		});
 	}
 	
-	private void removeJsonHeader(final String header){
-		int l = jsonHeadersList.getRowCount();
-		for(int i=1; i<l; i++){
-			Widget headerWidget = jsonHeadersList.getWidget(i, 0);
-			String headerValue = headerWidget.getElement().getAttribute("data-header");
-			if(headerValue == null || headerValue.trim().equals("")){
-				continue;
-			}
-			if(headerValue.equals(header)){
-				jsonHeadersList.removeRow(i);
-				List<String> headers = Utils.getJSONHeadersList();
-				if(headers.contains(header)){
-					headers.remove(header);
-				}
-				Utils.saveJSONHeadersList(headers);
-				break;
-			}
-		}
+	@Override
+	public void onShow() {
+		
 	}
 	
-	@UiHandler("addJSONHeader")
-	void onAddJsonHeaderButton(ClickEvent e){
-		String value = Window.prompt("Enter JSON header value", null);
-		if(value == null || value.trim().equals("")){
-			return;
-		}
-		value = value.toLowerCase();
-		addJsonHeader(value);
-		List<String> headers = Utils.getJSONHeadersList();
-		headers.add(value);
-		Utils.saveJSONHeadersList(headers);
+	@UiHandler("jsonHeadersWidget")
+	void onOpenJsonHeadersWidgetButton(ClickEvent e){
+		jsonHeadersOptions.onShow();
+		headersWrapper.removeClassName(style.hidden());
+	}
+	
+	@UiHandler("importExportWidget")
+	void onOpenImportExportWidgetButton(ClickEvent e){
+		importExportOptions.onShow(null);
+		importExportWrapper.removeClassName(style.hidden());
 	}
 	
 	@UiHandler("shortCutsButton")

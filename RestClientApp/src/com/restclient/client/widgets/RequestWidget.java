@@ -59,7 +59,7 @@ import com.restclient.client.storage.UrlsSuggestOracle;
  * @author jarrod
  *
  */
-public class RequestWidget extends Composite {
+public class RequestWidget extends Composite implements SubpageWidget {
 
 	interface Binder extends UiBinder<Widget, RequestWidget> {
 	}
@@ -345,6 +345,11 @@ public class RequestWidget extends Composite {
 				dialog.show();
 			}
 		});
+		
+	}
+	
+	@Override
+	public void onShow() {
 		
 	}
 

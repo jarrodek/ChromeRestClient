@@ -127,14 +127,12 @@ public class TasksLoader {
 		}
 		int percent = taskFinished*100/initialTasksCount;
 		if( RestApp.isDebug() ){
-			Log.debug( initialTasksCount-taskFinished+" tasks left to do of: "+initialTasksCount );
+			Log.debug( (initialTasksCount-taskFinished+1)+" tasks left to do of: "+initialTasksCount );
 		}
 		widget.setProgress(percent);
-		
 	}
 	
 	private static void runTasks(){
-		
 		if( !hasMoreTasks() ){
 			running = false;
 			Void v = GWT.create(Void.class);
@@ -144,11 +142,7 @@ public class TasksLoader {
 		}
 		
 		final LoadTask task = tasks.get(0);
-		
 		callTask(task, true);
-		
-		
-		
 	}
 	
 	private static void callTask(final LoadTask task, final boolean tryAgainOnFailure){
@@ -157,7 +151,12 @@ public class TasksLoader {
 			@Override
 			public void onSuccess() {
 				removeTask(task);
-				runTasks();
+				new Timer() {
+					@Override
+					public void run() {
+						runTasks();
+					}
+				}.schedule(200);
 			}
 			
 			@Override

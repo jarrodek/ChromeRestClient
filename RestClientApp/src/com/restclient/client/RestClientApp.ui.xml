@@ -32,8 +32,7 @@
 		.header-bar {
 			margin-bottom: 20px;
 		}
-		
-		.subpageContainer {
+		.subpages {
 			-webkit-transition: animationsTime opacity, 0.1s padding-left, 0.1s
 				padding-right;
 			box-sizing: border-box;
@@ -44,7 +43,6 @@
 			top: 0;
 			width: 100%;
 		}
-		
 		.subpage {
 			-webkit-box-shadow: #666 0px 2px 5px;
 			background-color: white;
@@ -54,16 +52,13 @@
 			width: 100%;
 			min-width: 651px;
 		}
-		
 		.restoreWidget {
 			-webkit-padding-start: 40px;
 			z-index: 5;
 		}
-		
 		.frozen {
 			position: fixed;
 		}
-		
 		.aboutContent {
 			-webkit-padding-start: 24px;
 			text-align: start;
@@ -155,7 +150,7 @@
 						width="100%"></rc:ResponseWidget>
 				</g:HTMLPanel>
 				<g:HTMLPanel
-					styleName="{style.subpageContainer} {style.restoreWidget} transparent">
+					styleName="{style.subpages} {style.restoreWidget} transparent">
 					<g:HTMLPanel ui:field="savedPanel" styleName="{style.subpage} hidden">
 						<rc:RestoreStateWidget ui:field="restoreWidget"></rc:RestoreStateWidget>
 					</g:HTMLPanel>
@@ -207,6 +202,10 @@
 						</section>
 						<section class="{style.aboutContent}">
 							<h3>Changelog</h3>
+							<p>1/24/2012</p>
+							<ul>
+								<li>Added Google App Engine server to store saved data and share it with coworkers</li>
+							</ul>
 							<p>1/11/2012</p>
 							<ul>
 								<li>Speed up code highlighting (I hope :).</li>

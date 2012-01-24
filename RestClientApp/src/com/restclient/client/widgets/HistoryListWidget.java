@@ -48,7 +48,7 @@ import com.restclient.client.resources.CellResources;
  * @author Paweł Psztyć
  *
  */
-public class HistoryListWidget extends Composite {
+public class HistoryListWidget extends Composite implements SubpageWidget {
 
 	private static final Binder binder = GWT.create(Binder.class);
 
@@ -338,6 +338,7 @@ public class HistoryListWidget extends Composite {
 	}
 	
 	
+	
 	protected void getHistoryValues(final int start, int limit) {
 		List<RequestHistoryItem> response = RequestHistory.getHistory(start, limit);
 		historyList.setRowData(start, response);
@@ -348,6 +349,7 @@ public class HistoryListWidget extends Composite {
 	/**
 	 * called just after when widget is shown. 
 	 */
+	@Override
 	public void onShow() {
 		int size = RequestHistory.size();
 		historyList.setRowCount(size);

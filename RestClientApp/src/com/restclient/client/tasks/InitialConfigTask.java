@@ -127,10 +127,24 @@ public class InitialConfigTask implements LoadTask {
 				dbLoadCallback();
 			}
 		});
+		RestApp.EXPORT_DATA_SERVICE.initTable(new VoidCallback() {
+			
+			@Override
+			public void onFailure(DataServiceException error) {
+				dbLoadError++;
+				dbLoadCallback();
+			}
+			
+			@Override
+			public void onSuccess() {
+				dbLoaded++;
+				dbLoadCallback();
+			}
+		});
 	}
 	
 	private void dbLoadCallback(){
-		if( dbLoadError + dbLoaded >= 4 ){ // all loaded (or not)
+		if( dbLoadError + dbLoaded >= 5 ){ // all loaded (or not)
 			createAndInitTablesTables();
 			DatabasesLoadedEvent event = new DatabasesLoadedEvent( dbLoadError == 0 );
 			RestClientApp.getAppMainEventBus().fireEventFromSource(event, InitialConfigTask.class);

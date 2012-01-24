@@ -16,8 +16,6 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -43,28 +41,24 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.restclient.client.RestApp;
-import com.restclient.client.event.DatabasesLoadedEvent;
 import com.restclient.client.event.RestoreRequestEvent;
 import com.restclient.client.storage.RestForm;
 import com.restclient.client.storage.RestFormJS;
 
 @SuppressWarnings("javadoc")
-public class RestoreStateWidget extends Composite {
+public class RestoreStateWidget extends Composite implements SubpageWidget {
 
 	interface Binder extends UiBinder<Widget, RestoreStateWidget> {}
 	
 	@UiField(provided=true) CellTable<RestForm> table;
 	@UiField(provided=true) SimplePager pager;
 	@UiField HTMLPanel tableContainer;
-//	@UiField Button exportButton;
 	
 	private ListDataProvider<RestForm> provider;
 	private SelectionModel<RestForm> selectionModel = null;
 	private EventBus eventBus;
 	
 	public RestoreStateWidget(EventBus eventBus) {
-		
-		
 		this.eventBus = eventBus;
 		SimplePager.Resources pagerResources = GWT.create(SimplePager.Resources.class);
 		provider = new ListDataProvider<RestForm>();
@@ -78,29 +72,21 @@ public class RestoreStateWidget extends Composite {
 		data += "</p>";
 		HTML info = new HTML(data);
 		
-		table.setEmptyTableWidget( info );
+		table.setEmptyTableWidget(info);
 		pager.setDisplay(table);
 		table.setKeyboardPagingPolicy(KeyboardPagingPolicy.CHANGE_PAGE);
 		
 		selectionModel = new SingleSelectionModel<RestForm>(provider.getKeyProvider());
 		table.setSelectionModel(selectionModel, DefaultSelectionEventManager.<RestForm> createDefaultManager());
 		provider.addDataDisplay(table);
-		
-		DatabasesLoadedEvent.register(eventBus, new DatabasesLoadedEvent.Handler() {
-			@Override
-			public void onChange(DatabasesLoadedEvent event) {
-				getDataAndSetTable();
-			}
-		});
-		
-		Window.addResizeHandler(new ResizeHandler() {
-			
-			@Override
-			public void onResize(ResizeEvent event) {
-				
-			}
-		});
-		
+		ListHandler<RestForm> sortHandler = new ListHandler<RestForm>(provider.getList());
+		table.addColumnSortHandler(sortHandler);
+		initTableColumns(selectionModel, sortHandler);
+	}
+	
+	@Override
+	public void onShow() {
+		getData();
 	}
 	
 	public void addRow(RestForm row){
@@ -110,7 +96,8 @@ public class RestoreStateWidget extends Composite {
 		table.redraw();
 	}
 	
-	public void getDataAndSetTable(){
+	public void getData(){
+		
 		RestApp.FORM_SERVICE.getAllData(new ListCallback<RestFormJS>() {
 			@Override
 			public void onFailure(DataServiceException error) {
@@ -130,17 +117,9 @@ public class RestoreStateWidget extends Composite {
 					row.setUrl(data.getUrl());
 					list.add(row);
 				}
-				fillTable(list);
+				provider.setList(list);
 			}
 		});
-	}
-	
-	private void fillTable(List<RestForm> list){
-		provider.setList(list);
-		table.setRowCount(list.size(), true);
-		ListHandler<RestForm> sortHandler = new ListHandler<RestForm>(provider.getList());
-		table.addColumnSortHandler(sortHandler);
-		initTableColumns(selectionModel, sortHandler);
 	}
 	
 	private void initTableColumns(SelectionModel<RestForm> selectionModel2,
@@ -297,59 +276,4 @@ public class RestoreStateWidget extends Composite {
 		});
 		table.setColumnWidth(deleteColumn, 90, Unit.PX);
 	}
-//	@UiHandler("exportButton")
-//	void onExportButton(ClickEvent e){
-//		exportRequestsToFile();
-//	}
-//	/**
-//	 * Create a link to download JSON file with requests data. 
-//	 */
-//	private void exportRequestsToFile(){
-//		exportButton.setEnabled(false);
-//		RestApp.FORM_SERVICE.getAllData(new ListCallback<RestFormJS>() {
-//			@Override
-//			public void onFailure(DataServiceException error) {
-//				exportButton.setEnabled(true);
-//				if( RestApp.isDebug() ){
-//					Log.error("error get data from form service (getAllData)", error);
-//				}
-//			}
-//			@Override
-//			public void onSuccess(List<RestFormJS> result) {
-//				JSONArray arr = new JSONArray();
-//				for (RestFormJS data : result) {
-//					String strictData = data.getData();
-//					JSONValue v = null;
-//					try{
-//					 v = JSONParser.parseStrict(strictData);
-//					} catch(Exception e){
-//						continue;
-//					}
-//					JSONObject o = new JSONObject();
-//					o.put("name", new JSONString(data.getName()));
-//					o.put("data", v);
-//					arr.set(arr.size(), o);
-//				}
-//				String value = null;
-//				try{
-//					value = arr.toString();
-//				} catch(Exception e){
-//					exportButton.setEnabled(true);
-//					//TODO error notification
-//					return;
-//				}
-//				
-//				BlobBuilder bb = BlobBuilder.create();
-//				bb.append(value,"native");
-//				Blob blob = bb.getBlob("application/json");
-//				_test(blob);
-//				exportButton.setEnabled(true);
-//			}
-//		});
-//	}
-//	private final native void _test(Blob data)/*-{
-//		window.URL = window.URL || window.webkitURL;
-//		var blobURLref = window.URL.createObjectURL(data);
-//		$wnd.chrome.tabs.create({'url': blobURLref, 'selected': false});
-//	}-*/;
 }

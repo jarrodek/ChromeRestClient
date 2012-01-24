@@ -1,7 +1,12 @@
 package com.restclient.client.storage;
 
-@SuppressWarnings("javadoc")
-public class RestForm {
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public class RestForm implements IsSerializable {
 
 	private int id;
 	private String name;
@@ -100,5 +105,23 @@ public class RestForm {
 	public Long getTime() {
 		return time;
 	}
-
+	
+	public JSONObject toJSON(){
+		
+		JSONValue dataValue = null;
+		JSONObject obj = null;
+		try{
+			dataValue = JSONParser.parseLenient(data);
+			obj = dataValue.isObject();
+		} catch(Exception e){
+			return null;
+		}
+		if(obj == null){
+			return null;
+		}
+		JSONObject result = new JSONObject();
+		result.put("n", new JSONString(name == null ? "" : name));
+		result.put("d", obj);
+		return result;
+	}
 }

@@ -1,5 +1,6 @@
 package com.restclient.client.storage;
 
+import java.util.Collection;
 import java.util.Date;
 
 import com.google.code.gwt.database.client.service.ListCallback;
@@ -15,6 +16,7 @@ import com.google.code.gwt.database.client.service.VoidCallback;
  * 
  */
 public interface RestFormService extends AppDatabase {
+	
 	/**
 	 * Create database table. Schema: <code>name</code> - configuration name
 	 * <code>url</code> - url for configuration (to display in select box)
@@ -45,6 +47,9 @@ public interface RestFormService extends AppDatabase {
 	void insertData(String name, String url, String config, Date dt,
 			RowIdListCallback callback);
 
+	@Update(sql = "INSERT INTO rest_forms (name,url,data,time) VALUES ({_.getName()},{_.getUrl()},{_.getData()},{dt.getTime()})", foreach = "data")
+	void insertImportData(Collection<RestForm> data, Date dt, VoidCallback callback);
+	
 	/**
 	 * @param callback
 	 */
@@ -65,4 +70,5 @@ public interface RestFormService extends AppDatabase {
 	 */
 	@Update("DELETE FROM rest_forms WHERE ID = {id}")
 	void deleteItem(int id, VoidCallback callback);
+	
 }

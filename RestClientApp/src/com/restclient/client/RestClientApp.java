@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.RowIdListCallback;
 import com.google.gwt.core.client.Callback;
@@ -36,9 +37,11 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.restclient.client.event.FormStateSaveEvent;
 import com.restclient.client.event.HistoryRestoreEvent;
+import com.restclient.client.event.ImportExternalDataAction;
 import com.restclient.client.event.OpenRequestEvent;
 import com.restclient.client.event.RestoreRequestEvent;
 import com.restclient.client.event.SaveRequestEvent;
+import com.restclient.client.event.StoreDataAction;
 import com.restclient.client.html5.HTML5Element;
 import com.restclient.client.request.RequestParameters;
 import com.restclient.client.request.ViewParameters;
@@ -105,16 +108,19 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 	/**
 	 * This is the entry point method.
 	 */
+	@Override
 	public void onModuleLoad() {
 		GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+			@Override
 			public void onUncaughtException(Throwable e) {
 				log.log(Level.SEVERE, e.getMessage(), e);
+				Log.error("Application error", e);
 			}
 		});
 	    Logger.getLogger("").addHandler(new ErrorDialog().getHandler());
 	    Logger.getLogger("").setLevel(Level.WARNING);
 		
-		requestWidget = new RequestWidget(eventBus);
+	    requestWidget = new RequestWidget(eventBus);
 		responseWidget = new ResponseWidget(eventBus);
 		restoreWidget = new RestoreStateWidget(eventBus);
 		historyList = new HistoryListWidget(eventBus);
@@ -122,18 +128,11 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 		
 		RootPanel.get().add(
 		        GWT.<Binder> create(Binder.class).createAndBindUi(this));
-		
-		plusButton.setHTML("<g:plusone href=\"https://chrome.google.com/webstore/detail/hgmloofddffdnphfgcellkdfbfbjeloo\"></g:plusone>");
-		
-		savedPanel.getParent().getElement().setAttribute("hidden", "");
-		setHistoryMenuItemVisible(RestApp.isHistoryEabled());
-		
-		Window.addResizeHandler(this);
-		History.addValueChangeHandler(this);
-		handleMenuItems();
+	    
 		RequestParameters.initialize(eventBus);
 		startTasks();
 	}
+	
 	
 	private void startTasks() {
 		InitialConfigTask init = new InitialConfigTask();
@@ -147,24 +146,36 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 		TasksLoader.runTasks(new Callback<Void, Void>() {
 			@Override
 			public void onFailure(Void reason) {
-				
+				Log.error("Unable to finish initial tasks :(");
 			}
 
 			@Override
 			public void onSuccess(Void result) {
-				ViewParameters.setRestoredState(eventBus);
-				ViewParameters.observeChanges(eventBus);
-				
-				AppRequestFactory.initialize(eventBus);
-				//RestApp.setupKeyboardShortcuts(eventBus);
-				
-				registerHandlers();
-				
-				History.fireCurrentHistoryState();
-				onResize(null);
-				initPlusOneButton();
+				afterTaskFinishedHandler();
 			}
 		});
+	}
+	
+	
+	private void afterTaskFinishedHandler(){
+		plusButton.setHTML("<g:plusone href=\"https://chrome.google.com/webstore/detail/hgmloofddffdnphfgcellkdfbfbjeloo\"></g:plusone>");
+		savedPanel.getParent().getElement().setAttribute("hidden", "");
+		setHistoryMenuItemVisible(RestApp.isHistoryEabled());
+		
+		Window.addResizeHandler(this);
+		History.addValueChangeHandler(this);
+		handleMenuItems();
+		
+		ViewParameters.setRestoredState(eventBus);
+		ViewParameters.observeChanges(eventBus);
+		
+		AppRequestFactory.initialize(eventBus);
+		
+		registerHandlers();
+		
+		History.fireCurrentHistoryState();
+		onResize(null);
+		initPlusOneButton();
 	}
 	
 	private void registerHandlers(){
@@ -180,6 +191,9 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 				createSaveDialog();
 			}
 		});
+		//
+		// Registers event to save request form
+		//
 		FormStateSaveEvent.register(eventBus, new FormStateSaveEvent.Handler() {
 			@Override
 			public void onSave(final String formName, Object source) {
@@ -255,7 +269,21 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 		if( cookiesValue.equals("true") ){
 			CookieCapture.initialize();
 		}
+		
+		//
+		// Store application data to external server
+		//
+		StoreDataAction.register(eventBus, new StoreDataAction.Handler() {
+			@Override
+			public void onAction() {
+				DataExportImpl impl = new DataExportImpl();
+				impl.setEventBus(eventBus);
+				impl.synch();
+			}
+		});
 	}
+	
+	
 	
 	/**
 	 * History menu item can be turned off. This method access this item visible state.
@@ -407,6 +435,17 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 		if( token == null || token.equals("") ){
 			token = "request";
 		}
+		String importUID = null;
+		//
+		// Special Tokens
+		// import/{UID} import data from Applications server
+		//
+		if(token.startsWith("import/")){
+			importUID = token.substring(7);
+			token = "options";
+		}
+		
+		
 		final HTML5Element root = (HTML5Element) mainPanel.getElement();
 		closeCurrentTab(root);
 		
@@ -422,6 +461,7 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 			hideMainPanel();
 			savedPanel.getElement().removeClassName("hidden");
 			savedPanel.getParent().getElement().removeAttribute("hidden");
+			restoreWidget.onShow();
 			onResize(null);
 			new Timer() {
 				@Override
@@ -444,6 +484,7 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 		} else if( token.equals("request") ){
 			showMainPanel();
 			hideBackDrop(root);
+			requestWidget.onShow();
 			int time = (int)(style.animationsTime()*1000);
 			new Timer() {
 				@Override
@@ -470,7 +511,12 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 			hideMainPanel();
 			optionsPanel.getElement().removeClassName("hidden");
 			optionsPanel.getParent().getElement().removeAttribute("hidden");
+			optionsWidget.onShow();
 			onResize(null);
+			if(importUID != null){
+				ImportExternalDataAction action = new ImportExternalDataAction(importUID);
+				eventBus.fireEvent(action);
+			}
 			new Timer() {
 				@Override
 				public void run() {

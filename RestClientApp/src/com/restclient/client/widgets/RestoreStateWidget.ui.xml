@@ -1,7 +1,8 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
-	xmlns:c="urn:import:com.google.gwt.user.cellview.client">
+	xmlns:c="urn:import:com.google.gwt.user.cellview.client"
+	xmlns:h5="urn:import:com.restclient.client.html5">
 	<ui:style>
 		.pager{
 			display: -webkit-box;
@@ -14,15 +15,8 @@
 			-moz-box-orient: horizontal;
 		}
 		.mainTable{table-layout: fixed;}
-<!-- 		.saveControls{ -->
-<!-- 			padding: 10px; -->
-<!-- 		} -->
 	</ui:style>
 	<g:HTMLPanel ui:field="tableContainer">
-<!-- 		<div class="{style.saveControls}"> -->
-<!-- 			<g:Button ui:field="exportButton" text="export list"></g:Button> -->
-<!-- 			<g:Button ui:field="importButton" text="import list"></g:Button> -->
-<!-- 		</div> -->
 		<c:CellTable addStyleNames="{style.mainTable}" width="100%" ui:field="table" pageSize="12"></c:CellTable>
 		<div class="{style.pager}">
 			<c:SimplePager ui:field="pager"/>

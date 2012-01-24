@@ -9,46 +9,45 @@ import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.code.gwt.database.client.service.RowIdListCallback;
 import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.storage.client.StorageEvent;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Event.NativePreviewEvent;
-import com.restclient.client.event.OpenRequestEvent;
-import com.restclient.client.event.SaveRequestEvent;
+import com.restclient.client.storage.ExportedDataReferenceService;
 import com.restclient.client.storage.HeadersService;
 import com.restclient.client.storage.RestFormService;
 import com.restclient.client.storage.StatusCodesService;
 import com.restclient.client.storage.UrlRow;
 import com.restclient.client.storage.UrlsService;
+import com.restclient.client.utils.UUID;
 
 /**
  * @author jarrod
- *
+ * 
  */
 public class RestApp {
 	
-	@SuppressWarnings("javadoc")
+
 	public static final HeadersService HEADERS_SERVICE = GWT
 			.create(HeadersService.class);
-	@SuppressWarnings("javadoc")
+
 	public static final StatusCodesService STATUSES_SERVICE = GWT
 			.create(StatusCodesService.class);
-	@SuppressWarnings("javadoc")
+
 	public static final UrlsService URLS_SERVICE = GWT
 			.create(UrlsService.class);
-	@SuppressWarnings("javadoc")
+
 	public static final RestFormService FORM_SERVICE = GWT
 			.create(RestFormService.class);
-
+	public static final ExportedDataReferenceService EXPORT_DATA_SERVICE = GWT
+			.create(ExportedDataReferenceService.class);
+	
 	/**
 	 * Class - holder for local storage keys
 	 * 
 	 */
-	public static class StorageKeys{
-		private StorageKeys(){}
-		
+	public static class StorageKeys {
+		private StorageKeys() {
+		}
+
 		/**
 		 * Key for debug enabled.
 		 */
@@ -65,15 +64,14 @@ public class RestApp {
 		 * Key for cookies capture
 		 */
 		public static final String COOKIES_CAPTURE = "COOKIES_CAPTURE";
-		
+
 		public static final String SHORTCUTS_VALUES = "SHORTCUTS";
 		/**
 		 * Key for JSON headers list.
 		 */
 		public static final String JSON_HEADERS = "JSONHEADERS";
 	}
-	
-	
+
 	/**
 	 * Add an URL value to list of past URLs for suggestions oracle.
 	 * <p>
@@ -81,12 +79,13 @@ public class RestApp {
 	 * time. In oracle rows are ordered by last use time. If not exists it's
 	 * insert new URL value.
 	 * </p>
-	 * @param requestUrl 
+	 * 
+	 * @param requestUrl
 	 * 
 	 */
 	public static void addOracleURL(final String requestUrl) {
-		if(requestUrl==null||requestUrl.isEmpty()) return;
-		
+		if (requestUrl == null || requestUrl.isEmpty())
+			return;
 		URLS_SERVICE.getUrls(requestUrl, new ListCallback<UrlRow>() {
 			@Override
 			public void onFailure(DataServiceException error) {
@@ -96,7 +95,7 @@ public class RestApp {
 			public void onSuccess(List<UrlRow> result) {
 				if (result == null) {
 					// error?
-					if( RestApp.isDebug() ){
+					if (RestApp.isDebug()) {
 						Log.error("Some undefined error during storage request. RestApp.addOracleURL(String)");
 					}
 					return;
@@ -128,113 +127,74 @@ public class RestApp {
 			}
 		});
 	}
-	
-	/**
-	 * Add keyboard shortcuts handlers.
-	 * @deprecated
-	 * @param eventBus
-	 */
-	public static void setupKeyboardShortcuts(final EventBus eventBus) {
-		Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
-			@Override
-			public void onPreviewNativeEvent(NativePreviewEvent preview) {
-				final NativeEvent event = preview.getNativeEvent();
-				//final  Element elt = event.getEventTarget().cast();
-				final int keycode = event.getKeyCode();
-				final boolean ctrl = event.getCtrlKey();
-				final boolean shift = event.getShiftKey();
-				final boolean alt = event.getAltKey();
-				final boolean meta = event.getMetaKey();
 
-				if (!event.getType().equalsIgnoreCase("keydown") || !ctrl
-						|| shift || alt || meta || !isHandlersKeycode(keycode)) {
-					// Tell the event handler to continue processing this event.
-					return;
-				}
-				handleKeycode(keycode,eventBus);
-				preview.cancel();
-			}
-		});
-	}
-	/**
-	 * @deprecated
-	 * @param keyCode
-	 * @return
-	 */
-	private static boolean isHandlersKeycode(final int keyCode) {
-		switch (keyCode) {
-		case 83:// s
-		case 79:// o
-			return true;
-		}
-		return false;
-	}
-	/**
-	 * @deprecated
-	 * @param keyCode
-	 * @param eventBus
-	 */
-	private static void handleKeycode(final int keyCode, final EventBus eventBus) {
-		switch (keyCode) {
-		case 83:// save action
-			eventBus.fireEventFromSource(new SaveRequestEvent(), RestApp.class);
-			break;
-		case 79:// open action
-			eventBus.fireEventFromSource(new OpenRequestEvent(), RestApp.class);
-			break;
-		default:
-			return;
-		}
-	}
 	/**
 	 * Check if requests history is enabled.
+	 * 
 	 * @return true if is enabled (default).
 	 */
-	public static final boolean isHistoryEabled(){
+	public static final boolean isHistoryEabled() {
 		boolean result = true;
 		Storage storage = Storage.getLocalStorageIfSupported();
-		if(storage != null){
-			String historyValue = storage.getItem( RestApp.StorageKeys.HISTORY_KEY );
-			if( historyValue == null || historyValue.isEmpty() ){
+		if (storage != null) {
+			String historyValue = storage
+					.getItem(RestApp.StorageKeys.HISTORY_KEY);
+			if (historyValue == null || historyValue.isEmpty()) {
 				historyValue = "true";
 			}
 			result = historyValue.equals("true");
 		}
 		return result;
 	}
-	
+
 	private static Boolean isDebug = null;
-	
+
 	/**
 	 * Check if debug is enabled.
+	 * 
 	 * @return true if is enabled (default is false).
 	 */
-	public static final boolean isDebug(){
-		if( isDebug == null ){
+	public static final boolean isDebug() {
+		if (isDebug == null) {
 			setIsDebugState();
 		}
 		return isDebug.booleanValue();
 	}
-	
-	private static void setIsDebugState(){
+
+	private static void setIsDebugState() {
 		boolean result = false;
 		Storage storage = Storage.getLocalStorageIfSupported();
-		if(storage != null){
-			String debugValue = storage.getItem( RestApp.StorageKeys.DEBUG_KEY );
-			if( debugValue == null || debugValue.isEmpty() ){
+		if (storage != null) {
+			String debugValue = storage.getItem(RestApp.StorageKeys.DEBUG_KEY);
+			if (debugValue == null || debugValue.isEmpty()) {
 				debugValue = "true";
 			}
 			result = debugValue.equals("true");
-			Storage.addStorageEventHandler( new StorageEvent.Handler() {
+			Storage.addStorageEventHandler(new StorageEvent.Handler() {
 				@Override
 				public void onStorageChange(StorageEvent event) {
 					String key = event.getKey();
-					if( RestApp.StorageKeys.DEBUG_KEY.equals( key ) ){
-						isDebug = event.getNewValue().equals( "true" );
+					if (RestApp.StorageKeys.DEBUG_KEY.equals(key)) {
+						isDebug = event.getNewValue().equals("true");
 					}
 				}
 			});
 		}
 		isDebug = result;
+	}
+
+	/**
+	 * Get application unique ID (36 characters).
+	 * 
+	 * @return generated RFC4122 UUID
+	 */
+	public static String getAppId() {
+		Storage storage = Storage.getLocalStorageIfSupported();
+		String uuid = storage.getItem("aapi");
+		if (uuid == null || uuid.equals("")) {
+			uuid = UUID.uuid();
+			storage.setItem("aapi", uuid);
+		}
+		return uuid;
 	}
 }

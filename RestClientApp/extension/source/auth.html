@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="/ext/CodeMirror-2.2/codemirror.css">
+<link type="text/css" rel="stylesheet" href="RestClientApp.css">
+<title>Please wait</title>
+<script type="text/javascript">
+//
+// First, set/change in localstorage 'applogin' item to current time.
+// then close this window.
+// In application handlers are hadle time change and do its actions.
+//
+try{
+localStorage.setItem('applogin',new Date().getTime());
+} catch(e){}
+if(!!(chrome.tabs)){
+	chrome.tabs.getCurrent(function(tab){
+	    chrome.tabs.remove(tab.id);
+	});
+} else {
+	window.close();
+}
+</script>
+</head>
+<body>
+	<p>Wait...</p>
+</body>
+</html>
