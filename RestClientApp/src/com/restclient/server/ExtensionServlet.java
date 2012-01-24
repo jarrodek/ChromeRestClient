@@ -6,9 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
@@ -245,15 +247,20 @@ public class ExtensionServlet extends HttpServlet {
 		String applicationId = i.getAsString();
 
 		List<RequestItem> toSave = new ArrayList<RequestItem>();
-
+		HashMap<String, Integer> uuidsMap = new HashMap<String, Integer>(); 
+		
+		
 		int dataSize = arr.size();
 		for (int _i = 0; _i < dataSize; _i++) {
 			RequestItem requestItem = new RequestItem();
 			requestItem.setApplicationUUID(applicationId);
-
+			requestItem.setItemUUID(UUID.randomUUID().toString());
+			
+			
 			JsonElement jsonItem = arr.get(_i);
 			JsonObject item = jsonItem.getAsJsonObject();
 			String name = item.get("n").getAsString();
+			int itemId = item.get("i").getAsInt();
 			requestItem.setName(name);
 
 			JsonObject formData = item.get("d").getAsJsonObject();
@@ -261,7 +268,8 @@ public class ExtensionServlet extends HttpServlet {
 			requestItem.setPost(formData.get("post").getAsString());
 			requestItem.setMethod(formData.get("method").getAsString());
 			requestItem.setEncoding(formData.get("formEncoding").getAsString());
-
+			uuidsMap.put(requestItem.getItemUUID(), itemId);
+			
 			List<RequestHeader> headers = new ArrayList<RequestHeader>();
 			JsonArray formHeaders = formData.get("headers").getAsJsonArray();
 			int headersSize = formHeaders.size();
@@ -283,10 +291,22 @@ public class ExtensionServlet extends HttpServlet {
 		}
 		
 		if (toSave.size() > 0) {
+			List<SaveResponseItem> response = new ArrayList<ExtensionServlet.SaveResponseItem>();
+			
 			appUser.getItemsSet().addAll(toSave);
 			PersistenceManager pm = PMF.get().getPersistenceManager();
 			try {
-				pm.makePersistent(appUser);
+				appUser = pm.makePersistent(appUser);
+				List<RequestItem> items = appUser.getItemsSet();
+				for(RequestItem item : items){
+					if(uuidsMap.containsKey(item.getItemUUID())){
+						SaveResponseItem r = new SaveResponseItem();
+						r.key = KeyFactory.keyToString(item.getKey());
+						r.id = uuidsMap.get(item.getItemUUID());
+						response.add(r);
+					}
+				}
+				return gson.toJson(response);
 			} catch (Exception e) {
 				return gson.toJson(new ResponseError(
 						"Persistance error: " + e.getMessage()));
@@ -295,8 +315,14 @@ public class ExtensionServlet extends HttpServlet {
 			}
 		}
 
-		return "{\"result\":\"OK\"}";
+		return gson.toJson(new ResponseError("Data parse error. Can't parse data on server."));
 	}
+	
+	static class SaveResponseItem {
+		String key;
+		Integer id;
+	}
+	
 	
 	/**
 	 * Response for list of requests available to get

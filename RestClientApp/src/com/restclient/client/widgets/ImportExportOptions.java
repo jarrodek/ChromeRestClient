@@ -287,9 +287,9 @@ public class ImportExportOptions extends Composite {
 		Extension ext = Extension.getExtensionIfSupported();
 		String returnPath = "";
 		if(ext == null){ //DEV MODE
-			returnPath = "http://127.0.0.1:8888/auth.html";
+			returnPath = "http://127.0.0.1:8888/auth.html#auth";
 		} else {
-			returnPath = ext.getURL("/auth.html");
+			returnPath = ext.getURL("/auth.html#auth");
 		}
 		signInUrl = signInUrl + URL.encodeQueryString(returnPath);
 		Tabs tabs = Tabs.getTabsIfSupported();

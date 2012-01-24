@@ -15,11 +15,23 @@
 			-moz-box-orient: horizontal;
 		}
 		.mainTable{table-layout: fixed;}
+		.appImportPanel{
+			margin: 20px;
+		}
+		.keyBox{
+			width: 200px;
+		}
 	</ui:style>
 	<g:HTMLPanel ui:field="tableContainer">
 		<c:CellTable addStyleNames="{style.mainTable}" width="100%" ui:field="table" pageSize="12"></c:CellTable>
 		<div class="{style.pager}">
 			<c:SimplePager ui:field="pager"/>
+		</div>
+		<div class="{style.appImportPanel}">
+			<p>Open from another application. Paste import key:</p>
+			<g:TextBox addStyleNames="{style.keyBox}" ui:field="openKey"></g:TextBox>
+			<g:Button ui:field="appImport" text="Open"></g:Button>
+			<p>It will replace current form.</p>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder> 

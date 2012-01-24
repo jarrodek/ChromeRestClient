@@ -7,9 +7,11 @@ import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.web.bindery.event.shared.EventBus;
+import com.restclient.client.storage.ExportedDataInsertItem;
 import com.restclient.client.storage.ExportedDataItem;
 import com.restclient.client.storage.RestForm;
 import com.restclient.client.storage.RestFormJS;
@@ -49,6 +51,11 @@ public abstract class DataExport {
 		void onEmptyData();
 	}
 	
+	public static interface ExportItemCallback {
+		void onSuccess(ExportedDataInsertItem item);
+		void onFailure(String message);
+	}
+	
 	
 	/**
 	 * Collect data from database and remove items already exported.
@@ -69,7 +76,7 @@ public abstract class DataExport {
 					formIdsList.add(item.getId());
 				}
 				allDataList = result;
-				RestApp.EXPORT_DATA_SERVICE.getExportedByReferenceId(formIdsList, new ListCallback<ExportedDataItem>() {
+				RestApp.EXPORT_DATA_SERVICE.getExportedFormByReferenceId(formIdsList, new ListCallback<ExportedDataItem>() {
 					@Override
 					public void onFailure(DataServiceException error) {
 						synchPrepareData(handler);
@@ -115,7 +122,9 @@ public abstract class DataExport {
 			
 			JSONObject jsonValue = row.toJSON();
 			if(jsonValue == null) continue;
+			jsonValue.put("i", new JSONNumber(row.getId()));
 			arr.set(arr.size(), jsonValue);
+			
 		}
 		data.put("d", arr);
 		data.put("i", new JSONString(RestApp.getAppId()));
@@ -129,6 +138,11 @@ public abstract class DataExport {
 	 * Export all data from application to remote service
 	 */
 	abstract void synch();
+	/**
+	 * Export only one item to server
+	 * @param item
+	 */
+	abstract void exportItem(RestForm item, ExportItemCallback callback);
 	/**
 	 * Sets application event bus.
 	 * @param eventBus

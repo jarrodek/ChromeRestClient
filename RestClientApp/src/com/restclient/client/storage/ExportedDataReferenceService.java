@@ -29,6 +29,7 @@ public interface ExportedDataReferenceService extends AppDatabase {
 	@Update("CREATE TABLE IF NOT EXISTS exported ("
 			+ "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
 			+ "reference_id INTEGER NOT NULL, "
+			+ "gaeKey TEXT, "
 			+ "type TEXT default 'form')")
 	void initTable(VoidCallback callback);
 
@@ -39,16 +40,23 @@ public interface ExportedDataReferenceService extends AppDatabase {
 	 * @param callback
 	 *            callback function
 	 */
-	@Update(sql = "INSERT INTO exported (reference_id,type) VALUES ({_.getReferenceId()},{_.getType()})", foreach = "data")
+	@Update(sql = "INSERT INTO exported (reference_id, gaeKey, type) VALUES ({_.getReferenceId()},{_.getGaeKey()},{_.getType()})", foreach = "data")
 	void insertExported(Collection<ExportedDataInsertItem> data,
 			VoidCallback callback);
 	/**
 	 * @param idsList
 	 * @param callback
 	 */
-	@Select("SELECT * FROM exported WHERE reference_id IN ({idsList})")
-	void getExportedByReferenceId(List<Integer> idsList, ListCallback<ExportedDataItem> callback);
+	@Select("SELECT * FROM exported WHERE reference_id IN ({idsList}) AND type='form'")
+	void getExportedFormByReferenceId(List<Integer> idsList, ListCallback<ExportedDataItem> callback);
+	/**
+	 * Find row by {@link RestForm} item ID.
+	 * @param restFormId referenced ID
+	 * @param callback
+	 */
+	@Select("SELECT * FROM exported WHERE reference_id = {restFormId} AND type='form'")
+	void findFormByReferenceId(int restFormId, ListCallback<ExportedDataItem> callback);
 	
-	@Select("SELECT COUNT(*) FROM exported")
-	void countExported(ScalarCallback<Integer> callback);
+	@Select("SELECT COUNT(*) FROM exported AND type='form'")
+	void countExportedRestForms(ScalarCallback<Integer> callback);
 }

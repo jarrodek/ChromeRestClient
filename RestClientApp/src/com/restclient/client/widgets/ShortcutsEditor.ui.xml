@@ -38,7 +38,7 @@
 				<span class="{style.label}">
 					Open
 				</span>
-				<p class="{style.desc}">Show "open request" tab</p>
+				<p class="{style.desc}">Show "saved requests" panel</p>
 				<div class="{style.input}">
 					<g:ToggleButton ui:field="openRequestCtrlToggle"
 						addStyleNames="{style.toggleButton}" text="ctrl"></g:ToggleButton>

@@ -1,10 +1,13 @@
 package com.restclient.client.request;
 
+import java.util.HashMap;
+
 public interface ExportCallback {
 	/**
 	 * Called when data has been saved on server
+	 * @param gaeKeys Key - local database item ID, Value - Google App Engine Key as string
 	 */
-	void onSuccess();
+	void onSuccess(HashMap<Integer, String> gaeKeys);
 	/**
 	 * Called when error occurred
 	 * @param message

@@ -43,6 +43,11 @@ public class RequestItem {
 	@Persistent
 	private String applicationUUID;
 	/**
+	 * Helper UUID
+	 */
+	@Persistent
+	private String itemUUID;
+	/**
 	 * User - owner of item.
 	 */
 	@Persistent
@@ -240,6 +245,26 @@ public class RequestItem {
 		this.applicationUUID = applicationUUID;
 	}
 	
+	
+	
+	/**
+	 * @return the itemUUID
+	 */
+	public final String getItemUUID() {
+		return itemUUID;
+	}
+
+
+
+	/**
+	 * @param itemUUID the itemUUID to set
+	 */
+	public final void setItemUUID(String itemUUID) {
+		this.itemUUID = itemUUID;
+	}
+
+
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -250,6 +275,7 @@ public class RequestItem {
 		sb.append("method=").append(method).append(", ");
 		sb.append("encoding=").append(encoding).append(", ");
 		sb.append("ownerUUID=").append(applicationUUID).append(", ");
+		sb.append("itemUUID=").append(itemUUID).append(", ");
 		sb.append("headers={");
 		
 		for(RequestHeader header : headers){

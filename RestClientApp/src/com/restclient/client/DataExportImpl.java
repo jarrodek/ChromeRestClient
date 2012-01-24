@@ -1,19 +1,25 @@
 package com.restclient.client;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.VoidCallback;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.web.bindery.event.shared.EventBus;
 import com.restclient.client.event.StoreDataEvent;
 import com.restclient.client.request.ExportCallback;
 import com.restclient.client.request.ExportRequest;
 import com.restclient.client.storage.ExportedDataInsertItem;
+import com.restclient.client.storage.RestForm;
 
 public class DataExportImpl extends DataExport {
-	EventBus eventBus = null;
 	
 	@Override
 	public void synch() {
@@ -25,10 +31,15 @@ public class DataExportImpl extends DataExport {
 				ExportRequest.export(data, new ExportCallback() {
 					
 					@Override
-					public void onSuccess() {
+					public void onSuccess(HashMap<Integer, String> result) {
 						List<ExportedDataInsertItem> databaseSave = new ArrayList<ExportedDataInsertItem>();
 						for(int _i : includeList){
-							ExportedDataInsertItem _insert = new ExportedDataInsertItem();
+							
+							if(!result.containsKey(_i)){
+								continue;
+							}
+							
+							ExportedDataInsertItem _insert = new ExportedDataInsertItem(result.get(_i));
 							_insert.setType("form");
 							_insert.setReferenceId(_i);
 							databaseSave.add(_insert);
@@ -73,4 +84,58 @@ public class DataExportImpl extends DataExport {
 		this.eventBus = eventBus;
 	}
 
+	@Override
+	public void exportItem(RestForm item, final ExportItemCallback callback) {
+		JSONObject data = new JSONObject();
+		JSONArray arr = new JSONArray();
+		JSONObject jsonValue = item.toJSON();
+		jsonValue.put("i", new JSONNumber(item.getId()));
+		arr.set(0, jsonValue);
+		data.put("d", arr);
+		data.put("i", new JSONString(RestApp.getAppId()));
+		
+		ExportRequest.export(data, new ExportCallback() {
+			
+			@Override
+			public void onSuccess(HashMap<Integer, String> result) {
+				if(result.size() != 1){
+					callback.onFailure("Something went wrong :/ Unable to export item to server.");
+					return;
+				}
+				Entry<Integer, String> it = result.entrySet().iterator().next();
+				List<ExportedDataInsertItem> databaseSave = new ArrayList<ExportedDataInsertItem>();
+				ExportedDataInsertItem _insert = new ExportedDataInsertItem(it.getValue());
+				_insert.setType("form");
+				_insert.setReferenceId(it.getKey());
+				databaseSave.add(_insert);
+				RestApp.EXPORT_DATA_SERVICE.insertExported(databaseSave, new VoidCallback() {
+					@Override
+					public void onFailure(DataServiceException error) {
+						if(RestApp.isDebug()){
+							Log.error("Unable to save exported values to database: " + error.getMessage(), error);
+						}
+					}
+					@Override
+					public void onSuccess() {
+						if(RestApp.isDebug()){
+							Log.debug("Insert into exported values.");
+						}
+					}
+				});
+				
+				callback.onSuccess(_insert);
+			}
+			
+			@Override
+			public void onNotLoggedIn() {
+				callback.onFailure("You are not connected to application server");
+			}
+			
+			@Override
+			public void onFailure(String message, Throwable throwable) {
+				callback.onFailure(message);
+			}
+		});
+	}
+	
 }

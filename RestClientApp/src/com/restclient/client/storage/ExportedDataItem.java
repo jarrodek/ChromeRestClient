@@ -32,4 +32,8 @@ public class ExportedDataItem extends JavaScriptObject {
 	public final native String getType()/*-{
 		return this.type;
 	}-*/;
+	
+	public final native String getAppEngineKey() /*-{
+		return this.gaeKey;
+	}-*/;
 }

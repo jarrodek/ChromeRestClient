@@ -58,11 +58,11 @@ public class AuthServlet extends HttpServlet {
 	            return;
             }
             // Sanitize the extRet URL for XSS protection
-            String regExChrome = "chrome-extension://[a-z]+" + (signIn ? "/auth\\.html" : "/signed_out\\.html");
+            String regExChrome = "chrome-extension://[a-z]+" + (signIn ? "/auth\\.html#auth" : "/signed_out\\.html");
             if (extRet.matches(regExChrome)) {
             	resp.getWriter().println("<meta http-equiv=\"refresh\" content=\"0;url=" + extRet + "\">");
             } else {
-            	String regDevModel = "http://127\\.0\\.0\\.1:8888+" + (signIn ? "/auth\\.html" : "/signed_out\\.html");
+            	String regDevModel = "http://127\\.0\\.0\\.1:8888+" + (signIn ? "/auth\\.html#auth" : "/signed_out\\.html");
             	if (extRet.matches(regDevModel)) {
             		resp.sendRedirect(extRet);
             		return;

@@ -1,7 +1,10 @@
 package com.restclient.client.request;
 
+import java.util.HashMap;
+
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.http.client.RequestException;
+import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
@@ -66,25 +69,39 @@ public class ExportRequest extends ApplicationRequest {
 					return;
 				}
 				JSONObject respObj = responseValue.isObject();
-				if(respObj == null) {
+				if(respObj != null) {
+					JSONValue errorValue = respObj.get("error");
+					if(errorValue != null){
+						int code = Integer.parseInt(respObj.get("code").toString());
+						if(code == 401){
+							callback.onNotLoggedIn();
+							return;
+						}
+						String errorMessage = respObj.get("message").isString().stringValue();
+						if(RestApp.isDebug()){
+							Log.error("Error to save data on server: " + errorMessage);
+						}
+						callback.onFailure("Error to save data on server: " + errorMessage, null);
+						return;
+					}
 					callback.onFailure("Server response is not valid",null);
 					return;
 				}
-				JSONValue errorValue = respObj.get("error");
-				if(errorValue != null){
-					int code = Integer.parseInt(respObj.get("code").toString());
-					if(code == 401){
-						callback.onNotLoggedIn();
-						return;
-					}
-					String errorMessage = respObj.get("message").isString().stringValue();
-					if(RestApp.isDebug()){
-						Log.error("Error to save data on server: " + errorMessage);
-					}
-					callback.onFailure("Error to save data on server: " + errorMessage, null);
+				JSONArray arrValue = responseValue.isArray();
+				if(arrValue == null){
+					callback.onFailure("Server response is not valid. Array expected.",null);
 					return;
 				}
-				callback.onSuccess();
+				HashMap<Integer, String> result = new HashMap<Integer, String>();
+				int cnt = arrValue.size();
+				for(int i=0; i<cnt; i++){
+					JSONObject rObj = arrValue.get(i).isObject();
+					if(rObj == null) continue;
+					String gaeKey = rObj.get("key").isString().stringValue();
+					Integer id = Integer.parseInt(rObj.get("id").toString());
+					result.put(id, gaeKey);
+				}
+				callback.onSuccess(result);
 			}
 
 			@Override

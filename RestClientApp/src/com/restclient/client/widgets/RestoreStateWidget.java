@@ -16,6 +16,7 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -25,6 +26,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -32,16 +34,21 @@ import com.google.gwt.user.cellview.client.HasKeyboardPagingPolicy.KeyboardPagin
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.restclient.client.RestApp;
+import com.restclient.client.StatusNotification;
 import com.restclient.client.event.RestoreRequestEvent;
+import com.restclient.client.request.ImportDataCallback;
+import com.restclient.client.request.ImportRequest;
 import com.restclient.client.storage.RestForm;
 import com.restclient.client.storage.RestFormJS;
 
@@ -53,6 +60,8 @@ public class RestoreStateWidget extends Composite implements SubpageWidget {
 	@UiField(provided=true) CellTable<RestForm> table;
 	@UiField(provided=true) SimplePager pager;
 	@UiField HTMLPanel tableContainer;
+	@UiField TextBox openKey;
+	@UiField Button appImport;
 	
 	private ListDataProvider<RestForm> provider;
 	private SelectionModel<RestForm> selectionModel = null;
@@ -174,7 +183,7 @@ public class RestoreStateWidget extends Composite implements SubpageWidget {
 				SafeHtml safeValue = SafeHtmlUtils.fromString(value);
 				SafeHtmlBuilder b = new SafeHtmlBuilder();
 				b.appendHtmlConstant("<div class=\"url-column-restore\"><a href=\""
-						+ safeValue.asString() + "\">");
+						+ safeValue.asString() + "\" target=\"blank\">");
 				b.append(safeValue);
 				b.appendHtmlConstant("</a></div>");
 				return b.toSafeHtml();
@@ -234,7 +243,7 @@ public class RestoreStateWidget extends Composite implements SubpageWidget {
 				new ButtonCell()) {
 			@Override
 			public String getValue(RestForm object) {
-				return "Select";
+				return "select";
 			}
 		};
 		selectColumn.setSortable(false);
@@ -275,5 +284,58 @@ public class RestoreStateWidget extends Composite implements SubpageWidget {
 			}
 		});
 		table.setColumnWidth(deleteColumn, 90, Unit.PX);
+		
+		//share row
+		Column<RestForm, String> shareColumn = new Column<RestForm, String>(new ButtonCell()){
+			@Override
+			public String getValue(RestForm object) {
+				return "share";
+			}
+		};
+		shareColumn.setSortable(false);
+		shareColumn.setFieldUpdater(new FieldUpdater<RestForm, String>() {
+			@Override
+			public void update(final int index, final RestForm object, final String value) {
+				ShareItemDialog dialog = new ShareItemDialog(object);
+				dialog.show();
+			}
+		});
+		table.addColumn(shareColumn);
+		table.setColumnWidth(shareColumn, 70, Unit.PX);
+	}
+	
+	@UiHandler("appImport")
+	void onImport(ClickEvent e){
+		
+		String key = openKey.getValue();
+		if(key == null || key.trim().equals("")){
+			openKey.getElement().focus();
+			return;
+		}
+		
+		openKey.setEnabled(false);
+		appImport.setEnabled(false);
+		
+		ImportRequest.importData(new String[]{key}, new ImportDataCallback() {
+			
+			@Override
+			public void onSuccess(List<RestForm> result) {
+				openKey.setEnabled(true);
+				appImport.setEnabled(true);
+				if(result.size() == 0){
+					StatusNotification.notify("An error occured. Please, try again later.");
+					return;
+				}
+				eventBus.fireEventFromSource( new RestoreRequestEvent(result.get(0)) , RestoreStateWidget.class);
+			}
+			
+			@Override
+			public void onFailure(String message, Throwable exception) {
+				openKey.setEnabled(true);
+				appImport.setEnabled(true);
+				StatusNotification.notify("An error occured. Please, try again later.");
+			}
+		});
+		
 	}
 }

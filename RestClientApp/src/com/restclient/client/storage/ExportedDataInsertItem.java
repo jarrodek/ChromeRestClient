@@ -9,9 +9,13 @@ package com.restclient.client.storage;
 public class ExportedDataInsertItem {
 	private int referenceId;
 	private String type;
+	/**
+	 * Google App Engine Key reference
+	 */
+	private final String gaeKey;
 
-	public ExportedDataInsertItem() {
-
+	public ExportedDataInsertItem(String gaeKey) {
+		this.gaeKey = gaeKey;
 	}
 
 	/**
@@ -43,6 +47,13 @@ public class ExportedDataInsertItem {
 	 */
 	public final void setReferenceId(int referenceId) {
 		this.referenceId = referenceId;
+	}
+
+	/**
+	 * @return the gaeKey
+	 */
+	public final String getGaeKey() {
+		return gaeKey;
 	}
 
 	

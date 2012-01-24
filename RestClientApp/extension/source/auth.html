@@ -12,15 +12,19 @@
 // In application handlers are hadle time change and do its actions.
 //
 try{
-localStorage.setItem('applogin',new Date().getTime());
+	if(location.hash == '#auth'){
+		localStorage.setItem('applogin',new Date().getTime());
+	}
 } catch(e){}
-if(!!(chrome.tabs)){
-	chrome.tabs.getCurrent(function(tab){
-	    chrome.tabs.remove(tab.id);
-	});
-} else {
-	window.close();
-}
+// if(!!(chrome.tabs)){
+// 	chrome.tabs.getCurrent(function(tab){
+// 	    chrome.tabs.remove(tab.id);
+// 	});
+// //require additional permissions
+// } else {
+// 	window.close();
+// }
+window.close();
 </script>
 </head>
 <body>

@@ -81,8 +81,8 @@ public class Tabs {
 
 	/**
 	 * Creates a new tab. <br/>
-	 * Note: This function can be used without requesting the 'tabs' permission
-	 * in the manifest.
+	 * <p>Note:<br/>This function can be used without requesting the <b>'tabs'</b> permission
+	 * in the manifest.</p>
 	 */
 	public final native void create(CreateProperties props, TabCallback handler)/*-{
 		var clb = $entry(function(item) {

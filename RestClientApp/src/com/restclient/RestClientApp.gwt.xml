@@ -24,6 +24,8 @@
 	<!-- Compile for Chrome only -->
 	<set-property name="user.agent" value="safari"/>
 	
+	<set-configuration-property name="UiBinder.useLazyWidgetBuilders" value="true"/>
+	
 	<extend-property name="log_level" values="DEBUG" />
 	<set-property name="log_level" value="DEBUG" />
 	<set-property name="log_DivLogger" value="DISABLED" />

@@ -167,7 +167,7 @@ public class RestApp {
 		if (storage != null) {
 			String debugValue = storage.getItem(RestApp.StorageKeys.DEBUG_KEY);
 			if (debugValue == null || debugValue.isEmpty()) {
-				debugValue = "true";
+				debugValue = "false";
 			}
 			result = debugValue.equals("true");
 			Storage.addStorageEventHandler(new StorageEvent.Handler() {
