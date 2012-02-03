@@ -1,5 +1,11 @@
 package com.restclient.client.widgets;
 
+import java.util.List;
+
+import com.allen_sauer.gwt.log.client.Log;
+import com.google.code.gwt.database.client.service.DataServiceException;
+import com.google.code.gwt.database.client.service.ListCallback;
+import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -11,11 +17,15 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
+import com.restclient.client.RestApp;
 import com.restclient.client.event.FormStateSaveEvent;
+import com.restclient.client.storage.RestFormJS;
 
 public class SaveStateDialog {
 	interface Binder extends UiBinder<DialogBox, SaveStateDialog> {
@@ -26,6 +36,8 @@ public class SaveStateDialog {
 	@UiField TextBox stateName;
 	@UiField Button save;
 	@UiField Label errorLabel;
+	@UiField HTMLPanel dataValuesPanel;
+	@UiField HTMLPanel overwriteInfoPanel;
 	
 	private final EventBus eventBus;
 	
@@ -88,14 +100,66 @@ public class SaveStateDialog {
 
 	@UiHandler("save")
 	void onSave(ClickEvent event) {
-		String currentValue = stateName.getValue();
+		final String currentValue = stateName.getValue();
 		if( currentValue.equals("") ){
 			errorLabel.getElement().setInnerText("Form name is empty");
 			errorLabel.setVisible(true);
 			errorTimer.schedule(4000);
+			stateName.getElement().focus();
 			return;
 		}
-		eventBus.fireEventFromSource(new FormStateSaveEvent(currentValue), SaveStateDialog.class);
+		//
+		// First check if name is available. If not suggest replace it
+		//
+		RestApp.FORM_SERVICE.getByName(currentValue, new ListCallback<RestFormJS>() {
+			
+			@Override
+			public void onFailure(DataServiceException error) {
+				fireEventEndExit(currentValue);
+			}
+			
+			@Override
+			public void onSuccess(List<RestFormJS> result) {
+				if(result == null || result.size() == 0){
+					fireEventEndExit(currentValue);
+					return;
+				}
+				dataValuesPanel.setVisible(false);
+				overwriteInfoPanel.setVisible(true);
+			}
+		});
+	}
+	
+	private void fireEventEndExit(String formName){
+		eventBus.fireEventFromSource(new FormStateSaveEvent(formName), SaveStateDialog.class);
 		dialog.hide();
+	}
+	
+	@UiHandler("overwrite")
+	void onOverwrite(ClickEvent e){
+		final String currentValue = stateName.getValue();
+		RestApp.FORM_SERVICE.deleteByName(currentValue, new VoidCallback() {
+			@Override
+			public void onFailure(DataServiceException error) {
+				if(RestApp.isDebug()){
+					Log.error("Unble to remove previous form :/ Try again. ", error);
+				}
+				Window.alert("Unable to complete. Check console output for more info.");
+			}
+			@Override
+			public void onSuccess() {
+				fireEventEndExit(currentValue);
+			}
+		});
+	}
+	@UiHandler("saveAsNew")
+	void onSaveAsNew(ClickEvent e){
+		final String currentValue = stateName.getValue();
+		fireEventEndExit(currentValue);
+	}
+	@UiHandler("back")
+	void onBack(ClickEvent e){
+		dataValuesPanel.setVisible(true);
+		overwriteInfoPanel.setVisible(false);
 	}
 }

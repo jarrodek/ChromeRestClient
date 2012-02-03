@@ -56,6 +56,9 @@ public interface RestFormService extends AppDatabase {
 	@Select("SELECT * FROM rest_forms ORDER BY name")
 	void getAllData(ListCallback<RestFormJS> callback);
 
+	@Select("SELECT * FROM rest_forms WHERE name = {name}")
+	void getByName(String name, ListCallback<RestFormJS> callback);
+	
 	/**
 	 * @param id
 	 * @param name
@@ -71,4 +74,9 @@ public interface RestFormService extends AppDatabase {
 	@Update("DELETE FROM rest_forms WHERE ID = {id}")
 	void deleteItem(int id, VoidCallback callback);
 	
+	@Update("DELETE FROM rest_forms WHERE name = {name}")
+	void deleteByName(String name, VoidCallback callback);
+	
+	@Update("UPDATE rest_forms SET data = {data}, time = {current.getTime()} WHERE ID = {id}")
+	void updateFormData(int id, String data, Date current, VoidCallback callback);
 }

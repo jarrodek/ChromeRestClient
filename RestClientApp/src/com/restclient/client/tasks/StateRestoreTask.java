@@ -1,5 +1,7 @@
 package com.restclient.client.tasks;
 
+import com.allen_sauer.gwt.log.client.Log;
+import com.restclient.client.RestApp;
 import com.restclient.client.ShortcutHandlers;
 import com.restclient.client.request.RequestParameters;
 import com.restclient.client.request.ViewParameters;
@@ -11,6 +13,9 @@ public class StateRestoreTask implements LoadTask {
 	
 	@Override
 	public void run(TasksCallback callback, boolean lastRun) {
+		if(RestApp.isDebug()){
+			Log.debug("Start task: restore view and form state.");
+		}
 		this.callback = callback;
 		//
 		// Restore view.

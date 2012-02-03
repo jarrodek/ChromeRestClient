@@ -282,7 +282,7 @@ public class RequestHistoryItem implements Serializable {
 		}
 		data.put("headers", headersArray);
 		
-		JSONNumber updated = this.updated == 0 ? new JSONNumber( new Date().getTime() )
+		JSONNumber updated = this.updated == 0 ? new JSONNumber(new Date().getTime())
 		: new JSONNumber(this.updated);
 		data.put("updated", updated);
 		return data;

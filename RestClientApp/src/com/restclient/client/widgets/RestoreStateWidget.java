@@ -46,6 +46,7 @@ import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.restclient.client.RestApp;
 import com.restclient.client.StatusNotification;
+import com.restclient.client.event.FormStateRemoveEvent;
 import com.restclient.client.event.RestoreRequestEvent;
 import com.restclient.client.request.ImportDataCallback;
 import com.restclient.client.request.ImportRequest;
@@ -69,10 +70,12 @@ public class RestoreStateWidget extends Composite implements SubpageWidget {
 	
 	public RestoreStateWidget(EventBus eventBus) {
 		this.eventBus = eventBus;
+		
 		SimplePager.Resources pagerResources = GWT.create(SimplePager.Resources.class);
 		provider = new ListDataProvider<RestForm>();
-		table = new CellTable<RestForm>( provider.getKeyProvider() );
+		table = new CellTable<RestForm>(provider.getKeyProvider());
 		pager = new SimplePager(TextLocation.CENTER,pagerResources, false, 0, true);
+		
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
 		
 		String data = "<p class=\"note\">";
@@ -118,6 +121,7 @@ public class RestoreStateWidget extends Composite implements SubpageWidget {
 			public void onSuccess(List<RestFormJS> result) {
 				List<RestForm> list = new ArrayList<RestForm>();
 				for (RestFormJS data : result) {
+					if(data == null) continue;
 					RestForm row = new RestForm();
 					row.setData(data.getData());
 					row.setId(data.getId());
@@ -133,6 +137,7 @@ public class RestoreStateWidget extends Composite implements SubpageWidget {
 	
 	private void initTableColumns(SelectionModel<RestForm> selectionModel2,
 			ListHandler<RestForm> sortHandler) {
+		
 		// name
 		Column<RestForm, String> nameColumn = new Column<RestForm, String>(
 				new EditTextCell()) {
@@ -145,6 +150,12 @@ public class RestoreStateWidget extends Composite implements SubpageWidget {
 		sortHandler.setComparator(nameColumn, new Comparator<RestForm>() {
 			@Override
 			public int compare(RestForm o1, RestForm o2) {
+				if(o1 == null || o1.getName() == null){
+					return -1;
+				}
+				if(o2 == null || o2.getName() == null) {
+					return 1;
+				}
 				return o1.getName().compareTo(o2.getName());
 			}
 		});
@@ -202,6 +213,12 @@ public class RestoreStateWidget extends Composite implements SubpageWidget {
 		sortHandler.setComparator(urlColumn, new Comparator<RestForm>() {
 			@Override
 			public int compare(RestForm o1, RestForm o2) {
+				if(o1 == null || o1.getUrl() == null){
+					return -1;
+				}
+				if(o2 == null || o2.getUrl() == null) {
+					return 1;
+				}
 				return o1.getUrl().compareTo(o2.getUrl());
 			}
 		});
@@ -216,24 +233,24 @@ public class RestoreStateWidget extends Composite implements SubpageWidget {
 				new DateCell(format)) {
 			@Override
 			public Date getValue(RestForm object) {
-				long time = object.getTime();
-				long ltime = Long.parseLong(String.valueOf(time));
-				return new Date(ltime);
+				Long time = object.getTime();
+				if(time == null){
+					return null;
+				}
+				return new Date(time);
 			}
 		};
 		timeColumn.setSortable(true);
 		sortHandler.setComparator(timeColumn, new Comparator<RestForm>() {
 			@Override
 			public int compare(RestForm o1, RestForm o2) {
-				double t1 = o1.getTime();
-				double t2 = o2.getTime();
-				if (t1 > t2) {
-					return 1;
-				}
-				if (t1 < t2) {
+				if(o1 == null || o1.getTime() == null){
 					return -1;
 				}
-				return 0;
+				if(o2 == null || o2.getTime() == null) {
+					return 1;
+				}
+				return o1.getTime().compareTo(o2.getTime());
 			}
 		});
 		table.addColumn(timeColumn, "Add date");
@@ -269,15 +286,19 @@ public class RestoreStateWidget extends Composite implements SubpageWidget {
 			@Override
 			public void update(final int index, final RestForm object, final String value) {
 				if(Window.confirm("Do you really want to remove this item?")){
-					
-					RestApp.FORM_SERVICE.deleteItem(object.getId(), new VoidCallback() {
+					final int removeId = object.getId();
+					RestApp.FORM_SERVICE.deleteItem(removeId, new VoidCallback() {
 						@Override
 						public void onFailure(DataServiceException error) {
 							Window.alert("Error to remove :( \n"+error.getMessage());
 						}
 						@Override
 						public void onSuccess() {
+							if(RestApp.isDebug()){
+								Log.debug("Saved item has been removed.");
+							}
 							provider.getList().remove(index);
+							eventBus.fireEvent(new FormStateRemoveEvent(removeId));
 						}
 					});
 				}

@@ -288,6 +288,12 @@ public class HistoryListWidget extends Composite implements SubpageWidget {
 		pager = new SimplePager(TextLocation.CENTER,pagerResources, false, 0, true);
 		
 		initWidget(binder.createAndBindUi(this));
+	}
+	
+	private boolean isInitialized = false;
+	private void initializeTable(){
+		if(isInitialized) return;
+		isInitialized = true;
 		
 		HistoryCell historyCell = new HistoryCell();
 		
@@ -338,7 +344,6 @@ public class HistoryListWidget extends Composite implements SubpageWidget {
 	}
 	
 	
-	
 	protected void getHistoryValues(final int start, int limit) {
 		List<RequestHistoryItem> response = RequestHistory.getHistory(start, limit);
 		historyList.setRowData(start, response);
@@ -351,13 +356,15 @@ public class HistoryListWidget extends Composite implements SubpageWidget {
 	 */
 	@Override
 	public void onShow() {
-		int size = RequestHistory.size();
-		historyList.setRowCount(size);
+		initializeTable();
 		
-		Range range = historyList.getVisibleRange();
-		int start = historyList.getPageStart();
-		int end = range.getLength();
-		getHistoryValues(start, end);
+//		int size = RequestHistory.size();
+//		historyList.setRowCount(size);
+//		
+//		Range range = historyList.getVisibleRange();
+//		int start = historyList.getPageStart();
+//		int end = range.getLength();
+//		getHistoryValues(start, end);
 	}
 	/**
 	 * Fire restore event from history item.

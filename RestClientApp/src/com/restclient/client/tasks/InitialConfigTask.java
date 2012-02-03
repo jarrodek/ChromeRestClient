@@ -39,6 +39,9 @@ public class InitialConfigTask implements LoadTask {
 	
 	@Override
 	public void run(TasksCallback callback, boolean lastRun) {
+		if(RestApp.isDebug()){
+			Log.debug("Start task: initalize database.");
+		}
 		this.callback = callback;
 		initTables();
 	}

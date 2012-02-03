@@ -23,14 +23,7 @@ public class TestDataServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		// synchronized (monitor) {
-		// try {
-		// monitor.wait(100);
-		// } catch (InterruptedException e) {
-		// e.printStackTrace();
-		// }
-		// }
-
+		
 		String payload = req.getParameter("p");
 		if (payload == null || payload.equals("")) {
 			resp.addHeader("Location", "/RestClientApp.html");

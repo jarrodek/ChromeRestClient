@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.RowIdListCallback;
+import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -35,6 +36,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.restclient.client.event.FormStateRemoveEvent;
 import com.restclient.client.event.FormStateSaveEvent;
 import com.restclient.client.event.HistoryRestoreEvent;
 import com.restclient.client.event.ImportExternalDataAction;
@@ -104,6 +106,9 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 	@UiField AppStyle style;
 	
 	private SaveStateDialog saveStateDialog;
+	private boolean isRestoredRequest = false;
+	private int currentRestoredRequestId = -1;
+	private String currentRestoredRequestName = null;
 	
 	/**
 	 * This is the entry point method.
@@ -135,6 +140,9 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 	
 	
 	private void startTasks() {
+		if(RestApp.isDebug()){
+			Log.debug("Start initial tasks.");
+		}
 		InitialConfigTask init = new InitialConfigTask();
 		StateRestoreTask restore = new StateRestoreTask();
 		UpdateTask update = new UpdateTask();
@@ -188,7 +196,50 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 		SaveRequestEvent.register(eventBus, new SaveRequestEvent.Handler() {
 			@Override
 			public void onSaveAction(Object source) {
+				
+				if(isRestoredRequest){
+					StringBuilder sb = new StringBuilder();
+					sb.append("Overwrite current loaded form \"");
+					sb.append(currentRestoredRequestName);
+					sb.append("\"?").append("\n");
+					sb.append("Press \"cancel\" to show save as dialog.");
+					
+					if(Window.confirm(sb.toString())){
+						final String config = RequestParameters.getInstance().toString();
+						final Date current = new Date();
+						
+						RestApp.FORM_SERVICE.updateFormData(currentRestoredRequestId, config, current, new VoidCallback(){
+							@Override
+							public void onFailure(DataServiceException error) {
+								if(RestApp.isDebug()){
+									Log.error("SaveRequestEvent handler: Unable to update data", error);
+								}
+								StatusNotification.notify(error.getMessage(), StatusNotification.TYPE_ERROR);
+							}
+							@Override
+							public void onSuccess() {
+								if(RestApp.isDebug()){
+									Log.debug("SaveRequestEvent handler: updated!");
+									StatusNotification.notify("Item updated.", StatusNotification.TYPE_NORMAL);
+								}
+							}
+						});
+						return;
+					}
+				}
 				createSaveDialog();
+			}
+		});
+		FormStateRemoveEvent.register(eventBus, new FormStateRemoveEvent.Handler() {
+			@Override
+			public void onRemove(int removedId) {
+				if(isRestoredRequest){
+					if(currentRestoredRequestId == removedId){
+						isRestoredRequest = false;
+						currentRestoredRequestId = -1;
+						currentRestoredRequestName = null;
+					}
+				}
 			}
 		});
 		//
@@ -198,35 +249,48 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 			@Override
 			public void onSave(final String formName, Object source) {
 				if( formName.trim().equals("") ){
+					if(RestApp.isDebug()){
+						Log.warn("FormStateSaveEvent handler: no name specified!");
+					}
 					return;
 				}
 				final String url = RequestParameters.getUrl();
-				if( url.equals("") ){
+				if(url.equals("")){
+					if(RestApp.isDebug()){
+						Log.warn("FormStateSaveEvent handler: current URL is empty!");
+					}
 					return;
 				}
 				final String config = RequestParameters.getInstance().toString();
 				final Date current = new Date();
+				
+				if(RestApp.isDebug()){
+					Log.debug("FormStateSaveEvent handler: Got full data. Try to save in DB.");
+				}
+				
 				RestApp.FORM_SERVICE.insertData(formName, url, config, current, new RowIdListCallback() {
 					@Override
 					public void onFailure(DataServiceException error) {
+						if(RestApp.isDebug()){
+							Log.warn("FormStateSaveEvent handler: Error save data!", error);
+						}
 						ErrorDialog dialog = new ErrorDialog();
 						dialog.getHandler().publish(new LogRecord(dialog.getHandler().getLevel(), error.getMessage()));
 					}
 					@Override
 					public void onSuccess(List<Integer> rowIds) {
+						
 						if( rowIds.size() == 0 ){
+							if(RestApp.isDebug()){
+								Log.error("FormStateSaveEvent handler: Insert has not return insert ID.");
+							}
 							ErrorDialog dialog = new ErrorDialog();
 							dialog.getHandler().publish(new LogRecord(dialog.getHandler().getLevel(), "Something went wrong while saveing form state. Undefined error."));
 							return;
 						}
-						int ID = rowIds.get(0).intValue();
-						RestForm row = new RestForm();
-						row.setData(config);
-						row.setId(ID);
-						row.setName(formName);
-						row.setTime(current.getTime());
-						row.setUrl(url);
-						restoreWidget.addRow(row);
+						if(RestApp.isDebug()){
+							Log.debug("FormStateSaveEvent handler: saved!");
+						}
 					}
 				});
 			}
@@ -234,6 +298,10 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 		RestoreRequestEvent.register(eventBus, new RestoreRequestEvent.Handler() {
 			@Override
 			public void onRestoreAction(RestForm form, Object source) {
+				isRestoredRequest = true;
+				currentRestoredRequestId = form.getId();
+				currentRestoredRequestName = form.getName();
+				
 				responseWidget.setVisible(false);
 				RequestParameters.restoreFromSavedState(form);
 				History.newItem("request");

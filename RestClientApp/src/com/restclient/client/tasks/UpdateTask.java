@@ -39,6 +39,9 @@ public class UpdateTask implements LoadTask {
 	
 	@Override
 	public void run(TasksCallback callback, boolean lastRun) {
+		if(RestApp.isDebug()){
+			Log.debug("Start task: Update app values.");
+		}
 		this.callback = callback;
 		updateHeadersXvalues();
 	}

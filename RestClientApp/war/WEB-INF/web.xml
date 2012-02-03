@@ -61,7 +61,8 @@
     
 	<!-- Default page to serve -->
 	<welcome-file-list>
-		<welcome-file>RestClientApp.html</welcome-file>
+<!-- 		<welcome-file>RestClientApp.html</welcome-file> -->
+		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>
 
 	
