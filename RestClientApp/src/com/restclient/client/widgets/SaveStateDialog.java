@@ -106,8 +106,16 @@ public class SaveStateDialog {
 			errorLabel.setVisible(true);
 			errorTimer.schedule(4000);
 			stateName.getElement().focus();
+			if(RestApp.isDebug()){
+				Log.warn("Form name is empty.");
+			}
 			return;
 		}
+		
+		if(RestApp.isDebug()){
+			Log.debug("Checking if name: "+currentValue+" exists on database.");
+		}
+		
 		//
 		// First check if name is available. If not suggest replace it
 		//
@@ -115,14 +123,23 @@ public class SaveStateDialog {
 			
 			@Override
 			public void onFailure(DataServiceException error) {
+				if(RestApp.isDebug()){
+					Log.warn("Failure to fetch database data. Save as new.", error);
+				}
 				fireEventEndExit(currentValue);
 			}
 			
 			@Override
 			public void onSuccess(List<RestFormJS> result) {
 				if(result == null || result.size() == 0){
+					if(RestApp.isDebug()){
+						Log.debug("No record found. Save as new");
+					}
 					fireEventEndExit(currentValue);
 					return;
+				}
+				if(RestApp.isDebug()){
+					Log.debug("Found previous saved data. Show overwrite options.");
 				}
 				dataValuesPanel.setVisible(false);
 				overwriteInfoPanel.setVisible(true);
@@ -131,12 +148,18 @@ public class SaveStateDialog {
 	}
 	
 	private void fireEventEndExit(String formName){
+		if(RestApp.isDebug()){
+			Log.debug("Fire event to save form with name: " + formName);
+		}
 		eventBus.fireEventFromSource(new FormStateSaveEvent(formName), SaveStateDialog.class);
 		dialog.hide();
 	}
 	
 	@UiHandler("overwrite")
 	void onOverwrite(ClickEvent e){
+		if(RestApp.isDebug()){
+			Log.debug("Overwrite new form data. First remove old one.");
+		}
 		final String currentValue = stateName.getValue();
 		RestApp.FORM_SERVICE.deleteByName(currentValue, new VoidCallback() {
 			@Override
@@ -148,12 +171,18 @@ public class SaveStateDialog {
 			}
 			@Override
 			public void onSuccess() {
+				if(RestApp.isDebug()){
+					Log.debug("Old form values has been removed.");
+				}
 				fireEventEndExit(currentValue);
 			}
 		});
 	}
 	@UiHandler("saveAsNew")
 	void onSaveAsNew(ClickEvent e){
+		if(RestApp.isDebug()){
+			Log.debug("Saving as new...");
+		}
 		final String currentValue = stateName.getValue();
 		fireEventEndExit(currentValue);
 	}

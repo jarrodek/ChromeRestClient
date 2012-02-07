@@ -248,6 +248,9 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 		FormStateSaveEvent.register(eventBus, new FormStateSaveEvent.Handler() {
 			@Override
 			public void onSave(final String formName, Object source) {
+				if(RestApp.isDebug()){
+					Log.warn("FormStateSaveEvent handler: Received data to save.");
+				}
 				if( formName.trim().equals("") ){
 					if(RestApp.isDebug()){
 						Log.warn("FormStateSaveEvent handler: no name specified!");
