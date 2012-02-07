@@ -318,6 +318,6 @@ public class ResponseBody extends Composite {
 	}
 	private final native void writeRawBody(String body)/*-{
 		var wnd = $wnd.open();
-		wnd.document.body.innerText = body;
+		wnd.document.body.innerHTML = body;
 	}-*/;
 }

@@ -30,12 +30,21 @@ public class RequestHistory {
 	
 	private static final String HISTORY_LIST_STORAGE_KEY = "historyList";
 	
-	private static final int MAX_HISTORY_ITEMS;
-	static{
-		MAX_HISTORY_ITEMS = 60;
+	private static int MAX_HISTORY_ITEMS = getHistoryLimit();
+	static List<RequestHistoryItem> items = new ArrayList<RequestHistoryItem>(MAX_HISTORY_ITEMS);
+	
+	private static int getHistoryLimit(){
+		int result = 60;
+		Storage storage = Storage.getLocalStorageIfSupported();
+		if( storage == null ){
+			return result;
+		}
+		try{
+			result = Integer.parseInt(storage.getItem(RestApp.StorageKeys.HISTORY_AMOUNT));
+		} catch(Exception e){};
+		return result;
 	}
 	
-	static List<RequestHistoryItem> items = new ArrayList<RequestHistoryItem>(MAX_HISTORY_ITEMS);
 	/**
 	 * History list comparator by timestamp.
 	 * @author Paweł Psztyć
@@ -87,7 +96,7 @@ public class RequestHistory {
 		int len = arr.size();
 		for(int i=0; i<len;i++){
 			JSONValue values = arr.get(i);
-			items.add( new RequestHistoryItem(values) );
+			items.add(new RequestHistoryItem(values));
 		}
 		if( RestApp.isDebug() ){
 			Log.debug("Restored history from local storge. List has: "+items.size()+" elements.");
@@ -100,9 +109,9 @@ public class RequestHistory {
 	 */
 	public static void store(){
 		checkRestore();
-		if( items.size() == 0 ){
-			return;
-		}
+//		if( items.size() == 0 ){
+//			return;
+//		}
 		Storage storage = Storage.getLocalStorageIfSupported();
 		if( storage == null ){
 			return;
@@ -126,27 +135,25 @@ public class RequestHistory {
 		checkRestore();
 		Collections.sort(items, updateComparator);
 		
-		
 		JSONObject data = RequestParameters.toJSON();
 		RequestHistoryItem item = new RequestHistoryItem(data);
 		RequestHistoryItem listItem = getEqual(item);
 		long time = new Date().getTime();
-		if( listItem == null ){
-			if( RestApp.isDebug() ){
+		if(listItem == null){
+			if(RestApp.isDebug()){
 				Log.debug("Adding new item to history.");
-				Log.debug(items.size() +" : "+ MAX_HISTORY_ITEMS);
+				Log.debug("Now history list contains "+items.size() +" items out of "+ MAX_HISTORY_ITEMS + " set in options.");
 			}
 			if(items.size() > MAX_HISTORY_ITEMS){
 				items.remove(MAX_HISTORY_ITEMS-1); // remove oldest one
-				if( RestApp.isDebug() ){
-					Log.debug("Remove oldest history item.");
+				if(RestApp.isDebug()){
+					Log.debug("Remove oldest history item to reach history limit.");
 				}
 			}
-			item.setUpdated( time );
-			items.add( item );
+			item.setUpdated(time);
+			items.add(item);
 		} else {
-//			Log.debug("Update existing history item (same values).");
-			listItem.setUpdated( time );
+			listItem.setUpdated(time);
 		}
 	}
 	/**
@@ -172,8 +179,8 @@ public class RequestHistory {
 	/**
 	 * Check if giver source History object is equal to another history object.
 	 * 
-	 * Equal mean:
-	 * - same headers
+	 * Equal means:
+	 * - same headers list
 	 * - same URL
 	 * - same request BODY
 	 * - same METHOD
@@ -185,25 +192,25 @@ public class RequestHistory {
 	 * @return
 	 */
 	private static boolean isEqual(RequestHistoryItem source, RequestHistoryItem item){
-//		Log.debug(source.getRequestUrl()+" : "+item.getRequestUrl());
+
 		if(!source.getRequestUrl().equals( item.getRequestUrl() )){
 			return false;
 		}
-//		Log.debug(source.getFormEncoding()+" : "+item.getFormEncoding());
+
 		if(!source.getFormEncoding().equals( item.getFormEncoding() )){
 			return false;
 		}
-//		Log.debug(source.getMethod()+" : "+item.getMethod());
+
 		if(!source.getMethod().equals( item.getMethod() )){
 			return false;
 		}
-//		Log.debug(source.getPostData()+" : "+item.getPostData());
+
 		if(!source.getPostData().equals( item.getPostData() )){
 			return false;
 		}
 		List<RequestHeader> sourceHeaders = source.getHeaders();
 		List<RequestHeader> itemHeaders = item.getHeaders();
-//		Log.debug(sourceHeaders.size()+" : "+itemHeaders.size());
+		
 		if( sourceHeaders.size() != itemHeaders.size() ){
 			return false;
 		}
@@ -247,10 +254,9 @@ public class RequestHistory {
 			return result;
 		}
 		
-		int maxIndex = Math.min( end, (listSize-1));
-//		Log.debug("Max item index: "+maxIndex+", start: "+start);
+		int maxIndex = Math.min(end, (listSize-1));
 		for( int i=start; i<=maxIndex; i++ ){
-			result.add( items.get(i) );
+			result.add(items.get(i));
 		}
 		
 		return result;
@@ -262,5 +268,31 @@ public class RequestHistory {
 	public static int size(){
 		checkRestore();
 		return items.size();
+	}
+	/**
+	 * Clear history list ad remove from local storage
+	 */
+	public static void clearHistory(){
+		if(RestApp.isDebug()){
+			Log.debug("RequestHistory: Clear history list.");
+		}
+		items.clear();
+		
+		Storage storage = Storage.getLocalStorageIfSupported();
+		if( storage == null ){
+			if(RestApp.isDebug()){
+				Log.warn("RequestHistory: Local storage is not supported.");
+			}
+			return;
+		}
+		try{
+			storage.setItem(HISTORY_LIST_STORAGE_KEY, "[]");
+		} catch(Exception e){
+			Log.error("Unable to remove history list. ",e);
+		}
+		
+		if(RestApp.isDebug()){
+			Log.debug("RequestHistory: Cleared.");
+		}
 	}
 }

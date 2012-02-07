@@ -51,22 +51,15 @@
         <servlet-name>AuthServlet</servlet-name>
         <url-pattern>/auth/signin</url-pattern>
     </servlet-mapping>
-	
-	
-	
 	<servlet-mapping>
 		<servlet-name>pingEntry</servlet-name>
 		<url-pattern>/ping/*</url-pattern>
 	</servlet-mapping>
-    
 	<!-- Default page to serve -->
 	<welcome-file-list>
 <!-- 		<welcome-file>RestClientApp.html</welcome-file> -->
 		<welcome-file>index.html</welcome-file>
-	</welcome-file-list>
-
-	
-	
+	</welcome-file-list>	
 	<filter>
         <filter-name>extensionOrginFilter</filter-name>
         <filter-class>com.restclient.server.ExtensionServletFilter</filter-class>

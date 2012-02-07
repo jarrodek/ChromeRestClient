@@ -420,7 +420,8 @@ public class RestClientApp implements EntryPoint, ResizeHandler, ValueChangeHand
 		//
 		int history = historyPanel.getOffsetHeight();
 		if( history > 0 && windowHeight >= history ){
-			historyPanel.setHeight(windowHeight+"px");
+//			historyPanel.setHeight(windowHeight+"px");
+			historyPanel.getElement().getStyle().setProperty("minHeight", windowHeight+"px");
 		} else {
 			historyPanel.setHeight("100%");
 		}

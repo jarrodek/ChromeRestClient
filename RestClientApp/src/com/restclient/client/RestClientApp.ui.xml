@@ -6,6 +6,7 @@
 		@def animationsTime 0.15s;
 		.mainPanel {
 			display: -webkit-box;
+			display: -moz-box;
 			position: absolute;
 			left: 0;
 			right: 0;
@@ -202,6 +203,12 @@
 						</section>
 						<section class="{style.aboutContent}">
 							<h3>Changelog</h3>
+							<p>2/7/2012</p>
+							<ul>
+								<li>Fixed history ammout</li>
+								<li>Added option "Clear history"</li>
+								<li>In "Parsed response" tab "Open output in new window" now paste HTML value into new window (instead of HTML markup text)</li>
+							</ul>
 							<p>1/24/2012</p>
 							<ul>
 								<li>Added Google App Engine server to store saved data and share it with coworkers</li>

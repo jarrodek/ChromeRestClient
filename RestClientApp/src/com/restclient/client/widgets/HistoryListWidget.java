@@ -10,6 +10,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -20,6 +21,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.CellList.Resources;
 import com.google.gwt.user.cellview.client.HasKeyboardPagingPolicy.KeyboardPagingPolicy;
@@ -40,6 +42,7 @@ import com.google.gwt.view.client.Range;
 import com.google.gwt.xhr2.client.RequestHeader;
 import com.restclient.client.RequestHistory;
 import com.restclient.client.RequestHistoryItem;
+import com.restclient.client.StatusNotification;
 import com.restclient.client.event.HistoryRestoreEvent;
 import com.restclient.client.resources.CellResources;
 
@@ -140,7 +143,7 @@ public class HistoryListWidget extends Composite implements SubpageWidget {
 				boolean isSelected = selectionModel.isSelected(value);
 				EventTarget target = event.getEventTarget();
 				Element targetElement = target.cast();
-				if(targetElement.getClassName().contains( "gwt-Button" )){
+				if(targetElement.getClassName().contains("gwt-Button")){
 					if( !isSelected ){
 						selectionModel.setSelected(value, true);
 					}
@@ -161,7 +164,6 @@ public class HistoryListWidget extends Composite implements SubpageWidget {
 				}
 				selectionModel.setSelected(value, !isSelected);
 			}
-			
 		}
 		
 		@Override
@@ -232,8 +234,6 @@ public class HistoryListWidget extends Composite implements SubpageWidget {
 			SafeHtmlBuilder headersBuilder = new SafeHtmlBuilder();
 			int headersMin = Math.min(headers.size(), 4);
 			
-			
-			
 			for( int i = 0; i<headersMin; i++ ){
 				RequestHeader item = headers.get(i);
 				String keaderKey = item.getName();
@@ -257,12 +257,12 @@ public class HistoryListWidget extends Composite implements SubpageWidget {
 	}
 	
 	private EventBus eventBus;
-	private CellList<RequestHistoryItem> historyList;
 	private MultiSelectionModel<RequestHistoryItem> selectionModel;
 	private final Label DEFAULT_EMPTY_MESSGAE = new Label("You do not have saved history.");
 	
 	@UiField WidgetStyle style;
 	@UiField(provided=true) SimplePager pager;
+	@UiField(provided=true) CellList<RequestHistoryItem> historyList;
 	@UiField HTMLPanel bodyPanel;
 	
 	private static final ProvidesKey<RequestHistoryItem> KEY_PROVIDER = new ProvidesKey<RequestHistoryItem>() {
@@ -287,20 +287,14 @@ public class HistoryListWidget extends Composite implements SubpageWidget {
 		SimplePager.Resources pagerResources = GWT.create(SimplePager.Resources.class);
 		pager = new SimplePager(TextLocation.CENTER,pagerResources, false, 0, true);
 		
-		initWidget(binder.createAndBindUi(this));
-	}
-	
-	private boolean isInitialized = false;
-	private void initializeTable(){
-		if(isInitialized) return;
-		isInitialized = true;
-		
 		HistoryCell historyCell = new HistoryCell();
-		
 		Resources resources = (com.google.gwt.user.cellview.client.CellList.Resources) GWT.create(CellResources.class);
 		historyList = new CellList<RequestHistoryItem>(historyCell,resources,KEY_PROVIDER);
+		
+		initWidget(binder.createAndBindUi(this));
+		
 		historyList.setVisibleRange(0, 19);
-		DEFAULT_EMPTY_MESSGAE.addStyleName( style.cellListEmptyNote() );
+		DEFAULT_EMPTY_MESSGAE.addStyleName(style.cellListEmptyNote());
 		historyList.setEmptyListWidget(DEFAULT_EMPTY_MESSGAE);
 		historyList.setTabIndex(-1);
 
@@ -312,9 +306,14 @@ public class HistoryListWidget extends Composite implements SubpageWidget {
 		
 		historyList.setSelectionModel(selectionModel,
 				DefaultSelectionEventManager.<RequestHistoryItem> createDefaultManager());
+	}
+	
+	private boolean isInitialized = false;
+	private void initializeTable(){
+		if(isInitialized) return;
+		isInitialized = true;
 		
 		historyList.addCellPreviewHandler(new CellPreviewEvent.Handler<RequestHistoryItem>() {
-
 			@Override
 			public void onCellPreview(CellPreviewEvent<RequestHistoryItem> preview) {
 				NativeEvent evt = preview.getNativeEvent();
@@ -339,10 +338,7 @@ public class HistoryListWidget extends Composite implements SubpageWidget {
 		
 		dataProvider.addDataDisplay(historyList);
 		pager.setDisplay(historyList);
-		
-		bodyPanel.add(historyList);
 	}
-	
 	
 	protected void getHistoryValues(final int start, int limit) {
 		List<RequestHistoryItem> response = RequestHistory.getHistory(start, limit);
@@ -358,13 +354,13 @@ public class HistoryListWidget extends Composite implements SubpageWidget {
 	public void onShow() {
 		initializeTable();
 		
-//		int size = RequestHistory.size();
-//		historyList.setRowCount(size);
-//		
-//		Range range = historyList.getVisibleRange();
-//		int start = historyList.getPageStart();
-//		int end = range.getLength();
-//		getHistoryValues(start, end);
+		int size = RequestHistory.size();
+		historyList.setRowCount(size);
+		
+		Range range = historyList.getVisibleRange();
+		int start = historyList.getPageStart();
+		int end = range.getLength();
+		getHistoryValues(start, end);
 	}
 	/**
 	 * Fire restore event from history item.
@@ -374,5 +370,11 @@ public class HistoryListWidget extends Composite implements SubpageWidget {
 		HistoryRestoreEvent ev = new HistoryRestoreEvent( item );
 		eventBus.fireEventFromSource(ev, HistoryListWidget.class);
 	}
-
+	
+	@UiHandler("clearHistory")
+	void onClearHistory(ClickEvent e){
+		RequestHistory.clearHistory();
+		StatusNotification.notify("History cleared.");
+		onShow();
+	}
 }

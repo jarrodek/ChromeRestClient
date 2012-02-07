@@ -34,16 +34,7 @@
 			color: #333;
 			font-weight: bold;
 		}
-		.pager{
-			display: -webkit-box;
-			-webkit-box-pack: center;
-			-webkit-box-align: center;
-			-webkit-box-orient: horizontal;
-			display: -moz-box;
-			-moz-box-pack: center;
-			-moz-box-align: center;
-			-moz-box-orient: horizontal;
-		}
+		
 		.methodCell{
 			width: 80px;
 			-webkit-box-ordinal-group: 1;
@@ -103,11 +94,43 @@
 			background-color: white;
 			color: black;
 		}
+		.pager{
+			display: -webkit-box;
+			display: -moz-box;
+		}
+		.controls{
+			display: -webkit-box;
+			-webkit-box-ordinal-group: 1;
+			-moz-box-ordinal-group: 1;
+			-webkit-box-align: center;
+			-moz-box-align: center;
+			margin: 12px 10px;
+		}
+		.pagerWrapper{
+			width: auto;
+			white-space: nowrap;
+			-webkit-box-ordinal-group: 2;
+			-webkit-box-flex: 1;
+			-webkit-box-pack: center;
+			-webkit-box-align: center;
+			-moz-box-ordinal-group: 2;
+			-moz-box-flex: 1;
+			-moz-box-pack: center;
+			-moz-box-align: center;
+			display: -moz-box;
+			display: -webkit-box;
+		}
 	</ui:style>
 
 	<g:HTMLPanel ui:field="bodyPanel">
 		<div class="{style.pager}">
-			<c:SimplePager ui:field="pager"/>
+			<div class="{style.controls}">
+				<g:Button ui:field="clearHistory" text="Clear history"></g:Button>
+			</div>
+			<div class="{style.pagerWrapper}">
+				<c:SimplePager ui:field="pager"/>
+			</div>
 		</div>
+		<c:CellList width="100%" ui:field="historyList"></c:CellList>
 	</g:HTMLPanel>
 </ui:UiBinder>

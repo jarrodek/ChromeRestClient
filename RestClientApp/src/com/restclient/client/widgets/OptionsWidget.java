@@ -21,7 +21,9 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.restclient.client.CookieCapture;
+import com.restclient.client.RequestHistory;
 import com.restclient.client.RestApp;
+import com.restclient.client.StatusNotification;
 import com.restclient.client.event.ImportExternalDataAction;
 import com.restclient.client.event.ImportItemsSelectedEvent;
 import com.restclient.client.html5.HTML5InputNumber;
@@ -50,6 +52,7 @@ public class OptionsWidget extends Composite implements SubpageWidget {
 	@UiField(provided=true) ImportExportOptions importExportOptions;
 	
 	@UiField DivElement historyAmount;
+	@UiField DivElement historyClear;
 	@UiField DivElement headersWrapper;
 	@UiField DivElement importExportWrapper;
 	
@@ -106,9 +109,11 @@ public class OptionsWidget extends Composite implements SubpageWidget {
 		
 		if( historyValue.equals("true") ){
 			historyAmount.removeClassName(style.hidden());
+			historyClear.removeAttribute(style.hidden());
 			history.setValue(true);
 		} else {
 			historyAmount.addClassName(style.hidden());
+			historyClear.addClassName(style.hidden());
 			history.setValue(false);
 		}
 		historyCount.setValue(historyAmountIntValue+"");
@@ -123,9 +128,11 @@ public class OptionsWidget extends Composite implements SubpageWidget {
 				}
 				if( value ){
 					historyAmount.removeClassName(style.hidden());
+					historyClear.removeClassName(style.hidden());
 					history.setValue(true);
 				} else {
 					historyAmount.addClassName(style.hidden());
+					historyClear.addClassName(style.hidden());
 					history.setValue(false);
 				}
 			}
@@ -133,7 +140,7 @@ public class OptionsWidget extends Composite implements SubpageWidget {
 		historyCount.addValueChangeHandler( new ValueChangeHandler<String>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
-				storage.setItem( RestApp.StorageKeys.HISTORY_AMOUNT, event.getValue() );
+				storage.setItem(RestApp.StorageKeys.HISTORY_AMOUNT, event.getValue());
 				if(RestApp.isDebug()){
 					Log.debug( "History ammount value changed. Current value is: " + event.getValue() );
 				}
@@ -211,5 +218,10 @@ public class OptionsWidget extends Composite implements SubpageWidget {
 	void onShortcutsButton(ClickEvent e){
 		ShortcutsEditor dialog = new ShortcutsEditor();
 		dialog.show();
+	}
+	@UiHandler("clearHistory")
+	void onClearHistory(ClickEvent e){
+		RequestHistory.clearHistory();
+		StatusNotification.notify("History cleared.");
 	}
 }
