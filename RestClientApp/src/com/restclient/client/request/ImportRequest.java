@@ -254,6 +254,7 @@ public class ImportRequest extends ApplicationRequest {
 			String url = itemObj.get("url").isString().stringValue();
 			String post = itemObj.get("post").isString().stringValue();
 			String method = itemObj.get("method").isString().stringValue();
+			String jDOKey = itemObj.get("key").isString().stringValue();
 			String encoding = itemObj.get("encoding").isString().stringValue();
 			JSONArray headerArray = itemObj.get("headers").isArray();
 			int hLen = headerArray.size();
@@ -268,6 +269,7 @@ public class ImportRequest extends ApplicationRequest {
 			}
 			rf.setName(name);
 			rf.setUrl(url);
+			rf.key = jDOKey;
 			JSONString _url = url == null ? new JSONString("null")
 					: new JSONString(url);
 			data.put("url", _url);

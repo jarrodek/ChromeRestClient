@@ -1,3 +1,7 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="com.google.appengine.api.users.User" %>
+<%@ page import="com.google.appengine.api.users.UserService" %>
+<%@ page import="com.google.appengine.api.users.UserServiceFactory" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -107,8 +111,21 @@ body {
 	width: 100%;
 	padding: 20px;
 }
+.error, .info{padding:10px 20px;background:rgba(255, 0, 0, 0.05);-webkit-border-radius:8px;-moz-border-radius:8px;border-radius:8px;border:1px solid rgba(255, 0, 0, 0.2);display: block;text-align: center;font-weight: bold;font-size: 14px;}
 </style>
 </head>
+<%
+    UserService userService = UserServiceFactory.getUserService();
+	boolean isUser = userService.isUserLoggedIn();
+	
+	String infoMessage = null;
+	String infoCode = request.getParameter("i");
+	if(infoCode != null){
+		if(infoCode.equals("removedall")){
+			infoMessage = "Your data has been removed. Now You are disconnected from application.";
+		}
+	}
+%>
 <body>
 	<div class="mainPanel">
 		<div class="menu">
@@ -116,10 +133,24 @@ body {
 			<ul role="tablist" class="mainNav">
 				<li page="about" class="navBarItem navBarItemSelected" role="tab"
 					tabindex="-1" aria-selected="true">About</li>
+				<% if(isUser){ %>
+				<li page="listing" class="navBarItem" role="tab"
+					tabindex="-1" aria-selected="false" onclick="document.location.href='listing.jsp'">My data</li>
+				<% } %>
+				<li class="navBarItem">
+					<g:plusone href="https://chrome.google.com/webstore/detail/hgmloofddffdnphfgcellkdfbfbjeloo"></g:plusone>
+				</li>
 			</ul>
 		</div>
 		<div class="bodyPanel">
 			<div class="mainViewContent">
+				<%
+				if(infoMessage != null){
+				%>
+				<div class="info"><%= infoMessage %></div>
+				<%
+				}
+				%>
 				<h2>Welcome to Advanced Rest Client service page</h2>
 				<p>
 					Go to <a href="https://chrome.google.com/webstore/detail/hgmloofddffdnphfgcellkdfbfbjeloo">Chrome Web Store</a> to install this application.
@@ -130,6 +161,10 @@ body {
 				<p>
 					Application blog: <a href="http://restforchrome.blogspot.com/">http://restforchrome.blogspot.com/</a>
 				</p>
+				<p>
+					Please, if You find bug in application create ticket on Google Code <a href="http://code.google.com/p/chrome-rest-client/issues/list">Issue tracker</a>.<br/>
+					Suggestions about application can be done as issue ticket as well. It's better way than leaving comment in Chrome Web Store :)
+				</p>
 				<section>
 					<h3>About this service</h3>
 					<p>
@@ -137,8 +172,30 @@ body {
 						Using this service You can store, restore and share saved data.  
 					</p>
 				</section>
+				<% if(!isUser){ %>
+				<section>
+					<h3>If You are user of this application</h3>
+					<p>
+						  You can <a href="<%= userService.createLoginURL("/listing.jsp") %>">view your data</a> stored in this application.
+					</p>
+				</section>
+				<% } %>
 			</div>
 		</div>
 	</div>
+	<script type="text/javascript">
+		var po = document.createElement('script');
+		po.type = 'text/javascript';
+		po.async = true;
+		po.src = 'https://apis.google.com/js/plusone.js';
+		var s = document.getElementsByTagName('script')[0];
+		s.parentNode.insertBefore(po, s);
+	</script>
+	<script>
+		var _gaq=[['_setAccount','UA-18021184-6'],['_trackPageview']];
+		(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+		g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+		s.parentNode.insertBefore(g,s)}(document,'script'));
+	</script>
 </body>
 </html>

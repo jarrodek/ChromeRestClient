@@ -25,7 +25,6 @@ import com.restclient.client.utils.UUID;
  */
 public class RestApp {
 	
-
 	public static final HeadersService HEADERS_SERVICE = GWT
 			.create(HeadersService.class);
 

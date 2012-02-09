@@ -37,6 +37,7 @@
 		<p>
 			<g:Button ui:field="connectButton" text="Connect"></g:Button>
 			<g:InlineLabel styleName="{style.connectedInfo}" ui:field="loggedInInfo" text="You are already connected" visible="false"></g:InlineLabel>
+			<g:InlineLabel styleName="{style.connectedInfo}" ui:field="statusInfo" text=""></g:InlineLabel>
 		</p>
 		<p ui:field="connectNote" class="{style.note}">
 			This actually doesn't do nothing.<br/>

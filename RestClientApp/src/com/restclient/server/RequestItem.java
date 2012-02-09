@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.jdo.PersistenceManager;
 import javax.jdo.annotations.IdGeneratorStrategy;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
@@ -264,7 +265,28 @@ public class RequestItem {
 	}
 
 
-
+	public static RequestItem getItemById(String itemId){
+		Key _key = null;
+		try{
+			_key = KeyFactory.stringToKey(itemId);
+		} catch(Exception e){
+			return null;
+		}
+		
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		RequestItem item = null;
+		try {
+			item = pm.getObjectById(RequestItem.class, _key);
+			return item; //pm.detachCopy(item);
+		} catch (Exception e) {
+			//e.printStackTrace();
+			return null;
+		} finally {
+			pm.close();
+		}
+	}
+	
+	
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -275,11 +297,13 @@ public class RequestItem {
 		sb.append("method=").append(method).append(", ");
 		sb.append("encoding=").append(encoding).append(", ");
 		sb.append("ownerUUID=").append(applicationUUID).append(", ");
+		sb.append("user=").append(appUser).append(", ");
 		sb.append("itemUUID=").append(itemUUID).append(", ");
 		sb.append("headers={");
-		
-		for(RequestHeader header : headers){
-			sb.append(header.toString()).append(", ");
+		if(headers != null){
+			for(RequestHeader header : headers){
+				sb.append(header.toString()).append(", ");
+			}
 		}
 		sb.append("}");
 		sb.append("]");

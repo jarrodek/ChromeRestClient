@@ -1,10 +1,12 @@
 package com.restclient.client.widgets;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
+import com.google.code.gwt.database.client.service.RowIdListCallback;
 import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ParagraphElement;
@@ -43,6 +45,7 @@ import com.restclient.client.request.ImportRequest;
 import com.restclient.client.request.ImportSuggestionsCallback;
 import com.restclient.client.request.PingRequest;
 import com.restclient.client.request.SuggestionImportItem;
+import com.restclient.client.storage.ExportedDataInsertItem;
 import com.restclient.client.storage.RestForm;
 import com.restclient.client.widgets.JSONHeadersOptions.CloseJsonHeadersOptionsWidgetEvent;
 
@@ -98,6 +101,7 @@ public class ImportExportOptions extends Composite {
 	@UiField Button restoreData;
 	
 	@UiField InlineLabel loggedInInfo;
+	@UiField InlineLabel statusInfo;
 	@UiField SectionElement storeDataPanel;
 	@UiField SectionElement shareUrlPanel;
 	@UiField ParagraphElement connectNote;
@@ -149,11 +153,12 @@ public class ImportExportOptions extends Composite {
 		if(RestApp.isDebug()){
 			Log.debug("Checking session status on applications server.");
 		}
-		
+		statusInfo.setText("Checking connection status...");
 		PingRequest.getSession(new ApplicationSessionCallback() {
 			
 			@Override
 			public void onSuccess(ApplicationSession session) {
+				statusInfo.setText("");
 				if(session.getState() == ApplicationSession.CONNECTED){
 					applicationUserId = session.getUserId();
 					hideConnectControls();
@@ -163,7 +168,14 @@ public class ImportExportOptions extends Composite {
 			
 			@Override
 			public void onFailure(String message, Throwable exception) {
-				//nothing
+				statusInfo.setText("Unable to check connection status...");
+				Timer t = new Timer() {
+					@Override
+					public void run() {
+						statusInfo.setText("");
+					}
+				};
+				t.schedule(3000);
 			}
 		});
 	}
@@ -238,14 +250,14 @@ public class ImportExportOptions extends Composite {
 		ImportRequest.importData(keys, new ImportDataCallback() {
 			
 			@Override
-			public void onSuccess(List<RestForm> result) {
+			public void onSuccess(final List<RestForm> result) {
 				if(result.size()==0){
 					StatusNotification.notify("Something went wrong. There is no data to save :(", StatusNotification.TYPE_ERROR);
 					dialog.hide();
 					return;
 				}
 				
-				RestApp.FORM_SERVICE.insertImportData(result, new Date(), new VoidCallback() {
+				RestApp.FORM_SERVICE.insertImportData(result, new Date(), new RowIdListCallback() {
 					@Override
 					public void onFailure(DataServiceException error) {
 						StatusNotification.notify("Unable to vave data to local database :(", StatusNotification.TYPE_ERROR);
@@ -256,7 +268,33 @@ public class ImportExportOptions extends Composite {
 					}
 					
 					@Override
-					public void onSuccess() {
+					public void onSuccess(List<Integer> rowIds) {
+						//
+						// Insert into exported list to prevent duplicates on server side.
+						//
+						List<ExportedDataInsertItem> exported = new ArrayList<ExportedDataInsertItem>();
+						int len = result.size();
+						for(int i=0; i<len; i++){
+							RestForm form = result.get(i);
+							int dbId = rowIds.get(i);
+							ExportedDataInsertItem item = new ExportedDataInsertItem(form.key);
+							item.setReferenceId(dbId);
+							item.setType("form");
+							exported.add(item);
+						}
+						RestApp.EXPORT_DATA_SERVICE.insertExported(exported, new VoidCallback() {
+							@Override
+							public void onFailure(DataServiceException error) {
+								if(RestApp.isDebug()){
+									Log.error("Unable to insert imported references. During export duplicates may occur.", error);
+								}
+							}
+							
+							@Override
+							public void onSuccess() {}
+						});
+						
+						
 						StatusNotification.notify("Saved import data.", StatusNotification.TYPE_NORMAL, StatusNotification.TIME_MEDIUM);
 						dialog.hide();
 					}

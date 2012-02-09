@@ -113,7 +113,7 @@ public class SaveStateDialog {
 		}
 		
 		if(RestApp.isDebug()){
-			Log.debug("Checking if name: "+currentValue+" exists on database.");
+			Log.debug("Checking if name: "+currentValue+" exists in database.");
 		}
 		
 		//

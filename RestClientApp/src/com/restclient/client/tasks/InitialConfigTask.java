@@ -14,59 +14,58 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.resources.client.ResourceCallback;
-import com.google.gwt.resources.client.ResourceException;
-import com.google.gwt.resources.client.TextResource;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Cookies;
 import com.restclient.client.RestApp;
 import com.restclient.client.RestClientApp;
 import com.restclient.client.event.DatabasesLoadedEvent;
-import com.restclient.client.resources.AppResources;
+import com.restclient.client.request.AssetRequest;
+import com.restclient.client.request.AssetStringCallback;
 import com.restclient.client.storage.HeaderInsertRow;
 import com.restclient.client.storage.StatusCodesInsertRow;
 
 /**
  * Task to perform initial app config.
+ * 
  * @author jarrod
- *
+ * 
  */
 public class InitialConfigTask implements LoadTask {
-	
+
 	TasksCallback callback;
 	private int dbLoaded = 0;
 	private int dbLoadError = 0;
-	
+
 	@Override
 	public void run(TasksCallback callback, boolean lastRun) {
-		if(RestApp.isDebug()){
+		if (RestApp.isDebug()) {
 			Log.debug("Start task: initalize database.");
 		}
 		this.callback = callback;
 		initTables();
 	}
-	
-	private void createAndInitTablesTables(){
+
+	private void createAndInitTablesTables() {
 		callback.onInnerTaskFinished();
-		
+
 		final Storage storage = Storage.getLocalStorageIfSupported();
 		final String initialCookie = Cookies.getCookie("initial");
 		boolean isSupportDatabaseSet = false;
-		if( storage == null ){
-			if( initialCookie != null ){
+		if (storage == null) {
+			if (initialCookie != null) {
 				String[] data = initialCookie.split("|");
-				if( data.length > 0 ){
+				if (data.length > 0) {
 					isSupportDatabaseSet = Boolean.parseBoolean(data[0]);
 				}
 			}
 		} else {
 			String initValue = storage.getItem("databaseSet");
-			if( initValue != null ){
+			if (initValue != null) {
 				isSupportDatabaseSet = Boolean.parseBoolean(initValue);
 			}
 		}
-		
-		if(isSupportDatabaseSet){
+
+		if (isSupportDatabaseSet) {
 			callback.onInnerTaskFinished();
 			callback.onInnerTaskFinished();
 			callback.onSuccess();
@@ -79,15 +78,17 @@ public class InitialConfigTask implements LoadTask {
 	public int getTasksCount() {
 		return 3;
 	}
-	
+
 	private void initTables() {
-		
+
 		RestApp.HEADERS_SERVICE.initTable(new VoidCallback() {
 			@Override
 			public void onFailure(DataServiceException error) {
+				Log.error("Unable to initialize HEADERS database table", error);
 				dbLoadError++;
 				dbLoadCallback();
 			}
+
 			@Override
 			public void onSuccess() {
 				dbLoaded++;
@@ -97,9 +98,11 @@ public class InitialConfigTask implements LoadTask {
 		RestApp.STATUSES_SERVICE.initTable(new VoidCallback() {
 			@Override
 			public void onFailure(DataServiceException error) {
+				Log.error("Unable to initialize STATUSES database table", error);
 				dbLoadError++;
 				dbLoadCallback();
 			}
+
 			@Override
 			public void onSuccess() {
 				dbLoaded++;
@@ -109,9 +112,11 @@ public class InitialConfigTask implements LoadTask {
 		RestApp.URLS_SERVICE.initTable(new VoidCallback() {
 			@Override
 			public void onFailure(DataServiceException error) {
+				Log.error("Unable to initialize URL database table", error);
 				dbLoadError++;
 				dbLoadCallback();
 			}
+
 			@Override
 			public void onSuccess() {
 				dbLoaded++;
@@ -121,9 +126,11 @@ public class InitialConfigTask implements LoadTask {
 		RestApp.FORM_SERVICE.initTable(new VoidCallback() {
 			@Override
 			public void onFailure(DataServiceException error) {
+				Log.error("Unable to initialize FORM database table", error);
 				dbLoadError++;
 				dbLoadCallback();
 			}
+
 			@Override
 			public void onSuccess() {
 				dbLoaded++;
@@ -131,13 +138,15 @@ public class InitialConfigTask implements LoadTask {
 			}
 		});
 		RestApp.EXPORT_DATA_SERVICE.initTable(new VoidCallback() {
-			
+
 			@Override
 			public void onFailure(DataServiceException error) {
+				Log.error("Unable to initialize EXPORT DATA database table",
+						error);
 				dbLoadError++;
 				dbLoadCallback();
 			}
-			
+
 			@Override
 			public void onSuccess() {
 				dbLoaded++;
@@ -145,33 +154,23 @@ public class InitialConfigTask implements LoadTask {
 			}
 		});
 	}
-	
-	private void dbLoadCallback(){
-		if( dbLoadError + dbLoaded >= 5 ){ // all loaded (or not)
+
+	private void dbLoadCallback() {
+		if (dbLoadError + dbLoaded >= 5) { // all loaded (or not)
 			createAndInitTablesTables();
-			DatabasesLoadedEvent event = new DatabasesLoadedEvent( dbLoadError == 0 );
-			RestClientApp.getAppMainEventBus().fireEventFromSource(event, InitialConfigTask.class);
+			DatabasesLoadedEvent event = new DatabasesLoadedEvent(
+					dbLoadError == 0);
+			RestClientApp.getAppMainEventBus().fireEventFromSource(event,
+					InitialConfigTask.class);
 		}
 	}
-	
+
 	@SuppressWarnings("javadoc")
 	public void createSupportData() {
-		try {
-			loadHeaders();
-		} catch (ResourceException e) {
-		}
-	}
-
-	private void loadHeaders() throws ResourceException {
-		AppResources.INSTANCE.asyncStatus().getText(new ResourceCallback<TextResource>() {
-			@Override
-			public void onError(ResourceException e) {
-				callback.onFailure(2);
-			}
+		AssetRequest.getAssetString("statuses.json", new AssetStringCallback() {
 
 			@Override
-			public void onSuccess(TextResource resource) {
-				String json = resource.getText();
+			public void onSuccess(String json) {
 				JSONValue data = JSONParser.parseLenient(json);
 				final JSONObject obj = data.isObject();
 				if (obj == null) {
@@ -184,7 +183,7 @@ public class InitialConfigTask implements LoadTask {
 					if (array != null) {
 						parseHeadersArray(array, "request");
 					}
-					
+
 				}
 				if (obj.containsKey("responses")) {
 					JSONArray array = obj.get("responses").isArray();
@@ -199,38 +198,44 @@ public class InitialConfigTask implements LoadTask {
 						parseCodesArray(array);
 					}
 				}
-				
+
 				final Storage storage = Storage.getLocalStorageIfSupported();
 				final String initialCookie = Cookies.getCookie("initial");
-				if( storage == null ){
+				if (storage == null) {
 					String cookieSave = "";
-					if( initialCookie != null ){
+					if (initialCookie != null) {
 						String[] cookieData = initialCookie.split("|");
-						if( cookieData.length > 0 ){
+						if (cookieData.length > 0) {
 							cookieData[0] = "true";
 						}
-						for( String _d : cookieData ){
+						for (String _d : cookieData) {
 							cookieSave += _d + "|";
-							cookieSave = cookieSave.substring(0, cookieSave.length()-1);
+							cookieSave = cookieSave.substring(0,
+									cookieSave.length() - 1);
 						}
 					} else {
 						cookieSave = "true|";
 					}
 					Date d = new Date();
 					long now = d.getTime();
-					//30 days is: 2592000s 
+					// 30 days is: 2592000s
 					long plus30days = now + 259200000;
 					d.setTime(plus30days);
 					Cookies.setCookie("initial", cookieSave, d);
 				} else {
-					storage.setItem("databaseSet","true");	
+					storage.setItem("databaseSet", "true");
 				}
 				callback.onInnerTaskFinished();
 				callback.onSuccess();
-			}}
-		);
+			}
+
+			@Override
+			public void onFailure(String message, Throwable exception) {
+				callback.onFailure(2);
+			}
+		});
 	}
-	
+
 	protected void parseCodesArray(JSONArray array) {
 		int cnt = array.size();
 		List<StatusCodesInsertRow> toSave = new ArrayList<StatusCodesInsertRow>();
@@ -253,19 +258,23 @@ public class InitialConfigTask implements LoadTask {
 			toSave.add(row);
 		}
 		if (toSave.size() > 0) {
-			RestApp.STATUSES_SERVICE.insertCodes(toSave, new RowIdListCallback() {
-				@Override
-				public void onFailure(DataServiceException error) {
-					if( RestApp.isDebug() ){
-						Log.error("Error save statuses to database.", error);
-					}
-				}
-				@Override
-				public void onSuccess(List<Integer> rowIds) {}
-			});
+			RestApp.STATUSES_SERVICE.insertCodes(toSave,
+					new RowIdListCallback() {
+						@Override
+						public void onFailure(DataServiceException error) {
+							if (RestApp.isDebug()) {
+								Log.error("Error save statuses to database.",
+										error);
+							}
+						}
+
+						@Override
+						public void onSuccess(List<Integer> rowIds) {
+						}
+					});
 		}
 	}
-	
+
 	/**
 	 * Parse headers from resource file and insert it's content to database.
 	 * 
@@ -298,17 +307,21 @@ public class InitialConfigTask implements LoadTask {
 			toSave.add(row);
 		}
 		if (toSave.size() > 0) {
-			RestApp.HEADERS_SERVICE.insertHeaders(toSave, new RowIdListCallback() {
-				@Override
-				public void onFailure(DataServiceException error) {
-					if( RestApp.isDebug() ){
-						Log.error("Error save headers data to database.", error);
-					}
-				}
+			RestApp.HEADERS_SERVICE.insertHeaders(toSave,
+					new RowIdListCallback() {
+						@Override
+						public void onFailure(DataServiceException error) {
+							if (RestApp.isDebug()) {
+								Log.error(
+										"Error save headers data to database.",
+										error);
+							}
+						}
 
-				@Override
-				public void onSuccess(List<Integer> rowIds) {}
-			});
+						@Override
+						public void onSuccess(List<Integer> rowIds) {
+						}
+					});
 		}
 	}
 }

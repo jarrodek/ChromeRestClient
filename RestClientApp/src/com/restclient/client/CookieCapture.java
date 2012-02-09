@@ -33,32 +33,31 @@ public class CookieCapture {
 		}
 		Cookies c = Cookies.getCookiesIfSupported();
 		
-		if( c == null ){
-			if( RestApp.isDebug() ){
-				Log.warn("Try to initialize cookie api when not an application.");
+		if(c == null){
+			if(RestApp.isDebug()){
+				Log.warn("Try to initialize cookie api when not an application. Exit.");
 			}
 			return;
 		}
-		if( RestApp.isDebug() ){
-			Log.debug("Has cookie capture support. Adding handler.");
+		if(RestApp.isDebug()){
+			Log.debug("Has cookies support. Add handler.");
 		}
 		c.addChangeHandler(new ChromeCookieChangeCallback() {
 			@Override
 			public void onChange(ChromeCookieChange event) {
 				if( !isObserving ) {
-					if( RestApp.isDebug() ){
-						Log.debug("Captured cookie change in browser but not listening.");
-					}
+//					if( RestApp.isDebug() ){
+//						Log.debug("Captured cookie change in browser but not listening.");
+//					}
 					return;
 				}
-				
 				if(event.isRemoved()){
 					if( RestApp.isDebug() ){
 						Log.debug("Captured cookie change but this is remove action.");
 					}
 					return;
 				}
-				if( RestApp.isDebug() ){
+				if(RestApp.isDebug()){
 					Log.debug("Have new cookie. Adding to list.");
 				}
 				ChromeCookie cookie = event.getCookie();

@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	
-	<ui:style type="com.restclient.client.widgets.JSONViewer.ParserStyle">
+	<ui:style type="com.restclient.client.widgets.JSONViewer.ParserStyle" src="../common.css">
 		@def indent 15px; 
 		.prettyPrint{}
 		.bodyPanel {
@@ -26,7 +26,7 @@
 		.stringValue{
 			color: #48A;
 		}
-		.node{}
+		.node{position: relative;}
 		.arrayCounter{
 			color: gray;
 			font-size: 11px;
@@ -36,6 +36,19 @@
 		}
 		.keyName{
 			color: rgb(206,123,0)
+		}
+		.rootElementToggleButton{
+			position: absolute;
+			top: 0px;
+			left: -9px;
+			font-size: 14px;
+			cursor: pointer;
+			font-weight: bold;
+		}
+		.infoRow{
+			display: inline-block;
+			margin: 0px 7px;
+			text-indent: 0px;
 		}
 	</ui:style>
 	<g:HTML ui:field="result" styleName="bodyPanel"></g:HTML>

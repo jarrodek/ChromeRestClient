@@ -13,6 +13,7 @@ public class RestForm implements IsSerializable {
 	private String url;
 	private String data;
 	private long time = 0;
+	public String key;
 
 	public RestForm() {
 	}

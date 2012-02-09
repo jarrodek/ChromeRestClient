@@ -1,13 +1,13 @@
-<!-- Indices written at Tue, 24 Jan 2012 18:47:30 CET -->
+<!-- Indices written at Thu, 9 Feb 2012 22:03:11 CET -->
 
 <datastore-indexes>
 
-    <!-- Used 18 times in query history -->
+    <!-- Used 13 times in query history -->
     <datastore-index kind="RequestItem" ancestor="true" source="auto">
         <property name="createDate" direction="desc"/>
     </datastore-index>
 
-    <!-- Used 165 times in query history -->
+    <!-- Used 126 times in query history -->
     <datastore-index kind="RequestHeader" ancestor="true" source="auto">
         <property name="headers_INTEGER_IDX" direction="asc"/>
     </datastore-index>

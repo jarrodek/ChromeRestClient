@@ -171,6 +171,7 @@ public class ExtensionServlet extends HttpServlet {
             	_item.name = e.getName();
             	_item.post = e.getPost();
             	_item.url = e.getUrl();
+            	_item.key = KeyFactory.keyToString(e.getKey());
             	List<ResponseFormItem.ResponseItemHeader> passHeaders = new ArrayList<ResponseFormItem.ResponseItemHeader>();
             	for(RequestHeader _h : e.getHeaders()){
             		ResponseFormItem.ResponseItemHeader hi = new ResponseFormItem.ResponseItemHeader();
@@ -268,6 +269,7 @@ public class ExtensionServlet extends HttpServlet {
 			requestItem.setPost(formData.get("post").getAsString());
 			requestItem.setMethod(formData.get("method").getAsString());
 			requestItem.setEncoding(formData.get("formEncoding").getAsString());
+			requestItem.setAppUser(appUser);
 			uuidsMap.put(requestItem.getItemUUID(), itemId);
 			
 			List<RequestHeader> headers = new ArrayList<RequestHeader>();
@@ -341,6 +343,7 @@ public class ExtensionServlet extends HttpServlet {
 			String key;
 			String value;
 		}
+		String key;
 		String name;
 		String url;
 		String post;

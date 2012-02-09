@@ -65,14 +65,14 @@ public class HTML5Element extends com.google.gwt.user.client.Element {
 	 * @return
 	 */
 	public final native String getDataString(String key) /*-{
-		return this.dataset[key];
+		return this.dataset[key] || null;
 	}-*/;
 	/**
 	 * Get value from dataset property
 	 * @param key
 	 * @return
 	 */
-	public final native int getDataInt(String key) /*-{
+	public final native Integer getDataInt(String key) /*-{
 		var value = this.dataset[key];
 		try{
 			value = parseInt(value);

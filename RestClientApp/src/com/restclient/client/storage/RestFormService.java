@@ -48,7 +48,7 @@ public interface RestFormService extends AppDatabase {
 			RowIdListCallback callback);
 
 	@Update(sql = "INSERT INTO rest_forms (name,url,data,time) VALUES ({_.getName()},{_.getUrl()},{_.getData()},{dt.getTime()})", foreach = "data")
-	void insertImportData(Collection<RestForm> data, Date dt, VoidCallback callback);
+	void insertImportData(Collection<RestForm> data, Date dt, RowIdListCallback callback);
 	
 	/**
 	 * @param callback
