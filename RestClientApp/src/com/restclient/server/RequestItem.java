@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.jdo.PersistenceManager;
+import javax.jdo.Query;
 import javax.jdo.annotations.IdGeneratorStrategy;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
@@ -263,7 +264,31 @@ public class RequestItem {
 	public final void setItemUUID(String itemUUID) {
 		this.itemUUID = itemUUID;
 	}
-
+	
+	
+	public static List<RequestItem> getByAppUser(AppUser user){
+		List<RequestItem> result = new ArrayList<RequestItem>();
+		
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		
+		Query query = pm.newQuery(RequestItem.class);
+		query.setFilter("appUser == userParam");
+	    query.setOrdering("createDate asc");
+	    query.declareParameters("com.restclient.server.AppUser userParam");
+	    
+	    try {
+	        @SuppressWarnings("unchecked")
+			List<RequestItem> results = (List<RequestItem>) query.execute(user);
+	        if (!results.isEmpty()) {
+	            for (RequestItem e : results) {
+	            	result.add(e);
+	            }
+	        }
+	    } finally {
+	        query.closeAll();
+	    }
+	    return result;
+	}
 
 	public static RequestItem getItemById(String itemId){
 		Key _key = null;
@@ -291,7 +316,8 @@ public class RequestItem {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("RequestItem[");
-		sb.append("key=").append(KeyFactory.keyToString(key)).append(", ");
+		if(key != null)
+			sb.append("key=").append(KeyFactory.keyToString(key)).append(", ");
 		sb.append("url=").append(url.getValue()).append(", ");
 		sb.append("post=").append(post.getValue()).append(", ");
 		sb.append("method=").append(method).append(", ");

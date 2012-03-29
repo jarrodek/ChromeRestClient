@@ -72,12 +72,12 @@ public class HTML5Element extends com.google.gwt.user.client.Element {
 	 * @param key
 	 * @return
 	 */
-	public final native Integer getDataInt(String key) /*-{
+	public final native Number getDataInt(String key) /*-{
 		var value = this.dataset[key];
 		try{
 			value = parseInt(value);
 		} catch(e){
-			value = null;
+			value = -1;
 		}
 		return value;
 	}-*/;

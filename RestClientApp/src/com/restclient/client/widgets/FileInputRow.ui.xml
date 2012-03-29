@@ -5,23 +5,24 @@
 	xmlns:h5="urn:import:com.restclient.client.html5">
 	<ui:style>
 		.formRow{
-			margin: 5px 0;
+			margin: 10px 0;
 		}
 		.filename{
 			display: -webkit-box;
 		}
 	</ui:style>
-	<g:HTMLPanel>
-		<div class="{style.formRow}">
-			<div class="{style.filename}">
-				<div>File field name</div>
-				<div>
-					<g:TextBox ui:field="formName"></g:TextBox>
-				</div>
-			</div>
+	<g:HTMLPanel addStyleNames="{style.formRow}">
+		
+		<div class="{style.filename}">
+			<div>File field name</div>
 			<div>
-				<h5:HTML5FileUpload multiple="true" ui:field="fileObject"></h5:HTML5FileUpload>
+				<g:TextBox ui:field="formName"></g:TextBox>
 			</div>
+		</div>	
+		<div>
+			<h5:HTML5FileUpload multiple="true" ui:field="fileObject"></h5:HTML5FileUpload>
+			<g:Button text="Remove" ui:field="removeButton"></g:Button>
 		</div>
+		
 	</g:HTMLPanel>
 </ui:UiBinder> 

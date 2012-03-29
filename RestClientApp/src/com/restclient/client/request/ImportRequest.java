@@ -49,12 +49,12 @@ public class ImportRequest extends ApplicationRequest {
 
 			@Override
 			public void onLoaded(Response response, ProgressEvent event) {
-
+				currentRequest = null;
 				if (response.getStatus() == 404) {
 					callback.onFailure("Object not found.", null);
 					return;
 				}
-				currentRequest = null;
+				
 				List<SuggestionImportItem> result = parseSuggestionsData(response
 						.getResponseText());
 				if (result == null) {

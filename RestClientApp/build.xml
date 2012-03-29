@@ -27,8 +27,8 @@
 				<exclude name="**/WEB-INF/" />
 				<exclude name="**/static/" />
 				<exclude name="**/*.jsp" />
-				<exclude name="**/auth.html" />
 				<exclude name="**/favicon.ico" />
+				<exclude name="**/test.xml" />
 				<!-- Do not copy images for IE6 -->
 				<exclude name="**/restclientapp/gwt/standard/images/ie6/" />
 				<exclude name="**/restclientapp/gwt/standard/images/corner_ie6.png" />
@@ -42,7 +42,7 @@
 				<exclude name="**/ext/CodeMirror-2.2/*_uncompressed.css" />
 			</fileset>
 		</copy>
-		<exec executable="./manifestversion.sh"/>
+		<!-- <exec executable="./manifestversion.sh"/> -->
 		<copy todir="${extension.src}">
 			<fileset file="manifest.json">
 			</fileset>

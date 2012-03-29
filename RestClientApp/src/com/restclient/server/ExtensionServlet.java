@@ -80,6 +80,7 @@ public class ExtensionServlet extends HttpServlet {
 						gson.toJson(new ResponseError("No ID :(")));
 				return;
 			}
+			
 			if(userId.equals("me")){
 				User user = getUser();
 				if(user == null){
@@ -89,6 +90,7 @@ public class ExtensionServlet extends HttpServlet {
 					return;
 				}
 				userId = user.getUserId();
+				System.out.println(userId);
 			}
 			AppUser appUser = AppUser.getUserById(userId);
 			if(appUser == null){
@@ -300,6 +302,7 @@ public class ExtensionServlet extends HttpServlet {
 			try {
 				appUser = pm.makePersistent(appUser);
 				List<RequestItem> items = appUser.getItemsSet();
+				System.out.println("Saved items size: "+items.size()+"");
 				for(RequestItem item : items){
 					if(uuidsMap.containsKey(item.getItemUUID())){
 						SaveResponseItem r = new SaveResponseItem();

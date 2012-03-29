@@ -119,8 +119,8 @@ public class RequestParameters {
 				instance.headers = headers;
 				if( RestApp.isDebug() ){
 					Log.debug( "Change in headers list. Current set:" );
-					
-					for( RequestHeader header : headers){
+					if(headers != null)
+					for(RequestHeader header : headers){
 						Log.debug( header.getName() + ": " + header.getValue() );
 					}
 				}
@@ -141,7 +141,22 @@ public class RequestParameters {
 		EncodingChangeEvent.register(eb, new EncodingChangeEvent.Handler() {
 			@Override
 			public void onChange(String enc, Object source) {
+				if( RestApp.isDebug() ){
+					Log.debug("Setting new form encoding to: " + enc);
+				}
 				instance.formEncoding = enc;
+				if(instance.headers != null){
+					for(RequestHeader header : instance.headers){
+						if(header.getName().toLowerCase().equals("content-type")){
+							header.setValue(enc);
+							if( RestApp.isDebug() ){
+								Log.debug("Overvrite existing content-type header value");
+							}
+							instance.eventBus.fireEventFromSource(new HeadersChangeEvent(instance.headers), RequestParameters.class);
+							break;
+						}
+					}
+				}
 			}
 		});
 	}
@@ -306,8 +321,8 @@ public class RequestParameters {
 		}
 
 		JSONArray headersArray = obj.get("headers").isArray();
+		List<RequestHeader> headers = new ArrayList<RequestHeader>();
 		if (headersArray != null) {
-			List<RequestHeader> headers = new ArrayList<RequestHeader>();
 			int cnt = headersArray.size();
 			for (int i = 0; i < cnt; i++) {
 				JSONValue _tmp = headersArray.get(i);
@@ -330,10 +345,10 @@ public class RequestParameters {
 					headers.add(new RequestHeader(headerName, headerValue));
 				}
 			}
-			ins.headers = headers;
-			if (fireEvents) {
-				ins.eventBus.fireEventFromSource(new HeadersChangeEvent(headers), RequestParameters.class);
-			}
+		}
+		ins.headers = headers;
+		if (fireEvents) {
+			ins.eventBus.fireEventFromSource(new HeadersChangeEvent(headers), RequestParameters.class);
 		}
 	}
 

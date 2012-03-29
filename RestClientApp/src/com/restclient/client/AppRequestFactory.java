@@ -242,35 +242,36 @@ public class AppRequestFactory {
 		// builder.setTimeoutMillis(500);
 		// builder.setWithCredentials(true);
 		
-		if (method.equals("POST") || method.equals("PUT")
-				|| method.equals("DELETE")) {
-			
-			if (!hasFile) {
-				if (headers == null) {
-					headers = new ArrayList<RequestHeader>();
-				}
-				
-				//check if headers list already contains content-type header.
-				//if not set one from form.
-				boolean hasContentTypeHeader = false;
-				for(RequestHeader item : headers){
-					String key = item.getName();
-					if(key.toLowerCase().equals("content-type")){
-						enc = item.getValue();
-						hasContentTypeHeader = true;
-						break;
-					}
-				}
-				
-				if(!hasContentTypeHeader){
-					headers.add(new RequestHeader("Content-Type", enc));
-				}
+		
+		
+		//check if headers list already contains content-type header.
+		//if not set one from form.
+		if (headers == null) {
+			headers = new ArrayList<RequestHeader>();
+		}
+		if( RestApp.isDebug() ){
+			Log.debug("Checking if headers list contains Content-Type");
+		}
+		boolean hasContentTypeHeader = false;
+		for(RequestHeader item : headers){
+			String key = item.getName();
+			if(key.toLowerCase().equals("content-type")){
+				enc = item.getValue();
+				hasContentTypeHeader = true;
 				if( RestApp.isDebug() ){
-					Log.debug("Add \"Content-Type\" header to headers list with value="+enc);
+					Log.debug("Found Content-Type header. Overwrite header to new one.");
 				}
+				break;
 			}
 		}
-
+		if(!hasContentTypeHeader){
+			if( RestApp.isDebug() ){
+				Log.debug("Content-Type header not found in headers list. Setting one from form value: " + enc);
+			}
+			headers.add(new RequestHeader("Content-Type", enc));
+		}
+		
+		
 		if (hasFile) {
 			Collections.sort(headers, new RequestHeader.HeadersComparator());
 			RequestHeader found = null;

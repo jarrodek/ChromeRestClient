@@ -268,7 +268,7 @@ public class RestoreStateWidget extends Composite implements SubpageWidget {
 		selectColumn.setFieldUpdater(new FieldUpdater<RestForm, String>() {
 			@Override
 			public void update(int index, RestForm object, String value) {
-				eventBus.fireEventFromSource( new RestoreRequestEvent(object) , RestoreStateWidget.class);
+				eventBus.fireEventFromSource(new RestoreRequestEvent(object) , RestoreStateWidget.class);
 			}
 		});
 		table.setColumnWidth(selectColumn, 85, Unit.PX);
@@ -347,7 +347,7 @@ public class RestoreStateWidget extends Composite implements SubpageWidget {
 					StatusNotification.notify("An error occured. Please, try again later.");
 					return;
 				}
-				eventBus.fireEventFromSource( new RestoreRequestEvent(result.get(0)) , RestoreStateWidget.class);
+				eventBus.fireEventFromSource(new RestoreRequestEvent(result.get(0)), RestoreStateWidget.class);
 			}
 			
 			@Override

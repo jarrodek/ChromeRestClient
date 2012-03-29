@@ -73,7 +73,11 @@ public class AppUser {
 	 * @return the itemsSet
 	 */
 	public final List<RequestItem> getItemsSet() {
-		return itemsSet == null ? new ArrayList<RequestItem>() : itemsSet;
+		if(itemsSet != null){
+			itemsSet.size();
+			return itemsSet;
+		}
+		return new ArrayList<RequestItem>();
 	}
 
 	/**
@@ -102,7 +106,7 @@ public class AppUser {
 			appUser = pm.getObjectById(AppUser.class, _key);
 			return pm.detachCopy(appUser);
 		} catch (Exception e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 			return null;
 		} finally {
 			pm.close();

@@ -96,9 +96,10 @@ public class HeaderInputWidget extends Composite {
 			@Override
 			public void onChange(HeaderFormRow row, Object source) {
 				List<RequestHeader> list = form.getHeaders();
-				rawInput.setValue( RequestDataFormatter.headersToString(list) );
+				rawInput.setValue(RequestDataFormatter.headersToString(list));
 				HeadersChangeEvent e = new HeadersChangeEvent(list);
 				HeaderInputWidget.this.eventBus.fireEventFromSource(e, HeaderInputWidget.class);
+				
 			}
 		});
 		HeaderRowRemovedEvent.register(eventBus, new HeaderRowRemovedEvent.Handler() {			
@@ -111,14 +112,14 @@ public class HeaderInputWidget extends Composite {
 		HeadersChangeEvent.register(eventBus, new HeadersChangeEvent.Handler() {
 			@Override
 			public void onChange(List<RequestHeader> headers, Object source) {
-				if( source != null && source.equals(RequestParameters.class) ){
+				if(source != null && source.equals(RequestParameters.class) ){
 					
-					for(RequestHeader fromList : headers){
-						if(fromList.getName().toLowerCase().equals("content-type")){
-							headers.remove(fromList);
-							break;
-						}
-					}
+//					for(RequestHeader fromList : headers){
+//						if(fromList.getName().toLowerCase().equals("content-type")){
+//							headers.remove(fromList);
+//							break;
+//						}
+//					}
 					
 					rawInput.setValue( RequestDataFormatter.headersToString(headers) );
 					form.setHeadersList(headers, false);

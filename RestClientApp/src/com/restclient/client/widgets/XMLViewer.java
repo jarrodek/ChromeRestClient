@@ -232,8 +232,7 @@ public class XMLViewer extends Composite {
 		for( int i=0; i < listCnt; i++ ){
 			final HTML5Element currentElement = arrows.get(i);
 			ElementWrapper wrapper = new ElementWrapper(currentElement);
-			
-			wrapper.addClickHandler( new ClickHandler() {
+			wrapper.addClickHandler(new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
 					boolean close = true;
@@ -241,18 +240,18 @@ public class XMLViewer extends Composite {
 					HTML5Element parent = (HTML5Element)currentElement.getParentElement();
 					parent.querySelectorAll("span."+style.arrowEmpty(),markers);
 					
-					HTML5Element marker = markers.get( markers.size()-1 );
+					HTML5Element marker = markers.get(markers.size()-1);
 					
-					if( parent.getClassList().contains( style.opened() ) ){
+					if( parent.getClassList().contains(style.opened())){
 						close = false;
-						parent.getClassList().remove( style.opened() );
+						parent.getClassList().remove(style.opened());
 						marker.setInnerText("");
 					} else {
 						parent.getClassList().add( style.opened() );
 						marker.setInnerText("(...)");
 					}
 					
-					int id = parent.getDataInt("id");
+					String id = parent.getDataString("id");
 					HTML5Element wrapper = (HTML5Element)parent.getParentElement();
 					ArrayList<HTML5Element> nodes = new ArrayList<HTML5Element>();
 					wrapper.querySelectorAll("div[data-id=\"" + id + "\"] > ." + style.node(), nodes);

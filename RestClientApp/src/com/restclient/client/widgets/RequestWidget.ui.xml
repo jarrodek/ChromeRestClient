@@ -98,6 +98,9 @@
 						<div class="{style.rowLabel}">Content-type</div>
 						<div class="{style.rowInput}">
 							<g:ListBox ui:field="contentType"></g:ListBox>
+							<span class="note">
+								Content-Type header will overwrite this value.
+							</span>
 						</div>
 					</div>
 				</div>

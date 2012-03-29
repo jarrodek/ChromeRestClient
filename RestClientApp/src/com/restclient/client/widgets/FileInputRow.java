@@ -3,15 +3,18 @@ package com.restclient.client.widgets;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xhr2.client.FileList;
 import com.restclient.client.event.FileRowChangeEvent;
+import com.restclient.client.event.FileRowRemovedEvent;
 import com.restclient.client.html5.HTML5FileUpload;
 /**
  * Single input file field.
@@ -70,12 +73,17 @@ public class FileInputRow extends Composite implements HasText, ChangeHandler {
 		}
 		this.formName.setValue("fileUpload"+text);
 	}
-	@Override
-	public boolean equals(Object obj) {
-		return formName.equals( ( (FileInputRow)obj ).getFileName() );
-	}
+//	@Override
+//	public boolean equals(Object obj) {
+//		return formName.equals(((FileInputRow)obj).getFileName());
+//	}
 	@Override
 	public void onChange(ChangeEvent event) {
 		eventBus.fireEvent(new FileRowChangeEvent(FileInputRow.this));
+	}
+	
+	@UiHandler("removeButton")
+	void onRemove(ClickEvent e){
+		eventBus.fireEvent(new FileRowRemovedEvent(this));
 	}
 }
