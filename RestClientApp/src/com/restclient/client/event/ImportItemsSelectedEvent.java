@@ -27,18 +27,30 @@ public class ImportItemsSelectedEvent extends GwtEvent<ImportItemsSelectedEvent.
 	 * Handles {@link ImportItemsSelectedEvent}.
 	 */
 	public interface Handler extends EventHandler {
-		void onChange(String[] keys);
+		void onSelectKeys(String[] keys);
+		void onCancelDialog();
 	}
 
 	private final String[] keys;
+	private final boolean canceled;
 
 	public ImportItemsSelectedEvent(String[] keys) {
 		this.keys = keys;
+		this.canceled = false;
 	}
+	public ImportItemsSelectedEvent() {
+		this.keys = null;
+		this.canceled = true;
+	}
+	
 
 	@Override
 	protected void dispatch(Handler handler) {
-		handler.onChange(keys);
+		if(canceled){
+			handler.onCancelDialog();
+		} else {
+			handler.onSelectKeys(keys);
+		}
 	}
 
 	@Override

@@ -28,6 +28,26 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 	 */
 	protected final UrlsService service;
 	/**
+	 * Allow to perform query
+	 */
+	private boolean allowQuery = true;
+	
+	/**
+	 * Sets if query can be performed.
+	 * @param allowQuery true if oracle should perform an query
+	 */
+	public void setAllowQuery(boolean allowQuery){
+		this.allowQuery = allowQuery;
+	}
+	/**
+	 * 
+	 * @return true if oracle can perform an query
+	 */
+	public boolean isAllowQuery(){
+		return allowQuery;
+	}
+	
+	/**
 	 * Local database suggestion oracle.
 	 * 
 	 * @param urlsService
@@ -56,6 +76,14 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 	 *            The callback to call when the request returns.
 	 */
 	void makeQuery(final Request request, final Callback callback) {
+		if(!allowQuery) {
+			_suggestions.clear();
+			recentDatabaseResult = new DatabaseRequestResponse<UrlSuggestion>(request,
+					numberOfDatabaseSuggestions, _suggestions);
+			returnSuggestions(callback);
+			return;
+		}
+		
 		requestInProgress = true;
 		isDatabaseQueryEnd = false;
 		isChromeQueryEnd = false;

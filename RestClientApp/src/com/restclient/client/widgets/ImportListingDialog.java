@@ -40,7 +40,7 @@ import com.restclient.client.StatusNotification;
 import com.restclient.client.event.ImportItemsSelectedEvent;
 import com.restclient.client.request.SuggestionImportItem;
 /**
- * TODO: event when user click "cancel" button
+ * 
  * @author Paweł Psztyć
  *
  */
@@ -262,6 +262,8 @@ public class ImportListingDialog {
 	@UiHandler("cancel")
 	void onDismiss(ClickEvent event) {
 		dialog.hide();
+		ImportItemsSelectedEvent e = new ImportItemsSelectedEvent();
+		eventBus.fireEvent(e);
 	}
 
 	@UiHandler("save")

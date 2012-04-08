@@ -25,7 +25,8 @@ public class AssetRequest extends ApplicationRequest {
 	 * @param callback
 	 */
 	public static void getAssetString(String assetName, final AssetStringCallback callback){
-		RequestBuilder b = new RequestBuilder(ASSETS_URL + assetName, "GET");
+		
+		RequestBuilder b = getApplicationRequestBuilder(ASSETS_URL + assetName, "GET");
 		b.setLoadHandler(new LoadHandler() {
 			@Override
 			public void onLoaded(Response response, ProgressEvent event) {

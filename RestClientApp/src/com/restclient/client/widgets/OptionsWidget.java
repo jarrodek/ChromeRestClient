@@ -183,15 +183,21 @@ public class OptionsWidget extends Composite implements SubpageWidget {
 		ImportExternalDataAction.register(eventBus, new ImportExternalDataAction.Handler() {
 			@Override
 			public void onAction(String uid) {
-				importExportOptions.onShow(uid);
+				importExportOptions.onShow(uid, false);
 				importExportWrapper.removeClassName(style.hidden());
 			}
 		});
 		ImportItemsSelectedEvent.register(eventBus, new ImportItemsSelectedEvent.Handler() {
 			@Override
-			public void onChange(final String[] keys) {
-				importExportOptions.onShow(null);
+			public void onSelectKeys(final String[] keys) {
+				importExportOptions.onShow(null, false);
 				importExportOptions.importSelectedData(keys);
+				importExportWrapper.removeClassName(style.hidden());
+			}
+
+			@Override
+			public void onCancelDialog() {
+				importExportOptions.onShow(null, false);
 				importExportWrapper.removeClassName(style.hidden());
 			}
 		});
@@ -210,7 +216,7 @@ public class OptionsWidget extends Composite implements SubpageWidget {
 	
 	@UiHandler("importExportWidget")
 	void onOpenImportExportWidgetButton(ClickEvent e){
-		importExportOptions.onShow(null);
+		importExportOptions.onShow(null, true);
 		importExportWrapper.removeClassName(style.hidden());
 	}
 	

@@ -64,16 +64,33 @@
 		.urlParamsSupport:hover{
 			opacity: 1;
 		}
+		.urlLabel{cursor:pointer;}
+		.urlPseudoList{display: inline-block;}
+		.urlPseudoList:hover{
+			border: 1px solid #AAA;
+			padding: 0px 5px;
+			background-color: #FAFAFA;
+			border-radius: 2px;
+		}
 	</ui:style>
 	<g:HTMLPanel ui:field="requestPanel">
 		<section class="{style.section}">
 			<div class="{style.requestForm}">
 				<div class="{style.formRow}">
-					<div class="{style.rowLabel}">URL</div>
-					<div class="{style.rowInput} {style.suggestBox}">
+					<div class="{style.rowLabel} {style.urlLabel}">
+					<g:Label ui:field="urlLabel" stylePrimaryName="{style.urlPseudoList}" title="Switch between simple and detailed view">
+						URL
+					</g:Label>
+					</div>
+					<g:HTMLPanel ui:field="regularUrlSuggestions" stylePrimaryName="{style.rowInput} {style.suggestBox}">
 						<g:SuggestBox styleName="{style.gwt-SuggestBox}" ui:field="urlField"></g:SuggestBox>
 						<g:HTML styleName="{style.urlParamsSupport}" ui:field="urlParamsSupport" title="Set GET params"></g:HTML>
-					</div>
+					</g:HTMLPanel>
+					
+					
+					<rc:DetailedParamsWidget ui:field="detaildeParamsWidget"></rc:DetailedParamsWidget>
+					
+					
 				</div>
 				<div class="{style.formRow}">
 					<div class="{style.rowLabel}">Method</div>

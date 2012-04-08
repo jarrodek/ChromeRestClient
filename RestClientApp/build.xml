@@ -40,6 +40,9 @@
 				<exclude name="**/*_uncompressed.css" />
 				<exclude name="**/restclientapp/gwt/standard/*_uncompressed.css" />
 				<exclude name="**/ext/CodeMirror-2.2/*_uncompressed.css" />
+				
+			    <!-- Other files -->
+				<exclude name="**/ext/crypto*" />
 			</fileset>
 		</copy>
 		<!-- <exec executable="./manifestversion.sh"/> -->

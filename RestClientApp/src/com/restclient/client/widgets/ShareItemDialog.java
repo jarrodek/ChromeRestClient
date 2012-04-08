@@ -74,6 +74,7 @@ public class ShareItemDialog {
 		loader.get().removeFromParent();
 		data.get().getStyle().setDisplay(Display.BLOCK);
 		dialog.center();
+		link.selectAll();
 	}
 	
 	private void requestForSessionAndCreateItem(){

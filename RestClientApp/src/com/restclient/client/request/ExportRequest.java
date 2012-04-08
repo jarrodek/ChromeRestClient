@@ -39,7 +39,7 @@ public class ExportRequest extends ApplicationRequest {
 		}
 		
 		String url = SERVICE_URL + ServerPaths.EXPORT_DATA;
-		RequestBuilder builder = new RequestBuilder(url, "POST");
+		RequestBuilder builder = getApplicationRequestBuilder(url, "POST");
 		builder.setHeader("Content-Type", "application/json");
 		builder.setRequestData(data);
 		builder.setErrorHandler(new ErrorHandler() {

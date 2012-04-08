@@ -44,7 +44,8 @@ public class ImportRequest extends ApplicationRequest {
 			return;
 		}
 		String url = SERVICE_URL + ServerPaths.SUGGESTIONS_LISTING + "/" + uuid;
-		RequestBuilder builder = new RequestBuilder(url, "GET");
+		
+		RequestBuilder builder = getApplicationRequestBuilder(url, "GET");
 		builder.setLoadHandler(new LoadHandler() {
 
 			@Override
@@ -153,7 +154,7 @@ public class ImportRequest extends ApplicationRequest {
 			callback.onFailure("Wait until current request ends.", null);
 			return;
 		}
-		RequestBuilder builder = new RequestBuilder(SERVICE_URL
+		RequestBuilder builder = getApplicationRequestBuilder(SERVICE_URL
 				+ ServerPaths.GET_IMPORT_DATA, "POST");
 		String postData = "";
 		for (String key : keys) {

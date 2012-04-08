@@ -275,7 +275,6 @@ public class RequestParameters {
 	 * Restore parameters from local storage.
 	 */
 	private static void restore(String data, boolean fireEvents) {
-
 		if (data == null) {
 			return;
 		}
@@ -300,6 +299,7 @@ public class RequestParameters {
 		
 		String formEncoding = Utils.getJsonString(obj, "formEncoding");
 		if (formEncoding != null) {
+			formEncoding = formEncoding.trim();
 			ins.formEncoding = formEncoding;
 			if (fireEvents) {
 				ins.eventBus.fireEventFromSource(new EncodingChangeEvent(formEncoding), RequestParameters.class);
@@ -342,6 +342,14 @@ public class RequestParameters {
 					}
 					JSONString _headerValueJS = headerValueJs.isString();
 					String headerValue = _headerValueJS.stringValue();
+					
+					if(headerName.toLowerCase().equals("content-type") && headerValue.trim().toLowerCase().equals(formEncoding)){
+						//
+						// Do not duplicate content type header if it is same as form encoding value
+						//
+						continue;
+					}
+					
 					headers.add(new RequestHeader(headerName, headerValue));
 				}
 			}

@@ -32,13 +32,14 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay;
 import com.google.gwt.user.client.ui.SuggestOracle;
+import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay;
-import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.xhr2.client.ProgressEvent;
 import com.google.gwt.xhr2.client.Response;
 import com.restclient.client.AppRequestFactory;
@@ -81,11 +82,30 @@ public class RequestWidget extends Composite implements SubpageWidget {
 	@UiField DivElement receivingDiv;
 	@UiField SpanElement sizeCounter;
 	@UiField HTML urlParamsSupport;
+	@UiField Label urlLabel;
+	@UiField HTMLPanel regularUrlSuggestions;
+	@UiField DetailedParamsWidget detaildeParamsWidget;
 
 	private final List<String> encodings;
 	private Date lastEnterTime;
+	private boolean detailsUrlOpened = false;
 
-	private DefaultSuggestionDisplay suggestionsDisplay;
+	private RestUrlsSuggestionDisplay suggestionsDisplay;
+	private UrlsSuggestOracle urlSuggestionOracle;
+	
+	
+	
+	class RestUrlsSuggestionDisplay extends DefaultSuggestionDisplay {
+		
+		@Override
+		public boolean isAnimationEnabled() {
+			return false;
+		}
+		
+	}
+	
+	
+	
 	/**
 	 * Whole request form.
 	 * @param eventBus
@@ -93,12 +113,13 @@ public class RequestWidget extends Composite implements SubpageWidget {
 	public RequestWidget(final EventBus eventBus) {
 		this.eventBus = eventBus;
 
-		UrlsSuggestOracle oracle = new UrlsSuggestOracle(RestApp.URLS_SERVICE);
-		suggestionsDisplay = new DefaultSuggestionDisplay();
-		suggestionsDisplay.setAnimationEnabled(true);
+		urlSuggestionOracle = new UrlsSuggestOracle(RestApp.URLS_SERVICE);
+		suggestionsDisplay = new RestUrlsSuggestionDisplay();
+		suggestionsDisplay.setAnimationEnabled(false);
 
-		urlField = new SuggestBox(oracle, new TextBox(), suggestionsDisplay);
-
+		urlField = new SuggestBox(urlSuggestionOracle, new TextBox(), suggestionsDisplay);
+		urlField.setAutoSelectEnabled(false);
+		
 		methodsWidget = new MethodsWidget(eventBus);
 		headersWidget = new HeaderInputWidget(eventBus);
 		bodyWidget = new BodyInputWidget(eventBus);
@@ -124,6 +145,8 @@ public class RequestWidget extends Composite implements SubpageWidget {
 
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
 		sendRequest.setEnabled(false);
+		detaildeParamsWidget.setVisible(false);
+		
 		
 		contentType.addChangeHandler(new ChangeHandler() {
 			@Override
@@ -190,8 +213,11 @@ public class RequestWidget extends Composite implements SubpageWidget {
 				}
 				if (source != null && ( source.equals(RequestParameters.class ) || source.equals(GETParamsEditorDialog.class) )) {
 					RequestWidget.this.urlField.setValue(url);
+					if(detailsUrlOpened){
+						detaildeParamsWidget.setValue(url);
+					}
 				}
-				if( url.trim().equals("") ){
+				if(url.trim().equals("")){
 					sendRequest.setEnabled(false);
 				} else {
 					sendRequest.setEnabled(true);
@@ -245,6 +271,7 @@ public class RequestWidget extends Composite implements SubpageWidget {
 				}
 			}
 		});
+		
 		urlField.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
 			@Override
 			public void onSelection(SelectionEvent<Suggestion> event) {
@@ -346,7 +373,47 @@ public class RequestWidget extends Composite implements SubpageWidget {
 			}
 		});
 		
+		urlLabel.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				onUrlLabelClick();
+			}
+		});
+		detaildeParamsWidget.addValueChangeHandler(new ValueChangeHandler<String>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				String newValue = event.getValue();
+				urlField.setValue(newValue, true);
+			}
+		});
 	}
+	
+	
+	void onUrlLabelClick(){
+		if(detailsUrlOpened){
+			closeDetailedUrlPanel();
+			detailsUrlOpened = false;
+		} else {
+			openDetailedUrlPanel();
+			detailsUrlOpened = true;
+		}
+	}
+	
+	
+	private void openDetailedUrlPanel(){
+		detaildeParamsWidget.setValue(urlField.getValue());
+		urlSuggestionOracle.setAllowQuery(false);
+		regularUrlSuggestions.setVisible(false);
+		detaildeParamsWidget.setVisible(true);
+	}
+	
+	private void closeDetailedUrlPanel(){
+		urlSuggestionOracle.setAllowQuery(true);
+		regularUrlSuggestions.setVisible(true);
+		detaildeParamsWidget.setVisible(false);
+	}
+	
+	
 	
 	@Override
 	public void onShow() {

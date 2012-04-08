@@ -19,7 +19,7 @@ public class PingRequest extends ApplicationRequest {
 	public static void getSession(final ApplicationSessionCallback callback){
 		
 		
-		RequestBuilder b = new RequestBuilder(PING_URL, "GET");
+		RequestBuilder b = getApplicationRequestBuilder(PING_URL, "GET");
 		b.setLoadHandler(new LoadHandler() {
 			@Override
 			public void onLoaded(Response response, ProgressEvent event) {

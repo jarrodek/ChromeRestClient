@@ -51,10 +51,7 @@
         <servlet-name>AuthServlet</servlet-name>
         <url-pattern>/auth/signin</url-pattern>
     </servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>pingEntry</servlet-name>
-		<url-pattern>/ping/*</url-pattern>
-	</servlet-mapping>
+	
 	
 	
 	
@@ -74,13 +71,18 @@
 <!-- 		<welcome-file>RestClientApp.html</welcome-file> -->
 		<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>	
+	
+	
+	
 	<filter>
         <filter-name>extensionOrginFilter</filter-name>
         <filter-class>com.restclient.server.ExtensionServletFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>extensionOrginFilter</filter-name>
-        <url-pattern>/ext-channel*</url-pattern>
+        <url-pattern>/ext-channel/*</url-pattern>
+        <url-pattern>/udata/*</url-pattern>
+        <url-pattern>/ping/*</url-pattern>
     </filter-mapping>
 
 </web-app>

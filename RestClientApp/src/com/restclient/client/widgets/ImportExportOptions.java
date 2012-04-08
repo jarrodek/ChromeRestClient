@@ -136,8 +136,10 @@ public class ImportExportOptions extends Composite {
 	 * Actions to perform when view is show.
 	 * @param uid
 	 */
-	public void onShow(final String importUid) {
-		checkUserSession();
+	public void onShow(final String importUid, boolean checkSession) {
+		if(checkSession){
+			checkUserSession();
+		}
 		if(importUid != null){
 			storeData.setEnabled(false);
 			restoreData.setEnabled(false);

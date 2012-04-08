@@ -2,6 +2,7 @@ package com.restclient.client.request;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.xhr2.client.Request;
+import com.google.gwt.xhr2.client.RequestBuilder;
 /**
  * Base class for requests to applications server.
  * @author Paweł Psztyć
@@ -29,5 +30,11 @@ public class ApplicationRequest {
 	}
 	
 	protected static Request currentRequest = null;
+	
+	protected static RequestBuilder getApplicationRequestBuilder(String url, String method) {
+		RequestBuilder b = new RequestBuilder(url, method);
+		b.setHeader("X-Chrome-Extension", "ChromeRestClient");
+		return b;
+	}
 	
 }
