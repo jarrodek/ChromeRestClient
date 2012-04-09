@@ -1,0 +1,36 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+	<ui:style>
+		.dialog-buttons{
+			-webkit-box-align: center;
+			-webkit-box-orient: horizontal;
+			-webkit-box-pack: end;
+			display: -webkit-box;
+			padding: 10px;
+		}
+		.button{
+			margin-left: 10px;
+		}
+		.additionalButtons{
+			margin-right: 20px;
+		}
+	</ui:style>
+	<g:DialogBox ui:field="dialog" modal="true"
+		animationEnabled="true" glassEnabled="true">
+		<g:caption>GET params editor</g:caption>
+		<g:HTMLPanel ui:field="contents">
+			<g:HTMLPanel ui:field="addPanel"></g:HTMLPanel>
+			<g:HTMLPanel ui:field="buttonPanel">
+				<g:Button text="Add row" ui:field="addRow" title="Add new row to form"></g:Button>
+			</g:HTMLPanel>
+			<div class="{style.dialog-buttons}">
+				<div class="{style.additionalButtons}">
+					<g:Button styleName="{style.button}" ui:field="decode">Decode all values</g:Button>
+					<g:Button styleName="{style.button}" ui:field="encode">Encode all values</g:Button>
+				</div>
+				<g:Button styleName="{style.button}" ui:field="save">Save</g:Button>
+				<g:Button styleName="{style.button}" ui:field="cancel">Cancel</g:Button>
+			</div>
+		</g:HTMLPanel>
+	</g:DialogBox>
+</ui:UiBinder>

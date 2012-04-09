@@ -1,0 +1,80 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" 
+	xmlns:h5="urn:import:com.restclient.client.html5"
+	xmlns:rca="urn:import:com.restclient.client.widgets">
+	<ui:style src="../common.css"
+		type="com.restclient.client.widgets.OptionsWidget.Style">
+			.optionsSection {
+				-webkit-padding-start: 24px;
+				border-bottom: 1px solid #EEE;
+				margin-top: 17px;
+				padding-bottom: 20px;
+			}
+			.optionsWidget {
+				position: relative;
+			}
+			.noLocalStorageLabel {
+				position: fixed;
+				top: 50px;
+				left: 300px;
+				border: 1px red solid;
+				background-color: white;
+				padding: 30px;
+				font-weight: bold;
+			}
+			.historyClear,
+			.historyAmount {
+				display: inline-block;
+				margin-left: 20px;
+			}
+			.jsonHeaderCaption{
+				font-weight:bold;
+			}
+		</ui:style>
+	<g:HTMLPanel ui:field="mainWidget" addStyleNames="{style.optionsWidget}">
+		<h1 class="{style.contentTitle} {style.about}">Advanced configuration and experimental features</h1>
+		<section class="{style.optionsSection}">
+			<p>Debug options</p>
+			<g:CheckBox ui:field="debug" value="false"
+				text="Enable debug messages in console output"></g:CheckBox>
+		</section>
+		<section class="{style.optionsSection}">
+			<p>History enabled</p>
+			<g:CheckBox ui:field="history" value="true"
+				text="Enable requests history list"></g:CheckBox>
+			<div class="{style.hidden} {style.historyAmount}" ui:field="historyAmount">
+				Remember last
+				<h5:HTML5InputNumber ui:field="historyCount"></h5:HTML5InputNumber>
+				requests
+			</div>
+			<div class="{style.hidden} {style.historyClear}" ui:field="historyClear">
+				<g:Button ui:field="clearHistory" text="Clear history"></g:Button>
+			</div>
+		</section>
+		<section class="{style.optionsSection}">
+			<p>Cookie capture enabled</p>
+			<g:CheckBox ui:field="cookie" value="false"
+				text="Enable cookie capture during request"></g:CheckBox>
+			<a href="http://restforchrome.blogspot.com/2011/11/cookies-capture-experimental-feature.html">read more about this</a>
+		</section>
+		<section class="{style.optionsSection}">
+			<p>Shortcuts</p>
+			<g:Button ui:field="shortCutsButton" text="Edit shortcuts"></g:Button>
+		</section>
+		<section class="{style.optionsSection}">
+			<p>JSON headers</p>
+			<g:Button ui:field="jsonHeadersWidget" text="Manage"></g:Button>
+		</section>
+		<section class="{style.optionsSection}">
+			<p>Import/export</p>
+			<g:Button ui:field="importExportWidget" text="Manage"></g:Button>
+		</section>
+		<div class="{style.subpageTopContainer} {style.hidden}" ui:field="headersWrapper">
+			<rca:JSONHeadersOptions ui:field="jsonHeadersOptions"></rca:JSONHeadersOptions>
+		</div>
+		<div class="{style.subpageTopContainer} {style.hidden}" ui:field="importExportWrapper">
+			<rca:ImportExportOptions ui:field="importExportOptions"></rca:ImportExportOptions>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder> 

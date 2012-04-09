@@ -1,0 +1,102 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+	<ui:style src="../common.css">
+		.mainPanel {
+			padding: 20px;
+		}
+		
+		.row {
+			margin: 7px 0px;
+		}
+		
+		.label {
+			cursor: pointer;
+			font-weight: bold;
+			margin-bottom: 7px;
+		}
+		
+		.input {
+			
+		}
+		
+		.toggleButton {
+			max-width: 20px;
+			font-size: 11px;
+			display: inline-block;
+		}
+		.desc{
+			margin: 3px 0px 0px 0px;
+			color: #A5A5A5;
+			font-size: 12px;
+		}
+	</ui:style>
+	<g:DialogBox ui:field="dialog" modal="true"
+		animationEnabled="true" glassEnabled="true">
+		<g:caption>Edit shortcuts</g:caption>
+		<g:HTMLPanel addStyleNames="{style.mainPanel}">
+			<div class="{style.row}">
+				<span class="{style.label}">
+					Open
+				</span>
+				<p class="{style.desc}">Show "saved requests" panel</p>
+				<div class="{style.input}">
+					<g:ToggleButton ui:field="openRequestCtrlToggle"
+						addStyleNames="{style.toggleButton}" text="ctrl"></g:ToggleButton>
+					<g:ToggleButton ui:field="openRequestShiftToggle"
+						addStyleNames="{style.toggleButton}" text="shift"></g:ToggleButton>
+					<g:ToggleButton ui:field="openRequestAltToggle"
+						addStyleNames="{style.toggleButton}" text="alt"></g:ToggleButton>
+					<g:TextBox ui:field="openLetter" name="openLetter" maxLength="1"></g:TextBox>
+				</div>
+			</div>
+			<div class="{style.row}">
+				<span class="{style.label}">
+					Save
+				</span>
+				<p class="{style.desc}">Show "save request" dialog</p>
+				<div class="{style.input}">
+					<g:ToggleButton ui:field="saveRequestCtrlToggle" addStyleNames="{style.toggleButton}"
+						text="ctrl"></g:ToggleButton>
+					<g:ToggleButton ui:field="saveRequestShiftToggle" addStyleNames="{style.toggleButton}"
+						text="shift"></g:ToggleButton>
+					<g:ToggleButton ui:field="saveRequestAltToggle" addStyleNames="{style.toggleButton}"
+						text="alt"></g:ToggleButton>
+					<g:TextBox ui:field="saveLetter" name="saveLetter" maxLength="1"></g:TextBox>
+				</div>
+			</div>
+			<div class="{style.row}">
+				<span class="{style.label}">
+					Send request
+				</span>
+				<p class="{style.desc}">Fire current request</p>
+				<div class="{style.input}">
+					<g:ToggleButton ui:field="sendRequestCtrlToggle" addStyleNames="{style.toggleButton}"
+						text="ctrl"></g:ToggleButton>
+					<g:ToggleButton ui:field="sendRequestShiftToggle" addStyleNames="{style.toggleButton}"
+						text="shift"></g:ToggleButton>
+					<g:ToggleButton ui:field="sendRequestAltToggle" addStyleNames="{style.toggleButton}"
+						text="alt"></g:ToggleButton>
+					<g:TextBox ui:field="sendLetter" name="sendLetter" maxLength="1"></g:TextBox>
+				</div>
+			</div>
+			<div class="{style.row}">
+				<span class="{style.label}">
+					History
+				</span>
+				<p class="{style.desc}">Show "history" tab</p>
+				<div class="{style.input}">
+					<g:ToggleButton ui:field="historyCtrlToggle" addStyleNames="{style.toggleButton}"
+						text="ctrl"></g:ToggleButton>
+					<g:ToggleButton ui:field="historyShiftToggle" addStyleNames="{style.toggleButton}"
+						text="shift"></g:ToggleButton>
+					<g:ToggleButton ui:field="historyAltToggle" addStyleNames="{style.toggleButton}"
+						text="alt"></g:ToggleButton>
+					<g:TextBox ui:field="historyLetter" name="historyLetter" maxLength="1"></g:TextBox>
+				</div>
+			</div>
+			<div class="{style.dialog-buttons}">
+				<g:Button styleName="{style.button}" ui:field="closeButton">Close</g:Button>
+			</div>
+		</g:HTMLPanel>
+	</g:DialogBox>
+</ui:UiBinder>
