@@ -1,0 +1,16 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:rcui="urn:import:org.rest.client.ui.html5">
+	<ui:with field="appResources" type="org.rest.client.resources.AppResources"/>
+	<ui:style>
+		.menuPanel{
+			margin: 0px;
+			padding: 0px;	
+			list-style: none;
+		}
+	</ui:style>
+	<rcui:ListPanel ui:field="root" styleName="{style.menuPanel}">
+	
+	</rcui:ListPanel>
+</ui:UiBinder>

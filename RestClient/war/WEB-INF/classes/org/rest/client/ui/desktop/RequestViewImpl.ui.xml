@@ -1,0 +1,88 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:rcui="urn:import:org.rest.client.ui.desktop.widget"
+	xmlns:h5="urn:import:org.rest.client.ui.html5">
+	<ui:with field="appResources" type="org.rest.client.resources.AppResources"/>
+	<ui:style>
+		.projectPanel{
+			height: 38px;
+			background-color: #f4f4f4;
+		}
+		.requestPanel{
+	
+		}
+		.methodsWidget{
+			display: -webkit-box; 
+			-webkit-box-orient: horizontal;
+		}
+		.otherInput{
+			font-size: 11px;
+			width: 150px;
+			vertical-align: top;
+			height: 9px;
+		}
+		.contentTypeSection{
+			
+		}
+		.actionBar{
+			float: right;
+			margin-right: 10px;
+		}
+		.actionBar,
+		.contentTypeSection{
+			margin-top: 15px;
+			display: inline-block;
+			vertical-align: top;
+		}
+		.actions{}
+		.actions > *{margin-left: 10px;}
+		.radioButton label,
+		.radioButton {
+			cursor: pointer;
+		}
+	</ui:style>
+	<g:HTMLPanel ui:field="root" styleName="{style.requestPanel}">
+		<!-- Project panel -->
+<!-- 		<g:HTMLPanel ui:field="projectPanel" styleName="{style.projectPanel}"></g:HTMLPanel> -->
+		
+		<!-- URL widget -->
+		<rcui:RequestUrlWidget ui:field="urlWidget"></rcui:RequestUrlWidget>
+		
+		<!-- Method selector -->
+		<g:HTMLPanel styleName="{style.methodsWidget}">
+			<g:RadioButton name="method" text="GET" ui:field="radioGet" checked="true" styleName="{style.radioButton}"></g:RadioButton>
+			<g:RadioButton name="method" text="POST" ui:field="radioPost" styleName="{style.radioButton}"></g:RadioButton>
+			<g:RadioButton name="method" text="PUT" ui:field="radioPut" styleName="{style.radioButton}"></g:RadioButton>
+			<g:RadioButton name="method" text="PATCH" ui:field="radioPatch" styleName="{style.radioButton}"></g:RadioButton>
+			<g:RadioButton name="method" text="DELETE" ui:field="radioDelete" styleName="{style.radioButton}"></g:RadioButton>
+			<g:RadioButton name="method" text="HEAD" ui:field="radioHead" styleName="{style.radioButton}"></g:RadioButton>
+			<g:RadioButton name="method" text="OPTIONS" ui:field="radioOptions" styleName="{style.radioButton}"></g:RadioButton>
+			<g:RadioButton name="method" text="Other" ui:field="radioOther" styleName="{style.radioButton}"></g:RadioButton>
+			<g:TextBox ui:field="otherMethodValue" enabled="false" addStyleNames="{style.otherInput}"></g:TextBox>
+		</g:HTMLPanel>
+		
+		<!-- Headers widget -->
+		<rcui:RequestHeadersWidget ui:field="requestHeaders"></rcui:RequestHeadersWidget>
+		
+		<!-- Payload widget  -->
+		<rcui:RequestBodyWidget ui:field="requestBody"></rcui:RequestBodyWidget>
+		
+		<!-- Content type -->
+		<div ui:field="contentTypeContainer" class="{style.contentTypeSection}">
+			<g:ListBox ui:field="contentTypeInput" title="Select form encoding" styleName="{appResources.appCss.selectControl}">
+			</g:ListBox>
+			<span class="{appResources.appCss.inlineNote}">
+				Set "Content-Type" header to overwrite this value.
+			</span>
+		</div>
+		
+		<div class="{style.actionBar}">
+			<div class="{style.actions}">
+				<h5:HTML5Progress ui:field="progressIndicator" width="200px" height="20px"></h5:HTML5Progress>
+				<g:Button ui:field="clearButton" title="Clear current form settings">Clear</g:Button>
+				<g:Button ui:field="sendButton" title="Send current data">Send</g:Button>
+			</div>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder>

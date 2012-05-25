@@ -1,0 +1,129 @@
+body.rest-client {
+	display: -webkit-box;
+	display: -moz-box;
+	display: -o-box;
+	display: -ms-box;
+	display: box;
+	margin: 0px;
+	font-family: arial, sans-serif;
+}
+
+ul {
+	list-style: none;
+	margin: 0px;
+	padding: 0px;
+}
+
+ul>li {
+	margin: 0px;
+	padding: 0px;
+}
+a, a:active, a:visited {
+	color: #607890;
+}
+a:link {
+	-webkit-tap-highlight-color: #FF5E99;
+}
+a, a:active, a:visited {
+	color: #607890;
+}
+
+body>.ls {
+	width: 120px;
+	margin-right: 10px;
+}
+
+body>.app {
+	-webkit-box-flex: 1;
+}
+
+h1.at {
+	-webkit-user-select: none;
+	color: black;
+	font-size: 175%;
+	font-weight: normal;
+	margin: 0;
+	padding-bottom: 14px;
+	border-bottom: 1px #EBEBEB solid;
+	margin-bottom: 30px;
+	margin-left: 10px;
+	margin-top: 10px;
+}
+
+.ls ul>li {
+	padding: 5px 0;
+	margin: 4px 0;
+	cursor: pointer;
+	padding-left: 10px;
+	border-left: 3px white solid;
+}
+
+.ls ul>li[aria-selected="true"] {
+	color: #DD4B39;
+	border-left: 3px #DD4B39 solid;
+}
+
+.ls ul>li:hover {
+	background-color: #EEE;
+}
+
+.hidden {
+	display: none;
+}
+
+/* DIALOG BOX */
+div.gwt-DialogBox {
+	clip: initial !important;
+	-webkit-box-shadow: 0px 5px 80px #505050;
+}
+
+div.gwt-DialogBox .dialogTop{
+	display: none;
+}
+div.gwt-DialogBox .dialogTitle{
+	font-weight: bold;
+	font-size: 16px;
+	margin-bottom: 16px;
+}
+
+.gwt-DialogBox .Caption {
+	font-size: 105%;
+	font-weight: bold;
+	padding: 10px 15px 8px 15px;
+	-webkit-padding-end: 24px;
+	-webkit-user-select: none;
+	color: #53637D;
+	text-shadow: white 0 1px 2px;
+	margin: 0;
+}
+
+.gwt-DialogBox.dialog-error .Caption {
+	color: red;
+}
+
+.gwt-DialogBox .dialogContent {
+	padding: 30px 40px;
+}
+
+.gwt-DialogBox tr.dialogTop .Caption {
+	border-top: none;
+}
+
+.gwt-DialogBox tr.dialogMiddle>td.dialogMiddleRight,.gwt-DialogBox tr.dialogMiddle>td.dialogMiddleLeft,.gwt-DialogBox tr.dialogTop>td.dialogTopRight,.gwt-DialogBox tr.dialogTop>td.dialogTopLeft,.gwt-DialogBox tr.dialogBottom
+	{
+	display: none;
+}
+
+div.gwt-PopupPanelGlass {
+	background: -webkit-radial-gradient(center, rgba(127, 127, 127, 0.32),
+		rgba(127, 127, 127, 0.40) 35%, rgba(0, 0, 0, 0.65) );
+	opacity: initial;
+	z-index: 6;
+	position: fixed !important;
+}
+
+div.gwt-DialogBox {
+	clip: initial !important;
+	-webkit-box-shadow: 0px 5px 80px #505050;
+	z-index: 7;
+}
