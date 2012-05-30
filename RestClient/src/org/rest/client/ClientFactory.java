@@ -16,9 +16,11 @@
 package org.rest.client;
 
 import org.rest.client.storage.store.FormEncodingsStore;
+import org.rest.client.storage.store.HeadersStore;
 import org.rest.client.storage.store.HistoryRequestStore;
 import org.rest.client.storage.store.LocalStore;
 import org.rest.client.storage.store.RequestDataStore;
+import org.rest.client.storage.store.StatusesStore;
 import org.rest.client.storage.store.UrlHistoryStore;
 import org.rest.client.ui.AddEncodingView;
 import org.rest.client.ui.MenuItemView;
@@ -35,10 +37,15 @@ public interface ClientFactory {
 	RequestView getRequestView();
 	MenuView getMenuView();
 	MenuItemView createMenuItem(org.rest.client.ui.MenuItemView.Presenter presenter);
-	LocalStore getLatestRequestStore();
+	
+	//STORES
+	LocalStore getLocalStore();
 	RequestDataStore getRequestDataStore();
 	HistoryRequestStore getHistoryRequestStore();
 	FormEncodingsStore getFormEncodingsStore();
 	UrlHistoryStore getUrlHistoryStore();
+	HeadersStore getHeadersStore();
+	StatusesStore getStatusesStore();
+	
 	AddEncodingView getAddEncodingView(EventBus eventBus);
 }

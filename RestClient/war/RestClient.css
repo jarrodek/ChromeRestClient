@@ -127,3 +127,35 @@ div.gwt-DialogBox {
 	-webkit-box-shadow: 0px 5px 80px #505050;
 	z-index: 7;
 }
+div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomLeft .popupBottomLeftInner,
+div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInner,
+div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupTopRight .popupTopRightInner,
+div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupTopCenter,
+div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupTopLeft .popupTopLeftInner,
+div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupMiddleRight,
+div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupMiddleLeft,
+div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupMiddleCenter,
+div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomCenter {
+	background: #FFDBDB;
+}
+.gwt-DecoratedPopupPanel{
+	z-index: 10;
+}
+div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupTopRight,
+div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupTopLeft,
+div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomLeft,
+div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight {
+	background: none;
+}
+div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupTopRight .popupTopRightInner {
+	border-top-right-radius: 20px 20px;
+}
+div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupTopLeft .popupTopLeftInner {
+	border-top-left-radius: 20px 20px;
+}
+div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomLeft .popupBottomLeftInner {
+	border-bottom-left-radius: 20px 20px;
+}
+div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInner {
+	border-bottom-right-radius: 20px 20px;
+}

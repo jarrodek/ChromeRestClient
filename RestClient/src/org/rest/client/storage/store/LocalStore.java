@@ -25,6 +25,7 @@ import org.rest.client.storage.LocalStorageAdapter;
 public class LocalStore extends LocalStorageAdapter {
 	
 	public final static String LATEST_REQUEST_KEY = "latest_request_data";
+	public final static String HEADERS_IMPORT_TIME_KEY = "headers_import_time";
 	
 	public LocalStore() {}
 

@@ -89,6 +89,7 @@ public interface TasksCallback {
 	/**
 	 * Called when each inner task is finished. If task has only one inner task its
 	 * should be executed before {@link #onSuccess()} is called.
+	 * @param taskFinished number of task finished.
 	 */
-	void onInnerTaskFinished();
+	void onInnerTaskFinished(int taskFinished);
 }

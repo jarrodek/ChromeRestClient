@@ -167,7 +167,7 @@ public class RequestActivity extends AppActivity implements
 		ro.setPayload(view.getPayload());
 		ro.setURL(view.getUrl());
 
-		this.clientFactory.getLatestRequestStore().put(ro.toJSON(),
+		this.clientFactory.getLocalStore().put(ro.toJSON(),
 				LocalStore.LATEST_REQUEST_KEY,
 				new StoreResultCallback<String>() {
 					@Override

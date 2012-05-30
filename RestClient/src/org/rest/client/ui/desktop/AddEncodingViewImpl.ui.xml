@@ -2,25 +2,6 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 	<ui:with field="appResources" type="org.rest.client.resources.AppResources" />
 	<ui:style>
-		.dialog-buttons {
-			-webkit-box-align: center;
-			-moz-box-align: center;
-			-ms-box-align: center;
-			box-align: center;
-			-webkit-box-orient: horizontal;
-			-moz-box-orient: horizontal;
-			-ms-box-orient: horizontal;
-			box-orient: horizontal;
-			-webkit-box-pack: start;
-			-moz-box-pack: start;
-			-ms-box-pack: start;
-			box-pack: start;
-			display: -webkit-box;
-			display: -moz-box;
-			display: -ms-box;
-			display: box;
-			margin-top: 20px;
-		}
 		
 		.container {
 			padding: 30px 40px;
@@ -43,7 +24,7 @@
 				<g:TextBox ui:field="encoding" width="400px"></g:TextBox>
 			</div>
 			<div class="{appResources.appCss.hidden} {style.errorField}" ui:field="errorField"></div>
-			<div class="{style.dialog-buttons}">
+			<div class="{appResources.appCss.dialogButtons}">
 				<g:Button styleName="{appResources.appCss.button}"
 					ui:field="save">Save
 				</g:Button>

@@ -79,8 +79,8 @@ public abstract class DatabaseSuggestOracle extends SuggestOracle {
 				// latest query (from starting) just filter latest results and
 				// display it
 				//
-			} else if (recentDatabaseResult.isComplete()
-					&& mostRecentQuery.startsWith(recentDatabaseResult
+			} else if (//recentDatabaseResult.isComplete() && 
+					mostRecentQuery.startsWith(recentDatabaseResult
 							.getQuery())) {
 				Response resp = new Response(recentDatabaseResult.filter(
 						recentClientRequest.getQuery(),

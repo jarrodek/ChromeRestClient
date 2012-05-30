@@ -40,7 +40,7 @@ public class RequestDataStore extends IndexedDbAdapter<Long, RequestObject> {
 	@SuppressWarnings("unchecked")
 	public static void setVestion(IDBDatabase db) throws IDBDatabaseException {
 		
-		Log.debug("Set store (url_history) new version" + databaseVersion);
+		Log.debug("Set store (url_history) new version " + databaseVersion);
 		Log.warn("This will remove all previous data.");
 		
 		if(db.getObjectStoreNames().contains(STORE_NAME)){

@@ -16,16 +16,15 @@
 package org.rest.client;
 
 import org.rest.client.event.ApplicationReadyEvent;
-import org.rest.client.load.LoadTask;
-import org.rest.client.load.TasksCallback;
 import org.rest.client.load.TasksLoader;
 import org.rest.client.mvp.AppActivityMapper;
 import org.rest.client.mvp.AppPlaceHistoryMapper;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.resources.AppResources;
-import org.rest.client.ui.MenuItemView;
-import org.rest.client.ui.MenuView;
+import org.rest.client.task.CreateMenuTask;
+import org.rest.client.task.InitialConfigTask;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.activity.shared.ActivityManager;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.core.client.Callback;
@@ -36,7 +35,7 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.place.shared.PlaceHistoryHandler;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.web.bindery.event.shared.EventBus; 
+import com.google.web.bindery.event.shared.EventBus;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -75,7 +74,10 @@ public class RestClient implements EntryPoint {
 		
 		
 		//Add initial tasks like load configuration or restore state
+		CreateMenuTask createMenuTask = new CreateMenuTask();
+		InitialConfigTask initTask = new InitialConfigTask();
 		
+		TasksLoader.addTask(initTask);
 		TasksLoader.addTask(createMenuTask);
 		
 		//run loaded tasks and show app view.
@@ -85,74 +87,26 @@ public class RestClient implements EntryPoint {
 				RootPanel.get("appContainer").add(appWidget);
 				historyHandler.handleCurrentHistory();
 				fixChromeLayoutIssue();
-				
 				eventBus.fireEvent(new ApplicationReadyEvent());
 			}
 			
 			@Override
 			public void onFailure(Void reason) {
+				Log.error("Initialize error...");
 				RootPanel.get("appContainer").add(appWidget);
-				historyHandler.handleCurrentHistory();
-				
-				eventBus.fireEvent(new ApplicationReadyEvent());
+//				historyHandler.handleCurrentHistory();
+//				eventBus.fireEvent(new ApplicationReadyEvent());
 			}
 		});
 		
 		AppResources.INSTANCE.appCss().ensureInjected();
 	}
 	
-	LoadTask createMenuTask = new LoadTask() {
-		
-		@Override
-		public void run(TasksCallback callback, boolean lastRun) {
-			MenuView mv = clientFactory.getMenuView();
-			
-			org.rest.client.ui.MenuItemView.Presenter p = new org.rest.client.ui.MenuItemView.Presenter() {
-				@Override
-				public void goTo(Place place) {
-					clientFactory.getPlaceController().goTo(place);
-				}
-			};
-			
-			MenuItemView request = clientFactory.createMenuItem(p);
-			request.setText("Request");
-			request.setPlace(new RequestPlace(null));
-			request.setSelected(true);
-			mv.addMenuItem(request);
-			
-			MenuItemView projects = clientFactory.createMenuItem(p);
-			projects.setText("Projects");
-//			projects.setPlace("projects");
-			mv.addMenuItem(projects);
-			
-			MenuItemView history = clientFactory.createMenuItem(p);
-			history.setText("History");
-//			history.setPlace("history");
-			mv.addMenuItem(history);
-			
-			MenuItemView settings = clientFactory.createMenuItem(p);
-			settings.setText("Settings");
-//			settings.setPlace("settings");
-			mv.addMenuItem(settings);
-			
-			MenuItemView about = clientFactory.createMenuItem(p);
-			about.setText("About");
-//			about.setPlace("about");
-			mv.addMenuItem(about);
-			
-			RootPanel.get("appNavigation").add(mv.asWidget());
-			
-			
-			
-			callback.onInnerTaskFinished();
-			callback.onSuccess();
-		}
-		
-		@Override
-		public int getTasksCount() {
-			return 1;
-		}
-	};
+	public static boolean isDebug(){
+		return true;
+	}
+	
+	
 	/**
 	 * @todo: report an issue. snap in /var/www/a/war/
 	 */

@@ -16,10 +16,20 @@
 package org.rest.client.ui.desktop.widget;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
+import org.rest.client.RestClient;
+import org.rest.client.headerssupport.HeadersFillSupport;
 import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.resources.AppCssResource;
 import org.rest.client.resources.AppResources;
+import org.rest.client.storage.StoreResultCallback;
+import org.rest.client.storage.store.HeadersStore;
+import org.rest.client.storage.store.objects.HeadersObject;
+import org.rest.client.suggestion.HeadersSuggestOracle;
 import org.rest.client.ui.html5.HTML5Element;
 import org.rest.client.ui.html5.SpanElement;
 
@@ -29,33 +39,50 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DecoratedPopupPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.InlineLabel;
+import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay;
+import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-
 import com.google.gwt.xhr2.client.RequestHeader;
 
 public class RequestHeadersWidget extends Composite implements HasText {
 	interface Binder extends UiBinder<Widget, RequestHeadersWidget> {
 	}
-		
+	
+	interface HeaderStyle extends CssResource {
+		String hasSupport();
+		String headerDesc();
+		String headerExample();
+		String headersDescPopup();
+		String keyBoxContainer();
+		String headerSupportHint();
+	}
+	
 	public enum TABS { RAW, FORM }
 	
 	private class FormInputs {
-		public FormInputs(TextBox keyBox, TextBox valueBox) {
+		public FormInputs(SuggestBox keyBox, TextBox valueBox) {
 			this.key = keyBox;
 			this.value = valueBox;
 		}
-		final TextBox key;
+		final SuggestBox key;
 		final TextBox value;
 	}
 	
@@ -65,15 +92,34 @@ public class RequestHeadersWidget extends Composite implements HasText {
 	@UiField DivElement tabContent;
 	@UiField HTMLPanel headersFormPanel;
 	@UiField TextArea headersRawInput;
+	@UiField HeaderStyle style;
 	
 	private TABS currentTab = TABS.RAW;
-	AppCssResource style = AppResources.INSTANCE.appCss();
+	AppCssResource appStyle = AppResources.INSTANCE.appCss();
 	private String headersData = "";
 	private ArrayList<FormInputs> formInputs = new ArrayList<RequestHeadersWidget.FormInputs>();
+	private HeadersSuggestOracle suggestOracle = null;
+	final HeadersStore store;
 	
 	public RequestHeadersWidget() {
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
 		
+		//
+		// Initialize Suggest Oracle for headers
+		//
+		store = RestClient.getClientFactory().getHeadersStore();
+		if(store.isOpened()){
+			suggestOracle = new HeadersSuggestOracle(store, "request");
+		} else {
+			store.open(new StoreResultCallback<Boolean>() {
+				@Override
+				public void onSuccess(Boolean result) {
+					suggestOracle = new HeadersSuggestOracle(store, "request");
+				}
+				@Override
+				public void onError(Throwable e) {}
+			});
+		}
 		headersRawInput.addKeyUpHandler(new KeyUpHandler() {
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
@@ -86,13 +132,18 @@ public class RequestHeadersWidget extends Composite implements HasText {
 			public void onClick(ClickEvent event) {
 				if(currentTab.equals(TABS.RAW)) return;
 				
+				String tabHandlercurrent = appStyle.tabHandlercurrent();
+				String tabsContent = appStyle.tabsContent();
+				String cssTabContent = appStyle.tabContent();
+				String tabContentCurrent = appStyle.tabContentCurrent();
+				
 				SpanElement tab = (SpanElement) rawTab.getElement();
-				((SpanElement)tab.getParentElement()).querySelector("."+style.tabHandlercurrent()).getClassList().remove(style.tabHandlercurrent());
-				tab.getClassList().add(style.tabHandlercurrent());
+				((SpanElement)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
+				tab.getClassList().add(tabHandlercurrent);
 				
 				HTML5Element contentParent = (HTML5Element) tabContent.getParentElement();
-				contentParent.querySelector("." + style.tabsContent() + " ." + style.tabContent() + "." + style.tabContentCurrent()).getClassList().remove(style.tabContentCurrent());
-				contentParent.querySelector("." + style.tabsContent() + " ." + style.tabContent() + "[data-tab=\"raw\"]").getClassList().add(style.tabContentCurrent());
+				contentParent.querySelector("." + tabsContent + " ." + cssTabContent + "." + tabContentCurrent).getClassList().remove(tabContentCurrent);
+				contentParent.querySelector("." + tabsContent + " ." + cssTabContent + "[data-tab=\"raw\"]").getClassList().add(tabContentCurrent);
 		        
 				currentTab = TABS.RAW;
 			}
@@ -105,13 +156,18 @@ public class RequestHeadersWidget extends Composite implements HasText {
 				updateForm();
 				ensureFormHasRow();
 				
+				String tabHandlercurrent = appStyle.tabHandlercurrent();
+				String tabsContent = appStyle.tabsContent();
+				String cssTabContent = appStyle.tabContent();
+				String tabContentCurrent = appStyle.tabContentCurrent();
+				
 				SpanElement tab = (SpanElement) formTab.getElement();
-				((SpanElement)tab.getParentElement()).querySelector("."+style.tabHandlercurrent()).getClassList().remove(style.tabHandlercurrent());
-				tab.getClassList().add(style.tabHandlercurrent());
+				((SpanElement)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
+				tab.getClassList().add(tabHandlercurrent);
 				
 				HTML5Element contentParent = (HTML5Element) tabContent.getParentElement();
-				contentParent.querySelector("." + style.tabsContent() + " ." + style.tabContent() + "." + style.tabContentCurrent()).getClassList().remove(style.tabContentCurrent());
-				contentParent.querySelector("." + style.tabsContent() + " ." + style.tabContent() + "[data-tab=\"form\"]").getClassList().add(style.tabContentCurrent());
+				contentParent.querySelector("." + tabsContent + " ." + cssTabContent + "." + tabContentCurrent).getClassList().remove(tabContentCurrent);
+				contentParent.querySelector("." + tabsContent + " ." + cssTabContent + "[data-tab=\"form\"]").getClassList().add(tabContentCurrent);
 		        
 				currentTab = TABS.FORM;
 			}
@@ -124,7 +180,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		//clear form inputs list
 		formInputs.clear();
 		//clear current value
-		headersData = null;
+		headersData = "";
 		//clear raw input
 		headersRawInput.setValue(null);
 	}
@@ -138,49 +194,94 @@ public class RequestHeadersWidget extends Composite implements HasText {
 	ValueChangeHandler<String> formRowChange = new ValueChangeHandler<String>() {
 		@Override
 		public void onValueChange(ValueChangeEvent<String> event) {
+			if (event.getSource() instanceof SuggestBox) {
+				SuggestBox sb = (SuggestBox) event.getSource();
+				if(((DefaultSuggestionDisplay)sb.getSuggestionDisplay()).isSuggestionListShowing()){
+					return;
+				}
+				SuggestBox key = (SuggestBox) event.getSource();
+				for(FormInputs fi : formInputs){
+					if(fi.key.equals(key)){
+						provideHeaderSupport(sb, fi.value);
+						break;
+					}
+				}
+			}
 			updateRaw();
 		}
 	};
 	
 	
 	private void addNewFormRow(String key, String value){
+		
 		final HTMLPanel row = new HTMLPanel("");
-		row.setStyleName(style.formRow());
-		TextBox keyBox = new TextBox();
+		row.setStyleName(appStyle.formRow());
+		final TextBox valueBox = new TextBox();
 		
+		SuggestBox _tmpKeySuggestBox = null;
+		//depends if DB has initialized successfully 
+		if(suggestOracle != null){
+			TextBox keyBox = new TextBox();
+			DefaultSuggestionDisplay suggestionsDisplay = new DefaultSuggestionDisplay();
+			suggestionsDisplay.setAnimationEnabled(true);
+			_tmpKeySuggestBox = new SuggestBox(suggestOracle, keyBox, suggestionsDisplay);
+		} else {
+			_tmpKeySuggestBox = new SuggestBox();
+		}
+		final SuggestBox keySuggestBox = _tmpKeySuggestBox;
 		
+		keySuggestBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
+			@Override
+			public void onSelection(SelectionEvent<SuggestOracle.Suggestion> event) {
+				provideHeaderSupport(keySuggestBox, valueBox);
+				updateRaw();
+			}
+		});
 		
-		
-		TextBox valueBox = new TextBox();
 		InlineLabel removeButton = new InlineLabel("x");
-		final FormInputs inputsListItem = new FormInputs(keyBox,valueBox);
+		final FormInputs inputsListItem = new FormInputs(keySuggestBox,valueBox);
 		formInputs.add(inputsListItem);
 		
 		if(key != null){
-			keyBox.setValue(key);
+			keySuggestBox.setValue(key);
 		}
 		if(value != null){
 			valueBox.setValue(value);
 		}
 		
-		keyBox.getElement().setAttribute("placeholder", "key");
+		keySuggestBox.getElement().setAttribute("placeholder", "key");
 		valueBox.getElement().setAttribute("placeholder", "value");
 		
-		keyBox.addStyleName(style.formKeyInput());
-		valueBox.addStyleName(style.formValueInput());
-		removeButton.addStyleName(style.removeButton());
+		keySuggestBox.addStyleName(appStyle.formKeyInput());
+		valueBox.addStyleName(appStyle.formValueInput());
+		removeButton.addStyleName(appStyle.removeButton());
 		
 		removeButton.setTitle("Remove");
 		
 		
-		keyBox.addValueChangeHandler(formRowChange);
+		keySuggestBox.addValueChangeHandler(formRowChange);
 		valueBox.addValueChangeHandler(formRowChange);
 		
-		row.add(keyBox);
+		InlineLabel hint = new InlineLabel();
+		hint.addStyleName(style.headerSupportHint());
+		final FlowPanel keyContainer = new FlowPanel();
+		keyContainer.add(keySuggestBox);
+		keyContainer.add(hint);
+		keyContainer.addStyleName(style.keyBoxContainer());
+		
+		row.add(keyContainer);
 		row.add(valueBox);
 		row.add(removeButton);
-		
 		headersFormPanel.add(row);
+		
+		hint.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				final int left = event.getClientX() + 10;
+	            final int top = event.getClientY() + 10;
+	            showHint(left, top, keySuggestBox.getValue());
+			}
+		});
 		
 		removeButton.addClickHandler(new ClickHandler() {
 			@Override
@@ -190,7 +291,91 @@ public class RequestHeadersWidget extends Composite implements HasText {
 				updateRaw();
 			}
 		});
-		keyBox.getElement().focus();
+		
+		if(key != null && !key.isEmpty()){
+			provideHeaderSupport(keySuggestBox, valueBox);
+		}
+		
+		keySuggestBox.getElement().focus();
+	}
+	
+	
+	private void showHint(final int left, final int top, final String forValue){
+		store.query(forValue, HeadersStore.HEADER_INDEX, new StoreResultCallback<Map<Long,HeadersObject>>() {
+        	@Override
+			public void onSuccess(final Map<Long, HeadersObject> result) {
+        		if(result.size() == 0){
+        			return;
+				} else {
+					HeadersObject v = null;
+					Iterator<Entry<Long, HeadersObject>> it = result.entrySet().iterator();
+					while(it.hasNext()){
+						HeadersObject _v = it.next().getValue();
+						if(_v.getHeader().equals(forValue)){
+							v = _v;
+							break;
+						}
+					}
+					if(v == null){
+						return;
+					}
+					String expl = "<span class=\""+style.headerDesc()+"\">";
+					expl += v.getDesc();
+					expl += "</span><br/><span class=\""+style.headerExample()+"\">";
+					expl += v.getExample()+"</span>";
+					
+					DecoratedPopupPanel simplePopup = new DecoratedPopupPanel(true);
+				    simplePopup.setWidth("300px");
+				    simplePopup.addStyleName( style.headersDescPopup() );
+			        simplePopup.setPopupPosition(left, top);
+			        simplePopup.add( new HTML(expl) );
+			        simplePopup.show();
+				}
+        	}
+        	@Override
+			public void onError(Throwable e) {}
+        });
+	}
+	
+	/**
+	 * Add fill headers support if current header is supported.
+	 * @param box 
+	 */
+	private void provideHeaderSupport(final SuggestBox value, TextBox box){
+		
+		store.query(value.getValue(), HeadersStore.HEADER_INDEX, new StoreResultCallback<Map<Long,HeadersObject>>() {
+			@Override
+			public void onSuccess(Map<Long, HeadersObject> result) {
+				if(result.size() == 0){
+					value.getElement().getParentElement().removeClassName(style.hasSupport()); //no support
+				} else {
+					Set<Long> keys = result.keySet();
+					Iterator<Long> it = keys.iterator();
+					while(it.hasNext()){
+						Long id = it.next();
+						HeadersObject header = result.get(id);
+						if(header.getHeader().equals(value.getValue())){
+							value.getElement().getParentElement().addClassName(style.hasSupport()); //has support
+							//addHintClickHandler();
+							break;
+						}
+					}
+				}
+			}
+			
+			@Override
+			public void onError(Throwable e) {
+				value.getElement().getParentElement().removeClassName(style.hasSupport()); //no support
+			}
+		});
+		
+		
+		if(HeadersFillSupport.isSupported(value.getValue())){
+			new HeadersFillSupport(value.getValue(), box);
+		} else {
+			HeadersFillSupport.removeSupport(box);
+		}
+		
 	}
 
 	@Override

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.rest.client.storage;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ import org.rest.client.storage.store.FormEncodingsStore;
 import org.rest.client.storage.store.HeadersStore;
 import org.rest.client.storage.store.HistoryRequestStore;
 import org.rest.client.storage.store.RequestDataStore;
+import org.rest.client.storage.store.StatusesStore;
 import org.rest.client.storage.store.UrlHistoryStore;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -61,7 +63,9 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 		implements StorageAdapter<K, V> {
 	
 	protected final static HashMap<String, IDBDatabase> connectedDatabases = new HashMap<String, IDBDatabase>();
-	protected final static String databaseVersion = "0.5";
+	protected final static String databaseVersion = "0.62";
+	protected final static ArrayList<String> openInProgressDatabasesList = new ArrayList<String>();
+	protected final static ArrayList<String> openedDatabasesList = new ArrayList<String>();
 	
 	/**
 	 * This method will be used when DB version is changed. Use
@@ -85,6 +89,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 			HistoryRequestStore.setVestion(db);
 			RequestDataStore.setVestion(db);
 			HeadersStore.setVestion(db);
+			StatusesStore.setVestion(db);
 		}
 	}
 	
@@ -92,6 +97,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 	protected final String storeName;
 	protected IDBDatabase db;
 	protected boolean isReady = false;
+	
 
 	public IndexedDbAdapter(String dbName, String storeName) {
 		this.dbName = dbName;
@@ -101,14 +107,31 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 			db = connectedDatabases.get(dbName);
 		}
 	}
-
+	
+	ArrayList<StoreResultCallback<Boolean>> waitOpenRequests = new ArrayList<StoreResultCallback<Boolean>>();
+	
+	/**
+	 * Check if DB is already opened.
+	 * @return true if connection to DB is opened.
+	 */
+	public boolean isOpened(){
+		return this.isReady;
+	}
+	
 	@Override
 	public void open(final StoreResultCallback<Boolean> callback) {
-		if (isReady) {
+		if (isReady || openedDatabasesList.contains(dbName)) {
 			Log.warn("Opening database: " + dbName + ", but it is opened.");
 			callback.onSuccess(true);
 			return;
 		}
+		
+		if(openInProgressDatabasesList.contains(dbName)){
+			waitOpenRequests.add(callback);
+			return;
+		}
+		
+		openInProgressDatabasesList.add(dbName);
 		
 		IDBFactory idb = IDBFactory.getIfSupported();
 		final IDBOpenDBRequest openRequest = idb.open(dbName, databaseVersion);
@@ -124,7 +147,10 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 				if (useSetVersion) {
 					initDB(callback);
 				} else {
-					callback.onSuccess(true);
+					if (databaseVersion.equals(db.getVersion())) {
+						callback.onSuccess(true);
+						cllbackWaitingOpenRequest(true);
+					}
 				}
 			}
 		});
@@ -132,6 +158,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 			@Override
 			public void onError() {
 				callback.onError(null);
+				cllbackWaitingOpenRequest(null);
 			}
 		});
 		openRequest.addUpdateNeededHandler(new IDBUpdateNeededHandler() {
@@ -142,19 +169,37 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 					setVestion(dbName, db);
 					isReady = true;
 					callback.onSuccess(true);
+					cllbackWaitingOpenRequest(true);
 				} catch (IDBDatabaseException e) {
 					e.printStackTrace();
 					callback.onError(e);
+					cllbackWaitingOpenRequest(e);
 				}
 
 			}
 		});
 	}
-
+	
+	void cllbackWaitingOpenRequest(boolean success){
+		int cnt = waitOpenRequests.size();
+		for(int i=0; i<cnt; i++){
+			waitOpenRequests.get(i).onSuccess(success);
+		}
+		waitOpenRequests.clear();
+		openInProgressDatabasesList.remove(dbName);
+		openedDatabasesList.add(dbName);
+	}
+	void cllbackWaitingOpenRequest(Exception e){
+		int cnt = waitOpenRequests.size();
+		for(int i=0; i<cnt; i++){
+			waitOpenRequests.get(i).onError(e);
+		}
+	}
+	
 	protected void initDB(final StoreResultCallback<Boolean> callback) {
 		if (!databaseVersion.equals(db.getVersion())) {
-			Log.debug("Upgrade database to verstion: " + databaseVersion
-					+ " from version: " + db.getVersion());
+			Log.debug("Upgrade database: " + db.getVersion()
+					+ " -> " + databaseVersion);
 			try {
 				IDBVersionChangeRequest versionChange = db.setVersion(databaseVersion);
 				versionChange.addSuccessHandler(new IDBSuccessHandler() {
@@ -165,8 +210,10 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 							setVestion(dbName, db);
 							isReady = true;
 							callback.onSuccess(true);
+							cllbackWaitingOpenRequest(true);
 						} catch (IDBDatabaseException e) {
 							callback.onError(e);
+							cllbackWaitingOpenRequest(e);
 						}
 					}
 				});
@@ -177,6 +224,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 						Log.error("Blocked error: Unable to set new version of database: "
 								+ dbName + ", store: " + storeName);
 						callback.onError(null);
+						cllbackWaitingOpenRequest(null);
 					}
 				});
 				versionChange.addErrorHandler(new IDBErrorHandler() {
@@ -185,16 +233,19 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 						Log.error("Unable to set new version of database: "
 								+ dbName + ", store: " + storeName);
 						callback.onError(null);
+						cllbackWaitingOpenRequest(null);
 					}
 				});
 			} catch (IDBDatabaseException e) {
 				Log.error("Unable to complete", e);
 				e.printStackTrace();
 				callback.onError(e);
+				cllbackWaitingOpenRequest(e);
 			}
 		} else {
 			isReady = true;
 			callback.onSuccess(true);
+			cllbackWaitingOpenRequest(true);
 		}
 	}
 
@@ -425,7 +476,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 							}
 						}
 					} else {
-						Log.debug("Cursor result is null");
+//						Log.debug("Cursor result is null");
 					}
 				}
 			});
@@ -514,7 +565,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 			final IDBObjectStore<K> store = (IDBObjectStore<K>) tx
 					.objectStore(storeName);
 			IDBIndex<K> _index = store.index(index);
-			IDBKeyRange range = IDBKeyRange.bound(query, query + "z", false,
+			IDBKeyRange range = IDBKeyRange.bound(query.toUpperCase(), query + "z", false,
 					false);
 			final IDBRequest<IDBCursor<K>> cursorRequest = (IDBRequest<IDBCursor<K>>) _index
 					.openCursor(range, IDBCursor.NEXT);

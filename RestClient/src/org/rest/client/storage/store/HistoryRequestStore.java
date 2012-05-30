@@ -38,7 +38,7 @@ public class HistoryRequestStore extends IndexedDbAdapter<Long, HistoryObject> {
 	@SuppressWarnings("unchecked")
 	public static void setVestion(IDBDatabase db) throws IDBDatabaseException {
 		
-		Log.debug("Set store (history) new version" + databaseVersion);
+		Log.debug("Set store (history) new version " + databaseVersion);
 		Log.warn("This will remove all previous data.");
 		
 		if(db.getObjectStoreNames().contains(STORE_NAME)){

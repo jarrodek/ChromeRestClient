@@ -16,9 +16,11 @@
 package org.rest.client;
 
 import org.rest.client.storage.store.FormEncodingsStore;
+import org.rest.client.storage.store.HeadersStore;
 import org.rest.client.storage.store.HistoryRequestStore;
 import org.rest.client.storage.store.LocalStore;
 import org.rest.client.storage.store.RequestDataStore;
+import org.rest.client.storage.store.StatusesStore;
 import org.rest.client.storage.store.UrlHistoryStore;
 import org.rest.client.ui.AddEncodingView;
 import org.rest.client.ui.MenuItemView;
@@ -46,6 +48,8 @@ public class ClientFactoryImpl implements ClientFactory {
 	private static HistoryRequestStore historyRequestStore = null;
 	private static FormEncodingsStore formEncodingsStore = null;
 	private static UrlHistoryStore urlHistoryStore = null;
+	private static HeadersStore headersStore = null;
+	private static StatusesStore statusesStore = null; 
 	
 	@Override
 	public EventBus getEventBus() {
@@ -81,7 +85,7 @@ public class ClientFactoryImpl implements ClientFactory {
 	}
 
 	@Override
-	public LocalStore getLatestRequestStore() {
+	public LocalStore getLocalStore() {
 		if(latestRequestStore == null){
 			latestRequestStore = GWT.create(LocalStore.class);
 		}
@@ -125,5 +129,21 @@ public class ClientFactoryImpl implements ClientFactory {
 			urlHistoryStore = GWT.create(UrlHistoryStore.class);
 		}
 		return urlHistoryStore;
+	}
+
+	@Override
+	public HeadersStore getHeadersStore() {
+		if(headersStore == null){
+			headersStore = GWT.create(HeadersStore.class);
+		}
+		return headersStore;
+	}
+
+	@Override
+	public StatusesStore getStatusesStore() {
+		if(statusesStore == null){
+			statusesStore = GWT.create(StatusesStore.class);
+		}
+		return statusesStore;
 	}
 }

@@ -38,21 +38,23 @@ public class DatabaseRequestResponse<K extends Suggestion> implements DatabaseRe
 
 	@Override
 	public boolean isComplete() {
-		return suggestions.size() <= databaseQueryLimit;
+		return suggestions.size() < databaseQueryLimit;
 	}
 
 	@Override
 	public List<Suggestion> filter(String query, int limit) {
 		query = query.toLowerCase();
 		List<Suggestion> newSuggestions = new ArrayList<Suggestion>(limit);
-		int i = 0, s = suggestions.size();
-		while (i < s && !suggestions.get(i).getDisplayString().toLowerCase().contains(query)) {
-			++i;
-		}
-		while (i < s && newSuggestions.size() < limit
-				&& suggestions.get(i).getDisplayString().toLowerCase().contains(query)) {
-			newSuggestions.add(suggestions.get(i));
-			++i;
+		
+		int curr = 0, all = suggestions.size();
+		for(int i=0; i < all; i++){
+			if(curr >= limit){
+				break;
+			}
+			if(suggestions.get(i).getDisplayString().toLowerCase().startsWith(query)){
+				curr++;
+				newSuggestions.add(suggestions.get(i));
+			}
 		}
 		return newSuggestions;
 	}

@@ -141,8 +141,8 @@ public class TasksLoader {
 			}
 			
 			@Override
-			public void onInnerTaskFinished() {
-				taskFinished++;
+			public void onInnerTaskFinished(int taskFinished) {
+				taskFinished += taskFinished;
 			}
 			
 			@Override

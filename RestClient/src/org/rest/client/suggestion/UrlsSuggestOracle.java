@@ -94,14 +94,23 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 					store.query(query, UrlHistoryStore.URL_INDEX, new StoreResultCallback<Map<Long,UrlHistoryObject>>() {
 						@Override
 						public void onSuccess(Map<Long, UrlHistoryObject> result) {
+//							Log.debug("URL response for query: " + query + " has "+result.size()+" items");
 							requestInProgress = false;
 							databaseQueryEnd = true;
+							
+							String lowerQuery = query.toLowerCase();
 							
 							Iterator<Entry<Long, UrlHistoryObject>> it = result.entrySet().iterator();
 							while(it.hasNext()){
 								Entry<Long, UrlHistoryObject> entry = it.next();
 								UrlHistoryObject value = entry.getValue();
 								String url = value.getURL();
+								if(url == null){
+									continue;
+								}
+								if(!url.toLowerCase().startsWith(lowerQuery)){
+									continue;
+								}
 								UrlSuggestion s = new UrlSuggestion(url);
 								_suggestions.add(s);
 							}

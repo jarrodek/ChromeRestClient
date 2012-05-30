@@ -53,7 +53,11 @@ public interface AppCssResource extends CssResource {
 	String green();
 	String nomargin();
 	String button();
+	String dialogButtons();
 	
 	/* Controls visibility */
 	String hidden();
+	
+	/* Headers fill support */
+	String w3cError();
 }

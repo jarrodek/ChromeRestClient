@@ -181,7 +181,7 @@ public class RequestParameters {
 	 */
 	public static void restoreLatest(final Callback<RequestParameters, Throwable> callback){
 		
-		final LocalStore store = RestClient.getClientFactory().getLatestRequestStore();
+		final LocalStore store = RestClient.getClientFactory().getLocalStore();
 		store.open(new StoreResultCallback<Boolean>() {
 			
 			@Override

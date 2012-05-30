@@ -37,7 +37,7 @@ public class FormEncodingsStore extends IndexedDbAdapter<Long, FormEncodingObjec
 	@SuppressWarnings("unchecked")
 	public static void setVestion(IDBDatabase db) throws IDBDatabaseException {
 		
-		Log.debug("Set store (form_encoding) new version" + databaseVersion);
+		Log.debug("Set store (form_encoding) new version " + databaseVersion);
 		Log.warn("This will remove all previous data.");
 		
 		if(db.getObjectStoreNames().contains(STORE_NAME)){

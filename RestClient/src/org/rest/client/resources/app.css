@@ -264,3 +264,26 @@
 .button:focus {
 	border: 1px solid #4D90FE;
 }
+.dialogButtons {
+	-webkit-box-align: center;
+	-moz-box-align: center;
+	-ms-box-align: center;
+	box-align: center;
+	-webkit-box-orient: horizontal;
+	-moz-box-orient: horizontal;
+	-ms-box-orient: horizontal;
+	box-orient: horizontal;
+	-webkit-box-pack: start;
+	-moz-box-pack: start;
+	-ms-box-pack: start;
+	box-pack: start;
+	display: -webkit-box;
+	display: -moz-box;
+	display: -ms-box;
+	display: box;
+	margin-top: 20px;
+}
+.w3cError {
+	outline-color: transparent;
+	border-color: red;
+}
