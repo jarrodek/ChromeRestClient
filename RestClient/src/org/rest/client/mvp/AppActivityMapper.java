@@ -16,8 +16,16 @@
 package org.rest.client.mvp;
 
 import org.rest.client.ClientFactory;
+import org.rest.client.activity.AboutActivity;
+import org.rest.client.activity.JSONHeadersActivity;
 import org.rest.client.activity.RequestActivity;
+import org.rest.client.activity.SettingsActivity;
+import org.rest.client.activity.ShortcutActivity;
+import org.rest.client.place.AboutPlace;
+import org.rest.client.place.JSONHeadersPlace;
 import org.rest.client.place.RequestPlace;
+import org.rest.client.place.SettingsPlace;
+import org.rest.client.place.ShortcutPlace;
 
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
@@ -44,8 +52,17 @@ public class AppActivityMapper implements ActivityMapper {
 	 */
 	@Override
 	public Activity getActivity(Place place) {
-		if (place instanceof RequestPlace)
+		if (place instanceof RequestPlace){
 			return new RequestActivity((RequestPlace) place, clientFactory);
+		} else if (place instanceof AboutPlace){
+			return new AboutActivity((AboutPlace)place, clientFactory);
+		} else if (place instanceof SettingsPlace){
+			return new SettingsActivity((SettingsPlace)place, clientFactory);
+		} else if (place instanceof JSONHeadersPlace){
+			return new JSONHeadersActivity((JSONHeadersPlace)place, clientFactory);
+		} else if (place instanceof ShortcutPlace){
+			return new ShortcutActivity((ShortcutPlace)place, clientFactory);
+		}
 		return null;
 	}
 

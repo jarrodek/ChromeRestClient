@@ -75,4 +75,8 @@ public interface MenuView {
 	 * @param w
 	 */
 	Widget asWidget();
+	/**
+	 * Deselect current selected menu item
+	 */
+	void deselectCurrent();
 }

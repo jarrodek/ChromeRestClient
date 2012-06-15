@@ -47,6 +47,8 @@ public class RequestObject extends HistoryObject {
 			skipHistory : false,
 			skipMethod: false,
 			skipPayload: false,
+			skipHeaders: false,
+			skipPath: false,
 			created: new Date() //order key
 		}
 	}-*/;
@@ -166,6 +168,22 @@ public class RequestObject extends HistoryObject {
 
 	public final native boolean isSkipPayload() /*-{
 		return this.skipPayload;
+	}-*/;
+	
+	public final native void setSkipHeaders(boolean skipHeaders) /*-{
+		this.skipHeaders = skipHeaders;
+	}-*/;
+	
+	public final native boolean isSkipHeaders() /*-{
+		return this.skipHeaders;
+	}-*/;
+	
+	public final native void setSkipPath(boolean skipPath) /*-{
+		this.skipPath = skipPath;
+	}-*/;
+	
+	public final native boolean isSkipPath() /*-{
+		return this.skipPath;
 	}-*/;
 
 	public final native String toJSON() /*-{

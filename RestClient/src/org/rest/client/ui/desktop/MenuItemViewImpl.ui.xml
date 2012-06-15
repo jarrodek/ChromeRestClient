@@ -17,7 +17,7 @@
 			border-left: 3px #DD4B39 solid;
 		}
 	</ui:style>
-	<rcui:ListItem ui:field="root" styleName="{style.item}">
+	<rcui:ListItem ui:field="mainListItem" styleName="{style.item}">
 	
 	</rcui:ListItem>
 </ui:UiBinder>

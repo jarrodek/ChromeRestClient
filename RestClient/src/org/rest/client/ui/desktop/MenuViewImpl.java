@@ -54,10 +54,8 @@ public class MenuViewImpl extends Composite implements MenuView {
 
 	@Override
 	public int addMenuItem(MenuItemView item) {
-		
-		MenuItemViewImpl impl = (MenuItemViewImpl) item;
-		impl.setTabIndex(childrenCount);
-		root.add(impl);
+		item.setRoot(this);
+		root.add(item.asWidget());
 		childrenCount++;
 		return root.getWidgetCount()-1;
 	}
@@ -72,13 +70,24 @@ public class MenuViewImpl extends Composite implements MenuView {
 
 	@Override
 	public void setOpened(int pos) {
+		if(pos + 1 < childrenCount) return;
 		((MenuItemView) root.getWidget(pos)).setOpened(true);
 	}
 
 
 	@Override
 	public void setOpened(MenuItemView item) {
-		// TODO Auto-generated method stub
+		
+		int cnt = root.getWidgetCount();
+		for(int i = 0; i<cnt; i++){
+			Widget w = root.getWidget(i);
+			if(w instanceof MenuItemView){
+				if(((MenuItemView) w).equals(item)){
+					item.setOpened(true);
+					break;
+				}
+			}
+		}
 		
 	}
 
@@ -108,7 +117,6 @@ public class MenuViewImpl extends Composite implements MenuView {
 
 	@Override
 	public void showItem(MenuItemView item) {
-		
 		for(Widget i : root){
 			if(i.equals(item)){
 				i.getElement().getStyle().setDisplay(Display.BLOCK);
@@ -118,10 +126,24 @@ public class MenuViewImpl extends Composite implements MenuView {
 	}
 
 
+
 	@Override
-	public Widget asWidget() {
-		return super.asWidget();
+	public void deselectCurrent() {
+		int cnt = root.getWidgetCount();
+		for(int i = 0; i<cnt; i++){
+			Widget w = root.getWidget(i);
+			if(w instanceof MenuItemView){
+				MenuItemView mi = (MenuItemView) w;
+				mi.setSelected(false);
+			}
+		}
 	}
+
+
+//	@Override
+//	public Widget asWidget() {
+//		return super.asWidget();
+//	}
 	
 	
 }

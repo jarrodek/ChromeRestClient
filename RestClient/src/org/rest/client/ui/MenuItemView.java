@@ -19,6 +19,7 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.user.client.ui.Widget;
 
 public interface MenuItemView extends HasText, HasWidgets, HasHTML {
 	/**
@@ -61,12 +62,13 @@ public interface MenuItemView extends HasText, HasWidgets, HasHTML {
 	 */
 	void setOpened(boolean isOpened);
 	/**
-	 * Set element's tab index attribute
-	 * @param tabIndex
+	 * Set menu top object. Only for first level children.
+	 * @param root
 	 */
-	void setTabIndex(int tabIndex);
-
+	void setRoot(MenuView root);
 	public MenuItemView getParentItem();
 
 	void remove();
+	
+	Widget asWidget();
 }

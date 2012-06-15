@@ -15,6 +15,12 @@
  ******************************************************************************/
 package org.rest.client.mvp;
 
+import org.rest.client.place.AboutPlace;
+import org.rest.client.place.JSONHeadersPlace;
+import org.rest.client.place.RequestPlace;
+import org.rest.client.place.SettingsPlace;
+import org.rest.client.place.ShortcutPlace;
+
 import com.google.gwt.place.shared.PlaceHistoryMapper;
 import com.google.gwt.place.shared.WithTokenizers;
 /**
@@ -23,7 +29,7 @@ import com.google.gwt.place.shared.WithTokenizers;
  * annotation or by extending PlaceHistoryMapperWithFactory and creating a
  * separate TokenizerFactory.
  */
-@WithTokenizers( {  })
+@WithTokenizers({AboutPlace.Tokenizer.class, RequestPlace.Tokenizer.class, SettingsPlace.Tokenizer.class, JSONHeadersPlace.Tokenizer.class, ShortcutPlace.Tokenizer.class})
 public interface AppPlaceHistoryMapper extends PlaceHistoryMapper {
 
 }

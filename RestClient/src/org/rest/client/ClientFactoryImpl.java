@@ -19,18 +19,29 @@ import org.rest.client.storage.store.FormEncodingsStore;
 import org.rest.client.storage.store.HeadersStore;
 import org.rest.client.storage.store.HistoryRequestStore;
 import org.rest.client.storage.store.LocalStore;
+import org.rest.client.storage.store.ProjectsStore;
 import org.rest.client.storage.store.RequestDataStore;
 import org.rest.client.storage.store.StatusesStore;
 import org.rest.client.storage.store.UrlHistoryStore;
+import org.rest.client.ui.AboutView;
 import org.rest.client.ui.AddEncodingView;
+import org.rest.client.ui.JSONHeadersView;
 import org.rest.client.ui.MenuItemView;
 import org.rest.client.ui.MenuItemView.Presenter;
 import org.rest.client.ui.MenuView;
 import org.rest.client.ui.RequestView;
+import org.rest.client.ui.SaveRequestDialogView;
+import org.rest.client.ui.SettingsView;
+import org.rest.client.ui.ShortcutView;
+import org.rest.client.ui.desktop.AboutViewImpl;
 import org.rest.client.ui.desktop.AddEncodingViewImpl;
+import org.rest.client.ui.desktop.JSONHeadersViewImpl;
 import org.rest.client.ui.desktop.MenuItemViewImpl;
 import org.rest.client.ui.desktop.MenuViewImpl;
 import org.rest.client.ui.desktop.RequestViewImpl;
+import org.rest.client.ui.desktop.SaveRequestDialogViewImpl;
+import org.rest.client.ui.desktop.SettingsViewImpl;
+import org.rest.client.ui.desktop.ShortcutViewImpl;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceController;
@@ -42,7 +53,9 @@ public class ClientFactoryImpl implements ClientFactory {
 	private static final EventBus eventBus = new SimpleEventBus();
 	private static final PlaceController placeController = new PlaceController(eventBus);
 	private static RequestView requestView = null;
+	private static AboutView aboutView = null;
 	private static MenuView menu = null;
+	private static SettingsView settingsView = null;
 	private static LocalStore latestRequestStore = null;
 	private static RequestDataStore requestDataStore = null;
 	private static HistoryRequestStore historyRequestStore = null;
@@ -50,6 +63,7 @@ public class ClientFactoryImpl implements ClientFactory {
 	private static UrlHistoryStore urlHistoryStore = null;
 	private static HeadersStore headersStore = null;
 	private static StatusesStore statusesStore = null; 
+	private static ProjectsStore projectsStore = null;
 	
 	@Override
 	public EventBus getEventBus() {
@@ -107,6 +121,15 @@ public class ClientFactoryImpl implements ClientFactory {
 		}
 		return historyRequestStore;
 	}
+	
+	@Override
+	public ProjectsStore getProjectsStore() {
+		if(projectsStore == null){
+			projectsStore = GWT.create(ProjectsStore.class);
+		}
+		return projectsStore;
+	}
+	
 
 	@Override
 	public AddEncodingView getAddEncodingView(EventBus eventBus) {
@@ -145,5 +168,36 @@ public class ClientFactoryImpl implements ClientFactory {
 			statusesStore = GWT.create(StatusesStore.class);
 		}
 		return statusesStore;
+	}
+
+	@Override
+	public AboutView getAboutView() {
+		if(aboutView == null){
+			aboutView = GWT.create(AboutViewImpl.class);
+		}
+		return aboutView;
+	}
+
+	@Override
+	public SettingsView getSettingsView() {
+		if(settingsView == null){
+			settingsView = GWT.create(SettingsViewImpl.class);
+		}
+		return settingsView;
+	}
+
+	@Override
+	public JSONHeadersView getJSONHeadersView() {
+		return GWT.create(JSONHeadersViewImpl.class);
+	}
+
+	@Override
+	public ShortcutView getShortcutView() {
+		return GWT.create(ShortcutViewImpl.class);
+	}
+
+	@Override
+	public SaveRequestDialogView getSaveRequestDialogView() {
+		return GWT.create(SaveRequestDialogViewImpl.class);
 	}
 }

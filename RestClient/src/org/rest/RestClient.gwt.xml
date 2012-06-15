@@ -11,7 +11,6 @@
 	
 	<inherits name="com.google.gwt.resources.Resources" />
 	<inherits name="com.google.gwt.xhr2.XMLHttpRequest2" />
-	<inherits name="com.allen_sauer.gwt.log.gwt-log-DEBUG" />
 	
 	<!-- Use ClientFactoryImpl by default -->
 	<replace-with class="org.rest.client.ClientFactoryImpl">
@@ -19,7 +18,9 @@
 	</replace-with>
 	
 	<!-- Logging properties -->
-	<extend-property name="log_level" values="DEBUG" />
+	<!-- To compile at `DEBUG`, `WARN` and `OFF` log levels (with a 3x compile time cost) -->
+	<inherits name="com.allen_sauer.gwt.log.gwt-log-DEBUG" /> <!-- com.allen_sauer.gwt.log.gwt-log-OFF  -->
+	<extend-property name="log_level" values="DEBUG,WARN"/>
 	<set-property name="log_level" value="DEBUG" />
 	<set-property name="log_DivLogger" value="DISABLED" />
 	<set-property name="log_ConsoleLogger" value="ENABLED" />

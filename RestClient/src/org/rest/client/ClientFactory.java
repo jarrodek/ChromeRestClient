@@ -19,13 +19,19 @@ import org.rest.client.storage.store.FormEncodingsStore;
 import org.rest.client.storage.store.HeadersStore;
 import org.rest.client.storage.store.HistoryRequestStore;
 import org.rest.client.storage.store.LocalStore;
+import org.rest.client.storage.store.ProjectsStore;
 import org.rest.client.storage.store.RequestDataStore;
 import org.rest.client.storage.store.StatusesStore;
 import org.rest.client.storage.store.UrlHistoryStore;
+import org.rest.client.ui.AboutView;
 import org.rest.client.ui.AddEncodingView;
+import org.rest.client.ui.JSONHeadersView;
 import org.rest.client.ui.MenuItemView;
 import org.rest.client.ui.MenuView;
 import org.rest.client.ui.RequestView;
+import org.rest.client.ui.SaveRequestDialogView;
+import org.rest.client.ui.SettingsView;
+import org.rest.client.ui.ShortcutView;
 
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
@@ -34,9 +40,7 @@ public interface ClientFactory {
 	
 	EventBus getEventBus();
 	PlaceController getPlaceController();
-	RequestView getRequestView();
-	MenuView getMenuView();
-	MenuItemView createMenuItem(org.rest.client.ui.MenuItemView.Presenter presenter);
+	
 	
 	//STORES
 	LocalStore getLocalStore();
@@ -46,6 +50,16 @@ public interface ClientFactory {
 	UrlHistoryStore getUrlHistoryStore();
 	HeadersStore getHeadersStore();
 	StatusesStore getStatusesStore();
+	ProjectsStore getProjectsStore();
 	
+	//VIEWS
 	AddEncodingView getAddEncodingView(EventBus eventBus);
+	AboutView getAboutView();
+	RequestView getRequestView();
+	MenuView getMenuView();
+	MenuItemView createMenuItem(org.rest.client.ui.MenuItemView.Presenter presenter);
+	SettingsView getSettingsView();
+	JSONHeadersView getJSONHeadersView();
+	ShortcutView getShortcutView();
+	SaveRequestDialogView getSaveRequestDialogView();
 }

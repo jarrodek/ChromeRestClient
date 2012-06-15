@@ -30,6 +30,18 @@ public class HeadersFillSupport implements FocusHandler, ClickHandler {
 		registerSupport("authorization", HeaderSupportAuthorizationImpl.class);
 	}
 	
+	private static HeaderSupport initalizeHelperClass(Class<? extends HeaderSupport> clazz){
+		HeaderSupport helper = null;
+		if(clazz.equals(HeaderSupportAuthorizationImpl.class)){
+			helper = GWT.create(HeaderSupportAuthorizationImpl.class);
+		} else if(clazz.equals(HeaderSupportDate.class)){
+			helper = GWT.create(HeaderSupportDate.class);
+		}
+		return helper;
+	}
+	
+	
+	
 	/**
 	 * Register class to provide support to fill up header value. Class will be
 	 * initialized via GWT.create method.
@@ -41,6 +53,7 @@ public class HeadersFillSupport implements FocusHandler, ClickHandler {
 	 */
 	public static void registerSupport(String headerName,
 			Class<? extends HeaderSupport> clazz) {
+		
 		if (supportedHandlers.containsKey(headerName)) {
 			supportedHandlers.remove(headerName);
 		}
@@ -225,7 +238,12 @@ public class HeadersFillSupport implements FocusHandler, ClickHandler {
 			return;
 		}
 		
-		HeaderSupport helper = GWT.create(supportedHandlers.get(header));
+		HeaderSupport helper = initalizeHelperClass(supportedHandlers.get(header));
+		if(helper == null){
+			return;
+		}
+		
+		
 		final String currentText = textBox.getValue();
 		helper.setValue(currentText);
 		helper.openDialog();

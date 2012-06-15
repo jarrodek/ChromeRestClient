@@ -30,13 +30,19 @@ a, a:active, a:visited {
 
 body>.ls {
 	width: 120px;
-	margin-right: 10px;
+	margin-right: 30px;
 }
 
 body>.app {
 	-webkit-box-flex: 1;
 }
-
+#appContainer{position: relative;}
+#mainLoader{
+	position: absolute;
+	top: 100px;
+	left: 100px;
+	font-size: 16px;
+}
 h1.at {
 	-webkit-user-select: none;
 	color: black;

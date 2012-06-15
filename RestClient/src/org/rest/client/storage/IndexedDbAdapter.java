@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.rest.client.RestClient;
 import org.rest.client.storage.indexeddb.IDBAbortHandler;
 import org.rest.client.storage.indexeddb.IDBBlockedHandler;
 import org.rest.client.storage.indexeddb.IDBCompleteHandler;
@@ -40,6 +41,7 @@ import org.rest.client.storage.indexeddb.IDBVersionChangeRequest;
 import org.rest.client.storage.store.FormEncodingsStore;
 import org.rest.client.storage.store.HeadersStore;
 import org.rest.client.storage.store.HistoryRequestStore;
+import org.rest.client.storage.store.ProjectsStore;
 import org.rest.client.storage.store.RequestDataStore;
 import org.rest.client.storage.store.StatusesStore;
 import org.rest.client.storage.store.UrlHistoryStore;
@@ -63,7 +65,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 		implements StorageAdapter<K, V> {
 	
 	protected final static HashMap<String, IDBDatabase> connectedDatabases = new HashMap<String, IDBDatabase>();
-	protected final static String databaseVersion = "0.62";
+	protected final static String databaseVersion = "0.63";
 	protected final static ArrayList<String> openInProgressDatabasesList = new ArrayList<String>();
 	protected final static ArrayList<String> openedDatabasesList = new ArrayList<String>();
 	
@@ -90,6 +92,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 			RequestDataStore.setVestion(db);
 			HeadersStore.setVestion(db);
 			StatusesStore.setVestion(db);
+			ProjectsStore.setVestion(db);
 		}
 	}
 	
@@ -139,9 +142,10 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 		openRequest.addSuccessHandler(new IDBSuccessHandler() {
 			@Override
 			public void onSuccess() {
-
-				Log.debug("Database: " + dbName
+				if (RestClient.isDebug()) {
+					Log.debug("Database: " + dbName
 						+ " opened. Checking version....");
+				}
 				db = openRequest.getResult().cast();
 				connectedDatabases.put(dbName, db);
 				if (useSetVersion) {
@@ -198,15 +202,19 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 	
 	protected void initDB(final StoreResultCallback<Boolean> callback) {
 		if (!databaseVersion.equals(db.getVersion())) {
-			Log.debug("Upgrade database: " + db.getVersion()
-					+ " -> " + databaseVersion);
+			if (RestClient.isDebug()) {
+				Log.debug("Upgrade database: " + db.getVersion()
+						+ " -> " + databaseVersion);
+			}
 			try {
 				IDBVersionChangeRequest versionChange = db.setVersion(databaseVersion);
 				versionChange.addSuccessHandler(new IDBSuccessHandler() {
 					@Override
 					public void onSuccess() {
 						try {
-							Log.debug("Success. Update table data....");
+							if (RestClient.isDebug()) {
+								Log.debug("Success. Update table data....");
+							}
 							setVestion(dbName, db);
 							isReady = true;
 							callback.onSuccess(true);
@@ -221,8 +229,10 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 
 					@Override
 					public void onBlocked() {
-						Log.error("Blocked error: Unable to set new version of database: "
-								+ dbName + ", store: " + storeName);
+						if (RestClient.isDebug()) {
+							Log.error("Blocked error: Unable to set new version of database: "
+									+ dbName + ", store: " + storeName);
+						}
 						callback.onError(null);
 						cllbackWaitingOpenRequest(null);
 					}
@@ -230,14 +240,18 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 				versionChange.addErrorHandler(new IDBErrorHandler() {
 					@Override
 					public void onError() {
-						Log.error("Unable to set new version of database: "
-								+ dbName + ", store: " + storeName);
+						if (RestClient.isDebug()) {
+							Log.error("Unable to set new version of database: "
+									+ dbName + ", store: " + storeName);
+						}
 						callback.onError(null);
 						cllbackWaitingOpenRequest(null);
 					}
 				});
 			} catch (IDBDatabaseException e) {
-				Log.error("Unable to complete", e);
+				if (RestClient.isDebug()) {
+					Log.error("Unable to complete", e);
+				}
 				e.printStackTrace();
 				callback.onError(e);
 				cllbackWaitingOpenRequest(e);

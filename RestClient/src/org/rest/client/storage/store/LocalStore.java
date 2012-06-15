@@ -27,6 +27,26 @@ public class LocalStore extends LocalStorageAdapter {
 	public final static String LATEST_REQUEST_KEY = "latest_request_data";
 	public final static String HEADERS_IMPORT_TIME_KEY = "headers_import_time";
 	
+	/**
+	 * Key for debug enabled.
+	 */
+	public static final String DEBUG_KEY = "DEBUG_ENABLED";
+	/**
+	 * Key for history list enabled value
+	 */
+	public static final String HISTORY_KEY = "HISTORY_ENABLED";
+	/**
+	 * Key for amount of history list
+	 */
+	public static final String HISTORY_AMOUNT = "HISTORY_AMOUNT";
+	/**
+	 * Key for cookies capture
+	 */
+	public static final String COOKIES_CAPTURE = "COOKIES_CAPTURE";
+	
+	public static final String JSON_HEADERS_KEY = "JSONHEADERS";
+	public static final String SHORTCUTS_VALUES = "SHORTCUTS";
+	
 	public LocalStore() {}
 
 }

@@ -19,9 +19,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.rest.client.ui.MenuItemView;
+import org.rest.client.ui.MenuView;
 import org.rest.client.ui.html5.HTML5Element;
 import org.rest.client.ui.html5.ListItem;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -42,14 +44,20 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 
 	private HTML5Element _element = null;
 	private Place place = null;
-	@UiField
-	ListItem root;
-
-	
 	private Presenter listener = null;
 	private ArrayList<MenuItemViewImpl> children = new ArrayList<MenuItemViewImpl>();
+	/**
+	 * Parent menu
+	 */
 	private MenuItemViewImpl parent;
-
+	/**
+	 * Has not null value if this item is in top level of menu
+	 */
+	private MenuView root;
+	
+	@UiField ListItem mainListItem;
+	
+	
 	public MenuItemViewImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
 		_element = (HTML5Element) getElement();
@@ -59,7 +67,9 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 
 		addDomHandler(this, ClickEvent.getType());
 	}
-
+	
+	
+	
 	@Override
 	public void addChild(MenuItemView item) {
 		MenuItemViewImpl it = (MenuItemViewImpl) item;
@@ -85,23 +95,23 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 
 	@Override
 	public void add(Widget w) {
-		root.add(w);
+		mainListItem.add(w);
 
 	}
 
 	@Override
 	public void clear() {
-		root.clear();
+		mainListItem.clear();
 	}
 
 	@Override
 	public Iterator<Widget> iterator() {
-		return root.iterator();
+		return mainListItem.iterator();
 	}
 
 	@Override
 	public boolean remove(Widget w) {
-		return root.remove(w);
+		return mainListItem.remove(w);
 	}
 
 	@Override
@@ -116,34 +126,29 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 
 	@Override
 	public void setSelected(boolean isSelected) {
+		if(isSelected && root != null){
+			root.deselectCurrent();
+		}
 		getElement().setAttribute("aria-selected", String.valueOf(isSelected));
 	}
 
 	@Override
 	public void setOpened(boolean isOpened) {
-		// TODO Auto-generated method stub
-
+		//TODO: open children tree
 	}
 
 	@Override
 	public void onClick(ClickEvent event) {
-		GWT.log("Click");
+		
 		if (children.size() > 0) {
-			GWT.log("Open");
 			setOpened(true);
 		} else {
 			if (place != null && listener != null) {
-				GWT.log("Goto place");
 				listener.goTo(place);
 			} else {
-				GWT.log("Something is wrong..");
+				Log.debug("Something is wrong ..");
 			}
 		}
-	}
-
-	@Override
-	public void setTabIndex(int tabIndex) {
-		getElement().setAttribute("tabindex", String.valueOf(tabIndex));
 	}
 
 	@Override
@@ -168,5 +173,12 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 	@Override
 	public MenuItemView getParentItem() {
 		return parent;
+	}
+
+
+
+	@Override
+	public void setRoot(MenuView root) {
+		this.root = root;
 	}
 }
