@@ -26,7 +26,7 @@ import org.rest.client.event.UrlValueChangeEvent;
 import org.rest.client.request.URLParser;
 import org.rest.client.request.URLParser.QueryParam;
 import org.rest.client.resources.AppResources;
-import org.rest.client.storage.store.UrlHistoryStore;
+import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.suggestion.UrlsSuggestOracle;
 
 import com.google.gwt.core.client.GWT;
@@ -106,7 +106,7 @@ public class RequestUrlWidget extends Composite implements HasText {
 	public RequestUrlWidget(final EventBus eventBus) {
 		this.eventBus = eventBus;
 		
-		UrlHistoryStore historyStore = RestClient.getClientFactory().getUrlHistoryStore();
+		UrlHistoryStoreWebSql historyStore = RestClient.getClientFactory().getUrlHistoryStore();
 		
 		//create URL simple field (suggestion box)
 		suggestOracle = new UrlsSuggestOracle(historyStore);
@@ -202,7 +202,6 @@ public class RequestUrlWidget extends Composite implements HasText {
 		}
 	};
 	KeyDownHandler anyValueKeyDownHandler = new KeyDownHandler() {
-		
 		@Override
 		public void onKeyDown(KeyDownEvent event) {
 			if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
@@ -227,8 +226,7 @@ public class RequestUrlWidget extends Composite implements HasText {
 		}
 		
 		lastEnterTime = new Date();
-		//suggestionCallback();
-		RequestStartActionEvent e = new RequestStartActionEvent(lastEnterTime.getTime());
+		RequestStartActionEvent e = new RequestStartActionEvent(lastEnterTime);
 		eventBus.fireEvent(e);
 	}
 	

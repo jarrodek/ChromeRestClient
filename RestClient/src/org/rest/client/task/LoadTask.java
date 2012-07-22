@@ -1,5 +1,7 @@
 package org.rest.client.task;
 
+import org.rest.client.task.ui.LoaderWidget;
+
 /**
  * Main idea of Task Loader is to load some tasks on page load.
  * <p>
@@ -77,4 +79,11 @@ public interface LoadTask {
 	 * @return number of inner tasks
 	 */
 	int getTasksCount();
+	/**
+	 * Loader widget.
+	 * Tasks can update loader widget UI if needed.
+	 * Widget is always set before {@link #run(TasksCallback, boolean)} method
+	 * @param loaderWidget
+	 */
+	void setLoader(LoaderWidget loaderWidget);
 }

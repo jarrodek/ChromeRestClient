@@ -2,14 +2,13 @@ package org.rest.client.task;
 
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
-import org.rest.client.load.LoadTask;
-import org.rest.client.load.TasksCallback;
 import org.rest.client.place.AboutPlace;
 import org.rest.client.place.JSONHeadersPlace;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SettingsPlace;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.LocalStore;
+import org.rest.client.task.ui.LoaderWidget;
 import org.rest.client.ui.MenuItemView;
 import org.rest.client.ui.MenuView;
 import org.rest.client.ui.desktop.StatusNotification;
@@ -107,6 +106,12 @@ public class CreateMenuTask implements LoadTask {
 	@Override
 	public int getTasksCount() {
 		return 1;
+	}
+
+	@Override
+	public void setLoader(LoaderWidget loaderWidget) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

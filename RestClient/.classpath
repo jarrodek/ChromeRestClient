@@ -11,5 +11,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/jarrod/Documents/sdk/gwt-html5-database-1.5.2.GWT.2.4/gwt-html5-database.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

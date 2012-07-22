@@ -15,6 +15,8 @@
  ******************************************************************************/
 package org.rest.client.event;
 
+import java.util.Date;
+
 import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
@@ -58,14 +60,14 @@ public class RequestStopEvent extends Event<RequestStopEvent.Handler> {
 		 * Called when request has stopped either with error or success.
 		 * @param time Time when event occurred.
 		 */
-		void onStop(long time);
+		void onStop(Date time);
 	}
-	private final long time;
+	private final Date time;
 	/**
 	 * Create request stop event.
 	 * @param time Start time as a new Date().getTime();
 	 */
-	public RequestStopEvent(long time){
+	public RequestStopEvent(Date time){
 		this.time = time;
 	}
 	

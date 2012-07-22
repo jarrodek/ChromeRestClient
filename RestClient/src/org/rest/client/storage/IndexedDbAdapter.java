@@ -278,7 +278,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 	public void put(final V obj, final StoreResultCallback<K> callback) {
 		try {
 			IDBTransaction tx = db.transaction(storeName,
-					IDBTransaction.READ_WRITE);
+					IDBTransaction.READ_WRITE_TRANSACTION);
 			IDBObjectStore<K> store = (IDBObjectStore<K>) tx
 					.objectStore(storeName);
 			final IDBRequest<K> request = (IDBRequest<K>) store.put(obj, null);
@@ -320,7 +320,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 	public void put(final V obj, K key, final StoreResultCallback<K> callback) {
 		try {
 			IDBTransaction tx = db.transaction(storeName,
-					IDBTransaction.READ_WRITE);
+					IDBTransaction.READ_WRITE_TRANSACTION);
 
 			IDBObjectStore<K> store = (IDBObjectStore<K>) tx
 					.objectStore(storeName);
@@ -355,7 +355,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 	public void getByKey(K key, final StoreResultCallback<V> callback) {
 		try {
 			IDBTransaction tx = db.transaction(storeName,
-					IDBTransaction.READ_ONLY);
+					IDBTransaction.READ_ONLY_TRANSACTION);
 			IDBObjectStore<K> store = (IDBObjectStore<K>) tx
 					.objectStore(storeName);
 			final IDBRequest<V> request = (IDBRequest<V>) store.get(key);
@@ -384,7 +384,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 	public void exists(K key, final StoreResultCallback<Boolean> callback) {
 		try {
 			IDBTransaction tx = db.transaction(storeName,
-					IDBTransaction.READ_ONLY);
+					IDBTransaction.READ_ONLY_TRANSACTION);
 
 			IDBObjectStore<K> store = (IDBObjectStore<K>) tx
 					.objectStore(storeName);
@@ -419,7 +419,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 		try {
 			final Map<K, V> result = new HashMap<K, V>();
 			IDBTransaction tx = db.transaction(storeName,
-					IDBTransaction.READ_ONLY);
+					IDBTransaction.READ_ONLY_TRANSACTION);
 			tx.addCompleteHandler(new IDBCompleteHandler() {
 				@Override
 				public void onComplete() {
@@ -441,7 +441,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 			final IDBObjectStore<K> store = (IDBObjectStore<K>) tx
 					.objectStore(storeName);
 			final IDBRequest<V> request = (IDBRequest<V>) store.openCursor(
-					null, IDBCursor.NEXT);
+					null, IDBCursor.CURSOR_NEXT);
 			request.addErrorHandler(new IDBErrorHandler() {
 
 				@Override
@@ -454,17 +454,25 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 				@Override
 				public void onSuccess() {
 					V cursorResult = request.getResult();
-
 					if (cursorResult != null) {
 						final IDBCursor<K> cursor = cursorResult.cast();
 						final K key = cursor.getKey();
 						try {
+							
 							final IDBRequest<V> getReq = (IDBRequest<V>) store
 									.get(key);
+							getReq.addErrorHandler(new IDBErrorHandler() {
+								@Override
+								public void onError() {
+									int code = getReq.getErrorCode();
+									Log.error("Has error with code " + code);
+								}
+							});
 							getReq.addSuccessHandler(new IDBSuccessHandler() {
 
 								@Override
 								public void onSuccess() {
+									
 									try {
 										V res = getReq.getResult().cast();
 										result.put(key, res);
@@ -507,7 +515,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 	public void remove(K key, final StoreResultCallback<Boolean> callback) {
 		try {
 			IDBTransaction tx = db.transaction(storeName,
-					IDBTransaction.READ_WRITE);
+					IDBTransaction.READ_WRITE_TRANSACTION);
 			IDBObjectStore<K> store = (IDBObjectStore<K>) tx
 					.objectStore(storeName);
 			final IDBRequest<Void> request = store.delete(key);
@@ -536,7 +544,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 	public void countAll(final StoreResultCallback<Long> callback) {
 		try {
 			IDBTransaction tx = db.transaction(storeName,
-					IDBTransaction.READ_ONLY);
+					IDBTransaction.READ_ONLY_TRANSACTION);
 			final IDBObjectStore<String> store = (IDBObjectStore<String>) tx
 					.objectStore(storeName);
 			final IDBRequest<Long> request = store.count();
@@ -567,7 +575,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 		final Map<K, V> result = new HashMap<K, V>();
 		try {
 			IDBTransaction tx = db.transaction(storeName,
-					IDBTransaction.READ_ONLY);
+					IDBTransaction.READ_ONLY_TRANSACTION);
 			tx.addCompleteHandler(new IDBCompleteHandler() {
 
 				@Override
@@ -582,7 +590,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 			IDBKeyRange range = IDBKeyRange.bound(query.toUpperCase(), query + "z", false,
 					false);
 			final IDBRequest<IDBCursor<K>> cursorRequest = (IDBRequest<IDBCursor<K>>) _index
-					.openCursor(range, IDBCursor.NEXT);
+					.openCursor(range, IDBCursor.CURSOR_NEXT);
 
 			cursorRequest.addSuccessHandler(new IDBSuccessHandler() {
 

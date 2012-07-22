@@ -28,10 +28,10 @@ import com.google.gwt.core.client.JavaScriptObject;
  * 
  * <p>IDBCursor Constants:</p>
  * <ul>
- * 	<li>{@link #NEXT}</li>
- * 	<li>{@link #NEXT_NO_DUPLICATE}</li>
- * 	<li>{@link #PREV}</li>
- * 	<li>{@link #PREV_NO_DUPLICATE}</li>
+ * 	<li>{@link #CURSOR_NEXT}</li>
+ * 	<li>{@link #CURSOR_NEXT_NO_DUPLICATE}</li>
+ * 	<li>{@link #CURSOR_PREV}</li>
+ * 	<li>{@link #CURSOR_PREV_NO_DUPLICATE}</li>
  * </ul>
  * @author jarrod
  * 
@@ -43,25 +43,51 @@ public class IDBCursor<K> extends JavaScriptObject {
 	/**
 	 * Indicates that this cursor should yield all records, including duplicates
 	 * and its direction is monotonically increasing order of keys.
+	 * @deprecated
 	 */
 	public static final int NEXT;
+	/**
+	 * Indicates that this cursor should yield all records, including duplicates
+	 * and its direction is monotonically increasing order of keys.
+	 */
+	public static final String CURSOR_NEXT = "next";
+	/**
+	 * Indicates that this cursor should yield all records, not including
+	 * duplicates and its direction is monotonically increasing order of keys.
+	 * For every key with duplicate values, only the first record is yielded.
+	 * @deprecated
+	 */
+	public static final int NEXT_NO_DUPLICATE;
 	/**
 	 * Indicates that this cursor should yield all records, not including
 	 * duplicates and its direction is monotonically increasing order of keys.
 	 * For every key with duplicate values, only the first record is yielded.
 	 */
-	public static final int NEXT_NO_DUPLICATE;
+	public static final String CURSOR_NEXT_NO_DUPLICATE = "nextunique";
+	/**
+	 * Indicates that cursor should yield all records, including duplicates and
+	 * its direction is monotonically decreasing order of keys.
+	 * @deprecated
+	 */
+	public static final int PREV;
 	/**
 	 * Indicates that cursor should yield all records, including duplicates and
 	 * its direction is monotonically decreasing order of keys.
 	 */
-	public static final int PREV;
+	public static final String CURSOR_PREV = "prev";
+	/**
+	 * Indicates that this cursor should yield all records, not including
+	 * duplicates and its direction is monotonically decreasing order of keys.
+	 * For every key with duplicate values, only the first record is yielded.
+	 * @deprecated
+	 */
+	public static final int PREV_NO_DUPLICATE;
 	/**
 	 * Indicates that this cursor should yield all records, not including
 	 * duplicates and its direction is monotonically decreasing order of keys.
 	 * For every key with duplicate values, only the first record is yielded.
 	 */
-	public static final int PREV_NO_DUPLICATE;
+	public static final String CURSOR_PREV_NO_DUPLICATE = "prevunique";
 
 	static {
 		setVariables();

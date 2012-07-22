@@ -17,11 +17,15 @@ package org.rest.client.ui.desktop;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.rest.client.RestClient;
 import org.rest.client.event.HttpMethodChangeEvent;
+import org.rest.client.event.RequestStartActionEvent;
+import org.rest.client.event.RequestStopEvent;
 import org.rest.client.event.UrlValueChangeEvent;
+import org.rest.client.request.FilesObject;
 import org.rest.client.request.HttpContentTypeHelper;
 import org.rest.client.request.HttpMethodOptions;
 import org.rest.client.request.RequestHeadersParser;
@@ -33,6 +37,7 @@ import org.rest.client.ui.desktop.widget.RequestHeadersWidget;
 import org.rest.client.ui.desktop.widget.RequestUrlWidget;
 import org.rest.client.ui.html5.HTML5Progress;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -155,6 +160,21 @@ public class RequestViewImpl extends Composite implements RequestView {
 				} else {
 					sendButton.setEnabled(true);
 				}
+			}
+		});
+		
+		//When request starts disable UI controls
+		RequestStartActionEvent.register(eventBus, new RequestStartActionEvent.Handler() {
+			@Override
+			public void onStart(Date time) {
+				sendButton.setEnabled(false);
+			}
+		});
+		RequestStopEvent.register(eventBus, new RequestStopEvent.Handler() {
+			@Override
+			public void onStop(Date time) {
+				Log.debug("RequestViewImpl: RequestStopEvent fired");
+				sendButton.setEnabled(true);
 			}
 		});
 	}
@@ -367,9 +387,23 @@ public class RequestViewImpl extends Composite implements RequestView {
 		}
 		setHeaders(RequestHeadersParser.headersListToString(list));
 	}
+	
 
+
+	@Override
+	public ArrayList<FilesObject> getFiles() {
+		return requestBody.getInputFiles();
+	}
+	
 	@Override
 	public void appendEncodingValues(String[] values) {
 		createContentTypeValues(values);
 	}
+	@UiHandler("sendButton")
+	void onSendClick(ClickEvent e){
+		EventBus eventBus = RestClient.getClientFactory().getEventBus();
+		RequestStartActionEvent ev = new RequestStartActionEvent(new Date());
+		eventBus.fireEvent(ev);
+	}
+
 }

@@ -47,8 +47,10 @@ public class ShortcutHandlers {
 		});
 	}
 	
+	private static EventBus eventBus;
 	
-	public static void initialize() {
+	public static void initialize(final EventBus eventBus) {
+		ShortcutHandlers.eventBus = eventBus;
 		assert initialized == false : "Shortcuts already has been set.";
 		initialized = true;
 		if(RestClient.isDebug()){
@@ -71,7 +73,7 @@ public class ShortcutHandlers {
 			}
 		});
 		
-		ShortcutChangeEvent.register(RestClient.getClientFactory().getEventBus(),
+		ShortcutChangeEvent.register(eventBus,
 				new ShortcutChangeEvent.Handler() {
 					@Override
 					public void onChange(ShortcutChangeEvent event) {
@@ -290,7 +292,7 @@ public class ShortcutHandlers {
 	}
 	private static void handleShortcut(final Shortcut sc){
 		ShortcutType type = sc.getType();
-		EventBus eventBus = RestClient.getClientFactory().getEventBus();
+		
 		if(type.equals(ShortcutType.OPEN_REQUEST)){
 			Log.debug("OPEN");
 		} else if(type.equals(ShortcutType.SAVE_REQUEST)){

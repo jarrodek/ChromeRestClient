@@ -15,6 +15,8 @@
  ******************************************************************************/
 package org.rest.client.event;
 
+import java.util.Date;
+
 import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
@@ -58,14 +60,14 @@ public class RequestStartActionEvent extends Event<RequestStartActionEvent.Handl
 		 * Called when request has started.
 		 * @param time Time when event occurred.
 		 */
-		void onStart(long time);
+		void onStart(Date time);
 	}
-	private final long time;
+	private final Date time;
 	/**
-	 * Create request start evet.
+	 * Create request start event.
 	 * @param time Start time as a new Date().getTime();
 	 */
-	public RequestStartActionEvent(long time){
+	public RequestStartActionEvent(Date time){
 		this.time = time;
 	}
 	

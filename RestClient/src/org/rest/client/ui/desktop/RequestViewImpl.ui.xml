@@ -13,8 +13,9 @@
 	
 		}
 		.methodsWidget{
-			display: -webkit-box; 
-			-webkit-box-orient: horizontal;
+			display: -webkit-flex;
+			-webkit-justify-content: flex-start;
+			-webkit-align-items: center;
 		}
 		.otherInput{
 			font-size: 11px;
@@ -26,8 +27,7 @@
 			
 		}
 		.actionBar{
-			float: right;
-			margin-right: 10px;
+			
 		}
 		.actionBar,
 		.contentTypeSection{
@@ -40,6 +40,12 @@
 		.radioButton label,
 		.radioButton {
 			cursor: pointer;
+		}
+		.radioButton{
+			margin: 0px 7px;
+		}
+		.radioButton:first-child{
+			margin-left: -3px;
 		}
 	</ui:style>
 	<g:HTMLPanel ui:field="root" styleName="{style.requestPanel}">
@@ -58,8 +64,10 @@
 			<g:RadioButton name="method" text="DELETE" ui:field="radioDelete" styleName="{style.radioButton}"></g:RadioButton>
 			<g:RadioButton name="method" text="HEAD" ui:field="radioHead" styleName="{style.radioButton}"></g:RadioButton>
 			<g:RadioButton name="method" text="OPTIONS" ui:field="radioOptions" styleName="{style.radioButton}"></g:RadioButton>
+			<div>
 			<g:RadioButton name="method" text="Other" ui:field="radioOther" styleName="{style.radioButton}"></g:RadioButton>
 			<g:TextBox ui:field="otherMethodValue" enabled="false" addStyleNames="{style.otherInput}"></g:TextBox>
+			</div>
 		</g:HTMLPanel>
 		
 		<!-- Headers widget -->
@@ -80,8 +88,8 @@
 		<div class="{style.actionBar}">
 			<div class="{style.actions}">
 				<h5:HTML5Progress ui:field="progressIndicator" width="200px" height="20px"></h5:HTML5Progress>
-				<g:Button ui:field="clearButton" title="Clear current form settings">Clear</g:Button>
-				<g:Button ui:field="sendButton" title="Send current data">Send</g:Button>
+				<g:Button styleName="{appResources.appCss.button}" ui:field="clearButton" title="Clear current form settings">Clear</g:Button>
+				<g:Button styleName="{appResources.appCss.button}" ui:field="sendButton" title="Send current data">Send</g:Button>
 			</div>
 		</div>
 	</g:HTMLPanel>

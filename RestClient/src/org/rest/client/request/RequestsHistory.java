@@ -1,13 +1,8 @@
 package org.rest.client.request;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
 import org.rest.client.RestClient;
 import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.HistoryRequestStore;
-import org.rest.client.storage.store.objects.HistoryObject;
+import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -15,7 +10,7 @@ import com.google.gwt.core.client.Callback;
 
 public class RequestsHistory {
 	
-	static final HistoryRequestStore store;
+	static final HistoryRequestStoreWebSql store;
 	static boolean initialized = false;
 	static{
 		store = RestClient.getClientFactory().getHistoryRequestStore();
@@ -47,29 +42,15 @@ public class RequestsHistory {
 		if(RestClient.isDebug()){
 			Log.debug("Clear history list.");
 		}
-		
-		store.all(new StoreResultCallback<Map<Long,HistoryObject>>() {
+		store.deleteHistory(new StoreResultCallback<Boolean>() {
+			
 			@Override
-			public void onSuccess(Map<Long, HistoryObject> result) {
-				Set<Long> set = result.keySet();
-				Iterator<Long> it = set.iterator();
-				while(it.hasNext()){
-					Long id = it.next();
-					store.remove(id, new StoreResultCallback<Boolean>() {
-						@Override
-						public void onSuccess(Boolean result) {}
-						@Override
-						public void onError(Throwable e) {}
-					});
-				}
+			public void onSuccess(Boolean result) {
 				callback.onSuccess(true);
 			}
 			
 			@Override
 			public void onError(Throwable e) {
-				if(RestClient.isDebug()){
-					Log.warn("Unable to clear history. History store error.", e);
-				}
 				callback.onFailure(e);
 			}
 		});

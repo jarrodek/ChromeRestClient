@@ -161,9 +161,8 @@ public class IDBRequest<T> extends JavaScriptObject {
 	 * @param handler
 	 */
 	public final native void addErrorHandler(IDBErrorHandler handler) /*-{
-		this.onabort = function() {
-			handler
-					.@org.rest.client.storage.indexeddb.IDBErrorHandler::onError()();
+		this.onerror = function() {
+			handler.@org.rest.client.storage.indexeddb.IDBErrorHandler::onError()();
 		}
 	}-*/;
 
@@ -174,8 +173,7 @@ public class IDBRequest<T> extends JavaScriptObject {
 	 */
 	public final native void addSuccessHandler(IDBSuccessHandler handler) /*-{
 		this.onsuccess = function() {
-			handler
-					.@org.rest.client.storage.indexeddb.IDBSuccessHandler::onSuccess()();
+			handler.@org.rest.client.storage.indexeddb.IDBSuccessHandler::onSuccess()();
 		}
 	}-*/;
 	/**

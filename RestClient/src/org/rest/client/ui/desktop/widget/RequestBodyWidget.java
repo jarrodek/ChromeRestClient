@@ -17,6 +17,7 @@ package org.rest.client.ui.desktop.widget;
 
 import java.util.ArrayList;
 
+import org.rest.client.request.FilesObject;
 import org.rest.client.request.FormPayloadData;
 import org.rest.client.request.RequestPayloadParser;
 import org.rest.client.resources.AppCssResource;
@@ -31,6 +32,7 @@ import org.rest.client.util.Units;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -38,6 +40,10 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.CssResource;
@@ -106,15 +112,33 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 			public void onClick(ClickEvent event) {
 				if(currentTab.equals(TABS.RAW)) return;
 				
+				String tabHandlercurrent = appStyle.inlineButtonChecked();
+				
 				SpanElement tab = (SpanElement) rawTab.getElement();
-				((SpanElement)tab.getParentElement()).querySelector("."+appStyle.tabHandlercurrent()).getClassList().remove(appStyle.tabHandlercurrent());
-				tab.getClassList().add(appStyle.tabHandlercurrent());
+				((SpanElement)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
+				tab.getClassList().add(tabHandlercurrent);
 				
 				HTML5Element contentParent = (HTML5Element) tabContent.getParentElement();
 				contentParent.querySelector("." + appStyle.tabsContent() + " ." + appStyle.tabContent() + "." + appStyle.tabContentCurrent()).getClassList().remove(appStyle.tabContentCurrent());
 				contentParent.querySelector("." + appStyle.tabsContent() + " ." + appStyle.tabContent() + "[data-tab=\"raw\"]").getClassList().add(appStyle.tabContentCurrent());
 		        
 				currentTab = TABS.RAW;
+			}
+		});
+		rawTab.addMouseOverHandler(new MouseOverHandler() {
+			@Override
+			public void onMouseOver(MouseOverEvent event) {
+				SpanElement tab = (SpanElement) rawTab.getElement();
+				if(!tab.getClassList().contains(appStyle.inlineButtonChecked()))
+					tab.getClassList().add(appStyle.inlineButtonHover());
+			}
+		});
+		rawTab.addMouseOutHandler(new MouseOutHandler() {
+			@Override
+			public void onMouseOut(MouseOutEvent event) {
+				SpanElement tab = (SpanElement) rawTab.getElement();
+				if(!tab.getClassList().contains(appStyle.inlineButtonHover()))
+					tab.getClassList().remove(appStyle.inlineButtonHover());
 			}
 		});
 		formTab.addClickHandler(new ClickHandler() {
@@ -125,15 +149,33 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 				updateForm();
 				ensureFormHasRow();
 				
+				String tabHandlercurrent = appStyle.inlineButtonChecked();
+				
 				SpanElement tab = (SpanElement) formTab.getElement();
-				((SpanElement)tab.getParentElement()).querySelector("."+appStyle.tabHandlercurrent()).getClassList().remove(appStyle.tabHandlercurrent());
-				tab.getClassList().add(appStyle.tabHandlercurrent());
+				((SpanElement)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
+				tab.getClassList().add(tabHandlercurrent);
 				
 				HTML5Element contentParent = (HTML5Element) tabContent.getParentElement();
 				contentParent.querySelector("." + appStyle.tabsContent() + " ." + appStyle.tabContent() + "." + appStyle.tabContentCurrent()).getClassList().remove(appStyle.tabContentCurrent());
 				contentParent.querySelector("." + appStyle.tabsContent() + " ." + appStyle.tabContent() + "[data-tab=\"form\"]").getClassList().add(appStyle.tabContentCurrent());
 		        
 				currentTab = TABS.FORM;
+			}
+		});
+		formTab.addMouseOverHandler(new MouseOverHandler() {
+			@Override
+			public void onMouseOver(MouseOverEvent event) {
+				SpanElement tab = (SpanElement) formTab.getElement();
+				if(!tab.getClassList().contains(appStyle.inlineButtonChecked()))
+					tab.getClassList().add(appStyle.inlineButtonHover());
+			}
+		});
+		formTab.addMouseOutHandler(new MouseOutHandler() {
+			@Override
+			public void onMouseOut(MouseOutEvent event) {
+				SpanElement tab = (SpanElement) formTab.getElement();
+				if(tab.getClassList().contains(appStyle.inlineButtonHover()))
+					tab.getClassList().remove(appStyle.inlineButtonHover());
 			}
 		});
 		filesTab.addClickHandler(new ClickHandler() {
@@ -143,15 +185,33 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 				
 				ensureFilesHasRow();
 				
+				String tabHandlercurrent = appStyle.inlineButtonChecked();
+				
 				SpanElement tab = (SpanElement) filesTab.getElement();
-				((SpanElement)tab.getParentElement()).querySelector("."+appStyle.tabHandlercurrent()).getClassList().remove(appStyle.tabHandlercurrent());
-				tab.getClassList().add(appStyle.tabHandlercurrent());
+				((SpanElement)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
+				tab.getClassList().add(tabHandlercurrent);
 				
 				HTML5Element contentParent = (HTML5Element) tabContent.getParentElement();
 				contentParent.querySelector("." + appStyle.tabsContent() + " ." + appStyle.tabContent() + "." + appStyle.tabContentCurrent()).getClassList().remove(appStyle.tabContentCurrent());
 				contentParent.querySelector("." + appStyle.tabsContent() + " ." + appStyle.tabContent() + "[data-tab=\"file\"]").getClassList().add(appStyle.tabContentCurrent());
 		        
 				currentTab = TABS.FILES;
+			}
+		});
+		filesTab.addMouseOverHandler(new MouseOverHandler() {
+			@Override
+			public void onMouseOver(MouseOverEvent event) {
+				SpanElement tab = (SpanElement) filesTab.getElement();
+				if(!tab.getClassList().contains(appStyle.inlineButtonChecked()))
+					tab.getClassList().add(appStyle.inlineButtonHover());
+			}
+		});
+		filesTab.addMouseOutHandler(new MouseOutHandler() {
+			@Override
+			public void onMouseOut(MouseOutEvent event) {
+				SpanElement tab = (SpanElement) filesTab.getElement();
+				if(tab.getClassList().contains(appStyle.inlineButtonHover()))
+					tab.getClassList().remove(appStyle.inlineButtonHover());
 			}
 		});
 	}
@@ -164,6 +224,8 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		filesFormPanel.clear();
 		fileFieldNumber = 0;
 		payloadRawInput.setValue(null);
+		allFilesCount = 0;
+		filesTab.setText("Files (0)");
 	}
 	
 	
@@ -251,6 +313,10 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		
 		keyBox.getElement().focus();
 	}
+	
+	private int allFilesCount = 0;
+	private ArrayList<HTML5FileUpload> fileInputs = new ArrayList<HTML5FileUpload>();
+	
 	private void addNewFileRow(String key){
 		final HTMLPanel row = new HTMLPanel("");
 		final ListPanel listPanel = new ListPanel();
@@ -261,6 +327,7 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		final HTML5FileUpload valueBox = new HTML5FileUpload();
 		InlineLabel removeButton = new InlineLabel("x");
 		
+		fileInputs.add(valueBox);
 		keyBox.getElement().setAttribute("placeholder", "Field name");
 		
 		String value = null;
@@ -281,9 +348,13 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 			
 			@Override
 			public void onChange(ChangeEvent event) {
+				int prevCnt = listPanel.getWidgetCount();
+				allFilesCount -= prevCnt;
 				listPanel.clear();
 				FileList files = valueBox.getFiles();
 				int cnt = files.size();
+				allFilesCount += cnt;
+				filesTab.setText("Files (" + allFilesCount + ")");
 				for(int i=0; i<cnt; i++){
 					File file = files.get(i);
 					
@@ -317,6 +388,10 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		removeButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
+				int cnt = listPanel.getWidgetCount();
+				allFilesCount -= cnt;
+				filesTab.setText("Files (" + allFilesCount + ")");
+				fileInputs.remove(valueBox);
 				row.removeFromParent();
 			}
 		});
@@ -381,6 +456,18 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		}
 		payloadData = RequestPayloadParser.parseData(list);
 		payloadRawInput.setValue(payloadData);
+	}
+	public ArrayList<FilesObject> getInputFiles() {
+		ArrayList<FilesObject> fo = new ArrayList<FilesObject>();
+		for(HTML5FileUpload file : fileInputs){
+			if(file == null) continue;
+			FileList files = file.getFiles();
+			if(files == null || files.size() == 0) continue;
+			InputElement ie = (InputElement)file.getElement().getNextSiblingElement();
+			FilesObject fileObjet = new FilesObject(ie.getValue(), files);
+			fo.add(fileObjet);
+		}
+		return fo;
 	}
 }
 

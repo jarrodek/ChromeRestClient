@@ -36,6 +36,33 @@ body>.ls {
 body>.app {
 	-webkit-box-flex: 1;
 }
+#loader-screen{
+	position:fixed;
+	top:0px;
+	left:0px;
+	width:100%;
+	height:100%;
+	background-color:white;
+	opacity:1;
+	z-index:1001;
+	-webkit-transition:opacity 0.5s linear;
+	display: -webkit-flex;
+	display: -moz-flex;
+	display: -ms-flex;
+	display: -o-flex;
+	display: flex;
+	-webkit-justify-content: center;
+	-moz-justify-content: center;
+	-o-justify-content: center;
+	-o-justify-content: center;
+	justify-content: center;
+	-webkit-align-items: center;
+	-moz-align-items: center;
+	-o-align-items: center;
+	-o-align-items: center;
+	align-items: center;
+}
+#loader-screen.fade{opacity:0;}
 #appContainer{position: relative;}
 #mainLoader{
 	position: absolute;

@@ -7,11 +7,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 public class AppEventsHandlers {
 	
-	private static EventBus eventBus;
-
-	public static void initialize(){
-		eventBus = RestClient.getClientFactory().getEventBus();
-		
+	public static void initialize(final EventBus eventBus){
 		
 		SaveRequestEvent.register(eventBus, new SaveRequestEvent.Handler() {
 			@Override

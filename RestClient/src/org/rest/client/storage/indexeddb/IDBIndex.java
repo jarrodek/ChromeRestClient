@@ -161,6 +161,7 @@ public class IDBIndex<K> extends JavaScriptObject {
 	 * @return A request object on which subsequent events related to this
 	 *         operation are fired.
 	 * @throws IDBDatabaseException
+	 * @deprecated
 	 */
 	public final IDBRequest<?> openCursor(IDBKeyRange range, int direction)
 			throws IDBDatabaseException {
@@ -170,13 +171,60 @@ public class IDBIndex<K> extends JavaScriptObject {
 			throw new IDBDatabaseException(e);
 		}
 	}
-
+	/**
+	 * Returns an {@link IDBRequest} object, and, in a separate thread, creates
+	 * a cursor over the specified key range. The method sets the position of
+	 * the cursor to the appropriate record, based on the specified direction.
+	 * 
+	 * <ul>
+	 * <li>If the key range is not specified or is null, then the range includes
+	 * all the records.</li>
+	 * <li>If at least one record matches the key range, then a success event is
+	 * fired on the result object, with its result set to the new
+	 * {@link IDBCursor} object; the value of the cursor object is set to a
+	 * structured clone of the referenced value.</li>
+	 * <li>If no records match the key range, then then an error event is fired
+	 * on the request object, with its code set to
+	 * {@link IDBDatabaseException#NOT_FOUND_ERR} and a suitable message.</li>
+	 * </ul>
+	 * 
+	 * @param range
+	 *            Optional. The key range to use as the cursor's range.
+	 * @param direction
+	 *            Optional. The cursor's required direction. See
+	 *            {@link IDBCursor} Constants for possible values.
+	 * @return A request object on which subsequent events related to this
+	 *         operation are fired.
+	 * @throws IDBDatabaseException
+	 */
+	public final IDBRequest<?> openCursor(IDBKeyRange range, String direction)
+			throws IDBDatabaseException {
+		try {
+			return openCursorImpl(range, direction);
+		} catch (JavaScriptException e) {
+			throw new IDBDatabaseException(e);
+		}
+	}
+	/**
+	 * @deprecated use {@link IDBIndex#openCursorImpl(IDBKeyRange, String)} instead.
+	 */
 	private final native IDBRequest<?> openCursorImpl(IDBKeyRange range,
 			int direction) throws JavaScriptException /*-{
 		var cursor = this.openCursor(range, direction);
 		return cursor;
 	}-*/;
-
+	/**
+	 * Native implementation of open cursor from index
+	 * @param range
+	 * @param direction
+	 * @return
+	 * @throws JavaScriptException
+	 */
+	private final native IDBRequest<?> openCursorImpl(IDBKeyRange range,
+			String direction) throws JavaScriptException /*-{
+		var cursor = this.openCursor(range, direction);
+		return cursor;
+	}-*/;
 	/**
 	 * Returns an {@link IDBRequest} object, and, in a separate thread, creates
 	 * a cursor over the specified key range, as arranged by this index. The

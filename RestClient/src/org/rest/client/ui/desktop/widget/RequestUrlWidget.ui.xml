@@ -7,7 +7,6 @@
 	<ui:style type="org.rest.client.ui.desktop.widget.RequestUrlWidget.WidgetStyle">
 		.fullWidthRelativeInput{
 			border-radius: 2px;
-			border: 1px solid #aaa;
 			position: absolute;
 			right: 0px;
 			left: 0px;
@@ -17,9 +16,12 @@
 		.urlInput{
 			left: 15px;
 		}
+		.inputPadding{
+			padding: 5px 4px;
+		}
 		.urlPanel{
 			position: relative;
-			min-height: 40px;
+			min-height: 50px;
 			width: 100%;
 		}
 		
@@ -30,11 +32,11 @@
 			margin-bottom: 20px;
 		}
 		.pathInput{
-			top: 40px;
+			top: 50px;
 		}
 		.paramsSection{
 			position: relative;
-			margin-top: 55px;
+			margin-top: 75px;
 		}
 		.queryParamRow{
 			display: -webkit-box;
@@ -61,18 +63,22 @@
 	<g:HTMLPanel styleName="{style.urlPanel}">
 		<!-- Toggle simple/detailed view -->
 		
+		
+		
 		<g:InlineLabel ui:field="toggleView" styleName="{appResources.appCss.handlerImageClosed} {appResources.appCss.handlerImageContainer} {style.urlToggleHandlerImage}"></g:InlineLabel>
 		
 		<!-- Full URL input box with suggestions -->
-		<g:SuggestBox styleName="{style.fullWidthRelativeInput} {style.urlInput}" ui:field="urlField"></g:SuggestBox>
+		<g:SuggestBox addStyleNames="{style.fullWidthRelativeInput} {style.urlInput} {style.inputPadding}" ui:field="urlField"></g:SuggestBox>
+		
+		
 		
 		<!-- Panel to keep detailed form -->
 		<div ui:field="detailedPanel" class="hidden {style.detailedPanel} {style.opened}">
 			
 			<!-- Host value text box -->
-			<g:TextBox styleName="{style.fullWidthRelativeInput} {style.urlInput}" ui:field="detailedHostField" title="HOST value"></g:TextBox>
+			<g:TextBox addStyleNames="{style.fullWidthRelativeInput} {style.urlInput} {style.inputPadding}" ui:field="detailedHostField" title="HOST value"></g:TextBox>
 			<!-- PATH value text box -->
-			<g:TextBox styleName="{style.fullWidthRelativeInput} {style.pathInput}" ui:field="detailedPathField" title="PATH value"></g:TextBox>
+			<g:TextBox addStyleNames="{style.fullWidthRelativeInput} {style.pathInput} {style.inputPadding}" ui:field="detailedPathField" title="PATH value"></g:TextBox>
 			<!-- Query params form section -->
 			<section class="{style.paramsSection}">
 				<p class="{style.sectionTitle}">
@@ -89,7 +95,7 @@
 			</section>
 			<!-- Query params form section -->
 			<section class="{style.hashSection}">
-				<g:TextBox styleName="{style.fullWidthRelativeInput}" ui:field="detailedHashField" title="PATH value"></g:TextBox>
+				<g:TextBox addStyleNames="{style.fullWidthRelativeInput} {style.inputPadding}" ui:field="detailedHashField" title="PATH value"></g:TextBox>
 			</section>
 		</div>
 		

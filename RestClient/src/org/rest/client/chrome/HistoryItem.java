@@ -39,7 +39,7 @@ public class HistoryItem extends JavaScriptObject {
 	 * @optional
 	 * @return the lastVisitTime
 	 */
-	public final native long getLastVisitTime() /*-{
+	public final native double getLastVisitTime() /*-{
 		return this.lastVisitTime;
 	}-*/;
 	/**

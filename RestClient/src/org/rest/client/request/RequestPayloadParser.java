@@ -75,7 +75,10 @@ public class RequestPayloadParser {
 	 */
 	public static ArrayList<FormPayloadData> stringToFormArrayList(String input){
 		ArrayList<FormPayloadData> result = new ArrayList<FormPayloadData>();
-		/**
+		if(input == null || input.isEmpty()){
+			return result;
+		}
+		/*
     	 * Chrome inspector has FormData output like:
     	 * key:value
     	 * key:value

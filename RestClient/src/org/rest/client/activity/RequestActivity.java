@@ -15,24 +15,33 @@
  ******************************************************************************/
 package org.rest.client.activity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.rest.client.ClientFactory;
 import org.rest.client.event.AddEncodingEvent;
 import org.rest.client.event.ClearFormEvent;
+import org.rest.client.event.RequestChangeEvent;
+import org.rest.client.event.RequestEndEvent;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.RequestParameters;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.LocalStore;
 import org.rest.client.storage.store.objects.FormEncodingObject;
 import org.rest.client.storage.store.objects.RequestObject;
+import org.rest.client.storage.websql.HeaderRow;
+import org.rest.client.storage.websql.StatusCodeRow;
 import org.rest.client.ui.AddEncodingView;
 import org.rest.client.ui.RequestView;
+import org.rest.client.ui.ResponseView;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.xhr2.client.Response;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
@@ -44,11 +53,13 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * 
  */
 public class RequestActivity extends AppActivity implements
-		RequestView.Presenter {
+		RequestView.Presenter, ResponseView.ResponsePresenter {
 
 	@SuppressWarnings("unused")
 	final private RequestPlace place;
 	private EventBus eventBus;
+	protected ResponseView responseView;
+	FlowPanel viewFlowPanel;
 
 	public RequestActivity(RequestPlace place, ClientFactory clientFactory) {
 		super(clientFactory);
@@ -60,13 +71,38 @@ public class RequestActivity extends AppActivity implements
 		this.eventBus = eventBus;
 		super.start(panel, eventBus);
 
-		RequestView view = this.clientFactory.getRequestView();
-		view.setPresenter(this);
-		panel.setWidget(view.asWidget());
-		restoreLatestRequest(view);
+		RequestView requestView = this.clientFactory.getRequestView();
+		requestView.setPresenter(this);
+		viewFlowPanel = new FlowPanel();
+		viewFlowPanel.add(requestView);
+		panel.setWidget(viewFlowPanel);
+		restoreLatestRequest(requestView);
 		
+		observeEvents();
 	}
 	
+	private void observeEvents() {
+		RequestChangeEvent.register(eventBus, new RequestChangeEvent.Handler() {
+			@Override
+			public void onChange(RequestChangeEvent event) {
+				Log.debug("RequestChangeEvent: " + event.getChangeType()); 
+			}
+		});
+		RequestEndEvent.register(eventBus, new RequestEndEvent.Handler() {
+			@Override
+			public void onResponse(boolean success, Response response, long requestTime) {
+				if(responseView != null){
+					responseView.asWidget().removeFromParent();
+					responseView = null;
+				}
+				responseView = clientFactory.getResponseView();
+				responseView.setPresenter(RequestActivity.this);
+				responseView.setResponseData(success, response, requestTime);
+				viewFlowPanel.add(responseView);
+			}
+		});
+	}
+
 	private void restoreLatestRequest(final RequestView view){
 		RequestParameters
 			.restoreLatest(new Callback<RequestParameters, Throwable>() {
@@ -229,5 +265,38 @@ public class RequestActivity extends AppActivity implements
 	@Override
 	public void fireClearAllEvent() {
 		eventBus.fireEvent(new ClearFormEvent());
+	}
+
+	@Override
+	public void getStatusCodeInfo(int code, final Callback<StatusCodeRow, Throwable> callback) {
+		clientFactory.getStatusesStore().getByKey(code, new StoreResultCallback<StatusCodeRow>(){
+
+			@Override
+			public void onSuccess(StatusCodeRow result) {
+				callback.onSuccess(result);
+			}
+
+			@Override
+			public void onError(Throwable e) {
+				callback.onFailure(e);
+			}});
+	}
+
+	@Override
+	public void getResponseHeadersInfo(ArrayList<String> names,
+			final Callback<List<HeaderRow>, Throwable> callback) {
+		
+		clientFactory.getHeadersStore().getResponseHeadersByName(names, new StoreResultCallback<List<HeaderRow>>() {
+			
+			@Override
+			public void onSuccess(List<HeaderRow> result) {
+				callback.onSuccess(result);
+			}
+			
+			@Override
+			public void onError(Throwable e) {
+				callback.onFailure(e);
+			}
+		});
 	}
 }

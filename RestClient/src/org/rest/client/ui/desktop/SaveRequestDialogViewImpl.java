@@ -71,10 +71,10 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	
 	public SaveRequestDialogViewImpl(){
 		setPreviewURL();
+		Binder.BINDER.createAndBindUi(this);
 		if(requestOrygURL == null || requestOrygURL.isEmpty()){
 			return;
 		}
-		Binder.BINDER.createAndBindUi(this);
 		dialog.addDomHandler(this, KeyDownEvent.getType());
 		dialog.addCloseHandler(this);
 		
@@ -117,6 +117,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		
 		prevUrlTextBox.setText(requestOrygURL);
 		updatePreviewURL();
+		Log.debug("Try set projects list");
 		setProjectsList();
 	}
 	
@@ -126,9 +127,11 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		store.open(new StoreResultCallback<Boolean>() {
 			@Override
 			public void onSuccess(Boolean result) {
+				
 				store.all(new StoreResultCallback<Map<Long,ProjectObject>>() {
 					@Override
 					public void onSuccess(Map<Long, ProjectObject> result) {
+						Log.debug("Result project list");
 						Iterator<Entry<Long, ProjectObject>> it = result.entrySet().iterator();
 						while(it.hasNext()){
 							Entry<Long, ProjectObject> set = it.next();
@@ -146,6 +149,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 					}
 					@Override
 					public void onError(Throwable e) {
+						Log.debug("aaaaa");
 						if(RestClient.isDebug()){
 							Log.error("Unable to read stored projects. Error during read operation.", e);
 						}
@@ -203,21 +207,21 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		if(pathStatus.getValue()){
 			url += "/[FUTURE]/";
 		} else {
-			if(!data.getPath().isEmpty()){
+			if(data.getPath() != null && !data.getPath().isEmpty()){
 				url += data.getPath();
 			}
 		}
 		if(parametersStatus.getValue()){
 			url += "?[FUTURE]";
 		} else {
-			if(!data.getQuery().isEmpty()){
+			if(data.getQuery() != null && !data.getQuery().isEmpty()){
 				url += "?" + data.getQuery();
 			}
 		}
 		if(tokenStatus.getValue()){
 			url += "#[FUTURE]";
 		} else {
-			if(!data.getAnchor().isEmpty()){
+			if(data.getAnchor() != null && !data.getAnchor().isEmpty()){
 				url += "#" + data.getAnchor();
 			}
 		}

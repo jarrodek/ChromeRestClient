@@ -24,7 +24,7 @@ package org.rest.client.task;
  * 	}
  * 
  * 	public void onFailure(int finished) {
- * 		if( tryOnFailure ){
+ * 		if (tryOnFailure) {
  * 			TasksLoader.tryAgainOrDie();
  * 		} else {
  * 			taskFinished += task.getTasksCount() - finished;
@@ -58,6 +58,19 @@ public interface TasksCallback {
 	void onFailure(int tasksExecutedCount);
 
 	/**
+	 * Should be called when task is unable to complete it's work and this is
+	 * fatal error.
+	 * <p>
+	 * Application can't run without this task and should display error message
+	 * only.
+	 * </p>
+	 * 
+	 * @param message
+	 *            Message to display to user.
+	 */
+	void onFatalError(String message);
+
+	/**
 	 * Called when an task call completes successfully.
 	 * <p>
 	 * After this call {@link TasksLoader} remove task from tasks que and
@@ -74,6 +87,7 @@ public interface TasksCallback {
 	/**
 	 * Called when each inner task is finished. If task has only one inner task its
 	 * should be executed before {@link #onSuccess()} is called.
+	 * @param taskFinished number of task finished.
 	 */
-	void onInnerTaskFinished();
+	void onInnerTaskFinished(int taskFinished);
 }

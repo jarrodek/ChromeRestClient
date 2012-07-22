@@ -16,6 +16,10 @@
 package org.rest.client.ui;
 
 
+import java.util.ArrayList;
+
+import org.rest.client.request.FilesObject;
+
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.IsWidget;
 
@@ -55,6 +59,7 @@ public interface RequestView extends IsWidget {
 	String getHeaders();
 	String getPayload();
 	String getEncoding();
+	ArrayList<FilesObject> getFiles();
 	
 	void setUrl(String url);
 	void setMethod(String method);

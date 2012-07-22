@@ -17,7 +17,6 @@ package org.rest.client.request;
 
 import com.google.gwt.xhr2.client.FileList;
 
-@SuppressWarnings("javadoc")
 public class FilesObject {
 	private String name;
 	private FileList files;

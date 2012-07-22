@@ -1,9 +1,7 @@
 package org.rest.client.suggestion;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 
 import org.rest.client.chrome.History;
 import org.rest.client.chrome.History.Query;
@@ -11,8 +9,8 @@ import org.rest.client.chrome.HistoryItem;
 import org.rest.client.chrome.HistorySearchCallback;
 import org.rest.client.chrome.JsArray;
 import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.UrlHistoryStore;
-import org.rest.client.storage.store.objects.UrlHistoryObject;
+import org.rest.client.storage.store.UrlHistoryStoreWebSql;
+import org.rest.client.storage.websql.UrlRow;
 
 import com.allen_sauer.gwt.log.client.Log;
 
@@ -22,7 +20,7 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 	 * Allow to perform query
 	 */
 	private boolean allowQuery = true;
-	final private UrlHistoryStore store;
+	final private UrlHistoryStoreWebSql store;
 	private boolean databaseQueryEnd = true;
 	private boolean chromeQueryEnd = true;
 	ArrayList<UrlSuggestion> _suggestions = new ArrayList<UrlSuggestion>();
@@ -50,7 +48,7 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 		return allowQuery;
 	}
 
-	public UrlsSuggestOracle(UrlHistoryStore store) {
+	public UrlsSuggestOracle(UrlHistoryStoreWebSql store) {
 		this.store = store;
 	}
 
@@ -85,62 +83,38 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 		}
 		
 		
-		// search in DB
-		store.open(new StoreResultCallback<Boolean>() {
-
+		store.getByUrl("%" + query + "%", new StoreResultCallback<List<UrlRow>>() {
+			
 			@Override
-			public void onSuccess(Boolean result) {
-				if(result != null && result.booleanValue()){
-					store.query(query, UrlHistoryStore.URL_INDEX, new StoreResultCallback<Map<Long,UrlHistoryObject>>() {
-						@Override
-						public void onSuccess(Map<Long, UrlHistoryObject> result) {
-//							Log.debug("URL response for query: " + query + " has "+result.size()+" items");
-							requestInProgress = false;
-							databaseQueryEnd = true;
-							
-							String lowerQuery = query.toLowerCase();
-							
-							Iterator<Entry<Long, UrlHistoryObject>> it = result.entrySet().iterator();
-							while(it.hasNext()){
-								Entry<Long, UrlHistoryObject> entry = it.next();
-								UrlHistoryObject value = entry.getValue();
-								String url = value.getURL();
-								if(url == null){
-									continue;
-								}
-								if(!url.toLowerCase().startsWith(lowerQuery)){
-									continue;
-								}
-								UrlSuggestion s = new UrlSuggestion(url);
-								_suggestions.add(s);
-							}
-							if(chromeQueryEnd){
-								recentDatabaseResult = new DatabaseRequestResponse<UrlSuggestion>(request,
-										numberOfDatabaseSuggestions, _suggestions);
-								UrlsSuggestOracle.this.returnSuggestions(callback);
-							}
-						}
-						
-						@Override
-						public void onError(Throwable e) {
-							requestInProgress = false;
-							databaseQueryEnd = true;
-							Log.error("UrlsSuggestOracle - databaseService open error:", e);
-							//UrlsSuggestOracle.this.returnSuggestions(callback);
-						}
-					});
+			public void onSuccess(List<UrlRow> result) {
+				requestInProgress = false;
+				databaseQueryEnd = true;
+				String lowerQuery = query.toLowerCase();
+				for(UrlRow row : result){
+					String url = row.getUrl();
+					if(url == null){
+						continue;
+					}
+					if(!url.toLowerCase().startsWith(lowerQuery)){
+						continue;
+					}
+					UrlSuggestion s = new UrlSuggestion(url);
+					_suggestions.add(s);
+				}
+				if(chromeQueryEnd){
+					recentDatabaseResult = new DatabaseRequestResponse<UrlSuggestion>(request,
+							numberOfDatabaseSuggestions, _suggestions);
+					UrlsSuggestOracle.this.returnSuggestions(callback);
 				}
 			}
-
+			
 			@Override
 			public void onError(Throwable e) {
 				requestInProgress = false;
 				databaseQueryEnd = true;
 				Log.error("UrlsSuggestOracle - databaseService open error:", e);
-				//UrlsSuggestOracle.this.returnSuggestions(callback);
 			}
 		});
-		
 		
 		// Call chrome API.
 		if(h != null){

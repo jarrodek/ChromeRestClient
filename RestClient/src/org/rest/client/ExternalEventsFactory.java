@@ -15,6 +15,8 @@
  ******************************************************************************/
 package org.rest.client;
 
+import java.util.Date;
+
 import org.rest.client.event.AddEncodingEvent;
 import org.rest.client.event.ApplicationReadyEvent;
 import org.rest.client.event.ClearFormEvent;
@@ -80,16 +82,16 @@ public class ExternalEventsFactory {
 		});
 		RequestStartActionEvent.register(eventBus, new RequestStartActionEvent.Handler() {
 			@Override
-			public void onStart(long time) {
-				double startTime = (double) time;
+			public void onStart(Date time) {
+				double startTime = (double) time.getTime();
 				Log.debug("Request start event!: " +time);
 				fireDocumentEvent(CustomEvent.REQUEST_START_ACTION.getValue(), startTime);
 			}
 		});
 		RequestStopEvent.register(eventBus, new RequestStopEvent.Handler() {
 			@Override
-			public void onStop(long time) {
-				double endTime = (double) time;
+			public void onStop(Date time) {
+				double endTime = (double) time.getTime();
 				fireDocumentEvent(CustomEvent.REQUEST_STOP.getValue(), endTime);
 			}
 		});

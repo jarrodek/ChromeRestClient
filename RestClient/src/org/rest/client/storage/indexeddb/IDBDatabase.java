@@ -120,7 +120,8 @@ public class IDBDatabase extends JavaScriptObject {
 		}
 	}
 
-	private final native IDBRequest<Void> deleteObjectStoreImpl(String name) throws JavaScriptException  /*-{
+	private final native IDBRequest<Void> deleteObjectStoreImpl(String name)
+			throws JavaScriptException /*-{
 		return this.deleteObjectStore(name);
 	}-*/;
 
@@ -153,7 +154,7 @@ public class IDBDatabase extends JavaScriptObject {
 
 	private final native IDBVersionChangeRequest setVersionImpl(
 			String newVersion) throws JavaScriptException /*-{
-				var versionRequest = this.setVersion(newVersion);
+		var versionRequest = this.setVersion(newVersion);
 		return versionRequest;
 	}-*/;
 
@@ -165,23 +166,26 @@ public class IDBDatabase extends JavaScriptObject {
 	 * Example in javascript:
 	 * 
 	 * <pre>
-	 * var transaction = db.transaction(['my-store-name', 'my-store-name2'], IDBTransaction.READ_ONLY);
+	 * var transaction = db.transaction(['my-store-name', 'my-store-name2'], IDBTransaction.READ_ONLY_TRANSACTION);
 	 * </pre>
 	 * 
 	 * You cannot pass an empty array into the storeNames parameter, such as in
 	 * the following: <br/>
-	 * var transaction = db.transaction([], IDBTransaction.READ_ONLY); <br/>
+	 * var transaction = db.transaction([],
+	 * IDBTransaction.READ_ONLY_TRANSACTION); <br/>
 	 * Use something like: example in javascript:
 	 * 
 	 * <pre>
-	 * var transaction = db.transaction(db.objectStoreNames, IDBTransaction.READ_ONLY);
+	 * var transaction = db.transaction(db.objectStoreNames,
+	 * 		IDBTransaction.READ_ONLY_TRANSACTION);
 	 * </pre>
 	 * 
 	 * <br/>
 	 * 
-	 * Warning: Accessing all obejct stores under the READ_WRITE mode means that
-	 * you can run only that transaction. You cannot have writing transactions
-	 * with overlapping scopes.
+	 * Warning: Accessing all obejct stores under the
+	 * {@link IDBTransaction#READ_WRITE_TRANSACTION} mode means that you can run
+	 * only that transaction. You cannot have writing transactions with
+	 * overlapping scopes.
 	 * 
 	 * @param storeNames
 	 *            The names of object stores and indexes that are in the scope
@@ -191,23 +195,23 @@ public class IDBDatabase extends JavaScriptObject {
 	 * @param mode
 	 *            The types of access that can be performed in the transaction.
 	 *            Transactions are opened in one of three modes:
-	 *            {@link IDBTransaction#READ_ONLY},
-	 *            {@link IDBTransaction#READ_WRITE}, and
+	 *            {@link IDBTransaction#READ_ONLY_TRANSACTION},
+	 *            {@link IDBTransaction#READ_WRITE_TRANSACTION}, and
 	 *            {@link IDBTransaction#VERSION_CHANGE}. If you don't provide
 	 *            the parameter, the default access mode is READ_ONLY. To avoid
 	 *            slowing things down, don't open a
-	 *            {@link IDBTransaction#READ_WRITE} transaction, unless you
-	 *            actually need to write into the database.
+	 *            {@link IDBTransaction#READ_WRITE_TRANSACTION} transaction,
+	 *            unless you actually need to write into the database.
 	 * @return
 	 */
-	public final IDBTransaction transaction(String[] storeNames, int mode)
+	public final IDBTransaction transaction(String[] storeNames, String mode)
 			throws IDBDatabaseException {
 		try {
 			JsArrayString store = JsArrayString.createArray().cast();
-			for(String name : storeNames){
+			for (String name : storeNames) {
 				store.push(name);
 			}
-			
+
 			return this.transactionImpl(store, mode);
 		} catch (JavaScriptException e) {
 			throw new IDBDatabaseException(e);
@@ -242,23 +246,73 @@ public class IDBDatabase extends JavaScriptObject {
 	 *            slowing things down, don't open a
 	 *            {@link IDBTransaction#READ_WRITE} transaction, unless you
 	 *            actually need to write into the database.
-	 * @return
+	 * @return current {@link IDBTransaction}
+	 * @deprecated use {@link IDBDatabase#transaction(String, String)} instead
 	 */
 	public final IDBTransaction transaction(String storeName, int mode)
 			throws IDBDatabaseException {
+		String modeStr = "";
+		switch (mode) {
+		case 0:
+			modeStr = IDBTransaction.READ_ONLY_TRANSACTION;
+			break;
+		case 1:
+			modeStr = IDBTransaction.READ_WRITE_TRANSACTION;
+			break;
+		}
+		if (modeStr.isEmpty()) {
+			return null;
+		}
+		return transaction(storeName, modeStr);
+	}
+
+	/**
+	 * Immediately returns an {@link IDBTransaction} object, and starts a
+	 * transaction in a separate thread. The method returns a transaction object
+	 * ({@link IDBTransaction}) containing the objectStore() method, which you
+	 * can use to access your object store. <br/>
+	 * Example in javascript:
+	 * 
+	 * <pre>
+	 * var transaction = db.transaction(['my-store-name'], IDBTransaction.READ_ONLY_TRANSACTION);
+	 * or
+	 * var transaction = db.transaction('my-store-name', IDBTransaction.READ_ONLY_TRANSACTION);
+	 * </pre>
+	 * 
+	 * @param storeName
+	 *            The names of object stores and indexes that are in the scope
+	 *            of the new transaction. Specify only the object stores that
+	 *            you need to access. Include into transaction single object
+	 *            store
+	 * @param mode
+	 *            The types of access that can be performed in the transaction.
+	 *            Transactions are opened in one of three modes:
+	 *            {@link IDBTransaction#READ_ONLY_TRANSACTION},
+	 *            {@link IDBTransaction#READ_WRITE_TRANSACTION}, and
+	 *            {@link IDBTransaction#VERSION_CHANGE}. If you don't provide
+	 *            the parameter, the default access mode is
+	 *            {@link IDBTransaction#READ_ONLY_TRANSACTION}. To avoid slowing
+	 *            things down, don't open a
+	 *            {@link IDBTransaction#READ_WRITE_TRANSACTION} transaction,
+	 *            unless you actually need to write into the database.
+	 * @return current {@link IDBTransaction}
+	 * @throws IDBDatabaseException
+	 */
+	public final IDBTransaction transaction(String storeName, String mode)
+			throws IDBDatabaseException {
 		try {
-			
+
 			JsArrayString store = JsArrayString.createArray().cast();
 			store.push(storeName);
-			
+
 			return this.transactionImpl(store, mode);
 		} catch (JavaScriptException e) {
 			throw new IDBDatabaseException(e);
 		}
 	}
 
-	private final native IDBTransaction transactionImpl(JsArrayString storeNames,
-			int mode) throws JavaScriptException /*-{
+	private final native IDBTransaction transactionImpl(
+			JsArrayString storeNames, String mode) throws JavaScriptException /*-{
 		return this.transaction(storeNames, mode);
 	}-*/;
 
@@ -272,7 +326,7 @@ public class IDBDatabase extends JavaScriptObject {
 	public final native void close() /*-{
 		return this.close();
 	}-*/;
-	
+
 	/**
 	 * The event handler for the onabort event.
 	 * 
@@ -280,8 +334,7 @@ public class IDBDatabase extends JavaScriptObject {
 	 */
 	public final native void addAbortHandler(IDBAbortHandler handler) /*-{
 		this.onabort = function() {
-			handler
-					.@org.rest.client.storage.indexeddb.IDBAbortHandler::onAbort()();
+			handler.@org.rest.client.storage.indexeddb.IDBAbortHandler::onAbort()();
 		}
 	}-*/;
 
@@ -291,22 +344,21 @@ public class IDBDatabase extends JavaScriptObject {
 	 * @param handler
 	 */
 	public final native void addErrorHandler(IDBErrorHandler handler) /*-{
-		this.onabort = function() {
-			handler
-					.@org.rest.client.storage.indexeddb.IDBErrorHandler::onError()();
+		this.onerror = function() {
+			handler.@org.rest.client.storage.indexeddb.IDBErrorHandler::onError()();
 		}
 	}-*/;
-	
+
 	/**
 	 * The event handler for the error event.
 	 * 
 	 * @param handler
 	 */
-	public final native void addVersionChangeHandler(IDBVersionChangeHandler handler) /*-{
+	public final native void addVersionChangeHandler(
+			IDBVersionChangeHandler handler) /*-{
 		this.onversionchange = function() {
-			handler
-					.@org.rest.client.storage.indexeddb.IDBVersionChangeHandler::onChangeVersion()();
+			handler.@org.rest.client.storage.indexeddb.IDBVersionChangeHandler::onChangeVersion()();
 		}
 	}-*/;
-	
+
 }

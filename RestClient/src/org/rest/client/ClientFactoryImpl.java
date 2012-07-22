@@ -16,13 +16,13 @@
 package org.rest.client;
 
 import org.rest.client.storage.store.FormEncodingsStore;
-import org.rest.client.storage.store.HeadersStore;
-import org.rest.client.storage.store.HistoryRequestStore;
+import org.rest.client.storage.store.HeadersStoreWebSql;
+import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.storage.store.LocalStore;
 import org.rest.client.storage.store.ProjectsStore;
 import org.rest.client.storage.store.RequestDataStore;
-import org.rest.client.storage.store.StatusesStore;
-import org.rest.client.storage.store.UrlHistoryStore;
+import org.rest.client.storage.store.StatusesStoreWebSql;
+import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.ui.AboutView;
 import org.rest.client.ui.AddEncodingView;
 import org.rest.client.ui.JSONHeadersView;
@@ -30,6 +30,7 @@ import org.rest.client.ui.MenuItemView;
 import org.rest.client.ui.MenuItemView.Presenter;
 import org.rest.client.ui.MenuView;
 import org.rest.client.ui.RequestView;
+import org.rest.client.ui.ResponseView;
 import org.rest.client.ui.SaveRequestDialogView;
 import org.rest.client.ui.SettingsView;
 import org.rest.client.ui.ShortcutView;
@@ -39,6 +40,7 @@ import org.rest.client.ui.desktop.JSONHeadersViewImpl;
 import org.rest.client.ui.desktop.MenuItemViewImpl;
 import org.rest.client.ui.desktop.MenuViewImpl;
 import org.rest.client.ui.desktop.RequestViewImpl;
+import org.rest.client.ui.desktop.ResponseViewImpl;
 import org.rest.client.ui.desktop.SaveRequestDialogViewImpl;
 import org.rest.client.ui.desktop.SettingsViewImpl;
 import org.rest.client.ui.desktop.ShortcutViewImpl;
@@ -53,16 +55,17 @@ public class ClientFactoryImpl implements ClientFactory {
 	private static final EventBus eventBus = new SimpleEventBus();
 	private static final PlaceController placeController = new PlaceController(eventBus);
 	private static RequestView requestView = null;
-	private static AboutView aboutView = null;
+//	private static ResponseView responseView = null;
+//	private static AboutView aboutView = null;
 	private static MenuView menu = null;
-	private static SettingsView settingsView = null;
+//	private static SettingsView settingsView = null;
 	private static LocalStore latestRequestStore = null;
 	private static RequestDataStore requestDataStore = null;
-	private static HistoryRequestStore historyRequestStore = null;
+	private static HistoryRequestStoreWebSql historyRequestStore = null;
 	private static FormEncodingsStore formEncodingsStore = null;
-	private static UrlHistoryStore urlHistoryStore = null;
-	private static HeadersStore headersStore = null;
-	private static StatusesStore statusesStore = null; 
+	private static UrlHistoryStoreWebSql urlHistoryStore = null;
+	private static HeadersStoreWebSql headersStore = null;
+	private static StatusesStoreWebSql statusesStore = null; 
 	private static ProjectsStore projectsStore = null;
 	
 	@Override
@@ -82,7 +85,16 @@ public class ClientFactoryImpl implements ClientFactory {
 		}
 		return requestView;
 	}
-
+	
+	@Override
+	public ResponseView getResponseView(){
+//		if(responseView == null){
+//			responseView = GWT.create(ResponseView.class);
+//		}
+//		return responseView;
+		return GWT.create(ResponseViewImpl.class);
+	}
+	
 	@Override
 	public MenuView getMenuView() {
 		if(menu == null){
@@ -115,9 +127,9 @@ public class ClientFactoryImpl implements ClientFactory {
 	}
 
 	@Override
-	public HistoryRequestStore getHistoryRequestStore() {
+	public HistoryRequestStoreWebSql getHistoryRequestStore() {
 		if(historyRequestStore == null){
-			historyRequestStore = GWT.create(HistoryRequestStore.class);
+			historyRequestStore = GWT.create(HistoryRequestStoreWebSql.class);
 		}
 		return historyRequestStore;
 	}
@@ -147,43 +159,45 @@ public class ClientFactoryImpl implements ClientFactory {
 	}
 	
 	@Override
-	public UrlHistoryStore getUrlHistoryStore(){
+	public UrlHistoryStoreWebSql getUrlHistoryStore(){
 		if(urlHistoryStore == null){
-			urlHistoryStore = GWT.create(UrlHistoryStore.class);
+			urlHistoryStore = GWT.create(UrlHistoryStoreWebSql.class);
 		}
 		return urlHistoryStore;
 	}
 
 	@Override
-	public HeadersStore getHeadersStore() {
+	public HeadersStoreWebSql getHeadersStore() {
 		if(headersStore == null){
-			headersStore = GWT.create(HeadersStore.class);
+			headersStore = GWT.create(HeadersStoreWebSql.class);
 		}
 		return headersStore;
 	}
 
 	@Override
-	public StatusesStore getStatusesStore() {
+	public StatusesStoreWebSql getStatusesStore() {
 		if(statusesStore == null){
-			statusesStore = GWT.create(StatusesStore.class);
+			statusesStore = GWT.create(StatusesStoreWebSql.class);
 		}
 		return statusesStore;
 	}
 
 	@Override
 	public AboutView getAboutView() {
-		if(aboutView == null){
-			aboutView = GWT.create(AboutViewImpl.class);
-		}
-		return aboutView;
+//		if(aboutView == null){
+//			aboutView = GWT.create(AboutViewImpl.class);
+//		}
+//		return aboutView;
+		return  GWT.create(AboutViewImpl.class);
 	}
 
 	@Override
 	public SettingsView getSettingsView() {
-		if(settingsView == null){
-			settingsView = GWT.create(SettingsViewImpl.class);
-		}
-		return settingsView;
+//		if(settingsView == null){
+//			settingsView = GWT.create(SettingsViewImpl.class);
+//		}
+//		return settingsView;
+		return GWT.create(SettingsViewImpl.class);
 	}
 
 	@Override

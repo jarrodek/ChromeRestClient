@@ -45,9 +45,12 @@
 		}
 	</ui:style> 
 	<g:HTMLPanel styleName="{appResources.appCss.tabsPanel}">
+		
 		<div class="{appResources.appCss.tabs}">
-			<g:InlineLabel ui:field="rawTab" styleName="{appResources.appCss.tabHadler} {appResources.appCss.tabHandlercurrent}">Raw</g:InlineLabel>
-			<g:InlineLabel ui:field="formTab" styleName="{appResources.appCss.tabHadler}">Form</g:InlineLabel>
+			<div class="{appResources.appCss.inlineButtonsGroup}">
+				<g:InlineLabel ui:field="rawTab" styleName="{appResources.appCss.inlineButton} {appResources.appCss.inlineButtonChecked}">Raw</g:InlineLabel>
+				<g:InlineLabel ui:field="formTab" styleName="{appResources.appCss.inlineButton}">Form</g:InlineLabel>
+			</div>
 			<span class="{appResources.appCss.tabCaption}">Headers</span>
 		</div>
 		<div ui:field="tabContent" class="{appResources.appCss.tabsContent}">

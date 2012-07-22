@@ -54,6 +54,10 @@ public interface AppCssResource extends CssResource {
 	String nomargin();
 	String button();
 	String dialogButtons();
+	String inlineButtonsGroup();
+	String inlineButton();
+	String inlineButtonChecked();
+	String inlineButtonHover();
 	
 	/* Controls visibility */
 	String hidden();

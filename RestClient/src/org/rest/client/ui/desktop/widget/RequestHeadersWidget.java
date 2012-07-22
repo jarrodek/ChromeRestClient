@@ -16,10 +16,7 @@
 package org.rest.client.ui.desktop.widget;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.util.List;
 
 import org.rest.client.RestClient;
 import org.rest.client.headerssupport.HeadersFillSupport;
@@ -27,8 +24,8 @@ import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.resources.AppCssResource;
 import org.rest.client.resources.AppResources;
 import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.HeadersStore;
-import org.rest.client.storage.store.objects.HeadersObject;
+import org.rest.client.storage.store.HeadersStoreWebSql;
+import org.rest.client.storage.websql.HeaderRow;
 import org.rest.client.suggestion.HeadersSuggestOracle;
 import org.rest.client.ui.html5.HTML5Element;
 import org.rest.client.ui.html5.SpanElement;
@@ -39,6 +36,10 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -99,7 +100,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 	private String headersData = "";
 	private ArrayList<FormInputs> formInputs = new ArrayList<RequestHeadersWidget.FormInputs>();
 	private HeadersSuggestOracle suggestOracle = null;
-	final HeadersStore store;
+	final HeadersStoreWebSql store;
 	
 	public RequestHeadersWidget() {
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
@@ -108,18 +109,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		// Initialize Suggest Oracle for headers
 		//
 		store = RestClient.getClientFactory().getHeadersStore();
-		if(store.isOpened()){
-			suggestOracle = new HeadersSuggestOracle(store, "request");
-		} else {
-			store.open(new StoreResultCallback<Boolean>() {
-				@Override
-				public void onSuccess(Boolean result) {
-					suggestOracle = new HeadersSuggestOracle(store, "request");
-				}
-				@Override
-				public void onError(Throwable e) {}
-			});
-		}
+		suggestOracle = new HeadersSuggestOracle(store, "request");
 		headersRawInput.addKeyUpHandler(new KeyUpHandler() {
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
@@ -127,12 +117,13 @@ public class RequestHeadersWidget extends Composite implements HasText {
 			}
 		});
 		
+		
 		rawTab.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				if(currentTab.equals(TABS.RAW)) return;
 				
-				String tabHandlercurrent = appStyle.tabHandlercurrent();
+				String tabHandlercurrent = appStyle.inlineButtonChecked();
 				String tabsContent = appStyle.tabsContent();
 				String cssTabContent = appStyle.tabContent();
 				String tabContentCurrent = appStyle.tabContentCurrent();
@@ -148,6 +139,22 @@ public class RequestHeadersWidget extends Composite implements HasText {
 				currentTab = TABS.RAW;
 			}
 		});
+		rawTab.addMouseOverHandler(new MouseOverHandler() {
+			@Override
+			public void onMouseOver(MouseOverEvent event) {
+				SpanElement tab = (SpanElement) rawTab.getElement();
+				if(!tab.getClassList().contains(appStyle.inlineButtonChecked()))
+					tab.getClassList().add(appStyle.inlineButtonHover());
+			}
+		});
+		rawTab.addMouseOutHandler(new MouseOutHandler() {
+			@Override
+			public void onMouseOut(MouseOutEvent event) {
+				SpanElement tab = (SpanElement) rawTab.getElement();
+				if(!tab.getClassList().contains(appStyle.inlineButtonHover()))
+					tab.getClassList().remove(appStyle.inlineButtonHover());
+			}
+		});
 		formTab.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -156,7 +163,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 				updateForm();
 				ensureFormHasRow();
 				
-				String tabHandlercurrent = appStyle.tabHandlercurrent();
+				String tabHandlercurrent = appStyle.inlineButtonChecked();
 				String tabsContent = appStyle.tabsContent();
 				String cssTabContent = appStyle.tabContent();
 				String tabContentCurrent = appStyle.tabContentCurrent();
@@ -170,6 +177,22 @@ public class RequestHeadersWidget extends Composite implements HasText {
 				contentParent.querySelector("." + tabsContent + " ." + cssTabContent + "[data-tab=\"form\"]").getClassList().add(tabContentCurrent);
 		        
 				currentTab = TABS.FORM;
+			}
+		});
+		formTab.addMouseOverHandler(new MouseOverHandler() {
+			@Override
+			public void onMouseOver(MouseOverEvent event) {
+				SpanElement tab = (SpanElement) formTab.getElement();
+				if(!tab.getClassList().contains(appStyle.inlineButtonChecked()))
+					tab.getClassList().add(appStyle.inlineButtonHover());
+			}
+		});
+		formTab.addMouseOutHandler(new MouseOutHandler() {
+			@Override
+			public void onMouseOut(MouseOutEvent event) {
+				SpanElement tab = (SpanElement) formTab.getElement();
+				if(tab.getClassList().contains(appStyle.inlineButtonHover()))
+					tab.getClassList().remove(appStyle.inlineButtonHover());
 			}
 		});
 	}
@@ -301,18 +324,16 @@ public class RequestHeadersWidget extends Composite implements HasText {
 	
 	
 	private void showHint(final int left, final int top, final String forValue){
-		store.query(forValue, HeadersStore.HEADER_INDEX, new StoreResultCallback<Map<Long,HeadersObject>>() {
-        	@Override
-			public void onSuccess(final Map<Long, HeadersObject> result) {
-        		if(result.size() == 0){
-        			return;
+		store.getHeaders(forValue, "request" , new StoreResultCallback<List<HeaderRow>>() {
+			@Override
+			public void onSuccess(List<HeaderRow> result) {
+				if(result == null || result.size() == 0){
+					return;
 				} else {
-					HeadersObject v = null;
-					Iterator<Entry<Long, HeadersObject>> it = result.entrySet().iterator();
-					while(it.hasNext()){
-						HeadersObject _v = it.next().getValue();
-						if(_v.getHeader().equals(forValue)){
-							v = _v;
+					HeaderRow v = null;
+					for(HeaderRow row : result){
+						if(row.getName().equals(forValue)){
+							v = row;
 							break;
 						}
 					}
@@ -331,10 +352,13 @@ public class RequestHeadersWidget extends Composite implements HasText {
 			        simplePopup.add( new HTML(expl) );
 			        simplePopup.show();
 				}
-        	}
-        	@Override
-			public void onError(Throwable e) {}
-        });
+			}
+			
+			@Override
+			public void onError(Throwable e) {
+				
+			}
+		});
 	}
 	
 	/**
@@ -342,19 +366,15 @@ public class RequestHeadersWidget extends Composite implements HasText {
 	 * @param box 
 	 */
 	private void provideHeaderSupport(final SuggestBox value, TextBox box){
-		
-		store.query(value.getValue(), HeadersStore.HEADER_INDEX, new StoreResultCallback<Map<Long,HeadersObject>>() {
+		store.getHeaders(value.getValue(), "request", new StoreResultCallback<List<HeaderRow>>() {
+
 			@Override
-			public void onSuccess(Map<Long, HeadersObject> result) {
-				if(result.size() == 0){
+			public void onSuccess(List<HeaderRow> result) {
+				if(result == null || result.size() == 0){
 					value.getElement().getParentElement().removeClassName(style.hasSupport()); //no support
 				} else {
-					Set<Long> keys = result.keySet();
-					Iterator<Long> it = keys.iterator();
-					while(it.hasNext()){
-						Long id = it.next();
-						HeadersObject header = result.get(id);
-						if(header.getHeader().equals(value.getValue())){
+					for(HeaderRow row : result){
+						if(row.getName().equals(value.getValue())){
 							value.getElement().getParentElement().addClassName(style.hasSupport()); //has support
 							//addHintClickHandler();
 							break;
@@ -362,13 +382,13 @@ public class RequestHeadersWidget extends Composite implements HasText {
 					}
 				}
 			}
-			
+
 			@Override
 			public void onError(Throwable e) {
 				value.getElement().getParentElement().removeClassName(style.hasSupport()); //no support
 			}
+			
 		});
-		
 		
 		if(HeadersFillSupport.isSupported(value.getValue())){
 			new HeadersFillSupport(value.getValue(), box);

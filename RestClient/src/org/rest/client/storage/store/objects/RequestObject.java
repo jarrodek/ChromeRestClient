@@ -15,6 +15,10 @@
  ******************************************************************************/
 package org.rest.client.storage.store.objects;
 
+import java.util.ArrayList;
+
+import org.rest.client.request.FilesObject;
+
 /**
  * This is representation of data stored in IDB request table. This class
  * represents any request related data in application. Either it is saved
@@ -52,6 +56,14 @@ public class RequestObject extends HistoryObject {
 			created: new Date() //order key
 		}
 	}-*/;
+	
+	private static ArrayList<FilesObject> fileList = new ArrayList<FilesObject>();
+	public final void setFiles(ArrayList<FilesObject> list){
+		fileList = list;
+	}
+	public final ArrayList<FilesObject> getFiles(){
+		return fileList;
+	}
 
 	/**
 	 * @return request given name or null if none

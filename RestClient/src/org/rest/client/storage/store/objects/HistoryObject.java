@@ -58,7 +58,11 @@ public class HistoryObject extends JavaScriptObject {
 	public final native Date getCreated() /*-{
 		return this.created;
 	}-*/;
-
+	
+	public final native double getTime() /*-{
+		return this.created.getTime();
+	}-*/;
+	
 	/**
 	 * Sets request URL data
 	 * 

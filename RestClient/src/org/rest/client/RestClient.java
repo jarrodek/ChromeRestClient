@@ -16,7 +16,6 @@
 package org.rest.client;
 
 import org.rest.client.event.ApplicationReadyEvent;
-import org.rest.client.load.TasksLoader;
 import org.rest.client.mvp.AppActivityMapper;
 import org.rest.client.mvp.AppPlaceHistoryMapper;
 import org.rest.client.place.RequestPlace;
@@ -28,8 +27,10 @@ import org.rest.client.storage.store.RequestDataStore;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.task.CreateMenuTask;
-import org.rest.client.task.InitialConfigTask;
+import org.rest.client.task.FirstRunTask;
 import org.rest.client.task.InitializeAppHandlersTask;
+import org.rest.client.task.InitializeDatabaseTask;
+import org.rest.client.task.TasksLoader;
 import org.rest.client.ui.RequestView;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -77,21 +78,25 @@ public class RestClient implements EntryPoint {
 				historyMapper);
 		historyHandler.register(placeController, eventBus, defaultPlace);
 
+		AppResources.INSTANCE.appCss().ensureInjected();
+		
+		
 		//
-		// Register external events
+		// Start up application. 
 		//
-		ExternalEventsFactory.init(eventBus);
-
-		// Add initial tasks like load configuration or restore state
-		CreateMenuTask createMenuTask = new CreateMenuTask();
-		InitialConfigTask initTask = new InitialConfigTask();
-		InitializeAppHandlersTask appHandlersTask = new InitializeAppHandlersTask();
-
-		TasksLoader.addTask(initTask);
-		TasksLoader.addTask(createMenuTask);
-		TasksLoader.addTask(appHandlersTask);
-		// run loaded tasks and show app view.
+		
+		TasksLoader.addTask(new InitializeDatabaseTask());
+		TasksLoader.addTask(new FirstRunTask());
+		TasksLoader.addTask(new InitializeAppHandlersTask());
+		TasksLoader.addTask(new CreateMenuTask());
+		
 		TasksLoader.runTasks(new Callback<Void, Void>() {
+
+			@Override
+			public void onFailure(Void reason) {
+				Log.error("Initialize error...");
+			}
+
 			@Override
 			public void onSuccess(Void result) {
 				RootPanel.get("appContainer").add(appWidget);
@@ -99,20 +104,20 @@ public class RestClient implements EntryPoint {
 				fixChromeLayoutIssue();
 				eventBus.fireEvent(new ApplicationReadyEvent());
 			}
-
-			@Override
-			public void onFailure(Void reason) {
-				Log.error("Initialize error...");
-				RootPanel.get("appContainer").add(appWidget);
-				// historyHandler.handleCurrentHistory();
-				// eventBus.fireEvent(new ApplicationReadyEvent());
-			}
 		});
-
-		AppResources.INSTANCE.appCss().ensureInjected();
 	}
-
+	/**
+	 * TODO: implement me :)
+	 * @return true if debug output is enabled, false otherwise
+	 */
 	public static boolean isDebug() {
+		return true;
+	}
+	/**
+	 * TODO: implement me :)
+	 * @return true if history feature output is enabled, false otherwise
+	 */
+	public static boolean isHistoryEabled(){
 		return true;
 	}
 
@@ -125,7 +130,7 @@ public class RestClient implements EntryPoint {
 	public static void collectRequestData(
 			final Callback<RequestObject, Throwable> callback) {
 		final RequestObject requestObject = RequestObject.createRequest();
-		if (History.getToken().startsWith("RequestPlace")) {
+		if (History.getToken().isEmpty() || History.getToken().startsWith("RequestPlace")) {
 			RequestView requestView = RestClient.getClientFactory()
 					.getRequestView();
 			requestObject.setEncoding(requestView.getEncoding());
@@ -133,6 +138,7 @@ public class RestClient implements EntryPoint {
 			requestObject.setMethod(requestView.getMethod());
 			requestObject.setPayload(requestView.getPayload());
 			requestObject.setURL(requestView.getUrl());
+			requestObject.setFiles(requestView.getFiles());
 			callback.onSuccess(requestObject);
 		} else {
 			RequestParameters

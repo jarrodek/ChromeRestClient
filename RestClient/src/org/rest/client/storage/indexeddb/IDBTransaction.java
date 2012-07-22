@@ -45,14 +45,26 @@ public class IDBTransaction extends JavaScriptObject {
 	 * Allows data to be read but not changed.
 	 * 
 	 * @value 0
+	 * @deprecated use {@link #READ_ONLY_TRANSACTION} instead
 	 */
 	public static final int READ_ONLY = 0;
+	/**
+	 * Allows data to be read but not changed.
+	 * @value readonly
+	 */
+	public static final String READ_ONLY_TRANSACTION = "readonly";
 	/**
 	 * Allows reading and writing of data in existing data stores to be changed.
 	 * 
 	 * @value 1
+	 * @deprecated use {@link #READ_WRITE_TRANSACTION} instead
 	 */
 	public static final int READ_WRITE = 1;
+	/**
+	 * Allows reading and writing of data in existing data stores to be changed.
+	 * @value readwrite
+	 */
+	public static final String READ_WRITE_TRANSACTION = "readwrite";
 	/**
 	 * Allows any operation to be performed, including ones that delete and
 	 * create object stores and indexes. This mode is for updating the version
