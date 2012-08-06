@@ -16,6 +16,7 @@
 package org.rest.client.mvp;
 
 import org.rest.client.place.AboutPlace;
+import org.rest.client.place.HistoryPlace;
 import org.rest.client.place.JSONHeadersPlace;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SettingsPlace;
@@ -23,13 +24,16 @@ import org.rest.client.place.ShortcutPlace;
 
 import com.google.gwt.place.shared.PlaceHistoryMapper;
 import com.google.gwt.place.shared.WithTokenizers;
+
 /**
  * PlaceHistoryMapper interface is used to attach all places which the
  * PlaceHistoryHandler should be aware of. This is done via the @WithTokenizers
  * annotation or by extending PlaceHistoryMapperWithFactory and creating a
  * separate TokenizerFactory.
  */
-@WithTokenizers({AboutPlace.Tokenizer.class, RequestPlace.Tokenizer.class, SettingsPlace.Tokenizer.class, JSONHeadersPlace.Tokenizer.class, ShortcutPlace.Tokenizer.class})
+@WithTokenizers({ AboutPlace.Tokenizer.class, RequestPlace.Tokenizer.class,
+		SettingsPlace.Tokenizer.class, JSONHeadersPlace.Tokenizer.class,
+		ShortcutPlace.Tokenizer.class, HistoryPlace.Tokenizer.class })
 public interface AppPlaceHistoryMapper extends PlaceHistoryMapper {
 
 }

@@ -5,11 +5,13 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -81,16 +83,26 @@ public class ResponseHeaderLine extends Composite {
 		}
 	}
 	
+	Timer hideTimer = new Timer() {
+		@Override
+		public void run() {
+			if(!hintParent.getStyle().getDisplay().equals(Display.NONE.getCssName())){
+				hintParent.getStyle().setDisplay(Display.NONE);
+			}
+		}
+	};
 	
 	@UiHandler("hintHandler")
 	void handleClick(ClickEvent e) {
 		Element parent = hintParent.getParentElement();
 		String currentClass = parent.getClassName();
-		if( currentClass.contains( style.opened() ) ){
-			parent.removeClassName( style.opened() );
+		if(currentClass.contains(style.opened())){
+			parent.removeClassName(style.opened());
 			hintParent.setAttribute("style", "height:0px");
+			hideTimer.schedule(350);
 		} else {
-			parent.addClassName( style.opened() );
+			hintParent.getStyle().setDisplay(Display.BLOCK);
+			parent.addClassName(style.opened());
 			hintParent.setAttribute("style", "height:"+hintParent.getScrollHeight()+"px");
 		}
 	}

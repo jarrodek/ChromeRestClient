@@ -32,8 +32,11 @@
 		.actionBar,
 		.contentTypeSection{
 			margin-top: 15px;
-			display: inline-block;
 			vertical-align: top;
+		}
+		.actionBar{
+			text-align: right;
+			margin-right: 1em;
 		}
 		.actions{}
 		.actions > *{margin-left: 10px;}

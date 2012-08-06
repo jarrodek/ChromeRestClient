@@ -84,7 +84,7 @@
 		</div>
 		
 		
-		<div class="{style.hintInfo}" ui:field="hintParent">
+		<div class="{style.hintInfo}" style="display:none;" ui:field="hintParent">
 			<span class="{style.helpDescItem}">
 				<span class="{style.hdName}" ui:field="headerName"></span>
 				<br />

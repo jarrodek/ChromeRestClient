@@ -64,4 +64,10 @@ public interface AppCssResource extends CssResource {
 	
 	/* Headers fill support */
 	String w3cError();
+	
+	/* Image for loader */
+	String loaderImage();
+	
+	/* Position children in center of this container */
+	String flexCenter();
 }

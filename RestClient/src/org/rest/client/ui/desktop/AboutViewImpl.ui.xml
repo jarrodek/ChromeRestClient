@@ -1,7 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:rcui="urn:import:org.rest.client.ui.desktop.widget"
-	xmlns:h5="urn:import:org.rest.client.ui.html5">
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with field="appResources" type="org.rest.client.resources.AppResources" />
 	<ui:style>
 		.contentTitle {

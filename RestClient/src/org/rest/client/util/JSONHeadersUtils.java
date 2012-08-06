@@ -9,9 +9,37 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.storage.client.Storage;
 
 public class JSONHeadersUtils {
 	
+	public static String[] getJSONHeadersListSynch(){
+		Storage store = Storage.getLocalStorageIfSupported();
+		return parseStoreResult(store.getItem(LocalStore.JSON_HEADERS_KEY));
+	}
+	
+	private static String[] parseStoreResult(String result){
+		
+		if(result != null && !result.equals("")){
+			JSONValue jsonHeadersJsonValue = JSONParser.parseStrict(result);
+			JSONArray jsonHeadersJsonArr = jsonHeadersJsonValue.isArray();
+			if(jsonHeadersJsonArr != null){
+				int l = jsonHeadersJsonArr.size();
+				String[] res = new String[l];
+				for(int i=0; i<l; i++){
+					JSONValue jv = jsonHeadersJsonArr.get(i);
+					JSONString jsonHeaderJSONString = jv.isString();
+					if(jsonHeaderJSONString == null){
+						continue;
+					}
+					String header = jsonHeaderJSONString.stringValue();
+					res[i] = header;
+				}
+				return res;
+			}
+		}
+		return new String[0];
+	}
 	/**
 	 * 
 	 * @return saved in local storage headers values for JSON response
@@ -24,28 +52,7 @@ public class JSONHeadersUtils {
 				store.getByKey(LocalStore.JSON_HEADERS_KEY, new StoreResultCallback<String>() {
 					@Override
 					public void onSuccess(String result) {
-						if(result != null && !result.equals("")){
-							JSONValue jsonHeadersJsonValue = JSONParser.parseStrict(result);
-							JSONArray jsonHeadersJsonArr = jsonHeadersJsonValue.isArray();
-							if(jsonHeadersJsonArr != null){
-								int l = jsonHeadersJsonArr.size();
-								String[] res = new String[l];
-								for(int i=0; i<l; i++){
-									JSONValue jv = jsonHeadersJsonArr.get(i);
-									JSONString jsonHeaderJSONString = jv.isString();
-									if(jsonHeaderJSONString == null){
-										continue;
-									}
-									String header = jsonHeaderJSONString.stringValue();
-									res[i] = header;
-								}
-								callback.onSuccess(res);
-							} else {
-								callback.onSuccess(new String[0]);
-							}
-						} else {
-							callback.onSuccess(new String[0]);
-						}
+						callback.onSuccess(parseStoreResult(result));
 					}
 					@Override
 					public void onError(Throwable e) {
@@ -59,7 +66,8 @@ public class JSONHeadersUtils {
 			}
 		});
 	}
-
+	
+	
 	public static void store(String[] newArray, final Callback<Boolean, Throwable> callback) {
 		final JSONArray data = new JSONArray();
 		for(String header : newArray){

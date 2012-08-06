@@ -24,44 +24,93 @@ public class RequestPlace extends Place {
 	private boolean history = false;
 	private boolean projectsEndpoint = false;
 	private boolean project = false;
+	private boolean saved = false;
+	private boolean external = false;
+
 	/**
-	 * TODO: requestData should be like h_ID (history _ history ID), e_ID (Project's endpoint ID), ID (Project ID with default endpoint) or NULL if none
+	 * TODO: requestData should be like history/ID (history/ history ID),
+	 * projectEndpoint/ID (Project's endpoint ID), project/ID (Project ID with
+	 * default endpoint), NULL or default if none and saved/ID for old fashioned
+	 * save methd
+	 * 
 	 * @param requestData
 	 */
-	public RequestPlace(String requestData){
-		if(requestData == null){
+	public RequestPlace(String requestData) {
+		if (requestData == null) {
 			return;
 		}
-		if(requestData.startsWith("h")){
+		if (requestData.startsWith("history/")) {
 			history = true;
-			entryId = requestData.substring(2);
-		} else if(requestData.startsWith("e")){
+			entryId = requestData.substring(8);
+		} else if (requestData.startsWith("projectEndpoint/")) {
 			projectsEndpoint = true;
-			entryId = requestData.substring(2);
-		} else {
+			entryId = requestData.substring(16);
+		} else if (requestData.startsWith("project/")) {
 			project = true;
-			entryId = requestData;
+			entryId = requestData.substring(8);
+		} else if (requestData.startsWith("saved/")) {
+			saved = true;
+			entryId = requestData.substring(6);
+		} else if (requestData.startsWith("external/")) {
+			external = true;
 		}
+
 		this.placeToken = requestData;
 	}
-	
-	public boolean isProject(){
+
+	/**
+	 * 
+	 * @return true if this request is for saved project. It should display
+	 *         default endpoint.
+	 */
+	public boolean isProject() {
 		return project;
 	}
-	public boolean isHistory(){
+
+	/**
+	 * 
+	 * @return True if request should be restored from history store.
+	 */
+	public boolean isHistory() {
 		return history;
 	}
-	public boolean isProjectsEndpoint(){
+
+	/**
+	 * 
+	 * @return True if request should be restored from project data for selected
+	 *         endpoint.
+	 */
+	public boolean isProjectsEndpoint() {
 		return projectsEndpoint;
 	}
-	public String getEntryId(){
+
+	/**
+	 * 
+	 * @return True if request has been saved as a regulr request without
+	 *         project information in it.
+	 */
+	public boolean isSaved() {
+		return saved;
+	}
+
+	/**
+	 * 
+	 * @return True if request has been requested from external source like
+	 *         WebIntent, External Event (@todo) or from external extension via
+	 *         message passing.
+	 */
+	public boolean isExternal() {
+		return external;
+	}
+
+	public String getEntryId() {
 		return entryId;
 	}
-	
-	public String getToken(){
+
+	public String getToken() {
 		return placeToken;
 	}
-	
+
 	public static class Tokenizer implements PlaceTokenizer<RequestPlace> {
 
 		@Override
@@ -74,5 +123,57 @@ public class RequestPlace extends Place {
 			return new RequestPlace(token);
 		}
 
+		/**
+		 * Create {@link RequestPlace} for item from history.
+		 * 
+		 * @param historyId
+		 * @return {@link RequestPlace} recognizable as restored from history
+		 *         request
+		 */
+		public static RequestPlace fromHistory(int historyId) {
+			return new RequestPlace("history/" + historyId);
+		}
+
+		/**
+		 * Create {@link RequestPlace} for project with default endpoint.
+		 * 
+		 * @param projectsId
+		 * @return
+		 */
+		public static RequestPlace fromProjectDefault(int projectsId) {
+			return new RequestPlace("project/" + projectsId);
+		}
+
+		/**
+		 * Create {@link RequestPlace} for project with selected endpoint.
+		 * 
+		 * @param projectsEndpointId
+		 * @return
+		 */
+		public static RequestPlace fromProject(int projectsEndpointId) {
+			return new RequestPlace("projectEndpoint/" + projectsEndpointId);
+		}
+
+		/**
+		 * Create {@link RequestPlace} for request saved without project.
+		 * 
+		 * @param savedId
+		 * @return
+		 */
+		public static RequestPlace fromSaved(int savedId) {
+			return new RequestPlace("saved/" + savedId);
+		}
+
+		/**
+		 * Create {@link RequestPlace} for request called from external source.
+		 * It can be external extension via message passing system from
+		 * background page or from event fired from external source.
+		 * 
+		 * @param source
+		 * @return
+		 */
+		public static RequestPlace fromExternal(String source) {
+			return new RequestPlace("external/" + source);
+		}
 	}
 }

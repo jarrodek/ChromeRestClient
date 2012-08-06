@@ -21,13 +21,14 @@ import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.storage.store.LocalStore;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
+import org.rest.client.storage.store.objects.HistoryObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.storage.websql.UrlRow;
+import org.rest.client.ui.ErrorDialogView;
 import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
-import com.google.gwt.http.client.RequestException;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.xhr2.client.AbortHandler;
 import com.google.gwt.xhr2.client.ErrorHandler;
@@ -364,18 +365,16 @@ public class AppRequestFactory {
 			Log.debug("All set. Sending...");
 		}
 		
-		
+		startTime = new Date();
 		try {
-			startTime = new Date();
 			builder.send();
-		} catch (RequestException e) {
+		} catch (Throwable e) {
 			Log.error("Request send failure.", e);
-			
 			//TODO: Stop cookie capture
 			eventBus.fireEvent(new RequestStopEvent(new Date()));
 			requestInProgress = false;
-//			ErrorDialog dialog = new ErrorDialog();
-//			dialog.getHandler().publish(new LogRecord(dialog.getHandler().getLevel(), e.getMessage())  );
+			ErrorDialogView dialog = RestClient.getClientFactory().getErrorDialogView();
+			dialog.getHandler().publish(new LogRecord(dialog.getHandler().getLevel(), e.getMessage()));
 		}
 	}
 	
@@ -436,21 +435,66 @@ public class AppRequestFactory {
 		if(!RestClient.isHistoryEabled()){
 			return;
 		}
-		HistoryRequestStoreWebSql store = RestClient.getClientFactory().getHistoryRequestStore();
-		store.put(data, null, new StoreResultCallback<Integer>() {
-			
+		final HistoryRequestStoreWebSql store = RestClient.getClientFactory().getHistoryRequestStore();
+		store.getHistoryItem(data.getURL(), data.getMethod(), new StoreResultCallback<List<HistoryObject>>() {
 			@Override
-			public void onSuccess(Integer result) {
-				
+			public void onSuccess(List<HistoryObject> result) {
+				boolean found = false;
+				HistoryObject old = null;
+				for(HistoryObject item : result){
+					if(!item.getEncoding().equals(data.getEncoding())){
+						continue;
+					}
+					if(!item.getHeaders().equals(data.getHeaders())){
+						continue;
+					}
+					if(!item.getPayload().equals(data.getPayload())){
+						continue;
+					}
+					found = true;
+					old = item;
+					break;
+				}
+				if(!found){
+					store.put(data, null, new StoreResultCallback<Integer>() {
+						@Override
+						public void onSuccess(Integer result) {
+							if(RestClient.isDebug()){
+								Log.debug("Saved new item in history.");
+							}
+						}
+						@Override
+						public void onError(Throwable e) {
+							if(RestClient.isDebug()){
+								Log.error("Unable to save current request data in history table.", e);
+							}
+						}
+					});
+				} else {
+					if(RestClient.isDebug()){
+						Log.debug("Item already exists in history");
+					}
+					store.updateHistoryItemTime(old.getId(), new Date(), new StoreResultCallback<Boolean>() {
+						@Override
+						public void onSuccess(Boolean result) {}
+						
+						@Override
+						public void onError(Throwable e) {
+							if(RestClient.isDebug()){
+								Log.error("An error occured when updating history item time.", e);
+							}
+						}
+					});
+				}
 			}
-			
 			@Override
 			public void onError(Throwable e) {
 				if(RestClient.isDebug()){
-					Log.error("Unable to save current request data in history table.", e);
+					Log.error("Unable to save current request data in history table. Error to get history data to compare past data.", e);
 				}
 			}
 		});
+		
 	}
 	/**
 	 * Save URL value in database for suggestions.

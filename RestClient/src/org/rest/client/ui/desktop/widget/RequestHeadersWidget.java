@@ -28,7 +28,6 @@ import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.websql.HeaderRow;
 import org.rest.client.suggestion.HeadersSuggestOracle;
 import org.rest.client.ui.html5.HTML5Element;
-import org.rest.client.ui.html5.SpanElement;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -128,8 +127,8 @@ public class RequestHeadersWidget extends Composite implements HasText {
 				String cssTabContent = appStyle.tabContent();
 				String tabContentCurrent = appStyle.tabContentCurrent();
 				
-				SpanElement tab = (SpanElement) rawTab.getElement();
-				((SpanElement)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
+				HTML5Element tab = (HTML5Element) rawTab.getElement();
+				((HTML5Element)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
 				tab.getClassList().add(tabHandlercurrent);
 				
 				HTML5Element contentParent = (HTML5Element) tabContent.getParentElement();
@@ -142,7 +141,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		rawTab.addMouseOverHandler(new MouseOverHandler() {
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
-				SpanElement tab = (SpanElement) rawTab.getElement();
+				HTML5Element tab = (HTML5Element) rawTab.getElement();
 				if(!tab.getClassList().contains(appStyle.inlineButtonChecked()))
 					tab.getClassList().add(appStyle.inlineButtonHover());
 			}
@@ -150,7 +149,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		rawTab.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
-				SpanElement tab = (SpanElement) rawTab.getElement();
+				HTML5Element tab = (HTML5Element) rawTab.getElement();
 				if(!tab.getClassList().contains(appStyle.inlineButtonHover()))
 					tab.getClassList().remove(appStyle.inlineButtonHover());
 			}
@@ -168,8 +167,8 @@ public class RequestHeadersWidget extends Composite implements HasText {
 				String cssTabContent = appStyle.tabContent();
 				String tabContentCurrent = appStyle.tabContentCurrent();
 				
-				SpanElement tab = (SpanElement) formTab.getElement();
-				((SpanElement)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
+				HTML5Element tab = (HTML5Element) formTab.getElement();
+				((HTML5Element)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
 				tab.getClassList().add(tabHandlercurrent);
 				
 				HTML5Element contentParent = (HTML5Element) tabContent.getParentElement();
@@ -182,7 +181,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		formTab.addMouseOverHandler(new MouseOverHandler() {
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
-				SpanElement tab = (SpanElement) formTab.getElement();
+				HTML5Element tab = (HTML5Element) formTab.getElement();
 				if(!tab.getClassList().contains(appStyle.inlineButtonChecked()))
 					tab.getClassList().add(appStyle.inlineButtonHover());
 			}
@@ -190,7 +189,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		formTab.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
-				SpanElement tab = (SpanElement) formTab.getElement();
+				HTML5Element tab = (HTML5Element) formTab.getElement();
 				if(tab.getClassList().contains(appStyle.inlineButtonHover()))
 					tab.getClassList().remove(appStyle.inlineButtonHover());
 			}

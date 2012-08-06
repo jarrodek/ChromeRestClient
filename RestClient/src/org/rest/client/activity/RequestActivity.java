@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.rest.client.ClientFactory;
+import org.rest.client.RestClient;
 import org.rest.client.event.AddEncodingEvent;
 import org.rest.client.event.ClearFormEvent;
 import org.rest.client.event.RequestChangeEvent;
@@ -30,15 +31,18 @@ import org.rest.client.request.RequestParameters;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.LocalStore;
 import org.rest.client.storage.store.objects.FormEncodingObject;
+import org.rest.client.storage.store.objects.HistoryObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.storage.websql.HeaderRow;
 import org.rest.client.storage.websql.StatusCodeRow;
 import org.rest.client.ui.AddEncodingView;
 import org.rest.client.ui.RequestView;
 import org.rest.client.ui.ResponseView;
+import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.xhr2.client.Response;
@@ -55,7 +59,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 public class RequestActivity extends AppActivity implements
 		RequestView.Presenter, ResponseView.ResponsePresenter {
 
-	@SuppressWarnings("unused")
+	
 	final private RequestPlace place;
 	private EventBus eventBus;
 	protected ResponseView responseView;
@@ -74,13 +78,42 @@ public class RequestActivity extends AppActivity implements
 		RequestView requestView = this.clientFactory.getRequestView();
 		requestView.setPresenter(this);
 		viewFlowPanel = new FlowPanel();
+		viewFlowPanel.getElement().getStyle().setOverflow(Overflow.HIDDEN);
 		viewFlowPanel.add(requestView);
 		panel.setWidget(viewFlowPanel);
-		restoreLatestRequest(requestView);
 		
+		String entryId = place.getEntryId();
+		
+		if(place.isHistory()){
+			try{
+				int historyId = Integer.parseInt(entryId);
+				restoreRequestFromHistory(historyId, requestView);
+			} catch(Exception e){
+				if(RestClient.isDebug()){
+					Log.error("Unable read history ID",e);
+				}
+				StatusNotification.notify("Unable read history ID", StatusNotification.TYPE_ERROR);
+				restoreLatestRequest(requestView);
+			}
+		} else if(place.isProject()){
+			Log.error("Restore method for this place is not yet implemented.");
+			throw new IllegalArgumentException("Not implemented yet");
+		} else if(place.isProjectsEndpoint()){
+			Log.error("Restore method for this place is not yet implemented.");
+			throw new IllegalArgumentException("Not implemented yet");
+		} else if(place.isSaved()){
+			Log.error("Restore method for this place is not yet implemented.");
+			throw new IllegalArgumentException("Not implemented yet");
+		} else if(place.isExternal()){
+			Log.error("Restore method for this place is not yet implemented.");
+			throw new IllegalArgumentException("Not implemented yet");
+		} else {
+			restoreLatestRequest(requestView);
+		}
 		observeEvents();
 	}
 	
+
 	private void observeEvents() {
 		RequestChangeEvent.register(eventBus, new RequestChangeEvent.Handler() {
 			@Override
@@ -102,7 +135,31 @@ public class RequestActivity extends AppActivity implements
 			}
 		});
 	}
-
+	
+	private void restoreRequestFromHistory(int historyId,
+			final RequestView requestView) {
+		RestClient.getClientFactory().getHistoryRequestStore().getHistoryItem(historyId, new StoreResultCallback<HistoryObject>() {
+			
+			@Override
+			public void onSuccess(HistoryObject result) {
+				requestView.setUrl(result.getURL());
+				requestView.setMethod(result.getMethod());
+				requestView.setHeaders(result.getHeaders());
+				requestView.setPayload(result.getPayload());
+				setUserDefinedContentEncodingValues(result
+						.getEncoding());
+			}
+			
+			@Override
+			public void onError(Throwable e) {
+				if(RestClient.isDebug()){
+					Log.error("Unable read history data",e);
+				}
+				StatusNotification.notify("Unable read history data", StatusNotification.TYPE_ERROR);
+			}
+		});
+	}
+	
 	private void restoreLatestRequest(final RequestView view){
 		RequestParameters
 			.restoreLatest(new Callback<RequestParameters, Throwable>() {
@@ -130,67 +187,47 @@ public class RequestActivity extends AppActivity implements
 			});
 	}
 	
-
 	private void setUserDefinedContentEncodingValues(
 			final String selectCurrentEncoding) {
 
-		clientFactory.getFormEncodingsStore().open(
-				new StoreResultCallback<Boolean>() {
-					@Override
-					public void onSuccess(Boolean result) {
-						if (!result)
-							return;
-						clientFactory
-								.getFormEncodingsStore()
-								.all(new StoreResultCallback<Map<Long, FormEncodingObject>>() {
+		
+		clientFactory.getFormEncodingStore().all(new StoreResultCallback<Map<Integer,FormEncodingObject>>() {
+			
+			@Override
+			public void onSuccess(Map<Integer, FormEncodingObject> result) {
+				final RequestView view = clientFactory
+						.getRequestView();
+				String encodingToSelect = selectCurrentEncoding;
 
-									@Override
-									public void onSuccess(
-											Map<Long, FormEncodingObject> result) {
+				if (selectCurrentEncoding == null) {
+					encodingToSelect = view
+							.getEncoding();
+				}
+				
 
-										final RequestView view = clientFactory
-												.getRequestView();
-										String encodingToSelect = selectCurrentEncoding;
+				String[] values = new String[result
+						.size()];
+				Set<Integer> keys = result.keySet();
+				int i = 0;
+				for (Integer k : keys) {
+					FormEncodingObject dbvalue = result
+							.get(k);
+					if (dbvalue != null)
+						values[i] = dbvalue
+								.getEncoding();
+					i++;
+				}
 
-										if (selectCurrentEncoding == null) {
-											encodingToSelect = view
-													.getEncoding();
-										}
-
-										String[] values = new String[result
-												.size()];
-										Set<Long> keys = result.keySet();
-										int i = 0;
-										for (Long k : keys) {
-											FormEncodingObject dbvalue = result
-													.get(k);
-											if (dbvalue != null)
-												values[i] = dbvalue
-														.getEncoding();
-											i++;
-										}
-
-										view.appendEncodingValues(values);
-										view.setEncoding(encodingToSelect);
-									}
-
-									@Override
-									public void onError(Throwable e) {
-										e.printStackTrace();
-										Log.error(
-												"getFormEncodingsStore.all in RequestActivity",
-												e);
-									}
-								});
-					}
-
-					@Override
-					public void onError(Throwable e) {
-						Log.error(
-								"getFormEncodingsStore.open in RequestActivity",
-								e);
-					}
-				});
+				view.appendEncodingValues(values);
+				view.setEncoding(encodingToSelect);
+			}
+			
+			@Override
+			public void onError(Throwable e) {
+				e.printStackTrace();
+				Log.error("getFormEncodingsStore.all in RequestActivity",e);
+			}
+		});
 	}
 
 	@Override
@@ -237,10 +274,10 @@ public class RequestActivity extends AppActivity implements
 				} else {
 					FormEncodingObject feo = FormEncodingObject.create();
 					feo.setEncoding(encoding);
-					clientFactory.getFormEncodingsStore().put(feo, null,
-							new StoreResultCallback<Long>() {
+					clientFactory.getFormEncodingStore().put(feo, null,
+							new StoreResultCallback<Integer>() {
 								@Override
-								public void onSuccess(Long result) {
+								public void onSuccess(Integer result) {
 									setUserDefinedContentEncodingValues(encoding);
 								}
 

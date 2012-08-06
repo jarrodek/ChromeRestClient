@@ -10,7 +10,7 @@ import org.rest.client.request.URLParser;
 import org.rest.client.resources.AppCssResource;
 import org.rest.client.resources.AppResources;
 import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.ProjectsStore;
+import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.SaveRequestDialogView;
@@ -123,48 +123,36 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	
 	
 	private void setProjectsList(){
-		final ProjectsStore store = RestClient.getClientFactory().getProjectsStore();
-		store.open(new StoreResultCallback<Boolean>() {
+		final ProjectStoreWebSql store = RestClient.getClientFactory().getProjectsStore();
+		store.all(new StoreResultCallback<Map<Integer,ProjectObject>>() {
 			@Override
-			public void onSuccess(Boolean result) {
-				
-				store.all(new StoreResultCallback<Map<Long,ProjectObject>>() {
-					@Override
-					public void onSuccess(Map<Long, ProjectObject> result) {
-						Log.debug("Result project list");
-						Iterator<Entry<Long, ProjectObject>> it = result.entrySet().iterator();
-						while(it.hasNext()){
-							Entry<Long, ProjectObject> set = it.next();
-							ProjectObject project = set.getValue();
-							if(project == null){
-								continue;
-							}
-							String name = project.getName();
-							if(name == null || name.isEmpty()){
-								continue;
-							}
-							int id = project.getId();
-							projectList.addItem(name, String.valueOf(id));
-						}
+			public void onSuccess(Map<Integer, ProjectObject> result) {
+				Log.debug("Result project list");
+				Iterator<Entry<Integer, ProjectObject>> it = result.entrySet().iterator();
+				while(it.hasNext()){
+					Entry<Integer, ProjectObject> set = it.next();
+					ProjectObject project = set.getValue();
+					if(project == null){
+						continue;
 					}
-					@Override
-					public void onError(Throwable e) {
-						Log.debug("aaaaa");
-						if(RestClient.isDebug()){
-							Log.error("Unable to read stored projects. Error during read operation.", e);
-						}
-						StatusNotification.notify("Unable to set projects data..", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+					String name = project.getName();
+					if(name == null || name.isEmpty()){
+						continue;
 					}
-				});
+					int id = project.getId();
+					projectList.addItem(name, String.valueOf(id));
+				}
 			}
 			@Override
 			public void onError(Throwable e) {
 				if(RestClient.isDebug()){
-					Log.error("Unable to read stored projects. Can't open store.", e);
+					Log.error("Unable to read stored projects. Error during read operation.", e);
 				}
 				StatusNotification.notify("Unable to set projects data..", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 			}
 		});
+			
+		
 	}
 	
 	private void setPreviewURL(){

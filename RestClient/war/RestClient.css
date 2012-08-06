@@ -33,7 +33,7 @@ body>.ls {
 	margin-right: 30px;
 }
 
-body>.app {
+.app {
 	-webkit-box-flex: 1;
 }
 #loader-screen{
@@ -191,4 +191,12 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomLeft .popupBottomLeftInner
 }
 div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInner {
 	border-bottom-right-radius: 20px 20px;
+}
+.CodeMirror-scroll {
+	height: auto !important;
+	overflow: visible !important;
+}
+
+.CodeMirror {
+	margin-right: 10px;
 }

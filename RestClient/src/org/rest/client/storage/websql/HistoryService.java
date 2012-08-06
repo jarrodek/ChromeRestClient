@@ -1,8 +1,12 @@
 package org.rest.client.storage.websql;
 
+import java.util.Date;
+
 import org.rest.client.storage.store.objects.HistoryObject;
 
+import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.code.gwt.database.client.service.RowIdListCallback;
+import com.google.code.gwt.database.client.service.Select;
 import com.google.code.gwt.database.client.service.Update;
 import com.google.code.gwt.database.client.service.VoidCallback;
 
@@ -47,4 +51,31 @@ public interface HistoryService extends AppDatabase {
 	 */
 	@Update(sql = "DELETE FROM history")
 	void truncate(VoidCallback callback);
+	/**
+	 * Get data for history view. Response will include: id, url and method fields.
+	 * @param callback
+	 */
+	@Select("SELECT id,url,method FROM history ORDER BY time DESC")
+	void getDataForHistoryView(ListCallback<HistoryObject> callback);
+	/**
+	 * Find all history items for given URL and method
+	 * @param url
+	 * @param method
+	 * @param callback
+	 */
+	@Select("SELECT * FROM history WHERE url={url} AND method={method} ORDER BY time DESC")
+	void getHistoryItems(String url, String method, ListCallback<HistoryObject> callback);
+	
+	@Select("SELECT * FROM history WHERE ID={id}")
+	void getHistoryItem(int id, ListCallback<HistoryObject> callback);
+	/**
+	 * Update timestamp when history item has been used.
+	 * 
+	 * @param id
+	 * @param upd
+	 *            {@link Date} object
+	 * @param callback
+	 */
+	@Update("UPDATE history SET time = {upd.getTime()} WHERE ID = {id}")
+	void updateTime(int id, Date upd,VoidCallback callback);
 }

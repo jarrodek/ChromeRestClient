@@ -20,6 +20,7 @@ import java.util.Date;
 import org.rest.client.event.AddEncodingEvent;
 import org.rest.client.event.ApplicationReadyEvent;
 import org.rest.client.event.ClearFormEvent;
+import org.rest.client.event.ClearHistoryEvent;
 import org.rest.client.event.CustomEvent;
 import org.rest.client.event.HttpMethodChangeEvent;
 import org.rest.client.event.RequestStartActionEvent;
@@ -123,6 +124,12 @@ public class ExternalEventsFactory {
 			@Override
 			public void onMethodChange(String method) {
 				fireDocumentEvent(CustomEvent.HTTP_METHOD_CHANGE.getValue(), method);
+			}
+		});
+		ClearHistoryEvent.register(eventBus, new ClearHistoryEvent.Handler() {
+			@Override
+			public void onClearForm() {
+				fireDocumentEvent(CustomEvent.CLEAR_HISTORY.getValue());
 			}
 		});
 	}

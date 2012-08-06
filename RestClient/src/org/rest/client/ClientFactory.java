@@ -15,16 +15,19 @@
  ******************************************************************************/
 package org.rest.client;
 
-import org.rest.client.storage.store.FormEncodingsStore;
+import org.rest.client.storage.store.FormEncodingStoreWebSql;
 import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.storage.store.LocalStore;
-import org.rest.client.storage.store.ProjectsStore;
-import org.rest.client.storage.store.RequestDataStore;
+import org.rest.client.storage.store.ProjectStoreWebSql;
+import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.store.StatusesStoreWebSql;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.ui.AboutView;
 import org.rest.client.ui.AddEncodingView;
+import org.rest.client.ui.ErrorDialogView;
+import org.rest.client.ui.HistoryListItemView;
+import org.rest.client.ui.HistoryView;
 import org.rest.client.ui.JSONHeadersView;
 import org.rest.client.ui.MenuItemView;
 import org.rest.client.ui.MenuView;
@@ -45,13 +48,13 @@ public interface ClientFactory {
 	
 	//STORES
 	LocalStore getLocalStore();
-	RequestDataStore getRequestDataStore();
+	RequestDataStoreWebSql getRequestDataStore();
 	HistoryRequestStoreWebSql getHistoryRequestStore();
-	FormEncodingsStore getFormEncodingsStore();
+	FormEncodingStoreWebSql getFormEncodingStore();
 	UrlHistoryStoreWebSql getUrlHistoryStore();
 	HeadersStoreWebSql getHeadersStore();
 	StatusesStoreWebSql getStatusesStore();
-	ProjectsStore getProjectsStore();
+	ProjectStoreWebSql getProjectsStore();
 	
 	//VIEWS
 	AddEncodingView getAddEncodingView(EventBus eventBus);
@@ -64,4 +67,7 @@ public interface ClientFactory {
 	JSONHeadersView getJSONHeadersView();
 	ShortcutView getShortcutView();
 	SaveRequestDialogView getSaveRequestDialogView();
+	ErrorDialogView getErrorDialogView();
+	HistoryView getHistoryView();
+	HistoryListItemView getHistoryListItemView();
 }

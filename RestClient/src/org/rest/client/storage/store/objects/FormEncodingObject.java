@@ -15,8 +15,6 @@
  ******************************************************************************/
 package org.rest.client.storage.store.objects;
 
-import java.util.Date;
-
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
@@ -35,18 +33,19 @@ public class FormEncodingObject extends JavaScriptObject {
 	 */
 	public static final native FormEncodingObject create() /*-{
 		return {
-			encoding: null,
-			timeStamp: new Date().getTime()
+			encoding: null
 		}
 	}-*/;
 	
-	public final native void setCreated(Date created) /*-{
-		this.timeStamp = created.getTime();
+	public final native int getId() /*-{
+		var id = -1;
+		if(this.id){
+			id = this.id;
+		}
+		return id;
 	}-*/;
-
-	public final native double getCreated() /*-{
-		return this.timeStamp;
-	}-*/;
+	
+	
 	/**
 	 * Sets application data encoding values
 	 * 

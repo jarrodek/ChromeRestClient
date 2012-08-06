@@ -29,6 +29,9 @@ public class InitializeDatabaseTask implements LoadTask {
 		databases.add((WebSqlAdapter) factory.getStatusesStore());
 		databases.add((WebSqlAdapter) factory.getHistoryRequestStore());
 		databases.add((WebSqlAdapter) factory.getUrlHistoryStore());
+		databases.add((WebSqlAdapter) factory.getFormEncodingStore());
+		databases.add((WebSqlAdapter) factory.getRequestDataStore());
+		databases.add((WebSqlAdapter) factory.getProjectsStore());
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

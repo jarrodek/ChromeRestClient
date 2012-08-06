@@ -15,6 +15,9 @@
  ******************************************************************************/
 package org.rest.client;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.rest.client.event.ApplicationReadyEvent;
 import org.rest.client.mvp.AppActivityMapper;
 import org.rest.client.mvp.AppPlaceHistoryMapper;
@@ -22,8 +25,9 @@ import org.rest.client.place.RequestPlace;
 import org.rest.client.request.RequestParameters;
 import org.rest.client.resources.AppResources;
 import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.ProjectsStore;
-import org.rest.client.storage.store.RequestDataStore;
+import org.rest.client.storage.store.LocalStore;
+import org.rest.client.storage.store.ProjectStoreWebSql;
+import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.task.CreateMenuTask;
@@ -39,9 +43,11 @@ import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.place.shared.PlaceHistoryHandler;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -54,6 +60,8 @@ public class RestClient implements EntryPoint {
 
 	private Place defaultPlace = new RequestPlace(null);
 	private SimplePanel appWidget = new SimplePanel();
+	private static final Logger log = Logger.getLogger(RestClient.class
+			.getName());
 	private final static ClientFactory clientFactory = GWT
 			.create(ClientFactory.class);
 
@@ -62,7 +70,18 @@ public class RestClient implements EntryPoint {
 	}
 
 	public void onModuleLoad() {
-
+		
+		GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+			@Override
+			public void onUncaughtException(Throwable e) {
+				log.log(Level.SEVERE, e.getMessage(), e);
+				Log.error("Application error", e);
+			}
+		});
+		
+		Logger.getLogger("").addHandler(clientFactory.getErrorDialogView().getHandler());
+		Logger.getLogger("").setLevel(Level.WARNING);
+		
 		final EventBus eventBus = clientFactory.getEventBus();
 		PlaceController placeController = clientFactory.getPlaceController();
 		// Start ActivityManager for the main widget with our ActivityMapper
@@ -106,19 +125,57 @@ public class RestClient implements EntryPoint {
 			}
 		});
 	}
+	
+	private static Boolean appDebug = null;
+	
 	/**
-	 * TODO: implement me :)
+	 * 
 	 * @return true if debug output is enabled, false otherwise
 	 */
 	public static boolean isDebug() {
-		return true;
+		if(appDebug == null){
+			Storage store = Storage.getLocalStorageIfSupported();
+			if(store == null){
+				appDebug = true;
+			} else {
+				String result = store.getItem(LocalStore.DEBUG_KEY);
+				if(result != null && result.equals("true")){
+					appDebug = true;
+				} else {
+					appDebug = false;
+				}
+			}
+		}
+		return appDebug;
 	}
+	
+	public static void setDebug(boolean debug){
+		appDebug = debug;
+	}
+	
+	private static Boolean appHistoryEnabled = null;
 	/**
-	 * TODO: implement me :)
 	 * @return true if history feature output is enabled, false otherwise
 	 */
 	public static boolean isHistoryEabled(){
-		return true;
+		if(appHistoryEnabled == null){
+			Storage store = Storage.getLocalStorageIfSupported();
+			if(store == null){
+				appHistoryEnabled = true;
+			} else {
+				String result = store.getItem(LocalStore.HISTORY_KEY);
+				if(result == null || result.equals("true")){
+					appHistoryEnabled = true;
+				} else {
+					appHistoryEnabled = false;
+				}
+			}
+		}
+		return appHistoryEnabled;
+	}
+	
+	public static void setHistoryEnabled(boolean historyEnabled){
+		appHistoryEnabled = historyEnabled;
 	}
 
 	/**
@@ -167,35 +224,21 @@ public class RestClient implements EntryPoint {
 	 * @param callback
 	 */
 	public static void saveRequestData(final RequestObject obj, final String newProjectName, final Callback<RequestObject, Throwable> callback){
-		final ProjectsStore store = clientFactory.getProjectsStore();
-		store.open(new StoreResultCallback<Boolean>() {
-			
+		final ProjectStoreWebSql store = clientFactory.getProjectsStore();
+		ProjectObject project = ProjectObject.create();
+		project.setName(newProjectName);
+		store.put(project, null, new StoreResultCallback<Integer>() {
+
 			@Override
-			public void onSuccess(Boolean result) {
-				ProjectObject project = ProjectObject.create();
-				project.setName(newProjectName);
-				store.put(project, new StoreResultCallback<Long>() {
-					
-					@Override
-					public void onSuccess(Long result) {
-						obj.setProject(result.intValue());
-						saveRequestData(obj, callback);
-					}
-					
-					@Override
-					public void onError(Throwable e) {
-						if(RestClient.isDebug()){
-							Log.error("Unable to save project data. Can't save project to store.", e);
-						}
-						callback.onFailure(e);
-					}
-				});
+			public void onSuccess(Integer result) {
+				obj.setProject(result.intValue());
+				saveRequestData(obj, callback);
 			}
-			
+
 			@Override
 			public void onError(Throwable e) {
 				if(RestClient.isDebug()){
-					Log.error("Unable to save project data. Can't open project's store.", e);
+					Log.error("Unable to save project data. Can't save project to store.", e);
 				}
 				callback.onFailure(e);
 			}
@@ -207,28 +250,20 @@ public class RestClient implements EntryPoint {
 	 * @param callback
 	 */
 	public static void saveRequestData(final RequestObject obj, final Callback<RequestObject, Throwable> callback){
-		final RequestDataStore store = clientFactory.getRequestDataStore();
-		store.open(new StoreResultCallback<Boolean>() {
+		final RequestDataStoreWebSql store = clientFactory.getRequestDataStore();
+		
+		store.put(obj, null, new StoreResultCallback<Integer>() {
+			
 			@Override
-			public void onSuccess(Boolean res) {
-				store.put(obj, new StoreResultCallback<Long>() {
-					@Override
-					public void onSuccess(Long result) {
-						callback.onSuccess(obj);
-					}
-					
-					@Override
-					public void onError(Throwable e) {
-						if(RestClient.isDebug()){
-							Log.error("Unable to save request data. Can't save request to store.", e);
-						}
-						callback.onFailure(e);
-					}
-				});
+			public void onSuccess(Integer result) {
+				callback.onSuccess(obj);
 			}
 			
 			@Override
 			public void onError(Throwable e) {
+				if(RestClient.isDebug()){
+					Log.error("Unable to save request data. Can't save request to store.", e);
+				}
 				callback.onFailure(e);
 			}
 		});

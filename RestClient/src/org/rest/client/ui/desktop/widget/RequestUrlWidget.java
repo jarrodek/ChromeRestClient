@@ -135,7 +135,6 @@ public class RequestUrlWidget extends Composite implements HasText {
 			public void onSelection(SelectionEvent<Suggestion> event) {
 				suggestionCallback();
 			}
-
 		});
 		
 		detailedHostField.addKeyDownHandler(anyValueKeyDownHandler);
@@ -340,7 +339,7 @@ public class RequestUrlWidget extends Composite implements HasText {
 		detailedHostField.setValue(null);
 		detailedPathField.setValue(null);
 		detailedHashField.setValue(null);
-		eventBus.fireEvent(new UrlValueChangeEvent(null));
+		//eventBus.fireEvent(new UrlValueChangeEvent(null));
 	}
 	/**
 	 * Get current headers value and fill up form.

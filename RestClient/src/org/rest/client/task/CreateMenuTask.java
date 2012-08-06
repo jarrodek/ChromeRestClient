@@ -3,6 +3,7 @@ package org.rest.client.task;
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
 import org.rest.client.place.AboutPlace;
+import org.rest.client.place.HistoryPlace;
 import org.rest.client.place.JSONHeadersPlace;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SettingsPlace;
@@ -44,7 +45,7 @@ public class CreateMenuTask implements LoadTask {
 
 		final MenuItemView history = clientFactory.createMenuItem(p);
 		history.setText("History");
-		// history.setPlace("history");
+		history.setPlace(new HistoryPlace("default"));
 		mv.addMenuItem(history);
 
 		final MenuItemView settings = clientFactory.createMenuItem(p);
@@ -71,6 +72,8 @@ public class CreateMenuTask implements LoadTask {
 						} else if(newPlace instanceof SettingsPlace
 								|| newPlace instanceof JSONHeadersPlace){
 							settings.setSelected(true);
+						} else if(newPlace instanceof HistoryPlace){
+							history.setSelected(true);
 						}
 					}
 			});

@@ -15,16 +15,19 @@
  ******************************************************************************/
 package org.rest.client;
 
-import org.rest.client.storage.store.FormEncodingsStore;
+import org.rest.client.storage.store.FormEncodingStoreWebSql;
 import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.storage.store.LocalStore;
-import org.rest.client.storage.store.ProjectsStore;
-import org.rest.client.storage.store.RequestDataStore;
+import org.rest.client.storage.store.ProjectStoreWebSql;
+import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.store.StatusesStoreWebSql;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.ui.AboutView;
 import org.rest.client.ui.AddEncodingView;
+import org.rest.client.ui.ErrorDialogView;
+import org.rest.client.ui.HistoryListItemView;
+import org.rest.client.ui.HistoryView;
 import org.rest.client.ui.JSONHeadersView;
 import org.rest.client.ui.MenuItemView;
 import org.rest.client.ui.MenuItemView.Presenter;
@@ -36,6 +39,9 @@ import org.rest.client.ui.SettingsView;
 import org.rest.client.ui.ShortcutView;
 import org.rest.client.ui.desktop.AboutViewImpl;
 import org.rest.client.ui.desktop.AddEncodingViewImpl;
+import org.rest.client.ui.desktop.ErrorDialogViewImpl;
+import org.rest.client.ui.desktop.HistoryListItemViewImpl;
+import org.rest.client.ui.desktop.HistoryViewImpl;
 import org.rest.client.ui.desktop.JSONHeadersViewImpl;
 import org.rest.client.ui.desktop.MenuItemViewImpl;
 import org.rest.client.ui.desktop.MenuViewImpl;
@@ -60,13 +66,13 @@ public class ClientFactoryImpl implements ClientFactory {
 	private static MenuView menu = null;
 //	private static SettingsView settingsView = null;
 	private static LocalStore latestRequestStore = null;
-	private static RequestDataStore requestDataStore = null;
+	private static RequestDataStoreWebSql requestDataStore = null;
 	private static HistoryRequestStoreWebSql historyRequestStore = null;
-	private static FormEncodingsStore formEncodingsStore = null;
+	private static FormEncodingStoreWebSql formEncodingStore = null;
 	private static UrlHistoryStoreWebSql urlHistoryStore = null;
 	private static HeadersStoreWebSql headersStore = null;
 	private static StatusesStoreWebSql statusesStore = null; 
-	private static ProjectsStore projectsStore = null;
+	private static ProjectStoreWebSql projectsStore = null;
 	
 	@Override
 	public EventBus getEventBus() {
@@ -119,9 +125,9 @@ public class ClientFactoryImpl implements ClientFactory {
 	}
 
 	@Override
-	public RequestDataStore getRequestDataStore() {
+	public RequestDataStoreWebSql getRequestDataStore() {
 		if(requestDataStore == null){
-			requestDataStore = GWT.create(RequestDataStore.class);
+			requestDataStore = GWT.create(RequestDataStoreWebSql.class);
 		}
 		return requestDataStore;
 	}
@@ -135,9 +141,9 @@ public class ClientFactoryImpl implements ClientFactory {
 	}
 	
 	@Override
-	public ProjectsStore getProjectsStore() {
+	public ProjectStoreWebSql getProjectsStore() {
 		if(projectsStore == null){
-			projectsStore = GWT.create(ProjectsStore.class);
+			projectsStore = GWT.create(ProjectStoreWebSql.class);
 		}
 		return projectsStore;
 	}
@@ -151,11 +157,11 @@ public class ClientFactoryImpl implements ClientFactory {
 	}
 
 	@Override
-	public FormEncodingsStore getFormEncodingsStore() {
-		if(formEncodingsStore == null){
-			formEncodingsStore = GWT.create(FormEncodingsStore.class);
+	public FormEncodingStoreWebSql getFormEncodingStore() {
+		if(formEncodingStore == null){
+			formEncodingStore = GWT.create(FormEncodingStoreWebSql.class);
 		}
-		return formEncodingsStore;
+		return formEncodingStore;
 	}
 	
 	@Override
@@ -213,5 +219,20 @@ public class ClientFactoryImpl implements ClientFactory {
 	@Override
 	public SaveRequestDialogView getSaveRequestDialogView() {
 		return GWT.create(SaveRequestDialogViewImpl.class);
+	}
+
+	@Override
+	public ErrorDialogView getErrorDialogView() {
+		return GWT.create(ErrorDialogViewImpl.class);
+	}
+
+	@Override
+	public HistoryView getHistoryView() {
+		return GWT.create(HistoryViewImpl.class);
+	}
+
+	@Override
+	public HistoryListItemView getHistoryListItemView() {
+		return GWT.create(HistoryListItemViewImpl.class);
 	}
 }

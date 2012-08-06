@@ -115,9 +115,15 @@ public class SettingsActivity extends AppActivity implements
 			@Override
 			public void onSuccess(String result) {
 				if(result == null || result.isEmpty()){
-					result = "60";
+					result = "500";
+					localStore.put(result, LocalStore.HISTORY_AMOUNT, new StoreResultCallback<String>() {
+						@Override
+						public void onSuccess(String result) {}
+						@Override
+						public void onError(Throwable e) {}
+					});
 				}
-				int resultIntValue = 60;
+				int resultIntValue = 500;
 				try{
 					resultIntValue = Integer.parseInt(result);
 				} catch( NumberFormatException e ){}
@@ -191,6 +197,7 @@ public class SettingsActivity extends AppActivity implements
 	@Override
 	public void changeDebugValue(boolean newValue) {
 		saveSetting(LocalStore.DEBUG_KEY, String.valueOf(newValue));
+		RestClient.setDebug(newValue);
 	}
 
 	@Override

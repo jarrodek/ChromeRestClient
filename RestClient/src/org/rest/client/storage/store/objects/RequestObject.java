@@ -117,9 +117,17 @@ public class RequestObject extends HistoryObject {
 	 *         instead)
 	 */
 	public final native boolean isSkipProtocol() /*-{
-		return this.skipProtocol;
+		return !!(this.skipProtocol);
 	}-*/;
-
+	
+	public final native int getSkipProtocol() /*-{
+		var res = 0;
+		if(!!this.skipProtocol){
+			res = 1;
+		}
+		return res;
+	}-*/;
+	
 	/**
 	 * If skipServer flag is set to true then when restoring this requests data
 	 * server addr value will be removed and current form value will be
@@ -139,9 +147,15 @@ public class RequestObject extends HistoryObject {
 	 *         instead)
 	 */
 	public final native boolean isSkipServer() /*-{
-		return this.skipServer;
+		return !!(this.skipServer);
 	}-*/;
-
+	public final native int getSkipServer() /*-{
+		var res = 0;
+		if(!!this.skipServer){
+			res = 1;
+		}
+		return res;
+	}-*/;
 	/**
 	 * Set this flag to true to drop any URL parameters saved with this request
 	 * 
@@ -155,7 +169,14 @@ public class RequestObject extends HistoryObject {
 	 *         restored (use current form value instead)
 	 */
 	public final native boolean isSkipParams() /*-{
-		return this.skipParams;
+		return !!(this.skipParams);
+	}-*/;
+	public final native int getSkipParams() /*-{
+		var res = 0;
+		if(!!this.skipParams){
+			res = 1;
+		}
+		return res;
 	}-*/;
 
 	public final native void setSkipHistory(boolean skipHistory) /*-{
@@ -163,7 +184,14 @@ public class RequestObject extends HistoryObject {
 	}-*/;
 
 	public final native boolean isSkipHistory() /*-{
-		return this.skipHistory;
+		return !!(this.skipHistory);
+	}-*/;
+	public final native int getSkipHistory() /*-{
+		var res = 0;
+		if(!!this.skipHistory){
+			res = 1;
+		}
+		return res;
 	}-*/;
 
 	public final native void setSkipMethod(boolean skipMethod) /*-{
@@ -171,7 +199,14 @@ public class RequestObject extends HistoryObject {
 	}-*/;
 
 	public final native boolean isSkipMethod() /*-{
-		return this.skipMethod;
+		return !!(this.skipMethod);
+	}-*/;
+	public final native int getSkipMethod() /*-{
+		var res = 0;
+		if(!!(this.skipMethod)){
+			res = 1;
+		}
+		return res;
 	}-*/;
 
 	public final native void setSkipPayload(boolean skipPayload) /*-{
@@ -179,7 +214,14 @@ public class RequestObject extends HistoryObject {
 	}-*/;
 
 	public final native boolean isSkipPayload() /*-{
-		return this.skipPayload;
+		return !!(this.skipPayload);
+	}-*/;
+	public final native int getSkipPayload() /*-{
+		var res = 0;
+		if(!!(this.skipPayload)){
+			res = 1;
+		}
+		return res;
 	}-*/;
 	
 	public final native void setSkipHeaders(boolean skipHeaders) /*-{
@@ -187,7 +229,14 @@ public class RequestObject extends HistoryObject {
 	}-*/;
 	
 	public final native boolean isSkipHeaders() /*-{
-		return this.skipHeaders;
+		return !!(this.skipHeaders);
+	}-*/;
+	public final native int getSkipHeaders() /*-{
+		var res = 0;
+		if(!!(this.skipHeaders)){
+			res = 1;
+		}
+		return res;
 	}-*/;
 	
 	public final native void setSkipPath(boolean skipPath) /*-{
@@ -195,7 +244,14 @@ public class RequestObject extends HistoryObject {
 	}-*/;
 	
 	public final native boolean isSkipPath() /*-{
-		return this.skipPath;
+		return !!(this.skipPath);
+	}-*/;
+	public final native int getSkipPath() /*-{
+		var res = 0;
+		if(!!(this.skipPath)){
+			res = 1;
+		}
+		return res;
 	}-*/;
 
 	public final native String toJSON() /*-{

@@ -1,0 +1,76 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" >
+	<ui:with field="appResources" type="org.rest.client.resources.AppResources" />
+	<ui:style>
+		.itemWrapper{ padding: 3px; margin: 3px; border-bottom: 1px rgba(229, 229, 229, 0.12) solid;}
+		.listRow{}
+		.flex{
+			display: -webkit-flex;
+			display: -mox-flex;
+			display: -ms-flex;
+			display: -o-flex;
+			display: flex;
+		}
+		.method,
+		.url,
+		.action{
+			-webkit-align-items: center;
+		}
+		.method{margin-right: 7px;font-weight: bold;cursor: pointer;}
+		.url{ 
+			-webkit-flex: 1 0 0px;
+			-moz-flex: 1 0 0px;
+			-ms-flex: 1 0 0px;
+			-o-flex: 1 0 0px;
+			flex: 1 0 0px; 
+			margin-right: 7px;
+			cursor: pointer;
+			
+			text-overflow: ellipsis;
+			overflow: hidden;
+			width: 1px;
+			display: block;
+			
+		}
+		.flex1{
+			-webkit-flex: 1 0 0px;
+			-moz-flex: 1 0 0px;
+			-ms-flex: 1 0 0px;
+			-o-flex: 1 0 0px;
+			flex: 1 0 0px; 
+		}
+		.action{}
+		.headers{
+			max-height: 100px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: pre; 
+			width: 1px;display: block;
+		}
+		.payload{
+			max-height: 100px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: pre; 
+			margin-right: 15px;
+			width: 1px;display: block;
+		}
+		.encoding{margin-right: 15px;}
+		.detailed{margin-top: 15px;}
+	</ui:style>
+	<g:HTMLPanel addStyleNames="{style.itemWrapper}">
+		<div class="{style.listRow} {style.flex}">
+			<g:InlineLabel styleName="{style.method} {style.flex}" ui:field="methodLabel"></g:InlineLabel>
+			<g:InlineLabel styleName="{style.url} {style.flex}" ui:field="urlLabel"></g:InlineLabel>
+			<span class="{style.action} {style.flex}">
+				<g:Button ui:field="select" styleName="{appResources.appCss.button}">Select</g:Button>
+			</span>
+		</div>
+		<div class="{appResources.appCss.hidden} {style.flex} {style.detailed}" ui:field="detailedPanel">
+			<span class="{style.encoding} {style.flex} " ui:field="encoding"></span>
+			<span class="{style.payload} {style.flex} {style.flex1}" ui:field="payload"></span>
+			<span class="{style.headers} {style.flex} {style.flex1}" ui:field="headers"></span>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder>

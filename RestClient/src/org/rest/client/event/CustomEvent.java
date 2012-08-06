@@ -133,7 +133,13 @@ public enum CustomEvent {
 	 * field is empty.
 	 * </p>
 	 */
-	HTTP_METHOD_CHANGE("arc:metodchange");
+	HTTP_METHOD_CHANGE("arc:metodchange"),
+	/**
+	 * User clears history store.<br/>
+	 */
+	CLEAR_HISTORY("arc:historyclear");
+	
+	
 
 	private final String evenNamet;
 

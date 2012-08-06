@@ -1,6 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:d="urn:import:com.google.gwt.user.datepicker.client" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:d="urn:import:com.google.gwt.user.datepicker.client" 
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:rc="urn:import:org.rest.client.ui.html5">
 	<ui:with field="appResources" type="org.rest.client.resources.AppResources" />
 	<ui:style>
