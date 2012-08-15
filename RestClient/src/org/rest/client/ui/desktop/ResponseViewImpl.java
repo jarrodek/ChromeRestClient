@@ -21,15 +21,16 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.rest.client.RestClient;
+import org.rest.client.request.RedirectData;
 import org.rest.client.resources.AppCssResource;
 import org.rest.client.resources.AppResources;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.storage.websql.HeaderRow;
-import org.rest.client.storage.websql.StatusCodeRow;
 import org.rest.client.ui.ResponseView;
 import org.rest.client.ui.desktop.widget.JSONViewer;
+import org.rest.client.ui.desktop.widget.RedirectView;
 import org.rest.client.ui.desktop.widget.ResponseHeaderLine;
-import org.rest.client.ui.desktop.widget.StatusCodeInfo;
+import org.rest.client.ui.desktop.widget.StatusCodeImage;
 import org.rest.client.ui.desktop.widget.XMLViewer;
 import org.rest.client.ui.html5.HTML5Element;
 import org.rest.client.util.CodeMirrorElement;
@@ -62,10 +63,12 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.InlineLabel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xhr2.client.Header;
 import com.google.gwt.xhr2.client.Response;
@@ -81,49 +84,10 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		String error();
 		String warning();
 		String requestError();
+		String responseRow();
+		String label();
+		String result();
 	}
-	
-	private ClickHandler statusCodeHintHandler = new ClickHandler() {
-		@Override
-		public void onClick(ClickEvent event) {
-			final int responseCode = response.getStatus(); 
-			if (responseCode == 0) {
-				StatusCodeInfo dialog = new StatusCodeInfo();
-				dialog.setHTML("Status Code: " + responseCode);
-				dialog.setInfoText("No response data.");
-				dialog.center();
-				dialog.show();
-				return;
-			}
-			
-			listener.getStatusCodeInfo(responseCode, new Callback<StatusCodeRow, Throwable>() {
-				
-				@Override
-				public void onSuccess(StatusCodeRow code) {
-					
-					String message = response.getStatusText();
-					String html = "<b>Status Code: " + responseCode;
-					if(message != null){
-						html += " - " + message + " ";
-					}
-					html += "</b><br/><br/>"+code.getDesc();
-					StatusCodeInfo dialog = new StatusCodeInfo();
-					dialog.setInfoText(html);
-					dialog.center();
-					dialog.show();
-				}
-				
-				@Override
-				public void onFailure(Throwable reason) {
-					StatusCodeInfo dialog = new StatusCodeInfo();
-					dialog.setHTML("Status Code: " + responseCode);
-					dialog.setInfoText("Unable to find explanation");
-					dialog.center();
-					dialog.show();
-				}
-			});
-		}
-	};
 	
 	private ResponsePresenter listener;
 	private boolean success = false;
@@ -135,7 +99,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	
 	AppCssResource appStyle = AppResources.INSTANCE.appCss();
 	
-	@UiField Image codeImage;
+	@UiField StatusCodeImage codeImage;
 	@UiField InlineLabel loadingTime;
 	@UiField InlineLabel codeContainer;
 	@UiField HTMLPanel headersPanel;
@@ -150,6 +114,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	@UiField PreElement parsedBody;
 	@UiField HTMLPanel xmlPanel;
 	@UiField HTMLPanel jsonPanel;
+	@UiField HTMLPanel redirects;
 	@UiField WidgetStyle style;
 	
 	public ResponseViewImpl() {
@@ -177,11 +142,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		} else {
 			this.removeStyleName(style.requestError());
 		}
-		
-		
 		setResponseStatus();
-		//setResponseHeaders();
-		//setResponseCookies();
 		setResponseBody();
 	}
 	
@@ -203,8 +164,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			txt += " NO RESPONSE";
 		}
 		codeContainer.getElement().setInnerHTML(txt);
-		codeImage.setVisible(true);
-		codeImage.addClickHandler(statusCodeHintHandler);
+		codeImage.setCode(code);
 		
 		
 		//
@@ -284,6 +244,29 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		});
 	}
 	
+	@Override
+	public void setRedirectData(ArrayList<RedirectData> redirectData) {
+		if(redirectData == null) return;
+		boolean addNumber = false;
+		int size = redirectData.size();
+		if(size > 1) addNumber = true;
+		
+		for(int i=0; i<size; i++){
+			RedirectData data = redirectData.get(i);
+			
+			FlowPanel wrapper = new FlowPanel();
+			wrapper.setStyleName(style.responseRow());
+			Label redirectLabel = new Label("Redirect" + ( addNumber ? " #"+(i+1) : "" ));
+			redirectLabel.setStyleName(style.label());
+			wrapper.add(redirectLabel);
+			SimplePanel result = new SimplePanel();
+			result.setStyleName(style.result());
+			wrapper.add(result);
+			RedirectView view = new RedirectView(data, listener);
+			result.add(view);
+			redirects.add(wrapper);
+		}
+	}
 	
 	private void setResponseBody() {
 		if(!success || response.getStatus() == 0){
@@ -697,7 +680,5 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	private final native void writeRawBody(String body)/*-{
 		var wnd = $wnd.open();
 		wnd.document.body.innerHTML = body;
-	}-*/;
-
-	
+	}-*/;	
 }

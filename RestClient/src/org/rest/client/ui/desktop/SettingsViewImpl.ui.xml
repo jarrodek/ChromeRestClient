@@ -68,7 +68,7 @@
 				requests
 			</div>
 			<div class="{appResources.appCss.hidden} {style.historyClear}" ui:field="historyClear">
-				<g:Button ui:field="clearHistory" text="Clear history"></g:Button>
+				<g:Button styleName="{appResources.appCss.button}" ui:field="clearHistory" text="Clear history"></g:Button>
 			</div>
 		</section>
 		<section class="{style.optionsSection}">
@@ -80,15 +80,15 @@
 		</section>
 		<section class="{style.optionsSection}">
 			<p>Shortcuts</p>
-			<g:Button ui:field="shortCutsButton" text="Edit shortcuts"></g:Button>
+			<g:Button styleName="{appResources.appCss.button}" ui:field="shortCutsButton" text="Edit shortcuts"></g:Button>
 		</section>
 		<section class="{style.optionsSection}">
 			<p>JSON headers</p>
-			<g:Button ui:field="jsonHeadersWidget" text="Manage"></g:Button>
+			<g:Button styleName="{appResources.appCss.button}" ui:field="jsonHeadersWidget" text="Manage"></g:Button>
 		</section>
 		<section class="{style.optionsSection}">
 			<p>Import/export</p>
-			<g:Button ui:field="importExportWidget" text="Manage"></g:Button>
+			<g:Button styleName="{appResources.appCss.button}" ui:field="importExportWidget" text="Manage"></g:Button>
 		</section>
 	</g:HTMLPanel>
 </ui:UiBinder>

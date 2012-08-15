@@ -28,6 +28,7 @@ import org.rest.client.event.ClearFormEvent;
 import org.rest.client.event.RequestChangeEvent;
 import org.rest.client.event.RequestEndEvent;
 import org.rest.client.place.RequestPlace;
+import org.rest.client.request.RedirectData;
 import org.rest.client.request.RequestParameters;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.LocalStore;
@@ -35,7 +36,6 @@ import org.rest.client.storage.store.objects.FormEncodingObject;
 import org.rest.client.storage.store.objects.HistoryObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.storage.websql.HeaderRow;
-import org.rest.client.storage.websql.StatusCodeRow;
 import org.rest.client.ui.AddEncodingView;
 import org.rest.client.ui.RequestView;
 import org.rest.client.ui.ResponseView;
@@ -137,6 +137,11 @@ public class RequestActivity extends AppActivity implements
 				responseView.setPresenter(RequestActivity.this);
 				responseView.setResponseData(success, response, requestTime);
 				viewFlowPanel.add(responseView);
+				
+				
+				/**
+				 * Get request and response headers data from Chrome Extensions API
+				 */
 				ExternalEventsFactory.postMessage(ExternalEventsFactory.EXT_GET_COLLECTED_REQUEST_DATA, null, new Callback<String, Throwable>() {
 					@Override
 					public void onSuccess(String result) {
@@ -156,6 +161,16 @@ public class RequestActivity extends AppActivity implements
 						
 						responseView.setRequestHeadersExternal(extractHeadersExternal(parsedResponse, "REQUEST_HEADERS"));
 						responseView.setResponseHeadersExternal(extractHeadersExternal(parsedResponse, "RESPONSE_HEADERS"));
+						
+						
+						//look for redirections
+						JSONValue redirectValue = parsedResponse.get("REDIRECT_DATA");
+						if(redirectValue != null){
+							ArrayList<RedirectData> redirects = getRedirectData(redirectValue.isArray());
+							if(redirects != null && redirects.size() > 0){
+								responseView.setRedirectData(redirects);
+							}
+						}
 					}
 					
 					@Override
@@ -166,6 +181,41 @@ public class RequestActivity extends AppActivity implements
 			}
 		});
 	}
+	
+	
+	private ArrayList<RedirectData> getRedirectData(JSONArray response){
+		ArrayList<RedirectData> result = new ArrayList<RedirectData>();
+		if(response == null){
+			return result;
+		}
+		int size = response.size();
+		for(int i=0; i<size; i++){
+			JSONValue itemValue = response.get(i);
+			JSONObject item = itemValue.isObject();
+			if(item == null) continue;
+			
+			boolean fromCache = item.get("fromCache").isBoolean().booleanValue();
+			String redirectUrl = item.get("redirectUrl").isString().stringValue();
+			
+			String statusLine = null;
+			JSONValue statusLineValue = item.get("statusLine");
+			if(statusLineValue != null){
+				statusLine = item.get("statusLine").isString().stringValue();
+			}
+			int statusCode = Integer.parseInt(item.get("statusCode").isNumber().toString());
+			ArrayList<Header> headers = extractHeadersExternal(item, "responseHeaders");
+			RedirectData redirect = new RedirectData();
+			redirect.setRedirectUrl(redirectUrl);
+			redirect.setFromCache(fromCache);
+			redirect.setResponseHeaders(headers);
+			redirect.setStatusCode(statusCode);
+			if(statusLine != null)
+				redirect.setStatusLine(statusLine);
+			result.add(redirect);
+		}
+		return result;
+	}
+	
 	
 	private ArrayList<Header> extractHeadersExternal(JSONObject response, String key){
 		ArrayList<Header> headers = new ArrayList<Header>();
@@ -201,9 +251,6 @@ public class RequestActivity extends AppActivity implements
 			headers.add(header);
 		}
 		return headers;
-		//{"URL":"http://127.0.0.1:8888/test?p=cookie",
-		//"RESPONSE_HEADERS":[{"name":"Content-Type","value":"text/plain; charset=iso-8859-1"},{"name":"Expires","value":"Thu, 01 Jan 1970 00:00:00 GMT"},{"name":"Set-Cookie","value":"testcookie_1344376133560=\"another value : 1344376133560\""},{"name":"Content-Length","value":"13"},{"name":"Server","value":"Jetty(6.1.x)"}],
-		//"REQUEST_HEADERS":[{"name":"User-Agent","value":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.3 (KHTML, like Gecko) Chrome/22.0.1221.0 Safari/537.3"},{"name":"Content-Type","value":"application/x-www-form-urlencoded"},{"name":"Accept","value":"*/*"},{"name":"Referer","value":"http://127.0.0.1:8888/RestClient.html?gwt.codesvr=127.0.0.1:9997"},{"name":"Accept-Encoding","value":"gzip,deflate,sdch"},{"name":"Accept-Language","value":"pl,en-US;q=0.8,en;q=0.6"},{"name":"Accept-Charset","value":"UTF-8,*;q=0.5"}]}
 	}
 	
 	
@@ -428,21 +475,6 @@ public class RequestActivity extends AppActivity implements
 	@Override
 	public void fireClearAllEvent() {
 		eventBus.fireEvent(new ClearFormEvent());
-	}
-
-	@Override
-	public void getStatusCodeInfo(int code, final Callback<StatusCodeRow, Throwable> callback) {
-		clientFactory.getStatusesStore().getByKey(code, new StoreResultCallback<StatusCodeRow>(){
-
-			@Override
-			public void onSuccess(StatusCodeRow result) {
-				callback.onSuccess(result);
-			}
-
-			@Override
-			public void onError(Throwable e) {
-				callback.onFailure(e);
-			}});
 	}
 
 	@Override

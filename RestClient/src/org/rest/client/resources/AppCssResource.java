@@ -70,4 +70,8 @@ public interface AppCssResource extends CssResource {
 	
 	/* Position children in center of this container */
 	String flexCenter();
+	
+	
+	
+	String statusCodeHintImage();
 }

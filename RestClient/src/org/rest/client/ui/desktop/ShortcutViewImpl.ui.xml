@@ -57,6 +57,9 @@
 			color: #A5A5A5;
 			font-size: 12px;
 		}
+		.backLink{
+			margin-top: 20px;
+		}
 	</ui:style>
 	<g:HTMLPanel ui:field="root">
 		<h1 class="{style.contentTitle} {style.about}">Edit shortcuts</h1>
@@ -122,5 +125,8 @@
 				</div>
 			</div>
 		</section>
+		<div class="{style.backLink}">
+			<g:Anchor href="javascript:;" ui:field="backLink">Back to settings</g:Anchor>
+		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>

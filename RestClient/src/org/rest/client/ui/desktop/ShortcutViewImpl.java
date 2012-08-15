@@ -7,6 +7,7 @@ import org.rest.client.RestClient;
 import org.rest.client.Shortcut;
 import org.rest.client.ShortcutType;
 import org.rest.client.event.ShortcutChangeEvent;
+import org.rest.client.place.SettingsPlace;
 import org.rest.client.ui.ShortcutView;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -66,13 +67,15 @@ public class ShortcutViewImpl extends Composite implements ShortcutView {
 	private int sendKeyCode = -1;
 	private int historyKeyCode = -1;
 	
+	private Presenter listener;
+	
 	public ShortcutViewImpl(){
 		initWidget(uiBinder.createAndBindUi(this));
 	}
 	
 	@Override
 	public void setPresenter(Presenter listener) {
-		
+		this.listener = listener;
 	}
 
 	@Override
@@ -235,5 +238,10 @@ public class ShortcutViewImpl extends Composite implements ShortcutView {
 		ShortcutChangeEvent e = new ShortcutChangeEvent(sc);
 		EventBus eventBus = RestClient.getClientFactory().getEventBus();
 		eventBus.fireEvent(e);
+	}
+	
+	@UiHandler("backLink")
+	void onBackToSettings(ClickEvent e){
+		listener.goTo(new SettingsPlace("view"));
 	}
 }

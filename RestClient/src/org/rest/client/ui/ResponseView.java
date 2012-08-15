@@ -19,8 +19,8 @@ package org.rest.client.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.rest.client.request.RedirectData;
 import org.rest.client.storage.websql.HeaderRow;
-import org.rest.client.storage.websql.StatusCodeRow;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.place.shared.Place;
@@ -40,11 +40,6 @@ public interface ResponseView extends IsWidget {
 		 * @param place
 		 */
 		void goTo(Place place);
-		/**
-		 * Get information about given status code
-		 * @param code
-		 */
-		void getStatusCodeInfo(int code, Callback<StatusCodeRow, Throwable> callback);
 		/**
 		 * Get information about given response headers
 		 * @param names
@@ -80,6 +75,11 @@ public interface ResponseView extends IsWidget {
 	 * @param headers
 	 */
 	void setResponseHeadersExternal(ArrayList<Header> headers);
+	/**
+	 * If redirection occurred set redirect data to response view.
+	 * @param redirectData data to set. List must be in redirection occur order.
+	 */
+	void setRedirectData(ArrayList<RedirectData> redirectData);
 	
 	void clear();
 }

@@ -402,3 +402,14 @@
 	-o-align-items: center;
 	align-items: center;
 }
+.statusCodeHintImage {
+	cursor: pointer;
+	-webkit-transition: opacity 0.15s ease-in-out;
+	opacity: 0.4;
+	height: 16px;
+	width: 16px;
+	vertical-align: baseline;
+}
+.statusCodeHintImage:hover{
+	opacity: 1;
+}
