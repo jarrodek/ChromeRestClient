@@ -53,6 +53,7 @@ public class RequestPlace extends Place {
 			entryId = requestData.substring(6);
 		} else if (requestData.startsWith("external/")) {
 			external = true;
+			entryId = requestData.substring(9);
 		}
 
 		this.placeToken = requestData;

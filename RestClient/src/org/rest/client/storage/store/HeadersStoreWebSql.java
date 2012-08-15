@@ -159,10 +159,28 @@ public class HeadersStoreWebSql extends WebSqlAdapter<Integer, HeaderRow> {
 		});
 	}
 	/**
-	 * Returns all headers for given names.
+	 * Returns all response headers for given names.
 	 * @param headersList
 	 */
 	public void getResponseHeadersByName(List<String> headersList, final StoreResultCallback<List<HeaderRow>> callback){
+		service.getResponseHeaders(headersList, new ListCallback<HeaderRow>() {
+			
+			@Override
+			public void onFailure(DataServiceException error) {
+				callback.onError(error);
+			}
+			
+			@Override
+			public void onSuccess(List<HeaderRow> result) {
+				callback.onSuccess(result);	
+			}
+		});
+	}
+	/**
+	 * Returns all request headers for given names.
+	 * @param headersList
+	 */
+	public void getRequestHeadersByName(List<String> headersList, final StoreResultCallback<List<HeaderRow>> callback){
 		service.getResponseHeaders(headersList, new ListCallback<HeaderRow>() {
 			
 			@Override

@@ -14,10 +14,6 @@
 		.label{
 			padding-right: 20px;
 			width: 80px;
-			vertical-align: middle;
-			-webkit-align-items: flex-start;
-			display: -webkit-flex;
-			-webkit-justify-content: flex-end;
 		}
 		.result{ -webkit-align-items: center;display: -webkit-flex; }
 		.statusCode {
@@ -84,20 +80,29 @@
 				<g:InlineLabel ui:field="loadingTime" styleName="{style.loadingTime}">unknown</g:InlineLabel>
 			</div>
 		</div>
-		<!-- HEADERS -->
+		<!-- REQUEST HEADERS -->
 		<div class="{style.responseRow}">
 			<div class="{style.label}">
-				Headers
+				Request headers
+			</div>
+			<g:HTMLPanel ui:field="requestHeadersPanel" styleName="{style.result} {style.headersPanel}"></g:HTMLPanel>
+		</div>
+		<!-- RESPONSE HEADERS -->
+		<div class="{style.responseRow}">
+			<div class="{style.label}">
+				Response headers
 			</div>
 			<g:HTMLPanel ui:field="headersPanel" styleName="{style.result} {style.headersPanel}"></g:HTMLPanel>
 		</div>
 		<!-- Cookies -->
+		<!-- 
 		<div class="{style.responseRow}">
 			<div class="{style.label}">
 				Cookies
 			</div>
 			<g:HTMLPanel ui:field="cookiesPanel" styleName="{style.result}" visible="false"></g:HTMLPanel>
 		</div>
+		 -->
 		<!-- Body -->
 		<div class="{style.responseRow}">
 			<g:HTMLPanel styleName="{appResources.appCss.tabsPanel} {style.result} {style.bodyResult}">

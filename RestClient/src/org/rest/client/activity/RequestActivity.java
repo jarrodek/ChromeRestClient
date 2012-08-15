@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.rest.client.ClientFactory;
+import org.rest.client.ExternalEventsFactory;
 import org.rest.client.RestClient;
 import org.rest.client.event.AddEncodingEvent;
 import org.rest.client.event.ClearFormEvent;
@@ -43,8 +44,13 @@ import org.rest.client.ui.desktop.StatusNotification;
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.dom.client.Style.Overflow;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.xhr2.client.Header;
 import com.google.gwt.xhr2.client.Response;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
@@ -105,25 +111,24 @@ public class RequestActivity extends AppActivity implements
 			Log.error("Restore method for this place is not yet implemented.");
 			throw new IllegalArgumentException("Not implemented yet");
 		} else if(place.isExternal()){
-			Log.error("Restore method for this place is not yet implemented.");
-			throw new IllegalArgumentException("Not implemented yet");
+			createExternalRequest(requestView,entryId);
 		} else {
 			restoreLatestRequest(requestView);
 		}
 		observeEvents();
 	}
 	
-
+	
 	private void observeEvents() {
 		RequestChangeEvent.register(eventBus, new RequestChangeEvent.Handler() {
 			@Override
 			public void onChange(RequestChangeEvent event) {
-				Log.debug("RequestChangeEvent: " + event.getChangeType()); 
+//				Log.debug("RequestChangeEvent: " + event.getChangeType()); 
 			}
 		});
 		RequestEndEvent.register(eventBus, new RequestEndEvent.Handler() {
 			@Override
-			public void onResponse(boolean success, Response response, long requestTime) {
+			public void onResponse(boolean success, final Response response, long requestTime) {
 				if(responseView != null){
 					responseView.asWidget().removeFromParent();
 					responseView = null;
@@ -132,9 +137,75 @@ public class RequestActivity extends AppActivity implements
 				responseView.setPresenter(RequestActivity.this);
 				responseView.setResponseData(success, response, requestTime);
 				viewFlowPanel.add(responseView);
+				ExternalEventsFactory.postMessage(ExternalEventsFactory.EXT_GET_COLLECTED_REQUEST_DATA, null, new Callback<String, Throwable>() {
+					@Override
+					public void onSuccess(String result) {
+						if(result == null){
+							responseView.setRequestHeadersExternal(null);
+							responseView.setResponseHeadersExternal(null);
+							return;
+						}
+						JSONObject parsedResponse = null;
+						try{
+							parsedResponse = JSONParser.parseStrict(result).isObject();
+						}catch(Exception e){
+							responseView.setRequestHeadersExternal(null);
+							responseView.setResponseHeadersExternal(null);
+							return;
+						}
+						
+						responseView.setRequestHeadersExternal(extractHeadersExternal(parsedResponse, "REQUEST_HEADERS"));
+						responseView.setResponseHeadersExternal(extractHeadersExternal(parsedResponse, "RESPONSE_HEADERS"));
+					}
+					
+					@Override
+					public void onFailure(Throwable reason) {
+						
+					}
+				});
 			}
 		});
 	}
+	
+	private ArrayList<Header> extractHeadersExternal(JSONObject response, String key){
+		ArrayList<Header> headers = new ArrayList<Header>();
+		JSONValue valuesValue = response.get(key);
+		if(valuesValue == null){
+			return headers;
+		}
+		JSONArray arr = valuesValue.isArray();
+		if(arr == null){
+			return headers;
+		}
+		int len = arr.size();
+		for(int i=0; i<len; i++){
+			JSONValue item = arr.get(i);
+			final String name = item.isObject().get("name").isString().stringValue();
+			final String value = item.isObject().get("value").isString().stringValue();
+			Header header = new Header() {
+				@Override
+				public String getName() {
+					return name;
+				}
+
+				@Override
+				public String getValue() {
+					return value;
+				}
+
+				@Override
+				public String toString() {
+					return name + " : " + value;
+				}
+			};
+			headers.add(header);
+		}
+		return headers;
+		//{"URL":"http://127.0.0.1:8888/test?p=cookie",
+		//"RESPONSE_HEADERS":[{"name":"Content-Type","value":"text/plain; charset=iso-8859-1"},{"name":"Expires","value":"Thu, 01 Jan 1970 00:00:00 GMT"},{"name":"Set-Cookie","value":"testcookie_1344376133560=\"another value : 1344376133560\""},{"name":"Content-Length","value":"13"},{"name":"Server","value":"Jetty(6.1.x)"}],
+		//"REQUEST_HEADERS":[{"name":"User-Agent","value":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.3 (KHTML, like Gecko) Chrome/22.0.1221.0 Safari/537.3"},{"name":"Content-Type","value":"application/x-www-form-urlencoded"},{"name":"Accept","value":"*/*"},{"name":"Referer","value":"http://127.0.0.1:8888/RestClient.html?gwt.codesvr=127.0.0.1:9997"},{"name":"Accept-Encoding","value":"gzip,deflate,sdch"},{"name":"Accept-Language","value":"pl,en-US;q=0.8,en;q=0.6"},{"name":"Accept-Charset","value":"UTF-8,*;q=0.5"}]}
+	}
+	
 	
 	private void restoreRequestFromHistory(int historyId,
 			final RequestView requestView) {
@@ -158,6 +229,61 @@ public class RequestActivity extends AppActivity implements
 				StatusNotification.notify("Unable read history data", StatusNotification.TYPE_ERROR);
 			}
 		});
+	}
+	
+	
+	private void createExternalRequest(final RequestView view, final String requestUUID){
+		ExternalEventsFactory.postMessage(ExternalEventsFactory.EXT_GET_EXTERNAL_REQUEST_DATA, requestUUID, new Callback<String, Throwable>() {
+			@Override
+			public void onSuccess(String result) {
+				if(result.isEmpty()){
+					StatusNotification.notify("Data from external extension is no longer available :(", StatusNotification.TYPE_CRITICAL, StatusNotification.TIME_MEDIUM);
+					return;
+				}
+				JSONValue parsedValue = null;
+				try{
+					parsedValue = JSONParser.parseStrict(result);
+				}catch(Exception e){
+				}
+				if(parsedValue == null){
+					Log.error("Malformed External Data Exception. Passed data: " + result);
+					StatusNotification.notify("Unable to read data from external extension :(", StatusNotification.TYPE_CRITICAL, StatusNotification.TIME_MEDIUM);
+					return;
+				}
+				JSONObject obj = parsedValue.isObject();
+				if(obj.containsKey("error")){
+					if(obj.get("error").isBoolean().booleanValue()){
+						Log.error("Error get External Data. Message: " + obj.get("message").isString().stringValue());
+						StatusNotification.notify(obj.get("message").isString().stringValue(), StatusNotification.TYPE_CRITICAL, StatusNotification.TIME_MEDIUM);
+						return;
+					}
+				}
+				if(obj.containsKey("data")){
+					JSONObject dataObj = obj.get("data").isObject();
+					if(dataObj.containsKey("url")){
+						view.setUrl(dataObj.get("url").isString().stringValue());
+					}
+					if(dataObj.containsKey("method")){
+						view.setMethod(dataObj.get("method").isString().stringValue());
+					}
+					if(dataObj.containsKey("headers")){
+						view.setHeaders(dataObj.get("headers").isString().stringValue());
+					}
+					if(dataObj.containsKey("payload")){
+						view.setPayload(dataObj.get("payload").isString().stringValue());
+					}
+					if(dataObj.containsKey("encoding")){
+						view.setEncoding(dataObj.get("encoding").isString().stringValue());
+					}
+				}
+			}
+			
+			@Override
+			public void onFailure(Throwable reason) {
+				Log.error("Can't receive mesage for " + requestUUID);
+			}
+		});
+		
 	}
 	
 	private void restoreLatestRequest(final RequestView view){
@@ -324,6 +450,23 @@ public class RequestActivity extends AppActivity implements
 			final Callback<List<HeaderRow>, Throwable> callback) {
 		
 		clientFactory.getHeadersStore().getResponseHeadersByName(names, new StoreResultCallback<List<HeaderRow>>() {
+			
+			@Override
+			public void onSuccess(List<HeaderRow> result) {
+				callback.onSuccess(result);
+			}
+			
+			@Override
+			public void onError(Throwable e) {
+				callback.onFailure(e);
+			}
+		});
+	}
+
+	@Override
+	public void getRequestHeadersInfo(ArrayList<String> names,
+			final Callback<List<HeaderRow>, Throwable> callback) {
+		clientFactory.getHeadersStore().getRequestHeadersByName(names, new StoreResultCallback<List<HeaderRow>>() {
 			
 			@Override
 			public void onSuccess(List<HeaderRow> result) {

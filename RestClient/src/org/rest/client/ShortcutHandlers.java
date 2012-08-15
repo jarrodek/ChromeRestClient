@@ -248,7 +248,7 @@ public class ShortcutHandlers {
 				
 				if(event == null || event.getType() == null) return;
 				
-				if (!event.getType().equalsIgnoreCase("keydown")){
+				if (event.getType() == null || !event.getType().equalsIgnoreCase("keydown")){
 					return;
 				}
 				

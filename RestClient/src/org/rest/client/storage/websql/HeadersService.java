@@ -74,6 +74,14 @@ public interface HeadersService extends AppDatabase {
 	@Select("SELECT * FROM headers WHERE name IN ({headersList}) AND type='response'")
 	void getResponseHeaders(List<String> headersList, ListCallback<HeaderRow> callback);
 
+	
+	/**
+	 * @param headersList
+	 * @param callback
+	 */
+	@Select("SELECT * FROM headers WHERE name IN ({headersList}) AND type='request'")
+	void getRequestHeaders(List<String> headersList, ListCallback<HeaderRow> callback);
+	
 	/**
 	 * @param headersList
 	 * @param type

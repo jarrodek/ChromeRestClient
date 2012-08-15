@@ -61,10 +61,7 @@ public class TestDataServlet extends HttpServlet {
 			resp.setStatus(200);
 			resp.getWriter().println(response);
 		} else if (payload.equals("cookie")){
-//			Cookie c = new Cookie("cookieName", "cookie value");
-//			c.setDomain("127.0.0.1");
-//			c.setMaxAge(100000);
-//			resp.addCookie(c);
+
 			@SuppressWarnings("unchecked")
 			Enumeration<String> headersNames = req.getHeaderNames();
 			System.out.println("======== HEADERS LIST ==========");
@@ -79,6 +76,12 @@ public class TestDataServlet extends HttpServlet {
 			
 			Cookie c2 = new Cookie("testcookie_"+t, "another value : " + t);
 			resp.addCookie(c2);
+			
+			Cookie c = new Cookie("cookieName", "cookie value");
+//			c.setDomain("127.0.0.1");
+//			c.setMaxAge(100000);
+			resp.addCookie(c);
+			
 			
 			resp.setContentType("text/plain");
 			resp.setStatus(200);

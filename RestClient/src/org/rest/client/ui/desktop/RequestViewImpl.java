@@ -37,7 +37,6 @@ import org.rest.client.ui.desktop.widget.RequestHeadersWidget;
 import org.rest.client.ui.desktop.widget.RequestUrlWidget;
 import org.rest.client.ui.html5.HTML5Progress;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -173,7 +172,6 @@ public class RequestViewImpl extends Composite implements RequestView {
 		RequestStopEvent.register(eventBus, new RequestStopEvent.Handler() {
 			@Override
 			public void onStop(Date time) {
-				Log.debug("RequestViewImpl: RequestStopEvent fired");
 				sendButton.setEnabled(true);
 			}
 		});
@@ -368,24 +366,35 @@ public class RequestViewImpl extends Composite implements RequestView {
 			return;
 		}
 		
+		boolean found = false;
 		int cnt = contentTypeInput.getItemCount();
 		for (int i = 0; i < cnt; i++) {
 			if (contentTypeInput.getValue(i).equals(encoding)) {
 				contentTypeInput.setSelectedIndex(i);
-				latestSelectedContentType = contentTypeInput.getValue(i); 
-				return;
+				latestSelectedContentType = contentTypeInput.getValue(i);
+				found = true;
+				break;
 			}
+		}
+		if(!found){
+			//add new form encoding to list
+			contentTypeInput.addItem(encoding, encoding);
+			contentTypeInput.setSelectedIndex(cnt);
 		}
 
 		ArrayList<RequestHeader> list = RequestHeadersParser
 				.stringToHeaders(getHeaders());
+		boolean changed = false;
 		for (RequestHeader h : list) {
 			if (h.getName().toLowerCase().equals("content-type")) {
 				h.setValue(encoding);
+				changed = true;
 				break;
 			}
 		}
-		setHeaders(RequestHeadersParser.headersListToString(list));
+		if(changed){
+			setHeaders(RequestHeadersParser.headersListToString(list));
+		}
 	}
 	
 

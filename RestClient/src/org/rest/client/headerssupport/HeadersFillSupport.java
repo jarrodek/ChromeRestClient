@@ -88,27 +88,27 @@ public class HeadersFillSupport implements FocusHandler, ClickHandler {
 	public final static List<String> NOT_SUPPORTED_W3C;
 	static {
 		NOT_SUPPORTED_W3C = new ArrayList<String>();
-		NOT_SUPPORTED_W3C.add("accept-charset");
-		NOT_SUPPORTED_W3C.add("accept-encoding");
-		NOT_SUPPORTED_W3C.add("connection");
-		NOT_SUPPORTED_W3C.add("content-length");
-		NOT_SUPPORTED_W3C.add("cookie");
-		NOT_SUPPORTED_W3C.add("cookie2");
-		NOT_SUPPORTED_W3C.add("content-transfer-encoding");
-		NOT_SUPPORTED_W3C.add("date");
-		NOT_SUPPORTED_W3C.add("expect");
-		NOT_SUPPORTED_W3C.add("host");
-		NOT_SUPPORTED_W3C.add("keep-alive");
-		NOT_SUPPORTED_W3C.add("referer");
-		NOT_SUPPORTED_W3C.add("te");
-		NOT_SUPPORTED_W3C.add("trailer");
-		NOT_SUPPORTED_W3C.add("transfer-encoding");
-		NOT_SUPPORTED_W3C.add("upgrade");
-		NOT_SUPPORTED_W3C.add("user-agent");
-		NOT_SUPPORTED_W3C.add("via");
-		NOT_SUPPORTED_W3C.add("origin");
-		NOT_SUPPORTED_W3C.add("proxy");
-		NOT_SUPPORTED_W3C.add("sec");
+//		NOT_SUPPORTED_W3C.add("accept-charset");
+//		NOT_SUPPORTED_W3C.add("accept-encoding");
+//		NOT_SUPPORTED_W3C.add("connection");
+//		NOT_SUPPORTED_W3C.add("content-length");
+//		NOT_SUPPORTED_W3C.add("cookie");
+//		NOT_SUPPORTED_W3C.add("cookie2");
+//		NOT_SUPPORTED_W3C.add("content-transfer-encoding");
+//		NOT_SUPPORTED_W3C.add("date");
+//		NOT_SUPPORTED_W3C.add("expect");
+//		NOT_SUPPORTED_W3C.add("host");
+//		NOT_SUPPORTED_W3C.add("keep-alive");
+//		NOT_SUPPORTED_W3C.add("referer");
+//		NOT_SUPPORTED_W3C.add("te");
+//		NOT_SUPPORTED_W3C.add("trailer");
+//		NOT_SUPPORTED_W3C.add("transfer-encoding");
+//		NOT_SUPPORTED_W3C.add("upgrade");
+//		NOT_SUPPORTED_W3C.add("user-agent");
+//		NOT_SUPPORTED_W3C.add("via");
+//		NOT_SUPPORTED_W3C.add("origin");
+//		NOT_SUPPORTED_W3C.add("proxy");
+//		NOT_SUPPORTED_W3C.add("sec");
 	}
 
 	/**

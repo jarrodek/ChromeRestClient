@@ -1,0 +1,35 @@
+{
+  "name": "TEST",
+  "version": "0.1",
+  "manifest_version": 2,
+  "minimum_chrome_version": "22",
+  "permissions": [
+    "webRequest",
+    "<all_urls>",
+    "history",
+    "background",
+    "declarativeWebRequest"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "app": {
+    "launch": {
+      "local_path": "test.html"
+    }
+  },
+  "content_scripts": [{
+      "matches": ["http://127.0.0.1:8888/RestClient.html*"],
+      "js": ["cs.js"],
+	  "run_at": "document_start"
+    }
+  ],
+  "intents": {
+	"http://webintents.org/view": [{
+		"title": "Advanced Rest Client Application",
+		"type": ["application/restclient+data"],
+		"href": "/intentview.html",
+		"disposition" : "inline"
+	}]
+  }
+}

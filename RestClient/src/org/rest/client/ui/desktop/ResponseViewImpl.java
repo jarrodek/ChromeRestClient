@@ -139,6 +139,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	@UiField InlineLabel loadingTime;
 	@UiField InlineLabel codeContainer;
 	@UiField HTMLPanel headersPanel;
+	@UiField HTMLPanel requestHeadersPanel;
 	@UiField InlineLabel rawTab;
 	@UiField InlineLabel xmlTab;
 	@UiField InlineLabel jsonTab;
@@ -179,8 +180,8 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		
 		
 		setResponseStatus();
-		setResponseHeaders();
-		setResponseCookies();
+		//setResponseHeaders();
+		//setResponseCookies();
 		setResponseBody();
 	}
 	
@@ -211,8 +212,46 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		//
 		loadingTime.getElement().setInnerText(String.valueOf(requestTime));
 	}
-	private void setResponseHeaders() {
-		Header[] headers = response.getHeaders();
+	
+	
+	
+	@Override
+	public void setRequestHeadersExternal(ArrayList<Header> headers) {
+		final HashMap<String, ResponseHeaderLine> map = new HashMap<String, ResponseHeaderLine>();
+		ArrayList<String> list = new ArrayList<String>();
+		if(headers != null){
+			for(Header header : headers){
+				String headerName = header.getName(); 
+				ResponseHeaderLine rhl = new ResponseHeaderLine(header);
+				map.put(headerName, rhl);
+				list.add(headerName);
+				requestHeadersPanel.add(rhl);
+			}
+		}
+		listener.getRequestHeadersInfo(list, new Callback<List<HeaderRow>, Throwable>() {
+			@Override
+			public void onSuccess(List<HeaderRow> result) {
+				for(HeaderRow row : result){
+					String name = row.getName();
+					if(map.containsKey(name)){
+						ResponseHeaderLine line = map.get(name);
+						line.updateDesc(row.getDesc());
+						line.updateExample(row.getExample());
+						line.updateName(name);
+					}
+				}
+			}
+			@Override
+			public void onFailure(Throwable reason) {
+				if(RestClient.isDebug()){
+					Log.debug("Unable to get request headers help.",reason);
+				}
+			}
+		});
+	}
+
+	@Override
+	public void setResponseHeadersExternal(ArrayList<Header> headers) {
 		final HashMap<String, ResponseHeaderLine> map = new HashMap<String, ResponseHeaderLine>();
 		ArrayList<String> list = new ArrayList<String>();
 		for(Header header : headers){
@@ -224,7 +263,6 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		}
 		
 		listener.getResponseHeadersInfo(list, new Callback<List<HeaderRow>, Throwable>() {
-			
 			@Override
 			public void onSuccess(List<HeaderRow> result) {
 				for(HeaderRow row : result){
@@ -245,10 +283,8 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			}
 		});
 	}
-	private void setResponseCookies() {
-		// TODO Auto-generated method stub
-		
-	}
+	
+	
 	private void setResponseBody() {
 		if(!success || response.getStatus() == 0){
 			return;
@@ -346,6 +382,9 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		}
 		return false;
 	}
+	
+	
+	
 	
 	
 	/**
@@ -659,4 +698,6 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		var wnd = $wnd.open();
 		wnd.document.body.innerHTML = body;
 	}-*/;
+
+	
 }

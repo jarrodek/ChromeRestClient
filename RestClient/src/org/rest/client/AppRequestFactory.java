@@ -117,12 +117,31 @@ public class AppRequestFactory {
 		
 		RestClient.collectRequestData(new Callback<RequestObject, Throwable>() {
 			@Override
-			public void onSuccess(RequestObject data) {
+			public void onSuccess(final RequestObject data) {
 				saveCurrentState(data);
+				
+				
+				String requestUrl = data.getURL();
+				if(requestUrl == null || requestUrl.isEmpty()){
+					Throwable t = new Throwable("You must provide URL before request starts.");
+					reportFailure("You must provide request URL.", t);
+					return;
+				}
+				requestInProgress = true;
 				saveHistory(data);
 				//save URL for suggestion oracle
 				saveUrl(data.getURL());
-				startHttpRequest(data);
+				
+				ExternalEventsFactory.postMessage(ExternalEventsFactory.EXT_REQUEST_BEGIN, data.toJSON(), new Callback<String, Throwable>() {
+					@Override
+					public void onSuccess(String result) {
+						startHttpRequest(data);
+					}
+					
+					@Override
+					public void onFailure(Throwable reason) {}
+				});
+				
 			}
 			
 			@Override
@@ -137,13 +156,6 @@ public class AppRequestFactory {
 			Log.debug("Start new request");
 		}
 		String requestUrl = data.getURL();
-		if(requestUrl == null || requestUrl.isEmpty()){
-			Throwable t = new Throwable("You must provide URL before request starts.");
-			reportFailure("You must provide request URL.", t);
-			return;
-		}
-		requestInProgress = true;
-		
 		
 		String method = data.getMethod();
 		String payload = data.getPayload();
@@ -358,7 +370,7 @@ public class AppRequestFactory {
 			}
 		});
 		
-		//TODO: cookie capture
+//		ExternalEventsFactory.postMessage(ExternalEventsFactory.EXT_OBSERVE_COOKIE, requestUrl);
 		
 		
 		if(RestClient.isDebug()){
@@ -370,7 +382,9 @@ public class AppRequestFactory {
 			builder.send();
 		} catch (Throwable e) {
 			Log.error("Request send failure.", e);
-			//TODO: Stop cookie capture
+			
+//			ExternalEventsFactory.postMessage(ExternalEventsFactory.EXT_STOP_OBSERVE_COOKIE, null);
+			
 			eventBus.fireEvent(new RequestStopEvent(new Date()));
 			requestInProgress = false;
 			ErrorDialogView dialog = RestClient.getClientFactory().getErrorDialogView();
@@ -394,7 +408,7 @@ public class AppRequestFactory {
 	}
 	
 	protected static void onFailureRequest(Response response) {
-		//TODO: Stop cookie capture
+//		ExternalEventsFactory.postMessage(ExternalEventsFactory.EXT_STOP_OBSERVE_COOKIE, null);
 		
 		requestInProgress = false;
 		eventBus.fireEvent(new RequestStopEvent(new Date()));

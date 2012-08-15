@@ -25,6 +25,7 @@ import org.rest.client.storage.websql.StatusCodeRow;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.xhr2.client.Header;
 import com.google.gwt.xhr2.client.Response;
 
 public interface ResponseView extends IsWidget {
@@ -50,6 +51,12 @@ public interface ResponseView extends IsWidget {
 		 * @param callback
 		 */
 		void getResponseHeadersInfo(ArrayList<String> names, Callback<List<HeaderRow>, Throwable> callback);
+		/**
+		 * Get information about given request headers
+		 * @param names
+		 * @param callback
+		 */
+		void getRequestHeadersInfo(ArrayList<String> names, Callback<List<HeaderRow>, Throwable> callback);
 	}
 	/**
 	 * Sets presenter for this view
@@ -63,6 +70,16 @@ public interface ResponseView extends IsWidget {
 	 * @param requestTime Time in milliseconds 
 	 */
 	void setResponseData(boolean success, Response response, long requestTime);
+	/**
+	 * Set view data for request headers coming from background page
+	 * @param headers
+	 */
+	void setRequestHeadersExternal(ArrayList<Header> headers);
+	/**
+	 * Set view data for response headers coming from background page
+	 * @param headers
+	 */
+	void setResponseHeadersExternal(ArrayList<Header> headers);
 	
 	void clear();
 }

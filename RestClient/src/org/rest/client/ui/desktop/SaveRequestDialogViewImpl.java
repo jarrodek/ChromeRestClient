@@ -331,7 +331,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 						}
 					});
 					return;
-				} else if (_projectName.equals("")){
+				} else if (!_projectName.equals("")){
 					int projectId = -1;
 					projectNameContainer.addClassName(appStyle.hidden());
 					try{
