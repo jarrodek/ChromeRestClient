@@ -17,7 +17,7 @@ import java.util.List;
  */
 public interface HeadersService extends AppDatabase {
 	/**
-	 * Create database table. Schema: <code>name</code> - header name
+	 * Create database table.  Schema: <code>name</code> - header name
 	 * <code>desc</code> - header long desc <code>example</code> - example
 	 * <code>type</code> - request or response ONLY!
 	 * 

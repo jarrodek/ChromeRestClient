@@ -46,7 +46,6 @@ public interface SettingsView extends IsWidget {
 		
 		void changeDebugValue(boolean newValue);
 		void changeHistoryValue(boolean newValue);
-		void changeCookieCaptureValue(boolean newValue);
 		void changeHistoryAmmount(int newValue);
 	}
 	/**
@@ -60,6 +59,4 @@ public interface SettingsView extends IsWidget {
 	boolean isHistoryEnabled();
 	void setHistoryLimit(int historyLimit);
 	int getHistoryLimit();
-	void setCookieCaptureEnabled(boolean cookieCaptureEnabled);
-	boolean isCoockieCaptureEnabled();
 }

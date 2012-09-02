@@ -1,2 +1,2 @@
 eclipse.preferences.version=1
-jarsExcludedFromWebInfLib=C\:/Users/jarrod/Documents/sdk/gwt-html5-database-1.5.2.GWT.2.4/gwt-html5-database.jar|C\:/Users/jarrod/workspace/RestClient/lib/gwt-log-3.1.8.jar|C\:/Users/jarrod/workspace/RestClient/lib/gwt-xmlhttp-request-l2-library-2.4.0.jar
+jarsExcludedFromWebInfLib=C\:/Users/jarrod/Documents/sdk/gwt-html5-database-1.5.2.GWT.2.4/gwt-html5-database.jar|C\:/Users/jarrod/workspace/RestClient/lib/gwt-log-3.1.8.jar|C\:/Users/jarrod/workspace/RestClient/lib/gwt-xmlhttp-request-l2-library-2.4.0.jar|/home/jarrod/workspace/RestClient/lib/gwt-html5-database.jar|/home/jarrod/workspace/RestClient/lib/gwt-log-3.1.8.jar

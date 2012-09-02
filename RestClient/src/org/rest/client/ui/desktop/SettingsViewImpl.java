@@ -32,7 +32,6 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	
 	@UiField CheckBox debug;
 	@UiField CheckBox history;
-	@UiField CheckBox cookie;
 	@UiField(provided=true) HTML5InputNumber historyCount;
 	@UiField DivElement historyAmount;
 	@UiField DivElement historyClear;
@@ -89,16 +88,6 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 				listener.changeHistoryAmmount(value);
 			}
 		});
-		cookie.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				boolean value = event.getValue();
-				if(RestClient.isDebug()){
-					Log.debug("Cookie setting value changed. Current value is: " + value);
-				}
-				listener.changeCookieCaptureValue(value);
-			}
-		});
 	}
 	
 	@Override
@@ -145,16 +134,6 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 			return Integer.parseInt(historyCount.getValue());
 		} catch(Exception e){}
 		return 0;
-	}
-
-	@Override
-	public void setCookieCaptureEnabled(boolean cookieCaptureEnabled) {
-		cookie.setValue(cookieCaptureEnabled);
-	}
-
-	@Override
-	public boolean isCoockieCaptureEnabled() {
-		return cookie.getValue();
 	}
 	
 	@UiHandler("clearHistory")

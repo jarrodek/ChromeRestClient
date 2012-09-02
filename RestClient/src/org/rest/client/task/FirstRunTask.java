@@ -58,8 +58,8 @@ public class FirstRunTask implements LoadTask {
 		this.lastRun = lastRun;
 		callback.onInnerTaskFinished(1);
 		// this is first run. lest's get to work! :)
-		// Download headers definitions and insert to DB
-		// Download status codes definitions and insert to DB
+		// Download headers and status codes definitions and insert to DB
+		// TODO: IMPORTANT! set default form encodings, json headers, sample URL (some Google API)
 		downloadDefinitionsTask();
 	}
 

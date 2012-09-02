@@ -8,6 +8,8 @@ import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.WebSqlAdapter;
 import org.rest.client.task.ui.LoaderWidget;
 
+import com.allen_sauer.gwt.log.client.Log;
+
 /**
  * The first task during startup. Initialize databases and set handlers to
  * databases. It's call "initTable" method in each DB service which contains
@@ -25,19 +27,34 @@ public class InitializeDatabaseTask implements LoadTask {
 	@SuppressWarnings({ "rawtypes" })
 	public InitializeDatabaseTask() {
 		ClientFactory factory = RestClient.getClientFactory();
-		databases.add((WebSqlAdapter) factory.getHeadersStore());
-		databases.add((WebSqlAdapter) factory.getStatusesStore());
-		databases.add((WebSqlAdapter) factory.getHistoryRequestStore());
-		databases.add((WebSqlAdapter) factory.getUrlHistoryStore());
-		databases.add((WebSqlAdapter) factory.getFormEncodingStore());
-		databases.add((WebSqlAdapter) factory.getRequestDataStore());
-		databases.add((WebSqlAdapter) factory.getProjectsStore());
+		try{
+			databases.add((WebSqlAdapter) factory.getHeadersStore());
+			databases.add((WebSqlAdapter) factory.getStatusesStore());
+			databases.add((WebSqlAdapter) factory.getHistoryRequestStore());
+			databases.add((WebSqlAdapter) factory.getUrlHistoryStore());
+			databases.add((WebSqlAdapter) factory.getFormEncodingStore());
+			databases.add((WebSqlAdapter) factory.getRequestDataStore());
+			databases.add((WebSqlAdapter) factory.getProjectsStore());
+		} catch(Exception e){
+			e.printStackTrace();
+			Log.error("Unable to initializa database",e);
+		}
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void run(final TasksCallback callback, final boolean lastRun) {
 		final int dbCount = databases.size();
+		
+		if(dbCount == 0){
+			if(lastRun){
+				callback.onFatalError("Unable to initializa database. This is fatal.");
+				return;
+			}
+			callback.onFailure(0);
+			return;
+		}
+		
 		for (WebSqlAdapter db : databases) {
 			db.open(new StoreResultCallback<Boolean>() {
 

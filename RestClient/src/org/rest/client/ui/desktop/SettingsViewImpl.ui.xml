@@ -72,13 +72,6 @@
 			</div>
 		</section>
 		<section class="{style.optionsSection}">
-			<p>Cookie capture enabled</p>
-			<g:CheckBox ui:field="cookie" value="false"
-				text="Enable cookie capture during request"></g:CheckBox>
-			<a
-				href="http://restforchrome.blogspot.com/2011/11/cookies-capture-experimental-feature.html">read more about this</a>
-		</section>
-		<section class="{style.optionsSection}">
 			<p>Shortcuts</p>
 			<g:Button styleName="{appResources.appCss.button}" ui:field="shortCutsButton" text="Edit shortcuts"></g:Button>
 		</section>

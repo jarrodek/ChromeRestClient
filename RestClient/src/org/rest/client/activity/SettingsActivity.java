@@ -135,24 +135,6 @@ public class SettingsActivity extends AppActivity implements
 				view.setHistoryLimit(0);
 			}
 		});
-		localStore.getByKey(LocalStore.COOKIES_CAPTURE, new StoreResultCallback<String>() {
-			@Override
-			public void onSuccess(String result) {
-				
-				if(result == null || result.isEmpty()){
-					result = "false";
-				}
-				if(result.equals("true")){
-					view.setCookieCaptureEnabled(true);
-				} else {
-					view.setCookieCaptureEnabled(false);
-				}
-			}
-			@Override
-			public void onError(Throwable e) {
-				view.setCookieCaptureEnabled(false);
-			}
-		});
 	}
 
 	@Override
@@ -212,10 +194,7 @@ public class SettingsActivity extends AppActivity implements
 		}
 	}
 
-	@Override
-	public void changeCookieCaptureValue(boolean newValue) {
-		saveSetting(LocalStore.COOKIES_CAPTURE, String.valueOf(newValue));
-	}
+	
 
 	@Override
 	public void changeHistoryAmmount(int newValue) {

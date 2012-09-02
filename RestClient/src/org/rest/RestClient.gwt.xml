@@ -23,7 +23,6 @@
 	<property-provider name="inside_extension"><![CDATA[
 		{
  			return (chrome && typeof chrome.webRequest != 'undefined') ? "yes" : "no";
- 			//return "yes";
  		}
  	]]></property-provider>
  	
