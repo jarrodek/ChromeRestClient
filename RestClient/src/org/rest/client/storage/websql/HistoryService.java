@@ -55,7 +55,7 @@ public interface HistoryService extends AppDatabase {
 	 * Get data for history view. Response will include: id, url and method fields.
 	 * @param callback
 	 */
-	@Select("SELECT id,url,method FROM history ORDER BY time DESC")
+	@Select("SELECT id,url,method,time FROM history ORDER BY time DESC")
 	void getDataForHistoryView(ListCallback<HistoryObject> callback);
 	/**
 	 * Find all history items for given URL and method

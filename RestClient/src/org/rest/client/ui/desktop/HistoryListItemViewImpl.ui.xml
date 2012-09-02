@@ -2,8 +2,13 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" >
 	<ui:with field="appResources" type="org.rest.client.resources.AppResources" />
-	<ui:style>
-		.itemWrapper{ padding: 3px; margin: 3px; border-bottom: 1px rgba(229, 229, 229, 0.12) solid;}
+	<ui:style type="org.rest.client.ui.desktop.HistoryListItemViewImpl.WidgetStyle">
+		.itemWrapper{
+			padding: 3px;
+			margin: 3px 10px 3px 3px;
+			border: 1px transparent solid;
+			border-bottom: 1px rgba(229, 229, 229, 0.12) solid;
+		}
 		.listRow{}
 		.flex{
 			display: -webkit-flex;
@@ -14,10 +19,18 @@
 		}
 		.method,
 		.url,
+		.date,
 		.action{
 			-webkit-align-items: center;
 		}
-		.method{margin-right: 7px;font-weight: bold;cursor: pointer;}
+		.date{
+			margin-right: 1em;
+		}
+		.method{
+			margin-right: 1em;
+			font-weight: bold;
+			cursor: pointer;
+		}
 		.url{ 
 			-webkit-flex: 1 0 0px;
 			-moz-flex: 1 0 0px;
@@ -26,12 +39,15 @@
 			flex: 1 0 0px; 
 			margin-right: 7px;
 			cursor: pointer;
-			
+			width: 1px;
+			overflow: hidden;
+		}
+		.urlValue{
+			display: block;
+			line-height: 2em;
 			text-overflow: ellipsis;
 			overflow: hidden;
-			width: 1px;
-			display: block;
-			
+			white-space: nowrap;
 		}
 		.flex1{
 			-webkit-flex: 1 0 0px;
@@ -54,17 +70,30 @@
 			text-overflow: ellipsis;
 			white-space: pre; 
 			margin-right: 15px;
-			width: 1px;display: block;
+			width: 1px;
+			display: block;
 		}
 		.encoding{margin-right: 15px;}
 		.detailed{margin-top: 15px;}
+		.selectButton{padding: 0px;}
+		.selected{
+			border-color: #BED8FF;
+			background-color: #F7FBFF;
+			margin-bottom: 10px;
+			margin-top: 10px;
+			border-radius: 2px;
+<!-- 			box-shadow: 0px 0px 8px rgba(100, 162, 255, 0.47); -->
+		}
 	</ui:style>
-	<g:HTMLPanel addStyleNames="{style.itemWrapper}">
+	<g:HTMLPanel ui:field="container" addStyleNames="{style.itemWrapper}">
 		<div class="{style.listRow} {style.flex}">
+			<g:InlineLabel styleName="{style.date} {style.flex}" ui:field="dateLabel"></g:InlineLabel>
 			<g:InlineLabel styleName="{style.method} {style.flex}" ui:field="methodLabel"></g:InlineLabel>
-			<g:InlineLabel styleName="{style.url} {style.flex}" ui:field="urlLabel"></g:InlineLabel>
+			<g:HTMLPanel styleName="{style.url} {style.flex}" ui:field="urlLabel">
+				<g:InlineLabel styleName="{style.urlValue}" ui:field="urlValue"></g:InlineLabel>
+			</g:HTMLPanel>
 			<span class="{style.action} {style.flex}">
-				<g:Button ui:field="select" styleName="{appResources.appCss.button}">Select</g:Button>
+				<g:Button ui:field="select" styleName="{appResources.appCss.button} {style.selectButton}">Select</g:Button>
 			</span>
 		</div>
 		<div class="{appResources.appCss.hidden} {style.flex} {style.detailed}" ui:field="detailedPanel">

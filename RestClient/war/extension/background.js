@@ -1,4 +1,4 @@
-var dev = true;
+var dev = false;
 
 var requestFilter = {
 	urls : [ "<all_urls>" ],
@@ -77,20 +77,33 @@ chrome.webRequest.onBeforeRedirect.addListener(onBeforeRedirect, requestFilter,
 		[ 'responseHeaders' ]);
 chrome.webRequest.onCompleted.addListener(onRequestCompleted, requestFilter,
 		[ 'responseHeaders' ]);
+
+
+window.requestAction = function(request, callback){
+	callback = callback || new Function();
+	handleInternalMessage(request,function(responseObj){
+		callback(responseObj);
+	});
+}
+
 /**
- * Registers listener to handle extension message passing.
+ * Registers listener to handle extension message passing from content script.
  */
 chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
-	// console.log(sender.tab ? "from a content script:" + sender.tab.url :
-	// "from the extension",request, sender);
+	handleInternalMessage(request,sendResponse);
+	return true;
+});
+
+
+function handleInternalMessage(request,sendResponse){
 	if (!request.payload)
 		return;
 
 	switch (request.payload) {
 	case 'setEnvironment':
-		delete request.payload;
-		for ( var key in request) {
-			window[key] = request[key];
+		var data = JSON.parse(request.data);
+		for (var key in data) {
+			window[key] = data[key];
 		}
 		sendResponse({
 			'payload' : 'setEnvironment',
@@ -160,8 +173,9 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 		});
 		break;
 	}
-	return true;
-});
+}
+
+
 
 var declarativeRequest = {
 	notSupportedW3CHeaders : "accept-charset,accept-encoding,connection,content-length,cookie,cookie2,content-transfer-encoding,date,expect,host,keep-alive,referer,te,trailer,transfer-encoding,upgrade,user-agent,via,origin,proxy,sec"

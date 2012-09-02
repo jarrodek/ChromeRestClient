@@ -245,10 +245,8 @@ public class ShortcutHandlers {
 			@Override
 			public void onPreviewNativeEvent(NativePreviewEvent preview) {
 				final NativeEvent event = preview.getNativeEvent();
-				
 				if(event == null || event.getType() == null) return;
-				
-				if (event.getType() == null || !event.getType().equalsIgnoreCase("keydown")){
+				if (!event.getType().equalsIgnoreCase("keydown")){
 					return;
 				}
 				

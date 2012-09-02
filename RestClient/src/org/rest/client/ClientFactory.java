@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.rest.client;
 
+import org.rest.client.chrome.ChromeMessagePassing;
 import org.rest.client.storage.store.FormEncodingStoreWebSql;
 import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
@@ -70,4 +71,8 @@ public interface ClientFactory {
 	ErrorDialogView getErrorDialogView();
 	HistoryView getHistoryView();
 	HistoryListItemView getHistoryListItemView();
+	
+	
+	// Communication with extension
+	ChromeMessagePassing getChromeMessagePassing();
 }

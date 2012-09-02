@@ -6,17 +6,39 @@
 	<inherits name='com.google.gwt.place.Place' />
 
 	<inherits name='com.google.gwt.user.theme.clean.Clean' />
-<!-- 	<inherits name='com.google.gwt.user.theme.chrome.Chrome' /> -->
-<!-- 	<inherits name='com.google.gwt.user.theme.standard.Standard' /> -->
 	
 	<inherits name="com.google.gwt.resources.Resources" />
 	<inherits name="com.google.gwt.xhr2.XMLHttpRequest2" />
 	<inherits name="com.google.code.gwt.database.Html5Database" />
 	
-	<!-- Use ClientFactoryImpl by default -->
 	<replace-with class="org.rest.client.ClientFactoryImpl">
 		<when-type-is class="org.rest.client.ClientFactory" />
 	</replace-with>
+	
+	
+	<!-- Deffered binding for message passing system -->
+	<define-property name="inside_extension" values="yes,no" />
+<!-- 	<set-property name="inside_extension" value="no"/> -->
+	
+	<property-provider name="inside_extension"><![CDATA[
+		{
+ 			return (chrome && typeof chrome.webRequest != 'undefined') ? "yes" : "no";
+ 			//return "yes";
+ 		}
+ 	]]></property-provider>
+ 	
+
+	<replace-with class="org.rest.client.chrome.ChromeCSmessagePassingImpl">
+		<when-type-is class="org.rest.client.chrome.ChromeMessagePassing" />
+		<when-property-is name="inside_extension" value="no" />
+	</replace-with>
+	
+	<replace-with class="org.rest.client.chrome.ChromeMessagePassingImpl">
+		<when-type-is class="org.rest.client.chrome.ChromeMessagePassing" />
+		<when-property-is name="inside_extension" value="yes" />
+	</replace-with>
+	
+	
 	
 	<!-- Logging properties -->
 	<!-- To compile at `DEBUG`, `WARN` and `OFF` log levels (with a 3x compile time cost) -->

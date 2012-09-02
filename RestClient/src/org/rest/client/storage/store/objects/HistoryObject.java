@@ -40,7 +40,7 @@ public class HistoryObject extends JavaScriptObject {
 			encoding : null,
 			headers : null,
 			payload : null,
-			created: new Date() //order key
+			time: new Date() //order key
 		}
 	}-*/;
 	
@@ -51,16 +51,18 @@ public class HistoryObject extends JavaScriptObject {
 		return this.id;
 	}-*/;
 	
-	public final native void setCreated(Date created) /*-{
-		this.created = created;
-	}-*/;
-
-	public final native Date getCreated() /*-{
-		return this.created;
+	public final native void setTime(Date time) /*-{
+		this.time = tiom;
 	}-*/;
 	
 	public final native double getTime() /*-{
-		return this.created.getTime();
+		if(!this.time){
+			this.time = Date.now();
+		}
+		if(typeof this.time == 'number'){
+			return this.time;
+		}
+		return this.time.getTime();
 	}-*/;
 	
 	/**

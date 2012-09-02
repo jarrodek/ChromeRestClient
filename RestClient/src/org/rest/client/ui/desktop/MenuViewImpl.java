@@ -47,7 +47,6 @@ public class MenuViewImpl extends Composite implements MenuView {
 		
 		sinkEvents(Event.ONMOUSEDOWN | Event.ONCLICK | Event.KEYEVENTS);
 		Accessibility.setRole(getElement(), Accessibility.ROLE_TREE);
-		
 	}
 	
 	
@@ -71,13 +70,14 @@ public class MenuViewImpl extends Composite implements MenuView {
 	@Override
 	public void setOpened(int pos) {
 		if(pos + 1 < childrenCount) return;
-		((MenuItemView) root.getWidget(pos)).setOpened(true);
+		Widget item = root.getWidget(pos);
+		if(item == null) return;
+		((MenuItemView) item).setOpened(true);
 	}
 
 
 	@Override
 	public void setOpened(MenuItemView item) {
-		
 		int cnt = root.getWidgetCount();
 		for(int i = 0; i<cnt; i++){
 			Widget w = root.getWidget(i);
@@ -88,7 +88,6 @@ public class MenuViewImpl extends Composite implements MenuView {
 				}
 			}
 		}
-		
 	}
 
 

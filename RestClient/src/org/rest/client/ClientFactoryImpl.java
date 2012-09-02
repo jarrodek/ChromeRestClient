@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.rest.client;
 
+import org.rest.client.chrome.ChromeMessagePassing;
 import org.rest.client.storage.store.FormEncodingStoreWebSql;
 import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
@@ -57,28 +58,33 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 
 public class ClientFactoryImpl implements ClientFactory {
-	
+
 	private static final EventBus eventBus = new SimpleEventBus();
-	private static final PlaceController placeController = new PlaceController(eventBus);
+	private static final PlaceController placeController = new PlaceController(
+			eventBus);
 	private static RequestView requestView = null;
-//	private static ResponseView responseView = null;
-//	private static AboutView aboutView = null;
+	// private static ResponseView responseView = null;
+	// private static AboutView aboutView = null;
 	private static MenuView menu = null;
-//	private static SettingsView settingsView = null;
+	// private static SettingsView settingsView = null;
 	private static LocalStore latestRequestStore = null;
 	private static RequestDataStoreWebSql requestDataStore = null;
 	private static HistoryRequestStoreWebSql historyRequestStore = null;
 	private static FormEncodingStoreWebSql formEncodingStore = null;
 	private static UrlHistoryStoreWebSql urlHistoryStore = null;
 	private static HeadersStoreWebSql headersStore = null;
-	private static StatusesStoreWebSql statusesStore = null; 
+	private static StatusesStoreWebSql statusesStore = null;
 	private static ProjectStoreWebSql projectsStore = null;
-	
+	/**
+	 * It must be cached and created only once!
+	 */
+	private static ChromeMessagePassing chromeMessagePassing = null;
+
 	@Override
 	public EventBus getEventBus() {
 		return eventBus;
 	}
-	
+
 	@Override
 	public PlaceController getPlaceController() {
 		return placeController;
@@ -86,24 +92,24 @@ public class ClientFactoryImpl implements ClientFactory {
 
 	@Override
 	public RequestView getRequestView() {
-		if(requestView == null){
+		if (requestView == null) {
 			requestView = GWT.create(RequestViewImpl.class);
 		}
 		return requestView;
 	}
-	
+
 	@Override
-	public ResponseView getResponseView(){
-//		if(responseView == null){
-//			responseView = GWT.create(ResponseView.class);
-//		}
-//		return responseView;
+	public ResponseView getResponseView() {
+		// if(responseView == null){
+		// responseView = GWT.create(ResponseView.class);
+		// }
+		// return responseView;
 		return GWT.create(ResponseViewImpl.class);
 	}
-	
+
 	@Override
 	public MenuView getMenuView() {
-		if(menu == null){
+		if (menu == null) {
 			menu = new MenuViewImpl();
 		}
 		return menu;
@@ -118,7 +124,7 @@ public class ClientFactoryImpl implements ClientFactory {
 
 	@Override
 	public LocalStore getLocalStore() {
-		if(latestRequestStore == null){
+		if (latestRequestStore == null) {
 			latestRequestStore = GWT.create(LocalStore.class);
 		}
 		return latestRequestStore;
@@ -126,7 +132,7 @@ public class ClientFactoryImpl implements ClientFactory {
 
 	@Override
 	public RequestDataStoreWebSql getRequestDataStore() {
-		if(requestDataStore == null){
+		if (requestDataStore == null) {
 			requestDataStore = GWT.create(RequestDataStoreWebSql.class);
 		}
 		return requestDataStore;
@@ -134,20 +140,19 @@ public class ClientFactoryImpl implements ClientFactory {
 
 	@Override
 	public HistoryRequestStoreWebSql getHistoryRequestStore() {
-		if(historyRequestStore == null){
+		if (historyRequestStore == null) {
 			historyRequestStore = GWT.create(HistoryRequestStoreWebSql.class);
 		}
 		return historyRequestStore;
 	}
-	
+
 	@Override
 	public ProjectStoreWebSql getProjectsStore() {
-		if(projectsStore == null){
+		if (projectsStore == null) {
 			projectsStore = GWT.create(ProjectStoreWebSql.class);
 		}
 		return projectsStore;
 	}
-	
 
 	@Override
 	public AddEncodingView getAddEncodingView(EventBus eventBus) {
@@ -158,15 +163,15 @@ public class ClientFactoryImpl implements ClientFactory {
 
 	@Override
 	public FormEncodingStoreWebSql getFormEncodingStore() {
-		if(formEncodingStore == null){
+		if (formEncodingStore == null) {
 			formEncodingStore = GWT.create(FormEncodingStoreWebSql.class);
 		}
 		return formEncodingStore;
 	}
-	
+
 	@Override
-	public UrlHistoryStoreWebSql getUrlHistoryStore(){
-		if(urlHistoryStore == null){
+	public UrlHistoryStoreWebSql getUrlHistoryStore() {
+		if (urlHistoryStore == null) {
 			urlHistoryStore = GWT.create(UrlHistoryStoreWebSql.class);
 		}
 		return urlHistoryStore;
@@ -174,7 +179,7 @@ public class ClientFactoryImpl implements ClientFactory {
 
 	@Override
 	public HeadersStoreWebSql getHeadersStore() {
-		if(headersStore == null){
+		if (headersStore == null) {
 			headersStore = GWT.create(HeadersStoreWebSql.class);
 		}
 		return headersStore;
@@ -182,7 +187,7 @@ public class ClientFactoryImpl implements ClientFactory {
 
 	@Override
 	public StatusesStoreWebSql getStatusesStore() {
-		if(statusesStore == null){
+		if (statusesStore == null) {
 			statusesStore = GWT.create(StatusesStoreWebSql.class);
 		}
 		return statusesStore;
@@ -190,19 +195,19 @@ public class ClientFactoryImpl implements ClientFactory {
 
 	@Override
 	public AboutView getAboutView() {
-//		if(aboutView == null){
-//			aboutView = GWT.create(AboutViewImpl.class);
-//		}
-//		return aboutView;
-		return  GWT.create(AboutViewImpl.class);
+		// if(aboutView == null){
+		// aboutView = GWT.create(AboutViewImpl.class);
+		// }
+		// return aboutView;
+		return GWT.create(AboutViewImpl.class);
 	}
 
 	@Override
 	public SettingsView getSettingsView() {
-//		if(settingsView == null){
-//			settingsView = GWT.create(SettingsViewImpl.class);
-//		}
-//		return settingsView;
+		// if(settingsView == null){
+		// settingsView = GWT.create(SettingsViewImpl.class);
+		// }
+		// return settingsView;
 		return GWT.create(SettingsViewImpl.class);
 	}
 
@@ -234,5 +239,15 @@ public class ClientFactoryImpl implements ClientFactory {
 	@Override
 	public HistoryListItemView getHistoryListItemView() {
 		return GWT.create(HistoryListItemViewImpl.class);
+	}
+
+	@Override
+	public ChromeMessagePassing getChromeMessagePassing() {
+		if (chromeMessagePassing == null) {
+			// in deferred binder change this class to one that can handle
+			// message passing without content script
+			chromeMessagePassing = GWT.create(ChromeMessagePassing.class);
+		}
+		return chromeMessagePassing;
 	}
 }

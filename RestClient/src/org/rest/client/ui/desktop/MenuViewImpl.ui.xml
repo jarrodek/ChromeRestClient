@@ -10,7 +10,5 @@
 			list-style: none;
 		}
 	</ui:style>
-	<rcui:ListPanel ui:field="root" styleName="{style.menuPanel}">
-	
-	</rcui:ListPanel>
+	<rcui:ListPanel ui:field="root" styleName="{style.menuPanel}"></rcui:ListPanel>
 </ui:UiBinder>

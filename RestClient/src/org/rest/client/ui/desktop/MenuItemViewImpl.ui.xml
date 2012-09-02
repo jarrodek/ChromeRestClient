@@ -3,7 +3,7 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:rcui="urn:import:org.rest.client.ui.html5">
 	<ui:with field="appResources" type="org.rest.client.resources.AppResources"/>
-	<ui:style>
+	<ui:style type="org.rest.client.ui.desktop.MenuItemViewImpl.WidgetStyle">
 		.item{
 			list-style: none;
 			padding: 5px 0;
@@ -11,10 +11,14 @@
 			cursor: pointer;
 			padding-left: 10px;
 			border-left: 3px white solid;
+
 		}
-		.item[aria-selected="true"] {
+		.selected {
 			color: #DD4B39;
 			border-left: 3px #DD4B39 solid;
+		}
+		.hover{
+			background-color: #EEE;
 		}
 	</ui:style>
 	<rcui:ListItem ui:field="mainListItem" styleName="{style.item}">

@@ -24,12 +24,14 @@ public class InitializeAppHandlersTask implements LoadTask {
 		callback.onInnerTaskFinished(1);
 		AppRequestFactory.initialize(eventBus);
 		callback.onInnerTaskFinished(1);
+		RestClient.getClientFactory().getChromeMessagePassing();
+		callback.onInnerTaskFinished(1);
 		callback.onSuccess();
 	}
 
 	@Override
 	public int getTasksCount() {
-		return 4;
+		return 5;
 	}
 
 	@Override

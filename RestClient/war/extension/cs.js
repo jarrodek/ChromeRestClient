@@ -1,9 +1,7 @@
 
-window.addEventListener('ARC:READY',function(e){
-	chrome.extension.sendMessage({"payload":"setEnvironment", 'dev':true}, function(response) {
-		console.log('set dev flag in background page.',response);
-	});
-},false);
+//window.addEventListener('ARC:READY',function(e){
+//	
+//},false);
 
 window.addEventListener("message", receiveMessage, false);
 
@@ -19,6 +17,9 @@ function receiveMessage(e){
 	
 	if(data.payload){
 		switch(data.payload){
+			case 'setEnvironment':
+			chrome.extension.sendMessage(data, function(response) {});
+			break;
 			case "requestBegin": 
 				chrome.extension.sendMessage(data, function(response) {
 					window.postMessage({"source":"arc:cs", "payload":"requestBegin"}, location.href);

@@ -82,16 +82,14 @@ public class XMLViewer extends Composite {
 	
 	
 	private String parse(Node node, int indent){
-		
 		int indentValue = indent * 10;
-		
+		int maginLeftValue = 0;
 		String parsed = "";
-		
 		String name = node.getNodeName();
 		int type = node.getNodeType();
 		boolean hasChildren = node.hasChildNodes();
 		int childrenCount = 0;
-		if( hasChildren ){
+		if(hasChildren){
 			childrenCount = node.getChildCount();
 		}
 		XMLNode nodeElement = ((XMLNode) node);
@@ -101,7 +99,7 @@ public class XMLViewer extends Composite {
 			case Document.ELEMENT_NODE: //ELEMENT_NODE, value null
 				boolean showArrows = false;
 				
-				if ( childrenCount > 1 ){
+				if (childrenCount > 1){
 					parsed += "<span class=\""+style.arrowExpanded()+"\">&nbsp;</span>";
 					indent++;
 					showArrows = true;
@@ -115,7 +113,7 @@ public class XMLViewer extends Composite {
 						parsed += " " + this.getAttributesString( attr.get(i) );
 					}
 				}
-				if( hasChildren ){
+				if(hasChildren){
 					parsed += "<span class=\""+style.punctuation()+"\">&gt;</span>";
 					NodeList<Node> children = node.getChildNodes();
 					
@@ -126,36 +124,33 @@ public class XMLViewer extends Composite {
 					}
 					
 					int nextIndent = indent;
-					if( showInline ){
+					if(showInline){
 						parsed += "<div class=\""+style.inline()+"\">";
 						nextIndent = 0;
 					} else {
 						nextIndent++;
 					}
-					
 					for(int i=0; i<childrenCount; i++){
-						parsed += this.parse( children.getItem(i), nextIndent );
+						parsed += this.parse(children.getItem(i), nextIndent);
 					}
-					
-					if( showInline ){
+					if(showInline){
 						parsed += "</div>";
 					}
-					
-					if( showArrows ){
-						parsed += "<span class=\""+style.arrowEmpty()+"\">&nbsp;</span>";						
+					String styleData = "";
+					if(showArrows){
+						parsed += "<span style=\"margin-left:"+indentValue+"px;\" class=\""+style.arrowEmpty()+"\">&nbsp;</span>";
+						styleData = "";
 					}
-					
-					parsed += "<span class=\""+style.punctuation()+"\">&lt;/</span>";
-					parsed += "<span class=\""+style.tagname()+"\">"+name+"</span>";
-					parsed += "<span class=\""+style.punctuation()+"\">&gt;</span>";
+					parsed += "<span "+styleData+"class=\""+style.punctuation()+"\">&lt;/</span>";
+					parsed += "<span data-test3 class=\""+style.tagname()+"\">"+name+"</span>";
+					parsed += "<span data-test4 class=\""+style.punctuation()+"\">&gt;</span>";
 				} else {
-					parsed += "<span class=\""+style.punctuation()+"\"> /&gt;</span>";
+					parsed += "<span data-test5 class=\""+style.punctuation()+"\"> /&gt;</span>";
 				}
 				
 				break;
 			case 2: //ATTRIBUTE_NODE, attribute value
 				parsed += "ATTRIBUTE_NODE";
-//				Log.debug(parsed);
 				return "";
 			case Document.TEXT_NODE: //TEXT_NODE, content of node
 				String value = node.getNodeValue();
@@ -166,20 +161,19 @@ public class XMLViewer extends Composite {
 				break;
 			case 4: //CDATA_SECTION_NODE, content of node
 				parsed += "<span class=\""+style.cdata()+"\">&lt;![CDATA[</span>";
-				parsed += SafeHtmlUtils.htmlEscape( node.getNodeValue() ).replace("\n", "<br/>");
+				parsed += SafeHtmlUtils.htmlEscape(node.getNodeValue()).replace("\n", "<br/>");
 				parsed += "<span class=\""+style.cdata()+"\">]]&gt;</span>";
+				maginLeftValue = indentValue; 
+				indentValue = 0;
 				break;
 			case 5: //ENTITY_REFERENCE_NODE, value null
 				parsed += "ENTITY_REFERENCE_NODE";
-//				Log.debug(parsed);
 				return "";
 			case 6: //ENTITY_NODE, value null
 				parsed += "ENTITY_NODE";
-//				Log.debug(parsed);
 				return "";
 			case 7: //PROCESSING_INSTRUCTION_NODE, content of node
 				parsed += "PROCESSING_INSTRUCTION_NODE";
-//				Log.debug(parsed);
 				return "";
 			case 8: //COMMENT_NODE, comment text
 				parsed += "<span class=\""+style.comment()+"\">&lt;--";
@@ -188,23 +182,26 @@ public class XMLViewer extends Composite {
 				break;
 			case Document.DOCUMENT_NODE: //DOCUMENT_NODE, value null
 				parsed += "DOCUMENT_NODE";
-//				Log.debug(parsed);
 				return "";
 			case 10: //DOCUMENT_TYPE_NODE, value null
 				parsed += "DOCUMENT_TYPE_NODE";
-//				Log.debug(parsed);
 				return "";
 			case 11: //DOCUMENT_FRAGMENT_NODE, value null
 				parsed += "DOCUMENT_FRAGMENT_NODE";
-//				Log.debug(parsed);
 				return "";
 			case 12: //NOTATION_NODE, value null
 				parsed += "NOTATION_NODE";
-//				Log.debug(parsed);
 				return "";
 		}
 		
-		parsed = "<div class=\""+style.node()+"\" style=\"text-indent: "+indentValue+"px;\">"+parsed+"</div>";
+		String styleStr = "";
+//		if(indentValue > 0){
+			styleStr += "text-indent: " + indentValue+"px;";
+//		}
+		if(maginLeftValue > 0){
+			styleStr += "margin-left: " + maginLeftValue+"px;";
+		}
+		parsed = "<div class=\""+style.node()+"\" style=\""+styleStr+"\">"+parsed+"</div>";
 		return parsed;
 	}
 	

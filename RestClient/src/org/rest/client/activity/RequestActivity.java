@@ -142,7 +142,7 @@ public class RequestActivity extends AppActivity implements
 				/**
 				 * Get request and response headers data from Chrome Extensions API
 				 */
-				ExternalEventsFactory.postMessage(ExternalEventsFactory.EXT_GET_COLLECTED_REQUEST_DATA, null, new Callback<String, Throwable>() {
+				clientFactory.getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_GET_COLLECTED_REQUEST_DATA, null, new Callback<String, Throwable>() {
 					@Override
 					public void onSuccess(String result) {
 						if(result == null){
@@ -280,7 +280,7 @@ public class RequestActivity extends AppActivity implements
 	
 	
 	private void createExternalRequest(final RequestView view, final String requestUUID){
-		ExternalEventsFactory.postMessage(ExternalEventsFactory.EXT_GET_EXTERNAL_REQUEST_DATA, requestUUID, new Callback<String, Throwable>() {
+		clientFactory.getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_GET_EXTERNAL_REQUEST_DATA, requestUUID, new Callback<String, Throwable>() {
 			@Override
 			public void onSuccess(String result) {
 				if(result.isEmpty()){

@@ -83,22 +83,6 @@ h1.at {
 	margin-top: 10px;
 }
 
-.ls ul>li {
-	padding: 5px 0;
-	margin: 4px 0;
-	cursor: pointer;
-	padding-left: 10px;
-	border-left: 3px white solid;
-}
-
-.ls ul>li[aria-selected="true"] {
-	color: #DD4B39;
-	border-left: 3px #DD4B39 solid;
-}
-
-.ls ul>li:hover {
-	background-color: #EEE;
-}
 
 .hidden {
 	display: none;

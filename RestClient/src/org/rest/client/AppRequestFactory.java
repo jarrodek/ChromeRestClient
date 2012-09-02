@@ -132,7 +132,7 @@ public class AppRequestFactory {
 				//save URL for suggestion oracle
 				saveUrl(data.getURL());
 				
-				ExternalEventsFactory.postMessage(ExternalEventsFactory.EXT_REQUEST_BEGIN, data.toJSON(), new Callback<String, Throwable>() {
+				RestClient.getClientFactory().getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_REQUEST_BEGIN, data.toJSON(), new Callback<String, Throwable>() {
 					@Override
 					public void onSuccess(String result) {
 						startHttpRequest(data);

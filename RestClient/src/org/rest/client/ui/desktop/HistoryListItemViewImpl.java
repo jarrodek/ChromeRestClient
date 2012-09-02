@@ -1,5 +1,7 @@
 package org.rest.client.ui.desktop;
 
+import java.util.Date;
+
 import org.rest.client.resources.AppCssResource;
 import org.rest.client.resources.AppResources;
 import org.rest.client.storage.store.objects.HistoryObject;
@@ -11,10 +13,15 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -25,14 +32,20 @@ public class HistoryListItemViewImpl extends Composite implements HistoryListIte
 
 	interface HistoryListItemViewImplUiBinder extends UiBinder<Widget, HistoryListItemViewImpl> {
 	}
+	interface WidgetStyle extends CssResource {
+		String selected();
+	}
 	
 	@UiField InlineLabel methodLabel;
-	@UiField InlineLabel urlLabel;
+	@UiField InlineLabel urlValue;
+	@UiField InlineLabel dateLabel;
 	@UiField SpanElement encoding;
 	@UiField SpanElement payload;
 	@UiField SpanElement headers;
 	@UiField DivElement detailedPanel;
-	
+	@UiField HTMLPanel urlLabel;
+	@UiField HTMLPanel container;
+	@UiField WidgetStyle style;
 	
 	AppCssResource appStyle = AppResources.INSTANCE.appCss();
 	HistoryView parentList = null;
@@ -40,7 +53,15 @@ public class HistoryListItemViewImpl extends Composite implements HistoryListIte
 	private boolean fullHistoryObject = false;
 	
 	public HistoryListItemViewImpl(){
+		
 		initWidget(uiBinder.createAndBindUi(this));
+		urlLabel.addDomHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent e) {
+				e.preventDefault();
+				doOnExpand();
+			}
+		}, ClickEvent.getType());
 	}
 
 	@Override
@@ -55,16 +76,21 @@ public class HistoryListItemViewImpl extends Composite implements HistoryListIte
 
 	@Override
 	public void setURL(String url) {
-		this.urlLabel.setText(url);
+		this.urlValue.setText(url);
 	}
 	@Override
 	public void setItemId(int id) {
 		this.historyId = id;
 	}
 	
-	@UiHandler({"methodLabel","urlLabel"})
+	@UiHandler({"methodLabel"})
 	void onExpand(ClickEvent e){
 		e.preventDefault();
+		doOnExpand();
+	}
+	
+	
+	private void doOnExpand(){
 		if(detailedPanel.getClassName().contains(appStyle.hidden())){
 			expandDetails();
 		} else {
@@ -103,13 +129,23 @@ public class HistoryListItemViewImpl extends Composite implements HistoryListIte
 					StatusNotification.notify("Unable to read history data :(",StatusNotification.TYPE_ERROR);
 				}
 			});
+			container.addStyleName(style.selected());
 			detailedPanel.removeClassName(appStyle.hidden());
 		} else {
+			container.addStyleName(style.selected());
 			detailedPanel.removeClassName(appStyle.hidden());
 		}
 	}
 	
 	void hideDetails(){
+		container.removeStyleName(style.selected());
 		detailedPanel.addClassName(appStyle.hidden());
+	}
+
+	@Override
+	public void setDate(Date date) {
+		String data = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(date);
+		DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(date);
+		dateLabel.setText(data);
 	}	
 }

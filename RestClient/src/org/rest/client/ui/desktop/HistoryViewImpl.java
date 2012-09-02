@@ -1,5 +1,6 @@
 package org.rest.client.ui.desktop;
 
+import java.sql.Date;
 import java.util.List;
 
 import org.rest.client.RestClient;
@@ -78,6 +79,9 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 			item.setMethod(history.getMethod());
 			item.setURL(history.getURL());
 			item.setItemId(history.getId());
+			long time = (long) history.getTime();
+			Date d = new Date(time);
+			item.setDate(d);
 			root.add(item);
 		}
 		

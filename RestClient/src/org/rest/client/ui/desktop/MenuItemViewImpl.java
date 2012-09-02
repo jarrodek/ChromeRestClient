@@ -18,34 +18,54 @@ package org.rest.client.ui.desktop;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.rest.client.resources.AppCssResource;
+import org.rest.client.resources.AppResources;
 import org.rest.client.ui.MenuItemView;
 import org.rest.client.ui.MenuView;
 import org.rest.client.ui.html5.HTML5Element;
 import org.rest.client.ui.html5.ListItem;
+import org.rest.client.ui.html5.ListPanel;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.place.shared.Place;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
 public class MenuItemViewImpl extends Composite implements MenuItemView,
-		ClickHandler {
+		ClickHandler, MouseOutHandler, MouseOverHandler {
 	private static RequestViewImplUiBinder uiBinder = GWT
 			.create(RequestViewImplUiBinder.class);
 
 	interface RequestViewImplUiBinder extends
 			UiBinder<Widget, MenuItemViewImpl> {
 	}
+	
+	
+	interface WidgetStyle extends CssResource {
+		String selected();
+		String hover();
+	}
 
 	private HTML5Element _element = null;
 	private Place place = null;
 	private Presenter listener = null;
 	private ArrayList<MenuItemViewImpl> children = new ArrayList<MenuItemViewImpl>();
+	private ListPanel childrenPanel;
+	
+	@UiField WidgetStyle style;
+	
+	
 	/**
 	 * Parent menu
 	 */
@@ -56,9 +76,11 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 	private MenuView root;
 	
 	@UiField ListItem mainListItem;
+	private AppCssResource appStyle;
 	
 	
 	public MenuItemViewImpl() {
+		appStyle = AppResources.INSTANCE.appCss();
 		initWidget(uiBinder.createAndBindUi(this));
 		_element = (HTML5Element) getElement();
 
@@ -66,6 +88,8 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 		getElement().setAttribute("role", "tab");
 
 		addDomHandler(this, ClickEvent.getType());
+		addDomHandler(this, MouseOverEvent.getType());
+		addDomHandler(this, MouseOutEvent.getType());
 	}
 	
 	
@@ -74,6 +98,7 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 	public void addChild(MenuItemView item) {
 		MenuItemViewImpl it = (MenuItemViewImpl) item;
 		maybeRemoveItemFromParent(item);
+		
 		add(it);
 		children.add(it);
 	}
@@ -95,8 +120,11 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 
 	@Override
 	public void add(Widget w) {
-		mainListItem.add(w);
-
+		if(childrenPanel == null){
+			childrenPanel = new ListPanel();
+			mainListItem.add(childrenPanel);
+		}
+		childrenPanel.add(w);
 	}
 
 	@Override
@@ -130,23 +158,43 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 			root.deselectCurrent();
 		}
 		getElement().setAttribute("aria-selected", String.valueOf(isSelected));
+		if(isSelected)
+			addStyleName(style.selected());
+		else
+			removeStyleName(style.selected());
 	}
 
 	@Override
 	public void setOpened(boolean isOpened) {
-		//TODO: open children tree
+		if(children.size() == 0) return;
+		if(isOpened){
+			childrenPanel.removeStyleName(appStyle.hidden());
+		} else {
+			childrenPanel.addStyleName(appStyle.hidden());
+		}
 	}
 
+	public boolean isOpened(){
+		if(children.size() == 0) return false;
+		return !childrenPanel.getStyleName().contains(appStyle.hidden());
+	}
+	
+	
 	@Override
 	public void onClick(ClickEvent event) {
+		event.stopPropagation();
+		event.preventDefault();
+		
+		Element e = event.getNativeEvent().getCurrentEventTarget().cast();
+		if(!(e != null && e.equals(getElement()))) return;
 		
 		if (children.size() > 0) {
-			setOpened(true);
+			setOpened(!isOpened());
 		} else {
 			if (place != null && listener != null) {
 				listener.goTo(place);
 			} else {
-				Log.debug("Something is wrong ..");
+				Log.debug("Something is wrong .. " + (place != null) + ", " + (listener != null) );
 			}
 		}
 	}
@@ -180,5 +228,18 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 	@Override
 	public void setRoot(MenuView root) {
 		this.root = root;
+	}
+
+
+
+	@Override
+	public void onMouseOver(MouseOverEvent event) {
+		if(children.size() > 0) return;
+		addStyleName(style.hover());
+	}
+
+	@Override
+	public void onMouseOut(MouseOutEvent event) {
+		removeStyleName(style.hover());
 	}
 }
