@@ -459,10 +459,12 @@ public class AppRequestFactory {
 					if(!item.getEncoding().equals(data.getEncoding())){
 						continue;
 					}
-					if(!item.getHeaders().equals(data.getHeaders())){
+					String itemHeaders = item.getHeaders();
+					if(itemHeaders != null && !itemHeaders.equals(data.getHeaders())){
 						continue;
 					}
-					if(!item.getPayload().equals(data.getPayload())){
+					String itemPayload = item.getPayload();
+					if(itemPayload != null && !itemPayload.equals(data.getPayload())){
 						continue;
 					}
 					found = true;

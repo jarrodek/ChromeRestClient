@@ -258,9 +258,9 @@ public class RequestUrlWidget extends Composite implements HasText {
 		valueBox.getElement().setAttribute("placeholder", "value");
 		
 		valueBox.addStyleName(style.queryParamValueInput());
-		removeButton.addStyleName(AppResources.INSTANCE.appCss().removeButton());
-		encodeButton.addStyleName(AppResources.INSTANCE.appCss().formCtrl());
-		decodeButton.addStyleName(AppResources.INSTANCE.appCss().formCtrl());
+		removeButton.setStyleName(AppResources.INSTANCE.appCss().removeButton());
+		encodeButton.setStyleName(AppResources.INSTANCE.appCss().formCtrl());
+		decodeButton.setStyleName(AppResources.INSTANCE.appCss().formCtrl());
 		
 		removeButton.setTitle("Remove");
 		encodeButton.setTitle("Encode query string. Use CTRL to replace + with %20");
