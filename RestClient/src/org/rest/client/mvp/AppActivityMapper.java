@@ -18,13 +18,11 @@ package org.rest.client.mvp;
 import org.rest.client.ClientFactory;
 import org.rest.client.activity.AboutActivity;
 import org.rest.client.activity.HistoryActivity;
-import org.rest.client.activity.JSONHeadersActivity;
 import org.rest.client.activity.RequestActivity;
 import org.rest.client.activity.SettingsActivity;
 import org.rest.client.activity.ShortcutActivity;
 import org.rest.client.place.AboutPlace;
 import org.rest.client.place.HistoryPlace;
-import org.rest.client.place.JSONHeadersPlace;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SettingsPlace;
 import org.rest.client.place.ShortcutPlace;
@@ -60,8 +58,6 @@ public class AppActivityMapper implements ActivityMapper {
 			return new AboutActivity((AboutPlace)place, clientFactory);
 		} else if (place instanceof SettingsPlace){
 			return new SettingsActivity((SettingsPlace)place, clientFactory);
-		} else if (place instanceof JSONHeadersPlace){
-			return new JSONHeadersActivity((JSONHeadersPlace)place, clientFactory);
 		} else if (place instanceof ShortcutPlace){
 			return new ShortcutActivity((ShortcutPlace)place, clientFactory);
 		} else if(place instanceof HistoryPlace){

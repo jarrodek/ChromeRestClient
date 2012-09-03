@@ -1,7 +1,6 @@
 package org.rest.client.ui.desktop;
 
 import org.rest.client.RestClient;
-import org.rest.client.place.JSONHeadersPlace;
 import org.rest.client.place.ShortcutPlace;
 import org.rest.client.resources.AppCssResource;
 import org.rest.client.resources.AppResources;
@@ -140,10 +139,7 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	void onClearHistory(ClickEvent e){
 		listener.clearHistory();
 	}
-	@UiHandler("jsonHeadersWidget")
-	void onJSONHeadersManage(ClickEvent e){
-		listener.goTo(new JSONHeadersPlace("edit"));
-	}
+	
 	@UiHandler("shortCutsButton")
 	void onShortcutsEdit(ClickEvent e){
 		listener.goTo(new ShortcutPlace("edit"));

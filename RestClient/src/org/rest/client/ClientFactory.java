@@ -29,7 +29,6 @@ import org.rest.client.ui.AddEncodingView;
 import org.rest.client.ui.ErrorDialogView;
 import org.rest.client.ui.HistoryListItemView;
 import org.rest.client.ui.HistoryView;
-import org.rest.client.ui.JSONHeadersView;
 import org.rest.client.ui.MenuItemView;
 import org.rest.client.ui.MenuView;
 import org.rest.client.ui.RequestView;
@@ -65,7 +64,6 @@ public interface ClientFactory {
 	MenuView getMenuView();
 	MenuItemView createMenuItem(org.rest.client.ui.MenuItemView.Presenter presenter);
 	SettingsView getSettingsView();
-	JSONHeadersView getJSONHeadersView();
 	ShortcutView getShortcutView();
 	SaveRequestDialogView getSaveRequestDialogView();
 	ErrorDialogView getErrorDialogView();

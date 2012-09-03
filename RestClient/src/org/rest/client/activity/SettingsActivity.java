@@ -151,11 +151,6 @@ public class SettingsActivity extends AppActivity implements
 			}
 		});
 	}
-
-	@Override
-	public void addJSONHeader(String headerValue) {
-		
-	}
 	
 	
 	private void saveSetting(String key, String value){

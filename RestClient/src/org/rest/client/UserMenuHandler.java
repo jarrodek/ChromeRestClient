@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.rest.client.place.AboutPlace;
 import org.rest.client.place.HistoryPlace;
-import org.rest.client.place.JSONHeadersPlace;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SettingsPlace;
 import org.rest.client.storage.StoreResultCallback;
@@ -98,8 +97,7 @@ public class UserMenuHandler {
 							about.setSelected(true);
 						} else if(newPlace instanceof RequestPlace){
 							request.setSelected(true);
-						} else if(newPlace instanceof SettingsPlace
-								|| newPlace instanceof JSONHeadersPlace){
+						} else if(newPlace instanceof SettingsPlace){
 							settings.setSelected(true);
 						} else if(newPlace instanceof HistoryPlace){
 							history.setSelected(true);

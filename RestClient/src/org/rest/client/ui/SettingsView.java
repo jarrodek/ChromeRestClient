@@ -38,11 +38,6 @@ public interface SettingsView extends IsWidget {
 		 * Clears application requests history
 		 */
 		void clearHistory();
-		/**
-		 * Add new JSON header to recognize response as JSON.
-		 * @param headerValue
-		 */
-		void addJSONHeader(String headerValue);
 		
 		void changeDebugValue(boolean newValue);
 		void changeHistoryValue(boolean newValue);

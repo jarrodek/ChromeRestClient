@@ -10,12 +10,16 @@ import org.rest.client.request.AssetRequest;
 import org.rest.client.request.AssetStringCallback;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.HeadersStoreWebSql;
+import org.rest.client.storage.store.LocalStore;
 import org.rest.client.storage.store.StatusesStoreWebSql;
+import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.storage.websql.HeaderRow;
 import org.rest.client.storage.websql.StatusCodeRow;
 import org.rest.client.task.ui.LoaderWidget;
+import org.rest.client.util.JSONHeadersUtils;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
@@ -59,10 +63,43 @@ public class FirstRunTask implements LoadTask {
 		callback.onInnerTaskFinished(1);
 		// this is first run. lest's get to work! :)
 		// Download headers and status codes definitions and insert to DB
-		// TODO: IMPORTANT! set default form encodings, json headers, sample URL (some Google API)
-		downloadDefinitionsTask();
+		setApplicationData();
 	}
-
+	
+	
+	private void setApplicationData(){
+		
+		RequestObject ro = RequestObject.createRequest();
+		ro.setMethod("GET");
+		ro.setURL("http://gdata.youtube.com/feeds/api/playlists/56D792A831D0C362/?v=2&alt=json&feature=plcp");
+		Storage store = Storage.getLocalStorageIfSupported();
+		if(store != null)
+			store.setItem(LocalStore.LATEST_REQUEST_KEY, ro.toJSON());
+		
+		
+		String[] jsonArray = new String[]{"application/json", "text/json"};
+		JSONHeadersUtils.store(jsonArray, new Callback<Boolean, Throwable>() {
+			
+			@Override
+			public void onSuccess(Boolean result) {
+				callback.onInnerTaskFinished(1);
+				downloadDefinitionsTask();
+			}
+			
+			@Override
+			public void onFailure(Throwable reason) {
+				if(lastRun){
+					callback.onInnerTaskFinished(1);
+					downloadDefinitionsTask();
+				} else {
+					callback.onFailure(1);
+				}
+			}
+		});
+		
+	}
+	
+	
 	private void downloadDefinitionsTask(){
 		loaderWidget.setText("Downloading definitions...");
 		
@@ -217,7 +254,7 @@ public class FirstRunTask implements LoadTask {
 	
 	@Override
 	public int getTasksCount() {
-		return 5;
+		return 6;
 	}
 
 	@Override

@@ -29,7 +29,6 @@ import org.rest.client.ui.AddEncodingView;
 import org.rest.client.ui.ErrorDialogView;
 import org.rest.client.ui.HistoryListItemView;
 import org.rest.client.ui.HistoryView;
-import org.rest.client.ui.JSONHeadersView;
 import org.rest.client.ui.MenuItemView;
 import org.rest.client.ui.MenuItemView.Presenter;
 import org.rest.client.ui.MenuView;
@@ -43,7 +42,6 @@ import org.rest.client.ui.desktop.AddEncodingViewImpl;
 import org.rest.client.ui.desktop.ErrorDialogViewImpl;
 import org.rest.client.ui.desktop.HistoryListItemViewImpl;
 import org.rest.client.ui.desktop.HistoryViewImpl;
-import org.rest.client.ui.desktop.JSONHeadersViewImpl;
 import org.rest.client.ui.desktop.MenuItemViewImpl;
 import org.rest.client.ui.desktop.MenuViewImpl;
 import org.rest.client.ui.desktop.RequestViewImpl;
@@ -209,11 +207,6 @@ public class ClientFactoryImpl implements ClientFactory {
 		// }
 		// return settingsView;
 		return GWT.create(SettingsViewImpl.class);
-	}
-
-	@Override
-	public JSONHeadersView getJSONHeadersView() {
-		return GWT.create(JSONHeadersViewImpl.class);
 	}
 
 	@Override

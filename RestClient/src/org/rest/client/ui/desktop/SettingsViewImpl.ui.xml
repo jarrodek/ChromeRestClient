@@ -76,10 +76,6 @@
 			<g:Button styleName="{appResources.appCss.button}" ui:field="shortCutsButton" text="Edit shortcuts"></g:Button>
 		</section>
 		<section class="{style.optionsSection}">
-			<p>JSON headers</p>
-			<g:Button styleName="{appResources.appCss.button}" ui:field="jsonHeadersWidget" text="Manage"></g:Button>
-		</section>
-		<section class="{style.optionsSection}">
 			<p>Import/export</p>
 			<g:Button styleName="{appResources.appCss.button}" ui:field="importExportWidget" text="Manage"></g:Button>
 		</section>
