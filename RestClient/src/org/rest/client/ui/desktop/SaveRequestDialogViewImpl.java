@@ -235,6 +235,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		
 		if(_projectName.equals("__new__")){
 			projectNameContainer.removeClassName(appStyle.hidden());
+			requestOverwriteContainer.addClassName(appStyle.hidden());
 		} else {
 			int parojectId = -1;
 			projectNameContainer.addClassName(appStyle.hidden());

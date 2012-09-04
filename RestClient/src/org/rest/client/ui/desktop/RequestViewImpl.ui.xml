@@ -45,15 +45,15 @@
 			cursor: pointer;
 		}
 		.radioButton{
-			margin: 0px 7px;
-		}
-		.radioButton:first-child{
-			margin-left: -3px;
+			margin: 0 10px 0 0;
 		}
 	</ui:style>
 	<g:HTMLPanel ui:field="root" styleName="{style.requestPanel}">
 		<!-- Project panel -->
-<!-- 		<g:HTMLPanel ui:field="projectPanel" styleName="{style.projectPanel}"></g:HTMLPanel> -->
+		<g:HTMLPanel ui:field="projectPanel" styleName="{style.projectPanel} {appResources.appCss.hidden}">
+			<g:InlineLabel ui:field="projectName"></g:InlineLabel>
+			<g:HTMLPanel ui:field="endpointsContainer"></g:HTMLPanel>
+		</g:HTMLPanel>
 		
 		<!-- URL widget -->
 		<rcui:RequestUrlWidget ui:field="urlWidget"></rcui:RequestUrlWidget>

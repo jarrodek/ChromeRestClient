@@ -3,6 +3,7 @@ package org.rest.client;
 import java.util.Collection;
 import java.util.Map;
 
+import org.rest.client.event.NewProjectAvailableEvent;
 import org.rest.client.place.AboutPlace;
 import org.rest.client.place.HistoryPlace;
 import org.rest.client.place.RequestPlace;
@@ -15,9 +16,11 @@ import org.rest.client.ui.MenuItemView;
 import org.rest.client.ui.MenuView;
 import org.rest.client.ui.desktop.StatusNotification;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceChangeEvent;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 public class UserMenuHandler {
 	
@@ -48,7 +51,6 @@ public class UserMenuHandler {
 
 		final MenuItemView projects = clientFactory.createMenuItem(p);
 		projects.setText("Projects");
-		// projects.setPlace();
 		mv.addMenuItem(projects);
 
 		final MenuItemView history = clientFactory.createMenuItem(p);
@@ -69,7 +71,7 @@ public class UserMenuHandler {
 		RootPanel.get("appNavigation").add(mv.asWidget());
 		
 		
-		ProjectStoreWebSql projectsStore = clientFactory.getProjectsStore();
+		final ProjectStoreWebSql projectsStore = clientFactory.getProjectsStore();
 		projectsStore.all(new StoreResultCallback<Map<Integer,ProjectObject>>() {
 			@Override
 			public void onSuccess(Map<Integer, ProjectObject> result) {
@@ -78,7 +80,7 @@ public class UserMenuHandler {
 					MenuItemView _project = clientFactory.createMenuItem(p);
 					_project.setText(obj.getName());
 					_project.setPlace(RequestPlace.Tokenizer.fromProjectDefault(obj.getId()));
-					projects.addChild(_project);
+					projects.addChild((Widget) _project);
 				}
 			}
 			
@@ -88,6 +90,29 @@ public class UserMenuHandler {
 			}
 		});
 		
+		//observe add project event to add new item to menu
+		NewProjectAvailableEvent.register(clientFactory.getEventBus(), new NewProjectAvailableEvent.Handler() {
+			
+			@Override
+			public void onNewProject(int projectId) {
+				projectsStore.getByKey(projectId, new StoreResultCallback<ProjectObject>(){
+
+					@Override
+					public void onSuccess(ProjectObject result) {
+						if(result == null) return;
+						MenuItemView _project = clientFactory.createMenuItem(p);
+						_project.setText(result.getName());
+						_project.setPlace(RequestPlace.Tokenizer.fromProjectDefault(result.getId()));
+						projects.addChild((Widget) _project);
+					}
+
+					@Override
+					public void onError(Throwable e) {
+						Log.error("Unable read project data.", e);
+					}
+				});
+			}
+		});
 		
 		clientFactory.getEventBus().addHandler(PlaceChangeEvent.TYPE,
 				new PlaceChangeEvent.Handler() {

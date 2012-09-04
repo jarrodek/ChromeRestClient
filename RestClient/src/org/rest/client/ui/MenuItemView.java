@@ -40,7 +40,7 @@ public interface MenuItemView extends HasText, HasWidgets, HasHTML {
 	 */
 	void setPresenter(Presenter listener);
 	
-	void addChild(MenuItemView item);
+	void addChild(Widget item);
 	/**
 	 * Set place name where menu will point to.
 	 * @param place

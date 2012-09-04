@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.rest.client.event.ApplicationReadyEvent;
+import org.rest.client.event.NewProjectAvailableEvent;
 import org.rest.client.mvp.AppActivityMapper;
 import org.rest.client.mvp.AppPlaceHistoryMapper;
 import org.rest.client.place.RequestPlace;
@@ -233,6 +234,7 @@ public class RestClient implements EntryPoint {
 			public void onSuccess(Integer result) {
 				obj.setProject(result.intValue());
 				saveRequestData(obj, callback);
+				clientFactory.getEventBus().fireEvent(new NewProjectAvailableEvent(result.intValue()));
 			}
 
 			@Override

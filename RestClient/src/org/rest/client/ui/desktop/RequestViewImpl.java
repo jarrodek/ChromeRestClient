@@ -30,6 +30,8 @@ import org.rest.client.request.HttpContentTypeHelper;
 import org.rest.client.request.HttpMethodOptions;
 import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.resources.AppResources;
+import org.rest.client.storage.store.objects.ProjectObject;
+import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.IsHideable;
 import org.rest.client.ui.RequestView;
 import org.rest.client.ui.desktop.widget.RequestBodyWidget;
@@ -47,11 +49,14 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xhr2.client.RequestHeader;
@@ -68,36 +73,25 @@ public class RequestViewImpl extends Composite implements RequestView {
 
 	@UiField
 	HTMLPanel root;
-	@UiField(provided=true)
-	RequestUrlWidget urlWidget;
-	@UiField
-	RequestHeadersWidget requestHeaders;
-	@UiField
-	RequestBodyWidget requestBody;
-	@UiField
-	RadioButton radioGet;
-	@UiField
-	RadioButton radioPost;
-	@UiField
-	RadioButton radioPut;
-	@UiField
-	RadioButton radioDelete;
-	@UiField
-	RadioButton radioHead;
-	@UiField
-	RadioButton radioOptions;
-	@UiField
-	RadioButton radioPatch;
-	@UiField
-	RadioButton radioOther;
-	@UiField
-	TextBox otherMethodValue;
-	@UiField
-	ListBox contentTypeInput;
-	@UiField
-	DivElement contentTypeContainer;
+	@UiField(provided=true) RequestUrlWidget urlWidget;
+	@UiField RequestHeadersWidget requestHeaders;
+	@UiField RequestBodyWidget requestBody;
+	@UiField RadioButton radioGet;
+	@UiField RadioButton radioPost;
+	@UiField RadioButton radioPut;
+	@UiField RadioButton radioDelete;
+	@UiField RadioButton radioHead;
+	@UiField RadioButton radioOptions;
+	@UiField RadioButton radioPatch;
+	@UiField RadioButton radioOther;
+	@UiField TextBox otherMethodValue;
+	@UiField ListBox contentTypeInput;
+	@UiField DivElement contentTypeContainer;
 	@UiField HTML5Progress progressIndicator;
 	@UiField Button sendButton;
+	@UiField HTMLPanel projectPanel;
+	@UiField InlineLabel projectName;
+	@UiField HTMLPanel endpointsContainer;
 	
 
 	private List<IsHideable> hidableList = new ArrayList<IsHideable>();
@@ -109,6 +103,8 @@ public class RequestViewImpl extends Composite implements RequestView {
 		
 		urlWidget = new RequestUrlWidget(eventBus);
 		initWidget(uiBinder.createAndBindUi(this));
+		
+		projectPanel.addStyleName(AppResources.INSTANCE.appCss().hidden());
 		sendButton.setEnabled(false);
 		progressIndicator.setStyleName(AppResources.INSTANCE.appCss().hidden());
 		
@@ -413,6 +409,23 @@ public class RequestViewImpl extends Composite implements RequestView {
 		EventBus eventBus = RestClient.getClientFactory().getEventBus();
 		RequestStartActionEvent ev = new RequestStartActionEvent(new Date());
 		eventBus.fireEvent(ev);
+	}
+
+
+	@Override
+	public void setProjectData(ProjectObject project, List<RequestObject> requests) {
+		projectPanel.removeStyleName(AppResources.INSTANCE.appCss().hidden());
+		
+		projectName.setText(project.getName());
+		
+		for(RequestObject r : requests){
+			SimplePanel wrapper = new SimplePanel();
+			Anchor a = new Anchor(r.getName(),"javascript:;");
+			wrapper.add(a);
+			endpointsContainer.add(wrapper);
+		}
+		
+		
 	}
 
 }

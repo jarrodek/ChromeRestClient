@@ -19,6 +19,12 @@ public class ProjectStoreWebSql extends WebSqlAdapter<Integer, ProjectObject> {
 	
 	ProjectService service = GWT.create(ProjectService.class);
 	
+	
+	
+	public ProjectService getService(){
+		return service;
+	}
+	
 	@Override
 	public void open(final StoreResultCallback<Boolean> callback) {
 		service.initTable(new VoidCallback() {

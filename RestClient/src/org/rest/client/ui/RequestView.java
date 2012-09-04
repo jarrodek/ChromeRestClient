@@ -17,8 +17,11 @@ package org.rest.client.ui;
 
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.rest.client.request.FilesObject;
+import org.rest.client.storage.store.objects.ProjectObject;
+import org.rest.client.storage.store.objects.RequestObject;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -71,4 +74,6 @@ public interface RequestView extends IsWidget {
 	 * @param values
 	 */
 	void appendEncodingValues(String[] values);
+	
+	void setProjectData(ProjectObject project, List<RequestObject> requests);
 }

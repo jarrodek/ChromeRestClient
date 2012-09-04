@@ -1,10 +1,13 @@
 package org.rest.client;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import org.rest.client.event.RequestStartActionEvent;
 import org.rest.client.event.SaveRequestEvent;
 import org.rest.client.event.ShortcutChangeEvent;
+import org.rest.client.place.HistoryPlace;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.LocalStore;
 import org.rest.client.ui.desktop.StatusNotification;
@@ -296,9 +299,9 @@ public class ShortcutHandlers {
 		} else if(type.equals(ShortcutType.SAVE_REQUEST)){
 			eventBus.fireEvent(new SaveRequestEvent());
 		} else if(type.equals(ShortcutType.SEND_REQUEST)){
-			Log.debug("SEND");
+			eventBus.fireEvent(new RequestStartActionEvent(new Date()));
 		} else if(type.equals(ShortcutType.HISTORY_TAB)){
-			Log.debug("HISTORY");
+			RestClient.getClientFactory().getPlaceController().goTo(new HistoryPlace("default"));
 		}
 	}
 }

@@ -4,7 +4,10 @@ import java.util.Date;
 
 import org.rest.client.storage.store.objects.RequestObject;
 
+import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.code.gwt.database.client.service.RowIdListCallback;
+import com.google.code.gwt.database.client.service.ScalarCallback;
+import com.google.code.gwt.database.client.service.Select;
 import com.google.code.gwt.database.client.service.Update;
 import com.google.code.gwt.database.client.service.VoidCallback;
 
@@ -52,5 +55,16 @@ public interface RequestDataService extends AppDatabase {
 			+ "{data.getSkipHistory()},{data.getSkipMethod()},{data.getSkipPayload()},"
 			+ "{data.getSkipHeaders()},{data.getSkipPath()},{dt.getTime()})")
 	void insertData(RequestObject data, Date dt, RowIdListCallback callback);
-
+	
+	@Select("SELECT * FROM request_data WHERE project={projectId} ORDER BY time ASC")
+	void getProjectRequests(int projectId, ListCallback<RequestObject> calloback);
+	
+	@Select("SELECT * FROM request_data WHERE project={projectId} ORDER BY time ASC LIMIT 1")
+	void getProjectDefaultRequests(int projectId, ListCallback<RequestObject> calloback);
+	
+	@Select("SELECT * FROM request_data WHERE ID={id}")
+	void getRequest(int id, ListCallback<RequestObject> calloback);
+	
+	@Select("SELECT COUNT(*) FROM request_data WHERE project={projectId}")
+	void getEndpointsCount(int projectId, ScalarCallback<Integer> callback);
 }

@@ -38,16 +38,11 @@
 			position: relative;
 			margin-top: 75px;
 		}
-		.queryParamRow{
-			display: -webkit-box;
-		}
+		
 		.sectionTitle{
 			font-weight: bold;
 			margin-bottom: 4px;
 			margin-left: 2px;
-		}
-		.queryParamValueInput{
-			width: 800px;
 		}
 		.hashSection{
 			position: relative;

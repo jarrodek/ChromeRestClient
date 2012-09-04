@@ -50,6 +50,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -65,6 +66,8 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 	
 	interface WidgetStyle extends CssResource {
 		String selectedFilesList();
+		String flex();
+		String valueBlock();
 	}
 	
 	public enum TABS { RAW, FORM, FILES }
@@ -269,7 +272,7 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 	
 	private void addNewFormRow(String key, String value){
 		final HTMLPanel row = new HTMLPanel("");
-		row.setStyleName(appStyle.formRow());
+		row.setStyleName(style.flex());
 		TextBox keyBox = new TextBox();
 		TextBox valueBox = new TextBox();
 		InlineLabel removeButton = new InlineLabel("x");
@@ -289,15 +292,27 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		
 		valueBox.addStyleName(appStyle.formValueInput());
 		removeButton.addStyleName(appStyle.removeButton());
-		
 		removeButton.setTitle("Remove");
-		
 		keyBox.addValueChangeHandler(formRowChange);
 		valueBox.addValueChangeHandler(formRowChange);
 		
-		row.add(keyBox);
-		row.add(valueBox);
-		row.add(removeButton);
+		
+		final FlowPanel keyContainer = new FlowPanel();
+		keyContainer.add(keyBox);
+		keyContainer.addStyleName(style.flex());
+		
+		final FlowPanel valueContainer = new FlowPanel();
+		valueContainer.add(valueBox);
+		valueContainer.addStyleName(style.flex() + " " + style.valueBlock());
+		
+		final FlowPanel actionsContainer = new FlowPanel();
+		actionsContainer.add(removeButton);
+		actionsContainer.addStyleName(style.flex());
+		
+		
+		row.add(keyContainer);
+		row.add(valueContainer);
+		row.add(actionsContainer);
 		
 		payloadFormPanel.add(row);
 		

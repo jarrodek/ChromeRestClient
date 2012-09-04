@@ -16,11 +16,6 @@ public class AppEventsHandlers {
 				dialog.show();
 			}
 		});
-		
-		
-		
 	}
-	
-	
 	
 }

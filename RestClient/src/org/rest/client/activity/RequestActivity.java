@@ -32,8 +32,10 @@ import org.rest.client.request.RedirectData;
 import org.rest.client.request.RequestParameters;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.LocalStore;
+import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.objects.FormEncodingObject;
 import org.rest.client.storage.store.objects.HistoryObject;
+import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.storage.websql.HeaderRow;
 import org.rest.client.ui.AddEncodingView;
@@ -42,6 +44,8 @@ import org.rest.client.ui.ResponseView;
 import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.code.gwt.database.client.service.DataServiceException;
+import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.json.client.JSONArray;
@@ -102,11 +106,31 @@ public class RequestActivity extends AppActivity implements
 				restoreLatestRequest(requestView);
 			}
 		} else if(place.isProject()){
-			Log.error("Restore method for this place is not yet implemented.");
-			throw new IllegalArgumentException("Not implemented yet");
+			
+			
+			try{
+				int projectId = Integer.parseInt(entryId);
+				restoreRequestFromProject(projectId, -1, requestView);
+			} catch(Exception e){
+				if(RestClient.isDebug()){
+					Log.error("Unable read project ID",e);
+				}
+				StatusNotification.notify("Unable read project ID", StatusNotification.TYPE_ERROR);
+				restoreLatestRequest(requestView);
+			}
+			
+			
 		} else if(place.isProjectsEndpoint()){
-			Log.error("Restore method for this place is not yet implemented.");
-			throw new IllegalArgumentException("Not implemented yet");
+			try{
+				int endpointId = Integer.parseInt(entryId);
+				restoreRequestFromProject(-1, endpointId, requestView);
+			} catch(Exception e){
+				if(RestClient.isDebug()){
+					Log.error("Unable read project's endpoint ID",e);
+				}
+				StatusNotification.notify("Unable read project data", StatusNotification.TYPE_ERROR);
+				restoreLatestRequest(requestView);
+			}
 		} else if(place.isSaved()){
 			Log.error("Restore method for this place is not yet implemented.");
 			throw new IllegalArgumentException("Not implemented yet");
@@ -118,7 +142,132 @@ public class RequestActivity extends AppActivity implements
 		observeEvents();
 	}
 	
+	/**
+	 * 
+	 * @param projectId -1 if project ID is unknown
+	 * @param endopintId -1 for default endpoint (first one) 
+	 * @param requestView
+	 */
+	private void restoreRequestFromProject(int projectId, int endopintId,
+			final RequestView requestView) {
+		if(projectId == -1 && endopintId == -1){
+			if(RestClient.isDebug()){
+				Log.error("Project ID and endpoint ID can't be -1 at once.");
+			}
+			StatusNotification.notify("Unable read project data", StatusNotification.TYPE_ERROR);
+			restoreLatestRequest(requestView);
+			return;
+		}
+		final ProjectStoreWebSql projectsStore = clientFactory.getProjectsStore();
+		if(endopintId == -1){
+			projectsStore.getByKey(projectId, new StoreResultCallback<ProjectObject>(){
+
+				@Override
+				public void onSuccess(ProjectObject result) {
+					restoreDefaultRequestFromProject(result, requestView);
+				}
+
+				@Override
+				public void onError(Throwable e) {
+					if(RestClient.isDebug()){
+						Log.error("Unable read project data.", e);
+					}
+					StatusNotification.notify("Unable read project data", StatusNotification.TYPE_ERROR);
+				}
+			});
+		} else {
+			clientFactory.getRequestDataStore().getByKey(endopintId, new StoreResultCallback<RequestObject>(){
+				@Override
+				public void onSuccess(final RequestObject result) {
+					if(result.getProject() > 0){
+						projectsStore.getByKey(result.getProject(), new StoreResultCallback<ProjectObject>(){
 	
+							@Override
+							public void onSuccess(ProjectObject project) {
+								restoreProjectEndpoint(project, result, requestView);
+							}
+	
+							@Override
+							public void onError(Throwable e) {
+								if(RestClient.isDebug()){
+									Log.error("Unable read project data.", e);
+								}
+								StatusNotification.notify("Unable read project data", StatusNotification.TYPE_ERROR);
+							}
+						});
+					} else {
+						if(RestClient.isDebug()){
+							Log.error("Project does not contain selected endpoint.");
+						}
+						StatusNotification.notify("Project does not contain selected endpoint.", StatusNotification.TYPE_ERROR);
+					}
+				}
+
+				@Override
+				public void onError(Throwable e) {
+					if(RestClient.isDebug()){
+						Log.error("Unable read project data.", e);
+					}
+					StatusNotification.notify("Unable read project's endpoint data", StatusNotification.TYPE_ERROR);
+				}
+			});
+		}
+	}
+	
+	private void restoreDefaultRequestFromProject(final ProjectObject project, final RequestView requestView){
+		if(project == null || project.getId() <= 0){
+			if(RestClient.isDebug()){
+				Log.error("No such project.");
+			}
+			StatusNotification.notify("No such project.", StatusNotification.TYPE_ERROR);
+		}
+		clientFactory.getRequestDataStore().getService().getProjectDefaultRequests(project.getId(), new ListCallback<RequestObject>(){
+
+			@Override
+			public void onFailure(DataServiceException error) {
+				if(RestClient.isDebug()){
+					Log.error("Can't find default endpoint for this project. Database error.",error);
+				}
+				StatusNotification.notify("Can't find default endpoint for this project.", StatusNotification.TYPE_ERROR);
+			}
+
+			@Override
+			public void onSuccess(List<RequestObject> result) {
+				if(result == null || result.size() == 0){
+					if(RestClient.isDebug()){
+						Log.error("Can't find default endpoint for this project.");
+					}
+					StatusNotification.notify("Can't find default endpoint for this project.", StatusNotification.TYPE_ERROR);
+					return;
+				}
+				restoreProjectEndpoint(project, result.get(0), requestView);
+			}});
+	}
+	
+	private void restoreProjectEndpoint(final ProjectObject project, final RequestObject request, final RequestView requestView){
+		
+		clientFactory.getRequestDataStore().getService().getProjectRequests(project.getId(), new ListCallback<RequestObject>(){
+
+			@Override
+			public void onFailure(DataServiceException error) {
+				
+			}
+	
+			@Override
+			public void onSuccess(List<RequestObject> result) {
+				requestView.setProjectData(project, result);
+			}});
+		
+		requestView.setUrl(request.getURL());
+		requestView.setMethod(request.getMethod());
+		requestView.setHeaders(request.getHeaders());
+		requestView.setPayload(request.getPayload());
+		setUserDefinedContentEncodingValues(request
+				.getEncoding());
+		
+	}
+	
+
 	private void observeEvents() {
 		RequestChangeEvent.register(eventBus, new RequestChangeEvent.Handler() {
 			@Override

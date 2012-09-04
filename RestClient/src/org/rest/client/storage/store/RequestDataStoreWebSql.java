@@ -10,6 +10,7 @@ import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.storage.websql.RequestDataService;
 
 import com.google.code.gwt.database.client.service.DataServiceException;
+import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.code.gwt.database.client.service.RowIdListCallback;
 import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.core.client.GWT;
@@ -17,6 +18,11 @@ import com.google.gwt.core.client.GWT;
 public class RequestDataStoreWebSql extends WebSqlAdapter<Integer, RequestObject> {
 	
 	RequestDataService service = GWT.create(RequestDataService.class);
+	
+	
+	public RequestDataService getService(){
+		return service;
+	}
 	
 	@Override
 	public void open(final StoreResultCallback<Boolean> callback) {
@@ -62,8 +68,23 @@ public class RequestDataStoreWebSql extends WebSqlAdapter<Integer, RequestObject
 
 	@Override
 	public void getByKey(Integer key,
-			StoreResultCallback<RequestObject> callback) {
-		callback.onError(null);
+			final StoreResultCallback<RequestObject> callback) {
+		service.getRequest(key, new ListCallback<RequestObject>() {
+
+			@Override
+			public void onFailure(DataServiceException error) {
+				callback.onError(error);
+			}
+
+			@Override
+			public void onSuccess(List<RequestObject> result) {
+				if(result.size() == 0){
+					callback.onSuccess(null);
+					return;
+				}
+				callback.onSuccess(result.get(0));
+			}
+		});
 	}
 
 	@Override

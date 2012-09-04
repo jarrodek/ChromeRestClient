@@ -18,6 +18,31 @@
 		.filesContainer ul{
 			-webkit-box-orient: vertical;
 		}
+		.payloadFormPanel{
+			padding-left: 7px;
+			padding-bottom: 7px;
+			padding-right: 7px;
+		}
+		/*form controls*/
+		.flex{
+			display: -webkit-flex;
+			display: -mox-flex;
+			display: -ms-flex;
+			display: -o-flex;
+			display: flex;
+			-webkit-align-items: center;
+		}
+		.flex input{
+			width: literal("-webkit-calc(100% - 12px)");
+			width: literal("calc(100% - 12px)");
+		}
+		.valueBlock{
+			-webkit-flex: 1 0 0;
+			-moz-flex: 1 0 0;
+			-ms-flex: 1 0 0;
+			-o-flex: 1 0 0;
+			flex: 1 0 0;
+		}
 	</ui:style>
 	<g:HTMLPanel styleName="{appResources.appCss.tabsPanel}">
 		
@@ -38,7 +63,7 @@
 				<!-- Add new form value button -->
 				<g:Anchor styleName="{appResources.appCss.addValueAnchor}" ui:field="addValue" href="#">Add new value</g:Anchor>
 				
-				<g:HTMLPanel ui:field="payloadFormPanel">
+				<g:HTMLPanel ui:field="payloadFormPanel" styleName="{style.payloadFormPanel}">
 					
 				</g:HTMLPanel>
 			</section>

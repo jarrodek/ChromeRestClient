@@ -29,6 +29,9 @@ import org.rest.client.ui.html5.ListPanel;
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.FontStyle;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -40,6 +43,7 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 public class MenuItemViewImpl extends Composite implements MenuItemView,
@@ -60,8 +64,9 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 	private HTML5Element _element = null;
 	private Place place = null;
 	private Presenter listener = null;
-	private ArrayList<MenuItemViewImpl> children = new ArrayList<MenuItemViewImpl>();
+	private ArrayList<Widget> children = new ArrayList<Widget>();
 	private ListPanel childrenPanel;
+	private Label emptyLabel = null;
 	
 	@UiField WidgetStyle style;
 	
@@ -95,12 +100,14 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 	
 	
 	@Override
-	public void addChild(MenuItemView item) {
-		MenuItemViewImpl it = (MenuItemViewImpl) item;
+	public void addChild(Widget item) {
+		if(emptyLabel != null && !item.equals(emptyLabel)){
+			emptyLabel.removeFromParent();
+			emptyLabel = null;
+		}
 		maybeRemoveItemFromParent(item);
-		
-		add(it);
-		children.add(it);
+		add(item);
+		children.add(item);
 	}
 
 	@Override
@@ -194,6 +201,17 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 			if (place != null && listener != null) {
 				listener.goTo(place);
 			} else {
+				//open and show "empty" info
+				if(emptyLabel == null){
+					emptyLabel = new Label("empty");
+					Style labelStyle = emptyLabel.getElement().getStyle();
+					labelStyle.setColor("#7C7C7C");
+					labelStyle.setMarginLeft(14, Unit.PX);
+					labelStyle.setMarginTop(14, Unit.PX);
+					labelStyle.setFontStyle(FontStyle.ITALIC);
+					addChild(emptyLabel);
+				}
+				setOpened(true);
 				Log.debug("Something is wrong .. " + (place != null) + ", " + (listener != null) );
 			}
 		}
@@ -212,9 +230,16 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 		}
 	}
 
-	private void maybeRemoveItemFromParent(MenuItemView item) {
-		if (item.getParentItem() != null) {
-			item.remove();
+	private void maybeRemoveItemFromParent(Widget item) {
+		if(item instanceof MenuItemView){
+			MenuItemView _item = (MenuItemView)item;
+			if (_item.getParentItem() != null) {
+				_item.remove();
+			}
+		} else {
+			if(item.getParent()!=null){
+				item.removeFromParent();
+			}
 		}
 	}
 

@@ -73,6 +73,8 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		String headersDescPopup();
 		String keyBoxContainer();
 		String headerSupportHint();
+		String flex();
+		String valueBlock();
 	}
 	
 	public enum TABS { RAW, FORM }
@@ -237,7 +239,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 	private void addNewFormRow(String key, String value){
 		
 		final HTMLPanel row = new HTMLPanel("");
-		row.setStyleName(appStyle.formRow());
+		row.setStyleName(style.flex());
 		final TextBox valueBox = new TextBox();
 		
 		SuggestBox _tmpKeySuggestBox = null;
@@ -275,25 +277,32 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		valueBox.getElement().setAttribute("placeholder", "value");
 		
 		keySuggestBox.addStyleName(appStyle.formKeyInput());
-		valueBox.addStyleName(appStyle.formValueInput());
 		removeButton.addStyleName(appStyle.removeButton());
-		
 		removeButton.setTitle("Remove");
-		
 		
 		keySuggestBox.addValueChangeHandler(formRowChange);
 		valueBox.addValueChangeHandler(formRowChange);
 		
 		InlineLabel hint = new InlineLabel();
 		hint.addStyleName(style.headerSupportHint());
+		
+		
 		final FlowPanel keyContainer = new FlowPanel();
 		keyContainer.add(keySuggestBox);
 		keyContainer.add(hint);
-		keyContainer.addStyleName(style.keyBoxContainer());
+		keyContainer.addStyleName(style.keyBoxContainer() + " " + style.flex());
+		
+		final FlowPanel valueContainer = new FlowPanel();
+		valueContainer.add(valueBox);
+		valueContainer.addStyleName(style.flex() + " " + style.valueBlock());
+		
+		final FlowPanel actionsContainer = new FlowPanel();
+		actionsContainer.add(removeButton);
+		actionsContainer.addStyleName(style.flex());
 		
 		row.add(keyContainer);
-		row.add(valueBox);
-		row.add(removeButton);
+		row.add(valueContainer);
+		row.add(actionsContainer);
 		headersFormPanel.add(row);
 		
 		hint.addClickHandler(new ClickHandler() {

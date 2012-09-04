@@ -36,11 +36,11 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -50,11 +50,11 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay;
 import com.google.gwt.user.client.ui.SuggestOracle;
+import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay;
-import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.web.bindery.event.shared.EventBus;
 
 /**
@@ -66,26 +66,14 @@ public class RequestUrlWidget extends Composite implements HasText {
 	interface Binder extends UiBinder<Widget, RequestUrlWidget> {
 	}
 	interface WidgetStyle extends CssResource {
-		String queryParamRow();
-		String queryParamValueInput();
-	}
-	
-	private class QueryInputs {
-		public QueryInputs(TextBox keyBox, TextBox valueBox) {
-			this.key = keyBox;
-			this.value = valueBox;
-		}
-		final TextBox key;
-		final TextBox value;
+		
 	}
 	
 	class UrlsSuggestionDisplay extends DefaultSuggestionDisplay {
-		
 		@Override
 		public boolean isAnimationEnabled() {
 			return false;
 		}
-		
 	}
 	
 	@UiField(provided=true) SuggestBox urlField;
@@ -97,8 +85,8 @@ public class RequestUrlWidget extends Composite implements HasText {
 	@UiField InlineLabel toggleView;
 	@UiField WidgetStyle style;
 	
-	private ArrayList<QueryInputs> formInputs = new ArrayList<QueryInputs>();
 	final private EventBus eventBus;
+	final private ArrayList<QueryDetailRow> queryParamsList = new ArrayList<QueryDetailRow>();
 	private Date lastEnterTime;
 	private UrlsSuggestionDisplay suggestionsDisplay;
 	private UrlsSuggestOracle suggestOracle;
@@ -114,7 +102,6 @@ public class RequestUrlWidget extends Composite implements HasText {
 		suggestionsDisplay.setAnimationEnabled(false);
 		urlField = new SuggestBox(suggestOracle, new TextBox(), suggestionsDisplay);
 		urlField.getElement().setAttribute("placeholder", "URL");
-		
 		
 		//init widget
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
@@ -231,21 +218,25 @@ public class RequestUrlWidget extends Composite implements HasText {
 	
 	
 	/**
-	 * Add new key-value pair for query params
+	 * Add new key-value pair for query parameters
 	 */
 	private void addDetailedQueryParamRow(String key, String value){
 		
-		final HTMLPanel row = new HTMLPanel("");
-		row.setStyleName(style.queryParamRow());
 		TextBox keyBox = new TextBox();
 		TextBox valueBox = new TextBox();
-		InlineLabel removeButton = new InlineLabel("x");
-		InlineLabel encodeButton = new InlineLabel("enc");
-		InlineLabel decodeButton = new InlineLabel("dec");
 		
+		keyBox.addValueChangeHandler(anyValueChangeHandler);
+		valueBox.addValueChangeHandler(anyValueChangeHandler);
+		keyBox.addKeyDownHandler(anyValueKeyDownHandler);
+		valueBox.addKeyDownHandler(anyValueKeyDownHandler);
 		
-		final QueryInputs inputsListItem = new QueryInputs(keyBox,valueBox);
-		formInputs.add(inputsListItem);
+		final QueryDetailRow row = new QueryDetailRow(keyBox, valueBox, new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				updateURL();
+			}
+		});
+		paramsContainer.add(row);
 		
 		if(key != null){
 			keyBox.setValue(key);
@@ -253,74 +244,13 @@ public class RequestUrlWidget extends Composite implements HasText {
 		if(value != null){
 			valueBox.setValue(value);
 		}
-		
-		keyBox.getElement().setAttribute("placeholder", "key");
-		valueBox.getElement().setAttribute("placeholder", "value");
-		
-		valueBox.addStyleName(style.queryParamValueInput());
-		removeButton.setStyleName(AppResources.INSTANCE.appCss().removeButton());
-		encodeButton.setStyleName(AppResources.INSTANCE.appCss().formCtrl());
-		decodeButton.setStyleName(AppResources.INSTANCE.appCss().formCtrl());
-		
-		removeButton.setTitle("Remove");
-		encodeButton.setTitle("Encode query string. Use CTRL to replace + with %20");
-		decodeButton.setTitle("Decode query string. Use CTRL to replace + with %20");
-		
-		keyBox.addValueChangeHandler(anyValueChangeHandler);
-		valueBox.addValueChangeHandler(anyValueChangeHandler);
-		keyBox.addKeyDownHandler(anyValueKeyDownHandler);
-		valueBox.addKeyDownHandler(anyValueKeyDownHandler);
-		
-		
-		row.add(keyBox);
-		row.add(valueBox);
-		row.add(removeButton);
-		row.add(encodeButton);
-		row.add(decodeButton);
-		
-		paramsContainer.add(row);
-		
-		removeButton.addClickHandler(new ClickHandler() {
+		queryParamsList.add(row);
+		row.asWidget().addAttachHandler(new AttachEvent.Handler() {
 			@Override
-			public void onClick(ClickEvent event) {
-				formInputs.remove(inputsListItem);
-				row.removeFromParent();
-				updateURL();
+			public void onAttachOrDetach(AttachEvent event) {
+				queryParamsList.remove(row);
 			}
 		});
-		
-		encodeButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				String value = inputsListItem.value.getValue();
-				if(value.trim().isEmpty()) return;
-				
-				if(event.isControlKeyDown()){
-					value = URL.encodePathSegment(value);
-				} else {
-					value = URL.encodeQueryString(value);
-				}
-				inputsListItem.value.setValue(value);
-				updateURL();
-			}
-		});
-		decodeButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				String value = inputsListItem.value.getValue();
-				if(value.trim().isEmpty()) return;
-				
-				if(event.isControlKeyDown()){
-					value = URL.decodePathSegment(value);
-				} else {
-					value = URL.decodeQueryString(value);
-				}
-				inputsListItem.value.setValue(value);
-				updateURL();
-			}
-		});
-		
-		keyBox.getElement().focus();
 	}
 	
 	/**
@@ -335,11 +265,10 @@ public class RequestUrlWidget extends Composite implements HasText {
 	 */
 	void clearForm(){
 		paramsContainer.clear();
-		formInputs.clear();
+		queryParamsList.clear();
 		detailedHostField.setValue(null);
 		detailedPathField.setValue(null);
 		detailedHashField.setValue(null);
-		//eventBus.fireEvent(new UrlValueChangeEvent(null));
 	}
 	/**
 	 * Get current headers value and fill up form.
@@ -347,10 +276,8 @@ public class RequestUrlWidget extends Composite implements HasText {
 	void updateQueryForm(){
 		clearForm();
 		
-		
 		//parse given path and place it to proper fields
 		URLParser data = new URLParser().parse(urlField.getValue());
-		
 		String protocol = data.getProtocol();
 		String authority = data.getAuthority();
 		String hostField = "";
@@ -360,7 +287,6 @@ public class RequestUrlWidget extends Composite implements HasText {
 			}
 			hostField += data.getAuthority();
 		}
-		
 		detailedHostField.setValue(hostField);
 		detailedPathField.setValue(data.getPath());
 		detailedHashField.setValue(data.getAnchor());
@@ -396,7 +322,7 @@ public class RequestUrlWidget extends Composite implements HasText {
 		}
 		
 		url += path;
-		int paramsSize = formInputs.size();
+		int paramsSize = queryParamsList.size();
 		if(paramsSize > 0){
 			url += "?";
 		}
@@ -404,8 +330,8 @@ public class RequestUrlWidget extends Composite implements HasText {
 			if(i>0){
 				url += "&";
 			}
-			QueryInputs fi = formInputs.get(i);
-			url += fi.key.getText() + "="+ fi.value.getText(); 
+			QueryDetailRow fi = queryParamsList.get(i);
+			url += fi.getKeyValue() + "="+ fi.getValue(); 
 		}
 		
 		String hash = detailedHashField.getValue();
