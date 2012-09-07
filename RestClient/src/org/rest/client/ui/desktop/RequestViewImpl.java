@@ -25,6 +25,7 @@ import org.rest.client.event.HttpMethodChangeEvent;
 import org.rest.client.event.RequestStartActionEvent;
 import org.rest.client.event.RequestStopEvent;
 import org.rest.client.event.UrlValueChangeEvent;
+import org.rest.client.place.RequestPlace;
 import org.rest.client.request.FilesObject;
 import org.rest.client.request.HttpContentTypeHelper;
 import org.rest.client.request.HttpMethodOptions;
@@ -41,9 +42,11 @@ import org.rest.client.ui.html5.HTML5Progress;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -103,10 +106,6 @@ public class RequestViewImpl extends Composite implements RequestView {
 		
 		urlWidget = new RequestUrlWidget(eventBus);
 		initWidget(uiBinder.createAndBindUi(this));
-		
-		projectPanel.addStyleName(AppResources.INSTANCE.appCss().hidden());
-		sendButton.setEnabled(false);
-		progressIndicator.setStyleName(AppResources.INSTANCE.appCss().hidden());
 		
 		createContentTypeValues(null);
 
@@ -415,17 +414,40 @@ public class RequestViewImpl extends Composite implements RequestView {
 	@Override
 	public void setProjectData(ProjectObject project, List<RequestObject> requests) {
 		projectPanel.removeStyleName(AppResources.INSTANCE.appCss().hidden());
-		
 		projectName.setText(project.getName());
 		
-		for(RequestObject r : requests){
+		for(final RequestObject r : requests){
 			SimplePanel wrapper = new SimplePanel();
+			wrapper.getElement().getStyle().setMarginRight(10, Unit.PX);
 			Anchor a = new Anchor(r.getName(),"javascript:;");
 			wrapper.add(a);
+			a.addClickHandler(new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
+					listener.goTo(RequestPlace.Tokenizer.fromProject(r.getId()));
+				}
+			});
 			endpointsContainer.add(wrapper);
 		}
 		
+		RestClient.fixChromeLayout();
+	}
+
+
+	@Override
+	public void reset() {
+		projectPanel.addStyleName(AppResources.INSTANCE.appCss().hidden());
+		sendButton.setEnabled(false);
+		progressIndicator.setStyleName(AppResources.INSTANCE.appCss().hidden());
 		
+		projectName.setText("");
+		endpointsContainer.clear();
+		
+		urlWidget.clearAll();
+		requestHeaders.clear();
+		requestBody.clear();
+		radioGet.setEnabled(true);
+		selectContentTypeValue(HttpContentTypeHelper.getDefaulSelected());
 	}
 
 }

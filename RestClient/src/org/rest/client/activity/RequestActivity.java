@@ -25,11 +25,11 @@ import org.rest.client.ExternalEventsFactory;
 import org.rest.client.RestClient;
 import org.rest.client.event.AddEncodingEvent;
 import org.rest.client.event.ClearFormEvent;
-import org.rest.client.event.RequestChangeEvent;
 import org.rest.client.event.RequestEndEvent;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.RedirectData;
 import org.rest.client.request.RequestParameters;
+import org.rest.client.request.URLParser;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.LocalStore;
 import org.rest.client.storage.store.ProjectStoreWebSql;
@@ -52,6 +52,7 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.xhr2.client.Header;
@@ -74,9 +75,10 @@ public class RequestActivity extends AppActivity implements
 	private EventBus eventBus;
 	protected ResponseView responseView;
 	FlowPanel viewFlowPanel;
-
+	
 	public RequestActivity(RequestPlace place, ClientFactory clientFactory) {
 		super(clientFactory);
+		Log.debug("Create activity");
 		this.place = place;
 	}
 
@@ -84,8 +86,14 @@ public class RequestActivity extends AppActivity implements
 	public void start(AcceptsOneWidget panel, com.google.gwt.event.shared.EventBus eventBus) {
 		this.eventBus = eventBus;
 		super.start(panel, eventBus);
+		if(RestClient.getOpenedProject() > 0){
+			RestClient.setPreviousProject(RestClient.getOpenedProject());
+			RestClient.setOpenedProject(-1);
+		}
 
 		RequestView requestView = this.clientFactory.getRequestView();
+		requestView.reset();
+		
 		requestView.setPresenter(this);
 		viewFlowPanel = new FlowPanel();
 		viewFlowPanel.getElement().getStyle().setOverflow(Overflow.HIDDEN);
@@ -110,6 +118,7 @@ public class RequestActivity extends AppActivity implements
 			
 			try{
 				int projectId = Integer.parseInt(entryId);
+				RestClient.setOpenedProject(projectId);
 				restoreRequestFromProject(projectId, -1, requestView);
 			} catch(Exception e){
 				if(RestClient.isDebug()){
@@ -180,6 +189,7 @@ public class RequestActivity extends AppActivity implements
 				@Override
 				public void onSuccess(final RequestObject result) {
 					if(result.getProject() > 0){
+						RestClient.setOpenedProject(result.getProject());
 						projectsStore.getByKey(result.getProject(), new StoreResultCallback<ProjectObject>(){
 	
 							@Override
@@ -246,35 +256,118 @@ public class RequestActivity extends AppActivity implements
 	
 	private void restoreProjectEndpoint(final ProjectObject project, final RequestObject request, final RequestView requestView){
 		
-		clientFactory.getRequestDataStore().getService().getProjectRequests(project.getId(), new ListCallback<RequestObject>(){
-
-			@Override
-			public void onFailure(DataServiceException error) {
-				
-			}
-	
-			@Override
-			public void onSuccess(List<RequestObject> result) {
-				requestView.setProjectData(project, result);
-			}});
+		showProjectRelatedData(project.getId(),project, requestView);
 		
-		requestView.setUrl(request.getURL());
-		requestView.setMethod(request.getMethod());
-		requestView.setHeaders(request.getHeaders());
-		requestView.setPayload(request.getPayload());
+		boolean canOvervriteCurrentParameters = false;
+		
+		if(RestClient.getOpenedProject() == RestClient.getPreviousProject()){
+			canOvervriteCurrentParameters = true;
+		}
+		
+		if(!(canOvervriteCurrentParameters && request.isSkipHeaders())){
+			requestView.setHeaders(request.getHeaders());
+		}
+		if(!(canOvervriteCurrentParameters && request.isSkipMethod())){
+			requestView.setMethod(request.getMethod());
+		}
+		if(!(canOvervriteCurrentParameters && request.isSkipPayload())){
+			requestView.setPayload(request.getPayload());
+		}
+		
+		Storage store = Storage.getLocalStorageIfSupported();
+		
+		String _oldUrl = store.getItem(LocalStore.LATEST_REQUEST_KEY); 
+		if(_oldUrl == null || _oldUrl.isEmpty()){
+			requestView.setUrl(request.getURL());
+			Log.debug("OLD URL is null.");
+			return;
+		}
+		JSONValue oldUrlValue = JSONParser.parseStrict(_oldUrl);
+		if(!oldUrlValue.isObject().containsKey("url")){
+			requestView.setUrl(request.getURL());
+			Log.debug("No URL key in old url.");
+			return;
+		}
+		
+		String oldUrl = oldUrlValue.isObject().get("url").isString().stringValue();
+		
+		String newUrl = request.getURL();
+		URLParser urlData = new URLParser().parse(newUrl);
+		URLParser oldUrlData = new URLParser().parse(oldUrl);
+		
+		if(canOvervriteCurrentParameters && request.isSkipHistory()){
+			//remove hash from restored and get one from latest
+			urlData.setAnchor(oldUrlData.getAnchor());
+		}
+		if(canOvervriteCurrentParameters && request.isSkipParams()){
+			//remove query string from restored and get one from latest
+			Log.debug("Old params: " + oldUrlData.getQuery());
+			urlData.setQuery(oldUrlData.getQuery());
+		}
+		if(canOvervriteCurrentParameters && request.isSkipPath()){
+			//remove path from restored and get one from latest
+			urlData.setPath(oldUrlData.getPath());
+		}
+		if(canOvervriteCurrentParameters && request.isSkipProtocol()){
+			//remove hash from restored and get one from latest
+			urlData.setProtocol(oldUrlData.getProtocol());
+		}
+		if(canOvervriteCurrentParameters && request.isSkipServer()){
+			//remove hash from restored and get one from latest
+			urlData.setAuthority(oldUrlData.getAuthority());
+		}
+		
+		requestView.setUrl(urlData.toString());
+		
 		setUserDefinedContentEncodingValues(request
 				.getEncoding());
 		
 	}
 	
+	
+	private void showProjectRelatedData(final int projectId, final ProjectObject project, final RequestView requestView){
+		clientFactory.getRequestDataStore().getService().getProjectRequests(projectId, new ListCallback<RequestObject>(){
+
+			@Override
+			public void onFailure(DataServiceException error) {
+				if(RestClient.isDebug()){
+					Log.error("Unable to find related projects.", error);
+				}
+			}
+	
+			@Override
+			public void onSuccess(final List<RequestObject> request) {
+				if(project == null){
+					ProjectStoreWebSql projectsStore = clientFactory.getProjectsStore();
+					projectsStore.getByKey(projectId, new StoreResultCallback<ProjectObject>(){
+
+						@Override
+						public void onSuccess(ProjectObject project) {
+							requestView.setProjectData(project, request);
+						}
+
+						@Override
+						public void onError(Throwable e) {
+							if(RestClient.isDebug()){
+								Log.error("Unable read project data.", e);
+							}
+							StatusNotification.notify("Unable read project related data", StatusNotification.TYPE_ERROR);
+						}
+					});
+				} else {
+					requestView.setProjectData(project, request);
+				}
+			}});
+	}
+	
 
 	private void observeEvents() {
-		RequestChangeEvent.register(eventBus, new RequestChangeEvent.Handler() {
-			@Override
-			public void onChange(RequestChangeEvent event) {
+//		RequestChangeEvent.register(eventBus, new RequestChangeEvent.Handler() {
+//			@Override
+//			public void onChange(RequestChangeEvent event) {
 //				Log.debug("RequestChangeEvent: " + event.getChangeType()); 
-			}
-		});
+//			}
+//		});
 		RequestEndEvent.register(eventBus, new RequestEndEvent.Handler() {
 			@Override
 			public void onResponse(boolean success, final Response response, long requestTime) {
@@ -402,7 +495,11 @@ public class RequestActivity extends AppActivity implements
 		return headers;
 	}
 	
-	
+	/**
+	 * Restore request from history DB
+	 * @param historyId
+	 * @param requestView
+	 */
 	private void restoreRequestFromHistory(int historyId,
 			final RequestView requestView) {
 		RestClient.getClientFactory().getHistoryRequestStore().getHistoryItem(historyId, new StoreResultCallback<HistoryObject>() {
@@ -481,7 +578,10 @@ public class RequestActivity extends AppActivity implements
 		});
 		
 	}
-	
+	/**
+	 * Restore latest, not saved request
+	 * @param view
+	 */
 	private void restoreLatestRequest(final RequestView view){
 		RequestParameters
 			.restoreLatest(new Callback<RequestParameters, Throwable>() {
@@ -495,6 +595,12 @@ public class RequestActivity extends AppActivity implements
 						view.setEncoding(null);
 						return;
 					}
+					
+					if(result.getProject() > 0){
+						showProjectRelatedData(result.getProject(), null, view);
+						RestClient.setOpenedProject(result.getProject());
+					}
+					
 					view.setUrl(result.getRequestUrl());
 					view.setMethod(result.getMethod());
 					view.setHeaders(result.getHeaders());
@@ -561,7 +667,8 @@ public class RequestActivity extends AppActivity implements
 		ro.setMethod(view.getMethod());
 		ro.setPayload(view.getPayload());
 		ro.setURL(view.getUrl());
-
+		ro.setProject(RestClient.getOpenedProject());
+		
 		this.clientFactory.getLocalStore().put(ro.toJSON(),
 				LocalStore.LATEST_REQUEST_KEY,
 				new StoreResultCallback<String>() {

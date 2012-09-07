@@ -48,6 +48,12 @@ public interface RequestView extends IsWidget {
 		 */
 		void fireClearAllEvent();
 	}
+	
+	/**
+	 * Reset request view to initial state
+	 */
+	void reset();
+	
 	/**
 	 * Sets presenter for this view
 	 * @param listener

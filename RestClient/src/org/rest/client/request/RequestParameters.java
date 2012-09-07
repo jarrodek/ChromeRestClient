@@ -51,9 +51,19 @@ public class RequestParameters {
 	 * Headers to send;
 	 */
 	private String headers = null;
+	/**
+	 * Project for this request if abailable.
+	 */
+	private int project = -1;
 	
 	
+	public void setProject(int project) {
+		this.project  = project;
+	}
 	
+	public int getProject() {
+		return project;
+	}
 	
 	/**
 	 * @return the postData
@@ -201,6 +211,7 @@ public class RequestParameters {
 						}
 						try{
 							RequestObject ro = RequestObject.fromString(result);
+							rp.setProject(ro.getProject());
 							rp.setFormEncoding(ro.getEncoding());
 							rp.setHeaders(ro.getHeaders());
 							rp.setMethod(ro.getMethod());
@@ -227,4 +238,9 @@ public class RequestParameters {
 			}
 		});
 	}
+
+
+
+
+	
 }

@@ -26,6 +26,7 @@ public class InitializeDatabaseTask implements LoadTask {
 
 	@SuppressWarnings({ "rawtypes" })
 	public InitializeDatabaseTask() {
+		
 		ClientFactory factory = RestClient.getClientFactory();
 		try{
 			databases.add((WebSqlAdapter) factory.getHeadersStore());

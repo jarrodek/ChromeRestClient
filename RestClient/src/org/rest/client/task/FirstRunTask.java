@@ -13,13 +13,18 @@ import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.store.LocalStore;
 import org.rest.client.storage.store.StatusesStoreWebSql;
 import org.rest.client.storage.store.objects.RequestObject;
+import org.rest.client.storage.websql.AppDatabase;
 import org.rest.client.storage.websql.HeaderRow;
 import org.rest.client.storage.websql.StatusCodeRow;
 import org.rest.client.task.ui.LoaderWidget;
 import org.rest.client.util.JSONHeadersUtils;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.code.gwt.database.client.SQLError;
+import com.google.code.gwt.database.client.SQLTransaction;
+import com.google.code.gwt.database.client.TransactionCallback;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
@@ -34,7 +39,17 @@ import com.google.gwt.user.client.Window;
  * Task will execute only if it is first run. 
  * It downloads and insert to database headers and status codes definitions. 
  * @author jarrod
- * 
+ *
+ * Upgrade options:
+ * - From previous version: 
+ * 		- update database structure
+ * 		- rename local store keys
+ * 		- change latestRequest data structure
+ * 		- insert old history data to new history table
+ * - Fresh install
+ * 		- insert default data to view (method and URL)
+ * 		- insert default JSON headers
+ * 		- download status codes definitions
  */
 public class FirstRunTask implements LoadTask {
 
@@ -43,6 +58,7 @@ public class FirstRunTask implements LoadTask {
 	LoaderWidget loaderWidget;
 	boolean lastRun;
 	ClientFactory factory = RestClient.getClientFactory();
+	Storage store = Storage.getLocalStorageIfSupported();
 	
 	interface SimpleCallback {
 		void onResult();
@@ -51,6 +67,7 @@ public class FirstRunTask implements LoadTask {
 	
 	@Override
 	public void run(final TasksCallback callback, final boolean lastRun) {
+		upgradeAppliction();
 		Storage storage = Storage.getLocalStorageIfSupported();
 		String firstRunFlag = storage.getItem(FIRST_RUN_FLAG);
 		if(firstRunFlag != null){
@@ -63,21 +80,97 @@ public class FirstRunTask implements LoadTask {
 		callback.onInnerTaskFinished(1);
 		// this is first run. lest's get to work! :)
 		// Download headers and status codes definitions and insert to DB
-		setApplicationData();
+		
+		String oldDbSet = store.getItem("databaseSet");
+		if(oldDbSet == null || oldDbSet.isEmpty()){
+			//fresh install
+			createAppliction();
+		} else {
+			//upgrade
+			upgradeAppliction();
+		}
+	}
+	/**
+	 * From previous version: 
+	 * 	- update database structure -OK
+	 * 	- move data from old rest_forms table to request_data table -OK
+	 *  - insert old history data to new history table
+	 * 	- rename local store keys
+	 * 	- change latestRequest data structure
+	 */
+	private void upgradeAppliction(){
+		//check if DB need upgrade
+		AppDatabase service = GWT.create(AppDatabase.class);
+		if(service.getDatabase().getVersion().equals("")){
+			service.getDatabase().changeVersion("", "1.0", new TransactionCallback() {
+				@Override
+				public void onTransactionSuccess() {
+					
+				}
+				
+				@Override
+				public void onTransactionStart(SQLTransaction transaction) {
+					upgradeRequestsData(transaction);
+				}
+				
+				@Override
+				public void onTransactionFailure(SQLError error) {
+					
+				}
+			});
+		}
 	}
 	
 	
-	private void setApplicationData(){
-		
+	private final native void upgradeRequestsData(SQLTransaction tx) /*-{
+		console.log('start upgrade');
+		tx.executeSql("SELECT * FROM rest_forms",[],function(tx, result){
+			var cnt = result.rows.length;
+			for(var i=0; i<cnt; i++){
+				var item = result.rows.item(i);
+				try{
+					var data = JSON.parse(item.data);
+					var headers = "";
+					for(var headerNumber in data['headers']){ 
+						var header = data['headers'][headerNumber]; 
+						for(var key in header){
+							headers += key + ": " + header[key] + "\n";
+						}
+					}
+					var sql = "INSERT INTO request_data (name,url,method,encoding,headers,payload,time) VALUES ";
+					sql += "(";
+					sql += "'"+item['name'].replace(/"/gim,'\\"')+"',";
+					sql += "'"+data['url'].replace(/"/gim,'\\"')+"',";
+					sql += "'"+data['method'].replace(/"/gim,'\\"')+"',";
+					sql += "'"+data['formEncoding'].replace(/"/gim,'\\"')+"',";
+					sql += "'"+headers.replace(/"/gim,'\\"')+"',";
+					sql += "'"+data['post'].replace(/"/gim,'\\"')+"',";
+					sql += item['time'];
+					sql += ")";
+					tx.executeSql(sql,[],null,function(tx, error){console.error(error.message);});
+				} catch(e){
+					console.error(e)
+				}
+			}
+		}, function(tx, error){console.log(error.message);});
+	}-*/;
+	
+	
+	
+	
+	/**
+	 * Fresh install
+	 * 	- insert default data to view (method and URL)
+ 	 * 	- insert default JSON headers
+ 	 * 	- download status codes definitions
+	 */
+	private void createAppliction(){
 		RequestObject ro = RequestObject.createRequest();
 		ro.setMethod("GET");
 		ro.setURL("http://gdata.youtube.com/feeds/api/playlists/56D792A831D0C362/?v=2&alt=json&feature=plcp");
-		Storage store = Storage.getLocalStorageIfSupported();
-		if(store != null)
-			store.setItem(LocalStore.LATEST_REQUEST_KEY, ro.toJSON());
-		
-		
-		String[] jsonArray = new String[]{"application/json", "text/json"};
+		store.setItem(LocalStore.LATEST_REQUEST_KEY, ro.toJSON());
+	
+		String[] jsonArray = new String[]{"application/json", "text/json", "text/x-json"};
 		JSONHeadersUtils.store(jsonArray, new Callback<Boolean, Throwable>() {
 			
 			@Override
@@ -96,8 +189,11 @@ public class FirstRunTask implements LoadTask {
 				}
 			}
 		});
-		
 	}
+	
+	
+	
+	
 	
 	
 	private void downloadDefinitionsTask(){

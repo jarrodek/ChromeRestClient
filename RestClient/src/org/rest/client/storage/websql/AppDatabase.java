@@ -10,7 +10,7 @@ import com.google.code.gwt.database.client.service.DataService;
  * @author jarrod
  * 
  */
-@Connection(name = "restClient", version = "1.0", description = "Rest service database", maxsize = 10000000)
+@Connection(name = "restClient", version = "", description = "Rest service database", maxsize = 10000000)
 public interface AppDatabase extends DataService {
 	
 }

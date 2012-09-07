@@ -129,7 +129,8 @@ public class URLParser {
 		public final native String getValue() /*-{ return this.value;  }-*/;
 	}
 	/**
-	 * Get source - full url.
+	 * Get source - full url. Oryginal value of the source. 
+	 * Source can't be changed via any setters.
 	 * In URL like: http://usr:pwd@www.test.com:81/dir/dir.2/index.htm?q1=0&&test1&test2=value&a[]=1&a[]=2#top
 	 * it would be  http://usr:pwd@www.test.com:81/dir/dir.2/index.htm?q1=0&&test1&test2=value&a[]=1&a[]=2#top
 	 * @return URL source text
@@ -137,6 +138,8 @@ public class URLParser {
 	public String getSource() {
 		return source;
 	}
+	
+	
 	/**
 	 * Get protocol used in URL
 	 * 
@@ -149,6 +152,16 @@ public class URLParser {
 		return protocol;
 	}
 	/**
+	 * Set new protocol value.
+	 * <p>Note: It will not change source value</p>
+	 * Example:
+	 * <p><strong>http</strong>://usr:pwd@www.test.com:81/dir/dir.2/index.htm?q1=0&&test1&test2=value&a[]=1&a[]=2#top</p>
+	 * @param protocol
+	 */
+	public void setProtocol(String protocol) {
+		this.protocol = protocol;
+	}
+	/**
 	 * Get Authority used in URL.
 	 * <p>Authotity is: [USER:PASSWORD@]HOST[:PORT]</p>
 	 * Example:
@@ -158,6 +171,17 @@ public class URLParser {
 	 */
 	public String getAuthority() {
 		return authority;
+	}
+	/**
+	 * Set new authority value.
+	 * <p>Note: It will not change source value</p>
+	 * <p>Authotity is: [USER:PASSWORD@]HOST[:PORT]</p>
+	 * Example:
+	 * <p>http://<strong>usr:pwd@www.test.com:81</strong>/dir/dir.2/index.htm?q1=0&&test1&test2=value&a[]=1&a[]=2#top</p>
+	 * @param authority
+	 */
+	public void setAuthority(String authority) {
+		this.authority = authority;
 	}
 	/**
 	 * Get User Info used in URL
@@ -173,6 +197,17 @@ public class URLParser {
 		return userInfo;
 	}
 	/**
+	 * Set new userInfo value.
+	 * <p>User info is: USER:PASSWORD</p>
+	 * <p>Note: It will not change source value</p>
+	 * Example:
+	 * <p>http://<strong>usr:pwd</strong>@www.test.com:81/dir/dir.2/index.htm?q1=0&&test1&test2=value&a[]=1&a[]=2#top</p>
+	 * @param userInfo
+	 */
+	public void setUserInfo(String userInfo) {
+		this.userInfo = userInfo;
+	}
+	/**
 	 * Get User used in URL
 	 * 
 	 * Example:
@@ -182,6 +217,16 @@ public class URLParser {
 	 */
 	public String getUser() {
 		return user;
+	}
+	/**
+	 * Set new user value.
+	 * <p>Note: It will not change source value</p>
+	 * Example:
+	 * <p>http://<strong>usr</strong>:pwd@www.test.com:81/dir/dir.2/index.htm?q1=0&&test1&test2=value&a[]=1&a[]=2#top</p>
+	 * @param user
+	 */
+	public void setUser(String user) {
+		this.user = user;
 	}
 	/**
 	 * Get Password used in URL
@@ -195,6 +240,17 @@ public class URLParser {
 		return password;
 	}
 	/**
+	 * Set new password value.
+	 * <p>Note: It will not change source value</p>
+	 * Example:
+	 * <p>http://usr:<strong>pwd</strong>@www.test.com:81/dir/dir.2/index.htm?q1=0&&test1&test2=value&a[]=1&a[]=2#top</p>
+	 * @param password
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
+	/**
 	 * Get HOST used in URL
 	 * 
 	 * Example:
@@ -204,6 +260,16 @@ public class URLParser {
 	 */
 	public String getHost() {
 		return host;
+	}
+	/**
+	 * Set new HOST value used in URL.
+	 * <p>Note: It will not change source value</p>
+	 * Example:
+	 * <p>http://usr:pwd@<strong>www.test.com</strong>:81/dir/dir.2/index.htm?q1=0&&test1&test2=value&a[]=1&a[]=2#top</p>
+	 * @param host
+	 */
+	public void setHost(String host) {
+		this.host = host;
 	}
 	/**
 	 * Get PORT used in URL
@@ -217,6 +283,16 @@ public class URLParser {
 		return port;
 	}
 	/**
+	 * Set new PORT value used in URL.
+	 * <p>Note: It will not change source value</p>
+	 * Example:
+	 * <p>http://usr:pwd@www.test.com:<strong>81</strong>/dir/dir.2/index.htm?q1=0&&test1&test2=value&a[]=1&a[]=2#top</p>
+	 * @param port
+	 */
+	public void setPort(String port) {
+		this.port = port;
+	}
+	/**
 	 * Get all data after host value used in URL
 	 * 
 	 * Example:
@@ -226,6 +302,16 @@ public class URLParser {
 	 */
 	public String getRelative() {
 		return relative;
+	}
+	/**
+	 * Set all data after host value used in URL
+	 * <p>Note: It will not change source value</p>
+	 * Example:
+	 * <p>http://usr:pwd@www.test.com:81<strong>/dir/dir.2/index.htm?q1=0&&test1&test2=value&a[]=1&a[]=2#top</strong></p>
+	 * @param relative
+	 */
+	public void setRelative(String relative) {
+		this.relative = relative;
 	}
 	/**
 	 * Get path value used in URL.
@@ -240,6 +326,16 @@ public class URLParser {
 		return path;
 	}
 	/**
+	 * Set path value used in URL.
+	 * <p>Note: It will not change source value</p>
+	 * Example:
+	 * <p>http://usr:pwd@www.test.com:81<strong>/dir/dir.2/index.htm</strong>?q1=0&&test1&test2=value&a[]=1&a[]=2#top</p>
+	 * @param path
+	 */
+	public void setPath(String path) {
+		this.path = path;
+	}
+	/**
 	 * Get directory value used in URL.
 	 * 
 	 * Example:
@@ -249,6 +345,16 @@ public class URLParser {
 	 */
 	public String getDirectory() {
 		return directory;
+	}
+	/**
+	 * Set directory value used in URL.
+	 * <p>Note: It will not change source value</p>
+	 * Example:
+	 * <p>http://usr:pwd@www.test.com:81<strong>/dir/dir.2/</strong>index.htm?q1=0&&test1&test2=value&a[]=1&a[]=2#top</p>
+	 * @param directory
+	 */
+	public void setDirectory(String directory) {
+		this.directory = directory;
 	}
 	/**
 	 * Get file value used in URL.
@@ -262,6 +368,16 @@ public class URLParser {
 		return file;
 	}
 	/**
+	 * Set file value used in URL.
+	 * <p>Note: It will not change source value</p>
+	 * Example:
+	 * <p>http://usr:pwd@www.test.com:81/dir/dir.2/<strong>index.htm</strong>?q1=0&&test1&test2=value&a[]=1&a[]=2#top</p>
+	 * @param file
+	 */
+	public void setFile(String file) {
+		this.file = file;
+	}
+	/**
 	 * Get query value used in URL.
 	 * 
 	 * Example:
@@ -271,6 +387,25 @@ public class URLParser {
 	 */
 	public String getQuery() {
 		return query;
+	}
+	/**
+	 * Set query value used in URL.
+	 * <p>Note: It will not change source value</p>
+	 * Example:
+	 * <p>http://usr:pwd@www.test.com:81/dir/dir.2/index.htm?<strong>q1=0&&test1&test2=value&a[]=1&a[]=2</strong>#top</p>
+	 * @param file
+	 */
+	public void setQuery(String query) {
+		this.query = query;
+		paramsList.clear();
+		if(this.query != null){
+			JsArray<QueryParam> params = _parseParams(query);
+			int paramsCnt = params.length();
+			for(int j=0; j<paramsCnt; j++){
+				QueryParam _p = params.get(j);
+				paramsList.add(_p);
+			}
+		}
 	}
 	/**
 	 * Get anchor value used in URL.
@@ -284,10 +419,57 @@ public class URLParser {
 		return anchor;
 	}
 	/**
+	 * Set anchor value used in URL.
+	 * <p>Note: It will not change source value</p>
+	 * Example:
+	 * <p>http://usr:pwd@www.test.com:81/dir/dir.2/index.htm?q1=0&&test1&test2=value&a[]=1&a[]=2#<strong>top</strong></p>
+	 * @param anchor
+	 */
+	public void setAnchor(String anchor) {
+		this.anchor = anchor;
+	}
+	/**
 	 * 
 	 * @return QueryParams list
 	 */
 	public List<QueryParam> getParamsList() {
 		return paramsList;
+	}
+	
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getProtocol());
+		sb.append("://");
+		boolean hasUser = false;
+		boolean hasPassword = false;
+		if(user!=null && !user.isEmpty()){
+			hasUser = true;
+			sb.append(user);
+		}
+		if(password!=null && !password.isEmpty()){
+			hasPassword = true;
+			if(hasUser){
+				sb.append(":");
+			}
+			sb.append(password);
+		}
+		if(hasPassword || hasUser){
+			sb.append("@");
+		}
+		sb.append(getHost());
+		if(port != null && !port.isEmpty()){
+			sb.append(":");
+			sb.append(port);
+		}
+		sb.append(path);
+		if(query != null && !query.isEmpty()){
+			sb.append("?");
+			sb.append(query);
+		}
+		if(anchor != null && !anchor.isEmpty())
+			sb.append(anchor);
+		return sb.toString();
 	}
 }

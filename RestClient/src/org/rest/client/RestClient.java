@@ -69,6 +69,35 @@ public class RestClient implements EntryPoint {
 	public final static ClientFactory getClientFactory() {
 		return clientFactory;
 	}
+	
+	private static int currentOpenedProject = -1;
+	private static int previousOpenedProject = -1;
+	/**
+	 * @return current opened project ID or -1 if none
+	 */
+	public final static int getOpenedProject(){
+		return currentOpenedProject;
+	}
+	/**
+	 * @return previously opened project ID or -1 if none
+	 */
+	public final static int getPreviousProject(){
+		return previousOpenedProject;
+	}
+	/**
+	 * @param project current opened project ID or -1 if none
+	 */
+	public final static void setOpenedProject(int project){
+		currentOpenedProject = project;
+	}
+	/**
+	 * 
+	 * @param project previously opened project ID or -1 if none
+	 */
+	public final static void setPreviousProject(int project){
+		previousOpenedProject = project;
+	}
+	
 
 	public void onModuleLoad() {
 		
@@ -121,7 +150,7 @@ public class RestClient implements EntryPoint {
 			public void onSuccess(Void result) {
 				RootPanel.get("appContainer").add(appWidget);
 				historyHandler.handleCurrentHistory();
-				fixChromeLayoutIssue();
+				fixChromeLayout();
 				eventBus.fireEvent(new ApplicationReadyEvent());
 			}
 		});
@@ -272,12 +301,13 @@ public class RestClient implements EntryPoint {
 	}
 	
 	/**
-	 * @todo: report an issue. snap in /var/www/a/war/
+	 * Sometimes chrome freeze after layout change via javascript (not sure if is it).
+	 * Use this after operations when it's happen.
 	 */
-	private final native void fixChromeLayoutIssue() /*-{
+	public static final native void fixChromeLayout() /*-{
 		$doc.body.style.display = 'none';
 		$wnd.setTimeout(function() {
 			$doc.body.style.removeProperty('display');
-		}, 25);
+		}, 15);
 	}-*/;
 }

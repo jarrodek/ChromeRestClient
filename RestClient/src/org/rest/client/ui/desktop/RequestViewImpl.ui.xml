@@ -47,12 +47,25 @@
 		.radioButton{
 			margin: 0 10px 0 0;
 		}
+		.projectName{
+			font-size: 2em;
+			margin-right: 1em;
+		}
+		.projectendpoints{}
+		.flex{
+			display: -webkit-flex;
+			display: -mox-flex;
+			display: -ms-flex;
+			display: -o-flex;
+			display: flex;
+			-webkit-align-items: center;
+		}
 	</ui:style>
 	<g:HTMLPanel ui:field="root" styleName="{style.requestPanel}">
 		<!-- Project panel -->
-		<g:HTMLPanel ui:field="projectPanel" styleName="{style.projectPanel} {appResources.appCss.hidden}">
-			<g:InlineLabel ui:field="projectName"></g:InlineLabel>
-			<g:HTMLPanel ui:field="endpointsContainer"></g:HTMLPanel>
+		<g:HTMLPanel ui:field="projectPanel" styleName="{style.projectPanel} {style.flex} {appResources.appCss.hidden}">
+			<g:InlineLabel ui:field="projectName" styleName="{style.projectName} {style.flex}"></g:InlineLabel>
+			<g:HTMLPanel ui:field="endpointsContainer" styleName="{style.projectendpoints} {style.flex}"></g:HTMLPanel>
 		</g:HTMLPanel>
 		
 		<!-- URL widget -->
