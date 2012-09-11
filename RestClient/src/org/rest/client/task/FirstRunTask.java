@@ -3,6 +3,7 @@ package org.rest.client.task;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
@@ -10,6 +11,7 @@ import org.rest.client.request.AssetRequest;
 import org.rest.client.request.AssetStringCallback;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.HeadersStoreWebSql;
+import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.storage.store.LocalStore;
 import org.rest.client.storage.store.StatusesStoreWebSql;
 import org.rest.client.storage.store.objects.RequestObject;
@@ -18,6 +20,7 @@ import org.rest.client.storage.websql.HeaderRow;
 import org.rest.client.storage.websql.StatusCodeRow;
 import org.rest.client.task.ui.LoaderWidget;
 import org.rest.client.util.JSONHeadersUtils;
+import org.rest.client.util.Utils;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.SQLError;
@@ -67,7 +70,7 @@ public class FirstRunTask implements LoadTask {
 	
 	@Override
 	public void run(final TasksCallback callback, final boolean lastRun) {
-		upgradeAppliction();
+		
 		Storage storage = Storage.getLocalStorageIfSupported();
 		String firstRunFlag = storage.getItem(FIRST_RUN_FLAG);
 		if(firstRunFlag != null){
@@ -94,18 +97,27 @@ public class FirstRunTask implements LoadTask {
 	 * From previous version: 
 	 * 	- update database structure -OK
 	 * 	- move data from old rest_forms table to request_data table -OK
-	 *  - insert old history data to new history table
+	 *  - insert old history data to new history table -OK
 	 * 	- rename local store keys
-	 * 	- change latestRequest data structure
+	 * 	- change latestRequest data structure -OK
 	 */
 	private void upgradeAppliction(){
+		
 		//check if DB need upgrade
 		AppDatabase service = GWT.create(AppDatabase.class);
 		if(service.getDatabase().getVersion().equals("")){
+			loaderWidget.setText("Upgrading application...");
+			Log.debug("Upgrade application's database from previous version");
 			service.getDatabase().changeVersion("", "1.0", new TransactionCallback() {
+				//DELETE FROM request_data WHERE ID > 4
 				@Override
 				public void onTransactionSuccess() {
-					
+					Log.debug("Database structure updated.");
+					//
+					//next upgrade LocalStore keys
+					//
+					callback.onInnerTaskFinished(1);
+					upgradeLocalStore();
 				}
 				
 				@Override
@@ -115,15 +127,191 @@ public class FirstRunTask implements LoadTask {
 				
 				@Override
 				public void onTransactionFailure(SQLError error) {
-					
+					Log.error("Unable to upgrade databse to new version. Error: " + error.getMessage());
 				}
 			});
 		}
 	}
 	
+	private void upgradeLocalStore(){
+		
+		//
+		// Upgrade latest request
+		//
+		updateLatestRequest();
+		callback.onInnerTaskFinished(1);
+		
+		
+		//
+		// Insert old history into new database
+		//
+		updateOldHistory();
+		
+		//
+		// Finish upgrade
+		//
+		callback.onInnerTaskFinished(3);
+		finishUpdate();
+	}
+	private void finishUpdate() {
+		Date d = new Date();
+		String time = String.valueOf(d.getTime());
+		store.setItem(FIRST_RUN_FLAG, time);
+		loaderWidget.setText("Upgrade complete. Thank you.");
+		new Timer() {
+			@Override
+			public void run() {
+				loaderWidget.setText("Loading...");
+				callback.onSuccess();
+			}
+		}.schedule(2000);
+	}
+	
+	
+	
+	
+	private void updateOldHistory() {
+		Log.debug("Upgrade historyList key");
+		String historyList = store.getItem("historyList");
+		store.removeItem("historyList");
+		if(!(historyList == null || historyList.isEmpty())){
+			JSONValue value = null;
+			try{
+				value = JSONParser.parseLenient(historyList);
+			} catch(Exception e){}
+			if (value != null) {
+				JSONArray arr = value.isArray();
+				if (arr != null) {
+					int len = arr.size();
+					final HistoryRequestStoreWebSql store = RestClient.getClientFactory().getHistoryRequestStore();
+					for(int i=0; i<len;i++){
+						final RequestObject ro = RequestObject.createRequest();
+						JSONValue values = arr.get(i);
+						if (values == null) {
+							continue;
+						}
+						JSONObject obj = values.isObject();
+						if (obj == null) {
+							continue;
+						}
+						String url = Utils.getJsonString(obj, "url");
+						if (url != null) {
+							ro.setURL(url);
+						}
+						String formEncoding = Utils.getJsonString(obj, "formEncoding");
+						if (formEncoding != null) {
+							ro.setEncoding(formEncoding);
+						}
+						String post = Utils.getJsonString(obj, "post");
+						if (post != null) {
+							ro.setPayload(post);
+						}
+						String method = Utils.getJsonString(obj, "method");
+						if (method != null) {
+							ro.setMethod(method);
+						}
+						JSONArray headersArray = obj.get("headers").isArray();
+						String headers = "";
+						if (headersArray != null) {
+							int cnt = headersArray.size();
+							for (int j = 0; j < cnt; j++) {
+								JSONValue _tmp = headersArray.get(j);
+								if (_tmp == null) {
+									continue;
+								}
+								JSONObject _data = _tmp.isObject();
+								if (_data == null) {
+									continue;
+								}
+								Set<String> keys = _data.keySet();
+								if (keys.size() == 1) {
+									String headerName = keys.iterator().next();
+									JSONValue headerValueJs = _data.get(headerName);
+									if (headerValueJs == null) {
+										continue;
+									}
+									JSONString _headerValueJS = headerValueJs.isString();
+									String headerValue = _headerValueJS.stringValue();
+									headers += headerName + ": " + headerValue + "\n";
+								}
+							}
+						}
+						ro.setHeaders(headers);
+						store.put(ro, null, new StoreResultCallback<Integer>() {
+							@Override
+							public void onSuccess(Integer result) {}
+							@Override
+							public void onError(Throwable e) {}});
+					}
+				}
+			}
+		}
+	}
+	
+	private void updateLatestRequest() {
+		Log.debug("Upgrade latestRequest key");
+		String latestRequest = store.getItem("latestRequest");
+		store.removeItem("latestRequest");
+		if (latestRequest != null) {
+			JSONValue value = JSONParser.parseLenient(latestRequest);
+			if (value != null) {
+				JSONObject obj = value.isObject();
+				if (obj != null) {
+					
+					final RequestObject ro = RequestObject.createRequest();
+					
+					String url = Utils.getJsonString(obj, "url");
+					if(url != null){
+						ro.setURL(url);
+					}
+					String formEncoding = Utils.getJsonString(obj, "formEncoding");
+					if(formEncoding != null){
+						ro.setEncoding(formEncoding);
+					}
+					String post = Utils.getJsonString(obj, "post");
+					if(post != null){
+						ro.setPayload(post);
+					}
+					String method = Utils.getJsonString(obj, "method");
+					if(method != null){
+						ro.setMethod(method);
+					}
+					ro.setProject(-1);
+					String headers = "";
+					JSONArray headersArray = obj.get("headers").isArray();
+					if (headersArray != null) {
+						int cnt = headersArray.size();
+						for (int i = 0; i < cnt; i++) {
+							JSONValue _tmp = headersArray.get(i);
+							if (_tmp == null) {
+								continue;
+							}
+							JSONObject _data = _tmp.isObject();
+							if (_data == null) {
+								continue;
+							}
+							Set<String> keys = _data.keySet();
+							if (keys.size() == 1) {
+								String headerName = keys.iterator().next();
+								JSONValue headerValueJs = _data.get(headerName);
+								if (headerValueJs == null) {
+									continue;
+								}
+								JSONString _headerValueJS = headerValueJs.isString();
+								String headerValue = _headerValueJS.stringValue();
+								headers += headerName + ": " + headerValue + "\n";
+							}
+						}
+					}
+					ro.setHeaders(headers);
+					store.setItem(LocalStore.LATEST_REQUEST_KEY, ro.toJSON());
+				}
+			}
+		}
+	}
+	
 	
 	private final native void upgradeRequestsData(SQLTransaction tx) /*-{
-		console.log('start upgrade');
 		tx.executeSql("SELECT * FROM rest_forms",[],function(tx, result){
 			var cnt = result.rows.length;
 			for(var i=0; i<cnt; i++){
@@ -152,6 +340,7 @@ public class FirstRunTask implements LoadTask {
 					console.error(e)
 				}
 			}
+			tx.executeSql("DROP TABLE IF EXISTS rest_forms",[],null,function(tx, error){console.error(error.message);});
 		}, function(tx, error){console.log(error.message);});
 	}-*/;
 	
@@ -334,18 +523,8 @@ public class FirstRunTask implements LoadTask {
 	
 	private void postConfigTask(){
 		callback.onInnerTaskFinished(1);
-		Storage storage = Storage.getLocalStorageIfSupported();
-		Date d = new Date();
-		String time = String.valueOf(d.getTime());
-		storage.setItem(FIRST_RUN_FLAG, time);
-		loaderWidget.setText("Update complete. Thank you.");
-		new Timer() {
-			@Override
-			public void run() {
-				loaderWidget.setText("Loading...");
-				callback.onSuccess();
-			}
-		}.schedule(1500);
+		
+		finishUpdate();
 	}
 	
 	@Override
