@@ -34,6 +34,7 @@ import org.rest.client.ui.MenuView;
 import org.rest.client.ui.RequestView;
 import org.rest.client.ui.ResponseView;
 import org.rest.client.ui.SaveRequestDialogView;
+import org.rest.client.ui.SavedView;
 import org.rest.client.ui.SettingsView;
 import org.rest.client.ui.ShortcutView;
 
@@ -59,6 +60,7 @@ public interface ClientFactory {
 	//VIEWS
 	AddEncodingView getAddEncodingView(EventBus eventBus);
 	AboutView getAboutView();
+	SavedView getSavedView();
 	RequestView getRequestView();
 	ResponseView getResponseView();
 	MenuView getMenuView();

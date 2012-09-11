@@ -15,13 +15,15 @@
  ******************************************************************************/
 package org.rest.client.ui;
 
-import com.google.gwt.place.shared.Place;
-import com.google.gwt.user.client.ui.HasHTML;
-import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.Widget;
 
-public interface MenuItemView extends HasText, HasWidgets, HasHTML {
+import com.google.gwt.place.shared.Place;
+import com.google.gwt.user.client.ui.IsWidget;
+/**
+ * View for "Saved requests" place
+ * @author jarrod
+ *
+ */
+public interface SavedView extends IsWidget {
 	/**
 	 * Presenter interface
 	 * @author Paweł Psztyć
@@ -39,39 +41,4 @@ public interface MenuItemView extends HasText, HasWidgets, HasHTML {
 	 * @param listener
 	 */
 	void setPresenter(Presenter listener);
-	
-	void addChild(Widget item);
-	
-	void setData(String key, String value);
-	
-	/**
-	 * Set place name where menu will point to.
-	 * @param place
-	 */
-	void setPlace(Place place);
-	/**
-	 * Set display name
-	 * @param text
-	 */
-	void setText(String text);
-	/**
-	 * Set selected/deselect state for this control
-	 * @param isSelected
-	 */
-	void setSelected(boolean isSelected);
-	/**
-	 * Show/hide children (if any)
-	 * @param isOpened
-	 */
-	void setOpened(boolean isOpened);
-	/**
-	 * Set menu top object. Only for first level children.
-	 * @param root
-	 */
-	void setRoot(MenuView root);
-	public MenuItemView getParentItem();
-
-	void remove();
-	
-	Widget asWidget();
 }

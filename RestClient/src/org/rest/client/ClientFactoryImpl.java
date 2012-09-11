@@ -35,6 +35,7 @@ import org.rest.client.ui.MenuView;
 import org.rest.client.ui.RequestView;
 import org.rest.client.ui.ResponseView;
 import org.rest.client.ui.SaveRequestDialogView;
+import org.rest.client.ui.SavedView;
 import org.rest.client.ui.SettingsView;
 import org.rest.client.ui.ShortcutView;
 import org.rest.client.ui.desktop.AboutViewImpl;
@@ -47,6 +48,7 @@ import org.rest.client.ui.desktop.MenuViewImpl;
 import org.rest.client.ui.desktop.RequestViewImpl;
 import org.rest.client.ui.desktop.ResponseViewImpl;
 import org.rest.client.ui.desktop.SaveRequestDialogViewImpl;
+import org.rest.client.ui.desktop.SavedViewImpl;
 import org.rest.client.ui.desktop.SettingsViewImpl;
 import org.rest.client.ui.desktop.ShortcutViewImpl;
 
@@ -242,5 +244,10 @@ public class ClientFactoryImpl implements ClientFactory {
 			chromeMessagePassing = GWT.create(ChromeMessagePassing.class);
 		}
 		return chromeMessagePassing;
+	}
+
+	@Override
+	public SavedView getSavedView() {
+		return GWT.create(SavedViewImpl.class);
 	}
 }

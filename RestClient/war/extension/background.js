@@ -272,7 +272,7 @@ var declarativeRequest = {
  * External extension communication.
  * 
  * @param details:
- *            message - (any data) The message sent by the calling script.
+ *            message - (any data) The message sent by the calling script. It's must be javascript object described in the bottom of this file.
  *            sender - (object): tab - This property will only be present when
  *            the connection was opened from a tab or content script; id - The
  *            extension ID of the extension that opened the connection.
@@ -333,7 +333,7 @@ function runApplication(requestDetails) {
 }
 
 /**
- * Taen from http://note19.com/2007/05/27/javascript-guid-generator/
+ * Found at http://note19.com/2007/05/27/javascript-guid-generator/
  * 
  * @returns {String}
  */
@@ -347,40 +347,40 @@ function guidGenerator() {
 
 /**
  * ======================================== External data structure
- * ======================================== If you want to run this application
- * either from other extension/application or webIntent you need to pass a
- * message object:
- * 
- * "payload" (required) - message payload: "create" to open new application
- * window with values; (other payloads may be available in future). "data" -
- * (required) javascript object with any of values: url - (String) request URL
- * to set method - (String) request method to set headers - (String) an RFC
- * string representing request headers example: >>> User-Agent: X-Extension
- * X-header: header value; second value <<< payload - (String) data to pass
- * into payload field. Only for http methods that carry payload data encoding -
- * (String) data form encoding Every entry in "data" parameter is optional. Any
- * other parameters are not used by application.
+ * If you want to run this application either from other extension/application or webIntent you need to pass a message object:
+ * <ul>
+ * <li>"payload" (required) - message payload: "create" to open new application window with values; (other payloads may be available in future). 
+ * <li>"data" - (required) javascript object with any of values:
+ * <ul> 
+ * 		<li>url - (String) request URL to set</li>
+ * 		<li>method - (String) request method to set</li>
+ * 		<li>headers - (String) an RFC string representing request headers 
+ * 					example: >>> User-Agent: X-Extension 
+ * 								 X-header: header value; second value <<< 
+ * 		<li>payload - (String) data to pass into payload field. Only for http methods that carry payload data</li> 
+ * 		<li>encoding - (String) data form encoding</li>
+ * </ul> 
+ * </ul>
+ * <p>Every entry in "data" parameter is optional. Any other parameters are not used by application.</p>
  * 
  * 
  * Example of usage:
- * 
- * var message = { 'payload': 'create', 'data': { 'url':
- * 'http://www.google.com/', 'method': 'GET', 'headers': "User-Agent:
- * Chrome-Extension\nX-extension-id: SomeID" } };
- * 
+ * <pre>
+ * var message = { 'payload': 'create', 'data': { 'url': 'http://www.google.com/', 'method': 'GET', 'headers': "User-Agent: Chrome-Extension\nX-extension-id: SomeID" } };
+ * </pre>
  * Via extensions message passing system:
- * chrome.extension.sendMessage(THIS_APPLICATION_ID_FROM_CHROME_WEB_STORE,
- * message, function(response) {});
- * 
+ * <pre>
+ * chrome.extension.sendMessage(THIS_APPLICATION_ID_FROM_CHROME_WEB_STORE, message, function(response) {});
+ * </pre>
  * Via webIntents:
- * 
+ * <pre>
  * window.Intent = window.Intent || window.WebKitIntent;
  * window.navigator.startActivity = window.navigator.startActivity ||
  * window.navigator.webkitStartActivity;
  * 
- * var params = { "action": "http://webintents.org/view", "type":
- * "application/restclient+data" , "data": message }; var i = new
+ * var params = { "action": "http://webintents.org/view", "type": "application/restclient+data" , "data": message }; var i = new
  * WebKitIntent(params); var onSuccess = function(data) {console.log(data);};
  * var onFailure = function() {console.log('intent error')};
  * navigator.webkitStartActivity(i, onSuccess, onFailure);
+ * </pre>
  */

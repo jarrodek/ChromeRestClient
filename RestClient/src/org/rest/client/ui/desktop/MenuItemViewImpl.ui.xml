@@ -17,6 +17,10 @@
 			color: #DD4B39;
 			border-left: 3px #DD4B39 solid;
 		}
+		.selected > ul {
+			color: initial;
+			border-left: 3px white solid;
+		}
 		.hover{
 			background-color: #EEE;
 		}

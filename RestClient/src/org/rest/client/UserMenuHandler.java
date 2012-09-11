@@ -7,6 +7,7 @@ import org.rest.client.event.NewProjectAvailableEvent;
 import org.rest.client.place.AboutPlace;
 import org.rest.client.place.HistoryPlace;
 import org.rest.client.place.RequestPlace;
+import org.rest.client.place.SavedPlace;
 import org.rest.client.place.SettingsPlace;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.LocalStore;
@@ -52,6 +53,13 @@ public class UserMenuHandler {
 		final MenuItemView projects = clientFactory.createMenuItem(p);
 		projects.setText("Projects");
 		mv.addMenuItem(projects);
+		projects.setOpened(false);
+		
+		
+		final MenuItemView saved = clientFactory.createMenuItem(p);
+		saved.setText("Saved");
+		saved.setPlace(new SavedPlace("default"));
+		mv.addMenuItem(saved);
 
 		final MenuItemView history = clientFactory.createMenuItem(p);
 		history.setText("History");
@@ -79,9 +87,11 @@ public class UserMenuHandler {
 				for(ProjectObject obj : values){
 					MenuItemView _project = clientFactory.createMenuItem(p);
 					_project.setText(obj.getName());
+					_project.setData("projectid", String.valueOf(obj.getId()));
 					_project.setPlace(RequestPlace.Tokenizer.fromProjectDefault(obj.getId()));
 					projects.addChild((Widget) _project);
 				}
+				projects.setOpened(false);
 			}
 			
 			@Override
@@ -103,6 +113,7 @@ public class UserMenuHandler {
 						MenuItemView _project = clientFactory.createMenuItem(p);
 						_project.setText(result.getName());
 						_project.setPlace(RequestPlace.Tokenizer.fromProjectDefault(result.getId()));
+						_project.setData("projectid", String.valueOf(result.getId()));
 						projects.addChild((Widget) _project);
 					}
 
@@ -121,11 +132,18 @@ public class UserMenuHandler {
 						if(newPlace instanceof AboutPlace){
 							about.setSelected(true);
 						} else if(newPlace instanceof RequestPlace){
-							request.setSelected(true);
+							RequestPlace _place = (RequestPlace) newPlace;
+							if(_place.isProject() || _place.isProjectsEndpoint()){
+								projects.setSelected(true);
+							} else {
+								request.setSelected(true);
+							}
 						} else if(newPlace instanceof SettingsPlace){
 							settings.setSelected(true);
 						} else if(newPlace instanceof HistoryPlace){
 							history.setSelected(true);
+						} else if(newPlace instanceof SavedPlace){
+							saved.setSelected(true);
 						}
 					}
 			});

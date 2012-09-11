@@ -267,4 +267,8 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 	public void onMouseOut(MouseOutEvent event) {
 		removeStyleName(style.hover());
 	}
+	
+	public void setData(String key, String value){
+		getElement().setAttribute("data-"+key, value);
+	}
 }
