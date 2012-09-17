@@ -2,7 +2,7 @@ var dev = false;
 
 var requestFilter = {
 	urls : [ "<all_urls>" ],
-	types : [ "xmlhttprequest" ]
+	//types : [ "xmlhttprequest" ]
 }
 var requestDetails = {
 	URL : null,
@@ -182,6 +182,16 @@ var declarativeRequest = {
 			.split(","),
 	requestData : null,
 	previousRules : null,
+	
+	
+	
+	
+	
+	/**
+	 * By default remove this headers from request (if they are not set by user):
+	 * accept,accept-charset,accept-encoding,accept-language,connection,content-type,host,if-modified-since,if-none-match,origin,referer,user-agent
+	 * This headers are set by default by browser and should not be included into request.
+	 */
 	setRules : function(_requestData) {
 		// console.log('declarativeRequest',_requestData);
 
@@ -194,6 +204,7 @@ var declarativeRequest = {
 		// extract request headers
 		var requestHeaders = declarativeRequest
 				.parseHeaders(_requestData.headers);
+		var requestHeadersLength = requestHeaders.length;
 		// check if request contains unsupported by w3c headers
 		var unsupportedHeadersList = [];
 		for ( var i in requestHeaders) {
@@ -204,21 +215,71 @@ var declarativeRequest = {
 				unsupportedHeadersList[unsupportedHeadersList.length] = header;
 			}
 		}
-		if (unsupportedHeadersList.length == 0)
-			return;
+		
+		
+		var requestActions = [];
 
 		// register rules in declarativeRequest to add headers just before
 		// request send.
-
-		// create actions
-		var actions = [];
-		for ( var i = 0; i < unsupportedHeadersList.length; i++) {
-			var header = unsupportedHeadersList[i];
-			actions[actions.length] = new chrome.declarativeWebRequest.SetRequestHeader(
-					header);
+		var addActions = declarativeRequest._getUnsupportedHeadersActions(unsupportedHeadersList);
+		if(addActions != null){
+			requestActions = requestActions.concat(addActions);
 		}
+		
+		
+		
+		
+		//
+		// Here's a trick.
+		// Browser, by default, set some headers. We don't want them.
+		// Remove all request headers set by browser by default and that are not set by user
+		// (can't remove and set headers in one request by this API)
+		//
+		var defaultHeaders = "accept,accept-charset,accept-encoding,accept-language,cache-control,connection,content-type,host,if-modified-since,if-none-match,origin,referer,user-agent".split(",");
+		var requestHeadersKeys = [];
+		for(var i=0; i<requestHeadersLength;i++){
+			requestHeadersKeys[requestHeadersKeys.length] = requestHeaders[i].name.toLowerCase();
+		}
+		
+		var removeHeaders = defaultHeaders.filter(function(element, index, array){ 
+			if(requestHeadersKeys.indexOf(element)!=-1) 
+				return false; 
+			return true 
+		});
+		console.log(removeHeaders);
+		var removeActions = declarativeRequest._getRemoveHeadersActions(removeHeaders);
+		if(removeActions != null){
+			requestActions = requestActions.concat(removeActions);
+		}
+		
+		
+		if(requestActions.length == 0){
+			return;
+		}
+		
+		var rule = {
+			id : null,
+			priority : 100,
+			conditions : [ new chrome.declarativeWebRequest.RequestMatcher({
+				url : declarativeRequest._getUrlData(_requestData.url),
+				resourceType : [ "xmlhttprequest" ]
+			})],
+			actions : requestActions
+		};
+		console.log(rule);
+		
+		chrome.declarativeWebRequest.onRequest.addRules([rule],
+			function callback(details) {
+				declarativeRequest.previousRules = details;
+			});
+	},
+	
+	/**
+	 * Create URL object from request url for Rule object.
+	 */
+	_getUrlData: function(requestUrl){
 		var parser = document.createElement('a');
-		parser.href = _requestData.url;
+		parser.href = requestUrl;
 
 		var urlData = {};
 		if (parser.hostname) {
@@ -236,26 +297,47 @@ var declarativeRequest = {
 		if (parser.search) {
 			urlData.queryEquals = parser.search;
 		}
-		var rule = {
-			id : null,
-			priority : 100,
-			conditions : [ new chrome.declarativeWebRequest.RequestMatcher({
-				url : urlData,
-				resourceType : [ "xmlhttprequest" ]
-			}), ],
-			actions : actions
-		}
-		chrome.declarativeWebRequest.onRequest.addRules([ rule ],
-				function callback(details) {
-					declarativeRequest.previousRules = details;
-				});
+		return urlData;
 	},
+	/**
+	 * Remove selected headers from request.
+	 */
+	_getRemoveHeadersActions: function(removeHeaders){
+		var removeHeadersLength = removeHeaders.length;
+		if (removeHeadersLength == 0)
+			return null;
+		// create actions
+		var actions = [];
+		for (var i = 0; i < removeHeadersLength; i++) {
+			var header = removeHeaders[i];
+			actions[actions.length] = new chrome.declarativeWebRequest.RemoveRequestHeader({name:header});
+		}
+		return actions;
+	},
+	/**
+	 * Set headers that cen't be set via XMLHttpRequest
+	 */
+	_getUnsupportedHeadersActions: function(unsupportedHeadersList){
+		if (unsupportedHeadersList.length == 0)
+			return null;
+		// create actions
+		var actions = [];
+		for ( var i = 0; i < unsupportedHeadersList.length; i++) {
+			var header = unsupportedHeadersList[i];
+			actions[actions.length] = new chrome.declarativeWebRequest.SetRequestHeader(header);
+		}
+		return actions;
+	},
+	
 	unregisterEarlierRules : function() {
 		chrome.declarativeWebRequest.onRequest.removeRules();
 	},
 	parseHeaders : function(str) {
-		var headers = str.split(/\n/);
 		var result = [];
+		if(!str){
+			return result;
+		}
+		var headers = str.split(/\n/);
 		for ( var i in headers) {
 			var header = headers[i];
 			var headerData = header.split(/:\s?/);

@@ -16,6 +16,10 @@
 package org.rest.client.ui;
 
 
+import java.util.List;
+
+import org.rest.client.storage.store.objects.RequestObject;
+
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.IsWidget;
 /**
@@ -41,4 +45,9 @@ public interface SavedView extends IsWidget {
 	 * @param listener
 	 */
 	void setPresenter(Presenter listener);
+	/**
+	 * Set store data
+	 * @param data
+	 */
+	void setData(List<RequestObject> data);
 }

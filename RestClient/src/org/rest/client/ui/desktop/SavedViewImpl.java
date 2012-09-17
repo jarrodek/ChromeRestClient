@@ -1,5 +1,8 @@
 package org.rest.client.ui.desktop;
 
+import java.util.List;
+
+import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.SavedView;
 
 import com.google.gwt.core.client.GWT;
@@ -24,4 +27,8 @@ public class SavedViewImpl extends Composite implements SavedView {
 		
 	}
 
+	@Override
+	public void setData(List<RequestObject> data) {
+		
+	}
 }

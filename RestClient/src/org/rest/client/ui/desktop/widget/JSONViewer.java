@@ -80,9 +80,18 @@ public class JSONViewer extends Composite {
 			}
 		}
 	}
-	
+	/**
+	 * TODO: parse data in worker or via scheduler
+	 * @param data
+	 * @param indent
+	 * @return
+	 */
 	private String parse(JSONValue data, int indent){
+		if(data == null){
+			return "";
+		}
 		String result = "";
+		
 		JSONObject obj = data.isObject(); //JSON Object or null
 		JSONArray arr = data.isArray(); //JSON array or null
 		JSONString str = data.isString();//JSON string or null
@@ -138,9 +147,11 @@ public class JSONViewer extends Composite {
 		String value = str.stringValue();
 		if(value != null){
 			value = SafeHtmlUtils.htmlEscape(value);
-			if(linkRegExp.test(value)){
-				value = "<a href=\""+value+"\">"+value+"</a>";
-			}
+			try{
+				if(linkRegExp.test(value)){
+					value = "<a href=\""+value+"\">"+value+"</a>";
+				}
+			} catch(Exception e){}
 		} else {
 			value = "null";
 		}

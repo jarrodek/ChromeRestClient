@@ -15,10 +15,19 @@
  ******************************************************************************/
 package org.rest.client.activity;
 
-import org.rest.client.ClientFactory;
-import org.rest.client.place.SavedPlace;
-import org.rest.client.ui.SavedView;
+import java.util.List;
 
+import org.rest.client.ClientFactory;
+import org.rest.client.RestClient;
+import org.rest.client.place.SavedPlace;
+import org.rest.client.storage.store.objects.RequestObject;
+import org.rest.client.storage.websql.RequestDataService;
+import org.rest.client.ui.SavedView;
+import org.rest.client.ui.desktop.StatusNotification;
+
+import com.allen_sauer.gwt.log.client.Log;
+import com.google.code.gwt.database.client.service.DataServiceException;
+import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -35,6 +44,7 @@ public class SavedActivity extends AppActivity implements
 	
 	final private SavedPlace place;
 	private EventBus eventBus;
+	private SavedView view;
 
 	public SavedActivity(SavedPlace place, ClientFactory clientFactory) {
 		super(clientFactory);
@@ -46,8 +56,27 @@ public class SavedActivity extends AppActivity implements
 		this.eventBus = eventBus;
 		super.start(panel, eventBus);
 		
-		SavedView view = clientFactory.getSavedView();
+		view = clientFactory.getSavedView();
 		view.setPresenter(this);
 		panel.setWidget(view.asWidget());
+		
+		
+		RequestDataService storeService = clientFactory.getRequestDataStore().getService();
+		storeService.getSavedRequests(new ListCallback<RequestObject>() {
+			
+			@Override
+			public void onFailure(DataServiceException error) {
+				if(RestClient.isDebug()){
+					Log.error("Database error. Unable read history data.", error);
+				}
+				StatusNotification.notify("Database error. Unable read history data.", StatusNotification.TYPE_ERROR);
+			}
+			
+			@Override
+			public void onSuccess(List<RequestObject> result) {
+				view.setData(result);
+			}
+		});
+		
 	}
 }
