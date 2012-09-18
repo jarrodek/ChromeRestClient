@@ -78,7 +78,6 @@ public class RequestActivity extends AppActivity implements
 	
 	public RequestActivity(RequestPlace place, ClientFactory clientFactory) {
 		super(clientFactory);
-		Log.debug("Create activity");
 		this.place = place;
 	}
 
@@ -141,8 +140,16 @@ public class RequestActivity extends AppActivity implements
 				restoreLatestRequest(requestView);
 			}
 		} else if(place.isSaved()){
-			Log.error("Restore method for this place is not yet implemented.");
-			throw new IllegalArgumentException("Not implemented yet");
+			try{
+				int savedId = Integer.parseInt(entryId);
+				restoreFormSavedRequest(savedId, requestView);
+			} catch(Exception e){
+				if(RestClient.isDebug()){
+					Log.error("Unable read saved item ID",e);
+				}
+				StatusNotification.notify("Unable read saved request data", StatusNotification.TYPE_ERROR);
+				restoreLatestRequest(requestView);
+			}
 		} else if(place.isExternal()){
 			createExternalRequest(requestView,entryId);
 		} else {
@@ -578,6 +585,41 @@ public class RequestActivity extends AppActivity implements
 		});
 		
 	}
+	
+	private void restoreFormSavedRequest(final int savedId, final RequestView view){
+		clientFactory.getRequestDataStore().getByKey(savedId, new StoreResultCallback<RequestObject>(){
+
+			@Override
+			public void onSuccess(RequestObject result) {
+				if (result == null) {
+					view.setUrl(null);
+					view.setMethod(null);
+					view.setHeaders(null);
+					view.setPayload(null);
+					view.setEncoding(null);
+					return;
+				}
+				if(result.getProject() > 0){
+					showProjectRelatedData(result.getProject(), null, view);
+					RestClient.setOpenedProject(result.getProject());
+				}
+				
+				view.setUrl(result.getURL());
+				view.setMethod(result.getMethod());
+				view.setHeaders(result.getHeaders());
+				view.setPayload(result.getPayload());
+				setUserDefinedContentEncodingValues(result
+						.getEncoding());
+			}
+
+			@Override
+			public void onError(Throwable e) {
+				Log.error("Unable read stored data :(", e);
+				StatusNotification.notify("Unable read stored data :(", StatusNotification.TYPE_CRITICAL, StatusNotification.TIME_MEDIUM);
+			}});
+	}
+	
+	
 	/**
 	 * Restore latest, not saved request
 	 * @param view

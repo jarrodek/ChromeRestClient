@@ -2,7 +2,7 @@ var dev = false;
 
 var requestFilter = {
 	urls : [ "<all_urls>" ],
-	//types : [ "xmlhttprequest" ]
+	types : [ "xmlhttprequest" ]
 }
 var requestDetails = {
 	URL : null,
@@ -65,7 +65,9 @@ function onRequestCompleted(details){
 		return;
 	requestDetails.RESPONSE_HEADERS = details.responseHeaders;
 }
-
+function onRequestError(details){
+	console.log(details);
+}
 /**
  * Register Web Requests listeners to handle sent/received headers info in
  * proper way (get all info) See more at <a
@@ -77,7 +79,7 @@ chrome.webRequest.onBeforeRedirect.addListener(onBeforeRedirect, requestFilter,
 		[ 'responseHeaders' ]);
 chrome.webRequest.onCompleted.addListener(onRequestCompleted, requestFilter,
 		[ 'responseHeaders' ]);
-
+chrome.webRequest.onErrorOccurred.addListener(onRequestError,requestFilter);
 
 window.requestAction = function(request, callback){
 	callback = callback || new Function();
@@ -235,7 +237,7 @@ var declarativeRequest = {
 		// Remove all request headers set by browser by default and that are not set by user
 		// (can't remove and set headers in one request by this API)
 		//
-		var defaultHeaders = "accept,accept-charset,accept-encoding,accept-language,cache-control,connection,content-type,host,if-modified-since,if-none-match,origin,referer,user-agent".split(",");
+		var defaultHeaders = "accept,accept-charset,accept-encoding,accept-language,access-control-request-headers,cache-control,access-control-request-method,connection,content-type,host,if-modified-since,if-none-match,origin,referer,user-agent".split(",");
 		var requestHeadersKeys = [];
 		for(var i=0; i<requestHeadersLength;i++){
 			requestHeadersKeys[requestHeadersKeys.length] = requestHeaders[i].name.toLowerCase();
@@ -246,7 +248,7 @@ var declarativeRequest = {
 				return false; 
 			return true 
 		});
-		console.log(removeHeaders);
+		
 		var removeActions = declarativeRequest._getRemoveHeadersActions(removeHeaders);
 		if(removeActions != null){
 			requestActions = requestActions.concat(removeActions);
@@ -266,7 +268,6 @@ var declarativeRequest = {
 			})],
 			actions : requestActions
 		};
-		console.log(rule);
 		
 		chrome.declarativeWebRequest.onRequest.addRules([rule],
 			function callback(details) {

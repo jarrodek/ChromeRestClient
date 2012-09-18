@@ -18,6 +18,7 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -37,7 +38,9 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 	
 	@UiField DivElement loaderInfo;
 	@UiField HTMLPanel root;
+	@UiField HTMLPanel list;
 	@UiField WidgetStyle style;
+	@UiField Button loadNextPage;
 	
 	public HistoryViewImpl(){
 		initWidget(uiBinder.createAndBindUi(this));
@@ -45,7 +48,8 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 		ClearHistoryEvent.register(RestClient.getClientFactory().getEventBus(), new ClearHistoryEvent.Handler() {
 			@Override
 			public void onClearForm() {
-				root.clear();
+				list.clear();
+				loadNextPage.removeFromParent();
 				emptyInfo();
 			}
 		});
@@ -56,13 +60,14 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 		this.listener = listener;
 	}
 	/**
-	 * @todo Create info message for empty data
+	 * Create info message when no data available
 	 */
 	private void emptyInfo(){
 		InlineLabel label = new InlineLabel();
 		label.setText("You do not have any saved history :(");
 		label.addStyleName(style.emptyInfo());
 		root.add(label);
+		loadNextPage.removeFromParent();
 	}
 	
 	
@@ -82,7 +87,7 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 			long time = (long) history.getTime();
 			Date d = new Date(time);
 			item.setDate(d);
-			root.add(item);
+			list.add(item);
 		}
 		
 		
@@ -92,7 +97,13 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 		e.preventDefault();
 		listener.onClearHistory();
 	}
-
+	
+	@UiHandler("loadNextPage")
+	void onLoadNextPage(ClickEvent e){
+		e.preventDefault();
+		listener.getNextItemsPage();
+	}
+	
 	@Override
 	public void getHistoryDetails(int historyId, final Callback<HistoryObject, Throwable> callback) {
 		listener.onHistoryItemSelect(historyId, new Callback<HistoryObject, Throwable>() {
@@ -112,5 +123,10 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 	@Override
 	public void onSelectedHistoryItem(int historyId) {
 		listener.goTo(RequestPlace.Tokenizer.fromHistory(historyId));
+	}
+
+	@Override
+	public void setNoMoreItems() {
+		loadNextPage.removeFromParent();
 	}
 }

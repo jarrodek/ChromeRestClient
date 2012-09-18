@@ -29,7 +29,6 @@ import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.web.bindery.event.shared.EventBus;
 
 /**
  * Activities typically restore state ("wake up"), perform initialization
@@ -42,18 +41,23 @@ public class SavedActivity extends AppActivity implements
 	SavedView.Presenter {
 
 	
-	final private SavedPlace place;
-	private EventBus eventBus;
+	//final private SavedPlace place;
+	//private EventBus eventBus;
 	private SavedView view;
+	
+	private int displayedItems = 0;
+	private boolean hasMoreItems = true;
+	private final static int PAGE_SIZE = 15;
+	private RequestDataService storeService = clientFactory.getRequestDataStore().getService();
 
 	public SavedActivity(SavedPlace place, ClientFactory clientFactory) {
 		super(clientFactory);
-		this.place = place;
+		//this.place = place;
 	}
 
 	@Override
 	public void start(AcceptsOneWidget panel, com.google.gwt.event.shared.EventBus eventBus) {
-		this.eventBus = eventBus;
+		//this.eventBus = eventBus;
 		super.start(panel, eventBus);
 		
 		view = clientFactory.getSavedView();
@@ -61,11 +65,27 @@ public class SavedActivity extends AppActivity implements
 		panel.setWidget(view.asWidget());
 		
 		
-		RequestDataService storeService = clientFactory.getRequestDataStore().getService();
-		storeService.getSavedRequests(new ListCallback<RequestObject>() {
+		getNextItemsPage();
+		
+	}
+	
+	private boolean gettingNextPage = false;
+	
+	@Override
+	public void getNextItemsPage(){
+		if(gettingNextPage){
+			return;
+		}
+		gettingNextPage = true;
+		if(!hasMoreItems){
+			view.setNoMoreItems();
+			return;
+		}
+		storeService.getSavedRequests(PAGE_SIZE, displayedItems, new ListCallback<RequestObject>() {
 			
 			@Override
 			public void onFailure(DataServiceException error) {
+				gettingNextPage = false;
 				if(RestClient.isDebug()){
 					Log.error("Database error. Unable read history data.", error);
 				}
@@ -74,9 +94,19 @@ public class SavedActivity extends AppActivity implements
 			
 			@Override
 			public void onSuccess(List<RequestObject> result) {
-				view.setData(result);
+				int len = result.size();
+				displayedItems += len;
+				if(len < PAGE_SIZE){
+					hasMoreItems = false;
+					view.setNoMoreItems();
+				}
+				gettingNextPage = false;
+				
+				if(len>0)
+					view.addData(result);
 			}
 		});
-		
 	}
+	
+	
 }

@@ -385,6 +385,13 @@
 	height: 24px;
 	display: inline-block;
 }
+.flex{
+	display: -webkit-flex;
+	display: -moz-flex;
+	display: -ms-flex;
+	display: -o-flex;
+	display: flex;
+}
 .flexCenter{
 	display: -webkit-flex;
 	display: -moz-flex;
@@ -412,4 +419,79 @@
 }
 .statusCodeHintImage:hover{
 	opacity: 1;
+}
+
+/* HISTORY/SAVED request list */
+.historyWrapper{
+	padding: 3px;
+	margin: 3px 10px 3px 3px;
+	border: 1px transparent solid;
+	border-bottom: 1px rgba(229, 229, 229, 0.12) solid;
+}
+.historyListRow{}
+.historyMethod,
+.historyUrl,
+.historyDate,
+.historyAction{
+	-webkit-align-items: center;
+}
+.historyDate{
+	margin-right: 1em;
+}
+.historyMethod{
+	margin-right: 1em;
+	font-weight: bold;
+	cursor: pointer;
+}
+.historyUrl{ 
+	-webkit-flex: 1 0 0px;
+	-moz-flex: 1 0 0px;
+	-ms-flex: 1 0 0px;
+	-o-flex: 1 0 0px;
+	flex: 1 0 0px; 
+	margin-right: 7px;
+	cursor: pointer;
+	width: 1px;
+	overflow: hidden;
+}
+.historyUrlValue{
+	display: block;
+	line-height: 2em;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+}
+.historySelectButton{padding: 0px;}
+.historyHeaders{
+	max-height: 100px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: pre; 
+	width: 1px;display: block;
+}
+.historyPayload{
+	max-height: 100px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: pre; 
+	margin-right: 15px;
+	width: 1px;
+	display: block;
+}
+.historyEncoding{margin-right: 15px;}
+.historyDetailed{margin-top: 15px;}
+
+.historySelected{
+	border-color: #BED8FF;
+	background-color: #F7FBFF;
+	margin-bottom: 10px;
+	margin-top: 10px;
+	border-radius: 2px;
+}
+.historyFlex1{
+	-webkit-flex: 1 0 0px;
+	-moz-flex: 1 0 0px;
+	-ms-flex: 1 0 0px;
+	-o-flex: 1 0 0px;
+	flex: 1 0 0px; 
 }

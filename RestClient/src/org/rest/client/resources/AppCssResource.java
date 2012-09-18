@@ -70,8 +70,25 @@ public interface AppCssResource extends CssResource {
 	
 	/* Position children in center of this container */
 	String flexCenter();
-	
+	String flex();
 	
 	
 	String statusCodeHintImage();
+	
+	/* HISTORY/SAVED request list */
+	String historyWrapper();
+	String historyListRow();
+	String historyMethod();
+	String historyUrl();
+	String historyDate();
+	String historyAction();
+	String historyUrlValue();
+	String historySelectButton();
+	String historyHeaders();
+	String historyPayload();
+	String historyEncoding();
+	String historyDetailed();
+	String historySelected();
+	String historyFlex1();
+	
 }

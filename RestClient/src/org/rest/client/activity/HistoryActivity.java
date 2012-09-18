@@ -45,8 +45,12 @@ public class HistoryActivity extends AppActivity implements
 	@SuppressWarnings("unused")
 	final private HistoryPlace place;
 	private EventBus eventBus;
-	HistoryView view = null;
-
+	private HistoryView view = null;
+	private int displayedItems = 0;
+	private boolean hasMoreItems = true;
+	private final static int PAGE_SIZE = 15;
+	private boolean gettingNextPage = false;
+	
 	public HistoryActivity(HistoryPlace place, ClientFactory clientFactory) {
 		super(clientFactory);
 		this.place = place;
@@ -60,19 +64,38 @@ public class HistoryActivity extends AppActivity implements
 		view = clientFactory.getHistoryView();
 		view.setPresenter(this);
 		panel.setWidget(view.asWidget());
-		getHistoryData();
+		getNextItemsPage();
 	}
 
-	private void getHistoryData() {
-		clientFactory.getHistoryRequestStore().historyList(new StoreResultCallback<List<HistoryObject>>() {
+	@Override
+	public void getNextItemsPage() {
+		if(gettingNextPage){
+			return;
+		}
+		gettingNextPage = true;
+		if(!hasMoreItems){
+			view.setNoMoreItems();
+			return;
+		}
+		
+		clientFactory.getHistoryRequestStore().historyList(PAGE_SIZE, displayedItems, new StoreResultCallback<List<HistoryObject>>() {
 			
 			@Override
 			public void onSuccess(List<HistoryObject> result) {
-				view.setHistory(result);
+				int len = result.size();
+				displayedItems += len;
+				if(len < PAGE_SIZE){
+					hasMoreItems = false;
+					view.setNoMoreItems();
+				}
+				gettingNextPage = false;
+				if(len>0)
+				 view.setHistory(result);
 			}
 			
 			@Override
 			public void onError(Throwable e) {
+				gettingNextPage = false;
 				if(RestClient.isDebug()){
 					Log.error("Database error. Unable read history data.", e);
 				}

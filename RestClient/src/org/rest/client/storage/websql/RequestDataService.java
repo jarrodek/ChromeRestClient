@@ -68,6 +68,6 @@ public interface RequestDataService extends AppDatabase {
 	@Select("SELECT COUNT(*) FROM request_data WHERE project={projectId}")
 	void getEndpointsCount(int projectId, ScalarCallback<Integer> callback);
 	
-	@Select("SELECT * FROM request_data WHERE project=0 ORDER BY time ASC")
-	void getSavedRequests(ListCallback<RequestObject> calloback);
+	@Select("SELECT * FROM request_data WHERE project=0 ORDER BY time ASC LIMIT {limit} OFFSET {offset}")
+	void getSavedRequests(int limit, int offset, ListCallback<RequestObject> calloback);
 }

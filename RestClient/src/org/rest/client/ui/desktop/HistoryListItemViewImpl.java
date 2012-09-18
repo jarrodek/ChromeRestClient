@@ -16,7 +16,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -32,9 +31,6 @@ public class HistoryListItemViewImpl extends Composite implements HistoryListIte
 
 	interface HistoryListItemViewImplUiBinder extends UiBinder<Widget, HistoryListItemViewImpl> {
 	}
-	interface WidgetStyle extends CssResource {
-		String selected();
-	}
 	
 	@UiField InlineLabel methodLabel;
 	@UiField InlineLabel urlValue;
@@ -45,7 +41,6 @@ public class HistoryListItemViewImpl extends Composite implements HistoryListIte
 	@UiField DivElement detailedPanel;
 	@UiField HTMLPanel urlLabel;
 	@UiField HTMLPanel container;
-	@UiField WidgetStyle style;
 	
 	AppCssResource appStyle = AppResources.INSTANCE.appCss();
 	HistoryView parentList = null;
@@ -129,23 +124,22 @@ public class HistoryListItemViewImpl extends Composite implements HistoryListIte
 					StatusNotification.notify("Unable to read history data :(",StatusNotification.TYPE_ERROR);
 				}
 			});
-			container.addStyleName(style.selected());
+			container.addStyleName(appStyle.historySelected());
 			detailedPanel.removeClassName(appStyle.hidden());
 		} else {
-			container.addStyleName(style.selected());
+			container.addStyleName(appStyle.historySelected());
 			detailedPanel.removeClassName(appStyle.hidden());
 		}
 	}
 	
 	void hideDetails(){
-		container.removeStyleName(style.selected());
+		container.removeStyleName(appStyle.historySelected());
 		detailedPanel.addClassName(appStyle.hidden());
 	}
 
 	@Override
 	public void setDate(Date date) {
 		String data = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(date);
-		DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(date);
 		dateLabel.setText(data);
 	}	
 }

@@ -126,8 +126,8 @@ public class HistoryRequestStoreWebSql extends WebSqlAdapter<Integer, HistoryObj
 	 * Get from database data only for history list. It's include: database ID, URL and method field.
 	 * @param callback
 	 */
-	public void historyList(final StoreResultCallback<List<HistoryObject>> callback){
-		service.getDataForHistoryView(new ListCallback<HistoryObject>() {
+	public void historyList(int limit, int offset, final StoreResultCallback<List<HistoryObject>> callback){
+		service.getDataForHistoryView(limit, offset, new ListCallback<HistoryObject>() {
 			
 			@Override
 			public void onFailure(DataServiceException error) {

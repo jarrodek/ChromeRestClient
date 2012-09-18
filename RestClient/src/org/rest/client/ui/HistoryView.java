@@ -54,6 +54,10 @@ public interface HistoryView extends IsWidget {
 		 * Called when user wants to clear history table.
 		 */
 		void onClearHistory();
+		/**
+		 * Get next results page and set in view
+		 */
+		void getNextItemsPage();
 	}
 	/**
 	 * Sets presenter for this view
@@ -69,4 +73,8 @@ public interface HistoryView extends IsWidget {
 	void getHistoryDetails(int historyId, Callback<HistoryObject, Throwable> callback);
 	
 	void onSelectedHistoryItem(int historyId);
+	/**
+	 * Set information that there is no more items in datastore
+	 */
+	void setNoMoreItems();
 }

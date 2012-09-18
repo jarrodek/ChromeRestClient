@@ -1,17 +1,28 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui" >
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with field="appResources" type="org.rest.client.resources.AppResources" />
 	<ui:style>
-		
+		.savedName{
+			font-weight: bold;
+			-webkit-align-items: center;
+			margin-right: 1em;
+			min-width: 20%;
+			max-width: 30%;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+		.lastUsed{-webkit-align-items: center;margin-right: 7px;}
 	</ui:style>
-	<g:HTMLPanel ui:field="container" addStyleNames="{appResources.appCss.historyWrapper}">
+	<g:HTMLPanel ui:field="container" styleName="{appResources.appCss.historyWrapper}">
 		<div class="{appResources.appCss.historyListRow} {appResources.appCss.flex}">
-			<g:InlineLabel styleName="{appResources.appCss.historyDate} {appResources.appCss.flex}" ui:field="dateLabel"></g:InlineLabel>
+			<g:InlineLabel styleName="{style.savedName} {appResources.appCss.flex}" ui:field="nameLabel"></g:InlineLabel>
 			<g:InlineLabel styleName="{appResources.appCss.historyMethod} {appResources.appCss.flex}" ui:field="methodLabel"></g:InlineLabel>
 			<g:HTMLPanel styleName="{appResources.appCss.historyUrl} {appResources.appCss.flex}" ui:field="urlLabel">
 				<g:InlineLabel styleName="{appResources.appCss.historyUrlValue}" ui:field="urlValue"></g:InlineLabel>
 			</g:HTMLPanel>
+			<g:InlineLabel styleName="{style.lastUsed} {appResources.appCss.flex}" ui:field="dateLabel"></g:InlineLabel>
 			<span class="{appResources.appCss.historyAction} {appResources.appCss.flex}">
 				<g:Button ui:field="select" styleName="{appResources.appCss.button} {appResources.appCss.historySelectButton}">Select</g:Button>
 			</span>
@@ -22,4 +33,4 @@
 			<span class="{appResources.appCss.historyHeaders} {appResources.appCss.flex} {appResources.appCss.historyFlex1}" ui:field="headers"></span>
 		</div>
 	</g:HTMLPanel>
-</ui:UiBinder>
+</ui:UiBinder> 

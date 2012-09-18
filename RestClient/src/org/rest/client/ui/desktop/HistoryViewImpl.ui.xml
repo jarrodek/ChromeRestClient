@@ -39,6 +39,7 @@
 		}
 		.historyNav{}
 		.emptyInfo{display: block;text-align: center;padding-top: 20px;font-weight: bold;}
+		.loadNextRow{}
 	</ui:style>
 	<g:HTMLPanel addStyleNames="{style.historyList}" ui:field="root">
 		<section class="{style.historyNav}">
@@ -58,6 +59,10 @@
 			<span class="{style.loadingInfo}">
 				Please wait. Loading history.
 			</span>
+		</div>
+		<g:HTMLPanel ui:field="list"></g:HTMLPanel>
+		<div class="{style.loadNextRow}">
+			<g:Button ui:field="loadNextPage" styleName="{appResources.appCss.button}">Load more</g:Button>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>

@@ -39,6 +39,10 @@ public interface SavedView extends IsWidget {
 		 * @param place
 		 */
 		void goTo(Place place);
+		/**
+		 * Get next results page and set in view
+		 */
+		void getNextItemsPage();
 	}
 	/**
 	 * Sets presenter for this view
@@ -49,5 +53,10 @@ public interface SavedView extends IsWidget {
 	 * Set store data
 	 * @param data
 	 */
-	void setData(List<RequestObject> data);
+	void addData(List<RequestObject> data);
+	
+	/**
+	 * Set information that there is no more items in datastore
+	 */
+	void setNoMoreItems();
 }

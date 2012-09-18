@@ -2,11 +2,59 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with field="appResources" type="org.rest.client.resources.AppResources" />
-	<ui:style>
-		
+	<ui:style type="org.rest.client.ui.desktop.SavedViewImpl.WidgetStyle">
+		.loadingWrapper{min-height: 100px;}
+		.historyList{}
+		.loaderDotsContainer{
+			margin-right: 10px;
+			-webkit-justify-content: space-between;
+			-moz-justify-content: space-between;
+			-o-justify-content: space-between;
+			-o-justify-content: space-between;
+			justify-content: space-between;
+			-webkit-align-items: center;
+			-moz-align-items: center;
+			-o-align-items: center;
+			-o-align-items: center;
+			align-items: center;
+			display: -webkit-flex;
+			display: -moz-flex;
+			display: -ms-flex;
+			display: -o-flex;
+			display: flex;
+			width: 20px;
+			margin-left: 10px;
+		}
+		.loaderDot{ 
+			width: 4px;
+			height: 4px;
+			background-color: #189B06;
+			-webkit-border-radius: 2px;
+			-moz-border-radius: 2px;
+			-ms-border-radius: 2px;
+			-o-border-radius: 2px;
+			border-radius: 2px;  
+		}
+		.loadingInfo{}
+		.emptyInfo{display: block;text-align: center;padding-top: 20px;font-weight: bold;}
+		.loadNextRow{}
 	</ui:style>
-	<g:HTMLPanel ui:field="root">
-		<h1>Saved</h1>
-		
+	<g:HTMLPanel addStyleNames="{style.historyList}" ui:field="root">
+		<div ui:field="loaderInfo" class="{style.loadingWrapper} {appResources.appCss.flexCenter}">
+			<span class="{appResources.appCss.loaderImage}"></span>
+			<div class="{style.loaderDotsContainer}">
+				<div class="{style.loaderDot}"></div>
+				<div class="{style.loaderDot}"></div>
+				<div class="{style.loaderDot}"></div>
+			</div>
+			
+			<span class="{style.loadingInfo}">
+				Please wait. Loading history.
+			</span>
+		</div>
+		<g:HTMLPanel ui:field="list"></g:HTMLPanel>
+		<div class="{style.loadNextRow}">
+			<g:Button ui:field="loadNextPage" styleName="{appResources.appCss.button}">Load more</g:Button>
+		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>
