@@ -14,7 +14,65 @@
 		<servlet-name>TestDataServlet</servlet-name>
 		<url-pattern>/test</url-pattern>
 	</servlet-mapping>
+	
+	
+	
+	<!-- Save/Restore data servlet -->
+	<servlet>
+		<servlet-name>extensionEntry</servlet-name>
+		<servlet-class>org.rest.server.ExtensionServlet</servlet-class>
+	</servlet>
 
+	<servlet-mapping>
+		<servlet-name>extensionEntry</servlet-name>
+		<url-pattern>/ext-channel</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>extensionEntry</servlet-name>
+		<url-pattern>/ext-channel/*</url-pattern>
+	</servlet-mapping>
+	<!-- Ping servlet -->
+	<servlet>
+		<servlet-name>pingEntry</servlet-name>
+		<servlet-class>org.rest.server.PingServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>pingEntry</servlet-name>
+		<url-pattern>/ping/*</url-pattern>
+	</servlet-mapping>
+	
+	<!-- Auth servlet -->
+	<servlet>
+		<servlet-name>AuthServlet</servlet-name>
+		<servlet-class>org.rest.server.AuthServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+        <servlet-name>AuthServlet</servlet-name>
+        <url-pattern>/auth/signin</url-pattern>
+    </servlet-mapping>
+	<servlet>
+		<servlet-name>UserDataServlet</servlet-name>
+		<servlet-class>org.rest.server.UserDataServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+        <servlet-name>UserDataServlet</servlet-name>
+        <url-pattern>/udata/*</url-pattern>
+    </servlet-mapping>
+	
+	
+	<filter>
+        <filter-name>extensionOrginFilter</filter-name>
+        <filter-class>org.rest.server.ExtensionServletFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>extensionOrginFilter</filter-name>
+        <url-pattern>/ext-channel/*</url-pattern>
+        <url-pattern>/udata/*</url-pattern>
+        <url-pattern>/ping/*</url-pattern>
+    </filter-mapping>
+    
+    
 	<welcome-file-list>
 		<welcome-file>RestClient.html</welcome-file>
 	</welcome-file-list>

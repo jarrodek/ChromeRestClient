@@ -1,6 +1,7 @@
 package org.rest.client.ui.desktop;
 
 import org.rest.client.RestClient;
+import org.rest.client.place.ImportExportPlace;
 import org.rest.client.place.ShortcutPlace;
 import org.rest.client.resources.AppCssResource;
 import org.rest.client.resources.AppResources;
@@ -143,5 +144,9 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	@UiHandler("shortCutsButton")
 	void onShortcutsEdit(ClickEvent e){
 		listener.goTo(new ShortcutPlace("edit"));
+	}
+	@UiHandler("importExportWidget")
+	void onImportExportEdit(ClickEvent e){
+		listener.goTo(new ImportExportPlace("default"));
 	}
 }

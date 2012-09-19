@@ -17,6 +17,7 @@ package org.rest.client.mvp;
 
 import org.rest.client.place.AboutPlace;
 import org.rest.client.place.HistoryPlace;
+import org.rest.client.place.ImportExportPlace;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SavedPlace;
 import org.rest.client.place.SettingsPlace;
@@ -33,7 +34,7 @@ import com.google.gwt.place.shared.WithTokenizers;
  */
 @WithTokenizers({ AboutPlace.Tokenizer.class, RequestPlace.Tokenizer.class,
 		SettingsPlace.Tokenizer.class, 
-		ShortcutPlace.Tokenizer.class, HistoryPlace.Tokenizer.class, SavedPlace.Tokenizer.class })
+		ShortcutPlace.Tokenizer.class, HistoryPlace.Tokenizer.class, SavedPlace.Tokenizer.class, ImportExportPlace.Tokenizer.class })
 public interface AppPlaceHistoryMapper extends PlaceHistoryMapper {
 
 }

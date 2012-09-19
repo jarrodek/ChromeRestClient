@@ -29,6 +29,7 @@ import org.rest.client.ui.AddEncodingView;
 import org.rest.client.ui.ErrorDialogView;
 import org.rest.client.ui.HistoryListItemView;
 import org.rest.client.ui.HistoryView;
+import org.rest.client.ui.ImportExportView;
 import org.rest.client.ui.MenuItemView;
 import org.rest.client.ui.MenuView;
 import org.rest.client.ui.RequestView;
@@ -71,6 +72,7 @@ public interface ClientFactory {
 	ErrorDialogView getErrorDialogView();
 	HistoryView getHistoryView();
 	HistoryListItemView getHistoryListItemView();
+	ImportExportView getImportExportView();
 	
 	
 	// Communication with extension

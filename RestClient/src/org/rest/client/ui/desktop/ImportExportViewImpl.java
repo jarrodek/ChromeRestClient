@@ -1,0 +1,131 @@
+package org.rest.client.ui.desktop;
+
+import org.rest.client.chrome.Extension;
+import org.rest.client.chrome.Tab;
+import org.rest.client.chrome.TabCallback;
+import org.rest.client.chrome.Tabs;
+import org.rest.client.request.ApplicationRequest;
+import org.rest.client.ui.ImportExportView;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.ParagraphElement;
+import com.google.gwt.dom.client.PreElement;
+import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.http.client.URL;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.InlineLabel;
+import com.google.gwt.user.client.ui.Widget;
+
+public class ImportExportViewImpl extends Composite implements ImportExportView {
+
+	private static ImportExportViewImplUiBinder uiBinder = GWT
+			.create(ImportExportViewImplUiBinder.class);
+	
+	
+	interface ImportExportViewImplUiBinder extends
+			UiBinder<Widget, ImportExportViewImpl> {
+	}
+	
+	
+	
+	private Presenter listener;
+	
+	
+	public ImportExportViewImpl() {
+		initWidget(uiBinder.createAndBindUi(this));
+		
+		
+		
+		
+		
+		//
+		// OLD SYSTEM SETUP
+		//
+		statusInfo.setText("Checking connection status...");
+	}
+
+	@Override
+	public void setPresenter(Presenter listener) {
+		this.listener = listener;
+	}
+	
+	
+	
+	
+	//
+	// OLD SYSTEM
+	//
+	@UiField InlineLabel loggedInInfo;
+	@UiField InlineLabel statusInfo;
+	@UiField DivElement storeDataPanel;
+	@UiField DivElement shareUrlPanel;
+	@UiField ParagraphElement connectNote;
+	@UiField PreElement shareLink;
+	
+	@UiField Button connectButton;
+	@UiField Button storeData;
+	@UiField Button restoreData;
+	@Override
+	public void setIsUserView() {
+		statusInfo.setText("");
+		hideConnectControls();
+		showShareLink();
+		
+		
+	}
+	
+	/**
+	 * Hide controls like "connect to application"
+	 */
+	private void hideConnectControls(){
+		loggedInInfo.setVisible(true);
+		connectButton.setVisible(false);
+		connectNote.getStyle().setDisplay(Display.NONE);
+		storeDataPanel.getStyle().setDisplay(Display.BLOCK);
+	}
+	
+	private void showShareLink(){
+		String applicationUserId = listener.getApplicationUserId();
+		if(applicationUserId == null) return;
+		
+		shareUrlPanel.getStyle().setDisplay(Display.BLOCK);
+		Extension ext = Extension.getExtensionIfSupported();
+		String url = "";
+		if(ext == null){ //DEV mode
+			url = "http://127.0.0.1:8888/RestClientApp.html?gwt.codesvr=127.0.0.1:9997";
+		} else {
+			url = ext.getURL("/RestClientApp.html");
+		}
+		url += "#import/" + applicationUserId;
+		shareLink.setInnerText(url);
+	}
+	
+	@UiHandler("connectButton")
+	void onConnectButton(ClickEvent e){
+		String signInUrl = ApplicationRequest.AUTH_URL + "/signin?ret=";
+		Extension ext = Extension.getExtensionIfSupported();
+		String returnPath = "";
+		if(ext == null){ //DEV MODE
+			returnPath = "http://127.0.0.1:8888/auth.html#auth";
+		} else {
+			returnPath = ext.getURL("/auth.html#auth");
+		}
+		signInUrl = signInUrl + URL.encodeQueryString(returnPath);
+		Tabs tabs = Tabs.getTabsIfSupported();
+		if(tabs == null){ //DEV MODE
+			Window.open(signInUrl, "_blank", "");
+		} else {
+			tabs.create(Tabs.CreateProperties.create().setUrl(signInUrl), new TabCallback() {
+				@Override
+				public void onResult(Tab tab) {}
+			});
+		}
+	}
+}

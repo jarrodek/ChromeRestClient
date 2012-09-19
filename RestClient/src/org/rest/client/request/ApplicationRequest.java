@@ -13,9 +13,9 @@ public class ApplicationRequest {
 	/**
 	 * URL where to send remote requests.
 	 */
-//	protected static final String SERVICE_URL;
-//	protected static final String PING_URL;
-//	public static final String AUTH_URL;
+	protected static final String SERVICE_URL;
+	protected static final String PING_URL;
+	public static final String AUTH_URL;
 	public static final String ASSETS_URL;
 	static {
 		if (GWT.isProdMode()) {
@@ -23,9 +23,9 @@ public class ApplicationRequest {
 		} else {
 			SERVICE_HOST = "http://127.0.0.1:8888/";
 		}
-//		SERVICE_URL = SERVICE_HOST + "ext-channel";
-//		PING_URL = SERVICE_HOST + "ping/session";
-//		AUTH_URL = SERVICE_HOST + "auth";
+		SERVICE_URL = SERVICE_HOST + "ext-channel";
+		PING_URL = SERVICE_HOST + "ping/session";
+		AUTH_URL = SERVICE_HOST + "auth";
 		ASSETS_URL = SERVICE_HOST + "static/";
 	}
 	

@@ -18,12 +18,14 @@ package org.rest.client.mvp;
 import org.rest.client.ClientFactory;
 import org.rest.client.activity.AboutActivity;
 import org.rest.client.activity.HistoryActivity;
+import org.rest.client.activity.ImportExportActivity;
 import org.rest.client.activity.RequestActivity;
 import org.rest.client.activity.SavedActivity;
 import org.rest.client.activity.SettingsActivity;
 import org.rest.client.activity.ShortcutActivity;
 import org.rest.client.place.AboutPlace;
 import org.rest.client.place.HistoryPlace;
+import org.rest.client.place.ImportExportPlace;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SavedPlace;
 import org.rest.client.place.SettingsPlace;
@@ -66,6 +68,8 @@ public class AppActivityMapper implements ActivityMapper {
 			return new HistoryActivity((HistoryPlace)place, clientFactory);
 		} else if(place instanceof SavedPlace){
 			return new SavedActivity((SavedPlace)place, clientFactory);
+		} else if (place instanceof ImportExportPlace){
+			return new ImportExportActivity((ImportExportPlace)place, clientFactory);
 		}
 		return null;
 	}
