@@ -1,5 +1,6 @@
 package org.rest.client.storage.websql;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import org.rest.client.storage.store.objects.RequestObject;
@@ -70,4 +71,20 @@ public interface RequestDataService extends AppDatabase {
 	
 	@Select("SELECT * FROM request_data WHERE project=0 ORDER BY time ASC LIMIT {limit} OFFSET {offset}")
 	void getSavedRequests(int limit, int offset, ListCallback<RequestObject> calloback);
+	
+	/**
+	 * @param callback
+	 */
+	@Select("SELECT * FROM request_data ORDER BY name")
+	void getAllData(ListCallback<RequestObject> callback);
+	
+	@Update(sql = "INSERT INTO request_data (project, name, url, method, encoding, headers, "
+			+ "payload, skipProtocol, skipServer, skipParams, skipHistory, skipMethod, "
+			+ "skipPayload, skipHeaders, skipPath, time) VALUES ("
+			+ "{_.getProject()},{_.getName()},{_.getURL()},{_.getMethod()},"
+			+ "{_.getEncoding()},{_.getHeaders()},{_.getPayload()},"
+			+ "{_.getSkipProtocol()},{_.getSkipServer()},{_.getSkipParams()},"
+			+ "{_.getSkipHistory()},{_.getSkipMethod()},{_.getSkipPayload()},"
+			+ "{_.getSkipHeaders()},{_.getSkipPath()},{dt.getTime()})", foreach = "data")
+	void insertImportData(ArrayList<RequestObject> data, Date dt, RowIdListCallback callback);
 }

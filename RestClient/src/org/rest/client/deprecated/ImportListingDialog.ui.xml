@@ -1,0 +1,28 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'
+	xmlns:c="urn:import:com.google.gwt.user.cellview.client">
+	<ui:with field="appResources" type="org.rest.client.resources.AppResources"/>
+	<ui:style>
+		.dialog{
+			width: 700px;
+			height: 100%;
+		}
+		.cellTable {
+	    	border-bottom: 1px solid #ccc;
+	    	text-align: left;
+	    	margin-bottom: 4px;
+	    }
+	</ui:style>
+	<g:DialogBox ui:field="dialog" modal="true"
+		animationEnabled="true" glassEnabled="true">
+		<g:caption>Select data to import</g:caption>
+		<g:HTMLPanel ui:field="contents" styleName="{style.dialog}">
+			<c:CellTable addStyleNames='{style.cellTable}' pageSize='10' ui:field='cellTable' />
+			<c:SimplePager ui:field='pager' />
+			<div class="{appResources.appCss.dialogButtons}">
+				<g:Button styleName="{appResources.appCss.button}" ui:field="save">Import</g:Button>
+				<g:Button styleName="{appResources.appCss.button}" ui:field="cancel">Cancel</g:Button>
+			</div>
+		</g:HTMLPanel>
+	</g:DialogBox>
+</ui:UiBinder>

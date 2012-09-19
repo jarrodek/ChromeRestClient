@@ -21,18 +21,39 @@ import com.google.gwt.place.shared.PlaceTokenizer;
 public class ImportExportPlace extends Place {
 	
 	private String placeToken = null;
-	
+	private boolean serverImport = false;
+	private String appId = null;
 	/**
 	 * @param requestData
 	 */
 	public ImportExportPlace(String requestData){
 		this.placeToken = requestData;
+		
+		if (requestData == null) {
+			return;
+		}
+		if (requestData.startsWith("import/")) {
+			serverImport = true;
+			appId = requestData.substring(7);
+		}
 	}
+	
+	public boolean isServerImport(){
+		return serverImport;
+	}
+	
+	public String getServerImportApplicationId(){
+		return appId;
+	}
+	
 	
 	public String getToken(){
 		return placeToken;
 	}
 	
+	public static ImportExportPlace fromServerImport(String appId){
+		return new ImportExportPlace("import/"+appId);
+	}
 	
 	public static class Tokenizer implements PlaceTokenizer<ImportExportPlace> {
 

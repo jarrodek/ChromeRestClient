@@ -6,7 +6,6 @@ import com.google.code.gwt.database.client.service.Select;
 import com.google.code.gwt.database.client.service.Update;
 import com.google.code.gwt.database.client.service.VoidCallback;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -36,12 +35,12 @@ public interface ExportedDataReferenceService extends AppDatabase {
 	/**
 	 * Insert data.
 	 * 
-	 * @param data
+	 * @param databaseSave
 	 * @param callback
 	 *            callback function
 	 */
-	@Update(sql = "INSERT INTO exported (reference_id, gaeKey, type) VALUES ({_.getReferenceId()},{_.getAppEngineKey()},{_.getType()})", foreach = "data")
-	void insertExported(Collection<ExportedDataItem> data,
+	@Update(sql = "INSERT INTO exported (reference_id, gaeKey, type) VALUES ({_.getReferenceId()},{_.getGaeKey()},{_.getType()})", foreach = "data")
+	void insertExported(List<ExportedDataInsertItem> data,
 			VoidCallback callback);
 	/**
 	 * @param idsList
@@ -50,7 +49,7 @@ public interface ExportedDataReferenceService extends AppDatabase {
 	@Select("SELECT * FROM exported WHERE reference_id IN ({idsList}) AND type='form'")
 	void getExportedFormByReferenceId(List<Integer> idsList, ListCallback<ExportedDataItem> callback);
 	/**
-	 * Find row by {@link RestForm} item ID.
+	 * Find row by request object item ID.
 	 * @param restFormId referenced ID
 	 * @param callback
 	 */

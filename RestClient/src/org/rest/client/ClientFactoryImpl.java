@@ -24,6 +24,7 @@ import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.store.StatusesStoreWebSql;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
+import org.rest.client.storage.websql.ExportedDataReferenceService;
 import org.rest.client.ui.AboutView;
 import org.rest.client.ui.AddEncodingView;
 import org.rest.client.ui.ErrorDialogView;
@@ -77,6 +78,7 @@ public class ClientFactoryImpl implements ClientFactory {
 	private static HeadersStoreWebSql headersStore = null;
 	private static StatusesStoreWebSql statusesStore = null;
 	private static ProjectStoreWebSql projectsStore = null;
+	private static ExportedDataReferenceService exportedDataService = null;
 	/**
 	 * It must be cached and created only once!
 	 */
@@ -256,5 +258,14 @@ public class ClientFactoryImpl implements ClientFactory {
 	@Override
 	public ImportExportView getImportExportView() {
 		return GWT.create(ImportExportViewImpl.class);
+	}
+
+	@Override
+	public ExportedDataReferenceService getExportedDataReferenceService() {
+		if(exportedDataService == null){
+			exportedDataService = GWT
+					.create(ExportedDataReferenceService.class);
+		}
+		return exportedDataService;
 	}
 }

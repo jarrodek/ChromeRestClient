@@ -1,0 +1,15 @@
+<!-- Indices written at Thu, 20 Sep 2012 01:01:22 CEST -->
+
+<datastore-indexes>
+
+    <!-- Used 9 times in query history -->
+    <datastore-index kind="RequestItem" ancestor="true" source="auto">
+        <property name="createDate" direction="desc"/>
+    </datastore-index>
+
+    <!-- Used 7 times in query history -->
+    <datastore-index kind="RequestHeader" ancestor="true" source="auto">
+        <property name="headers_INTEGER_IDX" direction="asc"/>
+    </datastore-index>
+
+</datastore-indexes>

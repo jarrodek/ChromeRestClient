@@ -35,6 +35,12 @@ public interface ImportExportView extends IsWidget {
 		 * 
 		 */
 		String getApplicationUserId();
+		/**
+		 * For old store system.
+		 * Call activity action to store current data. 
+		 */
+		void serverStoreAction();
+		void doServerImport(String[] keys);
 	}
 	/**
 	 * Sets presenter for this view
@@ -43,4 +49,6 @@ public interface ImportExportView extends IsWidget {
 	void setPresenter(Presenter listener);
 	
 	void setIsUserView();
+	void setIsNotUserView();
+	void serverControlsSetEnabled(boolean enabled);
 }

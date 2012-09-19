@@ -22,6 +22,7 @@ import org.rest.client.event.ApplicationReadyEvent;
 import org.rest.client.event.NewProjectAvailableEvent;
 import org.rest.client.mvp.AppActivityMapper;
 import org.rest.client.mvp.AppPlaceHistoryMapper;
+import org.rest.client.place.ImportExportPlace;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.RequestParameters;
 import org.rest.client.resources.AppResources;
@@ -37,6 +38,7 @@ import org.rest.client.task.InitializeAppHandlersTask;
 import org.rest.client.task.InitializeDatabaseTask;
 import org.rest.client.task.TasksLoader;
 import org.rest.client.ui.RequestView;
+import org.rest.client.util.UUID;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.activity.shared.ActivityManager;
@@ -50,6 +52,7 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.place.shared.PlaceHistoryHandler;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.web.bindery.event.shared.EventBus;
@@ -113,7 +116,7 @@ public class RestClient implements EntryPoint {
 		Logger.getLogger("").setLevel(Level.WARNING);
 		
 		final EventBus eventBus = clientFactory.getEventBus();
-		PlaceController placeController = clientFactory.getPlaceController();
+		final PlaceController placeController = clientFactory.getPlaceController();
 		// Start ActivityManager for the main widget with our ActivityMapper
 		ActivityMapper activityMapper = new AppActivityMapper(clientFactory);
 		ActivityManager activityManager = new ActivityManager(activityMapper,
@@ -149,7 +152,19 @@ public class RestClient implements EntryPoint {
 			@Override
 			public void onSuccess(Void result) {
 				RootPanel.get("appContainer").add(appWidget);
-				historyHandler.handleCurrentHistory();
+				
+				
+				//
+				// Special Tokens
+				// import/{UID} import data from Applications server
+				// TODO: to be removed on December 1st, 2012
+				//
+				if (Window.Location.getHash().startsWith("#import/")) {
+					String importUID = Window.Location.getHash().substring(8);
+					placeController.goTo(ImportExportPlace.fromServerImport(importUID));
+				} else {
+					historyHandler.handleCurrentHistory();
+				}
 				fixChromeLayout();
 				eventBus.fireEvent(new ApplicationReadyEvent());
 			}
@@ -299,6 +314,22 @@ public class RestClient implements EntryPoint {
 			}
 		});
 	}
+	
+	/**
+	 * Get application unique ID (36 characters).
+	 * 
+	 * @return generated RFC4122 UUID
+	 */
+	public static String getAppId() {
+		Storage storage = Storage.getLocalStorageIfSupported();
+		String uuid = storage.getItem("aapi");
+		if (uuid == null || uuid.equals("")) {
+			uuid = UUID.uuid();
+			storage.setItem("aapi", uuid);
+		}
+		return uuid;
+	}
+	
 	
 	/**
 	 * Sometimes chrome freeze after layout change via javascript (not sure if is it).

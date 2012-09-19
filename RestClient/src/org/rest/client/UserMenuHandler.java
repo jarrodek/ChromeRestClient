@@ -6,6 +6,7 @@ import java.util.Map;
 import org.rest.client.event.NewProjectAvailableEvent;
 import org.rest.client.place.AboutPlace;
 import org.rest.client.place.HistoryPlace;
+import org.rest.client.place.ImportExportPlace;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SavedPlace;
 import org.rest.client.place.SettingsPlace;
@@ -138,7 +139,8 @@ public class UserMenuHandler {
 							} else {
 								request.setSelected(true);
 							}
-						} else if(newPlace instanceof SettingsPlace){
+						} else if(newPlace instanceof SettingsPlace ||
+								newPlace instanceof ImportExportPlace){
 							settings.setSelected(true);
 						} else if(newPlace instanceof HistoryPlace){
 							history.setSelected(true);

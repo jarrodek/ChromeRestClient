@@ -9,6 +9,8 @@ import org.rest.client.storage.WebSqlAdapter;
 import org.rest.client.task.ui.LoaderWidget;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.code.gwt.database.client.service.DataServiceException;
+import com.google.code.gwt.database.client.service.VoidCallback;
 
 /**
  * The first task during startup. Initialize databases and set handlers to
@@ -64,6 +66,19 @@ public class InitializeDatabaseTask implements LoadTask {
 					callback.onInnerTaskFinished(1);
 					dbOpened++;
 					if (dbCount == dbOpened) {
+						//
+						// Temporary service
+						// TODO: remove December 1st, 2012.
+						//
+						RestClient.getClientFactory().getExportedDataReferenceService().initTable(new VoidCallback() {
+							
+							@Override
+							public void onFailure(DataServiceException error) {
+								Log.error("Unable initialize exported data service", error);
+							}
+							@Override
+							public void onSuccess() {}
+						});
 						callback.onSuccess();
 					}
 				}
@@ -78,6 +93,8 @@ public class InitializeDatabaseTask implements LoadTask {
 				}
 			});
 		}
+		
+		
 	}
 
 	@Override
