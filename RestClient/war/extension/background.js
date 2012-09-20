@@ -2,7 +2,7 @@ var dev = false;
 
 var requestFilter = {
 	urls : [ "<all_urls>" ],
-	types : [ "xmlhttprequest" ]
+	//types : [ "xmlhttprequest" ]
 }
 var requestDetails = {
 	URL : null,
@@ -24,8 +24,8 @@ window.externalDataHolder = {};
 function onHeadersSend(details) {
 	if (requestDetails.URL == null || !details.url)
 		return;
-	if (!(requestDetails.URL == details.url || requestDetails.URL
-			.indexOf(details.url) > -1))
+	if (!(requestDetails.URL == details.url || details.url
+			.indexOf(requestDetails.URL) > -1))
 		return;
 	requestDetails.REQUEST_HEADERS = details.requestHeaders;
 }
@@ -38,8 +38,8 @@ function onBeforeRedirect(details) {
 	
 	if (currentCheckUrl == null || !details.url)
 		return;
-	if (!(currentCheckUrl == details.url || currentCheckUrl
-			.indexOf(details.url) > -1))
+	if (!(requestDetails.URL == details.url || details.url
+			.indexOf(requestDetails.URL) > -1))
 		return;
 	var data = {
 		fromCache : details.fromCache,
@@ -50,6 +50,17 @@ function onBeforeRedirect(details) {
 	}
 	requestDetails.REDIRECT_DATA[requestDetails.REDIRECT_DATA.length] = data;
 	redirectDetails.currentUrl = details.redirectUrl;
+	//
+	// It takes too long :( redirect is faster...
+	//
+	var rule = declarativeRequest.currentRules;
+	rule.conditions.url = declarativeRequest._getUrlData(details.redirectUrl);
+	declarativeRequest.currentRules = rule;
+	
+	chrome.declarativeWebRequest.onRequest.addRules([rule],
+	function callback(details) {
+		declarativeRequest.previousRules = details;
+	});
 }
 
 function onRequestCompleted(details){
@@ -60,8 +71,8 @@ function onRequestCompleted(details){
 	
 	if (currentCheckUrl == null || !details.url)
 		return;
-	if (!(currentCheckUrl == details.url || currentCheckUrl
-			.indexOf(details.url) > -1))
+	if (!(requestDetails.URL == details.url || details.url
+			.indexOf(requestDetails.URL) > -1))
 		return;
 	requestDetails.RESPONSE_HEADERS = details.responseHeaders;
 }
@@ -180,6 +191,7 @@ function handleInternalMessage(request,sendResponse){
 
 
 var declarativeRequest = {
+	currentRules: {},
 	notSupportedW3CHeaders : "accept-charset,accept-encoding,connection,content-length,cookie,cookie2,content-transfer-encoding,date,expect,host,keep-alive,referer,te,trailer,transfer-encoding,upgrade,user-agent,via,origin,proxy,sec"
 			.split(","),
 	requestData : null,
@@ -254,7 +266,6 @@ var declarativeRequest = {
 			requestActions = requestActions.concat(removeActions);
 		}
 		
-		
 		if(requestActions.length == 0){
 			return;
 		}
@@ -268,6 +279,7 @@ var declarativeRequest = {
 			})],
 			actions : requestActions
 		};
+		declarativeRequest.currentRules = rule;
 		
 		chrome.declarativeWebRequest.onRequest.addRules([rule],
 			function callback(details) {

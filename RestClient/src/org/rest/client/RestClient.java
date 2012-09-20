@@ -239,7 +239,15 @@ public class RestClient implements EntryPoint {
 			requestObject.setHeaders(requestView.getHeaders());
 			requestObject.setMethod(requestView.getMethod());
 			requestObject.setPayload(requestView.getPayload());
-			requestObject.setURL(requestView.getUrl());
+			String url = requestView.getUrl();
+			if(url.startsWith("/")){
+				//
+				// DEV mode.
+				//
+				url = "http://127.0.0.1:8888"+url;
+			}
+			
+			requestObject.setURL(url);
 			requestObject.setFiles(requestView.getFiles());
 			callback.onSuccess(requestObject);
 		} else {

@@ -19,10 +19,13 @@
     }
   },
   "content_scripts": [{
-      "matches": ["http://127.0.0.1:8888/RestClient.html*"],
+      "matches": ["http://127.0.0.1:8888/*"],
       "js": ["cs.js"],
 	  "run_at": "document_start"
     }
+  ],
+  "web_accessible_resources": [
+    "cs.js"
   ],
   "intents": {
 	"http://webintents.org/view": [{
