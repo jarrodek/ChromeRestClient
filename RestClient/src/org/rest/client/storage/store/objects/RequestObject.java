@@ -19,6 +19,11 @@ import java.util.ArrayList;
 
 import org.rest.client.request.FilesObject;
 
+import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONBoolean;
+
 /**
  * This is representation of data stored in IDB request table. This class
  * represents any request related data in application. Either it is saved
@@ -53,7 +58,7 @@ public class RequestObject extends HistoryObject {
 			skipPayload: false,
 			skipHeaders: false,
 			skipPath: false,
-			created: new Date() //order key
+//			created: new Date() //order key
 		}
 	}-*/;
 	
@@ -253,7 +258,32 @@ public class RequestObject extends HistoryObject {
 		}
 		return res;
 	}-*/;
-
+	/**
+	 * @return {@link RequestObject} as a {@link JSONObject}
+	 */
+	public final JSONObject toJSONObject(){
+		JSONObject obj = new JSONObject();
+		
+		obj.put("encoding", new JSONString(getEncoding() == null ? "" : getEncoding()));
+		obj.put("headers", new JSONString(getHeaders() == null ? "" : getHeaders()));
+		obj.put("method", new JSONString(getMethod() == null ? "" : getMethod()));
+		obj.put("name", new JSONString(getName() == null ? "" : getName()));
+		obj.put("payload", new JSONString(getPayload() == null ? "" : getPayload()));
+		obj.put("project", new JSONNumber(getProject()));
+		obj.put("skipHeaders", JSONBoolean.getInstance(getSkipHeaders() == 1 ? true : false));
+		obj.put("skipHistory", JSONBoolean.getInstance(getSkipHistory() == 1 ? true : false));
+		obj.put("skipMethod", JSONBoolean.getInstance(getSkipMethod() == 1 ? true : false));
+		obj.put("skipParams", JSONBoolean.getInstance(getSkipParams() == 1 ? true : false));
+		obj.put("skipPath", JSONBoolean.getInstance(getSkipPath() == 1 ? true : false));
+		obj.put("skipPayload", JSONBoolean.getInstance(getSkipPayload() == 1 ? true : false));
+		obj.put("skipProtocol", JSONBoolean.getInstance(getSkipProtocol() == 1 ? true : false));
+		obj.put("skipServer", JSONBoolean.getInstance(getSkipServer() == 1 ? true : false));
+		obj.put("time", new JSONNumber(getTime()));
+		obj.put("url", new JSONString(getURL() == null ? "" : getURL()));
+		return obj;
+	}
+	
+	
 	public final native String toJSON() /*-{
 		return JSON.stringify(this);
 	}-*/;

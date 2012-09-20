@@ -1,5 +1,6 @@
 package org.rest.client.ui.desktop;
 
+import java.util.Date;
 import java.util.List;
 
 import org.rest.client.RestClient;
@@ -17,17 +18,22 @@ import org.rest.client.ui.ImportExportView;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.ParagraphElement;
 import com.google.gwt.dom.client.PreElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -43,6 +49,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 	}
 
 	private Presenter listener;
+	@UiField Anchor fileDownload;
 
 	public ImportExportViewImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -58,6 +65,58 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		this.listener = listener;
 	}
 
+	@UiHandler("fileExport")
+	void onfileExportClick(ClickEvent e) {
+		prepareFileExport();
+	}
+	
+	@UiHandler("fileDownload")
+	void onDownloadFileClick(ClickEvent e) {
+		if(!fileDownload.getElement().getAttribute("disabled").isEmpty()){
+			return;
+		}
+		fileDownload.getElement().setAttribute("disabled", "true");
+		Timer t = new Timer() {
+			@Override
+			public void run() {
+				fileDownload.setVisible(false);
+				fileDownload.setHref("");
+				listener.revokeDownloadData();
+			}
+		};
+		t.schedule(1500);
+	}
+
+	void prepareFileExport() {
+		listener.prepareDataToFile(new StringCallback() {
+			@Override
+			public void onResult(final String result) {
+				
+				Scheduler.get().scheduleDeferred(new Command() {
+					public void execute() {
+						String fileObjectUrl = listener.createDownloadData(result);
+						fileDownload.setHref(fileObjectUrl);
+						String date = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM).format(new Date());
+						String fileName = "arc-"+date+".json";
+						fileDownload.getElement().setAttribute("download", fileName);
+						fileDownload.getElement().setAttribute("data-downloadurl", "application/json:"+fileName+":"+fileObjectUrl);
+						fileDownload.setVisible(true);
+					}
+				});
+
+			}
+		});
+	}
+
+	
+
+	
+	
+	
+	
+	
+	
+	
 	//
 	// OLD SYSTEM
 	//
@@ -84,9 +143,12 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 	@Override
 	public void setIsUserView() {
 		statusInfo.setText("");
+
+		//
+		// OLD SYSTEM
+		//
 		hideConnectControls();
 		showShareLink();
-
 	}
 
 	/**
@@ -197,7 +259,8 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 							restoreData.setEnabled(true);
 							return;
 						}
-						final ImportListingDialog importDialog = new ImportListingDialog(listener);
+						final ImportListingDialog importDialog = new ImportListingDialog(
+								listener);
 						importDialog.append(result);
 						//
 						// delay show dialog for data providers to refresh the

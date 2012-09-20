@@ -82,5 +82,11 @@
 			</div>
 		</div>
 		
+		<div class="fileExport">
+			<h3>Export to file</h3>
+			<g:Button styleName="{appResources.appCss.button}" ui:field="fileExport" text="Create a file"></g:Button>
+			<g:Anchor ui:field="fileDownload" visible="false" text="Download file"></g:Anchor>
+		</div>
+		
 	</g:HTMLPanel>
 </ui:UiBinder> 

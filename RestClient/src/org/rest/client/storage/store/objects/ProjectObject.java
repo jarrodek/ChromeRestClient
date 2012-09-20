@@ -18,6 +18,9 @@ package org.rest.client.storage.store.objects;
 import java.util.Date;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 
 /**
  * This class represents form encoding data row object.
@@ -36,7 +39,7 @@ public class ProjectObject extends JavaScriptObject {
 	public static final native ProjectObject create() /*-{
 		return {
 			name: null,
-			timeStamp: new Date().getTime()
+			time: new Date().getTime()
 		}
 	}-*/;
 	
@@ -48,11 +51,14 @@ public class ProjectObject extends JavaScriptObject {
 	}-*/;
 	
 	public final native void setCreated(Date created) /*-{
-		this.timeStamp = created.getTime();
+		this.time = created.getTime();
 	}-*/;
 
 	public final native double getCreated() /*-{
-		return this.timeStamp;
+		if(!this.time){
+			this.time = new Date().getTime();
+		}
+		return this.time;
 	}-*/;
 	/**
 	 * Sets project name
@@ -70,4 +76,14 @@ public class ProjectObject extends JavaScriptObject {
 	public final native String getName() /*-{
 		return this.name;
 	}-*/;
+	
+	/**
+	 * @return {@link RequestObject} as a {@link JSONObject}
+	 */
+	public final JSONObject toJSONObject(){
+		JSONObject obj = new JSONObject();
+		obj.put("name", new JSONString(getName() == null ? "" : getName()));
+		obj.put("time", new JSONNumber(getCreated()));
+		return obj;
+	}
 }

@@ -3,6 +3,7 @@ package org.rest.client.activity;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.rest.client.ClientFactory;
@@ -20,9 +21,12 @@ import org.rest.client.place.ImportExportPlace;
 import org.rest.client.request.ApplicationSession;
 import org.rest.client.request.ApplicationSessionCallback;
 import org.rest.client.request.PingRequest;
+import org.rest.client.storage.StoreResultCallback;
+import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.storage.websql.ExportedDataInsertItem;
 import org.rest.client.ui.ImportExportView;
+import org.rest.client.ui.ImportExportView.StringCallback;
 import org.rest.client.ui.desktop.StatusNotification;
 import org.rest.client.util.Utils;
 
@@ -46,6 +50,7 @@ public class ImportExportActivity extends AppActivity implements
 	final private ImportExportPlace place;
 	private EventBus eventBus;
 	private ImportExportView view;
+	private String exportFileObjectUrl = null;
 
 	public ImportExportActivity(ImportExportPlace place,
 			ClientFactory clientFactory) {
@@ -84,9 +89,115 @@ public class ImportExportActivity extends AppActivity implements
 			importData(place.getServerImportApplicationId());
 		}
 	}
+	
+	
+	@Override
+	public void prepareDataToFile(final StringCallback callback) {
+		//
+		// Get all request data
+		//
+		clientFactory.getRequestDataStore().all(new StoreResultCallback<Map<Integer,RequestObject>>() {
+			@Override
+			public void onSuccess(final Map<Integer, RequestObject> requestDataResult) {
+				//
+				// Get project data
+				//
+				clientFactory.getProjectsStore().all(new StoreResultCallback<Map<Integer,ProjectObject>>() {
+					@Override
+					public void onSuccess(final Map<Integer, ProjectObject> projectDataResult) {
+						
+						JSONArray requestsArray = new JSONArray();
+						JSONArray projectsArray = new JSONArray();
+						Set<Integer> keys = requestDataResult.keySet();
+						for(Integer _k : keys){
+							RequestObject ro = requestDataResult.get(_k);
+							requestsArray.set(requestsArray.size(), ro.toJSONObject());
+						}
+						Set<Integer> projectKeys = projectDataResult.keySet();
+						for(Integer _k : projectKeys){
+							ProjectObject pd = projectDataResult.get(_k);
+							projectsArray.set(projectsArray.size(), pd.toJSONObject());
+						}
+						
+						JSONObject result = new JSONObject();
+						result.put("projects", projectsArray);
+						result.put("requests", requestsArray);
+						
+						callback.onResult(result.toString());
+					}
+					@Override
+					public void onError(Throwable e) {
+						if(RestClient.isDebug()){
+							Log.error("Unable to collect requests data :/", e);
+						}
+						StatusNotification.notify("Unable to collect requests data :/",StatusNotification.TYPE_ERROR);
+					}
+				});
+			}
+			
+			@Override
+			public void onError(Throwable e) {
+				if(RestClient.isDebug()){
+					Log.error("Unable to collect requests data :/", e);
+				}
+				StatusNotification.notify("Unable to collect requests data :/",StatusNotification.TYPE_ERROR);
+			}
+		});
+	}
+	
+	@Override
+	public String createDownloadData(String data) {
+		if(exportFileObjectUrl != null){
+			revokeDownloadData();
+		}
+		exportFileObjectUrl = createDownloadDataImpl(data); 
+		return exportFileObjectUrl;
+	}
+	
+	private final native String createDownloadDataImpl(String data) /*-{
+		var blob = new $wnd.Blob([data], {type: 'application/json'});
+		return $wnd.URL.createObjectURL(blob);
+	}-*/;
+	
 
+	@Override
+	public void revokeDownloadData() {
+		if(exportFileObjectUrl != null){
+			revokeDownloadDataImpl(exportFileObjectUrl);
+			exportFileObjectUrl = null;
+		}
+	}
+	private final native void revokeDownloadDataImpl(String url) /*-{
+		$wnd.URL.revokeObjectURL(url);
+	}-*/;
+	
+	
+	@Override
+	public String mayStop() {
+		revokeDownloadData();
+		return super.mayStop();
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	//
 	// OLD SYSTEM
+	// This will be removed in the end of the year
 	//
 	private String applicationUserId = null;
 
@@ -388,4 +499,6 @@ public class ImportExportActivity extends AppActivity implements
 					}
 				});
 	}
+
+	
 }

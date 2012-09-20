@@ -19,6 +19,12 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.IsWidget;
 
 public interface ImportExportView extends IsWidget {
+	
+	public interface StringCallback {
+		void onResult(String result);
+	}
+	
+	
 	/**
 	 * Presenter interface
 	 * @author Paweł Psztyć
@@ -30,9 +36,24 @@ public interface ImportExportView extends IsWidget {
 		 * @param place
 		 */
 		void goTo(Place place);
+		/**
+		 * Prepare request data to be exported. 
+		 */
+		void prepareDataToFile(StringCallback callback);
+		/**
+		 * Creates a download URL for this data in browser's filesystem
+		 * @param data Data to be stored
+		 * @return
+		 */
+		String createDownloadData(String data);
+		/**
+		 * Revoke previously created file via {@link #createDownloadData(String)}
+		 * @param url
+		 */
+		void revokeDownloadData();
 		
 		/**
-		 * 
+		 * For old store system.
 		 */
 		String getApplicationUserId();
 		/**

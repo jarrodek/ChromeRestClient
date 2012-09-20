@@ -1,6 +1,7 @@
 package org.rest.client.storage.store;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -93,8 +94,23 @@ public class RequestDataStoreWebSql extends WebSqlAdapter<Integer, RequestObject
 	}
 
 	@Override
-	public void all(StoreResultCallback<Map<Integer, RequestObject>> callback) {
-		callback.onError(null);
+	public void all(final StoreResultCallback<Map<Integer, RequestObject>> callback) {
+		
+		service.getAllData(new ListCallback<RequestObject>() {
+			@Override
+			public void onFailure(DataServiceException error) {
+				callback.onError(error);
+			}
+			
+			@Override
+			public void onSuccess(List<RequestObject> result) {
+				Map<Integer, RequestObject> mapResult = new HashMap<Integer, RequestObject>();
+				for(RequestObject item : result){
+					mapResult.put(item.getId(), item);
+				}
+				callback.onSuccess(mapResult);
+			}
+		});
 	}
 
 	@Override
