@@ -1,4 +1,4 @@
-package com.google.gwt.xhr2.client;
+package com.google.gwt.file.client;
 
 import com.google.gwt.core.client.JavaScriptObject;
 

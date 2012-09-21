@@ -1,4 +1,4 @@
-package com.google.gwt.xhr2.client;
+package com.google.gwt.file.client;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
@@ -8,7 +8,7 @@ public class FileList extends JavaScriptObject {
 	protected FileList(){}
 	
 	public static FileList create( Element e ){
-		if( e.getNodeName().toLowerCase().equals("input") && e.getAttribute("type").equals("file")){
+		if(e.getNodeName().toLowerCase().equals("input") && e.getAttribute("type").equals("file")){
 			return _create(e);
 		}
 		return null;

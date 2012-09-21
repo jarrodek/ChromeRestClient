@@ -1,6 +1,7 @@
 package com.google.gwt.xhr2.client;
 
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.file.client.Blob;
 
 /**
  * {@link XMLHttpRequest2} response object

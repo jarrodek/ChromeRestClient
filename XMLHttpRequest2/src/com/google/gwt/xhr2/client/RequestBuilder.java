@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.core.client.JavaScriptException;
+import com.google.gwt.file.client.Blob;
+import com.google.gwt.file.client.File;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.RequestPermissionException;
 

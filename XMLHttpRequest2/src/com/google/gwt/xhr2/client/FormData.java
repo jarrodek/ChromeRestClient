@@ -1,6 +1,7 @@
 package com.google.gwt.xhr2.client;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.file.client.Blob;
 
 public class FormData extends JavaScriptObject {
 	protected FormData(){}

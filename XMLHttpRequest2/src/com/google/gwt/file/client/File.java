@@ -1,4 +1,4 @@
-package com.google.gwt.xhr2.client;
+package com.google.gwt.file.client;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.Element;
@@ -49,7 +49,6 @@ public class File extends Blob {
 	}-*/;
 
 	public final native JavaScriptObject getArrayResult()/*-{
-		$wnd.console.log(this.result);
 		return this.result;
 	}-*/;
 

@@ -1,4 +1,4 @@
-package com.google.gwt.xhr2.client;
+package com.google.gwt.file.client;
 /**
  * ErrorCode representation class.
  * 

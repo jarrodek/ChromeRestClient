@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module>
-	<source path="client" />
 	<inherits name="com.google.gwt.user.User"/>
+	<inherits name="com.google.gwt.file.FileApi"/>
+	<inherits name="com.google.gwt.filereader.FileReader"/>
+	<source path="client" />
 </module>

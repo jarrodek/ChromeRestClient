@@ -2,6 +2,7 @@ package com.google.gwt.xhr2.client;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.file.client.Blob;
 /**
  * The native XMLHttpRequest (Level 2) object. 
  * 

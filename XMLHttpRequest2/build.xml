@@ -110,9 +110,25 @@
 		<copy todir="${tmp.dir}/${module.path}/">
 			<fileset file="${src.dir}/${module.path}/${module.name}" />
 		</copy>
+		<copy todir="${tmp.dir}/${module.filepath}/">
+			<fileset file="${src.dir}/${module.filepath}/${module.filename}" />
+		</copy>
+		<copy todir="${tmp.dir}/${module.filereaderpath}/">
+			<fileset file="${src.dir}/${module.filereaderpath}/${module.filereadername}" />
+		</copy>
 		<!-- copy all source files from client dir (required for include to another project) -->
 		<copy todir="${tmp.dir}/${module.path}/client">
 			<fileset dir="${src.dir}/${module.path}/client">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy todir="${tmp.dir}/${module.filepath}/client">
+			<fileset dir="${src.dir}/${module.filepath}/client">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy todir="${tmp.dir}/${module.filereaderpath}/client">
+			<fileset dir="${src.dir}/${module.filereaderpath}/client">
 				<include name="**/*.java" />
 			</fileset>
 		</copy>

@@ -1,0 +1,5 @@
+Import lib in your module:
+
+<inherits name="com.google.gwt.xhr2.XMLHttpRequest2" />
+
+enjoj :)
