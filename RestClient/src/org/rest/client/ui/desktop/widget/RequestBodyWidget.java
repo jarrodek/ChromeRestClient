@@ -45,6 +45,8 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.file.client.File;
+import com.google.gwt.file.client.FileList;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -57,8 +59,7 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.xhr2.client.File;
-import com.google.gwt.xhr2.client.FileList;
+
 
 public class RequestBodyWidget extends Composite implements IsHideable, HasText {
 	interface Binder extends UiBinder<Widget, RequestBodyWidget> {

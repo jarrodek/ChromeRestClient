@@ -15,6 +15,9 @@
  ******************************************************************************/
 package org.rest.client.ui;
 
+import org.rest.client.importparser.ImportResult;
+
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.IsWidget;
 
@@ -51,6 +54,11 @@ public interface ImportExportView extends IsWidget {
 		 * @param url
 		 */
 		void revokeDownloadData();
+		/**
+		 * Save imported data.
+		 * @param data
+		 */
+		void saveImportedFileData(ImportResult data, Callback<Boolean, Void> callback);
 		
 		/**
 		 * For old store system.

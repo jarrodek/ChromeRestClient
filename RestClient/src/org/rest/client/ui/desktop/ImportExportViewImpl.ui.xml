@@ -1,6 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:h5="urn:import:org.rest.client.ui.html5">
 	<ui:with field="appResources" type="org.rest.client.resources.AppResources" />
 	<ui:style>
 		.depricationInfo{
@@ -86,6 +87,13 @@
 			<h3>Export to file</h3>
 			<g:Button styleName="{appResources.appCss.button}" ui:field="fileExport" text="Create a file"></g:Button>
 			<g:Anchor ui:field="fileDownload" visible="false" text="Download file"></g:Anchor>
+		</div>
+		
+		<div class="fileImport">
+			<h3>Import file</h3>
+			<h5:HTML5FileUpload ui:field="fileImport" multiple="false"></h5:HTML5FileUpload>
+			<g:InlineLabel ui:field="importFileLog"></g:InlineLabel>
+			<g:HTMLPanel ui:field="importPreview"></g:HTMLPanel>
 		</div>
 		
 	</g:HTMLPanel>

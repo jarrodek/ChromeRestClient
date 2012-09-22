@@ -15,8 +15,6 @@
  ******************************************************************************/
 package org.rest.client.storage.store.objects;
 
-import java.util.Date;
-
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
@@ -38,6 +36,7 @@ public class ProjectObject extends JavaScriptObject {
 	 */
 	public static final native ProjectObject create() /*-{
 		return {
+			id: -1,
 			name: null,
 			time: new Date().getTime()
 		}
@@ -50,8 +49,12 @@ public class ProjectObject extends JavaScriptObject {
 		return this.id;
 	}-*/;
 	
-	public final native void setCreated(Date created) /*-{
-		this.time = created.getTime();
+	public final native void setId(int id) /*-{
+		this.id = id;
+	}-*/;
+	
+	public final native void setCreated(double created) /*-{
+		this.time = created;
 	}-*/;
 
 	public final native double getCreated() /*-{
@@ -82,6 +85,7 @@ public class ProjectObject extends JavaScriptObject {
 	 */
 	public final JSONObject toJSONObject(){
 		JSONObject obj = new JSONObject();
+		obj.put("id", new JSONNumber(getId()));
 		obj.put("name", new JSONString(getName() == null ? "" : getName()));
 		obj.put("time", new JSONNumber(getCreated()));
 		return obj;

@@ -43,6 +43,7 @@ public class RequestObject extends HistoryObject {
 	 */
 	public static final native RequestObject createRequest() /*-{
 		return {
+			id: -1,
 			name : null, //search key
 			project : 0, //search key
 			url : null, //search key
@@ -263,7 +264,7 @@ public class RequestObject extends HistoryObject {
 	 */
 	public final JSONObject toJSONObject(){
 		JSONObject obj = new JSONObject();
-		
+		obj.put("id", new JSONNumber(getId()));
 		obj.put("encoding", new JSONString(getEncoding() == null ? "" : getEncoding()));
 		obj.put("headers", new JSONString(getHeaders() == null ? "" : getHeaders()));
 		obj.put("method", new JSONString(getMethod() == null ? "" : getMethod()));

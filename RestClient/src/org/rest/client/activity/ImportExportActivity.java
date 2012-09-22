@@ -17,6 +17,7 @@ import org.rest.client.deprecated.LoaderDialog;
 import org.rest.client.deprecated.RestForm;
 import org.rest.client.deprecated.SuggestionImportItem;
 import org.rest.client.event.StoreDataEvent;
+import org.rest.client.importparser.ImportResult;
 import org.rest.client.place.ImportExportPlace;
 import org.rest.client.request.ApplicationSession;
 import org.rest.client.request.ApplicationSessionCallback;
@@ -34,6 +35,7 @@ import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.RowIdListCallback;
 import com.google.code.gwt.database.client.service.VoidCallback;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -118,7 +120,6 @@ public class ImportExportActivity extends AppActivity implements
 							ProjectObject pd = projectDataResult.get(_k);
 							projectsArray.set(projectsArray.size(), pd.toJSONObject());
 						}
-						
 						JSONObject result = new JSONObject();
 						result.put("projects", projectsArray);
 						result.put("requests", requestsArray);
@@ -177,6 +178,82 @@ public class ImportExportActivity extends AppActivity implements
 		revokeDownloadData();
 		return super.mayStop();
 	}
+	
+	
+	@Override
+	public void saveImportedFileData(ImportResult data, final Callback<Boolean, Void> callback) {
+		final ArrayList<ProjectObject> projects = data.getProjects();
+		final ArrayList<RequestObject> requests = data.getRequests();
+		
+		if(projects != null && projects.size()>0){
+			clientFactory.getProjectsStore().getService().importData(projects, new RowIdListCallback() {
+				
+				@Override
+				public void onFailure(DataServiceException error) {
+					if(RestClient.isDebug()){
+						Log.error("Unable insert project data",error);
+					}
+					callback.onSuccess(false);
+				}
+				
+				@Override
+				public void onSuccess(List<Integer> rowIds) {
+					int len = rowIds.size();
+					for(int i=0; i<len; i++){
+						int prevRequestProject = requests.get(i).getProject();
+						int projectId = rowIds.get(i);
+						for(RequestObject r : requests){
+							if(r.getProject() == prevRequestProject){
+								r.setProject(projectId);
+								break;
+							}
+						}
+						
+					}
+					saveImportedFileData(requests, callback);
+				}
+			});
+		} else {
+			saveImportedFileData(requests, callback);
+		}
+	}
+	
+	public void saveImportedFileData(final ArrayList<RequestObject> requests, final Callback<Boolean, Void> callback){
+		if(requests == null || requests.size() == 0){
+			if(RestClient.isDebug()){
+				Log.error("Request data is emnpty.");
+			}
+			callback.onSuccess(false);
+			return;
+		}
+		clientFactory.getRequestDataStore().getService().insertFileImportData(requests, new RowIdListCallback() {
+			
+			@Override
+			public void onFailure(DataServiceException error) {
+				if(RestClient.isDebug()){
+					Log.error("Unable insert requests data",error);
+				}
+				callback.onSuccess(false);
+			}
+			
+			@Override
+			public void onSuccess(List<Integer> rowIds) {
+				callback.onSuccess(true);
+			}
+		});
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
@@ -499,6 +576,8 @@ public class ImportExportActivity extends AppActivity implements
 					}
 				});
 	}
+
+	
 
 	
 }

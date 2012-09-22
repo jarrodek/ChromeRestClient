@@ -1,5 +1,7 @@
 package org.rest.client.storage.websql;
 
+import java.util.ArrayList;
+
 import org.rest.client.storage.store.objects.ProjectObject;
 
 import com.google.code.gwt.database.client.service.ListCallback;
@@ -32,6 +34,10 @@ public interface ProjectService extends AppDatabase {
 	@Update("INSERT INTO projects (name, time) VALUES ("
 			+ "{data.getName()},{data.getCreated()})")
 	void insert(ProjectObject data, RowIdListCallback callback);
+	
+	@Update(sql = "INSERT INTO projects (name, time) VALUES ("
+			+ "{_.getName()},{_.getCreated()})", foreach = "data")
+	void importData(ArrayList<ProjectObject> data, RowIdListCallback callback);
 	
 	@Select("SELECT * FROM projects WHERE ID = {id}")
 	void get(int id, ListCallback<ProjectObject> result);

@@ -52,11 +52,11 @@ public class HistoryObject extends JavaScriptObject {
 	}-*/;
 	
 	public final native void setTime(Date time) /*-{
-		this.time = tiom;
+		this.time = time;
 	}-*/;
 	
 	public final native double getTime() /*-{
-		if(!this.time){
+		if(!this.time || !this.time.getTime){
 			this.time = Date.now();
 		}
 		if(typeof this.time == 'number'){

@@ -87,4 +87,14 @@ public interface RequestDataService extends AppDatabase {
 			+ "{_.getSkipHistory()},{_.getSkipMethod()},{_.getSkipPayload()},"
 			+ "{_.getSkipHeaders()},{_.getSkipPath()},{dt.getTime()})", foreach = "data")
 	void insertImportData(ArrayList<RequestObject> data, Date dt, RowIdListCallback callback);
+	
+	@Update(sql = "INSERT INTO request_data (project, name, url, method, encoding, headers, "
+			+ "payload, skipProtocol, skipServer, skipParams, skipHistory, skipMethod, "
+			+ "skipPayload, skipHeaders, skipPath, time) VALUES ("
+			+ "{_.getProject()},{_.getName()},{_.getURL()},{_.getMethod()},"
+			+ "{_.getEncoding()},{_.getHeaders()},{_.getPayload()},"
+			+ "{_.getSkipProtocol()},{_.getSkipServer()},{_.getSkipParams()},"
+			+ "{_.getSkipHistory()},{_.getSkipMethod()},{_.getSkipPayload()},"
+			+ "{_.getSkipHeaders()},{_.getSkipPath()},{_.getTime()})", foreach = "data")
+	void insertFileImportData(ArrayList<RequestObject> data, RowIdListCallback callback);
 }

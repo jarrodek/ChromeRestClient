@@ -8,7 +8,8 @@
     "<all_urls>",
     "history",
     "background",
-    "declarativeWebRequest"
+    "declarativeWebRequest",
+    "storage"
   ],
   "background": {
     "scripts": ["background.js"]

@@ -16,11 +16,10 @@
 package org.rest.client.ui.html5;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.file.client.FileList;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.FileUpload;
-import com.google.gwt.xhr2.client.FileList;
 
-@SuppressWarnings("javadoc")
 public class HTML5FileUpload extends FileUpload {
 	
 	public HTML5FileUpload(){
@@ -33,7 +32,7 @@ public class HTML5FileUpload extends FileUpload {
 	 */
 	public FileList getFiles(){
 		FileList list = FileList.create(getElement());
-		if( list.size() == 0 ){
+		if(list.size() == 0){
 			return null;
 		}
 		return list;
@@ -41,7 +40,8 @@ public class HTML5FileUpload extends FileUpload {
 	
 	public final native JavaScriptObject _getFiles(Element element) /*-{
 		var f = element.files;
-		$wnd.console.log(f);
+//		$wnd.tmp_file = f;
+//		$wnd.console.log(f);
 		return f;
 	}-*/;
 	

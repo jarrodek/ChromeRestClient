@@ -29,11 +29,11 @@ import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.file.client.File;
+import com.google.gwt.file.client.FileList;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.xhr2.client.AbortHandler;
 import com.google.gwt.xhr2.client.ErrorHandler;
-import com.google.gwt.xhr2.client.File;
-import com.google.gwt.xhr2.client.FileList;
 import com.google.gwt.xhr2.client.FormData;
 import com.google.gwt.xhr2.client.LoadHandler;
 import com.google.gwt.xhr2.client.LoadStartHandler;

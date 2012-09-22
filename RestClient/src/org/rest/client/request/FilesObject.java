@@ -15,7 +15,7 @@
  ******************************************************************************/
 package org.rest.client.request;
 
-import com.google.gwt.xhr2.client.FileList;
+import com.google.gwt.file.client.FileList;
 
 public class FilesObject {
 	private String name;
