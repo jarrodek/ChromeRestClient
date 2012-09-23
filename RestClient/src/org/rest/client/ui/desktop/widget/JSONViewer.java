@@ -38,8 +38,8 @@ public class JSONViewer extends Composite {
 	private RegExp linkRegExp = RegExp.compile("^\\w+://","gim");
 	interface Binder extends UiBinder<Widget, JSONViewer> {}
 	
+	
 	interface ParserStyle extends CssResource {
-		int indent();
 		String prettyPrint();
 		String numeric();
 		String nullValue();
@@ -51,6 +51,8 @@ public class JSONViewer extends Composite {
 		String keyName();
 		String rootElementToggleButton();
 		String infoRow();
+		
+		String brace();
 	}
 	@UiField HTML result;
 	@UiField ParserStyle style;
@@ -60,7 +62,6 @@ public class JSONViewer extends Composite {
 	
 	public JSONViewer(String data, HTMLPanel jsonPanel) {
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
-		
 		JSONValue jsonValue = null;
 		try {
 			jsonValue = JSONParser.parseStrict(data);
@@ -71,7 +72,7 @@ public class JSONViewer extends Composite {
 				StatusNotification.notify("Unable to parse JSON response.", StatusNotification.TYPE_ERROR);
 			} else {
 				String parsedData = "<div class=\""+style.prettyPrint()+"\">";
-				parsedData += this.parse(jsonValue, 1);
+				parsedData += this.parse(jsonValue); //, 1
 				parsedData += "</div>";
 				result.setHTML(parsedData);
 				jsonPanel.add(this);
@@ -80,13 +81,15 @@ public class JSONViewer extends Composite {
 			}
 		}
 	}
+	
+	
 	/**
 	 * TODO: parse data in worker or via scheduler
 	 * @param data
 	 * @param indent
 	 * @return
 	 */
-	private String parse(JSONValue data, int indent){
+	private String parse(JSONValue data){ //, int indent
 		if(data == null){
 			return "";
 		}
@@ -99,17 +102,17 @@ public class JSONViewer extends Composite {
 		JSONNull isNull = data.isNull(); //JSON null or null
 		JSONNumber number = data.isNumber();//JSON number or null
 		
-		if( obj != null ){
-			result += this.parseObject(obj, indent);
-		} else if( arr != null ) {
-			result += this.parseArray(arr, indent);
-		} else if( str != null ) {
+		if(obj != null){
+			result += this.parseObject(obj); //, indent
+		} else if(arr != null) {
+			result += this.parseArray(arr); // , indent
+		} else if(str != null) {
 			result += this.parseStringValue(str);
-		} else if( bool != null ) {
+		} else if(bool != null) {
 			result += this.parseBooleanValue(bool);
-		} else if( isNull != null ) {
+		} else if(isNull != null) {
 			result += this.parseNullValue(isNull);
-		} else if( number != null ) {
+		} else if(number != null) {
 			result += this.parseNumericValue(number);
 		}
 		return result;
@@ -163,19 +166,19 @@ public class JSONViewer extends Composite {
 		return result;
 	}
 
-	private String parseObject(JSONObject object, int indent) {
+
+	private String parseObject(JSONObject object) {
 		String result = "";
-		result += "<span class=\""+style.punctuation()+"\">{</span>";
+		result += "<div class=\""+style.punctuation() + " " + style.brace() + "\">{</div>";
 		Set<String> keys = object.keySet();
 		Iterator<String> it = keys.iterator();
 		
 		while(it.hasNext()){
 			int elementNo = elementsCounter++;
-			int indentValue = indent*style.indent();
-			result += "<div data-element=\""+elementNo+"\" style=\"text-indent:"+indentValue+"px\" class=\""+style.node()+"\">";
+			result += "<div data-element=\""+elementNo+"\" style=\"margin-left: 15px\" class=\""+style.node()+"\">";
 			String key = it.next();
 			JSONValue value = object.get(key);
-			String data = this.parse(value, indent+1);
+			String data = this.parse(value);
 			result += this.parseKey(key) +": "+data;
 			if(it.hasNext()){
 				result += "<span class=\""+style.punctuation()+"\">,</span>";
@@ -183,32 +186,30 @@ public class JSONViewer extends Composite {
 			result += "</div>";
 		}
 		
-		result += "<span class=\""+style.punctuation()+"\">}</span>";
+		result += "<div class=\"" + style.punctuation() + " " + style.brace() + "\">}</div>";
 		return result;
 	}
-	
-	private String parseArray(JSONArray array, int indent) {
+	private String parseArray(JSONArray array) {
 		String result = "";
-		result += "<span class=\""+style.punctuation()+"\">[</span>";
+		result += "<span class=\""+style.punctuation()+ " " + style.brace() + "\">[</span>";
 		int cnt = array.size();
 		result += "<span class=\""+style.arrayCounter()+"\">("+cnt+")</span>";
 		
 		for( int i = 0; i<cnt; i++ ){
 			int elementNo = elementsCounter++;
-			int indentValue = indent*style.indent();
-			result += "<div data-element=\""+elementNo+"\" style=\"text-indent:"+indentValue+"px\" class=\""+style.node()+"\">";
+			result += "<div data-element=\""+elementNo+"\" style=\"margin-left: 15px\" class=\""+style.node()+"\">";
 			JSONValue value = array.get(i);
-			result += this.parse(value, indent+1);
+			result += this.parse(value);
 			if(i<cnt-1){
 				result += "<span class=\""+style.punctuation()+"\">,</span>";
 			}
 			result += "</div>";
 		}
 		
-		result += "<span class=\""+style.punctuation()+"\">]</span>";
+		result += "<span class=\""+style.punctuation() +  " " + style.brace() + "\">]</span>";
 		return result;
 	}
-	
+
 	private String parseKey( String key ){
 		String result = "";
 		result += "<span class=\""+style.punctuation()+"\">&quot;</span>";

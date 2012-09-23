@@ -20,7 +20,9 @@
 			white-space: nowrap;
 		}
 		-->
-		
+		.brace{
+			display: inline-block;
+		}
 		.numeric{
 			color: blue;
 		}

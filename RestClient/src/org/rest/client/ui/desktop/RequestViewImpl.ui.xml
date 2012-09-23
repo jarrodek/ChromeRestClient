@@ -8,6 +8,7 @@
 		.projectPanel{
 			height: 38px;
 			background-color: #f4f4f4;
+			padding: 0 10px;
 		}
 		.requestPanel{
 	

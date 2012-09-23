@@ -59,10 +59,59 @@ public class TestDataServlet extends HttpServlet {
 			resp.setHeader("WWW-Authenticate", "Basic realm=\"Secure Area\"");
 			resp.setContentType("text/html");
 		} else if ( payload.equals("json2") ){
-			String response = "{\"aaa\":[null],\"count\":5,\"fruits\":[\"apple\",\"banana\",\"orange\",\"lemon\",\"grapes\"],\"nullValue\":\"null\",\"ok\":true,\"long\":18014398509481984419,\"array\":[\"string1\",\"string2\",\"string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 string3 \"]}";
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append("{");
+			sb.append("\"aaa\"").append(":").append("[null]").append(",");
+			sb.append("\"count\"").append(":").append("5").append(",");
+			sb.append("\"fruits\"").append(":").append("[\"apple\",\"banana\",\"orange\",\"lemon\",\"grapes\"]").append(",");
+			sb.append("\"nullValue\"").append(":").append("\"null\"").append(",");
+			sb.append("\"ok\"").append(":").append("true").append(",");
+			sb.append("\"long\"").append(":").append("18014398509481984419").append(",");
+			sb.append("\"array\"").append(":").append("[\"string1\",\"string2\",\"string3 string3 string3 string3 string3 string3\"]").append(",");
+			sb.append("\"deep\"").append(":");
+				sb.append("[");
+					sb.append("{");
+					sb.append("\"aaa\"").append(":").append("[null]").append(",");
+					sb.append("\"count\"").append(":").append("5").append(",");
+					sb.append("\"fruits\"").append(":").append("[\"apple\",\"banana\",\"orange\",\"lemon\",\"grapes\"]").append(",");
+					sb.append("\"nullValue\"").append(":").append("\"null\"").append(",");
+					sb.append("\"ok\"").append(":").append("true").append(",");
+					sb.append("\"long\"").append(":").append("18014398509481984419").append(",");
+					sb.append("\"array\"").append(":").append("[\"string1\",\"string2\",\"string3 string3 string3 string3 string3 string3\"]").append(",");
+					sb.append("\"deep\"").append(":");
+						sb.append("[");
+							sb.append("{");
+							sb.append("\"aaa\"").append(":").append("[null]").append(",");
+							sb.append("\"count\"").append(":").append("5").append(",");
+							sb.append("\"fruits\"").append(":").append("[\"apple\",\"banana\",\"orange\",\"lemon\",\"grapes\"]").append(",");
+							sb.append("\"nullValue\"").append(":").append("\"null\"").append(",");
+							sb.append("\"ok\"").append(":").append("true").append(",");
+							sb.append("\"long\"").append(":").append("18014398509481984419").append(",");
+							sb.append("\"array\"").append(":").append("[\"string1\",\"string2\",\"string3 string3 string3 string3 string3 string3\"]").append(",");
+							sb.append("\"deep\"").append(":").append("[").append("]");
+							sb.append("}");
+							sb.append(",");
+							sb.append("\"test\"");
+						sb.append("]");
+					sb.append("}").append(",").append("{");
+						sb.append("\"aaa\"").append(":").append("[null]").append(",");
+						sb.append("\"count\"").append(":").append("5").append(",");
+						sb.append("\"fruits\"").append(":").append("[\"apple\",\"banana\",\"orange\",\"lemon\",\"grapes\"]").append(",");
+						sb.append("\"nullValue\"").append(":").append("\"null\"").append(",");
+						sb.append("\"ok\"").append(":").append("true").append(",");
+						sb.append("\"long\"").append(":").append("18014398509481984419").append(",");
+						sb.append("\"array\"").append(":").append("[\"string1\",\"string2\",\"string3 string3 string3 string3 string3 string3\"]").append(",");
+						sb.append("\"deep\"").append(":");
+							sb.append("[");
+								sb.append("\"long\"").append(",").append("18014398509481984419");
+							sb.append("]");
+					sb.append("}");
+				sb.append("]");
+			sb.append("}");
 			resp.setContentType("application/json");
 			resp.setStatus(200);
-			resp.getWriter().println(response);
+			resp.getWriter().println(sb.toString());
 		} else if (payload.equals("cookie")){
 
 			@SuppressWarnings("unchecked")
