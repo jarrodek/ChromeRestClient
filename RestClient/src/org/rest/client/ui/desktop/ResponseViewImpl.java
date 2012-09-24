@@ -332,7 +332,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		}
 		if(isXML){
 			setTabOpened(TABS.XML, xmlTab);
-			new XMLViewer(xml, xmlPanel);
+			new XMLViewer(body, xmlPanel);
 			setTabVisible(TABS.XML, xmlTab);
 		}
 		if(RestClient.isDebug()){

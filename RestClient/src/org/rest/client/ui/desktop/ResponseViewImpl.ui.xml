@@ -38,8 +38,10 @@
 		}
 		.plainPanel{
 			margin: 1em 0px;
-			font-family: monospace;
 			overflow: auto;
+			font-family: monospace;
+			font-size: 13px;
+			white-space: pre;
 		}
 		.rawInput{
 			box-sizing: border-box;

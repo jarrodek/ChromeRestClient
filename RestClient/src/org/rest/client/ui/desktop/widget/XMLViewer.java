@@ -2,23 +2,20 @@ package org.rest.client.ui.desktop.widget;
 
 import java.util.ArrayList;
 
-import org.rest.client.dom.NodeAttribute;
-import org.rest.client.dom.XMLDocument;
-import org.rest.client.dom.XMLNode;
+import org.rest.client.chrome.worker.Worker;
+import org.rest.client.chrome.worker.WorkerMessageHandler;
 import org.rest.client.ui.html5.HTML5Element;
 import org.rest.client.util.ElementWrapper;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JsArray;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Node;
-import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -43,178 +40,68 @@ public class XMLViewer extends Composite {
 		String processing();
 		String node();
 		String opened();
+		String nodeMargin();
+		String collapseIndicator();
 	}
 	
 	@UiField HTML result;
 	@UiField ParserStyle style;
 	
 	
-	public XMLViewer (Document xml, HTMLPanel xmlPanel){
-		
+	public XMLViewer(String xml, HTMLPanel xmlPanel){
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
-		
-		NodeList<Node> nodes = null;
-		XMLDocument doc = null;
-		try{
-			nodes = xml.getChildNodes();
-			doc = (XMLDocument) xml;
-		} catch( Exception e ){}
-		
-		if( nodes == null || doc == null ){
-			//TODO parse error
-			return;
-		}
-		String enc = doc.getXmlEncoding();
-		String ver = doc.getXmlVersion();
-		int cnt = nodes.getLength();
-		String data = "<div class=\""+style.prettyPrint()+"\">";
-		if( enc != null && enc != null ){
-			data += "<span class=\""+style.processing()+"\">&lt;?xml version=\""+ver+"\" encoding=\""+enc+"\"?&gt;</span>";
-		}
-		for( int i = 0; i< cnt; i++ ){
-			data += parse(nodes.getItem(i), 0);
-		}
-		data += "</div>";
-		result.setHTML(data);
 		xmlPanel.add(this);
-		addEditorSupport();
-	}
-	
-	
-	private String parse(Node node, int indent){
-		int indentValue = indent * 10;
-		int maginLeftValue = 0;
-		String parsed = "";
-		String name = node.getNodeName();
-		int type = node.getNodeType();
-		boolean hasChildren = node.hasChildNodes();
-		int childrenCount = 0;
-		if(hasChildren){
-			childrenCount = node.getChildCount();
-		}
-		XMLNode nodeElement = ((XMLNode) node);
 		
-		JsArray<NodeAttribute> attr;
-		switch(type){
-			case Document.ELEMENT_NODE: //ELEMENT_NODE, value null
-				boolean showArrows = false;
-				
-				if (childrenCount > 1){
-					parsed += "<span class=\""+style.arrowExpanded()+"\">&nbsp;</span>";
-					indent++;
-					showArrows = true;
-				}
-				
-				parsed += "<span class=\""+style.punctuation()+"\">&lt;</span>";
-				parsed += "<span class=\""+style.tagname()+"\">"+name+"</span>";
-				attr = nodeElement.getAttributes();
-				if( attr != null && attr.length() > 0 ){
-					for( int i=0; i< attr.length(); i++ ){
-						parsed += " " + this.getAttributesString( attr.get(i) );
-					}
-				}
-				if(hasChildren){
-					parsed += "<span class=\""+style.punctuation()+"\">&gt;</span>";
-					NodeList<Node> children = node.getChildNodes();
-					
-					boolean showInline = false;
-					if(childrenCount == 1 && Document.TEXT_NODE == children.getItem(0).getNodeType() ){
-						//simple: only one child - text - show response inline.
-						showInline = true;
-					}
-					
-					int nextIndent = indent;
-					if(showInline){
-						parsed += "<div class=\""+style.inline()+"\">";
-						nextIndent = 0;
-					} else {
-						nextIndent++;
-					}
-					for(int i=0; i<childrenCount; i++){
-						parsed += this.parse(children.getItem(i), nextIndent);
-					}
-					if(showInline){
-						parsed += "</div>";
-					}
-					String styleData = "";
-					if(showArrows){
-						parsed += "<span style=\"margin-left:"+indentValue+"px;\" class=\""+style.arrowEmpty()+"\">&nbsp;</span>";
-						styleData = "";
-					}
-					parsed += "<span "+styleData+"class=\""+style.punctuation()+"\">&lt;/</span>";
-					parsed += "<span data-test3 class=\""+style.tagname()+"\">"+name+"</span>";
-					parsed += "<span data-test4 class=\""+style.punctuation()+"\">&gt;</span>";
-				} else {
-					parsed += "<span data-test5 class=\""+style.punctuation()+"\"> /&gt;</span>";
-				}
-				
-				break;
-			case 2: //ATTRIBUTE_NODE, attribute value
-				parsed += "ATTRIBUTE_NODE";
-				return "";
-			case Document.TEXT_NODE: //TEXT_NODE, content of node
-				String value = node.getNodeValue();
-				if( value.equals("") ){
-					return "";
-				}
-				parsed += node.getNodeValue();
-				break;
-			case 4: //CDATA_SECTION_NODE, content of node
-				parsed += "<span class=\""+style.cdata()+"\">&lt;![CDATA[</span>";
-				parsed += SafeHtmlUtils.htmlEscape(node.getNodeValue()).replace("\n", "<br/>");
-				parsed += "<span class=\""+style.cdata()+"\">]]&gt;</span>";
-				maginLeftValue = indentValue; 
-				indentValue = 0;
-				break;
-			case 5: //ENTITY_REFERENCE_NODE, value null
-				parsed += "ENTITY_REFERENCE_NODE";
-				return "";
-			case 6: //ENTITY_NODE, value null
-				parsed += "ENTITY_NODE";
-				return "";
-			case 7: //PROCESSING_INSTRUCTION_NODE, content of node
-				parsed += "PROCESSING_INSTRUCTION_NODE";
-				return "";
-			case 8: //COMMENT_NODE, comment text
-				parsed += "<span class=\""+style.comment()+"\">&lt;--";
-				parsed += node.getNodeValue();
-				parsed += "--&gt</span>";
-				break;
-			case Document.DOCUMENT_NODE: //DOCUMENT_NODE, value null
-				parsed += "DOCUMENT_NODE";
-				return "";
-			case 10: //DOCUMENT_TYPE_NODE, value null
-				parsed += "DOCUMENT_TYPE_NODE";
-				return "";
-			case 11: //DOCUMENT_FRAGMENT_NODE, value null
-				parsed += "DOCUMENT_FRAGMENT_NODE";
-				return "";
-			case 12: //NOTATION_NODE, value null
-				parsed += "NOTATION_NODE";
-				return "";
-		}
+		Worker xmlWorker =  new Worker("/workers/xmlviewer.js");
+		xmlWorker.onMessage(new WorkerMessageHandler() {
+			@Override
+			public void onMessage(String message) {
+				result.setHTML(message);
+				addNativeControls(result.getElement());
+			}
+		});
 		
-		String styleStr = "";
-//		if(indentValue > 0){
-			styleStr += "text-indent: " + indentValue+"px;";
-//		}
-		if(maginLeftValue > 0){
-			styleStr += "margin-left: " + maginLeftValue+"px;";
-		}
-		parsed = "<div class=\""+style.node()+"\" style=\""+styleStr+"\">"+parsed+"</div>";
-		return parsed;
+		
+		JSONObject styleData = new JSONObject();
+		styleData.put("prettyPrint", new JSONString(style.prettyPrint()));
+		styleData.put("node", new JSONString(style.node()));
+		styleData.put("punctuation", new JSONString(style.punctuation()));
+		styleData.put("comment", new JSONString(style.comment()));
+		styleData.put("tagname", new JSONString(style.tagname()));
+		styleData.put("attname", new JSONString(style.attname()));
+		styleData.put("attribute", new JSONString(style.attribute()));
+		styleData.put("cdata", new JSONString(style.cdata()));
+		styleData.put("inline", new JSONString(style.inline()));
+		styleData.put("arrowExpanded", new JSONString(style.arrowExpanded()));
+		styleData.put("arrowEmpty", new JSONString(style.arrowEmpty()));
+		styleData.put("processing", new JSONString(style.processing()));
+		styleData.put("opened", new JSONString(style.opened()));
+		styleData.put("nodeMargin", new JSONString(style.nodeMargin()));
+		styleData.put("collapseIndicator", new JSONString(style.collapseIndicator()));
+		
+		
+		JSONObject post = new JSONObject();
+		post.put("style", styleData);
+		post.put("data", new JSONString(xml));
+		
+		xmlWorker.postMessage(post.toString());
+		
+//		addEditorSupport();
 	}
 	
-	private String getAttributesString(NodeAttribute attr){
-		String data = "<span class=\""+style.attname()+"\">";
-		data += attr.getName();
-		data += "</span>";
-		data += "<span class=\""+style.punctuation()+"\">=</span>";
-		data += "<span class=\""+style.attribute()+"\">&quot;";
-		data += attr.getValue();
-		data += "&quot;</span>";
-		return data;
-	}
+	private final native void addNativeControls(Element element)/*-{
+		element.addEventListener('click', function(e){
+			if(!e.target) return;
+			console.log(e.target);
+			var parent = e.target.parentNode;
+			var expanded = parent.dataset['expanded'];
+			if(!expanded || expanded == "true"){
+				parent.dataset['expanded'] = "false";
+			} else {
+				parent.dataset['expanded'] = "true";
+			}
+		}, true);
+	}-*/;
 	
 	private void addEditorSupport(){
 		HTML5Element root = (HTML5Element) result.getElement();
