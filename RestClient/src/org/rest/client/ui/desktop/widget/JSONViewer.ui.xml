@@ -39,6 +39,9 @@
 			color: #48A;
 		}
 		.node{position: relative;white-space: nowrap;}
+		
+		div[data-expanded="false"] div[data-element]{display: none !important;}
+		
 		.arrayCounter{
 			color: gray;
 			font-size: 11px;
@@ -58,10 +61,16 @@
 			font-weight: bold;
 		}
 		.infoRow{
-			display: inline-block;
+			display: none;
 			margin: 0px 7px;
 			text-indent: 0px;
 		}
+		div[data-expanded="false"] div[collapse-indicator]{
+			display: inline-block !important;
+		}
+		
 	</ui:style>
-	<g:HTML ui:field="result" styleName="bodyPanel"></g:HTML>
+	<g:HTML ui:field="result" styleName="bodyPanel">
+		<p>loading...</p>
+	</g:HTML>
 </ui:UiBinder>

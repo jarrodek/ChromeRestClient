@@ -26,7 +26,7 @@ class WorkerImpl extends JavaScriptObject {
 	
 	final native void onMessage(WorkerMessageHandler handler) /*-{
 		this.addEventListener('message', $entry(function(e) {
-		  console.log('Worker said: ', e.data);
+//		  console.log('Worker said: ', e.data);
 		  handler.@org.rest.client.chrome.worker.WorkerMessageHandler::onMessage(Ljava/lang/String;)(e.data);
 		}), false);
 	}-*/;

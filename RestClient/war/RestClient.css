@@ -85,7 +85,7 @@ h1.at {
 
 
 .hidden {
-	display: none;
+	display: none !important;
 }
 
 /* DIALOG BOX */
