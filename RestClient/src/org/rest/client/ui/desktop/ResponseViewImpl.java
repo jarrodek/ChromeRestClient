@@ -45,6 +45,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.PreElement;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -61,6 +62,8 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Window.ScrollEvent;
+import com.google.gwt.user.client.Window.ScrollHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -116,6 +119,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	@UiField HTMLPanel jsonPanel;
 	@UiField HTMLPanel redirects;
 	@UiField WidgetStyle style;
+	@UiField DivElement scrollContainer;
 	
 	public ResponseViewImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -132,8 +136,10 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		this.requestTime = requestTime;
 		this.success = success;
 		this.response = response;
+		getElement().getStyle().setWidth(getElement().getOffsetWidth()-16, Unit.PX);
 		handleTabsChange();
 		fill();
+		
 	}
 
 	private void fill(){
@@ -638,7 +644,6 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
 				HTML5Element tab = (HTML5Element) jsonTab.getElement();
-//				if(!tab.getClassList().contains(appStyle.inlineButtonChecked()))
 					tab.getClassList().add(appStyle.inlineButtonHover());
 			}
 		});
@@ -680,5 +685,87 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	private final native void writeRawBody(String body)/*-{
 		var wnd = $wnd.open();
 		wnd.document.body.innerHTML = body;
-	}-*/;	
+	}-*/;
+	
+	
+	
+	private int initialScrollTop = -1;
+	private int initialOffsetTop = -1;
+	private final int marginOffset = 25;
+	private int lastEndPosition = -1;
+	@Override
+	public void scrollToView() {
+		_scrollIntoView(this.getElement());
+		Window.addWindowScrollHandler(new ScrollHandler() {
+			@Override
+			public void onWindowScroll(ScrollEvent event) {
+				int top = event.getScrollTop();
+				int scrollTop = scrollContainer.getAbsoluteTop();
+				
+				int nextPos = initialOffsetTop+marginOffset+(top-initialScrollTop);
+				boolean canMove = false;
+				if(top+marginOffset > scrollTop){
+					if(initialOffsetTop == -1){
+						initialOffsetTop = scrollContainer.getOffsetTop();
+						initialScrollTop = scrollTop;
+						nextPos = initialOffsetTop+marginOffset+(top-initialScrollTop);
+					}
+					canMove = true;
+				} else if(nextPos<lastEndPosition){
+					if(top > initialScrollTop){
+						canMove = true;
+					} else {
+						if(scrollTop != initialScrollTop){
+							nextPos = initialOffsetTop;
+							canMove = true;
+						}
+					}
+				}
+				if(canMove){
+					lastEndPosition = nextPos;
+					scrollContainer.getStyle().setTop(nextPos, Unit.PX);
+				}
+				
+			}
+		});
+	}
+	@UiHandler("scrollButton")
+	void onscrollButton(ClickEvent e){
+		e.preventDefault();
+		_scrollToStart();
+	}
+	
+	private final native void _scrollToStart() /*-{
+		$wnd.scrollTo(0,0);
+	}-*/;
+	
+	private final native void _scrollIntoView(Element element) /*-{
+		element.scrollIntoView();
+//		element.scrollIntoViewIfNeeded();
+	}-*/;
+	
+	@UiHandler("wrapContentButton")
+	void onWrapContent(ClickEvent e){
+		e.preventDefault();
+		Anchor el = (Anchor)e.getSource();
+		String whiteSpace = plainBody.getElement().getStyle().getProperty("whiteSpace");
+		boolean isWrapped = false;
+		if(!whiteSpace.isEmpty()){
+			isWrapped = whiteSpace.equals("normal");
+		}
+		
+		if(!isWrapped){
+			plainBody.setWordWrap(true);
+			el.setText("Word unwrap");
+		} else {
+			plainBody.setWordWrap(false);
+			el.setText("Word wrap");
+		}
+	}
+	@UiHandler({"copyClipboardButton","copyClipboardButton2","copyClipboardButton3","copyClipboardButton4"})
+	void onCopy(ClickEvent e){
+		e.preventDefault();
+		String body = response.getResponseText();
+		RestClient.getClientFactory().getChromeMessagePassing().postMessage("copyToClipboard",body);
+	}
 }

@@ -185,6 +185,15 @@ function handleInternalMessage(request,sendResponse){
 			})
 		});
 		break;
+	case "copyToClipboard":
+		var copyData = request.data;
+		var clipboardholder = document.createElement("textarea");
+        document.body.appendChild(clipboardholder);
+		clipboardholder.value = copyData;
+		clipboardholder.select();
+		document.execCommand("Copy");
+        clipboardholder.parentNode.removeChild(clipboardholder);
+		break;
 	}
 }
 

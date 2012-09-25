@@ -5,6 +5,7 @@
 	>
 	<ui:with field="appResources" type="org.rest.client.resources.AppResources"/>
 	<ui:style type="org.rest.client.ui.desktop.ResponseViewImpl.WidgetStyle">
+		.root{margin-top: 15px;position: relative;margin-bottom: 20px;}
 		.responseRow{
 			display: -webkit-box;
 			margin: 5px 0px;
@@ -31,7 +32,6 @@
 		.requestError {box-shadow: inset 3px 3px 21px rgba(255, 0, 0, 0.25);}
 		.loadingTimeLabel{margin-left: 10px;margin-right: 7px;}
 		.loadingTime:after{ content: " ms" }
-		.root{margin-top: 15px;}
 		.headersPanel{
 			-webkit-flex-direction: column;
 			-webkit-align-items: flex-start;
@@ -55,12 +55,27 @@
 			display: -webkit-box;
 			-webkit-box-orient: vertical;
 			-webkit-box-flex: 1;
+			
 		}
 		.codeHighlight{margin-top: 20px;}
 		.newWindowOutput{margin-bottom: 15px;}
-		.bodyOverflow{ overflow: auto; }
+		.bodyOverflow{ overflow: auto;}
+		.scrollContainer{
+			-webkit-transform: rotate(-90deg);
+			-webkit-transition: top 0.3s ease-out;
+			position: absolute;
+			top: 230px;
+			left: -75px;
+		}
+		.scrollButton{padding: 7px 8px;text-decoration: none !important;}
+		.copyClipboardBody{margin-left:7px;}
 	</ui:style>
 	<g:HTMLPanel addStyleNames="{style.root}">
+		<!-- scroll to top panel -->
+		<div ui:field="scrollContainer" class="{style.scrollContainer}">
+			<g:Anchor ui:field="scrollButton" href="javascript:;" text="Scroll to top" styleName="{appResources.appCss.button} {style.scrollButton}"></g:Anchor>
+		</div>
+	
 		<!-- Redirect widgets if any -->
 		<g:HTMLPanel ui:field="redirects"></g:HTMLPanel>
 		
@@ -90,15 +105,6 @@
 			</div>
 			<g:HTMLPanel ui:field="headersPanel" styleName="{style.result} {style.headersPanel}"></g:HTMLPanel>
 		</div>
-		<!-- Cookies -->
-		<!-- 
-		<div class="{style.responseRow}">
-			<div class="{style.label}">
-				Cookies
-			</div>
-			<g:HTMLPanel ui:field="cookiesPanel" styleName="{style.result}" visible="false"></g:HTMLPanel>
-		</div>
-		 -->
 		<!-- Body -->
 		<div class="{style.responseRow}">
 			<g:HTMLPanel styleName="{appResources.appCss.tabsPanel} {style.result} {style.bodyResult}">
@@ -113,25 +119,38 @@
 				</div>
 				<div ui:field="tabContent" class="{appResources.appCss.tabsContent}">
 					<section data-tab="raw" class="{appResources.appCss.tabContent} {appResources.appCss.tabContentCurrent}">
+						<div>
+							<g:Anchor ui:field="wrapContentButton" href="javascript:;" >Word wrap</g:Anchor>
+							<g:Anchor addStyleNames="{style.copyClipboardBody}" ui:field="copyClipboardButton" href="javascript:;" >Copy to clipboard</g:Anchor>
+						</div>
 						<g:HTML width="100%" ui:field="plainBody" styleName="{style.plainPanel}"></g:HTML>
 					</section>
 					<section data-tab="parsed" class="{appResources.appCss.tabContent} {appResources.appCss.hidden}">
-							<div class="{style.newWindowOutput}">
-								<g:Anchor ui:field="parsedOpen" href="#">Open output in new window</g:Anchor>
-							</div>
-							<div class="CodeMirror">
-								<div class="lines"></div>
-								<pre ui:field="parsedBody" class="cm-s-default"></pre>
-							</div>
-							<div class="{style.codeHighlight}">
-								Code highlighting thanks to
-								<a target="_blank" href="http://codemirror.net/">Code Mirror</a>
-							</div>
+						<div>
+							<g:Anchor ui:field="copyClipboardButton2" href="javascript:;" >Copy to clipboard</g:Anchor>
+						</div>
+						<div class="{style.newWindowOutput}">
+							<g:Anchor ui:field="parsedOpen" href="#">Open output in new window</g:Anchor>
+						</div>
+						<div class="CodeMirror">
+							<div class="lines"></div>
+							<pre ui:field="parsedBody" class="cm-s-default"></pre>
+						</div>
+						<div class="{style.codeHighlight}">
+							Code highlighting thanks to
+							<a target="_blank" href="http://codemirror.net/">Code Mirror</a>
+						</div>
 					</section>
 					<section data-tab="xml" class="{appResources.appCss.tabContent} {appResources.appCss.hidden}">
+						<div>
+							<g:Anchor ui:field="copyClipboardButton3" href="javascript:;" >Copy to clipboard</g:Anchor>
+						</div>
 						<g:HTMLPanel ui:field="xmlPanel" styleName="{style.rawInput} {style.bodyOverflow}"/>
 					</section>
 					<section data-tab="json" class="{appResources.appCss.tabContent} {appResources.appCss.hidden}">
+						<div>
+							<g:Anchor ui:field="copyClipboardButton4" href="javascript:;" >Copy to clipboard</g:Anchor>
+						</div>
 						<g:HTMLPanel ui:field="jsonPanel" styleName="{style.rawInput} {style.bodyOverflow}"/>
 					</section>
 				</div>

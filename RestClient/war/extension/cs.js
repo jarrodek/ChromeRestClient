@@ -35,6 +35,9 @@ function receiveMessage(e){
 					window.postMessage({"source":"arc:cs", "payload":data.payload, "data": response}, location.href);
 				});
 			break;
+			case "copyToClipboard":
+				chrome.extension.sendMessage(data, function(response) {});
+				break;
 		}
 	}
 }

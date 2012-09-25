@@ -1,6 +1,11 @@
 {
-  "name": "TEST",
-  "version": "0.1",
+  "name": "Advanced REST client",
+  "description": "Helper for web developers for creating custom HTTP requests and to test REST API.",
+  "icons": {
+    "16": "img/arc_icon_16.png",
+    "128": "img/arc_icon_128.png"
+  },
+  "version": "3.0",
   "manifest_version": 2,
   "minimum_chrome_version": "22",
   "permissions": [
@@ -9,14 +14,15 @@
     "history",
     "background",
     "declarativeWebRequest",
-    "storage"
+    "storage",
+    "clipboardWrite"
   ],
   "background": {
     "scripts": ["background.js"]
   },
   "app": {
     "launch": {
-      "local_path": "test.html"
+      "local_path": "RestClient.html"
     }
   },
   "content_scripts": [{
@@ -25,12 +31,9 @@
 	  "run_at": "document_start"
     }
   ],
-  "web_accessible_resources": [
-    "cs.js"
-  ],
   "intents": {
 	"http://webintents.org/view": [{
-		"title": "Advanced Rest Client Application",
+		"title": "Advanced REST client",
 		"type": ["application/restclient+data"],
 		"href": "/intentview.html",
 		"disposition" : "inline"

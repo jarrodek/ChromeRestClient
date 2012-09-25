@@ -47,7 +47,6 @@ import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.gwt.core.client.Callback;
-import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -95,7 +94,7 @@ public class RequestActivity extends AppActivity implements
 		
 		requestView.setPresenter(this);
 		viewFlowPanel = new FlowPanel();
-		viewFlowPanel.getElement().getStyle().setOverflow(Overflow.HIDDEN);
+//		viewFlowPanel.getElement().getStyle().setOverflow(Overflow.HIDDEN);
 		viewFlowPanel.add(requestView);
 		panel.setWidget(viewFlowPanel);
 		
@@ -383,9 +382,10 @@ public class RequestActivity extends AppActivity implements
 					responseView = null;
 				}
 				responseView = clientFactory.getResponseView();
+				viewFlowPanel.add(responseView);
 				responseView.setPresenter(RequestActivity.this);
 				responseView.setResponseData(success, response, requestTime);
-				viewFlowPanel.add(responseView);
+				
 				
 				
 				/**
@@ -420,6 +420,9 @@ public class RequestActivity extends AppActivity implements
 								responseView.setRedirectData(redirects);
 							}
 						}
+						
+						
+						responseView.scrollToView();
 					}
 					
 					@Override

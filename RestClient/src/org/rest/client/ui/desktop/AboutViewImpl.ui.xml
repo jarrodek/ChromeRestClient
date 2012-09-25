@@ -43,7 +43,7 @@
 		<h1 class="{style.contentTitle} {style.about}">Advanced Rest Client Application</h1>
 		<section class="{style.aboutContent}">
 			<div class="credits">
-				Copyright © 2011 Paweł Psztyć (Poland)
+				Copyright © 2012 Paweł Psztyć (Poland)
 			</div>
 			<div class="source">
 				Source code at
