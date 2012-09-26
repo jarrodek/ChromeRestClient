@@ -177,7 +177,7 @@ public class FirstRunTask implements LoadTask {
 		if(!(historyList == null || historyList.isEmpty())){
 			JSONValue value = null;
 			try{
-				value = JSONParser.parseLenient(historyList);
+				value = JSONParser.parseStrict(historyList);
 			} catch(Exception e){}
 			if (value != null) {
 				JSONArray arr = value.isArray();
@@ -253,7 +253,7 @@ public class FirstRunTask implements LoadTask {
 		String latestRequest = store.getItem("latestRequest");
 		store.removeItem("latestRequest");
 		if (latestRequest != null) {
-			JSONValue value = JSONParser.parseLenient(latestRequest);
+			JSONValue value = JSONParser.parseStrict(latestRequest);
 			if (value != null) {
 				JSONObject obj = value.isObject();
 				if (obj != null) {
@@ -391,6 +391,20 @@ public class FirstRunTask implements LoadTask {
 		AssetRequest.getAssetString("definitions.json", new AssetStringCallback() {
 			@Override
 			public void onSuccess(String response) {
+				if(response == null || response.isEmpty()){
+					if(lastRun){
+						if(RestClient.isDebug()){
+							Log.error("Error download application data file. Will try next time.");
+						}
+						loaderWidget.setText("Loading...");
+						callback.onInnerTaskFinished(getTasksCount()-1);
+						callback.onSuccess();
+						return;
+					}
+					loaderWidget.setText("Unable to download definitions. Retrying...");
+					callback.onFailure(1);
+					return;
+				}
 				callback.onInnerTaskFinished(1);
 				parseAssetResponse(response);
 			}
@@ -415,7 +429,18 @@ public class FirstRunTask implements LoadTask {
 	
 	private void parseAssetResponse(String json){
 		loaderWidget.setText("Creatintg databases...");
-		JSONValue data = JSONParser.parseLenient(json);
+		JSONValue data = null;
+		try{
+			data = JSONParser.parseStrict(json);
+		} catch(Exception e){
+			Log.error("Unable parse response from server. Can't read definitions.", e);
+			Log.error("Definitions string: " + json);
+			Window.alert("Unable parse response from server. Can't read definitions.");
+			loaderWidget.setText("Loading...");
+			callback.onInnerTaskFinished(getTasksCount()-1);
+			callback.onSuccess();
+			return;
+		}
 		final JSONObject obj = data.isObject();
 		if (obj == null) {
 			if(RestClient.isDebug()){

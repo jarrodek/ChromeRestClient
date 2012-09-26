@@ -16,26 +16,26 @@
 	</replace-with>
 	
 	
-	<!-- Deffered binding for message passing system -->
-	<define-property name="inside_extension" values="yes,no" />
-<!-- 	<set-property name="inside_extension" value="no"/> -->
-	
-	<property-provider name="inside_extension"><![CDATA[
-		{
- 			return (chrome && typeof chrome.webRequest != 'undefined') ? "yes" : "no";
- 		}
- 	]]></property-provider>
- 	
+	 <!-- Deffered binding for message passing system -->
+        <define-property name="inside_extension" values="yes,no" />
+<!--    <set-property name="inside_extension" value="no"/> -->
+        
+        <property-provider name="inside_extension"><![CDATA[
+                {
+                        return (chrome && typeof chrome.webRequest != 'undefined') ? "yes" : "no";
+                }
+        ]]></property-provider>
+        
 
-	<replace-with class="org.rest.client.chrome.ChromeCSmessagePassingImpl">
-		<when-type-is class="org.rest.client.chrome.ChromeMessagePassing" />
-		<when-property-is name="inside_extension" value="no" />
-	</replace-with>
-	
-	<replace-with class="org.rest.client.chrome.ChromeMessagePassingImpl">
-		<when-type-is class="org.rest.client.chrome.ChromeMessagePassing" />
-		<when-property-is name="inside_extension" value="yes" />
-	</replace-with>
+        <replace-with class="org.rest.client.chrome.ChromeCSmessagePassingImpl">
+                <when-type-is class="org.rest.client.chrome.ChromeMessagePassing" />
+                <when-property-is name="inside_extension" value="no" />
+        </replace-with>
+        
+        <replace-with class="org.rest.client.chrome.ChromeMessagePassingImpl">
+                <when-type-is class="org.rest.client.chrome.ChromeMessagePassing" />
+                <when-property-is name="inside_extension" value="yes" />
+        </replace-with>
 	
 	
 	

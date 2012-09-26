@@ -25,6 +25,7 @@ import org.rest.client.ExternalEventsFactory;
 import org.rest.client.RestClient;
 import org.rest.client.event.AddEncodingEvent;
 import org.rest.client.event.ClearFormEvent;
+import org.rest.client.event.OverwriteUrlEvent;
 import org.rest.client.event.RequestEndEvent;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.RedirectData;
@@ -73,6 +74,7 @@ public class RequestActivity extends AppActivity implements
 	final private RequestPlace place;
 	private EventBus eventBus;
 	protected ResponseView responseView;
+	protected RequestView requestView;
 	FlowPanel viewFlowPanel;
 	
 	public RequestActivity(RequestPlace place, ClientFactory clientFactory) {
@@ -89,7 +91,7 @@ public class RequestActivity extends AppActivity implements
 			RestClient.setOpenedProject(-1);
 		}
 
-		RequestView requestView = this.clientFactory.getRequestView();
+		requestView = this.clientFactory.getRequestView();
 		requestView.reset();
 		
 		requestView.setPresenter(this);
@@ -327,6 +329,7 @@ public class RequestActivity extends AppActivity implements
 		
 		setUserDefinedContentEncodingValues(request
 				.getEncoding());
+		RestClient.fixChromeLayout();
 		
 	}
 	
@@ -374,6 +377,12 @@ public class RequestActivity extends AppActivity implements
 //				Log.debug("RequestChangeEvent: " + event.getChangeType()); 
 //			}
 //		});
+		OverwriteUrlEvent.register(eventBus, new OverwriteUrlEvent.Handler() {
+			@Override
+			public void onUrlChange(String url) {
+				requestView.setUrl(url);
+			}
+		});
 		RequestEndEvent.register(eventBus, new RequestEndEvent.Handler() {
 			@Override
 			public void onResponse(boolean success, final Response response, long requestTime) {
@@ -522,6 +531,7 @@ public class RequestActivity extends AppActivity implements
 				requestView.setPayload(result.getPayload());
 				setUserDefinedContentEncodingValues(result
 						.getEncoding());
+				RestClient.fixChromeLayout();
 			}
 			
 			@Override
@@ -579,6 +589,7 @@ public class RequestActivity extends AppActivity implements
 						view.setEncoding(dataObj.get("encoding").isString().stringValue());
 					}
 				}
+				RestClient.fixChromeLayout();
 			}
 			
 			@Override
@@ -613,6 +624,7 @@ public class RequestActivity extends AppActivity implements
 				view.setPayload(result.getPayload());
 				setUserDefinedContentEncodingValues(result
 						.getEncoding());
+				RestClient.fixChromeLayout();
 			}
 
 			@Override
@@ -652,6 +664,7 @@ public class RequestActivity extends AppActivity implements
 					view.setPayload(result.getPostData());
 					setUserDefinedContentEncodingValues(result
 							.getFormEncoding());
+					RestClient.fixChromeLayout();
 				}
 	
 				@Override
@@ -705,6 +718,8 @@ public class RequestActivity extends AppActivity implements
 
 	@Override
 	public String mayStop() {
+		revokeDownloadData();
+		
 		RequestView view = this.clientFactory.getRequestView();
 		RequestObject ro = RequestObject.createRequest();
 		ro.setEncoding(view.getEncoding());
@@ -812,4 +827,32 @@ public class RequestActivity extends AppActivity implements
 			}
 		});
 	}
+	
+	
+	private String exportFileObjectUrl = null;
+	@Override
+	public String createDownloadData(String body, String endoding) {
+		if(exportFileObjectUrl != null){
+			revokeDownloadData();
+		}
+		exportFileObjectUrl = createDownloadDataImpl(body, endoding); 
+		return exportFileObjectUrl;
+	}
+	private final native String createDownloadDataImpl(String data, String endoding) /*-{
+		var blob = new $wnd.Blob([data], {type: endoding});
+		return $wnd.URL.createObjectURL(blob);
+	}-*/;
+	
+	
+	@Override
+	public void revokeDownloadData() {
+		if(exportFileObjectUrl != null){
+			revokeDownloadDataImpl(exportFileObjectUrl);
+			exportFileObjectUrl = null;
+		}
+	}
+	private final native void revokeDownloadDataImpl(String url) /*-{
+		$wnd.URL.revokeObjectURL(url);
+	}-*/;
+	
 }

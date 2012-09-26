@@ -1,7 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
-	
+	<ui:with field="appResources" type="org.rest.client.resources.AppResources" />
 	<ui:style type="org.rest.client.ui.desktop.widget.JSONViewer.ParserStyle" >
 		@def indent 15px; 
 		.prettyPrint{}
@@ -71,6 +71,8 @@
 		
 	</ui:style>
 	<g:HTML ui:field="result" styleName="bodyPanel">
-		<p>loading...</p>
+		<div class="{appResources.appCss.flexCenter}">
+			<span class="{appResources.appCss.loaderImage}"></span>
+		</div>
 	</g:HTML>
 </ui:UiBinder>

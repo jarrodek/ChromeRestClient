@@ -16,6 +16,7 @@
 package org.rest.client.ui.desktop;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.rest.client.ui.html5.HTML5Element;
 import org.rest.client.util.CodeMirrorElement;
 import org.rest.client.util.CodeMirrorHelper;
 import org.rest.client.util.JSONHeadersUtils;
+import org.rest.client.util.Utils;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
@@ -52,6 +54,8 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.resources.client.CssResource;
@@ -59,8 +63,10 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.ScrollEvent;
 import com.google.gwt.user.client.Window.ScrollHandler;
@@ -90,6 +96,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		String responseRow();
 		String label();
 		String result();
+		String onTop();
 	}
 	
 	private ResponsePresenter listener;
@@ -700,6 +707,14 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			@Override
 			public void onWindowScroll(ScrollEvent event) {
 				int top = event.getScrollTop();
+				
+				if(Math.abs(top) < 20){
+					scrollContainer.addClassName(style.onTop());
+				} else {
+					scrollContainer.removeClassName(style.onTop());
+				}
+				
+				
 				int scrollTop = scrollContainer.getAbsoluteTop();
 				
 				int nextPos = initialOffsetTop+marginOffset+(top-initialScrollTop);
@@ -767,5 +782,56 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		e.preventDefault();
 		String body = response.getResponseText();
 		RestClient.getClientFactory().getChromeMessagePassing().postMessage("copyToClipboard",body);
+	}
+	@UiHandler({"saveAsFileButton1","saveAsFileButton2","saveAsFileButton3","saveAsFileButton4"})
+	void onSaveAsFileClick(ClickEvent e){
+		final Anchor anchor = (Anchor)e.getSource();
+		final Element anchorElement = anchor.getElement();
+		String download = anchorElement.getAttribute("download");
+		if(download != null && !download.isEmpty()){
+			//already have download.
+			if(!anchorElement.getAttribute("disabled").isEmpty()){
+				return;
+			}
+			anchorElement.setAttribute("disabled", "true");
+			Timer t = new Timer() {
+				@Override
+				public void run() {
+					anchor.setHref("about:blank");
+					anchor.setText("Save as file");
+					anchorElement.removeAttribute("download");
+					anchorElement.removeAttribute("data-downloadurl");
+					anchorElement.removeAttribute("disabled");
+					listener.revokeDownloadData();
+				}
+			};
+			t.schedule(1500);
+			return;
+		}
+		e.preventDefault();
+		
+		final String body = response.getResponseText();
+		String _encoding = "text/plain";
+		Header[] headers = response.getHeaders();
+		for(Header header : headers){
+			if(header.getName().toLowerCase().equals("content-type")){
+				_encoding = header.getValue().split(";")[0];
+				break;
+			}
+		}
+		final String encoding = _encoding;
+		
+		Scheduler.get().scheduleDeferred(new Command() {
+			public void execute() {
+				String ext = Utils.guessFileExtension(encoding);
+				String fileObjectUrl = listener.createDownloadData(body,encoding);
+				anchor.setHref(fileObjectUrl);
+				String date = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM).format(new Date());
+				String fileName = "arc-response-"+date+"."+ext;
+				anchorElement.setAttribute("download", fileName);
+				anchorElement.setAttribute("data-downloadurl", encoding+":"+fileName+":"+fileObjectUrl);
+				anchor.setText("Download");
+			}
+		});
 	}
 }

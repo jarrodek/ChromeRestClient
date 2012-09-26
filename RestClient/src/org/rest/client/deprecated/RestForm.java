@@ -112,7 +112,7 @@ public class RestForm implements IsSerializable {
 		JSONValue dataValue = null;
 		JSONObject obj = null;
 		try{
-			dataValue = JSONParser.parseLenient(data);
+			dataValue = JSONParser.parseStrict(data);
 			obj = dataValue.isObject();
 		} catch(Exception e){
 			return null;

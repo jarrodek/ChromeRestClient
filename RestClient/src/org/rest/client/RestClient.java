@@ -24,6 +24,7 @@ import org.rest.client.mvp.AppActivityMapper;
 import org.rest.client.mvp.AppPlaceHistoryMapper;
 import org.rest.client.place.ImportExportPlace;
 import org.rest.client.place.RequestPlace;
+import org.rest.client.request.HttpMethodOptions;
 import org.rest.client.request.RequestParameters;
 import org.rest.client.resources.AppResources;
 import org.rest.client.storage.StoreResultCallback;
@@ -237,10 +238,16 @@ public class RestClient implements EntryPoint {
 		if (History.getToken().isEmpty() || History.getToken().startsWith("RequestPlace")) {
 			RequestView requestView = RestClient.getClientFactory()
 					.getRequestView();
-			requestObject.setEncoding(requestView.getEncoding());
+			
+			String httpMethod = requestView.getMethod();
 			requestObject.setHeaders(requestView.getHeaders());
 			requestObject.setMethod(requestView.getMethod());
-			requestObject.setPayload(requestView.getPayload());
+			
+			if(HttpMethodOptions.hasBody(httpMethod)){
+				requestObject.setPayload(requestView.getPayload());
+				requestObject.setEncoding(requestView.getEncoding());
+			}
+			
 			String url = requestView.getUrl();
 			if(url.startsWith("/")){
 				//

@@ -47,6 +47,7 @@ public class SavedActivity extends AppActivity implements
 	
 	private int displayedItems = 0;
 	private boolean hasMoreItems = true;
+	private boolean initialize = true;
 	private final static int PAGE_SIZE = 15;
 	private RequestDataService storeService = clientFactory.getRequestDataStore().getService();
 
@@ -90,6 +91,7 @@ public class SavedActivity extends AppActivity implements
 					Log.error("Database error. Unable read history data.", error);
 				}
 				StatusNotification.notify("Database error. Unable read history data.", StatusNotification.TYPE_ERROR);
+				initialize = false;
 			}
 			
 			@Override
@@ -102,8 +104,9 @@ public class SavedActivity extends AppActivity implements
 				}
 				gettingNextPage = false;
 				
-				if(len>0)
+				if(len>0 || initialize)
 					view.addData(result);
+				initialize = false;
 			}
 		});
 	}

@@ -52,6 +52,17 @@ public interface ResponseView extends IsWidget {
 		 * @param callback
 		 */
 		void getRequestHeadersInfo(ArrayList<String> names, Callback<List<HeaderRow>, Throwable> callback);
+		/**
+		 * Creates a download URL for this data in browser's filesystem
+		 * @param data Data to be stored
+		 * @return
+		 */
+		String createDownloadData(String body, String encoding);
+		/**
+		 * Revoke previously created file via {@link #createDownloadData(String)}
+		 * @param url
+		 */
+		void revokeDownloadData();
 	}
 	/**
 	 * Sets presenter for this view

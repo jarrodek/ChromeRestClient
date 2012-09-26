@@ -30,9 +30,9 @@ public interface HistoryService extends AppDatabase {
 			+ "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
 			+ "url TEXT NOT NULL, "
 			+ "method TEXT NOT NULL, "
-			+ "encoding TEXT NOT NULL, "
-			+ "headers TEXT, "
-			+ "payload TEXT, "
+			+ "encoding TEXT NULL, "
+			+ "headers TEXT NULL, "
+			+ "payload TEXT NULL, "
 			+ "time INTEGER)")
 	void initTable(VoidCallback callback);
 

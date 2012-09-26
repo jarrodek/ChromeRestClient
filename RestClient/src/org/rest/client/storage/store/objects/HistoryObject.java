@@ -129,7 +129,7 @@ public class HistoryObject extends JavaScriptObject {
 	 * @return Saved request headers data.
 	 */
 	public final native String getHeaders() /*-{
-		return this.headers;
+		return this.headers || null;
 	}-*/;
 
 	/**

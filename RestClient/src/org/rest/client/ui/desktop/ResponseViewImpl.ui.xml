@@ -62,11 +62,13 @@
 		.bodyOverflow{ overflow: auto;}
 		.scrollContainer{
 			-webkit-transform: rotate(-90deg);
-			-webkit-transition: top 0.3s ease-out;
+			-webkit-transition: top, opacity 0.3s, 0.15s ease-out;
 			position: absolute;
-			top: 230px;
+			top: 40px;
 			left: -75px;
+			opacity: 1;
 		}
+		.scrollContainer.onTop{opacity: 0;}
 		.scrollButton{padding: 7px 8px;text-decoration: none !important;}
 		.copyClipboardBody{margin-left:7px;}
 	</ui:style>
@@ -122,15 +124,15 @@
 						<div>
 							<g:Anchor ui:field="wrapContentButton" href="javascript:;" >Word wrap</g:Anchor>
 							<g:Anchor addStyleNames="{style.copyClipboardBody}" ui:field="copyClipboardButton" href="javascript:;" >Copy to clipboard</g:Anchor>
+							<g:Anchor addStyleNames="{style.copyClipboardBody}" ui:field="saveAsFileButton1" href="javascript:;" >Save as file</g:Anchor>
 						</div>
 						<g:HTML width="100%" ui:field="plainBody" styleName="{style.plainPanel}"></g:HTML>
 					</section>
 					<section data-tab="parsed" class="{appResources.appCss.tabContent} {appResources.appCss.hidden}">
-						<div>
-							<g:Anchor ui:field="copyClipboardButton2" href="javascript:;" >Copy to clipboard</g:Anchor>
-						</div>
 						<div class="{style.newWindowOutput}">
 							<g:Anchor ui:field="parsedOpen" href="#">Open output in new window</g:Anchor>
+							<g:Anchor addStyleNames="{style.copyClipboardBody}" ui:field="copyClipboardButton2" href="javascript:;" >Copy to clipboard</g:Anchor>
+							<g:Anchor addStyleNames="{style.copyClipboardBody}" ui:field="saveAsFileButton2" href="javascript:;" >Save as file</g:Anchor>
 						</div>
 						<div class="CodeMirror">
 							<div class="lines"></div>
@@ -144,12 +146,14 @@
 					<section data-tab="xml" class="{appResources.appCss.tabContent} {appResources.appCss.hidden}">
 						<div>
 							<g:Anchor ui:field="copyClipboardButton3" href="javascript:;" >Copy to clipboard</g:Anchor>
+							<g:Anchor addStyleNames="{style.copyClipboardBody}" ui:field="saveAsFileButton3" href="javascript:;" >Save as file</g:Anchor>
 						</div>
 						<g:HTMLPanel ui:field="xmlPanel" styleName="{style.rawInput} {style.bodyOverflow}"/>
 					</section>
 					<section data-tab="json" class="{appResources.appCss.tabContent} {appResources.appCss.hidden}">
 						<div>
 							<g:Anchor ui:field="copyClipboardButton4" href="javascript:;" >Copy to clipboard</g:Anchor>
+							<g:Anchor addStyleNames="{style.copyClipboardBody}" ui:field="saveAsFileButton4" href="javascript:;" >Save as file</g:Anchor>
 						</div>
 						<g:HTMLPanel ui:field="jsonPanel" styleName="{style.rawInput} {style.bodyOverflow}"/>
 					</section>

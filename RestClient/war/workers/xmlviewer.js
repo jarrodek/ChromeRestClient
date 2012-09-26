@@ -17,7 +17,7 @@ self.onmessage = function(e) {
 };
 
 function XMLViewer(data){
-	this.linkRegExp = new RegExp(/^\w+:\/\//gim);
+	this.linkRegExp = /(&quot;|&lt;|&gt;)?([^"\s&;<>]*:\/\/[^"\s<>]*)(&quot;|&lt;|&gt;)?/gim;
     this.xml = null;
     this.latestError = null;
     
@@ -58,6 +58,12 @@ XMLViewer.prototype = {
     		result += this.parse(nodes.item(i));
 		}
     	result += "</div>";
+    	
+//    	var replace = '<a response-anchor href="$1">$1</a>';
+//        var match = result.match(this.linkRegExp);
+//        replace = replace.replace(/\$0/, match)
+//        result = result.replace(this.linkRegExp,replace);
+        
     	return result;
     },
     /**
@@ -80,9 +86,10 @@ XMLViewer.prototype = {
 			parsed += value;
 			break;
     	case 4: //CDATA_SECTION_NODE, content of node
-    		parsed += '<span class="'+XMLViewer.STYLE.arrowExpanded+'">&nbsp;</span>';
+    		parsed += '<span colapse-marker="true" class="'+XMLViewer.STYLE.arrowExpanded+'">&nbsp;</span>';
 			parsed += '<span class="'+XMLViewer.STYLE.cdata+'">&lt;![CDATA[</span><div collapsible style="white-space: pre;">';
-			parsed += this.urlify(SafeHtmlUtils.htmlEscape(node.nodeValue));
+//			parsed += this.urlify(SafeHtmlUtils.htmlEscape(node.nodeValue));
+			parsed += SafeHtmlUtils.htmlEscape(node.nodeValue);
 			parsed += '</div><span class="'+XMLViewer.STYLE.cdata+'">]]&gt;</span>';
 			break;
     	case 7: //document declaration
@@ -105,7 +112,7 @@ XMLViewer.prototype = {
     	var parsed = "";
     	var showArrows = false;
 		if (childrenCount > 1 || this._childIsCDATA(node)){
-			parsed += '<span class="'+XMLViewer.STYLE.arrowExpanded+'">&nbsp;</span>';
+			parsed += '<span colapse-marker="true" class="'+XMLViewer.STYLE.arrowExpanded+'">&nbsp;</span>';
 			showArrows = true;
 		}
 		parsed += '<span class="'+XMLViewer.STYLE.punctuation+'">&lt;</span>';
@@ -170,18 +177,18 @@ XMLViewer.prototype = {
 		data += '<span class="'+XMLViewer.STYLE.attribute+'">&quot;';
 		var value = attr.getValue();
 		value = SafeHtmlUtils.htmlEscape(value);
-		try{
-			if(this.linkRegExp.test(value)){
-				value = '<a response-anchor href="'+value+'">'+value+'</a>';
-			}
-		} catch(e){}
+//		try{
+//			if(this.linkRegExp.test(value)){
+//				value = '<a response-anchor href="'+value+'">'+value+'</a>';
+//			}
+//		} catch(e){}
 		data += value;
 		data += "&quot;</span>";
 		return data;
 	},
 	
 	urlify: function(text) {
-		var exp = /([^"\s&;]*:\/\/[^"\s]*)&quot;/gim;
+		var exp = /([^"\s&;]*:\/\/[^"\s]*)(&quot;)?/gim;
 	    return text.replace(exp, '<a response-anchor href="$1">$1</a>');
 	}
     

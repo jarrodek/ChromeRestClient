@@ -67,6 +67,11 @@ public class TestDataServlet extends HttpServlet {
 			sb.append("\"fruits\"").append(":").append("[\"apple\",\"banana\",\"orange\",\"lemon\",\"grapes\"]").append(",");
 			sb.append("\"nullValue\"").append(":").append("\"null\"").append(",");
 			sb.append("\"ok\"").append(":").append("true").append(",");
+			sb.append("\"link\"").append(":").append("\"https://www.google.pl/webhp?sourceid=chrome-instant&ion=1&ie=UTF-8#hl=en&sclient=psy-ab&q=javascript%20find%20links%20in%20text&oq=&gs_l=&pbx=1&fp=4f8778963b1a64d3&ion=1&bav=on.2,or.r_gc.r_pw.r_cp.r_qf.&biw=1215&bih=938\"").append(",");
+			sb.append("\"link2\"").append(":").append("\"https://www.google.pl/webhp?sourceid\"").append(",");
+			sb.append("\"link3\"").append(":").append("\"file:///file\"").append(",");
+			sb.append("\"link4\"").append(":").append("\"ftp://www.google.pl/webhp?sourceid\"").append(",");
+			sb.append("\"link5\"").append(":").append("\"http://www.google.pl/webhp?sourceid\"").append(",");
 			sb.append("\"long\"").append(":").append("18014398509481984419").append(",");
 			sb.append("\"array\"").append(":").append("[\"string1\",\"string2\",\"string3 string3 string3 string3 string3 string3\"]").append(",");
 			sb.append("\"deep\"").append(":");

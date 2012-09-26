@@ -154,7 +154,7 @@ public class ShortcutHandlers {
 					return;
 				}
 				
-				JSONValue value = JSONParser.parseLenient(data);
+				JSONValue value = JSONParser.parseStrict(data);
 				if (value == null) {
 					callback.onSuccess(result);
 					return;

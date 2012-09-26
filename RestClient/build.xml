@@ -2,7 +2,7 @@
 	<property name="extension.dir" value="extension" />
 	<property name="extension.src" value="${extension.dir}/source" />
 	
-	<property name="extension.srcdir" value="wr/extension" />
+	<property name="extension.srcdir" value="war/extension" />
 	
 	<!-- Crate dist rirectories -->
 	<target name="createRequiredDirectories" description="Create extenstions directory set.">
@@ -42,18 +42,17 @@
 				<exclude name="**/*_uncompressed.css" />
 				<exclude name="**/restclientapp/gwt/standard/*_uncompressed.css" />
 				<exclude name="**/ext/CodeMirror-2.2/*_uncompressed.css" />
-				
 			    <!-- Other files -->
 				<exclude name="**/ext/crypto*" />
-				<!-- inlude files from extension directory -->
-				<include name="**/extension/img/"/>
-				<include name="**/extension/background.js"/>
-				<include name="**/extension/intentview.html"/>
-				<include name="**/extension/intentview.js"/>
+			</fileset>
+		</copy>
+		<copy todir="${extension.src}">
+			<fileset dir="${extension.srcdir}">
+				<exclude name="**/manifest.json.old" />
 			</fileset>
 		</copy>
 		<exec executable="./manifestversion.sh"/>
-		<copy todir="${extension.src}">
+		<copy todir="${extension.src}" overwrite="true">
 			<fileset file="war/extension/manifest.json"></fileset>
 		</copy>
 	</target>

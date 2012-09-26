@@ -29,6 +29,8 @@ import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.file.client.File;
 import com.google.gwt.file.client.FileList;
 import com.google.gwt.user.client.Window;
@@ -135,11 +137,18 @@ public class AppRequestFactory {
 				RestClient.getClientFactory().getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_REQUEST_BEGIN, data.toJSON(), new Callback<String, Throwable>() {
 					@Override
 					public void onSuccess(String result) {
+						if(RestClient.isDebug()){
+							Log.debug("Message to bacground page passed.");
+						}
 						startHttpRequest(data);
 					}
 					
 					@Override
-					public void onFailure(Throwable reason) {}
+					public void onFailure(Throwable reason) {
+						if(RestClient.isDebug()){
+							Log.error("Error to send message to extension.", reason);
+						}
+					}
 				});
 				
 			}
@@ -252,7 +261,8 @@ public class AppRequestFactory {
 			if(RestClient.isDebug()){
 				Log.debug("Content-Type header not found in headers list. Setting one from form value: " + encoding);
 			}
-			headers.add(new RequestHeader("Content-Type", encoding));
+			if(encoding != null)
+				headers.add(new RequestHeader("Content-Type", encoding));
 		}
 		
 		
@@ -392,7 +402,7 @@ public class AppRequestFactory {
 		}
 	}
 	
-	protected static void onSuccesRequest(Response response) {
+	protected static void onSuccesRequest(final Response response) {
 		if(RestClient.isDebug()){
 			Log.debug("Request sent successfully. Building response view.");
 		}
@@ -402,19 +412,32 @@ public class AppRequestFactory {
 			Window.alert("Something goes wrong :(\nResponse is null!");
 			return;
 		}
-		long loadingTime = new Date().getTime() - startTime.getTime();
-		RequestEndEvent event = new RequestEndEvent(true, response, loadingTime);
-		eventBus.fireEvent(event);
+		ScheduledCommand sc = new ScheduledCommand() {
+			@Override
+			public void execute() {
+				long loadingTime = new Date().getTime() - startTime.getTime();
+				RequestEndEvent event = new RequestEndEvent(true, response, loadingTime);
+				eventBus.fireEvent(event);
+			}
+		};
+		Scheduler.get().scheduleDeferred(sc);
 	}
 	
-	protected static void onFailureRequest(Response response) {
+	protected static void onFailureRequest(final Response response) {
 //		ExternalEventsFactory.postMessage(ExternalEventsFactory.EXT_STOP_OBSERVE_COOKIE, null);
 		
 		requestInProgress = false;
 		eventBus.fireEvent(new RequestStopEvent(new Date()));
-		long loadingTime = new Date().getTime() - startTime.getTime();
-		RequestEndEvent event = new RequestEndEvent(false, response, loadingTime);
-		eventBus.fireEvent(event);
+		ScheduledCommand sc = new ScheduledCommand() {
+			@Override
+			public void execute() {
+				long loadingTime = new Date().getTime() - startTime.getTime();
+				RequestEndEvent event = new RequestEndEvent(false, response, loadingTime);
+				eventBus.fireEvent(event);
+			}
+		};
+		Scheduler.get().scheduleDeferred(sc);
+		
 	}
 	/**
 	 * Save current form state in local storage.
@@ -449,6 +472,9 @@ public class AppRequestFactory {
 		if(!RestClient.isHistoryEabled()){
 			return;
 		}
+		if(RestClient.isDebug()){
+			Log.debug("Try to save new item in history.");
+		}
 		final HistoryRequestStoreWebSql store = RestClient.getClientFactory().getHistoryRequestStore();
 		store.getHistoryItem(data.getURL(), data.getMethod(), new StoreResultCallback<List<HistoryObject>>() {
 			@Override
@@ -456,7 +482,8 @@ public class AppRequestFactory {
 				boolean found = false;
 				HistoryObject old = null;
 				for(HistoryObject item : result){
-					if(!item.getEncoding().equals(data.getEncoding())){
+					String enc = item.getEncoding();
+					if(enc == null || !enc.equals(data.getEncoding())){
 						continue;
 					}
 					String itemHeaders = item.getHeaders();
@@ -492,7 +519,11 @@ public class AppRequestFactory {
 					}
 					store.updateHistoryItemTime(old.getId(), new Date(), new StoreResultCallback<Boolean>() {
 						@Override
-						public void onSuccess(Boolean result) {}
+						public void onSuccess(Boolean result) {
+							if(RestClient.isDebug()){
+								Log.debug("History item saved.");
+							}
+						}
 						
 						@Override
 						public void onError(Throwable e) {

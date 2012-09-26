@@ -19,7 +19,7 @@ self.onmessage = function(e) {
 };
 
 function JSONViewer(data){
-	this.linkRegExp = new RegExp(/^\w+:\/\//gim);
+	this.linkRegExp = /([^"\s&;<>]*:\/\/[^"\s<>]*)(&quot;|&lt;|&gt;)?/gim;
     this.jsonValue = null;
     this.latestError = null;
     this.elementsCounter = 0;
@@ -54,6 +54,12 @@ JSONViewer.prototype = {
     	var parsedData = '<div class="'+JSONViewer.STYLE.prettyPrint+'">';
         parsedData += this.parse(this.jsonValue);
         parsedData += "</div>";
+        
+        var replace = '<a response-anchor href="$1">$1</a>';
+        var match = parsedData.match(this.linkRegExp);
+        replace = replace.replace(/\$0/, match)
+        parsedData = parsedData.replace(this.linkRegExp,replace);
+        
         return parsedData;
     },
     /**
@@ -111,11 +117,6 @@ JSONViewer.prototype = {
 		var value = str || "";
 		if(value != null){
 			value = SafeHtmlUtils.htmlEscape(value);
-			try{
-				if(this.linkRegExp.test(value)){
-					value = '<a response-anchor href="'+value+'">'+value+'</a>';
-				}
-			} catch(e){}
 		} else {
 			value = "null";
 		}

@@ -1,5 +1,9 @@
 package org.rest.client.util;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
@@ -90,5 +94,45 @@ public class Utils {
 	public static String autoLinkUrls(String input){
 		RegExp r = RegExp.compile("(https?:\\/\\/(\\w|\\.)+(\\S+))","gim");
 		return r.replace(input, "<a target=\"_blank\" href=\"$1\">$1</a>");
+	}
+	
+	/**
+	 * Try to guess file extension from content type value.
+	 * @param contentType Response content type header
+	 * @return If recognized - file extension. Default return: <b>text/plain</b>
+	 */
+	public static String guessFileExtension(String contentType){
+		String result = "text/plain";
+		HashMap<String, String> map = new HashMap<String, String>();
+		map.put("application/json", "json");
+		map.put("text/html,xhtml+xml", "html");
+		map.put("atom,xml", "xml");
+		map.put("javascript,", "js");
+		map.put("css", "css");
+		map.put("application/java,text/x-java-source", "class");
+		map.put("application/x-gzip", "gz");
+		map.put("text/x-h", "h");
+		map.put("image/jpeg,image/pjpeg", "jpg");
+		map.put("audio/x-mpequrl", "m3u");
+		map.put("image/png", "png");
+		map.put("application/x-tar", "tar");
+		map.put("image/tiff,image/x-tiff", "");
+		map.put("application/x-zip-compressed,application/zip,multipart/x-zip", "");
+		map.put("application/pdf", "pdf");
+		map.put("image/gif", "gif");
+		map.put("image/svg+xml", "svg");
+		map.put("image/vnd.microsoft.icon", "icon");
+		map.put("text/csv", "csv");
+		
+		Set<String> set = map.keySet();
+		Iterator<String> it = set.iterator();
+		while(it.hasNext()){
+			String key = it.next();
+			if(contentType.contains(key) || key.contains(contentType)){
+				result = map.get(key);
+				break;
+			}
+		}
+		return result;
 	}
 }

@@ -5,7 +5,7 @@
     "16": "img/arc_icon_16.png",
     "128": "img/arc_icon_128.png"
   },
-  "version": "3.0",
+  "version": "3.0.7",
   "manifest_version": 2,
   "minimum_chrome_version": "22",
   "permissions": [
@@ -25,6 +25,7 @@
       "local_path": "RestClient.html"
     }
   },
+  "content_security_policy": "script-src chrome-extension:// chrome-extension-resource:// https://plusone.google.com https://chromerestclient.appspot.com https://ssl.google-analytics.com https://apis.google.com 'self'; object-src chrome-extension:// chrome-extension-resource:// 'self'; frame-src chrome-extension:// chrome-extension-resource:// 'self' style-src chrome-extension:// chrome-extension-resource:// 'self'",
   "content_scripts": [{
       "matches": ["http://127.0.0.1:8888/*"],
       "js": ["cs.js"],

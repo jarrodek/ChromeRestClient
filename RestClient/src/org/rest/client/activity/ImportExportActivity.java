@@ -376,7 +376,7 @@ public class ImportExportActivity extends AppActivity implements
 					String data = _i.getData();
 					JSONValue value = null;
 					try {
-						value = JSONParser.parseLenient(data);
+						value = JSONParser.parseStrict(data);
 					} catch (Exception e) {
 						Log.error("Unable to parse data: " + data, e);
 						continue;

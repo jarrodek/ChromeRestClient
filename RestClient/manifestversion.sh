@@ -1,6 +1,6 @@
 #!/bin/sh
 
-manifestFile="manifest.json"
+manifestFile="war/extension/manifest.json"
 
 ver=`grep "\"version\":\W\"\([0-9]\)" $manifestFile` #should be something like: "version": "1.0.9",
 ver=`grep "\"version\":\W\"\([0-9]\)" $manifestFile | sed 's/"version":\W\?"\([0-9]\{1,\}.[0-9]\{1,\}.[0-9]\{1,\}\)",/\1/g'`

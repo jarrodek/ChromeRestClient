@@ -29,6 +29,7 @@ public class ChromeMessagePassingImpl implements ChromeMessagePassing {
 	@Override
 	public void postMessage(String payload, String data,
 			final Callback<String, Throwable> callback) {
+		
 		final JSONObject respObj = preparePostMessage();
 		if (data != null) {
 			respObj.put("data", new JSONString(data));
