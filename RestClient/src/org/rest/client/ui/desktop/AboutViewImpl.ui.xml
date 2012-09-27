@@ -42,6 +42,7 @@
 	<g:HTMLPanel ui:field="root">
 		<h1 class="{style.contentTitle} {style.about}">Advanced Rest Client Application</h1>
 		<section class="{style.aboutContent}">
+			<div ui:field="versionField"></div>
 			<div class="credits">
 				Copyright © 2012 Paweł Psztyć (Poland)
 			</div>
@@ -75,6 +76,27 @@
 		</section>
 		<section class="{style.aboutContent}">
 			<h3>Changelog</h3>
+			<p>9/27/2012</p>
+			<ul>
+				<li>New UI and migration to GWT 2.5 RC</li>
+				<li>Migration to extensions manifest version 2</li>
+				<li>Optimized XML nad JSON view renderer using web workers and optymizing regular expressions</li>
+				<li>Added save to file and "copy" function to response view.</li>
+				<li>Deprecated server import/export</li>
+				<li>Added file export import</li>
+				<li>Implemented new Chrome APIs: webRequest, declarativeWebRequest and storage</li>
+				<li>Move part of request functionality to bacground page to set declarativeWebRequest filter before request</li>
+				<li>Integration with other extensions providing API to set request data in application via extensions passage massing and web intents</li>
+				<li>Now background page removes almost all default browser's headers not set by user.</li>
+				<li>Database structure and local storage keys has changed.</li>
+				<li>Links in response view now changing URL value in request view.</li>
+				<li>Added chrome.synch API to synch user settings</li>
+				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=57">Issue 57</a>: Application have new "save request" system. User can link requests into project and switch between overwriting selected data.</li>
+				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=62">Issue 62</a>: Now application can set all request headers (even prohibited by XMLHttpRequest spec)</li>
+				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=67">Issue 67</a>: Application now can show redirect information.</li>
+				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=68">Issue 68</a>: Payload is set in request when using custom "method"</li>
+				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=70">Issue 70</a> and <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=73">Issue 73</a>: Application now wil not set Content-Type header fon non-payload requests</li>
+			</ul>
 			<p>8/4/2012</p>
 			<ul>
 				<li>Added detailed view to Request URL section (hover URL sign)</li>
@@ -113,72 +135,6 @@
 					<a
 						href="http://code.google.com/p/chrome-rest-client/issues/detail?id=53">Issue 53</a>
 					: Cannot save Content-Type header
-				</li>
-			</ul>
-			<p>2/7/2012</p>
-			<ul>
-				<li>Fixed history ammout</li>
-				<li>Added option "Clear history"</li>
-				<li>In "Parsed response" tab "Open output in new window" now paste
-					HTML value into new window (instead of HTML markup text)</li>
-			</ul>
-			<p>1/24/2012</p>
-			<ul>
-				<li>Added Google App Engine server to store saved data and share it
-					with coworkers</li>
-			</ul>
-			<p>1/11/2012</p>
-			<ul>
-				<li>Speed up code highlighting (I hope :).</li>
-				<li>Added permission "History" to provide request url suggestions
-					from browser history</li>
-				<li>Fixed date-type header support (time now sets correctly)</li>
-				<li>Reorganized database suggest oracle</li>
-			</ul>
-			<p>1/8/2012</p>
-			<ul>
-				<li>Improvements in CodeMirror load. Fixed non visible CodeMirror
-					output.</li>
-				<li>CodeMirror response panel now has clickable links (href and src
-					attributes values).</li>
-			</ul>
-			<p>1/2/2012</p>
-			<ul>
-				<li>Added JSON headers definitions in options panel. Now user can
-					define custom JSON headers.</li>
-			</ul>
-			<p>12/27/2011</p>
-			<ul>
-				<li>Fixed "Authorization" header support (restore basic params in
-					wizard)</li>
-				<li>Added shortcuts editor. Now you can define Your own shortcuts
-					for some actions.</li>
-				<li>Updated CodeMirror to version 2.2</li>
-			</ul>
-			<p>12/22/2011</p>
-			<ul>
-				<li>Fixed many headers with same name support</li>
-				<li>
-					Fixed long URL overflow in saved requests page (
-					<a
-						href="http://code.google.com/p/chrome-rest-client/issues/detail?id=32">Issue 32</a>
-					)
-				</li>
-				<li>
-					Fixed BODY form array values (
-					<a
-						href="http://code.google.com/p/chrome-rest-client/issues/detail?id=31">Issue 31</a>
-					)
-				</li>
-			</ul>
-			<p>12/6/2011</p>
-			<ul>
-				<li>
-					Fixed file transport using headers and raw body (instead of
-					file form)
-					<a
-						href="http://code.google.com/p/chrome-rest-client/issues/detail?id=28"
-						target="_blank">Issue 28</a>
 				</li>
 			</ul>
 		</section>

@@ -41,6 +41,7 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 	@UiField HTMLPanel list;
 	@UiField WidgetStyle style;
 	@UiField Button loadNextPage;
+	@UiField InlineLabel clearHistory;
 	
 	public HistoryViewImpl(){
 		initWidget(uiBinder.createAndBindUi(this));
@@ -68,6 +69,7 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 		label.addStyleName(style.emptyInfo());
 		root.add(label);
 		loadNextPage.removeFromParent();
+		clearHistory.setVisible(false);
 	}
 	
 	

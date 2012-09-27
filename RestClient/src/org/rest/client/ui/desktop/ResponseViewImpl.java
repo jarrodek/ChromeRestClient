@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.rest.client.RestClient;
+import org.rest.client.event.OverwriteUrlEvent;
 import org.rest.client.request.RedirectData;
 import org.rest.client.resources.AppCssResource;
 import org.rest.client.resources.AppResources;
@@ -328,8 +329,14 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 				Log.debug("Initialize code mirror...");
 			}
 			codeMirrorHelper = new CodeMirrorHelper();
+			String encoding = getRequestContentType("text/html");
+			if(encoding.contains("javascript")){
+				encoding = "text/javascript";
+			}
+			
+			
 			try{
-				loadCodeMirror(body);
+				loadCodeMirror(body, encoding);
 			} catch(Exception e){
 				if(RestClient.isDebug()){
 					Log.warn("Unable to load CodeMirror.",e );
@@ -386,9 +393,10 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	/**
 	 * Load code mirror library.
 	 * @param text
+	 * @param encoding 
 	 * @throws JavaScriptException
 	 */
-	final native void loadCodeMirror(String text) throws JavaScriptException /*-{
+	final native void loadCodeMirror(String text, String encoding) throws JavaScriptException /*-{
 		var context = this;
 		var clb = $entry(function(a,b) {
 			context.@org.rest.client.ui.desktop.ResponseViewImpl::codeMirrorParseCallback(Ljava/lang/String;Ljava/lang/String;)(a,b);
@@ -397,7 +405,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			context.@org.rest.client.ui.desktop.ResponseViewImpl::codeMirrorParsedCallback()();
 		});
 		try{
-			$wnd.CodeMirror.runMode(text, "text/html", clb, ready);
+			$wnd.CodeMirror.runMode(text, encoding, clb, ready);
 		} catch(e){
 			$wnd.alert("Unable to initialize CodeMirror :( " + e.message);
 		}
@@ -511,7 +519,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 							
 							String replacement = "<span class=\"cm-attribute\">";
 							replacement += attrName + "</span>=<span class=\"cm-string\">";
-							replacement += "\"<a target=\"_blank\" href=\""+fullHref+"\">"+url+"</a>\"</span>";
+							replacement += "\"<a response-anchor href=\""+fullHref+"\">"+url+"</a>\"</span>";
 							
 							codeMirrorParsed = codeMirrorParsed.replace(wholeLine, replacement);
 							if(loopCount >= WORK_CHUNK){
@@ -519,6 +527,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 							}
 						}
 						parsedBody.setInnerHTML(codeMirrorParsed);
+						addNativeControls(parsedBody);
 						//clean up
 						codeMirrorParsed = null;
 						codeMirrorHelper.clear();
@@ -536,6 +545,23 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			}
 		});
 	}
+	
+	final void fireUrlChangeEvent(String url){
+		RestClient.getClientFactory().getEventBus().fireEvent(new OverwriteUrlEvent(url));
+	}
+	
+	private final native void addNativeControls(com.google.gwt.dom.client.Element element)/*-{
+		var context = this;
+		element.addEventListener('click', function(e){
+			if(!e.target) return;
+			if(e.target.nodeName == "A"){
+				e.preventDefault();
+				var url = e.target.getAttribute('href');
+				context.@org.rest.client.ui.desktop.ResponseViewImpl::fireUrlChangeEvent(Ljava/lang/String;)(url);
+				return;
+			}
+		}, true);
+	}-*/;
 	
 	@Override
 	public void clear() {
@@ -694,7 +720,21 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		wnd.document.body.innerHTML = body;
 	}-*/;
 	
-	
+	private String requestEncoding = null;
+	private String getRequestContentType(String defaultEncodeing){
+		if(requestEncoding != null){
+			return requestEncoding;
+		}
+		Header[] headers = response.getHeaders();
+		for(Header header : headers){
+			if(header.getName().toLowerCase().equals("content-type")){
+				defaultEncodeing = header.getValue().split(";")[0];
+				break;
+			}
+		}
+		requestEncoding = defaultEncodeing;
+		return defaultEncodeing;
+	}
 	
 	private int initialScrollTop = -1;
 	private int initialOffsetTop = -1;
@@ -811,15 +851,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		e.preventDefault();
 		
 		final String body = response.getResponseText();
-		String _encoding = "text/plain";
-		Header[] headers = response.getHeaders();
-		for(Header header : headers){
-			if(header.getName().toLowerCase().equals("content-type")){
-				_encoding = header.getValue().split(";")[0];
-				break;
-			}
-		}
-		final String encoding = _encoding;
+		final String encoding = getRequestContentType("text/html");
 		
 		Scheduler.get().scheduleDeferred(new Command() {
 			public void execute() {

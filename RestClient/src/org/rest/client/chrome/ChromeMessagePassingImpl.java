@@ -58,14 +58,14 @@ public class ChromeMessagePassingImpl implements ChromeMessagePassing {
 	};
 	
 	private final native void sendExtensionMessage(String data, ChromeMessageReceiver handler)/*-{
-		//get background page
-		var bg = chrome.extension.getBackgroundPage();
-		var receiver = $entry(function(response) {
-			if (!(response && response.payload))
-				return;
-			handler.@org.rest.client.chrome.ChromeMessageReceiver::onMessage(Ljava/lang/String;Ljava/lang/String;)(response.payload,response.data);
-		});
-		bg.requestAction(data, receiver);
+		chrome.runtime.getBackgroundPage($entry(function(backgroundPage){
+			var receiver = $entry(function(response) {
+				if (!(response && response.payload))
+					return;
+				handler.@org.rest.client.chrome.ChromeMessageReceiver::onMessage(Ljava/lang/String;Ljava/lang/String;)(response.payload,response.data);
+			});
+			backgroundPage.requestAction(data, receiver);
+		}));
 	}-*/;
 
 }

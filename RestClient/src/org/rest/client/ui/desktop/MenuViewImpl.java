@@ -19,12 +19,12 @@ import org.rest.client.ui.MenuItemView;
 import org.rest.client.ui.MenuView;
 import org.rest.client.ui.html5.ListPanel;
 
+import com.google.gwt.aria.client.Roles;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.Accessibility;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -46,7 +46,7 @@ public class MenuViewImpl extends Composite implements MenuView {
 		initWidget(uiBinder.createAndBindUi(this));
 		
 		sinkEvents(Event.ONMOUSEDOWN | Event.ONCLICK | Event.KEYEVENTS);
-		Accessibility.setRole(getElement(), Accessibility.ROLE_TREE);
+		Roles.getTreeRole().set(getElement());
 	}
 	
 	

@@ -18,6 +18,9 @@ package org.rest.client;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.rest.client.chrome.Storage.StorageChangeHandler;
+import org.rest.client.chrome.StorageChangeObject;
+import org.rest.client.chrome.StorageArea.StorageItemCallback;
 import org.rest.client.event.ApplicationReadyEvent;
 import org.rest.client.event.NewProjectAvailableEvent;
 import org.rest.client.mvp.AppActivityMapper;
@@ -117,6 +120,8 @@ public class RestClient implements EntryPoint {
 		Logger.getLogger("").addHandler(clientFactory.getErrorDialogView().getHandler());
 		Logger.getLogger("").setLevel(Level.WARNING);
 		
+		setDebug();
+		
 		final EventBus eventBus = clientFactory.getEventBus();
 		final PlaceController placeController = clientFactory.getPlaceController();
 		// Start ActivityManager for the main widget with our ActivityMapper
@@ -176,24 +181,54 @@ public class RestClient implements EntryPoint {
 	
 	private static Boolean appDebug = null;
 	
+	
+	private static void setDebug(){
+		org.rest.client.chrome.Storage chromeStore = org.rest.client.chrome.Storage.getStorageIfAvailable();
+		if(chromeStore != null){
+			chromeStore.getSync().get(LocalStore.DEBUG_KEY, new StorageItemCallback() {
+				@Override
+				public void onResult(String data) {
+					if(data != null && data.equals("true")){
+						appDebug = true;
+					} else {
+						appDebug = false;
+					}
+				}
+				@Override
+				public void onError(String message) {
+					appDebug = false;
+				}
+			});
+			
+			chromeStore.addChangeHandler(new StorageChangeHandler() {
+				@Override
+				public void onChange(StorageChangeObject data, String areaName) {
+					if(areaName.equals(org.rest.client.chrome.Storage.SYNC)){
+						setDebug();
+					}
+				}
+			});
+			
+			return;
+		}
+		Storage store = Storage.getLocalStorageIfSupported();
+		if(store == null){
+			appDebug = true;
+		} else {
+			String result = store.getItem(LocalStore.DEBUG_KEY);
+			if(result != null && result.equals("true")){
+				appDebug = true;
+			} else {
+				appDebug = false;
+			}
+		}
+	}
+	
 	/**
 	 * 
 	 * @return true if debug output is enabled, false otherwise
 	 */
 	public static boolean isDebug() {
-		if(appDebug == null){
-			Storage store = Storage.getLocalStorageIfSupported();
-			if(store == null){
-				appDebug = true;
-			} else {
-				String result = store.getItem(LocalStore.DEBUG_KEY);
-				if(result != null && result.equals("true")){
-					appDebug = true;
-				} else {
-					appDebug = false;
-				}
-			}
-		}
 		return appDebug;
 	}
 	

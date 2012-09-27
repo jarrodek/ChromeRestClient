@@ -41,13 +41,7 @@ public class ChromeCSmessagePassingImpl implements ChromeMessagePassing {
 	public final void postMessage(String payload, String data,
 			Callback<String, Throwable> callback) {
 		messageCallbackList.put(payload, callback);
-
-		final JSONObject respObj = preparePostMessage();
-		if (data != null) {
-			respObj.put("data", new JSONString(data));
-		}
-		respObj.put("payload", new JSONString(payload));
-		sendExtensionMessage(respObj.toString());
+		postMessage(payload, data);
 	}
 
 	/**
@@ -59,8 +53,7 @@ public class ChromeCSmessagePassingImpl implements ChromeMessagePassing {
 		var rec = $entry(function(e) {
 			if (e.origin != location.origin) {
 				return;
-			}
-			;
+			};
 			if (!(e.data && e.data.source && e.data.source == "arc:cs"))
 				return;
 			if (!(e.data && e.data.payload))

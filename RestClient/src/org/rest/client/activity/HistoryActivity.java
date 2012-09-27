@@ -48,6 +48,7 @@ public class HistoryActivity extends AppActivity implements
 	private HistoryView view = null;
 	private int displayedItems = 0;
 	private boolean hasMoreItems = true;
+	private boolean initialize = true;
 	private final static int PAGE_SIZE = 15;
 	private boolean gettingNextPage = false;
 	
@@ -89,8 +90,9 @@ public class HistoryActivity extends AppActivity implements
 					view.setNoMoreItems();
 				}
 				gettingNextPage = false;
-				if(len>0)
-				 view.setHistory(result);
+				if(len>0 || initialize)
+					view.setHistory(result);
+				initialize = false;
 			}
 			
 			@Override
@@ -100,6 +102,7 @@ public class HistoryActivity extends AppActivity implements
 					Log.error("Database error. Unable read history data.", e);
 				}
 				StatusNotification.notify("Database error. Unable read history data.", StatusNotification.TYPE_ERROR);
+				initialize = false;
 			}
 		});
 	}

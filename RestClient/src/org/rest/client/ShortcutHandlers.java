@@ -8,6 +8,7 @@ import org.rest.client.event.RequestStartActionEvent;
 import org.rest.client.event.SaveRequestEvent;
 import org.rest.client.event.ShortcutChangeEvent;
 import org.rest.client.place.HistoryPlace;
+import org.rest.client.place.SavedPlace;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.LocalStore;
 import org.rest.client.ui.desktop.StatusNotification;
@@ -295,7 +296,7 @@ public class ShortcutHandlers {
 		ShortcutType type = sc.getType();
 		
 		if(type.equals(ShortcutType.OPEN_REQUEST)){
-			Log.debug("OPEN");
+			RestClient.getClientFactory().getPlaceController().goTo(new SavedPlace("default"));
 		} else if(type.equals(ShortcutType.SAVE_REQUEST)){
 			eventBus.fireEvent(new SaveRequestEvent());
 		} else if(type.equals(ShortcutType.SEND_REQUEST)){

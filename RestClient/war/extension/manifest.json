@@ -10,10 +10,10 @@
   "minimum_chrome_version": "22",
   "permissions": [
     "webRequest",
+    "declarativeWebRequest",
     "<all_urls>",
     "history",
     "background",
-    "declarativeWebRequest",
     "storage",
     "clipboardWrite"
   ],

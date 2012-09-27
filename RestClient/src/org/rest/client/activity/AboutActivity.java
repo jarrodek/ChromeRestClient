@@ -16,9 +16,15 @@
 package org.rest.client.activity;
 
 import org.rest.client.ClientFactory;
+import org.rest.client.RestClient;
+import org.rest.client.chrome.ManifestDetails;
 import org.rest.client.place.AboutPlace;
 import org.rest.client.ui.AboutView;
 
+import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.core.client.Callback;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -35,6 +41,7 @@ public class AboutActivity extends AppActivity implements
 	
 	final private AboutPlace place;
 	private EventBus eventBus;
+	AboutView view = null;
 
 	public AboutActivity(AboutPlace place, ClientFactory clientFactory) {
 		super(clientFactory);
@@ -46,10 +53,41 @@ public class AboutActivity extends AppActivity implements
 		this.eventBus = eventBus;
 		super.start(panel, eventBus);
 		
-		AboutView view = clientFactory.getAboutView();
+		view = clientFactory.getAboutView();
 		view.setPresenter(this);
 		panel.setWidget(view.asWidget());
+		getAppVersion();
 		initPlusOne();
+	}
+	
+	
+	private void getAppVersion(){
+		
+		clientFactory.getChromeMessagePassing().postMessage("getManifest", "", new Callback<String, Throwable>() {
+			
+			@Override
+			public void onSuccess(String result) {
+				try{
+				JSONValue value = JSONParser.parseStrict(result);
+				ManifestDetails manifest = value.isObject().getJavaScriptObject().cast();
+				if(view != null){
+					view.setManifest(manifest);
+				}
+				} catch(Exception e){
+					if(RestClient.isDebug()){
+						Log.warn("Can't parse manifest info",e);
+					}
+				}
+				
+			}
+			
+			@Override
+			public void onFailure(Throwable reason) {
+				if(RestClient.isDebug()){
+					Log.warn("Can't load manifest info",reason);
+				}
+			}
+		});
 	}
 	
 	private final native void initPlusOne()/*-{

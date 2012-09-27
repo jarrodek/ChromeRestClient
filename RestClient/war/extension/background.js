@@ -109,6 +109,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 
 
 function handleInternalMessage(request,sendResponse){
+//	console.log("handleInternalMessage: ",request);
 	if (!request.payload)
 		return;
 
@@ -193,6 +194,16 @@ function handleInternalMessage(request,sendResponse){
 		clipboardholder.select();
 		document.execCommand("Copy");
         clipboardholder.parentNode.removeChild(clipboardholder);
+		break;
+	case "getManifest":
+		var manifest = chrome.runtime.getManifest();
+		var result = {
+			version: manifest.version,
+			permissions: manifest.permissions,
+			manifest_version: manifest.manifest_version,
+			name: manifest.name
+		}
+		sendResponse(JSON.stringify(result));
 		break;
 	}
 }

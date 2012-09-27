@@ -2,7 +2,6 @@ var _gaq=[['_setAccount','UA-18021184-6'],['_trackPageview'],['_setDomainName', 
 var bouncerate_timer=0;
 function trackDrop(){
     if(bouncerate_timer == 1){
-        _gaq.push(['kali._trackEvent','Zamykanie', 'Strona', location.pathname]);
         _gaq.push(['_trackEvent','Zamykanie', 'Strona', location.pathname]);
     }
 }

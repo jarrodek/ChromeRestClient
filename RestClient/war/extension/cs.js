@@ -38,6 +38,11 @@ function receiveMessage(e){
 			case "copyToClipboard":
 				chrome.extension.sendMessage(data, function(response) {});
 				break;
+			default:
+				chrome.extension.sendMessage(data, function(response) {
+					window.postMessage({"source":"arc:cs", "payload":data.payload, "data": response}, location.href);
+				});
+				break;
 		}
 	}
 }
