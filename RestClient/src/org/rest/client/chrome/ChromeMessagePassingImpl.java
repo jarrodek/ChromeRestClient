@@ -62,7 +62,7 @@ public class ChromeMessagePassingImpl implements ChromeMessagePassing {
 			var receiver = $entry(function(response) {
 				if (!(response && response.payload))
 					return;
-				handler.@org.rest.client.chrome.ChromeMessageReceiver::onMessage(Ljava/lang/String;Ljava/lang/String;)(response.payload,response.data);
+				handler.@org.rest.client.chrome.ChromeMessageReceiver::onMessage(Ljava/lang/String;Ljava/lang/String;)(response.payload,response.data+"");
 			});
 			backgroundPage.requestAction(data, receiver);
 		}));

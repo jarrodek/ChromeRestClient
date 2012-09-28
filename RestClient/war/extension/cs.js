@@ -1,7 +1,7 @@
 
-window.addEventListener('ARC:READY',function(e){
-	console.log('ARC:READY');
-},false);
+//window.addEventListener('ARC:READY',function(e){
+//	console.log('ARC:READY');
+//},false);
 
 window.addEventListener("message", receiveMessage, false);
 

@@ -205,6 +205,26 @@ function handleInternalMessage(request,sendResponse){
 		}
 		sendResponse(JSON.stringify(result));
 		break;
+	default:
+		if(request.payload.indexOf("storage")===0){
+//			console.log('requested action for:',request.payload,request.data);
+			var c = request.payload.split('.')
+			var call = chrome;
+			var action = c.pop();
+			for(var i = 0; i<c.length; i++){
+				call = call[c[i]];
+			}
+			var data = request.data ? JSON.parse(request.data) : null;
+			call[action].call(call,data,function(result){
+//				console.log("result: ", result);
+				if(typeof result == "object"){
+					sendResponse(JSON.stringify(result));
+				} else {
+					sendResponse(result+"");
+				}
+			});
+		}
+		break;
 	}
 }
 

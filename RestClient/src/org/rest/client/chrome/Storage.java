@@ -1,5 +1,7 @@
 package org.rest.client.chrome;
 
+import com.google.gwt.core.client.GWT;
+
 public class Storage {
 	
 	public interface StorageChangeHandler {
@@ -20,46 +22,51 @@ public class Storage {
 	 * Sync storage area
 	 */
 	public static final String SYNC = "sync";
-	
-	private Storage(){}
-	
 	/**
-	 * 
-	 * @return null if not 
+	 * Flag if chrome storage API is available. If not it must use different interface implementation.
 	 */
-	public static Storage getStorageIfAvailable(){
-		if(isAvailable()){
-			return new Storage();
-		}
-		return null;
+	private final boolean isAvailable; 
+	
+	private Storage(boolean isAvailable){
+		this.isAvailable = isAvailable;
 	}
 	
-	private final static native boolean isAvailable() /*-{
-		return !!($wnd.chrome.storage);
-	}-*/;
+	private static StorageImpl impl = GWT.create(StorageImpl.class);
+	
+	/**
+	 * If extension's storage object if unavailable (is dev mode) it use message passing to background page instead 
+	 * @return Storage object. 
+	 */
+	public static Storage getStorage(){
+		if(impl.isAvailable()){
+			return new Storage(true);
+		}
+		return new Storage(false);
+	}
+	/**
+	 * Details about the error which occurred.
+	 * @return
+	 */
+	public String getLastError(){
+		return impl.getLastError();
+	}
 	
 	/**
 	 * 
 	 * @return Items under the "local" storage area are local to each machine.
 	 */
 	public LocalStorageArea getLocal(){
-		return new LocalStorageArea();
+		return new LocalStorageArea(isAvailable);
 	}
 	/**
 	 * 
 	 * @return Items under the "sync" storage area are synced using Chrome Sync.
 	 */
 	public SyncStorageArea getSync(){
-		return new SyncStorageArea();
+		return new SyncStorageArea(isAvailable);
 	}
 	
 	public void addChangeHandler(StorageChangeHandler handler){
-		_addChangeHandler(handler);
+		impl.addChangeHandler(handler);
 	}
-	
-	private final native void _addChangeHandler(StorageChangeHandler handler) /*-{
-		chrome.storage.onChanged.addListener(function(changes, areaName) {
-			handler.@org.rest.client.chrome.Storage.StorageChangeHandler::onChange(Lorg/rest/client/chrome/StorageChangeObject;Ljava/lang/String;)(changes, areaName);
-		});
-	}-*/;
 }

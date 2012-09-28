@@ -6,7 +6,6 @@ import org.rest.client.place.ShortcutPlace;
 import org.rest.client.resources.AppCssResource;
 import org.rest.client.resources.AppResources;
 import org.rest.client.ui.SettingsView;
-import org.rest.client.ui.html5.HTML5InputNumber;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
@@ -32,15 +31,13 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	
 	@UiField CheckBox debug;
 	@UiField CheckBox history;
-	@UiField(provided=true) HTML5InputNumber historyCount;
-	@UiField DivElement historyAmount;
 	@UiField DivElement historyClear;
 	
 	AppCssResource appStyle = AppResources.INSTANCE.appCss();
 	Presenter listener = null;
 	
 	public SettingsViewImpl(){
-		historyCount = new HTML5InputNumber(0, 500, 1);
+		
 		initWidget(uiBinder.createAndBindUi(this));
 		
 		history.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -51,12 +48,10 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 				if(RestClient.isDebug()){
 					Log.debug("History value changed. Current value is: " + value);
 				}
-				if( value ){
-					historyAmount.removeClassName(appStyle.hidden());
+				if(value){
 					historyClear.removeClassName(appStyle.hidden());
 					history.setValue(true);
 				} else {
-					historyAmount.addClassName(appStyle.hidden());
 					historyClear.addClassName(appStyle.hidden());
 					history.setValue(false);
 				}
@@ -72,20 +67,6 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 					Log.debug("Debug value changed. Current value is: " + String.valueOf(event.getValue()));
 				}
 				listener.changeDebugValue(event.getValue());
-			}
-		});
-		historyCount.addValueChangeHandler(new ValueChangeHandler<String>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<String> event) {
-				String _v = event.getValue();
-				int value = 0;
-				if(_v != null && !_v.isEmpty()){
-					value = Integer.parseInt(_v);
-				}
-				if(RestClient.isDebug()){
-					Log.debug("History amount value changed. Current value is: " + _v);
-				}
-				listener.changeHistoryAmmount(value);
 			}
 		});
 	}
@@ -108,10 +89,8 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	@Override
 	public void setHistoryEnabled(boolean historyEnabled) {
 		if(historyEnabled){
-			historyAmount.removeClassName(appStyle.hidden());
 			historyClear.removeClassName(appStyle.hidden());
-		} else {
-			historyAmount.addClassName(appStyle.hidden());
+		} else {			
 			historyClear.addClassName(appStyle.hidden());
 		}
 		history.setValue(historyEnabled);
@@ -120,20 +99,6 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	@Override
 	public boolean isHistoryEnabled() {
 		return history.getValue();
-	}
-
-	@Override
-	public void setHistoryLimit(int historyLimit) {
-		historyCount.setValue(String.valueOf(historyLimit));
-		
-	}
-
-	@Override
-	public int getHistoryLimit() {
-		try{
-			return Integer.parseInt(historyCount.getValue());
-		} catch(Exception e){}
-		return 0;
 	}
 	
 	@UiHandler("clearHistory")

@@ -24,9 +24,15 @@ public class LocalStorageArea implements StorageArea {
 	 */
 	public static final int QUOTA_BYTES = 5242880;
 	
-	LocalStorageAreaImpl impl = GWT.create(LocalStorageAreaImpl.class);
+	final StorageAreaImpl impl;
 	
-	protected LocalStorageArea(){}
+	protected LocalStorageArea(boolean isAvailable){
+		if(isAvailable){
+			impl = GWT.create(LocalStorageAreaImpl.class);
+		} else {
+			impl = GWT.create(LocalStorageAreaWebImpl.class);
+		}
+	}
 
 	@Override
 	public void getBytesInUse(String key, StorageUseCallback callback) {

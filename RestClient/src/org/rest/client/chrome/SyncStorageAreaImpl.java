@@ -12,10 +12,11 @@ import com.google.gwt.core.client.JavaScriptObject;
  * @author jarrod
  * 
  */
-public class SyncStorageAreaImpl {
+public class SyncStorageAreaImpl implements StorageAreaImpl {
 	
 	private SyncStorageAreaImpl(){}
 	
+	@Override
 	public final native void getBytesInUse(String[] keys, StorageUseCallback callback) /*-{
 		chrome.storage.sync.getBytesInUse(keys, $entry(function(bytesInUse){
 			if(!bytesInUse && bytesInUse != 0){
@@ -26,26 +27,28 @@ public class SyncStorageAreaImpl {
 		}));
 	}-*/;
 
-	
+	@Override
 	public final native void clear(StorageSimpleCallback callback) /*-{
 		chrome.storage.sync.clear($entry(function(){
 			callback.@org.rest.client.chrome.StorageArea.StorageSimpleCallback::onDone()();
 		}));
 	}-*/;
-
+	
+	@Override
 	public final native void set(JavaScriptObject data, StorageSimpleCallback callback) /*-{
 		chrome.storage.sync.set(data, $entry(function(){
 			callback.@org.rest.client.chrome.StorageArea.StorageSimpleCallback::onDone()();
 		}));
 	}-*/;
-
+	
+	@Override
 	public final native void remove(String[] keys, StorageSimpleCallback callback) /*-{
 		chrome.storage.sync.remove(data, $entry(function(){
 			callback.@org.rest.client.chrome.StorageArea.StorageSimpleCallback::onDone()();
 		}));
 	}-*/;
 	
-	
+	@Override
 	public final native void get(JavaScriptObject keysWithDefaults,
 			StorageItemsCallback callback) /*-{
 		chrome.storage.sync.get(keysWithDefaults, $entry(function(items){

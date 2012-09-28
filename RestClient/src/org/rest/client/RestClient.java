@@ -19,8 +19,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.rest.client.chrome.Storage.StorageChangeHandler;
+import org.rest.client.chrome.StorageArea.StorageItemsCallback;
 import org.rest.client.chrome.StorageChangeObject;
-import org.rest.client.chrome.StorageArea.StorageItemCallback;
+import org.rest.client.chrome.SyncStorageArea;
 import org.rest.client.event.ApplicationReadyEvent;
 import org.rest.client.event.NewProjectAvailableEvent;
 import org.rest.client.mvp.AppActivityMapper;
@@ -52,6 +53,8 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.place.shared.PlaceHistoryHandler;
@@ -120,7 +123,7 @@ public class RestClient implements EntryPoint {
 		Logger.getLogger("").addHandler(clientFactory.getErrorDialogView().getHandler());
 		Logger.getLogger("").setLevel(Level.WARNING);
 		
-		setDebug();
+		setSyncData();
 		
 		final EventBus eventBus = clientFactory.getEventBus();
 		final PlaceController placeController = clientFactory.getPlaceController();
@@ -179,51 +182,9 @@ public class RestClient implements EntryPoint {
 		});
 	}
 	
+	
+	
 	private static Boolean appDebug = null;
-	
-	
-	private static void setDebug(){
-		org.rest.client.chrome.Storage chromeStore = org.rest.client.chrome.Storage.getStorageIfAvailable();
-		if(chromeStore != null){
-			chromeStore.getSync().get(LocalStore.DEBUG_KEY, new StorageItemCallback() {
-				@Override
-				public void onResult(String data) {
-					if(data != null && data.equals("true")){
-						appDebug = true;
-					} else {
-						appDebug = false;
-					}
-				}
-				@Override
-				public void onError(String message) {
-					appDebug = false;
-				}
-			});
-			
-			chromeStore.addChangeHandler(new StorageChangeHandler() {
-				@Override
-				public void onChange(StorageChangeObject data, String areaName) {
-					if(areaName.equals(org.rest.client.chrome.Storage.SYNC)){
-						setDebug();
-					}
-				}
-			});
-			
-			return;
-		}
-		Storage store = Storage.getLocalStorageIfSupported();
-		if(store == null){
-			appDebug = true;
-		} else {
-			String result = store.getItem(LocalStore.DEBUG_KEY);
-			if(result != null && result.equals("true")){
-				appDebug = true;
-			} else {
-				appDebug = false;
-			}
-		}
-	}
-	
 	/**
 	 * 
 	 * @return true if debug output is enabled, false otherwise
@@ -261,6 +222,85 @@ public class RestClient implements EntryPoint {
 		appHistoryEnabled = historyEnabled;
 	}
 
+	/**
+	 * Sets synch data from chrome.storage.sync API
+	 */
+	private static void setSyncData(){
+		final Storage store = Storage.getLocalStorageIfSupported();
+		org.rest.client.chrome.Storage chromeStore = org.rest.client.chrome.Storage.getStorage();
+		
+		//first, restore local value, for quick access
+		String debugValue = store.getItem(LocalStore.DEBUG_KEY);
+		String historyValue = store.getItem(LocalStore.HISTORY_KEY);
+		if(debugValue != null && debugValue.equals("true")){
+			appDebug = true;
+		} else {
+			appDebug = false;
+		}
+		if(historyValue == null || historyValue.equals("true")){
+			appHistoryEnabled = true;
+		} else {
+			appHistoryEnabled = false;
+		}
+		
+		
+		//then check sync value
+		SyncStorageArea sync = chromeStore.getSync();
+		JSONObject query = new JSONObject();
+		query.put(LocalStore.DEBUG_KEY, new JSONString("false"));
+		query.put(LocalStore.HISTORY_KEY, new JSONString("true"));
+		sync.get(query.getJavaScriptObject(), new StorageItemsCallback() {
+			@Override
+			public void onResult(JSONObject data) {
+				if(data == null){
+					return;
+				}
+				if(data.containsKey(LocalStore.DEBUG_KEY)){
+					JSONString _debugValue = data.get(LocalStore.DEBUG_KEY).isString();
+					if(_debugValue != null){
+						if(_debugValue.stringValue().equals("true")){
+							appDebug = true;
+							store.setItem(LocalStore.DEBUG_KEY, "true");
+						} else {
+							appDebug = false;
+							store.setItem(LocalStore.DEBUG_KEY, "false");
+						}
+					}
+				}
+				if(data.containsKey(LocalStore.HISTORY_KEY)){
+					JSONString _historyValue = data.get(LocalStore.HISTORY_KEY).isString();
+					if(_historyValue != null){
+						if(_historyValue.stringValue().equals("true")){
+							appHistoryEnabled = true;
+							store.setItem(LocalStore.HISTORY_KEY, "true");
+						} else {
+							appHistoryEnabled = false;
+							store.setItem(LocalStore.HISTORY_KEY, "false");
+						}
+					}
+				}
+			}
+			
+			@Override
+			public void onError(String message) {
+				
+			}
+		});
+		
+		chromeStore.addChangeHandler(new StorageChangeHandler() {
+			@Override
+			public void onChange(StorageChangeObject data, String areaName) {
+				if(areaName.equals(org.rest.client.chrome.Storage.SYNC)){
+					setSyncData();
+				}
+			}
+		});
+	}
+	
+	
+	
+	
+	
 	/**
 	 * Get request data from current form. If current view is not request view
 	 * it will get data from storage, from latest request.

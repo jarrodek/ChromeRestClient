@@ -35,10 +35,6 @@ public class LocalStore extends LocalStorageAdapter {
 	 * Key for history list enabled value
 	 */
 	public static final String HISTORY_KEY = "HISTORY_ENABLED";
-	/**
-	 * Key for amount of history list
-	 */
-	public static final String HISTORY_AMOUNT = "HISTORY_AMOUNT";
 	
 	public static final String JSON_HEADERS_KEY = "JSONHEADERS";
 	public static final String SHORTCUTS_VALUES = "SHORTCUTS";

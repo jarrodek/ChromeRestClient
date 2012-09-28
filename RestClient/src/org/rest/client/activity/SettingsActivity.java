@@ -17,15 +17,20 @@ package org.rest.client.activity;
 
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
+import org.rest.client.chrome.LocalStorageArea;
+import org.rest.client.chrome.Storage;
+import org.rest.client.chrome.StorageArea.StorageSimpleCallback;
+import org.rest.client.chrome.SyncStorageArea;
 import org.rest.client.place.SettingsPlace;
 import org.rest.client.request.RequestsHistory;
-import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.LocalStore;
 import org.rest.client.ui.SettingsView;
 import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -45,11 +50,17 @@ public class SettingsActivity extends AppActivity implements
 	@SuppressWarnings("unused")
 	private EventBus eventBus;
 	
-	LocalStore localStore;
+	final Storage store = Storage.getStorage();
+	final LocalStorageArea localStorage;
+	final SyncStorageArea syncStorage;
+	String latestError = null;
 
 	public SettingsActivity(SettingsPlace place, ClientFactory clientFactory) {
 		super(clientFactory);
 		this.place = place;
+		latestError = store.getLastError();
+		localStorage = store.getLocal();
+		syncStorage = store.getSync();
 	}
 
 	@Override
@@ -61,80 +72,22 @@ public class SettingsActivity extends AppActivity implements
 		view.setPresenter(this);
 		panel.setWidget(view.asWidget());
 		
-		
-		localStore = clientFactory.getLocalStore();
-		localStore.open(new StoreResultCallback<Boolean>() {
-			@Override
-			public void onSuccess(Boolean result) {
-				if(!result) return;
-				
-				updateView(view);
-			}
-			
-			@Override
-			public void onError(Throwable e) {
-				
-			}
-		});
-		
+		updateView(view);
 	}
 
 	protected void updateView(final SettingsView view) {
-		localStore.getByKey(LocalStore.DEBUG_KEY, new StoreResultCallback<String>() {
-			@Override
-			public void onSuccess(String result) {
-				if(result != null && result.equals("true")){
-					view.setDebugEnabled(true);
-				} else {
-					view.setDebugEnabled(false);
-				}
-			}
-			@Override
-			public void onError(Throwable e) {
-				view.setDebugEnabled(false);
-			}
-		});
-		localStore.getByKey(LocalStore.HISTORY_KEY, new StoreResultCallback<String>() {
-			@Override
-			public void onSuccess(String result) {
-				if(result == null || result.isEmpty()){
-					result = "true";
-				}
-				if(result.equals("true")){
-					view.setHistoryEnabled(true);
-				} else {
-					view.setHistoryEnabled(false);
-				}
-			}
-			@Override
-			public void onError(Throwable e) {
-				view.setHistoryEnabled(false);
-			}
-		});
-		localStore.getByKey(LocalStore.HISTORY_AMOUNT, new StoreResultCallback<String>() {
-			@Override
-			public void onSuccess(String result) {
-				if(result == null || result.isEmpty()){
-					result = "500";
-					localStore.put(result, LocalStore.HISTORY_AMOUNT, new StoreResultCallback<String>() {
-						@Override
-						public void onSuccess(String result) {}
-						@Override
-						public void onError(Throwable e) {}
-					});
-				}
-				int resultIntValue = 500;
-				try{
-					resultIntValue = Integer.parseInt(result);
-				} catch( NumberFormatException e ){}
-				
-				view.setHistoryLimit(resultIntValue);
-			}
-			@Override
-			public void onError(Throwable e) {
-				view.setHistoryLimit(0);
-			}
-		});
+		if(RestClient.isDebug()){
+			view.setDebugEnabled(true);
+		} else {
+			view.setDebugEnabled(false);
+		}
+		
+		if(RestClient.isHistoryEabled()){
+			view.setHistoryEnabled(true);
+		} else {
+			view.setHistoryEnabled(false);
+		}
+		
 	}
 
 	@Override
@@ -153,18 +106,31 @@ public class SettingsActivity extends AppActivity implements
 	}
 	
 	
-	private void saveSetting(String key, String value){
-		localStore.put(value, key, new StoreResultCallback<String>() {
+	private void saveSetting(final String key, final String value){
+		
+		JSONObject setObj = new JSONObject();
+		setObj.put(key, new JSONString(value));
+		syncStorage.set(setObj.getJavaScriptObject(), new StorageSimpleCallback() {
 			@Override
-			public void onSuccess(String result) {
+			public void onDone() {
+				String error = store.getLastError();
+				if(error != latestError){
+					latestError = error;
+					StatusNotification.notify("Unable to save value in local storage :( " + error, StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM, true);
+					if(RestClient.isDebug()){
+						Log.debug("Unable to save "+key+" value in sync storage.");
+					}
+					return;
+				}
 				StatusNotification.notify("Settings saved.", StatusNotification.TYPE_NORMAL, StatusNotification.TIME_ULTRA_SHORT, true);
-			}
-			
-			@Override
-			public void onError(Throwable e) {
-				StatusNotification.notify("Unable to save value in local storage :(", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM, true);
-				if(RestClient.isDebug()){
-					Log.debug("Unable to save DEBUG value in local storage.", e);
+				if(key.equals(LocalStore.DEBUG_KEY)){
+					RestClient.setDebug(value.equals("true") ? true : false);
+				} else if(key.equals(LocalStore.HISTORY_KEY)){
+					if(value.equals("false")){
+						clientFactory.getMenuView().hideItem(2);
+					} else {
+						clientFactory.getMenuView().showItem(2);
+					}
 				}
 			}
 		});
@@ -174,25 +140,10 @@ public class SettingsActivity extends AppActivity implements
 	@Override
 	public void changeDebugValue(boolean newValue) {
 		saveSetting(LocalStore.DEBUG_KEY, String.valueOf(newValue));
-		RestClient.setDebug(newValue);
 	}
 
 	@Override
 	public void changeHistoryValue(boolean newValue) {
 		saveSetting(LocalStore.HISTORY_KEY, String.valueOf(newValue));
-		
-		if(!newValue){
-			Log.debug("Hide history");
-			clientFactory.getMenuView().hideItem(2);
-		} else {
-			clientFactory.getMenuView().showItem(2);
-		}
-	}
-
-	
-
-	@Override
-	public void changeHistoryAmmount(int newValue) {
-		saveSetting(LocalStore.HISTORY_AMOUNT, String.valueOf(newValue));
 	}
 }

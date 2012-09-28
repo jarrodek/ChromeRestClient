@@ -35,7 +35,7 @@
 			margin-bottom: 7px;
 		}
 		
-		.historyClear,.historyAmount {
+		.historyClear {
 			display: inline-block;
 			margin-left: 20px;
 		}
@@ -62,11 +62,6 @@
 			<p>History enabled</p>
 			<g:CheckBox ui:field="history" value="true"
 				text="Enable requests history list"></g:CheckBox>
-			<div class="{appResources.appCss.hidden} {style.historyAmount}" ui:field="historyAmount">
-				Remember last
-				<h5:HTML5InputNumber ui:field="historyCount"></h5:HTML5InputNumber>
-				requests
-			</div>
 			<div class="{appResources.appCss.hidden} {style.historyClear}" ui:field="historyClear">
 				<g:Button styleName="{appResources.appCss.button}" ui:field="clearHistory" text="Clear history"></g:Button>
 			</div>

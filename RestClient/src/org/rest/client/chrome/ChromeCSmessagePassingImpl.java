@@ -58,7 +58,7 @@ public class ChromeCSmessagePassingImpl implements ChromeMessagePassing {
 				return;
 			if (!(e.data && e.data.payload))
 				return;
-			handler.@org.rest.client.chrome.ChromeMessageReceiver::onMessage(Ljava/lang/String;Ljava/lang/String;)(e.data.payload,e.data.data);
+			handler.@org.rest.client.chrome.ChromeMessageReceiver::onMessage(Ljava/lang/String;Ljava/lang/String;)(e.data.payload,e.data.data+"");
 		});
 
 		$wnd.addEventListener("message", rec, false);

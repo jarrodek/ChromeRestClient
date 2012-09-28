@@ -41,7 +41,6 @@ public interface SettingsView extends IsWidget {
 		
 		void changeDebugValue(boolean newValue);
 		void changeHistoryValue(boolean newValue);
-		void changeHistoryAmmount(int newValue);
 	}
 	/**
 	 * Sets presenter for this view
@@ -52,6 +51,4 @@ public interface SettingsView extends IsWidget {
 	boolean isDebugEnabled();
 	void setHistoryEnabled(boolean historyEnabled);
 	boolean isHistoryEnabled();
-	void setHistoryLimit(int historyLimit);
-	int getHistoryLimit();
 }

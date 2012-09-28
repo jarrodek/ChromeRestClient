@@ -76,9 +76,16 @@ public class SyncStorageArea implements StorageArea {
 	 */
 	public static final int QUOTA_BYTES_PER_ITEM = 4096;
 	
-	protected SyncStorageArea(){}
+	final StorageAreaImpl impl;
+	protected SyncStorageArea(boolean isAvailable){
+		if(isAvailable){
+			impl = GWT.create(SyncStorageAreaImpl.class);
+		} else {
+			impl = GWT.create(SyncStorageAreaWebImpl.class);
+		}
+	}
 	
-	SyncStorageAreaImpl impl = GWT.create(SyncStorageAreaImpl.class);
+	
 	
 	@Override
 	public void getBytesInUse(String key, StorageUseCallback callback) {
