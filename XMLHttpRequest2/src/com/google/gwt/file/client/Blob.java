@@ -19,8 +19,8 @@ public class Blob extends JavaScriptObject {
 	protected Blob() {
 	}
 
-	public final native Double getSize()/*-{
-		return this.size;
+	public final native double getSize()/*-{
+		return this.size || 0;
 	}-*/;
 
 	public final native String getType()/*-{
