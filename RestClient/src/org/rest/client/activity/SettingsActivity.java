@@ -17,10 +17,12 @@ package org.rest.client.activity;
 
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
+import org.rest.client.SyncAdapter;
 import org.rest.client.chrome.LocalStorageArea;
 import org.rest.client.chrome.Storage;
 import org.rest.client.chrome.StorageArea.StorageSimpleCallback;
 import org.rest.client.chrome.SyncStorageArea;
+import org.rest.client.event.NotificationsStateChangeEvent;
 import org.rest.client.place.SettingsPlace;
 import org.rest.client.request.RequestsHistory;
 import org.rest.client.storage.store.LocalStore;
@@ -46,8 +48,6 @@ public class SettingsActivity extends AppActivity implements
 
 	
 	@SuppressWarnings("unused")
-	final private SettingsPlace place;
-	@SuppressWarnings("unused")
 	private EventBus eventBus;
 	
 	final Storage store = Storage.getStorage();
@@ -57,7 +57,6 @@ public class SettingsActivity extends AppActivity implements
 
 	public SettingsActivity(SettingsPlace place, ClientFactory clientFactory) {
 		super(clientFactory);
-		this.place = place;
 		latestError = store.getLastError();
 		localStorage = store.getLocal();
 		syncStorage = store.getSync();
@@ -88,6 +87,11 @@ public class SettingsActivity extends AppActivity implements
 			view.setHistoryEnabled(false);
 		}
 		
+		if(SyncAdapter.isNotifications()){
+			view.setNotificationsEnabled(true);
+		} else {
+			view.setNotificationsEnabled(false);
+		}
 	}
 
 	@Override
@@ -131,6 +135,8 @@ public class SettingsActivity extends AppActivity implements
 					} else {
 						clientFactory.getMenuView().showItem(2);
 					}
+				} else if(key.equals(LocalStore.NOTIFICATIONS_ENABLED_KEY)){
+					clientFactory.getEventBus().fireEvent(new NotificationsStateChangeEvent(value.equals("true") ? true : false));
 				}
 			}
 		});
@@ -145,5 +151,10 @@ public class SettingsActivity extends AppActivity implements
 	@Override
 	public void changeHistoryValue(boolean newValue) {
 		saveSetting(LocalStore.HISTORY_KEY, String.valueOf(newValue));
+	}
+
+	@Override
+	public void changeNotificationsValue(boolean notificationsEnabled) {
+		saveSetting(LocalStore.NOTIFICATIONS_ENABLED_KEY, String.valueOf(notificationsEnabled));
 	}
 }

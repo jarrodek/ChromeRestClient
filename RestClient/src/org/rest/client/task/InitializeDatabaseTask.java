@@ -25,6 +25,7 @@ public class InitializeDatabaseTask implements LoadTask {
 	private int dbOpened = 0;
 	@SuppressWarnings({ "rawtypes" })
 	ArrayList<WebSqlAdapter> databases = new ArrayList<WebSqlAdapter>();
+	LoaderWidget loaderWidget;
 
 	@SuppressWarnings({ "rawtypes" })
 	public InitializeDatabaseTask() {
@@ -47,6 +48,9 @@ public class InitializeDatabaseTask implements LoadTask {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void run(final TasksCallback callback, final boolean lastRun) {
+		if(loaderWidget != null){
+			loaderWidget.setText("Initialize databases");
+		}
 		final int dbCount = databases.size();
 		
 		if(dbCount == 0){
@@ -104,8 +108,7 @@ public class InitializeDatabaseTask implements LoadTask {
 
 	@Override
 	public void setLoader(LoaderWidget loaderWidget) {
-		// TODO Auto-generated method stub
-		
+		this.loaderWidget = loaderWidget;
 	}
 
 }

@@ -36,9 +36,12 @@ public class LocalStore extends LocalStorageAdapter {
 	 */
 	public static final String HISTORY_KEY = "HISTORY_ENABLED";
 	
+	public static final String NOTIFICATIONS_ENABLED_KEY = "NOTIFICATIONS_ENABLED";
+	
 	public static final String JSON_HEADERS_KEY = "JSONHEADERS";
 	public static final String SHORTCUTS_VALUES = "SHORTCUTS";
 	
+	public static final String LATEST_MESSAGE_KEY = "LATESTMSG";
 	public LocalStore() {}
 
 }

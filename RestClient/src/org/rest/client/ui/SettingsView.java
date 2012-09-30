@@ -41,6 +41,7 @@ public interface SettingsView extends IsWidget {
 		
 		void changeDebugValue(boolean newValue);
 		void changeHistoryValue(boolean newValue);
+		void changeNotificationsValue(boolean notificationsEnabled);
 	}
 	/**
 	 * Sets presenter for this view
@@ -51,4 +52,6 @@ public interface SettingsView extends IsWidget {
 	boolean isDebugEnabled();
 	void setHistoryEnabled(boolean historyEnabled);
 	boolean isHistoryEnabled();
+	void setNotificationsEnabled(boolean notificationsEnabled);
+	boolean isNotificationsEnabled();
 }

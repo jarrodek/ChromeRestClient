@@ -12,7 +12,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -28,7 +27,7 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	interface SettingsViewImplUiBinder extends UiBinder<Widget, SettingsViewImpl> {
 	}
 	
-	
+	@UiField CheckBox notifications;
 	@UiField CheckBox debug;
 	@UiField CheckBox history;
 	@UiField DivElement historyClear;
@@ -37,38 +36,7 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	Presenter listener = null;
 	
 	public SettingsViewImpl(){
-		
 		initWidget(uiBinder.createAndBindUi(this));
-		
-		history.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				boolean value = event.getValue();
-				
-				if(RestClient.isDebug()){
-					Log.debug("History value changed. Current value is: " + value);
-				}
-				if(value){
-					historyClear.removeClassName(appStyle.hidden());
-					history.setValue(true);
-				} else {
-					historyClear.addClassName(appStyle.hidden());
-					history.setValue(false);
-				}
-				listener.changeHistoryValue(value);
-			}
-		});
-		
-		
-		debug.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				if(RestClient.isDebug()){
-					Log.debug("Debug value changed. Current value is: " + String.valueOf(event.getValue()));
-				}
-				listener.changeDebugValue(event.getValue());
-			}
-		});
 	}
 	
 	@Override
@@ -101,6 +69,49 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 		return history.getValue();
 	}
 	
+	@Override
+	public void setNotificationsEnabled(boolean notificationsEnabled) {
+		notifications.setValue(notificationsEnabled);
+	}
+
+	@Override
+	public boolean isNotificationsEnabled() {
+		return notifications.getValue().booleanValue();
+	}
+	
+	@UiHandler("history")
+	void onHistoryChange(ValueChangeEvent<Boolean> event){
+		boolean value = event.getValue();
+		
+		if(RestClient.isDebug()){
+			Log.debug("History value changed. Current value is: " + value);
+		}
+		if(value){
+			historyClear.removeClassName(appStyle.hidden());
+			history.setValue(true);
+		} else {
+			historyClear.addClassName(appStyle.hidden());
+			history.setValue(false);
+		}
+		listener.changeHistoryValue(value);
+	}
+	
+	@UiHandler("debug")
+	void onDebugChange(ValueChangeEvent<Boolean> event){
+		if(RestClient.isDebug()){
+			Log.debug("Debug value changed. Current value is: " + String.valueOf(event.getValue()));
+		}
+		listener.changeDebugValue(event.getValue());
+	}
+	
+	@UiHandler("notifications")
+	void onNotificationsChange(ValueChangeEvent<Boolean> event){
+		if(RestClient.isDebug()){
+			Log.debug("Notifications value changed. Current value is: " + String.valueOf(event.getValue()));
+		}
+		listener.changeNotificationsValue(event.getValue());
+	}
+	
 	@UiHandler("clearHistory")
 	void onClearHistory(ClickEvent e){
 		listener.clearHistory();
@@ -114,4 +125,6 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	void onImportExportEdit(ClickEvent e){
 		listener.goTo(new ImportExportPlace("default"));
 	}
+
+	
 }

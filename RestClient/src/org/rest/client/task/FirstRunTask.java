@@ -71,12 +71,16 @@ public class FirstRunTask implements LoadTask {
 	@Override
 	public void run(final TasksCallback callback, final boolean lastRun) {
 		
+		
 		Storage storage = Storage.getLocalStorageIfSupported();
 		String firstRunFlag = storage.getItem(FIRST_RUN_FLAG);
 		if(firstRunFlag != null){
 			callback.onInnerTaskFinished(getTasksCount());
 			callback.onSuccess();
 			return;
+		}
+		if(loaderWidget != null){
+			loaderWidget.setText("Installing application...");
 		}
 		this.callback = callback;
 		this.lastRun = lastRun;

@@ -117,6 +117,7 @@ body {
 <%
     UserService userService = UserServiceFactory.getUserService();
 	boolean isUser = userService.isUserLoggedIn();
+	boolean admin = userService.isUserAdmin();
 	
 	String infoMessage = null;
 	String infoCode = request.getParameter("i");
@@ -136,6 +137,10 @@ body {
 				<% if(isUser){ %>
 				<li page="listing" class="navBarItem" role="tab"
 					tabindex="-1" aria-selected="false" onclick="document.location.href='listing.jsp'">My data</li>
+				<% } %>
+				<% if(admin){ %>
+				<li page="admin" class="navBarItem" role="tab"
+					tabindex="-1" aria-selected="false" onclick="document.location.href='admin.jsp'">Admin</li>
 				<% } %>
 				<li class="navBarItem">
 					<g:plusone href="https://chrome.google.com/webstore/detail/hgmloofddffdnphfgcellkdfbfbjeloo"></g:plusone>

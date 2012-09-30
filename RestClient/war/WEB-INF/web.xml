@@ -4,7 +4,7 @@
               http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	version="2.5" xmlns="http://java.sun.com/xml/ns/javaee">
 
-	<!-- Servlets -->
+	<!-- Test servlet -->
 	<servlet>
 		<servlet-name>TestDataServlet</servlet-name>
 		<servlet-class>org.rest.server.TestDataServlet</servlet-class>
@@ -15,14 +15,32 @@
 		<url-pattern>/test</url-pattern>
 	</servlet-mapping>
 	
-	
-	
-	<!-- Save/Restore data servlet -->
+	<!-- Admin servlet -->
+	<servlet>
+		<servlet-name>AdminServlet</servlet-name>
+		<servlet-class>org.rest.server.AdminServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>AdminServlet</servlet-name>
+		<url-pattern>/admin</url-pattern>
+	</servlet-mapping>
+
+	<!-- Messages servlet -->
+	<servlet>
+		<servlet-name>MessagesServlet</servlet-name>
+		<servlet-class>org.rest.server.MessagesServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>MessagesServlet</servlet-name>
+		<url-pattern>/messages/*</url-pattern>
+	</servlet-mapping>
+
+	<!-- Extension entry point servlet -->
 	<servlet>
 		<servlet-name>extensionEntry</servlet-name>
 		<servlet-class>org.rest.server.ExtensionServlet</servlet-class>
 	</servlet>
-
 	<servlet-mapping>
 		<servlet-name>extensionEntry</servlet-name>
 		<url-pattern>/ext-channel</url-pattern>
@@ -31,6 +49,7 @@
 		<servlet-name>extensionEntry</servlet-name>
 		<url-pattern>/ext-channel/*</url-pattern>
 	</servlet-mapping>
+	
 	<!-- Ping servlet -->
 	<servlet>
 		<servlet-name>pingEntry</servlet-name>
@@ -41,38 +60,54 @@
 		<servlet-name>pingEntry</servlet-name>
 		<url-pattern>/ping/*</url-pattern>
 	</servlet-mapping>
-	
+
 	<!-- Auth servlet -->
 	<servlet>
 		<servlet-name>AuthServlet</servlet-name>
 		<servlet-class>org.rest.server.AuthServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-        <servlet-name>AuthServlet</servlet-name>
-        <url-pattern>/auth/signin</url-pattern>
-    </servlet-mapping>
+		<servlet-name>AuthServlet</servlet-name>
+		<url-pattern>/auth/signin</url-pattern>
+	</servlet-mapping>
+	
+	<!-- User data -->
 	<servlet>
 		<servlet-name>UserDataServlet</servlet-name>
 		<servlet-class>org.rest.server.UserDataServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-        <servlet-name>UserDataServlet</servlet-name>
-        <url-pattern>/udata/*</url-pattern>
-    </servlet-mapping>
+		<servlet-name>UserDataServlet</servlet-name>
+		<url-pattern>/udata/*</url-pattern>
+	</servlet-mapping>
+
 	
-	
-	<filter>
-        <filter-name>extensionOrginFilter</filter-name>
-        <filter-class>org.rest.server.ExtensionServletFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>extensionOrginFilter</filter-name>
-        <url-pattern>/ext-channel/*</url-pattern>
-        <url-pattern>/udata/*</url-pattern>
-        <url-pattern>/ping/*</url-pattern>
-    </filter-mapping>
-    
-    
+	<security-constraint>
+        <web-resource-collection>
+        	<url-pattern>/admin</url-pattern>
+            <url-pattern>/admin/*</url-pattern>
+            <url-pattern>/admin.jsp</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>admin</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+
+	<!-- <filter> -->
+	<!-- <filter-name>extensionOrginFilter</filter-name> -->
+	<!-- <filter-class>org.rest.server.ExtensionServletFilter</filter-class> -->
+	<!-- </filter> -->
+	<!-- <filter-mapping> -->
+	<!-- <filter-name>extensionOrginFilter</filter-name> -->
+	<!-- <url-pattern>/ext-channel/*</url-pattern> -->
+	<!-- <url-pattern>/udata/*</url-pattern> -->
+	<!-- <url-pattern>/ping/*</url-pattern> -->
+	<!-- </filter-mapping> -->
+
+
 	<welcome-file-list>
 		<welcome-file>RestClient.html</welcome-file>
 	</welcome-file-list>

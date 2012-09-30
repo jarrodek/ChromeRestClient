@@ -70,7 +70,6 @@
 			<p>Developer notifications</p>
 			<g:CheckBox ui:field="notifications" value="false"
 				text="Enable notifications from developer (very few) about application updates"></g:CheckBox>
-			<p>It will require additional permissions: notification</p>
 		</section>
 		<section class="{style.optionsSection}">
 			<p>Shortcuts</p>

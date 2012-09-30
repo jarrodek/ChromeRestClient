@@ -39,7 +39,7 @@ public class PingServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-System.out.println("sssssssss");
+		
 		HttpServletResponse response = (HttpServletResponse) resp;
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -51,7 +51,7 @@ System.out.println("sssssssss");
 		if(path == null || path.equals("") || path.equals("/")){
 			resp.setStatus(400);
 			resp.getWriter().print(
-					gson.toJson(new ResponseError("Unknown.")));
+					gson.toJson(new ResponseError("Unknown path.")));
 			return;
 		}
 		

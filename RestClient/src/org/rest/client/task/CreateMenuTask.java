@@ -5,9 +5,13 @@ import org.rest.client.UserMenuHandler;
 import org.rest.client.task.ui.LoaderWidget;
 
 public class CreateMenuTask implements LoadTask {
-
+	
+	LoaderWidget loaderWidget;
 	@Override
 	public void run(TasksCallback callback, boolean lastRun) {
+		if(loaderWidget != null){
+			loaderWidget.setText("Initialize menu");
+		}
 		new UserMenuHandler(RestClient.getClientFactory());
 		
 		callback.onInnerTaskFinished(1);
@@ -21,8 +25,7 @@ public class CreateMenuTask implements LoadTask {
 
 	@Override
 	public void setLoader(LoaderWidget loaderWidget) {
-		// TODO Auto-generated method stub
-		
+		this.loaderWidget = loaderWidget;
 	}
 
 }
