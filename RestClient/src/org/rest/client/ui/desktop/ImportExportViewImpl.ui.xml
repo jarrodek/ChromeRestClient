@@ -41,6 +41,10 @@
 			display: none;
 		}
 		.shareLink{}
+		
+		.downloadFileLink{margin-top: 20px;font-size: large;}
+		.importPrevControls{margin-top: 40px;}
+		.importPrevTitle{font-size: large;margin-right: 30px;}
 	</ui:style>
 	<g:HTMLPanel>
 		<h1 class="{style.title}">Import/Export options</h1>
@@ -84,17 +88,24 @@
 		</div>
 		
 		<div class="fileExport">
-			<h3>Export to file</h3>
-			<g:Button styleName="{appResources.appCss.button}" ui:field="fileExport" text="Create a file"></g:Button>
-			<g:Anchor ui:field="fileDownload" visible="false" text="Download file"></g:Anchor>
+			<h3>Import/Export to file</h3>
+			<div>
+				<g:Button styleName="{appResources.appCss.button}" ui:field="fileExport" text="Generate a file"></g:Button>
+				<h5:HTML5FileUpload ui:field="fileImport" multiple="false"></h5:HTML5FileUpload>
+			</div>
+			<div class="{style.downloadFileLink}">
+				<g:Anchor ui:field="fileDownload" visible="false" text="Download file"></g:Anchor>
+			</div>
 		</div>
 		
 		<div class="fileImport">
-			<h3>Import file</h3>
-			<h5:HTML5FileUpload ui:field="fileImport" multiple="false"></h5:HTML5FileUpload>
 			<g:InlineLabel ui:field="importFileLog"></g:InlineLabel>
-			<g:HTMLPanel ui:field="importPreview"></g:HTMLPanel>
+			<g:HTMLPanel ui:field="importPreview" visible="false">
+				<div class="{style.importPrevControls}">
+					<span class="{style.importPrevTitle}">Import preview</span>
+					<g:Button styleName="{appResources.appCss.button}" ui:field="saveImportedData" text="Save imported data"></g:Button>
+				</div>
+			</g:HTMLPanel>
 		</div>
-		
 	</g:HTMLPanel>
 </ui:UiBinder> 

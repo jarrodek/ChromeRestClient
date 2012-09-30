@@ -54,16 +54,16 @@ public abstract class DatabaseSuggestOracle extends SuggestOracle {
 	 *            The callback.
 	 */
 	void returnSuggestions(Callback callback) {
-		
-		if(recentClientRequest == null){
+
+		if (recentClientRequest == null) {
 			callback.onSuggestionsReady(null, null);
 			return;
 		}
-		
-		final String mostRecentQuery = recentClientRequest.getQuery();
 
 		// check if there is earlier search result
 		if (recentDatabaseResult != null) {
+			final String mostRecentQuery = recentClientRequest.getQuery();
+			
 			// if current query is equal to latest query do not perform new
 			// search, just display latest results
 			// TODO: try to give some expire time to latest request. Eg: 1-2
@@ -79,25 +79,31 @@ public abstract class DatabaseSuggestOracle extends SuggestOracle {
 				// latest query (from starting) just filter latest results and
 				// display it
 				//
-			} else if (//recentDatabaseResult.isComplete() && 
-					mostRecentQuery.startsWith(recentDatabaseResult
-							.getQuery())) {
-				Response resp = new Response(recentDatabaseResult.filter(
-						recentClientRequest.getQuery(),
-						recentClientRequest.getLimit()));
-				callback.onSuggestionsReady(recentClientRequest, resp);
+				// NOTE:
+				// For chrome history API even if earlier query starts with
+				// current query results may change.
+				// It should omit cache and perform search again 
+				//
+//			} else if (recentDatabaseResult.isComplete()
+//					&& mostRecentQuery.startsWith(recentDatabaseResult
+//							.getQuery())) {
+//				Response resp = new Response(recentDatabaseResult.filter(
+//						recentClientRequest.getQuery(),
+//						recentClientRequest.getLimit()));
+//				callback.onSuggestionsReady(recentClientRequest, resp);
 			} else {
-				//make query to DB
+				// make query to DB
 				makeQuery(recentClientRequest, callback);
 			}
 		} else {
-			//make query to DB
+			// make query to DB
 			makeQuery(recentClientRequest, callback);
 		}
 	}
-	
+
 	/**
 	 * Perform search in database.
+	 * 
 	 * @param request
 	 * @param callback
 	 */

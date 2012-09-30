@@ -197,6 +197,8 @@ public class TestDataServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		PrintWriter writer = resp.getWriter();
+		
+		
 		@SuppressWarnings("unchecked")
 		Enumeration<String> names = req.getParameterNames();
 		writer.println("=====PARAMS====");
@@ -204,6 +206,24 @@ public class TestDataServlet extends HttpServlet {
 			String key = names.nextElement();
 			String value = req.getParameter(key);
 			writer.println("key="+key+", value="+value);
+		}
+		writer.println("===============");
+		writer.println("Payload:");
+		writer.println("===============");
+		BufferedReader reader = req.getReader();
+		while(true){
+			String line = reader.readLine();
+			if(line == null) break;
+			writer.println(line);
+		}
+		writer.println("===============");
+		@SuppressWarnings("unchecked")
+		Enumeration<String> headersNames = req.getHeaderNames();
+		writer.println("======== HEADERS LIST ==========");
+		while(headersNames.hasMoreElements()){
+			String _hn = headersNames.nextElement();
+			String _hv = req.getHeader(_hn);
+			writer.println("Received header: " + _hn + ": " + _hv);
 		}
 		writer.println("===============");
 	}

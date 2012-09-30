@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.rest.client.RestClient;
 import org.rest.client.event.HttpMethodChangeEvent;
+import org.rest.client.event.RequestChangeEvent;
 import org.rest.client.event.RequestStartActionEvent;
 import org.rest.client.event.RequestStopEvent;
 import org.rest.client.event.UrlValueChangeEvent;
@@ -30,6 +31,7 @@ import org.rest.client.request.FilesObject;
 import org.rest.client.request.HttpContentTypeHelper;
 import org.rest.client.request.HttpMethodOptions;
 import org.rest.client.request.RequestHeadersParser;
+import org.rest.client.resources.AppCssResource;
 import org.rest.client.resources.AppResources;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
@@ -100,6 +102,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 	private List<IsHideable> hidableList = new ArrayList<IsHideable>();
 	private String currentSelectedMethod = "GET";
 	private String latestSelectedContentType = "";
+	AppCssResource appCss = AppResources.INSTANCE.appCss();
 
 	public RequestViewImpl() {
 		final EventBus eventBus = RestClient.getClientFactory().getEventBus();
@@ -161,13 +164,40 @@ public class RequestViewImpl extends Composite implements RequestView {
 		RequestStartActionEvent.register(eventBus, new RequestStartActionEvent.Handler() {
 			@Override
 			public void onStart(Date time) {
+				progressIndicator.removeStyleName(AppResources.INSTANCE.appCss().hidden());
 				sendButton.setEnabled(false);
 			}
 		});
 		RequestStopEvent.register(eventBus, new RequestStopEvent.Handler() {
 			@Override
 			public void onStop(Date time) {
+				progressIndicator.addStyleName(AppResources.INSTANCE.appCss().hidden());
+				progressIndicator.getElement().removeAttribute("value");
 				sendButton.setEnabled(true);
+			}
+		});
+		RequestChangeEvent.register(eventBus, new RequestChangeEvent.Handler() {
+			
+			@Override
+			public void onChange(RequestChangeEvent event) {
+				
+				switch(event.getChangeType()){
+				case RequestChangeEvent.UPLOAD_START:
+					progressIndicator.setMax(100);
+					progressIndicator.removeStyleName(appCss.hidden());
+					break;
+				case RequestChangeEvent.UPLOAD_PROGRESS:
+					progressIndicator.setMax((int) event.getTotal());
+					double current = event.getLoaded();
+					progressIndicator.setValue((int) current);
+					break;
+				case RequestChangeEvent.UPLOAD_END:
+					progressIndicator.getElement().removeAttribute("value");
+					break;
+				case RequestChangeEvent.DOWNLOAD_PROGRESS:
+					progressIndicator.setMax(100);
+					break;
+				}
 			}
 		});
 	}
@@ -439,6 +469,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 		projectPanel.addStyleName(AppResources.INSTANCE.appCss().hidden());
 		sendButton.setEnabled(false);
 		progressIndicator.setStyleName(AppResources.INSTANCE.appCss().hidden());
+		progressIndicator.getElement().removeAttribute("value");
 		
 		projectName.setText("");
 		endpointsContainer.clear();

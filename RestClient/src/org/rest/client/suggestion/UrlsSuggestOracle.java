@@ -3,6 +3,7 @@ package org.rest.client.suggestion;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.rest.client.RestClient;
 import org.rest.client.chrome.History;
 import org.rest.client.chrome.History.Query;
 import org.rest.client.chrome.HistoryItem;
@@ -27,7 +28,7 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 
 	@Override
 	public boolean isDisplayStringHTML() {
-		return false;
+		return true;
 	}
 
 	/**
@@ -76,13 +77,6 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 
 		final String query = request.getQuery();
 		
-		
-		History h = History.getHistoryIfSupported();
-		if(h == null){
-			chromeQueryEnd = true;
-		}
-		
-		
 		store.getByUrl("%" + query + "%", new StoreResultCallback<List<UrlRow>>() {
 			
 			@Override
@@ -98,10 +92,11 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 					if(!url.toLowerCase().startsWith(lowerQuery)){
 						continue;
 					}
-					UrlSuggestion s = new UrlSuggestion(url);
+					UrlSuggestion s = new UrlSuggestion(url, false);
 					_suggestions.add(s);
 				}
 				if(chromeQueryEnd){
+					Log.debug("chromeQueryEnd");
 					recentDatabaseResult = new DatabaseRequestResponse<UrlSuggestion>(request,
 							numberOfDatabaseSuggestions, _suggestions);
 					UrlsSuggestOracle.this.returnSuggestions(callback);
@@ -116,8 +111,41 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 			}
 		});
 		
-		// Call chrome API.
-		if(h != null){
+		Query _q = Query.create(query);
+		_q.setMaxResults(numberOfDatabaseSuggestions);
+		
+		History h = History.getHistoryIfSupported();
+		if(h == null){ 
+			// Use chrome message passing to background page
+			RestClient.getClientFactory().getChromeMessagePassing().postMessage("history.search", _q.toJSON(), new com.google.gwt.core.client.Callback<String, Throwable>() {
+				
+				@Override
+				public void onSuccess(String result) {
+					JsArray<HistoryItem> found = HistoryItem.fromString(result);
+					chromeQueryEnd = true;
+					if(found != null){
+						int cnt = found.length();
+						for(int i = 0; i<cnt; i++){
+							String url = found.get(i).getUrl();
+							if(url == null || !url.contains("://")) continue;
+							UrlSuggestion s = new UrlSuggestion(url, true);
+							_suggestions.add(s);
+						}
+					}
+					if(databaseQueryEnd){
+						recentDatabaseResult = new DatabaseRequestResponse<UrlSuggestion>(request,
+								numberOfDatabaseSuggestions, _suggestions);
+						UrlsSuggestOracle.this.returnSuggestions(callback);
+					}
+				}
+				
+				@Override
+				public void onFailure(Throwable reason) {
+					chromeQueryEnd = true;
+				}
+			});
+		} else {
+			// Call chrome API (compiled extension)
 			Query q = Query.create(query);
 			q.setMaxResults(numberOfDatabaseSuggestions);
 			h.search(q, new HistorySearchCallback() {
@@ -128,7 +156,7 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 					for(int i = 0; i<cnt; i++){
 						String url = found.get(i).getUrl();
 						if(url == null || !url.contains("://")) continue;
-						UrlSuggestion s = new UrlSuggestion(url);
+						UrlSuggestion s = new UrlSuggestion(url, true);
 						_suggestions.add(s);
 					}
 					if(databaseQueryEnd){

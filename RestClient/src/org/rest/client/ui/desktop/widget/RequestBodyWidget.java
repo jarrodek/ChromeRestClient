@@ -372,17 +372,7 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 				filesTab.setText("Files (" + allFilesCount + ")");
 				for(int i=0; i<cnt; i++){
 					File file = files.get(i);
-					
-					String sizeValue = String.valueOf(file.getSize());
-					int dotPos = sizeValue.indexOf(",");
-					if(dotPos == -1){
-						dotPos = sizeValue.indexOf(".");
-					}
-					if(dotPos > -1){
-						sizeValue = sizeValue.substring(0, dotPos);
-					}
-					
-					long sizeLong = Long.parseLong(sizeValue);
+					double sizeLong = file.getSize();
 					String fileSize = Units.swithFileSize(sizeLong);
 					
 					String html = file.getName() + " ";

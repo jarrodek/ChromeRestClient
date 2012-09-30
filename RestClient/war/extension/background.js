@@ -90,7 +90,7 @@ chrome.webRequest.onBeforeRedirect.addListener(onBeforeRedirect, requestFilter,
 		[ 'responseHeaders' ]);
 chrome.webRequest.onCompleted.addListener(onRequestCompleted, requestFilter,
 		[ 'responseHeaders' ]);
-chrome.webRequest.onErrorOccurred.addListener(onRequestError,requestFilter);
+//chrome.webRequest.onErrorOccurred.addListener(onRequestError,requestFilter);
 
 window.requestAction = function(request, callback){
 	callback = callback || new Function();
@@ -217,6 +217,23 @@ function handleInternalMessage(request,sendResponse){
 			var data = request.data ? JSON.parse(request.data) : null;
 			call[action].call(call,data,function(result){
 //				console.log("result: ", result);
+				if(typeof result == "object"){
+					sendResponse(JSON.stringify(result));
+				} else {
+					sendResponse(result+"");
+				}
+			});
+		} else if (request.payload.indexOf(".") != -1){
+//			console.log('requested action for:',request.payload,request.data);
+			var c = request.payload.split('.')
+			var call = chrome;
+			var action = c.pop();
+			for(var i = 0; i<c.length; i++){
+				call = call[c[i]];
+			}
+			var data = request.data ? JSON.parse(request.data) : null;
+			call[action].call(call,data,function(result){
+				console.log("result: ", result);
 				if(typeof result == "object"){
 					sendResponse(JSON.stringify(result));
 				} else {

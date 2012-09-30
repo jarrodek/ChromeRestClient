@@ -45,17 +45,24 @@ public class DatabaseRequestResponse<K extends Suggestion> implements DatabaseRe
 	public List<Suggestion> filter(String query, int limit) {
 		query = query.toLowerCase();
 		List<Suggestion> newSuggestions = new ArrayList<Suggestion>(limit);
-		
-		int curr = 0, all = suggestions.size();
-		for(int i=0; i < all; i++){
-			if(curr >= limit){
+		int size = suggestions.size();
+		for(int i=0; i< size; i++){
+			if(i==limit){
 				break;
 			}
-			if(suggestions.get(i).getDisplayString().toLowerCase().startsWith(query)){
-				curr++;
-				newSuggestions.add(suggestions.get(i));
-			}
+			newSuggestions.add(suggestions.get(i));
 		}
+		
+//		int curr = 0, all = suggestions.size();
+//		for(int i=0; i < all; i++){
+//			if(curr >= limit){
+//				break;
+//			}
+//			if(suggestions.get(i).getDisplayString().toLowerCase().startsWith(query)){
+//				curr++;
+//				newSuggestions.add(suggestions.get(i));
+//			}
+//		}
 		return newSuggestions;
 	}
 }

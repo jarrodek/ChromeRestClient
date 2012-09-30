@@ -49,7 +49,7 @@ public class HistoryActivity extends AppActivity implements
 	private int displayedItems = 0;
 	private boolean hasMoreItems = true;
 	private boolean initialize = true;
-	private final static int PAGE_SIZE = 15;
+	private final static int PAGE_SIZE = 30;
 	private boolean gettingNextPage = false;
 	
 	public HistoryActivity(HistoryPlace place, ClientFactory clientFactory) {

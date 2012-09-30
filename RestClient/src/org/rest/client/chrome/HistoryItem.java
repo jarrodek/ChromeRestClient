@@ -58,4 +58,13 @@ public class HistoryItem extends JavaScriptObject {
 	public final native int getTypedCount() /*-{
 		return this.typedCount;
 	}-*/;
+	
+	public final static native JsArray<HistoryItem> fromString(String data) /*-{
+		try{
+			var values = JSON.parse(data);
+			return values;
+		} catch(e){
+			return null;
+		}
+	}-*/;
 }

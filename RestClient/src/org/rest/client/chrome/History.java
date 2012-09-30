@@ -41,6 +41,16 @@ public class History {
 		public final native int getMaxResults() /*-{
 			return this.maxResults;
 		}-*/;
+		
+		public final native String toJSON() /*-{
+			var tmp = {
+				text: this.text
+			};
+			if(this.maxResults){
+				tmp.maxResults = this.maxResults;
+			}
+			return JSON.stringify(tmp);
+		}-*/;
 	}
 	
 	/**

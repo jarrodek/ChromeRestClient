@@ -15,22 +15,31 @@
  ******************************************************************************/
 package org.rest.client.util;
 
+import com.google.gwt.i18n.client.NumberFormat;
+
 public class Units {
 	
-	public static String swithFileSize(long bytes){
-		String[] units = {"b","B","KB","MB","GB","TB"}; 
-		long _result = bytes;
-		String result = "";
+	public static String swithFileSize(double bytes){
+		String[] units = {"bytes","KB","MB","GB","TB"}; 
+		double _result = bytes;
 		
+		if(bytes <= 8){
+			return bytes+"b";
+		}
+		bytes = bytes/8;
+		
+		String usedUnit = "";
 		for(int i=0; i<units.length; i++){
 			if(_result > 1024){
 				_result = _result/1024;
 			} else {
-				result = _result + " " + units[i];
+				usedUnit = units[i];
 				break;
 			}
 		}
 		
-		return result;
+		String formatted = NumberFormat.getFormat("#,##0.#").format(_result);
+		formatted += " " + usedUnit;
+		return formatted;
 	}
 }

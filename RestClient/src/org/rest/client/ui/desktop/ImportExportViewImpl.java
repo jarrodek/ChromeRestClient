@@ -17,7 +17,6 @@ import org.rest.client.deprecated.SuggestionImportItem;
 import org.rest.client.importparser.ImportParser;
 import org.rest.client.importparser.ImportResult;
 import org.rest.client.request.ApplicationRequest;
-import org.rest.client.resources.AppResources;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.ImportExportView;
@@ -34,7 +33,6 @@ import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.file.client.File;
 import com.google.gwt.file.client.FileError;
 import com.google.gwt.file.client.FileList;
@@ -74,9 +72,12 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 	@UiField HTML5FileUpload fileImport;
 	@UiField InlineLabel importFileLog;
 	@UiField HTMLPanel importPreview;
+	
 
 	public ImportExportViewImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
+		
+		
 		
 		//
 		// OLD SYSTEM SETUP
@@ -132,6 +133,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		});
 	}
 	
+	
 	@UiHandler("fileImport")
 	void onFileImportChange(ChangeEvent e){
 		
@@ -139,7 +141,10 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		if(files.size() == 0) return;
 		
 		
-		importPreview.clear();
+		if(previewGrid != null){
+			previewGrid.clear();
+		}
+		importPreview.setVisible(false);
 		fileImport.setEnabled(false);
 		importFileLog.setText("working...");
 		
@@ -187,6 +192,10 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 					
 					@Override
 					public void onParse(ImportResult result) {
+						if(result == null){
+							StatusNotification.notify("Unable to parse input file.",StatusNotification.TYPE_ERROR);
+							return;
+						}
 						showImportTable(result);
 					}
 				});
@@ -196,7 +205,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		reader.readAsText(file);
 	}
 	
-	
+	private Grid previewGrid = null;
 	private void showImportTable(ImportResult result){
 		ArrayList<ProjectObject> projects = result.getProjects();
 		ArrayList<RequestObject> requests = result.getRequests();
@@ -207,10 +216,16 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		}
 		
 		int len = requests.size();
-		Grid grid = new Grid(len+1, 4);
-		grid.setCellPadding(7);
-		grid.setCellSpacing(3);
-		grid.setWidth("100%");
+		
+		if(previewGrid != null){
+			previewGrid.clear();
+		} else {
+			previewGrid = new Grid();
+		}
+		previewGrid.resize(len+1, 4);
+		previewGrid.setCellPadding(7);
+		previewGrid.setCellSpacing(3);
+		previewGrid.setWidth("100%");
 		
 		Label nameLabel = new Label("Name");
 		Label methodLabel = new Label("Method");
@@ -220,17 +235,17 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		methodLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
 		urlLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
 		projectsLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-		grid.setWidget(0, 0, nameLabel);
-		grid.setWidget(0, 1, methodLabel);
-		grid.setWidget(0, 2, urlLabel);
-		grid.setWidget(0, 3, projectsLabel);
+		previewGrid.setWidget(0, 0, nameLabel);
+		previewGrid.setWidget(0, 1, methodLabel);
+		previewGrid.setWidget(0, 2, urlLabel);
+		previewGrid.setWidget(0, 3, projectsLabel);
 		
 		
 		for(int i=0; i< len; i++){
 			RequestObject request = requests.get(i); 
-			grid.setText(i+1, 0, request.getName());
-			grid.setText(i+1, 1, request.getMethod());
-			grid.setText(i+1, 2, request.getURL());
+			previewGrid.setText(i+1, 0, request.getName());
+			previewGrid.setText(i+1, 1, request.getMethod());
+			previewGrid.setText(i+1, 2, request.getURL());
 			String projectName = "";
 			int projectId = request.getProject();
 			if(projectId > 0){
@@ -241,18 +256,10 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 					}
 				}
 			}
-			grid.setText(i+1, 3, projectName);
+			previewGrid.setText(i+1, 3, projectName);
 		}
-		Button b = new Button("Save data");
-		b.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				saveCurrentFileImportData();
-			}
-		});
-		b.setStyleName(AppResources.INSTANCE.appCss().button());
-		importPreview.add(b);
-		importPreview.add(grid);
+		importPreview.add(previewGrid);
+		importPreview.setVisible(true);
 		currentFileImport = result;
 	}
 	
@@ -281,10 +288,16 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		});
 	}
 	private void cleanUpImportData(){
-		importPreview.clear();
+		if(previewGrid != null){
+			previewGrid.clear();
+		}
+		importPreview.setVisible(false);
 		currentFileImport = null;
 	}
-	
+	@UiHandler("saveImportedData")
+	void onSaveImportedData(ClickEvent e){
+		saveCurrentFileImportData();
+	}
 	
 	
 	
