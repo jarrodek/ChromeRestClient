@@ -1,0 +1,147 @@
+<project name="gwt-xmlhttp-request-l2-library" default="dist" basedir=".">
+
+	<property name="gwt.root" location="." />
+
+	<property file="local.ant.properties" />
+	<property file="build.properties" />
+
+	<property environment="env" />
+	<condition property="gwt.home" value="${env.GWT_HOME}">
+		<isset property="env.GWT_HOME" />
+	</condition>
+	<condition property="gwt.home" value="${GWT_HOME}">
+		<isset property="GWT_HOME" />
+	</condition>
+	<fail unless="gwt.home" message="You need to set env value 'GWT_HOME' that's point to GWTs sdk home dir. Use command: export GWT_HOME=./gwt/home/path/ (${gwt.home})" />
+
+
+	<!-- Check for GWT VERSION. -->
+	<!-- If system property exists - set its value or default value -->
+	<condition property="gwt.version" value="${env.GWT_VERSION}" else="0.0.0">
+		<isset property="env.GWT_VERSION" />
+	</condition>
+	<!-- If local project value exist - overwrite system values. -->
+	<condition property="gwt.version" value="${GWT_VERSION}">
+		<isset property="GWT_VERSION" />
+	</condition>
+
+
+	<property name="classes.dir" value="${build.dir}/classes" />
+	<property name="jar.dir" value="${build.dir}/jar" />
+	<property name="tmp.dir" value="${build.dir}/tmp" />
+
+	<!-- Platform identification -->
+	<condition property="build.host.islinux">
+		<and>
+			<os family="unix" />
+			<not>
+				<contains string="${os.name}" substring="mac" casesensitive="false" />
+			</not>
+		</and>
+	</condition>
+	<condition property="build.host.platform" value="linux">
+		<isset property="build.host.islinux" />
+	</condition>
+
+	<condition property="build.host.ismac">
+		<and>
+			<os family="unix" />
+			<contains string="${os.name}" substring="mac" casesensitive="false" />
+		</and>
+	</condition>
+	<condition property="build.host.platform" value="mac">
+		<isset property="build.host.ismac" />
+	</condition>
+
+	<condition property="build.host.iswindows">
+		<os family="windows" />
+	</condition>
+	<condition property="build.host.platform" value="windows">
+		<isset property="build.host.iswindows" />
+	</condition>
+	<fail unless="build.host.platform" message="Building on ${os.name} is not supported" />
+
+	<condition property="is.gwt">
+		<available file="${gwt.home}/gwt-dev.jar" />
+	</condition>
+	<condition property="dev.jar" value="${gwt.home}/gwt-dev.jar" else="${gwt.home}/gwt-dev-${build.host.platform}.jar">
+		<isset property="is.gwt" />
+	</condition>
+
+	<property name="gwt.dev.jar" location="${dev.jar}" />
+	<available file="${gwt.dev.jar}" property="gwt.dev.jar.exists" />
+	<fail unless="gwt.dev.jar.exists" message="Cannot find '${gwt.dev.jar}'; perhaps you should define the GWT_HOME environment variable" />
+
+	<target name="dist" depends="clean, jar">
+	</target>
+
+	<target name="clean">
+		<delete failonerror="false">
+			<!-- clean up alle .class files -->
+			<fileset dir="${classes.dir}" includes="**/*">
+				<exclude name="**/.svn" />
+				<exclude name="**/.svn/**" />
+			</fileset>
+		</delete>
+		<delete failonerror="false">
+			<!-- clean previous builded jar files -->
+			<fileset dir="${jar.dir}" includes="**/*">
+				<exclude name="**/.svn" />
+				<exclude name="**/.svn/**" />
+			</fileset>
+		</delete>
+	</target>
+
+	<target name="compile">
+		<!-- create classes dir if nessesery -->
+		<mkdir dir="${classes.dir}" />
+		<!-- compile java files -->
+		<javac srcdir="${src.dir}" destdir="${classes.dir}" classpath="${GWT_HOME}/gwt-user.jar" />
+	</target>
+	
+	<!-- Creates temp dir to collect all files and create jar file. -->
+	<target name="createtemp">
+		<mkdir dir="${tmp.dir}" />
+		<!-- copy all *.class files to temp dir -->
+		<copy todir="${tmp.dir}">
+			<fileset dir="${classes.dir}" />
+		</copy>
+		<!-- copy GWT module name to tmp dir -->
+		<copy todir="${tmp.dir}/${module.path}/">
+			<fileset file="${src.dir}/${module.path}/${module.name}" />
+		</copy>
+		<copy todir="${tmp.dir}/${module.filepath}/">
+			<fileset file="${src.dir}/${module.filepath}/${module.filename}" />
+		</copy>
+		<copy todir="${tmp.dir}/${module.filereaderpath}/">
+			<fileset file="${src.dir}/${module.filereaderpath}/${module.filereadername}" />
+		</copy>
+		<!-- copy all source files from client dir (required for include to another project) -->
+		<copy todir="${tmp.dir}/${module.path}/client">
+			<fileset dir="${src.dir}/${module.path}/client">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy todir="${tmp.dir}/${module.filepath}/client">
+			<fileset dir="${src.dir}/${module.filepath}/client">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy todir="${tmp.dir}/${module.filereaderpath}/client">
+			<fileset dir="${src.dir}/${module.filereaderpath}/client">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="jar" depends="compile, createtemp">
+		<mkdir dir="${jar.dir}" />
+		<!-- create jar file from all files in tmp dir -->
+		<jar destfile="${jar.dir}/${jar.modulename}-${GWT_VERSION}.jar" index="true">
+			<fileset dir="${tmp.dir}" />
+		</jar>
+		<!-- now you can delete tmp dir -->
+		<delete dir="${tmp.dir}" />
+	</target>
+
+</project>
