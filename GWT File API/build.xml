@@ -1,4 +1,4 @@
-<project name="gwt-xmlhttp-request-l2-library" default="dist" basedir=".">
+<project name="gwt-file-library" default="dist" basedir=".">
 
 	<property name="gwt.root" location="." />
 

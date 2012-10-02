@@ -1,6 +1,0 @@
-<module>
-	<inherits name="com.google.gwt.user.User"/>
-	<inherits name="com.google.gwt.filereader.FileReader"/>
-	<inherits name="com.google.gwt.xhr2.XMLHttpRequest2"/>
-	<source path="client" />
-</module>
