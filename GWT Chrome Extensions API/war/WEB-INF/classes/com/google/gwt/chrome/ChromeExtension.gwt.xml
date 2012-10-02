@@ -1,0 +1,10 @@
+<module>
+	<inherits name="com.google.gwt.user.User"/>
+	<source path="cookie" />
+	<source path="extension" />
+	<source path="history" />
+	<source path="manifest" />
+	<source path="message" />
+	<source path="storage" />
+	<source path="tabs" />
+</module>
