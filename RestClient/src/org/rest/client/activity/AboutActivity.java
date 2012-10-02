@@ -17,11 +17,11 @@ package org.rest.client.activity;
 
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
-import org.rest.client.chrome.ManifestDetails;
 import org.rest.client.place.AboutPlace;
 import org.rest.client.ui.AboutView;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.chrome.manifest.ManifestDetails;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;

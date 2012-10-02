@@ -15,9 +15,7 @@
  ******************************************************************************/
 package org.rest.client.ui;
 
-
-import org.rest.client.chrome.ManifestDetails;
-
+import com.google.gwt.chrome.manifest.ManifestDetails;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.IsWidget;
 /**

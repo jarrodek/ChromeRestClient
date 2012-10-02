@@ -5,10 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.rest.client.RestClient;
-import org.rest.client.chrome.Extension;
-import org.rest.client.chrome.Tab;
-import org.rest.client.chrome.TabCallback;
-import org.rest.client.chrome.Tabs;
 import org.rest.client.deprecated.ImportListingDialog;
 import org.rest.client.deprecated.ImportRequest;
 import org.rest.client.deprecated.ImportSuggestionsCallback;
@@ -23,6 +19,10 @@ import org.rest.client.ui.ImportExportView;
 import org.rest.client.ui.html5.HTML5FileUpload;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.chrome.extension.Extension;
+import com.google.gwt.chrome.tabs.Tab;
+import com.google.gwt.chrome.tabs.TabCallback;
+import com.google.gwt.chrome.tabs.Tabs;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;

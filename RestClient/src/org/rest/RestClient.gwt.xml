@@ -8,7 +8,8 @@
 	<inherits name='com.google.gwt.user.theme.clean.Clean' />
 	
 	<inherits name="com.google.gwt.resources.Resources" />
-	<inherits name="com.google.gwt.xhr2.XMLHttpRequest2" />
+	<inherits name="com.google.gwt.file.FileApi" />
+	<inherits name="com.google.gwt.chrome.ChromeExtension" />
 	<inherits name="com.google.code.gwt.database.Html5Database" />
 	
 	<replace-with class="org.rest.client.ClientFactoryImpl">

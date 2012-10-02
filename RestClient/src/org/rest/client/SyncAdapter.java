@@ -1,11 +1,11 @@
 package org.rest.client;
 
-import org.rest.client.chrome.StorageChangeObject;
-import org.rest.client.chrome.SyncStorageArea;
-import org.rest.client.chrome.Storage.StorageChangeHandler;
-import org.rest.client.chrome.StorageArea.StorageItemsCallback;
 import org.rest.client.storage.store.LocalStore;
 
+import com.google.gwt.chrome.storage.Storage.StorageChangeHandler;
+import com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback;
+import com.google.gwt.chrome.storage.StorageChangeObject;
+import com.google.gwt.chrome.storage.SyncStorageArea;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.storage.client.Storage;
@@ -23,7 +23,7 @@ public class SyncAdapter {
 	private static boolean observing = false;
 	
 	public static void sync(){
-		org.rest.client.chrome.Storage chromeStore = org.rest.client.chrome.Storage.getStorage();
+		com.google.gwt.chrome.storage.Storage chromeStore = com.google.gwt.chrome.storage.Storage.getStorage();
 		final Storage store = Storage.getLocalStorageIfSupported();
 		SyncStorageArea sync = chromeStore.getSync();
 		JSONObject query = new JSONObject();
@@ -85,11 +85,11 @@ public class SyncAdapter {
 	public static void observe(){
 		if(observing) return;
 		observing = true;
-		org.rest.client.chrome.Storage chromeStore = org.rest.client.chrome.Storage.getStorage();
+		com.google.gwt.chrome.storage.Storage chromeStore = com.google.gwt.chrome.storage.Storage.getStorage();
 		chromeStore.addChangeHandler(new StorageChangeHandler() {
 			@Override
 			public void onChange(StorageChangeObject data, String areaName) {
-				if(areaName.equals(org.rest.client.chrome.Storage.SYNC)){
+				if(areaName.equals(com.google.gwt.chrome.storage.Storage.SYNC)){
 					sync();
 				}
 			}

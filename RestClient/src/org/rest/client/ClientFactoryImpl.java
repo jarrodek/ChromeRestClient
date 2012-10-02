@@ -15,7 +15,6 @@
  ******************************************************************************/
 package org.rest.client;
 
-import org.rest.client.chrome.ChromeMessagePassing;
 import org.rest.client.storage.store.FormEncodingStoreWebSql;
 import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
@@ -55,6 +54,8 @@ import org.rest.client.ui.desktop.SavedViewImpl;
 import org.rest.client.ui.desktop.SettingsViewImpl;
 import org.rest.client.ui.desktop.ShortcutViewImpl;
 
+import com.google.gwt.chrome.message.BackgroundMessage;
+import com.google.gwt.chrome.message.ChromeMessagePassing;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
@@ -245,7 +246,7 @@ public class ClientFactoryImpl implements ClientFactory {
 		if (chromeMessagePassing == null) {
 			// in deferred binder change this class to one that can handle
 			// message passing without content script
-			chromeMessagePassing = GWT.create(ChromeMessagePassing.class);
+			chromeMessagePassing = GWT.create(BackgroundMessage.class);
 		}
 		return chromeMessagePassing;
 	}

@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.rest.client.RestClient;
-import org.rest.client.chrome.History;
-import org.rest.client.chrome.History.Query;
-import org.rest.client.chrome.HistoryItem;
-import org.rest.client.chrome.HistorySearchCallback;
-import org.rest.client.chrome.JsArray;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.storage.websql.UrlRow;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.chrome.history.History;
+import com.google.gwt.chrome.history.History.Query;
+import com.google.gwt.chrome.history.HistoryItem;
+import com.google.gwt.chrome.history.HistorySearchCallback;
+import com.google.gwt.core.client.JsArray;
 
 public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 

@@ -1,8 +1,8 @@
 package org.rest.client.ui.desktop.widget;
 
 import org.rest.client.RestClient;
-import org.rest.client.chrome.worker.Worker;
-import org.rest.client.chrome.worker.WorkerMessageHandler;
+import org.rest.client.dom.worker.Worker;
+import org.rest.client.dom.worker.WorkerMessageHandler;
 import org.rest.client.event.OverwriteUrlEvent;
 import org.rest.client.resources.AppCssResource;
 import org.rest.client.resources.AppResources;

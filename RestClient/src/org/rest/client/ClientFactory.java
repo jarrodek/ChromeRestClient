@@ -15,7 +15,6 @@
  ******************************************************************************/
 package org.rest.client;
 
-import org.rest.client.chrome.ChromeMessagePassing;
 import org.rest.client.storage.store.FormEncodingStoreWebSql;
 import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
@@ -40,6 +39,7 @@ import org.rest.client.ui.SavedView;
 import org.rest.client.ui.SettingsView;
 import org.rest.client.ui.ShortcutView;
 
+import com.google.gwt.chrome.message.ChromeMessagePassing;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
 
