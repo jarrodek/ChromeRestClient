@@ -4,58 +4,42 @@
 	<inherits name="com.google.gwt.json.JSON" />
 	<inherits name='com.google.gwt.activity.Activity' />
 	<inherits name='com.google.gwt.place.Place' />
+	<inherits name="com.google.gwt.resources.Resources" />
+
 
 	<inherits name='com.google.gwt.user.theme.clean.Clean' />
-	
-	<inherits name="com.google.gwt.resources.Resources" />
+
+
 	<inherits name="com.google.gwt.file.FileApi" />
 	<inherits name="com.google.gwt.chrome.ChromeExtension" />
 	<inherits name="com.google.code.gwt.database.Html5Database" />
-	
+
+
 	<replace-with class="org.rest.client.ClientFactoryImpl">
 		<when-type-is class="org.rest.client.ClientFactory" />
 	</replace-with>
 	
 	
-	 <!-- Deffered binding for message passing system -->
-        <define-property name="inside_extension" values="yes,no" />
-<!--    <set-property name="inside_extension" value="no"/> -->
-        
-        <property-provider name="inside_extension"><![CDATA[
-                {
-                        return (chrome && typeof chrome.webRequest != 'undefined') ? "yes" : "no";
-                }
-        ]]></property-provider>
-        
+	<!-- This Linker will produce a monolithic JavaScript file. It may be used only when there is a single distinct compilation result. -->
+	<add-linker name="sso" />
 
-        <replace-with class="org.rest.client.chrome.ChromeCSmessagePassingImpl">
-                <when-type-is class="org.rest.client.chrome.ChromeMessagePassing" />
-                <when-property-is name="inside_extension" value="no" />
-        </replace-with>
-        
-        <replace-with class="org.rest.client.chrome.ChromeMessagePassingImpl">
-                <when-type-is class="org.rest.client.chrome.ChromeMessagePassing" />
-                <when-property-is name="inside_extension" value="yes" />
-        </replace-with>
-	
-	
-	
 	<!-- Logging properties -->
-	<!-- To compile at `DEBUG`, `WARN` and `OFF` log levels (with a 3x compile time cost) -->
-	<inherits name="com.allen_sauer.gwt.log.gwt-log-DEBUG" /> <!-- com.allen_sauer.gwt.log.gwt-log-OFF  -->
-	<extend-property name="log_level" values="DEBUG,WARN"/>
+	<!-- To compile at `DEBUG`, `WARN` and `OFF` log levels (with a 3x compile 
+		time cost) -->
+	<inherits name="com.allen_sauer.gwt.log.gwt-log-DEBUG" /> <!-- com.allen_sauer.gwt.log.gwt-log-OFF -->
+	<extend-property name="log_level" values="DEBUG,WARN" />
 	<set-property name="log_level" value="DEBUG" />
 	<set-property name="log_DivLogger" value="DISABLED" />
 	<set-property name="log_ConsoleLogger" value="ENABLED" />
-	
+
 	<!-- Compile for Chrome only -->
-	<set-property name="user.agent" value="safari"/>
+	<set-property name="user.agent" value="safari" />
 	<!-- Removes client-side stack trace info (can reduce size up to 15%) -->
-<!-- 	<set-property name="compiler.stackMode" value="strip"/> -->
+	<set-property name="compiler.stackMode" value="strip"/>
 	<!-- (only use if you’re not using enums as String values) -->
-<!-- 	<set-configuration-property name="compiler.enum.obfuscate.names" value="true"/> -->
-	
-	
+	<!-- <set-configuration-property name="compiler.enum.obfuscate.names" value="true"/> -->
+
+
 	<entry-point class='org.rest.client.RestClient' />
 
 	<source path='client' />

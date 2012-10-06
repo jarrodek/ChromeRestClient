@@ -2,7 +2,7 @@ package org.rest.client.ui.desktop;
 
 import org.rest.client.ui.AboutView;
 
-import com.google.gwt.chrome.manifest.ManifestDetails;
+import com.google.gwt.chrome.runtime.ManifestDetails;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;

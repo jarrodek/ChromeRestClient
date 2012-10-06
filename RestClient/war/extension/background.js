@@ -110,8 +110,24 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 
 function handleInternalMessage(request,sendResponse){
 //	console.log("handleInternalMessage: ",request);
-	if (!request.payload)
+	if (typeof request == "string") {
+		try{
+			request = JSON.parse(request);
+		}catch(e){
+			console.error('Error parse payload data',e);
+		}
+	}
+	if (!request.payload){
+		sendResponse({
+			'payload' : 'error',
+			'data' : JSON.stringify({
+				'error' : true,
+				'message' : 'Unknown payload.',
+				'data' : null
+			})
+		});
 		return;
+	}
 
 	switch (request.payload) {
 	case 'setEnvironment':
@@ -154,7 +170,10 @@ function handleInternalMessage(request,sendResponse){
 		break;
 	case 'getRequestData':
 //		console.log('requestDetails summary',requestDetails);
-		sendResponse(JSON.stringify(requestDetails));
+		sendResponse({
+			'payload' : 'getRequestData',
+			'data' : JSON.stringify(requestDetails)
+		});
 		requestDetails.URL = null;
 		requestDetails.REQUEST_HEADERS = null;
 		requestDetails.RESPONSE_HEADERS = null;

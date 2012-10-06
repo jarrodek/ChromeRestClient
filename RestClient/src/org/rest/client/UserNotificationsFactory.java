@@ -3,12 +3,13 @@ package org.rest.client;
 import java.util.ArrayList;
 import java.util.Date;
 
-import org.rest.client.event.NotificationsArriveEvent;
 import org.rest.client.event.NotificationsStateChangeEvent;
 import org.rest.client.request.MessageObject;
 import org.rest.client.request.MessagesRequest;
 import org.rest.client.storage.store.LocalStore;
+import org.rest.client.ui.desktop.StatusNotification;
 
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Timer;
 
@@ -82,8 +83,7 @@ public class UserNotificationsFactory {
 				if(result == null || result.size() == 0){
 					return;
 				}
-				
-				RestClient.getClientFactory().getEventBus().fireEvent(new NotificationsArriveEvent(result));
+				notifyUser(result);
 			}
 		});
 		
@@ -97,4 +97,13 @@ public class UserNotificationsFactory {
 		messageSchedule.schedule(3600000); //1hr
 	}
 	
+	
+	private static void notifyUser(ArrayList<MessageObject> messages){
+		for(MessageObject msg : messages){
+			String msgStr = "<strong>"+SafeHtmlUtils.htmlEscape(msg.getTitle())+"</strong><br/>";
+			msgStr += SafeHtmlUtils.htmlEscape(msg.getMessage());
+			
+			StatusNotification.notify(msgStr, StatusNotification.TYPE_HTML, StatusNotification.TIME_INFINITY, false);
+		}
+	}
 }

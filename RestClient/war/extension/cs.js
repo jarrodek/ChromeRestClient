@@ -12,7 +12,7 @@ function receiveMessage(e){
 		data = JSON.parse(e.data);
 	} catch(e){ return; }
 	
-	if(!(data && data.source && data.source == "arc:gwt")) return;
+	if(!(data && data.source && data.source == "dev:gwt")) return;
 	//console.log('receiveMessage (ext)', data.data);
 	
 	if(data.payload){
@@ -22,7 +22,7 @@ function receiveMessage(e){
 			break;
 			case "requestBegin": 
 				chrome.extension.sendMessage(data, function(response) {
-					window.postMessage({"source":"arc:cs", "payload":"requestBegin"}, location.href);
+					window.postMessage({"source":"dev:cs", "payload":"requestBegin"}, location.href);
 				});
 			break;
 			case "getRequestData":
@@ -32,7 +32,7 @@ function receiveMessage(e){
 						data.payload = response.payload;
 						response = response.data;
 					}
-					window.postMessage({"source":"arc:cs", "payload":data.payload, "data": response}, location.href);
+					window.postMessage({"source":"dev:cs", "payload":data.payload, "data": response}, location.href);
 				});
 			break;
 			case "copyToClipboard":
@@ -40,7 +40,7 @@ function receiveMessage(e){
 				break;
 			default:
 				chrome.extension.sendMessage(data, function(response) {
-					window.postMessage({"source":"arc:cs", "payload":data.payload, "data": response}, location.href);
+					window.postMessage({"source":"dev:cs", "payload":data.payload, "data": response}, location.href);
 				});
 				break;
 		}

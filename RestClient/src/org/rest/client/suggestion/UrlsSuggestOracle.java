@@ -9,6 +9,7 @@ import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.storage.websql.UrlRow;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.chrome.def.BackgroundPageCallback;
 import com.google.gwt.chrome.history.History;
 import com.google.gwt.chrome.history.History.Query;
 import com.google.gwt.chrome.history.HistoryItem;
@@ -117,7 +118,7 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 		History h = History.getHistoryIfSupported();
 		if(h == null){ 
 			// Use chrome message passing to background page
-			RestClient.getClientFactory().getChromeMessagePassing().postMessage("history.search", _q.toJSON(), new com.google.gwt.core.client.Callback<String, Throwable>() {
+			RestClient.getClientFactory().getChromeMessagePassing().postMessage("history.search", _q.toJSON(), new BackgroundPageCallback() {
 				
 				@Override
 				public void onSuccess(String result) {
@@ -137,11 +138,6 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 								numberOfDatabaseSuggestions, _suggestions);
 						UrlsSuggestOracle.this.returnSuggestions(callback);
 					}
-				}
-				
-				@Override
-				public void onFailure(Throwable reason) {
-					chromeQueryEnd = true;
 				}
 			});
 		} else {

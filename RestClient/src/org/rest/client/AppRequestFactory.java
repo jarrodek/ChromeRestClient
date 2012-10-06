@@ -28,6 +28,7 @@ import org.rest.client.ui.ErrorDialogView;
 import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.chrome.def.BackgroundPageCallback;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -134,20 +135,13 @@ public class AppRequestFactory {
 				//save URL for suggestion oracle
 				saveUrl(data.getURL());
 				
-				RestClient.getClientFactory().getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_REQUEST_BEGIN, data.toJSON(), new Callback<String, Throwable>() {
+				RestClient.getClientFactory().getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_REQUEST_BEGIN, data.toJSON(), new BackgroundPageCallback() {
 					@Override
 					public void onSuccess(String result) {
 						if(RestClient.isDebug()){
 							Log.debug("Message to bacground page passed.");
 						}
 						startHttpRequest(data);
-					}
-					
-					@Override
-					public void onFailure(Throwable reason) {
-						if(RestClient.isDebug()){
-							Log.error("Error to send message to extension.", reason);
-						}
 					}
 				});
 				

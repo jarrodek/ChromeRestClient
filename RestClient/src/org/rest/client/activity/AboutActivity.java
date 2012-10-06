@@ -21,8 +21,8 @@ import org.rest.client.place.AboutPlace;
 import org.rest.client.ui.AboutView;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.google.gwt.chrome.manifest.ManifestDetails;
-import com.google.gwt.core.client.Callback;
+import com.google.gwt.chrome.def.BackgroundPageCallback;
+import com.google.gwt.chrome.runtime.ManifestDetails;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -62,8 +62,7 @@ public class AboutActivity extends AppActivity implements
 	
 	
 	private void getAppVersion(){
-		
-		clientFactory.getChromeMessagePassing().postMessage("getManifest", "", new Callback<String, Throwable>() {
+		clientFactory.getChromeMessagePassing().postMessage("getManifest", "", new BackgroundPageCallback() {
 			
 			@Override
 			public void onSuccess(String result) {
@@ -79,13 +78,6 @@ public class AboutActivity extends AppActivity implements
 					}
 				}
 				
-			}
-			
-			@Override
-			public void onFailure(Throwable reason) {
-				if(RestClient.isDebug()){
-					Log.warn("Can't load manifest info",reason);
-				}
 			}
 		});
 	}

@@ -47,6 +47,7 @@ import org.rest.client.ui.desktop.StatusNotification;
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
+import com.google.gwt.chrome.def.BackgroundPageCallback;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
@@ -400,12 +401,13 @@ public class RequestActivity extends AppActivity implements
 				/**
 				 * Get request and response headers data from Chrome Extensions API
 				 */
-				clientFactory.getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_GET_COLLECTED_REQUEST_DATA, null, new Callback<String, Throwable>() {
+				clientFactory.getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_GET_COLLECTED_REQUEST_DATA, null, new BackgroundPageCallback() {
 					@Override
 					public void onSuccess(String result) {
 						if(result == null){
 							responseView.setRequestHeadersExternal(null);
 							responseView.setResponseHeadersExternal(null);
+							responseView.scrollToView();
 							return;
 						}
 						JSONObject parsedResponse = null;
@@ -414,6 +416,7 @@ public class RequestActivity extends AppActivity implements
 						}catch(Exception e){
 							responseView.setRequestHeadersExternal(null);
 							responseView.setResponseHeadersExternal(null);
+							responseView.scrollToView();
 							return;
 						}
 						
@@ -432,11 +435,6 @@ public class RequestActivity extends AppActivity implements
 						
 						
 						responseView.scrollToView();
-					}
-					
-					@Override
-					public void onFailure(Throwable reason) {
-						
 					}
 				});
 			}
@@ -546,7 +544,7 @@ public class RequestActivity extends AppActivity implements
 	
 	
 	private void createExternalRequest(final RequestView view, final String requestUUID){
-		clientFactory.getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_GET_EXTERNAL_REQUEST_DATA, requestUUID, new Callback<String, Throwable>() {
+		clientFactory.getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_GET_EXTERNAL_REQUEST_DATA, requestUUID, new BackgroundPageCallback() {
 			@Override
 			public void onSuccess(String result) {
 				if(result.isEmpty()){
@@ -590,11 +588,6 @@ public class RequestActivity extends AppActivity implements
 					}
 				}
 				RestClient.fixChromeLayout();
-			}
-			
-			@Override
-			public void onFailure(Throwable reason) {
-				Log.error("Can't receive mesage for " + requestUUID);
 			}
 		});
 		

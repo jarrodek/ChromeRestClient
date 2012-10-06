@@ -5,12 +5,11 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -55,6 +54,11 @@ public class StatusNotification extends Composite {
 	 */
 	public static final String TYPE_CRITICAL = "critical";
 	/**
+	 * Normal notification bar with HTML value. Value: html
+	 */
+	public static final String TYPE_HTML = "html";
+	
+	/**
 	 * Notification display time: 1sec.
 	 */
 	public static final int TIME_ULTRA_SHORT = 1000;
@@ -92,6 +96,14 @@ public class StatusNotification extends Composite {
 		 * @return class name for hidden container
 		 */
 		String hidden();
+		/**
+		 * @return class name for regular message with HTML content
+		 */
+		String html();
+		/**
+		 * @return class name for text transition to fade out 
+		 */
+		String textHidden();
 	}
 
 	/**
@@ -149,6 +161,7 @@ public class StatusNotification extends Composite {
 
 	private static List<NotificationObject> messages = new ArrayList<NotificationObject>();
 	private static NotificationObject current = null;
+	private static boolean showing = false;
 	private static StatusNotification INSTANCE = GWT
 			.create(StatusNotification.class);
 	private static Timer messageTimer = new Timer() {
@@ -161,19 +174,12 @@ public class StatusNotification extends Composite {
 	};
 
 	@UiField HTMLPanel mainPanel;
-	@UiField Anchor flashDismiss;
 	@UiField InlineLabel message;
 	@UiField WidgetStyle style;
 
 	private StatusNotification() {
 		RootPanel.get().add(
 				GWT.<Binder> create(Binder.class).createAndBindUi(this));
-		flashDismiss.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				dismissMessage();
-			}
-		});
 	}	
 
 	/**
@@ -192,8 +198,8 @@ public class StatusNotification extends Composite {
 	 * @param message
 	 *            Message to display
 	 * @param type
-	 *            {@link #TYPE_NORMAL} (default), {@link #TYPE_ERROR} or
-	 *            {@link #TYPE_CRITICAL}.
+	 *            {@link #TYPE_NORMAL} (default), {@link #TYPE_ERROR}, 
+	 *            {@link #TYPE_CRITICAL} or {@link #TYPE_HTML}.
 	 */
 	public static void notify(String message, String type) {
 		notify(message, type, 0, false);
@@ -205,8 +211,8 @@ public class StatusNotification extends Composite {
 	 * @param message
 	 *            Message to display
 	 * @param type
-	 *            {@link #TYPE_NORMAL} (default), {@link #TYPE_ERROR} or
-	 *            {@link #TYPE_CRITICAL}.
+	 *            {@link #TYPE_NORMAL} (default), {@link #TYPE_ERROR},
+	 *            {@link #TYPE_CRITICAL} or {@link #TYPE_HTML}.
 	 * @param timeout
 	 *            number of milliseconds after message will gone. Presets:
 	 *            {@link #TIME_SHORT}, {@link #TIME_MEDIUM},
@@ -223,8 +229,8 @@ public class StatusNotification extends Composite {
 	 * @param message
 	 *            Message to display
 	 * @param type
-	 *            {@link #TYPE_NORMAL} (default), {@link #TYPE_ERROR} or
-	 *            {@link #TYPE_CRITICAL}.
+	 *            {@link #TYPE_NORMAL} (default), {@link #TYPE_ERROR},
+	 *            {@link #TYPE_CRITICAL} or {@link #TYPE_HTML}.
 	 * @param timeout
 	 *            number of milliseconds after message will gone. Presets:
 	 *            {@link #TIME_SHORT}, {@link #TIME_MEDIUM},
@@ -247,7 +253,7 @@ public class StatusNotification extends Composite {
 		}
 
 		messages.add(no);
-		if (!overwrite && (current != null && current.getTimeout() > 0)) {
+		if (!overwrite && current != null) {
 			return;
 		}
 		if (current != null){
@@ -262,29 +268,53 @@ public class StatusNotification extends Composite {
 	private static void dismissMessage() {
 		messageTimer.cancel();
 		current = null;
-		cleanupContainer();
-		next();
+		if(messages.size() > 0){
+			INSTANCE.message.addStyleName(INSTANCE.style.textHidden());
+			new Timer() {
+				@Override
+				public void run() {
+					next();
+				}
+			}.schedule(300);
+		} else {
+			cleanupContainer();
+		}
 	}
 	/**
 	 * Display next notification.
 	 */
 	private static void next(){
 		if(messages.size() == 0){
+			cleanupContainer();
+			showing = false;
 			return;
 		}
 		current = messages.remove(0);
 		if(current == null) return;
-		INSTANCE.message.setText(current.getMessage());
+		boolean isHTML = false;
 		
 		if(current.getType().equals(TYPE_CRITICAL)){
 			INSTANCE.mainPanel.addStyleName(INSTANCE.style.critical());
 		} else if(current.getType().equals(TYPE_ERROR)){
 			INSTANCE.mainPanel.addStyleName(INSTANCE.style.error());
+		} else if(current.getType().equals(TYPE_HTML)){
+			INSTANCE.mainPanel.addStyleName(INSTANCE.style.html());
+			isHTML = true;
 		} else {
 			INSTANCE.mainPanel.addStyleName(INSTANCE.style.common());
 		}
-		INSTANCE.mainPanel.removeStyleName(INSTANCE.style.hidden());
 		
+		if(isHTML){
+			INSTANCE.message.getElement().setInnerHTML(current.getMessage());
+		} else {
+			INSTANCE.message.setText(current.getMessage());
+		}
+		if(showing){
+			INSTANCE.message.removeStyleName(INSTANCE.style.textHidden());
+		} else {
+			INSTANCE.mainPanel.removeStyleName(INSTANCE.style.hidden());
+			showing = true;
+		}
 		if(current.getTimeout() > 0){
 			messageTimer.schedule(current.getTimeout());
 		}
@@ -310,9 +340,16 @@ public class StatusNotification extends Composite {
 	 */
 	private static void cleanupContainer(){
 		INSTANCE.message.setText("");
+		INSTANCE.message.removeStyleName(INSTANCE.style.textHidden());
 		INSTANCE.mainPanel.addStyleName(INSTANCE.style.hidden());
 		INSTANCE.mainPanel.removeStyleName(INSTANCE.style.critical());
 		INSTANCE.mainPanel.removeStyleName(INSTANCE.style.common());
+		INSTANCE.mainPanel.removeStyleName(INSTANCE.style.html());
 		INSTANCE.mainPanel.removeStyleName(INSTANCE.style.error());
+	}
+	@UiHandler("flashDismiss")
+	void onDissmiss(ClickEvent e){
+		e.preventDefault();
+		dismissMessage();
 	}
 }

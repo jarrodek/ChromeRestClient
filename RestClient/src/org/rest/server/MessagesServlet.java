@@ -1,6 +1,7 @@
 package org.rest.server;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,8 +12,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 public class MessagesServlet extends AppServlet {
 
@@ -49,8 +56,10 @@ public class MessagesServlet extends AppServlet {
 		ArrayList<Message> result = Message.getMessages(since);
 		GsonBuilder gsonBuilder = new GsonBuilder();
 		gsonBuilder.serializeNulls();
+		gsonBuilder.registerTypeAdapter(Key.class, new MessageKeySerializer());
 		gsonBuilder.setPrettyPrinting();
 		gsonBuilder.setDateFormat(DateFormat.FULL);
+		gsonBuilder.excludeFieldsWithoutExposeAnnotation();
 		Gson gson = gsonBuilder.create();
 		String json = gson.toJson(result);
 		resp.setHeader("Content-Type", "application/json");
@@ -67,6 +76,14 @@ public class MessagesServlet extends AppServlet {
 		// "max-age=86400, must-revalidate, public");
 		resp.setStatus(200);
 		resp.getWriter().print(json);
-		// Type fooType = new TypeToken<Key>() {}.getType();
+	}
+	
+	private class MessageKeySerializer implements JsonSerializer<Key> {
+
+		@Override
+		public JsonElement serialize(Key src, Type typeOfSrc,
+				JsonSerializationContext context) {
+			return new JsonPrimitive(KeyFactory.keyToString(src));
+		}
 	}
 }

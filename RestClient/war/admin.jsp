@@ -10,7 +10,23 @@
 <body>
 <h1>Messages</h1>
 
-
+<section>
+	<h2>Add message</h2>
+	<form action="/admin/message/add" method="post">
+		<input type="hidden" name="payload" value="message-add"/>
+		<div>
+			Title:
+			<input type="text" name="title" value="" placeholder="Title of the message"/>
+		</div>
+		<div>
+			Message:
+			<textarea name="message" placeholder="The message"></textarea>
+		</div>
+		<div>
+			<input type="submit" value="save"/>
+		</div>
+	</form>
+</section>
 
 </body>
 </html>

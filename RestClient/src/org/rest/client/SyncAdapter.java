@@ -6,6 +6,7 @@ import com.google.gwt.chrome.storage.Storage.StorageChangeHandler;
 import com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback;
 import com.google.gwt.chrome.storage.StorageChangeObject;
 import com.google.gwt.chrome.storage.SyncStorageArea;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.storage.client.Storage;
@@ -33,46 +34,46 @@ public class SyncAdapter {
 		
 		sync.get(query.getJavaScriptObject(), new StorageItemsCallback() {
 			@Override
-			public void onResult(JSONObject data) {
-				if(data == null){
+			public void onResult(JavaScriptObject _data) {
+				if(_data == null){
 					return;
 				}
-				if(data.containsKey(LocalStore.DEBUG_KEY)){
-					JSONString _debugValue = data.get(LocalStore.DEBUG_KEY).isString();
-					if(_debugValue != null){
-						if(_debugValue.stringValue().equals("true")){
-							debug = true;
-							store.setItem(LocalStore.DEBUG_KEY, "true");
-						} else {
-							debug = false;
-							store.setItem(LocalStore.DEBUG_KEY, "false");
-						}
+				SyncData data = _data.cast();
+				String _debugValue = data.getDebug();
+				String _historyValue = data.getHistory();
+				String _notificationsValue = data.getNotifications();
+				
+				if(_debugValue != null){
+					if(_debugValue.equals("true")){
+						debug = true;
+						store.setItem(LocalStore.DEBUG_KEY, "true");
+					} else {
+						debug = false;
+						store.setItem(LocalStore.DEBUG_KEY, "false");
 					}
 				}
-				if(data.containsKey(LocalStore.HISTORY_KEY)){
-					JSONString _historyValue = data.get(LocalStore.HISTORY_KEY).isString();
-					if(_historyValue != null){
-						if(_historyValue.stringValue().equals("true")){
-							history = true;
-							store.setItem(LocalStore.HISTORY_KEY, "true");
-						} else {
-							history = false;
-							store.setItem(LocalStore.HISTORY_KEY, "false");
-						}
+				
+				if(_historyValue != null){
+					if(_historyValue.equals("true")){
+						history = true;
+						store.setItem(LocalStore.HISTORY_KEY, "true");
+					} else {
+						history = false;
+						store.setItem(LocalStore.HISTORY_KEY, "false");
 					}
 				}
-				if(data.containsKey(LocalStore.NOTIFICATIONS_ENABLED_KEY)){
-					JSONString _notificationsValue = data.get(LocalStore.NOTIFICATIONS_ENABLED_KEY).isString();
-					if(_notificationsValue != null){
-						if(_notificationsValue.stringValue().equals("true")){
-							notifications = true;
-							store.setItem(LocalStore.NOTIFICATIONS_ENABLED_KEY, "true");
-						} else {
-							notifications = false;
-							store.setItem(LocalStore.NOTIFICATIONS_ENABLED_KEY, "false");
-						}
+				
+				
+				if(_notificationsValue != null){
+					if(_notificationsValue.equals("true")){
+						notifications = true;
+						store.setItem(LocalStore.NOTIFICATIONS_ENABLED_KEY, "true");
+					} else {
+						notifications = false;
+						store.setItem(LocalStore.NOTIFICATIONS_ENABLED_KEY, "false");
 					}
 				}
+				
 			}
 			
 			@Override
