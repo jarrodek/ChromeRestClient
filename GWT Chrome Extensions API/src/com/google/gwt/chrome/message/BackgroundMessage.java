@@ -1,6 +1,6 @@
 package com.google.gwt.chrome.message;
 
-import com.google.gwt.core.client.Callback;
+import com.google.gwt.chrome.def.BackgroundPageCallback;
 
 /**
  * Class to call function in background page.
@@ -28,7 +28,7 @@ public class BackgroundMessage implements ChromeMessagePassing {
 	
 
 	private final native boolean isApiAvailable() /*-{
-		return (chrome.runtime != 'undefined');
+		return !!(chrome.runtime);
 	}-*/;
 
 
@@ -40,7 +40,7 @@ public class BackgroundMessage implements ChromeMessagePassing {
 
 	@Override
 	public void postMessage(String payload, String data,
-			Callback<String, Throwable> callback) {
+			BackgroundPageCallback callback) {
 		impl.postMessage(payload, data, callback);
 	}
 }

@@ -1,7 +1,6 @@
 package com.google.gwt.chrome.storage;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.json.client.JSONObject;
 
 public interface StorageArea {
 	/**
@@ -48,7 +47,7 @@ public interface StorageArea {
 		 * @param data
 		 *            Object with items in their key-value mappings.
 		 */
-		void onResult(JSONObject data);
+		void onResult(JavaScriptObject data);
 		/**
 		 * Called when error occurred
 		 * @param message

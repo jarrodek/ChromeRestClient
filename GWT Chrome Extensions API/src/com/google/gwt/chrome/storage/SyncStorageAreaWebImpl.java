@@ -1,10 +1,10 @@
 package com.google.gwt.chrome.storage;
 
+import com.google.gwt.chrome.def.BackgroundPageCallback;
 import com.google.gwt.chrome.message.BackgroundMessage;
 import com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
 import com.google.gwt.chrome.storage.StorageArea.StorageUseCallback;
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONObject;
@@ -26,7 +26,7 @@ public class SyncStorageAreaWebImpl implements StorageAreaImpl {
 	
 	@Override
 	public void getBytesInUse(String[] keys, final StorageUseCallback callback) {
-		messagePassing.postMessage("storage.sync.getBytesInUse", "", new Callback<String, Throwable>() {
+		messagePassing.postMessage("storage.sync.getBytesInUse", "", new BackgroundPageCallback() {
 			@Override
 			public void onSuccess(String result) {
 				int _result = -1;
@@ -37,24 +37,14 @@ public class SyncStorageAreaWebImpl implements StorageAreaImpl {
 				}
 				callback.onCalculate(_result);
 			}
-			
-			@Override
-			public void onFailure(Throwable reason) {
-				callback.onError(reason.getMessage());
-			}
 		});
 	}
 
 	@Override
 	public void clear(final StorageSimpleCallback callback) {
-		messagePassing.postMessage("storage.sync.clear", "", new Callback<String, Throwable>() {
+		messagePassing.postMessage("storage.sync.clear", "", new BackgroundPageCallback() {
 			@Override
 			public void onSuccess(String result) {
-				callback.onDone();
-			}
-			
-			@Override
-			public void onFailure(Throwable reason) {
 				callback.onDone();
 			}
 		});
@@ -63,14 +53,9 @@ public class SyncStorageAreaWebImpl implements StorageAreaImpl {
 	@Override
 	public void set(JavaScriptObject data, final StorageSimpleCallback callback) {
 		JSONObject obj = new JSONObject(data);
-		messagePassing.postMessage("storage.sync.set", obj.toString(), new Callback<String, Throwable>() {
+		messagePassing.postMessage("storage.sync.set", obj.toString(), new BackgroundPageCallback() {
 			@Override
 			public void onSuccess(String result) {
-				callback.onDone();
-			}
-			
-			@Override
-			public void onFailure(Throwable reason) {
 				callback.onDone();
 			}
 		});
@@ -78,14 +63,9 @@ public class SyncStorageAreaWebImpl implements StorageAreaImpl {
 
 	@Override
 	public void remove(String[] keys, final StorageSimpleCallback callback) {
-		messagePassing.postMessage("storage.sync.remove", "", new Callback<String, Throwable>() {
+		messagePassing.postMessage("storage.sync.remove", "", new BackgroundPageCallback() {
 			@Override
 			public void onSuccess(String result) {
-				callback.onDone();
-			}
-			
-			@Override
-			public void onFailure(Throwable reason) {
 				callback.onDone();
 			}
 		});
@@ -95,15 +75,10 @@ public class SyncStorageAreaWebImpl implements StorageAreaImpl {
 	public void get(JavaScriptObject keysWithDefaults,
 			final StorageItemsCallback callback) {
 		JSONObject obj = new JSONObject(keysWithDefaults);
-		messagePassing.postMessage("storage.sync.get", obj.toString(), new Callback<String, Throwable>() {
+		messagePassing.postMessage("storage.sync.get", obj.toString(), new BackgroundPageCallback() {
 			@Override
 			public void onSuccess(String result) {
-				callback.onResult(JSONParser.parseStrict(result).isObject());
-			}
-			
-			@Override
-			public void onFailure(Throwable reason) {
-				callback.onError(reason.getMessage());
+				callback.onResult(JSONParser.parseStrict(result).isObject().getJavaScriptObject());
 			}
 		});
 	}

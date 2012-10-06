@@ -56,7 +56,7 @@ public class SyncStorageAreaImpl implements StorageAreaImpl {
 				callback.@com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback::onError(Ljava/lang/String;)(chrome.runtime.lastError);
 				return;
 			}
-			callback.@com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback::onResult(Lcom/google/gwt/json/client/JSONObject;)(items);
+			callback.@com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback::onResult(Lcom/google/gwt/core/client/JavaScriptObject;)(items);
 		}));
 	}-*/;
 

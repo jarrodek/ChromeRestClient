@@ -1,6 +1,6 @@
 package com.google.gwt.chrome.message;
 
-import com.google.gwt.core.client.Callback;
+import com.google.gwt.chrome.def.BackgroundPageCallback;
 /**
  * There should be only one implementation of this interface.
  * 
@@ -19,5 +19,5 @@ public interface ChromeMessagePassing {
 	 * @param payload Payload string
 	 * @param data any data to pass
 	 */
-	void postMessage(String payload, String data, Callback<String, Throwable> callback);
+	void postMessage(String payload, String data, BackgroundPageCallback callback);
 }

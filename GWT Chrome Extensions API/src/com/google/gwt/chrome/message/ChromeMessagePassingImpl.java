@@ -1,6 +1,6 @@
 package com.google.gwt.chrome.message;
 
-import com.google.gwt.core.client.Callback;
+import com.google.gwt.chrome.def.BackgroundPageCallback;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 
@@ -28,7 +28,7 @@ public class ChromeMessagePassingImpl implements ChromeMessagePassing {
 
 	@Override
 	public void postMessage(String payload, String data,
-			final Callback<String, Throwable> callback) {
+			final BackgroundPageCallback callback) {
 		
 		final JSONObject respObj = preparePostMessage();
 		if (data != null) {
@@ -60,6 +60,13 @@ public class ChromeMessagePassingImpl implements ChromeMessagePassing {
 	private final native void sendExtensionMessage(String data, ChromeMessageReceiver handler)/*-{
 		chrome.runtime.getBackgroundPage($entry(function(backgroundPage){
 			var receiver = $entry(function(response) {
+				if (typeof request == "string") {
+					try{
+						request = JSON.parse(request);
+					}catch(e){
+						$wnd.console.error('Error parse payload data',e);
+					}
+				}
 				if (!(response && response.payload))
 					return;
 				handler.@com.google.gwt.chrome.message.ChromeMessageReceiver::onMessage(Ljava/lang/String;Ljava/lang/String;)(response.payload,response.data+"");

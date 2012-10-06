@@ -1,12 +1,10 @@
 package com.google.gwt.chrome.storage;
 
-import java.util.Iterator;
-
+import com.google.gwt.chrome.def.SimpleJSObject;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
 
 /**
  * Items under the "sync" storage area are synced using Chrome Sync.
@@ -118,25 +116,22 @@ public class SyncStorageArea implements StorageArea {
 	}
 
 	@Override
-	public void get(String key, final StorageItemCallback callback) {
+	public void get(final String key, final StorageItemCallback callback) {
 		JSONObject obj = new JSONObject();
 		obj.put(key, new JSONString(""));
 		get(obj.getJavaScriptObject(), new StorageItemsCallback() {
 			
 			@Override
-			public void onResult(JSONObject data) {
-				Iterator<String> it = data.keySet().iterator();
-				if(!it.hasNext()){
-					callback.onResult("");
-					return;
+			public void onResult(JavaScriptObject data) {
+				SimpleJSObject obj = data.cast();
+				String[] keys = obj.getKeys();
+				for(String _key : keys){
+					if(_key.equals(key)){
+						callback.onResult(obj.getString(_key));
+						return;
+					}
 				}
-				String key = it.next();
-				JSONValue valueObject = data.get(key);
-				if(valueObject == null){
-					callback.onResult("");
-					return;
-				}
-				callback.onResult(valueObject.isString().stringValue());
+				callback.onResult("");
 			}
 			
 			@Override

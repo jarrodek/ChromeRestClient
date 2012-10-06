@@ -1,0 +1,26 @@
+{
+  "name": "GWT TEST environment",
+  "description": "This will help you use Chrome API in dev mode",
+  "version": "1.0",
+  "manifest_version": 2,
+  "minimum_chrome_version": "23",
+  "permissions": [
+    "webRequest",
+    "declarativeWebRequest",
+    "<all_urls>",
+    "history",
+    "background",
+    "storage",
+    "clipboardWrite"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  }
+  "content_security_policy": "script-src chrome-extension:// chrome-extension-resource:// 'self'; object-src chrome-extension:// chrome-extension-resource:// 'self'; frame-src chrome-extension:// chrome-extension-resource:// 'self' style-src chrome-extension:// chrome-extension-resource:// 'self'",
+  "content_scripts": [{
+      "matches": ["http://127.0.0.1:8888/*"],
+      "js": ["cs.js"],
+	  "run_at": "document_start"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-package com.google.gwt.chrome.manifest;
+package com.google.gwt.chrome.runtime;
 
 import com.google.gwt.core.client.JavaScriptObject;
 

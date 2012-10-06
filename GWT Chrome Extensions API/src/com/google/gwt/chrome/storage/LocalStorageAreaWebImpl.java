@@ -85,7 +85,7 @@ public class LocalStorageAreaWebImpl implements StorageAreaImpl {
 			}
 			result.put(key, new JSONString(value));
 		}
-		callback.onResult(result);
+		callback.onResult(result.getJavaScriptObject());
 	}
 	
 	private final native String _get(String key) /*-{

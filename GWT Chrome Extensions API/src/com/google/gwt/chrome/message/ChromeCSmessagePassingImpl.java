@@ -2,7 +2,7 @@ package com.google.gwt.chrome.message;
 
 import java.util.HashMap;
 
-import com.google.gwt.core.client.Callback;
+import com.google.gwt.chrome.def.BackgroundPageCallback;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 
@@ -14,7 +14,7 @@ import com.google.gwt.json.client.JSONString;
  */
 public class ChromeCSmessagePassingImpl implements ChromeMessagePassing {
 
-	private static HashMap<String, Callback<String, Throwable>> messageCallbackList = new HashMap<String, Callback<String, Throwable>>();
+	private static HashMap<String, BackgroundPageCallback> messageCallbackList = new HashMap<String, BackgroundPageCallback>();
 
 	public ChromeCSmessagePassingImpl() {
 		handleContentScriptMessages(new ChromeMessageReceiver() {
@@ -39,7 +39,7 @@ public class ChromeCSmessagePassingImpl implements ChromeMessagePassing {
 
 	@Override
 	public final void postMessage(String payload, String data,
-			Callback<String, Throwable> callback) {
+			BackgroundPageCallback callback) {
 		messageCallbackList.put(payload, callback);
 		postMessage(payload, data);
 	}
@@ -54,7 +54,7 @@ public class ChromeCSmessagePassingImpl implements ChromeMessagePassing {
 			if (e.origin != location.origin) {
 				return;
 			};
-			if (!(e.data && e.data.source && e.data.source == "arc:cs"))
+			if (!(e.data && e.data.source && e.data.source == "dev:cs"))
 				return;
 			if (!(e.data && e.data.payload))
 				return;
@@ -63,14 +63,14 @@ public class ChromeCSmessagePassingImpl implements ChromeMessagePassing {
 
 		$wnd.addEventListener("message", rec, false);
 		var e = $doc.createEvent('Events');
-		e.initEvent('ARC:READY');
+		e.initEvent('DEV:READY');
 		$wnd.dispatchEvent(e);
 
 	}-*/;
 
 	private JSONObject preparePostMessage() {
 		JSONObject respObj = new JSONObject();
-		respObj.put("source", new JSONString("arc:gwt"));
+		respObj.put("source", new JSONString("dev:gwt"));
 		return respObj;
 	}
 
@@ -80,17 +80,9 @@ public class ChromeCSmessagePassingImpl implements ChromeMessagePassing {
 
 	private final void handleExternalMessage(final String payload,
 			final String message) {
-		JSONObject respObj = null;
-		if (payload.equals("ping")) {
-			respObj = preparePostMessage();
-			respObj.put("data", new JSONString("ok"));
-			respObj.put("payload", new JSONString("ping"));
-			sendExtensionMessage(respObj.toString());
-		} else {
-			if (messageCallbackList.containsKey(payload)) {
-				messageCallbackList.get(payload).onSuccess(message);
-				messageCallbackList.remove(payload);
-			}
+		if (messageCallbackList.containsKey(payload)) {
+			messageCallbackList.get(payload).onSuccess(message);
+			messageCallbackList.remove(payload);
 		}
 	}
 }

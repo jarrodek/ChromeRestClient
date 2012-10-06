@@ -123,6 +123,12 @@
 				<include name="**/*.java" />
 			</fileset>
 		</copy>
+		<!-- DEFAULTS -->
+		<copy todir="${tmp.dir}/${module.path}/def">
+			<fileset dir="${src.dir}/${module.path}/def">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
 		<!-- EXTENSION -->
 		<copy todir="${tmp.dir}/${module.path}/extension">
 			<fileset dir="${src.dir}/${module.path}/extension">
@@ -135,9 +141,15 @@
 				<include name="**/*.java" />
 			</fileset>
 		</copy>
-		<!-- MANIFEST -->
-		<copy todir="${tmp.dir}/${module.path}/manifest">
-			<fileset dir="${src.dir}/${module.path}/manifest">
+		<!-- MESSAGE -->
+		<copy todir="${tmp.dir}/${module.path}/message">
+			<fileset dir="${src.dir}/${module.path}/message">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		<!-- RUNTIME -->
+		<copy todir="${tmp.dir}/${module.path}/runtime">
+			<fileset dir="${src.dir}/${module.path}/runtime">
 				<include name="**/*.java" />
 			</fileset>
 		</copy>
