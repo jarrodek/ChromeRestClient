@@ -16,7 +16,7 @@
 			margin-right: 10px;
 			margin-left: 7px;
 		}
-		.message{white-space: pre-wrap;}
+		.message{white-space: pre-line;}
 		.received{}
 		.received .type{}
 	</ui:style>

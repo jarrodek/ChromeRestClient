@@ -58,8 +58,7 @@ public class RequestObject extends HistoryObject {
 			skipMethod: false,
 			skipPayload: false,
 			skipHeaders: false,
-			skipPath: false,
-//			created: new Date() //order key
+			skipPath: false
 		}
 	}-*/;
 	

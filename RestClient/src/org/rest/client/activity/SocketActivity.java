@@ -17,12 +17,15 @@ package org.rest.client.activity;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
 import org.rest.client.place.SocketPlace;
-import org.rest.client.storage.store.UrlHistoryStoreWebSql;
-import org.rest.client.suggestion.UrlsSuggestOracle;
+import org.rest.client.storage.StoreResultCallback;
+import org.rest.client.storage.store.WebSocketDataStoreWebSql;
+import org.rest.client.storage.store.objects.WebSocketObject;
+import org.rest.client.suggestion.SocketSuggestOracle;
 import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.SocketView;
 import org.rest.client.ui.desktop.StatusNotification;
@@ -35,6 +38,8 @@ import org.rest.client.websocket.WebSocket;
 import org.rest.client.websocket.WebSocketImpl;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.code.gwt.database.client.service.DataServiceException;
+import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.shared.DateTimeFormat.PredefinedFormat;
@@ -180,14 +185,39 @@ public class SocketActivity extends AppActivity implements
 		socket = null;
 		socketUrl = url;
 		messages.clear();
-		
+		saveHistory();
 		view.setConnectionStatus(WebSocket.CONNECTING);
 		
 		socket = WebSocketImpl.open(url);
 		setUpSocketHandlers();
+		
+	}
+	
+	private void saveHistory(){
+		final WebSocketObject data = WebSocketObject.create(socketUrl);
+		final WebSocketDataStoreWebSql store = clientFactory.getWebSocketsStore();
+		store.getService().getByUrl(socketUrl, new ListCallback<WebSocketObject>() {
+			@Override
+			public void onFailure(DataServiceException error) {}
+			
+			@Override
+			public void onSuccess(List<WebSocketObject> result) {
+				if(result != null && result.size() == 1){
+					return;
+				}
+				clientFactory.getWebSocketsStore().put(data, null, new StoreResultCallback<Integer>() {
+					@Override
+					public void onSuccess(Integer result) {}
+					@Override
+					public void onError(Throwable e) {}
+				});
+			}
+		});
+		
 	}
 	
 	private void setUpSocketHandlers(){
+		if(socket == null) return;
 		socket.addCloseHandler(new SocketCloseHandler() {
 			@Override
 			public void onClose() {
@@ -226,15 +256,16 @@ public class SocketActivity extends AppActivity implements
 
 	@Override
 	public void disconnect() {
+		if(socket == null) return;
 		view.setConnectionStatus(WebSocket.CLOSING);
 		socket.close();
 		socket = null;
 	}
 
 	@Override
-	public UrlsSuggestOracle getUrlsSuggestOracle() {
-		UrlHistoryStoreWebSql historyStore = clientFactory.getUrlHistoryStore();
-		return new UrlsSuggestOracle(historyStore);
+	public SocketSuggestOracle getUrlsSuggestOracle() {
+		WebSocketDataStoreWebSql store = clientFactory.getWebSocketsStore();
+		return new SocketSuggestOracle(store);
 	}
 
 	@Override

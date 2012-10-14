@@ -15,7 +15,7 @@
  ******************************************************************************/
 package org.rest.client.ui;
 
-import org.rest.client.suggestion.UrlsSuggestOracle;
+import org.rest.client.suggestion.SocketSuggestOracle;
 import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.websocket.SocketMessage;
 
@@ -56,7 +56,7 @@ public interface SocketView extends IsWidget {
 		 */
 		void disconnect();
 		
-		UrlsSuggestOracle getUrlsSuggestOracle();
+		SocketSuggestOracle getUrlsSuggestOracle();
 		/**
 		 * clear all received and sent data
 		 */

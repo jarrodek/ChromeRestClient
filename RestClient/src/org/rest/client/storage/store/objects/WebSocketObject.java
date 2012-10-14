@@ -23,21 +23,17 @@ import com.google.gwt.core.client.JavaScriptObject;
  * @author Paweł Psztyć
  * 
  */
-public class HistoryObject extends JavaScriptObject {
-	protected HistoryObject() {
+public class WebSocketObject extends JavaScriptObject {
+	protected WebSocketObject() {
 	}
 	
 	/**
 	 * Create Request History object with predefined values.
 	 * @return
 	 */
-	public static final native HistoryObject create() /*-{
+	public static final native WebSocketObject create(String url) /*-{
 		return {
-			url : null, //search key, for future implementation in URL seatch oracle
-			method : null,
-			encoding : null,
-			headers : null,
-			payload : null,
+			url : url,
 			time: Date.now()
 		}
 	}-*/;
@@ -86,72 +82,5 @@ public class HistoryObject extends JavaScriptObject {
 	 */
 	public final native String getURL() /*-{
 		return this.url;
-	}-*/;
-
-	/**
-	 * Sets request method value eg. POST
-	 * 
-	 * @param method
-	 *            Method to set
-	 */
-	public final native void setMethod(String method) /*-{
-		this.method = method;
-	}-*/;
-
-	/**
-	 * @return Saved request method value
-	 */
-	public final native String getMethod() /*-{
-		return this.method;
-	}-*/;
-
-	/**
-	 * Sets request data encoding eg. application/json
-	 * 
-	 * @param encoding
-	 *            Encoding to set. Any valid encoding value
-	 */
-	public final native void setEncoding(String encoding) /*-{
-		this.encoding = encoding;
-	}-*/;
-
-	/**
-	 * @return Saved request form encoding
-	 */
-	public final native String getEncoding() /*-{
-		return this.encoding;
-	}-*/;
-
-	/**
-	 * Sets headers data in string representation.
-	 * 
-	 * @param headers
-	 */
-	public final native void setHeaders(String headers) /*-{
-		this.headers = headers;
-	}-*/;
-
-	/**
-	 * @return Saved request headers data.
-	 */
-	public final native String getHeaders() /*-{
-		return this.headers || null;
-	}-*/;
-
-	/**
-	 * Sets form payload
-	 * 
-	 * @param payload
-	 *            Payload to set. Any string.
-	 */
-	public final native void setPayload(String payload) /*-{
-		this.payload = payload;
-	}-*/;
-
-	/**
-	 * @return Saved payload data
-	 */
-	public final native String getPayload() /*-{
-		return this.payload;
 	}-*/;
 }

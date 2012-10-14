@@ -180,7 +180,7 @@ public class ImportParser {
 				}
 				long time = Utils.getJsonLong(item, "time");
 				if(time > 0){
-					ro.setTime(new Date(time));
+					ro.setTime(time);
 				}
 				if(project > 0){
 					Boolean skipHeaders = Utils.getJsoniBool(item, "skipHeaders");

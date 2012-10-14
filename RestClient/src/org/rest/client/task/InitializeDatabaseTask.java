@@ -39,6 +39,7 @@ public class InitializeDatabaseTask implements LoadTask {
 			databases.add((WebSqlAdapter) factory.getFormEncodingStore());
 			databases.add((WebSqlAdapter) factory.getRequestDataStore());
 			databases.add((WebSqlAdapter) factory.getProjectsStore());
+			databases.add((WebSqlAdapter) factory.getWebSocketsStore());
 		} catch(Exception e){
 			e.printStackTrace();
 			Log.error("Unable to initializa database",e);

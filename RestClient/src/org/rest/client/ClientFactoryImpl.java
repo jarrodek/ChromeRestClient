@@ -23,6 +23,7 @@ import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.store.StatusesStoreWebSql;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
+import org.rest.client.storage.store.WebSocketDataStoreWebSql;
 import org.rest.client.storage.websql.ExportedDataReferenceService;
 import org.rest.client.ui.AboutView;
 import org.rest.client.ui.AddEncodingView;
@@ -83,6 +84,7 @@ public class ClientFactoryImpl implements ClientFactory {
 	private static HeadersStoreWebSql headersStore = null;
 	private static StatusesStoreWebSql statusesStore = null;
 	private static ProjectStoreWebSql projectsStore = null;
+	private static WebSocketDataStoreWebSql webSocketSqlStore = null;
 	private static ExportedDataReferenceService exportedDataService = null;
 	/**
 	 * It must be cached and created only once!
@@ -282,5 +284,13 @@ public class ClientFactoryImpl implements ClientFactory {
 	@Override
 	public WebSocket getWebSocket() {
 		return GWT.create(WebSocketImpl.class);
+	}
+
+	@Override
+	public WebSocketDataStoreWebSql getWebSocketsStore() {
+		if(webSocketSqlStore == null){
+			webSocketSqlStore = GWT.create(WebSocketDataStoreWebSql.class);
+		}
+		return webSocketSqlStore;
 	}
 }

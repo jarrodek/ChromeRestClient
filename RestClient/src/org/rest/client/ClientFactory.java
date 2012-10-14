@@ -23,6 +23,7 @@ import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.store.StatusesStoreWebSql;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
+import org.rest.client.storage.store.WebSocketDataStoreWebSql;
 import org.rest.client.storage.websql.ExportedDataReferenceService;
 import org.rest.client.ui.AboutView;
 import org.rest.client.ui.AddEncodingView;
@@ -60,6 +61,8 @@ public interface ClientFactory {
 	HeadersStoreWebSql getHeadersStore();
 	StatusesStoreWebSql getStatusesStore();
 	ProjectStoreWebSql getProjectsStore();
+	WebSocketDataStoreWebSql getWebSocketsStore();
+	
 	//
 	// Temporary stores
 	//
