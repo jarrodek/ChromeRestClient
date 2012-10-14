@@ -49,7 +49,8 @@
 			<div class="source">
 				Source code at
 				<a href="http://code.google.com/p/chrome-rest-client/">Google Code Hosting</a>
-				under Apache License.
+				under Apache License.<br/>
+				Report issues at <a href="http://code.google.com/p/chrome-rest-client/issues/list">app issue list</a> (thanks).
 			</div>
 		</section>
 		<section class="{style.aboutContent}">
@@ -59,9 +60,8 @@
 		<section class="{style.aboutContent}">
 			<h3 class="{style.donateTitle}">If you like my work, please donate :)</h3>
 			<p>
-				Did you know if any of you donate €5 I could take one year off?
-				<br />
-				I like to have one year off! :)
+				Please, express your gratitude donating my work ;)<br/>
+				<strong>&euro;1</strong> is just fine if each of you donate. Really!
 			</p>
 			<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
 				<input type="hidden" name="cmd" value="_s-xclick" />

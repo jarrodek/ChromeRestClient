@@ -38,9 +38,10 @@ public class RequestEndEvent extends Event<RequestEndEvent.Handler> {
 	final private long requestTime;
 	
 	/**
-	 * 
-	 * @param payload action to perform
-	 * @param data any object to pass with request
+	 * Crate new request end event
+	 * @param success either true or false
+	 * @param response The response object or NULL on error 
+	 * @param requestTime The request time in milliseconds 
 	 */
 	public RequestEndEvent(boolean success, Response response, long requestTime) {
 		this.success = success;

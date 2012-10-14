@@ -73,7 +73,7 @@
 		<rcui:RequestUrlWidget ui:field="urlWidget"></rcui:RequestUrlWidget>
 		
 		<!-- Method selector -->
-		<g:HTMLPanel styleName="{style.methodsWidget}">
+		<div class="{style.methodsWidget}">
 			<g:RadioButton name="method" text="GET" ui:field="radioGet" checked="true" styleName="{style.radioButton}"></g:RadioButton>
 			<g:RadioButton name="method" text="POST" ui:field="radioPost" styleName="{style.radioButton}"></g:RadioButton>
 			<g:RadioButton name="method" text="PUT" ui:field="radioPut" styleName="{style.radioButton}"></g:RadioButton>
@@ -82,10 +82,10 @@
 			<g:RadioButton name="method" text="HEAD" ui:field="radioHead" styleName="{style.radioButton}"></g:RadioButton>
 			<g:RadioButton name="method" text="OPTIONS" ui:field="radioOptions" styleName="{style.radioButton}"></g:RadioButton>
 			<div>
-			<g:RadioButton name="method" text="Other" ui:field="radioOther" styleName="{style.radioButton}"></g:RadioButton>
-			<g:TextBox ui:field="otherMethodValue" enabled="false" addStyleNames="{style.otherInput}"></g:TextBox>
+				<g:RadioButton name="method" text="Other" ui:field="radioOther" styleName="{style.radioButton}"></g:RadioButton>
+				<g:TextBox ui:field="otherMethodValue" enabled="false" addStyleNames="{style.otherInput}"></g:TextBox>
 			</div>
-		</g:HTMLPanel>
+		</div>
 		
 		<!-- Headers widget -->
 		<rcui:RequestHeadersWidget ui:field="requestHeaders"></rcui:RequestHeadersWidget>

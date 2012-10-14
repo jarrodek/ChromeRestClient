@@ -2,12 +2,12 @@ package org.rest.client.ui.desktop.widget;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -22,19 +22,19 @@ public class QueryDetailRow extends Composite {
 	
 	@UiField SimplePanel keyPanel;
 	@UiField SimplePanel valuePanel;
+	@UiField InlineLabel removeButton;
 	
 	private final TextBox keyBox;
 	private final TextBox valueBox;
-	private final ClickHandler removeClickHandler;
-	
-	public QueryDetailRow(TextBox keyBox, TextBox valueBox, ClickHandler removeClickHandler) {
+
+	public QueryDetailRow(TextBox keyBox, TextBox valueBox) {
 		initWidget(uiBinder.createAndBindUi(this));
 		this.keyBox = keyBox;
 		this.valueBox = valueBox;
-		this.removeClickHandler = removeClickHandler;
+		
 		keyBox.getElement().setAttribute("placeholder", "key");
 		valueBox.getElement().setAttribute("placeholder", "value");
-		
+		removeButton.getElement().setAttribute("data-remove-row", "true");
 		
 		keyPanel.add(keyBox);
 		valuePanel.add(valueBox);
@@ -62,7 +62,6 @@ public class QueryDetailRow extends Composite {
 	@UiHandler("removeButton")
 	void onRemove(ClickEvent e){
 		this.removeFromParent();
-		removeClickHandler.onClick(e);
 	}
 	
 	@UiHandler("encodeButton")

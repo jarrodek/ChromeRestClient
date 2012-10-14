@@ -356,7 +356,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			setTabVisible(TABS.XML, xmlTab);
 		}
 		if(RestClient.isDebug()){
-			Log.debug("Response panel has been filled wint new data");
+			Log.debug("Response panel has been filled with new data");
 		}
 	}
 	

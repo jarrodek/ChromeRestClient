@@ -22,6 +22,7 @@ import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SavedPlace;
 import org.rest.client.place.SettingsPlace;
 import org.rest.client.place.ShortcutPlace;
+import org.rest.client.place.SocketPlace;
 
 import com.google.gwt.place.shared.PlaceHistoryMapper;
 import com.google.gwt.place.shared.WithTokenizers;
@@ -33,8 +34,9 @@ import com.google.gwt.place.shared.WithTokenizers;
  * separate TokenizerFactory.
  */
 @WithTokenizers({ AboutPlace.Tokenizer.class, RequestPlace.Tokenizer.class,
-		SettingsPlace.Tokenizer.class, 
-		ShortcutPlace.Tokenizer.class, HistoryPlace.Tokenizer.class, SavedPlace.Tokenizer.class, ImportExportPlace.Tokenizer.class })
+		SettingsPlace.Tokenizer.class, ShortcutPlace.Tokenizer.class,
+		HistoryPlace.Tokenizer.class, SavedPlace.Tokenizer.class,
+		ImportExportPlace.Tokenizer.class, SocketPlace.Tokenizer.class })
 public interface AppPlaceHistoryMapper extends PlaceHistoryMapper {
 
 }

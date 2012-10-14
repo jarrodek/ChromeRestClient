@@ -13,6 +13,7 @@ import org.rest.client.deprecated.SuggestionImportItem;
 import org.rest.client.importparser.ImportParser;
 import org.rest.client.importparser.ImportResult;
 import org.rest.client.request.ApplicationRequest;
+import org.rest.client.resources.AppResources;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.ImportExportView;
@@ -69,6 +70,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 	private Presenter listener;
 	private ImportResult currentFileImport = null;
 	@UiField Anchor fileDownload;
+	@UiField DivElement downloadFileAnchor;
 	@UiField HTML5FileUpload fileImport;
 	@UiField InlineLabel importFileLog;
 	@UiField HTMLPanel importPreview;
@@ -103,9 +105,9 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		fileDownload.getElement().setAttribute("disabled", "true");
 		Timer t = new Timer() {
 			@Override
-			public void run() {
-				fileDownload.setVisible(false);
-				fileDownload.setHref("");
+			public void run() {				
+				downloadFileAnchor.addClassName(AppResources.INSTANCE.appCss().hidden());
+				fileDownload.setHref("about:blank");
 				listener.revokeDownloadData();
 			}
 		};
@@ -126,6 +128,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 						fileDownload.getElement().setAttribute("download", fileName);
 						fileDownload.getElement().setAttribute("data-downloadurl", "application/json:"+fileName+":"+fileObjectUrl);
 						fileDownload.setVisible(true);
+						downloadFileAnchor.removeClassName(AppResources.INSTANCE.appCss().hidden());
 					}
 				});
 

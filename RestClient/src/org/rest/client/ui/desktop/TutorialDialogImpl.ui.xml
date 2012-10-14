@@ -1,0 +1,72 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:with field="appResources" type="org.rest.client.resources.AppResources"/>
+	<ui:style type="org.rest.client.ui.desktop.TutorialDialogImpl.WidgetStyle">
+		.wrapper{
+			position: absolute;
+			top:0px;
+			left:0px;
+			display: -webkit-box;
+			z-index: 2000;
+			opacity:0;
+			-webkit-transition: opacity 0.3s, 0.15s ease-out;
+		}
+		.wrapper[visible]{
+			opacity: 1 !important;
+		}
+		.content{
+			
+		}
+		.contentMargin{padding:17px 20px;}
+		.contentWrapper{
+			background: #363636;
+			color: #DDD;
+			-webkit-box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);			
+			box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+			display: -webkit-box;
+			position: relative;
+		}
+		.controls{display: -webkit-flex;-webkit-justify-content: space-between;margin-top: 7px;}
+		.arrowLeft {-webkit-box-orient: horizontal;}
+		.arrowRight {-webkit-box-orient: horizontal;}
+		.arrowTop{-webkit-box-orient: vertical;}
+		.arrowBottom{-webkit-box-orient: vertical;}
+		.arrow{display: -webkit-box;}
+		.hidden{display: none;}
+		
+		.arrowTop .contentWrapper,
+		.arrowLeft .contentWrapper{
+			-webkit-box-ordinal-group: 2;
+		}
+		.arrowTop .arrow,
+		.arrowLeft .arrow{
+			-webkit-box-ordinal-group: 1;
+		}
+		.arrowTop .arrow,
+		.arrowBottom .arrow{margin-left: 10px;}
+		.arrowRight .arrow,
+		.arrowLeft .arrow{margin-top: 10px;}
+		.close{position: absolute; top: 3px; right: 3px; display: block; text-decoration:none !important; cursor: pointer;font-size: x-small;border: 1px rgba(221, 221, 221, 0.39) solid;padding: 0px 3px;}
+		.close:hover{border: 1px rgba(221, 221, 221, 0.81) solid;}
+		.anchor{color: #DDD;text-decoration:underline; cursor:pointer;}
+		.anchor:hover{color: #DDD;}
+		.prev{}
+		.next{}
+		.finish{}
+	</ui:style>
+	<g:HTMLPanel ui:field="wrapper" styleName="{style.wrapper}">
+		<div class="{style.contentWrapper}">
+			<g:Anchor ui:field="close" styleName="{style.close} {style.anchor}">x</g:Anchor>
+			<div class="{style.contentMargin}">
+				<g:HTMLPanel ui:field="content" styleName="{style.content}"></g:HTMLPanel>
+				<g:HTMLPanel ui:field="controls" styleName="{style.controls} {style.hidden}">
+					<g:Anchor ui:field="prev" styleName="{style.prev} {style.anchor}">prev</g:Anchor>
+					<g:Anchor ui:field="next" styleName="{style.next} {style.anchor}">next</g:Anchor>
+					<g:Anchor ui:field="finish" styleName="{style.finish} {style.anchor}">finish</g:Anchor>
+				</g:HTMLPanel>
+			</div>
+		</div>
+		<div ui:field="arrow" class="{style.arrow} {style.hidden}"></div>
+	</g:HTMLPanel>
+</ui:UiBinder> 

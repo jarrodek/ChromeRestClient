@@ -10,6 +10,7 @@ import org.rest.client.place.ImportExportPlace;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SavedPlace;
 import org.rest.client.place.SettingsPlace;
+import org.rest.client.place.SocketPlace;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.LocalStore;
 import org.rest.client.storage.store.ProjectStoreWebSql;
@@ -50,6 +51,13 @@ public class UserMenuHandler {
 		request.setPlace(new RequestPlace("default"));
 		request.setSelected(true);
 		mv.addMenuItem(request);
+		
+		
+		final MenuItemView socket = clientFactory.createMenuItem(p);
+		socket.setText("Socket");
+		socket.setPlace(new SocketPlace("default"));
+		mv.addMenuItem(socket);
+		
 
 		final MenuItemView projects = clientFactory.createMenuItem(p);
 		projects.setText("Projects");
@@ -146,6 +154,8 @@ public class UserMenuHandler {
 							history.setSelected(true);
 						} else if(newPlace instanceof SavedPlace){
 							saved.setSelected(true);
+						} else if(newPlace instanceof SocketPlace){
+							socket.setSelected(true);
 						}
 					}
 			});

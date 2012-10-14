@@ -18,6 +18,7 @@ import com.google.gson.annotations.Expose;
 
 @PersistenceCapable
 public class Message {
+	
 	/**
 	 * key from userID
 	 */

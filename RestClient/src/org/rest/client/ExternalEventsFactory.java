@@ -22,13 +22,18 @@ import org.rest.client.event.ApplicationReadyEvent;
 import org.rest.client.event.ClearFormEvent;
 import org.rest.client.event.ClearHistoryEvent;
 import org.rest.client.event.CustomEvent;
+import org.rest.client.event.HttpEncodingChangeEvent;
 import org.rest.client.event.HttpMethodChangeEvent;
+import org.rest.client.event.RequestEndEvent;
 import org.rest.client.event.RequestStartActionEvent;
-import org.rest.client.event.RequestStopEvent;
 import org.rest.client.event.URLFieldToggleEvent;
 import org.rest.client.event.UrlValueChangeEvent;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.json.client.JSONBoolean;
+import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.xhr2.client.Response;
 import com.google.web.bindery.event.shared.EventBus;
 
 /**
@@ -91,14 +96,22 @@ public class ExternalEventsFactory {
 				fireDocumentEvent(CustomEvent.REQUEST_START_ACTION.getValue(), startTime);
 			}
 		});
-		RequestStopEvent.register(eventBus, new RequestStopEvent.Handler() {
+		
+		RequestEndEvent.register(eventBus, new RequestEndEvent.Handler() {
 			@Override
-			public void onStop(Date time) {
-				double endTime = (double) time.getTime();
-				fireDocumentEvent(CustomEvent.REQUEST_STOP.getValue(), endTime);
+			public void onResponse(boolean success, Response response, long requestTime) {
+				JSONObject obj = new JSONObject();
+				obj.put("error", JSONBoolean.getInstance(!success));
+				obj.put("requesttime", new JSONNumber(requestTime));
+				fireDocumentEvent(CustomEvent.REQUEST_STOP.getValue(), obj.getJavaScriptObject());
 			}
 		});
-		
+		HttpEncodingChangeEvent.register(eventBus, new HttpEncodingChangeEvent.Handler() {
+			@Override
+			public void onChange(String method) {
+				fireDocumentEvent(CustomEvent.HTTP_ENCODING_CHANGE.getValue(), method);
+			}
+		});
 		
 		
 		
@@ -169,6 +182,14 @@ public class ExternalEventsFactory {
 		if(passedData){
 			e.data = passedData;
 		}
+		$doc.dispatchEvent(e);
+	}-*/;
+	
+	private final static native void fireDocumentEvent(String eventName,
+			Object obj) /*-{
+		var e = $doc.createEvent('Events');
+		e.initEvent(eventName);
+		e.data = obj;
 		$doc.dispatchEvent(e);
 	}-*/;
 }

@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 import org.rest.client.event.RequestChangeEvent;
 import org.rest.client.event.RequestEndEvent;
 import org.rest.client.event.RequestStartActionEvent;
-import org.rest.client.event.RequestStopEvent;
 import org.rest.client.request.FilesObject;
 import org.rest.client.request.FormPayloadData;
 import org.rest.client.request.RequestHeadersParser;
@@ -104,8 +103,7 @@ public class AppRequestFactory {
 			Log.error(message, reason);
 		}
 		StatusNotification.notify(message, StatusNotification.TYPE_CRITICAL, StatusNotification.TIME_LONG, true);
-		RequestStopEvent e = new RequestStopEvent(new Date());
-		eventBus.fireEvent(e);
+		eventBus.fireEvent(new RequestEndEvent(false, null, 0));
 	}
 	
 	
@@ -190,6 +188,9 @@ public class AppRequestFactory {
 		
 		RequestBuilder builder = new RequestBuilder(requestUrl, method);
 		builder.setFollowRedirects(true);
+//		builder.setWithCredentials(true);
+//		builder.setTimeoutMillis(200);
+		
 		if (payload != null && !payload.equals("")) {
 			if(RestClient.isDebug()){
 				Log.debug("Set request data:");
@@ -298,7 +299,10 @@ public class AppRequestFactory {
 			@Override
 			public void onAbort(ProgressEvent event) {
 				requestInProgress = false;
-				eventBus.fireEvent(new RequestStopEvent(new Date()));
+				long loadingTime = 0;
+				if(startTime != null)
+					loadingTime = new Date().getTime() - startTime.getTime();
+				eventBus.fireEvent(new RequestEndEvent(false, null, loadingTime));
 				if(RestClient.isDebug()){
 					Log.error("Abort request.");
 				}
@@ -374,9 +378,6 @@ public class AppRequestFactory {
 			}
 		});
 		
-//		ExternalEventsFactory.postMessage(ExternalEventsFactory.EXT_OBSERVE_COOKIE, requestUrl);
-		
-		
 		if(RestClient.isDebug()){
 			Log.debug("All set. Sending...");
 		}
@@ -386,13 +387,11 @@ public class AppRequestFactory {
 			builder.send();
 		} catch (Throwable e) {
 			Log.error("Request send failure.", e);
-			
-//			ExternalEventsFactory.postMessage(ExternalEventsFactory.EXT_STOP_OBSERVE_COOKIE, null);
-			
-			eventBus.fireEvent(new RequestStopEvent(new Date()));
+			eventBus.fireEvent(new RequestEndEvent(false, null, 0));
 			requestInProgress = false;
 			ErrorDialogView dialog = RestClient.getClientFactory().getErrorDialogView();
 			dialog.getHandler().publish(new LogRecord(dialog.getHandler().getLevel(), e.getMessage()));
+			startTime = null;
 		}
 	}
 	
@@ -401,7 +400,6 @@ public class AppRequestFactory {
 			Log.debug("Request sent successfully. Building response view.");
 		}
 		requestInProgress = false;
-		eventBus.fireEvent(new RequestStopEvent(new Date()));
 		if(response == null){
 			Window.alert("Something goes wrong :(\nResponse is null!");
 			return;
@@ -418,10 +416,7 @@ public class AppRequestFactory {
 	}
 	
 	protected static void onFailureRequest(final Response response) {
-//		ExternalEventsFactory.postMessage(ExternalEventsFactory.EXT_STOP_OBSERVE_COOKIE, null);
-		
 		requestInProgress = false;
-		eventBus.fireEvent(new RequestStopEvent(new Date()));
 		ScheduledCommand sc = new ScheduledCommand() {
 			@Override
 			public void execute() {
@@ -477,7 +472,7 @@ public class AppRequestFactory {
 				HistoryObject old = null;
 				for(HistoryObject item : result){
 					String enc = item.getEncoding();
-					if(enc == null || !enc.equals(data.getEncoding())){
+					if(enc != null && !enc.equals(data.getEncoding())){
 						continue;
 					}
 					String itemHeaders = item.getHeaders();

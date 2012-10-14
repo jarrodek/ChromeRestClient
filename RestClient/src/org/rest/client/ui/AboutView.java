@@ -15,6 +15,8 @@
  ******************************************************************************/
 package org.rest.client.ui;
 
+import org.rest.client.tutorial.TutorialFactory;
+
 import com.google.gwt.chrome.runtime.ManifestDetails;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -46,4 +48,5 @@ public interface AboutView extends IsWidget {
 	 * @param manifest
 	 */
 	void setManifest(ManifestDetails manifest);
+	void setUpTutorial(TutorialFactory tutorialFactory);
 }

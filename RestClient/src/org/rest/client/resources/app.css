@@ -495,3 +495,30 @@
 	-o-flex: 1 0 0px;
 	flex: 1 0 0px; 
 }
+
+
+/* TUTORIAL */
+@sprite .trialngleTop {
+	gwt-image: "tutorialTrialngle";
+	width: 16px;
+	height: 8px;
+	background-position: -11px 0px;
+}
+@sprite .trialngleBottom{
+	gwt-image: "tutorialTrialngle";
+	width: 16px;
+	height: 8px;
+	background-position: -11px -30px;
+}
+@sprite .trialngleLeft{
+	gwt-image: "tutorialTrialngle";
+	width: 8px;
+	height: 17px;
+	background-position: 0px -10px;
+}
+@sprite .trialngleRight{
+	gwt-image: "tutorialTrialngle";
+	width: 8px;
+	height: 17px;
+	background-position: -30px -10px;
+}

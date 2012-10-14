@@ -1,6 +1,9 @@
 package org.rest.client.ui.desktop;
 
+import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.AboutView;
+import org.rest.client.ui.TutorialDialog;
+import org.rest.client.ui.TutorialDialog.Direction;
 
 import com.google.gwt.chrome.runtime.ManifestDetails;
 import com.google.gwt.core.client.GWT;
@@ -37,6 +40,23 @@ public class AboutViewImpl extends Composite implements AboutView {
 		String version = manifest.getVersion();
 		if(version == null) return;
 		versionField.setInnerText("Application version: " + version);
+	}
+
+	@Override
+	public void setUpTutorial(TutorialFactory factory) {
+		TutorialDialog plusone = TutorialFactory.createItem();
+		plusone.setAbsolutePosition(175, 123);
+		plusone.setHTML("<strong>+1 me! :)</strong><br/>You may also want to review my application in <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/advanced-rest-client-appl/hgmloofddffdnphfgcellkdfbfbjeloo/reviews?hl=en-US\">Chrome Web Store</a>");
+		plusone.showArrow(Direction.BOTTOM);
+		factory.addItem(plusone);
+		
+		TutorialDialog donate = TutorialFactory.createItem();
+		donate.setAbsolutePosition(228, 204);
+		donate.setHTML("<h1>Donate any value! :)</h1><br/>Please, express your gratitude donating my work. &euro; 1 is just fine if each of you donate :)");
+		donate.showArrow(Direction.BOTTOM);
+		factory.addItem(donate);
+		
+		factory.start();
 	}
 
 }

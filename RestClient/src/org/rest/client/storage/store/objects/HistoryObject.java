@@ -51,6 +51,13 @@ public class HistoryObject extends JavaScriptObject {
 		return this.id;
 	}-*/;
 	
+	/**
+	 * @param id ID to set (on update only)
+	 */
+	public final native void setId(int id) /*-{
+		this.id = id;
+	}-*/;
+	
 	public final native void setTime(Date time) /*-{
 		this.time = time;
 	}-*/;

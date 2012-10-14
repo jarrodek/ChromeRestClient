@@ -91,4 +91,11 @@ public interface AppCssResource extends CssResource {
 	String historySelected();
 	String historyFlex1();
 	
+	
+	/* TUTORIAL */
+	String trialngleTop();
+	String trialngleBottom();
+	String trialngleLeft();
+	String trialngleRight();
+	
 }

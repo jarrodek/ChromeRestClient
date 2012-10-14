@@ -17,11 +17,14 @@ package org.rest.client.ui;
 
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import org.rest.client.event.RequestChangeEvent;
 import org.rest.client.request.FilesObject;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
+import org.rest.client.tutorial.TutorialFactory;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -47,6 +50,16 @@ public interface RequestView extends IsWidget {
 		 * Fire event for clear form action
 		 */
 		void fireClearAllEvent();
+		
+		void fireEncodingChangeEvent(String newEncoding);
+		
+		void fireMethodChangeEvent(String newMethod);
+		
+		void fireUrlChangeEvent(String newUrl);
+		
+		void fireUrlToggleEvent(boolean isNowSimpleView);
+		
+		void fireRequestStartActionEvent(Date startTime);
 	}
 	
 	/**
@@ -82,4 +95,14 @@ public interface RequestView extends IsWidget {
 	void appendEncodingValues(String[] values);
 	
 	void setProjectData(ProjectObject project, List<RequestObject> requests);
+	/**
+	 * Set up tutorial.
+	 * @param factory
+	 */
+	void setUpTutorial(TutorialFactory factory);
+	
+	void handleUrlValueChangeEvent(String url);
+	void handleRequestStartActionEvent(Date time);
+	void handleRequestEndEvent();
+	void handleRequestChangeEvent(RequestChangeEvent event);
 }

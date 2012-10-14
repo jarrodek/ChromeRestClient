@@ -16,6 +16,7 @@
 package org.rest.client.activity;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,8 +26,14 @@ import org.rest.client.ExternalEventsFactory;
 import org.rest.client.RestClient;
 import org.rest.client.event.AddEncodingEvent;
 import org.rest.client.event.ClearFormEvent;
+import org.rest.client.event.HttpEncodingChangeEvent;
+import org.rest.client.event.HttpMethodChangeEvent;
 import org.rest.client.event.OverwriteUrlEvent;
+import org.rest.client.event.RequestChangeEvent;
 import org.rest.client.event.RequestEndEvent;
+import org.rest.client.event.RequestStartActionEvent;
+import org.rest.client.event.URLFieldToggleEvent;
+import org.rest.client.event.UrlValueChangeEvent;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.RedirectData;
 import org.rest.client.request.RequestParameters;
@@ -39,6 +46,7 @@ import org.rest.client.storage.store.objects.HistoryObject;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.storage.websql.HeaderRow;
+import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.AddEncodingView;
 import org.rest.client.ui.RequestView;
 import org.rest.client.ui.ResponseView;
@@ -77,6 +85,7 @@ public class RequestActivity extends AppActivity implements
 	protected ResponseView responseView;
 	protected RequestView requestView;
 	FlowPanel viewFlowPanel;
+	TutorialFactory tutorialFactory = null;
 	
 	public RequestActivity(RequestPlace place, ClientFactory clientFactory) {
 		super(clientFactory);
@@ -91,6 +100,9 @@ public class RequestActivity extends AppActivity implements
 			RestClient.setPreviousProject(RestClient.getOpenedProject());
 			RestClient.setOpenedProject(-1);
 		}
+		
+		Storage store = Storage.getSessionStorageIfSupported();
+		store.removeItem("restoredRequest");
 
 		requestView = this.clientFactory.getRequestView();
 		requestView.reset();
@@ -115,8 +127,6 @@ public class RequestActivity extends AppActivity implements
 				restoreLatestRequest(requestView);
 			}
 		} else if(place.isProject()){
-			
-			
 			try{
 				int projectId = Integer.parseInt(entryId);
 				RestClient.setOpenedProject(projectId);
@@ -158,8 +168,11 @@ public class RequestActivity extends AppActivity implements
 			restoreLatestRequest(requestView);
 		}
 		observeEvents();
+		activateTutorial();
 	}
 	
+	
+
 	/**
 	 * 
 	 * @param projectId -1 if project ID is unknown
@@ -372,25 +385,40 @@ public class RequestActivity extends AppActivity implements
 	
 
 	private void observeEvents() {
-//		RequestChangeEvent.register(eventBus, new RequestChangeEvent.Handler() {
-//			@Override
-//			public void onChange(RequestChangeEvent event) {
-//				Log.debug("RequestChangeEvent: " + event.getChangeType()); 
-//			}
-//		});
+		
+		//When request starts disable UI controls
+		RequestStartActionEvent.register(eventBus, new RequestStartActionEvent.Handler() {
+			@Override
+			public void onStart(Date time) {
+				requestView.handleRequestStartActionEvent(time);
+			}
+		});
+		
 		OverwriteUrlEvent.register(eventBus, new OverwriteUrlEvent.Handler() {
 			@Override
 			public void onUrlChange(String url) {
 				requestView.setUrl(url);
 			}
 		});
+		
+		RequestChangeEvent.register(eventBus, new RequestChangeEvent.Handler() {
+			@Override
+			public void onChange(RequestChangeEvent event) {
+				requestView.handleRequestChangeEvent(event);
+			}
+		});
+		
 		RequestEndEvent.register(eventBus, new RequestEndEvent.Handler() {
 			@Override
 			public void onResponse(boolean success, final Response response, long requestTime) {
+				
+				requestView.handleRequestEndEvent();
+				
 				if(responseView != null){
 					responseView.asWidget().removeFromParent();
 					responseView = null;
 				}
+				
 				responseView = clientFactory.getResponseView();
 				viewFlowPanel.add(responseView);
 				responseView.setPresenter(RequestActivity.this);
@@ -598,6 +626,7 @@ public class RequestActivity extends AppActivity implements
 
 			@Override
 			public void onSuccess(RequestObject result) {
+				
 				if (result == null) {
 					view.setUrl(null);
 					view.setMethod(null);
@@ -606,10 +635,14 @@ public class RequestActivity extends AppActivity implements
 					view.setEncoding(null);
 					return;
 				}
+				
 				if(result.getProject() > 0){
 					showProjectRelatedData(result.getProject(), null, view);
 					RestClient.setOpenedProject(result.getProject());
 				}
+				
+				Storage store = Storage.getSessionStorageIfSupported();
+				store.setItem("restoredRequest", ""+savedId);
 				
 				view.setUrl(result.getURL());
 				view.setMethod(result.getMethod());
@@ -711,8 +744,19 @@ public class RequestActivity extends AppActivity implements
 
 	@Override
 	public String mayStop() {
-		revokeDownloadData();
 		
+//		Storage store = Storage.getSessionStorageIfSupported();
+//		String restored = store.getItem("restoredRequest");
+//		if(restored != null && !restored.isEmpty()){
+			//TODO: check if anything is changed, if it is changed set warning.  
+//		}
+		
+		
+		revokeDownloadData();
+		if(tutorialFactory != null){
+			tutorialFactory.clear();
+		}
+				
 		RequestView view = this.clientFactory.getRequestView();
 		RequestObject ro = RequestObject.createRequest();
 		ro.setEncoding(view.getEncoding());
@@ -847,5 +891,39 @@ public class RequestActivity extends AppActivity implements
 	private final native void revokeDownloadDataImpl(String url) /*-{
 		$wnd.URL.revokeObjectURL(url);
 	}-*/;
+	
+	private void activateTutorial() {
+		tutorialFactory = new TutorialFactory("request");
+		
+		if(!tutorialFactory.canStartTutorial()){
+			return;
+		}
+		requestView.setUpTutorial(tutorialFactory);
+	}
+
+	@Override
+	public void fireEncodingChangeEvent(String newEncoding) {
+		eventBus.fireEvent(new HttpEncodingChangeEvent(newEncoding));
+	}
+
+	@Override
+	public void fireMethodChangeEvent(String newMethod) {
+		eventBus.fireEvent(new HttpMethodChangeEvent(newMethod));
+	}
+
+	@Override
+	public void fireUrlChangeEvent(String newUrl) {
+		eventBus.fireEvent(new UrlValueChangeEvent(newUrl));
+	}
+
+	@Override
+	public void fireUrlToggleEvent(boolean isNowSimpleView) {
+		eventBus.fireEvent(new URLFieldToggleEvent(isNowSimpleView));
+	}
+
+	@Override
+	public void fireRequestStartActionEvent(Date startTime) {
+		eventBus.fireEvent(new RequestStartActionEvent(startTime));
+	}
 	
 }

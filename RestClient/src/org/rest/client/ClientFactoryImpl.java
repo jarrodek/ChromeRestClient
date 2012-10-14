@@ -39,6 +39,7 @@ import org.rest.client.ui.SaveRequestDialogView;
 import org.rest.client.ui.SavedView;
 import org.rest.client.ui.SettingsView;
 import org.rest.client.ui.ShortcutView;
+import org.rest.client.ui.SocketView;
 import org.rest.client.ui.desktop.AboutViewImpl;
 import org.rest.client.ui.desktop.AddEncodingViewImpl;
 import org.rest.client.ui.desktop.ErrorDialogViewImpl;
@@ -53,6 +54,9 @@ import org.rest.client.ui.desktop.SaveRequestDialogViewImpl;
 import org.rest.client.ui.desktop.SavedViewImpl;
 import org.rest.client.ui.desktop.SettingsViewImpl;
 import org.rest.client.ui.desktop.ShortcutViewImpl;
+import org.rest.client.ui.desktop.SocketViewImpl;
+import org.rest.client.websocket.WebSocket;
+import org.rest.client.websocket.WebSocketImpl;
 
 import com.google.gwt.chrome.message.BackgroundMessage;
 import com.google.gwt.chrome.message.ChromeMessagePassing;
@@ -268,5 +272,15 @@ public class ClientFactoryImpl implements ClientFactory {
 					.create(ExportedDataReferenceService.class);
 		}
 		return exportedDataService;
+	}
+
+	@Override
+	public SocketView getSocketView() {
+		return GWT.create(SocketViewImpl.class);
+	}
+
+	@Override
+	public WebSocket getWebSocket() {
+		return GWT.create(WebSocketImpl.class);
 	}
 }

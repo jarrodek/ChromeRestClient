@@ -23,6 +23,7 @@ import org.rest.client.activity.RequestActivity;
 import org.rest.client.activity.SavedActivity;
 import org.rest.client.activity.SettingsActivity;
 import org.rest.client.activity.ShortcutActivity;
+import org.rest.client.activity.SocketActivity;
 import org.rest.client.place.AboutPlace;
 import org.rest.client.place.HistoryPlace;
 import org.rest.client.place.ImportExportPlace;
@@ -30,6 +31,7 @@ import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SavedPlace;
 import org.rest.client.place.SettingsPlace;
 import org.rest.client.place.ShortcutPlace;
+import org.rest.client.place.SocketPlace;
 
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
@@ -70,6 +72,8 @@ public class AppActivityMapper implements ActivityMapper {
 			return new SavedActivity((SavedPlace)place, clientFactory);
 		} else if (place instanceof ImportExportPlace){
 			return new ImportExportActivity((ImportExportPlace)place, clientFactory);
+		} else if (place instanceof SocketPlace){
+			return new SocketActivity((SocketPlace)place, clientFactory);
 		}
 		return null;
 	}

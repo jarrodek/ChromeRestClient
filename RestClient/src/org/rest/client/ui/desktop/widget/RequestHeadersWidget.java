@@ -122,22 +122,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		rawTab.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				if(currentTab.equals(TABS.RAW)) return;
-				
-				String tabHandlercurrent = appStyle.inlineButtonChecked();
-				String tabsContent = appStyle.tabsContent();
-				String cssTabContent = appStyle.tabContent();
-				String tabContentCurrent = appStyle.tabContentCurrent();
-				
-				HTML5Element tab = (HTML5Element) rawTab.getElement();
-				((HTML5Element)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
-				tab.getClassList().add(tabHandlercurrent);
-				
-				HTML5Element contentParent = (HTML5Element) tabContent.getParentElement();
-				contentParent.querySelector("." + tabsContent + " ." + cssTabContent + "." + tabContentCurrent).getClassList().remove(tabContentCurrent);
-				contentParent.querySelector("." + tabsContent + " ." + cssTabContent + "[data-tab=\"raw\"]").getClassList().add(tabContentCurrent);
-		        
-				currentTab = TABS.RAW;
+				openRawTab();
 			}
 		});
 		rawTab.addMouseOverHandler(new MouseOverHandler() {
@@ -159,26 +144,10 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		formTab.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				if(currentTab.equals(TABS.FORM)) return;
-				
-				updateForm();
-				ensureFormHasRow();
-				
-				String tabHandlercurrent = appStyle.inlineButtonChecked();
-				String tabsContent = appStyle.tabsContent();
-				String cssTabContent = appStyle.tabContent();
-				String tabContentCurrent = appStyle.tabContentCurrent();
-				
-				HTML5Element tab = (HTML5Element) formTab.getElement();
-				((HTML5Element)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
-				tab.getClassList().add(tabHandlercurrent);
-				
-				HTML5Element contentParent = (HTML5Element) tabContent.getParentElement();
-				contentParent.querySelector("." + tabsContent + " ." + cssTabContent + "." + tabContentCurrent).getClassList().remove(tabContentCurrent);
-				contentParent.querySelector("." + tabsContent + " ." + cssTabContent + "[data-tab=\"form\"]").getClassList().add(tabContentCurrent);
-		        
-				currentTab = TABS.FORM;
+				openFormTab();
 			}
+
+			
 		});
 		formTab.addMouseOverHandler(new MouseOverHandler() {
 			@Override
@@ -196,6 +165,56 @@ public class RequestHeadersWidget extends Composite implements HasText {
 					tab.getClassList().remove(appStyle.inlineButtonHover());
 			}
 		});
+	}
+	private void openRawTab() {
+		if(currentTab.equals(TABS.RAW)) return;
+		
+		String tabHandlercurrent = appStyle.inlineButtonChecked();
+		String tabsContent = appStyle.tabsContent();
+		String cssTabContent = appStyle.tabContent();
+		String tabContentCurrent = appStyle.tabContentCurrent();
+		
+		HTML5Element tab = (HTML5Element) rawTab.getElement();
+		((HTML5Element)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
+		tab.getClassList().add(tabHandlercurrent);
+		
+		HTML5Element contentParent = (HTML5Element) tabContent.getParentElement();
+		contentParent.querySelector("." + tabsContent + " ." + cssTabContent + "." + tabContentCurrent).getClassList().remove(tabContentCurrent);
+		contentParent.querySelector("." + tabsContent + " ." + cssTabContent + "[data-tab=\"raw\"]").getClassList().add(tabContentCurrent);
+		
+		currentTab = TABS.RAW;
+	}
+	
+	private void openFormTab() {
+		if(currentTab.equals(TABS.FORM)) return;
+		
+		updateForm();
+		ensureFormHasRow();
+		
+		String tabHandlercurrent = appStyle.inlineButtonChecked();
+		String tabsContent = appStyle.tabsContent();
+		String cssTabContent = appStyle.tabContent();
+		String tabContentCurrent = appStyle.tabContentCurrent();
+		
+		HTML5Element tab = (HTML5Element) formTab.getElement();
+		((HTML5Element)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
+		tab.getClassList().add(tabHandlercurrent);
+		
+		HTML5Element contentParent = (HTML5Element) tabContent.getParentElement();
+		contentParent.querySelector("." + tabsContent + " ." + cssTabContent + "." + tabContentCurrent).getClassList().remove(tabContentCurrent);
+		contentParent.querySelector("." + tabsContent + " ." + cssTabContent + "[data-tab=\"form\"]").getClassList().add(tabContentCurrent);
+        
+		currentTab = TABS.FORM;
+	}
+	
+	
+	public void setTabOpened(TABS tab){
+		if(tab == null) return;
+		if(tab.equals(TABS.FORM)){
+			openFormTab();
+		} else {
+			openRawTab();
+		}
 	}
 	
 	public void clear(){
@@ -461,4 +480,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		headersData = RequestHeadersParser.headersListToString(list);
 		headersRawInput.setValue(headersData);
 	}
+
+
+	
 }

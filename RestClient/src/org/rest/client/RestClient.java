@@ -324,8 +324,11 @@ public class RestClient implements EntryPoint {
 	 */
 	public static void saveRequestData(final RequestObject obj, final Callback<RequestObject, Throwable> callback){
 		final RequestDataStoreWebSql store = clientFactory.getRequestDataStore();
-		
-		store.put(obj, null, new StoreResultCallback<Integer>() {
+		Integer updateId = null;
+		if(obj.getId() > 0){
+			updateId = obj.getId();
+		}
+		store.put(obj, updateId, new StoreResultCallback<Integer>() {
 			
 			@Override
 			public void onSuccess(Integer result) {
@@ -341,6 +344,8 @@ public class RestClient implements EntryPoint {
 			}
 		});
 	}
+	
+	
 	
 	/**
 	 * Get application unique ID (36 characters).

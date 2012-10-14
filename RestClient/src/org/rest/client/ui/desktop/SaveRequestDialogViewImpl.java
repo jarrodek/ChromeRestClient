@@ -29,6 +29,7 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -56,6 +57,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	@UiField DivElement projectNameContainer;
 	@UiField DivElement requestOverwriteContainer;
 	@UiField Button save;
+	@UiField Button overwrite;
 	
 	@UiField CheckBox protocolStatus;
 	@UiField CheckBox serverStatus;
@@ -68,6 +70,8 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	
 	private String requestOrygURL = "";
 	private AppCssResource appStyle = AppResources.INSTANCE.appCss();
+	private int overwriteId = -1;
+	private boolean forceOverwrite = false;
 	
 	public SaveRequestDialogViewImpl(){
 		setPreviewURL();
@@ -117,8 +121,40 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		
 		prevUrlTextBox.setText(requestOrygURL);
 		updatePreviewURL();
-		Log.debug("Try set projects list");
 		setProjectsList();
+		
+		//
+		//check if it is a restored request. User may want to overwrite existing request.
+		//
+		Storage store = Storage.getSessionStorageIfSupported();
+		String restored = store.getItem("restoredRequest");
+		if(restored != null && !restored.isEmpty()){
+			int restoredId = -1;
+			try{
+				restoredId = Integer.parseInt(restored);
+			} catch(Exception e){}
+			if(restoredId > 0){
+				overwriteId = restoredId;
+				RestClient.getClientFactory().getRequestDataStore().getByKey(restoredId, new StoreResultCallback<RequestObject>(){
+					@Override
+					public void onSuccess(RequestObject result) {
+						if (result == null) {
+							overwriteId = -1;
+							return;
+						}
+						
+						name.setValue(result.getName());
+						overwrite.setVisible(true);
+						save.setText("Save as new");
+					}
+
+					@Override
+					public void onError(Throwable e) {
+						overwriteId = -1;
+						Log.error("Unable read stored data :(", e);
+					}});
+			}
+		}
 	}
 	
 	
@@ -268,13 +304,25 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	@UiHandler("save")
 	void onSave(ClickEvent event) {
 		save.setEnabled(false);
+		forceOverwrite = false;
 		doSaveRequest();
 	}
+	@UiHandler("overwrite")
+	void onOverwrite(ClickEvent event){
+		save.setEnabled(false);
+		overwrite.setEnabled(false);
+		forceOverwrite = true;
+		doSaveRequest();
+	}
+	
+	
 	
 	@Override
 	public void onClose(CloseEvent<PopupPanel> event) {
 		
 	}
+	
+	
 	@Override
 	public void onKeyDown(KeyDownEvent event) {
 		
@@ -311,7 +359,9 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				result.setSkipProtocol(protocolStatus.getValue());
 				result.setSkipServer(serverStatus.getValue());
 				result.setSkipPath(pathStatus.getValue());
-				
+				if(forceOverwrite && overwriteId > 0){
+					result.setId(overwriteId);
+				}
 				//
 				//check project data
 				//

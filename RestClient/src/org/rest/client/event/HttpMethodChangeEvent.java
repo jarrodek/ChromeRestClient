@@ -55,7 +55,7 @@ public class HttpMethodChangeEvent extends Event<HttpMethodChangeEvent.Handler> 
 	 */
 	public interface Handler {
 		/**
-		 * @param true if current view is "simple" view.
+		 * @param current selected method
 		 */
 		void onMethodChange(String method);
 	}

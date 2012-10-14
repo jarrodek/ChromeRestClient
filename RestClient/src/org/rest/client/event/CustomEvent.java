@@ -69,14 +69,14 @@ public enum CustomEvent {
 	 * </pre>
 	 * </p>
 	 */
-	REQUEST_START_ACTION("arc:start"),
+	REQUEST_START_ACTION("arc:httpstart"),
 	/**
-	 * This event is fired when request has stopped either by error or success.
-	 * This event has additional attribute "data" with (java double) end time.
+	 * This event is fired when request has stopped either with error or success.
+	 * This event has additional attribute "data" with request time (java double, "requesttime" paqrameter) and (boolean) "error" parameter.
 	 * <p>
 	 * For example:
 	 * <pre>
-	 * document.addEventListener('arc:httpstop', function(e){ var endTime = parseInt(e.data); //do something... });
+	 * document.addEventListener('arc:httpstop', function(e){ if(!e.data.error) {var endTime = parseInt(e.data.requesttime); //do something... }});
 	 * </pre>
 	 * </p>
 	 */
@@ -126,7 +126,7 @@ public enum CustomEvent {
 	 * 	var currentHttpMethod = e.data;
 	 * 	// do something with this information....
 	 * }
-	 * document.addEventListener('arc:urltoggle', fn);
+	 * document.addEventListener('arc:metodchange', fn);
 	 * </pre>
 	 * 
 	 * Note: data attribute may be undefined if user selects "Other" and input
@@ -135,7 +135,35 @@ public enum CustomEvent {
 	 */
 	HTTP_METHOD_CHANGE("arc:metodchange"),
 	/**
+	 * User change HTTP payload encoding to new value.<br/>
+	 * This event has additional attribute "data" with value as current HTTP
+	 * payload encoding.
+	 * <p>
+	 * For example (javascript):
+	 * 
+	 * <pre>
+	 * var fn = function(e){
+	 * 	var currentHttpEncoding = e.data;
+	 * 	// do something with this information....
+	 * }
+	 * document.addEventListener('arc:encodingchange', fn);
+	 * </pre>
+	 * 
+	 * Note: data attribute may be undefined if user switch to GET method (no payload).
+	 * </p>
+	 */
+	HTTP_ENCODING_CHANGE("arc:encodingchange"),
+	/**
 	 * User clears history store.<br/>
+	 * It don't have any additional fields.
+	 * <p>
+	 * For example (javascript):
+	 * 
+	 * <pre>
+	 * document.addEventListener('arc:historyclear', function(e){ //do something });
+	 * </pre>
+	 * 
+	 * </p>
 	 */
 	CLEAR_HISTORY("arc:historyclear");
 	

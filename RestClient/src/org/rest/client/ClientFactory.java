@@ -38,6 +38,8 @@ import org.rest.client.ui.SaveRequestDialogView;
 import org.rest.client.ui.SavedView;
 import org.rest.client.ui.SettingsView;
 import org.rest.client.ui.ShortcutView;
+import org.rest.client.ui.SocketView;
+import org.rest.client.websocket.WebSocket;
 
 import com.google.gwt.chrome.message.ChromeMessagePassing;
 import com.google.gwt.place.shared.PlaceController;
@@ -83,4 +85,7 @@ public interface ClientFactory {
 	
 	// Communication with extension
 	ChromeMessagePassing getChromeMessagePassing();
+	SocketView getSocketView();
+	
+	WebSocket getWebSocket();
 }

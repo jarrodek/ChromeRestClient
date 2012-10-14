@@ -26,7 +26,6 @@ import org.rest.client.ui.html5.HTML5Element;
 import org.rest.client.ui.html5.ListItem;
 import org.rest.client.ui.html5.ListPanel;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -212,7 +211,6 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 					addChild(emptyLabel);
 				}
 				setOpened(true);
-				Log.debug("Something is wrong .. " + (place != null) + ", " + (listener != null) );
 			}
 		}
 	}

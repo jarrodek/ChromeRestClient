@@ -47,24 +47,39 @@ public class RequestDataStoreWebSql extends WebSqlAdapter<Integer, RequestObject
 	}
 
 	@Override
-	public void put(RequestObject obj, Integer key,
+	public void put(RequestObject obj, final Integer key,
 			final StoreResultCallback<Integer> callback) {
-		service.insertData(obj, new Date(), new RowIdListCallback() {
-			
-			@Override
-			public void onFailure(DataServiceException error) {
-				callback.onError(error);
-			}
-			
-			@Override
-			public void onSuccess(List<Integer> rowIds) {
-				if(rowIds.size() == 0){
-					callback.onError(null);
-					return;
+		if(key == null){
+			service.insertData(obj, new Date(), new RowIdListCallback() {
+				
+				@Override
+				public void onFailure(DataServiceException error) {
+					callback.onError(error);
 				}
-				callback.onSuccess(rowIds.get(0));
-			}
-		});
+				
+				@Override
+				public void onSuccess(List<Integer> rowIds) {
+					if(rowIds.size() == 0){
+						callback.onError(null);
+						return;
+					}
+					callback.onSuccess(rowIds.get(0));
+				}
+			});
+		} else {
+			service.updateData(obj, new Date(), new VoidCallback() {
+				
+				@Override
+				public void onFailure(DataServiceException error) {
+					callback.onError(error);
+				}
+
+				@Override
+				public void onSuccess() {
+					callback.onSuccess(key);
+				}
+			});
+		}
 	}
 
 	@Override

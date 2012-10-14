@@ -20,17 +20,19 @@ import java.util.Date;
 import java.util.List;
 
 import org.rest.client.RestClient;
-import org.rest.client.event.RequestStartActionEvent;
-import org.rest.client.event.URLFieldToggleEvent;
-import org.rest.client.event.UrlValueChangeEvent;
 import org.rest.client.request.URLParser;
 import org.rest.client.request.URLParser.QueryParam;
 import org.rest.client.resources.AppResources;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.suggestion.UrlsSuggestOracle;
+import org.rest.client.ui.RequestView.Presenter;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.EventTarget;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -38,9 +40,7 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -51,11 +51,9 @@ import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay;
-import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.web.bindery.event.shared.EventBus;
 
 /**
  * 
@@ -85,14 +83,13 @@ public class RequestUrlWidget extends Composite implements HasText {
 	@UiField InlineLabel toggleView;
 	@UiField WidgetStyle style;
 	
-	final private EventBus eventBus;
+	private Presenter listener = null;
 	final private ArrayList<QueryDetailRow> queryParamsList = new ArrayList<QueryDetailRow>();
 	private Date lastEnterTime;
 	private UrlsSuggestionDisplay suggestionsDisplay;
 	private UrlsSuggestOracle suggestOracle;
 	
-	public RequestUrlWidget(final EventBus eventBus) {
-		this.eventBus = eventBus;
+	public RequestUrlWidget() {
 		
 		UrlHistoryStoreWebSql historyStore = RestClient.getClientFactory().getUrlHistoryStore();
 		
@@ -106,41 +103,71 @@ public class RequestUrlWidget extends Composite implements HasText {
 		//init widget
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
 		
-		
-		urlField.addValueChangeHandler(new ValueChangeHandler<String>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<String> event) {
-				if(suggestionsDisplay.isSuggestionListShowing()){
-					return;
-				}
-				eventBus.fireEvent(new UrlValueChangeEvent(event.getValue()));
-			}
-		});
-		urlField.addKeyDownHandler(anyValueKeyDownHandler);
-		urlField.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
-			@Override
-			public void onSelection(SelectionEvent<Suggestion> event) {
-				suggestionCallback();
-			}
-		});
-		
-		detailedHostField.addKeyDownHandler(anyValueKeyDownHandler);
-		detailedPathField.addKeyDownHandler(anyValueKeyDownHandler);
-		detailedHashField.addKeyDownHandler(anyValueKeyDownHandler);
-		
 		detailedHostField.getElement().setAttribute("placeholder", "HOST");
 		detailedPathField.getElement().setAttribute("placeholder", "PATH");
 		detailedHashField.getElement().setAttribute("placeholder", "HASH");
 		
-		detailedHostField.addValueChangeHandler(anyValueChangeHandler);
-		detailedPathField.addValueChangeHandler(anyValueChangeHandler);
-		detailedHashField.addValueChangeHandler(anyValueChangeHandler);
+		setParamsContainerEvents();
+	}
+	
+	public void setPresenter(Presenter listener){
+		this.listener = listener;
+	}
+	
+	/**
+	 * paramsContainer listen for the change, click and key down events.
+	 * On change event it checking if event target is input field and if it is, it update URL value.
+	 * On key down event it is looking for ENTER key to starts the request.
+	 * On click event it is looking for the remove row button and it will update UTL value. 
+	 */
+	private void setParamsContainerEvents(){
+		paramsContainer.addDomHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				EventTarget et = event.getNativeEvent().getEventTarget();
+				if(Element.is(et)){
+					Element el = Element.as(et);
+					if(el.getNodeName().toLowerCase().equals("input")){
+						updateURL();
+					}
+				}
+			}
+		}, ChangeEvent.getType());
+		
+		paramsContainer.addDomHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				EventTarget et = event.getNativeEvent().getEventTarget();
+				if(Element.is(et)){
+					Element el = Element.as(et);
+					if(el.getNodeName().toLowerCase().equals("span")){
+						String attr = el.getAttribute("data-remove-row");
+						if(attr != null && !attr.isEmpty()){
+							updateURL();
+						}
+					}
+					
+				}
+			}
+		}, ClickEvent.getType());
+		
+		paramsContainer.addDomHandler(new KeyDownHandler() {
+			@Override
+			public void onKeyDown(KeyDownEvent event) {
+				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+					updateURL();
+					performEnterKeyAction();
+				}
+			}
+		}, KeyDownEvent.getType());
 	}
 	
 	
 	private void suggestionCallback() {
 		String url = urlField.getValue();
-		eventBus.fireEvent(new UrlValueChangeEvent(url));
+		if(listener != null){
+			listener.fireUrlChangeEvent(url);
+		}
 	}
 	
 	public void clearAll(){
@@ -149,7 +176,36 @@ public class RequestUrlWidget extends Composite implements HasText {
 		detailedPathField.setValue(null);
 		detailedHashField.setValue(null);
 		clearForm();
-		eventBus.fireEvent(new UrlValueChangeEvent(null));
+		if(listener != null){
+			listener.fireUrlChangeEvent(null);
+		}
+	}
+	
+	@UiHandler({"detailedHostField","detailedPathField","detailedHashField"})
+	void onAnyValueChange(ValueChangeEvent<String> event) {
+		updateURL();
+	}
+	
+	
+	@UiHandler("urlField")
+	void onSelectionChange(SelectionEvent<Suggestion> event){
+		suggestionCallback();
+	}
+	
+	
+	@UiHandler({"urlField","detailedHostField","detailedPathField","detailedHashField"})
+	void onAnyValueKeyDownHandler(KeyDownEvent event) {
+		if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+			performEnterKeyAction();
+		}
+	}
+	
+	@UiHandler("urlField")
+	void onUrlValueChange(ValueChangeEvent<String> event){
+		if(suggestionsDisplay.isSuggestionListShowing()){
+			return;
+		}
+		listener.fireUrlChangeEvent(event.getValue());
 	}
 	
 	@UiHandler("addParam")
@@ -161,6 +217,11 @@ public class RequestUrlWidget extends Composite implements HasText {
 	@UiHandler("toggleView")
 	void onToggleView(ClickEvent e){
 		e.preventDefault();
+		toggleView();
+	}
+
+
+	private void toggleView() {
 		boolean isNowSimpleView = true;
 		if(detailedPanel.getClassName().contains("hidden")){
 			detailedPanel.removeClassName("hidden");
@@ -177,24 +238,25 @@ public class RequestUrlWidget extends Composite implements HasText {
 			toggleView.addStyleName(AppResources.INSTANCE.appCss().handlerImageClosed());
 			toggleView.removeStyleName(AppResources.INSTANCE.appCss().handlerImageOpened());
 		}
-		
-		eventBus.fireEvent(new URLFieldToggleEvent(isNowSimpleView));
+		listener.fireUrlToggleEvent(isNowSimpleView);
 	}
 	
-	ValueChangeHandler<String> anyValueChangeHandler = new ValueChangeHandler<String>() {
-		@Override
-		public void onValueChange(ValueChangeEvent<String> event) {
-			updateURL();
-		}
-	};
-	KeyDownHandler anyValueKeyDownHandler = new KeyDownHandler() {
-		@Override
-		public void onKeyDown(KeyDownEvent event) {
-			if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-				performEnterKeyAction();
+	/**
+	 * Toggle view.
+	 * @param expanded true if it should be expanded
+	 */
+	public void setToogleView(boolean expanded){
+		if(expanded){
+			if(detailedPanel.getClassName().contains("hidden")){
+				toggleView();
+			}
+		} else {
+			if(!detailedPanel.getClassName().contains("hidden")){
+				toggleView();
 			}
 		}
-	};
+	}
+	
 	
 	/**
 	 * Perform action when ENTER key is pressed
@@ -212,30 +274,23 @@ public class RequestUrlWidget extends Composite implements HasText {
 		}
 		
 		lastEnterTime = new Date();
-		RequestStartActionEvent e = new RequestStartActionEvent(lastEnterTime);
-		eventBus.fireEvent(e);
+		listener.fireRequestStartActionEvent(lastEnterTime);
 	}
 	
-	
 	/**
-	 * Add new key-value pair for query parameters
+	 * Add new key-value pair for query parameters.
+	 * <p>
+	 * 	Note:<br/>
+	 * 	All value change events for this text box are handled on parent container. 
+	 * </p>
 	 */
 	private void addDetailedQueryParamRow(String key, String value){
 		
 		TextBox keyBox = new TextBox();
 		TextBox valueBox = new TextBox();
 		
-		keyBox.addValueChangeHandler(anyValueChangeHandler);
-		valueBox.addValueChangeHandler(anyValueChangeHandler);
-		keyBox.addKeyDownHandler(anyValueKeyDownHandler);
-		valueBox.addKeyDownHandler(anyValueKeyDownHandler);
+		final QueryDetailRow row = new QueryDetailRow(keyBox, valueBox);
 		
-		final QueryDetailRow row = new QueryDetailRow(keyBox, valueBox, new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				updateURL();
-			}
-		});
 		paramsContainer.add(row);
 		
 		if(key != null){
@@ -306,7 +361,7 @@ public class RequestUrlWidget extends Composite implements HasText {
 	void updateURL(){
 		String url = getDetailedAsValue();
 		urlField.setValue(url);
-		eventBus.fireEvent(new UrlValueChangeEvent(url));
+		listener.fireUrlChangeEvent(url);
 	}
 	
 	
@@ -354,7 +409,7 @@ public class RequestUrlWidget extends Composite implements HasText {
 	@Override
 	public void setText(String text) {
 		urlField.setValue(text);
-		eventBus.fireEvent(new UrlValueChangeEvent(text));
+		listener.fireUrlChangeEvent(text);
 		updateQueryForm();
 	}
 }

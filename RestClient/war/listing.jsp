@@ -13,8 +13,8 @@
 <%@ page import="java.util.Set" %>
 <%@ page import="java.util.Iterator" %>
 <%@ page import="java.text.DateFormat" %>
-<%@ page import="com.restclient.server.AppUser" %>
-<%@ page import="com.restclient.server.RequestItem" %>
+<%@ page import="org.rest.server.AppUser" %>
+<%@ page import="org.rest.server.RequestItem" %>
 <!DOCTYPE html>
 <html>
 <head>

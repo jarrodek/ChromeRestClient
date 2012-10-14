@@ -80,11 +80,9 @@
 			</div>
 
 			<div class="{appResources.appCss.dialogButtons}">
-				<g:Button styleName="{appResources.appCss.button}"
-					ui:field="save">Save
-				</g:Button>
-				<g:Button styleName="{appResources.appCss.button}"
-					ui:field="cancel">Cancel
+				<g:Button styleName="{appResources.appCss.button}" ui:field="save">Save</g:Button>
+				<g:Button styleName="{appResources.appCss.button}" visible="false" ui:field="overwrite">Overwrite</g:Button>
+				<g:Button styleName="{appResources.appCss.button}" ui:field="cancel">Cancel
 				</g:Button>
 			</div>
 		</g:HTMLPanel>

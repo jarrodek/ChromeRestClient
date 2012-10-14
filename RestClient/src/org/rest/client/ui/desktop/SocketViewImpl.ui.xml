@@ -1,0 +1,80 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:with field="appResources" type="org.rest.client.resources.AppResources"/>
+	<ui:style type="org.rest.client.ui.desktop.SocketViewImpl.WidgetStyle">
+		.container{display: -webkit-box;-webkit-box-orient: vertical;}
+		.urlInput{
+			left: 15px;
+			width: 100%;
+		}
+		.urlContainer{
+			margin: 0.5em 1em 0.5em 0;
+		}
+		.controlsBar{
+			display: -webkit-box;
+			-webkit-box-orient: horizontal;
+			-webkit-box-align: center;
+			margin: 0.5em 1em 0.5em 0;
+		}
+		.connectionStatus{}
+		.actionBar{
+			display: -webkit-box;
+			-webkit-box-orient: horizontal;
+			-webkit-box-align: end;
+			-webkit-box-flex: 1;
+			-webkit-box-pack: end;
+		}
+		.connectionLabel{}
+		.disconnected{background-color: red;}
+		.connected{background-color: green;}
+		.resultPanel{
+			margin: 0.5em 0.5em 0.5em 0;
+			border: 1px #E2E2E2 solid;
+		}
+		.messagePanel{margin: 0.5em 1em 0.5em 0;}
+		.messageActionBar{}
+		.statusImage{
+			width: 10px;
+			height: 10px;
+			display: inline-block;
+			border-radius: 5px;
+		}
+		.outputLabel{
+			margin: 5px;
+			display: inline-block;
+		}
+		.output{
+			
+		}
+		.clearAnchor{margin-left: 10px;text-decoration: underline;}
+	</ui:style>
+	<g:HTMLPanel styleName="{style.container}">
+		<g:HTMLPanel ui:field="urlPanel" addStyleNames="{style.urlContainer}">
+			
+		</g:HTMLPanel>
+		<div class="{style.controlsBar}">
+			<div class="{style.connectionStatus}">
+				<span class="{style.connectionLabel}">Connection status: </span>
+				<span ui:field="statusImage" class="{style.disconnected} {style.statusImage}"></span>
+				<g:InlineLabel ui:field="connectionStatusDisplay">disconnected</g:InlineLabel>
+			</div>
+			<div class="{style.actionBar}">
+				<g:Button styleName="{appResources.appCss.button}" ui:field="connectButton">Connect</g:Button>
+				<g:Button styleName="{appResources.appCss.button}" ui:field="disconnectButton" visible="false">Disconnect</g:Button>
+			</div>
+		</div>
+		<div class="{style.messagePanel}">
+			<g:TextArea ui:field="messageField" width="100%" height="40px"></g:TextArea>
+			<div class="{style.messageActionBar}">
+				<g:Button styleName="{appResources.appCss.button}" ui:field="sendButton">Send</g:Button>
+			</div>
+		</div>
+		<div class="{style.resultPanel}">
+			<span class="{style.outputLabel}">Output:</span> 
+			<g:Anchor href="about:blank" ui:field="clearAnchor" styleName="{style.clearAnchor}">clear</g:Anchor> 
+			<g:Anchor href="about:blank" ui:field="saveAnchor" styleName="{style.clearAnchor}">save as file</g:Anchor>
+			<div ui:field="outputPanel" class="{style.output}"></div>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder> 

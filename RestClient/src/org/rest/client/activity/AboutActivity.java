@@ -18,6 +18,7 @@ package org.rest.client.activity;
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
 import org.rest.client.place.AboutPlace;
+import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.AboutView;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -42,6 +43,7 @@ public class AboutActivity extends AppActivity implements
 	final private AboutPlace place;
 	private EventBus eventBus;
 	AboutView view = null;
+	TutorialFactory tutorialFactory = null;
 
 	public AboutActivity(AboutPlace place, ClientFactory clientFactory) {
 		super(clientFactory);
@@ -58,6 +60,15 @@ public class AboutActivity extends AppActivity implements
 		panel.setWidget(view.asWidget());
 		getAppVersion();
 		initPlusOne();
+		activateTutorial();
+	}
+	
+	@Override
+	public String mayStop() {
+		if(tutorialFactory != null){
+			tutorialFactory.clear();
+		}
+		return null;
 	}
 	
 	
@@ -80,6 +91,16 @@ public class AboutActivity extends AppActivity implements
 				
 			}
 		});
+	}
+	
+	
+	private void activateTutorial() {
+		tutorialFactory = new TutorialFactory("about");
+		
+		if(!tutorialFactory.canStartTutorial()){
+			return;
+		}
+		view.setUpTutorial(tutorialFactory);
 	}
 	
 	private final native void initPlusOne()/*-{

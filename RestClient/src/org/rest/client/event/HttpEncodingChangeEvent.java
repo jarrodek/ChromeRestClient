@@ -15,29 +15,27 @@
  ******************************************************************************/
 package org.rest.client.event;
 
-import java.util.Date;
-
 import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
 /**
- * This event is fired when request has stopped either by error or success.
+ * This event is fired when user change HTTP payload encoding value.
  * <p>
  * It will be propagated through the applications {@link EventBus} and fired on
- * browser's document object as custom event {@link CustomEvent#REQUEST_STOP} so
+ * browser's document object as custom event {@link CustomEvent#HTTP_ENCODING_CHANGE} so
  * external extensions can handle action.
  * </p>
  * <p>
  * For example:
  * 
  * <pre>
- * document.addEventListener('arc:httpstop', function(e){ //do something... });
+ * document.addEventListener('arc:encodingchange', function(e){ var currentHttpEncoding = e.data; //do something... });
  * </pre>
  * 
  * </p>
  */
-public class RequestStopEvent extends Event<RequestStopEvent.Handler> {
+public class HttpEncodingChangeEvent extends Event<HttpEncodingChangeEvent.Handler> {
 	public static final Type<Handler> TYPE = new Type<Handler>();
 
 	/**
@@ -53,27 +51,25 @@ public class RequestStopEvent extends Event<RequestStopEvent.Handler> {
 	}
 
 	/**
-	 * Handles {@link RequestStopEvent}.
+	 * Handles {@link HttpEncodingChangeEvent}.
 	 */
-	public interface Handler{
+	public interface Handler {
 		/**
-		 * Called when request has stopped either with error or success.
-		 * @param time Time when event occurred.
+		 * @param current payload encoding
 		 */
-		void onStop(Date time);
+		void onChange(String method);
 	}
-	private final Date time;
-	/**
-	 * Create request stop event.
-	 * @param time Start time as a new Date().getTime();
-	 */
-	public RequestStopEvent(Date time){
-		this.time = time;
+	
+	public final String encoding;
+	
+	public HttpEncodingChangeEvent(String encoding){
+		this.encoding = encoding;
+		
 	}
 	
 	@Override
 	protected void dispatch(Handler handler) {
-		handler.onStop(time);
+		handler.onChange(encoding);
 	}
 
 	@Override

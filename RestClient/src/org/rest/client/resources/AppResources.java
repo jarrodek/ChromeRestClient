@@ -33,6 +33,10 @@ public interface AppResources extends ClientBundle {
 	@ImageOptions(repeatStyle=RepeatStyle.None)
 	ImageResource handlerArrowDown();
 	
+	@Source("triangle.png")
+	@ImageOptions(repeatStyle=RepeatStyle.None)
+	ImageResource tutorialTrialngle();
+	
 	@Source("app.css")
 	AppCssResource appCss();
 }

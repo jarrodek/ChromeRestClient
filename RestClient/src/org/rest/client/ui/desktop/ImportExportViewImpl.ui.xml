@@ -93,8 +93,8 @@
 				<g:Button styleName="{appResources.appCss.button}" ui:field="fileExport" text="Generate a file"></g:Button>
 				<h5:HTML5FileUpload ui:field="fileImport" multiple="false"></h5:HTML5FileUpload>
 			</div>
-			<div class="{style.downloadFileLink}">
-				<g:Anchor ui:field="fileDownload" visible="false" text="Download file"></g:Anchor>
+			<div class="{style.downloadFileLink} {appResources.appCss.hidden}" ui:field="downloadFileAnchor">
+				Now you can <g:Anchor ui:field="fileDownload" text="Download file"></g:Anchor>
 			</div>
 		</div>
 		

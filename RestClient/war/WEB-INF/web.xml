@@ -5,15 +5,15 @@
 	version="2.5" xmlns="http://java.sun.com/xml/ns/javaee">
 
 	<!-- Test servlet -->
-	<servlet>
-		<servlet-name>TestDataServlet</servlet-name>
-		<servlet-class>org.rest.server.TestDataServlet</servlet-class>
-	</servlet>
+<!-- 	<servlet> -->
+<!-- 		<servlet-name>TestDataServlet</servlet-name> -->
+<!-- 		<servlet-class>org.rest.server.TestDataServlet</servlet-class> -->
+<!-- 	</servlet> -->
 
-	<servlet-mapping>
-		<servlet-name>TestDataServlet</servlet-name>
-		<url-pattern>/test</url-pattern>
-	</servlet-mapping>
+<!-- 	<servlet-mapping> -->
+<!-- 		<servlet-name>TestDataServlet</servlet-name> -->
+<!-- 		<url-pattern>/test</url-pattern> -->
+<!-- 	</servlet-mapping> -->
 	
 	<!-- Admin servlet -->
 	<servlet>
@@ -24,6 +24,7 @@
 	<servlet-mapping>
 		<servlet-name>AdminServlet</servlet-name>
 		<url-pattern>/admin</url-pattern>
+		<url-pattern>/admin/message/add</url-pattern>
 	</servlet-mapping>
 
 	<!-- Messages servlet -->
@@ -109,7 +110,7 @@
 
 
 	<welcome-file-list>
-		<welcome-file>RestClient.html</welcome-file>
+		<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>
 
 </web-app>
