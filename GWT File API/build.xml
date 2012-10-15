@@ -1,4 +1,4 @@
-<project name="gwt-file-library" default="dist" basedir=".">
+<project name="gwt-IO-library" default="dist" basedir=".">
 
 	<property name="gwt.root" location="." />
 
@@ -116,6 +116,9 @@
 		<copy todir="${tmp.dir}/${module.filereaderpath}/">
 			<fileset file="${src.dir}/${module.filereaderpath}/${module.filereadername}" />
 		</copy>
+		<copy todir="${tmp.dir}/${module.socketpath}/">
+			<fileset file="${src.dir}/${module.socketpath}/${module.socketname}" />
+		</copy>
 		<!-- copy all source files from client dir (required for include to another project) -->
 		<copy todir="${tmp.dir}/${module.path}/client">
 			<fileset dir="${src.dir}/${module.path}/client">
@@ -129,6 +132,11 @@
 		</copy>
 		<copy todir="${tmp.dir}/${module.filereaderpath}/client">
 			<fileset dir="${src.dir}/${module.filereaderpath}/client">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy todir="${tmp.dir}/${module.socketpath}/client">
+			<fileset dir="${src.dir}/${module.socketpath}/client">
 				<include name="**/*.java" />
 			</fileset>
 		</copy>

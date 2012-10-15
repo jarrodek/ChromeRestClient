@@ -2,5 +2,6 @@
 	<inherits name="com.google.gwt.user.User"/>
 	<inherits name="com.google.gwt.filereader.FileReader"/>
 	<inherits name="com.google.gwt.xhr2.XMLHttpRequest2"/>
+	<inherits name="com.google.gwt.websocket.WebSocket"/>
 	<source path="client" />
 </module>
