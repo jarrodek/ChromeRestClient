@@ -42,6 +42,7 @@ import org.rest.client.ui.TutorialDialog.Direction;
 import org.rest.client.ui.desktop.widget.RequestBodyWidget;
 import org.rest.client.ui.desktop.widget.RequestHeadersWidget;
 import org.rest.client.ui.desktop.widget.RequestUrlWidget;
+import org.rest.client.ui.html5.HTML5Element;
 import org.rest.client.ui.html5.HTML5Progress;
 
 import com.google.gwt.core.client.GWT;
@@ -54,6 +55,9 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -257,6 +261,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 
 	@Override
 	public void setUrl(String url) {
+		if(url == null) url = "";
 		urlWidget.setText(url);
 		if (url == null || url.isEmpty()) {
 			sendButton.setEnabled(false);
@@ -290,6 +295,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 	 * @param method
 	 */
 	private void selectMethodRadio(String method) {
+		if(method == null) method = "GET";
 		if (method.equals("GET")) {
 			radioGet.setValue(true, false);
 		} else if (method.equals("POST")) {
@@ -318,6 +324,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 
 	@Override
 	public void setHeaders(String header) {
+		if(header == null) header = "";
 		requestHeaders.setText(header);
 	}
 
@@ -328,6 +335,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 
 	@Override
 	public void setPayload(String payload) {
+		if(payload == null) payload = "";
 		requestBody.setText(payload);
 	}
 
@@ -406,11 +414,12 @@ public class RequestViewImpl extends Composite implements RequestView {
 		for (final RequestObject r : requests) {
 			SimplePanel wrapper = new SimplePanel();
 			wrapper.getElement().getStyle().setMarginRight(10, Unit.PX);
-			Anchor a = new Anchor(r.getName(), "javascript:;");
+			Anchor a = new Anchor(r.getName(), "about:blank");
 			wrapper.add(a);
 			a.addClickHandler(new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
+					event.preventDefault();
 					listener.goTo(RequestPlace.Tokenizer.fromProject(r.getId()));
 				}
 			});
@@ -438,15 +447,29 @@ public class RequestViewImpl extends Composite implements RequestView {
 	}
 
 	@Override
-	public void setUpTutorial(TutorialFactory factory) {
+	public void setUpTutorial(final TutorialFactory factory) {
+		new Timer() {
+			@Override
+			public void run() {
+				setTutorialData(factory);
+			}
+		}.schedule(500);
+	}
+	
+	
+	private void setTutorialData(TutorialFactory factory){
 		TutorialDialog url = TutorialFactory.createItem();
-		url.setAbsolutePosition(138, 30);
+		url.setReferencedElement(urlWidget.getElement(), Direction.BOTTOM);
+		url.setPositionCorrection(-20, -13);
 		url.setHTML("Expand URL panel to see detailed view.");
 		url.showArrow(Direction.TOP);
 		factory.addItem(url);
-
+		
+		
+		
 		TutorialDialog form = TutorialFactory.createItem();
-		form.setAbsolutePosition(329, 76);
+		form.setReferencedElement(requestHeaders.getElement(), Direction.LEFT);
+		form.setPositionCorrection(-4, 660);
 		form.setHTML("In headers form panel start typing header name. For example Authorization. <br/>While typing, suggestions will show up.");
 		form.showArrow(Direction.LEFT);
 		form.setBeforeTutorialShowHandler(new TutorialDialog.BeforeTutorialShowHandler() {
@@ -457,27 +480,37 @@ public class RequestViewImpl extends Composite implements RequestView {
 			}
 		});
 		factory.addItem(form);
-
+		
+		HTML5Element nav = (HTML5Element)DOM.getElementById("appNavigation");
+		Element savedElement = nav.querySelector("li[data-place=\"saved\"]");
+		
 		TutorialDialog saved = TutorialFactory.createItem();
-		saved.setAbsolutePosition(71, 150);
+		saved.setReferencedElement(savedElement, Direction.RIGHT);
+		saved.setPositionCorrection(-5, -40);
 		saved.setHTML("When You press CTRL+C save dialog will appear.<br/>Saved requests are stored in this panel.");
 		saved.showArrow(Direction.LEFT);
 		factory.addItem(saved);
-
+		
+		Element historyElement = nav.querySelector("li[data-place=\"history\"]");
 		TutorialDialog history = TutorialFactory.createItem();
-		history.setAbsolutePosition(71, 179);
+		history.setReferencedElement(historyElement, Direction.RIGHT);
+		history.setPositionCorrection(-5, -40);
 		history.setHTML("When You send the request it will be automatically saved in local store.<br/>Anytime you can restore previous request.");
 		history.showArrow(Direction.LEFT);
 		factory.addItem(history);
-
+		
+		Element projectsElement = nav.querySelector("li[data-place=\"projects\"]");
 		TutorialDialog projects = TutorialFactory.createItem();
-		projects.setAbsolutePosition(71, 121);
+		projects.setReferencedElement(projectsElement, Direction.RIGHT);
+		projects.setPositionCorrection(-5, -40);
 		projects.setHTML("You can set a group of saved requests as the project.<br/>Easly switch between the endpoints of your application.");
 		projects.showArrow(Direction.LEFT);
 		factory.addItem(projects);
-
+		
+		Element aboutElement = nav.querySelector("li[data-place=\"about\"]");
 		TutorialDialog about = TutorialFactory.createItem();
-		about.setAbsolutePosition(55, 237);
+		about.setReferencedElement(aboutElement, Direction.RIGHT);
+		about.setPositionCorrection(-5, -40);
 		about.setHTML("For more informations visit the about page.");
 		about.showArrow(Direction.LEFT);
 		factory.addItem(about);

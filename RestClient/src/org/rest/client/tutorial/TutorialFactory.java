@@ -6,7 +6,6 @@ import org.rest.client.ui.TutorialDialog;
 import org.rest.client.ui.TutorialDialog.Controls;
 import org.rest.client.ui.desktop.TutorialDialogImpl;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONParser;
@@ -107,7 +106,6 @@ public class TutorialFactory {
 		int itemsSize = items.size();		
 		if(itemsSize<current+1){
 			//no more items...
-			Log.debug("No more items");
 			items.clear();
 			return;
 		}

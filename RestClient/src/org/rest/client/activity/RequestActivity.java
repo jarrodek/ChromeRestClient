@@ -109,7 +109,6 @@ public class RequestActivity extends AppActivity implements
 		
 		requestView.setPresenter(this);
 		viewFlowPanel = new FlowPanel();
-//		viewFlowPanel.getElement().getStyle().setOverflow(Overflow.HIDDEN);
 		viewFlowPanel.add(requestView);
 		panel.setWidget(viewFlowPanel);
 		
@@ -277,64 +276,86 @@ public class RequestActivity extends AppActivity implements
 	}
 	
 	private void restoreProjectEndpoint(final ProjectObject project, final RequestObject request, final RequestView requestView){
-		
 		showProjectRelatedData(project.getId(),project, requestView);
 		
-		boolean canOvervriteCurrentParameters = false;
-		
+		// if can overwrite current params first restore lates request
+		// and then set parameters.
 		if(RestClient.getOpenedProject() == RestClient.getPreviousProject()){
-			canOvervriteCurrentParameters = true;
+			RequestParameters.restoreLatest(new Callback<RequestParameters, Throwable>() {
+				@Override
+				public void onSuccess(RequestParameters result) {
+					restoreProjectEndpointWithLatestData(result, project, request, requestView);
+				}
+				
+				@Override
+				public void onFailure(Throwable reason) {
+					StatusNotification.notify("Unable to complete :(", StatusNotification.TYPE_CRITICAL);
+					Log.error("Unable to restore project data :(", reason);
+				}
+			});
+			
+			return;
 		}
+		//treat it as a default projects request
 		
-		if(!(canOvervriteCurrentParameters && request.isSkipHeaders())){
+		requestView.setHeaders(request.getHeaders());
+		requestView.setMethod(request.getMethod());
+		requestView.setPayload(request.getPayload());
+		requestView.setEncoding(request.getEncoding());
+		requestView.setUrl(request.getURL());
+		
+		setUserDefinedContentEncodingValues(request
+				.getEncoding());
+		RestClient.fixChromeLayout();
+		
+	}
+	private void restoreProjectEndpointWithLatestData(
+			RequestParameters lesteSavedRequest, final ProjectObject project, 
+			final RequestObject request, final RequestView requestView){
+		
+		if(request.isSkipHeaders()){
+			requestView.setHeaders(lesteSavedRequest.getHeaders());
+		} else {
 			requestView.setHeaders(request.getHeaders());
 		}
-		if(!(canOvervriteCurrentParameters && request.isSkipMethod())){
+		if(request.isSkipMethod()){
+			requestView.setMethod(lesteSavedRequest.getMethod());
+		} else {
 			requestView.setMethod(request.getMethod());
 		}
-		if(!(canOvervriteCurrentParameters && request.isSkipPayload())){
+		if(request.isSkipPayload()){
+			requestView.setPayload(lesteSavedRequest.getPostData());
+		} else {
 			requestView.setPayload(request.getPayload());
 		}
+		requestView.setEncoding(request.getEncoding());
 		
-		Storage store = Storage.getLocalStorageIfSupported();
 		
-		String _oldUrl = store.getItem(LocalStore.LATEST_REQUEST_KEY); 
-		if(_oldUrl == null || _oldUrl.isEmpty()){
-			requestView.setUrl(request.getURL());
-			Log.debug("OLD URL is null.");
-			return;
-		}
-		JSONValue oldUrlValue = JSONParser.parseStrict(_oldUrl);
-		if(!oldUrlValue.isObject().containsKey("url")){
-			requestView.setUrl(request.getURL());
-			Log.debug("No URL key in old url.");
-			return;
-		}
 		
-		String oldUrl = oldUrlValue.isObject().get("url").isString().stringValue();
+		String oldUrl = lesteSavedRequest.getRequestUrl();
 		
 		String newUrl = request.getURL();
 		URLParser urlData = new URLParser().parse(newUrl);
 		URLParser oldUrlData = new URLParser().parse(oldUrl);
 		
-		if(canOvervriteCurrentParameters && request.isSkipHistory()){
+		if(request.isSkipHistory()){
 			//remove hash from restored and get one from latest
 			urlData.setAnchor(oldUrlData.getAnchor());
 		}
-		if(canOvervriteCurrentParameters && request.isSkipParams()){
+		if(request.isSkipParams()){
 			//remove query string from restored and get one from latest
 			Log.debug("Old params: " + oldUrlData.getQuery());
 			urlData.setQuery(oldUrlData.getQuery());
 		}
-		if(canOvervriteCurrentParameters && request.isSkipPath()){
+		if(request.isSkipPath()){
 			//remove path from restored and get one from latest
 			urlData.setPath(oldUrlData.getPath());
 		}
-		if(canOvervriteCurrentParameters && request.isSkipProtocol()){
+		if(request.isSkipProtocol()){
 			//remove hash from restored and get one from latest
 			urlData.setProtocol(oldUrlData.getProtocol());
 		}
-		if(canOvervriteCurrentParameters && request.isSkipServer()){
+		if(request.isSkipServer()){
 			//remove hash from restored and get one from latest
 			urlData.setAuthority(oldUrlData.getAuthority());
 		}
@@ -344,7 +365,6 @@ public class RequestActivity extends AppActivity implements
 		setUserDefinedContentEncodingValues(request
 				.getEncoding());
 		RestClient.fixChromeLayout();
-		
 	}
 	
 	

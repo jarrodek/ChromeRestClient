@@ -40,10 +40,10 @@ import org.rest.client.ui.SavedView;
 import org.rest.client.ui.SettingsView;
 import org.rest.client.ui.ShortcutView;
 import org.rest.client.ui.SocketView;
-import org.rest.client.websocket.WebSocket;
 
 import com.google.gwt.chrome.message.ChromeMessagePassing;
 import com.google.gwt.place.shared.PlaceController;
+import com.google.gwt.websocket.client.WebSocket;
 import com.google.web.bindery.event.shared.EventBus;
 
 public interface ClientFactory {

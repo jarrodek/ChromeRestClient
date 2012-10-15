@@ -7,6 +7,7 @@ import org.rest.client.event.OverwriteUrlEvent;
 import org.rest.client.resources.AppCssResource;
 import org.rest.client.resources.AppResources;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -49,15 +50,17 @@ public class JSONViewer extends Composite {
 		new Timer() {
 			@Override
 			public void run() {
+				Log.debug("Start run");
 				Worker jsonWorker =  new Worker("/workers/jsonviewer.js");
 				jsonWorker.onMessage(new WorkerMessageHandler() {
 					@Override
 					public void onMessage(String message) {
+						Log.debug("message received");
 						result.setHTML(message);
 						addNativeControls(result.getElement());
 					}
 				});
-				
+				Log.debug("Set style");
 				JSONObject styleData = new JSONObject();
 				styleData.put("prettyPrint", new JSONString(style.prettyPrint()));
 				styleData.put("numeric", new JSONString(style.numeric()));
@@ -75,8 +78,9 @@ public class JSONViewer extends Composite {
 				JSONObject post = new JSONObject();
 				post.put("style", styleData);
 				post.put("data", new JSONString(data));
-				
-				jsonWorker.postMessage(post.toString());
+				Log.debug("post the message");
+				jsonWorker.postMessage(post.getJavaScriptObject());
+				Log.debug("message posted");
 			}
 		}.schedule(300);
 	}

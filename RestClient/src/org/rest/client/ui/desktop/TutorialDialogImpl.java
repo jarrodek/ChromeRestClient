@@ -10,13 +10,13 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -54,6 +54,10 @@ public class TutorialDialogImpl extends Composite implements TutorialDialog {
 	private BeforeTutorialShowHandler beforeShowHandler = null;
 	private int left = 0;
 	private int top = 0;
+	private int correctionLeft = 0;
+	private int correctionTop = 0;
+	private Element referenceElement = null;
+	private int referenceDirection = -1;
 	
 	public TutorialDialogImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -103,7 +107,12 @@ public class TutorialDialogImpl extends Composite implements TutorialDialog {
 
 	@Override
 	public void setReferencedElement(Element element, int direction) {
-		
+		if(element == null) {
+			return;
+		}
+		referenceElement = element;
+		referenceDirection = direction;
+		setDialogPosition();
 	}
 
 	@Override
@@ -114,6 +123,33 @@ public class TutorialDialogImpl extends Composite implements TutorialDialog {
 	
 	private void setDialogPosition(){
 		Element wrap = wrapper.getElement();
+		
+		//ensure that reference element is still in DOM.
+		if(referenceElement != null 
+				&& referenceElement.getParentElement() != null){
+			
+			switch(referenceDirection){
+			case Direction.TOP:
+				top = referenceElement.getAbsoluteTop() - wrap.getClientHeight();
+				left = referenceElement.getAbsoluteLeft();
+				break;
+			case Direction.BOTTOM:
+				top = referenceElement.getAbsoluteTop() + referenceElement.getClientHeight();
+				left = referenceElement.getAbsoluteLeft();
+				break;
+			case Direction.LEFT:
+				top = referenceElement.getAbsoluteTop();
+				left = referenceElement.getAbsoluteLeft() - wrap.getClientWidth();
+				break;
+			case Direction.RIGHT:
+				top = referenceElement.getAbsoluteTop();
+				left = referenceElement.getAbsoluteLeft() + referenceElement.getClientWidth();
+				break;
+			}
+		}
+		
+		top += correctionTop;
+		left += correctionLeft;
 		Style style = wrap.getStyle();
 		style.setTop(top, Unit.PX);
 		style.setLeft(left, Unit.PX);
@@ -125,7 +161,14 @@ public class TutorialDialogImpl extends Composite implements TutorialDialog {
 			beforeShowHandler.beforeShow();
 		}
 		setDialogPosition();
-		wrapper.getElement().setAttribute("visible", "true");
+		new Timer() {
+			
+			@Override
+			public void run() {
+				wrapper.getElement().setAttribute("visible", "true");
+			}
+		}.schedule(100);
+		
 	}
 
 	@Override
@@ -219,5 +262,12 @@ public class TutorialDialogImpl extends Composite implements TutorialDialog {
 	@Override
 	public void setBeforeTutorialShowHandler(BeforeTutorialShowHandler handler) {
 		beforeShowHandler = handler;
+	}
+
+	@Override
+	public void setPositionCorrection(int top, int left) {
+		correctionLeft = left;
+		correctionTop = top;
+		setDialogPosition();
 	}
 }

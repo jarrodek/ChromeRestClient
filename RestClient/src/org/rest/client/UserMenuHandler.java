@@ -36,8 +36,8 @@ public class UserMenuHandler {
 	}
 	
 	protected void bind(){
-		final MenuView mv = clientFactory.getMenuView();
 		
+		final MenuView mv = clientFactory.getMenuView();
 		
 		final MenuItemView.Presenter p = new MenuItemView.Presenter() {
 			@Override
@@ -50,39 +50,46 @@ public class UserMenuHandler {
 		request.setText("Request");
 		request.setPlace(new RequestPlace("default"));
 		request.setSelected(true);
+		request.setData("place", "request");
 		mv.addMenuItem(request);
 		
 		
 		final MenuItemView socket = clientFactory.createMenuItem(p);
 		socket.setText("Socket");
 		socket.setPlace(new SocketPlace("default"));
+		socket.setData("place", "socket");
 		mv.addMenuItem(socket);
 		
 
 		final MenuItemView projects = clientFactory.createMenuItem(p);
 		projects.setText("Projects");
 		mv.addMenuItem(projects);
+		projects.setData("place", "projects");
 		projects.setOpened(false);
 		
 		
 		final MenuItemView saved = clientFactory.createMenuItem(p);
 		saved.setText("Saved");
 		saved.setPlace(new SavedPlace("default"));
+		saved.setData("place", "saved");
 		mv.addMenuItem(saved);
 
 		final MenuItemView history = clientFactory.createMenuItem(p);
 		history.setText("History");
 		history.setPlace(new HistoryPlace("default"));
+		history.setData("place", "history");
 		mv.addMenuItem(history);
 
 		final MenuItemView settings = clientFactory.createMenuItem(p);
 		settings.setText("Settings");
 		settings.setPlace(new SettingsPlace("view"));
+		settings.setData("place", "settings");
 		mv.addMenuItem(settings);
 
 		final MenuItemView about = clientFactory.createMenuItem(p);
 		about.setText("About");
 		about.setPlace(new AboutPlace("view"));
+		about.setData("place", "about");
 		mv.addMenuItem(about);
 
 		RootPanel.get("appNavigation").add(mv.asWidget());

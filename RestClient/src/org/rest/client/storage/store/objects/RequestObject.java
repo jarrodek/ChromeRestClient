@@ -167,7 +167,9 @@ public class RequestObject extends HistoryObject {
 	 * @param skipParams
 	 *            True to drop params value
 	 */
-	public final native void setSkipParams(boolean skipParams) /*-{}-*/;
+	public final native void setSkipParams(boolean skipParams) /*-{
+		this.skipParams = skipParams;
+	}-*/;
 
 	/**
 	 * @return if true all URL parameters saved with this request will not be

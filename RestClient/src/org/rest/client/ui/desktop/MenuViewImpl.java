@@ -42,9 +42,12 @@ public class MenuViewImpl extends Composite implements MenuView {
 	
 	
 	
+	
+	
+	
+	
 	public MenuViewImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
-		
 		sinkEvents(Event.ONMOUSEDOWN | Event.ONCLICK | Event.KEYEVENTS);
 		Roles.getTreeRole().set(getElement());
 	}

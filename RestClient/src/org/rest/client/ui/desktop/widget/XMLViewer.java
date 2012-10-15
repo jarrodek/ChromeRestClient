@@ -82,7 +82,7 @@ public class XMLViewer extends Composite {
 				post.put("style", styleData);
 				post.put("data", new JSONString(xml));
 				
-				xmlWorker.postMessage(post.toString());
+				xmlWorker.postMessage(post.getJavaScriptObject());
 			}
 		}.schedule(300);
 	}

@@ -432,6 +432,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 
 	@Override
 	public void setText(String text) {
+		if(text == null) text = "";
 		this.headersData = text;
 		//propagate new value through widgets
 		propagateCurrentHeaders();

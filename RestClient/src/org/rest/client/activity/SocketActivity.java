@@ -29,13 +29,6 @@ import org.rest.client.suggestion.SocketSuggestOracle;
 import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.SocketView;
 import org.rest.client.ui.desktop.StatusNotification;
-import org.rest.client.websocket.SocketCloseHandler;
-import org.rest.client.websocket.SocketErrorHandler;
-import org.rest.client.websocket.SocketMessage;
-import org.rest.client.websocket.SocketMessageHandler;
-import org.rest.client.websocket.SocketOpenHandler;
-import org.rest.client.websocket.WebSocket;
-import org.rest.client.websocket.WebSocketImpl;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
@@ -45,6 +38,13 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.shared.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.websocket.client.SocketCloseHandler;
+import com.google.gwt.websocket.client.SocketErrorHandler;
+import com.google.gwt.websocket.client.SocketMessage;
+import com.google.gwt.websocket.client.SocketMessageHandler;
+import com.google.gwt.websocket.client.SocketOpenHandler;
+import com.google.gwt.websocket.client.WebSocket;
+import com.google.gwt.websocket.client.WebSocketImpl;
 import com.google.web.bindery.event.shared.EventBus;
 
 /**
@@ -116,7 +116,7 @@ public class SocketActivity extends AppActivity implements
 	
 	
 	private void activateTutorial() {
-		tutorialFactory = new TutorialFactory("about");
+		tutorialFactory = new TutorialFactory("socket");
 		
 		if(!tutorialFactory.canStartTutorial()){
 			return;
@@ -130,12 +130,12 @@ public class SocketActivity extends AppActivity implements
 			StatusNotification.notify("Socket not ready",StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
 			return;
 		}
+		SocketMessage msg = SocketMessage.create(message);
+		messages.add(msg);
 		try {
 			socket.send(message);
-			SocketMessage msg = SocketMessage.create(message);
-			messages.add(msg);
 		} catch (Exception e) {
-			e.printStackTrace();
+			messages.remove(msg);
 			Log.error("Unable sent socket message",e);
 			StatusNotification.notify("Unable sent socket message.");
 		}
@@ -146,17 +146,18 @@ public class SocketActivity extends AppActivity implements
 		if(exportFileObjectUrl != null){
 			revokeDownloadData();
 		}
-		String body = "";
+		StringBuilder out = new StringBuilder();
 		for(SocketMessage message : messages){
 			long time = (long) message.getCreated();
 			Date created = new Date(time);
-			String date = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_FULL).format(created);
+			String date = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM).format(created);
 			boolean isSent = message.isMessageIsSent();
-			body += "[" + date + "] ";
-			body += (isSent) ? "<<< " : ">>> ";
-			body += message.getStringMessage() + "\n";
+			out.append("[").append(date).append("]");
+			out.append(isSent ? " <<< " : " >>> ");
+			out.append(message.getStringMessage());
+			out.append("\n");
 		}
-		exportFileObjectUrl = createDownloadDataImpl(body, "text/plain");
+		exportFileObjectUrl = createDownloadDataImpl(out.toString(), "text/plain");
 		callback.onSuccess(exportFileObjectUrl);
 	}
 	

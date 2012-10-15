@@ -1,0 +1,2 @@
+eclipse.preferences.version=1
+jarsExcludedFromWebInfLib=/home/jarrod/workspace/GWT Chrome Extensions API/build/jar/ChromeExtension-2.5.0.jar|/home/jarrod/workspace/GWT IO API/build/jar/GwtIOApi-2.5.0.rc1.jar|/home/jarrod/workspace/RestClient/lib/gwt-html5-database.jar|/home/jarrod/workspace/RestClient/lib/gwt-log-3.1.8.jar

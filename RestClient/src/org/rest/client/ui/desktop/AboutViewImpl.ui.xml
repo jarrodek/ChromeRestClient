@@ -55,7 +55,7 @@
 		</section>
 		<section class="{style.aboutContent}">
 			<h3>+1 me</h3>
-			<div class="g-plusone" data-size="tall" data-annotation="inline"></div>
+			<div class="g-plusone" data-annotation="inline" data-width="400" data-href="https://chrome.google.com/webstore/detail/hgmloofddffdnphfgcellkdfbfbjeloo"></div>
 		</section>
 		<section class="{style.aboutContent}">
 			<h3 class="{style.donateTitle}">If you like my work, please donate :)</h3>

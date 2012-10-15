@@ -9,7 +9,7 @@ class WorkerImpl extends JavaScriptObject {
 	static final native WorkerImpl get(String script) /*-{
 		var worker = new Worker(script); 
 		worker.onerror = $entry(function(e){
-			console.error('WorkerError::',e);
+			$wnd.console.error('WorkerError::',e);
 		});
 		return worker;
 	}-*/;
@@ -20,6 +20,10 @@ class WorkerImpl extends JavaScriptObject {
 	 * @param message Message sent to worker.
 	 */
 	final native void postMessage(String message) /*-{
+		this.postMessage(message);
+	}-*/;
+	
+	final native void postMessage(JavaScriptObject message) /*-{
 		this.postMessage(message);
 	}-*/;
 	

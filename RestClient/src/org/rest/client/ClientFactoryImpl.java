@@ -56,13 +56,13 @@ import org.rest.client.ui.desktop.SavedViewImpl;
 import org.rest.client.ui.desktop.SettingsViewImpl;
 import org.rest.client.ui.desktop.ShortcutViewImpl;
 import org.rest.client.ui.desktop.SocketViewImpl;
-import org.rest.client.websocket.WebSocket;
-import org.rest.client.websocket.WebSocketImpl;
 
 import com.google.gwt.chrome.message.BackgroundMessage;
 import com.google.gwt.chrome.message.ChromeMessagePassing;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceController;
+import com.google.gwt.websocket.client.WebSocket;
+import com.google.gwt.websocket.client.WebSocketImpl;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 

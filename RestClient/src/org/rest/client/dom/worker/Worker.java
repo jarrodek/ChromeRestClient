@@ -1,4 +1,7 @@
 package org.rest.client.dom.worker;
+
+import com.google.gwt.core.client.JavaScriptObject;
+
 /**
  * FEATURES AVAILABLE TO WORKERS
  * Due to their multi-threaded behavior, web workers only has access to a subset of JavaScript's features:
@@ -32,6 +35,9 @@ public class Worker {
 		worker.postMessage(message);
 	}
 	
+	public void postMessage(JavaScriptObject message){
+		worker.postMessage(message);
+	}
 	
 	public void onMessage(WorkerMessageHandler handler){
 		worker.onMessage(handler);
