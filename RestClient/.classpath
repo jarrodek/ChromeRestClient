@@ -15,7 +15,7 @@
 	</classpathentry>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER/gwt-2.5.0.rc1"/>
 	<classpathentry kind="lib" path="/GWT Chrome Extensions API/build/jar/ChromeExtension-2.5.0.jar" sourcepath="/GWT Chrome Extensions API/src"/>
-	<classpathentry kind="lib" path="/GWT File API/build/jar/GwtFileApi-2.5.0.jar" sourcepath="/GWT File API/src"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/App Engine (2)/v2"/>
+	<classpathentry kind="lib" path="/GWT IO API/build/jar/GwtIOApi-2.5.0.rc1.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
