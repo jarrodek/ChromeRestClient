@@ -45,6 +45,7 @@
 		.downloadFileLink{margin-top: 20px;font-size: large;}
 		.importPrevControls{margin-top: 40px;}
 		.importPrevTitle{font-size: large;margin-right: 30px;}
+		.backButton{margin-top: 20px;}
 	</ui:style>
 	<g:HTMLPanel>
 		<h1 class="{style.title}">Import/Export options</h1>
@@ -106,6 +107,10 @@
 					<g:Button styleName="{appResources.appCss.button}" ui:field="saveImportedData" text="Save imported data"></g:Button>
 				</div>
 			</g:HTMLPanel>
+		</div>
+		
+		<div class="{style.backButton}">
+			<g:Anchor ui:field="backSettings" href="about:blank">Back to settings</g:Anchor>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder> 

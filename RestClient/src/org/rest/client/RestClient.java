@@ -77,6 +77,7 @@ public class RestClient implements EntryPoint {
 	
 	private static int currentOpenedProject = -1;
 	private static int previousOpenedProject = -1;
+	private static String applicationUserId = null;
 	/**
 	 * @return current opened project ID or -1 if none
 	 */
@@ -103,7 +104,14 @@ public class RestClient implements EntryPoint {
 		previousOpenedProject = project;
 	}
 	
-
+	
+	public static String getApplicationUserId() {
+		return applicationUserId;
+	}
+	public static void setApplicationUserId(String appUserId) {
+		applicationUserId = appUserId;
+	}
+	
 	public void onModuleLoad() {
 		
 		GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {

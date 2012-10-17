@@ -276,19 +276,23 @@ public class ImportExportActivity extends AppActivity implements
 	// OLD SYSTEM
 	// This will be removed in the end of the year
 	//
-	private String applicationUserId = null;
+	
 
 	private void checkUserSession() {
+		if(RestClient.getApplicationUserId() != null){
+			view.setIsUserView();
+			return;
+		}
 		if (RestClient.isDebug()) {
 			Log.debug("Checking session status on applications server.");
 		}
-
+		
 		PingRequest.getSession(new ApplicationSessionCallback() {
 
 			@Override
 			public void onSuccess(ApplicationSession session) {
 				if (session.getState() == ApplicationSession.CONNECTED) {
-					applicationUserId = session.getUserId();
+					RestClient.setApplicationUserId(session.getUserId());
 					view.setIsUserView();
 				} else {
 					view.setIsNotUserView();
@@ -308,7 +312,7 @@ public class ImportExportActivity extends AppActivity implements
 
 	@Override
 	public String getApplicationUserId() {
-		return applicationUserId;
+		return RestClient.getApplicationUserId();
 	}
 
 	/**

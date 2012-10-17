@@ -1,0 +1,1 @@
+window.location.href='/RestClient.html' + window.location.search + window.location.hash;

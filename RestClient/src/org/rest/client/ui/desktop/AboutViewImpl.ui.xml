@@ -78,15 +78,16 @@
 			<h3>Changelog</h3>
 			<p>9/27/2012</p>
 			<ul>
-				<li>New UI and migration to GWT 2.5 RC</li>
+				<li>New UI</li>
+				<li>Migration to GWT 2.5 RC</li>
 				<li>Migration to extensions manifest version 2</li>
 				<li>Optimized XML nad JSON view renderer using web workers and optymizing regular expressions</li>
 				<li>Added save to file and "copy" function to response view.</li>
 				<li>Deprecated server import/export</li>
-				<li>Added file export import</li>
+				<li>Added file export and import</li>
 				<li>Implemented new Chrome APIs: webRequest, declarativeWebRequest and storage</li>
-				<li>Move part of request functionality to bacground page to set declarativeWebRequest filter before request</li>
-				<li>Integration with other extensions providing API to set request data in application via extensions passage massing and web intents</li>
+				<li>Move part of request functionality to the bacground page to set declarativeWebRequest filter before request</li>
+				<li>Integration with other extensions providing API to set request data in application via extensions passage massing or via web intents</li>
 				<li>Now background page removes almost all default browser's headers not set by user.</li>
 				<li>Database structure and local storage keys has changed.</li>
 				<li>Links in response view now changing URL value in request view.</li>

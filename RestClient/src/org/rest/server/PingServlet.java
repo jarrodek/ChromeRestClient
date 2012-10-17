@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
@@ -56,11 +57,12 @@ public class PingServlet extends HttpServlet {
 		}
 		
 		if(path.equals("/session")){
+			HttpSession sis = req.getSession();
 			//
 			// Check if user has active session
 			//
 			resp.getWriter().print(
-					gson.toJson(new SessionState()));
+					gson.toJson(new SessionState(sis)));
 		}
 		
 
@@ -69,15 +71,26 @@ public class PingServlet extends HttpServlet {
 	
 	
 	
-	@SuppressWarnings("unused")
+	
 	private static class SessionState {
 		final boolean hasSession;
 		final String userId;
-		SessionState(){
+		SessionState(HttpSession sis){
+			String uid = null;
+			if(!sis.isNew()){
+				uid = (String) sis.getAttribute("uid");
+			}
+			if(uid != null){
+				this.userId = uid;
+				this.hasSession = true;
+				return;
+			}
+			
 			UserService userService = UserServiceFactory.getUserService();
 			this.hasSession = userService.isUserLoggedIn();
 			if(this.hasSession){
 				this.userId = userService.getCurrentUser().getUserId();
+				sis.setAttribute("uid", userId);
 			} else {
 				this.userId = null;
 			}

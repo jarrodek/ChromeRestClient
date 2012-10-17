@@ -12,6 +12,7 @@ import org.rest.client.deprecated.LoaderDialog;
 import org.rest.client.deprecated.SuggestionImportItem;
 import org.rest.client.importparser.ImportParser;
 import org.rest.client.importparser.ImportResult;
+import org.rest.client.place.SettingsPlace;
 import org.rest.client.request.ApplicationRequest;
 import org.rest.client.resources.AppResources;
 import org.rest.client.storage.store.objects.ProjectObject;
@@ -301,6 +302,12 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 	void onSaveImportedData(ClickEvent e){
 		saveCurrentFileImportData();
 	}
+	@UiHandler("backSettings")
+	void onGoBackToSettings(ClickEvent e){
+		e.preventDefault();
+		listener.goTo(new SettingsPlace(null));
+	}
+	
 	
 	
 	
@@ -372,9 +379,9 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		Extension ext = Extension.getExtensionIfSupported();
 		String url = "";
 		if (ext == null) { // DEV mode
-			url = "http://127.0.0.1:8888/RestClientApp.html?gwt.codesvr=127.0.0.1:9997";
+			url = "http://127.0.0.1:8888/RestClient.html?gwt.codesvr=127.0.0.1:9997";
 		} else {
-			url = ext.getURL("/RestClientApp.html");
+			url = ext.getURL("/RestClient.html");
 		}
 		url += "#ImportExportPlace:import/" + applicationUserId;
 		shareLink.setInnerText(url);

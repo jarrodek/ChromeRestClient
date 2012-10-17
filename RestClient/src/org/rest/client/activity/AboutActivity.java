@@ -78,11 +78,15 @@ public class AboutActivity extends AppActivity implements
 			@Override
 			public void onSuccess(String result) {
 				try{
-				JSONValue value = JSONParser.parseStrict(result);
-				ManifestDetails manifest = value.isObject().getJavaScriptObject().cast();
-				if(view != null){
-					view.setManifest(manifest);
-				}
+					JSONValue value = JSONParser.parseStrict(result);
+					ManifestDetails manifest = value.isObject().getJavaScriptObject().cast();
+					if(view != null){
+						view.setManifest(manifest);
+					} else {
+						if(RestClient.isDebug()){
+							Log.warn("View is null. cant set manifest data.");
+						}
+					}
 				} catch(Exception e){
 					if(RestClient.isDebug()){
 						Log.warn("Can't parse manifest info",e);

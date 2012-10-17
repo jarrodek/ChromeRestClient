@@ -222,7 +222,11 @@ function handleInternalMessage(request,sendResponse){
 			manifest_version: manifest.manifest_version,
 			name: manifest.name
 		}
-		sendResponse(JSON.stringify(result));
+		sendResponse({
+			'payload' : 'getManifest',
+			'data' : JSON.stringify(result)
+		});
+//		sendResponse(JSON.stringify(result));
 		break;
 	default:
 		if(request.payload.indexOf("storage")===0){
