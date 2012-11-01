@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.rest.client;
 
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,7 +25,9 @@ import org.rest.client.mvp.AppActivityMapper;
 import org.rest.client.mvp.AppPlaceHistoryMapper;
 import org.rest.client.place.ImportExportPlace;
 import org.rest.client.place.RequestPlace;
+import org.rest.client.request.FilesObject;
 import org.rest.client.request.HttpMethodOptions;
+import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.request.RequestParameters;
 import org.rest.client.resources.AppResources;
 import org.rest.client.storage.StoreResultCallback;
@@ -57,6 +60,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.xhr2.client.RequestHeader;
 import com.google.web.bindery.event.shared.EventBus;
 
 /**
@@ -252,42 +256,27 @@ public class RestClient implements EntryPoint {
 	 */
 	public static void collectRequestData(
 			final Callback<RequestObject, Throwable> callback) {
-		final RequestObject requestObject = RequestObject.createRequest();
+		
 		if (History.getToken().isEmpty() || History.getToken().startsWith("RequestPlace")) {
 			RequestView requestView = RestClient.getClientFactory()
 					.getRequestView();
 			
-			String httpMethod = requestView.getMethod();
-			requestObject.setHeaders(requestView.getHeaders());
-			requestObject.setMethod(requestView.getMethod());
+			RequestParameters rp = new RequestParameters();
+			rp.setFilesList(requestView.getFiles());
+			rp.setFormEncoding(requestView.getEncoding());
+			rp.setHeaders(requestView.getHeaders());
+			rp.setMethod(requestView.getMethod());
+			rp.setPostData(requestView.getPayload());
+			rp.setRequestUrl(requestView.getUrl());
 			
-			if(HttpMethodOptions.hasBody(httpMethod)){
-				requestObject.setPayload(requestView.getPayload());
-				requestObject.setEncoding(requestView.getEncoding());
-			}
 			
-			String url = requestView.getUrl();
-			if(url.startsWith("/")){
-				//
-				// DEV mode.
-				//
-				url = "http://127.0.0.1:8888"+url;
-			}
-			
-			requestObject.setURL(url);
-			requestObject.setFiles(requestView.getFiles());
-			callback.onSuccess(requestObject);
+			callback.onSuccess(parseRequestParameters(rp));
 		} else {
 			RequestParameters
 					.restoreLatest(new Callback<RequestParameters, Throwable>() {
 						@Override
 						public void onSuccess(RequestParameters result) {
-							requestObject.setEncoding(result.getFormEncoding());
-							requestObject.setHeaders(result.getHeaders());
-							requestObject.setMethod(result.getMethod());
-							requestObject.setPayload(result.getPostData());
-							requestObject.setURL(result.getRequestUrl());
-							callback.onSuccess(requestObject);
+							callback.onSuccess(parseRequestParameters(result));
 						}
 
 						@Override
@@ -297,6 +286,76 @@ public class RestClient implements EntryPoint {
 					});
 		}
 	}
+	
+	/**
+	 * Prepare request data.
+	 * It set (if request include payload) content-type header according to user preferences
+	 * @param rp
+	 * @return
+	 */
+	private static RequestObject parseRequestParameters(RequestParameters rp){
+		String headers = rp.getHeaders();
+		String method = rp.getMethod();
+		String encoding = rp.getFormEncoding();
+		boolean hasPayload = HttpMethodOptions.hasBody(method);
+		ArrayList<FilesObject> files = null;
+		if(hasPayload){
+			//handle content-type header for request with payload. 
+			//It can be either set via headers form or select input with predefined options.
+			ArrayList<RequestHeader> headersList = RequestHeadersParser.stringToHeaders(headers);
+			if (headers == null) {
+				headersList = new ArrayList<RequestHeader>();
+			}
+			int i = 0;
+			for(RequestHeader item : headersList){
+				String key = item.getName();
+				if(key.toLowerCase().equals("content-type")){
+					encoding = item.getValue();
+					if(RestClient.isDebug()){
+						Log.debug("Found Content-Type header in headers list. Overwrite content-type value to " + encoding);
+					}
+					//Temporarily remove it from headers list
+					headersList.remove(i);
+					break;
+				}
+				i++;
+			}
+			files = (ArrayList<FilesObject>) rp.getFilesList();
+			if(files != null && files.size() > 0){
+				encoding = null;
+			}
+			if(encoding != null){
+				headersList.add(new RequestHeader("Content-Type", encoding));
+			}
+			headers = RequestHeadersParser.headersListToString(headersList);
+			
+		}
+		
+		RequestObject requestObject = RequestObject.createRequest();
+		requestObject.setHeaders(headers);
+		requestObject.setMethod(method);
+		String url = rp.getRequestUrl();
+		if(url.startsWith("/") && !GWT.isProdMode()){
+			//
+			// DEV mode.
+			//
+			url = "http://127.0.0.1:8888"+url;
+		}
+		requestObject.setURL(url);
+		if(hasPayload){
+			requestObject.setPayload(rp.getPostData());
+			requestObject.setEncoding(null);
+			requestObject.setFiles(files);
+		}
+		return requestObject;
+	}
+	
+	
+	
+	
+	
+	
+	
 	/**
 	 * Save to Store Request form data. This method is used when creating new project.
 	 * @param obj Object data to save

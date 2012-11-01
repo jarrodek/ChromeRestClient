@@ -14,6 +14,7 @@ import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.storage.store.LocalStore;
 import org.rest.client.storage.store.StatusesStoreWebSql;
+import org.rest.client.storage.store.objects.HistoryObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.storage.websql.AppDatabase;
 import org.rest.client.storage.websql.HeaderRow;
@@ -189,7 +190,7 @@ public class FirstRunTask implements LoadTask {
 					int len = arr.size();
 					final HistoryRequestStoreWebSql store = RestClient.getClientFactory().getHistoryRequestStore();
 					for(int i=0; i<len;i++){
-						final RequestObject ro = RequestObject.createRequest();
+						final HistoryObject ro = HistoryObject.create();
 						JSONValue values = arr.get(i);
 						if (values == null) {
 							continue;

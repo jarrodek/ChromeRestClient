@@ -21,7 +21,7 @@
 	
 	
 	<!-- This Linker will produce a monolithic JavaScript file. It may be used only when there is a single distinct compilation result. -->
-<!--  	<add-linker name="sso" /> -->
+ 	<add-linker name="sso" />
 
 	<!-- Logging properties -->
 	<!-- To compile at `DEBUG`, `WARN` and `OFF` log levels (with a 3x compile 
@@ -39,7 +39,7 @@
 	<!-- (only use if you’re not using enums as String values) -->
 	<!-- <set-configuration-property name="compiler.enum.obfuscate.names" value="true"/> -->
 
-	<set-property name="compiler.useSourceMaps" value="true"></set-property>
+	
 	<entry-point class='org.rest.client.RestClient' />
 
 	<source path='client' />

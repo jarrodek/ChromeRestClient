@@ -19,6 +19,7 @@ import java.util.ArrayList;
 
 import org.rest.client.request.FilesObject;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -34,7 +35,7 @@ import com.google.gwt.json.client.JSONBoolean;
  * @author jarrod
  * 
  */
-public class RequestObject extends HistoryObject {
+public class RequestObject extends JavaScriptObject {
 	protected RequestObject() {
 	}
 	/**
@@ -44,9 +45,9 @@ public class RequestObject extends HistoryObject {
 	public static final native RequestObject createRequest() /*-{
 		return {
 			id: -1,
-			name : null, //search key
-			project : 0, //search key
-			url : null, //search key
+			name : null,
+			project : 0,
+			url : null,
 			method : null,
 			encoding : null,
 			headers : null,
@@ -58,8 +59,87 @@ public class RequestObject extends HistoryObject {
 			skipMethod: false,
 			skipPayload: false,
 			skipHeaders: false,
-			skipPath: false
+			skipPath: false,
+			time: Date.now()
 		}
+	}-*/;
+	
+	
+	public final native int getId() /*-{
+		return this.id;
+	}-*/;
+	
+	
+	
+	public final native void setId(int id) /*-{
+		this.id = id;
+	}-*/;
+	
+	
+	public final native void setTime(double time) /*-{
+		this.time = time;
+	}-*/;
+	
+	
+	public final native double getTime() /*-{
+		if(typeof this.time == 'number'){
+			return this.time;
+		}
+		if(!this.time || !this.time.getTime){
+			this.time = Date.now();
+			return this.time;
+		}
+		return this.time.getTime();
+	}-*/;
+	
+	
+	public final native void setURL(String url) /*-{
+		this.url = url;
+	}-*/;
+
+	
+	public final native String getURL() /*-{
+		return this.url;
+	}-*/;
+
+	
+	public final native void setMethod(String method) /*-{
+		this.method = method;
+	}-*/;
+
+	
+	public final native String getMethod() /*-{
+		return this.method;
+	}-*/;
+
+	
+	public final native void setEncoding(String encoding) /*-{
+		this.encoding = encoding;
+	}-*/;
+
+	
+	public final native String getEncoding() /*-{
+		return this.encoding;
+	}-*/;
+
+	
+	public final native void setHeaders(String headers) /*-{
+		this.headers = headers;
+	}-*/;
+
+	
+	public final native String getHeaders() /*-{
+		return this.headers || null;
+	}-*/;
+
+	
+	public final native void setPayload(String payload) /*-{
+		this.payload = payload;
+	}-*/;
+
+	
+	public final native String getPayload() /*-{
+		return this.payload;
 	}-*/;
 	
 	private static ArrayList<FilesObject> fileList = new ArrayList<FilesObject>();
@@ -69,7 +149,7 @@ public class RequestObject extends HistoryObject {
 	public final ArrayList<FilesObject> getFiles(){
 		return fileList;
 	}
-
+	
 	/**
 	 * @return request given name or null if none
 	 */
@@ -295,4 +375,31 @@ public class RequestObject extends HistoryObject {
 		} catch(e){}
 		return null;
 	}-*/;
+	/**
+	 * Copy request object to new one without ID.
+	 * Database API make it impossible to override ID.
+	 * @param from
+	 * @return
+	 */
+	public static RequestObject copyNew(RequestObject from){
+		RequestObject to = RequestObject.createRequest();
+		to.setEncoding(from.getEncoding());
+		to.setFiles(from.getFiles());
+		to.setHeaders(from.getHeaders());
+		to.setMethod(from.getMethod());
+		to.setName(from.getName());
+		to.setPayload(from.getPayload());
+		to.setProject(from.getProject());
+		to.setSkipHeaders(from.getSkipHeaders() == 1 ? true : false);
+		to.setSkipHistory(from.getSkipHistory() == 1 ? true : false);
+		to.setSkipMethod(from.getSkipMethod() == 1 ? true : false);
+		to.setSkipParams(from.getSkipParams() == 1 ? true : false);
+		to.setSkipPath(from.getSkipPath() == 1 ? true : false);
+		to.setSkipPayload(from.getSkipPayload() == 1 ? true : false);
+		to.setSkipProtocol(from.getSkipPayload() == 1 ? true : false);
+		to.setSkipServer(from.getSkipServer() == 1 ? true : false);
+		to.setTime(from.getTime());
+		to.setURL(from.getURL());
+		return to;
+	}
 }

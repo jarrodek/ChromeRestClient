@@ -25,6 +25,7 @@
 			<g:InlineLabel styleName="{style.lastUsed} {appResources.appCss.flex}" ui:field="dateLabel"></g:InlineLabel>
 			<span class="{appResources.appCss.historyAction} {appResources.appCss.flex}">
 				<g:Button ui:field="select" styleName="{appResources.appCss.button} {appResources.appCss.historySelectButton}">Select</g:Button>
+				<g:Button ui:field="delete" styleName="{appResources.appCss.button} {appResources.appCss.historySelectButton}">Delete</g:Button>
 			</span>
 		</div>
 		<div class="{appResources.appCss.hidden} {appResources.appCss.flex} {appResources.appCss.historyDetailed}" ui:field="detailedPanel">

@@ -307,6 +307,8 @@ public class RequestActivity extends AppActivity implements
 		setUserDefinedContentEncodingValues(request
 				.getEncoding());
 		RestClient.fixChromeLayout();
+		Storage store = Storage.getSessionStorageIfSupported();
+		store.setItem("restoredRequest", ""+request.getId());
 		
 	}
 	private void restoreProjectEndpointWithLatestData(
@@ -365,6 +367,8 @@ public class RequestActivity extends AppActivity implements
 		setUserDefinedContentEncodingValues(request
 				.getEncoding());
 		RestClient.fixChromeLayout();
+		Storage store = Storage.getSessionStorageIfSupported();
+		store.setItem("restoredRequest", ""+request.getId());
 	}
 	
 	

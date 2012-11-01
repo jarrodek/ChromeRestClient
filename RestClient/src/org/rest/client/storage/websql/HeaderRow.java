@@ -44,7 +44,7 @@ public class HeaderRow extends JavaScriptObject {
 	 * @return header's example
 	 */
 	public final native String getExample()/*-{
-		return this.example;
+		return this.example||"";
 	}-*/;
 
 	/**

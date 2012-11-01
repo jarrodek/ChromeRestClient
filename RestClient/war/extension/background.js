@@ -283,7 +283,7 @@ var declarativeRequest = {
 	
 	/**
 	 * By default remove this headers from request (if they are not set by user):
-	 * accept,accept-charset,accept-encoding,accept-language,connection,content-type,host,if-modified-since,if-none-match,origin,referer,user-agent
+	 * accept,accept-charset,accept-encoding,accept-language,connection,host,if-modified-since,if-none-match,origin,referer,user-agent
 	 * This headers are set by default by browser and should not be included into request.
 	 */
 	setRules : function(_requestData) {
@@ -329,7 +329,7 @@ var declarativeRequest = {
 		// Remove all request headers set by browser by default and that are not set by user
 		// (can't remove and set headers in one request by this API)
 		//
-		var defaultHeaders = "accept,accept-charset,accept-encoding,accept-language,access-control-request-headers,cache-control,access-control-request-method,connection,content-type,host,if-modified-since,if-none-match,origin,referer,user-agent".split(",");
+		var defaultHeaders = "accept,accept-charset,accept-encoding,accept-language,access-control-request-headers,cache-control,cookie,access-control-request-method,connection,host,if-modified-since,if-none-match,origin,referer,user-agent".split(",");
 		var requestHeadersKeys = [];
 		for(var i=0; i<requestHeadersLength;i++){
 			requestHeadersKeys[requestHeadersKeys.length] = requestHeaders[i].name.toLowerCase();

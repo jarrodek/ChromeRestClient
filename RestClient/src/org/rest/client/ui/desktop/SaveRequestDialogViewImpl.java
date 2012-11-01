@@ -124,7 +124,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		setProjectsList();
 		
 		//
-		//check if it is a restored request. User may want to overwrite existing request.
+		//check if it is a restored request. The user may want to overwrite existing request.
 		//
 		Storage store = Storage.getSessionStorageIfSupported();
 		String restored = store.getItem("restoredRequest");

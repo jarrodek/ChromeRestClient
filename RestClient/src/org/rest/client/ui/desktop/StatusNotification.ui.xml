@@ -16,6 +16,7 @@
 		.dismiss{
 			margin-left: 2em;
 	    }
+	    
 		.hidden{
 			display: none;
 		}
@@ -56,6 +57,9 @@
 		.html .wrapper .dismissAnchor{ 
 			color: black; 
 		}
+		.actionMessage{
+	    	margin-left: 1em;
+	    }
 		.textHiddable{-webkit-transition: opacity 0.2s linear;opacity: 1;}
 		.textHidden{opacity: 0;}
 	</ui:style>
@@ -64,9 +68,9 @@
 			<div class="{style.info}">
 				<g:InlineLabel styleName="{style.textHiddable}" ui:field="message" text="(empty)"></g:InlineLabel>
 			</div>
-			<div class="{style.dismiss}">
+			<g:HTMLPanel ui:field="actions" stylePrimaryName="{style.dismiss}">
 				<g:Anchor ui:field="flashDismiss" href="about:blank" styleName="{style.dismissAnchor}" title="Dismiss" text="dismiss"></g:Anchor>
-			</div>
+			</g:HTMLPanel>
 		</g:HTMLPanel>
 	</g:HTMLPanel>
 </ui:UiBinder>

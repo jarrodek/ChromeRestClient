@@ -1,7 +1,6 @@
 package org.rest.client;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Handler;
@@ -14,6 +13,7 @@ import org.rest.client.event.RequestEndEvent;
 import org.rest.client.event.RequestStartActionEvent;
 import org.rest.client.request.FilesObject;
 import org.rest.client.request.FormPayloadData;
+import org.rest.client.request.HttpMethodOptions;
 import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.request.RequestPayloadParser;
 import org.rest.client.storage.StoreResultCallback;
@@ -119,8 +119,8 @@ public class AppRequestFactory {
 		RestClient.collectRequestData(new Callback<RequestObject, Throwable>() {
 			@Override
 			public void onSuccess(final RequestObject data) {
-				saveCurrentState(data);
 				
+				saveCurrentState(data);
 				
 				String requestUrl = data.getURL();
 				if(requestUrl == null || requestUrl.isEmpty()){
@@ -137,7 +137,7 @@ public class AppRequestFactory {
 					@Override
 					public void onSuccess(String result) {
 						if(RestClient.isDebug()){
-							Log.debug("Message to bacground page passed.");
+							Log.debug("Message to background page passed.");
 						}
 						startHttpRequest(data);
 					}
@@ -157,144 +157,116 @@ public class AppRequestFactory {
 			Log.debug("Start new request");
 		}
 		String requestUrl = data.getURL();
-		
 		String method = data.getMethod();
-		String payload = data.getPayload();
 		ArrayList<FilesObject> files = data.getFiles();
-		ArrayList<RequestHeader> headers = RequestHeadersParser.stringToHeaders(data.getHeaders());
-		String encoding = data.getEncoding();
-		FormData fd = null;
-		boolean isEmptyFormData = true;
-		boolean hasFile = false;
-		boolean useFormData = false;
-		if (files != null && files.size() > 0) {
-			//
-			// FormData only with files to handle correct payload and
-			// headers!!
-			//
-			useFormData = true;
-		}
-		
-		if(useFormData) {
-			fd = FormData.create();
-			if(RestClient.isDebug()){
-				Log.debug("Request will use FormData class in order to handle files.");
-			}
-		}
-		
-		if(RestClient.isDebug()){
-			Log.debug("Createing builder object for URL: " + requestUrl + " and method: " + method);
-		}
-		
+		boolean hasPayload = HttpMethodOptions.hasBody(method);
 		RequestBuilder builder = new RequestBuilder(requestUrl, method);
 		builder.setFollowRedirects(true);
-//		builder.setWithCredentials(true);
-//		builder.setTimeoutMillis(200);
 		
-		if (payload != null && !payload.equals("")) {
-			if(RestClient.isDebug()){
-				Log.debug("Set request data:");
-				Log.debug(payload);
-				Log.debug("=============================");
-			}
-			if (useFormData) {
+		
+		if(hasPayload){
+			String payload = data.getPayload();
+			if(files != null && files.size() > 0){
+				FormData fd = FormData.create();
+				if(RestClient.isDebug()){
+					Log.debug("Request will use FormData object in order to handle files.");
+				}
+				//set payload
 				ArrayList<FormPayloadData> map = RequestPayloadParser.stringToFormArrayList(payload);
 				for(FormPayloadData _data : map){
 					fd.append(_data.getKey(), _data.getValue());
-					isEmptyFormData = false;
 				}
+				//set file
+				if(RestClient.isDebug()){
+					Log.debug("Set " + files.size() + " file(s) in request.");
+				}
+				for(FilesObject fo : files){
+					FileList fls = fo.getFiles();
+					String fieldName = fo.getName();
+					int len = fls.size();
+					for (int i = 0; i < len; i++) {
+						File f = fls.get(i);
+						fd.append(fieldName, f);
+					}
+				}
+				builder.setRequestFormData(fd);
 			} else {
-				builder.setRequestData(payload);
-			}
-		}
-		
-		if(useFormData) {
-			if(RestClient.isDebug()){
-				Log.debug("Set " + files.size() + " file(s) in request.");
-			}
-			for(FilesObject fo : files){
-				FileList fls = fo.getFiles();
-				String fieldName = fo.getName();
-				int len = fls.size();
-				for (int i = 0; i < len; i++) {
-					File f = fls.get(i);
-					fd.append(fieldName, f);
-					isEmptyFormData = false;
-					hasFile = true;
+				if (payload != null && !payload.equals("")) {
+					if(RestClient.isDebug()){
+						Log.debug("Set request data.");
+					}
+					builder.setRequestData(payload);
 				}
 			}
 		}
 		
-		if (!isEmptyFormData) {
-			builder.setRequestFormData(fd);
-		}
-		// builder.setTimeoutMillis(500);
-		// builder.setWithCredentials(true);
-		
-		//check if headers list already contains content-type header.
-		//if not set one from form.
+		ArrayList<RequestHeader> headers = RequestHeadersParser.stringToHeaders(data.getHeaders());
 		if (headers == null) {
 			headers = new ArrayList<RequestHeader>();
 		}
-		if(RestClient.isDebug()){
-			Log.debug("Checking if headers list contains Content-Type");
-		}
-		boolean hasContentTypeHeader = false;
-		for(RequestHeader item : headers){
-			String key = item.getName();
-			if(key.toLowerCase().equals("content-type")){
-				encoding = item.getValue();
-				hasContentTypeHeader = true;
-				if(RestClient.isDebug()){
-					Log.debug("Found Content-Type header. Overwrite header value to " + encoding);
-				}
-				break;
-			}
-		}
-		
-		if(!hasContentTypeHeader){
-			if(RestClient.isDebug()){
-				Log.debug("Content-Type header not found in headers list. Setting one from form value: " + encoding);
-			}
-			if(encoding != null)
-				headers.add(new RequestHeader("Content-Type", encoding));
-		}
-		
-		
-		if (hasFile) {
-			Collections.sort(headers, new RequestHeader.HeadersComparator());
-			RequestHeader found = null;
-			for(RequestHeader item : headers){
-				if(item.getName().toLowerCase().equals("content-type")){
-					found = item;
-					break;
-				}
-			}
-			
-			if(found != null){
-				headers.remove(found);
-				if(RestClient.isDebug()){
-					Log.debug("Remove \"Content-Type\" header in order to handle files.");
-				}
-			}
-		}
-		
-		
-		if (headers != null) {
+		if (headers.size() > 0) {
 			builder.setHeaders(headers);
 			if(RestClient.isDebug()){
-				Log.debug("Set request headers:");
+				Log.debug("Headers","Set request headers:");
 				for(RequestHeader item : headers){
-					Log.debug(item.getName()+": "+item.getValue());
+					Log.debug("Headers",">>> "+item.getName()+": "+item.getValue());
 				}
 			}
 		}
 		
+		// builder.setTimeoutMillis(500);
+		// builder.setWithCredentials(true);
+		
+		
+		setRequestHandlers(builder);
+		
+		
+		if(RestClient.isDebug()){
+			Log.debug("All set. Sending...");
+		}
+		
+		startTime = new Date();
+		try {
+			builder.send();
+		} catch (Throwable e) {
+			Log.error("Request send failure.", e);
+			eventBus.fireEvent(new RequestEndEvent(false, null, 0));
+			requestInProgress = false;
+			ErrorDialogView dialog = RestClient.getClientFactory().getErrorDialogView();
+			dialog.getHandler().publish(new LogRecord(dialog.getHandler().getLevel(), e.getMessage()));
+			startTime = null;
+		}
+	}
+	
+	protected static void onSuccesRequest(final Response response) {
+		if(RestClient.isDebug()){
+			Log.debug("Request sent successfully. Building response view.");
+		}
+		requestInProgress = false;
+		if(response == null){
+			Window.alert("Something goes wrong :(\nResponse is null!");
+			return;
+		}
+		ScheduledCommand sc = new ScheduledCommand() {
+			@Override
+			public void execute() {
+				long loadingTime = new Date().getTime() - startTime.getTime();
+				RequestEndEvent event = new RequestEndEvent(true, response, loadingTime);
+				eventBus.fireEvent(event);
+			}
+		};
+		Scheduler.get().scheduleDeferred(sc);
+	}
+	
+	
+	/**
+	 * Set callbacks to request.
+	 * @param builder
+	 */
+	private static void setRequestHandlers(RequestBuilder builder){
 		if(RestClient.isDebug()){
 			Log.debug("Set request handlers.");
 		}
-		
-		
 		builder.setAbortHandler(new AbortHandler() {
 			@Override
 			public void onAbort(ProgressEvent event) {
@@ -377,42 +349,6 @@ public class AppRequestFactory {
 				onFailureRequest(response);
 			}
 		});
-		
-		if(RestClient.isDebug()){
-			Log.debug("All set. Sending...");
-		}
-		
-		startTime = new Date();
-		try {
-			builder.send();
-		} catch (Throwable e) {
-			Log.error("Request send failure.", e);
-			eventBus.fireEvent(new RequestEndEvent(false, null, 0));
-			requestInProgress = false;
-			ErrorDialogView dialog = RestClient.getClientFactory().getErrorDialogView();
-			dialog.getHandler().publish(new LogRecord(dialog.getHandler().getLevel(), e.getMessage()));
-			startTime = null;
-		}
-	}
-	
-	protected static void onSuccesRequest(final Response response) {
-		if(RestClient.isDebug()){
-			Log.debug("Request sent successfully. Building response view.");
-		}
-		requestInProgress = false;
-		if(response == null){
-			Window.alert("Something goes wrong :(\nResponse is null!");
-			return;
-		}
-		ScheduledCommand sc = new ScheduledCommand() {
-			@Override
-			public void execute() {
-				long loadingTime = new Date().getTime() - startTime.getTime();
-				RequestEndEvent event = new RequestEndEvent(true, response, loadingTime);
-				eventBus.fireEvent(event);
-			}
-		};
-		Scheduler.get().scheduleDeferred(sc);
 	}
 	
 	protected static void onFailureRequest(final Response response) {
@@ -457,7 +393,9 @@ public class AppRequestFactory {
 	 * 
 	 * @param data
 	 */
-	private static void saveHistory(final RequestObject data){
+	private static void saveHistory(RequestObject _data){
+		final HistoryObject data = HistoryObject.copyRequestObject(_data);
+		
 		if(!RestClient.isHistoryEabled()){
 			return;
 		}

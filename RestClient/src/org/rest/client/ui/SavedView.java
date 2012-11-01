@@ -43,6 +43,15 @@ public interface SavedView extends IsWidget {
 		 * Get next results page and set in view
 		 */
 		void getNextItemsPage();
+		/**
+		 * Remove item for given ID from saved database.
+		 * @param savedId
+		 */
+		void removeFromSaved(RequestObject request);
+		/**
+		 * Called when user wants to clear all saved request (but not in projects).
+		 */
+		void onClearSaved();
 	}
 	/**
 	 * Sets presenter for this view

@@ -23,7 +23,7 @@ import com.google.gwt.core.client.JavaScriptObject;
  * @author Paweł Psztyć
  * 
  */
-public class HistoryObject extends JavaScriptObject {
+public class HistoryObject extends JavaScriptObject implements History {
 	protected HistoryObject() {
 	}
 	
@@ -33,6 +33,7 @@ public class HistoryObject extends JavaScriptObject {
 	 */
 	public static final native HistoryObject create() /*-{
 		return {
+			id: -1,
 			url : null, //search key, for future implementation in URL seatch oracle
 			method : null,
 			encoding : null,
@@ -42,24 +43,23 @@ public class HistoryObject extends JavaScriptObject {
 		}
 	}-*/;
 	
-	/**
-	 * @return IDB ID.
-	 */
+	@Override
 	public final native int getId() /*-{
 		return this.id;
 	}-*/;
 	
-	/**
-	 * @param id ID to set (on update only)
-	 */
+	
+	@Override
 	public final native void setId(int id) /*-{
 		this.id = id;
 	}-*/;
 	
+	@Override
 	public final native void setTime(double time) /*-{
 		this.time = time;
 	}-*/;
 	
+	@Override
 	public final native double getTime() /*-{
 		if(typeof this.time == 'number'){
 			return this.time;
@@ -71,87 +71,70 @@ public class HistoryObject extends JavaScriptObject {
 		return this.time.getTime();
 	}-*/;
 	
-	/**
-	 * Sets request URL data
-	 * 
-	 * @param url
-	 *            URL to save
-	 */
+	@Override
 	public final native void setURL(String url) /*-{
 		this.url = url;
 	}-*/;
 
-	/**
-	 * @return saved URL data
-	 */
+	@Override
 	public final native String getURL() /*-{
 		return this.url;
 	}-*/;
 
-	/**
-	 * Sets request method value eg. POST
-	 * 
-	 * @param method
-	 *            Method to set
-	 */
+	@Override
 	public final native void setMethod(String method) /*-{
 		this.method = method;
 	}-*/;
 
-	/**
-	 * @return Saved request method value
-	 */
+	@Override
 	public final native String getMethod() /*-{
 		return this.method;
 	}-*/;
 
-	/**
-	 * Sets request data encoding eg. application/json
-	 * 
-	 * @param encoding
-	 *            Encoding to set. Any valid encoding value
-	 */
+	@Override
 	public final native void setEncoding(String encoding) /*-{
 		this.encoding = encoding;
 	}-*/;
 
-	/**
-	 * @return Saved request form encoding
-	 */
+	@Override
 	public final native String getEncoding() /*-{
 		return this.encoding;
 	}-*/;
 
-	/**
-	 * Sets headers data in string representation.
-	 * 
-	 * @param headers
-	 */
+	@Override
 	public final native void setHeaders(String headers) /*-{
 		this.headers = headers;
 	}-*/;
 
-	/**
-	 * @return Saved request headers data.
-	 */
+	@Override
 	public final native String getHeaders() /*-{
 		return this.headers || null;
 	}-*/;
 
-	/**
-	 * Sets form payload
-	 * 
-	 * @param payload
-	 *            Payload to set. Any string.
-	 */
+	@Override
 	public final native void setPayload(String payload) /*-{
 		this.payload = payload;
 	}-*/;
 
-	/**
-	 * @return Saved payload data
-	 */
+	@Override
 	public final native String getPayload() /*-{
 		return this.payload;
 	}-*/;
+	
+	/**
+	 * Copy request object to new history object.
+	 * 
+	 * @param from
+	 * @return
+	 */
+	public static HistoryObject copyRequestObject(RequestObject from){
+		HistoryObject to = HistoryObject.create();
+		to.setEncoding(from.getEncoding());
+		to.setHeaders(from.getHeaders());
+		to.setMethod(from.getMethod());
+		to.setPayload(from.getPayload());
+		to.setTime(from.getTime());
+		to.setURL(from.getURL());
+		return to;
+	}
 }

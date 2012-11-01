@@ -117,7 +117,11 @@ body {
 <%
     UserService userService = UserServiceFactory.getUserService();
 	boolean isUser = userService.isUserLoggedIn();
-	boolean admin = userService.isUserAdmin();
+	boolean admin = false;
+	if(isUser && userService.isUserAdmin()){
+		admin = true;
+	}
+	
 	
 	String infoMessage = null;
 	String infoCode = request.getParameter("i");

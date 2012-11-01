@@ -5,11 +5,13 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -104,59 +106,29 @@ public class StatusNotification extends Composite {
 		 * @return class name for text transition to fade out 
 		 */
 		String textHidden();
+		
+		String dismissAnchor();
+		String actionMessage();
 	}
-
+	
+	public interface NotificationCallback {
+		void onActionPerformed();
+	}
+	
 	/**
 	 * Single notification.
 	 * 
 	 * @author Paweł Psztyć
 	 */
 	private static class NotificationObject {
-		private final String message;
-		private String type;
-		private int timeout;
+		public final String message;
+		public String type;
+		public int timeout;
+		public NotificationAction[] callbacks;
 
 		public NotificationObject(String message) {
 			this.message = message;
 		}
-
-		/**
-		 * @return the type
-		 */
-		public final String getType() {
-			return type;
-		}
-
-		/**
-		 * @param type
-		 *            the type to set
-		 */
-		public final void setType(String type) {
-			this.type = type;
-		}
-
-		/**
-		 * @return the timeout
-		 */
-		public final int getTimeout() {
-			return timeout;
-		}
-
-		/**
-		 * @param timeout
-		 *            the timeout to set
-		 */
-		public final void setTimeout(int timeout) {
-			this.timeout = timeout;
-		}
-		
-		/**
-		 * @return the message
-		 */
-		public final String getMessage() {
-			return message;
-		}
-
 	}
 
 	private static List<NotificationObject> messages = new ArrayList<NotificationObject>();
@@ -174,6 +146,7 @@ public class StatusNotification extends Composite {
 	};
 
 	@UiField HTMLPanel mainPanel;
+	@UiField HTMLPanel actions;
 	@UiField InlineLabel message;
 	@UiField WidgetStyle style;
 
@@ -245,8 +218,8 @@ public class StatusNotification extends Composite {
 	public static void notify(String message, String type, int timeout,
 			boolean overwrite) {
 		NotificationObject no = new NotificationObject(message);
-		no.setTimeout(timeout);
-		no.setType(type);
+		no.timeout = timeout;
+		no.type = type;
 
 		if (overwrite) {
 			messages.clear();
@@ -259,64 +232,123 @@ public class StatusNotification extends Composite {
 		if (current != null){
 			dismissMessage();
 		} else {
-			next();
+			INSTANCE.next();
 		}
 	}
+	/**
+	 * Special type of notification when the user see a message and have more than one option to click.
+	 * Status bar will always include "dismiss" message. 
+	 * @param message
+	 * @param type
+	 * @param callback
+	 */
+	public static void notify(String message, String type, int timeout, boolean overwrite, NotificationAction... callback) {
+		NotificationObject no = new NotificationObject(message);
+		no.timeout = timeout;
+		no.type = type;
+		no.callbacks = callback;
+		if (overwrite) {
+			messages.clear();
+		}
+		messages.add(no);
+		if (!overwrite && current != null) {
+			return;
+		}
+		if (current != null){
+			dismissMessage();
+		} else {
+			INSTANCE.next();
+		}
+	}
+	
+	
 	/**
 	 * Remove current message and cleanup.
 	 */
 	private static void dismissMessage() {
 		messageTimer.cancel();
 		current = null;
+		showing = false;
 		if(messages.size() > 0){
 			INSTANCE.message.addStyleName(INSTANCE.style.textHidden());
 			new Timer() {
 				@Override
 				public void run() {
-					next();
+					INSTANCE.next();
 				}
 			}.schedule(300);
 		} else {
-			cleanupContainer();
+			INSTANCE.cleanupContainer();
 		}
 	}
 	/**
 	 * Display next notification.
 	 */
-	private static void next(){
+	private void next(){
 		if(messages.size() == 0){
 			cleanupContainer();
 			showing = false;
+			current = null;
 			return;
 		}
 		current = messages.remove(0);
+		
+		
 		if(current == null) return;
 		boolean isHTML = false;
 		
-		if(current.getType().equals(TYPE_CRITICAL)){
-			INSTANCE.mainPanel.addStyleName(INSTANCE.style.critical());
-		} else if(current.getType().equals(TYPE_ERROR)){
-			INSTANCE.mainPanel.addStyleName(INSTANCE.style.error());
-		} else if(current.getType().equals(TYPE_HTML)){
-			INSTANCE.mainPanel.addStyleName(INSTANCE.style.html());
+		if(current.type.equals(TYPE_CRITICAL)){
+			mainPanel.addStyleName(style.critical());
+		} else if(current.type.equals(TYPE_ERROR)){
+			mainPanel.addStyleName(style.error());
+		} else if(current.type.equals(TYPE_HTML)){
+			mainPanel.addStyleName(style.html());
 			isHTML = true;
 		} else {
-			INSTANCE.mainPanel.addStyleName(INSTANCE.style.common());
+			mainPanel.addStyleName(style.common());
 		}
 		
 		if(isHTML){
-			INSTANCE.message.getElement().setInnerHTML(current.getMessage());
+			message.getElement().setInnerHTML(current.message);
 		} else {
-			INSTANCE.message.setText(current.getMessage());
+			message.setText(current.message);
 		}
+		
+		//remove any additional actions from previous notifications.
+		while(actions.getWidgetCount()>1){
+			actions.getWidget(1).removeFromParent();
+		}
+		
+		if(current.callbacks != null && current.callbacks.length > 0){
+			for(int i=0; i<current.callbacks.length; i++){
+				final NotificationAction callbackAction = current.callbacks[i];
+				if(callbackAction.callback == null){
+					continue;
+				}
+				if(callbackAction.name == null) callbackAction.name = "[undefined]";
+				Anchor action = new Anchor(callbackAction.name);
+				action.setHref("about:blank");
+				action.addClickHandler(new ClickHandler() {
+					@Override
+					public void onClick(ClickEvent event) {
+						event.preventDefault();
+						callbackAction.callback.onActionPerformed();
+						dismissMessage();
+					}
+				});
+				action.setStyleName(style.dismissAnchor()+" " +style.actionMessage());
+				actions.add(action);
+			}
+		}
+		
 		if(showing){
-			INSTANCE.message.removeStyleName(INSTANCE.style.textHidden());
+			message.removeStyleName(style.textHidden());
 		} else {
-			INSTANCE.mainPanel.removeStyleName(INSTANCE.style.hidden());
+			mainPanel.removeStyleName(style.hidden());
 			showing = true;
 		}
-		if(current.getTimeout() > 0){
-			messageTimer.schedule(current.getTimeout());
+		if(current.timeout > 0){
+			messageTimer.schedule(current.timeout);
 		}
 	}
 	
@@ -333,19 +365,19 @@ public class StatusNotification extends Composite {
 		messages = new ArrayList<StatusNotification.NotificationObject>();
 		messageTimer.cancel();
 		current = null;
-		cleanupContainer();
+		INSTANCE.cleanupContainer();
 	}
 	/**
 	 * Clear and hide notification bar
 	 */
-	private static void cleanupContainer(){
-		INSTANCE.message.setText("");
-		INSTANCE.message.removeStyleName(INSTANCE.style.textHidden());
-		INSTANCE.mainPanel.addStyleName(INSTANCE.style.hidden());
-		INSTANCE.mainPanel.removeStyleName(INSTANCE.style.critical());
-		INSTANCE.mainPanel.removeStyleName(INSTANCE.style.common());
-		INSTANCE.mainPanel.removeStyleName(INSTANCE.style.html());
-		INSTANCE.mainPanel.removeStyleName(INSTANCE.style.error());
+	private void cleanupContainer(){
+		message.setText("");
+		message.removeStyleName(style.textHidden());
+		mainPanel.addStyleName(style.hidden());
+		mainPanel.removeStyleName(style.critical());
+		mainPanel.removeStyleName(style.common());
+		mainPanel.removeStyleName(style.html());
+		mainPanel.removeStyleName(style.error());
 	}
 	@UiHandler("flashDismiss")
 	void onDissmiss(ClickEvent e){

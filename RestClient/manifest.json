@@ -1,0 +1,37 @@
+{
+  "name": "Advanced REST client",
+  "description": "The web developers helper program to create and test custom HTTP requests.",
+  "icons": {
+    "16": "img/arc_icon_16.png",
+    "128": "img/arc_icon_128.png"
+  },
+  "version": "3.0.22",
+  "manifest_version": 2,
+  "minimum_chrome_version": "23",
+  "permissions": [
+    "webRequest",
+    "declarativeWebRequest",
+    "<all_urls>",
+    "history",
+    "background",
+    "storage",
+    "clipboardWrite"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "app": {
+    "launch": {
+      "local_path": "RestClient.html"
+    }
+  },
+  "content_security_policy": "script-src chrome-extension:// chrome-extension-resource:// https://plusone.google.com https://chromerestclient.appspot.com https://ssl.google-analytics.com https://apis.google.com 'self'; object-src chrome-extension:// chrome-extension-resource:// 'self'; frame-src chrome-extension:// chrome-extension-resource:// https://plusone.google.com 'self' style-src chrome-extension:// chrome-extension-resource:// 'self'",
+  "intents": {
+	"http://webintents.org/view": [{
+		"title": "Advanced REST client",
+		"type": ["application/restclient+data"],
+		"href": "/intentview.html",
+		"disposition" : "inline"
+	}]
+  }
+}

@@ -69,7 +69,6 @@ public class SavedListItemViewImpl extends Composite {
 		this.methodLabel.setText(requestObject.getMethod());
 		this.urlValue.setText(requestObject.getURL());
 		
-		
 		if(requestObject.getPayload() != null){
 			payload.setInnerText(requestObject.getPayload());
 		}
@@ -90,6 +89,13 @@ public class SavedListItemViewImpl extends Composite {
 	void onSelectItem(ClickEvent e){
 		e.preventDefault();
 		listener.goTo(RequestPlace.Tokenizer.fromSaved(requestObject.getId()));
+	}
+	
+	@UiHandler("delete")
+	void onDeleteItem(ClickEvent e){
+		e.preventDefault();
+		listener.removeFromSaved(requestObject);
+		removeFromParent();
 	}
 	
 	private void doOnExpand(){

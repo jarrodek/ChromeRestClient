@@ -127,10 +127,40 @@ public class RequestDataStoreWebSql extends WebSqlAdapter<Integer, RequestObject
 			}
 		});
 	}
-
+	/**
+	 * If key is null table will be truncated.
+	 */
 	@Override
-	public void remove(Integer key, StoreResultCallback<Boolean> callback) {
-		callback.onError(null);
+	public void remove(Integer key, final StoreResultCallback<Boolean> callback) {
+		
+		
+		if(key == null){
+			service.truncate(new VoidCallback() {
+				@Override
+				public void onFailure(DataServiceException error) {
+					callback.onError(error);
+				}
+				
+				@Override
+				public void onSuccess() {
+					callback.onSuccess(true);
+				}
+			});
+			return;
+		}
+		
+		service.delete(key, new VoidCallback() {
+			
+			@Override
+			public void onFailure(DataServiceException error) {
+				callback.onError(error);
+			}
+			
+			@Override
+			public void onSuccess() {
+				callback.onSuccess(true);
+			}
+		});
 	}
 
 	@Override

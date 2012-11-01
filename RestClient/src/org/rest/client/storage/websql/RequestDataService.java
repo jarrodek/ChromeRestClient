@@ -106,4 +106,25 @@ public interface RequestDataService extends AppDatabase {
 			+ "{_.getSkipHeaders()},{_.getSkipPath()},{_.getTime()})", foreach = "data")
 	void insertFileImportData(ArrayList<RequestObject> data,
 			RowIdListCallback callback);
+	
+	/**
+	 * Truncate table.
+	 * @param callback
+	 */
+	@Update(sql = "DELETE FROM request_data")
+	void truncate(VoidCallback callback);
+	
+	/**
+	 * Truncate table.
+	 * @param callback
+	 */
+	@Update(sql = "DELETE FROM request_data WHERE project=0")
+	void deleteSaved(VoidCallback callback);
+	
+	/**
+	 * Truncate table.
+	 * @param callback
+	 */
+	@Update(sql = "DELETE FROM request_data WHERE ID={id}")
+	void delete(int id, VoidCallback callback);
 }
