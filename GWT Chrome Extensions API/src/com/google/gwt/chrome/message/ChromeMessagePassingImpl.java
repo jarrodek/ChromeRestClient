@@ -69,6 +69,9 @@ public class ChromeMessagePassingImpl implements ChromeMessagePassing {
 				}
 				if (!(response && response.payload))
 					return;
+				if(typeof response.data == "object"){
+					response.data = JSON.stringify(response.data);
+				}
 				handler.@com.google.gwt.chrome.message.ChromeMessageReceiver::onMessage(Ljava/lang/String;Ljava/lang/String;)(response.payload,response.data+"");
 			});
 			backgroundPage.requestAction(data, receiver);

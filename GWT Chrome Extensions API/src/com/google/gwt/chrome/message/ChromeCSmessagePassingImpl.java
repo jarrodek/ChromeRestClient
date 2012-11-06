@@ -3,6 +3,7 @@ package com.google.gwt.chrome.message;
 import java.util.HashMap;
 
 import com.google.gwt.chrome.def.BackgroundPageCallback;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 
@@ -15,7 +16,12 @@ import com.google.gwt.json.client.JSONString;
 public class ChromeCSmessagePassingImpl implements ChromeMessagePassing {
 
 	private static HashMap<String, BackgroundPageCallback> messageCallbackList = new HashMap<String, BackgroundPageCallback>();
-
+	static boolean isDebug = false;
+	static{
+		isDebug = !GWT.isProdMode();
+	}
+	
+	
 	public ChromeCSmessagePassingImpl() {
 		handleContentScriptMessages(new ChromeMessageReceiver() {
 			@Override
@@ -54,11 +60,21 @@ public class ChromeCSmessagePassingImpl implements ChromeMessagePassing {
 			if (e.origin != location.origin) {
 				return;
 			};
-			if (!(e.data && e.data.source && e.data.source == "dev:cs"))
+			var response = e.data;
+			if (!(response && response.source && response.source == "dev:cs"))
 				return;
-			if (!(e.data && e.data.payload))
+			if (!(response && response.payload))
 				return;
-			handler.@com.google.gwt.chrome.message.ChromeMessageReceiver::onMessage(Ljava/lang/String;Ljava/lang/String;)(e.data.payload,e.data.data+"");
+			if(typeof response.data == "object"){
+				response.data = JSON.stringify(response.data);
+			}
+			if(@com.google.gwt.chrome.message.ChromeCSmessagePassingImpl::isDebug){
+				console.log('Full response from background page:', response);
+				console.log('Response from background page (payload):', response.payload);
+				console.log('Response from background page (data):', response.data);
+				$wnd.__latestbackgroundresponse = response;
+			}
+			handler.@com.google.gwt.chrome.message.ChromeMessageReceiver::onMessage(Ljava/lang/String;Ljava/lang/String;)(response.payload,response.data+"");
 		});
 
 		$wnd.addEventListener("message", rec, false);
