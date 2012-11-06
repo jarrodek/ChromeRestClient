@@ -10,6 +10,7 @@ import org.rest.client.place.ImportExportPlace;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SavedPlace;
 import org.rest.client.place.SettingsPlace;
+import org.rest.client.place.ShortcutPlace;
 import org.rest.client.place.SocketPlace;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.LocalStore;
@@ -145,8 +146,10 @@ public class UserMenuHandler {
 				new PlaceChangeEvent.Handler() {
 					public void onPlaceChange(PlaceChangeEvent event) {
 						Place newPlace = event.getNewPlace();
+						
 						if(newPlace instanceof AboutPlace){
 							about.setSelected(true);
+							trackPageview("#AboutPlace:"+((AboutPlace)newPlace).getToken());
 						} else if(newPlace instanceof RequestPlace){
 							RequestPlace _place = (RequestPlace) newPlace;
 							if(_place.isProject() || _place.isProjectsEndpoint()){
@@ -154,15 +157,38 @@ public class UserMenuHandler {
 							} else {
 								request.setSelected(true);
 							}
-						} else if(newPlace instanceof SettingsPlace ||
-								newPlace instanceof ImportExportPlace){
+							
+							if(_place.isHistory()){
+								trackPageview("#RequestPlace:history");
+							} else if(_place.isProjectsEndpoint()){
+								trackPageview("#RequestPlace:projectEndpoint");
+							} else if(_place.isProject()){
+								trackPageview("#RequestPlace:project");
+							} else if(_place.isSaved()){
+								trackPageview("#RequestPlace:saved");
+							} else if(_place.isExternal()){
+								trackPageview("#RequestPlace:external");
+							} else {
+								trackPageview("#RequestPlace:default");
+							}
+						} else if(newPlace instanceof SettingsPlace){
 							settings.setSelected(true);
+							trackPageview("#SettingsPlace:"+((SettingsPlace)newPlace).getToken());
+						} else if(newPlace instanceof ImportExportPlace){
+							settings.setSelected(true);
+							trackPageview("#ImportExportPlace:"+((ImportExportPlace)newPlace).getToken());
+						} else if(newPlace instanceof ShortcutPlace){
+							settings.setSelected(true);
+							trackPageview("#ShortcutPlace:"+((ShortcutPlace)newPlace).getToken());
 						} else if(newPlace instanceof HistoryPlace){
 							history.setSelected(true);
+							trackPageview("#HistoryPlace:"+((HistoryPlace)newPlace).getToken());
 						} else if(newPlace instanceof SavedPlace){
 							saved.setSelected(true);
+							trackPageview("#SavedPlace:"+((SavedPlace)newPlace).getToken());
 						} else if(newPlace instanceof SocketPlace){
 							socket.setSelected(true);
+							trackPageview("#SocketPlace:"+((SocketPlace)newPlace).getToken());
 						}
 					}
 			});
@@ -190,6 +216,11 @@ public class UserMenuHandler {
 				StatusNotification.notify("Unable open LocalStore :(", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
 			}
 		});
-		
 	}
+	
+	final native void trackPageview(String pageUrl) /*-{
+		if(!$wnd._gaq) return;
+		if(@org.rest.client.RestClient::isInitializing()()) return;
+		$wnd._gaq.push(['_trackPageview', pageUrl]);
+	}-*/;
 }

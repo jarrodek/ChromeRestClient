@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.rest.client.activity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.rest.client.ClientFactory;
@@ -24,6 +25,7 @@ import org.rest.client.place.HistoryPlace;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.objects.HistoryObject;
 import org.rest.client.ui.HistoryView;
+import org.rest.client.ui.desktop.NotificationAction;
 import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -38,7 +40,7 @@ import com.google.web.bindery.event.shared.EventBus;
  * @author Paweł Psztyć
  * 
  */
-public class HistoryActivity extends AppActivity implements
+public class HistoryActivity extends ListActivity implements
 		HistoryView.Presenter {
 
 	
@@ -46,11 +48,7 @@ public class HistoryActivity extends AppActivity implements
 	final private HistoryPlace place;
 	private EventBus eventBus;
 	private HistoryView view = null;
-	private int displayedItems = 0;
-	private boolean hasMoreItems = true;
-	private boolean initialize = true;
-	private final static int PAGE_SIZE = 30;
-	private boolean gettingNextPage = false;
+	
 	
 	public HistoryActivity(HistoryPlace place, ClientFactory clientFactory) {
 		super(clientFactory);
@@ -65,56 +63,90 @@ public class HistoryActivity extends AppActivity implements
 		view = clientFactory.getHistoryView();
 		view.setPresenter(this);
 		panel.setWidget(view.asWidget());
-		getNextItemsPage();
+		performQuery();
 	}
 
 	@Override
 	public void getNextItemsPage() {
-		if(gettingNextPage){
-			return;
-		}
-		gettingNextPage = true;
-		if(!hasMoreItems){
-			view.setNoMoreItems();
-			return;
-		}
-		
-		clientFactory.getHistoryRequestStore().historyList(PAGE_SIZE, displayedItems, new StoreResultCallback<List<HistoryObject>>() {
+		current_page++;
+		performQuery();
+	}
+
+	@Override
+	public void removeFromeHistory(final int historyId) {
+		clientFactory.getHistoryRequestStore().getByKey(historyId, new StoreResultCallback<HistoryObject>() {
 			
 			@Override
-			public void onSuccess(List<HistoryObject> result) {
-				int len = result.size();
-				displayedItems += len;
-				if(len < PAGE_SIZE){
-					hasMoreItems = false;
-					view.setNoMoreItems();
-				}
-				gettingNextPage = false;
-				if(len>0 || initialize)
-					view.setHistory(result);
-				initialize = false;
+			public void onSuccess(final HistoryObject removedObject) {
+				
+				clientFactory.getHistoryRequestStore().remove(historyId, new StoreResultCallback<Boolean>() {
+
+					@Override
+					public void onSuccess(Boolean result) {
+						if(result != null && result.booleanValue()){
+							notifyRemoveAndRestore(removedObject);
+						} else {
+							StatusNotification.notify("Unknown error occured :(",StatusNotification.TYPE_ERROR);
+						}
+					}
+
+					@Override
+					public void onError(Throwable e) {
+						if(RestClient.isDebug()){
+							Log.error("Unable to clear history data.", e);
+						}
+						StatusNotification.notify("Unable to clear history data :(", StatusNotification.TYPE_ERROR);
+					}
+				});
+				
 			}
 			
 			@Override
 			public void onError(Throwable e) {
-				gettingNextPage = false;
 				if(RestClient.isDebug()){
-					Log.error("Database error. Unable read history data.", e);
+					Log.error("Unable to clear history data.", e);
 				}
-				StatusNotification.notify("Database error. Unable read history data.", StatusNotification.TYPE_ERROR);
-				initialize = false;
+				StatusNotification.notify("Unable to clear history data :(", StatusNotification.TYPE_ERROR);
 			}
 		});
 	}
+	
+	private void notifyRemoveAndRestore(final HistoryObject removedObject){
+		NotificationAction action = new NotificationAction();
+		action.name = "Undo";
+		action.callback = new StatusNotification.NotificationCallback() {
 
-	@Override
-	public void removeFromeHistory(int historyId) {
-		
+			@Override
+			public void onActionPerformed() {
+				final HistoryObject save = HistoryObject.copyNew(removedObject);
+				clientFactory.getHistoryRequestStore().put(save, null, new StoreResultCallback<Integer>() {
+					
+					@Override
+					public void onSuccess(Integer result) {
+						save.setId(result.intValue());
+						ArrayList<HistoryObject> list = new ArrayList<HistoryObject>();
+						list.add(save);
+						
+						view.appendResults(list);
+					}
+					
+					@Override
+					public void onError(Throwable e) {
+						if(RestClient.isDebug()){
+							Log.error("Unable to restore the request.",e);
+						}
+						StatusNotification.notify("Unable to restore the request :(",StatusNotification.TYPE_ERROR);
+					}
+				});
+			}
+			
+		};
+		StatusNotification.notify("The item has been deleted.",StatusNotification.TYPE_NORMAL, 30000, true, action);
 	}
 
 	@Override
 	public void onHistoryItemSelect(int historyId, final Callback<HistoryObject, Throwable> callback) {
-		RestClient.getClientFactory().getHistoryRequestStore().getHistoryItem(historyId, new StoreResultCallback<HistoryObject>() {
+		clientFactory.getHistoryRequestStore().getByKey(historyId, new StoreResultCallback<HistoryObject>() {
 			
 			@Override
 			public void onSuccess(HistoryObject result) {
@@ -130,7 +162,7 @@ public class HistoryActivity extends AppActivity implements
 
 	@Override
 	public void onClearHistory() {
-		RestClient.getClientFactory().getHistoryRequestStore().deleteHistory(new StoreResultCallback<Boolean>() {
+		clientFactory.getHistoryRequestStore().deleteHistory(new StoreResultCallback<Boolean>() {
 			
 			@Override
 			public void onSuccess(Boolean result) {
@@ -147,6 +179,45 @@ public class HistoryActivity extends AppActivity implements
 			}
 		});
 	}
+
+	@Override
+	public void serach(String query) {
+		recentQuery = "%"+query+"%";
+		current_page = 0;
+		view.clearResultList();
+		performQuery();
+	}
 	
-	
+	void performQuery(){
+		
+		if(fetchingNextPage){
+			return;
+		}
+		fetchingNextPage = true;
+		
+		
+		final String q = (recentQuery != null && recentQuery.length() > 2) ? recentQuery : null;
+		int offset = current_page * PAGE_SIZE;
+		clientFactory.getHistoryRequestStore().historyList(q, PAGE_SIZE, offset, new StoreResultCallback<List<HistoryObject>>() {
+
+			@Override
+			public void onSuccess(final List<HistoryObject> result) {
+				fetchingNextPage = false;
+				if(result.size() == 0){
+					view.setNoMoreItems();
+					return;
+				}
+				view.appendResults(result);
+			}
+
+			@Override
+			public void onError(Throwable e) {
+				fetchingNextPage = false;
+				if(RestClient.isDebug()){
+					Log.error("Database error. Unable read history data.", e);
+				}
+				StatusNotification.notify("Database error. Unable read history data.", StatusNotification.TYPE_ERROR);
+			}
+		});
+	}
 }

@@ -52,20 +52,21 @@ public interface SavedView extends IsWidget {
 		 * Called when user wants to clear all saved request (but not in projects).
 		 */
 		void onClearSaved();
+		
+		void changeSavedName(String newName, int savedId);
+		
+		void serach(String query);
 	}
 	/**
 	 * Sets presenter for this view
 	 * @param listener
 	 */
 	void setPresenter(Presenter listener);
-	/**
-	 * Set store data
-	 * @param data
-	 */
-	void addData(List<RequestObject> data);
 	
 	/**
 	 * Set information that there is no more items in datastore
 	 */
 	void setNoMoreItems();
+	void clearResultList();
+	void appendResults(List<RequestObject> result);
 }

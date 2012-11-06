@@ -146,7 +146,7 @@ public class WebSocketDataStoreWebSql extends WebSqlAdapter<Integer, WebSocketOb
 	}
 
 	@Override
-	public void countAll(StoreResultCallback<Long> callback) {
+	public void countAll(StoreResultCallback<Integer> callback) {
 		callback.onError(null);
 	}
 

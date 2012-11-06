@@ -102,7 +102,7 @@ public interface Store<K, V> {
 	 * 
 	 * @param callback
 	 */
-	void countAll(StoreResultCallback<Long> callback);
+	void countAll(StoreResultCallback<Integer> callback);
 
 	/**
 	 * Query storage for data. Some storage implementations do not provide query

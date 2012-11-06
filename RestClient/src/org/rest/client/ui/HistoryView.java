@@ -58,17 +58,15 @@ public interface HistoryView extends IsWidget {
 		 * Get next results page and set in view
 		 */
 		void getNextItemsPage();
+		
+		
+		void serach(String query); 
 	}
 	/**
 	 * Sets presenter for this view
 	 * @param listener
 	 */
 	void setPresenter(Presenter listener);
-	/**
-	 * Sets list of history items
-	 * @param data
-	 */
-	void setHistory(List<HistoryObject> data);
 	
 	void getHistoryDetails(int historyId, Callback<HistoryObject, Throwable> callback);
 	
@@ -77,4 +75,13 @@ public interface HistoryView extends IsWidget {
 	 * Set information that there is no more items in datastore
 	 */
 	void setNoMoreItems();
+	/**
+	 * Replace results window.
+	 * @param data The data to set
+	 */
+	void appendResults(List<HistoryObject> data);
+	
+	void clearResultList();
+
+	void removeItem(int historyId);
 }

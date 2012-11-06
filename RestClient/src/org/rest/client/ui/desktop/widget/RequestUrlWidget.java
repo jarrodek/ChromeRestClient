@@ -99,6 +99,7 @@ public class RequestUrlWidget extends Composite implements HasText {
 		suggestionsDisplay.setAnimationEnabled(false);
 		urlField = new SuggestBox(suggestOracle, new TextBox(), suggestionsDisplay);
 		urlField.getElement().setAttribute("placeholder", "URL");
+		urlField.setAutoSelectEnabled(false);
 		
 		//init widget
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));

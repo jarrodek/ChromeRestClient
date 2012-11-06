@@ -151,11 +151,12 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	}
 
 	private void fill(){
-		if(!success){
+		if(!success || response == null){
 			this.addStyleName(style.requestError());
 		} else {
 			this.removeStyleName(style.requestError());
 		}
+		if(response == null) return;
 		setResponseStatus();
 		setResponseBody();
 	}

@@ -30,6 +30,7 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	@UiField CheckBox notifications;
 	@UiField CheckBox debug;
 	@UiField CheckBox history;
+	@UiField CheckBox magicVars;
 	@UiField DivElement historyClear;
 	
 	AppCssResource appStyle = AppResources.INSTANCE.appCss();
@@ -79,6 +80,16 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 		return notifications.getValue().booleanValue();
 	}
 	
+	@Override
+	public void setMagicVarsEnabled(boolean magicVarsEnabled) {
+		magicVars.setValue(magicVarsEnabled);
+	}
+
+	@Override
+	public boolean isMagicVarsEnabled() {
+		return magicVars.getValue().booleanValue();
+	}
+	
 	@UiHandler("history")
 	void onHistoryChange(ValueChangeEvent<Boolean> event){
 		boolean value = event.getValue();
@@ -111,7 +122,13 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 		}
 		listener.changeNotificationsValue(event.getValue());
 	}
-	
+	@UiHandler("magicVars")
+	void onMagicVarsChange(ValueChangeEvent<Boolean> event){
+		if(RestClient.isDebug()){
+			Log.debug("Magic vars value changed. Current value is: " + String.valueOf(event.getValue()));
+		}
+		listener.changeMagicVarsValue(event.getValue());
+	}
 	@UiHandler("clearHistory")
 	void onClearHistory(ClickEvent e){
 		listener.clearHistory();
@@ -125,6 +142,8 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	void onImportExportEdit(ClickEvent e){
 		listener.goTo(new ImportExportPlace("default"));
 	}
+
+	
 
 	
 }

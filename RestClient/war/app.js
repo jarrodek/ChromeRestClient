@@ -1,4 +1,4 @@
-var _gaq=[['_setAccount','UA-18021184-6'],['_trackPageview'],['_setDomainName', 'none'],['_setAllowLinker', true],['_trackPageLoadTime']];
+var _gaq=[['_setAccount','UA-18021184-6'],['_trackPageview'],['_setDomainName', 'none'],['_setAllowLinker', true]];
 var bouncerate_timer=0;
 function trackDrop(){
     if(bouncerate_timer == 1){

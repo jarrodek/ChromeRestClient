@@ -474,5 +474,21 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		}
 		return fo;
 	}
+	
+	@UiHandler("decodeParams")
+	void decodeParamsClick(ClickEvent e){
+		e.preventDefault();
+		ArrayList<FormPayloadData> list = RequestPayloadParser.stringToFormArrayList(payloadData, true);
+		payloadData = RequestPayloadParser.parseData(list, false);
+		payloadRawInput.setValue(payloadData);
+	}
+
+	@UiHandler("encodeParams")
+	void encodeParamsClick(ClickEvent e){
+		e.preventDefault();
+		ArrayList<FormPayloadData> list = RequestPayloadParser.stringToFormArrayList(payloadData);
+		payloadData = RequestPayloadParser.parseData(list, true);
+		payloadRawInput.setValue(payloadData);
+	}
 }
 

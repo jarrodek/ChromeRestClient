@@ -42,6 +42,7 @@ public interface SettingsView extends IsWidget {
 		void changeDebugValue(boolean newValue);
 		void changeHistoryValue(boolean newValue);
 		void changeNotificationsValue(boolean notificationsEnabled);
+		void changeMagicVarsValue(boolean magicVarsEnabled);
 	}
 	/**
 	 * Sets presenter for this view
@@ -54,4 +55,6 @@ public interface SettingsView extends IsWidget {
 	boolean isHistoryEnabled();
 	void setNotificationsEnabled(boolean notificationsEnabled);
 	boolean isNotificationsEnabled();
+	void setMagicVarsEnabled(boolean magicVarsEnabled);
+	boolean isMagicVarsEnabled();
 }

@@ -23,10 +23,20 @@ import com.google.gwt.regexp.shared.RegExp;
 public class RequestPayloadParser {
 	/**
 	 * Parse list of Payload form values {@link FormPayloadData} to Payload string
-	 * @param v
+	 * @param input
 	 * @return
 	 */
 	public static String parseData(ArrayList<FormPayloadData> input){
+        return parseData(input,false);
+	}
+	
+	/**
+	 * Parse list of Payload form values {@link FormPayloadData} to Payload string
+	 * @param input
+	 * @param encode if true params will be encoded
+	 * @return
+	 */
+	public static String parseData(ArrayList<FormPayloadData> input, boolean encode){
 		if(input == null) return "";
     	String result = "";
     	
@@ -34,17 +44,24 @@ public class RequestPayloadParser {
     		if(!result.isEmpty()){
                 result += "&";
             }
-    		
     		String key = item.getKey();
             String value = item.getValue();
             if(!(key.trim().equals("") && value.trim().equals(""))){
-            	result += URL.encodeQueryString(key.trim());
+            	if(encode)
+            		result += URL.encodeQueryString(key.trim());
+            	else 
+            		result += key.trim();
             	result += "=";
-            	result += URL.encodeQueryString(value.trim());
+            	if(encode)
+            		result += URL.encodeQueryString(value.trim());
+            	else
+            		result += value.trim();
             }
     	}
         return result;
 	}
+	
+	
 	
 	/**
 	 * Old bodyToListValues method
@@ -63,6 +80,17 @@ public class RequestPayloadParser {
 		}
 		return result;
 	}
+	/**
+	 * Parse application/x-www-form-urlencoded form entity body to {@link FormPayloadData} object
+	 * 
+	 * Old parseBodyData method
+	 * 
+	 * @param input
+	 * @return
+	 */
+	public static ArrayList<FormPayloadData> stringToFormArrayList(String input){
+		return stringToFormArrayList(input,false);
+	}
 	
 	
 	/**
@@ -73,7 +101,7 @@ public class RequestPayloadParser {
 	 * @param input
 	 * @return
 	 */
-	public static ArrayList<FormPayloadData> stringToFormArrayList(String input){
+	public static ArrayList<FormPayloadData> stringToFormArrayList(String input, boolean decode){
 		ArrayList<FormPayloadData> result = new ArrayList<FormPayloadData>();
 		if(input == null || input.isEmpty()){
 			return result;
@@ -105,8 +133,8 @@ public class RequestPayloadParser {
             }
             
             try{
-            	String name = URL.decodeQueryString(_tmp[0].trim());
-                String value = URL.decodeQueryString(_tmp[1].trim());
+            	String name = decode ? URL.decodeQueryString(_tmp[0].trim()) : _tmp[0].trim();
+                String value = decode ? URL.decodeQueryString(_tmp[1].trim()) : _tmp[1].trim();
                 FormPayloadData fpd = new FormPayloadData();
                 fpd.setKey(name);
                 fpd.setValue(value);

@@ -21,6 +21,7 @@ public class SyncAdapter {
 	private static boolean debug = false;
 	private static boolean history = true;
 	private static boolean notifications = false;
+	private static boolean magicVars = true;
 	private static boolean observing = false;
 	
 	public static void sync(){
@@ -31,6 +32,7 @@ public class SyncAdapter {
 		query.put(LocalStore.DEBUG_KEY, new JSONString("false"));
 		query.put(LocalStore.HISTORY_KEY, new JSONString("true"));
 		query.put(LocalStore.NOTIFICATIONS_ENABLED_KEY, new JSONString("false"));
+		query.put(LocalStore.MAGIC_VARS_ENABLED_KEY, new JSONString("true"));
 		
 		sync.get(query.getJavaScriptObject(), new StorageItemsCallback() {
 			@Override
@@ -42,6 +44,7 @@ public class SyncAdapter {
 				String _debugValue = data.getDebug();
 				String _historyValue = data.getHistory();
 				String _notificationsValue = data.getNotifications();
+				String _magicVarsValue = data.getMagicVariables();
 				
 				if(_debugValue != null){
 					if(_debugValue.equals("true")){
@@ -74,6 +77,15 @@ public class SyncAdapter {
 					}
 				}
 				
+				if(_magicVarsValue != null){
+					if(_magicVarsValue.equals("true")){
+						magicVars = true;
+						store.setItem(LocalStore.MAGIC_VARS_ENABLED_KEY, "true");
+					} else {
+						magicVars = false;
+						store.setItem(LocalStore.MAGIC_VARS_ENABLED_KEY, "false");
+					}
+				}
 			}
 			
 			@Override
@@ -120,6 +132,13 @@ public class SyncAdapter {
 
 	public static void setNotifications(boolean notifications) {
 		SyncAdapter.notifications = notifications;
+	}
+	
+	public static boolean isMagicVars() {
+		return magicVars;
+	}
+	public static void setMagicVars(boolean magicVars) {
+		SyncAdapter.magicVars = magicVars;
 	}
 	
 }

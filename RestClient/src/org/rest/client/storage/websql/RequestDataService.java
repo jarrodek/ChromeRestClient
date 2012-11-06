@@ -127,4 +127,27 @@ public interface RequestDataService extends AppDatabase {
 	 */
 	@Update(sql = "DELETE FROM request_data WHERE ID={id}")
 	void delete(int id, VoidCallback callback);
+	
+	@Update(sql = "UPDATE request_data SET name={nawName} WHERE ID={id}")
+	void updateName(String nawName, int id, VoidCallback callback);
+	
+	/**
+	 * Get data for the saved view. 
+	 * 
+	 * @param query
+	 * @param limit
+	 * @param offset
+	 * @param callback
+	 */
+	@Select("SELECT * FROM request_data WHERE name LIKE {query} OR url LIKE {query} AND project = 0 ORDER BY time DESC  LIMIT {offset}, {limit}") 
+	void query(String query, int limit, int offset,
+			ListCallback<RequestObject> callback);
+	/**
+	 * Get data for the saved view. 
+	 * 
+	 * @param callback
+	 */
+	@Select("SELECT * FROM request_data WHERE project = 0 ORDER BY time DESC  LIMIT {offset}, {limit}")
+	void query(int limit, int offset,
+			ListCallback<RequestObject> callback);
 }

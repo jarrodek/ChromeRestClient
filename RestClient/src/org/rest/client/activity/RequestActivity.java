@@ -571,7 +571,7 @@ public class RequestActivity extends AppActivity implements
 	 */
 	private void restoreRequestFromHistory(int historyId,
 			final RequestView requestView) {
-		RestClient.getClientFactory().getHistoryRequestStore().getHistoryItem(historyId, new StoreResultCallback<HistoryObject>() {
+		RestClient.getClientFactory().getHistoryRequestStore().getByKey(historyId, new StoreResultCallback<HistoryObject>() {
 			
 			@Override
 			public void onSuccess(HistoryObject result) {

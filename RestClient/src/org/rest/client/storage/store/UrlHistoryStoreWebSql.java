@@ -106,7 +106,7 @@ public class UrlHistoryStoreWebSql extends WebSqlAdapter<Integer, UrlRow> {
 	 * This type of query is not available for this table.
 	 */
 	@Override
-	public void countAll(StoreResultCallback<Long> callback) {
+	public void countAll(StoreResultCallback<Integer> callback) {
 		callback.onError(null);
 	}
 	/**

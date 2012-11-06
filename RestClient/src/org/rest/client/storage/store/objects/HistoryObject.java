@@ -137,4 +137,15 @@ public class HistoryObject extends JavaScriptObject implements History {
 		to.setURL(from.getURL());
 		return to;
 	}
+	
+	public static HistoryObject copyNew(HistoryObject from){
+		HistoryObject to = HistoryObject.create();
+		to.setEncoding(from.getEncoding());
+		to.setHeaders(from.getHeaders());
+		to.setMethod(from.getMethod());
+		to.setPayload(from.getPayload());
+		to.setTime(from.getTime());
+		to.setURL(from.getURL());
+		return to;
+	}
 }

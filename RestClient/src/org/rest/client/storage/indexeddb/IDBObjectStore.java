@@ -140,7 +140,7 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 *         operation are fired.
 	 * @throws IDBDatabaseException
 	 */
-	public final IDBRequest<Long> count() throws IDBDatabaseException {
+	public final IDBRequest<Integer> count() throws IDBDatabaseException {
 		try{
 			return countImpl(null);
 		} catch(JavaScriptException e){
@@ -164,7 +164,7 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 *         operation are fired.
 	 * @throws IDBDatabaseException
 	 */
-	public final IDBRequest<Long> count(K key) throws IDBDatabaseException {
+	public final IDBRequest<Integer> count(K key) throws IDBDatabaseException {
 		try{
 			return countImpl(key);
 		} catch(JavaScriptException e){
@@ -172,7 +172,7 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 		}
 	}
 	
-	private final native IDBRequest<Long> countImpl(K key) throws JavaScriptException /*-{
+	private final native IDBRequest<Integer> countImpl(K key) throws JavaScriptException /*-{
 		return this.count(key);
 	}-*/;
 	/**

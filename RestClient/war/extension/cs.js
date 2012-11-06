@@ -40,6 +40,9 @@ function receiveMessage(e){
 				break;
 			default:
 				chrome.extension.sendMessage(data, function(response) {
+					if(typeof response.payload != 'undefined'){
+						response = response.data;
+					}
 					window.postMessage({"source":"dev:cs", "payload":data.payload, "data": response}, location.href);
 				});
 				break;

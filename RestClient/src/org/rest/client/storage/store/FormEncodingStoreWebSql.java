@@ -113,7 +113,7 @@ public class FormEncodingStoreWebSql extends WebSqlAdapter<Integer, FormEncoding
 	 * This store do not support this type of query.
 	 */
 	@Override
-	public void countAll(StoreResultCallback<Long> callback) {
+	public void countAll(StoreResultCallback<Integer> callback) {
 		callback.onError(null);
 	}
 	/**

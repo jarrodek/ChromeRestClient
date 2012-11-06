@@ -67,7 +67,10 @@ import com.google.web.bindery.event.shared.EventBus;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class RestClient implements EntryPoint {
-
+	
+	private static boolean initializing = true;
+	public static boolean isInitializing(){ return initializing; }
+	
 	private Place defaultPlace = new RequestPlace(null);
 	private SimplePanel appWidget = new SimplePanel();
 	private static final Logger log = Logger.getLogger(RestClient.class
@@ -184,6 +187,7 @@ public class RestClient implements EntryPoint {
 				}
 				fixChromeLayout();
 				eventBus.fireEvent(new ApplicationReadyEvent());
+				initializing = false;
 			}
 		});
 	}
@@ -224,6 +228,7 @@ public class RestClient implements EntryPoint {
 		String debugValue = store.getItem(LocalStore.DEBUG_KEY);
 		String historyValue = store.getItem(LocalStore.HISTORY_KEY);
 		String notificationsValue = store.getItem(LocalStore.NOTIFICATIONS_ENABLED_KEY);
+		String magicVarsValue = store.getItem(LocalStore.MAGIC_VARS_ENABLED_KEY);
 		if(debugValue != null && debugValue.equals("true")){
 			SyncAdapter.setDebug(true);
 		} else {
@@ -239,13 +244,14 @@ public class RestClient implements EntryPoint {
 		} else {
 			SyncAdapter.setNotifications(false);
 		}
-		
+		if(magicVarsValue != null && magicVarsValue.equals("true")){
+			SyncAdapter.setMagicVars(true);
+		} else {
+			SyncAdapter.setMagicVars(false);
+		}
 		SyncAdapter.sync();
 		SyncAdapter.observe();
 	}
-	
-	
-	
 	
 	
 	/**
@@ -341,12 +347,14 @@ public class RestClient implements EntryPoint {
 			//
 			url = "http://127.0.0.1:8888"+url;
 		}
+		
 		requestObject.setURL(url);
 		if(hasPayload){
 			requestObject.setPayload(rp.getPostData());
 			requestObject.setEncoding(null);
 			requestObject.setFiles(files);
 		}
+		
 		return requestObject;
 	}
 	

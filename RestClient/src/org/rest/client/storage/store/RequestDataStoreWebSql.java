@@ -16,24 +16,24 @@ import com.google.code.gwt.database.client.service.RowIdListCallback;
 import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.core.client.GWT;
 
-public class RequestDataStoreWebSql extends WebSqlAdapter<Integer, RequestObject> {
-	
+public class RequestDataStoreWebSql extends
+		WebSqlAdapter<Integer, RequestObject> {
+
 	RequestDataService service = GWT.create(RequestDataService.class);
-	
-	
-	public RequestDataService getService(){
+
+	public RequestDataService getService() {
 		return service;
 	}
-	
+
 	@Override
 	public void open(final StoreResultCallback<Boolean> callback) {
 		service.initTable(new VoidCallback() {
-			
+
 			@Override
 			public void onFailure(DataServiceException error) {
 				callback.onError(error);
 			}
-			
+
 			@Override
 			public void onSuccess() {
 				callback.onSuccess(true);
@@ -49,17 +49,17 @@ public class RequestDataStoreWebSql extends WebSqlAdapter<Integer, RequestObject
 	@Override
 	public void put(RequestObject obj, final Integer key,
 			final StoreResultCallback<Integer> callback) {
-		if(key == null){
+		if (key == null) {
 			service.insertData(obj, new Date(), new RowIdListCallback() {
-				
+
 				@Override
 				public void onFailure(DataServiceException error) {
 					callback.onError(error);
 				}
-				
+
 				@Override
 				public void onSuccess(List<Integer> rowIds) {
-					if(rowIds.size() == 0){
+					if (rowIds.size() == 0) {
 						callback.onError(null);
 						return;
 					}
@@ -68,7 +68,7 @@ public class RequestDataStoreWebSql extends WebSqlAdapter<Integer, RequestObject
 			});
 		} else {
 			service.updateData(obj, new Date(), new VoidCallback() {
-				
+
 				@Override
 				public void onFailure(DataServiceException error) {
 					callback.onError(error);
@@ -94,7 +94,7 @@ public class RequestDataStoreWebSql extends WebSqlAdapter<Integer, RequestObject
 
 			@Override
 			public void onSuccess(List<RequestObject> result) {
-				if(result.size() == 0){
+				if (result.size() == 0) {
 					callback.onSuccess(null);
 					return;
 				}
@@ -109,38 +109,39 @@ public class RequestDataStoreWebSql extends WebSqlAdapter<Integer, RequestObject
 	}
 
 	@Override
-	public void all(final StoreResultCallback<Map<Integer, RequestObject>> callback) {
-		
+	public void all(
+			final StoreResultCallback<Map<Integer, RequestObject>> callback) {
+
 		service.getAllData(new ListCallback<RequestObject>() {
 			@Override
 			public void onFailure(DataServiceException error) {
 				callback.onError(error);
 			}
-			
+
 			@Override
 			public void onSuccess(List<RequestObject> result) {
 				Map<Integer, RequestObject> mapResult = new HashMap<Integer, RequestObject>();
-				for(RequestObject item : result){
+				for (RequestObject item : result) {
 					mapResult.put(item.getId(), item);
 				}
 				callback.onSuccess(mapResult);
 			}
 		});
 	}
+
 	/**
 	 * If key is null table will be truncated.
 	 */
 	@Override
 	public void remove(Integer key, final StoreResultCallback<Boolean> callback) {
-		
-		
-		if(key == null){
+
+		if (key == null) {
 			service.truncate(new VoidCallback() {
 				@Override
 				public void onFailure(DataServiceException error) {
 					callback.onError(error);
 				}
-				
+
 				@Override
 				public void onSuccess() {
 					callback.onSuccess(true);
@@ -148,14 +149,14 @@ public class RequestDataStoreWebSql extends WebSqlAdapter<Integer, RequestObject
 			});
 			return;
 		}
-		
+
 		service.delete(key, new VoidCallback() {
-			
+
 			@Override
 			public void onFailure(DataServiceException error) {
 				callback.onError(error);
 			}
-			
+
 			@Override
 			public void onSuccess() {
 				callback.onSuccess(true);
@@ -164,7 +165,7 @@ public class RequestDataStoreWebSql extends WebSqlAdapter<Integer, RequestObject
 	}
 
 	@Override
-	public void countAll(StoreResultCallback<Long> callback) {
+	public void countAll(StoreResultCallback<Integer> callback) {
 		callback.onError(null);
 	}
 
@@ -174,6 +175,35 @@ public class RequestDataStoreWebSql extends WebSqlAdapter<Integer, RequestObject
 		callback.onError(null);
 	}
 
-	
+	public void queryWithLimit(String query, int limit, int offset,
+			final StoreResultCallback<List<RequestObject>> callback) {
+		if (query == null || query.isEmpty()) {
+			service.query(limit, offset, new ListCallback<RequestObject>() {
+
+				@Override
+				public void onFailure(DataServiceException error) {
+					callback.onError(error);
+				}
+
+				@Override
+				public void onSuccess(List<RequestObject> result) {
+					callback.onSuccess(result);
+				}
+			});
+			return;
+		}
+		service.query(query, limit, offset, new ListCallback<RequestObject>() {
+
+			@Override
+			public void onFailure(DataServiceException error) {
+				callback.onError(error);
+			}
+
+			@Override
+			public void onSuccess(List<RequestObject> result) {
+				callback.onSuccess(result);
+			}
+		});
+	}
 
 }

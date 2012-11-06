@@ -118,7 +118,7 @@ public class ProjectStoreWebSql extends WebSqlAdapter<Integer, ProjectObject> {
 	}
 
 	@Override
-	public void countAll(StoreResultCallback<Long> callback) {
+	public void countAll(StoreResultCallback<Integer> callback) {
 		callback.onError(null);
 	}
 

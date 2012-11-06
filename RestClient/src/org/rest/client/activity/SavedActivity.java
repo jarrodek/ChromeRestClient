@@ -23,14 +23,12 @@ import org.rest.client.RestClient;
 import org.rest.client.place.SavedPlace;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.objects.RequestObject;
-import org.rest.client.storage.websql.RequestDataService;
 import org.rest.client.ui.SavedView;
 import org.rest.client.ui.desktop.NotificationAction;
 import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
-import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
@@ -41,19 +39,13 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
  * @author Paweł Psztyć
  * 
  */
-public class SavedActivity extends AppActivity implements
+public class SavedActivity extends ListActivity implements
 	SavedView.Presenter {
 
 	
 	//final private SavedPlace place;
 	//private EventBus eventBus;
 	private SavedView view;
-	
-	private int displayedItems = 0;
-	private boolean hasMoreItems = true;
-	private boolean initialize = true;
-	private final static int PAGE_SIZE = 15;
-	private RequestDataService storeService = clientFactory.getRequestDataStore().getService();
 
 	public SavedActivity(SavedPlace place, ClientFactory clientFactory) {
 		super(clientFactory);
@@ -69,50 +61,9 @@ public class SavedActivity extends AppActivity implements
 		view.setPresenter(this);
 		panel.setWidget(view.asWidget());
 		
-		getNextItemsPage();
+		performQuery();
 	}
 	
-	private boolean gettingNextPage = false;
-	
-	@Override
-	public void getNextItemsPage(){
-		if(gettingNextPage){
-			return;
-		}
-		gettingNextPage = true;
-		if(!hasMoreItems){
-			view.setNoMoreItems();
-			return;
-		}
-		storeService.getSavedRequests(PAGE_SIZE, displayedItems, new ListCallback<RequestObject>() {
-			
-			@Override
-			public void onFailure(DataServiceException error) {
-				gettingNextPage = false;
-				if(RestClient.isDebug()){
-					Log.error("Database error. Unable read history data.", error);
-				}
-				StatusNotification.notify("Database error. Unable read history data.", StatusNotification.TYPE_ERROR);
-				initialize = false;
-			}
-			
-			@Override
-			public void onSuccess(List<RequestObject> result) {
-				int len = result.size();
-				displayedItems += len;
-				if(len < PAGE_SIZE){
-					hasMoreItems = false;
-					view.setNoMoreItems();
-				}
-				gettingNextPage = false;
-				
-				if(len>0 || initialize)
-					view.addData(result);
-				initialize = false;
-			}
-		});
-	}
-
 	@Override
 	public void removeFromSaved(final RequestObject request) {
 		clientFactory.getRequestDataStore().remove(request.getId(), new StoreResultCallback<Boolean>(){
@@ -153,12 +104,15 @@ public class SavedActivity extends AppActivity implements
 						ArrayList<RequestObject> list = new ArrayList<RequestObject>();
 						list.add(save);
 						
-						view.addData(list);
+						view.appendResults(list);
 					}
 					
 					@Override
 					public void onError(Throwable e) {
-						
+						if(RestClient.isDebug()){
+							Log.error("Unable to restore the request.",e);
+						}
+						StatusNotification.notify("Unable to restore the request :(",StatusNotification.TYPE_ERROR);
 					}
 				});
 			}
@@ -177,6 +131,72 @@ public class SavedActivity extends AppActivity implements
 			@Override
 			public void onSuccess() {
 				
+			}
+		});
+	}
+
+	@Override
+	public void changeSavedName(String newName, int savedId) {
+		clientFactory.getRequestDataStore().getService().updateName(newName, savedId, new VoidCallback() {
+			
+			@Override
+			public void onFailure(DataServiceException error) {
+				if(RestClient.isDebug()){
+					Log.error("Unable to change name :(", error);
+				}
+				StatusNotification.notify("Unable to change name :(",StatusNotification.TYPE_ERROR);
+			}
+			
+			@Override
+			public void onSuccess() {
+				
+			}
+		});
+	}
+	
+	@Override
+	public void getNextItemsPage(){
+		current_page++;
+		performQuery();
+	}
+
+	@Override
+	public void serach(String query) {
+		recentQuery = "%"+query+"%";
+		current_page = 0;
+		view.clearResultList();
+		performQuery();
+	}
+
+	@Override
+	void performQuery() {
+		if(fetchingNextPage){
+			return;
+		}
+		fetchingNextPage = true;
+		
+		
+		final String q = (recentQuery != null && recentQuery.length() > 2) ? recentQuery : null;
+		int offset = current_page * PAGE_SIZE;
+		clientFactory.getRequestDataStore().queryWithLimit(q, PAGE_SIZE, offset, new StoreResultCallback<List<RequestObject>>() {
+
+			@Override
+			public void onSuccess(final List<RequestObject> result) {
+				fetchingNextPage = false;
+				if(result.size() == 0){
+					view.setNoMoreItems();
+					return;
+				}
+				view.appendResults(result);
+			}
+
+			@Override
+			public void onError(Throwable e) {
+				fetchingNextPage = false;
+				if(RestClient.isDebug()){
+					Log.error("Database error. Unable read history data.", e);
+				}
+				StatusNotification.notify("Database error. Unable read history data.", StatusNotification.TYPE_ERROR);
 			}
 		});
 	}

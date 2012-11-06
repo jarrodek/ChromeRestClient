@@ -388,11 +388,11 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 
 			IDBObjectStore<K> store = (IDBObjectStore<K>) tx
 					.objectStore(storeName);
-			final IDBRequest<Long> request = store.count(key);
+			final IDBRequest<Integer> request = store.count(key);
 			request.addSuccessHandler(new IDBSuccessHandler() {
 				@Override
 				public void onSuccess() {
-					Long r = request.getResult();
+					Integer r = request.getResult();
 					if (r != null && r > 0) {
 						callback.onSuccess(true);
 					} else {
@@ -541,13 +541,13 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void countAll(final StoreResultCallback<Long> callback) {
+	public void countAll(final StoreResultCallback<Integer> callback) {
 		try {
 			IDBTransaction tx = db.transaction(storeName,
 					IDBTransaction.READ_ONLY_TRANSACTION);
 			final IDBObjectStore<String> store = (IDBObjectStore<String>) tx
 					.objectStore(storeName);
-			final IDBRequest<Long> request = store.count();
+			final IDBRequest<Integer> request = store.count();
 			request.addSuccessHandler(new IDBSuccessHandler() {
 				@Override
 				public void onSuccess() {

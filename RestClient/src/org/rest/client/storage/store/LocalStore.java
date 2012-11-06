@@ -37,6 +37,10 @@ public class LocalStore extends LocalStorageAdapter {
 	public static final String HISTORY_KEY = "HISTORY_ENABLED";
 	
 	public static final String NOTIFICATIONS_ENABLED_KEY = "NOTIFICATIONS_ENABLED";
+	/**
+	 * Key for magic variables.
+	 */
+	public static final String MAGIC_VARS_ENABLED_KEY = "MAGICVARS_ENABLED";
 	
 	public static final String JSON_HEADERS_KEY = "JSONHEADERS";
 	public static final String SHORTCUTS_VALUES = "SHORTCUTS";

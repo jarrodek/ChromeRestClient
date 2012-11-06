@@ -92,8 +92,8 @@ public class LocalStorageAdapter implements StorageAdapter<String, String> {
 	}
 
 	@Override
-	public void countAll(StoreResultCallback<Long> callback) {
-		callback.onSuccess((long) _storeImpl.getLength());
+	public void countAll(StoreResultCallback<Integer> callback) {
+		callback.onSuccess(_storeImpl.getLength());
 	}
 
 	@Override

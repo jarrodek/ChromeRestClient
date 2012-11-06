@@ -4,15 +4,17 @@ import java.util.List;
 
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.SavedView;
+import org.rest.client.ui.html5.SearchBox;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Window.ScrollEvent;
+import com.google.gwt.user.client.Window.ScrollHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -28,17 +30,27 @@ public class SavedViewImpl extends Composite implements SavedView {
 	
 	interface WidgetStyle extends CssResource {
 		String emptyInfo();
+		String searchBox();
 	}
 	
 	private Presenter listener = null;
+	private boolean loadingNext = false;
+	InlineLabel infoLabel = null;
 	@UiField DivElement loaderInfo;
+	@UiField SearchBox searchInput;
+	@UiField HTMLPanel loaderContainer;
+	@UiField InlineLabel loader;
 	@UiField HTMLPanel root;
 	@UiField HTMLPanel list;
 	@UiField WidgetStyle style;
-	@UiField Button loadNextPage;
 	
 	public SavedViewImpl(){
 		initWidget(uiBinder.createAndBindUi(this));
+		searchInput.addStyleName(style.searchBox());
+		searchInput.getElement().setAttribute("placeholder", "search the request...");
+		
+		observeScroll();
+		observeSearch(searchInput.getElement());
 	}
 	
 	@Override
@@ -46,39 +58,110 @@ public class SavedViewImpl extends Composite implements SavedView {
 		this.listener = listener;
 	}
 	
-	@UiHandler("loadNextPage")
-	void onLoadNextPage(ClickEvent e){
-		e.preventDefault();
-		listener.getNextItemsPage();
+	private void observeScroll(){
+		Window.addWindowScrollHandler(new ScrollHandler() {
+			@Override
+			public void onWindowScroll(ScrollEvent event) {
+				if(loadingNext){
+					return;
+				}
+				int bottom = event.getScrollTop() + Window.getClientHeight();
+				int referenceTop = loaderContainer.getAbsoluteTop();
+				if(bottom >= referenceTop){
+					loadingNext = true;
+					loader.setVisible(true);
+					listener.getNextItemsPage();
+				}
+			}
+		});
 	}
 	
 	/**
 	 * Create info message when no data available
 	 */
 	private void emptyInfo(){
-		InlineLabel label = new InlineLabel();
-		label.setText("You do not have any saved requests :(");
-		label.addStyleName(style.emptyInfo());
-		root.add(label);
-		loadNextPage.removeFromParent();
+		
+		infoLabel = new InlineLabel();
+		infoLabel.setText("You do not have any saved requests :(");
+		infoLabel.addStyleName(style.emptyInfo());
+		root.add(infoLabel);
+		
 	}
 	
+	private void emptyQueryResults(){
+		infoLabel = new InlineLabel();
+		infoLabel.setText("No history for query \""+searchInput.getValue()+"\" found.");
+		infoLabel.addStyleName(style.emptyInfo());
+		root.add(infoLabel);
+	}
+	
+	void startSearch(String query){ 
+		loader.setVisible(true);
+		listener.serach(query);
+	}
+	
+	final native void observeSearch(Element element) /*-{
+		var context = this;
+		var callback = $entry(function(e){
+			var value = e.target.value;
+			context.@org.rest.client.ui.desktop.SavedViewImpl::startSearch(Ljava/lang/String;)(value);
+		});
+		element.addEventListener('search',callback,false);
+	}-*/;
+	
 	@Override
-	public void addData(List<RequestObject> data) {
-		loaderInfo.removeFromParent();
-		if(data == null || data.isEmpty()){
-			emptyInfo();
-			return;
+	public void setNoMoreItems() {
+		if(infoLabel != null){
+			infoLabel.removeFromParent();
+			infoLabel = null;
 		}
-		
-		for(RequestObject item : data){
-			SavedListItemViewImpl widget = new SavedListItemViewImpl(listener, item);
-			root.add(widget);
+		loader.setVisible(false);
+		if(list.getWidgetCount() == 0 && searchInput.getValue().isEmpty()){
+			emptyInfo();
+		} else if(list.getWidgetCount() == 0 && !searchInput.getValue().isEmpty()){
+			emptyQueryResults();
 		}
 	}
 
+	private void ensureScrollItems(){
+		int bottom = Window.getScrollTop() + Window.getClientHeight();
+		int referenceTop = loaderContainer.getAbsoluteTop();
+		if(bottom >= referenceTop){
+			loadingNext = true;
+			loader.setVisible(true);
+			listener.getNextItemsPage();
+		}
+	}
+	
 	@Override
-	public void setNoMoreItems() {
-		loadNextPage.removeFromParent();
+	public void clearResultList() {
+		list.clear();
+	}
+
+	@Override
+	public void appendResults(List<RequestObject> data) {
+		
+		if(infoLabel != null){
+			infoLabel.removeFromParent();
+			infoLabel = null;
+		}
+		loadingNext = false;
+		loader.setVisible(false);
+		if(loaderInfo.hasParentElement()){
+			loaderInfo.removeFromParent();
+		}
+		if((data == null || data.isEmpty()) && list.getWidgetCount() == 0){
+			emptyInfo();
+			return;
+		}
+		//disable repainting
+		list.setVisible(false);
+		for(RequestObject item : data){
+			SavedListItemViewImpl widget = new SavedListItemViewImpl(listener, item);
+			list.add(widget);
+		}
+		list.setVisible(true);
+		
+		ensureScrollItems();
 	}
 }

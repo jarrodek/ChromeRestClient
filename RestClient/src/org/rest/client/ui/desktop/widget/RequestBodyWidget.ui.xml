@@ -43,6 +43,12 @@
 			-o-flex: 1 0 0;
 			flex: 1 0 0;
 		}
+		.rawEncodeButtonsContainer{
+			opacity:0.4;
+			-webkit-transition: opacity 0.15s linear;
+		}
+		.rawEncodeButtonsContainer:hover{opacity:1;}
+		.decodeAnchor{margin-left: 1em;}
 	</ui:style>
 	<g:HTMLPanel styleName="{appResources.appCss.tabsPanel}">
 		
@@ -57,6 +63,10 @@
 		
 		<div ui:field="tabContent" class="{appResources.appCss.tabsContent}">
 			<section data-tab="raw" class="{appResources.appCss.tabContent} {appResources.appCss.tabContentCurrent}">
+				<div class="{style.rawEncodeButtonsContainer}">
+					<g:Anchor ui:field="encodeParams" href="about:blank">Encode payload</g:Anchor>
+					<g:Anchor addStyleNames="{style.decodeAnchor}" ui:field="decodeParams" href="about:blank">Decode payload</g:Anchor>
+				</div>
 				<g:TextArea ui:field="payloadRawInput" styleName="{style.rawInput}"></g:TextArea>
 			</section>
 			<section data-tab="form" class="{appResources.appCss.tabContent}">

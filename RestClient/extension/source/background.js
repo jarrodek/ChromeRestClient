@@ -216,17 +216,17 @@ function handleInternalMessage(request,sendResponse){
 		break;
 	case "getManifest":
 		var manifest = chrome.runtime.getManifest();
-		var result = {
+		var result = JSON.stringify({
 			version: manifest.version,
 			permissions: manifest.permissions,
 			manifest_version: manifest.manifest_version,
 			name: manifest.name
-		}
+		});
+		
 		sendResponse({
 			'payload' : 'getManifest',
-			'data' : JSON.stringify(result)
+			'data' : result
 		});
-//		sendResponse(JSON.stringify(result));
 		break;
 	default:
 		if(request.payload.indexOf("storage")===0){

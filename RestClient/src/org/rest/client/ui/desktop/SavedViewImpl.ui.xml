@@ -1,6 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:h5="urn:import:org.rest.client.ui.html5">
 	<ui:with field="appResources" type="org.rest.client.resources.AppResources" />
 	<ui:style type="org.rest.client.ui.desktop.SavedViewImpl.WidgetStyle">
 		.loadingWrapper{min-height: 100px;}
@@ -38,8 +39,21 @@
 		.loadingInfo{}
 		.emptyInfo{display: block;text-align: center;padding-top: 20px;font-weight: bold;}
 		.loadNextRow{}
+		.historyNav{display: -webkit-flex;}
+		.searchContainer{margin-left: 1em;display: -webkit-flex;-webkit-flex: 1 0 0;}
+		.searchBox{
+			border-radius: 2px;
+			width: literal("-webkit-calc(100% - 12px)"); 
+			width: literal("calc(100% - 12px)");
+		}
 	</ui:style>
 	<g:HTMLPanel addStyleNames="{style.historyList}" ui:field="root">
+		<section class="{style.historyNav}">
+			<div class="{style.searchContainer}">
+				<h5:SearchBox ui:field="searchInput"></h5:SearchBox>
+			</div>
+			<div class="{style.searchContainer}"></div>
+		</section>
 		<div ui:field="loaderInfo" class="{style.loadingWrapper} {appResources.appCss.flexCenter}">
 			<span class="{appResources.appCss.loaderImage}"></span>
 			<div class="{style.loaderDotsContainer}">
@@ -53,8 +67,10 @@
 			</span>
 		</div>
 		<g:HTMLPanel ui:field="list"></g:HTMLPanel>
-		<div class="{style.loadNextRow}">
-			<g:Button ui:field="loadNextPage" styleName="{appResources.appCss.button}">Load more</g:Button>
-		</div>
+		
+		<g:HTMLPanel ui:field="loaderContainer" styleName="{style.loadNextRow}">
+			<g:InlineLabel visible="false" ui:field="loader" styleName="{appResources.appCss.loaderImage}"></g:InlineLabel>
+		</g:HTMLPanel>
+		
 	</g:HTMLPanel>
 </ui:UiBinder>

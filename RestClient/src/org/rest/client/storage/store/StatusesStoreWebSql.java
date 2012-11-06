@@ -101,7 +101,7 @@ public class StatusesStoreWebSql extends WebSqlAdapter<Integer, StatusCodeRow> {
 	 * This database do not support this method.
 	 */
 	@Override
-	public void countAll(StoreResultCallback<Long> callback) {
+	public void countAll(StoreResultCallback<Integer> callback) {
 		callback.onError(null);
 	}
 

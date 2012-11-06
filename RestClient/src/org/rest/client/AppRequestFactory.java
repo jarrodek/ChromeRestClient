@@ -133,6 +133,19 @@ public class AppRequestFactory {
 				//save URL for suggestion oracle
 				saveUrl(data.getURL());
 				
+				//replace magic variables
+				MagicVariables mv = new MagicVariables();
+				
+				data.setURL(mv.apply(requestUrl));
+				String headers = data.getHeaders();
+				if(headers != null && !headers.isEmpty()){
+					data.setHeaders(mv.apply(headers));
+				}
+				String payload = data.getPayload();
+				if(payload != null && !payload.isEmpty()){
+					data.setPayload(mv.apply(payload));
+				}
+				
 				RestClient.getClientFactory().getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_REQUEST_BEGIN, data.toJSON(), new BackgroundPageCallback() {
 					@Override
 					public void onSuccess(String result) {

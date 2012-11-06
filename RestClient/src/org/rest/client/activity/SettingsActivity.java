@@ -92,6 +92,12 @@ public class SettingsActivity extends AppActivity implements
 		} else {
 			view.setNotificationsEnabled(false);
 		}
+		
+		if(SyncAdapter.isMagicVars()){
+			view.setMagicVarsEnabled(true);
+		} else {
+			view.setMagicVarsEnabled(false);
+		}
 	}
 
 	@Override
@@ -127,6 +133,7 @@ public class SettingsActivity extends AppActivity implements
 					return;
 				}
 				StatusNotification.notify("Settings saved.", StatusNotification.TYPE_NORMAL, StatusNotification.TIME_ULTRA_SHORT, true);
+				
 				if(key.equals(LocalStore.DEBUG_KEY)){
 					RestClient.setDebug(value.equals("true") ? true : false);
 				} else if(key.equals(LocalStore.HISTORY_KEY)){
@@ -137,6 +144,8 @@ public class SettingsActivity extends AppActivity implements
 					}
 				} else if(key.equals(LocalStore.NOTIFICATIONS_ENABLED_KEY)){
 					clientFactory.getEventBus().fireEvent(new NotificationsStateChangeEvent(value.equals("true") ? true : false));
+				} else if(key.equals(LocalStore.MAGIC_VARS_ENABLED_KEY)){
+					SyncAdapter.setMagicVars(value.equals("true") ? true : false);
 				}
 			}
 		});
@@ -156,5 +165,10 @@ public class SettingsActivity extends AppActivity implements
 	@Override
 	public void changeNotificationsValue(boolean notificationsEnabled) {
 		saveSetting(LocalStore.NOTIFICATIONS_ENABLED_KEY, String.valueOf(notificationsEnabled));
+	}
+
+	@Override
+	public void changeMagicVarsValue(boolean magicVarsEnabled) {
+		saveSetting(LocalStore.MAGIC_VARS_ENABLED_KEY, String.valueOf(magicVarsEnabled));
 	}
 }

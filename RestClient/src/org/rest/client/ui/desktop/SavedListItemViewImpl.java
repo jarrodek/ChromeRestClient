@@ -13,6 +13,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -21,6 +22,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 public class SavedListItemViewImpl extends Composite {
@@ -39,7 +41,7 @@ public class SavedListItemViewImpl extends Composite {
 	@UiField InlineLabel dateLabel;
 	@UiField InlineLabel methodLabel;
 	@UiField InlineLabel urlValue;
-	@UiField InlineLabel nameLabel;
+	@UiField TextBox nameInput;
 	@UiField DivElement detailedPanel;
 	@UiField HTMLPanel urlLabel;
 	@UiField SpanElement encoding;
@@ -65,7 +67,7 @@ public class SavedListItemViewImpl extends Composite {
 		String data = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(date);
 		dateLabel.setText(data);
 		
-		this.nameLabel.setText(requestObject.getName());
+		this.nameInput.setValue(requestObject.getName());
 		this.methodLabel.setText(requestObject.getMethod());
 		this.urlValue.setText(requestObject.getURL());
 		
@@ -96,6 +98,11 @@ public class SavedListItemViewImpl extends Composite {
 		e.preventDefault();
 		listener.removeFromSaved(requestObject);
 		removeFromParent();
+	}
+	@UiHandler("nameInput")
+	void onNameInputChange(ValueChangeEvent<String> event){
+		String name = event.getValue();
+		listener.changeSavedName(name, requestObject.getId());
 	}
 	
 	private void doOnExpand(){

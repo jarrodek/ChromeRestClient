@@ -1,2 +1,4 @@
 eclipse.preferences.version=1
-jarsExcludedFromWebInfLib=/home/jarrod/workspace/GWT Chrome Extensions API/build/jar/ChromeExtension-2.5.0.jar|/home/jarrod/workspace/GWT IO API/build/jar/GwtIOApi-2.5.0.rc1.jar|/home/jarrod/workspace/RestClient/lib/gwt-html5-database.jar|/home/jarrod/workspace/RestClient/lib/gwt-log-3.1.8.jar
+jarsExcludedFromWebInfLib=/home/jarrod/workspace/GWT Chrome Extensions API/build/jar/ChromeExtension-2.5.0.jar|/home/jarrod/workspace/GWT IO API/build/jar/GwtIOApi-2.5.0.rc1.jar|/home/jarrod/workspace/RestClient/lib/gwt-html5-database.jar|/home/jarrod/workspace/RestClient/lib/gwt-log-3.1.8.jar|/home/jarrod/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201210291354-rel-r42/gwt-2.5.0/gwt-dev.jar|/home/jarrod/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201210291354-rel-r42/gwt-2.5.0/gwt-user.jar|/home/jarrod/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201210291354-rel-r42/gwt-2.5.0/validation-api-1.0.0.GA-sources.jar|/home/jarrod/eclipse/plugins/com.google.gwt.eclipse.sdkbundle_2.5.0.v201210291354-rel-r42/gwt-2.5.0/validation-api-1.0.0.GA.jar
+warSrcDir=war
+warSrcDirIsOutput=true

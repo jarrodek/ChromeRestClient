@@ -83,7 +83,12 @@ public class HistoryListItemViewImpl extends Composite implements HistoryListIte
 		e.preventDefault();
 		doOnExpand();
 	}
-	
+	@UiHandler("delete")
+	void onDeleteItem(ClickEvent e){
+		e.preventDefault();
+		parentList.removeItem(historyId);
+		removeFromParent();
+	}
 	
 	private void doOnExpand(){
 		if(detailedPanel.getClassName().contains(appStyle.hidden())){

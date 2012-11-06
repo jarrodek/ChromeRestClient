@@ -50,6 +50,9 @@
 			margin-top: 17px;
 			padding-bottom: 20px;
 		}
+		.help{
+			margin-left: 1em;
+		}
 	</ui:style>
 	<g:HTMLPanel ui:field="root">
 		<h1 class="{style.contentTitle} {style.about}">Advanced configuration and experimental features</h1>
@@ -65,6 +68,11 @@
 			<div class="{appResources.appCss.hidden} {style.historyClear}" ui:field="historyClear">
 				<g:Button styleName="{appResources.appCss.button}" ui:field="clearHistory" text="Clear history"></g:Button>
 			</div>
+		</section>
+		<section class="{style.optionsSection}">
+			<p>Magic variables</p>
+			<g:CheckBox ui:field="magicVars" value="false"
+				text="Enable magic variables"></g:CheckBox> <a href="http://restforchrome.blogspot.com/2012/11/introduce-magic-variables.html" target="_blank" class="{style.help}">what is this?</a>
 		</section>
 		<section class="{style.optionsSection}">
 			<p>Developer notifications</p>
