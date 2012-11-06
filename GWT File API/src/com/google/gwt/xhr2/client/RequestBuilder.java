@@ -17,6 +17,7 @@ import com.google.gwt.xhr2.client.ReadyStateChangeHandler;
  * @author jarrod
  */
 public class RequestBuilder {
+	
 	/**
 	 * The callback to call when the request completes. It's old method that use
 	 * onreadystatechange. If it's possible use other callback handlers.
@@ -662,7 +663,8 @@ public class RequestBuilder {
 
 		return request;
 	}
-
+	
+	
 	private void setHeaders(XMLHttpRequest2 xmlHttpRequest)
 			throws RequestException {
 		if (headers == null || headers.size() == 0) { // default header
