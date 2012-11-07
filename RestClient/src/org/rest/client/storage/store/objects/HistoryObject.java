@@ -129,7 +129,7 @@ public class HistoryObject extends JavaScriptObject implements History {
 	 */
 	public static HistoryObject copyRequestObject(RequestObject from){
 		HistoryObject to = HistoryObject.create();
-		to.setEncoding(from.getEncoding());
+		to.setEncoding(from.getEncoding() == null ? "" : from.getEncoding());
 		to.setHeaders(from.getHeaders());
 		to.setMethod(from.getMethod());
 		to.setPayload(from.getPayload());

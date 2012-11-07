@@ -1,5 +1,21 @@
 var dev = false;
 
+if(typeof chrome.declarativeWebRequest == 'undefined'){
+	chrome.declarativeWebRequest = {
+		onRequest: {
+			removeRules: function(){},
+			addRules: function(){}
+		}
+	};
+	chrome.declarativeWebRequest.RequestMatcher = function(){}
+	chrome.declarativeWebRequest.RequestMatcher.prototype = {};
+	chrome.declarativeWebRequest.RemoveRequestHeader = function(){}
+	chrome.declarativeWebRequest.RemoveRequestHeader.prototype = {};
+	chrome.declarativeWebRequest.SetRequestHeader = function(){}
+	chrome.declarativeWebRequest.SetRequestHeader.prototype = {};
+}
+
+
 var requestFilter = {
 	urls : [ "<all_urls>" ],
 	//types : [ "xmlhttprequest" ]
