@@ -21,7 +21,7 @@
 	
 	
 	<!-- This Linker will produce a monolithic JavaScript file. It may be used only when there is a single distinct compilation result. -->
- 	<add-linker name="sso" />
+<!--  	<add-linker name="sso" /> -->
 
 	<!-- Logging properties -->
 	<!-- To compile at `DEBUG`, `WARN` and `OFF` log levels (with a 3x compile 

@@ -67,4 +67,21 @@ public class RequestHeadersParser {
 		
 		return result;
 	}
+	/**
+	 * Check if given string is a valid headers string
+	 * @param input
+	 * @return
+	 */
+	public static boolean isValidHeaderString(String input){
+		
+		if (input == null || input.equals("")) {
+            return true; //empty string is vaild
+        }
+		String[] headers = input.split("[\r\n]");
+		for (String h : headers) {
+			String[] _tmp = h.split("[:|\r\n]", 2);
+			if(_tmp.length != 2) return false;
+		}
+		return true;
+	}
 }

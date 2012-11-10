@@ -37,7 +37,7 @@
 			-webkit-align-items: flex-start;
 		}
 		.plainPanel{
-			margin: 1em 0px;
+			margin: 2px 0px;
 			overflow: auto;
 			font-family: monospace;
 			font-size: 13px;
@@ -58,8 +58,16 @@
 			
 		}
 		.codeHighlight{margin-top: 20px;}
-		.newWindowOutput{margin-bottom: 15px;}
-		.bodyOverflow{ overflow: auto;}
+		.newWindowOutput{
+			margin-bottom: 2px;
+			border-bottom: 1px #C2C2C2 solid;
+			padding-bottom: 2px;
+			background-color: #F8F8F8;
+		}
+		.newWindowOutput a:first-child{ margin-left: 10px; }
+		.bodyOverflow{ 
+ 			/*overflow: auto;*/
+		}
 		.scrollContainer{
 			-webkit-transform: rotate(-90deg);
 			-webkit-transition: top, opacity 0.3s, 0.15s ease-out;
@@ -121,7 +129,7 @@
 				</div>
 				<div ui:field="tabContent" class="{appResources.appCss.tabsContent}">
 					<section data-tab="raw" class="{appResources.appCss.tabContent} {appResources.appCss.tabContentCurrent}">
-						<div>
+						<div class="{style.newWindowOutput}">
 							<g:Anchor ui:field="wrapContentButton" href="javascript:;" >Word wrap</g:Anchor>
 							<g:Anchor addStyleNames="{style.copyClipboardBody}" ui:field="copyClipboardButton" href="javascript:;" >Copy to clipboard</g:Anchor>
 							<g:Anchor addStyleNames="{style.copyClipboardBody}" ui:field="saveAsFileButton1" href="javascript:;" >Save as file</g:Anchor>
@@ -144,14 +152,14 @@
 						</div>
 					</section>
 					<section data-tab="xml" class="{appResources.appCss.tabContent} {appResources.appCss.hidden}">
-						<div>
+						<div class="{style.newWindowOutput}">
 							<g:Anchor ui:field="copyClipboardButton3" href="javascript:;" >Copy to clipboard</g:Anchor>
 							<g:Anchor addStyleNames="{style.copyClipboardBody}" ui:field="saveAsFileButton3" href="javascript:;" >Save as file</g:Anchor>
 						</div>
 						<g:HTMLPanel ui:field="xmlPanel" styleName="{style.rawInput} {style.bodyOverflow}"/>
 					</section>
 					<section data-tab="json" class="{appResources.appCss.tabContent} {appResources.appCss.hidden}">
-						<div>
+						<div class="{style.newWindowOutput}">
 							<g:Anchor ui:field="copyClipboardButton4" href="javascript:;" >Copy to clipboard</g:Anchor>
 							<g:Anchor addStyleNames="{style.copyClipboardBody}" ui:field="saveAsFileButton4" href="javascript:;" >Save as file</g:Anchor>
 						</div>

@@ -127,7 +127,13 @@ public class FirstRunTask implements LoadTask {
 				
 				@Override
 				public void onTransactionStart(SQLTransaction transaction) {
-					upgradeRequestsData(transaction);
+					try{
+						upgradeRequestsData(transaction);
+					} catch(Exception e){
+						Log.error("Unable to update requests table. Please report this issue.", e);
+						callback.onInnerTaskFinished(1);
+						upgradeLocalStore();
+					}
 				}
 				
 				@Override
@@ -317,6 +323,10 @@ public class FirstRunTask implements LoadTask {
 	
 	
 	private final native void upgradeRequestsData(SQLTransaction tx) /*-{
+		
+		var replaceReg = /'/gim;
+		
+		
 		tx.executeSql("SELECT * FROM rest_forms",[],function(tx, result){
 			var cnt = result.rows.length;
 			for(var i=0; i<cnt; i++){
@@ -332,12 +342,12 @@ public class FirstRunTask implements LoadTask {
 					}
 					var sql = "INSERT INTO request_data (name,url,method,encoding,headers,payload,time) VALUES ";
 					sql += "(";
-					sql += "'"+item['name'].replace(/"/gim,'\\"')+"',";
-					sql += "'"+data['url'].replace(/"/gim,'\\"')+"',";
-					sql += "'"+data['method'].replace(/"/gim,'\\"')+"',";
-					sql += "'"+data['formEncoding'].replace(/"/gim,'\\"')+"',";
-					sql += "'"+headers.replace(/"/gim,'\\"')+"',";
-					sql += "'"+data['post'].replace(/"/gim,'\\"')+"',";
+					sql += "'"+item['name'].replace(replaceReg,'\\\'')+"',";
+					sql += "'"+data['url'].replace(replaceReg,'\\\'')+"',";
+					sql += "'"+data['method'].replace(replaceReg,'\\\'')+"',";
+					sql += "'"+data['formEncoding'].replace(replaceReg,'\\\'')+"',";
+					sql += "'"+headers.replace(replaceReg,'\\\'')+"',";
+					sql += "'"+data['post'].replace(replaceReg,'\\\'')+"',";
 					sql += item['time'];
 					sql += ")";
 					tx.executeSql(sql,[],null,function(tx, error){console.error(error.message);});

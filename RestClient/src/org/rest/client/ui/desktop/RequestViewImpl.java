@@ -346,12 +346,21 @@ public class RequestViewImpl extends Composite implements RequestView {
 
 	@Override
 	public void setEncoding(String encoding) {
-
 		if (encoding == null) {
 			return;
 		}
-
-		boolean found = false;
+		
+		ArrayList<RequestHeader> requerstHeadersList = RequestHeadersParser
+				.stringToHeaders(getHeaders());
+		boolean headersListchanged = false;
+		RequestHeader possiblyToRemoveHeader = null;
+		for (RequestHeader h : requerstHeadersList) {
+			if (h.getName().toLowerCase().equals("content-type")) {
+				possiblyToRemoveHeader = h;
+				encoding = h.getValue(); 
+				break;
+			}
+		}
 		int cnt = contentTypeInput.getItemCount();
 		for (int i = 0; i < cnt; i++) {
 			if (contentTypeInput.getValue(i).equals(encoding)) {
@@ -363,28 +372,13 @@ public class RequestViewImpl extends Composite implements RequestView {
 						.fireEvent(
 								new HttpEncodingChangeEvent(
 										latestSelectedContentType));
-				found = true;
+				requerstHeadersList.remove(possiblyToRemoveHeader);
+				headersListchanged = true;
 				break;
 			}
 		}
-		if (!found) {
-			// add new form encoding to list
-			contentTypeInput.addItem(encoding, encoding);
-			contentTypeInput.setSelectedIndex(cnt);
-		}
-
-		ArrayList<RequestHeader> list = RequestHeadersParser
-				.stringToHeaders(getHeaders());
-		boolean changed = false;
-		for (RequestHeader h : list) {
-			if (h.getName().toLowerCase().equals("content-type")) {
-				h.setValue(encoding);
-				changed = true;
-				break;
-			}
-		}
-		if (changed) {
-			setHeaders(RequestHeadersParser.headersListToString(list));
+		if (headersListchanged) {
+			setHeaders(RequestHeadersParser.headersListToString(requerstHeadersList));
 		}
 	}
 

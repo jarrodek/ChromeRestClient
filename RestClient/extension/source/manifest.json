@@ -5,7 +5,7 @@
     "16": "img/arc_icon_16.png",
     "128": "img/arc_icon_128.png"
   },
-  "version": "3.0.25",
+  "version": "3.0.27",
   "manifest_version": 2,
   "permissions": [
     "webRequest",

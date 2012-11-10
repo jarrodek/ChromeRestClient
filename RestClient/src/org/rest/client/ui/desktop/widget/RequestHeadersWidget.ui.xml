@@ -68,6 +68,14 @@
 			-o-flex: 1 0 0;
 			flex: 1 0 0;
 		}
+		.error{
+			display: -webkit-box;
+			-webkit-box-pack: start;
+			-webkit-box-flex: 1;
+			font-weight: bold;
+			-webkit-box-align: end;
+			color: red;
+		}
 	</ui:style> 
 	<g:HTMLPanel styleName="{appResources.appCss.tabsPanel}">
 		
@@ -77,6 +85,7 @@
 				<g:InlineLabel ui:field="formTab" styleName="{appResources.appCss.inlineButton}">Form</g:InlineLabel>
 			</div>
 			<span class="{appResources.appCss.tabCaption}">Headers</span>
+			<g:Label styleName="{style.error}" ui:field="errorInfo" visible="false">Probably the value you entered is not a valid headers value</g:Label>
 		</div>
 		<div ui:field="tabContent" class="{appResources.appCss.tabsContent}">
 			<section data-tab="raw" class="{appResources.appCss.tabContent} {appResources.appCss.tabContentCurrent}">

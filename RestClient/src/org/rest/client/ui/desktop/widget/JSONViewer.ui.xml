@@ -11,15 +11,18 @@
 			color: black;
 			cursor: text;
 		}
-		<!-- 
+		 
 		.numeric,
 		.nullValue,
 		.booleanValue,
 		.stringValue,
 		.keyName{
-			white-space: nowrap;
+			
 		}
-		-->
+		.stringValue{
+			white-space: normal;
+		}
+		
 		.brace{
 			display: inline-block;
 		}
@@ -38,7 +41,10 @@
 		.stringValue{
 			color: #48A;
 		}
-		.node{position: relative;white-space: nowrap;}
+		.node{
+			position: relative;
+			white-space: nowrap;
+		}
 		
 		div[data-expanded="false"] div[data-element]{display: none !important;}
 		

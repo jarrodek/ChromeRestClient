@@ -114,7 +114,9 @@ XMLViewer.prototype = {
     	var childrenCount = node.childNodes.length;
     	var parsed = "";
     	var showArrows = false;
-		if (childrenCount > 1 || this._childIsCDATA(node)){
+    	var children = node.childNodes;
+    	
+		if (childrenCount > 1 || this._childIsCDATA(node) || (childrenCount >= 1 && children.item(0).getNodeType() == 3)){
 			parsed += '<span colapse-marker="true" class="'+XMLViewer.STYLE.arrowExpanded+'">&nbsp;</span>';
 			showArrows = true;
 		}
@@ -124,18 +126,18 @@ XMLViewer.prototype = {
 		if(childrenCount > 0){
 			parsed += '<span class="'+XMLViewer.STYLE.punctuation+'">&gt;</span>';
 			
-			var children = node.childNodes;
-			var showInline = false;
-			if(childrenCount == 1 && children.item(0).getNodeType() == 3){
-				//simple: only one child - text - show response inline.
-				showInline = true;
-			}
+			
+//			var showInline = false;
+//			if(childrenCount == 1 && children.item(0).getNodeType() == 3){
+//				//simple: only one child - text - show response inline.
+//				showInline = true;
+//			}
 			parsed += '<div collapse-indicator class="'+XMLViewer.STYLE.collapseIndicator+'">...</div>';
-			if(showInline){
-				parsed += '<div collapsible class="'+XMLViewer.STYLE.inline+'">';
-			} else {
+//			if(showInline){
+//				parsed += '<div collapsible class="'+XMLViewer.STYLE.inline+'">';
+//			} else {
 				parsed += '<div collapsible class="'+XMLViewer.STYLE.nodeMargin+'">';
-			}
+//			}
 			for(var i=0; i<childrenCount; i++){
 				parsed += this.parse(children.item(i));
 			}

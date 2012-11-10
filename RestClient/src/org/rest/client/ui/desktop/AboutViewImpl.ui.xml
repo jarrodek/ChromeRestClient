@@ -78,6 +78,10 @@
 		</section>
 		<section class="{style.aboutContent}">
 			<h3>Changelog</h3>
+			<p>11/10/2012</p>
+			<ul>
+				<li>Several bug fixes</li>
+			</ul>
 			<p>11/06/2012</p>
 			<ul>
 				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=85">Issue 85</a>: POST request failed</li>

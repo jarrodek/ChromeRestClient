@@ -92,7 +92,6 @@ public interface ResponseView extends IsWidget {
 	 */
 	void setRedirectData(ArrayList<RedirectData> redirectData);
 	
-	void clear();
 	/**
 	 * Scroll view to this widget
 	 */

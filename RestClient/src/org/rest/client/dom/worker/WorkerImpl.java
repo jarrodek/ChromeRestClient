@@ -30,7 +30,7 @@ class WorkerImpl extends JavaScriptObject {
 	
 	final native void onMessage(WorkerMessageHandler handler) /*-{
 		this.addEventListener('message', $entry(function(e) {
-//		  console.log('Worker said: ', e.data);
+		  $wnd._lastWorker = e.data;
 		  handler.@org.rest.client.dom.worker.WorkerMessageHandler::onMessage(Ljava/lang/String;)(e.data);
 		}), false);
 	}-*/;

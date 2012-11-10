@@ -18,10 +18,11 @@ package org.rest.client.ui.desktop;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import org.rest.client.RestClient;
+import org.rest.client.dom.worker.Worker;
+import org.rest.client.dom.worker.WorkerMessageHandler;
 import org.rest.client.event.OverwriteUrlEvent;
 import org.rest.client.request.RedirectData;
 import org.rest.client.resources.AppCssResource;
@@ -35,8 +36,6 @@ import org.rest.client.ui.desktop.widget.ResponseHeaderLine;
 import org.rest.client.ui.desktop.widget.StatusCodeImage;
 import org.rest.client.ui.desktop.widget.XMLViewer;
 import org.rest.client.ui.html5.HTML5Element;
-import org.rest.client.util.CodeMirrorElement;
-import org.rest.client.util.CodeMirrorHelper;
 import org.rest.client.util.JSONHeadersUtils;
 import org.rest.client.util.Utils;
 
@@ -44,6 +43,7 @@ import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
@@ -57,8 +57,6 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.regexp.shared.MatchResult;
-import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -104,9 +102,6 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	private boolean success = false;
 	private Response response;
 	private long requestTime;
-	static String codeMirrorParsed = "";
-	private CodeMirrorHelper codeMirrorHelper = null;
-	static final int WORK_CHUNK = 10;
 	
 	AppCssResource appStyle = AppResources.INSTANCE.appCss();
 	
@@ -288,7 +283,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			return;
 		}
 		//Response does not contain any data.
-		String body = response.getResponseText();
+		final String body = response.getResponseText();
 		Document xml = response.getResponseXML();
 		boolean isXML = false, isJSON = false;
 		
@@ -315,7 +310,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			xml = null;
 			isXML = false;
 			Element info = DOM.createSpan();
-			info.setInnerText( "Response does not contain any data." );
+			info.setInnerText("Response does not contain any data.");
 			info.addClassName("note italic");
 			plainBody.getElement().appendChild(info);
 			setTabOpened(TABS.RAW, rawTab);
@@ -329,15 +324,24 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			if(RestClient.isDebug()){
 				Log.debug("Initialize code mirror...");
 			}
-			codeMirrorHelper = new CodeMirrorHelper();
-			String encoding = getRequestContentType("text/html");
-			if(encoding.contains("javascript")){
-				encoding = "text/javascript";
+			String _encoding = getRequestContentType("text/html");
+			if(_encoding.contains("javascript")){
+				_encoding = "text/javascript";
 			}
-			
+			final String encoding = _encoding;
 			
 			try{
-				loadCodeMirror(body, encoding);
+				getRequestDomainAndPath(new Callback<String, Throwable>() {
+					@Override
+					public void onSuccess(String result) {
+						loadCodeMirror(body, encoding, result);
+					}
+					@Override
+					public void onFailure(Throwable reason) {
+						
+					}
+				});
+				
 			} catch(Exception e){
 				if(RestClient.isDebug()){
 					Log.warn("Unable to load CodeMirror.",e );
@@ -376,6 +380,9 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			String name = header.getName().toLowerCase();
 			if(name.equals("content-type")){
 				String value = header.getValue().toLowerCase();
+				if(value.contains("+json")){
+					return true;
+				}
 				for(String headerDef : jsonHeadersDefinitions){
 					if(value.contains(headerDef)){
 						return true;
@@ -397,13 +404,18 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	 * @param encoding 
 	 * @throws JavaScriptException
 	 */
-	final native void loadCodeMirror(String text, String encoding) throws JavaScriptException /*-{
+	final native void loadCodeMirror(String text, String encoding, String baseUrl) throws JavaScriptException /*-{
+		var elements = [];
 		var context = this;
 		var clb = $entry(function(a,b) {
-			context.@org.rest.client.ui.desktop.ResponseViewImpl::codeMirrorParseCallback(Ljava/lang/String;Ljava/lang/String;)(a,b);
+			elements.push({string:a,style:b});
 		});
 		var ready = $entry(function() {
-			context.@org.rest.client.ui.desktop.ResponseViewImpl::codeMirrorParsedCallback()();
+			var result = {
+				html: elements,
+				url: baseUrl 
+			}
+			context.@org.rest.client.ui.desktop.ResponseViewImpl::codeMirrorCallback(Lcom/google/gwt/core/client/JavaScriptObject;)(result);
 		});
 		try{
 			$wnd.CodeMirror.runMode(text, encoding, clb, ready);
@@ -411,37 +423,21 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			$wnd.alert("Unable to initialize CodeMirror :( " + e.message);
 		}
 	}-*/;
-	public void codeMirrorParseCallback(String str, String style){
-		CodeMirrorElement element = new CodeMirrorElement(str, style);
-		codeMirrorHelper.add(element);
-	}
 	
-	/**
-	 * First, after CodeMirror finish work via RepeatingCommand parse collected elements.
-	 * Next call {@link #setResponseLinks()} to parse anchors.
-	 */
-	void codeMirrorParsedCallback(){
-		Scheduler.RepeatingCommand rc = new Scheduler.RepeatingCommand() {
+	void codeMirrorCallback(JavaScriptObject html){
+		Worker worker =  new Worker("/workers/htmlviewer.js");
+		worker.onMessage(new WorkerMessageHandler() {
 			@Override
-			public boolean execute() {
-				Iterator<CodeMirrorElement> it = codeMirrorHelper.iterator();
-				int loopCount = 0;
-				while(it.hasNext()){
-					loopCount++;
-					codeMirrorParsed += it.next().parse();
-					if(loopCount >= WORK_CHUNK){
-						return true;
-					}
-				}
-				setResponseLinks();
-				return false;
+			public void onMessage(String message) {
+				parsedBody.setInnerHTML(message);
+				addNativeControls(parsedBody);
 			}
-		};
-		Scheduler.get().scheduleIncremental(rc);
+		});
+		worker.postMessage(html);
 	}
-	
 	
 	private void getRequestDomainAndPath(final Callback<String, Throwable> callback){
+		
 		RestClient.collectRequestData(new Callback<RequestObject, Throwable>() {
 			
 			@Override
@@ -484,69 +480,6 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	}
 	
 	
-	private void setResponseLinks(){
-		getRequestDomainAndPath(new Callback<String, Throwable>() {
-			@Override
-			public void onSuccess(final String domainAndPath) {
-				String _domain = domainAndPath;
-				int domainSlashPos = domainAndPath.indexOf("/", domainAndPath.indexOf("://")+3);
-				if(domainSlashPos > 0){
-					_domain = domainAndPath.substring(0,domainSlashPos);
-				}
-				final String domain = _domain;
-				final RegExp r = RegExp.compile("<span class=\"cm-attribute\">(href|src)+</span>=<span class=\"cm-string\">[\\&quot;]*([^<\"\\&]+)[\\&quot;]*</span>", "gim");
-				
-				Scheduler.RepeatingCommand rc = new Scheduler.RepeatingCommand() {
-					@Override
-					public boolean execute() {
-						int loopCount = 0;
-						MatchResult matcher = null;
-						while((matcher = r.exec(codeMirrorParsed)) != null){
-							loopCount++;
-							
-							int cnt = matcher.getGroupCount();
-							if(cnt != 3) continue;
-							String wholeLine = matcher.getGroup(0);
-							String attrName = matcher.getGroup(1);
-							String url = matcher.getGroup(2);
-							String fullHref = "";
-							if(url.contains("://")){
-								fullHref = url;
-							} else if(url.startsWith("/")){
-								fullHref = domain + url;
-							} else {
-								fullHref = domainAndPath + url;
-							}
-							
-							String replacement = "<span class=\"cm-attribute\">";
-							replacement += attrName + "</span>=<span class=\"cm-string\">";
-							replacement += "\"<a response-anchor href=\""+fullHref+"\">"+url+"</a>\"</span>";
-							
-							codeMirrorParsed = codeMirrorParsed.replace(wholeLine, replacement);
-							if(loopCount >= WORK_CHUNK){
-								return true;
-							}
-						}
-						parsedBody.setInnerHTML(codeMirrorParsed);
-						addNativeControls(parsedBody);
-						//clean up
-						codeMirrorParsed = null;
-						codeMirrorHelper.clear();
-						return false;
-					}
-				};
-				Scheduler.get().scheduleIncremental(rc);
-			}
-			
-			@Override
-			public void onFailure(Throwable reason) {
-				if(RestClient.isDebug()){
-					Log.debug("Unable to set anchors in sesponse view.", reason);
-				}
-			}
-		});
-	}
-	
 	final void fireUrlChangeEvent(String url){
 		RestClient.getClientFactory().getEventBus().fireEvent(new OverwriteUrlEvent(url));
 	}
@@ -559,15 +492,11 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 				e.preventDefault();
 				var url = e.target.getAttribute('href');
 				context.@org.rest.client.ui.desktop.ResponseViewImpl::fireUrlChangeEvent(Ljava/lang/String;)(url);
+				$wnd.scrollTo(0,0);
 				return;
 			}
 		}, true);
 	}-*/;
-	
-	@Override
-	public void clear() {
-		
-	}
 	
 	public enum TABS { 
 		RAW("raw"), 

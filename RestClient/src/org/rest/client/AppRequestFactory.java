@@ -297,8 +297,10 @@ public class AppRequestFactory {
 			@Override
 			public void onError(Response response, RuntimeException exception) {
 				if(RestClient.isDebug()){
-					Log.error("XMLHttpRequest2 callback", "onError", exception);
+					Log.error("XMLHttpRequest2 callback::onError", exception);
 				}
+//				ErrorDialogView dialog = RestClient.getClientFactory().getErrorDialogView();
+//				dialog.getHandler().publish(new LogRecord(dialog.getHandler().getLevel(), exception.getMessage()));
 				onFailureRequest(response);
 			}
 		});
@@ -375,7 +377,6 @@ public class AppRequestFactory {
 			}
 		};
 		Scheduler.get().scheduleDeferred(sc);
-		
 	}
 	/**
 	 * Save current form state in local storage.

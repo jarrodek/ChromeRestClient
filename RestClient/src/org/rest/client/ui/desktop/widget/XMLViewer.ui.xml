@@ -9,7 +9,7 @@
 		}
 		.prettyPrint{font-family: monospace;font-size: 13px;}
 		.arrowEmpty{}
-		.node{}
+		.node{margin:1px 0px;}
 		.opened{}
 		.comment{
 			color: #236E25;
@@ -77,7 +77,7 @@
 		}
 		div[data-expanded="false"] div[collapse-indicator]{display: inline-block !important;}
 	</ui:style>
-	<g:HTML ui:field="result" styleName="bodyPanel">
+	<g:HTML ui:field="result" styleName="{style.bodyPanel}">
 		<div class="{appResources.appCss.flexCenter}">
 			<span class="{appResources.appCss.loaderImage}"></span>
 		</div>

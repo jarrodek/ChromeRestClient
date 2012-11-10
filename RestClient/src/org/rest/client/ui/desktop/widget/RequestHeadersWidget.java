@@ -54,6 +54,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.InlineLabel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay;
 import com.google.gwt.user.client.ui.SuggestOracle;
@@ -95,6 +96,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 	@UiField HTMLPanel headersFormPanel;
 	@UiField TextArea headersRawInput;
 	@UiField HeaderStyle style;
+	@UiField Label errorInfo;
 	
 	private TABS currentTab = TABS.RAW;
 	AppCssResource appStyle = AppResources.INSTANCE.appCss();
@@ -115,6 +117,19 @@ public class RequestHeadersWidget extends Composite implements HasText {
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
 				headersData = headersRawInput.getValue();
+			}
+		});
+		
+		headersRawInput.addValueChangeHandler(new ValueChangeHandler<String>() {
+			
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				String headers = event.getValue();
+				if(!RequestHeadersParser.isValidHeaderString(headers)){
+					errorInfo.setVisible(true);
+				} else {
+					errorInfo.setVisible(false);
+				}
 			}
 		});
 		
@@ -225,7 +240,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		//clear current value
 		headersData = "";
 		//clear raw input
-		headersRawInput.setValue(null);
+		headersRawInput.setValue(null, true);
 	}
 	
 	@UiHandler("addHeader")
@@ -441,7 +456,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 	 * Set new value in raw text box and in form.
 	 */
 	void propagateCurrentHeaders(){
-		headersRawInput.setValue(headersData);
+		headersRawInput.setValue(headersData, true);
 		updateForm();
 	}
 	/**
@@ -479,7 +494,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 			list.add(new RequestHeader(inputs.key.getValue(), inputs.value.getValue()));
 		}
 		headersData = RequestHeadersParser.headersListToString(list);
-		headersRawInput.setValue(headersData);
+		headersRawInput.setValue(headersData, true);
 	}
 
 

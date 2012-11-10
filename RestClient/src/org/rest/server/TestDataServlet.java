@@ -21,6 +21,16 @@ public class TestDataServlet extends HttpServlet {
 	private static final long serialVersionUID = 745992985840230143L;
 
 	@Override
+	protected void doOptions(HttpServletRequest req, HttpServletResponse res)
+			throws ServletException, IOException {
+		HttpServletResponse response = (HttpServletResponse) res;
+		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+		super.doOptions(req, res);
+	}
+	
+	
+	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		
@@ -28,6 +38,11 @@ public class TestDataServlet extends HttpServlet {
 		if (payload == null || payload.equals("")) {
 			resp.addHeader("Location", "/RestClient.html");
 			resp.setStatus(307);
+		} else if (payload.equals("error")) {
+			resp.setContentType("application/x-custom+json; version=1");
+			resp.setStatus(200);
+			String json = "\n{\n\"companies\": \"http://localhost:8080/companies/\"\n}\n";
+			resp.getWriter().println(json);
 		} else if (payload.equals("json")) {
 			resp.setContentType("application/json");
 			resp.setStatus(200);
@@ -53,6 +68,7 @@ public class TestDataServlet extends HttpServlet {
 				buf = new char[1024];
 			}
 			reader.close();
+			resp.setContentType("application/atom+xml;charset=utf-8");
 			resp.getWriter().println(fileData.toString());
 		} else if ( payload.equals("auth") ){
 			resp.setStatus(401);
@@ -116,6 +132,7 @@ public class TestDataServlet extends HttpServlet {
 			sb.append("}");
 			resp.setContentType("application/json");
 			resp.setStatus(200);
+//			resp.getWriter().println("{\"companies\":\"http://localhost:8080/companies/\"");
 			resp.getWriter().println(sb.toString());
 		} else if (payload.equals("cookie")){
 
