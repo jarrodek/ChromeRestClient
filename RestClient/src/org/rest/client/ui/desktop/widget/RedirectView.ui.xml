@@ -2,31 +2,14 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:rc="urn:import:org.rest.client.ui.desktop.widget">
-	<ui:style type="org.rest.client.ui.desktop.widget.RedirectView.WidgetStyle">
-		.redirectWrapper{}
-		.statusLine{}
-		.cacheLine{
-			margin: 7px 0;
-		}
-		.statusItem{
-			margin: 0px 7px;
-			font-weight: bold;
-		}
-		.statusCode{
-	
-		}
-		.highlightCahceInfo{
-			color: #D50000;
-		}
-	</ui:style>
-	<g:HTMLPanel styleName="{style.redirectWrapper}">
-		<div class="{style.statusLine}">
-			To:<span class="{style.statusItem}" ui:field="redirectUrlLabel"></span>
-			with status: <span class="{style.statusItem} {style.statusCode}" ui:field="redirectStatusCodeLabel"></span>
+	<g:HTMLPanel styleName="Redirect_View_redirectWrapper">
+		<div class="Redirect_View_statusLine">
+			To:<span class="Redirect_View_statusItem" ui:field="redirectUrlLabel"></span>
+			with status: <span class="Redirect_View_statusItem Redirect_View_statusCode" ui:field="redirectStatusCodeLabel"></span>
 			<rc:StatusCodeImage ui:field="codeImage"></rc:StatusCodeImage>
-			<span class="{style.statusItem}" ui:field="redirectStatusLineLabel"></span>
+			<span class="Redirect_View_statusItem" ui:field="redirectStatusLineLabel"></span>
 		</div>
-		<div class="{style.cacheLine}" ui:field="cacheLine"></div>
+		<div class="Redirect_View_cacheLine" ui:field="cacheLine"></div>
 		<g:HTMLPanel ui:field="headersPanel"></g:HTMLPanel>
 	</g:HTMLPanel>
 </ui:UiBinder>

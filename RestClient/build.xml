@@ -38,7 +38,6 @@
 				<exclude name="**/restclient/gwt/clean/images/vborder_ie6.png" />
 				<!-- Do not copy uncompressed javascripts -->
 				<exclude name="**/ext/*_uncompressed.js" />
-				<exclude name="**/ext/CodeMirror-2.2/*_uncompressed.css" />
 			    <!-- Other files -->
 				<exclude name="**/ext/crypto*" />
 			</fileset>

@@ -13,8 +13,13 @@ self.onmessage = function(e) {
     for(var styleName in style){
     	XMLViewer.STYLE[styleName] = style[styleName]; 
     }
-    var parser = new XMLViewer(data.data);
-    var result = parser.getHTML();
+    var result = '';
+    try{
+	    var parser = new XMLViewer(data.data);
+	    result = parser.getHTML();
+    } catch(e){
+    	result = e.message;
+    }
     parser = null;
     self.postMessage(result);
 };
@@ -116,7 +121,7 @@ XMLViewer.prototype = {
     	var showArrows = false;
     	var children = node.childNodes;
     	
-		if (childrenCount > 1 || this._childIsCDATA(node) || (childrenCount >= 1 && children.item(0).getNodeType() == 3)){
+		if (childrenCount > 1 || this._childIsCDATA(node)){
 			parsed += '<span colapse-marker="true" class="'+XMLViewer.STYLE.arrowExpanded+'">&nbsp;</span>';
 			showArrows = true;
 		}
@@ -127,17 +132,17 @@ XMLViewer.prototype = {
 			parsed += '<span class="'+XMLViewer.STYLE.punctuation+'">&gt;</span>';
 			
 			
-//			var showInline = false;
-//			if(childrenCount == 1 && children.item(0).getNodeType() == 3){
-//				//simple: only one child - text - show response inline.
-//				showInline = true;
-//			}
-			parsed += '<div collapse-indicator class="'+XMLViewer.STYLE.collapseIndicator+'">...</div>';
-//			if(showInline){
-//				parsed += '<div collapsible class="'+XMLViewer.STYLE.inline+'">';
-//			} else {
+			var showInline = false;
+			if(childrenCount == 1 && children.item(0).getNodeType() == 3){
+				//simple: only one child - text - show response inline.
+				showInline = true;
+			}
+			if(showInline){
+				parsed += '<div class="'+XMLViewer.STYLE.inline+'">';
+			} else {
+				parsed += '<div collapse-indicator class="'+XMLViewer.STYLE.collapseIndicator+'">...</div>';
 				parsed += '<div collapsible class="'+XMLViewer.STYLE.nodeMargin+'">';
-//			}
+			}
 			for(var i=0; i<childrenCount; i++){
 				parsed += this.parse(children.item(i));
 			}

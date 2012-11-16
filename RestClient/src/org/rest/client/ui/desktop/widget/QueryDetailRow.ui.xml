@@ -1,38 +1,14 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
-	<ui:with field="appResources" type="org.rest.client.resources.AppResources"/>
-	<ui:style>
-		.row{}
-		.flex{
-			display: -webkit-flex;
-			display: -mox-flex;
-			display: -ms-flex;
-			display: -o-flex;
-			display: flex;	
-		}
-		.block{
-			-webkit-align-items: center;
-		}
-		.valueBlock{
-			-webkit-flex: 1 0 0;
-			-moz-flex: 1 0 0;
-			-ms-flex: 1 0 0;
-			-o-flex: 1 0 0;
-			flex: 1 0 0;
-		}
-		.valueBlock input{
-			width: literal("-webkit-calc(100% - 12px)");
-			width: literal("calc(100% - 12px)");
-		}
-	</ui:style>
-	<g:HTMLPanel styleName="{style.row} {style.flex}">
-		<g:SimplePanel ui:field="keyPanel" styleName="{style.block} {style.flex}"></g:SimplePanel>
-		<g:SimplePanel ui:field="valuePanel" styleName="{style.block} {style.flex} {style.valueBlock}"></g:SimplePanel>
-		<div class="{style.block} {style.flex}">
-			<g:InlineLabel styleName="{appResources.appCss.removeButton}" ui:field="removeButton" title="Remove">x</g:InlineLabel>
-			<g:InlineLabel styleName="{appResources.appCss.formCtrl}" ui:field="encodeButton" title="Encode query string. Use CTRL to replace + with %20">enc</g:InlineLabel>
-			<g:InlineLabel styleName="{appResources.appCss.formCtrl}" ui:field="decodeButton" title="Decode query string. Use CTRL to replace + with %20">dec</g:InlineLabel>
+	
+	<g:HTMLPanel styleName="Query_Detailed_Row_row Query_Detailed_Row_flex">
+		<g:SimplePanel ui:field="keyPanel" styleName="Query_Detailed_Row_block Query_Detailed_Row_flex"></g:SimplePanel>
+		<g:SimplePanel ui:field="valuePanel" styleName="Query_Detailed_Row_block Query_Detailed_Row_flex Query_Detailed_Row_valueBlock"></g:SimplePanel>
+		<div class="Query_Detailed_Row_block Query_Detailed_Row_flex">
+			<g:InlineLabel styleName="removeButton" ui:field="removeButton" title="Remove">x</g:InlineLabel>
+			<g:InlineLabel styleName="formCtrl" ui:field="encodeButton" title="Encode query string. Use CTRL to replace + with %20">enc</g:InlineLabel>
+			<g:InlineLabel styleName="formCtrl" ui:field="decodeButton" title="Decode query string. Use CTRL to replace + with %20">dec</g:InlineLabel>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder> 

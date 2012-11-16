@@ -107,7 +107,21 @@ public class AboutActivity extends AppActivity implements
 		view.setUpTutorial(tutorialFactory);
 	}
 	
-	private final native void initPlusOne()/*-{
+	void initPlusOne(){
+		if(!isPlusLoaded()){
+			loadPlus();
+		} else {
+			_initPlusOneButton();
+		}
+	}
+	
+	private final native boolean isPlusLoaded()/*-{
+		return !!($wnd.gapi);
+	}-*/;
+	private final native void loadPlus()/*-{
+		$wnd.loadPlusApi();
+	}-*/;
+	private final native void _initPlusOneButton()/*-{
 		try{
 			$wnd.gapi.plusone.go();
 		} catch(e){

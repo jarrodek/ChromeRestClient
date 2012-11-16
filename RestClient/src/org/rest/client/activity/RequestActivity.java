@@ -94,6 +94,7 @@ public class RequestActivity extends AppActivity implements
 
 	@Override
 	public void start(AcceptsOneWidget panel, com.google.gwt.event.shared.EventBus eventBus) {
+		
 		this.eventBus = eventBus;
 		super.start(panel, eventBus);
 		if(RestClient.getOpenedProject() > 0){
@@ -122,7 +123,7 @@ public class RequestActivity extends AppActivity implements
 				if(RestClient.isDebug()){
 					Log.error("Unable read history ID",e);
 				}
-				StatusNotification.notify("Unable read history ID", StatusNotification.TYPE_ERROR);
+				StatusNotification.notify("Unable read history ID", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
 				restoreLatestRequest(requestView);
 			}
 		} else if(place.isProject()){
@@ -134,7 +135,7 @@ public class RequestActivity extends AppActivity implements
 				if(RestClient.isDebug()){
 					Log.error("Unable read project ID",e);
 				}
-				StatusNotification.notify("Unable read project ID", StatusNotification.TYPE_ERROR);
+				StatusNotification.notify("Unable read project ID", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
 				restoreLatestRequest(requestView);
 			}
 			
@@ -147,7 +148,7 @@ public class RequestActivity extends AppActivity implements
 				if(RestClient.isDebug()){
 					Log.error("Unable read project's endpoint ID",e);
 				}
-				StatusNotification.notify("Unable read project data", StatusNotification.TYPE_ERROR);
+				StatusNotification.notify("Unable read project data", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
 				restoreLatestRequest(requestView);
 			}
 		} else if(place.isSaved()){
@@ -158,7 +159,7 @@ public class RequestActivity extends AppActivity implements
 				if(RestClient.isDebug()){
 					Log.error("Unable read saved item ID",e);
 				}
-				StatusNotification.notify("Unable read saved request data", StatusNotification.TYPE_ERROR);
+				StatusNotification.notify("Unable read saved request data", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
 				restoreLatestRequest(requestView);
 			}
 		} else if(place.isExternal()){

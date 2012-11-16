@@ -98,6 +98,11 @@ public class SettingsActivity extends AppActivity implements
 		} else {
 			view.setMagicVarsEnabled(false);
 		}
+		if(SyncAdapter.isCodeMirrorHeaders()){
+			view.setCodeMirrorHeadersEnabled(true);
+		} else {
+			view.setCodeMirrorHeadersEnabled(false);
+		}
 	}
 
 	@Override
@@ -116,10 +121,10 @@ public class SettingsActivity extends AppActivity implements
 	}
 	
 	
-	private void saveSetting(final String key, final String value){
+	private void saveSetting(final String key, final boolean value){
 		
 		JSONObject setObj = new JSONObject();
-		setObj.put(key, new JSONString(value));
+		setObj.put(key, new JSONString(String.valueOf(value)));
 		syncStorage.set(setObj.getJavaScriptObject(), new StorageSimpleCallback() {
 			@Override
 			public void onDone() {
@@ -135,17 +140,19 @@ public class SettingsActivity extends AppActivity implements
 				StatusNotification.notify("Settings saved.", StatusNotification.TYPE_NORMAL, StatusNotification.TIME_ULTRA_SHORT, true);
 				
 				if(key.equals(LocalStore.DEBUG_KEY)){
-					RestClient.setDebug(value.equals("true") ? true : false);
+					RestClient.setDebug(value);
 				} else if(key.equals(LocalStore.HISTORY_KEY)){
-					if(value.equals("false")){
+					if(value == false){
 						clientFactory.getMenuView().hideItem(2);
 					} else {
 						clientFactory.getMenuView().showItem(2);
 					}
 				} else if(key.equals(LocalStore.NOTIFICATIONS_ENABLED_KEY)){
-					clientFactory.getEventBus().fireEvent(new NotificationsStateChangeEvent(value.equals("true") ? true : false));
+					clientFactory.getEventBus().fireEvent(new NotificationsStateChangeEvent(value));
 				} else if(key.equals(LocalStore.MAGIC_VARS_ENABLED_KEY)){
-					SyncAdapter.setMagicVars(value.equals("true") ? true : false);
+					SyncAdapter.setMagicVars(value);
+				} else if(key.equals(LocalStore.CODE_MIRROR_HEADERS_KEY)){
+					SyncAdapter.setCodeMirrorHeaders(value);
 				}
 			}
 		});
@@ -154,21 +161,25 @@ public class SettingsActivity extends AppActivity implements
 	
 	@Override
 	public void changeDebugValue(boolean newValue) {
-		saveSetting(LocalStore.DEBUG_KEY, String.valueOf(newValue));
+		saveSetting(LocalStore.DEBUG_KEY, newValue);
 	}
 
 	@Override
 	public void changeHistoryValue(boolean newValue) {
-		saveSetting(LocalStore.HISTORY_KEY, String.valueOf(newValue));
+		saveSetting(LocalStore.HISTORY_KEY, newValue);
 	}
 
 	@Override
 	public void changeNotificationsValue(boolean notificationsEnabled) {
-		saveSetting(LocalStore.NOTIFICATIONS_ENABLED_KEY, String.valueOf(notificationsEnabled));
+		saveSetting(LocalStore.NOTIFICATIONS_ENABLED_KEY, notificationsEnabled);
 	}
 
 	@Override
 	public void changeMagicVarsValue(boolean magicVarsEnabled) {
-		saveSetting(LocalStore.MAGIC_VARS_ENABLED_KEY, String.valueOf(magicVarsEnabled));
+		saveSetting(LocalStore.MAGIC_VARS_ENABLED_KEY, magicVarsEnabled);
+	}
+	@Override
+	public void changeCodeMirrirHeadersValue(boolean codeMirrorHeadersEnabled) {
+		saveSetting(LocalStore.CODE_MIRROR_HEADERS_KEY, codeMirrorHeadersEnabled);
 	}
 }

@@ -1,47 +1,10 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
-	<ui:with field="appResources" type="org.rest.client.resources.AppResources" />
-	<ui:style>
-		.contentTitle {
-			-webkit-padding-end: 24px;
-			-webkit-user-select: none;
-			color: black;
-			font-size: 175%;
-			font-weight: normal;
-			margin: 0;
-			padding-bottom: 14px;
-			padding-top: 13px;
-			text-align: end;
-			cursor: pointer;
-		}
-		
-		.contentTitle.about {
-			-webkit-padding-start: 24px;
-			text-align: start;
-		}
-		
-		.aboutContent {
-			-webkit-padding-start: 24px;
-			text-align: start;
-			text-shadow: white 0 1px 2px;
-			border-bottom: 1px solid #eeeeee;
-			margin-top: 17px;
-			padding-bottom: 20px;
-		}
-		
-		.aboutContent>div {
-			margin-bottom: 7px;
-		}
-		
-		.donateTitle {
-			font-weight: bold;
-			font-size: 130%;
-		}
-	</ui:style>
+	
 	<g:HTMLPanel ui:field="root">
-		<h1 class="{style.contentTitle} {style.about}">Advanced Rest Client Application</h1>
-		<section class="{style.aboutContent}">
+		<h1 class="About_View_contentTitle About_View_about">Advanced Rest Client Application</h1>
+		<section class="About_View_aboutContent">
 			<div ui:field="versionField"></div>
 			<div class="credits">
 				Copyright © 2012 Paweł Psztyć (Poland)
@@ -55,12 +18,12 @@
 				The application's blog: <a target="_blank" href="http://restforchrome.blogspot.com/?utm_source=ARC&amp;utm_medium=InsideApplication&amp;utm_campaign=About">Advanced REST client for Google Chrome. Blog for Google Chrome application.</a><br/>
 			</div>
 		</section>
-		<section class="{style.aboutContent}">
+		<section class="About_View_aboutContent">
 			<h3>+1 me</h3>
 			<div class="g-plusone" data-annotation="inline" data-width="400" data-href="https://chrome.google.com/webstore/detail/hgmloofddffdnphfgcellkdfbfbjeloo"></div>
 		</section>
-		<section class="{style.aboutContent}">
-			<h3 class="{style.donateTitle}">If you like my work, please donate :)</h3>
+		<section class="About_View_aboutContent">
+			<h3 class="About_View_donateTitle">If you like my work, please donate :)</h3>
 			<p>
 				Please, express your gratitude donating my work ;)<br/>
 				<strong>&euro;5</strong> will be OK if each of you donate!
@@ -76,7 +39,7 @@
 					height="1" />
 			</form>
 		</section>
-		<section class="{style.aboutContent}">
+		<section class="About_View_aboutContent">
 			<h3>Changelog</h3>
 			<p>11/10/2012</p>
 			<ul>

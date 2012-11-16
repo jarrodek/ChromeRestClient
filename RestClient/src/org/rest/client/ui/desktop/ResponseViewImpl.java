@@ -25,8 +25,6 @@ import org.rest.client.dom.worker.Worker;
 import org.rest.client.dom.worker.WorkerMessageHandler;
 import org.rest.client.event.OverwriteUrlEvent;
 import org.rest.client.request.RedirectData;
-import org.rest.client.resources.AppCssResource;
-import org.rest.client.resources.AppResources;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.storage.websql.HeaderRow;
 import org.rest.client.ui.ResponseView;
@@ -57,7 +55,6 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -88,14 +85,14 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	interface ResponseViewImplUiBinder extends UiBinder<Widget, ResponseViewImpl> {
 	}
 	
-	interface WidgetStyle extends CssResource{
-		String error();
-		String warning();
-		String requestError();
-		String responseRow();
-		String label();
-		String result();
-		String onTop();
+	class WidgetStyle {
+		String error = "Response_View_error";
+		String warning = "Response_View_warning";
+		String requestError = "Response_View_requestError";
+		String responseRow = "Response_View_responseRow";
+		String label = "Response_View_label";
+		String result = "Response_View_result";
+		String onTop = "Response_View_onTop";
 	}
 	
 	private ResponsePresenter listener;
@@ -103,13 +100,14 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	private Response response;
 	private long requestTime;
 	
-	AppCssResource appStyle = AppResources.INSTANCE.appCss();
-	
 	@UiField StatusCodeImage codeImage;
 	@UiField InlineLabel loadingTime;
 	@UiField InlineLabel codeContainer;
 	@UiField HTMLPanel headersPanel;
 	@UiField HTMLPanel requestHeadersPanel;
+	@UiField HTMLPanel responsePayloadContainer;
+	@UiField HTMLPanel requestHeadersContainer;
+	@UiField HTMLPanel responseHeadersContainer;
 	@UiField InlineLabel rawTab;
 	@UiField InlineLabel xmlTab;
 	@UiField InlineLabel jsonTab;
@@ -121,7 +119,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	@UiField HTMLPanel xmlPanel;
 	@UiField HTMLPanel jsonPanel;
 	@UiField HTMLPanel redirects;
-	@UiField WidgetStyle style;
+	WidgetStyle style = new WidgetStyle();
 	@UiField DivElement scrollContainer;
 	
 	public ResponseViewImpl() {
@@ -139,7 +137,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		this.requestTime = requestTime;
 		this.success = success;
 		this.response = response;
-		getElement().getStyle().setWidth(getElement().getOffsetWidth()-16, Unit.PX);
+//		getElement().getStyle().setWidth(getElement().getOffsetWidth()-16, Unit.PX);
 		handleTabsChange();
 		fill();
 		
@@ -147,13 +145,26 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 
 	private void fill(){
 		if(!success || response == null){
-			this.addStyleName(style.requestError());
+			this.addStyleName(style.requestError);
 		} else {
-			this.removeStyleName(style.requestError());
+			this.removeStyleName(style.requestError);
 		}
-		if(response == null) return;
+		if(response == null) {
+			cleanupErrorResponse();
+			return;
+		}
 		setResponseStatus();
 		setResponseBody();
+	}
+	
+	void cleanupErrorResponse(){
+		codeContainer.getElement().setInnerHTML("An error occured during the request.");
+		codeContainer.getElement().addClassName(style.error);
+		loadingTime.setText("0");
+		responsePayloadContainer.setVisible(false);
+		responseHeadersContainer.setVisible(false);
+		requestHeadersContainer.setVisible(false);
+		scrollContainer.addClassName(style.onTop);
 	}
 	
 	private void setResponseStatus() {
@@ -163,9 +174,9 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		int code = response.getStatus();
 		String msg = response.getStatusText();
 		if(code >=500 || code == 0){
-			codeContainer.getElement().addClassName(style.error());
+			codeContainer.getElement().addClassName(style.error);
 		} else if( code >= 400 && code < 500 ){
-			codeContainer.getElement().addClassName(style.warning());
+			codeContainer.getElement().addClassName(style.warning);
 		}
 		String txt = "<strong>" + code + "</strong>";
 		if (msg != null && !msg.equals("")) {
@@ -265,12 +276,12 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			RedirectData data = redirectData.get(i);
 			
 			FlowPanel wrapper = new FlowPanel();
-			wrapper.setStyleName(style.responseRow());
+			wrapper.setStyleName(style.responseRow);
 			Label redirectLabel = new Label("Redirect" + ( addNumber ? " #"+(i+1) : "" ));
-			redirectLabel.setStyleName(style.label());
+			redirectLabel.setStyleName(style.label);
 			wrapper.add(redirectLabel);
 			SimplePanel result = new SimplePanel();
-			result.setStyleName(style.result());
+			result.setStyleName(style.result);
 			wrapper.add(result);
 			RedirectView view = new RedirectView(data, listener);
 			result.add(view);
@@ -530,16 +541,16 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
 				HTML5Element tab = (HTML5Element) rawTab.getElement();
-				if(!tab.getClassList().contains(appStyle.inlineButtonChecked()))
-					tab.getClassList().add(appStyle.inlineButtonHover());
+				if(!tab.getClassList().contains("inlineButtonChecked"))
+					tab.getClassList().add("inlineButtonHover");
 			}
 		});
 		rawTab.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
 				HTML5Element tab = (HTML5Element) rawTab.getElement();
-				if(!tab.getClassList().contains(appStyle.inlineButtonHover()))
-					tab.getClassList().remove(appStyle.inlineButtonHover());
+				if(!tab.getClassList().contains("inlineButtonHover"))
+					tab.getClassList().remove("inlineButtonHover");
 			}
 		});
 		
@@ -556,16 +567,16 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
 				HTML5Element tab = (HTML5Element) parsedTab.getElement();
-				if(!tab.getClassList().contains(appStyle.inlineButtonChecked()))
-					tab.getClassList().add(appStyle.inlineButtonHover());
+				if(!tab.getClassList().contains("inlineButtonChecked"))
+					tab.getClassList().add("inlineButtonHover");
 			}
 		});
 		parsedTab.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
 				HTML5Element tab = (HTML5Element) parsedTab.getElement();
-				if(!tab.getClassList().contains(appStyle.inlineButtonHover()))
-					tab.getClassList().remove(appStyle.inlineButtonHover());
+				if(!tab.getClassList().contains("inlineButtonHover"))
+					tab.getClassList().remove("inlineButtonHover");
 			}
 		});
 		
@@ -582,16 +593,16 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
 				HTML5Element tab = (HTML5Element) xmlTab.getElement();
-				if(!tab.getClassList().contains(appStyle.inlineButtonChecked()))
-					tab.getClassList().add(appStyle.inlineButtonHover());
+				if(!tab.getClassList().contains("inlineButtonChecked"))
+					tab.getClassList().add("inlineButtonHover");
 			}
 		});
 		xmlTab.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
 				HTML5Element tab = (HTML5Element) xmlTab.getElement();
-				if(tab.getClassList().contains(appStyle.inlineButtonHover()))
-					tab.getClassList().remove(appStyle.inlineButtonHover());
+				if(tab.getClassList().contains("inlineButtonHover"))
+					tab.getClassList().remove("inlineButtonHover");
 			}
 		});
 		
@@ -607,37 +618,37 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
 				HTML5Element tab = (HTML5Element) jsonTab.getElement();
-					tab.getClassList().add(appStyle.inlineButtonHover());
+					tab.getClassList().add("inlineButtonHover");
 			}
 		});
 		jsonTab.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
 				HTML5Element tab = (HTML5Element) jsonTab.getElement();
-				if(tab.getClassList().contains(appStyle.inlineButtonHover()))
-					tab.getClassList().remove(appStyle.inlineButtonHover());
+				if(tab.getClassList().contains("inlineButtonHover"))
+					tab.getClassList().remove("inlineButtonHover");
 			}
 		});
 	}
 	
 	private void setTabOpened(TABS type, InlineLabel tabHandler) {
-		String tabHandlercurrent = appStyle.inlineButtonChecked();
+		String tabHandlercurrent = "inlineButtonChecked";
 		HTML5Element tab = (HTML5Element) tabHandler.getElement();
 		((HTML5Element)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
 		tab.getClassList().add(tabHandlercurrent);
 		
 		HTML5Element contentParent = (HTML5Element) tabContent.getParentElement();
-		contentParent.querySelector("." + appStyle.tabsContent() + " ." + appStyle.tabContent() + "." + appStyle.tabContentCurrent()).getClassList().remove(appStyle.tabContentCurrent());
-		contentParent.querySelector("." + appStyle.tabsContent() + " ." + appStyle.tabContent() + "[data-tab=\""+type.toString()+"\"]").getClassList().add(appStyle.tabContentCurrent());
+		contentParent.querySelector(".tabsContent .tabContent.tabContentCurrent").getClassList().remove("tabContentCurrent");
+		contentParent.querySelector(".tabsContent .tabContent[data-tab=\""+type.toString()+"\"]").getClassList().add("tabContentCurrent");
         
 		currentTab = type;
 	}
 	
 	private void setTabVisible(TABS type, InlineLabel tabHandler){
 		HTML5Element tab = (HTML5Element) tabHandler.getElement();
-		tab.getClassList().remove(appStyle.hidden());
+		tab.getClassList().remove("hidden");
 		HTML5Element contentParent = (HTML5Element) tabContent.getParentElement();
-		contentParent.querySelector("." + appStyle.tabsContent() + " ." + appStyle.tabContent() + "[data-tab=\""+type.toString()+"\"]").getClassList().remove(appStyle.hidden());
+		contentParent.querySelector(".tabsContent .tabContent[data-tab=\""+type.toString()+"\"]").getClassList().remove("hidden");
 	}
 	
 	@UiHandler("parsedOpen")
@@ -679,9 +690,9 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 				int top = event.getScrollTop();
 				
 				if(Math.abs(top) < 20){
-					scrollContainer.addClassName(style.onTop());
+					scrollContainer.addClassName(style.onTop);
 				} else {
-					scrollContainer.removeClassName(style.onTop());
+					scrollContainer.removeClassName(style.onTop);
 				}
 				
 				

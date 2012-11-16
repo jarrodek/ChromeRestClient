@@ -137,7 +137,7 @@ public class SocketActivity extends AppActivity implements
 		} catch (Exception e) {
 			messages.remove(msg);
 			Log.error("Unable sent socket message",e);
-			StatusNotification.notify("Unable sent socket message.");
+			StatusNotification.notify("Unable sent socket message.",StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
 		}
 	}
 

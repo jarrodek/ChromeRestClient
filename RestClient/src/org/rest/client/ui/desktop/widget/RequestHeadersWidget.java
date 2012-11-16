@@ -19,10 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.rest.client.RestClient;
+import org.rest.client.SyncAdapter;
+import org.rest.client.codemirror.CodeMirror;
+import org.rest.client.codemirror.CodeMirrorChangeHandler;
+import org.rest.client.codemirror.CodeMirrorOptions;
 import org.rest.client.headerssupport.HeadersFillSupport;
 import org.rest.client.request.RequestHeadersParser;
-import org.rest.client.resources.AppCssResource;
-import org.rest.client.resources.AppResources;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.websql.HeaderRow;
@@ -43,7 +45,6 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -67,15 +68,15 @@ public class RequestHeadersWidget extends Composite implements HasText {
 	interface Binder extends UiBinder<Widget, RequestHeadersWidget> {
 	}
 	
-	interface HeaderStyle extends CssResource {
-		String hasSupport();
-		String headerDesc();
-		String headerExample();
-		String headersDescPopup();
-		String keyBoxContainer();
-		String headerSupportHint();
-		String flex();
-		String valueBlock();
+	class HeaderStyle  {
+		String hasSupport = "RequestHeaders_Widget_hasSupport";
+		String headerDesc = "RequestHeaders_Widget_headerDesc";
+		String headerExample = "RequestHeaders_Widget_headerExample";
+		String headersDescPopup = "RequestHeaders_Widget_headersDescPopup";
+		String keyBoxContainer = "RequestHeaders_Widget_keyBoxContainer";
+		String headerSupportHint = "RequestHeaders_Widget_headerSupportHint";
+		String flex = "RequestHeaders_Widget_flex";
+		String valueBlock = "RequestHeaders_Widget_valueBlock";
 	}
 	
 	public enum TABS { RAW, FORM }
@@ -95,18 +96,20 @@ public class RequestHeadersWidget extends Composite implements HasText {
 	@UiField DivElement tabContent;
 	@UiField HTMLPanel headersFormPanel;
 	@UiField TextArea headersRawInput;
-	@UiField HeaderStyle style;
 	@UiField Label errorInfo;
 	
+	HeaderStyle style = new HeaderStyle();
 	private TABS currentTab = TABS.RAW;
-	AppCssResource appStyle = AppResources.INSTANCE.appCss();
 	private String headersData = "";
 	private ArrayList<FormInputs> formInputs = new ArrayList<RequestHeadersWidget.FormInputs>();
 	private HeadersSuggestOracle suggestOracle = null;
 	final HeadersStoreWebSql store;
+	private CodeMirror headersCodeMirror = null;
 	
 	public RequestHeadersWidget() {
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
+		
+		loadCodeMirrorForHeaders();
 		
 		//
 		// Initialize Suggest Oracle for headers
@@ -116,7 +119,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		headersRawInput.addKeyUpHandler(new KeyUpHandler() {
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
-				headersData = headersRawInput.getValue();
+				updateHeadersRawData(headersRawInput.getValue());
 			}
 		});
 		
@@ -144,16 +147,16 @@ public class RequestHeadersWidget extends Composite implements HasText {
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
 				HTML5Element tab = (HTML5Element) rawTab.getElement();
-				if(!tab.getClassList().contains(appStyle.inlineButtonChecked()))
-					tab.getClassList().add(appStyle.inlineButtonHover());
+				if(!tab.getClassList().contains("inlineButtonChecked"))
+					tab.getClassList().add("inlineButtonHover");
 			}
 		});
 		rawTab.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
 				HTML5Element tab = (HTML5Element) rawTab.getElement();
-				if(!tab.getClassList().contains(appStyle.inlineButtonHover()))
-					tab.getClassList().remove(appStyle.inlineButtonHover());
+				if(!tab.getClassList().contains("inlineButtonHover"))
+					tab.getClassList().remove("inlineButtonHover");
 			}
 		});
 		formTab.addClickHandler(new ClickHandler() {
@@ -168,26 +171,27 @@ public class RequestHeadersWidget extends Composite implements HasText {
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
 				HTML5Element tab = (HTML5Element) formTab.getElement();
-				if(!tab.getClassList().contains(appStyle.inlineButtonChecked()))
-					tab.getClassList().add(appStyle.inlineButtonHover());
+				if(!tab.getClassList().contains("inlineButtonChecked"))
+					tab.getClassList().add("inlineButtonHover");
 			}
 		});
 		formTab.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
 				HTML5Element tab = (HTML5Element) formTab.getElement();
-				if(tab.getClassList().contains(appStyle.inlineButtonHover()))
-					tab.getClassList().remove(appStyle.inlineButtonHover());
+				if(tab.getClassList().contains("inlineButtonHover"))
+					tab.getClassList().remove("inlineButtonHover");
 			}
 		});
 	}
+	
 	private void openRawTab() {
 		if(currentTab.equals(TABS.RAW)) return;
 		
-		String tabHandlercurrent = appStyle.inlineButtonChecked();
-		String tabsContent = appStyle.tabsContent();
-		String cssTabContent = appStyle.tabContent();
-		String tabContentCurrent = appStyle.tabContentCurrent();
+		String tabHandlercurrent = "inlineButtonChecked";
+		String tabsContent = "tabsContent";
+		String cssTabContent = "tabContent";
+		String tabContentCurrent = "tabContentCurrent";
 		
 		HTML5Element tab = (HTML5Element) rawTab.getElement();
 		((HTML5Element)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
@@ -198,6 +202,10 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		contentParent.querySelector("." + tabsContent + " ." + cssTabContent + "[data-tab=\"raw\"]").getClassList().add(tabContentCurrent);
 		
 		currentTab = TABS.RAW;
+		
+		if(headersCodeMirror != null){
+			headersCodeMirror.refresh();
+		}
 	}
 	
 	private void openFormTab() {
@@ -206,10 +214,10 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		updateForm();
 		ensureFormHasRow();
 		
-		String tabHandlercurrent = appStyle.inlineButtonChecked();
-		String tabsContent = appStyle.tabsContent();
-		String cssTabContent = appStyle.tabContent();
-		String tabContentCurrent = appStyle.tabContentCurrent();
+		String tabHandlercurrent = "inlineButtonChecked";
+		String tabsContent = "tabsContent";
+		String cssTabContent = "tabContent";
+		String tabContentCurrent = "tabContentCurrent";
 		
 		HTML5Element tab = (HTML5Element) formTab.getElement();
 		((HTML5Element)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
@@ -238,9 +246,23 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		//clear form inputs list
 		formInputs.clear();
 		//clear current value
-		headersData = "";
+		updateHeadersRawData("");
 		//clear raw input
 		headersRawInput.setValue(null, true);
+		
+		if(headersCodeMirror != null){
+			headersCodeMirror.setValue("");
+		}
+		loadCodeMirrorForHeaders();
+	}
+	
+	
+	private void updateHeadersRawData(String data){
+		headersData = data;
+		if(headersCodeMirror != null){
+			headersCodeMirror.setValue(data);
+			headersCodeMirror.refresh();
+		}
 	}
 	
 	@UiHandler("addHeader")
@@ -273,7 +295,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 	private void addNewFormRow(String key, String value){
 		
 		final HTMLPanel row = new HTMLPanel("");
-		row.setStyleName(style.flex());
+		row.setStyleName(style.flex);
 		final TextBox valueBox = new TextBox();
 		
 		SuggestBox _tmpKeySuggestBox = null;
@@ -310,29 +332,29 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		keySuggestBox.getElement().setAttribute("placeholder", "key");
 		valueBox.getElement().setAttribute("placeholder", "value");
 		
-		keySuggestBox.addStyleName(appStyle.formKeyInput());
-		removeButton.addStyleName(appStyle.removeButton());
+		keySuggestBox.addStyleName("formKeyInput");
+		removeButton.addStyleName("removeButton");
 		removeButton.setTitle("Remove");
 		
 		keySuggestBox.addValueChangeHandler(formRowChange);
 		valueBox.addValueChangeHandler(formRowChange);
 		
 		InlineLabel hint = new InlineLabel();
-		hint.addStyleName(style.headerSupportHint());
+		hint.addStyleName(style.headerSupportHint);
 		
 		
 		final FlowPanel keyContainer = new FlowPanel();
 		keyContainer.add(keySuggestBox);
 		keyContainer.add(hint);
-		keyContainer.addStyleName(style.keyBoxContainer() + " " + style.flex());
+		keyContainer.addStyleName(style.keyBoxContainer + " " + style.flex);
 		
 		final FlowPanel valueContainer = new FlowPanel();
 		valueContainer.add(valueBox);
-		valueContainer.addStyleName(style.flex() + " " + style.valueBlock());
+		valueContainer.addStyleName(style.flex + " " + style.valueBlock);
 		
 		final FlowPanel actionsContainer = new FlowPanel();
 		actionsContainer.add(removeButton);
-		actionsContainer.addStyleName(style.flex());
+		actionsContainer.addStyleName(style.flex);
 		
 		row.add(keyContainer);
 		row.add(valueContainer);
@@ -382,14 +404,14 @@ public class RequestHeadersWidget extends Composite implements HasText {
 					if(v == null){
 						return;
 					}
-					String expl = "<span class=\""+style.headerDesc()+"\">";
+					String expl = "<span class=\""+style.headerDesc+"\">";
 					expl += v.getDesc();
-					expl += "</span><br/><span class=\""+style.headerExample()+"\">";
+					expl += "</span><br/><span class=\""+style.headerExample+"\">";
 					expl += v.getExample()+"</span>";
 					
 					DecoratedPopupPanel simplePopup = new DecoratedPopupPanel(true);
 				    simplePopup.setWidth("300px");
-				    simplePopup.addStyleName( style.headersDescPopup() );
+				    simplePopup.addStyleName(style.headersDescPopup);
 			        simplePopup.setPopupPosition(left, top);
 			        simplePopup.add( new HTML(expl) );
 			        simplePopup.show();
@@ -413,11 +435,11 @@ public class RequestHeadersWidget extends Composite implements HasText {
 			@Override
 			public void onSuccess(List<HeaderRow> result) {
 				if(result == null || result.size() == 0){
-					value.getElement().getParentElement().removeClassName(style.hasSupport()); //no support
+					value.getElement().getParentElement().removeClassName(style.hasSupport); //no support
 				} else {
 					for(HeaderRow row : result){
 						if(row.getName().equals(value.getValue())){
-							value.getElement().getParentElement().addClassName(style.hasSupport()); //has support
+							value.getElement().getParentElement().addClassName(style.hasSupport); //has support
 							//addHintClickHandler();
 							break;
 						}
@@ -427,7 +449,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 
 			@Override
 			public void onError(Throwable e) {
-				value.getElement().getParentElement().removeClassName(style.hasSupport()); //no support
+				value.getElement().getParentElement().removeClassName(style.hasSupport); //no support
 			}
 			
 		});
@@ -448,7 +470,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 	@Override
 	public void setText(String text) {
 		if(text == null) text = "";
-		this.headersData = text;
+		headersData = text;
 		//propagate new value through widgets
 		propagateCurrentHeaders();
 	}
@@ -456,6 +478,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 	 * Set new value in raw text box and in form.
 	 */
 	void propagateCurrentHeaders(){
+		updateHeadersRawData(headersData);
 		headersRawInput.setValue(headersData, true);
 		updateForm();
 	}
@@ -488,15 +511,46 @@ public class RequestHeadersWidget extends Composite implements HasText {
 	}
 	
 	void updateRaw(){
-		headersData = "";
+		updateHeadersRawData("");
 		ArrayList<RequestHeader> list = new ArrayList<RequestHeader>();
 		for(FormInputs inputs : formInputs){
 			list.add(new RequestHeader(inputs.key.getValue(), inputs.value.getValue()));
 		}
-		headersData = RequestHeadersParser.headersListToString(list);
+		updateHeadersRawData(RequestHeadersParser.headersListToString(list));
 		headersRawInput.setValue(headersData, true);
 	}
-
-
 	
+	
+	private void loadCodeMirrorForHeaders() {
+		if(SyncAdapter.isCodeMirrorHeaders()){
+			if(headersCodeMirror != null) {
+				headersCodeMirror.refresh();
+				RestClient.fixChromeLayout();
+				return;
+			}
+			
+			CodeMirrorOptions opt = CodeMirrorOptions.create();
+			opt.setMode("text/x-headers");
+			opt.setTheme("headers");
+			opt.setAutoClearEmptyLines(true);
+			opt.setLineWrapping(true);
+			if(!(headersData == null || headersData.isEmpty())){
+				opt.setValue(headersData);
+			}
+			headersCodeMirror = CodeMirror.fromTextArea(headersRawInput.getElement(), opt, new CodeMirrorChangeHandler() {
+				@Override
+				public void onChage() {
+					headersData = headersCodeMirror.getValue();
+					headersRawInput.setValue(headersData);
+				}
+			});
+			headersCodeMirror.refresh();
+			RestClient.fixChromeLayout();
+		} else {
+			if(headersCodeMirror != null){
+				headersCodeMirror.toTextArea();
+				headersCodeMirror = null;
+			}
+		}
+	}
 }

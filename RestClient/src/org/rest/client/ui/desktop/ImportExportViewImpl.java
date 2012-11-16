@@ -14,7 +14,6 @@ import org.rest.client.importparser.ImportParser;
 import org.rest.client.importparser.ImportResult;
 import org.rest.client.place.SettingsPlace;
 import org.rest.client.request.ApplicationRequest;
-import org.rest.client.resources.AppResources;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.ImportExportView;
@@ -107,7 +106,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		Timer t = new Timer() {
 			@Override
 			public void run() {				
-				downloadFileAnchor.addClassName(AppResources.INSTANCE.appCss().hidden());
+				downloadFileAnchor.addClassName("hidden");
 				fileDownload.setHref("about:blank");
 				listener.revokeDownloadData();
 			}
@@ -129,7 +128,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 						fileDownload.getElement().setAttribute("download", fileName);
 						fileDownload.getElement().setAttribute("data-downloadurl", "application/json:"+fileName+":"+fileObjectUrl);
 						fileDownload.setVisible(true);
-						downloadFileAnchor.removeClassName(AppResources.INSTANCE.appCss().hidden());
+						downloadFileAnchor.removeClassName("hidden");
 					}
 				});
 
@@ -182,7 +181,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 				if(RestClient.isDebug()){
 					Log.error(msg+" Error code: " + error.getCode());
 				}
-				StatusNotification.notify(msg,StatusNotification.TYPE_ERROR);
+				StatusNotification.notify(msg,StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 			}
 		});
 		reader.addLoadHandler(new LoadHandler() {
@@ -197,7 +196,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 					@Override
 					public void onParse(ImportResult result) {
 						if(result == null){
-							StatusNotification.notify("Unable to parse input file.",StatusNotification.TYPE_ERROR);
+							StatusNotification.notify("Unable to parse input file.",StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 							return;
 						}
 						showImportTable(result);
@@ -215,7 +214,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		ArrayList<RequestObject> requests = result.getRequests();
 		
 		if(requests == null || requests.size() == 0){
-			StatusNotification.notify("There is nothing to update",StatusNotification.TYPE_ERROR);
+			StatusNotification.notify("There is nothing to update",StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 			return;
 		}
 		
@@ -279,15 +278,15 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 			public void onSuccess(Boolean result) {
 				if(result != null && result){
 					cleanUpImportData();
-					StatusNotification.notify("Data saved.",StatusNotification.TYPE_NORMAL);
+					StatusNotification.notify("Data saved.",StatusNotification.TYPE_NORMAL, StatusNotification.TIME_SHORT);
 				} else {
-					StatusNotification.notify("Data save error.",StatusNotification.TYPE_ERROR);
+					StatusNotification.notify("Data save error.",StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 				}
 			}
 			
 			@Override
 			public void onFailure(Void reason) {
-				StatusNotification.notify("Data save error.",StatusNotification.TYPE_ERROR);
+				StatusNotification.notify("Data save error.",StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 			}
 		});
 	}
@@ -451,8 +450,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		storeData.setEnabled(false);
 		restoreData.setEnabled(false);
 		// Show dialog
-		final LoaderDialog dialog = new LoaderDialog(
-				"Preparing data to download. Please wait.", false);
+		final LoaderDialog dialog = new LoaderDialog("Preparing data to download. Please wait.", false);
 		dialog.show();
 		// Make request
 		ImportRequest.getImportSuggestions("me",
@@ -462,14 +460,11 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 					public void onSuccess(List<SuggestionImportItem> result) {
 						dialog.hide();
 						if (result == null) {
-							StatusNotification.notify(
-									"Server returns empty data",
-									StatusNotification.TYPE_ERROR);
+							StatusNotification.notify("Server returns empty data", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
 							restoreData.setEnabled(true);
 							return;
 						}
-						final ImportListingDialog importDialog = new ImportListingDialog(
-								listener);
+						final ImportListingDialog importDialog = new ImportListingDialog(listener);
 						importDialog.append(result);
 						//
 						// delay show dialog for data providers to refresh the
@@ -494,7 +489,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 							}
 						}
 						StatusNotification.notify(message,
-								StatusNotification.TYPE_ERROR);
+								StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 						dialog.hide();
 						storeData.setEnabled(true);
 						restoreData.setEnabled(true);

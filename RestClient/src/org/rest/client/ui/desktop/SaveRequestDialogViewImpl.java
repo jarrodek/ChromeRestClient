@@ -7,8 +7,6 @@ import java.util.Map.Entry;
 import org.rest.client.RestClient;
 import org.rest.client.request.RequestParameters;
 import org.rest.client.request.URLParser;
-import org.rest.client.resources.AppCssResource;
-import org.rest.client.resources.AppResources;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.objects.ProjectObject;
@@ -69,7 +67,6 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	@UiField CheckBox headersStatus;
 	
 	private String requestOrygURL = "";
-	private AppCssResource appStyle = AppResources.INSTANCE.appCss();
 	private int overwriteId = -1;
 	private boolean forceOverwrite = false;
 	
@@ -254,27 +251,27 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	
 	private void projectListValueChange(){
 		if(!addToProject.getValue()){
-			requestOverwriteContainer.addClassName(appStyle.hidden());
-			projectNameContainer.addClassName(appStyle.hidden());
+			requestOverwriteContainer.addClassName("hidden");
+			projectNameContainer.addClassName("hidden");
 			return;
 		}
 		
 		
 		String _projectName = projectList.getValue(projectList.getSelectedIndex());
 		if(_projectName.equals("")){
-			requestOverwriteContainer.addClassName(appStyle.hidden());
-			projectNameContainer.addClassName(appStyle.hidden());
+			requestOverwriteContainer.addClassName("hidden");
+			projectNameContainer.addClassName("hidden");
 			return;
 		}
 		
-		requestOverwriteContainer.removeClassName(appStyle.hidden());
+		requestOverwriteContainer.removeClassName("hidden");
 		
 		if(_projectName.equals("__new__")){
-			projectNameContainer.removeClassName(appStyle.hidden());
-			requestOverwriteContainer.addClassName(appStyle.hidden());
+			projectNameContainer.removeClassName("hidden");
+			requestOverwriteContainer.addClassName("hidden");
 		} else {
 			int parojectId = -1;
-			projectNameContainer.addClassName(appStyle.hidden());
+			projectNameContainer.addClassName("hidden");
 			try{
 				parojectId = Integer.parseInt(_projectName);
 			} catch(Exception e){}
@@ -384,7 +381,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 					return;
 				} else if (!_projectName.equals("")){
 					int projectId = -1;
-					projectNameContainer.addClassName(appStyle.hidden());
+					projectNameContainer.addClassName("hidden");
 					try{
 						projectId = Integer.parseInt(_projectName);
 					} catch(Exception e){}

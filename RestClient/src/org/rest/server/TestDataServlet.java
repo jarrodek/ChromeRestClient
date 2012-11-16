@@ -68,7 +68,7 @@ public class TestDataServlet extends HttpServlet {
 				buf = new char[1024];
 			}
 			reader.close();
-			resp.setContentType("application/atom+xml;charset=utf-8");
+//			resp.setContentType("application/atom+xml;charset=utf-8");
 			resp.getWriter().println(fileData.toString());
 		} else if ( payload.equals("auth") ){
 			resp.setStatus(401);

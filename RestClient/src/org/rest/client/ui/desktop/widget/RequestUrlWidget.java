@@ -22,7 +22,6 @@ import java.util.List;
 import org.rest.client.RestClient;
 import org.rest.client.request.URLParser;
 import org.rest.client.request.URLParser.QueryParam;
-import org.rest.client.resources.AppResources;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.suggestion.UrlsSuggestOracle;
 import org.rest.client.ui.RequestView.Presenter;
@@ -41,7 +40,6 @@ import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -63,9 +61,6 @@ import com.google.gwt.user.client.ui.Widget;
 public class RequestUrlWidget extends Composite implements HasText {
 	interface Binder extends UiBinder<Widget, RequestUrlWidget> {
 	}
-	interface WidgetStyle extends CssResource {
-		
-	}
 	
 	class UrlsSuggestionDisplay extends DefaultSuggestionDisplay {
 		@Override
@@ -81,7 +76,6 @@ public class RequestUrlWidget extends Composite implements HasText {
 	@UiField HTMLPanel paramsContainer;
 	@UiField DivElement detailedPanel;
 	@UiField InlineLabel toggleView;
-	@UiField WidgetStyle style;
 	
 	private Presenter listener = null;
 	final private ArrayList<QueryDetailRow> queryParamsList = new ArrayList<QueryDetailRow>();
@@ -142,8 +136,9 @@ public class RequestUrlWidget extends Composite implements HasText {
 				if(Element.is(et)){
 					Element el = Element.as(et);
 					if(el.getNodeName().toLowerCase().equals("span")){
-						String attr = el.getAttribute("data-remove-row");
-						if(attr != null && !attr.isEmpty()){
+						if(el.hasAttribute("data-remove-row")
+								|| el.hasAttribute("data-encode-row") 
+								|| el.hasAttribute("data-decode-row")){
 							updateURL();
 						}
 					}
@@ -227,8 +222,8 @@ public class RequestUrlWidget extends Composite implements HasText {
 		if(detailedPanel.getClassName().contains("hidden")){
 			detailedPanel.removeClassName("hidden");
 			urlField.setVisible(false);
-			toggleView.removeStyleName(AppResources.INSTANCE.appCss().handlerImageClosed());
-			toggleView.addStyleName(AppResources.INSTANCE.appCss().handlerImageOpened());
+			toggleView.removeStyleName("handlerImageClosed");
+			toggleView.addStyleName("handlerImageOpened");
 			
 			updateQueryForm();
 			ensureQueryFormHasRow();
@@ -236,8 +231,8 @@ public class RequestUrlWidget extends Composite implements HasText {
 		} else {
 			detailedPanel.addClassName("hidden");
 			urlField.setVisible(true);
-			toggleView.addStyleName(AppResources.INSTANCE.appCss().handlerImageClosed());
-			toggleView.removeStyleName(AppResources.INSTANCE.appCss().handlerImageOpened());
+			toggleView.addStyleName("handlerImageClosed");
+			toggleView.removeStyleName("handlerImageOpened");
 		}
 		listener.fireUrlToggleEvent(isNowSimpleView);
 	}

@@ -3,87 +3,30 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:rcui="urn:import:org.rest.client.ui.desktop.widget"
 	xmlns:h5="urn:import:org.rest.client.ui.html5">
-	<ui:with field="appResources" type="org.rest.client.resources.AppResources"/>
-	<ui:style>
-		.projectPanel{
-			height: 38px;
-			background-color: #f4f4f4;
-			padding: 0 10px;
-		}
-		.requestPanel{
 	
-		}
-		.methodsWidget{
-			display: -webkit-flex;
-			-webkit-justify-content: flex-start;
-			-webkit-align-items: center;
-		}
-		.otherInput{
-			font-size: 11px;
-			width: 150px;
-			vertical-align: top;
-			height: 9px;
-		}
-		.contentTypeSection{
-			
-		}
-		.actionBar{
-			
-		}
-		.actionBar,
-		.contentTypeSection{
-			margin-top: 15px;
-			vertical-align: top;
-		}
-		.actionBar{
-			text-align: right;
-			margin-right: 1em;
-		}
-		.actions{}
-		.actions > *{margin-left: 10px;}
-		.radioButton label,
-		.radioButton {
-			cursor: pointer;
-		}
-		.radioButton{
-			margin: 0 10px 0 0;
-		}
-		.projectName{
-			font-size: 2em;
-			margin-right: 1em;
-		}
-		.projectendpoints{}
-		.flex{
-			display: -webkit-flex;
-			display: -mox-flex;
-			display: -ms-flex;
-			display: -o-flex;
-			display: flex;
-			-webkit-align-items: center;
-		}
-	</ui:style>
-	<g:HTMLPanel ui:field="root" styleName="{style.requestPanel}">
+	
+	<g:HTMLPanel ui:field="root" styleName="requestPanel">
 		<!-- Project panel -->
-		<g:HTMLPanel ui:field="projectPanel" styleName="{style.projectPanel} {style.flex} {appResources.appCss.hidden}">
-			<g:InlineLabel ui:field="projectName" styleName="{style.projectName} {style.flex}"></g:InlineLabel>
-			<g:HTMLPanel ui:field="endpointsContainer" styleName="{style.projectendpoints} {style.flex}"></g:HTMLPanel>
+		<g:HTMLPanel ui:field="projectPanel" styleName="projectPanel flex hidden">
+			<g:InlineLabel ui:field="projectName" styleName="projectName flex"></g:InlineLabel>
+			<g:HTMLPanel ui:field="endpointsContainer" styleName="projectendpoints flex"></g:HTMLPanel>
 		</g:HTMLPanel>
 		
 		<!-- URL widget -->
 		<rcui:RequestUrlWidget ui:field="urlWidget"></rcui:RequestUrlWidget>
 		
 		<!-- Method selector -->
-		<div class="{style.methodsWidget}">
-			<g:RadioButton name="method" text="GET" ui:field="radioGet" checked="true" styleName="{style.radioButton}"></g:RadioButton>
-			<g:RadioButton name="method" text="POST" ui:field="radioPost" styleName="{style.radioButton}"></g:RadioButton>
-			<g:RadioButton name="method" text="PUT" ui:field="radioPut" styleName="{style.radioButton}"></g:RadioButton>
-			<g:RadioButton name="method" text="PATCH" ui:field="radioPatch" styleName="{style.radioButton}"></g:RadioButton>
-			<g:RadioButton name="method" text="DELETE" ui:field="radioDelete" styleName="{style.radioButton}"></g:RadioButton>
-			<g:RadioButton name="method" text="HEAD" ui:field="radioHead" styleName="{style.radioButton}"></g:RadioButton>
-			<g:RadioButton name="method" text="OPTIONS" ui:field="radioOptions" styleName="{style.radioButton}"></g:RadioButton>
+		<div class="methodsWidget">
+			<g:RadioButton name="method" text="GET" ui:field="radioGet" checked="true" styleName="radioButton"></g:RadioButton>
+			<g:RadioButton name="method" text="POST" ui:field="radioPost" styleName="radioButton"></g:RadioButton>
+			<g:RadioButton name="method" text="PUT" ui:field="radioPut" styleName="radioButton"></g:RadioButton>
+			<g:RadioButton name="method" text="PATCH" ui:field="radioPatch" styleName=".radioButton"></g:RadioButton>
+			<g:RadioButton name="method" text="DELETE" ui:field="radioDelete" styleName="radioButton"></g:RadioButton>
+			<g:RadioButton name="method" text="HEAD" ui:field="radioHead" styleName="radioButton"></g:RadioButton>
+			<g:RadioButton name="method" text="OPTIONS" ui:field="radioOptions" styleName="radioButton"></g:RadioButton>
 			<div>
-				<g:RadioButton name="method" text="Other" ui:field="radioOther" styleName="{style.radioButton}"></g:RadioButton>
-				<g:TextBox ui:field="otherMethodValue" enabled="false" addStyleNames="{style.otherInput}"></g:TextBox>
+				<g:RadioButton name="method" text="Other" ui:field="radioOther" styleName="radioButton"></g:RadioButton>
+				<g:TextBox ui:field="otherMethodValue" enabled="false" addStyleNames="otherInput"></g:TextBox>
 			</div>
 		</div>
 		
@@ -94,19 +37,19 @@
 		<rcui:RequestBodyWidget ui:field="requestBody"></rcui:RequestBodyWidget>
 		
 		<!-- Content type -->
-		<div ui:field="contentTypeContainer" class="{style.contentTypeSection}">
-			<g:ListBox ui:field="contentTypeInput" title="Select form encoding" styleName="{appResources.appCss.selectControl}">
+		<div ui:field="contentTypeContainer" class="contentTypeSection">
+			<g:ListBox ui:field="contentTypeInput" title="Select form encoding" styleName="selectControl">
 			</g:ListBox>
-			<span class="{appResources.appCss.inlineNote}">
+			<span class="inlineNote">
 				Set "Content-Type" header to overwrite this value.
 			</span>
 		</div>
 		
-		<div class="{style.actionBar}">
-			<div class="{style.actions}">
+		<div class="actionBar">
+			<div class="actions">
 				<h5:HTML5Progress ui:field="progressIndicator" width="200px" height="20px"></h5:HTML5Progress>
-				<g:Button styleName="{appResources.appCss.button}" ui:field="clearButton" title="Clear current form settings">Clear</g:Button>
-				<g:Button styleName="{appResources.appCss.button}" ui:field="sendButton" title="Send current data">Send</g:Button>
+				<g:Button styleName="button" ui:field="clearButton" title="Clear current form settings">Clear</g:Button>
+				<g:Button styleName="button" ui:field="sendButton" title="Send current data">Send</g:Button>
 			</div>
 		</div>
 	</g:HTMLPanel>

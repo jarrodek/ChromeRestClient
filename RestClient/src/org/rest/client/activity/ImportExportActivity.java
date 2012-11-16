@@ -131,7 +131,7 @@ public class ImportExportActivity extends AppActivity implements
 						if(RestClient.isDebug()){
 							Log.error("Unable to collect requests data :/", e);
 						}
-						StatusNotification.notify("Unable to collect requests data :/",StatusNotification.TYPE_ERROR);
+						StatusNotification.notify("Unable to collect requests data :/",StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 					}
 				});
 			}
@@ -141,7 +141,7 @@ public class ImportExportActivity extends AppActivity implements
 				if(RestClient.isDebug()){
 					Log.error("Unable to collect requests data :/", e);
 				}
-				StatusNotification.notify("Unable to collect requests data :/",StatusNotification.TYPE_ERROR);
+				StatusNotification.notify("Unable to collect requests data :/",StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 			}
 		});
 	}
@@ -305,7 +305,7 @@ public class ImportExportActivity extends AppActivity implements
 					Log.error(message, exception);
 				}
 				StatusNotification.notify(message,
-						StatusNotification.TYPE_CRITICAL);
+						StatusNotification.TYPE_CRITICAL, StatusNotification.TIME_MEDIUM);
 			}
 		});
 	}
@@ -370,7 +370,7 @@ public class ImportExportActivity extends AppActivity implements
 				if (result.size() == 0) {
 					StatusNotification
 							.notify("Something went wrong. There is no data to save :(",
-									StatusNotification.TYPE_ERROR);
+									StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 					dialog.hide();
 					return;
 				}
@@ -455,7 +455,7 @@ public class ImportExportActivity extends AppActivity implements
 											DataServiceException error) {
 										StatusNotification
 												.notify("Unable to save data to local database :(",
-														StatusNotification.TYPE_ERROR);
+														StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 										if (RestClient.isDebug()) {
 											Log.error(
 													"Unable to vave data to local database :(",
@@ -521,7 +521,7 @@ public class ImportExportActivity extends AppActivity implements
 					}
 				}
 				StatusNotification.notify(message,
-						StatusNotification.TYPE_ERROR);
+						StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 				dialog.hide();
 			}
 		});
@@ -543,7 +543,7 @@ public class ImportExportActivity extends AppActivity implements
 						if (result == null) {
 							StatusNotification.notify(
 									"Server returns empty data",
-									StatusNotification.TYPE_ERROR);
+									StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 //							storeData.setEnabled(true);
 //							restoreData.setEnabled(true);
 							return;
@@ -573,7 +573,7 @@ public class ImportExportActivity extends AppActivity implements
 							}
 						}
 						StatusNotification.notify(message,
-								StatusNotification.TYPE_ERROR);
+								StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 						dialog.hide();
 //						storeData.setEnabled(true);
 //						restoreData.setEnabled(true);

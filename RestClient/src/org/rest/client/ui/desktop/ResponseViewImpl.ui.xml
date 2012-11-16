@@ -1,169 +1,92 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
-	xmlns:rc="urn:import:org.rest.client.ui.desktop.widget"
-	>
-	<ui:with field="appResources" type="org.rest.client.resources.AppResources"/>
-	<ui:style type="org.rest.client.ui.desktop.ResponseViewImpl.WidgetStyle">
-		.root{margin-top: 15px;position: relative;margin-bottom: 20px;}
-		.responseRow{
-			display: -webkit-box;
-			margin: 5px 0px;
-			border-bottom: 1px rgba(0, 0, 0, 0.005) solid;
-			padding: 5px 0px;
-		}
-		.label{
-			padding-right: 20px;
-			width: 80px;
-		}
-		.result{ -webkit-align-items: center;display: -webkit-flex; }
-		.statusCode {
-			color: green;
-		}
-		.error {}
-		.warning {}
-		.statusCode.error {
-			color: red;
-		}
-		.statusCode.warning {
-			color: black;
-			font-weight: bold;
-		}
-		.requestError {box-shadow: inset 3px 3px 21px rgba(255, 0, 0, 0.25);}
-		.loadingTimeLabel{margin-left: 10px;margin-right: 7px;}
-		.loadingTime:after{ content: " ms" }
-		.headersPanel{
-			-webkit-flex-direction: column;
-			-webkit-align-items: flex-start;
-		}
-		.plainPanel{
-			margin: 2px 0px;
-			overflow: auto;
-			font-family: monospace;
-			font-size: 13px;
-			white-space: pre;
-		}
-		.rawInput{
-			box-sizing: border-box;
-			width: 100%;
-			min-height: 100px;
-			border:none;
-		}
-		.bodyResult{
-			margin-top: 10px;
-			margin-right: 5px;
-			display: -webkit-box;
-			-webkit-box-orient: vertical;
-			-webkit-box-flex: 1;
-			
-		}
-		.codeHighlight{margin-top: 20px;}
-		.newWindowOutput{
-			margin-bottom: 2px;
-			border-bottom: 1px #C2C2C2 solid;
-			padding-bottom: 2px;
-			background-color: #F8F8F8;
-		}
-		.newWindowOutput a:first-child{ margin-left: 10px; }
-		.bodyOverflow{ 
- 			/*overflow: auto;*/
-		}
-		.scrollContainer{
-			-webkit-transform: rotate(-90deg);
-			-webkit-transition: top, opacity 0.3s, 0.15s ease-out;
-			position: absolute;
-			top: 40px;
-			left: -75px;
-			opacity: 1;
-		}
-		.scrollContainer.onTop{opacity: 0;}
-		.scrollButton{padding: 7px 8px;text-decoration: none !important;}
-		.copyClipboardBody{margin-left:7px;}
-	</ui:style>
-	<g:HTMLPanel addStyleNames="{style.root}">
+	xmlns:rc="urn:import:org.rest.client.ui.desktop.widget">
+	
+	<g:HTMLPanel addStyleNames="Response_View_root">
 		<!-- scroll to top panel -->
-		<div ui:field="scrollContainer" class="{style.scrollContainer}">
-			<g:Anchor ui:field="scrollButton" href="javascript:;" text="Scroll to top" styleName="{appResources.appCss.button} {style.scrollButton}"></g:Anchor>
+		<div ui:field="scrollContainer" class="Response_View_scrollContainer">
+			<g:Anchor ui:field="scrollButton" href="javascript:;" text="Scroll to top" styleName="button Response_View_scrollButton"></g:Anchor>
 		</div>
 	
 		<!-- Redirect widgets if any -->
 		<g:HTMLPanel ui:field="redirects"></g:HTMLPanel>
 		
 		<!-- STATUS -->
-		<div class="{style.responseRow}">
-			<div class="{style.label}">
+		<div class="Response_View_responseRow">
+			<div class="Response_View_label">
 				Status
 			</div>
-			<div class="{style.result}">
-				<g:InlineLabel ui:field="codeContainer" styleName="{style.statusCode}">loading...</g:InlineLabel>
+			<div class="Response_View_result">
+				<g:InlineLabel ui:field="codeContainer" styleName="Response_View_statusCode">loading...</g:InlineLabel>
 				<rc:StatusCodeImage ui:field="codeImage"></rc:StatusCodeImage>
-				<span class="{style.loadingTimeLabel}">Loading time: </span>
-				<g:InlineLabel ui:field="loadingTime" styleName="{style.loadingTime}">unknown</g:InlineLabel>
+				<span class="Response_View_loadingTimeLabel">Loading time: </span>
+				<g:InlineLabel ui:field="loadingTime" styleName="Response_View_loadingTime">unknown</g:InlineLabel>
 			</div>
 		</div>
 		<!-- REQUEST HEADERS -->
-		<div class="{style.responseRow}">
-			<div class="{style.label}">
+		<g:HTMLPanel styleName="Response_View_responseRow" ui:field="requestHeadersContainer">
+			<div class="Response_View_label">
 				Request headers
 			</div>
-			<g:HTMLPanel ui:field="requestHeadersPanel" styleName="{style.result} {style.headersPanel}"></g:HTMLPanel>
-		</div>
+			<g:HTMLPanel ui:field="requestHeadersPanel" styleName="Response_View_result Response_View_headersPanel"></g:HTMLPanel>
+		</g:HTMLPanel>
 		<!-- RESPONSE HEADERS -->
-		<div class="{style.responseRow}">
-			<div class="{style.label}">
+		<g:HTMLPanel styleName="Response_View_responseRow" ui:field="responseHeadersContainer">
+			<div class="Response_View_label">
 				Response headers
 			</div>
-			<g:HTMLPanel ui:field="headersPanel" styleName="{style.result} {style.headersPanel}"></g:HTMLPanel>
-		</div>
+			<g:HTMLPanel ui:field="headersPanel" styleName="Response_View_result Response_View_headersPanel"></g:HTMLPanel>
+		</g:HTMLPanel>
 		<!-- Body -->
-		<div class="{style.responseRow}">
-			<g:HTMLPanel styleName="{appResources.appCss.tabsPanel} {style.result} {style.bodyResult}">
-				<div class="{appResources.appCss.tabs}">
-					<div class="{appResources.appCss.inlineButtonsGroup}">
-						<g:InlineLabel ui:field="rawTab" styleName="{appResources.appCss.inlineButton} {appResources.appCss.inlineButtonChecked}">Raw</g:InlineLabel>
-						<g:InlineLabel ui:field="parsedTab" styleName="{appResources.appCss.inlineButton} {appResources.appCss.hidden}">Parsed</g:InlineLabel>
-						<g:InlineLabel ui:field="xmlTab" styleName="{appResources.appCss.inlineButton} {appResources.appCss.hidden}">XML</g:InlineLabel>
-						<g:InlineLabel ui:field="jsonTab" styleName="{appResources.appCss.inlineButton} {appResources.appCss.hidden}">JSON</g:InlineLabel>
+		<div class="Response_View_responseRow">
+			<g:HTMLPanel ui:field="responsePayloadContainer" styleName="tabsPanel Response_View_result Response_View_bodyResult">
+				<div class="tabs">
+					<div class="inlineButtonsGroup">
+						<g:InlineLabel ui:field="rawTab" styleName="inlineButton inlineButtonChecked">Raw</g:InlineLabel>
+						<g:InlineLabel ui:field="parsedTab" styleName="inlineButton hidden">Parsed</g:InlineLabel>
+						<g:InlineLabel ui:field="xmlTab" styleName="inlineButton hidden">XML</g:InlineLabel>
+						<g:InlineLabel ui:field="jsonTab" styleName="inlineButton hidden">JSON</g:InlineLabel>
 					</div>
-					<span class="{appResources.appCss.tabCaption}">Response</span>
+					<span class="tabCaption">Response</span>
 				</div>
-				<div ui:field="tabContent" class="{appResources.appCss.tabsContent}">
-					<section data-tab="raw" class="{appResources.appCss.tabContent} {appResources.appCss.tabContentCurrent}">
-						<div class="{style.newWindowOutput}">
+				<div ui:field="tabContent" class="tabsContent">
+					<section data-tab="raw" class="tabContent tabContentCurrent">
+						<div class="Response_View_newWindowOutput">
 							<g:Anchor ui:field="wrapContentButton" href="javascript:;" >Word wrap</g:Anchor>
-							<g:Anchor addStyleNames="{style.copyClipboardBody}" ui:field="copyClipboardButton" href="javascript:;" >Copy to clipboard</g:Anchor>
-							<g:Anchor addStyleNames="{style.copyClipboardBody}" ui:field="saveAsFileButton1" href="javascript:;" >Save as file</g:Anchor>
+							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="copyClipboardButton" href="javascript:;" >Copy to clipboard</g:Anchor>
+							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="saveAsFileButton1" href="javascript:;" >Save as file</g:Anchor>
 						</div>
-						<g:HTML width="100%" ui:field="plainBody" styleName="{style.plainPanel}"></g:HTML>
+						<g:HTML width="100%" ui:field="plainBody" styleName="Response_View_plainPanel"></g:HTML>
 					</section>
-					<section data-tab="parsed" class="{appResources.appCss.tabContent} {appResources.appCss.hidden}">
-						<div class="{style.newWindowOutput}">
+					<section data-tab="parsed" class="tabContent hidden">
+						<div class="Response_View_newWindowOutput">
 							<g:Anchor ui:field="parsedOpen" href="#">Open output in new window</g:Anchor>
-							<g:Anchor addStyleNames="{style.copyClipboardBody}" ui:field="copyClipboardButton2" href="javascript:;" >Copy to clipboard</g:Anchor>
-							<g:Anchor addStyleNames="{style.copyClipboardBody}" ui:field="saveAsFileButton2" href="javascript:;" >Save as file</g:Anchor>
+							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="copyClipboardButton2" href="javascript:;" >Copy to clipboard</g:Anchor>
+							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="saveAsFileButton2" href="javascript:;" >Save as file</g:Anchor>
 						</div>
 						<div class="CodeMirror">
 							<div class="lines"></div>
 							<pre ui:field="parsedBody" class="cm-s-default"></pre>
 						</div>
-						<div class="{style.codeHighlight}">
+						<div class="Response_View_codeHighlight">
 							Code highlighting thanks to
 							<a target="_blank" href="http://codemirror.net/">Code Mirror</a>
 						</div>
 					</section>
-					<section data-tab="xml" class="{appResources.appCss.tabContent} {appResources.appCss.hidden}">
-						<div class="{style.newWindowOutput}">
+					<section data-tab="xml" class="tabContent hidden">
+						<div class="Response_View_newWindowOutput">
 							<g:Anchor ui:field="copyClipboardButton3" href="javascript:;" >Copy to clipboard</g:Anchor>
-							<g:Anchor addStyleNames="{style.copyClipboardBody}" ui:field="saveAsFileButton3" href="javascript:;" >Save as file</g:Anchor>
+							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="saveAsFileButton3" href="javascript:;" >Save as file</g:Anchor>
 						</div>
-						<g:HTMLPanel ui:field="xmlPanel" styleName="{style.rawInput} {style.bodyOverflow}"/>
+						<g:HTMLPanel ui:field="xmlPanel" styleName="Response_View_rawInput Response_View_bodyOverflow"/>
 					</section>
-					<section data-tab="json" class="{appResources.appCss.tabContent} {appResources.appCss.hidden}">
-						<div class="{style.newWindowOutput}">
+					<section data-tab="json" class="tabContent hidden">
+						<div class="Response_View_newWindowOutput">
 							<g:Anchor ui:field="copyClipboardButton4" href="javascript:;" >Copy to clipboard</g:Anchor>
-							<g:Anchor addStyleNames="{style.copyClipboardBody}" ui:field="saveAsFileButton4" href="javascript:;" >Save as file</g:Anchor>
+							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="saveAsFileButton4" href="javascript:;" >Save as file</g:Anchor>
 						</div>
-						<g:HTMLPanel ui:field="jsonPanel" styleName="{style.rawInput} {style.bodyOverflow}"/>
+						<g:HTMLPanel ui:field="jsonPanel" styleName="Response_View_rawInput Response_View_bodyOverflow"/>
 					</section>
 				</div>
 			</g:HTMLPanel>

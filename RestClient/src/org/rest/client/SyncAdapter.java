@@ -22,6 +22,7 @@ public class SyncAdapter {
 	private static boolean history = true;
 	private static boolean notifications = false;
 	private static boolean magicVars = true;
+	private static boolean codeMirrorHeaders = false;
 	private static boolean observing = false;
 	
 	public static void sync(){
@@ -33,6 +34,7 @@ public class SyncAdapter {
 		query.put(LocalStore.HISTORY_KEY, new JSONString("true"));
 		query.put(LocalStore.NOTIFICATIONS_ENABLED_KEY, new JSONString("false"));
 		query.put(LocalStore.MAGIC_VARS_ENABLED_KEY, new JSONString("true"));
+		query.put(LocalStore.CODE_MIRROR_HEADERS_KEY, new JSONString("false"));
 		
 		sync.get(query.getJavaScriptObject(), new StorageItemsCallback() {
 			@Override
@@ -45,6 +47,7 @@ public class SyncAdapter {
 				String _historyValue = data.getHistory();
 				String _notificationsValue = data.getNotifications();
 				String _magicVarsValue = data.getMagicVariables();
+				String _codeMirrorHeaders = data.getCodeMirrorHeaders();
 				
 				if(_debugValue != null){
 					if(_debugValue.equals("true")){
@@ -84,6 +87,14 @@ public class SyncAdapter {
 					} else {
 						magicVars = false;
 						store.setItem(LocalStore.MAGIC_VARS_ENABLED_KEY, "false");
+					}
+				}
+				
+				if(_codeMirrorHeaders != null){
+					if(_codeMirrorHeaders.equals("true")){
+						codeMirrorHeaders = true;
+					} else {
+						codeMirrorHeaders = false;
 					}
 				}
 			}
@@ -139,6 +150,14 @@ public class SyncAdapter {
 	}
 	public static void setMagicVars(boolean magicVars) {
 		SyncAdapter.magicVars = magicVars;
+	}
+
+	public static boolean isCodeMirrorHeaders() {
+		return codeMirrorHeaders;
+	}
+
+	public static void setCodeMirrorHeaders(boolean codeMirrorHeaders) {
+		SyncAdapter.codeMirrorHeaders = codeMirrorHeaders;
 	}
 	
 }

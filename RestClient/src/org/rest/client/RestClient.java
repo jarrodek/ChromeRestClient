@@ -29,7 +29,6 @@ import org.rest.client.request.FilesObject;
 import org.rest.client.request.HttpMethodOptions;
 import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.request.RequestParameters;
-import org.rest.client.resources.AppResources;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.LocalStore;
 import org.rest.client.storage.store.ProjectStoreWebSql;
@@ -149,9 +148,6 @@ public class RestClient implements EntryPoint {
 		final PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(
 				historyMapper);
 		historyHandler.register(placeController, eventBus, defaultPlace);
-
-		AppResources.INSTANCE.appCss().ensureInjected();
-		
 		
 		//
 		// Start up application. 

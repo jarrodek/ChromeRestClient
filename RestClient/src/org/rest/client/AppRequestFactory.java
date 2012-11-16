@@ -242,11 +242,14 @@ public class AppRequestFactory {
 		try {
 			builder.send();
 		} catch (Throwable e) {
-			Log.error("Request send failure.", e);
+			
 			eventBus.fireEvent(new RequestEndEvent(false, null, 0));
 			requestInProgress = false;
 			ErrorDialogView dialog = RestClient.getClientFactory().getErrorDialogView();
-			dialog.getHandler().publish(new LogRecord(dialog.getHandler().getLevel(), e.getMessage()));
+			LogRecord level = new LogRecord(dialog.getHandler().getLevel(), e.getMessage());
+			level.setThrown(e);
+			level.setLoggerName("request");
+			dialog.getHandler().publish(level);
 			startTime = null;
 		}
 	}

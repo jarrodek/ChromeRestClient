@@ -265,12 +265,16 @@ public class ExtensionServlet extends HttpServlet {
 			String name = item.get("n").getAsString();
 			int itemId = item.get("i").getAsInt();
 			requestItem.setName(name);
-
+			
 			JsonObject formData = item.get("d").getAsJsonObject();
-			requestItem.setUrl(formData.get("url").getAsString());
-			requestItem.setPost(formData.get("post").getAsString());
-			requestItem.setMethod(formData.get("method").getAsString());
-			requestItem.setEncoding(formData.get("formEncoding").getAsString());
+			JsonElement url = formData.get("url");
+			JsonElement post = formData.get("post");
+			JsonElement method = formData.get("method");
+			JsonElement formEncoding = formData.get("formEncoding");
+			requestItem.setUrl(url == null ? "" : url.getAsString());
+			requestItem.setPost(post == null ? "" : post.getAsString());
+			requestItem.setMethod(method == null ? "" : method.getAsString());
+			requestItem.setEncoding(formEncoding == null ? "" : formEncoding.getAsString());
 			requestItem.setAppUser(appUser);
 			uuidsMap.put(requestItem.getItemUUID(), itemId);
 			

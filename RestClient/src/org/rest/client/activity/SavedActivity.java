@@ -73,7 +73,7 @@ public class SavedActivity extends ListActivity implements
 				if(result != null && result.booleanValue()){
 					notifyRemoveAndRestore(request);
 				} else {
-					StatusNotification.notify("Unknown error occured :(",StatusNotification.TYPE_ERROR);
+					StatusNotification.notify("Unknown error occured :(",StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
 				}
 			}
 
@@ -82,7 +82,7 @@ public class SavedActivity extends ListActivity implements
 				if(RestClient.isDebug()){
 					Log.error("Unable remove saved request.",e);
 				}
-				StatusNotification.notify("Unable remove saved request :(",StatusNotification.TYPE_ERROR);
+				StatusNotification.notify("Unable remove saved request :(",StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
 			}});
 	}
 	
@@ -112,7 +112,7 @@ public class SavedActivity extends ListActivity implements
 						if(RestClient.isDebug()){
 							Log.error("Unable to restore the request.",e);
 						}
-						StatusNotification.notify("Unable to restore the request :(",StatusNotification.TYPE_ERROR);
+						StatusNotification.notify("Unable to restore the request :(",StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
 					}
 				});
 			}
@@ -144,7 +144,7 @@ public class SavedActivity extends ListActivity implements
 				if(RestClient.isDebug()){
 					Log.error("Unable to change name :(", error);
 				}
-				StatusNotification.notify("Unable to change name :(",StatusNotification.TYPE_ERROR);
+				StatusNotification.notify("Unable to change name :(",StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
 			}
 			
 			@Override
@@ -196,7 +196,7 @@ public class SavedActivity extends ListActivity implements
 				if(RestClient.isDebug()){
 					Log.error("Database error. Unable read history data.", e);
 				}
-				StatusNotification.notify("Database error. Unable read history data.", StatusNotification.TYPE_ERROR);
+				StatusNotification.notify("Database error. Unable read history data.", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
 			}
 		});
 	}

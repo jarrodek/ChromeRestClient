@@ -2,90 +2,44 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:h5="urn:import:org.rest.client.ui.html5">
-	<ui:with field="appResources" type="org.rest.client.resources.AppResources" />
-	<ui:style>
-		.contentTitle {
-			-webkit-padding-end: 24px;
-			-webkit-user-select: none;
-			color: black;
-			font-size: 175%;
-			font-weight: normal;
-			margin: 0;
-			padding-bottom: 14px;
-			padding-top: 13px;
-			text-align: end;
-			cursor: pointer;
-		}
-		
-		.contentTitle.about {
-			-webkit-padding-start: 24px;
-			text-align: start;
-		}
-		
-		.aboutContent {
-			-webkit-padding-start: 24px;
-			text-align: start;
-			text-shadow: white 0 1px 2px;
-			border-bottom: 1px solid #eeeeee;
-			margin-top: 17px;
-			padding-bottom: 20px;
-		}
-		
-		.aboutContent>div {
-			margin-bottom: 7px;
-		}
-		
-		.historyClear {
-			display: inline-block;
-			margin-left: 20px;
-		}
-		
-		.jsonHeaderCaption {
-			font-weight: bold;
-		}
-		
-		.optionsSection {
-			-webkit-padding-start: 24px;
-			border-bottom: 1px solid #EEE;
-			margin-top: 17px;
-			padding-bottom: 20px;
-		}
-		.help{
-			margin-left: 1em;
-		}
-	</ui:style>
+	
 	<g:HTMLPanel ui:field="root">
-		<h1 class="{style.contentTitle} {style.about}">Advanced configuration and experimental features</h1>
-		<section class="{style.optionsSection}">
+		<h1 class="Settings_View_contentTitle Settings_View_about">Advanced configuration and experimental features</h1>
+		<section class="Settings_View_optionsSection">
 			<p>Debug options</p>
 			<g:CheckBox ui:field="debug" value="false"
 				text="Enable debug messages in console output"></g:CheckBox>
 		</section>
-		<section class="{style.optionsSection}">
+		<section class="Settings_View_optionsSection">
 			<p>History enabled</p>
 			<g:CheckBox ui:field="history" value="true"
 				text="Enable requests history list"></g:CheckBox>
-			<div class="{appResources.appCss.hidden} {style.historyClear}" ui:field="historyClear">
-				<g:Button styleName="{appResources.appCss.button}" ui:field="clearHistory" text="Clear history"></g:Button>
+			<div class="hidden Settings_View_historyClear" ui:field="historyClear">
+				<g:Button styleName="button" ui:field="clearHistory" text="Clear history"></g:Button>
 			</div>
 		</section>
-		<section class="{style.optionsSection}">
+		<section class="Settings_View_optionsSection">
 			<p>Magic variables</p>
 			<g:CheckBox ui:field="magicVars" value="false"
-				text="Enable magic variables"></g:CheckBox> <a href="http://restforchrome.blogspot.com/2012/11/introduce-magic-variables.html" target="_blank" class="{style.help}">what is this?</a>
+				text="Enable magic variables"></g:CheckBox> <a href="http://restforchrome.blogspot.com/2012/11/introduce-magic-variables.html" target="_blank" class="Settings_View_help">what is this?</a>
 		</section>
-		<section class="{style.optionsSection}">
+		<section class="Settings_View_optionsSection">
 			<p>Developer notifications</p>
 			<g:CheckBox ui:field="notifications" value="false"
 				text="Enable notifications from developer (very few) about application updates"></g:CheckBox>
 		</section>
-		<section class="{style.optionsSection}">
-			<p>Shortcuts</p>
-			<g:Button styleName="{appResources.appCss.button}" ui:field="shortCutsButton" text="Edit shortcuts"></g:Button>
+		<section class="Settings_View_optionsSection">
+			<p>CodeMorror headers editor <span class="Settings_View_experimental">experimental</span></p>
+			<g:CheckBox ui:field="codeMirrorHeaders" value="false"
+				text="Enable CodeMirror editor in headers panel"></g:CheckBox>
 		</section>
-		<section class="{style.optionsSection}">
+		<section class="Settings_View_optionsSection">
+			<p>Shortcuts</p>
+			<g:Button styleName="button" ui:field="shortCutsButton" text="Edit shortcuts"></g:Button>
+		</section>
+		<section class="Settings_View_optionsSection">
 			<p>Import/export</p>
-			<g:Button styleName="{appResources.appCss.button}" ui:field="importExportWidget" text="Manage"></g:Button>
+			<g:Button styleName="button" ui:field="importExportWidget" text="Manage"></g:Button>
 		</section>
 	</g:HTMLPanel>
 </ui:UiBinder>

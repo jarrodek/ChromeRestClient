@@ -15,7 +15,6 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -35,19 +34,20 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 
 	interface HistoryViewImplUiBinder extends UiBinder<Widget, HistoryViewImpl> {
 	}
-	interface WidgetStyle extends CssResource {
-		String emptyInfo();
-		String searchBox();
+	class WidgetStyle {
+		final String emptyInfo = "History_View_emptyInfo";
+		String searchBox = "History_View_searchBox";
 	}
 	private Presenter listener = null;
 	private boolean loadingNext = false;
 	InlineLabel infoLabel = null;
+	WidgetStyle style = new WidgetStyle();
 	
 	@UiField DivElement loaderInfo;
 	@UiField HTMLPanel root;
 	@UiField HTMLPanel list;
 	@UiField HTMLPanel loaderContainer;
-	@UiField WidgetStyle style;
+	
 	@UiField InlineLabel loader;
 	@UiField InlineLabel clearHistory;
 	@UiField SearchBox searchInput;
@@ -55,7 +55,7 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 	public HistoryViewImpl(){
 		initWidget(uiBinder.createAndBindUi(this));
 		
-		searchInput.addStyleName(style.searchBox());
+		searchInput.addStyleName(style.searchBox);
 		searchInput.getElement().setAttribute("placeholder", "search history...");
 		
 		ClearHistoryEvent.register(RestClient.getClientFactory().getEventBus(), new ClearHistoryEvent.Handler() {
@@ -100,14 +100,14 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 	private void emptyInfo(){
 		infoLabel = new InlineLabel();
 		infoLabel.setText("You do not have any saved history :(");
-		infoLabel.addStyleName(style.emptyInfo());
+		infoLabel.addStyleName(style.emptyInfo);
 		root.add(infoLabel);
 	}
 	
 	private void emptyQueryResults(){
 		infoLabel = new InlineLabel();
 		infoLabel.setText("No history for query \""+searchInput.getValue()+"\" found.");
-		infoLabel.addStyleName(style.emptyInfo());
+		infoLabel.addStyleName(style.emptyInfo);
 		root.add(infoLabel);
 	}
 	

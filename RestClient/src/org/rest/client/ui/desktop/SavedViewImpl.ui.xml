@@ -2,74 +2,30 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:h5="urn:import:org.rest.client.ui.html5">
-	<ui:with field="appResources" type="org.rest.client.resources.AppResources" />
-	<ui:style type="org.rest.client.ui.desktop.SavedViewImpl.WidgetStyle">
-		.loadingWrapper{min-height: 100px;}
-		.historyList{}
-		.loaderDotsContainer{
-			margin-right: 10px;
-			-webkit-justify-content: space-between;
-			-moz-justify-content: space-between;
-			-o-justify-content: space-between;
-			-o-justify-content: space-between;
-			justify-content: space-between;
-			-webkit-align-items: center;
-			-moz-align-items: center;
-			-o-align-items: center;
-			-o-align-items: center;
-			align-items: center;
-			display: -webkit-flex;
-			display: -moz-flex;
-			display: -ms-flex;
-			display: -o-flex;
-			display: flex;
-			width: 20px;
-			margin-left: 10px;
-		}
-		.loaderDot{ 
-			width: 4px;
-			height: 4px;
-			background-color: #189B06;
-			-webkit-border-radius: 2px;
-			-moz-border-radius: 2px;
-			-ms-border-radius: 2px;
-			-o-border-radius: 2px;
-			border-radius: 2px;  
-		}
-		.loadingInfo{}
-		.emptyInfo{display: block;text-align: center;padding-top: 20px;font-weight: bold;}
-		.loadNextRow{}
-		.historyNav{display: -webkit-flex;}
-		.searchContainer{margin-left: 1em;display: -webkit-flex;-webkit-flex: 1 0 0;}
-		.searchBox{
-			border-radius: 2px;
-			width: literal("-webkit-calc(100% - 12px)"); 
-			width: literal("calc(100% - 12px)");
-		}
-	</ui:style>
-	<g:HTMLPanel addStyleNames="{style.historyList}" ui:field="root">
-		<section class="{style.historyNav}">
-			<div class="{style.searchContainer}">
+	
+	<g:HTMLPanel addStyleNames="Saved_View_historyList" ui:field="root">
+		<section class="Saved_View_historyNav">
+			<div class="Saved_View_searchContainer">
 				<h5:SearchBox ui:field="searchInput"></h5:SearchBox>
 			</div>
-			<div class="{style.searchContainer}"></div>
+			<div class="Saved_View_searchContainer"></div>
 		</section>
-		<div ui:field="loaderInfo" class="{style.loadingWrapper} {appResources.appCss.flexCenter}">
-			<span class="{appResources.appCss.loaderImage}"></span>
-			<div class="{style.loaderDotsContainer}">
-				<div class="{style.loaderDot}"></div>
-				<div class="{style.loaderDot}"></div>
-				<div class="{style.loaderDot}"></div>
+		<div ui:field="loaderInfo" class="Saved_View_loadingWrapper flexCenter">
+			<span class="loaderImage"></span>
+			<div class="Saved_View_loaderDotsContainer">
+				<div class="Saved_View_loaderDot"></div>
+				<div class="Saved_View_loaderDot"></div>
+				<div class="Saved_View_loaderDot"></div>
 			</div>
 			
-			<span class="{style.loadingInfo}">
+			<span class="Saved_View_loadingInfo">
 				Please wait. Loading history.
 			</span>
 		</div>
 		<g:HTMLPanel ui:field="list"></g:HTMLPanel>
 		
-		<g:HTMLPanel ui:field="loaderContainer" styleName="{style.loadNextRow}">
-			<g:InlineLabel visible="false" ui:field="loader" styleName="{appResources.appCss.loaderImage}"></g:InlineLabel>
+		<g:HTMLPanel ui:field="loaderContainer" styleName="Saved_View_loadNextRow">
+			<g:InlineLabel visible="false" ui:field="loader" styleName="loaderImage"></g:InlineLabel>
 		</g:HTMLPanel>
 		
 	</g:HTMLPanel>

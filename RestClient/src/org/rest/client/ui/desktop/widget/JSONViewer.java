@@ -4,13 +4,10 @@ import org.rest.client.RestClient;
 import org.rest.client.dom.worker.Worker;
 import org.rest.client.dom.worker.WorkerMessageHandler;
 import org.rest.client.event.OverwriteUrlEvent;
-import org.rest.client.resources.AppCssResource;
-import org.rest.client.resources.AppResources;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Element;
@@ -23,23 +20,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class JSONViewer extends Composite {
 	
 	interface Binder extends UiBinder<Widget, JSONViewer> {}
-	interface ParserStyle extends CssResource {
-		String prettyPrint();
-		String numeric();
-		String nullValue();
-		String booleanValue();
-		String punctuation();
-		String stringValue();
-		String node();
-		String arrayCounter();
-		String keyName();
-		String rootElementToggleButton();
-		String infoRow();
-		String brace();
-	}
 	@UiField HTML result;
-	@UiField ParserStyle style;
-	AppCssResource appStyle = AppResources.INSTANCE.appCss();
 	
 	
 	public JSONViewer(final String data, final HTMLPanel jsonPanel) {
@@ -58,18 +39,18 @@ public class JSONViewer extends Composite {
 					}
 				});
 				JSONObject styleData = new JSONObject();
-				styleData.put("prettyPrint", new JSONString(style.prettyPrint()));
-				styleData.put("numeric", new JSONString(style.numeric()));
-				styleData.put("nullValue", new JSONString(style.nullValue()));
-				styleData.put("booleanValue", new JSONString(style.booleanValue()));
-				styleData.put("punctuation", new JSONString(style.punctuation()));
-				styleData.put("stringValue", new JSONString(style.stringValue()));
-				styleData.put("node", new JSONString(style.node()));
-				styleData.put("arrayCounter", new JSONString(style.arrayCounter()));
-				styleData.put("keyName", new JSONString(style.keyName()));
-				styleData.put("rootElementToggleButton", new JSONString(style.rootElementToggleButton()));
-				styleData.put("infoRow", new JSONString(style.infoRow()));
-				styleData.put("brace", new JSONString(style.brace()));
+				styleData.put("prettyPrint", new JSONString("JSON_parser_prettyPrint"));
+				styleData.put("numeric", new JSONString("JSON_parser_numeric"));
+				styleData.put("nullValue", new JSONString("JSON_parser_nullValue"));
+				styleData.put("booleanValue", new JSONString("JSON_parser_booleanValue"));
+				styleData.put("punctuation", new JSONString("JSON_parser_punctuation"));
+				styleData.put("stringValue", new JSONString("JSON_parser_stringValue"));
+				styleData.put("node", new JSONString("JSON_parser_node"));
+				styleData.put("arrayCounter", new JSONString("JSON_parser_arrayCounter"));
+				styleData.put("keyName", new JSONString("JSON_parser_keyName"));
+				styleData.put("rootElementToggleButton", new JSONString("JSON_parser_rootElementToggleButton"));
+				styleData.put("infoRow", new JSONString("JSON_parser_infoRow"));
+				styleData.put("brace", new JSONString("JSON_parser_brace"));
 				
 				JSONObject post = new JSONObject();
 				post.put("style", styleData);

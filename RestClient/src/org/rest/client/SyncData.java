@@ -20,6 +20,9 @@ public class SyncData extends JavaScriptObject {
 	public final String getMagicVariables(){
 		return getVar(LocalStore.MAGIC_VARS_ENABLED_KEY);
 	}
+	public final String getCodeMirrorHeaders(){
+		return getVar(LocalStore.CODE_MIRROR_HEADERS_KEY);
+	}
 	private final native String getVar(String key)/*-{
 		return this[key] || null;
 	}-*/;

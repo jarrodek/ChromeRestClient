@@ -3,8 +3,6 @@ package org.rest.client.ui.desktop;
 import java.sql.Date;
 
 import org.rest.client.place.RequestPlace;
-import org.rest.client.resources.AppCssResource;
-import org.rest.client.resources.AppResources;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.SavedView.Presenter;
 
@@ -36,7 +34,6 @@ public class SavedListItemViewImpl extends Composite {
 	
 	final private Presenter listener;
 	final private RequestObject requestObject;
-	AppCssResource appStyle = AppResources.INSTANCE.appCss();
 	
 	@UiField InlineLabel dateLabel;
 	@UiField InlineLabel methodLabel;
@@ -106,18 +103,18 @@ public class SavedListItemViewImpl extends Composite {
 	}
 	
 	private void doOnExpand(){
-		if(detailedPanel.getClassName().contains(appStyle.hidden())){
+		if(detailedPanel.getClassName().contains("hidden")){
 			expandDetails();
 		} else {
 			hideDetails();
 		}
 	}
 	void hideDetails(){
-		container.removeStyleName(appStyle.historySelected());
-		detailedPanel.addClassName(appStyle.hidden());
+		container.removeStyleName("historySelected");
+		detailedPanel.addClassName("hidden");
 	}
 	void expandDetails(){ 
-		container.addStyleName(appStyle.historySelected());
-		detailedPanel.removeClassName(appStyle.hidden());
+		container.addStyleName("historySelected");
+		detailedPanel.removeClassName("hidden");
 	}
 }

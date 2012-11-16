@@ -8,7 +8,6 @@ import org.rest.client.ui.html5.SearchBox;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Element;
@@ -28,10 +27,7 @@ public class SavedViewImpl extends Composite implements SavedView {
 	interface SavedViewImplUiBinder extends UiBinder<Widget, SavedViewImpl> {
 	}
 	
-	interface WidgetStyle extends CssResource {
-		String emptyInfo();
-		String searchBox();
-	}
+	
 	
 	private Presenter listener = null;
 	private boolean loadingNext = false;
@@ -42,11 +38,10 @@ public class SavedViewImpl extends Composite implements SavedView {
 	@UiField InlineLabel loader;
 	@UiField HTMLPanel root;
 	@UiField HTMLPanel list;
-	@UiField WidgetStyle style;
 	
 	public SavedViewImpl(){
 		initWidget(uiBinder.createAndBindUi(this));
-		searchInput.addStyleName(style.searchBox());
+		searchInput.addStyleName("Saved_View_searchBox");
 		searchInput.getElement().setAttribute("placeholder", "search the request...");
 		
 		observeScroll();
@@ -83,7 +78,7 @@ public class SavedViewImpl extends Composite implements SavedView {
 		
 		infoLabel = new InlineLabel();
 		infoLabel.setText("You do not have any saved requests :(");
-		infoLabel.addStyleName(style.emptyInfo());
+		infoLabel.addStyleName("Saved_View_emptyInfo");
 		root.add(infoLabel);
 		
 	}
@@ -91,7 +86,7 @@ public class SavedViewImpl extends Composite implements SavedView {
 	private void emptyQueryResults(){
 		infoLabel = new InlineLabel();
 		infoLabel.setText("No history for query \""+searchInput.getValue()+"\" found.");
-		infoLabel.addStyleName(style.emptyInfo());
+		infoLabel.addStyleName("Saved_View_emptyInfo");
 		root.add(infoLabel);
 	}
 	

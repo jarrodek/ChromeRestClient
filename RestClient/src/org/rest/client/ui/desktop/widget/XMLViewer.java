@@ -6,7 +6,6 @@ import org.rest.client.dom.worker.WorkerMessageHandler;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Element;
@@ -20,28 +19,7 @@ public class XMLViewer extends Composite {
 	
 	interface Binder extends UiBinder<Widget, XMLViewer> {}
 	
-	interface ParserStyle extends CssResource {
-		
-		String prettyPrint();
-		String comment();
-		String punctuation();
-		String tagname();
-		String attname();
-		String attribute();
-		String cdata();
-		String inline();
-		String arrowExpanded();
-		String arrowEmpty();
-		String processing();
-		String node();
-		String opened();
-		String nodeMargin();
-		String collapseIndicator();
-	}
-	
 	@UiField HTML result;
-	@UiField ParserStyle style;
-	
 	
 	public XMLViewer(final String xml, HTMLPanel xmlPanel){
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
@@ -61,21 +39,21 @@ public class XMLViewer extends Composite {
 				
 				
 				JSONObject styleData = new JSONObject();
-				styleData.put("prettyPrint", new JSONString(style.prettyPrint()));
-				styleData.put("node", new JSONString(style.node()));
-				styleData.put("punctuation", new JSONString(style.punctuation()));
-				styleData.put("comment", new JSONString(style.comment()));
-				styleData.put("tagname", new JSONString(style.tagname()));
-				styleData.put("attname", new JSONString(style.attname()));
-				styleData.put("attribute", new JSONString(style.attribute()));
-				styleData.put("cdata", new JSONString(style.cdata()));
-				styleData.put("inline", new JSONString(style.inline()));
-				styleData.put("arrowExpanded", new JSONString(style.arrowExpanded()));
-				styleData.put("arrowEmpty", new JSONString(style.arrowEmpty()));
-				styleData.put("processing", new JSONString(style.processing()));
-				styleData.put("opened", new JSONString(style.opened()));
-				styleData.put("nodeMargin", new JSONString(style.nodeMargin()));
-				styleData.put("collapseIndicator", new JSONString(style.collapseIndicator()));
+				styleData.put("prettyPrint", new JSONString("XML_parser_prettyPrint"));
+				styleData.put("node", new JSONString("XML_parser_node"));
+				styleData.put("punctuation", new JSONString("XML_parser_punctuation"));
+				styleData.put("comment", new JSONString("XML_parser_comment"));
+				styleData.put("tagname", new JSONString("XML_parser_tagname"));
+				styleData.put("attname", new JSONString("XML_parser_attname"));
+				styleData.put("attribute", new JSONString("XML_parser_attribute"));
+				styleData.put("cdata", new JSONString("XML_parser_cdata"));
+				styleData.put("inline", new JSONString("XML_parser_inline"));
+				styleData.put("arrowExpanded", new JSONString("XML_parser_arrowExpanded"));
+				styleData.put("arrowEmpty", new JSONString("XML_parser_arrowEmpty"));
+				styleData.put("processing", new JSONString("XML_parser_processing"));
+				styleData.put("opened", new JSONString("XML_parser_opened"));
+				styleData.put("nodeMargin", new JSONString("XML_parser_nodeMargin"));
+				styleData.put("collapseIndicator", new JSONString("XML_parser_collapseIndicator"));
 				
 				
 				JSONObject post = new JSONObject();

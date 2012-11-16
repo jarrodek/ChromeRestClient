@@ -23,6 +23,8 @@ public class QueryDetailRow extends Composite {
 	@UiField SimplePanel keyPanel;
 	@UiField SimplePanel valuePanel;
 	@UiField InlineLabel removeButton;
+	@UiField InlineLabel encodeButton;
+	@UiField InlineLabel decodeButton;
 	
 	private final TextBox keyBox;
 	private final TextBox valueBox;
@@ -35,6 +37,8 @@ public class QueryDetailRow extends Composite {
 		keyBox.getElement().setAttribute("placeholder", "key");
 		valueBox.getElement().setAttribute("placeholder", "value");
 		removeButton.getElement().setAttribute("data-remove-row", "true");
+		encodeButton.getElement().setAttribute("data-encode-row", "true");
+		decodeButton.getElement().setAttribute("data-decode-row", "true");
 		
 		keyPanel.add(keyBox);
 		valuePanel.add(valueBox);

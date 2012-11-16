@@ -2,77 +2,33 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"	
 	xmlns:h5="urn:import:org.rest.client.ui.html5">
-	<ui:with field="appResources" type="org.rest.client.resources.AppResources" />
-	<ui:style type="org.rest.client.ui.desktop.HistoryViewImpl.WidgetStyle">
-		.loadingWrapper{min-height: 100px;}
-		.historyList{}
-		.loadingInfo{}
-		.loaderDotsContainer{
-			margin-right: 10px;
-			-webkit-justify-content: space-between;
-			-moz-justify-content: space-between;
-			-o-justify-content: space-between;
-			-o-justify-content: space-between;
-			justify-content: space-between;
-			-webkit-align-items: center;
-			-moz-align-items: center;
-			-o-align-items: center;
-			-o-align-items: center;
-			align-items: center;
-			display: -webkit-flex;
-			display: -moz-flex;
-			display: -ms-flex;
-			display: -o-flex;
-			display: flex;
-			width: 20px;
-			margin-left: 10px;
-		}
-		.loaderDot{ 
-			width: 4px;
-			height: 4px;
-			background-color: #189B06;
-			-webkit-border-radius: 2px;
-			-moz-border-radius: 2px;
-			-ms-border-radius: 2px;
-			-o-border-radius: 2px;
-			border-radius: 2px;  
-		}
-		.historyNav{display: -webkit-flex;}
-		.emptyInfo{display: block;text-align: center;padding-top: 20px;font-weight: bold;}
-		.loadNextRow{}
-		.searchContainer{margin-left: 1em;display: -webkit-flex;-webkit-flex: 1 0 0;}
-		.searchBox{
-			border-radius: 2px;
-			width: literal("-webkit-calc(100% - 12px)"); 
-			width: literal("calc(100% - 12px)");
-		}
-	</ui:style>
-	<g:HTMLPanel addStyleNames="{style.historyList}" ui:field="root">
-		<section class="{style.historyNav}">
-			<div class="{appResources.appCss.inlineButtonsGroup}">
-				<g:InlineLabel title="Remove all data from history store." ui:field="clearHistory" styleName="{appResources.appCss.inlineButton}">Clear history</g:InlineLabel>
+	
+	<g:HTMLPanel addStyleNames="History_View_historyList" ui:field="root">
+		<section class="History_View_historyNav">
+			<div class="inlineButtonsGroup">
+				<g:InlineLabel title="Remove all data from history store." ui:field="clearHistory" styleName="inlineButton">Clear history</g:InlineLabel>
 			</div>
-			<div class="{style.searchContainer}">
+			<div class="History_View_searchContainer">
 				<h5:SearchBox ui:field="searchInput"></h5:SearchBox>
 			</div>
-			<div class="{style.searchContainer}"></div>
+			<div class="History_View_searchContainer"></div>
 		</section>
 		
-		<div ui:field="loaderInfo" class="{style.loadingWrapper} {appResources.appCss.flexCenter}">
-			<span class="{appResources.appCss.loaderImage}"></span>
-			<div class="{style.loaderDotsContainer}">
-				<div class="{style.loaderDot}"></div>
-				<div class="{style.loaderDot}"></div>
-				<div class="{style.loaderDot}"></div>
+		<div ui:field="loaderInfo" class="History_View_loadingWrapper flexCenter">
+			<span class="loaderImage"></span>
+			<div class="History_View_loaderDotsContainer">
+				<div class="History_View_loaderDot"></div>
+				<div class="History_View_loaderDot"></div>
+				<div class="History_View_loaderDot"></div>
 			</div>
 			
-			<span class="{style.loadingInfo}">
+			<span class="History_View_loadingInfo">
 				Please wait. Loading history.
 			</span>
 		</div>
 		<g:HTMLPanel ui:field="list"></g:HTMLPanel>
-		<g:HTMLPanel ui:field="loaderContainer" styleName="{style.loadNextRow}">
-			<g:InlineLabel visible="false" ui:field="loader" styleName="{appResources.appCss.loaderImage}"></g:InlineLabel>
+		<g:HTMLPanel ui:field="loaderContainer" styleName="History_View_loadNextRow">
+			<g:InlineLabel visible="false" ui:field="loader" styleName="loaderImage"></g:InlineLabel>
 		</g:HTMLPanel>
 	</g:HTMLPanel>
 </ui:UiBinder>

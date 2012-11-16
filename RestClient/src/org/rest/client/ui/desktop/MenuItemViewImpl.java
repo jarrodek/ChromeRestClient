@@ -18,8 +18,6 @@ package org.rest.client.ui.desktop;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.rest.client.resources.AppCssResource;
-import org.rest.client.resources.AppResources;
 import org.rest.client.ui.MenuItemView;
 import org.rest.client.ui.MenuView;
 import org.rest.client.ui.html5.HTML5Element;
@@ -38,7 +36,6 @@ import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.place.shared.Place;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -55,9 +52,9 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 	}
 	
 	
-	interface WidgetStyle extends CssResource {
-		String selected();
-		String hover();
+	class WidgetStyle {
+		final String selected = "selected";
+		final String hover = "hover";
 	}
 
 	private HTML5Element _element = null;
@@ -67,7 +64,7 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 	private ListPanel childrenPanel;
 	private Label emptyLabel = null;
 	
-	@UiField WidgetStyle style;
+	WidgetStyle style = new WidgetStyle();
 	
 	
 	/**
@@ -80,11 +77,9 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 	private MenuView root;
 	
 	@UiField ListItem mainListItem;
-	private AppCssResource appStyle;
 	
 	
 	public MenuItemViewImpl() {
-		appStyle = AppResources.INSTANCE.appCss();
 		initWidget(uiBinder.createAndBindUi(this));
 		_element = (HTML5Element) getElement();
 
@@ -165,24 +160,24 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 		}
 		getElement().setAttribute("aria-selected", String.valueOf(isSelected));
 		if(isSelected)
-			addStyleName(style.selected());
+			addStyleName(style.selected);
 		else
-			removeStyleName(style.selected());
+			removeStyleName(style.selected);
 	}
 
 	@Override
 	public void setOpened(boolean isOpened) {
 		if(children.size() == 0) return;
 		if(isOpened){
-			childrenPanel.removeStyleName(appStyle.hidden());
+			childrenPanel.removeStyleName("hidden");
 		} else {
-			childrenPanel.addStyleName(appStyle.hidden());
+			childrenPanel.addStyleName("hidden");
 		}
 	}
 
 	public boolean isOpened(){
 		if(children.size() == 0) return false;
-		return !childrenPanel.getStyleName().contains(appStyle.hidden());
+		return !childrenPanel.getStyleName().contains("hidden");
 	}
 	
 	
@@ -258,12 +253,12 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 	@Override
 	public void onMouseOver(MouseOverEvent event) {
 		if(children.size() > 0) return;
-		addStyleName(style.hover());
+		addStyleName(style.hover);
 	}
 
 	@Override
 	public void onMouseOut(MouseOutEvent event) {
-		removeStyleName(style.hover());
+		removeStyleName(style.hover);
 	}
 	
 	public void setData(String key, String value){

@@ -7,4 +7,6 @@ public interface ErrorDialogView {
 	 * @return
 	 */
 	Handler getHandler();
+	
+	void setTitle(String message);
 }

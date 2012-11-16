@@ -86,7 +86,7 @@ public class HistoryActivity extends ListActivity implements
 						if(result != null && result.booleanValue()){
 							notifyRemoveAndRestore(removedObject);
 						} else {
-							StatusNotification.notify("Unknown error occured :(",StatusNotification.TYPE_ERROR);
+							StatusNotification.notify("Unknown error occured :(",StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 						}
 					}
 
@@ -95,7 +95,7 @@ public class HistoryActivity extends ListActivity implements
 						if(RestClient.isDebug()){
 							Log.error("Unable to clear history data.", e);
 						}
-						StatusNotification.notify("Unable to clear history data :(", StatusNotification.TYPE_ERROR);
+						StatusNotification.notify("Unable to clear history data :(", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 					}
 				});
 				
@@ -106,7 +106,7 @@ public class HistoryActivity extends ListActivity implements
 				if(RestClient.isDebug()){
 					Log.error("Unable to clear history data.", e);
 				}
-				StatusNotification.notify("Unable to clear history data :(", StatusNotification.TYPE_ERROR);
+				StatusNotification.notify("Unable to clear history data :(", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 			}
 		});
 	}
@@ -135,7 +135,7 @@ public class HistoryActivity extends ListActivity implements
 						if(RestClient.isDebug()){
 							Log.error("Unable to restore the request.",e);
 						}
-						StatusNotification.notify("Unable to restore the request :(",StatusNotification.TYPE_ERROR);
+						StatusNotification.notify("Unable to restore the request :(",StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 					}
 				});
 			}
@@ -175,7 +175,7 @@ public class HistoryActivity extends ListActivity implements
 				if(RestClient.isDebug()){
 					Log.error("Unable to clear history data.", e);
 				}
-				StatusNotification.notify("Unable to clear history data :(", StatusNotification.TYPE_ERROR);
+				StatusNotification.notify("Unable to clear history data :(", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 			}
 		});
 	}
@@ -216,7 +216,7 @@ public class HistoryActivity extends ListActivity implements
 				if(RestClient.isDebug()){
 					Log.error("Database error. Unable read history data.", e);
 				}
-				StatusNotification.notify("Database error. Unable read history data.", StatusNotification.TYPE_ERROR);
+				StatusNotification.notify("Database error. Unable read history data.", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 			}
 		});
 	}

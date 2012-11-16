@@ -3,81 +3,41 @@
 	xmlns:d="urn:import:com.google.gwt.user.datepicker.client" 
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:rc="urn:import:org.rest.client.ui.html5">
-	<ui:with field="appResources" type="org.rest.client.resources.AppResources" />
-	<ui:style>
-		.error {
-			color: red;
-			margin: 0;
-			padding: 0;
-		}
-		
-		.dateTimeFillHelper {
-			display: -webkit-box;
-			-webkit-box-pack: center;
-			-webkit-box-align: center;
-		}
-		
-		.datePickerWrapper {
-			text-shadow: none;
-		}
-		
-		.datePickerDays {
-			font-size: medium;
-		}
-		
-		.datePickerMonth {
-			font-size: small;
-		}
-		
-		.setCurrentButton {
-			margin-top: 10px;
-			-webkit-box-pack: end;
-			display: -webkit-box;
-		}
-		.datePicker{}
-		.timeSelectorWrapper {
-			margin-left: 20px;
-		}
-		.timeSelector{}
-		.setTimeLegend{}
-		.timeFields{}
-		.timeSeparator{}
-	</ui:style>
 	<g:DialogBox ui:field="dialog" modal="true"
 		animationEnabled="true" glassEnabled="true">
 		<g:caption>Set HTTP-date header value</g:caption>
 		<g:HTMLPanel>
-			<div class="{style.dateTimeFillHelper}">
-				<div class="{style.datePickerWrapper}">
-					<div class="{style.datePicker}">
+			<div class="HS_Date_dateTimeFillHelper">
+				<div class="HS_Date_datePickerWrapper">
+					<div class="HS_Date_datePicker">
 						<d:DatePicker ui:field="picker" />
 					</div>
 				</div>
-				<div class="{style.timeSelectorWrapper}">
-					<div class="{style.timeSelector}">
-						<span class="{style.setTimeLegend}">Set time</span>
-						<div class="{style.timeFields}">
+				<div class="HS_Date_timeSelectorWrapper">
+					<div class="HS_Date_timeSelector">
+						<span class="HS_Date_setTimeLegend">Set time</span>
+						<div class="HS_Date_timeFields">
 							<rc:HTML5InputNumber text="23" visibleLength="3"
 								required="true" maxLength="2" ui:field="hrsValue" alignment="RIGHT"
 								autocomplete="true" autofocus="true" />
-							<span class="{style.timeSeparator}">:</span>
+							<span class="HS_Date_timeSeparator">:</span>
 							<rc:HTML5InputNumber text="23" visibleLength="3"
 								required="true" maxLength="2" ui:field="minValue" autocomplete="true"
 								textAlignment="ALIGN_RIGHT" />
-							<span class="{style.timeSeparator}">:</span>
+							<span class="HS_Date_timeSeparator">:</span>
 							<rc:HTML5InputNumber text="23" visibleLength="3"
 								required="true" maxLength="2" ui:field="secValue" autocomplete="true"
 								textAlignment="ALIGN_RIGHT" />
 						</div>
-						<div class="{style.setCurrentButton}">
+						<div class="HS_Date_setCurrentButton">
 							<g:Button ui:field="setCurrent">Set current</g:Button>
 						</div>
 					</div>
 				</div>
 			</div>
-			<div class="{appResources.appCss.dialogButtons}">
-				<g:Button styleName="{appResources.appCss.button}" ui:field="okButton">OK</g:Button>
-				<g:Button styleName="{appResources.appCss.button}" ui:field="cancelButton">Cancel</g:Button>
+			<div class="dialogButtons">
+				<g:Button styleName="button" ui:field="okButton">OK</g:Button>
+				<g:Button styleName="button" ui:field="cancelButton">Cancel</g:Button>
 			</div>
 		</g:HTMLPanel>
 	</g:DialogBox>

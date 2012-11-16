@@ -30,8 +30,6 @@ import org.rest.client.request.FilesObject;
 import org.rest.client.request.HttpContentTypeHelper;
 import org.rest.client.request.HttpMethodOptions;
 import org.rest.client.request.RequestHeadersParser;
-import org.rest.client.resources.AppCssResource;
-import org.rest.client.resources.AppResources;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.tutorial.TutorialFactory;
@@ -47,10 +45,9 @@ import org.rest.client.ui.html5.HTML5Progress;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -58,14 +55,12 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RadioButton;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xhr2.client.RequestHeader;
@@ -103,7 +98,6 @@ public class RequestViewImpl extends Composite implements RequestView {
 	private List<IsHideable> hidableList = new ArrayList<IsHideable>();
 	private String currentSelectedMethod = "GET";
 	private String latestSelectedContentType = "";
-	AppCssResource appCss = AppResources.INSTANCE.appCss();
 
 	public RequestViewImpl() {
 
@@ -175,14 +169,12 @@ public class RequestViewImpl extends Composite implements RequestView {
 			for (IsHideable _i : hidableList) {
 				_i.show();
 			}
-			contentTypeContainer.removeClassName(AppResources.INSTANCE.appCss()
-					.hidden());
+			contentTypeContainer.removeClassName("hidden");
 		} else {
 			for (IsHideable _i : hidableList) {
 				_i.hide();
 			}
-			contentTypeContainer.addClassName(AppResources.INSTANCE.appCss()
-					.hidden());
+			contentTypeContainer.addClassName("hidden");
 		}
 
 		RestClient.getClientFactory().getEventBus()
@@ -402,32 +394,31 @@ public class RequestViewImpl extends Composite implements RequestView {
 	@Override
 	public void setProjectData(ProjectObject project,
 			List<RequestObject> requests) {
-		projectPanel.removeStyleName(AppResources.INSTANCE.appCss().hidden());
+		projectPanel.removeStyleName("hidden");
 		projectName.setText(project.getName());
-
+		
+		final ListBox lb = new ListBox();
 		for (final RequestObject r : requests) {
-			SimplePanel wrapper = new SimplePanel();
-			wrapper.getElement().getStyle().setMarginRight(10, Unit.PX);
-			Anchor a = new Anchor(r.getName(), "about:blank");
-			wrapper.add(a);
-			a.addClickHandler(new ClickHandler() {
-				@Override
-				public void onClick(ClickEvent event) {
-					event.preventDefault();
-					listener.goTo(RequestPlace.Tokenizer.fromProject(r.getId()));
-				}
-			});
-			endpointsContainer.add(wrapper);
+			lb.addItem(r.getName(), r.getId()+"");
 		}
-
+		endpointsContainer.add(lb);
+		lb.addChangeHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				int id = Integer.parseInt(lb.getValue(lb.getSelectedIndex()));
+				listener.goTo(RequestPlace.Tokenizer.fromProject(id));
+			}
+		});
+		
+		
 		RestClient.fixChromeLayout();
 	}
 
 	@Override
 	public void reset() {
-		projectPanel.addStyleName(AppResources.INSTANCE.appCss().hidden());
+		projectPanel.addStyleName("hidden");
 		sendButton.setEnabled(false);
-		progressIndicator.setStyleName(AppResources.INSTANCE.appCss().hidden());
+		progressIndicator.setStyleName("hidden");
 		progressIndicator.getElement().removeAttribute("value");
 
 		projectName.setText("");
@@ -526,14 +517,13 @@ public class RequestViewImpl extends Composite implements RequestView {
 	 */
 	@Override
 	public void handleRequestStartActionEvent(Date time) {
-		progressIndicator.removeStyleName(AppResources.INSTANCE.appCss()
-				.hidden());
+		progressIndicator.removeStyleName("hidden");
 		sendButton.setEnabled(false);
 	}
 
 	@Override
 	public void handleRequestEndEvent() {
-		progressIndicator.addStyleName(AppResources.INSTANCE.appCss().hidden());
+		progressIndicator.addStyleName("hidden");
 		progressIndicator.getElement().removeAttribute("value");
 		sendButton.setEnabled(true);
 	}
@@ -543,7 +533,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 		switch (event.getChangeType()) {
 		case RequestChangeEvent.UPLOAD_START:
 			progressIndicator.setMax(100);
-			progressIndicator.removeStyleName(appCss.hidden());
+			progressIndicator.removeStyleName("hidden");
 			break;
 		case RequestChangeEvent.UPLOAD_PROGRESS:
 			progressIndicator.setMax((int) event.getTotal());

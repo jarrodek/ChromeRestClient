@@ -16,7 +16,6 @@
 package org.rest.client.ui.desktop;
 
 import org.rest.client.event.AddEncodingEvent;
-import org.rest.client.resources.AppResources;
 import org.rest.client.ui.AddEncodingView;
 
 import com.google.gwt.core.client.GWT;
@@ -28,7 +27,6 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.web.bindery.event.shared.EventBus;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -37,6 +35,7 @@ import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.web.bindery.event.shared.EventBus;
 
 public class AddEncodingViewImpl implements HasText,
 		AddEncodingView, CloseHandler<PopupPanel>, KeyDownHandler {
@@ -45,12 +44,9 @@ public class AddEncodingViewImpl implements HasText,
 		Binder BINDER = GWT.create(Binder.class);
 	}
 
-	@UiField
-	DialogBox dialog;
-	@UiField
-	TextBox encoding;
-	@UiField
-	DivElement errorField;
+	@UiField DialogBox dialog;
+	@UiField TextBox encoding;
+	@UiField DivElement errorField;
 	private EventBus eventBus;
 	private boolean eventFired = false;
 	private boolean hasErrorDiplayed = false;
@@ -65,7 +61,7 @@ public class AddEncodingViewImpl implements HasText,
 			public void onKeyDown(KeyDownEvent event) {
 				if(hasErrorDiplayed){
 					errorField.setInnerText("");
-					errorField.addClassName(AppResources.INSTANCE.appCss().hidden());
+					errorField.addClassName("hidden");
 					hasErrorDiplayed = false;
 				}
 			}
@@ -98,7 +94,7 @@ public class AddEncodingViewImpl implements HasText,
 		String currentValue = encoding.getValue();
 		if (currentValue.trim().isEmpty()) {
 			errorField.setInnerText("You must enter encoding value");
-			errorField.removeClassName(AppResources.INSTANCE.appCss().hidden());
+			errorField.removeClassName("hidden");
 			hasErrorDiplayed = true;
 			return;
 		}

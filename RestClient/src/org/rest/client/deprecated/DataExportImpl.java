@@ -60,13 +60,13 @@ public class DataExportImpl extends DataExport {
 					@Override
 					public void onNotLoggedIn() {
 						eventBus.fireEvent(new StoreDataEvent(false));
-						StatusNotification.notify("You are not connected to application server", StatusNotification.TYPE_ERROR);
+						StatusNotification.notify("You are not connected to application server", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 					}
 					
 					@Override
 					public void onFailure(String message, Throwable throwable) {
 						eventBus.fireEvent(new StoreDataEvent(false));
-						StatusNotification.notify(message, StatusNotification.TYPE_ERROR);
+						StatusNotification.notify(message, StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 					}
 				});
 			}
@@ -74,7 +74,7 @@ public class DataExportImpl extends DataExport {
 			@Override
 			public void onEmptyData() {
 				eventBus.fireEvent(new StoreDataEvent(true));
-				StatusNotification.notify("All data already on server", StatusNotification.TYPE_NORMAL);
+				StatusNotification.notify("All data already on server", StatusNotification.TYPE_NORMAL, StatusNotification.TIME_MEDIUM);
 			}
 		});
 	}

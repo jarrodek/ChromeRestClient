@@ -2,8 +2,6 @@ package org.rest.client.ui.desktop;
 
 import java.util.Iterator;
 
-import org.rest.client.resources.AppCssResource;
-import org.rest.client.resources.AppResources;
 import org.rest.client.ui.TutorialDialog;
 
 import com.google.gwt.core.client.GWT;
@@ -11,7 +9,6 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -31,25 +28,23 @@ public class TutorialDialogImpl extends Composite implements TutorialDialog {
 			UiBinder<Widget, TutorialDialogImpl> {
 	}
 	
-	interface WidgetStyle extends CssResource{
-		String hidden();
-		String arrowLeft();
-		String arrowBottom();
-		String arrowTop();
-		String arrowRight();
+	class WidgetStyle {
+		final String arrowLeft = "Tutorial_arrowLeft";
+		final String arrowBottom = "Tutorial_arrowBottom";
+		final String arrowTop = "Tutorial_arrowTop";
+		final String arrowRight = "Tutorial_arrowRight";
 	}
 	
 	@UiField HTMLPanel wrapper;
 	@UiField HTMLPanel content;
 	@UiField HTMLPanel controls;
 	@UiField DivElement arrow;
-	@UiField WidgetStyle style;
+	WidgetStyle style = new WidgetStyle();
 	@UiField Anchor prev;
 	@UiField Anchor next;
 	@UiField Anchor finish;
 	
 	private int userResult = UserAction.CLOSE;
-	private AppCssResource appStyle = AppResources.INSTANCE.appCss();
 	private CloseTutorialHandler closeHandler = null;
 	private BeforeTutorialShowHandler beforeShowHandler = null;
 	private int left = 0;
@@ -175,23 +170,23 @@ public class TutorialDialogImpl extends Composite implements TutorialDialog {
 	public void showArrow(int direction) {
 		switch(direction){
 		case Direction.TOP: 
-			arrow.addClassName(appStyle.trialngleTop());
-			wrapper.addStyleName(style.arrowTop());
+			arrow.addClassName("trialngleTop");
+			wrapper.addStyleName(style.arrowTop);
 			break;
 		case Direction.BOTTOM: 
-			arrow.addClassName(appStyle.trialngleBottom());
-			wrapper.addStyleName(style.arrowBottom());
+			arrow.addClassName("trialngleBottom");
+			wrapper.addStyleName(style.arrowBottom);
 			break;
 		case Direction.LEFT: 
-			arrow.addClassName(appStyle.trialngleLeft());
-			wrapper.addStyleName(style.arrowLeft());
+			arrow.addClassName("trialngleLeft");
+			wrapper.addStyleName(style.arrowLeft);
 			break;
 		case Direction.RIGHT: 
-			arrow.addClassName(appStyle.trialngleRight());
-			wrapper.addStyleName(style.arrowRight());
+			arrow.addClassName("trialngleRight");
+			wrapper.addStyleName(style.arrowRight);
 			break;
 		}
-		arrow.removeClassName(style.hidden());
+		arrow.removeClassName("hidden");
 	}
 
 	@Override
@@ -212,7 +207,7 @@ public class TutorialDialogImpl extends Composite implements TutorialDialog {
 			next.setVisible(false);
 			break;
 		}
-		controls.removeStyleName(style.hidden());
+		controls.removeStyleName("hidden");
 	}
 
 	@Override

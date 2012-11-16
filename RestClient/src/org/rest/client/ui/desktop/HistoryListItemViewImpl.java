@@ -2,8 +2,6 @@ package org.rest.client.ui.desktop;
 
 import java.util.Date;
 
-import org.rest.client.resources.AppCssResource;
-import org.rest.client.resources.AppResources;
 import org.rest.client.storage.store.objects.HistoryObject;
 import org.rest.client.ui.HistoryListItemView;
 import org.rest.client.ui.HistoryView;
@@ -42,7 +40,6 @@ public class HistoryListItemViewImpl extends Composite implements HistoryListIte
 	@UiField HTMLPanel urlLabel;
 	@UiField HTMLPanel container;
 	
-	AppCssResource appStyle = AppResources.INSTANCE.appCss();
 	HistoryView parentList = null;
 	private int historyId = -1;
 	private boolean fullHistoryObject = false;
@@ -91,7 +88,7 @@ public class HistoryListItemViewImpl extends Composite implements HistoryListIte
 	}
 	
 	private void doOnExpand(){
-		if(detailedPanel.getClassName().contains(appStyle.hidden())){
+		if(detailedPanel.getClassName().contains("hidden")){
 			expandDetails();
 		} else {
 			hideDetails();
@@ -129,17 +126,17 @@ public class HistoryListItemViewImpl extends Composite implements HistoryListIte
 					StatusNotification.notify("Unable to read history data :(",StatusNotification.TYPE_ERROR);
 				}
 			});
-			container.addStyleName(appStyle.historySelected());
-			detailedPanel.removeClassName(appStyle.hidden());
+			container.addStyleName("historySelected");
+			detailedPanel.removeClassName("hidden");
 		} else {
-			container.addStyleName(appStyle.historySelected());
-			detailedPanel.removeClassName(appStyle.hidden());
+			container.addStyleName("historySelected");
+			detailedPanel.removeClassName("hidden");
 		}
 	}
 	
 	void hideDetails(){
-		container.removeStyleName(appStyle.historySelected());
-		detailedPanel.addClassName(appStyle.hidden());
+		container.removeStyleName("historySelected");
+		detailedPanel.addClassName("hidden");
 	}
 
 	@Override

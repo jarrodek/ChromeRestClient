@@ -15,6 +15,12 @@
  */
 package org.rest.client.ui.desktop;
 
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+
+import org.rest.client.ui.ErrorDialogView;
+
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -23,13 +29,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.TextArea;
-
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-
-import org.rest.client.ui.ErrorDialogView;
+import com.google.gwt.user.client.ui.Label;
 
 /**
  * A simple glass panel popup that terminates interaction with the application.
@@ -39,7 +39,8 @@ public class ErrorDialogViewImpl implements ErrorDialogView {
 	}
 
 	@UiField DialogBox errorDialog;
-	@UiField TextArea errorMessage;
+	@UiField Label errorMessage;
+	@UiField Label errorTitle;
 
 	public ErrorDialogViewImpl() {
 		GWT.<Binder> create(Binder.class).createAndBindUi(this);
@@ -62,15 +63,24 @@ public class ErrorDialogViewImpl implements ErrorDialogView {
 
 			@Override
 			public void publish(LogRecord record) {
-				Log.warn(record.getMessage(), record.getThrown());
+				
+				String name = record.getLoggerName();
+				if(name != null && name.equals("request")){
+					errorTitle.setText("An error occured during the request");
+				}
+				
+				Log.error("An error occured.", record.getThrown());
 				errorMessage.setText(record.getMessage());
-				errorDialog.getElement().getStyle().setZIndex(1000);
+				errorDialog.getElement().getStyle().setZIndex(10000);
 				errorDialog.center();
 				errorDialog.show();
 			}
 		};
 	}
-
+	
+	
+	
+	
 	@UiHandler("dismiss")
 	void onDismiss(ClickEvent event) {
 		errorDialog.hide();
@@ -79,5 +89,10 @@ public class ErrorDialogViewImpl implements ErrorDialogView {
 	@UiHandler("reload")
 	void onReload(ClickEvent event) {
 		Window.Location.reload();
+	}
+
+	@Override
+	public void setTitle(String message) {
+		errorTitle.setText(message);
 	}
 }

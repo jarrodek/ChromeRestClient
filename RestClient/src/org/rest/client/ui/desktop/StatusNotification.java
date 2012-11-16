@@ -6,7 +6,6 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -81,34 +80,34 @@ public class StatusNotification extends Composite {
 	 */
 	public static final int TIME_INFINITY = 0;
 
-	interface WidgetStyle extends CssResource {
+	class WidgetStyle {
 		/**
 		 * @return class name for error
 		 */
-		String error();
+		String error = "Status_Notification_error";
 		/**
 		 * @return class name for critical error
 		 */
-		String critical();
+		String critical = "Status_Notification_critical";
 		/**
 		 * @return class name for regular message
 		 */
-		String common();
+		String common = "Status_Notification_common";
 		/**
 		 * @return class name for hidden container
 		 */
-		String hidden();
+		String hidden = "Status_Notification_hidden";
 		/**
 		 * @return class name for regular message with HTML content
 		 */
-		String html();
+		String html = "Status_Notification_html";
 		/**
 		 * @return class name for text transition to fade out 
 		 */
-		String textHidden();
+		String textHidden = "Status_Notification_textHidden";
 		
-		String dismissAnchor();
-		String actionMessage();
+		String dismissAnchor = "Status_Notification_dismissAnchor";
+		String actionMessage = "Status_Notification_actionMessage";
 	}
 	
 	public interface NotificationCallback {
@@ -148,7 +147,7 @@ public class StatusNotification extends Composite {
 	@UiField HTMLPanel mainPanel;
 	@UiField HTMLPanel actions;
 	@UiField InlineLabel message;
-	@UiField WidgetStyle style;
+	WidgetStyle style = new WidgetStyle();
 
 	private StatusNotification() {
 		RootPanel.get().add(
@@ -270,7 +269,7 @@ public class StatusNotification extends Composite {
 		current = null;
 		showing = false;
 		if(messages.size() > 0){
-			INSTANCE.message.addStyleName(INSTANCE.style.textHidden());
+			INSTANCE.message.addStyleName(INSTANCE.style.textHidden);
 			new Timer() {
 				@Override
 				public void run() {
@@ -298,14 +297,14 @@ public class StatusNotification extends Composite {
 		boolean isHTML = false;
 		
 		if(current.type.equals(TYPE_CRITICAL)){
-			mainPanel.addStyleName(style.critical());
+			mainPanel.addStyleName(style.critical);
 		} else if(current.type.equals(TYPE_ERROR)){
-			mainPanel.addStyleName(style.error());
+			mainPanel.addStyleName(style.error);
 		} else if(current.type.equals(TYPE_HTML)){
-			mainPanel.addStyleName(style.html());
+			mainPanel.addStyleName(style.html);
 			isHTML = true;
 		} else {
-			mainPanel.addStyleName(style.common());
+			mainPanel.addStyleName(style.common);
 		}
 		
 		if(isHTML){
@@ -336,15 +335,15 @@ public class StatusNotification extends Composite {
 						dismissMessage();
 					}
 				});
-				action.setStyleName(style.dismissAnchor()+" " +style.actionMessage());
+				action.setStyleName(style.dismissAnchor+" " +style.actionMessage);
 				actions.add(action);
 			}
 		}
 		
 		if(showing){
-			message.removeStyleName(style.textHidden());
+			message.removeStyleName(style.textHidden);
 		} else {
-			mainPanel.removeStyleName(style.hidden());
+			mainPanel.removeStyleName(style.hidden);
 			showing = true;
 		}
 		if(current.timeout > 0){
@@ -372,12 +371,12 @@ public class StatusNotification extends Composite {
 	 */
 	private void cleanupContainer(){
 		message.setText("");
-		message.removeStyleName(style.textHidden());
-		mainPanel.addStyleName(style.hidden());
-		mainPanel.removeStyleName(style.critical());
-		mainPanel.removeStyleName(style.common());
-		mainPanel.removeStyleName(style.html());
-		mainPanel.removeStyleName(style.error());
+		message.removeStyleName(style.textHidden);
+		mainPanel.addStyleName(style.hidden);
+		mainPanel.removeStyleName(style.critical);
+		mainPanel.removeStyleName(style.common);
+		mainPanel.removeStyleName(style.html);
+		mainPanel.removeStyleName(style.error);
 	}
 	@UiHandler("flashDismiss")
 	void onDissmiss(ClickEvent e){

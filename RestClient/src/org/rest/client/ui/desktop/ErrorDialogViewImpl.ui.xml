@@ -1,21 +1,10 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
-	<ui:style>
-		.message {
-			height: 350px;
-			width: 400px;
-		}
-		.error{
-			
-		}
-	</ui:style>
+	
 	<g:DialogBox ui:field="errorDialog" glassEnabled="true" animationEnabled="true" addStyleNames="dialog-error">
-		<g:caption>
-			An unexpected error has occurred
-    	</g:caption>
 		<g:HTMLPanel>
-			<g:TextArea ui:field="errorMessage" readOnly="true"
-				stylePrimaryName="{style.message}"></g:TextArea>
+			<g:Label ui:field="errorTitle" stylePrimaryName="Error_Dialog_title">An unexpected error has occured</g:Label>
+			<g:Label ui:field="errorMessage" stylePrimaryName="Error_Dialog_message"></g:Label>
 			<br />
 			<g:Button ui:field="dismiss">Continue</g:Button>
 			<g:Button ui:field="reload">Reload</g:Button>

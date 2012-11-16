@@ -19,7 +19,6 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -45,10 +44,10 @@ public class SocketViewImpl extends Composite implements SocketView {
 
 	interface SocketViewImplUiBinder extends UiBinder<Widget, SocketViewImpl> {
 	}
-	interface WidgetStyle extends CssResource {
-		String urlInput();
-		String connected();
-		String disconnected();
+	class WidgetStyle {
+		String urlInput = "Socket_View_urlInput";
+		String connected = "Socket_View_connected";
+		String disconnected = "Socket_View_disconnected";
 	}
 	class UrlsSuggestionDisplay extends DefaultSuggestionDisplay {
 		@Override
@@ -59,7 +58,7 @@ public class SocketViewImpl extends Composite implements SocketView {
 	
 	@UiField HTMLPanel urlPanel;
 	@UiField DivElement outputPanel;
-	@UiField WidgetStyle style;
+	WidgetStyle style = new WidgetStyle();
 	@UiField Button connectButton;
 	@UiField Button disconnectButton;
 	@UiField SpanElement statusImage;
@@ -89,7 +88,7 @@ public class SocketViewImpl extends Composite implements SocketView {
 		suggestionsDisplay.setAnimationEnabled(false);
 		urlField = new SuggestBox(suggestOracle, new TextBox(), suggestionsDisplay);
 		urlField.getElement().setAttribute("placeholder", "URL");
-		urlField.addStyleName(style.urlInput());
+		urlField.addStyleName(style.urlInput);
 		urlPanel.add(urlField);
 		//connect on enter
 		urlPanel.addDomHandler(new KeyDownHandler() {
@@ -166,26 +165,26 @@ public class SocketViewImpl extends Composite implements SocketView {
 	public void setConnectionStatus(int status) {
 		switch(status){
 		case WebSocket.CLOSED:
-			statusImage.replaceClassName(style.connected(), style.disconnected());
+			statusImage.replaceClassName(style.connected, style.disconnected);
 			connectionStatusDisplay.setText("disconnected");
 			disconnectButton.setVisible(false);
 			connectButton.setVisible(true);
 			connectButton.setEnabled(true);
 			break;
 		case WebSocket.CLOSING:
-			statusImage.replaceClassName(style.connected(), style.disconnected());
+			statusImage.replaceClassName(style.connected, style.disconnected);
 			connectionStatusDisplay.setText("disconnecting");
 			disconnectButton.setVisible(false);
 			break;
 		case WebSocket.OPEN:
-			statusImage.replaceClassName(style.disconnected(), style.connected());
+			statusImage.replaceClassName(style.disconnected, style.connected);
 			connectionStatusDisplay.setText("connected");
 			disconnectButton.setVisible(true);
 			connectButton.setVisible(false);
 			connectButton.setEnabled(true);
 			break;
 		case WebSocket.CONNECTING:
-			statusImage.replaceClassName(style.disconnected(), style.connected());
+			statusImage.replaceClassName(style.disconnected, style.connected);
 			connectionStatusDisplay.setText("connecting");
 			disconnectButton.setVisible(false);
 			connectButton.setEnabled(false);
@@ -212,7 +211,7 @@ public class SocketViewImpl extends Composite implements SocketView {
 		listener.disconnect();
 		String url = urlField.getValue();
 		if(url == null || url.isEmpty()){
-			StatusNotification.notify("You must enter socket URL.");
+			StatusNotification.notify("You must enter socket URL.", StatusNotification.TYPE_NORMAL, StatusNotification.TIME_SHORT);
 		}
 		listener.connect(url);
 		connectButton.setEnabled(false);

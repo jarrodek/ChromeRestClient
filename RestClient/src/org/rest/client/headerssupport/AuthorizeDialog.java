@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Random;
 
 import org.rest.client.headerssupport.OAuth.OauthParam;
-import org.rest.client.resources.AppCssResource;
-import org.rest.client.resources.AppResources;
 import org.rest.client.ui.html5.HTML5InputNumber;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -77,18 +75,14 @@ public class AuthorizeDialog extends DialogBox {
 		mainPanel.add(formPanel);
 		formPanel.setWidth("100%");
 		
-		
-		AppCssResource appStyle = AppResources.INSTANCE.appCss();
-		
-		
 		FlowPanel buttonsPanel = new FlowPanel();
 		Button cancel = new Button("Cancel");
 		Button okButton = new Button("OK");
 		buttonsPanel.add(okButton);
 		buttonsPanel.add(cancel);
-		buttonsPanel.addStyleName(appStyle.dialogButtons());
-		okButton.addStyleName(appStyle.button());
-		cancel.addStyleName(appStyle.button());
+		buttonsPanel.addStyleName("dialogButtons");
+		okButton.addStyleName("button");
+		cancel.addStyleName("button");
 		
 
 		mainPanel.add(buttonsPanel);

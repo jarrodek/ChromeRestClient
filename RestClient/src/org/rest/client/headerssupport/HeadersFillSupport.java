@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.rest.client.resources.AppResources;
 import org.rest.client.ui.desktop.HeaderSupportAuthorizationImpl;
 import org.rest.client.ui.desktop.HeaderSupportDate;
 import org.rest.client.ui.desktop.W3CHeaderErrorImpl;
@@ -166,7 +165,7 @@ public class HeadersFillSupport implements FocusHandler, ClickHandler {
 		}
 		w3cError = NOT_SUPPORTED_W3C.contains(header.toLowerCase());
 		if(w3cError){
-			box.addStyleName(AppResources.INSTANCE.appCss().w3cError());
+			box.addStyleName("w3cError");
 		}
 		removeSupport(box);
 		HandlerRegistration handler = box.addFocusHandler(this);
@@ -181,7 +180,7 @@ public class HeadersFillSupport implements FocusHandler, ClickHandler {
 			HandlerRegistration pastHandler = REGISTERED.get(textBox);
 			pastHandler.removeHandler();
 			REGISTERED.remove(textBox);
-			String errorCssName = AppResources.INSTANCE.appCss().w3cError();
+			String errorCssName = "w3cError";
 			if(textBox.getStyleName().contains(errorCssName)){
 				textBox.removeStyleName(errorCssName);
 			}

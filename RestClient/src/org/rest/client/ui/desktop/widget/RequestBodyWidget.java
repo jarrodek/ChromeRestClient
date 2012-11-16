@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import org.rest.client.request.FilesObject;
 import org.rest.client.request.FormPayloadData;
 import org.rest.client.request.RequestPayloadParser;
-import org.rest.client.resources.AppCssResource;
-import org.rest.client.resources.AppResources;
 import org.rest.client.ui.IsHideable;
 import org.rest.client.ui.html5.HTML5Element;
 import org.rest.client.ui.html5.HTML5FileUpload;
@@ -47,7 +45,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.file.client.File;
 import com.google.gwt.file.client.FileList;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -63,12 +60,6 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class RequestBodyWidget extends Composite implements IsHideable, HasText {
 	interface Binder extends UiBinder<Widget, RequestBodyWidget> {
-	}
-	
-	interface WidgetStyle extends CssResource {
-		String selectedFilesList();
-		String flex();
-		String valueBlock();
 	}
 	
 	public enum TABS { RAW, FORM, FILES }
@@ -88,11 +79,9 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 	@UiField DivElement tabContent;
 	@UiField HTMLPanel payloadFormPanel;
 	@UiField HTMLPanel filesFormPanel;
-	@UiField WidgetStyle style;
 	@UiField TextArea payloadRawInput;
 	
 	private TABS currentTab = TABS.RAW;
-	AppCssResource appStyle = AppResources.INSTANCE.appCss();
 	
 	private int fileFieldNumber = 0;
 	private String fileFieldName = "fileUpload";
@@ -115,15 +104,15 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 			public void onClick(ClickEvent event) {
 				if(currentTab.equals(TABS.RAW)) return;
 				
-				String tabHandlercurrent = appStyle.inlineButtonChecked();
+				String tabHandlercurrent = "inlineButtonChecked";
 				
 				HTML5Element tab = (HTML5Element) rawTab.getElement();
 				((HTML5Element)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
 				tab.getClassList().add(tabHandlercurrent);
 				
 				HTML5Element contentParent = (HTML5Element) tabContent.getParentElement();
-				contentParent.querySelector("." + appStyle.tabsContent() + " ." + appStyle.tabContent() + "." + appStyle.tabContentCurrent()).getClassList().remove(appStyle.tabContentCurrent());
-				contentParent.querySelector("." + appStyle.tabsContent() + " ." + appStyle.tabContent() + "[data-tab=\"raw\"]").getClassList().add(appStyle.tabContentCurrent());
+				contentParent.querySelector("." + "tabsContent" + " ." + "tabContent" + "." + "tabContentCurrent").getClassList().remove("tabContentCurrent");
+				contentParent.querySelector("." + "tabsContent" + " ." + "tabContent" + "[data-tab=\"raw\"]").getClassList().add("tabContentCurrent");
 		        
 				currentTab = TABS.RAW;
 			}
@@ -132,16 +121,16 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
 				HTML5Element tab = (HTML5Element) rawTab.getElement();
-				if(!tab.getClassList().contains(appStyle.inlineButtonChecked()))
-					tab.getClassList().add(appStyle.inlineButtonHover());
+				if(!tab.getClassList().contains("inlineButtonChecked"))
+					tab.getClassList().add("inlineButtonHover");
 			}
 		});
 		rawTab.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
 				HTML5Element tab = (HTML5Element) rawTab.getElement();
-				if(!tab.getClassList().contains(appStyle.inlineButtonHover()))
-					tab.getClassList().remove(appStyle.inlineButtonHover());
+				if(!tab.getClassList().contains("inlineButtonHover"))
+					tab.getClassList().remove("inlineButtonHover");
 			}
 		});
 		formTab.addClickHandler(new ClickHandler() {
@@ -152,15 +141,15 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 				updateForm();
 				ensureFormHasRow();
 				
-				String tabHandlercurrent = appStyle.inlineButtonChecked();
+				String tabHandlercurrent = "inlineButtonChecked";
 				
 				HTML5Element tab = (HTML5Element) formTab.getElement();
 				((HTML5Element)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
 				tab.getClassList().add(tabHandlercurrent);
 				
 				HTML5Element contentParent = (HTML5Element) tabContent.getParentElement();
-				contentParent.querySelector("." + appStyle.tabsContent() + " ." + appStyle.tabContent() + "." + appStyle.tabContentCurrent()).getClassList().remove(appStyle.tabContentCurrent());
-				contentParent.querySelector("." + appStyle.tabsContent() + " ." + appStyle.tabContent() + "[data-tab=\"form\"]").getClassList().add(appStyle.tabContentCurrent());
+				contentParent.querySelector("." + "tabsContent" + " ." + "tabContent" + "." + "tabContentCurrent").getClassList().remove("tabContentCurrent");
+				contentParent.querySelector("." + "tabsContent" + " ." + "tabContent" + "[data-tab=\"form\"]").getClassList().add("tabContentCurrent");
 		        
 				currentTab = TABS.FORM;
 			}
@@ -169,16 +158,16 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
 				HTML5Element tab = (HTML5Element) formTab.getElement();
-				if(!tab.getClassList().contains(appStyle.inlineButtonChecked()))
-					tab.getClassList().add(appStyle.inlineButtonHover());
+				if(!tab.getClassList().contains("inlineButtonChecked"))
+					tab.getClassList().add("inlineButtonHover");
 			}
 		});
 		formTab.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
 				HTML5Element tab = (HTML5Element) formTab.getElement();
-				if(tab.getClassList().contains(appStyle.inlineButtonHover()))
-					tab.getClassList().remove(appStyle.inlineButtonHover());
+				if(tab.getClassList().contains("inlineButtonHover"))
+					tab.getClassList().remove("inlineButtonHover");
 			}
 		});
 		filesTab.addClickHandler(new ClickHandler() {
@@ -188,15 +177,15 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 				
 				ensureFilesHasRow();
 				
-				String tabHandlercurrent = appStyle.inlineButtonChecked();
+				String tabHandlercurrent = "inlineButtonChecked";
 				
 				HTML5Element tab = (HTML5Element) filesTab.getElement();
 				((HTML5Element)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
 				tab.getClassList().add(tabHandlercurrent);
 				
 				HTML5Element contentParent = (HTML5Element) tabContent.getParentElement();
-				contentParent.querySelector("." + appStyle.tabsContent() + " ." + appStyle.tabContent() + "." + appStyle.tabContentCurrent()).getClassList().remove(appStyle.tabContentCurrent());
-				contentParent.querySelector("." + appStyle.tabsContent() + " ." + appStyle.tabContent() + "[data-tab=\"file\"]").getClassList().add(appStyle.tabContentCurrent());
+				contentParent.querySelector("." + "tabsContent" + " ." + "tabContent" + "." + "tabContentCurrent").getClassList().remove("tabContentCurrent");
+				contentParent.querySelector("." + "tabsContent" + " ." + "tabContent" + "[data-tab=\"file\"]").getClassList().add("tabContentCurrent");
 		        
 				currentTab = TABS.FILES;
 			}
@@ -205,16 +194,16 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
 				HTML5Element tab = (HTML5Element) filesTab.getElement();
-				if(!tab.getClassList().contains(appStyle.inlineButtonChecked()))
-					tab.getClassList().add(appStyle.inlineButtonHover());
+				if(!tab.getClassList().contains("inlineButtonChecked"))
+					tab.getClassList().add("inlineButtonHover");
 			}
 		});
 		filesTab.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
 				HTML5Element tab = (HTML5Element) filesTab.getElement();
-				if(tab.getClassList().contains(appStyle.inlineButtonHover()))
-					tab.getClassList().remove(appStyle.inlineButtonHover());
+				if(tab.getClassList().contains("inlineButtonHover"))
+					tab.getClassList().remove("inlineButtonHover");
 			}
 		});
 	}
@@ -273,7 +262,7 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 	
 	private void addNewFormRow(String key, String value){
 		final HTMLPanel row = new HTMLPanel("");
-		row.setStyleName(style.flex());
+		row.setStyleName("Request_Body_Widget_flex");
 		TextBox keyBox = new TextBox();
 		TextBox valueBox = new TextBox();
 		InlineLabel removeButton = new InlineLabel("x");
@@ -291,8 +280,8 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		keyBox.getElement().setAttribute("placeholder", "key");
 		valueBox.getElement().setAttribute("placeholder", "value");
 		
-		valueBox.addStyleName(appStyle.formValueInput());
-		removeButton.addStyleName(appStyle.removeButton());
+		valueBox.addStyleName("formValueInput");
+		removeButton.addStyleName("removeButton");
 		removeButton.setTitle("Remove");
 		keyBox.addValueChangeHandler(formRowChange);
 		valueBox.addValueChangeHandler(formRowChange);
@@ -300,15 +289,15 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		
 		final FlowPanel keyContainer = new FlowPanel();
 		keyContainer.add(keyBox);
-		keyContainer.addStyleName(style.flex());
+		keyContainer.addStyleName("Request_Body_Widget_flex");
 		
 		final FlowPanel valueContainer = new FlowPanel();
 		valueContainer.add(valueBox);
-		valueContainer.addStyleName(style.flex() + " " + style.valueBlock());
+		valueContainer.addStyleName("Request_Body_Widget_flex" + " " + "valueBlock");
 		
 		final FlowPanel actionsContainer = new FlowPanel();
 		actionsContainer.add(removeButton);
-		actionsContainer.addStyleName(style.flex());
+		actionsContainer.addStyleName("Request_Body_Widget_flex");
 		
 		
 		row.add(keyContainer);
@@ -335,9 +324,9 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 	private void addNewFileRow(String key){
 		final HTMLPanel row = new HTMLPanel("");
 		final ListPanel listPanel = new ListPanel();
-		listPanel.setStyleName(style.selectedFilesList());
+		listPanel.setStyleName("selectedFilesList");
 		
-		row.setStyleName(appStyle.formRow());
+		row.setStyleName("formRow");
 		TextBox keyBox = new TextBox();
 		final HTML5FileUpload valueBox = new HTML5FileUpload();
 		InlineLabel removeButton = new InlineLabel("x");
@@ -355,7 +344,7 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 			value = key;
 		}
 		keyBox.setValue(value);
-		removeButton.addStyleName(appStyle.removeButton());
+		removeButton.addStyleName("removeButton");
 		removeButton.setTitle("Remove");
 		
 		valueBox.setMultiple(true);

@@ -242,6 +242,7 @@ public class ShortcutViewImpl extends Composite implements ShortcutView {
 	
 	@UiHandler("backLink")
 	void onBackToSettings(ClickEvent e){
+		e.preventDefault();
 		listener.goTo(new SettingsPlace("view"));
 	}
 }

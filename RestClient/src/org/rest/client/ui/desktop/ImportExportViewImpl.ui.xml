@@ -2,87 +2,43 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:h5="urn:import:org.rest.client.ui.html5">
-	<ui:with field="appResources" type="org.rest.client.resources.AppResources" />
-	<ui:style>
-		.depricationInfo{
-			background-color: #FF7735;
-			color: white;
-			font-weight: bold;
-			padding: 6px 8px;
-			margin-bottom: 20px;
-		}
-		.title{
-			color: black;
-			font-size: 175%;
-			font-weight: normal;
-			margin: 0;
-			padding-bottom: 14px;
-			padding-top: 13px;
-			cursor: pointer;
-		}
-		.serverExport{}
-		.highlight{text-decoration:underline; font-weight: bold;}
-		.connectedInfo{
-			color: green;
-			font-weight: bold;
-		}
-		.note {
-			text-align: left;
-			padding: 10px 20px;
-			background: rgba(255, 0, 0, 0.05);
-			border-radius: 8px;
-			border: 1px solid rgba(255, 0, 0, 0.2);
-			display: inline-block;
-		}
-		.storeDataPanel{
-			display: none;
-		}
-		.shareUrlPanel{
-			display: none;
-		}
-		.shareLink{}
-		
-		.downloadFileLink{margin-top: 20px;font-size: large;}
-		.importPrevControls{margin-top: 40px;}
-		.importPrevTitle{font-size: large;margin-right: 30px;}
-		.backButton{margin-top: 20px;}
-	</ui:style>
+	
 	<g:HTMLPanel>
-		<h1 class="{style.title}">Import/Export options</h1>
+		<h1 class="Import_Export_title">Import/Export options</h1>
 		
 		
-		<div class="{style.serverExport}">
+		<div class="Import_Export_serverExport">
 		
-			<div class="{style.depricationInfo}">
-				<p>Import/export using application server is now <span class="{style.highlight}">deprected</span>.</p>
+			<div class="Import_Export_depricationInfo">
+				<p>Import/export using application server is now <span class="Import_Export_highlight">deprected</span>.</p>
 				<p>Soon it will be switched off. I'm suggest to import all Your remaining data and use Google Drive or file import/export.</p>
-				<p>This options will be removed from application <span class="{style.highlight}">December 1st, 2012</span>.</p>
+				<p>This options will be removed from application <span class="Import_Export_highlight">December 1st, 2012</span>.</p>
 			</div>
 			<h3>Application server export</h3>
 			<p>First step is to connect with server.<br/>When you install application on other machine you will be able to download all data.</p>
 			<p>
-				<g:Button styleName="{appResources.appCss.button}" ui:field="connectButton" text="Connect"></g:Button>
-				<g:InlineLabel styleName="{style.connectedInfo}" ui:field="loggedInInfo" text="You are already connected" visible="false"></g:InlineLabel>
-				<g:InlineLabel styleName="{style.connectedInfo}" ui:field="statusInfo" text=""></g:InlineLabel>
+				<g:Button styleName="button" ui:field="connectButton" text="Connect"></g:Button>
+				<g:InlineLabel styleName="Import_Export_connectedInfo" ui:field="loggedInInfo" text="You are already connected" visible="false"></g:InlineLabel>
+				<g:InlineLabel styleName="Import_Export_connectedInfo" ui:field="statusInfo" text=""></g:InlineLabel>
 			</p>
-			<p ui:field="connectNote" class="{style.note}">
+			<p ui:field="connectNote" class="Import_Export_note">
 				This actually doesn't do nothing.<br/>
 				Requests are not automatically synchronized with server. Still you need press "Export" button. 
 			</p>
-			<div ui:field="storeDataPanel" class="{style.storeDataPanel}">
+			<div ui:field="storeDataPanel" class="Import_Export_storeDataPanel">
 				<p>
 					Now you can store or restore your data.<br/>
 				</p>
 				<p>
-					<g:Button styleName="{appResources.appCss.button}" ui:field="storeData" text="Store current data on external server"></g:Button>
-					<g:Button styleName="{appResources.appCss.button}" ui:field="restoreData" text="Restore my data"></g:Button>
+					<g:Button styleName="button" ui:field="storeData" text="Store current data on external server"></g:Button>
+					<g:Button styleName="button" ui:field="restoreData" text="Restore my data"></g:Button>
 				</p>
 			</div>
-			<div ui:field="shareUrlPanel" class="{style.shareUrlPanel}">
+			<div ui:field="shareUrlPanel" class="Import_Export_shareUrlPanel">
 				<p>
 					You can share all your saved requests data by giving someone link below
 				</p>
-				<pre class="{style.shareLink}" ui:field="shareLink">
+				<pre class="Import_Export_shareLink" ui:field="shareLink">
 					
 				</pre>
 			</div>
@@ -91,10 +47,10 @@
 		<div class="fileExport">
 			<h3>Import/Export to file</h3>
 			<div>
-				<g:Button styleName="{appResources.appCss.button}" ui:field="fileExport" text="Generate a file"></g:Button>
+				<g:Button styleName="button" ui:field="fileExport" text="Generate a file"></g:Button>
 				<h5:HTML5FileUpload ui:field="fileImport" multiple="false"></h5:HTML5FileUpload>
 			</div>
-			<div class="{style.downloadFileLink} {appResources.appCss.hidden}" ui:field="downloadFileAnchor">
+			<div class="Import_Export_downloadFileLink hidden" ui:field="downloadFileAnchor">
 				Now you can <g:Anchor ui:field="fileDownload" text="Download file"></g:Anchor>
 			</div>
 		</div>
@@ -102,14 +58,14 @@
 		<div class="fileImport">
 			<g:InlineLabel ui:field="importFileLog"></g:InlineLabel>
 			<g:HTMLPanel ui:field="importPreview" visible="false">
-				<div class="{style.importPrevControls}">
-					<span class="{style.importPrevTitle}">Import preview</span>
-					<g:Button styleName="{appResources.appCss.button}" ui:field="saveImportedData" text="Save imported data"></g:Button>
+				<div class="Import_Export_importPrevControls">
+					<span class="Import_Export_importPrevTitle">Import preview</span>
+					<g:Button styleName="button" ui:field="saveImportedData" text="Save imported data"></g:Button>
 				</div>
 			</g:HTMLPanel>
 		</div>
 		
-		<div class="{style.backButton}">
+		<div class="Import_Export_backButton">
 			<g:Anchor ui:field="backSettings" href="about:blank">Back to settings</g:Anchor>
 		</div>
 	</g:HTMLPanel>

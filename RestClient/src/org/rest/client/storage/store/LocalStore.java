@@ -46,6 +46,12 @@ public class LocalStore extends LocalStorageAdapter {
 	public static final String SHORTCUTS_VALUES = "SHORTCUTS";
 	
 	public static final String LATEST_MESSAGE_KEY = "LATESTMSG";
+	/**
+	 * Key for code mirror in headers panel
+	 */
+	public static final String CODE_MIRROR_HEADERS_KEY = "CMH_ENABLED";
+	
+	
 	public LocalStore() {}
 
 }

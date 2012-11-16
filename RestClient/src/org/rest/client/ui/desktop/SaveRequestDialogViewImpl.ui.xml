@@ -1,35 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
-	<ui:with field="appResources" type="org.rest.client.resources.AppResources" />
-	<ui:style>
-		.container {
-			padding: 30px 40px;
-		}
-		
-		.button {
-			margin-left: 10px;
-		}
-		
-		.projectSection {
-			margin: 10px 0px;
-		}
-		
-		.filterCheckbox {
-			display: block;
-		}
-		
-		.expl {
-			margin-bottom: 1px;
-			color: #4B4B4B;
-		}
-		
-		.filterContainer {
-			-webkit-column-count: 2;
-			-webkit-column-gap: 2em;
-			-webkit-column-rule: 1px solid #bbb;
-		}
-		.previewContainer{}
-	</ui:style>
+	
 	<g:DialogBox ui:field="dialog" modal="true"
 		animationEnabled="true" glassEnabled="true">
 		<g:HTMLPanel ui:field="contents" styleName="container">
@@ -39,7 +10,7 @@
 			<div>
 				<g:TextBox ui:field="name" width="400px"></g:TextBox>
 			</div>
-			<div class="{style.projectSection}">
+			<div class="Save_Request_Dialog_projectSection">
 				<g:CheckBox ui:field="addToProject" checked="false"
 					text="Add to project"></g:CheckBox>
 				<g:ListBox ui:field="projectList" enabled="false">
@@ -50,39 +21,39 @@
 						New project
 					</g:item>
 				</g:ListBox>
-				<div class="{appResources.appCss.hidden}" ui:field="projectNameContainer">
+				<div class="hidden" ui:field="projectNameContainer">
 					<g:TextBox ui:field="projectName" width="400px"></g:TextBox>
 				</div>
 			</div>
-			<div class="{appResources.appCss.hidden}" ui:field="requestOverwriteContainer">
-				<p class="{style.expl}">When loading this request do not overwrite previous:</p>
-				<section class="{style.filterContainer}">
-					<g:CheckBox addStyleNames="{style.filterCheckbox}"
+			<div class="hidden" ui:field="requestOverwriteContainer">
+				<p class="Save_Request_Dialog_expl}">When loading this request do not overwrite previous:</p>
+				<section class="Save_Request_Dialog_filterContainer">
+					<g:CheckBox addStyleNames="Save_Request_Dialog_filterCheckbox"
 						ui:field="protocolStatus" checked="false" text="Protocol"></g:CheckBox>
-					<g:CheckBox addStyleNames="{style.filterCheckbox}"
+					<g:CheckBox addStyleNames="Save_Request_Dialog_filterCheckbox"
 						ui:field="serverStatus" checked="false" text="Server addr"></g:CheckBox>
-					<g:CheckBox addStyleNames="{style.filterCheckbox}"
+					<g:CheckBox addStyleNames="Save_Request_Dialog_filterCheckbox"
 						ui:field="pathStatus" checked="false" text="Path info"></g:CheckBox>
-					<g:CheckBox addStyleNames="{style.filterCheckbox}"
+					<g:CheckBox addStyleNames="Save_Request_Dialog_filterCheckbox"
 						ui:field="parametersStatus" checked="false" text="GET parameters"></g:CheckBox>
-					<g:CheckBox addStyleNames="{style.filterCheckbox}"
+					<g:CheckBox addStyleNames="Save_Request_Dialog_filterCheckbox"
 						ui:field="tokenStatus" checked="false" text="History token"></g:CheckBox>
-					<g:CheckBox addStyleNames="{style.filterCheckbox}"
+					<g:CheckBox addStyleNames="Save_Request_Dialog_filterCheckbox"
 						ui:field="methodStatus" checked="false" text="HTTP method"></g:CheckBox>
-					<g:CheckBox addStyleNames="{style.filterCheckbox}"
+					<g:CheckBox addStyleNames="Save_Request_Dialog_filterCheckbox"
 						ui:field="payloadStatus" checked="false" text="Request payload"></g:CheckBox>
-					<g:CheckBox addStyleNames="{style.filterCheckbox}"
+					<g:CheckBox addStyleNames="Save_Request_Dialog_filterCheckbox"
 						ui:field="headersStatus" checked="false" text="Request headers"></g:CheckBox>
 				</section>
-				<section class="{style.previewContainer}">
+				<section class="Save_Request_Dialog_previewContainer">
 					<g:TextBox ui:field="prevUrlTextBox" width="400px" readOnly="true"></g:TextBox>
 				</section>
 			</div>
 
-			<div class="{appResources.appCss.dialogButtons}">
-				<g:Button styleName="{appResources.appCss.button}" ui:field="save">Save</g:Button>
-				<g:Button styleName="{appResources.appCss.button}" visible="false" ui:field="overwrite">Overwrite</g:Button>
-				<g:Button styleName="{appResources.appCss.button}" ui:field="cancel">Cancel
+			<div class="dialogButtons">
+				<g:Button styleName="button" ui:field="save">Save</g:Button>
+				<g:Button styleName="button" visible="false" ui:field="overwrite">Overwrite</g:Button>
+				<g:Button styleName="button" ui:field="cancel">Cancel
 				</g:Button>
 			</div>
 		</g:HTMLPanel>

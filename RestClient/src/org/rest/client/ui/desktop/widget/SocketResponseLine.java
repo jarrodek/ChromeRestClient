@@ -2,7 +2,6 @@ package org.rest.client.ui.desktop.widget;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -17,16 +16,13 @@ public class SocketResponseLine extends Composite {
 	interface SocketResponseLineUiBinder extends
 			UiBinder<Widget, SocketResponseLine> {
 	}
-	interface WidgetStyle extends CssResource {
-		String received();
-	}
+	
 	
 	final boolean isResponse;
 	final String message;
 	
 	@UiField SpanElement typeDisplay;
 	@UiField SpanElement messageDisplay;
-	@UiField WidgetStyle style;
 	@UiField HTMLPanel container;
 	
 	public SocketResponseLine(boolean isResponse, String message) {
@@ -39,7 +35,7 @@ public class SocketResponseLine extends Composite {
 	private void styleRow(){
 		if(isResponse){
 			typeDisplay.setInnerText(">>>");
-			container.addStyleName(style.received());
+			container.addStyleName("Socket_Response_Line_received");
 		} else {
 			typeDisplay.setInnerText("<<<");
 		}

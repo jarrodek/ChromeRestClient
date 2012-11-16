@@ -1,84 +1,9 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
-	<ui:with field="appResources" type="org.rest.client.resources.AppResources" />
-	<ui:style type="org.rest.client.ui.desktop.widget.JSONViewer.ParserStyle" >
-		@def indent 15px; 
-		.prettyPrint{}
-		.bodyPanel {
-			font-family: monospace;
-			font-size: 10pt;
-			color: black;
-			cursor: text;
-		}
-		 
-		.numeric,
-		.nullValue,
-		.booleanValue,
-		.stringValue,
-		.keyName{
-			
-		}
-		.stringValue{
-			white-space: normal;
-		}
-		
-		.brace{
-			display: inline-block;
-		}
-		.numeric{
-			color: blue;
-		}
-		.nullValue{
-			color: #708;
-		}
-		.booleanValue{
-			color: #708;
-		}
-		.punctuation{
-			color: black;
-		}
-		.stringValue{
-			color: #48A;
-		}
-		.node{
-			position: relative;
-			white-space: nowrap;
-		}
-		
-		div[data-expanded="false"] div[data-element]{display: none !important;}
-		
-		.arrayCounter{
-			color: gray;
-			font-size: 11px;
-		}
-		.arrayCounter:before {
-			content: "size";
-		}
-		.keyName{
-			color: rgb(206,123,0)
-		}
-		.rootElementToggleButton{
-			position: absolute;
-			top: 0px;
-			left: -9px;
-			font-size: 14px;
-			cursor: pointer;
-			font-weight: bold;
-		}
-		.infoRow{
-			display: none;
-			margin: 0px 7px;
-			text-indent: 0px;
-		}
-		div[data-expanded="false"] div[collapse-indicator]{
-			display: inline-block !important;
-		}
-		
-	</ui:style>
-	<g:HTML ui:field="result" styleName="bodyPanel">
-		<div class="{appResources.appCss.flexCenter}">
-			<span class="{appResources.appCss.loaderImage}"></span>
+	<g:HTML ui:field="result" styleName="JSON_parser_bodyPanel">
+		<div class="flexCenter">
+			<span class="loaderImage"></span>
 		</div>
 	</g:HTML>
 </ui:UiBinder>

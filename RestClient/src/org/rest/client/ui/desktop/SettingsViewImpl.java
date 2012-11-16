@@ -3,8 +3,6 @@ package org.rest.client.ui.desktop;
 import org.rest.client.RestClient;
 import org.rest.client.place.ImportExportPlace;
 import org.rest.client.place.ShortcutPlace;
-import org.rest.client.resources.AppCssResource;
-import org.rest.client.resources.AppResources;
 import org.rest.client.ui.SettingsView;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -31,9 +29,10 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	@UiField CheckBox debug;
 	@UiField CheckBox history;
 	@UiField CheckBox magicVars;
+	@UiField CheckBox codeMirrorHeaders;
 	@UiField DivElement historyClear;
 	
-	AppCssResource appStyle = AppResources.INSTANCE.appCss();
+	
 	Presenter listener = null;
 	
 	public SettingsViewImpl(){
@@ -58,9 +57,9 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	@Override
 	public void setHistoryEnabled(boolean historyEnabled) {
 		if(historyEnabled){
-			historyClear.removeClassName(appStyle.hidden());
+			historyClear.removeClassName("hidden");
 		} else {			
-			historyClear.addClassName(appStyle.hidden());
+			historyClear.addClassName("hidden");
 		}
 		history.setValue(historyEnabled);
 	}
@@ -89,6 +88,10 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	public boolean isMagicVarsEnabled() {
 		return magicVars.getValue().booleanValue();
 	}
+	@Override
+	public void setCodeMirrorHeadersEnabled(boolean codeMirrorHeadersEnabled) {
+		codeMirrorHeaders.setValue(codeMirrorHeadersEnabled);
+	}
 	
 	@UiHandler("history")
 	void onHistoryChange(ValueChangeEvent<Boolean> event){
@@ -98,10 +101,10 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 			Log.debug("History value changed. Current value is: " + value);
 		}
 		if(value){
-			historyClear.removeClassName(appStyle.hidden());
+			historyClear.removeClassName("hidden");
 			history.setValue(true);
 		} else {
-			historyClear.addClassName(appStyle.hidden());
+			historyClear.addClassName("hidden");
 			history.setValue(false);
 		}
 		listener.changeHistoryValue(value);
@@ -129,6 +132,16 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 		}
 		listener.changeMagicVarsValue(event.getValue());
 	}
+	
+	@UiHandler("codeMirrorHeaders")
+	void onCodeMirrorHeadersChange(ValueChangeEvent<Boolean> event){
+		if(RestClient.isDebug()){
+			Log.debug("CodeMirror for headers value changed. Current value is: " + String.valueOf(event.getValue()));
+		}
+		listener.changeCodeMirrirHeadersValue(event.getValue());
+	}
+	
+	
 	@UiHandler("clearHistory")
 	void onClearHistory(ClickEvent e){
 		listener.clearHistory();
@@ -142,6 +155,8 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	void onImportExportEdit(ClickEvent e){
 		listener.goTo(new ImportExportPlace("default"));
 	}
+
+	
 
 	
 

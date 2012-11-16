@@ -1,7 +1,6 @@
 package org.rest.client.ui.desktop.widget;
 
 import org.rest.client.RestClient;
-import org.rest.client.resources.AppResources;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.websql.StatusCodeRow;
 
@@ -25,7 +24,7 @@ public class StatusCodeImage extends Image implements ClickHandler {
 		};
 		setUrl(url);
 		setTitle("Show explanation");
-		setStyleName(AppResources.INSTANCE.appCss().statusCodeHintImage());
+		setStyleName("statusCodeHintImage");
 		setWidth("16px");
 		setHeight("16px");
 		setVisible(false);

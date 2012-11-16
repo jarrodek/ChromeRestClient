@@ -2,85 +2,27 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	
-	<ui:with field="appResources" type="org.rest.client.resources.AppResources"/>
-	
-	<ui:style type="org.rest.client.ui.desktop.widget.RequestUrlWidget.WidgetStyle">
-		.fullWidthRelativeInput{
-			border-radius: 2px;
-			position: absolute;
-			right: 0px;
-			left: 0px;
-			top: 7px;
-			height: 20px;
-		}
-		.urlInput{
-			left: 15px;
-		}
-		.inputPadding{
-			padding: 5px 4px;
-		}
-		.urlPanel{
-			position: relative;
-			min-height: 50px;
-			width: 100%;
-		}
-		
-		.detailedPanel{
-		}
-		.opened{
-			min-height: 80px;
-			margin-bottom: 20px;
-		}
-		.pathInput{
-			top: 50px;
-		}
-		.paramsSection{
-			position: relative;
-			margin-top: 75px;
-		}
-		
-		.sectionTitle{
-			font-weight: bold;
-			margin-bottom: 4px;
-			margin-left: 2px;
-		}
-		.hashSection{
-			position: relative;
-			min-height: 40px;
-			margin-top: 10px;
-		}
-		.addParamAnchor{ margin-left: 7px; }
-		.urlToggleHandlerImage{
-			position: relative;
-			top: 7px;
-		}
-	</ui:style>
-	<g:HTMLPanel styleName="{style.urlPanel}">
+	<g:HTMLPanel styleName="url_widget_urlPanel">
 		<!-- Toggle simple/detailed view -->
-		
-		
-		
-		<g:InlineLabel ui:field="toggleView" styleName="{appResources.appCss.handlerImageClosed} {appResources.appCss.handlerImageContainer} {style.urlToggleHandlerImage}"></g:InlineLabel>
+		<g:InlineLabel ui:field="toggleView" styleName="handlerImageClosed handlerImageContainer url_widget_urlToggleHandlerImage"></g:InlineLabel>
 		
 		<!-- Full URL input box with suggestions -->
-		<g:SuggestBox addStyleNames="{style.fullWidthRelativeInput} {style.urlInput} {style.inputPadding}" ui:field="urlField"></g:SuggestBox>
-		
-		
+		<g:SuggestBox addStyleNames="url_widget_fullWidthRelativeInput url_widget_urlInput url_widget_inputPadding" ui:field="urlField"></g:SuggestBox>
 		
 		<!-- Panel to keep detailed form -->
-		<div ui:field="detailedPanel" class="hidden {style.detailedPanel} {style.opened}">
+		<div ui:field="detailedPanel" class="hidden url_widget_detailedPanel url_widget_opened">
 			
 			<!-- Host value text box -->
-			<g:TextBox addStyleNames="{style.fullWidthRelativeInput} {style.urlInput} {style.inputPadding}" ui:field="detailedHostField" title="HOST value"></g:TextBox>
+			<g:TextBox addStyleNames="url_widget_fullWidthRelativeInput url_widget_urlInput url_widget_inputPadding" ui:field="detailedHostField" title="HOST value"></g:TextBox>
 			<!-- PATH value text box -->
-			<g:TextBox addStyleNames="{style.fullWidthRelativeInput} {style.pathInput} {style.inputPadding}" ui:field="detailedPathField" title="PATH value"></g:TextBox>
+			<g:TextBox addStyleNames="url_widget_fullWidthRelativeInput url_widget_pathInput url_widget_inputPadding" ui:field="detailedPathField" title="PATH value"></g:TextBox>
 			<!-- Query params form section -->
-			<section class="{style.paramsSection}">
-				<p class="{style.sectionTitle}">
+			<section class="url_widget_paramsSection">
+				<p class="url_widget_sectionTitle">
 					Query parameters
 					
 					<!-- Add new query param button -->
-					<g:Anchor styleName="{style.addParamAnchor}" ui:field="addParam" href="#">Add</g:Anchor>
+					<g:Anchor styleName="url_widget_addParamAnchor" ui:field="addParam" href="#">Add</g:Anchor>
 				</p>
 				<!-- Query params form container -->
 				<g:HTMLPanel ui:field="paramsContainer">
@@ -89,8 +31,8 @@
 				
 			</section>
 			<!-- Query params form section -->
-			<section class="{style.hashSection}">
-				<g:TextBox addStyleNames="{style.fullWidthRelativeInput} {style.inputPadding}" ui:field="detailedHashField" title="PATH value"></g:TextBox>
+			<section class="url_widget_hashSection">
+				<g:TextBox addStyleNames="url_widget_fullWidthRelativeInput url_widget_inputPadding" ui:field="detailedHashField" title="PATH value"></g:TextBox>
 			</section>
 		</div>
 		

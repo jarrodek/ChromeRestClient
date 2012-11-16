@@ -80,7 +80,7 @@ public abstract class DataExport {
 				for(RequestObject item : result){
 					formIdsList.add(item.getId());
 				}
-				Log.debug("prepared " + formIdsList.size() + " items to export.");
+				
 				allDataList = result;
 				RestClient.getClientFactory().getExportedDataReferenceService().getExportedFormByReferenceId(formIdsList, new ListCallback<ExportedDataItem>() {
 					@Override
@@ -93,7 +93,7 @@ public abstract class DataExport {
 						for(ExportedDataItem _item : res){
 							excludeList.add(_item.getReferenceId());
 						}
-						Log.debug("exlude " + excludeList.size() + " items from export.");
+						
 						synchPrepareData(handler);
 					}
 				});
@@ -109,8 +109,6 @@ public abstract class DataExport {
 			readyToSendList.add(item);
 			includeList.add(item.getId());
 		}
-		
-		Log.debug("readyToSendList: " + readyToSendList.size());
 		
 		if(readyToSendList.size() == 0){
 			allDataList = null;
@@ -132,7 +130,7 @@ public abstract class DataExport {
 			ArrayList<RequestHeader> _list = RequestHeadersParser.stringToHeaders(item.getHeaders());
 			for(RequestHeader _h : _list){
 				JSONObject ho = new JSONObject();
-				ho.put(_h.getName(), new JSONString(_h.getValue()));
+				ho.put(_h.getName(), new JSONString(_h.getValue() == null ? "" : _h.getValue()));
 				_headersArray.set(_headersArray.size(), ho);
 			}
 			_data.put("headers", _headersArray);

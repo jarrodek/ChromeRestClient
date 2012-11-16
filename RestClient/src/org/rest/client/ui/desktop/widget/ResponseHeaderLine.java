@@ -7,7 +7,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -24,9 +23,6 @@ import com.google.gwt.xhr2.client.Header;
 public class ResponseHeaderLine extends Composite {
 	interface Binder extends UiBinder<Widget, ResponseHeaderLine> {}
 	
-	interface LineStyle extends CssResource {
-		String opened();
-	}
 	@UiField Anchor hintHandler;
 	@UiField SpanElement headerNameTitle;
 	@UiField SpanElement headerValueTitle;
@@ -34,7 +30,6 @@ public class ResponseHeaderLine extends Composite {
 	@UiField SpanElement example;
 	@UiField SpanElement headerName;
 	@UiField DivElement hintParent;
-	@UiField LineStyle style;
 	/**
 	 * 
 	 * @param header
@@ -96,13 +91,13 @@ public class ResponseHeaderLine extends Composite {
 	void handleClick(ClickEvent e) {
 		Element parent = hintParent.getParentElement();
 		String currentClass = parent.getClassName();
-		if(currentClass.contains(style.opened())){
-			parent.removeClassName(style.opened());
+		if(currentClass.contains("Response_Header_Line_opened")){
+			parent.removeClassName("Response_Header_Line_opened");
 			hintParent.setAttribute("style", "height:0px");
 			hideTimer.schedule(350);
 		} else {
 			hintParent.getStyle().setDisplay(Display.BLOCK);
-			parent.addClassName(style.opened());
+			parent.addClassName("Response_Header_Line_opened");
 			hintParent.setAttribute("style", "height:"+hintParent.getScrollHeight()+"px");
 		}
 	}

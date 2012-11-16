@@ -66,7 +66,7 @@ public class ShortcutActivity extends AppActivity implements
 			
 			@Override
 			public void onFailure(Throwable reason) {
-				StatusNotification.notify("Unable to find current shorcuts state.", StatusNotification.TYPE_ERROR);
+				StatusNotification.notify("Unable to find current shorcuts state.", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
 			}
 		});
 	}
