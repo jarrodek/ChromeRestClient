@@ -41,6 +41,20 @@
 		</section>
 		<section class="About_View_aboutContent">
 			<h3>Changelog</h3>
+			
+			<h4>Konwn issues</h4>
+			<ul>
+				<li>Layout may seems to freezed switching HTTP request method (konown workaround: mouse over any menu element).</li>
+			</ul>
+			<p>11/23/2012</p>
+			<ul>
+				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=100">Issue 100</a>: XML is not shown for application/atom+xml content-type</li>
+			</ul>
+			<p>11/17/2012</p>
+			<ul>
+				<li>Removed all CSS declaration to external CSS file.</li>
+				<li>Projects menu now contain "select" input instead of several block elements with name.</li>
+			</ul>
 			<p>11/10/2012</p>
 			<ul>
 				<li>Several bug fixes</li>

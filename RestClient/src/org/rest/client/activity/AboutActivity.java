@@ -94,6 +94,13 @@ public class AboutActivity extends AppActivity implements
 				}
 				
 			}
+
+			@Override
+			public void onError(String message) {
+				if(RestClient.isDebug()){
+					Log.error("Unknown error occured: " + message);
+				}
+			}
 		});
 	}
 	

@@ -6,9 +6,7 @@
 	<inherits name='com.google.gwt.place.Place' />
 	<inherits name="com.google.gwt.resources.Resources" />
 
-
 	<inherits name='com.google.gwt.user.theme.clean.Clean' />
-
 
 	<inherits name="com.google.gwt.file.FileApi" />
 	<inherits name="com.google.gwt.chrome.ChromeExtension" />

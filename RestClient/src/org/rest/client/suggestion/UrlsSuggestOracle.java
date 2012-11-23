@@ -139,6 +139,19 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 						UrlsSuggestOracle.this.returnSuggestions(callback);
 					}
 				}
+
+				@Override
+				public void onError(String message) {
+					chromeQueryEnd = true;
+					if(databaseQueryEnd){
+						recentDatabaseResult = new DatabaseRequestResponse<UrlSuggestion>(request,
+								numberOfDatabaseSuggestions, _suggestions);
+						UrlsSuggestOracle.this.returnSuggestions(callback);
+					}
+					if(RestClient.isDebug()){
+						Log.error("Unknown error occured: " + message);
+					}
+				}
 			});
 		} else {
 			// Call chrome API (compiled extension)

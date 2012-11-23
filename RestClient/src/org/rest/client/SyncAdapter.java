@@ -18,7 +18,7 @@ import com.google.gwt.storage.client.Storage;
  */
 public class SyncAdapter {
 	
-	private static boolean debug = false;
+	private static boolean debug = true;
 	private static boolean history = true;
 	private static boolean notifications = false;
 	private static boolean magicVars = true;
@@ -30,7 +30,7 @@ public class SyncAdapter {
 		final Storage store = Storage.getLocalStorageIfSupported();
 		SyncStorageArea sync = chromeStore.getSync();
 		JSONObject query = new JSONObject();
-		query.put(LocalStore.DEBUG_KEY, new JSONString("false"));
+		query.put(LocalStore.DEBUG_KEY, new JSONString("true"));
 		query.put(LocalStore.HISTORY_KEY, new JSONString("true"));
 		query.put(LocalStore.NOTIFICATIONS_ENABLED_KEY, new JSONString("false"));
 		query.put(LocalStore.MAGIC_VARS_ENABLED_KEY, new JSONString("true"));

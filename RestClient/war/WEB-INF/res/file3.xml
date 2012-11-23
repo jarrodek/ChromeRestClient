@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<feed xml:base="http://services.odata.org/OData/OData.svc/" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">Products</title>
+  <id>http://services.odata.org/OData/OData.svc/Products(1)/Supplier/Products</id>
+  <updated>2012-11-23T21:32:07Z</updated>
+  <link rel="self" title="Products" href="Products" />
+  <entry>
+    <id>http://services.odata.org/OData/OData.svc/Products(1)</id>
+    <title type="text">Milk</title>
+    <summary type="text"><![CDATA[Low fat milk]]></summary>
+    <updated>2012-11-23T21:32:07Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="Product" href="Products(1)" />
+    <link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Category" type="application/atom+xml;type=entry" title="Category" href="Products(1)/Category" />
+    <link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Supplier" type="application/atom+xml;type=entry" title="Supplier" href="Products(1)/Supplier" />
+    <category term="ODataDemo.Product" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:ID m:type="Edm.Int32">1</d:ID>
+        <d:ReleaseDate m:type="Edm.DateTime">1995-10-01T00:00:00</d:ReleaseDate>
+        <d:DiscontinuedDate m:type="Edm.DateTime" m:null="true" />
+        <d:Rating m:type="Edm.Int32">3</d:Rating>
+        <d:Price m:type="Edm.Decimal">3.5</d:Price>
+      </m:properties>
+    </content>
+  </entry>
+  <entry>
+    <id>http://services.odata.org/OData/OData.svc/Products(2)</id>
+    <title type="text">Vint soda</title>
+    <summary type="text">Americana Variety - Mix of 6 flavors</summary>
+    <updated>2012-11-23T21:32:07Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="Product" href="Products(2)" />
+    <link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Category" type="application/atom+xml;type=entry" title="Category" href="Products(2)/Category" />
+    <link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Supplier" type="application/atom+xml;type=entry" title="Supplier" href="Products(2)/Supplier" />
+    <category term="ODataDemo.Product" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:ID m:type="Edm.Int32">2</d:ID>
+        <d:ReleaseDate m:type="Edm.DateTime">2000-10-01T00:00:00</d:ReleaseDate>
+        <d:DiscontinuedDate m:type="Edm.DateTime" m:null="true" />
+        <d:Rating m:type="Edm.Int32">3</d:Rating>
+        <d:Price m:type="Edm.Decimal">20.9</d:Price>
+      </m:properties>
+    </content>
+  </entry>
+  <entry>
+    <id>http://services.odata.org/OData/OData.svc/Products(3)</id>
+    <title type="text">Havina Cola</title>
+    <summary type="text">The Original Key Lime Cola</summary>
+    <updated>2012-11-23T21:32:07Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="Product" href="Products(3)" />
+    <link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Category" type="application/atom+xml;type=entry" title="Category" href="Products(3)/Category" />
+    <link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Supplier" type="application/atom+xml;type=entry" title="Supplier" href="Products(3)/Supplier" />
+    <category term="ODataDemo.Product" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:ID m:type="Edm.Int32">3</d:ID>
+        <d:ReleaseDate m:type="Edm.DateTime">2005-10-01T00:00:00</d:ReleaseDate>
+        <d:DiscontinuedDate m:type="Edm.DateTime">2006-10-01T00:00:00</d:DiscontinuedDate>
+        <d:Rating m:type="Edm.Int32">3</d:Rating>
+        <d:Price m:type="Edm.Decimal">19.9</d:Price>
+      </m:properties>
+    </content>
+  </entry>
+  <entry>
+    <id>http://services.odata.org/OData/OData.svc/Products(4)</id>
+    <title type="text">Fruit Punch</title>
+    <summary type="text">Mango flavor, 8.3 Ounce Cans (Pack of 24)</summary>
+    <updated>2012-11-23T21:32:07Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="Product" href="Products(4)" />
+    <link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Category" type="application/atom+xml;type=entry" title="Category" href="Products(4)/Category" />
+    <link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Supplier" type="application/atom+xml;type=entry" title="Supplier" href="Products(4)/Supplier" />
+    <category term="ODataDemo.Product" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:ID m:type="Edm.Int32">4</d:ID>
+        <d:ReleaseDate m:type="Edm.DateTime">2003-01-05T00:00:00</d:ReleaseDate>
+        <d:DiscontinuedDate m:type="Edm.DateTime" m:null="true" />
+        <d:Rating m:type="Edm.Int32">3</d:Rating>
+        <d:Price m:type="Edm.Decimal">22.99</d:Price>
+      </m:properties>
+    </content>
+  </entry>
+  <entry>
+    <id>http://services.odata.org/OData/OData.svc/Products(5)</id>
+    <title type="text">Cranberry Juice</title>
+    <summary type="text">16-Ounce Plastic Bottles (Pack of 12)</summary>
+    <updated>2012-11-23T21:32:07Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="Product" href="Products(5)" />
+    <link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Category" type="application/atom+xml;type=entry" title="Category" href="Products(5)/Category" />
+    <link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Supplier" type="application/atom+xml;type=entry" title="Supplier" href="Products(5)/Supplier" />
+    <category term="ODataDemo.Product" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:ID m:type="Edm.Int32">5</d:ID>
+        <d:ReleaseDate m:type="Edm.DateTime">2006-08-04T00:00:00</d:ReleaseDate>
+        <d:DiscontinuedDate m:type="Edm.DateTime" m:null="true" />
+        <d:Rating m:type="Edm.Int32">3</d:Rating>
+        <d:Price m:type="Edm.Decimal">22.8</d:Price>
+      </m:properties>
+    </content>
+  </entry>
+  <entry>
+    <id>http://services.odata.org/OData/OData.svc/Products(6)</id>
+    <title type="text">Pink Lemonade</title>
+    <summary type="text">36 Ounce Cans (Pack of 3)</summary>
+    <updated>2012-11-23T21:32:07Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="Product" href="Products(6)" />
+    <link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Category" type="application/atom+xml;type=entry" title="Category" href="Products(6)/Category" />
+    <link rel="http://schemas.microsoft.com/ado/2007/08/dataservices/related/Supplier" type="application/atom+xml;type=entry" title="Supplier" href="Products(6)/Supplier" />
+    <category term="ODataDemo.Product" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:ID m:type="Edm.Int32">6</d:ID>
+        <d:ReleaseDate m:type="Edm.DateTime">2006-11-05T00:00:00</d:ReleaseDate>
+        <d:DiscontinuedDate m:type="Edm.DateTime" m:null="true" />
+        <d:Rating m:type="Edm.Int32">3</d:Rating>
+        <d:Price m:type="Edm.Decimal">18.8</d:Price>
+      </m:properties>
+    </content>
+  </entry>
+</feed>

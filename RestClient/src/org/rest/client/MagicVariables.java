@@ -3,6 +3,7 @@ package org.rest.client;
 import java.util.Date;
 import java.util.HashMap;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Random;
@@ -14,8 +15,12 @@ public class MagicVariables {
 	
 	public String apply(String input){
 		if(!SyncAdapter.isMagicVars()) return input;
-		input = applyRandom(input);
-		input = applyTime(input);
+		try{
+			input = applyRandom(input);
+			input = applyTime(input);
+		} catch(Exception e){
+			Log.error("Error applying Magic Variables",e);
+		}
 		return input;
 	}
 	

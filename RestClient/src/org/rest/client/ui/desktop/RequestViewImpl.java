@@ -153,7 +153,6 @@ public class RequestViewImpl extends Composite implements RequestView {
 	 *            True to check "Other" field status and enable/disable control
 	 */
 	private void methodChangeAction(String newValue, boolean checkOther) {
-
 		if (checkOther) {
 			if (newValue.equals("Other")) {
 				otherMethodValue.setEnabled(true);
@@ -212,7 +211,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 		String defaultSelectedContentTypeValue = HttpContentTypeHelper
 				.getDefaulSelected();
 		selectContentTypeValue(defaultSelectedContentTypeValue);
-
+		projectPanel.addStyleName("hidden");
 		listener.fireClearAllEvent();
 	}
 
@@ -472,7 +471,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 		TutorialDialog saved = TutorialFactory.createItem();
 		saved.setReferencedElement(savedElement, Direction.RIGHT);
 		saved.setPositionCorrection(-5, -40);
-		saved.setHTML("When You press CTRL+C save dialog will appear.<br/>Saved requests are stored in this panel.");
+		saved.setHTML("When You press CTRL+S save dialog will appear.<br/>Saved requests are stored in this panel.");
 		saved.showArrow(Direction.LEFT);
 		factory.addItem(saved);
 		

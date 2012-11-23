@@ -8,9 +8,6 @@ class WorkerImpl extends JavaScriptObject {
 	
 	static final native WorkerImpl get(String script) /*-{
 		var worker = new Worker(script); 
-		worker.onerror = $entry(function(e){
-			$wnd.console.error('WorkerError::',e);
-		});
 		return worker;
 	}-*/;
 	
@@ -32,6 +29,11 @@ class WorkerImpl extends JavaScriptObject {
 		this.addEventListener('message', $entry(function(e) {
 		  $wnd._lastWorker = e.data;
 		  handler.@org.rest.client.dom.worker.WorkerMessageHandler::onMessage(Ljava/lang/String;)(e.data);
+		}), false);
+		
+		this.addEventListener('error', $entry(function(e){
+			$wnd._lastWorkerError = ['ERROR: Line ', e.lineno, ' in ', e.filename, ': ', e.message].join('');
+			handler.@org.rest.client.dom.worker.WorkerMessageHandler::onError(Lorg/rest/client/dom/worker/WebWorkerError;)(e);
 		}), false);
 	}-*/;
 }

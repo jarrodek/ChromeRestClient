@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.rest.client.RestClient;
+import org.rest.client.dom.worker.WebWorkerError;
 import org.rest.client.dom.worker.Worker;
 import org.rest.client.dom.worker.WorkerMessageHandler;
 import org.rest.client.event.OverwriteUrlEvent;
@@ -368,7 +369,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		}
 		if(isXML){
 			setTabOpened(TABS.XML, xmlTab);
-			new XMLViewer(body, xmlPanel);
+			new XMLViewer(body, xmlPanel, xml);
 			setTabVisible(TABS.XML, xmlTab);
 		}
 		if(RestClient.isDebug()){
@@ -442,6 +443,11 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			public void onMessage(String message) {
 				parsedBody.setInnerHTML(message);
 				addNativeControls(parsedBody);
+			}
+
+			@Override
+			public void onError(WebWorkerError err) {
+				parsedBody.setInnerHTML(err.getMessage());
 			}
 		});
 		worker.postMessage(html);

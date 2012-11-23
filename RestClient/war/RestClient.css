@@ -877,9 +877,22 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 }
 .methodsWidget{
 	display: -webkit-flex;
+	display: flex;
 	-webkit-justify-content: flex-start;
+	justify-content: flex-start;
 	-webkit-align-items: center;
+	align-items: center;
+	-webkit-flex-flow: row wrap;
+	flex-flow: row wrap;
 }
+.methodsWidget > div,
+.methodsWidget .radioButton {
+	-webkit-flex: 0 1 auto;
+	flex: 0 1 auto;
+	-webkit-align-self: auto;
+	align-self: auto;
+}
+
 .radioButton label,
 .radioButton {
 	cursor: pointer;

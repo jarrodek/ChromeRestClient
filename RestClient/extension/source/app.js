@@ -18,3 +18,11 @@ window.onbeforeunload = trackDrop;
 	s.parentNode.insertBefore(ga, s);
 })();
 window.URL = window.webkitURL || window.URL;
+
+function loadPlusApi(){
+	var ga = document.createElement('script');
+	ga.type = 'text/javascript';
+	ga.src = 'https://apis.google.com/js/plusone.js';
+	var s = document.getElementsByTagName('script')[0];
+	s.parentNode.insertBefore(ga, s);
+}

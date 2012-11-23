@@ -141,6 +141,19 @@ public class SocketSuggestOracle extends DatabaseSuggestOracle {
 						SocketSuggestOracle.this.returnSuggestions(callback);
 					}
 				}
+
+				@Override
+				public void onError(String message) {
+					chromeQueryEnd = true;
+					if(databaseQueryEnd){
+						recentDatabaseResult = new DatabaseRequestResponse<UrlSuggestion>(request,
+								numberOfDatabaseSuggestions, _suggestions);
+						SocketSuggestOracle.this.returnSuggestions(callback);
+					}
+					if(RestClient.isDebug()){
+						Log.error("Unknown error occured: " + message);
+					}
+				}
 			});
 		} else {
 			// Call chrome API (compiled extension)

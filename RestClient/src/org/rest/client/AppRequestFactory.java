@@ -154,6 +154,11 @@ public class AppRequestFactory {
 						}
 						startHttpRequest(data);
 					}
+
+					@Override
+					public void onError(String message) {
+						reportFailure("Unknown error occured: " + message,null);
+					}
 				});
 				
 			}

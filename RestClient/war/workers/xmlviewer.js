@@ -18,7 +18,8 @@ self.onmessage = function(e) {
 	    var parser = new XMLViewer(data.data);
 	    result = parser.getHTML();
     } catch(e){
-    	result = e.message;
+    	//result = e.message;
+    	throw e;
     }
     parser = null;
     self.postMessage(result);
@@ -119,7 +120,6 @@ XMLViewer.prototype = {
     	var childrenCount = node.childNodes.length;
     	var parsed = "";
     	var showArrows = false;
-    	var children = node.childNodes;
     	
 		if (childrenCount > 1 || this._childIsCDATA(node)){
 			parsed += '<span colapse-marker="true" class="'+XMLViewer.STYLE.arrowExpanded+'">&nbsp;</span>';
@@ -129,6 +129,7 @@ XMLViewer.prototype = {
 		parsed += '<span class="'+XMLViewer.STYLE.tagname+'">'+node.nodeName+'</span>';
 		parsed += this.parseAttributes(node);
 		if(childrenCount > 0){
+			var children = node.childNodes;
 			parsed += '<span class="'+XMLViewer.STYLE.punctuation+'">&gt;</span>';
 			
 			

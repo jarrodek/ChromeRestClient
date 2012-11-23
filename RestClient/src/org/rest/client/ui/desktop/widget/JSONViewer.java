@@ -1,10 +1,12 @@
 package org.rest.client.ui.desktop.widget;
 
 import org.rest.client.RestClient;
+import org.rest.client.dom.worker.WebWorkerError;
 import org.rest.client.dom.worker.Worker;
 import org.rest.client.dom.worker.WorkerMessageHandler;
 import org.rest.client.event.OverwriteUrlEvent;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -36,6 +38,13 @@ public class JSONViewer extends Composite {
 					public void onMessage(String message) {
 						result.setHTML(message);
 						addNativeControls(result.getElement());
+					}
+
+					@Override
+					public void onError(WebWorkerError err) {
+						if(RestClient.isDebug()){
+							Log.error("Error in web worker", err);
+						}
 					}
 				});
 				JSONObject styleData = new JSONObject();

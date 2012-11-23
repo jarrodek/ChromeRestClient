@@ -155,6 +155,11 @@ public class SettingsActivity extends AppActivity implements
 					SyncAdapter.setCodeMirrorHeaders(value);
 				}
 			}
+
+			@Override
+			public void onError(String message) {
+				StatusNotification.notify("Save error: " + message, StatusNotification.TYPE_CRITICAL, StatusNotification.TIME_SHORT, true);
+			}
 		});
 	}
 	

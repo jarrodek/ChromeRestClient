@@ -489,6 +489,13 @@ public class RequestActivity extends AppActivity implements
 						
 						responseView.scrollToView();
 					}
+
+					@Override
+					public void onError(String message) {
+						if(RestClient.isDebug()){
+							Log.error("Unknown error occured: " + message);
+						}
+					}
 				});
 			}
 		});
@@ -641,6 +648,12 @@ public class RequestActivity extends AppActivity implements
 					}
 				}
 				RestClient.fixChromeLayout();
+			}
+			@Override
+			public void onError(String message) {
+				if(RestClient.isDebug()){
+					Log.error("Unknown error occured: " + message);
+				}
 			}
 		});
 		
@@ -852,6 +865,8 @@ public class RequestActivity extends AppActivity implements
 
 	@Override
 	public void fireClearAllEvent() {
+		RestClient.setPreviousProject(RestClient.getOpenedProject());
+		RestClient.setOpenedProject(-1);
 		eventBus.fireEvent(new ClearFormEvent());
 	}
 
