@@ -651,14 +651,16 @@ public class RequestBuilder {
 		
 		try {
 			if( requestFormData != null ){
-				xmlHttpRequest.send( requestFormData );
+				xmlHttpRequest.send(requestFormData);
 			} else if( requestData != null ){
 				xmlHttpRequest.send(requestData);
 			} else {
 				xmlHttpRequest.send();
 			}
 		} catch (JavaScriptException e) {
-			throw new RequestException(e.getMessage());
+			RequestException ex = new RequestException("Unable send the request.");
+			ex.initCause(e);
+			throw ex;
 		}
 
 		return request;
@@ -682,7 +684,9 @@ public class RequestBuilder {
 				try {
 					xmlHttpRequest.setRequestHeader(token, value);
 				} catch (JavaScriptException e) {
-					throw new RequestException(e.getMessage());
+					RequestException exc = new RequestException("Unable set request header: "+token+": "+value);
+					exc.initCause(e);
+					throw exc;
 				}
 			}
 		}
