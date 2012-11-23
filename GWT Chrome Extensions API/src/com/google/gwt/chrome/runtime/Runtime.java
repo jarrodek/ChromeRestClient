@@ -10,10 +10,12 @@ public class Runtime implements ChromeRuntime {
 	
 	public interface RuntimeStringHandler {
 		void onResult(String result);
+		void onError(String message);
 	}
 	
 	public interface ManifestHandler {
 		void onManifest(ManifestDetails manifest);
+		void onError(String message);
 	}
 	
 	private final ChromeRuntime impl;

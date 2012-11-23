@@ -11,4 +11,9 @@ public interface ChromeMessageReceiver {
 	 * @param message
 	 */
 	void onMessage(String payload, String message);
+	/**
+	 * Called when error occur in background page 
+	 * @param message
+	 */
+	void onBackgroundError(String message);
 }

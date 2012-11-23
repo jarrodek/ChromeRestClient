@@ -28,6 +28,10 @@ public class ChromeCSmessagePassingImpl implements ChromeMessagePassing {
 			public void onMessage(String payload, String message) {
 				handleExternalMessage(payload, message);
 			}
+			@Override
+			public void onBackgroundError(String message) {
+				error(message);
+			}
 		});
 		
 		postMessage("setEnvironment", "{\"dev\":true}");
@@ -101,4 +105,7 @@ public class ChromeCSmessagePassingImpl implements ChromeMessagePassing {
 			messageCallbackList.remove(payload);
 		}
 	}
+	private final native void error(String message) /*-{
+		$wnd.console.error(message);
+	}-*/;
 }

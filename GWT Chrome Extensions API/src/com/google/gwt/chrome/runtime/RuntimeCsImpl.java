@@ -31,6 +31,11 @@ public class RuntimeCsImpl implements ChromeRuntime {
 				}
 				handler.onResult(result);
 			}
+
+			@Override
+			public void onError(String message) {
+				handler.onError(message);
+			}
 		});
 	}
 
@@ -40,6 +45,11 @@ public class RuntimeCsImpl implements ChromeRuntime {
 			@Override
 			public void onSuccess(String message) {
 				handler.onResult(message);
+			}
+
+			@Override
+			public void onError(String message) {
+				handler.onError(message);
 			}
 		});
 	}
@@ -57,6 +67,10 @@ public class RuntimeCsImpl implements ChromeRuntime {
 					handler.onManifest(null);
 				}
 			}
+			@Override
+			public void onError(String message) {
+				handler.onError(message);
+			}
 		});
 	}
 
@@ -67,6 +81,11 @@ public class RuntimeCsImpl implements ChromeRuntime {
 			@Override
 			public void onSuccess(String message) {
 				handler.onResult(message);
+			}
+
+			@Override
+			public void onError(String message) {
+				handler.onError(message);
 			}
 		});
 	}

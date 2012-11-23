@@ -1,6 +1,7 @@
 package com.google.gwt.chrome.message;
 
 import com.google.gwt.chrome.def.BackgroundPageCallback;
+import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 
@@ -23,6 +24,7 @@ public class ChromeMessagePassingImpl implements ChromeMessagePassing {
 			respObj.put("data", new JSONString(data));
 		}
 		respObj.put("payload", new JSONString(payload));
+		
 		sendExtensionMessage(respObj.toString());
 	}
 
@@ -40,6 +42,12 @@ public class ChromeMessagePassingImpl implements ChromeMessagePassing {
 			public void onMessage(String payload, String message) {
 				callback.onSuccess(message);
 			}
+
+			@Override
+			public void onBackgroundError(String message) {
+				error(message);
+				callback.onError(message);
+			}
 		});
 	}
 	
@@ -50,14 +58,23 @@ public class ChromeMessagePassingImpl implements ChromeMessagePassing {
 	}
 
 	
-	private void sendExtensionMessage(String data) {
+	private void sendExtensionMessage(String data)  throws JavaScriptException  {
 		sendExtensionMessage(data, new ChromeMessageReceiver() {
 			@Override
 			public void onMessage(String payload, String message) {}
+
+			@Override
+			public void onBackgroundError(String message) {
+				error(message);
+			}
 		});
 	};
 	
-	private final native void sendExtensionMessage(String data, ChromeMessageReceiver handler)/*-{
+	private final native void error(String message) /*-{
+		$wnd.console.error(message);
+	}-*/;
+	
+	private final native void sendExtensionMessage(String data, ChromeMessageReceiver handler) throws JavaScriptException /*-{
 		chrome.runtime.getBackgroundPage($entry(function(backgroundPage){
 			var receiver = $entry(function(response) {
 				if (typeof request == "string") {
@@ -74,7 +91,12 @@ public class ChromeMessagePassingImpl implements ChromeMessagePassing {
 				}
 				handler.@com.google.gwt.chrome.message.ChromeMessageReceiver::onMessage(Ljava/lang/String;Ljava/lang/String;)(response.payload,response.data+"");
 			});
-			backgroundPage.requestAction(data, receiver);
+			try{
+				backgroundPage.requestAction(data, receiver);
+			} catch(e){
+				handler.@com.google.gwt.chrome.message.ChromeMessageReceiver::onBackgroundError(Ljava/lang/String;)(e.message);
+				throw e;
+			}
 		}));
 	}-*/;
 

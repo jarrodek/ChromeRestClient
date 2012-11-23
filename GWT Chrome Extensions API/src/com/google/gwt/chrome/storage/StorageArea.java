@@ -32,6 +32,7 @@ public interface StorageArea {
 	 */
 	public interface StorageSimpleCallback {
 		void onDone();
+		void onError(String message);
 	}
 
 	/**

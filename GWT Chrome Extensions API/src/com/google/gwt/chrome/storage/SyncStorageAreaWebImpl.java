@@ -37,6 +37,11 @@ public class SyncStorageAreaWebImpl implements StorageAreaImpl {
 				}
 				callback.onCalculate(_result);
 			}
+
+			@Override
+			public void onError(String message) {
+				callback.onError(message);
+			}
 		});
 	}
 
@@ -46,6 +51,10 @@ public class SyncStorageAreaWebImpl implements StorageAreaImpl {
 			@Override
 			public void onSuccess(String result) {
 				callback.onDone();
+			}
+			@Override
+			public void onError(String message) {
+				callback.onError(message);
 			}
 		});
 	}
@@ -58,6 +67,10 @@ public class SyncStorageAreaWebImpl implements StorageAreaImpl {
 			public void onSuccess(String result) {
 				callback.onDone();
 			}
+			@Override
+			public void onError(String message) {
+				callback.onError(message);
+			}
 		});
 	}
 
@@ -67,6 +80,10 @@ public class SyncStorageAreaWebImpl implements StorageAreaImpl {
 			@Override
 			public void onSuccess(String result) {
 				callback.onDone();
+			}
+			@Override
+			public void onError(String message) {
+				callback.onError(message);
 			}
 		});
 	}
@@ -79,6 +96,10 @@ public class SyncStorageAreaWebImpl implements StorageAreaImpl {
 			@Override
 			public void onSuccess(String result) {
 				callback.onResult(JSONParser.parseStrict(result).isObject().getJavaScriptObject());
+			}
+			@Override
+			public void onError(String message) {
+				callback.onError(message);
 			}
 		});
 	}
