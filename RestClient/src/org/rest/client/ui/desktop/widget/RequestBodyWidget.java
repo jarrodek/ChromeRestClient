@@ -293,7 +293,7 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		
 		final FlowPanel valueContainer = new FlowPanel();
 		valueContainer.add(valueBox);
-		valueContainer.addStyleName("Request_Body_Widget_flex" + " " + "valueBlock");
+		valueContainer.addStyleName("Request_Body_Widget_flex" + " " + "Request_Body_Widget_valueBlock");
 		
 		final FlowPanel actionsContainer = new FlowPanel();
 		actionsContainer.add(removeButton);

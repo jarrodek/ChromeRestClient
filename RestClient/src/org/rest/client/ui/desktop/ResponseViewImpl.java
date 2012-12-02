@@ -78,6 +78,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xhr2.client.Header;
 import com.google.gwt.xhr2.client.Response;
+import com.google.gwt.xhr2.client.XMLHttpRequest2;
 
 public class ResponseViewImpl extends Composite implements ResponseView {
 	private static ResponseViewImplUiBinder uiBinder = GWT
@@ -112,12 +113,14 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	@UiField InlineLabel rawTab;
 	@UiField InlineLabel xmlTab;
 	@UiField InlineLabel jsonTab;
+	@UiField InlineLabel imageTab;
 	@UiField InlineLabel parsedTab;
 	@UiField DivElement tabContent;
 	@UiField HTML plainBody;
 	@UiField Anchor parsedOpen;
 	@UiField PreElement parsedBody;
 	@UiField HTMLPanel xmlPanel;
+	@UiField HTMLPanel imagePanel;
 	@UiField HTMLPanel jsonPanel;
 	@UiField HTMLPanel redirects;
 	WidgetStyle style = new WidgetStyle();
@@ -297,7 +300,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		//Response does not contain any data.
 		final String body = response.getResponseText();
 		Document xml = response.getResponseXML();
-		boolean isXML = false, isJSON = false;
+		boolean isXML = false, isJSON = false, isImage = false;
 		
 		String escaped = SafeHtmlUtils.htmlEscape(body);
 		boolean useCodeMirror = false;
@@ -305,8 +308,8 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		if(xml != null){
 			isXML = true;
 		}
+		Header[] headers = response.getHeaders();
 		if(!isXML){
-			Header[] headers = response.getHeaders();
 			//check if response has JSON header:
 			if(isJSONHeader(headers)){
 				isJSON = true;
@@ -317,6 +320,12 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			useCodeMirror = true;
 		}
 		
+		isImage = isImageHeader(headers);
+		if(isImage){
+			useCodeMirror = false;
+			isJSON = false;
+			isXML = false;
+		}
 		
 		if(escaped.equals("")){
 			xml = null;
@@ -333,6 +342,9 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		
 		if(useCodeMirror){
 			setTabOpened(TABS.PARSED, parsedTab);
+			//show this tab
+			setTabVisible(TABS.PARSED, parsedTab);
+			
 			if(RestClient.isDebug()){
 				Log.debug("Initialize code mirror...");
 			}
@@ -359,8 +371,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 					Log.warn("Unable to load CodeMirror.",e );
 				}
 			}
-			//show this tab
-			setTabVisible(TABS.PARSED, parsedTab);
+			
 		}
 		if(isJSON){
 			setTabOpened(TABS.JSON, jsonTab);
@@ -372,12 +383,33 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			new XMLViewer(body, xmlPanel, xml);
 			setTabVisible(TABS.XML, xmlTab);
 		}
+		if(isImage){
+			
+//			setTabOpened(TABS.IMAGE, imageTab);
+//			setTabVisible(TABS.IMAGE, imageTab);
+//			final Image img = new Image();
+//			img.addLoadHandler(new LoadHandler() {
+//				@Override
+//				public void onLoad(LoadEvent event) {
+//					revokeImageUrl(img.getUrl());
+//				}
+//			});
+//			img.setUrl(createImageUrl(response.getRequest(),"image/png"));
+//			imagePanel.add(img);
+		}
 		if(RestClient.isDebug()){
 			Log.debug("Response panel has been filled with new data");
 		}
 	}
 	
+	private final native String createImageUrl(XMLHttpRequest2 xhr, String mime) /*-{
+		var blob = new $wnd.Blob([xhr.response], {type: mime});
+		return $wnd.URL.createObjectURL(blob);
+	}-*/;
 	
+	private final native void revokeImageUrl(String url) /*-{
+		$wnd.URL.revokeObjectURL(url);
+	}-*/;
 	/**
 	 * Check if in response headers is some header defined as JSON header.
 	 * @param headers
@@ -406,6 +438,16 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		return false;
 	}
 	
+	private boolean isImageHeader(Header[] headers){
+		boolean result = false;
+		for (Header header : headers) {
+			if(!header.getName().toLowerCase().equals("content-type")) continue;
+			if(header.getValue().startsWith("image/")){
+				result = true;
+			}
+		}
+		return result;
+	}
 	
 	
 	
@@ -519,7 +561,8 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		RAW("raw"), 
 		XML("xml"), 
 		JSON("json"), 
-		PARSED("parsed");
+		PARSED("parsed"),
+		IMAGE("image");
 		
 		private final String type;
 		TABS(String type){
@@ -631,6 +674,31 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
 				HTML5Element tab = (HTML5Element) jsonTab.getElement();
+				if(tab.getClassList().contains("inlineButtonHover"))
+					tab.getClassList().remove("inlineButtonHover");
+			}
+		});
+		
+		
+		//IMAGE RESPONSE
+		imageTab.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				if(currentTab.equals(TABS.IMAGE)) return;
+				setTabOpened(TABS.IMAGE, imageTab);
+			}
+		});
+		imageTab.addMouseOverHandler(new MouseOverHandler() {
+			@Override
+			public void onMouseOver(MouseOverEvent event) {
+				HTML5Element tab = (HTML5Element) imageTab.getElement();
+					tab.getClassList().add("inlineButtonHover");
+			}
+		});
+		imageTab.addMouseOutHandler(new MouseOutHandler() {
+			@Override
+			public void onMouseOut(MouseOutEvent event) {
+				HTML5Element tab = (HTML5Element) imageTab.getElement();
 				if(tab.getClassList().contains("inlineButtonHover"))
 					tab.getClassList().remove("inlineButtonHover");
 			}
@@ -751,16 +819,16 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		e.preventDefault();
 		Anchor el = (Anchor)e.getSource();
 		String whiteSpace = plainBody.getElement().getStyle().getProperty("whiteSpace");
-		boolean isWrapped = false;
+		boolean isWrapped = true;
 		if(!whiteSpace.isEmpty()){
-			isWrapped = whiteSpace.equals("normal");
+			isWrapped = whiteSpace.equals("pre");
 		}
 		
 		if(!isWrapped){
-			plainBody.setWordWrap(true);
+			plainBody.getElement().getStyle().setProperty("whiteSpace", "pre");
 			el.setText("Word unwrap");
 		} else {
-			plainBody.setWordWrap(false);
+			plainBody.getElement().getStyle().setProperty("whiteSpace", "nowrap");
 			el.setText("Word wrap");
 		}
 	}

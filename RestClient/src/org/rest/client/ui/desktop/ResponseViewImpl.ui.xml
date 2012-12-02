@@ -47,13 +47,14 @@
 						<g:InlineLabel ui:field="parsedTab" styleName="inlineButton hidden">Parsed</g:InlineLabel>
 						<g:InlineLabel ui:field="xmlTab" styleName="inlineButton hidden">XML</g:InlineLabel>
 						<g:InlineLabel ui:field="jsonTab" styleName="inlineButton hidden">JSON</g:InlineLabel>
+						<g:InlineLabel ui:field="imageTab" styleName="inlineButton hidden">Image</g:InlineLabel>
 					</div>
 					<span class="tabCaption">Response</span>
 				</div>
 				<div ui:field="tabContent" class="tabsContent">
 					<section data-tab="raw" class="tabContent tabContentCurrent">
 						<div class="Response_View_newWindowOutput">
-							<g:Anchor ui:field="wrapContentButton" href="javascript:;" >Word wrap</g:Anchor>
+							<g:Anchor ui:field="wrapContentButton" href="javascript:;" >Word unwrap</g:Anchor>
 							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="copyClipboardButton" href="javascript:;" >Copy to clipboard</g:Anchor>
 							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="saveAsFileButton1" href="javascript:;" >Save as file</g:Anchor>
 						</div>
@@ -87,6 +88,10 @@
 							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="saveAsFileButton4" href="javascript:;" >Save as file</g:Anchor>
 						</div>
 						<g:HTMLPanel ui:field="jsonPanel" styleName="Response_View_rawInput Response_View_bodyOverflow"/>
+					</section>
+					<section data-tab="image" class="tabContent hidden">
+						<div class="Response_View_newWindowOutput"></div>
+						<g:HTMLPanel ui:field="imagePanel" styleName="Response_View_rawInput Response_View_bodyOverflow"/>
 					</section>
 				</div>
 			</g:HTMLPanel>
