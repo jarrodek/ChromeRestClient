@@ -27,6 +27,7 @@ import org.rest.client.storage.store.WebSocketDataStoreWebSql;
 import org.rest.client.storage.websql.ExportedDataReferenceService;
 import org.rest.client.ui.AboutView;
 import org.rest.client.ui.AddEncodingView;
+import org.rest.client.ui.EditProjectView;
 import org.rest.client.ui.ErrorDialogView;
 import org.rest.client.ui.HistoryListItemView;
 import org.rest.client.ui.HistoryView;
@@ -84,7 +85,7 @@ public interface ClientFactory {
 	HistoryView getHistoryView();
 	HistoryListItemView getHistoryListItemView();
 	ImportExportView getImportExportView();
-	
+	EditProjectView getEditProjectView();
 	
 	// Communication with extension
 	ChromeMessagePassing getChromeMessagePassing();

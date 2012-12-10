@@ -60,6 +60,10 @@ public interface RequestView extends IsWidget {
 		void fireUrlToggleEvent(boolean isNowSimpleView);
 		
 		void fireRequestStartActionEvent(Date startTime);
+		
+		void deleteCurrentEndpoint();
+		
+		EditProjectView getEditProjectDialog();
 	}
 	
 	/**
@@ -94,7 +98,7 @@ public interface RequestView extends IsWidget {
 	 */
 	void appendEncodingValues(String[] values);
 	
-	void setProjectData(ProjectObject project, List<RequestObject> requests);
+	void setProjectData(ProjectObject project, List<RequestObject> requests, int currentEndpoint);
 	/**
 	 * Set up tutorial.
 	 * @param factory
@@ -105,4 +109,6 @@ public interface RequestView extends IsWidget {
 	void handleRequestStartActionEvent(Date time);
 	void handleRequestEndEvent();
 	void handleRequestChangeEvent(RequestChangeEvent event);
+	
+	void updateProjectMetadata(ProjectObject project);
 }

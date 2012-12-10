@@ -49,4 +49,5 @@ public interface AboutView extends IsWidget {
 	 */
 	void setManifest(ManifestDetails manifest);
 	void setUpTutorial(TutorialFactory tutorialFactory);
+	void showDonateDialog();
 }

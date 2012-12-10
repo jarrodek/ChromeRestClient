@@ -6,12 +6,27 @@
 	
 	
 	<g:HTMLPanel ui:field="root" styleName="requestPanel">
-		<!-- Project panel -->
-		<g:HTMLPanel ui:field="projectPanel" styleName="projectPanel flex hidden">
-			<g:InlineLabel ui:field="projectName" styleName="projectName flex"></g:InlineLabel>
-			<g:HTMLPanel ui:field="endpointsContainer" styleName="projectendpoints flex"></g:HTMLPanel>
-		</g:HTMLPanel>
-		
+	
+		<div ui:field="topRequestPanel" class="topRequestPanel flex">
+			<div class="projectWrapper flex">
+				<!-- Project panel -->
+				<div ui:field="projectPanel" class="projectPanel hidden flex">
+					<g:InlineLabel ui:field="projectName" styleName="projectName"></g:InlineLabel>
+					<div class="projectEdit">
+						<g:Image url="img/5_content_edit.png" ui:field="editProject" styleName="editProjectAction" title="Edit project data"></g:Image>
+					</div>
+					<g:HTMLPanel ui:field="endpointsContainer" styleName="projectendpoints"></g:HTMLPanel>
+					<div class="projectControls">
+						<g:Image url="img/5_content_discard.png" ui:field="deleteEndpoint" styleName="deleteEndpointAction" title="Delete endpoint"></g:Image>
+					</div>
+				</div>
+			</div>
+			<div class="topActions box">
+				<g:Button styleName="button" ui:field="saveButton" title="Save current state">Save</g:Button>
+				<g:Button styleName="button" ui:field="openButton" title="Open saved request">Open</g:Button>
+			</div>
+			
+		</div>
 		<!-- URL widget -->
 		<rcui:RequestUrlWidget ui:field="urlWidget"></rcui:RequestUrlWidget>
 		

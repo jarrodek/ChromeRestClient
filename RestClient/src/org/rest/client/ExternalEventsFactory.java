@@ -24,10 +24,13 @@ import org.rest.client.event.ClearHistoryEvent;
 import org.rest.client.event.CustomEvent;
 import org.rest.client.event.HttpEncodingChangeEvent;
 import org.rest.client.event.HttpMethodChangeEvent;
+import org.rest.client.event.ProjectChangeEvent;
+import org.rest.client.event.ProjectDeleteEvent;
 import org.rest.client.event.RequestEndEvent;
 import org.rest.client.event.RequestStartActionEvent;
 import org.rest.client.event.URLFieldToggleEvent;
 import org.rest.client.event.UrlValueChangeEvent;
+import org.rest.client.storage.store.objects.ProjectObject;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONBoolean;
@@ -145,6 +148,19 @@ public class ExternalEventsFactory {
 			@Override
 			public void onClearForm() {
 				fireDocumentEvent(CustomEvent.CLEAR_HISTORY.getValue());
+			}
+		});
+		
+		ProjectChangeEvent.register(eventBus, new ProjectChangeEvent.Handler() {
+			@Override
+			public void onProjectChange(ProjectObject project) {
+				fireDocumentEvent(CustomEvent.PROJECT_CHANGE.getValue(), project);
+			}
+		});
+		ProjectDeleteEvent.register(eventBus, new ProjectDeleteEvent.Handler() {
+			@Override
+			public void onProjectDelete(int projectId) {
+				fireDocumentEvent(CustomEvent.PROJECT_DELETE.getValue(), projectId+"");
 			}
 		});
 	}

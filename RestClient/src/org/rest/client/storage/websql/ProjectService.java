@@ -35,6 +35,12 @@ public interface ProjectService extends AppDatabase {
 			+ "{data.getName()},{data.getCreated()})")
 	void insert(ProjectObject data, RowIdListCallback callback);
 	
+	@Update("UPDATE projects SET name = {data.getName()}, time = {data.getCreated()} WHERE ID = {id}")
+	void update(ProjectObject data, int id, VoidCallback callback);
+	
+	@Update(sql = "DELETE FROM projects WHERE ID = {id}")
+	void delete(int id, VoidCallback callback);
+	
 	@Update(sql = "INSERT INTO projects (name, time) VALUES ("
 			+ "{_.getName()},{_.getCreated()})", foreach = "data")
 	void importData(ArrayList<ProjectObject> data, RowIdListCallback callback);

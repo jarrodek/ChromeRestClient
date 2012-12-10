@@ -1,13 +1,10 @@
 body.rest-client {
-	display: -webkit-box;
-	display: -moz-box;
-	display: -o-box;
-	display: -ms-box;
-	display: box;
 	margin: 0px;
 	font-family: arial, sans-serif;
 }
-
+.rest-client:hover {
+background-color: rgba(254, 254, 254, 0.99);
+}
 ul {
 	list-style: none;
 	margin: 0px;
@@ -31,6 +28,7 @@ a, a:active, a:visited {
 body>.ls {
 	width: 120px;
 	margin-right: 30px;
+	display: inline-block;
 }
 
 .app {
@@ -63,7 +61,12 @@ body>.ls {
 	align-items: center;
 }
 #loader-screen.fade{opacity:0;}
-#appContainer{position: relative;}
+#appContainer{
+	position: absolute;
+	right: 10px;
+	left: 150px;
+	top: 0;
+}
 #mainLoader{
 	position: absolute;
 	top: 100px;
@@ -443,18 +446,21 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 }
 
 /* REMOVE CONTROL */
-.formCtrl,.removeButton {
+.formCtrl,
+.removeButton {
 	margin: 5px 0px 7px 7px;
 	padding: 4px 9px;
 	border: 1px #E5E5E5 solid;
 	cursor: pointer;
 }
 
-.formRow .removeButton {
-	display: -webkit-inline-box;
+.formRow 
+.removeButton {
+/* 	display: -webkit-inline-box; */
 }
 
-.formCtrl:hover,.removeButton:hover {
+.formCtrl:hover,
+.removeButton:hover {
 	border-color: #999;
 	background-color: #EAEAEA;
 }
@@ -483,8 +489,9 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	display: inline-block;
 }
 
-.formRow,.formRow>* {
-	display: -webkit-box;
+.formRow > * {
+	display: inline-block;
+	vertical-align: top;
 }
 
 .formKeyInput {
@@ -745,6 +752,13 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	height: 24px;
 	display: inline-block;
 }
+.box{
+	display: -webkit-box;
+	display: -moz-box;
+	display: -ms-box;
+	display: -o-box;
+	display: box;
+}
 .flex{
 	display: -webkit-flex;
 	display: -moz-flex;
@@ -859,22 +873,62 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 .requestPanel{
 
 }
-.projectPanel{
+.topRequestPanel{
 	min-height: 38px;
 	background-color: #F4F4F4;
+}
+.projectPanel{
+	height: 38px;
 	padding: 0 10px;
 	-webkit-flex-flow: row;
-	-webkit-flex-wrap: wrap;
 	-webkit-justify-content: flex-start;
 	-webkit-align-content: center;
-	-webkit-align-items: enter;
+	-webkit-align-items: center;
 }
+.topActions{
+	width: 20%;
+	min-width: 120px;
+	-webkit-box-pack: end;
+	-webkit-box-align: center;
+	margin-right: 1em;
+}
+
 .projectName{
 	font-size: large;
+	margin-right: 0.3em;
+}
+.projectEdit {
 	margin-right: 1em;
 }
 .projectendpoints{
 }
+.projectControls{
+	
+}
+.projectWrapper {
+	-webkit-flex: 1 0 0;
+	display: -webkit-flex;
+}
+.deleteEndpointAction {
+	width: 21px;
+	height: 21px;
+	opacity: 0.2;
+}
+.deleteEndpointAction,
+.editProjectAction{
+	cursor: pointer;
+	-webkit-transition: opacity 0.15s linear;
+	vertical-align: middle;
+}
+.editProjectAction {
+	width: 18px;
+	height: 18px;
+	opacity: 0;
+}
+.projectPanel:hover .editProjectAction,
+.projectPanel:hover .deleteEndpointAction{
+	opacity: 1;
+} 
 .methodsWidget{
 	display: -webkit-flex;
 	display: flex;
@@ -1003,16 +1057,20 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	list-style-type: disc;
 	margin-left: 30px;
 	margin-bottom: 15px;
+	margin-left: 20px;
 }
 .Request_Body_Widget_filesContainer ul{
-	-webkit-box-orient: vertical;
+	font-size: 14px;
+	margin-left: 20px;
 }
 .Request_Body_Widget_payloadFormPanel{
 	padding-left: 7px;
 	padding-bottom: 7px;
 	padding-right: 7px;
 }
-
+.Request_Body_Widget_filesContainer .formRow {
+	margin: 10px 0;
+}
 /*form controls*/
 .Request_Body_Widget_flex{
 	display: -webkit-flex;
@@ -2042,4 +2100,37 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	top: -10px;
 	left: 0px;
 	-webkit-transition: left 0.2s linear;
+}
+/* EDIT PROJECT DIALOG  */
+.deleteProjectImage {
+	vertical-align: middle;
+	height: 25px;
+	width: 25px;
+}
+.deleteProjectContainer{
+	margin-top: 1em;
+}
+.rateAppNav {
+	margin-top: 2em;
+	margin-left: 1em;
+}
+.donateAppNav {
+	margin-left: 1em;
+	margin-top: 0.5em;
+}
+.About_View_facebookShare {
+	margin-top: 0.5em;
+}
+.About_View_donateMsg {
+	max-width: 250px;
+	margin-left: 30px;
+}
+.About_View_donateInfo {
+	margin-bottom: 40px;
+}
+div.About_View_DonatePopupPanelGlass {
+	background: -webkit-radial-gradient(center, rgba(127, 127, 127, 0), rgba(224, 224, 224, 0.87) 35%, rgba(20, 0, 0, 0.78) );
+	opacity: initial;
+	z-index: 6;
+	position: fixed !important;
 }

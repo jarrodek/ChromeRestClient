@@ -26,6 +26,7 @@ import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.suggestion.UrlsSuggestOracle;
 import org.rest.client.ui.RequestView.Presenter;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
@@ -185,12 +186,18 @@ public class RequestUrlWidget extends Composite implements HasText {
 	
 	@UiHandler("urlField")
 	void onSelectionChange(SelectionEvent<Suggestion> event){
+		if(suggestionsDisplay.isSuggestionListShowing()){
+			return;
+		}
 		suggestionCallback();
 	}
 	
 	
 	@UiHandler({"urlField","detailedHostField","detailedPathField","detailedHashField"})
 	void onAnyValueKeyDownHandler(KeyDownEvent event) {
+		if(suggestionsDisplay.isSuggestionListShowing()){
+			return;
+		}
 		if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
 			performEnterKeyAction();
 		}
@@ -268,7 +275,7 @@ public class RequestUrlWidget extends Composite implements HasText {
 				return;
 			}
 		}
-		
+		Log.debug("performEnterKeyAction");
 		lastEnterTime = new Date();
 		listener.fireRequestStartActionEvent(lastEnterTime);
 	}

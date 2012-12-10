@@ -21,6 +21,12 @@
 		<section class="About_View_aboutContent">
 			<h3>+1 me</h3>
 			<div class="g-plusone" data-annotation="inline" data-width="400" data-href="https://chrome.google.com/webstore/detail/hgmloofddffdnphfgcellkdfbfbjeloo"></div>
+			
+			<div class="About_View_facebookShare">
+				<a href="http://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fchrome.google.com%2Fwebstore%2Fdetail%2Fadvanced-rest-client%2Fhgmloofddffdnphfgcellkdfbfbjeloo">
+					<img target="_blank" src="img/fbicon.png" alt="Share to facebook" title="Share to facebook"/>
+				</a>
+			</div>
 		</section>
 		<section class="About_View_aboutContent">
 			<h3 class="About_View_donateTitle">If you like my work, please donate :)</h3>
@@ -45,6 +51,14 @@
 			<h4>Konwn issues</h4>
 			<ul>
 				<li>Layout may seems to freezed switching HTTP request method (konown workaround: mouse over any menu element).</li>
+			</ul>
+			<p>12/09/2012</p>
+			<ul>
+				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=129">Issue 129</a>: Combobox to select requests in project always selects the first item</li>
+				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=128">Issue 128</a>: Mutlipart Boundary not sent in request body when file is not attach using mutlipart/form-data</li>
+				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=117">Issue 117</a>: How do you delete a project ?</li>
+				<li>When multipart/form-data is selected as a content-type the app will parse payload data from the form tab in proper way (including boundary section)</li>
+				<li>When response content-type header is javascript you will be able to open result in JSON tab (link on the top of the "parsed" tab). Facebook API do not set right JSON header and response is parsed as a JavaScript.</li>
 			</ul>
 			<p>11/23/2012</p>
 			<ul>
@@ -91,46 +105,6 @@
 				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=67">Issue 67</a>: Application now can show redirect information.</li>
 				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=68">Issue 68</a>: Payload is set in request when using custom "method"</li>
 				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=70">Issue 70</a> and <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=73">Issue 73</a>: Application now wil not set Content-Type header fon non-payload requests</li>
-			</ul>
-			<p>8/4/2012</p>
-			<ul>
-				<li>Added detailed view to Request URL section (hover URL sign)</li>
-				<li>
-					Fixed
-					<a
-						href="http://code.google.com/p/chrome-rest-client/issues/detail?id=54">Issue 54</a>
-					: Auto-complete prevents "enter" on parent path of previous entry
-				</li>
-				<li>
-					Fixed
-					<a
-						href="http://code.google.com/p/chrome-rest-client/issues/detail?id=55">Issue 55</a>
-					: Content-Type is set by Default
-					(application/x-www-form-urlencoded), but should not be
-				</li>
-				<li>Added server request "X-Chrome-Extension" header to prevent
-					eneter some URLs outside extension</li>
-			</ul>
-			<p>3/29/2012</p>
-			<ul>
-				<li>
-					Fixed
-					<a
-						href="http://code.google.com/p/chrome-rest-client/issues/detail?id=50">Issue 50</a>
-					: Cannot remove file from body
-				</li>
-				<li>
-					Fixed
-					<a
-						href="http://code.google.com/p/chrome-rest-client/issues/detail?id=51">Issue 51</a>
-					: XML Body has collapse/expand arrows, but they do not work
-				</li>
-				<li>
-					Fixed
-					<a
-						href="http://code.google.com/p/chrome-rest-client/issues/detail?id=53">Issue 53</a>
-					: Cannot save Content-Type header
-				</li>
 			</ul>
 		</section>
 	</g:HTMLPanel>

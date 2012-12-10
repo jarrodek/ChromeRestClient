@@ -118,6 +118,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	@UiField DivElement tabContent;
 	@UiField HTML plainBody;
 	@UiField Anchor parsedOpen;
+	@UiField Anchor forceOpenAsJSON;
 	@UiField PreElement parsedBody;
 	@UiField HTMLPanel xmlPanel;
 	@UiField HTMLPanel imagePanel;
@@ -372,6 +373,9 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 				}
 			}
 			
+			if(isJavaScriptHeader(headers)){
+				forceOpenAsJSON.removeStyleName("hidden");
+			}
 		}
 		if(isJSON){
 			setTabOpened(TABS.JSON, jsonTab);
@@ -450,7 +454,16 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	}
 	
 	
-	
+	private boolean isJavaScriptHeader(Header[] headers){
+		boolean result = false;
+		for (Header header : headers) {
+			if(!header.getName().toLowerCase().equals("content-type")) continue;
+			if(header.getValue().contains("javascript")){
+				result = true;
+			}
+		}
+		return result;
+	}
 	
 	/**
 	 * Load code mirror library.
@@ -880,5 +893,14 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 				anchor.setText("Download");
 			}
 		});
+	}
+	@UiHandler("forceOpenAsJSON")
+	void onForceOpenAsJSON(ClickEvent e){
+		e.preventDefault();
+		forceOpenAsJSON.addStyleName("hidden");
+		final String body = response.getResponseText();
+		setTabOpened(TABS.JSON, jsonTab);
+		new JSONViewer(body, jsonPanel);
+		setTabVisible(TABS.JSON, jsonTab);
 	}
 }

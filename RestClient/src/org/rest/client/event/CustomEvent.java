@@ -165,8 +165,43 @@ public enum CustomEvent {
 	 * 
 	 * </p>
 	 */
-	CLEAR_HISTORY("arc:historyclear");
-	
+	CLEAR_HISTORY("arc:historyclear"),
+	/**
+	 * The user changed project metadata.<br/>
+	 * This event has additional attribute "data" with project data as a javascript object.
+	 * <p>
+	 * For example (javascript):
+	 * 
+	 * <pre>
+	 * var fn = function(e){
+	 * 	var project = e.data;
+	 *  //project.id, project.name, project.time
+	 * 	// do something with this information....
+	 * }
+	 * document.addEventListener('arc:projectchange', fn);
+	 * </pre>
+	 * 
+	 * </p>
+	 */
+	PROJECT_CHANGE("arc:projectchange"),
+	/**
+	 * The user deleted the project and associated requests.<br/>
+	 * This event has additional attribute "data" with project database ID.
+	 * <p>
+	 * For example (javascript):
+	 * 
+	 * <pre>
+	 * var fn = function(e){
+	 * 	var projectId = e.data;
+	 *  
+	 * 	// do something with this information....
+	 * }
+	 * document.addEventListener('arc:projectdelete', fn);
+	 * </pre>
+	 * 
+	 * </p>
+	 */
+	PROJECT_DELETE("arc:projectdelete");
 	
 
 	private final String evenNamet;

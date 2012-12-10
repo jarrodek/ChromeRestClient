@@ -21,23 +21,22 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.regexp.shared.RegExp;
 
 public class RequestPayloadParser {
-	/**
-	 * Parse list of Payload form values {@link FormPayloadData} to Payload string
-	 * @param input
-	 * @return
-	 */
-	public static String parseData(ArrayList<FormPayloadData> input){
-        return parseData(input,false);
-	}
-	
+
 	/**
 	 * Parse list of Payload form values {@link FormPayloadData} to Payload string
 	 * @param input
 	 * @param encode if true params will be encoded
 	 * @return
 	 */
-	public static String parseData(ArrayList<FormPayloadData> input, boolean encode){
-		if(input == null) return "";
+	public static String parseData(ArrayList<FormPayloadData> input, boolean encode, boolean useBoundary, String currentBoundary){
+		if(useBoundary){
+			return parseDataBoundary(input, encode, currentBoundary);
+		}
+		return parseDataMultipart(input, encode);
+	}
+	
+	private static String parseDataMultipart(ArrayList<FormPayloadData> input, boolean encode){
+		if(input == null || input.size() == 0) return "";
     	String result = "";
     	
     	for(FormPayloadData item : input){
@@ -60,6 +59,66 @@ public class RequestPayloadParser {
     	}
         return result;
 	}
+	
+	
+	public static String recognizeBoundary(String input){
+		if(input == null || input.isEmpty()){
+			return null;
+		}
+		String[] body = input.split("\n");
+		int lines = body.length;
+		if(lines == 0){
+			return null;
+		}
+		
+		
+		for(int i=0; i<lines; i++){
+			String line = body[i];
+			if(line.startsWith("--")){
+				if(line.endsWith("--")){ //it should not happen
+					return null;
+				}
+				return line.substring(2);
+			}
+		}
+		
+		return null;
+	}
+	
+	
+	private static String parseDataBoundary(ArrayList<FormPayloadData> input, final boolean encode, String currentBoundary){
+		if(input == null || input.size() == 0) return "";
+    	
+    	StringBuilder sb = new StringBuilder();
+    	
+    	final String boundary = currentBoundary == null ? "--ARCFormBoundary" + generateBoundary() : "--"+currentBoundary;
+    	
+    	for(FormPayloadData item : input){
+    		String key = item.getKey();
+            String value = item.getValue();
+            if(key.trim().equals("") && value.trim().equals("")){
+            	continue;
+            }
+            
+            if(encode){
+            	key = URL.encodeQueryString(key.trim());
+            	value = URL.encodeQueryString(value.trim());
+            } else { 
+            	key = key.trim();
+            	value = value.trim();
+            }
+    		
+    		sb.append(boundary).append("\n");
+    		sb.append("Content-Disposition: form-data; name=\"").append(key).append("\"").append("\n");
+    		sb.append("\n");
+    		sb.append(value).append("\n");
+    		
+    	}
+    	sb.append(boundary).append("--").append("\n");
+    	return sb.toString();
+	}
+	
+	private static final native String generateBoundary() /*-{ return Math.random().toString(36).substring(3); }-*/;
 	
 	
 	
@@ -89,7 +148,7 @@ public class RequestPayloadParser {
 	 * @return
 	 */
 	public static ArrayList<FormPayloadData> stringToFormArrayList(String input){
-		return stringToFormArrayList(input,false);
+		return stringToFormArrayList(input,false, false);
 	}
 	
 	
@@ -101,7 +160,85 @@ public class RequestPayloadParser {
 	 * @param input
 	 * @return
 	 */
-	public static ArrayList<FormPayloadData> stringToFormArrayList(String input, boolean decode){
+	public static ArrayList<FormPayloadData> stringToFormArrayList(String input, boolean decode, boolean useBoundary){
+		if(useBoundary){
+			return stringToFormArrayListBoundary(input, decode);
+		}
+		return stringToFormArrayListMultipart(input, decode);
+	}
+	
+	
+	public static ArrayList<FormPayloadData> stringToFormArrayListBoundary(String input, boolean decode){
+		ArrayList<FormPayloadData> result = new ArrayList<FormPayloadData>();
+		if(input == null || input.isEmpty()){
+			return result;
+		}
+		String[] body = input.split("\n");
+		int lines = body.length;
+		if(lines == 0){
+			return result;
+		}
+		
+		FormPayloadData current = null;
+		String currentValue = "";
+		for(int i=0; i<lines; i++){
+			String line = body[i];
+			if(line.startsWith("--")){
+				
+				if(current != null){
+					current.setValue(currentValue);
+					result.add(current);
+					current = new FormPayloadData();
+					currentValue = "";
+				}
+				
+				if(line.endsWith("--")){ //end of body
+					break;
+				}
+				//begin part of body
+				//just move to the next line
+			} else if(line.toLowerCase().contains("content-disposition")){
+				String fieldName = extractNameFromBoundaryLine(line);
+				
+				if(decode){
+					fieldName = URL.decodeQueryString(fieldName.trim());
+				}
+				
+				if(current == null){
+					current = new FormPayloadData();
+				}
+				current.setKey(fieldName);
+				i++;
+				line = body[i];
+				//next line should be empty, but check for misspelling 
+				if(!line.isEmpty()){
+					currentValue = line;
+				}
+			} else {
+				
+				if(!currentValue.isEmpty()){
+					currentValue += "\n";
+				}
+				currentValue += line;
+			}
+		}
+		return result;
+	}
+	
+	private static final native String extractNameFromBoundaryLine(String line) /*-{
+		var r = /\sname="(.*?)"/gim
+		var result = "[unknown]";
+		try{
+			var m = r.exec(line);
+			if(m && m.length > 1){
+				result = m[1]; 
+			}
+		} catch(e){}
+		
+		return result;
+	}-*/;
+	
+	public static ArrayList<FormPayloadData> stringToFormArrayListMultipart(String input, boolean decode){
 		ArrayList<FormPayloadData> result = new ArrayList<FormPayloadData>();
 		if(input == null || input.isEmpty()){
 			return result;
@@ -143,6 +280,10 @@ public class RequestPayloadParser {
         }
         return result;
 	}
+	
+	
+	
+	
 	/**
 	 * Parse raw body data to decoded entity body string for application/x-www-form-urlencoded encoding.
 	 * Old parseUrlencodedEntiti method

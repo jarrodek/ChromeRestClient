@@ -6,7 +6,7 @@
 	<g:HTMLPanel addStyleNames="Response_View_root">
 		<!-- scroll to top panel -->
 		<div ui:field="scrollContainer" class="Response_View_scrollContainer">
-			<g:Anchor ui:field="scrollButton" href="javascript:;" text="Scroll to top" styleName="button Response_View_scrollButton"></g:Anchor>
+			<g:Anchor ui:field="scrollButton" href="about:blank" text="Scroll to top" styleName="button Response_View_scrollButton"></g:Anchor>
 		</div>
 	
 		<!-- Redirect widgets if any -->
@@ -54,17 +54,18 @@
 				<div ui:field="tabContent" class="tabsContent">
 					<section data-tab="raw" class="tabContent tabContentCurrent">
 						<div class="Response_View_newWindowOutput">
-							<g:Anchor ui:field="wrapContentButton" href="javascript:;" >Word unwrap</g:Anchor>
-							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="copyClipboardButton" href="javascript:;" >Copy to clipboard</g:Anchor>
-							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="saveAsFileButton1" href="javascript:;" >Save as file</g:Anchor>
+							<g:Anchor ui:field="wrapContentButton" href="about:blank" >Word unwrap</g:Anchor>
+							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="copyClipboardButton" href="about:blank" >Copy to clipboard</g:Anchor>
+							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="saveAsFileButton1" href="about:blank" >Save as file</g:Anchor>
 						</div>
 						<g:HTML width="100%" ui:field="plainBody" styleName="Response_View_plainPanel"></g:HTML>
 					</section>
 					<section data-tab="parsed" class="tabContent hidden">
 						<div class="Response_View_newWindowOutput">
 							<g:Anchor ui:field="parsedOpen" href="#">Open output in new window</g:Anchor>
-							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="copyClipboardButton2" href="javascript:;" >Copy to clipboard</g:Anchor>
-							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="saveAsFileButton2" href="javascript:;" >Save as file</g:Anchor>
+							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="copyClipboardButton2" href="about:blank" >Copy to clipboard</g:Anchor>
+							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="saveAsFileButton2" href="about:blank" >Save as file</g:Anchor>
+							<g:Anchor addStyleNames="Response_View_copyClipboardBody hidden" ui:field="forceOpenAsJSON" href="about:blank" >Open in JSON tab</g:Anchor>
 						</div>
 						<div class="CodeMirror">
 							<div class="lines"></div>
@@ -77,15 +78,15 @@
 					</section>
 					<section data-tab="xml" class="tabContent hidden">
 						<div class="Response_View_newWindowOutput">
-							<g:Anchor ui:field="copyClipboardButton3" href="javascript:;" >Copy to clipboard</g:Anchor>
-							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="saveAsFileButton3" href="javascript:;" >Save as file</g:Anchor>
+							<g:Anchor ui:field="copyClipboardButton3" href="about:blank" >Copy to clipboard</g:Anchor>
+							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="saveAsFileButton3" href="about:blank" >Save as file</g:Anchor>
 						</div>
 						<g:HTMLPanel ui:field="xmlPanel" styleName="Response_View_rawInput Response_View_bodyOverflow"/>
 					</section>
 					<section data-tab="json" class="tabContent hidden">
 						<div class="Response_View_newWindowOutput">
-							<g:Anchor ui:field="copyClipboardButton4" href="javascript:;" >Copy to clipboard</g:Anchor>
-							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="saveAsFileButton4" href="javascript:;" >Save as file</g:Anchor>
+							<g:Anchor ui:field="copyClipboardButton4" href="about:blank" >Copy to clipboard</g:Anchor>
+							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="saveAsFileButton4" href="about:blank" >Save as file</g:Anchor>
 						</div>
 						<g:HTMLPanel ui:field="jsonPanel" styleName="Response_View_rawInput Response_View_bodyOverflow"/>
 					</section>

@@ -73,6 +73,8 @@ public class SocketViewImpl extends Composite implements SocketView {
 	
 	public SocketViewImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
+		
+		messageField.getElement().setAttribute("placeholder", "Type your message...");
 	}
 	
 

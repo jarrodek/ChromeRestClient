@@ -181,7 +181,6 @@ public class AppRequestFactory {
 		RequestBuilder builder = new RequestBuilder(requestUrl, method);
 		builder.setFollowRedirects(true);
 		
-		
 		if(hasPayload){
 			String payload = data.getPayload();
 			if(files != null && files.size() > 0){
@@ -189,8 +188,16 @@ public class AppRequestFactory {
 				if(RestClient.isDebug()){
 					Log.debug("Request will use FormData object in order to handle files.");
 				}
+				
+				//check if payload has boudary
+				String boudary = RequestPayloadParser.recognizeBoundary(payload);
+				boolean extractFromBoundary = false;
+				if(boudary != null){
+					extractFromBoundary = true;
+				}
+				
 				//set payload
-				ArrayList<FormPayloadData> map = RequestPayloadParser.stringToFormArrayList(payload);
+				ArrayList<FormPayloadData> map = RequestPayloadParser.stringToFormArrayList(payload, false, extractFromBoundary);
 				for(FormPayloadData _data : map){
 					fd.append(_data.getKey(), _data.getValue());
 				}

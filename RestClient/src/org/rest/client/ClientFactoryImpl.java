@@ -27,6 +27,7 @@ import org.rest.client.storage.store.WebSocketDataStoreWebSql;
 import org.rest.client.storage.websql.ExportedDataReferenceService;
 import org.rest.client.ui.AboutView;
 import org.rest.client.ui.AddEncodingView;
+import org.rest.client.ui.EditProjectView;
 import org.rest.client.ui.ErrorDialogView;
 import org.rest.client.ui.HistoryListItemView;
 import org.rest.client.ui.HistoryView;
@@ -43,6 +44,7 @@ import org.rest.client.ui.ShortcutView;
 import org.rest.client.ui.SocketView;
 import org.rest.client.ui.desktop.AboutViewImpl;
 import org.rest.client.ui.desktop.AddEncodingViewImpl;
+import org.rest.client.ui.desktop.EditProjectViewImpl;
 import org.rest.client.ui.desktop.ErrorDialogViewImpl;
 import org.rest.client.ui.desktop.HistoryListItemViewImpl;
 import org.rest.client.ui.desktop.HistoryViewImpl;
@@ -292,5 +294,10 @@ public class ClientFactoryImpl implements ClientFactory {
 			webSocketSqlStore = GWT.create(WebSocketDataStoreWebSql.class);
 		}
 		return webSocketSqlStore;
+	}
+
+	@Override
+	public EditProjectView getEditProjectView() {
+		return GWT.create(EditProjectViewImpl.class);
 	}
 }

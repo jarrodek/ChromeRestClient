@@ -17,6 +17,9 @@ package org.rest.client.ui.desktop.widget;
 
 import java.util.ArrayList;
 
+import org.rest.client.RestClient;
+import org.rest.client.event.BoundaryChangeEvent;
+import org.rest.client.event.HttpEncodingChangeEvent;
 import org.rest.client.request.FilesObject;
 import org.rest.client.request.FormPayloadData;
 import org.rest.client.request.RequestPayloadParser;
@@ -87,6 +90,7 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 	private String fileFieldName = "fileUpload";
 	private String payloadData = "";
 	private ArrayList<FormInputs> formInputs = new ArrayList<FormInputs>();
+	private String requestEncoding = "application/x-www-form-urlencoded"; //default
 	
 	public RequestBodyWidget() {
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
@@ -206,6 +210,16 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 					tab.getClassList().remove("inlineButtonHover");
 			}
 		});
+		
+		
+		
+		HttpEncodingChangeEvent.register(RestClient.getClientFactory().getEventBus(), new HttpEncodingChangeEvent.Handler() {
+			@Override
+			public void onChange(String method) {
+				requestEncoding = method;
+			}
+		});
+		
 	}
 	/**
 	 * Reset widget
@@ -436,20 +450,30 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 	 */
 	void updateForm(){
 		clearForm();
-		ArrayList<FormPayloadData> list = RequestPayloadParser.stringToFormArrayList(payloadData);
+		ArrayList<FormPayloadData> list = RequestPayloadParser.stringToFormArrayList(payloadData,false, requestEncoding.equals("multipart/form-data"));
 		for(FormPayloadData payload : list){
 			addNewFormRow(payload.getKey(), payload.getValue());
 		}
 	}
 	
 	void updateRaw(){
+		boolean useBoundary = requestEncoding.contains("multipart/form-data");
+		String currentBoundary = null;
+		if(useBoundary){
+			currentBoundary = RequestPayloadParser.recognizeBoundary(payloadData);
+		}
 		payloadData = "";
 		ArrayList<FormPayloadData> list = new ArrayList<FormPayloadData>();
 		for(FormInputs inputs : formInputs){
 			list.add(new FormPayloadData(inputs.key.getValue(), inputs.value.getValue()));
 		}
-		payloadData = RequestPayloadParser.parseData(list);
+		payloadData = RequestPayloadParser.parseData(list, false, useBoundary, currentBoundary);
 		payloadRawInput.setValue(payloadData);
+		if(useBoundary){
+			currentBoundary = RequestPayloadParser.recognizeBoundary(payloadData);
+			BoundaryChangeEvent e = new BoundaryChangeEvent(currentBoundary);
+			RestClient.getClientFactory().getEventBus().fireEvent(e);
+		}
 	}
 	public ArrayList<FilesObject> getInputFiles() {
 		ArrayList<FilesObject> fo = new ArrayList<FilesObject>();
@@ -467,16 +491,26 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 	@UiHandler("decodeParams")
 	void decodeParamsClick(ClickEvent e){
 		e.preventDefault();
-		ArrayList<FormPayloadData> list = RequestPayloadParser.stringToFormArrayList(payloadData, true);
-		payloadData = RequestPayloadParser.parseData(list, false);
+		boolean useBoundary = requestEncoding.contains("multipart/form-data");
+		String currentBoundary = null;
+		if(useBoundary){
+			currentBoundary = RequestPayloadParser.recognizeBoundary(payloadData);
+		}
+		ArrayList<FormPayloadData> list = RequestPayloadParser.stringToFormArrayList(payloadData, true, requestEncoding.equals("multipart/form-data"));
+		payloadData = RequestPayloadParser.parseData(list, false, useBoundary, currentBoundary);
 		payloadRawInput.setValue(payloadData);
 	}
 
 	@UiHandler("encodeParams")
 	void encodeParamsClick(ClickEvent e){
 		e.preventDefault();
+		boolean useBoundary = requestEncoding.contains("multipart/form-data");
+		String currentBoundary = null;
+		if(useBoundary){
+			currentBoundary = RequestPayloadParser.recognizeBoundary(payloadData);
+		}
 		ArrayList<FormPayloadData> list = RequestPayloadParser.stringToFormArrayList(payloadData);
-		payloadData = RequestPayloadParser.parseData(list, true);
+		payloadData = RequestPayloadParser.parseData(list, true, useBoundary,currentBoundary);
 		payloadRawInput.setValue(payloadData);
 	}
 }

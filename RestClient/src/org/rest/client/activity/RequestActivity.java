@@ -29,6 +29,10 @@ import org.rest.client.event.ClearFormEvent;
 import org.rest.client.event.HttpEncodingChangeEvent;
 import org.rest.client.event.HttpMethodChangeEvent;
 import org.rest.client.event.OverwriteUrlEvent;
+import org.rest.client.event.ProjectChangeEvent;
+import org.rest.client.event.ProjectChangeRequestEvent;
+import org.rest.client.event.ProjectDeleteEvent;
+import org.rest.client.event.ProjectDeleteRequestEvent;
 import org.rest.client.event.RequestChangeEvent;
 import org.rest.client.event.RequestEndEvent;
 import org.rest.client.event.RequestStartActionEvent;
@@ -41,6 +45,7 @@ import org.rest.client.request.URLParser;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.LocalStore;
 import org.rest.client.storage.store.ProjectStoreWebSql;
+import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.store.objects.FormEncodingObject;
 import org.rest.client.storage.store.objects.HistoryObject;
 import org.rest.client.storage.store.objects.ProjectObject;
@@ -48,6 +53,7 @@ import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.storage.websql.HeaderRow;
 import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.AddEncodingView;
+import org.rest.client.ui.EditProjectView;
 import org.rest.client.ui.RequestView;
 import org.rest.client.ui.ResponseView;
 import org.rest.client.ui.desktop.StatusNotification;
@@ -55,6 +61,7 @@ import org.rest.client.ui.desktop.StatusNotification;
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
+import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.chrome.def.BackgroundPageCallback;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.json.client.JSONArray;
@@ -252,6 +259,7 @@ public class RequestActivity extends AppActivity implements
 				Log.error("No such project.");
 			}
 			StatusNotification.notify("No such project.", StatusNotification.TYPE_ERROR);
+			return;
 		}
 		clientFactory.getRequestDataStore().getService().getProjectDefaultRequests(project.getId(), new ListCallback<RequestObject>(){
 
@@ -279,7 +287,7 @@ public class RequestActivity extends AppActivity implements
 	private void restoreProjectEndpoint(final ProjectObject project, final RequestObject request, final RequestView requestView){
 		showProjectRelatedData(project.getId(),project, requestView);
 		
-		// if can overwrite current params first restore lates request
+		// if can overwrite current params first restore latest request
 		// and then set parameters.
 		if(RestClient.getOpenedProject() == RestClient.getPreviousProject()){
 			RequestParameters.restoreLatest(new Callback<RequestParameters, Throwable>() {
@@ -385,13 +393,24 @@ public class RequestActivity extends AppActivity implements
 	
 			@Override
 			public void onSuccess(final List<RequestObject> request) {
+				if(request.size() == 0){
+					return;
+				}
+				int _endpointId = -1;
+				if(place.isProjectsEndpoint()){
+					try{
+					_endpointId = Integer.parseInt(place.getEntryId());
+					} catch(Exception e){}
+				}
+				final int endpointId = _endpointId;
+				
 				if(project == null){
 					ProjectStoreWebSql projectsStore = clientFactory.getProjectsStore();
 					projectsStore.getByKey(projectId, new StoreResultCallback<ProjectObject>(){
 
 						@Override
 						public void onSuccess(ProjectObject project) {
-							requestView.setProjectData(project, request);
+							requestView.setProjectData(project, request, endpointId);
 						}
 
 						@Override
@@ -403,7 +422,7 @@ public class RequestActivity extends AppActivity implements
 						}
 					});
 				} else {
-					requestView.setProjectData(project, request);
+					requestView.setProjectData(project, request, endpointId);
 				}
 			}});
 	}
@@ -495,6 +514,86 @@ public class RequestActivity extends AppActivity implements
 						if(RestClient.isDebug()){
 							Log.error("Unknown error occured: " + message);
 						}
+					}
+				});
+			}
+		});
+		
+		ProjectChangeRequestEvent.register(eventBus, new ProjectChangeRequestEvent.Handler() {
+			@Override
+			public void onProjectChange(final ProjectObject project) {
+				if(project == null){
+					return;
+				}
+				ProjectStoreWebSql store = clientFactory.getProjectsStore();
+				store.put(project, project.getId(), new StoreResultCallback<Integer>(){
+
+					@Override
+					public void onSuccess(Integer result) {
+						ProjectChangeEvent ev = new ProjectChangeEvent(project);
+						eventBus.fireEvent(ev);
+						
+						if(RestClient.getOpenedProject() == project.getId()){
+							requestView.updateProjectMetadata(project);
+						}
+					}
+
+					@Override
+					public void onError(Throwable e) {
+						if(RestClient.isDebug()){
+							Log.error("Unable to update project data",e);
+						}
+						StatusNotification.notify("Unable to update project data", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+					}
+				});
+			}
+		});
+		ProjectDeleteRequestEvent.register(eventBus, new ProjectDeleteRequestEvent.Handler() {
+			
+			@Override
+			public void onProjectDelete(final int projectId) {
+				ProjectStoreWebSql projectStore = clientFactory.getProjectsStore();
+				projectStore.remove(projectId, new StoreResultCallback<Boolean>() {
+
+					@Override
+					public void onSuccess(Boolean result) {
+						if(!result.booleanValue()){
+							if(RestClient.isDebug()){
+								Log.error("Unable to delete project data");
+							}
+							StatusNotification.notify("Unable to delete project data", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+							return;
+						}
+						
+						RequestDataStoreWebSql requestsStore = clientFactory.getRequestDataStore();
+						requestsStore.getService().deleteFromProject(projectId, new VoidCallback() {
+							
+							@Override
+							public void onFailure(DataServiceException error) {
+								if(RestClient.isDebug()){
+									Log.error("Unable to delete project related  data",error);
+								}
+								ProjectDeleteEvent ev = new ProjectDeleteEvent(projectId);
+								eventBus.fireEvent(ev);
+								goTo(new RequestPlace(null));
+							}
+							
+							@Override
+							public void onSuccess() {
+								ProjectDeleteEvent ev = new ProjectDeleteEvent(projectId);
+								eventBus.fireEvent(ev);
+								goTo(new RequestPlace(null));
+							}
+						});
+						
+					}
+
+					@Override
+					public void onError(Throwable e) {
+						if(RestClient.isDebug()){
+							Log.error("Unable to delete project data",e);
+						}
+						StatusNotification.notify("Unable to delete project data", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
 					}
 				});
 			}
@@ -964,6 +1063,93 @@ public class RequestActivity extends AppActivity implements
 	@Override
 	public void fireRequestStartActionEvent(Date startTime) {
 		eventBus.fireEvent(new RequestStartActionEvent(startTime));
+	}
+
+	@Override
+	public void deleteCurrentEndpoint() {
+		String _entryId = place.getEntryId();
+		final int entryId = Integer.parseInt(_entryId);
+		if(place.isProjectsEndpoint()){
+			try{
+				clientFactory.getRequestDataStore().remove(entryId, new StoreResultCallback<Boolean>(){
+
+					@Override
+					public void onSuccess(Boolean result) {
+						if(result.booleanValue()){
+							goTo(RequestPlace.Tokenizer.fromProjectDefault(RestClient.getOpenedProject()));
+						} else {
+							if(RestClient.isDebug()){
+								Log.error("Unable delete endpoint. Unknown error.");
+							}
+							StatusNotification.notify("Unable delete endpoint. Unknown error.", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+						}
+					}
+
+					@Override
+					public void onError(Throwable e) {
+						if(RestClient.isDebug()){
+							Log.error("Unable delete endpoint ",e);
+						}
+						StatusNotification.notify("Unable delete endpoint", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+					}
+				});
+				
+			} catch(Exception e){
+				if(RestClient.isDebug()){
+					Log.error("Unable read project's endpoint ID",e);
+				}
+				StatusNotification.notify("Unable read project data", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+			}
+		} else if(place.isProject()){
+			clientFactory.getRequestDataStore().getService().getProjectDefaultRequests(entryId, new ListCallback<RequestObject>(){
+
+				@Override
+				public void onFailure(DataServiceException error) {
+					if(RestClient.isDebug()){
+						Log.error("Can't find selected endpoint.",error);
+					}
+					StatusNotification.notify("Can't find selected endpoint.", StatusNotification.TYPE_ERROR);
+				}
+
+				@Override
+				public void onSuccess(List<RequestObject> result) {
+					if(result == null || result.size() == 0){
+						if(RestClient.isDebug()){
+							Log.error("Can't find selected endpoint. No database entries.");
+						}
+						StatusNotification.notify("Can't find selected endpoint. No database entries.", StatusNotification.TYPE_ERROR);
+						return;
+					}
+					
+					clientFactory.getRequestDataStore().remove(result.get(0).getId(), new StoreResultCallback<Boolean>(){
+
+						@Override
+						public void onSuccess(Boolean result) {
+							if(result.booleanValue()){
+								goTo(RequestPlace.Tokenizer.fromProjectDefault(RestClient.getOpenedProject()));
+							} else {
+								if(RestClient.isDebug()){
+									Log.error("Unable delete endpoint. Unknown error.");
+								}
+								StatusNotification.notify("Unable delete endpoint. Unknown error.", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+							}
+						}
+
+						@Override
+						public void onError(Throwable e) {
+							if(RestClient.isDebug()){
+								Log.error("Unable delete endpoint ",e);
+							}
+							StatusNotification.notify("Unable delete endpoint", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+						}
+					});
+				}});
+		}
+	}
+
+	@Override
+	public EditProjectView getEditProjectDialog() {
+		return clientFactory.getEditProjectView();
 	}
 	
 }

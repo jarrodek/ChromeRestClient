@@ -1,9 +1,12 @@
 package org.rest.client;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
 import org.rest.client.event.NewProjectAvailableEvent;
+import org.rest.client.event.ProjectChangeEvent;
+import org.rest.client.event.ProjectDeleteEvent;
 import org.rest.client.place.AboutPlace;
 import org.rest.client.place.HistoryPlace;
 import org.rest.client.place.ImportExportPlace;
@@ -95,7 +98,7 @@ public class UserMenuHandler {
 
 		RootPanel.get("appNavigation").add(mv.asWidget());
 		
-		
+		final ArrayList<MenuItemView> projectsMenu = new ArrayList<MenuItemView>();
 		final ProjectStoreWebSql projectsStore = clientFactory.getProjectsStore();
 		projectsStore.all(new StoreResultCallback<Map<Integer,ProjectObject>>() {
 			@Override
@@ -106,6 +109,8 @@ public class UserMenuHandler {
 					_project.setText(obj.getName());
 					_project.setData("projectid", String.valueOf(obj.getId()));
 					_project.setPlace(RequestPlace.Tokenizer.fromProjectDefault(obj.getId()));
+					_project.setParentItem(projects);
+					projectsMenu.add(_project);
 					projects.addChild((Widget) _project);
 				}
 				projects.setOpened(false);
@@ -114,6 +119,18 @@ public class UserMenuHandler {
 			@Override
 			public void onError(Throwable e) {
 				
+			}
+		});
+		
+		ProjectChangeEvent.register(clientFactory.getEventBus(), new ProjectChangeEvent.Handler() {
+			@Override
+			public void onProjectChange(ProjectObject project) {
+				for(MenuItemView item : projectsMenu){
+					if(item.getData("projectid").equals(project.getId()+"")){
+						item.setText(project.getName());
+						break;
+					}
+				}
 			}
 		});
 		
@@ -131,6 +148,8 @@ public class UserMenuHandler {
 						_project.setText(result.getName());
 						_project.setPlace(RequestPlace.Tokenizer.fromProjectDefault(result.getId()));
 						_project.setData("projectid", String.valueOf(result.getId()));
+						_project.setParentItem(projects);
+						projectsMenu.add(_project);
 						projects.addChild((Widget) _project);
 					}
 
@@ -139,6 +158,17 @@ public class UserMenuHandler {
 						Log.error("Unable read project data.", e);
 					}
 				});
+			}
+		});
+		ProjectDeleteEvent.register(clientFactory.getEventBus(), new ProjectDeleteEvent.Handler() {
+			@Override
+			public void onProjectDelete(int projectId) {
+				for(MenuItemView item : projectsMenu){
+					if(item.getData("projectid").equals(projectId+"")){
+						item.remove();
+						break;
+					}
+				}
 			}
 		});
 		

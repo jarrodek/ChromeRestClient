@@ -28,10 +28,6 @@ public class RequestPlace extends Place {
 	private boolean external = false;
 
 	/**
-	 * TODO: requestData should be like history/ID (history/ history ID),
-	 * projectEndpoint/ID (Project's endpoint ID), project/ID (Project ID with
-	 * default endpoint), NULL or default if none and saved/ID for old fashioned
-	 * save methd
 	 * 
 	 * @param requestData
 	 */

@@ -23,6 +23,7 @@ import org.rest.client.SyncAdapter;
 import org.rest.client.codemirror.CodeMirror;
 import org.rest.client.codemirror.CodeMirrorChangeHandler;
 import org.rest.client.codemirror.CodeMirrorOptions;
+import org.rest.client.event.BoundaryChangeEvent;
 import org.rest.client.headerssupport.HeadersFillSupport;
 import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.storage.StoreResultCallback;
@@ -183,6 +184,34 @@ public class RequestHeadersWidget extends Composite implements HasText {
 					tab.getClassList().remove("inlineButtonHover");
 			}
 		});
+		
+		
+		
+		BoundaryChangeEvent.register(RestClient.getClientFactory().getEventBus(), new BoundaryChangeEvent.Handler() {
+			@Override
+			public void onChange(String boundary) {
+				ArrayList<RequestHeader> list = RequestHeadersParser.stringToHeaders(headersData);
+				boolean found = false;
+				for(RequestHeader header : list){
+					if(header.getName().toLowerCase().equals("content-type")){
+						header.setValue("multipart/form-data; boundary="+boundary);
+						found = true;
+						break;
+					}
+				}
+				if(!found){
+					list.add(new RequestHeader("Content-Type", "multipart/form-data; boundary="+boundary));
+				}
+				updateHeadersRawData(RequestHeadersParser.headersListToString(list));
+				headersRawInput.setValue(headersData, true);
+				
+				if(currentTab.equals(TABS.FORM)){
+					updateForm();
+				}
+			}
+		});
+		
+		
 	}
 	
 	private void openRawTab() {
@@ -302,9 +331,13 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		//depends if DB has initialized successfully 
 		if(suggestOracle != null){
 			TextBox keyBox = new TextBox();
-			DefaultSuggestionDisplay suggestionsDisplay = new DefaultSuggestionDisplay();
-			suggestionsDisplay.setAnimationEnabled(true);
-			_tmpKeySuggestBox = new SuggestBox(suggestOracle, keyBox, suggestionsDisplay);
+			try{
+				DefaultSuggestionDisplay suggestionsDisplay = new DefaultSuggestionDisplay();
+				suggestionsDisplay.setAnimationEnabled(true);
+				_tmpKeySuggestBox = new SuggestBox(suggestOracle, keyBox, suggestionsDisplay);
+			} catch(Exception e){
+				_tmpKeySuggestBox = new SuggestBox();
+			}
 		} else {
 			_tmpKeySuggestBox = new SuggestBox();
 		}

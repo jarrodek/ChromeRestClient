@@ -147,6 +147,7 @@ public class SavedViewImpl extends Composite implements SavedView {
 		}
 		if((data == null || data.isEmpty()) && list.getWidgetCount() == 0){
 			emptyInfo();
+			
 			return;
 		}
 		//disable repainting

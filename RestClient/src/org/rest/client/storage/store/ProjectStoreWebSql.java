@@ -9,6 +9,7 @@ import org.rest.client.storage.WebSqlAdapter;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.websql.ProjectService;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.code.gwt.database.client.service.RowIdListCallback;
@@ -49,22 +50,38 @@ public class ProjectStoreWebSql extends WebSqlAdapter<Integer, ProjectObject> {
 	@Override
 	public void put(ProjectObject obj, Integer key,
 			final StoreResultCallback<Integer> callback) {
-		service.insert(obj, new RowIdListCallback() {
-			
-			@Override
-			public void onFailure(DataServiceException error) {
-				callback.onError(error);
-			}
-			
-			@Override
-			public void onSuccess(List<Integer> rowIds) {
-				if(rowIds.size() == 0){
-					callback.onError(null);
-					return;
+		if(key == null){
+			service.insert(obj, new RowIdListCallback() {
+				
+				@Override
+				public void onFailure(DataServiceException error) {
+					callback.onError(error);
 				}
-				callback.onSuccess(rowIds.get(0));
-			}
-		});
+				
+				@Override
+				public void onSuccess(List<Integer> rowIds) {
+					if(rowIds.size() == 0){
+						callback.onError(null);
+						return;
+					}
+					callback.onSuccess(rowIds.get(0));
+				}
+			});
+		} else {
+			service.update(obj, key.intValue(), new VoidCallback() {
+				
+				@Override
+				public void onFailure(DataServiceException error) {
+					callback.onError(error);
+				}
+				
+				@Override
+				public void onSuccess() {
+					Log.debug("Update object: success");
+					callback.onSuccess(null);
+				}
+			});
+		}
 	}
 
 	@Override
@@ -113,8 +130,19 @@ public class ProjectStoreWebSql extends WebSqlAdapter<Integer, ProjectObject> {
 	}
 
 	@Override
-	public void remove(Integer key, StoreResultCallback<Boolean> callback) {
-		callback.onError(null);
+	public void remove(Integer key, final StoreResultCallback<Boolean> callback) {
+		service.delete(key.intValue(), new VoidCallback() {
+			
+			@Override
+			public void onFailure(DataServiceException error) {
+				callback.onError(error);
+			}
+			
+			@Override
+			public void onSuccess() {
+				callback.onSuccess(true);
+			}
+		});
 	}
 
 	@Override

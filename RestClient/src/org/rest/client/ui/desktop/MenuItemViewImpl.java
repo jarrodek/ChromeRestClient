@@ -18,12 +18,14 @@ package org.rest.client.ui.desktop;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.rest.client.RestClient;
 import org.rest.client.ui.MenuItemView;
 import org.rest.client.ui.MenuView;
 import org.rest.client.ui.html5.HTML5Element;
 import org.rest.client.ui.html5.ListItem;
 import org.rest.client.ui.html5.ListPanel;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -70,7 +72,7 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 	/**
 	 * Parent menu
 	 */
-	private MenuItemViewImpl parent;
+	private MenuItemView parent;
 	/**
 	 * Has not null value if this item is in top level of menu
 	 */
@@ -102,6 +104,9 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 		maybeRemoveItemFromParent(item);
 		add(item);
 		children.add(item);
+		if(item instanceof MenuItemView){
+			((MenuItemView)item).setParentItem(this);
+		}
 	}
 
 	@Override
@@ -219,7 +224,11 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 	public void remove() {
 		if (parent != null) {
 			// If this item has a parent, remove self from it.
-			parent.remove(this);
+			parent.removeChild(this);
+		} else {
+			if(RestClient.isDebug()){
+				Log.debug("This menu item has no parent set. Can't remove it.");
+			}
 		}
 	}
 
@@ -240,7 +249,10 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 	public MenuItemView getParentItem() {
 		return parent;
 	}
-
+	@Override
+	public void setParentItem(MenuItemView parent) {
+		this.parent = parent;		
+	}
 
 
 	@Override
@@ -264,4 +276,29 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 	public void setData(String key, String value){
 		getElement().setAttribute("data-"+key, value);
 	}
+
+
+
+	@Override
+	public String getData(String key) {
+		return getElement().getAttribute("data-"+key);
+	}
+
+
+
+	@Override
+	public void removeChild(MenuItemView child) {
+		if(!children.contains(child)){
+			return;
+		}
+		children.remove(child);
+		if(childrenPanel == null) {
+			return;
+		}
+		childrenPanel.remove((Widget)child);
+	}
+
+
+
+	
 }

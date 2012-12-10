@@ -59,4 +59,10 @@ public class AboutViewImpl extends Composite implements AboutView {
 		factory.start();
 	}
 
+	@Override
+	public void showDonateDialog() {
+		DonateDialogViewImpl dialog = new DonateDialogViewImpl();
+		dialog.show();
+	}
+
 }

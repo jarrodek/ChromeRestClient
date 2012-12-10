@@ -1,0 +1,35 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+	<g:DialogBox ui:field="dialog" modal="true"
+		animationEnabled="true" glassEnabled="true" autoHideEnabled="true" autoHideOnHistoryEventsEnabled="true" glassStyleName="About_View_DonatePopupPanelGlass">
+		<g:HTMLPanel ui:field="contents" styleName="container">
+			<div class="dialogTitle">
+				<span>Donate me!</span>
+			</div>
+			<div class="flex">
+				<div class="About_View_donateImg">
+					<g:Image ui:field="meImage" url="https://lh4.googleusercontent.com/-mnTCXKM6c8Q/UMUWNjNEKjI/AAAAAAAAvws/6Jiw3r-xGBg/s288/IMG_20120626_130021.jpg"></g:Image>
+				</div>
+				<div class="About_View_donateMsg">
+					<p class="About_View_donateInfo">
+						<strong>I'm pleased you enjoy my application.</strong> <br/>
+						<br/>
+						I spend a lot time writing this application. It has great reviews so I think I did a lot of good job.<br/>
+						So, if you want to buy my a coffe to say thanks consider a donation. I will be truly appreciated. My account as well :)<br/>
+						<br/>
+						I'm living in Poland so the best way for donation is to use PayPal.
+					</p>
+					<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+						<input type="hidden" name="cmd" value="_s-xclick" />
+						<input type="hidden" name="hosted_button_id" value="9NA4P36M7C22L" />
+						<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!" />
+						<img alt="" border="0" src="https://www.paypalobjects.com/pl_PL/i/scr/pixel.gif" width="1" height="1" />
+					</form>
+				</div>
+			</div>
+			<div class="dialogButtons">
+				<g:Button styleName="button" ui:field="cancel">Cancel</g:Button>
+			</div>
+		</g:HTMLPanel>
+	</g:DialogBox>
+</ui:UiBinder>

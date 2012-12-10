@@ -42,6 +42,7 @@ public interface MenuItemView extends HasText, HasWidgets, HasHTML {
 	
 	void addChild(Widget item);
 	
+	String getData(String key);
 	void setData(String key, String value);
 	
 	/**
@@ -70,8 +71,8 @@ public interface MenuItemView extends HasText, HasWidgets, HasHTML {
 	 */
 	void setRoot(MenuView root);
 	public MenuItemView getParentItem();
-
+	public void setParentItem(MenuItemView parent);
 	void remove();
-	
+	void removeChild(MenuItemView child);
 	Widget asWidget();
 }

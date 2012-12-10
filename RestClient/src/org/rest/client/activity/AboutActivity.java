@@ -61,6 +61,11 @@ public class AboutActivity extends AppActivity implements
 		getAppVersion();
 		initPlusOne();
 		activateTutorial();
+		
+		
+		if(place.getToken().equals("donate")){
+			view.showDonateDialog();
+		}
 	}
 	
 	@Override

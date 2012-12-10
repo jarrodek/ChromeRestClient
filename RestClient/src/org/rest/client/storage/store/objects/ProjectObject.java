@@ -26,7 +26,7 @@ import com.google.gwt.json.client.JSONString;
  * @author Paweł Psztyć
  * 
  */
-public class ProjectObject extends JavaScriptObject {
+public final class ProjectObject extends JavaScriptObject {
 	protected ProjectObject() {
 	}
 	
@@ -34,7 +34,7 @@ public class ProjectObject extends JavaScriptObject {
 	 * Create Request History object with predefined values.
 	 * @return
 	 */
-	public static final native ProjectObject create() /*-{
+	public static native ProjectObject create() /*-{
 		return {
 			id: -1,
 			name: null,
@@ -71,6 +71,7 @@ public class ProjectObject extends JavaScriptObject {
 	 */
 	public final native void setName(String name) /*-{
 		this.name = name;
+		$wnd._a = this;
 	}-*/;
 
 	/**
@@ -78,6 +79,15 @@ public class ProjectObject extends JavaScriptObject {
 	 */
 	public final native String getName() /*-{
 		return this.name;
+	}-*/;
+	
+	
+	public final static native ProjectObject redefineObject(ProjectObject obj) /*-{
+		return {
+			id: obj.id,
+			name: obj.name,
+			time: obj.time
+		}
 	}-*/;
 	
 	/**

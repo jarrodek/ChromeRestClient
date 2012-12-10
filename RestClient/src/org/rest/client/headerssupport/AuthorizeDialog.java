@@ -71,6 +71,7 @@ public class AuthorizeDialog extends DialogBox {
 	public AuthorizeDialog() {
 		setText("Authorization");
 		VerticalPanel mainPanel = new VerticalPanel();
+		mainPanel.setStyleName("authorizeDialog");
 		formPanel = new DecoratedTabPanel();
 		mainPanel.add(formPanel);
 		formPanel.setWidth("100%");
@@ -81,8 +82,8 @@ public class AuthorizeDialog extends DialogBox {
 		buttonsPanel.add(okButton);
 		buttonsPanel.add(cancel);
 		buttonsPanel.addStyleName("dialogButtons");
-		okButton.addStyleName("button");
-		cancel.addStyleName("button");
+		okButton.setStyleName("button");
+		cancel.setStyleName("button");
 		
 
 		mainPanel.add(buttonsPanel);

@@ -125,6 +125,13 @@ public interface RequestDataService extends AppDatabase {
 	 * Truncate table.
 	 * @param callback
 	 */
+	@Update(sql = "DELETE FROM request_data WHERE project={projectId}")
+	void deleteFromProject(int projectId, VoidCallback callback);
+	
+	/**
+	 * Truncate table.
+	 * @param callback
+	 */
 	@Update(sql = "DELETE FROM request_data WHERE ID={id}")
 	void delete(int id, VoidCallback callback);
 	

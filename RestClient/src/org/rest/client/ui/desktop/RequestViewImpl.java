@@ -25,7 +25,9 @@ import org.rest.client.event.HttpEncodingChangeEvent;
 import org.rest.client.event.HttpMethodChangeEvent;
 import org.rest.client.event.RequestChangeEvent;
 import org.rest.client.event.RequestStartActionEvent;
+import org.rest.client.event.SaveRequestEvent;
 import org.rest.client.place.RequestPlace;
+import org.rest.client.place.SavedPlace;
 import org.rest.client.request.FilesObject;
 import org.rest.client.request.HttpContentTypeHelper;
 import org.rest.client.request.HttpMethodOptions;
@@ -33,6 +35,7 @@ import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.tutorial.TutorialFactory;
+import org.rest.client.ui.EditProjectView;
 import org.rest.client.ui.IsHideable;
 import org.rest.client.ui.RequestView;
 import org.rest.client.ui.TutorialDialog;
@@ -48,6 +51,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -57,8 +61,10 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
@@ -91,13 +97,15 @@ public class RequestViewImpl extends Composite implements RequestView {
 	@UiField DivElement contentTypeContainer;
 	@UiField HTML5Progress progressIndicator;
 	@UiField Button sendButton;
-	@UiField HTMLPanel projectPanel;
+	@UiField DivElement projectPanel;
 	@UiField InlineLabel projectName;
 	@UiField HTMLPanel endpointsContainer;
 
 	private List<IsHideable> hidableList = new ArrayList<IsHideable>();
 	private String currentSelectedMethod = "GET";
 	private String latestSelectedContentType = "";
+
+	private ProjectObject openedProject;
 
 	public RequestViewImpl() {
 
@@ -211,7 +219,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 		String defaultSelectedContentTypeValue = HttpContentTypeHelper
 				.getDefaulSelected();
 		selectContentTypeValue(defaultSelectedContentTypeValue);
-		projectPanel.addStyleName("hidden");
+		projectPanel.addClassName("hidden");
 		listener.fireClearAllEvent();
 	}
 
@@ -352,6 +360,12 @@ public class RequestViewImpl extends Composite implements RequestView {
 				break;
 			}
 		}
+		boolean hasBoudary = false;
+		if(encoding.contains("multipart/form-data;")){ //"multipart/form-data" with boudary
+			encoding = "multipart/form-data";
+			hasBoudary = true;
+		}
+		
 		int cnt = contentTypeInput.getItemCount();
 		for (int i = 0; i < cnt; i++) {
 			if (contentTypeInput.getValue(i).equals(encoding)) {
@@ -363,7 +377,9 @@ public class RequestViewImpl extends Composite implements RequestView {
 						.fireEvent(
 								new HttpEncodingChangeEvent(
 										latestSelectedContentType));
-				requerstHeadersList.remove(possiblyToRemoveHeader);
+				if(!hasBoudary){
+					requerstHeadersList.remove(possiblyToRemoveHeader);
+				}
 				headersListchanged = true;
 				break;
 			}
@@ -392,14 +408,23 @@ public class RequestViewImpl extends Composite implements RequestView {
 
 	@Override
 	public void setProjectData(ProjectObject project,
-			List<RequestObject> requests) {
-		projectPanel.removeStyleName("hidden");
+			List<RequestObject> requests, int currentEndpoint) {
+		this.openedProject = project;
+		projectPanel.removeClassName("hidden");
 		projectName.setText(project.getName());
 		
 		final ListBox lb = new ListBox();
+		lb.setStyleName("selectControl");
+		int i = 0;
+		int endpointPosition = 0;
 		for (final RequestObject r : requests) {
 			lb.addItem(r.getName(), r.getId()+"");
+			if(r.getId() == currentEndpoint){
+				endpointPosition = i;
+			}
+			i++;
 		}
+		lb.setSelectedIndex(endpointPosition);
 		endpointsContainer.add(lb);
 		lb.addChangeHandler(new ChangeHandler() {
 			@Override
@@ -415,7 +440,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 
 	@Override
 	public void reset() {
-		projectPanel.addStyleName("hidden");
+		projectPanel.addClassName("hidden");
 		sendButton.setEnabled(false);
 		progressIndicator.setStyleName("hidden");
 		progressIndicator.getElement().removeAttribute("value");
@@ -428,6 +453,8 @@ public class RequestViewImpl extends Composite implements RequestView {
 		requestBody.clear();
 		radioGet.setEnabled(true);
 		selectContentTypeValue(HttpContentTypeHelper.getDefaulSelected());
+		
+		openedProject = null;
 	}
 
 	@Override
@@ -547,5 +574,73 @@ public class RequestViewImpl extends Composite implements RequestView {
 			break;
 		}
 	}
-
+	
+	@UiHandler("deleteEndpoint")
+	void onDeleteEndpoint(ClickEvent e){
+		e.preventDefault();
+		final DialogBox dialog = new DialogBox(true);
+		dialog.setAnimationEnabled(true);
+		dialog.setGlassEnabled(true);
+		dialog.setModal(true);
+		
+		HTMLPanel wrapper = new HTMLPanel("");
+		Label message = new Label("Delete selected endpoint?");
+		HTMLPanel buttons = new HTMLPanel("");
+		buttons.setStyleName("dialogButtons");
+		Button confirm = new Button("Confirm");
+		confirm.setStyleName("button");
+		Button cancel = new Button("Cancel");
+		cancel.setStyleName("button");
+		buttons.add(confirm);
+		buttons.add(cancel);
+		wrapper.add(message);
+		wrapper.add(buttons);
+		dialog.add(wrapper);
+		dialog.show();
+		dialog.center();
+		cancel.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				dialog.hide();
+			}
+		});
+		confirm.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				dialog.hide();
+				listener.deleteCurrentEndpoint();
+			}
+		});
+	}
+	
+	@UiHandler("editProject")
+	void onEditProject(ClickEvent e){
+		if(openedProject == null){
+			return;
+		}
+		EditProjectView dialog = listener.getEditProjectDialog();
+		EventBus eventBus = RestClient.getClientFactory().getEventBus();
+		dialog.setEventBus(eventBus);
+		dialog.setProjectData(openedProject);
+		dialog.show();
+	}
+	
+	
+	@Override
+	public void updateProjectMetadata(ProjectObject project) {
+		this.openedProject = project;
+		projectName.setText(project.getName());
+	}
+	@UiHandler("saveButton")
+	void onSaveButtonClick(ClickEvent e){
+		e.preventDefault();
+		EventBus eventBus = RestClient.getClientFactory().getEventBus();
+		SaveRequestEvent saveEvent = new SaveRequestEvent();
+		eventBus.fireEvent(saveEvent);
+	}
+	@UiHandler("openButton")
+	void onOpenButtonClick(ClickEvent e){
+		e.preventDefault();
+		listener.goTo(new SavedPlace("default"));
+	}
 }
