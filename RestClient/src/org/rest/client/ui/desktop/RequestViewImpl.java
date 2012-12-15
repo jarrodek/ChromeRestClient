@@ -46,6 +46,7 @@ import org.rest.client.ui.desktop.widget.RequestUrlWidget;
 import org.rest.client.ui.html5.HTML5Element;
 import org.rest.client.ui.html5.HTML5Progress;
 
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -97,9 +98,12 @@ public class RequestViewImpl extends Composite implements RequestView {
 	@UiField DivElement contentTypeContainer;
 	@UiField HTML5Progress progressIndicator;
 	@UiField Button sendButton;
+	@UiField Button refreshDriveButton;
 	@UiField DivElement projectPanel;
+	@UiField DivElement requestNamePanel;
 	@UiField InlineLabel projectName;
 	@UiField HTMLPanel endpointsContainer;
+	@UiField TextBox requestNameField;
 
 	private List<IsHideable> hidableList = new ArrayList<IsHideable>();
 	private String currentSelectedMethod = "GET";
@@ -111,7 +115,9 @@ public class RequestViewImpl extends Composite implements RequestView {
 
 		urlWidget = new RequestUrlWidget();
 		initWidget(uiBinder.createAndBindUi(this));
-
+		
+		requestNameField.getElement().setAttribute("placeholder", "[Unnamed]");
+		
 		createContentTypeValues(null);
 		hidableList.add(requestBody);
 	}
@@ -220,7 +226,10 @@ public class RequestViewImpl extends Composite implements RequestView {
 				.getDefaulSelected();
 		selectContentTypeValue(defaultSelectedContentTypeValue);
 		projectPanel.addClassName("hidden");
+		
 		listener.fireClearAllEvent();
+		refreshDriveButton.setEnabled(true);
+		refreshDriveButton.addStyleName("hidden");
 	}
 
 	/**
@@ -411,6 +420,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 			List<RequestObject> requests, int currentEndpoint) {
 		this.openedProject = project;
 		projectPanel.removeClassName("hidden");
+		requestNamePanel.addClassName("hidden");
 		projectName.setText(project.getName());
 		
 		final ListBox lb = new ListBox();
@@ -455,6 +465,8 @@ public class RequestViewImpl extends Composite implements RequestView {
 		selectContentTypeValue(HttpContentTypeHelper.getDefaulSelected());
 		
 		openedProject = null;
+		refreshDriveButton.setEnabled(true);
+		refreshDriveButton.addStyleName("hidden");
 	}
 
 	@Override
@@ -642,5 +654,51 @@ public class RequestViewImpl extends Composite implements RequestView {
 	void onOpenButtonClick(ClickEvent e){
 		e.preventDefault();
 		listener.goTo(new SavedPlace("default"));
+	}
+
+	@Override
+	public void setRequestName(String name) {
+		if(name == null || name.isEmpty()){
+			name = ""; //[Unnamed]
+		}
+		requestNameField.getElement().setAttribute("data-name", name);
+		requestNameField.setValue(name);
+		requestNamePanel.removeClassName("hidden");
+		projectPanel.addClassName("hidden");
+	}
+	@UiHandler("requestNameField")
+	void onRequestNameField(ValueChangeEvent<String> event){
+		final String name = event.getValue();
+		if(name.isEmpty()){
+			String prevName = requestNameField.getElement().getAttribute("data-name");
+			requestNameField.setValue(prevName);
+			return;
+		}
+		
+		listener.changeSavedName(name, new Callback<Boolean, Throwable>() {
+			@Override
+			public void onSuccess(Boolean result) {
+				requestNameField.getElement().setAttribute("data-name", name);
+			}
+			
+			@Override
+			public void onFailure(Throwable reason) {
+				String prevName = requestNameField.getElement().getAttribute("data-name");
+				requestNameField.setValue(prevName);
+			}
+		});
+	}
+	
+	
+	@Override
+	public void setGDriveConstrols() {
+		refreshDriveButton.setEnabled(true);
+		refreshDriveButton.removeStyleName("hidden");
+	}
+	@UiHandler("refreshDriveButton")
+	void onRefreshDriveButton(ClickEvent e){
+		e.preventDefault();
+		refreshDriveButton.setEnabled(false);
+		listener.refreshCurrentDriveItem();
 	}
 }

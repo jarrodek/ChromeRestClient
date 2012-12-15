@@ -146,7 +146,12 @@ public interface RequestDataService extends AppDatabase {
 	 * @param offset
 	 * @param callback
 	 */
-	@Select("SELECT * FROM request_data WHERE name LIKE {query} OR url LIKE {query} AND project = 0 ORDER BY time DESC  LIMIT {offset}, {limit}") 
+	@Select("SELECT * FROM request_data " +
+			"WHERE name LIKE {query} " +
+			"OR url LIKE {query} " +
+			"AND project = 0 " +
+			"ORDER BY id DESC  " +
+			"LIMIT {offset}, {limit}") 
 	void query(String query, int limit, int offset,
 			ListCallback<RequestObject> callback);
 	/**
@@ -154,7 +159,10 @@ public interface RequestDataService extends AppDatabase {
 	 * 
 	 * @param callback
 	 */
-	@Select("SELECT * FROM request_data WHERE project = 0 ORDER BY time DESC  LIMIT {offset}, {limit}")
+	@Select("SELECT * FROM request_data " +
+			"WHERE project = 0 " +
+			"ORDER BY id DESC " +
+			"LIMIT {offset}, {limit}")
 	void query(int limit, int offset,
 			ListCallback<RequestObject> callback);
 }

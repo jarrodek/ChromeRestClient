@@ -76,7 +76,7 @@ body>.ls {
 h1.at {
 	-webkit-user-select: none;
 	color: black;
-	font-size: 175%;
+	font-size: 120%;
 	font-weight: normal;
 	margin: 0;
 	padding-bottom: 14px;
@@ -579,9 +579,6 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	border-radius: 2px;
 	background-color: whiteSmoke;
 	background-image: -webkit-linear-gradient(top, whiteSmoke, #F1F1F1);
-	background-image: -moz-linear-gradient(top, whiteSmoke, #F1F1F1);
-	background-image: -ms-linear-gradient(top, whiteSmoke, #F1F1F1);
-	background-image: -o-linear-gradient(top, whiteSmoke, #F1F1F1);
 	background-image: linear-gradient(top, whiteSmoke, #F1F1F1);
 	border: 1px solid gainsboro;
 	border: 1px solid rgba(0, 0, 0, 0.1);
@@ -600,9 +597,6 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 .button:disabled{
 	color: #B3B3B3 !important;
 	background-image: -webkit-linear-gradient(top, whiteSmoke, #F1F1F1) !important;
-	background-image: -moz-linear-gradient(top, whiteSmoke, #F1F1F1) !important;
-	background-image: -ms-linear-gradient(top, whiteSmoke, #F1F1F1) !important;
-	background-image: -o-linear-gradient(top, whiteSmoke, #F1F1F1) !important;
 	background-image: linear-gradient(top, whiteSmoke, #F1F1F1) !important;
 	background-color: whiteSmoke !important;
 	-webkit-box-shadow: initial !important;
@@ -611,32 +605,21 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	border: 1px solid gainsboro !important;
 	border: 1px solid rgba(0, 0, 0, 0.1) !important;
 }
-.button:hover {
+.button:active,
+.button:hover{
 	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-	-moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 	background-color: #F8F8F8;
 	background-image: -webkit-linear-gradient(top, #F8F8F8, #F1F1F1);
-	background-image: -moz-linear-gradient(top, #F8F8F8, #F1F1F1);
-	background-image: -ms-linear-gradient(top, #F8F8F8, #F1F1F1);
-	background-image: -o-linear-gradient(top, #F8F8F8, #F1F1F1);
 	background-image: linear-gradient(top, #F8F8F8, #F1F1F1);
 	border: 1px solid #C6C6C6;
 	color: #333;
 }
+.button:hover {
+	
+}
 
 .button:active {
-	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-	-moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-	background-color: #F8F8F8;
-	background-image: -webkit-linear-gradient(top, #F8F8F8, #F1F1F1);
-	background-image: -moz-linear-gradient(top, #F8F8F8, #F1F1F1);
-	background-image: -ms-linear-gradient(top, #F8F8F8, #F1F1F1);
-	background-image: -o-linear-gradient(top, #F8F8F8, #F1F1F1);
-	background-image: linear-gradient(top, #F8F8F8, #F1F1F1);
-	border: 1px solid #C6C6C6;
-	color: #333;
 	-webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
 	-moz-box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
 	box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
@@ -644,6 +627,50 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 
 .button:focus {
 	border: 1px solid #4D90FE;
+}
+.button.driveButton{
+	background: url(img/drive_color16.png) 6px center no-repeat, -webkit-linear-gradient(top, whiteSmoke, #F1F1F1);
+	background: url(img/drive_color16.png) 6px center no-repeat, linear-gradient(top, whiteSmoke, #F1F1F1);
+	padding-left: 27px;
+}
+.button.driveButton:hover{
+	background: url(img/drive_color16.png) 6px center no-repeat, -webkit-linear-gradient(top, #F8F8F8, #F1F1F1);
+	background: url(img/drive_color16.png) 6px center no-repeat, linear-gradient(top, #F8F8F8, #F1F1F1);
+	padding-left: 27px;
+}
+.button.driveButton:active{
+	background: url(img/drive_color16.png) 6px center no-repeat, -webkit-linear-gradient(top, #F8F8F8, #F1F1F1);
+	background: url(img/drive_color16.png) 6px center no-repeat, linear-gradient(top, #F8F8F8, #F1F1F1);
+	padding-left: 27px;
+}
+.button.driveButton:disabled{
+	background: url(img/drive_mono16.png) 6px center no-repeat, -webkit-linear-gradient(top, whiteSmoke, #F1F1F1) !important;
+	background: url(img/drive_mono16.png) 6px center no-repeat, linear-gradient(top, whiteSmoke, #F1F1F1) !important;
+	padding-left: 27px;
+}
+.button.refreshButton{
+	background: url(img/1_navigation_refresh.png) 6px center no-repeat, -webkit-linear-gradient(top, whiteSmoke, #F1F1F1);
+	background: url(img/1_navigation_refresh.png) 6px center no-repeat, linear-gradient(top, whiteSmoke, #F1F1F1);
+	padding-left: 27px;
+	background-size: 20px 20px;
+}
+.button.refreshButton:hover{
+	background: url(img/1_navigation_refresh.png) 6px center no-repeat, -webkit-linear-gradient(top, #F8F8F8, #F1F1F1);
+	background: url(img/1_navigation_refresh.png) 6px center no-repeat, linear-gradient(top, #F8F8F8, #F1F1F1);
+	padding-left: 27px;
+	background-size: 20px 20px;
+}
+.button.refreshButton:active{
+	background: url(img/1_navigation_refresh.png) 6px center no-repeat, -webkit-linear-gradient(top, #F8F8F8, #F1F1F1);
+	background: url(img/1_navigation_refresh.png) 6px center no-repeat, linear-gradient(top, #F8F8F8, #F1F1F1);
+	padding-left: 27px;
+	background-size: 20px 20px;
+}
+.button.refreshButton:disabled{
+	background: url(img/1_navigation_refresh.png) 6px center no-repeat, -webkit-linear-gradient(top, whiteSmoke, #F1F1F1) !important;
+	background: url(img/1_navigation_refresh.png) 6px center no-repeat, linear-gradient(top, whiteSmoke, #F1F1F1) !important;
+	padding-left: 27px;
+	background-size: 20px 20px;
 }
 .dialogButtons {
 	-webkit-box-align: center;
@@ -751,6 +778,20 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	width: 24px;
 	height: 24px;
 	display: inline-block;
+}
+.actionDomLoader{
+	position: absolute;
+	top: 20px;
+	right: 20px;
+	z-index: 10;
+	background: -webkit-radial-gradient(center, rgba(255, 255, 255, 0.78), rgba(235, 235, 235, 0.57) 35%, rgba(190, 190, 190, 0.53) );
+	padding: 13px;
+	border-radius: 25px;
+}
+.actionDomLoader .loaderImage{
+	background-image: url(img/loader2.gif);
+	width: 16px;
+	height: 16px;
 }
 .box{
 	display: -webkit-box;
@@ -877,6 +918,7 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	min-height: 38px;
 	background-color: #F4F4F4;
 }
+
 .projectPanel{
 	height: 38px;
 	padding: 0 10px;
@@ -884,6 +926,31 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	-webkit-justify-content: flex-start;
 	-webkit-align-content: center;
 	-webkit-align-items: center;
+}
+.requestNamePanel {
+	font-size: 14px;
+	padding: 0 10px;
+	-webkit-align-items: center;
+	width: 100%;
+}
+.requestNameField {
+	border: 1px transparent solid;
+	background: transparent;
+	padding: 4px;
+	border-radius: 2px;
+	min-width: 50%;
+}
+.requestNameField:focus {
+	background: white;
+}
+.requestNameField:hover:focus {
+	box-shadow: none;
+	border: 1px #E5E5E5 solid;
+}
+.requestNameField:hover {
+	box-shadow: inset 0px 1px 2px rgba(0, 0, 0, 0.1);
+	border: 1px solid #B9B9B9;
+	border-top-color: #A0A0A0;
 }
 .topActions{
 	width: 20%;
@@ -1750,6 +1817,7 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 .Saved_List_Item_nameInput {
 	outline: none;
 	border: 1px transparent solid;
+	width: 100%;
 }
 .Saved_List_Item_nameInput:hover {
 	border: 1px #E5E5E5 solid;
@@ -2133,4 +2201,54 @@ div.About_View_DonatePopupPanelGlass {
 	opacity: initial;
 	z-index: 6;
 	position: fixed !important;
+}
+
+/* GDRIVE FOLDER PICKUP */
+.Folder_Pickup_dialogContent{
+	min-width: 790px;
+}
+.Folder_Pickup_wrapper{
+	position: relative;
+}
+.Folder_Pickup_loader{
+	position: fixed;
+	top: 175px;
+	left: 50%;
+}
+.Folder_Pickup_results{
+	overflow-y: auto;
+	overflow-x: hidden;
+	margin-top: 20px;
+}
+.Folder_Pickup_ResultRow {
+	display: -webkit-box;
+	padding: 5px 20px;
+	border-bottom: 1px #E5E5E5 solid;
+	border-left: 1px transparent solid;
+	border-right: 1px transparent solid;
+	border-top: 1px transparent solid;
+	cursor: pointer;
+}
+/* .Folder_Pickup_ResultRow:hover { */
+/* 	border: 1px solid #77ABFF; */
+/* 	outline: none; */
+/* 	box-shadow: inset 0px 1px 2px rgba(77, 144, 254, 0.47); */
+/* } */
+.Folder_Pickup_Icon {
+	margin: 0px 15px 0px 20px;
+}
+.Folder_Pickup_Name {
+	min-width: 700px;
+	-webkit-flex: 1 0 0;
+	display: -webkit-box;
+	font-weight: bold;
+}
+.Folder_Pickup_search {
+	min-width: 400px;
+}
+.Folder_Pickup_search{
+	-webkit-appearance: none;
+}
+.Folder_Pickup_ResultRowSelected{
+	background-color: #E7E7E7;
 }

@@ -8,7 +8,9 @@
 			<div class="Saved_View_searchContainer">
 				<h5:SearchBox ui:field="searchInput"></h5:SearchBox>
 			</div>
-			<div class="Saved_View_searchContainer"></div>
+			<div class="Saved_View_searchContainer">
+				<g:Button styleName="button driveButton" ui:field="openDrive" title="Open saved request from Google Drive™">Open from Google Drive™</g:Button>
+			</div>
 		</section>
 		<div ui:field="loaderInfo" class="Saved_View_loadingWrapper flexCenter">
 			<span class="loaderImage"></span>

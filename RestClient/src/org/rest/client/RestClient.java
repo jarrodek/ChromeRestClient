@@ -21,6 +21,9 @@ import java.util.logging.Logger;
 
 import org.rest.client.event.ApplicationReadyEvent;
 import org.rest.client.event.NewProjectAvailableEvent;
+import org.rest.client.gdrive.DriveAuth;
+import org.rest.client.gdrive.DriveCall;
+import org.rest.client.gdrive.DriveFileItem;
 import org.rest.client.mvp.AppActivityMapper;
 import org.rest.client.mvp.AppPlaceHistoryMapper;
 import org.rest.client.place.ImportExportPlace;
@@ -28,7 +31,6 @@ import org.rest.client.place.RequestPlace;
 import org.rest.client.request.FilesObject;
 import org.rest.client.request.HttpMethodOptions;
 import org.rest.client.request.RequestHeadersParser;
-import org.rest.client.request.RequestParameters;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.LocalStore;
 import org.rest.client.storage.store.ProjectStoreWebSql;
@@ -49,6 +51,7 @@ import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.place.shared.Place;
@@ -263,21 +266,21 @@ public class RestClient implements EntryPoint {
 			RequestView requestView = RestClient.getClientFactory()
 					.getRequestView();
 			
-			RequestParameters rp = new RequestParameters();
-			rp.setFilesList(requestView.getFiles());
-			rp.setFormEncoding(requestView.getEncoding());
+			RequestObject rp = RequestObject.createRequest(); 
+			rp.setFiles(requestView.getFiles());
+			rp.setEncoding(requestView.getEncoding());
 			rp.setHeaders(requestView.getHeaders());
 			rp.setMethod(requestView.getMethod());
-			rp.setPostData(requestView.getPayload());
-			rp.setRequestUrl(requestView.getUrl());
+			rp.setPayload(requestView.getPayload());
+			rp.setURL(requestView.getUrl());
 			
 			
 			callback.onSuccess(parseRequestParameters(rp));
 		} else {
-			RequestParameters
-					.restoreLatest(new Callback<RequestParameters, Throwable>() {
+			RequestObject
+					.restoreLatest(new Callback<RequestObject, Throwable>() {
 						@Override
-						public void onSuccess(RequestParameters result) {
+						public void onSuccess(RequestObject result) {
 							callback.onSuccess(parseRequestParameters(result));
 						}
 
@@ -295,11 +298,12 @@ public class RestClient implements EntryPoint {
 	 * @param rp
 	 * @return
 	 */
-	private static RequestObject parseRequestParameters(RequestParameters rp){
+	private static RequestObject parseRequestParameters(RequestObject rp){
 		String headers = rp.getHeaders();
 		String method = rp.getMethod();
-		String encoding = rp.getFormEncoding();
+		String encoding = rp.getEncoding();
 		boolean hasPayload = HttpMethodOptions.hasBody(method);
+		
 		ArrayList<FilesObject> files = null;
 		if(hasPayload){
 			//handle content-type header for request with payload. 
@@ -322,7 +326,7 @@ public class RestClient implements EntryPoint {
 				}
 				i++;
 			}
-			files = (ArrayList<FilesObject>) rp.getFilesList();
+			files = rp.getFiles();
 			if(files != null && files.size() > 0){
 				encoding = null;
 			}
@@ -336,7 +340,7 @@ public class RestClient implements EntryPoint {
 		RequestObject requestObject = RequestObject.createRequest();
 		requestObject.setHeaders(headers);
 		requestObject.setMethod(method);
-		String url = rp.getRequestUrl();
+		String url = rp.getURL();
 		if(url.startsWith("/") && !GWT.isProdMode()){
 			//
 			// DEV mode.
@@ -346,11 +350,10 @@ public class RestClient implements EntryPoint {
 		
 		requestObject.setURL(url);
 		if(hasPayload){
-			requestObject.setPayload(rp.getPostData());
+			requestObject.setPayload(rp.getPayload());
 			requestObject.setEncoding(null);
 			requestObject.setFiles(files);
 		}
-		
 		return requestObject;
 	}
 	
@@ -403,6 +406,7 @@ public class RestClient implements EntryPoint {
 			
 			@Override
 			public void onSuccess(Integer result) {
+				obj.setId(result.intValue());
 				callback.onSuccess(obj);
 			}
 			
@@ -415,6 +419,87 @@ public class RestClient implements EntryPoint {
 			}
 		});
 	}
+	
+	public static void saveRequestToGDrive(final RequestObject obj, final Callback<DriveFileItem, Throwable> callback){
+		DriveCall.hasSession(new DriveCall.SessionHandler() {
+			@Override
+			public void onResult(DriveAuth result) {
+				if(result == null){
+					//no logged in user
+					DriveCall.auth(new DriveCall.SessionHandler() {
+						@Override
+						public void onResult(DriveAuth result) {
+							if(result == null){
+								callback.onFailure(new Throwable("Authorization required."));
+								return;
+							}
+							doSaveRequestToGDrive(obj, callback, result.getAccessToken());
+						}
+					});
+					return;
+				}
+				doSaveRequestToGDrive(obj, callback, result.getAccessToken());
+			}
+		});
+	}
+	
+	private static void doSaveRequestToGDrive(final RequestObject obj, final Callback<DriveFileItem, Throwable> callback, String accessToken){
+		
+		if(obj.getGDriveId() != null){
+			if(RestClient.isDebug()){
+				Log.debug("Updating Google Drive™ item");
+			}
+			DriveCall.updateFile(obj.getGDriveId(), obj, new DriveCall.FileUploadHandler() {
+				@Override
+				public void onLoad(DriveFileItem response) {
+					
+					callback.onSuccess(response);
+				}
+				
+				@Override
+				public void onError(JavaScriptException exc) {
+					callback.onFailure(exc);
+				}
+			});
+			return;
+		}
+		
+		
+		
+		DriveCall.showGoogleForlderPickerDialog(accessToken, new DriveCall.SelectFolderHandler() {
+			
+			@Override
+			public void onSelect(String folderId) {
+				if(folderId == null || folderId.isEmpty()){
+					callback.onSuccess(null);
+					return;
+				}
+				Storage storage = Storage.getLocalStorageIfSupported();
+				storage.setItem(LocalStore.LATEST_GDRIVE_FOLDER, folderId);
+				
+				
+				DriveCall.insertNewFile(folderId, obj.getName(), obj, new DriveCall.FileUploadHandler() {
+					@Override
+					public void onLoad(DriveFileItem response) {
+						callback.onSuccess(response);
+					}
+					
+					@Override
+					public void onError(JavaScriptException exc) {
+						callback.onFailure(exc);
+					}
+				});
+			}
+			
+			@Override
+			public void onCancel() {
+				callback.onSuccess(null);
+			}
+		});
+	}
+	
+	
+	
 	
 	
 	

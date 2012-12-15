@@ -53,8 +53,9 @@
 			<div class="dialogButtons">
 				<g:Button styleName="button" ui:field="save">Save</g:Button>
 				<g:Button styleName="button" visible="false" ui:field="overwrite">Overwrite</g:Button>
-				<g:Button styleName="button" ui:field="cancel">Cancel
-				</g:Button>
+				<g:Button styleName="button driveButton" ui:field="gdrive">Save to Google Drive™</g:Button>
+				<g:Button styleName="button" ui:field="cancel">Cancel</g:Button>
+				
 			</div>
 		</g:HTMLPanel>
 	</g:DialogBox>

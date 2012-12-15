@@ -5,9 +5,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.rest.client.RestClient;
-import org.rest.client.request.RequestParameters;
+import org.rest.client.gdrive.DriveFileItem;
 import org.rest.client.request.URLParser;
 import org.rest.client.storage.StoreResultCallback;
+import org.rest.client.storage.store.LocalStore;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
@@ -56,6 +57,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	@UiField DivElement requestOverwriteContainer;
 	@UiField Button save;
 	@UiField Button overwrite;
+	@UiField Button gdrive;
 	
 	@UiField CheckBox protocolStatus;
 	@UiField CheckBox serverStatus;
@@ -66,9 +68,10 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	@UiField CheckBox payloadStatus;
 	@UiField CheckBox headersStatus;
 	
-	private String requestOrygURL = "";
-	private int overwriteId = -1;
-	private boolean forceOverwrite = false;
+	String requestOrygURL = "";
+	int overwriteId = -1;
+	boolean forceOverwrite = false;
+	String gDriveItem = null;
 	
 	public SaveRequestDialogViewImpl(){
 		setPreviewURL();
@@ -87,8 +90,10 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 				if(event.getValue()){
 					projectList.setEnabled(true);
+					gdrive.setEnabled(false);
 				} else {
 					projectList.setEnabled(false);
+					gdrive.setEnabled(true);
 				}
 				projectListValueChange();
 			}
@@ -124,7 +129,8 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		//check if it is a restored request. The user may want to overwrite existing request.
 		//
 		Storage store = Storage.getSessionStorageIfSupported();
-		String restored = store.getItem("restoredRequest");
+		String restored = store.getItem(LocalStore.RESTORED_REQUEST);
+		gDriveItem = store.getItem(LocalStore.CURRENT_GOOGLE_DRIVE_ITEM);
 		if(restored != null && !restored.isEmpty()){
 			int restoredId = -1;
 			try{
@@ -152,6 +158,27 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 					}});
 			}
 		}
+		if(gDriveItem != null && !gDriveItem.isEmpty()){
+			RestClient.collectRequestData(new Callback<RequestObject, Throwable>() {
+				@Override
+				public void onSuccess(RequestObject result) {
+					name.setValue(result.getName());
+					overwrite.setVisible(true);
+					overwrite.addStyleName("driveButton");
+					gdrive.setVisible(false);
+					save.setVisible(false);
+					name.setEnabled(false);
+					addToProject.setEnabled(false);
+				}
+				
+				@Override
+				public void onFailure(Throwable reason) {
+					if(RestClient.isDebug()){
+						Log.error("Unable collect request data", reason);
+					}
+				}
+			});
+		}
 	}
 	
 	
@@ -160,7 +187,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		store.all(new StoreResultCallback<Map<Integer,ProjectObject>>() {
 			@Override
 			public void onSuccess(Map<Integer, ProjectObject> result) {
-				Log.debug("Result project list");
+				
 				Iterator<Entry<Integer, ProjectObject>> it = result.entrySet().iterator();
 				while(it.hasNext()){
 					Entry<Integer, ProjectObject> set = it.next();
@@ -192,11 +219,11 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		if(History.getToken().startsWith("RequestPlace")){
 			requestOrygURL = RestClient.getClientFactory().getRequestView().getUrl();
 		} else {
-			RequestParameters
-			.restoreLatest(new Callback<RequestParameters, Throwable>() {
+			RequestObject
+			.restoreLatest(new Callback<RequestObject, Throwable>() {
 				@Override
-				public void onSuccess(RequestParameters result) {
-					requestOrygURL = result.getRequestUrl();
+				public void onSuccess(RequestObject result) {
+					requestOrygURL = result.getURL();
 				}
 	
 				@Override
@@ -309,6 +336,12 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		save.setEnabled(false);
 		overwrite.setEnabled(false);
 		forceOverwrite = true;
+		
+		if(gDriveItem != null && !gDriveItem.isEmpty()){
+			doSaveGdrive();
+			return;
+		}
+		
 		doSaveRequest();
 	}
 	
@@ -334,6 +367,83 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	@Override
 	public Widget asWidget() {
 		return dialog.asWidget();
+	}
+	
+	@UiHandler("gdrive")
+	void onGdriveSave(ClickEvent e){
+		e.preventDefault();
+		
+		if(name.getValue().isEmpty()){
+			StatusNotification.notify("Name can't be empty.", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+			save.setEnabled(true);
+			return;
+		}
+		
+		gdrive.setEnabled(false);
+		save.setEnabled(false);
+		
+		doSaveGdrive();
+	}
+	
+	void doSaveGdrive(){
+		RestClient.collectRequestData(new Callback<RequestObject, Throwable>() {
+			
+			@Override
+			public void onSuccess(final RequestObject result) {
+				if(!forceOverwrite){
+					result.setName(name.getValue());
+				} else {
+					result.setGDriveId(gDriveItem);
+				}
+				result.setSkipHeaders(headersStatus.getValue());
+				result.setSkipHistory(tokenStatus.getValue());
+				result.setSkipMethod(methodStatus.getValue());
+				result.setSkipParams(parametersStatus.getValue());
+				result.setSkipPayload(payloadStatus.getValue());
+				result.setSkipProtocol(protocolStatus.getValue());
+				result.setSkipServer(serverStatus.getValue());
+				result.setSkipPath(pathStatus.getValue());
+				
+				RestClient.saveRequestToGDrive(result, new Callback<DriveFileItem, Throwable>() {
+					
+					@Override
+					public void onSuccess(DriveFileItem result) {
+						save.setEnabled(true);
+						gdrive.setEnabled(true);
+						
+						if(result == null){
+							//only if cancel
+							return;
+						}
+						
+						dialog.hide();
+						StatusNotification.notify("File saved", StatusNotification.TYPE_NORMAL, StatusNotification.TIME_SHORT);
+					}
+					
+					@Override
+					public void onFailure(Throwable reason) {
+						save.setEnabled(true);
+						gdrive.setEnabled(true);
+						if(RestClient.isDebug()){
+							Log.error("Unable to save request data.", reason);
+						}
+						StatusNotification.notify(reason.getMessage(), StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+					}
+				});
+				
+				
+			}
+			
+			@Override
+			public void onFailure(Throwable reason) {
+				save.setEnabled(true);
+				gdrive.setEnabled(true);
+				if(RestClient.isDebug()){
+					Log.error("Unable to save request data. Can't collect current request data.", reason);
+				}
+				StatusNotification.notify("Unable to save request data!", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+			}
+		});
 	}
 	
 	private void doSaveRequest(){

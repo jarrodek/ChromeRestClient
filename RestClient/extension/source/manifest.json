@@ -5,7 +5,7 @@
     "16": "img/arc_icon_16.png",
     "128": "img/arc_icon_128.png"
   },
-  "version": "3.0.33",
+  "version": "3.0.34",
   "manifest_version": 2,
   "permissions": [
     "webRequest",
@@ -23,6 +23,18 @@
     "launch": {
       "local_path": "RestClient.html"
     }
+  },
+  "container" : "GOOGLE_DRIVE",
+  "api_console_project_id" : "advancedrestclientext",
+  "gdrive_mime_types": {
+    "http://drive.google.com/intents/opendrivedoc": [
+      { 
+        "type": ["application/restclient+data","application/vnd.google.drive.ext-type.arc"],
+        "href": "RestClient.html",
+        "title" : "Open",
+        "disposition" : "window"
+      }
+    ]
   },
   "content_security_policy": "script-src chrome-extension:// chrome-extension-resource:// https://plusone.google.com https://chromerestclient.appspot.com https://ssl.google-analytics.com https://apis.google.com 'self'; object-src chrome-extension:// chrome-extension-resource:// 'self'; frame-src chrome-extension:// chrome-extension-resource:// https://plusone.google.com 'self'",
   "intents": {

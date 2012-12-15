@@ -20,9 +20,14 @@
 						<g:Image url="img/5_content_discard.png" ui:field="deleteEndpoint" styleName="deleteEndpointAction" title="Delete endpoint"></g:Image>
 					</div>
 				</div>
+				<!-- Name panel -->
+				<div class="requestNamePanel flex" ui:field="requestNamePanel">
+					<g:TextBox ui:field="requestNameField" styleName="requestNameField"></g:TextBox>
+				</div>
 			</div>
 			<div class="topActions box">
-				<g:Button styleName="button" ui:field="saveButton" title="Save current state">Save</g:Button>
+				<g:Button styleName="button refreshButton hidden" ui:field="refreshDriveButton" title="Refresh data from Google Drive™">Refresh</g:Button>
+				<g:Button styleName="button driveButton" ui:field="saveButton" title="Save current state">Save</g:Button>
 				<g:Button styleName="button" ui:field="openButton" title="Open saved request">Open</g:Button>
 			</div>
 			

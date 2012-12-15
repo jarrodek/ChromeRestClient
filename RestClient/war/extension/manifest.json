@@ -29,6 +29,10 @@
       "matches": ["http://127.0.0.1:8888/*"],
       "js": ["cs.js"],
 	  "run_at": "document_start"
+    },
+    {
+    	"matches": ["http://127.0.0.1:8888/GDrive.html*"],
+    	"js": ["gdriveinit.js"]
     }
   ],
   "intents": {

@@ -186,6 +186,11 @@ public class ImportExportActivity extends AppActivity implements
 		final ArrayList<RequestObject> requests = data.getRequests();
 		
 		if(projects != null && projects.size()>0){
+			
+			//
+			// First, save projects data and update referenced requests 
+			//
+			
 			clientFactory.getProjectsStore().getService().importData(projects, new RowIdListCallback() {
 				
 				@Override
@@ -198,14 +203,17 @@ public class ImportExportActivity extends AppActivity implements
 				
 				@Override
 				public void onSuccess(List<Integer> rowIds) {
-					int len = rowIds.size();
-					for(int i=0; i<len; i++){
-						int prevRequestProject = requests.get(i).getProject();
-						int projectId = rowIds.get(i);
+					
+					for(int i=0, len = rowIds.size(); i<len; i++){
+						int currentProjectId = rowIds.get(i);
+						int exportedProjectId = projects.get(i).getId();
+						//now find all request where project ID is
+						//"exportedProjectId" as an old ID and replace 
+						//it with new one.
+						
 						for(RequestObject r : requests){
-							if(r.getProject() == prevRequestProject){
-								r.setProject(projectId);
-								break;
+							if(r.getProject() == exportedProjectId){
+								r.setProject(currentProjectId);
 							}
 						}
 						

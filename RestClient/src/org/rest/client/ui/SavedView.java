@@ -56,6 +56,7 @@ public interface SavedView extends IsWidget {
 		void changeSavedName(String newName, int savedId);
 		
 		void serach(String query);
+		void openFromGoogleDrive();
 	}
 	/**
 	 * Sets presenter for this view
@@ -69,4 +70,6 @@ public interface SavedView extends IsWidget {
 	void setNoMoreItems();
 	void clearResultList();
 	void appendResults(List<RequestObject> result);
+	
+	void setDriveButtonEnabled(boolean enabled);
 }

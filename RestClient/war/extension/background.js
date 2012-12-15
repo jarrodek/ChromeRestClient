@@ -18,7 +18,7 @@ if(typeof chrome.declarativeWebRequest == 'undefined'){
 
 var requestFilter = {
 	urls : [ "<all_urls>" ],
-	//types : [ "xmlhttprequest" ]
+	types : [ "xmlhttprequest" ]
 }
 var requestDetails = {
 	URL : null,
@@ -91,9 +91,18 @@ function onRequestCompleted(details){
 			.indexOf(requestDetails.URL) > -1))
 		return;
 	requestDetails.RESPONSE_HEADERS = details.responseHeaders;
+	
+	//
+	// Clean rules or if the user will not call another request all XmlHttpRequest for this URL will be affected. 
+	//
+	declarativeRequest.unregisterEarlierRules();
 }
 function onRequestError(details){
 	console.log(details);
+	//
+	// Clean rules or if the user will not call another request all XmlHttpRequest for this URL will be affected. 
+	//
+	declarativeRequest.unregisterEarlierRules();
 }
 /**
  * Register Web Requests listeners to handle sent/received headers info in
@@ -106,7 +115,7 @@ chrome.webRequest.onBeforeRedirect.addListener(onBeforeRedirect, requestFilter,
 		[ 'responseHeaders' ]);
 chrome.webRequest.onCompleted.addListener(onRequestCompleted, requestFilter,
 		[ 'responseHeaders' ]);
-//chrome.webRequest.onErrorOccurred.addListener(onRequestError,requestFilter);
+chrome.webRequest.onErrorOccurred.addListener(onRequestError,requestFilter);
 
 window.requestAction = function(request, callback){
 	callback = callback || new Function();
@@ -146,6 +155,12 @@ function handleInternalMessage(request,sendResponse){
 	}
 
 	switch (request.payload) {
+	case 'gdrive':
+		var query = JSON.parse(request.data);
+		if(query.action == 'create'){
+			runApplicationFromGoogleDrive(query);
+		}
+		break;
 	case 'setEnvironment':
 		var data = JSON.parse(request.data);
 		for (var key in data) {
@@ -336,9 +351,6 @@ var declarativeRequest = {
 			requestActions = requestActions.concat(addActions);
 		}
 		
-		
-		
-		
 		//
 		// Here's a trick.
 		// Browser, by default, set some headers. We don't want them.
@@ -516,6 +528,21 @@ function runApplication(requestDetails) {
 	} else {
 		viewTabUrl = chrome.extension
 				.getURL('RestClient.html#RequestPlace:external/' + uuid);
+	}
+	window.externalDataHolder[uuid] = requestDetails;
+	chrome.tabs.create({
+		url : viewTabUrl
+	});
+}
+
+
+function runApplicationFromGoogleDrive(requestDetails) {
+	var uuid = guidGenerator();
+	var viewTabUrl = '';
+	if (dev) {
+		viewTabUrl = 'http://127.0.0.1:8888/RestClient.html?gwt.codesvr=127.0.0.1:9997#RequestPlace:gdrive/create/'+ uuid;
+	} else {
+		viewTabUrl = chrome.extension.getURL('RestClient.html#RequestPlace:gdrive/create/' + uuid);
 	}
 	window.externalDataHolder[uuid] = requestDetails;
 	chrome.tabs.create({

@@ -26,6 +26,7 @@ import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.tutorial.TutorialFactory;
 
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.IsWidget;
 
@@ -64,6 +65,8 @@ public interface RequestView extends IsWidget {
 		void deleteCurrentEndpoint();
 		
 		EditProjectView getEditProjectDialog();
+		void refreshCurrentDriveItem();
+		void changeSavedName(String name, Callback<Boolean, Throwable> callback);
 	}
 	
 	/**
@@ -100,6 +103,13 @@ public interface RequestView extends IsWidget {
 	
 	void setProjectData(ProjectObject project, List<RequestObject> requests, int currentEndpoint);
 	/**
+	 * Sets the request name. Name can be from saved requests or from GDrive file name.
+	 * When project is displayed the name should not appear (it is in "endpoints" input anyway).
+	 * @param name
+	 */
+	void setRequestName(String name);
+	
+	/**
 	 * Set up tutorial.
 	 * @param factory
 	 */
@@ -111,4 +121,9 @@ public interface RequestView extends IsWidget {
 	void handleRequestChangeEvent(RequestChangeEvent event);
 	
 	void updateProjectMetadata(ProjectObject project);
+	/**
+	 * Set Google Drive controls for request.
+	 * It is "refresh" and "save".
+	 */
+	void setGDriveConstrols();
 }

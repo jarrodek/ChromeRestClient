@@ -1,0 +1,29 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'
+	xmlns:h5="urn:import:org.rest.client.ui.html5">
+	<g:DialogBox ui:field="dialog" 
+		modal="false"
+		animationEnabled="true" 
+		glassEnabled="true" 
+		autoHideEnabled="false" 
+		autoHideOnHistoryEventsEnabled="true" >
+		<g:HTMLPanel ui:field="contents" styleName="container Folder_Pickup_dialogContent">
+			<div class="dialogTitle">
+				<span>Select a folder</span>
+			</div>
+			<div class="Folder_Pickup_wrapper">
+				<span class="loaderImage Folder_Pickup_loader" ui:field="loader"></span>
+				<div class="Folder_Pickup_search_bar">
+					<h5:SearchBox ui:field="searchBox" styleName="Folder_Pickup_search gwt-TextBox"></h5:SearchBox>
+					<g:Button styleName="button" ui:field="find">Find</g:Button>
+				</div>
+				
+				<g:HTMLPanel ui:field="results" styleName="Folder_Pickup_results"></g:HTMLPanel>
+			</div>
+			<div class="dialogButtons">
+				<g:Button styleName="button" ui:field="select">Select</g:Button>
+				<g:Button styleName="button" ui:field="cancel">Cancel</g:Button>
+			</div>
+		</g:HTMLPanel>
+	</g:DialogBox>
+</ui:UiBinder>

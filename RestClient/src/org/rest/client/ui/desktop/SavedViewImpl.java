@@ -8,12 +8,15 @@ import org.rest.client.ui.html5.SearchBox;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.ScrollEvent;
 import com.google.gwt.user.client.Window.ScrollHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -38,6 +41,7 @@ public class SavedViewImpl extends Composite implements SavedView {
 	@UiField InlineLabel loader;
 	@UiField HTMLPanel root;
 	@UiField HTMLPanel list;
+	@UiField Button openDrive;
 	
 	public SavedViewImpl(){
 		initWidget(uiBinder.createAndBindUi(this));
@@ -159,5 +163,17 @@ public class SavedViewImpl extends Composite implements SavedView {
 		list.setVisible(true);
 		
 		ensureScrollItems();
+	}
+	
+	@UiHandler("openDrive")
+	void onOpenDrive(ClickEvent e){
+		e.preventDefault();
+		openDrive.setEnabled(false);
+		listener.openFromGoogleDrive();
+	}
+
+	@Override
+	public void setDriveButtonEnabled(boolean enabled) {
+		openDrive.setEnabled(enabled);
 	}
 }

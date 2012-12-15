@@ -20,6 +20,9 @@ import java.util.List;
 
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
+import org.rest.client.gdrive.DriveAuth;
+import org.rest.client.gdrive.DriveCall;
+import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SavedPlace;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.objects.RequestObject;
@@ -200,6 +203,40 @@ public class SavedActivity extends ListActivity implements
 			}
 		});
 	}
-	
-	
+
+	@Override
+	public void openFromGoogleDrive() {
+		DriveCall.hasSession(new DriveCall.SessionHandler() {
+			@Override
+			public void onResult(DriveAuth result) {
+				if(result == null){
+					//no logged in user
+					DriveCall.auth(new DriveCall.SessionHandler() {
+						@Override
+						public void onResult(DriveAuth result) {
+							if(result == null){
+								view.setDriveButtonEnabled(true);
+								return;
+							}
+							pickDriveArcFile(result.getAccessToken());
+						}
+					});
+					return;
+				}
+				pickDriveArcFile(result.getAccessToken());
+			}
+		});
+	}
+	private void pickDriveArcFile(final String accessToken){
+		DriveCall.showGoogleSavedFilePickerDialog(accessToken, new DriveCall.SelectFolderHandler() {
+			@Override
+			public void onSelect(String fileId) {
+				goTo(RequestPlace.Tokenizer.fromDriveFile(fileId));
+			}
+
+			@Override
+			public void onCancel() {
+				view.setDriveButtonEnabled(true);
+			}});
+	}
 }

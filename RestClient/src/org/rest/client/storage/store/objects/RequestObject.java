@@ -17,13 +17,18 @@ package org.rest.client.storage.store.objects;
 
 import java.util.ArrayList;
 
+import org.rest.client.RestClient;
 import org.rest.client.request.FilesObject;
+import org.rest.client.storage.StoreResultCallback;
+import org.rest.client.storage.store.LocalStore;
 
+import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONBoolean;
 
 /**
  * This is representation of data stored in IDB request table. This class
@@ -60,13 +65,19 @@ public class RequestObject extends JavaScriptObject {
 			skipPayload: false,
 			skipHeaders: false,
 			skipPath: false,
-			time: Date.now()
+			time: Date.now(),
+			
+			//additional, non DB fields
+			driveId: null
 		}
 	}-*/;
 	
 	
 	public final native int getId() /*-{
-		return this.id;
+		if(isNaN(this.id)){
+			this.id = 0;
+		}
+		return this.id || 0;
 	}-*/;
 	
 	
@@ -109,7 +120,7 @@ public class RequestObject extends JavaScriptObject {
 
 	
 	public final native String getMethod() /*-{
-		return this.method;
+		return this.method || "GET";
 	}-*/;
 
 	
@@ -117,9 +128,9 @@ public class RequestObject extends JavaScriptObject {
 		this.encoding = encoding;
 	}-*/;
 
-	
+	//"application/x-www-form-urlencoded";
 	public final native String getEncoding() /*-{
-		return this.encoding;
+		return this.encoding || "application/x-www-form-urlencoded";
 	}-*/;
 
 	
@@ -127,6 +138,20 @@ public class RequestObject extends JavaScriptObject {
 		this.headers = headers;
 	}-*/;
 
+	/**
+	 * @return Google drive ID for this item
+	 */
+	public final native String getGDriveId() /*-{
+		return this.driveId || null;
+	}-*/;
+	
+	/**
+	 * Sets Google Drive ID rot this item  
+	 * @param driveId
+	 */
+	public final native void setGDriveId(String driveId) /*-{
+		this.driveId = driveId;
+	}-*/;
 	
 	public final native String getHeaders() /*-{
 		return this.headers || null;
@@ -150,6 +175,8 @@ public class RequestObject extends JavaScriptObject {
 		return fileList;
 	}
 	
+	
+	
 	/**
 	 * @return request given name or null if none
 	 */
@@ -171,6 +198,9 @@ public class RequestObject extends JavaScriptObject {
 	 * @return project ID or 0 if none
 	 */
 	public final native int getProject() /*-{
+		if(isNaN(this.project)){
+			this.project = 0;
+		}
 		return this.project || 0;
 	}-*/;
 
@@ -362,6 +392,7 @@ public class RequestObject extends JavaScriptObject {
 		obj.put("skipServer", JSONBoolean.getInstance(getSkipServer() == 1 ? true : false));
 		obj.put("time", new JSONNumber(getTime()));
 		obj.put("url", new JSONString(getURL() == null ? "" : getURL()));
+		obj.put("driveId", new JSONString(getGDriveId() == null ? "" : getGDriveId()));
 		return obj;
 	}
 	
@@ -400,6 +431,49 @@ public class RequestObject extends JavaScriptObject {
 		to.setSkipServer(from.getSkipServer() == 1 ? true : false);
 		to.setTime(from.getTime());
 		to.setURL(from.getURL());
+		to.setGDriveId(from.getGDriveId());
 		return to;
 	}
+	
+	
+	
+	/**
+	 * 
+	 * @param clientFactory
+	 * @param callback
+	 */
+	public static void restoreLatest(final Callback<RequestObject, Throwable> callback){
+		
+		final LocalStore store = RestClient.getClientFactory().getLocalStore();
+		store.open(new StoreResultCallback<Boolean>() {
+			
+			@Override
+			public void onSuccess(Boolean result) {
+				if(!result){
+					callback.onFailure(null);
+					return;
+				}
+				store.getByKey(LocalStore.LATEST_REQUEST_KEY, new StoreResultCallback<String>() {
+					
+					@Override
+					public void onSuccess(String result) {
+						RequestObject ro = fromString(result);
+						callback.onSuccess(ro);
+					}
+					
+					@Override
+					public void onError(Throwable e) {
+						Log.error("Error perform getByKey.",e);
+						callback.onFailure(e);
+					}
+				});
+			}
+			
+			@Override
+			public void onError(Throwable e) {
+				callback.onFailure(e);
+			}
+		});
+	}
+	
 }

@@ -26,6 +26,7 @@ public class RequestPlace extends Place {
 	private boolean project = false;
 	private boolean saved = false;
 	private boolean external = false;
+	private boolean gdrive = false;
 
 	/**
 	 * 
@@ -50,6 +51,9 @@ public class RequestPlace extends Place {
 		} else if (requestData.startsWith("external/")) {
 			external = true;
 			entryId = requestData.substring(9);
+		} else if (requestData.startsWith("gdrive/")) {
+			gdrive = true;
+			entryId = requestData.substring(7);
 		}
 
 		this.placeToken = requestData;
@@ -79,6 +83,13 @@ public class RequestPlace extends Place {
 	 */
 	public boolean isProjectsEndpoint() {
 		return projectsEndpoint;
+	}
+	/**
+	 * 
+	 * @return True if request data comes from GDrive.
+	 */
+	public boolean isGdrive() {
+		return gdrive;
 	}
 
 	/**
@@ -171,6 +182,16 @@ public class RequestPlace extends Place {
 		 */
 		public static RequestPlace fromExternal(String source) {
 			return new RequestPlace("external/" + source);
+		}
+		
+		/**
+		 * Create {@link RequestPlace} for request saved without project.
+		 * 
+		 * @param savedId
+		 * @return
+		 */
+		public static RequestPlace fromDriveFile(String fileId) {
+			return new RequestPlace("gdrive/" + fileId);
 		}
 	}
 }

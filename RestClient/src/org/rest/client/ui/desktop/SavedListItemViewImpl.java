@@ -17,6 +17,7 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -45,6 +46,8 @@ public class SavedListItemViewImpl extends Composite {
 	@UiField SpanElement payload;
 	@UiField SpanElement headers;
 	@UiField HTMLPanel container;
+	@UiField Button select;
+	@UiField Button delete;
 	
 	public SavedListItemViewImpl(Presenter listener, RequestObject requestObject) {
 		this.listener = listener;
@@ -64,7 +67,8 @@ public class SavedListItemViewImpl extends Composite {
 		String data = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(date);
 		dateLabel.setText(data);
 		
-		this.nameInput.setValue(requestObject.getName());
+		nameInput.setValue(requestObject.getName());
+		nameInput.getElement().setAttribute("data-name", requestObject.getName());
 		this.methodLabel.setText(requestObject.getMethod());
 		this.urlValue.setText(requestObject.getURL());
 		
@@ -77,6 +81,10 @@ public class SavedListItemViewImpl extends Composite {
 		if(requestObject.getEncoding() != null){
 			encoding.setInnerText(requestObject.getEncoding());
 		}
+		
+		container.getElement().setAttribute("data-request-id", ""+requestObject.getId());
+		delete.getElement().setAttribute("data-request-id", ""+requestObject.getId());
+		select.getElement().setAttribute("data-request-id", ""+requestObject.getId());
 	}
 	
 	@UiHandler({"methodLabel"})
@@ -99,7 +107,13 @@ public class SavedListItemViewImpl extends Composite {
 	@UiHandler("nameInput")
 	void onNameInputChange(ValueChangeEvent<String> event){
 		String name = event.getValue();
+		if(name.isEmpty()){
+			String prevName = nameInput.getElement().getAttribute("data-name");
+			nameInput.setValue(prevName);
+			return;
+		}
 		listener.changeSavedName(name, requestObject.getId());
+		nameInput.getElement().setAttribute("data-name", name);
 	}
 	
 	private void doOnExpand(){
