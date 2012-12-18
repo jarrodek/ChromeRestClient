@@ -1,17 +1,10 @@
-const
-CLIENT_ID = '10525470235.apps.googleusercontent.com';
-const
-SCOPES = 'https://www.googleapis.com/auth/drive.install https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly.metadata';
-const
-boundary = 'ARCFormBoundary49nr1hyovoq1tt9';
-const
-delimiter = "\r\n--" + boundary + "\r\n";
-const
-close_delim = "\r\n--" + boundary + "--";
-const
-appMimeType = 'application/restclient+data';
-const
-appFileExtension = 'arc';
+const CLIENT_ID = '10525470235.apps.googleusercontent.com';
+const SCOPES = 'https://www.googleapis.com/auth/drive.install https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly.metadata';
+const boundary = 'ARCFormBoundary49nr1hyovoq1tt9';
+const delimiter = "\r\n--" + boundary + "\r\n";
+const close_delim = "\r\n--" + boundary + "--";
+const appMimeType = 'application/restclient+data';
+const appFileExtension = 'arc';
 
 window.driveInitialized = false;
 window.pickerInitialized = false;
@@ -67,11 +60,41 @@ function handleDriveClientLoad() {
 
 	});
 }
+
+
+window.addEventListener("message", function(e){
+	if (e.origin != location.origin) {
+		return;
+	};
+	var response = e.data;
+	if (!(response && response.source && response.source == "dev:cs"))
+		return;
+	if (!(response && response.payload))
+		return;
+	var responseAsObject = (response.response && response.response == 'object');
+	if(!responseAsObject){
+		//string receiver
+		return;
+	}
+	
+	switch(response.payload){
+	case 'checkDriveAuth':
+		handleDriveAuthResult(response.data);
+		break;
+	case 'gdriveAuth':
+		handleDriveAuthResult(response.data);
+		break;
+		
+	}
+	
+}, false);
+
+
+
 /**
  * Check if the current user has authorized the application.
  */
 function checkDriveAuth(callback) {
-
 	if (!window.driveInitialized) {
 		window.setTimeout(function() {
 			loadApi(function() {
@@ -80,16 +103,35 @@ function checkDriveAuth(callback) {
 		}, 1);
 		return;
 	}
-
-	window.__arc_authcallback.push(callback);
-	gapi.auth.authorize({
-		'client_id' : CLIENT_ID,
-		'scope' : SCOPES,
-		'immediate' : true
-	}, handleDriveAuthResult);
+	
+	var payload = {
+		'payload': 'checkDriveAuth',
+		'response': 'object'
+	}
+	if(chrome.runtime){
+		chrome.runtime.getBackgroundPage(function(backgroundPage){
+			backgroundPage.requestAction(payload, function(response){
+				var authResult = response.data;
+				if(authResult && authResult.access_token){
+					gapi.auth.setToken({'access_token':authResult.access_token});
+				}
+				callback(response.data);
+			});
+		});
+	} else {
+		window.__arc_authcallback.push(callback);
+		payload.source = 'dev:gwt';
+		window.postMessage(payload, window.location.href);
+	}
+	
+//	gapi.auth.authorize({
+//		'client_id' : CLIENT_ID,
+//		'scope' : SCOPES,
+//		'immediate' : true
+//	}, handleDriveAuthResult);
 }
-function gdriveAuth(callback) {
-
+function gdriveAuth(callback, forceNew) {
+	forceNew = forceNew || false;
 	if (!window.driveInitialized) {
 		window.setTimeout(function() {
 			loadApi(function() {
@@ -98,18 +140,45 @@ function gdriveAuth(callback) {
 		}, 1);
 		return;
 	}
-
-	window.setTimeout(function() {
+	
+	
+	var payload = {
+		'payload': 'gdriveAuth',
+		'response': 'object',
+		'forceNew': forceNew
+	}
+	if(chrome.runtime){
+		chrome.runtime.getBackgroundPage(function(backgroundPage){
+			backgroundPage.requestAction(payload, function(response){
+				var authResult = response.data;
+				if(authResult && authResult.access_token){
+					gapi.auth.setToken({'access_token':authResult.access_token});
+				}
+				callback(response.data);
+			});
+		});
+	} else {
 		window.__arc_authcallback.push(callback);
-		gapi.auth.authorize({
-			'client_id' : CLIENT_ID,
-			'scope' : SCOPES,
-			'immediate' : false
-		}, handleDriveAuthResult);
-	}, 250);
+		payload.source = 'dev:gwt';
+		window.postMessage(payload, window.location.href);
+	}
+	
+	
+//	window.setTimeout(function() {
+//		window.__arc_authcallback.push(callback);
+//		gapi.auth.authorize({
+//			'client_id' : CLIENT_ID,
+//			'scope' : SCOPES,
+//			'immediate' : false
+//		}, handleDriveAuthResult);
+//	}, 250);
 }
 function handleDriveAuthResult(authResult) {
-
+	
+	if(authResult && authResult.access_token){
+		gapi.auth.setToken({'access_token':authResult.access_token});
+	}
+	
 	if (!window.__arc_authcallback || window.__arc_authcallback.length == 0)
 		return;
 	while (window.__arc_authcallback.length > 0) {
@@ -150,28 +219,28 @@ function handlePickerLoad() {
 		}
 	});
 }
-function gdriveGetFolders(nextPageToken, query, clb) {
-	var q = "mimeType='application/vnd.google-apps.folder'";
-	if (query) {
-		q += " and title contains '" + query + "'";
-	}
-	var params = {
-		'q' : q,
-		'maxResults' : 25,
-		'fields' : 'items(createdDate,iconLink,id,title),nextLink,nextPageToken'
-	};
-	if (nextPageToken != null) {
-		params.pageToken = nextPageToken
-	}
-	var request = gapi.client.request({
-		'path' : '/drive/v2/files',
-		'method' : 'GET',
-		'params' : params
-	});
-	request.execute(function(res) {
-		clb(res);
-	});
-}
+//function gdriveGetFolders(nextPageToken, query, clb) {
+//	var q = "mimeType='application/vnd.google-apps.folder'";
+//	if (query) {
+//		q += " and title contains '" + query + "' and trashed = false";
+//	}
+//	var params = {
+//		'q' : q,
+//		'maxResults' : 25,
+//		'fields' : 'items(createdDate,iconLink,id,title),nextLink,nextPageToken'
+//	};
+//	if (nextPageToken != null) {
+//		params.pageToken = nextPageToken
+//	}
+//	var request = gapi.client.request({
+//		'path' : '/drive/v2/files',
+//		'method' : 'GET',
+//		'params' : params
+//	});
+//	request.execute(function(res) {
+//		clb(res);
+//	});
+//}
 function gdriveInsertArcFile(parentId, filename, content, callback) {
 	try {
 		if (typeof content == "object") {

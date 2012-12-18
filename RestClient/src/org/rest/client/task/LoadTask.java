@@ -1,6 +1,5 @@
 package org.rest.client.task;
 
-import org.rest.client.task.ui.LoaderWidget;
 
 /**
  * Main idea of Task Loader is to load some tasks on page load.

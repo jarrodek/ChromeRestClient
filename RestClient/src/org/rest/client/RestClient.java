@@ -419,8 +419,22 @@ public class RestClient implements EntryPoint {
 			}
 		});
 	}
-	
-	public static void saveRequestToGDrive(final RequestObject obj, final Callback<DriveFileItem, Throwable> callback){
+	/**
+	 * Save the request to Google Drive.
+	 * 
+	 * @param obj The request to save. If request object contains gDriveId it will overwrite existing file instead of creating new.
+	 * @param callback
+	 */
+	public static void saveRequestToGDrive(RequestObject obj, Callback<DriveFileItem, Throwable> callback){
+		saveRequestToGDrive(obj, null, callback);
+	}
+	/**
+	 * Save request object in Google Drive.
+	 * @param obj The request to save
+	 * @param parentId If not null (create action from Drive UI) will not show folder selector.
+	 * @param callback
+	 */
+	public static void saveRequestToGDrive(final RequestObject obj, final String parentId, final Callback<DriveFileItem, Throwable> callback){
 		DriveCall.hasSession(new DriveCall.SessionHandler() {
 			@Override
 			public void onResult(DriveAuth result) {
@@ -433,17 +447,19 @@ public class RestClient implements EntryPoint {
 								callback.onFailure(new Throwable("Authorization required."));
 								return;
 							}
-							doSaveRequestToGDrive(obj, callback, result.getAccessToken());
+							doSaveRequestToGDrive(obj, callback, result.getAccessToken(),parentId);
 						}
-					});
+					}, false);
 					return;
 				}
-				doSaveRequestToGDrive(obj, callback, result.getAccessToken());
+				doSaveRequestToGDrive(obj, callback, result.getAccessToken(),parentId);
 			}
 		});
 	}
 	
-	private static void doSaveRequestToGDrive(final RequestObject obj, final Callback<DriveFileItem, Throwable> callback, String accessToken){
+	private static void doSaveRequestToGDrive(final RequestObject obj, 
+			final Callback<DriveFileItem, Throwable> callback, String accessToken, 
+			final String folderId){
 		
 		if(obj.getGDriveId() != null){
 			if(RestClient.isDebug()){
@@ -464,7 +480,20 @@ public class RestClient implements EntryPoint {
 			return;
 		}
 		
-		
+		if(folderId != null){
+			DriveCall.insertNewFile(folderId, obj.getName(), obj, new DriveCall.FileUploadHandler() {
+				@Override
+				public void onLoad(DriveFileItem response) {
+					callback.onSuccess(response);
+				}
+				
+				@Override
+				public void onError(JavaScriptException exc) {
+					callback.onFailure(exc);
+				}
+			});
+			return;
+		}
 		
 		DriveCall.showGoogleForlderPickerDialog(accessToken, new DriveCall.SelectFolderHandler() {
 			

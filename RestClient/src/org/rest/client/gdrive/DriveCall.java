@@ -1,12 +1,7 @@
 package org.rest.client.gdrive;
 
-import org.rest.client.gdrive.api.DrivePicker;
-import org.rest.client.gdrive.api.PickerDocument;
-import org.rest.client.gdrive.api.PickerResponse;
-
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -33,14 +28,15 @@ public class DriveCall {
 		
 	}-*/;
 	
-	public static final native void auth(SessionHandler handler) /*-{
+	public static final native void auth(SessionHandler handler, boolean forceClear) /*-{
 		$wnd.gdriveAuth(function(authResult){
 			handler.@org.rest.client.gdrive.DriveCall.SessionHandler::onResult(Lorg/rest/client/gdrive/DriveAuth;)(authResult);
-		});
+		}, forceClear);
 	}-*/;
 	
 	public static void showGoogleForlderPickerDialog(final String accessToken, final SelectFolderHandler handler){
-		final FolderPickerDialog dialog = new FolderPickerDialog();
+
+		final FilePickerDialog dialog = new FilePickerDialog("application/vnd.google-apps.folder");
 		dialog.addCloseHandler(new CloseHandler<PopupPanel>() {
 			@Override
 			public void onClose(CloseEvent<PopupPanel> event) {
@@ -57,13 +53,62 @@ public class DriveCall {
 	
 	
 	public static interface FolderRequestHandler {
-		void onLoad(FolderResponse response);
+		void onLoad(DriveFileListResponse response);
 	}
+	
 	public static native void getFolderList(final FolderRequestHandler handler, final String nextPageToken, String query) /*-{
 		$wnd.gdriveGetFolders(nextPageToken, query, function(result){
-			handler.@org.rest.client.gdrive.DriveCall.FolderRequestHandler::onLoad(Lorg/rest/client/gdrive/FolderResponse;)(result);
+			handler.@org.rest.client.gdrive.DriveCall.FolderRequestHandler::onLoad(Lorg/rest/client/gdrive/DriveFileListResponse;)(result);
 		});
 	}-*/;
+	
+	
+	
+	
+	public static interface FileRequestHandler {
+		void onLoad(DriveFileListResponse response);
+		void onError(DriveError error);
+	}
+	
+	public static native void getFileList(final FileRequestHandler handler, String mimeType, final String nextPageToken, String query, String access_token) throws JavaScriptException /*-{
+		
+		var clb = $entry(function(response){
+			if(response.error){
+				handler.@org.rest.client.gdrive.DriveCall.FileRequestHandler::onError(Lorg/rest/client/gdrive/DriveError;)(response.error);
+				return;
+			}
+			handler.@org.rest.client.gdrive.DriveCall.FileRequestHandler::onLoad(Lorg/rest/client/gdrive/DriveFileListResponse;)(response);
+		});
+		
+		var q = "mimeType='"+mimeType+"' and trashed = false";
+		if (query) {
+			q += " and title contains '" + query + "'";
+		}
+		var params = {
+			'q' : q,
+			'maxResults' : 25,
+			'fields' : 'items(createdDate,iconLink,id,title),nextLink,nextPageToken'
+		};
+		if(nextPageToken != null) {
+			params.pageToken = nextPageToken
+		}
+		
+		if(access_token){
+			$wnd.gapi.auth.setToken({'access_token':access_token});
+		}
+		
+		var request = $wnd.gapi.client.request({
+			'path' : '/drive/v2/files',
+			'method' : 'GET',
+			'params' : params
+		});
+		request.execute(clb);
+		
+	}-*/;
+	
+	
+	
+	
 	
 	
 	/* DON NOT USE UNTIL GOOGLE DRIVE PICKER WILL ALLOW TU PICKUP FOLDER  */
@@ -97,30 +142,48 @@ public class DriveCall {
 //	}
 	
 	public static void showGoogleSavedFilePickerDialog(final String accessToken, final SelectFolderHandler handler){
-	
-		loadPicker(new LoadPickerHandler() {
+		
+		final FilePickerDialog dialog = new FilePickerDialog("application/restclient+data");
+		dialog.addCloseHandler(new CloseHandler<PopupPanel>() {
 			@Override
-			public void onLoad() {
-				
-				DrivePicker.getArcRequestFile(new DrivePicker.PickerHandler() {
-					@Override
-					public void handleResponse(PickerResponse response) {
-						if(response.getAction().equals(PickerResponse.ACTION_CANCEL)){
-							handler.onCancel();
-							return;
-						}
-						
-						JsArray<PickerDocument> docs = response.getDocuments();
-						if(docs == null || docs.length() == 0){
-							handler.onCancel();
-							return;
-						}
-						String fileId = docs.get(0).getId();
-						handler.onSelect(fileId);
-					}
-				}, accessToken);
+			public void onClose(CloseEvent<PopupPanel> event) {
+				String result = dialog.getResult();
+				if(result == null){
+					handler.onCancel();
+					return;
+				}
+				handler.onSelect(result);
 			}
 		});
+		dialog.setAccessToken(accessToken);
+		dialog.show();
+		
+		
+		
+		
+//		loadPicker(new LoadPickerHandler() {
+//			@Override
+//			public void onLoad() {
+//				
+//				DrivePicker.getArcRequestFile(new DrivePicker.PickerHandler() {
+//					@Override
+//					public void handleResponse(PickerResponse response) {
+//						if(response.getAction().equals(PickerResponse.ACTION_CANCEL)){
+//							handler.onCancel();
+//							return;
+//						}
+//						
+//						JsArray<PickerDocument> docs = response.getDocuments();
+//						if(docs == null || docs.length() == 0){
+//							handler.onCancel();
+//							return;
+//						}
+//						String fileId = docs.get(0).getId();
+//						handler.onSelect(fileId);
+//					}
+//				}, accessToken);
+//			}
+//		});
 	}
 	
 	public static interface FileUploadHandler {
@@ -170,6 +233,7 @@ public class DriveCall {
 	public static final native void getFileMetadata(String fileId, FileMetadataHandler handler) /*-{
 		try{
 			$wnd.gdriveGetFileMeta(fileId, function(result){
+				if(!result) result = null;
 				handler.@org.rest.client.gdrive.DriveCall.FileMetadataHandler::onLoad(Lorg/rest/client/gdrive/DriveFileItem;)(result);
 			});
 		} catch(e){
@@ -186,6 +250,7 @@ public class DriveCall {
 	public static final native void downloadFile(String fileDownloadUrl, FileDownloadHandler handler) /*-{
 		try{
 			$wnd.gdriveDownloadFile(fileDownloadUrl, function(result){
+				if(!result) result = null;
 				handler.@org.rest.client.gdrive.DriveCall.FileDownloadHandler::onDownload(Ljava/lang/String;)(result);
 			});
 		} catch(e){

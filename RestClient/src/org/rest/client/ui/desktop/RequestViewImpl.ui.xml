@@ -22,7 +22,7 @@
 				</div>
 				<!-- Name panel -->
 				<div class="requestNamePanel flex" ui:field="requestNamePanel">
-					<g:TextBox ui:field="requestNameField" styleName="requestNameField"></g:TextBox>
+					<g:TextBox ui:field="requestNameField" title="Name of the request" styleName="requestNameField"></g:TextBox>
 				</div>
 			</div>
 			<div class="topActions box">

@@ -1,4 +1,7 @@
 var dev = false;
+const CLIENT_ID = '10525470235.apps.googleusercontent.com';
+const CLIENT_SECRET = '4DERCyUerlYZDmc7qbneQlgf';
+const SCOPES = 'https://www.googleapis.com/auth/drive.install https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly.metadata';
 
 if(typeof chrome.declarativeWebRequest == 'undefined'){
 	chrome.declarativeWebRequest = {
@@ -13,6 +16,15 @@ if(typeof chrome.declarativeWebRequest == 'undefined'){
 	chrome.declarativeWebRequest.RemoveRequestHeader.prototype = {};
 	chrome.declarativeWebRequest.SetRequestHeader = function(){}
 	chrome.declarativeWebRequest.SetRequestHeader.prototype = {};
+}
+
+window.googleAuth = null;
+function initOauth2Object(){
+	window.googleAuth = new OAuth2('google', {
+	  client_id: CLIENT_ID,
+	  client_secret: CLIENT_SECRET,
+	  api_scope: SCOPES
+	});
 }
 
 
@@ -98,7 +110,19 @@ function onRequestCompleted(details){
 	declarativeRequest.unregisterEarlierRules();
 }
 function onRequestError(details){
-	console.log(details);
+//	console.log(details);
+	
+	var currentCheckUrl = requestDetails.URL;
+	if(redirectDetails.currentUrl != null){
+		currentCheckUrl = redirectDetails.currentUrl;
+	}
+	
+	if (currentCheckUrl == null || !details.url)
+		return;
+	if (!(requestDetails.URL == details.url || details.url.indexOf(requestDetails.URL) > -1))
+		return;
+	requestDetails.RESPONSE_HEADERS = details.responseHeaders;
+	
 	//
 	// Clean rules or if the user will not call another request all XmlHttpRequest for this URL will be affected. 
 	//
@@ -142,23 +166,100 @@ function handleInternalMessage(request,sendResponse){
 			console.error('Error parse payload data',e);
 		}
 	}
+	var responseAsObject = (request.response && request.response == 'object');
 	if (!request.payload){
+		var data = {
+			'error' : true,
+			'message' : 'Unknown payload.',
+			'data' : null
+		}
+		if(!responseAsObject){
+			data = JSON.stringify(data);
+		}
 		sendResponse({
 			'payload' : 'error',
-			'data' : JSON.stringify({
-				'error' : true,
-				'message' : 'Unknown payload.',
-				'data' : null
-			})
+			'response':responseAsObject ? 'object' : null,
+			'data' : data
 		});
 		return;
 	}
 
 	switch (request.payload) {
+	case 'checkDriveAuth':
+		
+		if(request && request.forceNew){
+			window.googleAuth.clear();
+			window.googleAuth = null;
+		}
+		
+		if(!window.googleAuth){
+			initOauth2Object();
+		}
+		
+		var at = window.googleAuth.getAccessToken();
+		if(at && window.googleAuth.isAccessTokenExpired()){
+			at = null;
+		}
+		var data = null;
+		if(at){
+			data = {
+				'access_token': at,
+				'expires_in': window.googleAuth.get('expiresIn') - (~~((Date.now() - window.googleAuth.get('accessTokenDate')) / 1000))
+			};
+		}
+		sendResponse({
+			'payload' : 'checkDriveAuth',
+			'response':responseAsObject ? 'object' : null,
+			'data' : data
+		});
+		break;
+	case 'gdriveAuth':
+		
+		if(request && request.forceNew){
+			window.googleAuth.clear();
+			window.googleAuth = null;
+		}
+		
+		
+		if(!window.googleAuth){
+			initOauth2Object();
+		}
+		window.googleAuth.authorize(function(){
+			var at = window.googleAuth.getAccessToken();
+			if(at && window.googleAuth.isAccessTokenExpired()){
+				at = null;
+			}
+			var data = null;
+			if(at){
+				data = {
+					'access_token': at,
+					'expires_in': window.googleAuth.get('expiresIn') - (~~((Date.now() - window.googleAuth.get('accessTokenDate')) / 1000))
+				};
+			}
+			sendResponse({
+				'payload' : 'checkDriveAuth',
+				'response':responseAsObject ? 'object' : null,
+				'data' : data
+			});
+		});
+		break;
 	case 'gdrive':
-		var query = JSON.parse(request.data);
+		
+		var query = request.data;
+		if(typeof query == 'string'){
+			query = JSON.parse(request.data);
+		}
 		if(query.action == 'create'){
-			runApplicationFromGoogleDrive(query);
+			var viewTabUrl = runApplicationFromGoogleDrive(query);
+			sendResponse({assignUrl: viewTabUrl});
+		} else if(query.action == 'open'){
+			var viewTabUrl = '';
+			if (dev) {
+				viewTabUrl = 'http://127.0.0.1:8888/RestClient.html?gwt.codesvr=127.0.0.1:9997#RequestPlace:gdrive/'+ query.ids[0];
+			} else {
+				viewTabUrl = chrome.extension.getURL('RestClient.html#RequestPlace:gdrive/' + query.ids[0]);
+			}
+			sendResponse({assignUrl: viewTabUrl});
 		}
 		break;
 	case 'setEnvironment':
@@ -168,6 +269,7 @@ function handleInternalMessage(request,sendResponse){
 		}
 		sendResponse({
 			'payload' : 'setEnvironment',
+			'response':responseAsObject ? 'object' : null,
 			'result' : true
 		});
 		break;
@@ -201,9 +303,15 @@ function handleInternalMessage(request,sendResponse){
 		break;
 	case 'getRequestData':
 //		console.log('requestDetails summary',requestDetails);
+		
+		var data = requestDetails;
+		if(!responseAsObject){
+			data = JSON.stringify(data);
+		}
 		sendResponse({
 			'payload' : 'getRequestData',
-			'data' : JSON.stringify(requestDetails)
+			'response':responseAsObject ? 'object' : null,
+			'data' : data
 		});
 		requestDetails.URL = null;
 		requestDetails.REQUEST_HEADERS = null;
@@ -219,21 +327,32 @@ function handleInternalMessage(request,sendResponse){
 			delete window.externalDataHolder[externalUUid];
 		}
 		if (externalData == null) {
+			var data = {
+				'error' : true,
+				'message' : 'No data available :(',
+				'data' : null
+			};
+			if(!responseAsObject){
+				data = JSON.stringify(data);
+			}
 			sendResponse({
 				'payload' : 'getExternalData',
-				'data' : JSON.stringify({
-					'error' : true,
-					'message' : 'No data available :(',
-					'data' : null
-				})
+				'response':responseAsObject ? 'object' : null,
+				'data' : data
 			});
+			return;
+		}
+		var data = {
+			'error' : false,
+			'data' : externalData
+		};
+		if(!responseAsObject){
+			data = JSON.stringify(data);
 		}
 		sendResponse({
 			'payload' : 'getExternalData',
-			'data' : JSON.stringify({
-				'error' : false,
-				'data' : externalData
-			})
+			'response':responseAsObject ? 'object' : null,
+			'data' : data
 		});
 		break;
 	case "copyToClipboard":
@@ -247,16 +366,19 @@ function handleInternalMessage(request,sendResponse){
 		break;
 	case "getManifest":
 		var manifest = chrome.runtime.getManifest();
-		var result = JSON.stringify({
+		var data = {
 			version: manifest.version,
 			permissions: manifest.permissions,
 			manifest_version: manifest.manifest_version,
 			name: manifest.name
-		});
-		
+		};
+		if(!responseAsObject){
+			data = JSON.stringify(data);
+		}
 		sendResponse({
 			'payload' : 'getManifest',
-			'data' : result
+			'response':responseAsObject ? 'object' : null,
+			'data' : data
 		});
 		break;
 	default:
@@ -270,12 +392,24 @@ function handleInternalMessage(request,sendResponse){
 			}
 			var data = request.data ? JSON.parse(request.data) : null;
 			call[action].call(call,data,function(result){
-//				console.log("result: ", result);
-				if(typeof result == "object"){
-					sendResponse(JSON.stringify(result));
+				
+				
+				if(!responseAsObject){
+					if(typeof result == "object"){
+						result.response = responseAsObject ? 'object' : null;
+						result = JSON.stringify(result);
+					} else {
+						result = result+"";
+					}
 				} else {
-					sendResponse(result+"");
+					if(typeof result != "object"){
+						result = {'data':result}
+					}
+					result.response = responseAsObject ? 'object' : null;
 				}
+				
+				sendResponse(result);
+//				console.log("result: ", result);
 			});
 		} else if (request.payload.indexOf(".") != -1){
 //			console.log('requested action for:',request.payload,request.data);
@@ -287,12 +421,24 @@ function handleInternalMessage(request,sendResponse){
 			}
 			var data = request.data ? JSON.parse(request.data) : null;
 			call[action].call(call,data,function(result){
-				console.log("result: ", result);
-				if(typeof result == "object"){
-					sendResponse(JSON.stringify(result));
+//				console.log("result: ", result);
+				
+				
+				if(!responseAsObject){
+					if(typeof result == "object"){
+						result.response = responseAsObject ? 'object' : null;
+						result = JSON.stringify(result);
+					} else {
+						result = result+"";
+					}
 				} else {
-					sendResponse(result+"");
+					if(typeof result != "object"){
+						result = {'data':result}
+					}
+					result.response = responseAsObject ? 'object' : null;
 				}
+				
+				sendResponse(result);
 			});
 		}
 		break;
@@ -545,9 +691,10 @@ function runApplicationFromGoogleDrive(requestDetails) {
 		viewTabUrl = chrome.extension.getURL('RestClient.html#RequestPlace:gdrive/create/' + uuid);
 	}
 	window.externalDataHolder[uuid] = requestDetails;
-	chrome.tabs.create({
-		url : viewTabUrl
-	});
+//	chrome.tabs.create({
+//		url : viewTabUrl
+//	});
+	return viewTabUrl;
 }
 
 /**

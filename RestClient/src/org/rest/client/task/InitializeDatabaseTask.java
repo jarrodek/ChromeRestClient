@@ -6,7 +6,6 @@ import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.WebSqlAdapter;
-import org.rest.client.task.ui.LoaderWidget;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
@@ -50,7 +49,7 @@ public class InitializeDatabaseTask implements LoadTask {
 	@Override
 	public void run(final TasksCallback callback, final boolean lastRun) {
 		if(loaderWidget != null){
-			loaderWidget.setText("Initialize databases");
+			loaderWidget.setText("Initialize database");
 		}
 		final int dbCount = databases.size();
 		
@@ -64,12 +63,18 @@ public class InitializeDatabaseTask implements LoadTask {
 		}
 		
 		for (WebSqlAdapter db : databases) {
+			
 			db.open(new StoreResultCallback<Boolean>() {
 
 				@Override
 				public void onSuccess(Boolean result) {
 					callback.onInnerTaskFinished(1);
 					dbOpened++;
+					
+					if(loaderWidget != null){
+						loaderWidget.setText("Initialize table " + dbOpened + " of " + dbCount);
+					}
+					
 					if (dbCount == dbOpened) {
 						//
 						// Temporary service

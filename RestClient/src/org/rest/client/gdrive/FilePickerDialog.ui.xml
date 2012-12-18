@@ -9,7 +9,7 @@
 		autoHideOnHistoryEventsEnabled="true" >
 		<g:HTMLPanel ui:field="contents" styleName="container Folder_Pickup_dialogContent">
 			<div class="dialogTitle">
-				<span>Select a folder</span>
+				<span>Select a file</span>
 			</div>
 			<div class="Folder_Pickup_wrapper">
 				<span class="loaderImage Folder_Pickup_loader" ui:field="loader"></span>

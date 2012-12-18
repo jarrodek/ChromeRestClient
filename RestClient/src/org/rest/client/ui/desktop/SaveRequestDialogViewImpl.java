@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import org.rest.client.RestClient;
 import org.rest.client.gdrive.DriveFileItem;
+import org.rest.client.place.RequestPlace;
 import org.rest.client.request.URLParser;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.LocalStore;
@@ -72,6 +73,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	int overwriteId = -1;
 	boolean forceOverwrite = false;
 	String gDriveItem = null;
+	private String gDriveCreateFolder = null;
 	
 	public SaveRequestDialogViewImpl(){
 		setPreviewURL();
@@ -131,6 +133,8 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		Storage store = Storage.getSessionStorageIfSupported();
 		String restored = store.getItem(LocalStore.RESTORED_REQUEST);
 		gDriveItem = store.getItem(LocalStore.CURRENT_GOOGLE_DRIVE_ITEM);
+		gDriveCreateFolder = store.getItem(LocalStore.GOOGLE_DRIVE_CREATE_FOLDER_ID);
+		
 		if(restored != null && !restored.isEmpty()){
 			int restoredId = -1;
 			try{
@@ -178,6 +182,10 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 					}
 				}
 			});
+		} else if(gDriveCreateFolder != null && !gDriveCreateFolder.isEmpty()){
+			overwrite.setVisible(false);
+			save.setVisible(false);
+			addToProject.setEnabled(false);
 		}
 	}
 	
@@ -403,8 +411,10 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				result.setSkipProtocol(protocolStatus.getValue());
 				result.setSkipServer(serverStatus.getValue());
 				result.setSkipPath(pathStatus.getValue());
-				
-				RestClient.saveRequestToGDrive(result, new Callback<DriveFileItem, Throwable>() {
+				if(gDriveCreateFolder != null && gDriveCreateFolder.isEmpty()){
+					gDriveCreateFolder = null;
+				}
+				RestClient.saveRequestToGDrive(result, gDriveCreateFolder, new Callback<DriveFileItem, Throwable>() {
 					
 					@Override
 					public void onSuccess(DriveFileItem result) {
@@ -418,6 +428,12 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 						
 						dialog.hide();
 						StatusNotification.notify("File saved", StatusNotification.TYPE_NORMAL, StatusNotification.TIME_SHORT);
+						
+						Storage store = Storage.getSessionStorageIfSupported();
+						store.removeItem(LocalStore.CURRENT_GOOGLE_DRIVE_ITEM);
+						store.removeItem(LocalStore.GOOGLE_DRIVE_CREATE_FOLDER_ID);
+						
+						RestClient.getClientFactory().getPlaceController().goTo(RequestPlace.Tokenizer.fromDriveFile(result.getId()));
 					}
 					
 					@Override

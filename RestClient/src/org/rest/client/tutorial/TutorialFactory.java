@@ -19,13 +19,23 @@ public class TutorialFactory {
 	private ArrayList<TutorialDialog> items = new ArrayList<TutorialDialog>();
 	private TutorialDialog currentItem = null;
 	private boolean canRun = false;
-	
+	private boolean alwaysRun = false;
 	private int current = 0;
 
 	public TutorialFactory(String tutorialName) {
 		this.tutorialName = tutorialName;
-		
+		this.alwaysRun = false;
 		checkTutorialStatus();
+	}
+	/**
+	 * Initialize tutorial factory without checking if tutorial has been already seen
+	 * @param tutorialName
+	 * @param alwaysRun
+	 */
+	public TutorialFactory(String tutorialName, boolean alwaysRun) {
+		this.tutorialName = tutorialName;
+		this.alwaysRun = alwaysRun;
+		canRun = true;
 	}
 	
 	
@@ -40,6 +50,10 @@ public class TutorialFactory {
 	 * tutorial.
 	 */
 	private void checkTutorialStatus() {
+		if(alwaysRun){
+			canRun = true;
+			return;
+		}
 		Storage store = Storage.getLocalStorageIfSupported();
 		String pastTutorials = store.getItem(STORAGE_KEY);
 		if (pastTutorials == null || pastTutorials.isEmpty()) {
@@ -73,6 +87,7 @@ public class TutorialFactory {
 	
 	
 	private void preserveFuturerTutorials(){
+		if(alwaysRun) return;
 		Storage store = Storage.getLocalStorageIfSupported();
 		String pastTutorials = store.getItem(STORAGE_KEY);
 		JSONArray val = null;

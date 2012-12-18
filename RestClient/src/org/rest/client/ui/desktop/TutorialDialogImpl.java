@@ -53,6 +53,7 @@ public class TutorialDialogImpl extends Composite implements TutorialDialog {
 	private int correctionTop = 0;
 	private Element referenceElement = null;
 	private int referenceDirection = -1;
+	private int autocloseTime = -1;
 	
 	public TutorialDialogImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -157,10 +158,10 @@ public class TutorialDialogImpl extends Composite implements TutorialDialog {
 		}
 		setDialogPosition();
 		new Timer() {
-			
 			@Override
 			public void run() {
 				wrapper.getElement().setAttribute("visible", "true");
+				checkAutoCloseTime();
 			}
 		}.schedule(100);
 		
@@ -264,5 +265,22 @@ public class TutorialDialogImpl extends Composite implements TutorialDialog {
 		correctionLeft = left;
 		correctionTop = top;
 		setDialogPosition();
+	}
+
+	@Override
+	public void setAutoCloseTime(int time) {
+		autocloseTime = time;
+	}
+	
+	private void checkAutoCloseTime(){
+		if(autocloseTime <= 0) return;
+		
+		new Timer(){
+			@Override
+			public void run() {
+				userResult = UserAction.NEXT;
+				closeDialog();
+			}			
+		}.schedule(autocloseTime);
 	}
 }

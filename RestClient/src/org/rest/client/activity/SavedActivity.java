@@ -220,7 +220,7 @@ public class SavedActivity extends ListActivity implements
 							}
 							pickDriveArcFile(result.getAccessToken());
 						}
-					});
+					}, false);
 					return;
 				}
 				pickDriveArcFile(result.getAccessToken());

@@ -95,4 +95,9 @@ public interface TutorialDialog extends HasWidgets, HasHTML, IsWidget {
 	void setCloseHandler(CloseTutorialHandler handler);
 
 	void setBeforeTutorialShowHandler(BeforeTutorialShowHandler handler);
+	/**
+	 * Set time in milliseconds when tutorial item should close itself. By default it never close itself
+	 * @param time
+	 */
+	void setAutoCloseTime(int time);
 }

@@ -34,9 +34,9 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class FolderPickerDialog implements KeyDownHandler {
+public class FilePickerDialog implements KeyDownHandler {
 
-	interface Binder extends UiBinder<DialogBox, FolderPickerDialog> {
+	interface Binder extends UiBinder<DialogBox, FilePickerDialog> {
 		Binder BINDER = GWT.create(Binder.class);
 	}
 
@@ -55,8 +55,12 @@ public class FolderPickerDialog implements KeyDownHandler {
 	private String latestSearchValue = null;
 	
 	private String result = null;
+	private final String mimeType;
+	private String access_token = null;
 	
-	public FolderPickerDialog() {
+	public FilePickerDialog(String mimeType) {
+		this.mimeType = mimeType;
+		
 		Binder.BINDER.createAndBindUi(this);
 		dialog.addDomHandler(this, KeyDownEvent.getType());
 		searchBox.getElement().removeAttribute("placeholder");
@@ -109,6 +113,16 @@ public class FolderPickerDialog implements KeyDownHandler {
 	}
 	
 	
+	
+	
+	public String getAccessToken() {
+		return access_token;
+	}
+
+	public void setAccessToken(String access_token) {
+		this.access_token = access_token;
+	}
+
 	public void show() {
 		dialog.show();
 		dialog.center();
@@ -143,9 +157,10 @@ public class FolderPickerDialog implements KeyDownHandler {
 		requestProgress = true;
 		
 		loader.removeClassName("hidden");
-		DriveCall.getFolderList(new DriveCall.FolderRequestHandler() {
+		DriveCall.getFileList(new DriveCall.FileRequestHandler() {
 			@Override
-			public void onLoad(FolderResponse response) {
+			public void onLoad(DriveFileListResponse response) {
+				
 				loader.addClassName("hidden");
 				if(response == null){
 					disableNextRequest = true;
@@ -159,10 +174,44 @@ public class FolderPickerDialog implements KeyDownHandler {
 				displayResults(response.getItems());
 				requestProgress = false;
 			}
-		}, nextPageToken, searchBox.getValue());
+
+			@Override
+			public void onError(DriveError error) {
+				if(error.getCode() == 401){
+					//Unauthorized
+					DriveCall.auth(new DriveCall.SessionHandler() {
+						@Override
+						public void onResult(DriveAuth result) {
+							if(result == null){
+								
+								FlowPanel panel = new FlowPanel();
+								panel.setStyleName("Folder_Pickup_ResultRow");
+								
+								Label name = new Label("Unauthorized.");
+								name.setStyleName("Folder_Pickup_Name");
+								
+								results.add(panel);
+								return;
+							}
+							
+							getResultList();
+						}
+					}, true);
+				} else {
+					FlowPanel panel = new FlowPanel();
+					panel.setStyleName("Folder_Pickup_ResultRow");
+					
+					Label name = new Label("Error: " + error.getMessage());
+					name.setStyleName("Folder_Pickup_Name");
+					
+					results.add(panel);
+				}
+				
+			}
+		}, mimeType, nextPageToken, searchBox.getValue().trim(), access_token);
 	}
 	
-	private void displayResults(JsArray<FolderItem> items){
+	private void displayResults(JsArray<DriveFileListItem> items){
 		int size = items.length();
 		if(size == 0){
 			disableNextRequest = true;
@@ -170,7 +219,7 @@ public class FolderPickerDialog implements KeyDownHandler {
 		}
 		
 		for(int i=0; i<size; i++){
-			FolderItem item = items.get(i);
+			DriveFileListItem item = items.get(i);
 			
 			FlowPanel panel = new FlowPanel();
 			panel.setStyleName("Folder_Pickup_ResultRow");
@@ -248,7 +297,7 @@ public class FolderPickerDialog implements KeyDownHandler {
 		var context = this;
 		var callback = $entry(function(e){
 			var value = e.target.value;
-			context.@org.rest.client.gdrive.FolderPickerDialog::resetSearch(Ljava/lang/String;)(value);
+			context.@org.rest.client.gdrive.FilePickerDialog::resetSearch(Ljava/lang/String;)(value);
 		});
 		element.addEventListener('search',callback,false);
 	}-*/;

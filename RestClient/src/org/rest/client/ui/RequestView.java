@@ -126,4 +126,10 @@ public interface RequestView extends IsWidget {
 	 * It is "refresh" and "save".
 	 */
 	void setGDriveConstrols();
+
+	void setUpDriveTutorial(TutorialFactory tutorialFactory);
+	/**
+	 * @return The request name if any.
+	 */
+	String getRequestName();
 }

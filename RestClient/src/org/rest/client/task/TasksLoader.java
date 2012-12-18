@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.rest.client.RestClient;
-import org.rest.client.task.ui.LoaderWidget;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.RootPanel;
 
 /**
  * Class provide interface to load data before application can run.
@@ -70,6 +70,7 @@ public class TasksLoader {
 			callback.onSuccess(v);
 			return;
 		}
+		
 		if(running){
 			callback.onFailure(v);
 			return;
@@ -80,6 +81,8 @@ public class TasksLoader {
 		for(LoadTask task : tasks){
 			task.setLoader(loaderWidget);
 			initialTasksCount += task.getTasksCount();
+			
+			
 		}
 		appCallback = callback;
 		
@@ -95,31 +98,23 @@ public class TasksLoader {
 	 * Create user friendly information about loading page elements.
 	 */
 	private static void createSplashScreen(){
-		RootPanel splash = RootPanel.get("loader-screen");
-		if(splash == null){
-			return;
-		}
 		
 		loaderWidget = new LoaderWidget();
-		splash.add(loaderWidget);
+		
 	}
 	/**
 	 * Remove splash screen.
 	 */
 	private static void removeSplashScreen(){
-		final RootPanel splash = RootPanel.get("loader-screen");
-		if( splash != null ){
-			splash.addStyleName("fade");
-			new Timer() {
-				
-				@Override
-				public void run() {
-					splash.getElement().removeFromParent();
-					loaderWidget = null;
-				}
-			}.schedule(600);
+		final Element splash = DOM.getElementById("loader-screen");
+		if(splash != null){			
+			splash.removeFromParent();
+			loaderWidget = null;
 		}
-		DOM.getElementById("appNavigation").removeClassName("hidden");
+		Element appNav = DOM.getElementById("appNavigation");
+		if(appNav != null){
+			appNav.removeClassName("hidden");
+		}
 	}
 	
 	private static void updateLoader(){
@@ -136,9 +131,20 @@ public class TasksLoader {
 	private static void runTasks(){
 		if(!hasMoreTasks()){
 			running = false;
-			Void v = GWT.create(Void.class);
-			appCallback.onSuccess(v);
-			removeSplashScreen();
+			
+			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+				@Override
+				public void execute() {
+					removeSplashScreen();
+				}
+			});
+			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+				@Override
+				public void execute() {
+					Void v = GWT.create(Void.class);
+					appCallback.onSuccess(v);
+				}
+			});
 			return;
 		}
 		
@@ -147,6 +153,7 @@ public class TasksLoader {
 	}
 	
 	private static void callTask(final LoadTask task, final boolean tryAgainOnFailure){
+		
 		task.run(new TasksCallback() {
 			
 			@Override

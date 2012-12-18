@@ -9,12 +9,16 @@ function receiveMessage(e){
 	if(e.origin != location.origin){ return; };
 	var data;
 	try{
-		data = JSON.parse(e.data);
+		if(typeof e.data != 'object'){
+			data = JSON.parse(e.data);
+		} else {
+			data = e.data;
+		}
 	} catch(e){ return; }
 	
 	if(!(data && data.source && data.source == "dev:gwt")) return;
 	//console.log('receiveMessage (ext)', data.data);
-	
+	var responseAsObject = (e.data.response && e.data.response == 'object');
 	if(data.payload){
 		switch(data.payload){
 			case 'setEnvironment':
@@ -28,11 +32,18 @@ function receiveMessage(e){
 			case "getRequestData":
 			case "getExternalData":
 				chrome.extension.sendMessage(data, function(response) {
+					
 					if(response.payload&&response.data){
 						data.payload = response.payload;
 						response = response.data;
 					}
-					window.postMessage({"source":"dev:cs", "payload":data.payload, "data": response}, location.href);
+					var result = {
+						"source":"dev:cs", 
+						"payload":data.payload, 
+						"data": response,
+						"response": responseAsObject ? 'object' : null
+					}
+					window.postMessage(result, location.href);
 				});
 			break;
 			case "copyToClipboard":
@@ -43,7 +54,13 @@ function receiveMessage(e){
 					if(typeof response.payload != 'undefined'){
 						response = response.data;
 					}
-					window.postMessage({"source":"dev:cs", "payload":data.payload, "data": response}, location.href);
+					var result = {
+						"source":"dev:cs", 
+						"payload":data.payload, 
+						"data": response,
+						"response": responseAsObject ? 'object' : null
+					}
+					window.postMessage(result, location.href);
 				});
 				break;
 		}

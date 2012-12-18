@@ -19,7 +19,6 @@ import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.storage.websql.AppDatabase;
 import org.rest.client.storage.websql.HeaderRow;
 import org.rest.client.storage.websql.StatusCodeRow;
-import org.rest.client.task.ui.LoaderWidget;
 import org.rest.client.util.JSONHeadersUtils;
 import org.rest.client.util.Utils;
 
@@ -72,7 +71,9 @@ public class FirstRunTask implements LoadTask {
 	@Override
 	public void run(final TasksCallback callback, final boolean lastRun) {
 		
-		
+		if(loaderWidget != null){
+			loaderWidget.setText("Initialize...");
+		}
 		Storage storage = Storage.getLocalStorageIfSupported();
 		String firstRunFlag = storage.getItem(FIRST_RUN_FLAG);
 		if(firstRunFlag != null){
@@ -80,9 +81,7 @@ public class FirstRunTask implements LoadTask {
 			callback.onSuccess();
 			return;
 		}
-		if(loaderWidget != null){
-			loaderWidget.setText("Installing application...");
-		}
+		
 		this.callback = callback;
 		this.lastRun = lastRun;
 		callback.onInnerTaskFinished(1);
@@ -107,11 +106,13 @@ public class FirstRunTask implements LoadTask {
 	 * 	- change latestRequest data structure -OK
 	 */
 	private void upgradeAppliction(){
-		
+		if(loaderWidget != null){
+			loaderWidget.setText("Upgrading application...");
+		}
 		//check if DB need upgrade
 		AppDatabase service = GWT.create(AppDatabase.class);
 		if(service.getDatabase().getVersion().equals("")){
-			loaderWidget.setText("Upgrading application...");
+			
 			Log.debug("Upgrade application's database from previous version");
 			service.getDatabase().changeVersion("", "1.0", new TransactionCallback() {
 				//DELETE FROM request_data WHERE ID > 4
@@ -369,6 +370,11 @@ public class FirstRunTask implements LoadTask {
  	 * 	- download status codes definitions
 	 */
 	private void createAppliction(){
+		
+		if(loaderWidget != null){
+			loaderWidget.setText("Installing application...");
+		}
+		
 		RequestObject ro = RequestObject.createRequest();
 		ro.setMethod("GET");
 		ro.setURL("http://gdata.youtube.com/feeds/api/playlists/56D792A831D0C362/?v=2&alt=json&feature=plcp");
@@ -401,8 +407,10 @@ public class FirstRunTask implements LoadTask {
 	
 	
 	private void downloadDefinitionsTask(){
-		loaderWidget.setText("Downloading definitions...");
 		
+		if(loaderWidget != null){
+			loaderWidget.setText("Downloading definitions...");
+		}
 		AssetRequest.getAssetString("definitions.json", new AssetStringCallback() {
 			@Override
 			public void onSuccess(String response) {

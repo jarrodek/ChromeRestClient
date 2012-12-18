@@ -56,6 +56,8 @@ public class LocalStore extends LocalStorageAdapter {
 	 */
 	public static final String RESTORED_REQUEST = "restoredRequest"; 
 	public static final String CURRENT_GOOGLE_DRIVE_ITEM = "currentGdriveItem";
+	public static final String GOOGLE_DRIVE_CREATE_FOLDER_ID = "gdriveCreateParent";
+	public static final String GOOGLE_DRIVE_CREATE_USER_ID = "gdriveCreateUser";
 	public LocalStore() {}
 
 }

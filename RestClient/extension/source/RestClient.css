@@ -35,30 +35,35 @@ body>.ls {
 	-webkit-box-flex: 1;
 }
 #loader-screen{
-	position:fixed;
-	top:0px;
-	left:0px;
-	width:100%;
-	height:100%;
+	
+	-webkit-transition:opacity 0.5s linear;
 	background-color:white;
 	opacity:1;
 	z-index:1001;
-	-webkit-transition:opacity 0.5s linear;
-	display: -webkit-flex;
-	display: -moz-flex;
-	display: -ms-flex;
-	display: -o-flex;
-	display: flex;
-	-webkit-justify-content: center;
-	-moz-justify-content: center;
-	-o-justify-content: center;
-	-o-justify-content: center;
-	justify-content: center;
-	-webkit-align-items: center;
-	-moz-align-items: center;
-	-o-align-items: center;
-	-o-align-items: center;
-	align-items: center;
+	-webkit-box-orient: vertical;
+	-moz-box-orient: vertical;
+	-ms-box-orient: vertical;
+	-o-box-orient: vertical;
+	box-orient: vertical;
+	
+	
+	-webkit-box-align: center;	
+	-moz-box-align: center;
+	-ms-box-align: center;
+	-o-box-align: center;
+	box-align: center;
+	
+	-webkit-box-pack: center;
+	-moz-box-pack: center;
+	-ms-box-pack: center;
+	-o-box-pack: center;
+	box-pack: center;
+	
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
 }
 #loader-screen.fade{opacity:0;}
 #appContainer{
@@ -76,7 +81,7 @@ body>.ls {
 h1.at {
 	-webkit-user-select: none;
 	color: black;
-	font-size: 175%;
+	font-size: 120%;
 	font-weight: normal;
 	margin: 0;
 	padding-bottom: 14px;
@@ -644,11 +649,34 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	padding-left: 27px;
 }
 .button.driveButton:disabled{
-	background: url(img/drive_color16.png) 6px center no-repeat, -webkit-linear-gradient(top, whiteSmoke, #F1F1F1) !important;
-	background: url(img/drive_color16.png) 6px center no-repeat, linear-gradient(top, whiteSmoke, #F1F1F1) !important;
+	background: url(img/drive_mono16.png) 6px center no-repeat, -webkit-linear-gradient(top, whiteSmoke, #F1F1F1) !important;
+	background: url(img/drive_mono16.png) 6px center no-repeat, linear-gradient(top, whiteSmoke, #F1F1F1) !important;
 	padding-left: 27px;
 }
-
+.button.refreshButton{
+	background: url(img/1_navigation_refresh.png) 6px center no-repeat, -webkit-linear-gradient(top, whiteSmoke, #F1F1F1);
+	background: url(img/1_navigation_refresh.png) 6px center no-repeat, linear-gradient(top, whiteSmoke, #F1F1F1);
+	padding-left: 27px;
+	background-size: 20px 20px;
+}
+.button.refreshButton:hover{
+	background: url(img/1_navigation_refresh.png) 6px center no-repeat, -webkit-linear-gradient(top, #F8F8F8, #F1F1F1);
+	background: url(img/1_navigation_refresh.png) 6px center no-repeat, linear-gradient(top, #F8F8F8, #F1F1F1);
+	padding-left: 27px;
+	background-size: 20px 20px;
+}
+.button.refreshButton:active{
+	background: url(img/1_navigation_refresh.png) 6px center no-repeat, -webkit-linear-gradient(top, #F8F8F8, #F1F1F1);
+	background: url(img/1_navigation_refresh.png) 6px center no-repeat, linear-gradient(top, #F8F8F8, #F1F1F1);
+	padding-left: 27px;
+	background-size: 20px 20px;
+}
+.button.refreshButton:disabled{
+	background: url(img/1_navigation_refresh.png) 6px center no-repeat, -webkit-linear-gradient(top, whiteSmoke, #F1F1F1) !important;
+	background: url(img/1_navigation_refresh.png) 6px center no-repeat, linear-gradient(top, whiteSmoke, #F1F1F1) !important;
+	padding-left: 27px;
+	background-size: 20px 20px;
+}
 .dialogButtons {
 	-webkit-box-align: center;
 	-moz-box-align: center;
@@ -755,6 +783,20 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	width: 24px;
 	height: 24px;
 	display: inline-block;
+}
+.actionDomLoader{
+	position: absolute;
+	top: 20px;
+	right: 20px;
+	z-index: 10;
+	background: -webkit-radial-gradient(center, rgba(255, 255, 255, 0.78), rgba(235, 235, 235, 0.57) 35%, rgba(190, 190, 190, 0.53) );
+	padding: 13px;
+	border-radius: 25px;
+}
+.actionDomLoader .loaderImage{
+	background-image: url(img/loader2.gif);
+	width: 16px;
+	height: 16px;
 }
 .box{
 	display: -webkit-box;
@@ -881,6 +923,7 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	min-height: 38px;
 	background-color: #F4F4F4;
 }
+
 .projectPanel{
 	height: 38px;
 	padding: 0 10px;
@@ -888,6 +931,40 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	-webkit-justify-content: flex-start;
 	-webkit-align-content: center;
 	-webkit-align-items: center;
+}
+.requestNamePanel {
+	font-size: 14px;
+	padding: 0 10px;
+	-webkit-align-items: center;
+	width: 100%;
+}
+.requestNameField:disabled{
+	color: black;
+}
+.requestNameField:disabled:hover {
+	color: black;
+	border: 1px transparent solid;
+	box-shadow: none;
+	cursor: text;
+}
+.requestNameField {
+	border: 1px transparent solid;
+	background: transparent;
+	padding: 4px;
+	border-radius: 2px;
+	min-width: 50%;
+}
+.requestNameField:focus {
+	background: white;
+}
+.requestNameField:hover:focus {
+	box-shadow: none;
+	border: 1px #E5E5E5 solid;
+}
+.requestNameField:hover {
+	box-shadow: inset 0px 1px 2px rgba(0, 0, 0, 0.1);
+	border: 1px solid #B9B9B9;
+	border-top-color: #A0A0A0;
 }
 .topActions{
 	width: 20%;
@@ -1754,6 +1831,7 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 .Saved_List_Item_nameInput {
 	outline: none;
 	border: 1px transparent solid;
+	width: 100%;
 }
 .Saved_List_Item_nameInput:hover {
 	border: 1px #E5E5E5 solid;
@@ -2089,21 +2167,15 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 .Error_Dialog_title{font-size: x-large;}
 
 /* INITIAL LOADER */
-.Loader_loader-info {margin-bottom: 7px;font-weight: bold;}
-.Loader_loader-info > span {font-weight: bold;  font-size: 20px;}
-.Loader_loader-wrapper {margin: 10px; width: 300px;}
-.Loader_holder {border: 1px #189B06 solid; height: 3px; padding: 0px;position: relative;}
+.Loader_loader-info {margin-bottom: 7px;}
+.Loader_loader-info > span {font-weight: normal;}
+.Loader_loader-wrapper {margin: 10px; width: 200px;} /*width: 300px;*/
+.Loader_holder {border: 1px #007FF9 solid; height: 3px; padding: 0px;position: relative;}
 .Loader_loaded {
 	height: 100%; 
-	background-color: #189B06; 
+	background-color: #007FF9; 
 	width: 0%;
 	-webkit-transition: width 0.2s linear;
-}
-.Loader_pacman{
-	position: absolute;
-	top: -10px;
-	left: 0px;
-	-webkit-transition: left 0.2s linear;
 }
 /* EDIT PROJECT DIALOG  */
 .deleteProjectImage {

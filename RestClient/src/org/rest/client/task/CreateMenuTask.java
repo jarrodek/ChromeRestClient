@@ -2,7 +2,6 @@ package org.rest.client.task;
 
 import org.rest.client.RestClient;
 import org.rest.client.UserMenuHandler;
-import org.rest.client.task.ui.LoaderWidget;
 
 public class CreateMenuTask implements LoadTask {
 	

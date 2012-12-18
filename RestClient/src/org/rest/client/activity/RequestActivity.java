@@ -41,6 +41,8 @@ import org.rest.client.event.UrlValueChangeEvent;
 import org.rest.client.gdrive.DriveAuth;
 import org.rest.client.gdrive.DriveCall;
 import org.rest.client.gdrive.DriveFileItem;
+import org.rest.client.jso.ExternalDriveCreateData;
+import org.rest.client.jso.ExternalDriveCreateResponse;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.RedirectData;
 import org.rest.client.request.URLParser;
@@ -64,9 +66,11 @@ import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.code.gwt.database.client.service.VoidCallback;
+import com.google.gwt.chrome.def.BackgroundJsCallback;
 import com.google.gwt.chrome.def.BackgroundPageCallback;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptException;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.JSONArray;
@@ -182,7 +186,11 @@ public class RequestActivity extends AppActivity implements
 		} else if(place.isExternal()){
 			createExternalRequest(entryId);
 		} else if(place.isGdrive()){
-			fromGoogleDriveFile(entryId);
+			if(place.isCreate()){
+				fromGoogleDriveAction(entryId);
+			} else {
+				fromGoogleDriveFile(entryId);
+			}
 		} else {
 			restoreLatestRequest();
 		}
@@ -190,7 +198,48 @@ public class RequestActivity extends AppActivity implements
 		activateTutorial();
 	}
 	
-	
+	private void fromGoogleDriveAction(final String entryId){
+		requestView.reset();
+		
+		clientFactory.getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_GET_EXTERNAL_REQUEST_DATA, entryId, new BackgroundJsCallback() {
+			
+			@Override
+			public void onSuccess(JavaScriptObject message) {
+				ExternalDriveCreateResponse response;
+				try{
+					response = message.cast();
+				}catch(Exception e){
+					StatusNotification.notify("Unable to read response from background page", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+					return;
+				}
+				if(response.isError()){
+					StatusNotification.notify(response.getErrorMessage(), StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+					return;
+				}
+				ExternalDriveCreateData data = response.getData();
+				if(data == null){
+					StatusNotification.notify("No data passed to application.", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+					return;
+				}
+				
+				Storage store = Storage.getSessionStorageIfSupported();
+				store.setItem(LocalStore.GOOGLE_DRIVE_CREATE_FOLDER_ID, data.getFolderId());
+				store.setItem(LocalStore.GOOGLE_DRIVE_CREATE_USER_ID, data.getUserId());
+				
+				tutorialFactory = new TutorialFactory("gdriveCreate", true);
+				requestView.setUpDriveTutorial(tutorialFactory);
+				
+				
+			}
+			
+			@Override
+			public void onError(String message) {
+				
+				Log.error("Error get gdrive data",message);
+			}
+		});
+		
+	}
 
 	private void fromGoogleDriveFile(final String entryId) {
 		
@@ -220,7 +269,7 @@ public class RequestActivity extends AppActivity implements
 							}
 							getFileMetadataFromDrive(entryId, loader);
 						}
-					});
+					}, false);
 					return;
 				}
 				getFileMetadataFromDrive(entryId, loader);
@@ -1002,6 +1051,7 @@ public class RequestActivity extends AppActivity implements
 		ro.setMethod(requestView.getMethod());
 		ro.setPayload(requestView.getPayload());
 		ro.setURL(requestView.getUrl());
+		ro.setName(requestView.getRequestName());
 		ro.setProject(RestClient.getOpenedProject());
 		Storage store = Storage.getSessionStorageIfSupported();
 		String gDriveFileId = store.getItem(LocalStore.CURRENT_GOOGLE_DRIVE_ITEM);
@@ -1080,6 +1130,7 @@ public class RequestActivity extends AppActivity implements
 		
 		Storage sessionStore = Storage.getSessionStorageIfSupported();
 		sessionStore.removeItem(LocalStore.RESTORED_REQUEST);
+		sessionStore.removeItem(LocalStore.CURRENT_GOOGLE_DRIVE_ITEM);
 		
 		eventBus.fireEvent(new ClearFormEvent());
 		
@@ -1317,6 +1368,8 @@ public class RequestActivity extends AppActivity implements
 				});
 			}
 		}
+		
+		
 		
 		requestView.setUrl(result.getURL());
 		requestView.setMethod(result.getMethod());

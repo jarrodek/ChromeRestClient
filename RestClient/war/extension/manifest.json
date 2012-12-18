@@ -17,22 +17,28 @@
     "clipboardWrite"
   ],
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["background.js","/oauth2/oauth2.js"]
   },
   "app": {
     "launch": {
       "local_path": "RestClient.html"
     }
   },
-  "content_security_policy": "script-src chrome-extension:// chrome-extension-resource:// https://plusone.google.com https://chromerestclient.appspot.com https://ssl.google-analytics.com https://apis.google.com 'self'; object-src chrome-extension:// chrome-extension-resource:// 'self'; frame-src chrome-extension:// chrome-extension-resource:// https://plusone.google.com 'self'",
-  "content_scripts": [{
-      "matches": ["http://127.0.0.1:8888/*"],
+  "content_security_policy": "script-src 'unsafe-eval' chrome-extension:// chrome-extension-resource:// https://*.google.com https://chromerestclient.appspot.com https://ssl.google-analytics.com https://www-onepick-opensocial.googleusercontent.com https://*.googleapis.com https://*.googleusercontent.com 'self'; object-src chrome-extension:// chrome-extension-resource:// 'self'; frame-src https://apis.google.com https://www.google.com https://docs.google.com https://www-onepick-opensocial.googleusercontent.com https://www.googleapis.com https://accounts.google.com chrome-extension:// chrome-extension-resource:// https://plusone.google.com  https://doc-0k-0o-docs.googleusercontent.com https://*.googleusercontent.com 'self'",
+  "content_scripts": [
+  	{
+      "matches": ["http://127.0.0.1:8888/RestClient*"],
       "js": ["cs.js"],
 	  "run_at": "document_start"
     },
     {
     	"matches": ["http://127.0.0.1:8888/GDrive.html*"],
     	"js": ["gdriveinit.js"]
+    },
+    {
+    	"matches": ["http://www.google.com/robots.txt*"],
+	    "js": ["oauth2/oauth2_inject.js"],
+	    "run_at": "document_start"
     }
   ],
   "intents": {

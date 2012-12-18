@@ -27,6 +27,7 @@ public class RequestPlace extends Place {
 	private boolean saved = false;
 	private boolean external = false;
 	private boolean gdrive = false;
+	private boolean create = false;
 
 	/**
 	 * 
@@ -53,7 +54,12 @@ public class RequestPlace extends Place {
 			entryId = requestData.substring(9);
 		} else if (requestData.startsWith("gdrive/")) {
 			gdrive = true;
-			entryId = requestData.substring(7);
+			if(requestData.contains("/create/")){
+				create = true;
+				entryId = requestData.substring(14);
+			} else {
+				entryId = requestData.substring(7);
+			}
 		}
 
 		this.placeToken = requestData;
@@ -118,6 +124,15 @@ public class RequestPlace extends Place {
 	public String getToken() {
 		return placeToken;
 	}
+	
+	/**
+	 * @return true if it is a create action
+	 */
+	public boolean isCreate() {
+		return create;
+	}
+
+
 
 	public static class Tokenizer implements PlaceTokenizer<RequestPlace> {
 

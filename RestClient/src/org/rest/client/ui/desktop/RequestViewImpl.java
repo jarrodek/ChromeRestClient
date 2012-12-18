@@ -98,6 +98,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 	@UiField DivElement contentTypeContainer;
 	@UiField HTML5Progress progressIndicator;
 	@UiField Button sendButton;
+	@UiField Button saveButton;
 	@UiField Button refreshDriveButton;
 	@UiField DivElement projectPanel;
 	@UiField DivElement requestNamePanel;
@@ -216,22 +217,36 @@ public class RequestViewImpl extends Composite implements RequestView {
 
 	@UiHandler("clearButton")
 	void onClearButton(ClickEvent e) {
-		// clear current form.
-		urlWidget.clearAll();
-		radioGet.setValue(true, true);
-		requestHeaders.clear();
-		requestBody.clear();
-		// set default content type
-		String defaultSelectedContentTypeValue = HttpContentTypeHelper
-				.getDefaulSelected();
-		selectContentTypeValue(defaultSelectedContentTypeValue);
-		projectPanel.addClassName("hidden");
-		
+		reset();
 		listener.fireClearAllEvent();
-		refreshDriveButton.setEnabled(true);
-		refreshDriveButton.addStyleName("hidden");
 	}
 
+	
+	@Override
+	public void reset() {
+		projectPanel.addClassName("hidden");
+		sendButton.setEnabled(false);
+		progressIndicator.setStyleName("hidden");
+		progressIndicator.getElement().removeAttribute("value");
+
+		projectName.setText("");
+		endpointsContainer.clear();
+
+		urlWidget.clearAll();
+		requestHeaders.clear();
+		requestBody.clear();
+		radioGet.setEnabled(true);
+		selectContentTypeValue(HttpContentTypeHelper.getDefaulSelected());
+		
+		openedProject = null;
+		refreshDriveButton.setEnabled(true);
+		refreshDriveButton.addStyleName("hidden");
+		requestNameField.setEnabled(true);
+		requestNameField.setValue("");
+	}
+	
+	
+	
 	/**
 	 * Handler for method radio box state change
 	 * 
@@ -448,26 +463,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 		RestClient.fixChromeLayout();
 	}
 
-	@Override
-	public void reset() {
-		projectPanel.addClassName("hidden");
-		sendButton.setEnabled(false);
-		progressIndicator.setStyleName("hidden");
-		progressIndicator.getElement().removeAttribute("value");
-
-		projectName.setText("");
-		endpointsContainer.clear();
-
-		urlWidget.clearAll();
-		requestHeaders.clear();
-		requestBody.clear();
-		radioGet.setEnabled(true);
-		selectContentTypeValue(HttpContentTypeHelper.getDefaulSelected());
-		
-		openedProject = null;
-		refreshDriveButton.setEnabled(true);
-		refreshDriveButton.addStyleName("hidden");
-	}
+	
 
 	@Override
 	public void setUpTutorial(final TutorialFactory factory) {
@@ -663,6 +659,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 		}
 		requestNameField.getElement().setAttribute("data-name", name);
 		requestNameField.setValue(name);
+		requestNameField.setEnabled(true);
 		requestNamePanel.removeClassName("hidden");
 		projectPanel.addClassName("hidden");
 	}
@@ -678,7 +675,11 @@ public class RequestViewImpl extends Composite implements RequestView {
 		listener.changeSavedName(name, new Callback<Boolean, Throwable>() {
 			@Override
 			public void onSuccess(Boolean result) {
-				requestNameField.getElement().setAttribute("data-name", name);
+				if(result.booleanValue()){
+					requestNameField.getElement().setAttribute("data-name", name);
+				} else {
+					StatusNotification.notify("You can't change this item name.",StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+				}
 			}
 			
 			@Override
@@ -694,11 +695,43 @@ public class RequestViewImpl extends Composite implements RequestView {
 	public void setGDriveConstrols() {
 		refreshDriveButton.setEnabled(true);
 		refreshDriveButton.removeStyleName("hidden");
+		//disable name change field
+		requestNameField.setEnabled(false);
 	}
 	@UiHandler("refreshDriveButton")
 	void onRefreshDriveButton(ClickEvent e){
 		e.preventDefault();
 		refreshDriveButton.setEnabled(false);
 		listener.refreshCurrentDriveItem();
+	}
+
+	@Override
+	public void setUpDriveTutorial(final TutorialFactory factory) {
+		
+		new Timer() {
+			@Override
+			public void run() {
+				TutorialDialog tip = TutorialFactory.createItem();
+				tip.setAutoCloseTime(7000);
+				tip.setReferencedElement(saveButton.getElement(), Direction.LEFT);
+				tip.setPositionCorrection(0, -75);
+				tip.setHTML("After change save your work on Google Drive™.");
+				tip.showArrow(Direction.RIGHT);
+				factory.addItem(tip);
+				
+				factory.start();
+			}
+		}.schedule(1000);
+		
+		
+	}
+
+	@Override
+	public String getRequestName() {
+		String value = requestNameField.getValue();
+		if(value != null && value.isEmpty()){
+			value = null;
+		}
+		return value;
 	}
 }

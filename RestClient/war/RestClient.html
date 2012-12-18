@@ -8,7 +8,24 @@
 <script type="text/javascript" src="app.js"></script>
 </head>
 <body class="rest-client">
-	<div id="loader-screen"></div>
+	<div id="loader-screen" class="box">
+		<div class="arcIcon box">
+	 		<img src="img/arc_icon_128.png" alt="Advanced REST Client Application" title="Advanced REST Client Application"/>
+	 	</div>
+	 	<div class="loaderContainer box">
+	 		<img src="img/starterLoader.gif" alt="Application loader" title="Application loader"/>
+	 	</div>
+	 	<div class="Loader_loader-wrapper">
+		 	<div class="Loader_loader-info">
+				<span id="loadingInfo" class="loadingInfo"></span>
+			</div>
+			<div class="loader-container">
+				<div class="Loader_holder ">
+					<div class="Loader_loaded" id="progress"></div>
+				</div>
+			</div>
+	 	</div>
+	</div>
 
 	<div id="menuPanel" class="ls">
 		<h1 class="at">Advanced Rest Client</h1>
