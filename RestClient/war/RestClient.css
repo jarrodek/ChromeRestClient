@@ -1736,7 +1736,9 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	text-align: end;
 	cursor: pointer;
 }
-
+.Settings_View_SectionTitle{
+	font-weight: bold;
+}
 .Settings_View_contentTitle.Settings_View_about {
 	-webkit-padding-start: 24px;
 	text-align: start;

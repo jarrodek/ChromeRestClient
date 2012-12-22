@@ -197,14 +197,14 @@ div.gwt-PopupPanelGlass {
 	background: -webkit-radial-gradient(center, rgba(127, 127, 127, 0.32),
 		rgba(127, 127, 127, 0.40) 35%, rgba(0, 0, 0, 0.65) );
 	opacity: initial;
-	z-index: 6;
+	z-index: 1001;
 	position: fixed !important;
 }
 
 div.gwt-DialogBox {
 	clip: initial !important;
 	-webkit-box-shadow: 0px 5px 80px #505050;
-	z-index: 7;
+	z-index: 1002;
 }
 div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomLeft .popupBottomLeftInner,
 div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInner,
@@ -1736,7 +1736,9 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	text-align: end;
 	cursor: pointer;
 }
-
+.Settings_View_SectionTitle{
+	font-weight: bold;
+}
 .Settings_View_contentTitle.Settings_View_about {
 	-webkit-padding-start: 24px;
 	text-align: start;
@@ -2259,4 +2261,29 @@ div.About_View_DonatePopupPanelGlass {
 }
 .Folder_Pickup_ResultRowSelected{
 	background-color: #E7E7E7;
+}
+
+
+
+
+
+.china-download {
+	background-image: url('/img/china_flag.png');
+	display: inline-block;
+	width: 180px;
+	height: 33px;
+	position: absolute;
+	bottom: 20px;
+	right: 20px;
+	font-size: 11px;
+	background-repeat: no-repeat;
+	background-position: 100% 0;
+	padding-right: 55px;
+	text-align: right;
+	color: #666;
+	opacity: 0.5;
+	-webkit-transition: opacity 0.3s linear;
+}
+.china-download:hover{
+	opacity: 1;
 }

@@ -6,12 +6,16 @@
 	<g:HTMLPanel ui:field="root">
 		<h1 class="Settings_View_contentTitle Settings_View_about">Advanced configuration and experimental features</h1>
 		<section class="Settings_View_optionsSection">
-			<p>Debug options</p>
+			<p class="Settings_View_SectionTitle">Import/export</p>
+			<g:Button styleName="button" ui:field="importExportWidget" text="Manage"></g:Button>
+		</section>
+		<section class="Settings_View_optionsSection">
+			<p class="Settings_View_SectionTitle">Debug options</p>
 			<g:CheckBox ui:field="debug" value="false"
 				text="Enable debug messages in console output"></g:CheckBox>
 		</section>
 		<section class="Settings_View_optionsSection">
-			<p>History enabled</p>
+			<p class="Settings_View_SectionTitle">History enabled</p>
 			<g:CheckBox ui:field="history" value="true"
 				text="Enable requests history list"></g:CheckBox>
 			<div class="hidden Settings_View_historyClear" ui:field="historyClear">
@@ -19,27 +23,23 @@
 			</div>
 		</section>
 		<section class="Settings_View_optionsSection">
-			<p>Magic variables</p>
+			<p class="Settings_View_SectionTitle">Magic variables</p>
 			<g:CheckBox ui:field="magicVars" value="false"
 				text="Enable magic variables"></g:CheckBox> <a href="http://restforchrome.blogspot.com/2012/11/introduce-magic-variables.html" target="_blank" class="Settings_View_help">what is this?</a>
 		</section>
 		<section class="Settings_View_optionsSection">
-			<p>Developer notifications</p>
+			<p class="Settings_View_SectionTitle">Developer notifications</p>
 			<g:CheckBox ui:field="notifications" value="false"
 				text="Enable notifications from developer (very few) about application updates"></g:CheckBox>
 		</section>
 		<section class="Settings_View_optionsSection">
-			<p>CodeMorror headers editor <span class="Settings_View_experimental">experimental</span></p>
+			<p class="Settings_View_SectionTitle">CodeMorror headers editor <span class="Settings_View_experimental">experimental</span></p>
 			<g:CheckBox ui:field="codeMirrorHeaders" value="false"
 				text="Enable CodeMirror editor in headers panel"></g:CheckBox>
 		</section>
 		<section class="Settings_View_optionsSection">
-			<p>Shortcuts</p>
+			<p class="Settings_View_SectionTitle">Shortcuts</p>
 			<g:Button styleName="button" ui:field="shortCutsButton" text="Edit shortcuts"></g:Button>
-		</section>
-		<section class="Settings_View_optionsSection">
-			<p>Import/export</p>
-			<g:Button styleName="button" ui:field="importExportWidget" text="Manage"></g:Button>
 		</section>
 	</g:HTMLPanel>
 </ui:UiBinder>
