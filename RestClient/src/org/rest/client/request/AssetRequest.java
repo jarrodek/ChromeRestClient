@@ -4,6 +4,7 @@ import org.rest.client.RestClient;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.http.client.RequestException;
+import com.google.gwt.xhr2.client.ErrorHandler;
 import com.google.gwt.xhr2.client.LoadHandler;
 import com.google.gwt.xhr2.client.ProgressEvent;
 import com.google.gwt.xhr2.client.RequestBuilder;
@@ -48,6 +49,12 @@ public class AssetRequest extends ApplicationRequest {
 					Log.error("Error to load response from server. Asset can't be reached.", exception);
 				}
 				callback.onFailure("Error to load response from server. Asset can't be reached.", exception);
+			}
+		});
+		b.setErrorHandler(new ErrorHandler() {
+			@Override
+			public void onError(Response response, RuntimeException exception) {
+				callback.onFailure("Unable to download required definitions. Will try another time.", null);
 			}
 		});
 		try {

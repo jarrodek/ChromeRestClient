@@ -60,7 +60,7 @@ public class RedirectView extends Composite {
 		}
 		boolean isFromCache = data.isFromCache();
 		if(isFromCache){
-			cacheLine.setInnerText("This redirection comes from cache.");
+			cacheLine.setInnerText("This redirect comes from cache.");
 		} else {
 			cacheLine.setInnerText("Redirection information has not been cached.");
 		}

@@ -46,7 +46,7 @@ public class SavedViewImpl extends Composite implements SavedView {
 	public SavedViewImpl(){
 		initWidget(uiBinder.createAndBindUi(this));
 		searchInput.addStyleName("Saved_View_searchBox");
-		searchInput.getElement().setAttribute("placeholder", "search the request...");
+		searchInput.getElement().setAttribute("placeholder", "search for a request...");
 		
 		observeScroll();
 		observeSearch(searchInput.getElement());
@@ -80,6 +80,10 @@ public class SavedViewImpl extends Composite implements SavedView {
 	 */
 	private void emptyInfo(){
 		
+		if(loaderInfo.hasParentElement()){
+			loaderInfo.removeFromParent();
+		}
+		
 		infoLabel = new InlineLabel();
 		infoLabel.setText("You do not have any saved requests :(");
 		infoLabel.addStyleName("Saved_View_emptyInfo");
@@ -89,7 +93,7 @@ public class SavedViewImpl extends Composite implements SavedView {
 	
 	private void emptyQueryResults(){
 		infoLabel = new InlineLabel();
-		infoLabel.setText("No history for query \""+searchInput.getValue()+"\" found.");
+		infoLabel.setText("No entries for query \""+searchInput.getValue()+"\" found.");
 		infoLabel.addStyleName("Saved_View_emptyInfo");
 		root.add(infoLabel);
 	}
@@ -146,6 +150,7 @@ public class SavedViewImpl extends Composite implements SavedView {
 		}
 		loadingNext = false;
 		loader.setVisible(false);
+		
 		if(loaderInfo.hasParentElement()){
 			loaderInfo.removeFromParent();
 		}

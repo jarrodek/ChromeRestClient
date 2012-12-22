@@ -98,6 +98,9 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 	 * Create info message when no data available
 	 */
 	private void emptyInfo(){
+		if(loaderInfo.hasParentElement()){
+			loaderInfo.removeFromParent();
+		}
 		infoLabel = new InlineLabel();
 		infoLabel.setText("You do not have any saved history :(");
 		infoLabel.addStyleName(style.emptyInfo);

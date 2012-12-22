@@ -28,6 +28,8 @@ import com.google.code.gwt.database.client.SQLTransaction;
 import com.google.code.gwt.database.client.TransactionCallback;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
@@ -37,6 +39,7 @@ import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.PopupPanel;
 
 /**
  * Task will execute only if it is first run. 
@@ -416,9 +419,9 @@ public class FirstRunTask implements LoadTask {
 			public void onSuccess(String response) {
 				if(response == null || response.isEmpty()){
 					if(lastRun){
-						if(RestClient.isDebug()){
+//						if(RestClient.isDebug()){
 							Log.error("Error download application data file. Will try next time.");
-						}
+//						}
 						loaderWidget.setText("Loading...");
 						callback.onInnerTaskFinished(getTasksCount()-1);
 						callback.onSuccess();
@@ -435,13 +438,29 @@ public class FirstRunTask implements LoadTask {
 			@Override
 			public void onFailure(String message, Throwable exception) {
 				if(lastRun){
-					if(RestClient.isDebug()){
+//					if(RestClient.isDebug()){
 						Log.error("Error download application data file. Will try next time.");
-					}
-					Window.alert("Unable to download application data. Will try again next time.");
-					loaderWidget.setText("Loading...");
-					callback.onInnerTaskFinished(getTasksCount()-1);
-					callback.onSuccess();
+//					}
+					final DefinitionsErrorDialog dialog = new DefinitionsErrorDialog();
+					dialog.show();
+					
+					dialog.addCloseHandler(new CloseHandler<PopupPanel>() {
+						@Override
+						public void onClose(CloseEvent<PopupPanel> event) {
+							String result = dialog.getResult();
+							if(result == null || result.isEmpty()){
+								
+								loaderWidget.setText("Loading...");
+								callback.onInnerTaskFinished(getTasksCount()-1);
+								callback.onSuccess();
+								return;
+							}
+							
+							callback.onInnerTaskFinished(1);
+							parseAssetResponse(result);
+						}
+					});
+					
 					return;
 				}
 				loaderWidget.setText("Unable to download definitions. Retrying...");
