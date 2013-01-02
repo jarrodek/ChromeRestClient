@@ -1,5 +1,6 @@
 package com.google.gwt.xhr2.client;
 
+import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.file.client.Blob;
@@ -234,6 +235,28 @@ public class XMLHttpRequest2 extends JavaScriptObject {
 	 */
 	public final native Blob getResponseBlob() /*-{
 		return this.responseBlob;
+	}-*/;
+	
+	/**
+	 * 
+	 * @return the response as a Blob.
+	 */
+	public final native Blob getResponseAsBlob() throws JavaScriptException /*-{
+		return this.response;
+	}-*/;
+	/**
+	 * 
+	 * @return the response as a String.
+	 */
+	public final native String getResponseAsString() throws JavaScriptException /*-{
+		return this.response;
+	}-*/;
+	/**
+	 * 
+	 * @return the response as a Document.
+	 */
+	public final native Document getResponseAsDocument() throws JavaScriptException /*-{
+		return this.response;
 	}-*/;
 
 	/**

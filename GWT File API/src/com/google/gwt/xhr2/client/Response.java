@@ -21,7 +21,12 @@ public class Response {
 	public Response(XMLHttpRequest2 xhr2) {
 		this.xhr2 = xhr2;
 	}
-
+	
+	public XMLHttpRequest2 getRequest(){
+		return xhr2;
+	}
+	
+	
 	public Header[] getHeaders() {
 		return Request.getHeaders(this.xhr2);
 	}
