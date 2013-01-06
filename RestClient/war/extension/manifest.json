@@ -36,7 +36,7 @@
     	"js": ["gdriveinit.js"]
     },
     {
-    	"matches": ["http://www.google.com/robots.txt*"],
+    	"matches": ["https://chromerestclient.appspot.com/oauth2callback.html*"],
 	    "js": ["oauth2/oauth2_inject.js"],
 	    "run_at": "document_start"
     }

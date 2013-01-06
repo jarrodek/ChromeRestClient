@@ -75,7 +75,11 @@ public class XMLViewer extends Composite {
 						//
 						// Fallback for broken XMLs
 						//
-						parseFallback(fallbackXml);
+						if(fallbackXml != null){
+							parseFallback(fallbackXml);
+						} else {
+							result.setHTML("<div class=\"parse-error\">Sorry, but this is not a valid XML :(</div>");
+						}
 					}
 				});
 

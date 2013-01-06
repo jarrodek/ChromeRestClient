@@ -23,5 +23,9 @@ if (index > -1) {
   url = url.substring(0, index);
 }
 // Derive adapter name from URI and then finish the process.
-var adapterName = OAuth2.lookupAdapterName(url);
-var finisher = new OAuth2(adapterName, OAuth2.FINISH);
+try{
+	var adapterName = OAuth2.lookupAdapterName(url);
+	var finisher = new OAuth2(adapterName, OAuth2.FINISH);
+} catch(e){
+	document.body.innerHTML = e.message;
+}

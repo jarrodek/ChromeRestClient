@@ -82,6 +82,7 @@ public class JSONViewer extends Composite {
 				e.preventDefault();
 				var url = e.target.getAttribute('href');
 				@org.rest.client.ui.desktop.widget.JSONViewer::fireUrlChangeEvent(Ljava/lang/String;)(url);
+				$wnd.scrollTo(0,0);
 				return;
 			}
 			

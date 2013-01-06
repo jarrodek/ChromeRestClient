@@ -7,7 +7,7 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/RestClient/lib/gwt-log-3.1.8-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/gwt-html5-database.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-html5-database.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gson-2.2.2.jar" sourcepath="lib/google-gson-2.2.2/gson-2.2.2-sources.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:file:/home/jarrod/workspace/RestClient/lib/google-gson-2.2.2/gson-2.2.2-javadoc.jar!/"/>

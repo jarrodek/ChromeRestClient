@@ -119,6 +119,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	@UiField HTML plainBody;
 	@UiField Anchor parsedOpen;
 	@UiField Anchor forceOpenAsJSON;
+	@UiField Anchor forceOpenAsXML;
 	@UiField PreElement parsedBody;
 	@UiField HTMLPanel xmlPanel;
 	@UiField HTMLPanel imagePanel;
@@ -373,9 +374,9 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 				}
 			}
 			
-			if(isJavaScriptHeader(headers)){
+//			if(isJavaScriptHeader(headers)){
 				forceOpenAsJSON.removeStyleName("hidden");
-			}
+//			}
 		}
 		if(isJSON){
 			setTabOpened(TABS.JSON, jsonTab);
@@ -903,4 +904,17 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		new JSONViewer(body, jsonPanel);
 		setTabVisible(TABS.JSON, jsonTab);
 	}
+	
+	@UiHandler("forceOpenAsXML")
+	void onForceOpenAsXML(ClickEvent e){
+		e.preventDefault();
+		forceOpenAsXML.addStyleName("hidden");
+		final String body = response.getResponseText();
+		setTabOpened(TABS.JSON, xmlTab);
+		new XMLViewer(body, xmlPanel, response.getResponseXML());
+		setTabVisible(TABS.JSON, xmlTab);
+	}
+	
+	
+	
 }

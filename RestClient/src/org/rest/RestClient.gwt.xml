@@ -36,7 +36,7 @@
 	<set-property name="compiler.stackMode" value="strip"/>
 	<!-- (only use if you’re not using enums as String values) -->
 	<!-- <set-configuration-property name="compiler.enum.obfuscate.names" value="true"/> -->
-
+	<set-configuration-property name="CssResource.obfuscationPrefix" value="empty"/>
 	
 	<entry-point class='org.rest.client.RestClient' />
 

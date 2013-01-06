@@ -12,7 +12,7 @@ OAuth2.adapter('google', {
   },
 
   redirectURL: function(config) {
-    return 'http://www.google.com/robots.txt';
+    return 'https://chromerestclient.appspot.com/oauth2callback.html';
   },
 
   parseAuthorizationCode: function(url) {

@@ -66,6 +66,7 @@
 							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="copyClipboardButton2" href="about:blank" >Copy to clipboard</g:Anchor>
 							<g:Anchor addStyleNames="Response_View_copyClipboardBody" ui:field="saveAsFileButton2" href="about:blank" >Save as file</g:Anchor>
 							<g:Anchor addStyleNames="Response_View_copyClipboardBody hidden" ui:field="forceOpenAsJSON" href="about:blank" >Open in JSON tab</g:Anchor>
+							<g:Anchor addStyleNames="Response_View_copyClipboardBody hidden" ui:field="forceOpenAsXML" href="about:blank" >Open in XML tab</g:Anchor>
 						</div>
 						<div class="CodeMirror">
 							<div class="lines"></div>

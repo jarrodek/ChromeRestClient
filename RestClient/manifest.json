@@ -5,7 +5,7 @@
     "16": "img/arc_icon_16.png",
     "128": "img/arc_icon_128.png"
   },
-  "version": "3.0.39",
+  "version": "3.0.45",
   "manifest_version": 2,
   "permissions": [
     "webRequest",
@@ -31,7 +31,7 @@
     	"js": ["gdriveinit.js"]
     },
     {
-    	"matches": ["http://www.google.com/robots.txt*"],
+    	"matches": ["https://chromerestclient.appspot.com/oauth2callback.html*"],
 	    "js": ["oauth2/oauth2_inject.js"],
 	    "run_at": "document_start"
     }
