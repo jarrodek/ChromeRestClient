@@ -95,6 +95,8 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		String label = "Response_View_label";
 		String result = "Response_View_result";
 		String onTop = "Response_View_onTop";
+		String collapseButton = "androidNavigationCollapse";
+		String expandButton = "androidNavigationExpand";
 	}
 	
 	private ResponsePresenter listener;
@@ -119,18 +121,61 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	@UiField HTML plainBody;
 	@UiField Anchor parsedOpen;
 	@UiField Anchor forceOpenAsJSON;
+	@UiField Anchor collapseRequestHeaders;
+	@UiField Anchor collapseResponseHeaders;
 	@UiField Anchor forceOpenAsXML;
 	@UiField PreElement parsedBody;
 	@UiField HTMLPanel xmlPanel;
 	@UiField HTMLPanel imagePanel;
 	@UiField HTMLPanel jsonPanel;
 	@UiField HTMLPanel redirects;
-	WidgetStyle style = new WidgetStyle();
 	@UiField DivElement scrollContainer;
+	WidgetStyle style = new WidgetStyle();
+	
 	
 	public ResponseViewImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
-	}	
+		setHeadersPanelCollapsable();
+	}
+	
+	
+	private void setHeadersPanelCollapsable(){
+		requestHeadersContainer.addDomHandler(new MouseOverHandler() {
+			@Override
+			public void onMouseOver(MouseOverEvent event) {
+				if(collapseRequestHeaders.getStyleName().contains(" visible")){
+					return;
+				}
+				collapseRequestHeaders.addStyleName("visible");
+			}
+		}, MouseOverEvent.getType());
+		
+		requestHeadersContainer.addDomHandler(new MouseOutHandler() {
+			@Override
+			public void onMouseOut(MouseOutEvent event) {
+				collapseRequestHeaders.removeStyleName("visible");
+			}
+		}, MouseOutEvent.getType());
+		
+		responseHeadersContainer.addDomHandler(new MouseOverHandler() {
+			@Override
+			public void onMouseOver(MouseOverEvent event) {
+				if(collapseResponseHeaders.getStyleName().contains(" visible")){
+					return;
+				}
+				collapseResponseHeaders.addStyleName("visible");
+			}
+		}, MouseOverEvent.getType());
+		
+		responseHeadersContainer.addDomHandler(new MouseOutHandler() {
+			@Override
+			public void onMouseOut(MouseOutEvent event) {
+				collapseResponseHeaders.removeStyleName("visible");
+			}
+		}, MouseOutEvent.getType());
+	}
+	
+	
 	
 	@Override
 	public void setPresenter(ResponsePresenter listener) {
@@ -904,6 +949,34 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		new JSONViewer(body, jsonPanel);
 		setTabVisible(TABS.JSON, jsonTab);
 	}
+
+	
+	@UiHandler("collapseResponseHeaders")
+	void onCollapseResponseHeaders(ClickEvent e){
+		e.preventDefault();
+		if(responseHeadersContainer.getStyleName().contains("headersCollapsed")){
+			responseHeadersContainer.removeStyleName("headersCollapsed");
+			collapseResponseHeaders.removeStyleName(style.expandButton);
+			collapseResponseHeaders.addStyleName(style.collapseButton);
+		} else {
+			responseHeadersContainer.addStyleName("headersCollapsed");
+			collapseResponseHeaders.removeStyleName(style.collapseButton);
+			collapseResponseHeaders.addStyleName(style.expandButton);
+		}
+	}
+	@UiHandler("collapseRequestHeaders")
+	void onCollapseRequestHeaders(ClickEvent e){
+		e.preventDefault();
+		if(requestHeadersContainer.getStyleName().contains("headersCollapsed")){
+			requestHeadersContainer.removeStyleName("headersCollapsed");
+			collapseRequestHeaders.removeStyleName(style.expandButton);
+			collapseRequestHeaders.addStyleName(style.collapseButton);
+		} else {
+			requestHeadersContainer.addStyleName("headersCollapsed");
+			collapseRequestHeaders.removeStyleName(style.collapseButton);
+			collapseRequestHeaders.addStyleName(style.expandButton);
+		}
+	}
 	
 	@UiHandler("forceOpenAsXML")
 	void onForceOpenAsXML(ClickEvent e){
@@ -914,7 +987,4 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		new XMLViewer(body, xmlPanel, response.getResponseXML());
 		setTabVisible(TABS.JSON, xmlTab);
 	}
-	
-	
-	
 }

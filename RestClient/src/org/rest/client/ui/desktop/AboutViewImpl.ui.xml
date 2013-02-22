@@ -46,15 +46,16 @@
 			</form>
 		</section>
 		<section class="About_View_aboutContent">
-			<h3>Changelog</h3>
-			
-			
+			<h3>Changelog</h3>			
+			<p>2/22/2013</p>
+			<ul>
+				<li>Added hide option for response headers.</li>
+			</ul>
 			<p>1/2/2013</p>
 			<ul>
 				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=137">Issue 137</a>: Escaping &lang; &rang; in header response. </li>
 				<li>Link to "open in JSON tab" is now always visible in "Parsed" tab.</li>
 			</ul>
-			
 			<p>12/22/2012</p>
 			<ul>
 				<li>Fixed issue with handling error during app definition download.</li>

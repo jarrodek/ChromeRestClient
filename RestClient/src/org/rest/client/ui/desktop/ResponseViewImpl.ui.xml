@@ -28,15 +28,23 @@
 		<g:HTMLPanel styleName="Response_View_responseRow" ui:field="requestHeadersContainer">
 			<div class="Response_View_label">
 				Request headers
+				<g:Anchor ui:field="collapseRequestHeaders" styleName="androidNavigationCollapse hoverInvisible" title="Collapse headers panel"></g:Anchor>
 			</div>
-			<g:HTMLPanel ui:field="requestHeadersPanel" styleName="Response_View_result Response_View_headersPanel"></g:HTMLPanel>
+			<g:HTMLPanel ui:field="requestHeadersPanel" styleName="Response_View_result Response_View_headersPanel requestHeader"></g:HTMLPanel>
+			<span class="Response_View_headersHiddenInfo">
+			    Headers panel has been hidden.
+			</span>
 		</g:HTMLPanel>
 		<!-- RESPONSE HEADERS -->
 		<g:HTMLPanel styleName="Response_View_responseRow" ui:field="responseHeadersContainer">
 			<div class="Response_View_label">
 				Response headers
+				<g:Anchor ui:field="collapseResponseHeaders" styleName="androidNavigationCollapse hoverInvisible" title="Collapse headers panel"></g:Anchor>
 			</div>
-			<g:HTMLPanel ui:field="headersPanel" styleName="Response_View_result Response_View_headersPanel"></g:HTMLPanel>
+			<g:HTMLPanel ui:field="headersPanel" styleName="Response_View_result Response_View_headersPanel responseHeader"></g:HTMLPanel>
+			<span class="Response_View_headersHiddenInfo">
+			    Headers panel has been hidden.
+			</span>
 		</g:HTMLPanel>
 		<!-- Body -->
 		<div class="Response_View_responseRow">

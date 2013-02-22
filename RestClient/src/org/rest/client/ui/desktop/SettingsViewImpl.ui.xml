@@ -33,7 +33,7 @@
 				text="Enable notifications from developer (very few) about application updates"></g:CheckBox>
 		</section>
 		<section class="Settings_View_optionsSection">
-			<p class="Settings_View_SectionTitle">CodeMorror headers editor <span class="Settings_View_experimental">experimental</span></p>
+			<p class="Settings_View_SectionTitle">CodeMirror headers editor <span class="Settings_View_experimental">experimental</span></p>
 			<g:CheckBox ui:field="codeMirrorHeaders" value="false"
 				text="Enable CodeMirror editor in headers panel"></g:CheckBox>
 		</section>
