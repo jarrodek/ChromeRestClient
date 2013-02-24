@@ -28,6 +28,7 @@ import org.rest.client.ui.RequestView.Presenter;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
@@ -41,6 +42,7 @@ import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -104,6 +106,12 @@ public class RequestUrlWidget extends Composite implements HasText {
 		detailedHashField.getElement().setAttribute("placeholder", "HASH");
 		
 		setParamsContainerEvents();
+		Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+			@Override
+			public void execute() {
+				observeSettingsMenu();
+			}
+		});
 	}
 	
 	public void setPresenter(Presenter listener){
@@ -415,4 +423,146 @@ public class RequestUrlWidget extends Composite implements HasText {
 		listener.fireUrlChangeEvent(text);
 		updateQueryForm();
 	}
+	
+	
+	private final native void observeSettingsMenu() /*-{
+		var container = $doc.querySelector('.url_widget_UrlSettingsHoverMenu');
+		if(!container) return;
+		var context = this;
+		container.addEventListener('click',function(e){
+			e.preventDefault();
+			
+			var action = e.target.dataset['action'];
+			if(!action) return;
+			var isCtrl = !!e.ctrlKey;
+			context.@org.rest.client.ui.desktop.widget.RequestUrlWidget::callMenuAction(Ljava/lang/String;Z)(action,isCtrl);
+		}, false);
+		
+		
+		var hoveringMenu = false;
+		var dismissTimeout = null;
+		var settingsIcon = $doc.querySelector('.url_widget_UrlSettings');
+		
+		function startHovering(e){
+			hoveringMenu = true;
+			if(dismissTimeout != null){
+				$wnd.clearTimeout(dismissTimeout);
+			}
+			showMenu();
+		}
+		function stopHovering(e){
+			hoveringMenu = false;
+			dismissTimeout = $wnd.setTimeout(function(){
+				dismissMenu();
+			},250);
+		}
+		
+		function showMenu(){
+			container.classList.add('visible');
+		}
+		function dismissMenu(){
+			if(hoveringMenu) return;
+			dismissTimeout = null;
+			container.classList.remove('visible');
+		}
+		
+		settingsIcon.addEventListener('mouseover', startHovering, false);
+		container.addEventListener('mouseover', startHovering, false);
+		settingsIcon.addEventListener('mouseout', stopHovering, false);
+		container.addEventListener('mouseout', stopHovering, false);
+	}-*/;
+	
+	
+	private void callMenuAction(String action, boolean isCtrl){
+		if(action.equals("encParamsAction")){
+			performEncodeParamsAction(isCtrl);
+		} else if(action.equals("decParamsAction")){
+			performDecodeParamsAction(isCtrl);
+		} else if(action.equals("replAmpAction")){
+			performReplaceAmpAction();
+		} else if(action.equals("openUrlTabAction")){
+			performOpenUrlAction(urlField.getValue());
+		} else if(action.equals("replSemiAction")){
+			performReplaceSemicolonAction();
+		}
+	}
+	
+	private void performEncodeParamsAction(boolean isCtrl){
+		URLParser data = new URLParser().parse(urlField.getValue());
+		List<QueryParam> params = data.getParamsList();
+		int paramsSize = params.size();
+		for(int i=0; i<paramsSize; i++){
+			QueryParam param = params.get(i);
+			String key = param.getKey();
+			if(key == null || key.trim().isEmpty()){
+				continue;
+			}
+			if(isCtrl){
+				key = URL.encodePathSegment(key);
+			} else {
+				key = URL.encodeQueryString(key);
+			}
+			String value = param.getValue();
+			if(isCtrl){
+				value = URL.encodePathSegment(value);
+			} else {
+				value = URL.encodeQueryString(value);
+			}
+			QueryParam update = QueryParam.create(key, value);
+			params.set(i, update);
+		}
+		data.setParamsList(params);
+		String newUrl = data.toString();
+		setText(newUrl);
+	}
+	private void performDecodeParamsAction(boolean isCtrl){
+		URLParser data = new URLParser().parse(urlField.getValue());
+		List<QueryParam> params = data.getParamsList();
+		int paramsSize = params.size();
+		for(int i=0; i<paramsSize; i++){
+			QueryParam param = params.get(i);
+			String key = param.getKey();
+			if(key == null || key.trim().isEmpty()){
+				continue;
+			}
+			if(isCtrl){
+				key = URL.decodePathSegment(key);
+			} else {
+				key = URL.decodeQueryString(key);
+			}
+			String value = param.getValue();
+			if(isCtrl){
+				value = URL.decodePathSegment(value);
+			} else {
+				value = URL.decodeQueryString(value);
+			}
+			QueryParam update = QueryParam.create(key, value);
+			params.set(i, update);
+		}
+		data.setParamsList(params);
+		String newUrl = data.toString();
+		setText(newUrl);
+	}
+	private void performReplaceAmpAction(){
+		URLParser data = new URLParser().parse(urlField.getValue());
+		data.setParamsDelimiter(";");
+		data.setQueryFromCurrentParams();
+		String newUrl = data.toString();
+		setText(newUrl);
+	}
+	private void performReplaceSemicolonAction(){
+		URLParser data = new URLParser().parse(urlField.getValue());
+		data.setParamsDelimiter("&");
+		data.setQueryFromCurrentParams();
+		String newUrl = data.toString();
+		setText(newUrl);
+	}
+	private final native void performOpenUrlAction(String url) /*-{
+		if(chrome && chrome.tabs && chrome.tabs.create){ 
+			chrome.tabs.create({url:url});
+		} else {
+			console.log("Chrome API unavailable. Not in extension?");
+		}
+	}-*/;
+	
 }

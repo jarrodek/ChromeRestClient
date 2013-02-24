@@ -47,9 +47,10 @@
 		</section>
 		<section class="About_View_aboutContent">
 			<h3>Changelog</h3>			
-			<p>2/22/2013</p>
+			<p>2/23/2013</p>
 			<ul>
 				<li>Added hide option for response headers.</li>
+				<li>Added options menu for URL panel (hover URL and then setting icon).</li>
 			</ul>
 			<p>1/2/2013</p>
 			<ul>

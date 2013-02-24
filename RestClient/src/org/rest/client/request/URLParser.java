@@ -37,7 +37,7 @@ import com.google.gwt.regexp.shared.RegExp;
  */
 public class URLParser {
 	RegExp mainRegexp = RegExp.compile("^(?:(?![^:@]+:[^:@\\/]*@)([^:\\/?#.]+):)?(?:\\/\\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\\/?#]*)(?::(\\d*))?)(((\\/(?:[^?#](?![^?#\\/]*\\.[^?#\\/.]+(?:[?#]|$)))*\\/?)?([^?#\\/]*))(?:\\?([^#]*))?(?:#(.*))?)","gim");
-	RegExp paramsRegexp = RegExp.compile("(?:^|&)([^&=]*)=?([^&]*)", "gim");
+//	RegExp paramsRegexp = RegExp.compile("(?:^|&)([^&=]*)=?([^&]*)", "gim");
 	
 	private String source = null;
 	private String protocol = null;
@@ -54,6 +54,7 @@ public class URLParser {
 	private String query = null;
 	private String anchor = null;
 	private List<QueryParam> paramsList = new ArrayList<URLParser.QueryParam>();
+	private String queryDelimiter = "&";
 	
 	/**
 	 * Parse URL to get info.
@@ -104,7 +105,7 @@ public class URLParser {
 	 * @return
 	 */
 	private native JsArray<QueryParam> _parseParams(String query) /*-{
-		var reg = /(?:^|&)([^&=]*)=?([^&]*)/g;
+		var reg = /(?:^|&|;)([^&;=]*)=?([^&;]*)/g;
 		QueryParam = @org.rest.client.request.URLParser.QueryParam::create(Ljava/lang/String;Ljava/lang/String;);
 		var result = [];
 		query.replace(reg, function ($0, $1, $2) {
@@ -122,11 +123,12 @@ public class URLParser {
 	 */
 	public static class QueryParam extends JavaScriptObject {
 		protected QueryParam() {}
-		final static native QueryParam create(String key, String value) /*-{
+		public final static native QueryParam create(String key, String value) /*-{
 			return {key: key, value:value};
 		}-*/;
 		public final native String getKey() /*-{ return this.key; }-*/;
 		public final native String getValue() /*-{ return this.value;  }-*/;
+		public final native void setValue(String value) /*-{ this.value = value;  }-*/;
 	}
 	/**
 	 * Get source - full url. Oryginal value of the source. 
@@ -436,6 +438,25 @@ public class URLParser {
 		return paramsList;
 	}
 	
+	public void setParamsList(List<QueryParam> list) {
+		paramsList = list;
+		setQueryFromCurrentParams();
+	}
+	
+	public void setParamsDelimiter(String delimiter){
+		this.queryDelimiter = delimiter;
+	}
+	
+	public void setQueryFromCurrentParams(){
+		String params = "";
+		for(QueryParam param : paramsList){
+			if(params.length() > 0){
+				params += queryDelimiter;
+			}
+			params += param.getKey() + "=" + param.getValue();
+		}
+		query = params;
+	}
 	
 	@Override
 	public String toString() {

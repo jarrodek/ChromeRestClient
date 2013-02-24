@@ -30,6 +30,9 @@ body>.ls {
 	margin-right: 30px;
 	display: inline-block;
 }
+input[type="checkbox"] {
+	vertical-align: middle;
+}
 
 .app {
 	-webkit-box-flex: 1;
@@ -1074,6 +1077,56 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	min-height: 50px;
 	width: 100%;
 }
+.url_widget_QuickActions{
+	position: absolute;
+	top: -22px;
+	left: 17px;
+	background-color: #fff;
+	border: 1px rgb(204, 204, 204) solid;
+	padding: 3px 10px;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+	border-bottom: none;
+	opacity: 0;
+	-webkit-transition: opacity 0.25s linear;
+}
+.url_widget_QuickActions .url_widget_UrlSettings{
+	width: 20px;
+	height: 20px;
+}
+.url_widget_urlPanel:hover .url_widget_QuickActions{
+	opacity: 1;
+}
+.url_widget_UrlSettingsHoverMenu{
+	position: absolute;
+	z-index: 100;
+	top: 28px;
+	left: -1px;
+	background-color: #fff;
+	padding: 5px;
+	border: 1px rgb(197, 197, 197) solid;
+	width: 200px;
+	display: none;
+}
+
+.url_widget_UrlSettingsHoverMenu.visible{
+	display: block !important;
+}
+
+.url_widget_UrlSettingsHoverMenu > li{
+	padding: 5px 0;
+}
+.url_widget_UrlSettingsHoverMenu > li:hover {
+	background-color: rgb(235, 235, 235);
+}
+.url_widget_UrlSettingsHoverMenu > li a{
+	color: #000;
+	text-decoration: none;
+}
+.url_widget_UrlSettingsHoverMenu .lpad{
+	padding-left:20px;
+}
+
 
 .url_widget_detailedPanel{
 }
@@ -2296,8 +2349,13 @@ div.About_View_DonatePopupPanelGlass {
 .androidNavigationExpand {
 	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIE1hY2ludG9zaCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDoyMTQ4RkNCMTVCMEQxMUUxOTQxOUU0QkNBRjUxNzRCMSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDoyMTQ4RkNCMjVCMEQxMUUxOTQxOUU0QkNBRjUxNzRCMSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjIxNDhGQ0FGNUIwRDExRTE5NDE5RTRCQ0FGNTE3NEIxIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjIxNDhGQ0IwNUIwRDExRTE5NDE5RTRCQ0FGNTE3NEIxIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+TSA54QAAAUxJREFUeNrs1jFLAmEcx/HnysGQhpDAKcHF0cHbE5xaihICt5wa2qJehUNrTW1RkLNIb0DoegHiIm4RZlsN1fU9+AkOeXSPgkPPHz54z93zf54/z/k86oVhaJYZK2bJ4QpwBbgCXAGpWQ98348+ynjB0HL8LWziKQiCxCuwgRr2kbaYPK3cmsZKXEAdBa3CKbIJJs8qp6wx6jYFPGCA6NeqiHPk/zB5Xn2Lyh1orMQF9NFEDx5yOEMpJqekPjnl9DRG33YXjHCBrvpmcILKL30repZR365yR1a7YCrecYlX7Ojekd5zS+0D7OIbq2jjTm0zbwFGA91ijEO197Cu91zFp65v0Jn7HJgRHa1EA2vY1v0vfOAajws5iGIimuANxzpkjA6rq7gv26KP4skOGUrTZnLbFZjEM+6nrq3Cc/+KXQGuAFfAvy/gR4ABAA2IRNZegtVsAAAAAElFTkSuQmCC);
 }
+.androidActionSettingsExpand {
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIE1hY2ludG9zaCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo0MThCNTU2NTVCMEQxMUUxOTQxOUU0QkNBRjUxNzRCMSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo0MThCNTU2NjVCMEQxMUUxOTQxOUU0QkNBRjUxNzRCMSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjQxOEI1NTYzNUIwRDExRTE5NDE5RTRCQ0FGNTE3NEIxIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjQxOEI1NTY0NUIwRDExRTE5NDE5RTRCQ0FGNTE3NEIxIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+ZCL+sAAAAcBJREFUeNrsl71KA0EQx+9y8SsXtAi+gKCdFhoEwcr3sBC09FkUrETB2trOwkbBr5giqTTgG1gYEjXGeP4H/sKy7JLbeN4FceBHdpdhMzs7MzvnR1HkZSk5L2PJ3IC8OimXyz/dLwQLHNdBy6RUqVTMBiQgW2CZ41uwk+YVyOlnwAtog1lQStMASaeeMv+Ms79+BYtgDYxxg7iB/AqOwYeyLsaMg20wybUOOANVmwFduq87gAGi7xu80lI88c69rR6ok0GkAAJlHvDER2nFgK8ZkIvjxZxDhK+Q0KIjV/dIT4jOA3hyDcI4+X0Ddi16h+Cc43vnSmgRyeU5ntBnroec6yIBd5f0W6DfZY/RnfxbwDq+CkY5b4JTrcDIeAqsgwnHdJU0vAC14XwNaVlNW5s25Pcz2E+rH9BremCoeL9qgORyg5FfYK63LbpFsESKSaWhyAG4Uq7JJpsx64WzAZLflw79QMTaUepXDYeuH5hX6oDrc3xiqBfSV2wo/cB3HajbDBihK10bkoC/keGFLCoB2eF/WD1QVbuVAfqBvJaub2DvT/QDcUTvBxpJ9gOeQ724Vtq7/m77/zjN2oAvAQYAVbRqcDsg2NcAAAAASUVORK5CYII=);
+}
+
 .androidContentDelete,
 .androidNavigationCollapse,
+.androidActionSettingsExpand,
 .androidNavigationExpand{
 	background-size: contain;
 	width: 32px;

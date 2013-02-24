@@ -35,6 +35,28 @@
 				<g:TextBox addStyleNames="url_widget_fullWidthRelativeInput url_widget_inputPadding" ui:field="detailedHashField" title="PATH value"></g:TextBox>
 			</section>
 		</div>
-		
+		<div class="url_widget_QuickActions ">
+		    <span class="androidActionSettingsExpand url_widget_UrlSettings"></span>
+		    <ul class="url_widget_UrlSettingsHoverMenu">
+	            <li class="lpad">
+	            	<a href="about:blank" target="_blank" data-action="encParamsAction" class="contextMenuAction">Encode parameters</a>
+	            </li>
+	            <li class="lpad">
+	            	<a href="about:blank" target="_blank" data-action="decParamsAction" class="contextMenuAction">Decode parameters</a>
+	            </li>
+	            <li class="lpad">
+	            	<a href="about:blank" target="_blank" data-action="replAmpAction" class="contextMenuAction">Replace "&amp;" with ";"</a>
+	            </li>
+<!-- 	            <li> -->
+<!-- 	                <g:CheckBox ui:field="alwaysReplaceAmp" addStyleNames="contextMenuAction">Always replace "&amp;" with ";"</g:CheckBox> -->
+<!-- 	            </li> -->
+	            <li class="lpad">
+	            	<a href="about:blank" target="_blank" data-action="replSemiAction" class="contextMenuAction">Replace ";" with "&amp;"</a>
+	            </li>
+	            <li class="lpad">
+	            	<a href="about:blank" target="_blank" data-action="openUrlTabAction" class="contextMenuAction">Open URL in new tab</a>
+	            </li>
+		    </ul>
+		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>

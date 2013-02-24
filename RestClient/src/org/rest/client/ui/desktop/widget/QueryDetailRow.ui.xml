@@ -8,7 +8,7 @@
 		<div class="Query_Detailed_Row_block Query_Detailed_Row_flex">
 			<g:InlineLabel styleName="removeButton" ui:field="removeButton" title="Remove">x</g:InlineLabel>
 			<g:InlineLabel styleName="formCtrl" ui:field="encodeButton" title="Encode query string. Use CTRL to replace + with %20">enc</g:InlineLabel>
-			<g:InlineLabel styleName="formCtrl" ui:field="decodeButton" title="Decode query string. Use CTRL to replace + with %20">dec</g:InlineLabel>
+			<g:InlineLabel styleName="formCtrl" ui:field="decodeButton" title="Decode query string. Use CTRL to replace %20 with +">dec</g:InlineLabel>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder> 
