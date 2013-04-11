@@ -49,7 +49,9 @@ JSONViewer.STYLE = {
 	keyName: "keyName",
 	rootElementToggleButton: "rootElementToggleButton",
 	infoRow: "infoRow",
-	brace: "brace"
+	brace: "brace",
+	leftMargin: 25,
+	arrayKeyNumber: "JSON_parser_arrayKeyNumber"
 };
 
 JSONViewer.prototype = {
@@ -132,9 +134,7 @@ JSONViewer.prototype = {
 	},
 	
 	parseObject: function(object) {
-		var result = "";
-		result += '<div class="'+JSONViewer.STYLE.punctuation + " " + JSONViewer.STYLE.brace + '">{</div>';
-		result += '<div collapse-indicator class="'+JSONViewer.STYLE.infoRow+'">...</div>';
+		
 		var pairs = [];
 		for(var key in object){
 			if(!object.hasOwnProperty(key)) continue;
@@ -142,6 +142,14 @@ JSONViewer.prototype = {
 			pairs[pairs.length] = object[key];
 		}
 		var cnt = pairs.length;
+		
+		
+		var result = "";
+		result += '<div class="'+JSONViewer.STYLE.punctuation + " " + JSONViewer.STYLE.brace + '">{</div>';
+		result += '<div collapse-indicator class="'+JSONViewer.STYLE.infoRow+'">...</div>';
+		
+//		result += '<div class="' + JSONViewer.STYLE.punctuation + " " + JSONViewer.STYLE.brace + '">'+cnt+'}</div>';
+		
 		for(var i=0; i<cnt; i=i+2){
 			var key = pairs[i];
 			var value = pairs[i+1];
@@ -149,11 +157,11 @@ JSONViewer.prototype = {
 			var data = this.parse(value);
 			var hasManyChildren = this.elementsCounter - elementNo > 1;
 			
-			result += '<div data-element="'+elementNo+'" style="margin-left: 15px" class="'+JSONViewer.STYLE.node+'">';
+			result += '<div data-element="'+elementNo+'" style="margin-left: '+JSONViewer.STYLE.leftMargin+'px" class="'+JSONViewer.STYLE.node+'">';
 			result += this.parseKey(key) + ": " + data;
-			if(i+2 != cnt){
-				result += '<span class="'+JSONViewer.STYLE.punctuation+'">,</span>';
-			}
+//			if(i+2 != cnt){
+//				result += '<span class="'+JSONViewer.STYLE.punctuation+'">,</span>';
+//			}
 			if(hasManyChildren){
 				result += '<div data-toggle="'+elementNo+'" class="'+JSONViewer.STYLE.rootElementToggleButton+'">-</div>';
 			}
@@ -165,37 +173,41 @@ JSONViewer.prototype = {
 	},
 	
 	parseArray: function(array) {
+		
+		var cnt = array.length;
+		
 		var result = "";
 		result += '<div class="'+JSONViewer.STYLE.punctuation + " " + JSONViewer.STYLE.brace + '">[</div>';
 		result += '<div collapse-indicator class="'+JSONViewer.STYLE.infoRow+'">...</div>';
-		var cnt = array.length;
-		result += '<span class="'+JSONViewer.STYLE.arrayCounter+'">('+cnt+')</span>';
+		result += '<span class="'+JSONViewer.STYLE.arrayCounter+'">'+cnt+'</span>';
+		result += "<span class=\""+JSONViewer.STYLE.punctuation +  " " + JSONViewer.STYLE.brace + "\">]</span>";
 		
 		for(var i = 0; i<cnt; i++){
 			var elementNo = this.elementsCounter++;
 			var data = this.parse(array[i]);
 			var hasManyChildren = this.elementsCounter - elementNo > 1;
 			
-			result += '<div data-element="'+elementNo+'" style="margin-left: 15px" class="'+JSONViewer.STYLE.node+'">';
+			result += '<div data-element="'+elementNo+'" style="margin-left: '+JSONViewer.STYLE.leftMargin+'px" class="'+JSONViewer.STYLE.node+'">';
+			result += '<span class="'+JSONViewer.STYLE.arrayKeyNumber+'">'+i+': &nbsp;</span>';
 			result += data;
-			if(i<cnt-1){
-				result += '<span class="'+JSONViewer.STYLE.punctuation+'">,</span>';
-			}
+//			if(i<cnt-1){
+//				result += '<span class="'+JSONViewer.STYLE.punctuation+'">,</span>';
+//			}
 			if(hasManyChildren){
 				result += '<div data-toggle="'+elementNo+'" class="'+JSONViewer.STYLE.rootElementToggleButton+'">-</div>';
 			}
 			result += "</div>";
 		}
 		
-		result += "<span class=\""+JSONViewer.STYLE.punctuation +  " " + JSONViewer.STYLE.brace + "\">]</span>";
+		
 		return result;
 	},
 	
 	parseKey: function(key){
 		var result = "";
-		result += '<span class="'+JSONViewer.STYLE.punctuation+'">&quot;</span>';
+		//result += '<span class="'+JSONViewer.STYLE.punctuation+'">&quot;</span>';
 		result += '<span class="'+JSONViewer.STYLE.keyName+'">'+key+'</span>';
-		result += '<span class="'+JSONViewer.STYLE.punctuation+'">&quot;</span>';
+		//result += '<span class="'+JSONViewer.STYLE.punctuation+'">&quot;</span>';
 		return result;
 	}
 }

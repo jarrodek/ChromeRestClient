@@ -12,7 +12,8 @@
 			<div class="Import_Export_depricationInfo">
 				<p>Import and export via application service will be <span class="Import_Export_highlight">removed</span>.</p>
 				<p>I'm suggest to import all Your remaining data or use a file import/export.</p>
-				<p>This options will be removed from application <span class="Import_Export_highlight">March 1st, 2013</span>.</p>
+				<p>This options will be removed from application <span class="Import_Export_highlight">August 1st, 2013</span>.</p>
+				<p>Delay with removing this option is caused by poor integation of Chrome extensions and Google Drive.</p>
 			</div>
 			<h3>Application server export</h3>
 			<p>First step is to connect with server.<br/>When you install application on other machine you will be able to download all data.</p>

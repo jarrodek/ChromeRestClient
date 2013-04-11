@@ -191,7 +191,6 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			collapseResponseHeaders.removeStyleName(style.collapseButton);
 			collapseResponseHeaders.addStyleName(style.expandButton);
 		}
-		
 	}
 	
 	

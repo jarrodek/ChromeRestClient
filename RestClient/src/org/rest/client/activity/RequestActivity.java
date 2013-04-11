@@ -45,6 +45,7 @@ import org.rest.client.jso.ExternalDriveCreateData;
 import org.rest.client.jso.ExternalDriveCreateResponse;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.RedirectData;
+import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.request.URLParser;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.LocalStore;
@@ -83,6 +84,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.xhr2.client.Header;
+import com.google.gwt.xhr2.client.RequestHeader;
 import com.google.gwt.xhr2.client.Response;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
@@ -373,11 +375,11 @@ public class RequestActivity extends AppActivity implements
 	/**
 	 * 
 	 * @param projectId -1 if project ID is unknown
-	 * @param endopintId -1 for default endpoint (first one) 
+	 * @param endpointId -1 for default endpoint (first one) 
 	 * @param requestView
 	 */
-	private void restoreRequestFromProject(int projectId, int endopintId) {
-		if(projectId == -1 && endopintId == -1){
+	private void restoreRequestFromProject(int projectId, int endpointId) {
+		if(projectId == -1 && endpointId == -1){
 			if(RestClient.isDebug()){
 				Log.error("Project ID and endpoint ID can't be -1 at once.");
 			}
@@ -386,7 +388,7 @@ public class RequestActivity extends AppActivity implements
 			return;
 		}
 		final ProjectStoreWebSql projectsStore = clientFactory.getProjectsStore();
-		if(endopintId == -1){
+		if(endpointId == -1){
 			projectsStore.getByKey(projectId, new StoreResultCallback<ProjectObject>(){
 
 				@Override
@@ -403,7 +405,7 @@ public class RequestActivity extends AppActivity implements
 				}
 			});
 		} else {
-			clientFactory.getRequestDataStore().getByKey(endopintId, new StoreResultCallback<RequestObject>(){
+			clientFactory.getRequestDataStore().getByKey(endpointId, new StoreResultCallback<RequestObject>(){
 				@Override
 				public void onSuccess(final RequestObject result) {
 					if(result.getProject() > 0){
@@ -479,6 +481,11 @@ public class RequestActivity extends AppActivity implements
 		// if can overwrite current params first restore latest request
 		// and then set parameters.
 		if(RestClient.getOpenedProject() == RestClient.getPreviousProject()){
+			
+			if(RestClient.isDebug()){
+				Log.debug("Restoring data for the same project as previous.");
+			}
+			
 			RequestObject.restoreLatest(new Callback<RequestObject, Throwable>() {
 				@Override
 				public void onSuccess(RequestObject result) {
@@ -503,7 +510,7 @@ public class RequestActivity extends AppActivity implements
 		requestView.setUrl(request.getURL());
 		
 		setUserDefinedContentEncodingValues(request
-				.getEncoding());
+				.getEncoding(), request.getHeaders());
 		RestClient.fixChromeLayout();
 		Storage store = Storage.getSessionStorageIfSupported();
 		store.setItem(LocalStore.RESTORED_REQUEST, ""+request.getId());
@@ -529,7 +536,9 @@ public class RequestActivity extends AppActivity implements
 			requestView.setPayload(request.getPayload());
 		}
 		requestView.setEncoding(request.getEncoding());
-		
+		if(RestClient.isDebug()){
+			Log.debug("Restoring encoding to ." + request.getEncoding());
+		}
 		
 		
 		String oldUrl = lesteSavedRequest.getURL();
@@ -562,7 +571,7 @@ public class RequestActivity extends AppActivity implements
 		requestView.setUrl(urlData.toString());
 		
 		setUserDefinedContentEncodingValues(request
-				.getEncoding());
+				.getEncoding(),request.getHeaders());
 		RestClient.fixChromeLayout();
 		Storage store = Storage.getSessionStorageIfSupported();
 		store.setItem(LocalStore.RESTORED_REQUEST, ""+request.getId());
@@ -874,7 +883,7 @@ public class RequestActivity extends AppActivity implements
 				requestView.setHeaders(result.getHeaders());
 				requestView.setPayload(result.getPayload());
 				setUserDefinedContentEncodingValues(result
-						.getEncoding());
+						.getEncoding(),result.getHeaders());
 				
 				Date date = new Date((long) result.getTime());
 				String lastUseDate = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_FULL).format(date);
@@ -987,10 +996,25 @@ public class RequestActivity extends AppActivity implements
 			});
 	}
 	
+	/**
+	 * 
+	 * @param selectCurrentEncoding
+	 * @param headers
+	 */
 	private void setUserDefinedContentEncodingValues(
-			final String selectCurrentEncoding) {
-
+			String _selectCurrentEncoding, String headers) {
 		
+		if(headers != null){
+			ArrayList<RequestHeader> requerstHeadersList = RequestHeadersParser
+					.stringToHeaders(headers);
+			for(RequestHeader h : requerstHeadersList){
+				if(h.getName().toLowerCase().equals("content-type")){
+					_selectCurrentEncoding = h.getValue(); 
+				}
+			}
+		}
+		
+		final String selectCurrentEncoding = _selectCurrentEncoding; 
 		clientFactory.getFormEncodingStore().all(new StoreResultCallback<Map<Integer,FormEncodingObject>>() {
 			
 			@Override
@@ -998,12 +1022,11 @@ public class RequestActivity extends AppActivity implements
 				final RequestView view = clientFactory
 						.getRequestView();
 				String encodingToSelect = selectCurrentEncoding;
-
+				
 				if (selectCurrentEncoding == null) {
 					encodingToSelect = view
 							.getEncoding();
 				}
-				
 
 				String[] values = new String[result
 						.size()];
@@ -1017,7 +1040,6 @@ public class RequestActivity extends AppActivity implements
 								.getEncoding();
 					i++;
 				}
-
 				view.appendEncodingValues(values);
 				view.setEncoding(encodingToSelect);
 			}
@@ -1099,7 +1121,7 @@ public class RequestActivity extends AppActivity implements
 							new StoreResultCallback<Integer>() {
 								@Override
 								public void onSuccess(Integer result) {
-									setUserDefinedContentEncodingValues(encoding);
+									setUserDefinedContentEncodingValues(encoding, null);
 								}
 
 								@Override
@@ -1376,7 +1398,7 @@ public class RequestActivity extends AppActivity implements
 		requestView.setHeaders(result.getHeaders());
 		requestView.setPayload(result.getPayload());
 		setUserDefinedContentEncodingValues(result
-				.getEncoding());
+				.getEncoding(),result.getHeaders());
 		RestClient.fixChromeLayout();
 	}
 

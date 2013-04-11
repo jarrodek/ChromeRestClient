@@ -60,6 +60,7 @@ public class JSONViewer extends Composite {
 				styleData.put("rootElementToggleButton", new JSONString("JSON_parser_rootElementToggleButton"));
 				styleData.put("infoRow", new JSONString("JSON_parser_infoRow"));
 				styleData.put("brace", new JSONString("JSON_parser_brace"));
+				styleData.put("arrayKeyNumber", new JSONString("JSON_parser_arrayKeyNumber"));
 				
 				JSONObject post = new JSONObject();
 				post.put("style", styleData);

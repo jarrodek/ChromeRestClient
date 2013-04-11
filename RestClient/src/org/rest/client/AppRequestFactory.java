@@ -232,10 +232,16 @@ public class AppRequestFactory {
 		if (headers.size() > 0) {
 			builder.setHeaders(headers);
 			if(RestClient.isDebug()){
-				Log.debug("Headers","Set request headers:");
-				for(RequestHeader item : headers){
-					Log.debug("Headers",">>> "+item.getName()+": "+item.getValue());
+				if(RestClient.isDebug()){
+					Log.debug("Headers","Set request headers:");
+					for(RequestHeader item : headers){
+						Log.debug("Headers",">>> "+item.getName()+": "+item.getValue());
+					}
 				}
+			}
+		} else {
+			if(RestClient.isDebug()){
+				Log.debug("Headers","No headers to set.");
 			}
 		}
 		

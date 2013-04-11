@@ -1079,14 +1079,14 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 }
 .url_widget_QuickActions{
 	position: absolute;
-	top: -22px;
-	left: 17px;
+	top: 40px;
+	right: 2px;
 	background-color: #fff;
 	border: 1px rgb(204, 204, 204) solid;
 	padding: 3px 10px;
-	border-top-left-radius: 5px;
-	border-top-right-radius: 5px;
-	border-bottom: none;
+	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
+	border-top: none;
 	opacity: 0;
 	-webkit-transition: opacity 0.25s linear;
 }
@@ -1101,7 +1101,7 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	position: absolute;
 	z-index: 100;
 	top: 28px;
-	left: -1px;
+	left: -171px;
 	background-color: #fff;
 	padding: 5px;
 	border: 1px rgb(197, 197, 197) solid;
@@ -1114,7 +1114,7 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 }
 
 .url_widget_UrlSettingsHoverMenu > li{
-	padding: 5px 0;
+/* 	padding: 5px 0; */
 }
 .url_widget_UrlSettingsHoverMenu > li:hover {
 	background-color: rgb(235, 235, 235);
@@ -1122,6 +1122,8 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 .url_widget_UrlSettingsHoverMenu > li a{
 	color: #000;
 	text-decoration: none;
+	display: block;
+	padding: 5px 0;
 }
 .url_widget_UrlSettingsHoverMenu .lpad{
 	padding-left:20px;
@@ -1394,6 +1396,7 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 .JSON_parser_node{
 	position: relative;
 	white-space: nowrap;
+	margin-bottom: 5px; 
 }
 
 .JSON_parser_bodyPanel div[data-expanded="false"] div[data-element]{display: none !important;}
@@ -1403,7 +1406,7 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	font-size: 11px;
 }
 .JSON_parser_arrayCounter:before {
-	content: "size";
+/* 	content: "size"; */
 }
 .JSON_parser_keyName{
 	color: rgb(206,123,0)
@@ -1415,6 +1418,9 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	font-size: 14px;
 	cursor: pointer;
 	font-weight: bold;
+}
+.JSON_parser_arrayKeyNumber{
+	color: rgb(119, 119, 119);
 }
 .JSON_parser_infoRow{
 	display: none;
