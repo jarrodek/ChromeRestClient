@@ -1,6 +1,8 @@
 package org.rest.client.storage.store;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -99,8 +101,29 @@ public class HistoryRequestStoreWebSql extends WebSqlAdapter<Integer, HistoryObj
 	 * This type of query is not available for this table.
 	 */
 	@Override
-	public void all(StoreResultCallback<Map<Integer, HistoryObject>> callback) {
-		callback.onError(null);
+	public void all(final StoreResultCallback<Map<Integer, HistoryObject>> callback) {
+		try{
+		service.getAll(new ListCallback<HistoryObject>() {
+			
+			@Override
+			public void onFailure(DataServiceException error) {
+				callback.onError(error);
+			}
+			
+			@Override
+			public void onSuccess(List<HistoryObject> result) {
+				Iterator<HistoryObject> it = result.iterator();
+				HashMap<Integer, HistoryObject> all = new HashMap<Integer, HistoryObject>();
+				while(it.hasNext()){
+					HistoryObject next = it.next();
+					all.put(next.getId(), next);
+				}
+				callback.onSuccess(all);
+			}
+		});
+		} catch(Exception e){
+			callback.onError(e);
+		}
 	}
 	/**
 	 * This type of query is not available for this table.

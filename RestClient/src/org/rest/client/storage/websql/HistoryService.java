@@ -114,4 +114,7 @@ public interface HistoryService extends AppDatabase {
 	
 	@Select("SELECT COUNT(*) FROM history WHERE url LIKE {query}")
 	void count(String query, ScalarCallback<Integer> callback);
+	
+	@Select("SELECT * FROM history WHERE 1") //, 
+	void getAll(ListCallback<HistoryObject> callback);
 }

@@ -5,13 +5,17 @@
 	
 	<g:HTMLPanel addStyleNames="History_View_historyList" ui:field="root">
 		<section class="History_View_historyNav">
-			<div class="inlineButtonsGroup">
-				<g:InlineLabel title="Remove all data from history store." ui:field="clearHistory" styleName="inlineButton">Clear history</g:InlineLabel>
-			</div>
+			
 			<div class="History_View_searchContainer">
 				<h5:SearchBox ui:field="searchInput"></h5:SearchBox>
 			</div>
+			<div class="inlineButtonsGroup">
+				<g:InlineLabel title="Remove all data from history store." ui:field="clearHistory" styleName="inlineButton">Clear history</g:InlineLabel>
+				<g:InlineLabel title="Export all available hostory to a file." ui:field="exportHistory" styleName="inlineButton">Export history to a file</g:InlineLabel>
+				<g:Anchor title="Download file" visible="false" ui:field="downloadFile" styleName="inlineButton">Download file</g:Anchor>
+			</div>
 			<div class="History_View_searchContainer"></div>
+			
 		</section>
 		
 		<div ui:field="loaderInfo" class="History_View_loadingWrapper flexCenter">

@@ -99,9 +99,10 @@ public class HeaderSupportDate implements HeaderSupport {
 		d.setHours(getHoursValue());
 		d.setMinutes(getMinutesValue());
 
-		DateTimeFormat tmpFormat = DateTimeFormat.getFormat("EEE, dd MMM yyyy HH:mm:ss z");
+//		DateTimeFormat tmpFormat = DateTimeFormat.getFormat("EEE, dd MMM yyyy HH:mm:ss z");
 		if(callback != null){
-			callback.onSuccess(tmpFormat.format(d));
+			callback.onSuccess(d.toGMTString());
+			//callback.onSuccess(tmpFormat.format(d)); //,TimeZone.createTimeZone(0)
 		}
 	}
 	

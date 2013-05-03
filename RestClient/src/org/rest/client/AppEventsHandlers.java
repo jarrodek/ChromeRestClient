@@ -12,14 +12,12 @@ public class AppEventsHandlers {
 		SaveRequestEvent.register(eventBus, new SaveRequestEvent.Handler() {
 			@Override
 			public void onSave() {
+				if(RestClient.isSaveDialogEnabled) return;
+				
 				SaveRequestDialogView dialog = RestClient.getClientFactory().getSaveRequestDialogView();
 				dialog.show();
 			}
 		});
-		
-		
-		
-		
 		
 	}
 	

@@ -1,4 +1,4 @@
-package org.rest.server;
+ package org.rest.server;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -93,6 +93,7 @@ public class TestDataServlet extends HttpServlet {
 			sb.append("\"link3\"").append(":").append("\"file:///file\"").append(",");
 			sb.append("\"link4\"").append(":").append("\"ftp://www.google.pl/webhp?sourceid\"").append(",");
 			sb.append("\"link5\"").append(":").append("\"http://www.google.pl/webhp?sourceid\"").append(",");
+			sb.append("\"link6\"").append(":").append("\"/somepoint.php\"").append(",");
 			sb.append("\"long\"").append(":").append("18014398509481984419").append(",");
 			sb.append("\"array\"").append(":").append("[\"string1\",\"string2\",\"string3 string3 string3 string3 string3 string3\"]").append(",");
 			sb.append("\"deep\"").append(":");

@@ -47,6 +47,13 @@
 		</section>
 		<section class="About_View_aboutContent">
 			<h3>Changelog</h3>
+			<p>5/3/2013</p>
+			<ul>
+				<li>Added ability to export history data as JSON file recognizable by the app</li>
+				<li>"Save request dialog" will open only once pressing CTRL+S couple of times.</li>
+				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=174">Issue 174</a>: If-Modified-Since format now follow RFC.</li>
+				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=177">Issue 177</a>: New Feature Request for improved linkifying to suit Django + TastyPie.</li>
+			</ul>
 			<p>4/11/2013</p>
 			<ul>
 				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=155">Issue 155</a>: Default "Content-Type" header can't be saved</li>

@@ -60,7 +60,15 @@ public interface HistoryView extends IsWidget {
 		void getNextItemsPage();
 		
 		
-		void serach(String query); 
+		void serach(String query);
+		/**
+		 * Called after user click to Export button.
+		 */
+		void prepareExportData(Callback<String, Exception> callback);
+		/**
+		 * Should be called when user download the file.
+		 */
+		void revokeDownloadData(); 
 	}
 	/**
 	 * Sets presenter for this view

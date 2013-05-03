@@ -16,6 +16,9 @@
 package org.rest.client.storage.store.objects;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 
 /**
  * This class represents requests data stored in history store.
@@ -147,5 +150,19 @@ public class HistoryObject extends JavaScriptObject implements History {
 		to.setTime(from.getTime());
 		to.setURL(from.getURL());
 		return to;
+	}
+	
+	/**
+	 * @return {@link RequestObject} as a {@link JSONObject}
+	 */
+	public final JSONObject toJSONObject(){
+		JSONObject obj = new JSONObject();
+		obj.put("encoding", new JSONString(getEncoding() == null ? "" : getEncoding()));
+		obj.put("headers", new JSONString(getHeaders() == null ? "" : getHeaders()));
+		obj.put("method", new JSONString(getMethod() == null ? "" : getMethod()));
+		obj.put("payload", new JSONString(getPayload() == null ? "" : getPayload()));
+		obj.put("time", new JSONNumber(getTime()));
+		obj.put("url", new JSONString(getURL() == null ? "" : getURL()));
+		return obj;
 	}
 }

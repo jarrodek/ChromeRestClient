@@ -88,6 +88,10 @@ public class RestClient implements EntryPoint {
 	private static int previousOpenedProject = -1;
 	private static String applicationUserId = null;
 	/**
+	 * True if Save request dialog is opened.
+	 */
+	public static boolean isSaveDialogEnabled = false;
+	/**
 	 * @return current opened project ID or -1 if none
 	 */
 	public final static int getOpenedProject(){

@@ -17,6 +17,8 @@ package org.rest.client.activity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
@@ -30,6 +32,8 @@ import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -44,10 +48,11 @@ public class HistoryActivity extends ListActivity implements
 		HistoryView.Presenter {
 
 	
-	@SuppressWarnings("unused")
+	
 	final private HistoryPlace place;
 	private EventBus eventBus;
 	private HistoryView view = null;
+	private String exportFileObjectUrl = null;
 	
 	
 	public HistoryActivity(HistoryPlace place, ClientFactory clientFactory) {
@@ -219,5 +224,68 @@ public class HistoryActivity extends ListActivity implements
 				StatusNotification.notify("Database error. Unable read history data.", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 			}
 		});
+	}
+
+	@Override
+	public void prepareExportData(final Callback<String, Exception> callback) {
+		
+		try{
+			clientFactory.getHistoryRequestStore().all(new StoreResultCallback<Map<Integer,HistoryObject>>() {
+				
+				@Override
+				public void onSuccess(Map<Integer, HistoryObject> map) {
+					JSONArray requestsArray = new JSONArray();
+					JSONArray projectsArray = new JSONArray();
+					Set<Integer> keys = map.keySet();
+					for(Integer _k : keys){
+						HistoryObject history = map.get(_k);
+						requestsArray.set(requestsArray.size(), history.toJSONObject());
+					}
+					JSONObject result = new JSONObject();
+					result.put("projects", projectsArray);
+					result.put("requests", requestsArray);
+					
+					callback.onSuccess(createDownloadData(result.toString()));
+				}
+				
+				@Override
+				public void onError(Throwable e) {
+					callback.onFailure(new Exception(e.getMessage()));
+				}
+			});
+		} catch (Exception e){
+			callback.onFailure(e);
+		}
+		
+		
+	}
+	public String createDownloadData(String data) {
+		if(exportFileObjectUrl != null){
+			revokeDownloadData();
+		}
+		exportFileObjectUrl = createDownloadDataImpl(data); 
+		return exportFileObjectUrl;
+	}
+	
+	private final native String createDownloadDataImpl(String data) /*-{
+		var blob = new $wnd.Blob([data], {type: 'application/json'});
+		return $wnd.URL.createObjectURL(blob);
+	}-*/;
+	
+	@Override
+	public void revokeDownloadData() {
+		if(exportFileObjectUrl != null){
+			revokeDownloadDataImpl(exportFileObjectUrl);
+			exportFileObjectUrl = null;
+		}
+	}
+	private final native void revokeDownloadDataImpl(String url) /*-{
+		$wnd.URL.revokeObjectURL(url);
+	}-*/;
+	
+	@Override
+	public String mayStop() {
+		revokeDownloadData();
+		return super.mayStop();
 	}
 }

@@ -78,6 +78,9 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	public SaveRequestDialogViewImpl(){
 		setPreviewURL();
 		Binder.BINDER.createAndBindUi(this);
+		
+		RestClient.isSaveDialogEnabled = true;
+		
 		if(requestOrygURL == null || requestOrygURL.isEmpty()){
 			return;
 		}
@@ -357,7 +360,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	
 	@Override
 	public void onClose(CloseEvent<PopupPanel> event) {
-		
+		RestClient.isSaveDialogEnabled = false;
 	}
 	
 	

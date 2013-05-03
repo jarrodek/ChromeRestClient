@@ -1,6 +1,6 @@
 package org.rest.client.ui.desktop;
 
-import java.sql.Date;
+import java.util.Date;
 import java.util.List;
 
 import org.rest.client.RestClient;
@@ -11,17 +11,24 @@ import org.rest.client.ui.HistoryListItemView;
 import org.rest.client.ui.HistoryView;
 import org.rest.client.ui.html5.SearchBox;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.ScrollEvent;
 import com.google.gwt.user.client.Window.ScrollHandler;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -50,7 +57,9 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 	
 	@UiField InlineLabel loader;
 	@UiField InlineLabel clearHistory;
+	@UiField InlineLabel exportHistory;
 	@UiField SearchBox searchInput;
+	@UiField Anchor downloadFile;
 	
 	public HistoryViewImpl(){
 		initWidget(uiBinder.createAndBindUi(this));
@@ -222,5 +231,57 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 	@Override
 	public void clearResultList() {
 		list.clear();
+	}
+	@UiHandler("exportHistory")
+	void onExportAllClick(ClickEvent e){
+		e.preventDefault();
+		listener.prepareExportData(new Callback<String, Exception>() {
+			
+			@Override
+			public void onSuccess(final String fileObjectUrl) {
+				Scheduler.get().scheduleDeferred(new Command() {
+					public void execute() {
+						exportHistory.setVisible(false);
+						
+						String date = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM).format(new Date());
+						String fileName = "arc-"+date+".json";
+						downloadFile.getElement().setAttribute("download", fileName);
+						downloadFile.getElement().setAttribute("data-downloadurl", "application/json:"+fileName+":"+fileObjectUrl);
+						downloadFile.setHref(fileObjectUrl);
+						
+						downloadFile.setVisible(true);
+					}
+				});
+			}
+			
+			@Override
+			public void onFailure(Exception reason) {
+				exportHistory.setVisible(true);
+				downloadFile.setVisible(false);
+				StatusNotification.notify("Unable to generate a file. Unexpected error.", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM, true);
+				if(RestClient.isDebug()){
+					Log.debug("Unable to generate a file. Unexpected error.",reason);
+				}
+			}
+		});
+	}
+	
+	@UiHandler("downloadFile")
+	void onDownloadFileClick(ClickEvent e){
+		if(!downloadFile.getElement().getAttribute("disabled").isEmpty()){
+			return;
+		}
+		downloadFile.getElement().setAttribute("disabled", "true");
+		
+		Timer t = new Timer() {
+			@Override
+			public void run() {				
+				downloadFile.setVisible(false);
+				downloadFile.setHref("about:blank");
+				exportHistory.setVisible(true);
+				listener.revokeDownloadData();
+			}
+		};
+		t.schedule(1500);
 	}
 }

@@ -60,7 +60,7 @@ JSONViewer.prototype = {
         parsedData += this.parse(this.jsonValue);
         parsedData += "</div>";
         
-        var replace = '<a response-anchor href="$1">$1</a>';
+        var replace = '<a title="Click to insert into URL field" response-anchor href="$1">$1</a>';
         var match = parsedData.match(this.linkRegExp);
         replace = replace.replace(/\$0/, match)
         parsedData = parsedData.replace(this.linkRegExp,replace);
@@ -122,6 +122,9 @@ JSONViewer.prototype = {
 		var value = str || "";
 		if(value != null){
 			value = SafeHtmlUtils.htmlEscape(value);
+			if(value.slice(0,1) === "/"){
+				value = '<a title="Click to insert into URL field" response-anchor add-root-url href="'+value+'">'+value+'</a>';
+			}
 		} else {
 			value = "null";
 		}

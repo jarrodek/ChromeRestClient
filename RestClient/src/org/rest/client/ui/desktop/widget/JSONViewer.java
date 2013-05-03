@@ -5,8 +5,11 @@ import org.rest.client.dom.worker.WebWorkerError;
 import org.rest.client.dom.worker.Worker;
 import org.rest.client.dom.worker.WorkerMessageHandler;
 import org.rest.client.event.OverwriteUrlEvent;
+import org.rest.client.request.URLParser;
+import org.rest.client.storage.store.objects.RequestObject;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -70,8 +73,25 @@ public class JSONViewer extends Composite {
 		}.schedule(300);
 	}
 	
-	static final void fireUrlChangeEvent(String url){
-		RestClient.getClientFactory().getEventBus().fireEvent(new OverwriteUrlEvent(url));
+	static final void fireUrlChangeEvent(final String url){
+		if(url.startsWith("/")){
+			RestClient.collectRequestData(new Callback<RequestObject, Throwable>() {
+				@Override
+				public void onSuccess(RequestObject result) {
+					String rootUrl = result.getURL();
+					URLParser urlData = new URLParser().parse(rootUrl);
+					String protocol = urlData.getProtocol();
+					String authority = urlData.getAuthority();
+					String newUrl = protocol + "://" + authority + url;
+					RestClient.getClientFactory().getEventBus().fireEvent(new OverwriteUrlEvent(newUrl));
+				}
+				@Override
+				public void onFailure(Throwable reason) {
+					RestClient.getClientFactory().getEventBus().fireEvent(new OverwriteUrlEvent(url));
+				}
+			});
+		}
+		
 	}
 	
 	
