@@ -24,7 +24,7 @@
 			<section data-tab="form" class="tabContent">
 				<!-- Add new form value button -->
 				<g:Anchor styleName="addValueAnchor" ui:field="addValue" href="#">Add new value</g:Anchor>
-				
+				<span class="Request_Body_Widget_valuesEncodingInfo">Values from here will be URL encoded!</span>
 				<g:HTMLPanel ui:field="payloadFormPanel" styleName="Request_Body_Widget_payloadFormPanel">
 					
 				</g:HTMLPanel>

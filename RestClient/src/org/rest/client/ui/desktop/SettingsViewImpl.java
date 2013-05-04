@@ -30,6 +30,7 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	@UiField CheckBox history;
 	@UiField CheckBox magicVars;
 	@UiField CheckBox codeMirrorHeaders;
+	@UiField CheckBox codeMirrorPayload;
 	@UiField DivElement historyClear;
 	
 	
@@ -92,6 +93,10 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	public void setCodeMirrorHeadersEnabled(boolean codeMirrorHeadersEnabled) {
 		codeMirrorHeaders.setValue(codeMirrorHeadersEnabled);
 	}
+	@Override
+	public void setCodeMirrorPayloadEnabled(boolean codeMirrorPayloadEnabled) {
+		codeMirrorPayload.setValue(codeMirrorPayloadEnabled);
+	}
 	
 	@UiHandler("history")
 	void onHistoryChange(ValueChangeEvent<Boolean> event){
@@ -138,7 +143,14 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 		if(RestClient.isDebug()){
 			Log.debug("CodeMirror for headers value changed. Current value is: " + String.valueOf(event.getValue()));
 		}
-		listener.changeCodeMirrirHeadersValue(event.getValue());
+		listener.changeCodeMirrorHeadersValue(event.getValue());
+	}
+	@UiHandler("codeMirrorPayload")
+	void onCodeMirrorPayloadChange(ValueChangeEvent<Boolean> event){
+		if(RestClient.isDebug()){
+			Log.debug("CodeMirror for payload value changed. Current value is: " + String.valueOf(event.getValue()));
+		}
+		listener.changeCodeMirrorPayloadValue(event.getValue());
 	}
 	
 	

@@ -293,11 +293,15 @@ public class TestDataServlet extends HttpServlet {
 		writer.println("===============");
 		writer.println("Payload:");
 		writer.println("===============");
-		BufferedReader reader = req.getReader();
-		while(true){
-			String line = reader.readLine();
-			if(line == null) break;
-			writer.println(line);
+		try{
+			BufferedReader reader = req.getReader();
+			while(true){
+				String line = reader.readLine();
+				if(line == null) break;
+				writer.println(line);
+			}
+		} catch(Exception e){
+			writer.println("unable read payload.");
 		}
 		writer.println("===============");
 		@SuppressWarnings("unchecked")

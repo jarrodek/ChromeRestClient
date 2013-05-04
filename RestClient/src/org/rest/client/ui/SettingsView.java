@@ -43,7 +43,8 @@ public interface SettingsView extends IsWidget {
 		void changeHistoryValue(boolean newValue);
 		void changeNotificationsValue(boolean notificationsEnabled);
 		void changeMagicVarsValue(boolean magicVarsEnabled);
-		void changeCodeMirrirHeadersValue(boolean codeMirrorHeadersEnabled);
+		void changeCodeMirrorHeadersValue(boolean codeMirrorHeadersEnabled);
+		void changeCodeMirrorPayloadValue(boolean codeMirrorPayloadEnabled);
 	}
 	/**
 	 * Sets presenter for this view
@@ -59,4 +60,5 @@ public interface SettingsView extends IsWidget {
 	void setMagicVarsEnabled(boolean magicVarsEnabled);
 	boolean isMagicVarsEnabled();
 	void setCodeMirrorHeadersEnabled(boolean codeMirrorHeadersEnabled);
+	void setCodeMirrorPayloadEnabled(boolean codeMirrorPayloadEnabled);
 }

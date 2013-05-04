@@ -16,6 +16,7 @@
     "storage",
     "clipboardWrite"
   ],
+  "options_page": "RestClient.html?gwt.codesvr=127.0.0.1:9997#SettingsPlace:view",
   "background": {
     "scripts": ["background.js","/oauth2/oauth2.js"]
   },

@@ -22,6 +22,8 @@ import org.rest.client.RestClient;
 import org.rest.client.SyncAdapter;
 import org.rest.client.codemirror.CodeMirror;
 import org.rest.client.codemirror.CodeMirrorChangeHandler;
+import org.rest.client.codemirror.CodeMirrorImpl;
+import org.rest.client.codemirror.CodeMirrorKeyMap;
 import org.rest.client.codemirror.CodeMirrorOptions;
 import org.rest.client.event.BoundaryChangeEvent;
 import org.rest.client.headerssupport.HeadersFillSupport;
@@ -556,6 +558,8 @@ public class RequestHeadersWidget extends Composite implements HasText {
 	
 	private void loadCodeMirrorForHeaders() {
 		if(SyncAdapter.isCodeMirrorHeaders()){
+			tabContent.addClassName("codeMirror");
+			
 			if(headersCodeMirror != null) {
 				headersCodeMirror.refresh();
 				RestClient.fixChromeLayout();
@@ -563,10 +567,17 @@ public class RequestHeadersWidget extends Composite implements HasText {
 			}
 			
 			CodeMirrorOptions opt = CodeMirrorOptions.create();
-			opt.setMode("text/x-headers");
-			opt.setTheme("headers");
+			opt.setMode("message/http");
+//			opt.setTheme("headers");
 			opt.setAutoClearEmptyLines(true);
 			opt.setLineWrapping(true);
+			
+			CodeMirrorKeyMap extraKey = CodeMirrorKeyMap.create();
+			extraKey.add("Ctrl-Space", "autocompleteHeaders");
+			opt.setExtraKeys(extraKey);
+			
+			setHeadersEditor();
+			
 			if(!(headersData == null || headersData.isEmpty())){
 				opt.setValue(headersData);
 			}
@@ -577,6 +588,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 					headersRawInput.setValue(headersData);
 				}
 			});
+			setHeadersEditorCallback(headersCodeMirror.getInstance());
 			headersCodeMirror.refresh();
 			RestClient.fixChromeLayout();
 		} else {
@@ -584,6 +596,25 @@ public class RequestHeadersWidget extends Composite implements HasText {
 				headersCodeMirror.toTextArea();
 				headersCodeMirror = null;
 			}
+			tabContent.removeClassName("codeMirror");
 		}
 	}
+	
+	private final native void setHeadersEditor() /*-{
+		$wnd.CodeMirror.commands = $wnd.CodeMirror.commands || {};
+		$wnd.CodeMirror.commands.autocompleteHeaders = function(cm) {
+			try{
+            	$wnd.CodeMirror.showHint(cm, $wnd.CodeMirror.headersHint);
+			} catch(e){}
+        };
+	}-*/;
+	private final native void setHeadersEditorCallback(CodeMirrorImpl headersCodeMirror) /*-{
+		headersCodeMirror.on("change", function(cm, changeObj) {
+            if(changeObj.origin === "setValue" || changeObj.origin === undefined || (changeObj.origin === "+input" && changeObj.text[0] === "")){
+                //do not show on simple enter
+                return;
+            }
+            $wnd.CodeMirror.showHint(cm, $wnd.CodeMirror.headersHint, {completeSingle:false});
+        });
+	}-*/;
 }

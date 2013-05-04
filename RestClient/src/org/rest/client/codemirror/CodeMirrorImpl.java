@@ -42,4 +42,12 @@ public class CodeMirrorImpl extends JavaScriptObject {
 	public final native void toTextArea() /*-{
 		this.toTextArea();
 	}-*/;
+	
+	public final native void setOption(String option, String value) /*-{
+		this.setOption(option, value);
+	}-*/;
+	
+	public final native void setOption(String option, JavaScriptObject value) /*-{
+		this.setOption(option, value);
+	}-*/;
 }

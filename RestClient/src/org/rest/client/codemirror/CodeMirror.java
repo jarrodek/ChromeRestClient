@@ -9,6 +9,10 @@ public class CodeMirror {
 	protected CodeMirror(CodeMirrorImpl inst) {
 		impl = inst;
 	}
+	
+	public CodeMirrorImpl getInstance(){
+		return impl;
+	}
 
 	/**
 	 * Initialize CodeMirror library.
@@ -70,5 +74,14 @@ public class CodeMirror {
 	
 	public void toTextArea(){
 		impl.toTextArea();
+	}
+	/**
+	 * Set editor option
+	 * @param option Option name to change
+	 * @param value Value for the option
+	 */
+	public void setOption(String option, String value){
+		
+		impl.setOption(option, value);
 	}
 }

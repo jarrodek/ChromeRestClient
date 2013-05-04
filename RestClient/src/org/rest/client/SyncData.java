@@ -23,6 +23,9 @@ public class SyncData extends JavaScriptObject {
 	public final String getCodeMirrorHeaders(){
 		return getVar(LocalStore.CODE_MIRROR_HEADERS_KEY);
 	}
+	public final String getCodeMirrorPayload(){
+		return getVar(LocalStore.CODE_MIRROR_PAYLOAD_KEY);
+	}
 	private final native String getVar(String key)/*-{
 		return this[key] || null;
 	}-*/;

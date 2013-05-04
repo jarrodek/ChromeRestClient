@@ -7,14 +7,48 @@
 		<h1 class="Import_Export_title">Import/Export options</h1>
 		
 		
+		
+		
 		<div class="Import_Export_serverExport">
 		
-			<div class="Import_Export_depricationInfo">
-				<p>Import and export via application service will be <span class="Import_Export_highlight">removed</span>.</p>
-				<p>I'm suggest to import all Your remaining data or use a file import/export.</p>
-				<p>This options will be removed from application <span class="Import_Export_highlight">August 1st, 2013</span>.</p>
-				<p>Delay with removing this option is caused by poor integation of Chrome extensions and Google Drive.</p>
+			<div ui:field="collapsePanel" class="Import_Export_depricationInfo">
+			    <div class="Import_Export_expandPanel">
+					<p>
+					    Import and export via application service will be removed.
+					    <span class="Import_Export_expandIndicator"></span>
+					</p>
+				</div>
+				<div class="Import_Export_collapsed">
+					<p>I'm suggest to import all Your remaining data or use a file import/export.</p>
+					<p>This options will be removed from application <span class="Import_Export_highlight">August 1st, 2013</span>.</p>
+					<p>Delay with removing this option is caused by poor integation of Chrome extensions and Google Drive.</p>
+				</div>
 			</div>
+			
+			
+			<div class="fileExport">
+				<h3>Import/Export to file</h3>
+				<div>
+					<g:Button styleName="button" ui:field="fileExport" text="Generate a file"></g:Button>
+					<h5:HTML5FileUpload ui:field="fileImport" multiple="false"></h5:HTML5FileUpload>
+				</div>
+				<div class="Import_Export_downloadFileLink hidden" ui:field="downloadFileAnchor">
+					Now you can <g:Anchor ui:field="fileDownload" text="Download file"></g:Anchor>
+				</div>
+			</div>
+			
+			<div class="fileImport">
+				<g:InlineLabel ui:field="importFileLog"></g:InlineLabel>
+				<g:HTMLPanel ui:field="importPreview" visible="false">
+					<div class="Import_Export_importPrevControls">
+						<span class="Import_Export_importPrevTitle">Import preview</span>
+						<g:Button styleName="button" ui:field="saveImportedData" text="Save imported data"></g:Button>
+					</div>
+				</g:HTMLPanel>
+			</div>
+			
+			
+			
 			<h3>Application server export</h3>
 			<p>First step is to connect with server.<br/>When you install application on other machine you will be able to download all data.</p>
 			<p>
@@ -45,26 +79,7 @@
 			</div>
 		</div>
 		
-		<div class="fileExport">
-			<h3>Import/Export to file</h3>
-			<div>
-				<g:Button styleName="button" ui:field="fileExport" text="Generate a file"></g:Button>
-				<h5:HTML5FileUpload ui:field="fileImport" multiple="false"></h5:HTML5FileUpload>
-			</div>
-			<div class="Import_Export_downloadFileLink hidden" ui:field="downloadFileAnchor">
-				Now you can <g:Anchor ui:field="fileDownload" text="Download file"></g:Anchor>
-			</div>
-		</div>
 		
-		<div class="fileImport">
-			<g:InlineLabel ui:field="importFileLog"></g:InlineLabel>
-			<g:HTMLPanel ui:field="importPreview" visible="false">
-				<div class="Import_Export_importPrevControls">
-					<span class="Import_Export_importPrevTitle">Import preview</span>
-					<g:Button styleName="button" ui:field="saveImportedData" text="Save imported data"></g:Button>
-				</div>
-			</g:HTMLPanel>
-		</div>
 		
 		<div class="Import_Export_backButton">
 			<g:Anchor ui:field="backSettings" href="about:blank">Back to settings</g:Anchor>

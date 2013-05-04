@@ -38,6 +38,13 @@
 				text="Enable CodeMirror editor in headers panel"></g:CheckBox>
 		</section>
 		<section class="Settings_View_optionsSection">
+			<p class="Settings_View_SectionTitle">CodeMirror payload editor <span class="Settings_View_experimental">experimental</span>.</p>
+			<g:CheckBox ui:field="codeMirrorPayload" value="false"
+				text="Enable CodeMirror editor in payload panel"></g:CheckBox>
+			<p>Load CodeMirror editor in the Payload raw input instead of the standard textarea. 
+				The editor reconfigures itself according to the Content-type header, selecting the most appropriate editing engine for your content.</p>
+		</section>
+		<section class="Settings_View_optionsSection">
 			<p class="Settings_View_SectionTitle">Shortcuts</p>
 			<g:Button styleName="button" ui:field="shortCutsButton" text="Edit shortcuts"></g:Button>
 		</section>

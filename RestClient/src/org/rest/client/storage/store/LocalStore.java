@@ -50,6 +50,7 @@ public class LocalStore extends LocalStorageAdapter {
 	 * Key for code mirror in headers panel
 	 */
 	public static final String CODE_MIRROR_HEADERS_KEY = "CMH_ENABLED";
+	public static final String CODE_MIRROR_PAYLOAD_KEY = "CMP_ENABLED";
 	public static final String LATEST_GDRIVE_FOLDER = "LATEST_GDRIVE_FOLDER";
 	/**
 	 * Key for restored from DB key in session storage.

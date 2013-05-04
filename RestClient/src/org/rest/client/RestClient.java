@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import org.rest.client.event.ApplicationReadyEvent;
 import org.rest.client.event.NewProjectAvailableEvent;
+import org.rest.client.event.SavedRequestEvent;
 import org.rest.client.gdrive.DriveAuth;
 import org.rest.client.gdrive.DriveCall;
 import org.rest.client.gdrive.DriveFileItem;
@@ -382,8 +383,8 @@ public class RestClient implements EntryPoint {
 			@Override
 			public void onSuccess(Integer result) {
 				obj.setProject(result.intValue());
-				saveRequestData(obj, callback);
 				clientFactory.getEventBus().fireEvent(new NewProjectAvailableEvent(result.intValue()));
+				saveRequestData(obj, callback);
 			}
 
 			@Override
@@ -411,6 +412,7 @@ public class RestClient implements EntryPoint {
 			@Override
 			public void onSuccess(Integer result) {
 				obj.setId(result.intValue());
+				clientFactory.getEventBus().fireEvent(new SavedRequestEvent(obj));
 				callback.onSuccess(obj);
 			}
 			
@@ -472,7 +474,7 @@ public class RestClient implements EntryPoint {
 			DriveCall.updateFile(obj.getGDriveId(), obj, new DriveCall.FileUploadHandler() {
 				@Override
 				public void onLoad(DriveFileItem response) {
-					
+					clientFactory.getEventBus().fireEvent(new SavedRequestEvent(obj));
 					callback.onSuccess(response);
 				}
 				

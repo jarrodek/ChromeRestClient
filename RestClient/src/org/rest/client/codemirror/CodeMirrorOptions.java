@@ -98,8 +98,7 @@ public class CodeMirrorOptions extends JavaScriptObject {
 	 *            them. This is mostly useful to prevent auto indentation from
 	 *            introducing trailing whitespace in a file.
 	 */
-	public final native void setAutoClearEmptyLines(
-			boolean autoClearEmptyLines) /*-{
+	public final native void setAutoClearEmptyLines(boolean autoClearEmptyLines) /*-{
 		this.autoClearEmptyLines = autoClearEmptyLines;
 	}-*/;
 
@@ -131,7 +130,7 @@ public class CodeMirrorOptions extends JavaScriptObject {
 	 * @param lineNumbers
 	 *            Whether to show line numbers to the left of the editor.
 	 */
-	public final native void setLineNumbers(String lineNumbers) /*-{
+	public final native void setLineNumbers(boolean lineNumbers) /*-{
 		this.lineNumbers = lineNumbers;
 	}-*/;
 
@@ -271,6 +270,18 @@ public class CodeMirrorOptions extends JavaScriptObject {
 	 * @param dragDrop
 	 *            Controls whether drag-and-drop is enabled. On by default.
 	 */
-	public final native void setDragDrop(boolean dragDrop) /*-{ this.dragDrop = dragDrop; }-*/;
+	public final native void setDragDrop(boolean dragDrop) /*-{
+		this.dragDrop = dragDrop;
+	}-*/;
+
+	/**
+	 * Can be used to specify extra keybindings for the editor, alongside the
+	 * ones defined by keyMap. Should be either null, or a valid keymap value.
+	 * 
+	 * @param extraKeys
+	 */
+	public final native void setExtraKeys(CodeMirrorKeyMap extraKeys) /*-{
+		this.extraKeys = extraKeys;
+	}-*/;
 
 }

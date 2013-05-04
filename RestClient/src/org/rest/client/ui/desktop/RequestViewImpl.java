@@ -26,6 +26,7 @@ import org.rest.client.event.HttpMethodChangeEvent;
 import org.rest.client.event.RequestChangeEvent;
 import org.rest.client.event.RequestStartActionEvent;
 import org.rest.client.event.SaveRequestEvent;
+import org.rest.client.event.SavedRequestEvent;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SavedPlace;
 import org.rest.client.request.FilesObject;
@@ -46,6 +47,7 @@ import org.rest.client.ui.desktop.widget.RequestUrlWidget;
 import org.rest.client.ui.html5.HTML5Element;
 import org.rest.client.ui.html5.HTML5Progress;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -122,7 +124,22 @@ public class RequestViewImpl extends Composite implements RequestView {
 		createContentTypeValues(null);
 		hidableList.add(requestBody);
 	}
-
+	
+	void initializeAppHandlers(){
+		//when the user save current request and create a name for it - update name field
+		SavedRequestEvent.register(RestClient.getClientFactory().getEventBus(), new SavedRequestEvent.Handler() {
+			@Override
+			public void onSaved(RequestObject obj) {
+				Log.debug("aaaaaaaaaaaaaaa");
+				String name = obj.getName();
+				if(name == null){
+					name = "";
+				}
+				requestNameField.setValue(name);
+			}
+		});
+	}
+	
 	private void createContentTypeValues(String[] userValues) {
 		String[] ctValues = HttpContentTypeHelper.getAllValues();
 		String[] allValues = org.rest.client.util.ArraysUtils.concat(ctValues,

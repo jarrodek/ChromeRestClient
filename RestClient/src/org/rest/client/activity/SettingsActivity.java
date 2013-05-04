@@ -103,6 +103,11 @@ public class SettingsActivity extends AppActivity implements
 		} else {
 			view.setCodeMirrorHeadersEnabled(false);
 		}
+		if(SyncAdapter.isCodeMirrorPayload()){
+			view.setCodeMirrorPayloadEnabled(true);
+		} else {
+			view.setCodeMirrorPayloadEnabled(false);
+		}
 	}
 
 	@Override
@@ -153,6 +158,8 @@ public class SettingsActivity extends AppActivity implements
 					SyncAdapter.setMagicVars(value);
 				} else if(key.equals(LocalStore.CODE_MIRROR_HEADERS_KEY)){
 					SyncAdapter.setCodeMirrorHeaders(value);
+				} else if(key.equals(LocalStore.CODE_MIRROR_PAYLOAD_KEY)){
+					SyncAdapter.setCodeMirrorPayload(value);
 				}
 			}
 
@@ -184,7 +191,12 @@ public class SettingsActivity extends AppActivity implements
 		saveSetting(LocalStore.MAGIC_VARS_ENABLED_KEY, magicVarsEnabled);
 	}
 	@Override
-	public void changeCodeMirrirHeadersValue(boolean codeMirrorHeadersEnabled) {
+	public void changeCodeMirrorHeadersValue(boolean codeMirrorHeadersEnabled) {
 		saveSetting(LocalStore.CODE_MIRROR_HEADERS_KEY, codeMirrorHeadersEnabled);
+	}
+
+	@Override
+	public void changeCodeMirrorPayloadValue(boolean codeMirrorPayloadEnabled) {
+		saveSetting(LocalStore.CODE_MIRROR_PAYLOAD_KEY, codeMirrorPayloadEnabled);
 	}
 }

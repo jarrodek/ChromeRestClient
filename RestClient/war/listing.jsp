@@ -216,7 +216,7 @@ section {
 				        <%
 				    } else {
 				    	%>
-				    	<table class="table" cellspacing="0">
+				    	<table class="table">
 				    	<colgroup>
 				    		<col/>
 			    			<col style="width: 40%;"/>

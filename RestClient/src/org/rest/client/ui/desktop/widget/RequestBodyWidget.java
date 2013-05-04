@@ -18,6 +18,11 @@ package org.rest.client.ui.desktop.widget;
 import java.util.ArrayList;
 
 import org.rest.client.RestClient;
+import org.rest.client.SyncAdapter;
+import org.rest.client.codemirror.CodeMirror;
+import org.rest.client.codemirror.CodeMirrorChangeHandler;
+import org.rest.client.codemirror.CodeMirrorImpl;
+import org.rest.client.codemirror.CodeMirrorOptions;
 import org.rest.client.event.BoundaryChangeEvent;
 import org.rest.client.event.HttpEncodingChangeEvent;
 import org.rest.client.request.FilesObject;
@@ -91,6 +96,7 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 	private String payloadData = "";
 	private ArrayList<FormInputs> formInputs = new ArrayList<FormInputs>();
 	private String requestEncoding = "application/x-www-form-urlencoded"; //default
+	private CodeMirror bodyCodeMirror = null;
 	
 	public RequestBodyWidget() {
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
@@ -118,6 +124,10 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 				contentParent.querySelector("." + "tabsContent" + " ." + "tabContent" + "." + "tabContentCurrent").getClassList().remove("tabContentCurrent");
 				contentParent.querySelector("." + "tabsContent" + " ." + "tabContent" + "[data-tab=\"raw\"]").getClassList().add("tabContentCurrent");
 		        
+				if(bodyCodeMirror != null){
+					bodyCodeMirror.refresh();
+				}
+				
 				currentTab = TABS.RAW;
 			}
 		});
@@ -217,9 +227,12 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 			@Override
 			public void onChange(String method) {
 				requestEncoding = method;
+				setEditorCurrentMode();
+				
 			}
 		});
 		
+		loadCodeMirrorForBody();
 	}
 	/**
 	 * Reset widget
@@ -232,6 +245,9 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		payloadRawInput.setValue(null);
 		allFilesCount = 0;
 		filesTab.setText("Files (0)");
+		if(bodyCodeMirror != null){
+			bodyCodeMirror.setValue("");
+		}
 	}
 	
 	
@@ -424,6 +440,9 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 	 */
 	void propagateCurrentPayload(){
 		payloadRawInput.setValue(payloadData);
+		if(bodyCodeMirror != null){
+			bodyCodeMirror.setValue(payloadData);
+		}
 		updateForm();
 	}
 	/**
@@ -450,7 +469,7 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 	 */
 	void updateForm(){
 		clearForm();
-		ArrayList<FormPayloadData> list = RequestPayloadParser.stringToFormArrayList(payloadData,false, requestEncoding.equals("multipart/form-data"));
+		ArrayList<FormPayloadData> list = RequestPayloadParser.stringToFormArrayList(payloadData,true, requestEncoding.equals("multipart/form-data"));
 		for(FormPayloadData payload : list){
 			addNewFormRow(payload.getKey(), payload.getValue());
 		}
@@ -467,12 +486,16 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		for(FormInputs inputs : formInputs){
 			list.add(new FormPayloadData(inputs.key.getValue(), inputs.value.getValue()));
 		}
-		payloadData = RequestPayloadParser.parseData(list, false, useBoundary, currentBoundary);
+		payloadData = RequestPayloadParser.parseData(list, true, useBoundary, currentBoundary);
 		payloadRawInput.setValue(payloadData);
 		if(useBoundary){
 			currentBoundary = RequestPayloadParser.recognizeBoundary(payloadData);
 			BoundaryChangeEvent e = new BoundaryChangeEvent(currentBoundary);
 			RestClient.getClientFactory().getEventBus().fireEvent(e);
+		}
+		if(bodyCodeMirror != null){
+			bodyCodeMirror.setValue(payloadData);
+			bodyCodeMirror.refresh();
 		}
 	}
 	public ArrayList<FilesObject> getInputFiles() {
@@ -513,5 +536,68 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		payloadData = RequestPayloadParser.parseData(list, true, useBoundary,currentBoundary);
 		payloadRawInput.setValue(payloadData);
 	}
+	
+	private void loadCodeMirrorForBody() {
+		
+		if(!SyncAdapter.isCodeMirrorPayload()){
+			if(bodyCodeMirror != null){
+				bodyCodeMirror.toTextArea();
+				bodyCodeMirror = null;
+			}
+			tabContent.removeClassName("codeMirror");
+			return;
+		}
+		tabContent.addClassName("codeMirror");
+		
+		if(bodyCodeMirror != null) {
+			bodyCodeMirror.refresh();
+			RestClient.fixChromeLayout();
+			return;
+		}
+		
+		CodeMirrorOptions opt = CodeMirrorOptions.create();
+		opt.setLineNumbers(false);
+		opt.setLineWrapping(true);
+		
+		if(!(payloadData == null || payloadData.isEmpty())){
+			opt.setValue(payloadData);
+		}
+		
+		bodyCodeMirror = CodeMirror.fromTextArea(payloadRawInput.getElement(), opt, new CodeMirrorChangeHandler() {
+			@Override
+			public void onChage() {
+				payloadData = bodyCodeMirror.getValue();
+				payloadRawInput.setValue(payloadData);
+			}
+		});
+		bodyCodeMirror.refresh();
+		RestClient.fixChromeLayout();
+	}
+	
+	private void setEditorCurrentMode(){
+		if(bodyCodeMirror == null) return;
+		
+		//translate mode
+		String mode = "";
+		if(requestEncoding.contains("json")||requestEncoding.contains("javascript")){
+			mode = "javascript";
+		} else if(requestEncoding.contains("xml")||requestEncoding.contains("atom")||requestEncoding.contains("rss")){
+			mode = "xml";
+		} else if(requestEncoding.contains("sql")){
+			mode = "sql";
+		} else if(requestEncoding.contains("html")){
+			mode = "htmlmixed";
+		} else if(requestEncoding.contains("css")){
+			mode = "css";
+		}
+		
+		bodyCodeMirror.setOption("mode", requestEncoding);
+		if(!mode.isEmpty())
+			setAutoLoadCodeMirror(bodyCodeMirror.getInstance(), mode);
+	}
+	
+	private final native void setAutoLoadCodeMirror(CodeMirrorImpl editor, String requestEncoding) /*-{
+		$wnd.CodeMirror.autoLoadMode(editor, requestEncoding);
+	}-*/;
 }
 

@@ -1,4 +1,11 @@
-<!-- Indices written at Fri, 3 May 2013 02:50:36 CEST -->
+<!-- Indices written at Sat, 4 May 2013 21:14:34 CEST -->
 
-<datastore-indexes/>
+<datastore-indexes>
 
+    <!-- Used 8 times in query history -->
+    <datastore-index kind="Message" ancestor="false" source="auto">
+        <property name="ready" direction="asc"/>
+        <property name="created" direction="asc"/>
+    </datastore-index>
+
+</datastore-indexes>
