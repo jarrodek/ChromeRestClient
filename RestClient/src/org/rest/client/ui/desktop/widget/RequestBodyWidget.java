@@ -442,6 +442,7 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		payloadRawInput.setValue(payloadData);
 		if(bodyCodeMirror != null){
 			bodyCodeMirror.setValue(payloadData);
+			bodyCodeMirror.refresh();
 		}
 		updateForm();
 	}
@@ -522,6 +523,10 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		ArrayList<FormPayloadData> list = RequestPayloadParser.stringToFormArrayList(payloadData, true, requestEncoding.equals("multipart/form-data"));
 		payloadData = RequestPayloadParser.parseData(list, false, useBoundary, currentBoundary);
 		payloadRawInput.setValue(payloadData);
+		if(bodyCodeMirror != null){
+			bodyCodeMirror.setValue(payloadData);
+			bodyCodeMirror.refresh();
+		}
 	}
 
 	@UiHandler("encodeParams")
@@ -535,6 +540,10 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		ArrayList<FormPayloadData> list = RequestPayloadParser.stringToFormArrayList(payloadData);
 		payloadData = RequestPayloadParser.parseData(list, true, useBoundary,currentBoundary);
 		payloadRawInput.setValue(payloadData);
+		if(bodyCodeMirror != null){
+			bodyCodeMirror.setValue(payloadData);
+			bodyCodeMirror.refresh();
+		}
 	}
 	
 	private void loadCodeMirrorForBody() {

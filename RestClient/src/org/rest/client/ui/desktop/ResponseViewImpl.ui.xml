@@ -17,7 +17,7 @@
 			<div class="Response_View_label">
 				Status
 			</div>
-			<div class="Response_View_result">
+			<div class="Response_View_result status">
 				<g:InlineLabel ui:field="codeContainer" styleName="Response_View_statusCode">loading...</g:InlineLabel>
 				<rc:StatusCodeImage ui:field="codeImage"></rc:StatusCodeImage>
 				<span class="Response_View_loadingTimeLabel">Loading time: </span>

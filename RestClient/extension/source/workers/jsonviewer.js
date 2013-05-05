@@ -176,9 +176,7 @@ JSONViewer.prototype = {
 	},
 	
 	parseArray: function(array) {
-		
 		var cnt = array.length;
-		
 		var result = "";
 		result += '<div class="'+JSONViewer.STYLE.punctuation + " " + JSONViewer.STYLE.brace + '">[</div>';
 		result += '<div collapse-indicator class="'+JSONViewer.STYLE.infoRow+'">...</div>';

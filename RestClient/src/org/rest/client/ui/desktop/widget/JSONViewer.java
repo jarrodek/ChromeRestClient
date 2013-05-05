@@ -90,8 +90,9 @@ public class JSONViewer extends Composite {
 					RestClient.getClientFactory().getEventBus().fireEvent(new OverwriteUrlEvent(url));
 				}
 			});
+		} else {
+			RestClient.getClientFactory().getEventBus().fireEvent(new OverwriteUrlEvent(url));
 		}
-		
 	}
 	
 	

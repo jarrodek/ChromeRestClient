@@ -5,7 +5,7 @@
     "16": "img/arc_icon_16.png",
     "128": "img/arc_icon_128.png"
   },
-  "version": "3.1.2",
+  "version": "3.1.5",
   "manifest_version": 2,
   "permissions": [
     "webRequest",
@@ -16,6 +16,7 @@
     "storage",
     "clipboardWrite"
   ],
+  "options_page": "RestClient.html#SettingsPlace:view",
   "background": {
     "scripts": ["background.js","/oauth2/oauth2.js"]
   },
