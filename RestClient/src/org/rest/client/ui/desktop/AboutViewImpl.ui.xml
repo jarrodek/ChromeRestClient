@@ -17,6 +17,9 @@
 				Review the application at <a target="_blank" href="https://chrome.google.com/webstore/detail/advanced-rest-client-appl/hgmloofddffdnphfgcellkdfbfbjeloo/reviews?hl=en-US&amp;utm_source=ARC&amp;utm_medium=InsideApplication&amp;utm_campaign=About">Chrome Web Store</a> (double thanks).<br/>
 				The application's blog: <a target="_blank" href="http://restforchrome.blogspot.com/?utm_source=ARC&amp;utm_medium=InsideApplication&amp;utm_campaign=About">Advanced REST client for Google Chrome. Blog for Google Chrome application.</a><br/>
 			</div>
+			<div class="About_View_licensing">
+				<g:Anchor ui:field="licensing" href="#" title="Licensing information">Licensing information</g:Anchor>
+			</div>
 		</section>
 		<section class="About_View_aboutContent">
 			<h3>+1 me</h3>
@@ -24,9 +27,14 @@
 			
 			<div class="About_View_facebookShare">
 				<a target="_blank" href="http://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fchrome.google.com%2Fwebstore%2Fdetail%2Fadvanced-rest-client%2Fhgmloofddffdnphfgcellkdfbfbjeloo">
-					<img target="_blank" src="img/fbicon.png" alt="Share to facebook" title="Share to facebook"/>
+					<img src="img/FB-f-Logo__blue_50.png" alt="Share on facebook" title="Share to facebook"/>
+				</a>
+				<a target="_blank" href="https://twitter.com/intent/tweet?text=Chrome%20Web%20Store%3A&amp;url=http%3A%2F%2Fgoo.gl%2F7T99y">
+					<img src="img/twitter-bird-blue-on-white-50.png" alt="Tweet about Rest Client" title="Tweet about Rest Client"/>
 				</a>
 			</div>
+			
+			
 		</section>
 		<section class="About_View_aboutContent">
 			<h3 class="About_View_donateTitle">If you like my work, please donate :)</h3>
@@ -93,52 +101,6 @@
 				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=117">Issue 117</a>: How do you delete a project ?</li>
 				<li>When multipart/form-data is selected as a content-type the app will parse payload data from the form tab in proper way (including boundary section)</li>
 				<li>When response content-type header is javascript you will be able to open result in JSON tab (link on the top of the "parsed" tab). Facebook API do not set right JSON header and response is parsed as a JavaScript.</li>
-			</ul>
-			<p>11/23/2012</p>
-			<ul>
-				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=100">Issue 100</a>: XML is not shown for application/atom+xml content-type</li>
-			</ul>
-			<p>11/17/2012</p>
-			<ul>
-				<li>Removed all CSS declaration to external CSS file.</li>
-				<li>Projects menu now contain "select" input instead of several block elements with name.</li>
-			</ul>
-			<p>11/10/2012</p>
-			<ul>
-				<li>Several bug fixes</li>
-			</ul>
-			<p>11/06/2012</p>
-			<ul>
-				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=85">Issue 85</a>: POST request failed</li>
-				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=87">Issue 87</a>: BUG Save</li>
-				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=91">Issue 91</a>: Auto-complete prevents entering different URI</li>
-				<li>Added Magic Variables feature (<a href="http://restforchrome.blogspot.com/2012/11/introduce-magic-variables.html" target="_blank">more info</a>)</li>
-				<li>Added qearch to the saved requests ad history view</li>
-				<li>Added delete history entry button to the history view</li>
-				<li>Some changes in core data layer</li>
-				<li>Compiled with a latest stable GWT version (2.5.0)</li>
-			</ul>	
-			<p>9/27/2012</p>
-			<ul>
-				<li>New UI</li>
-				<li>Migration to GWT 2.5 RC</li>
-				<li>Migration to extensions manifest version 2</li>
-				<li>Optimized XML nad JSON view renderer using web workers and optymizing regular expressions</li>
-				<li>Added save to file and "copy" function to response view.</li>
-				<li>Deprecated server import/export</li>
-				<li>Added file export and import</li>
-				<li>Implemented new Chrome APIs: webRequest, declarativeWebRequest and storage</li>
-				<li>Move part of request functionality to the bacground page to set declarativeWebRequest filter before request</li>
-				<li>Integration with other extensions providing API to set request data in application via extensions passage massing or via web intents</li>
-				<li>Now background page removes almost all default browser's headers not set by user.</li>
-				<li>Database structure and local storage keys has changed.</li>
-				<li>Links in response view now changing URL value in request view.</li>
-				<li>Added chrome.synch API to synch user settings (<a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=76">Issue 76</a>)</li>
-				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=57">Issue 57</a>: Application have new "save request" system. User can link requests into project and switch between overwriting selected data.</li>
-				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=62">Issue 62</a>: Now application can set all request headers (even prohibited by XMLHttpRequest spec)</li>
-				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=67">Issue 67</a>: Application now can show redirect information.</li>
-				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=68">Issue 68</a>: Payload is set in request when using custom "method"</li>
-				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=70">Issue 70</a> and <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=73">Issue 73</a>: Application now wil not set Content-Type header fon non-payload requests</li>
 			</ul>
 		</section>
 	</g:HTMLPanel>

@@ -4,12 +4,15 @@ import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.AboutView;
 import org.rest.client.ui.TutorialDialog;
 import org.rest.client.ui.TutorialDialog.Direction;
+import org.rest.client.ui.desktop.widget.LicenseDialog;
 
 import com.google.gwt.chrome.runtime.ManifestDetails;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -62,6 +65,12 @@ public class AboutViewImpl extends Composite implements AboutView {
 	@Override
 	public void showDonateDialog() {
 		DonateDialogViewImpl dialog = new DonateDialogViewImpl();
+		dialog.show();
+	}
+	@UiHandler("licensing")
+	void onLicensingClick(ClickEvent e){
+		e.preventDefault();
+		LicenseDialog dialog = new LicenseDialog();
 		dialog.show();
 	}
 

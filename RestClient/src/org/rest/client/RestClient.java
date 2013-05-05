@@ -278,7 +278,7 @@ public class RestClient implements EntryPoint {
 			rp.setMethod(requestView.getMethod());
 			rp.setPayload(requestView.getPayload());
 			rp.setURL(requestView.getUrl());
-			
+			rp.setName(requestView.getRequestName());
 			
 			callback.onSuccess(parseRequestParameters(rp));
 		} else {

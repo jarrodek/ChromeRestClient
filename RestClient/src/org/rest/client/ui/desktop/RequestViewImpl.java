@@ -46,8 +46,6 @@ import org.rest.client.ui.desktop.widget.RequestHeadersWidget;
 import org.rest.client.ui.desktop.widget.RequestUrlWidget;
 import org.rest.client.ui.html5.HTML5Element;
 import org.rest.client.ui.html5.HTML5Progress;
-
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -130,7 +128,6 @@ public class RequestViewImpl extends Composite implements RequestView {
 		SavedRequestEvent.register(RestClient.getClientFactory().getEventBus(), new SavedRequestEvent.Handler() {
 			@Override
 			public void onSaved(RequestObject obj) {
-				Log.debug("aaaaaaaaaaaaaaa");
 				String name = obj.getName();
 				if(name == null){
 					name = "";
@@ -695,7 +692,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 				if(result.booleanValue()){
 					requestNameField.getElement().setAttribute("data-name", name);
 				} else {
-					StatusNotification.notify("You can't change this item name.",StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+					StatusNotification.notify("You can't change this item name.",StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 				}
 			}
 			
@@ -746,9 +743,9 @@ public class RequestViewImpl extends Composite implements RequestView {
 	@Override
 	public String getRequestName() {
 		String value = requestNameField.getValue();
-		if(value != null && value.isEmpty()){
-			value = null;
-		}
+//		if(value != null && value.isEmpty()){
+//			value = null;
+//		}
 		return value;
 	}
 }

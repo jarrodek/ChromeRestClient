@@ -169,13 +169,14 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 			RestClient.collectRequestData(new Callback<RequestObject, Throwable>() {
 				@Override
 				public void onSuccess(RequestObject result) {
+//					Log.debug("NAME: " + result.getName());
 					name.setValue(result.getName());
 					overwrite.setVisible(true);
 					overwrite.addStyleName("driveButton");
 					gdrive.setVisible(false);
-					save.setVisible(false);
-					name.setEnabled(false);
-					addToProject.setEnabled(false);
+//					save.setVisible(false);
+//					name.setEnabled(false);
+//					addToProject.setEnabled(false);
 				}
 				
 				@Override
@@ -499,6 +500,8 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 						@Override
 						public void onSuccess(RequestObject result) {
 							save.setEnabled(true);
+							
+							RestClient.getClientFactory().getPlaceController().goTo(RequestPlace.Tokenizer.fromSaved(result.getId()));
 							dialog.hide();
 						}
 						@Override
@@ -530,6 +533,9 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 					public void onSuccess(RequestObject result) {
 						save.setEnabled(true);
 						dialog.hide();
+//						if(gDriveItem != null && !gDriveItem.isEmpty()){
+						RestClient.getClientFactory().getPlaceController().goTo(RequestPlace.Tokenizer.fromSaved(result.getId()));
+//						}
 					}
 					@Override
 					public void onFailure(Throwable reason) {

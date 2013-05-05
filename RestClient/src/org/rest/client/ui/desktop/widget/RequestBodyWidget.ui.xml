@@ -15,7 +15,7 @@
 		
 		<div ui:field="tabContent" class="tabsContent">
 			<section data-tab="raw" class="tabContent tabContentCurrent">
-				<div class="Request_Body_Widget_rawEncodeButtonsContainer}">
+				<div class="Request_Body_Widget_rawEncodeButtonsContainer">
 					<g:Anchor ui:field="encodeParams" href="about:blank">Encode payload</g:Anchor>
 					<g:Anchor addStyleNames="Request_Body_Widget_decodeAnchor" ui:field="decodeParams" href="about:blank">Decode payload</g:Anchor>
 				</div>

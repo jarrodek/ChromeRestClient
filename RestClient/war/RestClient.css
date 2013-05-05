@@ -1237,6 +1237,8 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 .Request_Body_Widget_rawEncodeButtonsContainer{
 	opacity:0.4;
 	-webkit-transition: opacity 0.15s linear;
+	border-bottom: 1px rgb(167, 167, 167) solid;
+	padding-left: 1em;
 }
 .Request_Body_Widget_rawEncodeButtonsContainer:hover{opacity:1;}
 .Request_Body_Widget_decodeAnchor{margin-left: 1em;}
@@ -2112,6 +2114,19 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 .About_View_donateTitle {
 	font-weight: bold;
 	font-size: 130%;
+}
+.About_View_facebookShare img {
+	vertical-align: middle;
+}
+.About_View_facebookShare a {
+	text-decoration: none;
+}
+.licenseDialog {
+	max-width: 60%;
+}
+.licenseText{
+	max-height: 100px;
+	overflow: auto;
 }
 
 /* HISTORY VIEW */
