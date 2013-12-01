@@ -48,7 +48,7 @@
 				<exclude name="**/cs.js" />
 			</fileset>
 		</copy>
-		<exec executable="./manifestversion.sh"/>
+<!-- 		<exec executable="./manifestversion.sh"/> -->
 		<copy todir="${extension.src}" overwrite="true">
 			<fileset file="manifest.json"></fileset>
 		</copy>

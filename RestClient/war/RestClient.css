@@ -365,7 +365,7 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 .handlerImageContainer {
 	width: 15px;
 	height: 24px;
-	display: -webkit-box;
+	display: inline-block;
 	cursor: pointer;
 }
 .handlerImageContainer:hover {
@@ -1067,6 +1067,8 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	left: 0px;
 	top: 7px;
 	height: 20px;
+	display: inline-block;
+	width: 98%;
 }
 .url_widget_urlInput{
 	left: 15px;

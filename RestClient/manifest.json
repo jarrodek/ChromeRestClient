@@ -5,7 +5,7 @@
     "16": "img/arc_icon_16.png",
     "128": "img/arc_icon_128.png"
   },
-  "version": "3.1.5",
+  "version": "3.1.7",
   "manifest_version": 2,
   "permissions": [
     "webRequest",
@@ -36,13 +36,5 @@
 	    "js": ["oauth2/oauth2_inject.js"],
 	    "run_at": "document_start"
     }
-  ],
-  "intents": {
-	"http://webintents.org/view": [{
-		"title": "Advanced REST client",
-		"type": ["application/restclient+data"],
-		"href": "/intentview.html",
-		"disposition" : "inline"
-	}]
-  }
+  ]
 }

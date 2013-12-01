@@ -178,7 +178,7 @@ WebRequest.prototype.init = function(){
  * Clear all rules set earlier to the declarativeWebRequest.
  */
 WebRequest.prototype.clearRules = function(){
-    chrome.declarativeWebRequest.onRequest.removeRules();
+    //chrome.declarativeWebRequest.onRequest.removeRules();
 }
 /**
  * By default remove following headers from request (if they are not set by user):
@@ -186,6 +186,7 @@ WebRequest.prototype.clearRules = function(){
  * This headers are set by default by browser and should not be included into request.
  */
 WebRequest.prototype.setRules = function(requestData){
+	return;
     this.clearRules();
     var i = 0;
     // extract request headers
