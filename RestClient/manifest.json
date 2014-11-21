@@ -5,11 +5,10 @@
     "16": "img/arc_icon_16.png",
     "128": "img/arc_icon_128.png"
   },
-  "version": "3.1.8",
+  "version": "3.1.9",
   "manifest_version": 2,
   "permissions": [
     "webRequest",
-    "declarativeWebRequest",
     "<all_urls>",
     "history",
     "background",
