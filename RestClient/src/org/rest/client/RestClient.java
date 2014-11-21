@@ -127,6 +127,7 @@ public class RestClient implements EntryPoint {
 	}
 	
 	public void onModuleLoad() {
+		//Log.debug("AAAAAAAAAAAAAAAAAAAAAAAA");
 		
 		GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			@Override

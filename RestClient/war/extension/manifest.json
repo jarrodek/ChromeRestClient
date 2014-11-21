@@ -5,7 +5,7 @@
     "16": "img/arc_icon_16.png",
     "128": "img/arc_icon_128.png"
   },
-  "version": "3.1.7",
+  "version": "3.1.8",
   "manifest_version": 2,
   "permissions": [
     "webRequest",
@@ -25,7 +25,7 @@
       "local_path": "RestClient.html"
     }
   },
-  "content_security_policy": "script-src 'unsafe-eval' chrome-extension:// chrome-extension-resource:// https://*.google.com https://chromerestclient.appspot.com https://ssl.google-analytics.com https://www-onepick-opensocial.googleusercontent.com https://*.googleapis.com https://*.googleusercontent.com 'self'; object-src chrome-extension:// chrome-extension-resource:// 'self'; frame-src https://apis.google.com https://www.google.com https://docs.google.com https://www-onepick-opensocial.googleusercontent.com https://www.googleapis.com https://accounts.google.com chrome-extension:// chrome-extension-resource:// https://plusone.google.com  https://doc-0k-0o-docs.googleusercontent.com https://*.googleusercontent.com 'self'",
+  "content_security_policy": "script-src 'self' https://apis.google.com https://ssl.google-analytics.com https://chromerestclient.appspot.com https://www-onepick-opensocial.googleusercontent.com; object-src 'self'",
   "content_scripts": [
   	{
       "matches": ["http://127.0.0.1:8888/RestClient*"],

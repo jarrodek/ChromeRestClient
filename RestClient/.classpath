@@ -16,6 +16,6 @@
 	<classpathentry kind="lib" path="/GWT IO API/build/jar/GwtIOApi-2.5.0.rc1.jar" sourcepath="/GWT IO API/src"/>
 	<classpathentry kind="lib" path="lib/gwt-html5-database.jar"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER/GWT"/>
-	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/App Engine (1)"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
