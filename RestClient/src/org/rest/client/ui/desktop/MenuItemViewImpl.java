@@ -83,7 +83,7 @@ public class MenuItemViewImpl extends Composite implements MenuItemView,
 	
 	public MenuItemViewImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
-		_element = (HTML5Element) getElement();
+		_element = (HTML5Element) getElement().cast();
 
 		getElement().setAttribute("aria-selected", "false");
 		getElement().setAttribute("role", "tab");

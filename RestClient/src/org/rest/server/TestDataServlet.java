@@ -202,7 +202,6 @@ public class TestDataServlet extends HttpServlet {
 			resp.getWriter().println(sb.toString());
 		} else if (payload.equals("cookie")){
 
-			@SuppressWarnings("unchecked")
 			Enumeration<String> headersNames = req.getHeaderNames();
 			System.out.println("======== HEADERS LIST ==========");
 			while(headersNames.hasMoreElements()){
@@ -281,8 +280,6 @@ public class TestDataServlet extends HttpServlet {
 			throws ServletException, IOException {
 		PrintWriter writer = resp.getWriter();
 		
-		
-		@SuppressWarnings("unchecked")
 		Enumeration<String> names = req.getParameterNames();
 		writer.println("=====PARAMS====");
 		while(names.hasMoreElements()){
@@ -304,7 +301,7 @@ public class TestDataServlet extends HttpServlet {
 			writer.println("unable read payload.");
 		}
 		writer.println("===============");
-		@SuppressWarnings("unchecked")
+		
 		Enumeration<String> headersNames = req.getHeaderNames();
 		writer.println("======== HEADERS LIST ==========");
 		while(headersNames.hasMoreElements()){

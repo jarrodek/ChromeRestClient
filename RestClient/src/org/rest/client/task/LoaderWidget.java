@@ -1,7 +1,7 @@
 package org.rest.client.task;
 
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.HasText;
 
 public class LoaderWidget implements HasText {

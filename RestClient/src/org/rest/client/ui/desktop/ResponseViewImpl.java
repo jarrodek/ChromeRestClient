@@ -63,7 +63,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.ScrollEvent;
@@ -665,7 +665,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		rawTab.addMouseOverHandler(new MouseOverHandler() {
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
-				HTML5Element tab = (HTML5Element) rawTab.getElement();
+				HTML5Element tab = (HTML5Element) rawTab.getElement().cast();
 				if(!tab.getClassList().contains("inlineButtonChecked"))
 					tab.getClassList().add("inlineButtonHover");
 			}
@@ -673,7 +673,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		rawTab.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
-				HTML5Element tab = (HTML5Element) rawTab.getElement();
+				HTML5Element tab = (HTML5Element) rawTab.getElement().cast();
 				if(!tab.getClassList().contains("inlineButtonHover"))
 					tab.getClassList().remove("inlineButtonHover");
 			}
@@ -691,7 +691,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		parsedTab.addMouseOverHandler(new MouseOverHandler() {
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
-				HTML5Element tab = (HTML5Element) parsedTab.getElement();
+				HTML5Element tab = (HTML5Element) parsedTab.getElement().cast();
 				if(!tab.getClassList().contains("inlineButtonChecked"))
 					tab.getClassList().add("inlineButtonHover");
 			}
@@ -699,7 +699,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		parsedTab.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
-				HTML5Element tab = (HTML5Element) parsedTab.getElement();
+				HTML5Element tab = (HTML5Element) parsedTab.getElement().cast();
 				if(!tab.getClassList().contains("inlineButtonHover"))
 					tab.getClassList().remove("inlineButtonHover");
 			}
@@ -717,7 +717,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		xmlTab.addMouseOverHandler(new MouseOverHandler() {
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
-				HTML5Element tab = (HTML5Element) xmlTab.getElement();
+				HTML5Element tab = (HTML5Element) xmlTab.getElement().cast();
 				if(!tab.getClassList().contains("inlineButtonChecked"))
 					tab.getClassList().add("inlineButtonHover");
 			}
@@ -725,7 +725,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		xmlTab.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
-				HTML5Element tab = (HTML5Element) xmlTab.getElement();
+				HTML5Element tab = (HTML5Element) xmlTab.getElement().cast();
 				if(tab.getClassList().contains("inlineButtonHover"))
 					tab.getClassList().remove("inlineButtonHover");
 			}
@@ -742,14 +742,14 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		jsonTab.addMouseOverHandler(new MouseOverHandler() {
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
-				HTML5Element tab = (HTML5Element) jsonTab.getElement();
+				HTML5Element tab = (HTML5Element) jsonTab.getElement().cast();
 					tab.getClassList().add("inlineButtonHover");
 			}
 		});
 		jsonTab.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
-				HTML5Element tab = (HTML5Element) jsonTab.getElement();
+				HTML5Element tab = (HTML5Element) jsonTab.getElement().cast();
 				if(tab.getClassList().contains("inlineButtonHover"))
 					tab.getClassList().remove("inlineButtonHover");
 			}
@@ -767,14 +767,14 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		imageTab.addMouseOverHandler(new MouseOverHandler() {
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
-				HTML5Element tab = (HTML5Element) imageTab.getElement();
+				HTML5Element tab = (HTML5Element) imageTab.getElement().cast();
 					tab.getClassList().add("inlineButtonHover");
 			}
 		});
 		imageTab.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
-				HTML5Element tab = (HTML5Element) imageTab.getElement();
+				HTML5Element tab = (HTML5Element) imageTab.getElement().cast();
 				if(tab.getClassList().contains("inlineButtonHover"))
 					tab.getClassList().remove("inlineButtonHover");
 			}
@@ -783,7 +783,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	
 	private void setTabOpened(TABS type, InlineLabel tabHandler) {
 		String tabHandlercurrent = "inlineButtonChecked";
-		HTML5Element tab = (HTML5Element) tabHandler.getElement();
+		HTML5Element tab = (HTML5Element) tabHandler.getElement().cast();
 		((HTML5Element)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
 		tab.getClassList().add(tabHandlercurrent);
 		
@@ -795,7 +795,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	}
 	
 	private void setTabVisible(TABS type, InlineLabel tabHandler){
-		HTML5Element tab = (HTML5Element) tabHandler.getElement();
+		HTML5Element tab = (HTML5Element) tabHandler.getElement().cast();
 		tab.getClassList().remove("hidden");
 		HTML5Element contentParent = (HTML5Element) tabContent.getParentElement();
 		contentParent.querySelector(".tabsContent .tabContent[data-tab=\""+type.toString()+"\"]").getClassList().remove("hidden");

@@ -1,6 +1,6 @@
 package org.rest.client.codemirror;
 
-import com.google.gwt.user.client.Element;
+import com.google.gwt.dom.client.Element;
 
 public class CodeMirror {
 	private final CodeMirrorImpl impl;

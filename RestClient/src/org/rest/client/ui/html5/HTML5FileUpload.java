@@ -17,7 +17,7 @@ package org.rest.client.ui.html5;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.file.client.FileList;
-import com.google.gwt.user.client.Element;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.FileUpload;
 
 public class HTML5FileUpload extends FileUpload {

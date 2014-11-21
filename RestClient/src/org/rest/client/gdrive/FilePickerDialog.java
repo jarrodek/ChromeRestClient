@@ -25,7 +25,7 @@ import com.google.gwt.i18n.shared.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Element;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -69,7 +69,7 @@ public class FilePickerDialog implements KeyDownHandler {
 		if(h > 150+wingowHeightPagging){
 			results.getElement().getStyle().setHeight(h-wingowHeightPagging, Unit.PX);
 		}
-		final HTML5Element resultsElement = (HTML5Element) results.getElement();
+		final HTML5Element resultsElement = (HTML5Element) results.getElement().cast();
 		
 		results.addDomHandler(new ClickHandler() {
 			@Override

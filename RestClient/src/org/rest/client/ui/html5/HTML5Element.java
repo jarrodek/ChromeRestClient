@@ -16,12 +16,14 @@
 package org.rest.client.ui.html5;
 
 import java.util.ArrayList;
+import com.google.gwt.dom.client.Element;
+
 /**
  * GWT wrapper to basics properties available in HTML5 element.
  * @author Paweł Psztyć
  *
  */
-public class HTML5Element extends com.google.gwt.user.client.Element {
+public class HTML5Element extends Element {
 	
 	
 	protected HTML5Element() {

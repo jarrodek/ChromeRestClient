@@ -149,7 +149,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		rawTab.addMouseOverHandler(new MouseOverHandler() {
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
-				HTML5Element tab = (HTML5Element) rawTab.getElement();
+				HTML5Element tab = (HTML5Element) rawTab.getElement().cast();
 				if(!tab.getClassList().contains("inlineButtonChecked"))
 					tab.getClassList().add("inlineButtonHover");
 			}
@@ -157,7 +157,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		rawTab.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
-				HTML5Element tab = (HTML5Element) rawTab.getElement();
+				HTML5Element tab = (HTML5Element) rawTab.getElement().cast();
 				if(!tab.getClassList().contains("inlineButtonHover"))
 					tab.getClassList().remove("inlineButtonHover");
 			}
@@ -173,7 +173,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		formTab.addMouseOverHandler(new MouseOverHandler() {
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
-				HTML5Element tab = (HTML5Element) formTab.getElement();
+				HTML5Element tab = (HTML5Element) formTab.getElement().cast();
 				if(!tab.getClassList().contains("inlineButtonChecked"))
 					tab.getClassList().add("inlineButtonHover");
 			}
@@ -181,7 +181,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		formTab.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
-				HTML5Element tab = (HTML5Element) formTab.getElement();
+				HTML5Element tab = (HTML5Element) formTab.getElement().cast();
 				if(tab.getClassList().contains("inlineButtonHover"))
 					tab.getClassList().remove("inlineButtonHover");
 			}
@@ -224,7 +224,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		String cssTabContent = "tabContent";
 		String tabContentCurrent = "tabContentCurrent";
 		
-		HTML5Element tab = (HTML5Element) rawTab.getElement();
+		HTML5Element tab = (HTML5Element) rawTab.getElement().cast();
 		((HTML5Element)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
 		tab.getClassList().add(tabHandlercurrent);
 		
@@ -250,7 +250,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		String cssTabContent = "tabContent";
 		String tabContentCurrent = "tabContentCurrent";
 		
-		HTML5Element tab = (HTML5Element) formTab.getElement();
+		HTML5Element tab = (HTML5Element) formTab.getElement().cast();
 		((HTML5Element)tab.getParentElement()).querySelector("."+tabHandlercurrent).getClassList().remove(tabHandlercurrent);
 		tab.getClassList().add(tabHandlercurrent);
 		

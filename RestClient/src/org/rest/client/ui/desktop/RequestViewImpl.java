@@ -58,7 +58,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -514,7 +514,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 		});
 		factory.addItem(form);
 		
-		HTML5Element nav = (HTML5Element)DOM.getElementById("appNavigation");
+		HTML5Element nav = (HTML5Element) DOM.getElementById("appNavigation").cast();
 		Element savedElement = nav.querySelector("li[data-place=\"saved\"]");
 		
 		TutorialDialog saved = TutorialFactory.createItem();

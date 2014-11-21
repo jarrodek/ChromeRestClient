@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class ListItem extends ComplexPanel implements HasHTML, HasText {
 
 	public ListItem() {
+		
 		setElement(DOM.createElement("li"));
 	}
 	
