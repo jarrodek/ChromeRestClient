@@ -2,6 +2,7 @@ package org.rest.client.ui.desktop;
 
 import java.util.Date;
 
+import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.suggestion.SocketSuggestOracle;
 import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.SocketView;
@@ -207,6 +208,7 @@ public class SocketViewImpl extends Composite implements SocketView {
 	@UiHandler("connectButton")
 	void onConnectClick(ClickEvent e){
 		doConnect();
+		GoogleAnalytics.sendEvent("Engagement", "Click", "Connect to socket");
 	}
 	
 	private void doConnect(){
@@ -227,6 +229,7 @@ public class SocketViewImpl extends Composite implements SocketView {
 	@UiHandler("sendButton")
 	void onSend(ClickEvent e){
 		doSendMessage();
+		GoogleAnalytics.sendEvent("Engagement", "Click", "Send message to socket");
 	}
 
 

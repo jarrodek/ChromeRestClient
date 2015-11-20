@@ -108,7 +108,7 @@ function checkDriveAuth(callback) {
 		'payload': 'checkDriveAuth',
 		'response': 'object'
 	}
-	if(chrome.runtime){
+	if(chrome.runtime.getBackgroundPage){
 		chrome.runtime.getBackgroundPage(function(backgroundPage){
 			backgroundPage.requestAction(payload, function(response){
 				var authResult = response.data;
@@ -147,7 +147,7 @@ function gdriveAuth(callback, forceNew) {
 		'response': 'object',
 		'forceNew': forceNew
 	}
-	if(chrome.runtime){
+	if(chrome.runtime.getBackgroundPage){
 		chrome.runtime.getBackgroundPage(function(backgroundPage){
 			backgroundPage.requestAction(payload, function(response){
 				var authResult = response.data;

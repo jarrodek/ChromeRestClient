@@ -30,7 +30,7 @@ public class BackgroundMessage implements ChromeMessagePassing {
 	
 
 	private final native boolean isApiAvailable() /*-{
-		return !!(chrome.runtime);
+		return !!(chrome.runtime.getBackgroundPage);
 	}-*/;
 
 

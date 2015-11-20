@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.rest.client.RestClient;
+import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.gdrive.DriveFileItem;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.URLParser;
@@ -472,6 +473,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 			save.setEnabled(true);
 			return;
 		}
+		GoogleAnalytics.sendEvent("Engagement", "Click", "Save request");
 		
 		RestClient.collectRequestData(new Callback<RequestObject, Throwable>() {
 			

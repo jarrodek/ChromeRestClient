@@ -24,6 +24,7 @@ import java.util.Set;
 import org.rest.client.ClientFactory;
 import org.rest.client.ExternalEventsFactory;
 import org.rest.client.RestClient;
+import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.event.AddEncodingEvent;
 import org.rest.client.event.ClearFormEvent;
 import org.rest.client.event.HttpEncodingChangeEvent;
@@ -624,7 +625,13 @@ public class RequestActivity extends AppActivity implements
 			}});
 	}
 	
-
+	/**
+	 * Register event handlers from system's event bus to handle relevant data.
+	 * Registered events:
+	 *  - Request start 
+	 *  - Request end
+	 *  - 
+	 */
 	private void observeEvents() {
 		
 		//When request starts disable UI controls
@@ -632,6 +639,7 @@ public class RequestActivity extends AppActivity implements
 			@Override
 			public void onStart(Date time) {
 				requestView.handleRequestStartActionEvent(time);
+				GoogleAnalytics.sendEvent("Engagement", "Click", "Request start");
 			}
 		});
 		
@@ -1157,6 +1165,7 @@ public class RequestActivity extends AppActivity implements
 		eventBus.fireEvent(new ClearFormEvent());
 		
 		goTo(new RequestPlace("default"));
+		GoogleAnalytics.sendEvent("Engagement", "Click", "Clear request form");
 	}
 
 	@Override
