@@ -12,19 +12,20 @@ import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.VoidCallback;
 
 /**
- * The first task during startup. Initialize databases and set handlers to
- * databases. It's call "initTable" method in each DB service which contains
- * create table statement.
+ * Initialize databases and set handlers to opened databases. It will call "initTable" method 
+ * in each DB service which contains create table statement.
  * 
- * @author jarrod
+ * @author Pawel Psztyc
  * 
+ * @deprecated This class should not be used since WebSQL is deprecated and will be removed from Chrome.
+ * The app must upgrade to indexeddb adapter instead.
  */
 public class InitializeDatabaseTask implements LoadTask {
 
 	private int dbOpened = 0;
 	@SuppressWarnings({ "rawtypes" })
-	ArrayList<WebSqlAdapter> databases = new ArrayList<WebSqlAdapter>();
-	LoaderWidget loaderWidget;
+	private ArrayList<WebSqlAdapter> databases = new ArrayList<WebSqlAdapter>();
+	private LoaderWidget loaderWidget;
 
 	@SuppressWarnings({ "rawtypes" })
 	public InitializeDatabaseTask() {
@@ -96,7 +97,7 @@ public class InitializeDatabaseTask implements LoadTask {
 				@Override
 				public void onError(Throwable e) {
 					if(lastRun){
-						callback.onFatalError("Unable to initialize WebSQL database :( Can't run application.");
+						callback.onFatalError("Unable to initialize WebSQL database :( Can't run application. " + e.getMessage());
 						return;
 					}
 					callback.onFailure(dbOpened);

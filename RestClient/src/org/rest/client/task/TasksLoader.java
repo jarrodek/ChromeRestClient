@@ -81,8 +81,6 @@ public class TasksLoader {
 		for(LoadTask task : tasks){
 			task.setLoader(loaderWidget);
 			initialTasksCount += task.getTasksCount();
-			
-			
 		}
 		appCallback = callback;
 		
@@ -98,9 +96,7 @@ public class TasksLoader {
 	 * Create user friendly information about loading page elements.
 	 */
 	private static void createSplashScreen(){
-		
 		loaderWidget = new LoaderWidget();
-		
 	}
 	/**
 	 * Remove splash screen.

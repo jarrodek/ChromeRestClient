@@ -1,1 +1,4 @@
 /.project
+**/gwt-unitCache/*
+**/lib/*
+**/extras/*

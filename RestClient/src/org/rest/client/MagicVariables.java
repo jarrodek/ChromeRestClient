@@ -14,7 +14,7 @@ public class MagicVariables {
 	HashMap<String, String> nowGroupObjects = new HashMap<String, String>();
 	
 	public String apply(String input){
-		if(!SyncAdapter.isMagicVars()) return input;
+		if(!SyncAdapter.magicVars) return input;
 		try{
 			input = applyRandom(input);
 			input = applyTime(input);

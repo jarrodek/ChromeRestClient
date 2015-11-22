@@ -557,7 +557,7 @@ public class RequestHeadersWidget extends Composite implements HasText {
 	
 	
 	private void loadCodeMirrorForHeaders() {
-		if(SyncAdapter.isCodeMirrorHeaders()){
+		if(SyncAdapter.codeMirrorHeaders){
 			tabContent.addClassName("codeMirror");
 			
 			if(headersCodeMirror != null) {

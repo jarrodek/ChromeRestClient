@@ -38,13 +38,12 @@ import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 
 /**
- * Task will execute only if it is first run. 
- * It downloads and insert to database headers and status codes definitions. 
- * @author jarrod
+ * Task will execute itself only if it is first run. 
+ * It will downloads and insert to the database headers and status codes definitions. 
+ * @author Pawel Psztyc
  *
  * Upgrade options:
  * - From previous version: 
@@ -56,6 +55,8 @@ import com.google.gwt.user.client.ui.PopupPanel;
  * 		- insert default data to view (method and URL)
  * 		- insert default JSON headers
  * 		- download status codes definitions
+ * 
+ * @todo: update this class to use Chrome storage implementation.
  */
 public class FirstRunTask implements LoadTask {
 
@@ -262,76 +263,88 @@ public class FirstRunTask implements LoadTask {
 			}
 		}
 	}
-	
+	/**
+	 * To be called on app's upgrade.
+	 * Will replace old "latestRequest" local storage with new implementation.
+	 */
 	private void updateLatestRequest() {
 		Log.debug("Upgrade latestRequest key");
 		String latestRequest = store.getItem("latestRequest");
 		store.removeItem("latestRequest");
-		if (latestRequest != null) {
-			JSONValue value = JSONParser.parseStrict(latestRequest);
-			if (value != null) {
-				JSONObject obj = value.isObject();
-				if (obj != null) {
-					
-					final RequestObject ro = RequestObject.createRequest();
-					
-					String url = Utils.getJsonString(obj, "url");
-					if(url != null){
-						ro.setURL(url);
+		if (latestRequest == null) {
+			return;
+		}
+		JSONValue value = null;
+		try{
+			value = JSONParser.parseStrict(latestRequest);
+		} catch(Exception ex){
+			Log.warn("Latest request legacy object was malformatted. Skipping setting up new object.");
+			return;
+		}
+		if (value == null) {
+			return;
+		}
+		JSONObject obj = value.isObject();
+		if (obj == null) {
+			return;
+		}
+		final RequestObject ro = RequestObject.createRequest();
+		
+		String url = Utils.getJsonString(obj, "url");
+		if(url != null){
+			ro.setURL(url);
+		}
+		String formEncoding = Utils.getJsonString(obj, "formEncoding");
+		if(formEncoding != null){
+			ro.setEncoding(formEncoding);
+		}
+		String post = Utils.getJsonString(obj, "post");
+		if(post != null){
+			ro.setPayload(post);
+		}
+		String method = Utils.getJsonString(obj, "method");
+		if(method != null){
+			ro.setMethod(method);
+		}
+		ro.setProject(-1);
+		String headers = "";
+		JSONArray headersArray = obj.get("headers").isArray();
+		if (headersArray != null) {
+			int cnt = headersArray.size();
+			for (int i = 0; i < cnt; i++) {
+				JSONValue _tmp = headersArray.get(i);
+				if (_tmp == null) {
+					continue;
+				}
+				JSONObject _data = _tmp.isObject();
+				if (_data == null) {
+					continue;
+				}
+				Set<String> keys = _data.keySet();
+				if (keys.size() == 1) {
+					String headerName = keys.iterator().next();
+					JSONValue headerValueJs = _data.get(headerName);
+					if (headerValueJs == null) {
+						continue;
 					}
-					String formEncoding = Utils.getJsonString(obj, "formEncoding");
-					if(formEncoding != null){
-						ro.setEncoding(formEncoding);
-					}
-					String post = Utils.getJsonString(obj, "post");
-					if(post != null){
-						ro.setPayload(post);
-					}
-					String method = Utils.getJsonString(obj, "method");
-					if(method != null){
-						ro.setMethod(method);
-					}
-					ro.setProject(-1);
-					String headers = "";
-					JSONArray headersArray = obj.get("headers").isArray();
-					if (headersArray != null) {
-						int cnt = headersArray.size();
-						for (int i = 0; i < cnt; i++) {
-							JSONValue _tmp = headersArray.get(i);
-							if (_tmp == null) {
-								continue;
-							}
-							JSONObject _data = _tmp.isObject();
-							if (_data == null) {
-								continue;
-							}
-							Set<String> keys = _data.keySet();
-							if (keys.size() == 1) {
-								String headerName = keys.iterator().next();
-								JSONValue headerValueJs = _data.get(headerName);
-								if (headerValueJs == null) {
-									continue;
-								}
-								JSONString _headerValueJS = headerValueJs.isString();
-								String headerValue = _headerValueJS.stringValue();
-								headers += headerName + ": " + headerValue + "\n";
-							}
-						}
-					}
-					ro.setHeaders(headers);
-					store.setItem(LocalStore.LATEST_REQUEST_KEY, ro.toJSON());
+					JSONString _headerValueJS = headerValueJs.isString();
+					String headerValue = _headerValueJS.stringValue();
+					headers += headerName + ": " + headerValue + "\n";
 				}
 			}
 		}
+		ro.setHeaders(headers);
+		store.setItem(LocalStore.LATEST_REQUEST_KEY, ro.toJSON());
 	}
 	
-	
+	/**
+	 * To be called diring app's upgrade.
+	 * This method will replace old table structures into new structure.
+	 * @param tx
+	 */
 	private final native void upgradeRequestsData(SQLTransaction tx) /*-{
-		
 		var replaceReg = /'/gim;
-		
-		
-		tx.executeSql("SELECT * FROM rest_forms",[],function(tx, result){
+		tx.executeSql("SELECT * FROM rest_forms", [], function(tx, result){
 			var cnt = result.rows.length;
 			for(var i=0; i<cnt; i++){
 				var item = result.rows.item(i);
@@ -359,7 +372,7 @@ public class FirstRunTask implements LoadTask {
 					console.error(e)
 				}
 			}
-			tx.executeSql("DROP TABLE IF EXISTS rest_forms",[],null,function(tx, error){console.error(error.message);});
+			tx.executeSql("DROP TABLE IF EXISTS rest_forms", [], null, function(tx, error){console.error(error.message);});
 		}, function(tx, error){console.log(error.message);});
 	}-*/;
 	
@@ -408,12 +421,17 @@ public class FirstRunTask implements LoadTask {
 	
 	
 	
-	
+	/**
+	 * The app is using status codes and headers description in the UI.
+	 * To lower package weight list of definitions is stored on server and downloaded during first run.
+	 * @TODO: Make it local again and do not require server download. There is an issue with China users who can't download the file because of internet restrictions.
+	 */
 	private void downloadDefinitionsTask(){
 		
 		if(loaderWidget != null){
 			loaderWidget.setText("Downloading definitions...");
 		}
+		
 		AssetRequest.getAssetString("definitions.json", new AssetStringCallback() {
 			@Override
 			public void onSuccess(String response) {
@@ -438,12 +456,9 @@ public class FirstRunTask implements LoadTask {
 			@Override
 			public void onFailure(String message, Throwable exception) {
 				if(lastRun){
-//					if(RestClient.isDebug()){
-						Log.error("Error download application data file. Will try next time.");
-//					}
+					Log.error("Error download application data file. Will try next time.");
 					final DefinitionsErrorDialog dialog = new DefinitionsErrorDialog();
 					dialog.show();
-					
 					dialog.addCloseHandler(new CloseHandler<PopupPanel>() {
 						@Override
 						public void onClose(CloseEvent<PopupPanel> event) {
@@ -455,12 +470,10 @@ public class FirstRunTask implements LoadTask {
 								callback.onSuccess();
 								return;
 							}
-							
 							callback.onInnerTaskFinished(1);
 							parseAssetResponse(result);
 						}
 					});
-					
 					return;
 				}
 				loaderWidget.setText("Unable to download definitions. Retrying...");
@@ -468,7 +481,10 @@ public class FirstRunTask implements LoadTask {
 			}
 		});
 	}
-	
+	/**
+	 * After app's definitions file has been downloaded this method will parse response content and 
+	 * set up datastore.
+	 */
 	private void parseAssetResponse(String json){
 		loaderWidget.setText("Creatintg databases...");
 		JSONValue data = null;
@@ -477,7 +493,7 @@ public class FirstRunTask implements LoadTask {
 		} catch(Exception e){
 			Log.error("Unable parse response from server. Can't read definitions.", e);
 			Log.error("Definitions string: " + json);
-			Window.alert("Unable parse response from server. Can't read definitions.");
+			//Window.alert("Unable parse response from server. Can't read definitions.");  //this shouldn't be here
 			loaderWidget.setText("Loading...");
 			callback.onInnerTaskFinished(getTasksCount()-1);
 			callback.onSuccess();
@@ -488,7 +504,6 @@ public class FirstRunTask implements LoadTask {
 			if(RestClient.isDebug()){
 				Log.error("Error download application data file. Will try next time.");
 			}
-			Window.alert("Unable to parse downloaded application data. Will try again next time.");
 			loaderWidget.setText("Loading...");
 			callback.onInnerTaskFinished(getTasksCount()-2);
 			callback.onSuccess();

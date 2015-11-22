@@ -17,7 +17,6 @@ package org.rest.client.storage.indexeddb;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.JavaScriptException;
-import com.google.gwt.core.client.JavaScriptObject;
 
 public class IDBDatabaseException extends Exception {
 
@@ -120,7 +119,7 @@ public class IDBDatabaseException extends Exception {
 	public IDBDatabaseException(JavaScriptException exception) {
 		super(exception.getDescription(), exception);
 		Log.error("Error in ndexedDB", exception);
-		JavaScriptObject jso = exception.getException();
+		Object jso = exception.getThrown();
 		if (jso == null) {
 			code = UNKNOWN_ERR;
 		} else {
@@ -128,8 +127,8 @@ public class IDBDatabaseException extends Exception {
 		}
 	}
 
-	private native int getErrorCode(JavaScriptObject obj) /*-{
-		return obj.code;
+	private native int getErrorCode(Object obj) /*-{
+		return obj.code ? obj.code : 1;
 	}-*/;
 
 	public IDBDatabaseException(int code, String pMessage) {

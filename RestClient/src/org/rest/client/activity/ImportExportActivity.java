@@ -287,7 +287,7 @@ public class ImportExportActivity extends AppActivity implements
 	
 
 	private void checkUserSession() {
-		if(RestClient.getApplicationUserId() != null){
+		if(RestClient.applicationUserId != null){
 			view.setIsUserView();
 			return;
 		}
@@ -300,7 +300,7 @@ public class ImportExportActivity extends AppActivity implements
 			@Override
 			public void onSuccess(ApplicationSession session) {
 				if (session.getState() == ApplicationSession.CONNECTED) {
-					RestClient.setApplicationUserId(session.getUserId());
+					RestClient.applicationUserId = session.getUserId();
 					view.setIsUserView();
 				} else {
 					view.setIsNotUserView();
@@ -317,10 +317,14 @@ public class ImportExportActivity extends AppActivity implements
 			}
 		});
 	}
-
+	
+	/**
+	 * @deprecated This shouldn't be here.
+	 * @todo: Remove it from the interface.
+	 */
 	@Override
 	public String getApplicationUserId() {
-		return RestClient.getApplicationUserId();
+		return RestClient.applicationUserId;
 	}
 
 	/**

@@ -1,7 +1,7 @@
 package com.google.gwt.file.client;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.user.client.Element;
+import com.google.gwt.dom.client.Element;
 
 /**
  * This interface describes a single file in a FileList and exposes its name. It
@@ -11,7 +11,7 @@ import com.google.gwt.user.client.Element;
  * >http://dev.w3.org/2006/webapi/FileAPI/#dfn-File</a>
  * </p>
  * 
- * @author jarrod
+ * @author Pawel Psztyc
  * 
  */
 public class File extends Blob {

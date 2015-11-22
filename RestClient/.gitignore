@@ -1,0 +1,7 @@
+/gwt-unitCache/*
+/extras/*
+/lib/*
+.classpath
+.settings/*
+var/WEB-INF/lib/*
+build/

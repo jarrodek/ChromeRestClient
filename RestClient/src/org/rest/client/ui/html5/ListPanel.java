@@ -25,6 +25,7 @@ public class ListPanel extends ComplexPanel {
 		this(false);
 	}
 
+	@SuppressWarnings("deprecation")
 	public ListPanel(boolean isOrdered) {
 		if (isOrdered) {
 			setElement(DOM.createElement("ol"));
@@ -34,10 +35,12 @@ public class ListPanel extends ComplexPanel {
 
 	}
 
+	@SuppressWarnings("deprecation")
 	public void add(Widget w) {
 		super.add(w, getElement());
 	}
 
+	@SuppressWarnings("deprecation")
 	public void insert(Widget w, int beforeIndex) {
 		super.insert(w, getElement(), beforeIndex, true);
 	}

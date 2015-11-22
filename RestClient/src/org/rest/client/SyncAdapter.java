@@ -12,19 +12,42 @@ import com.google.gwt.json.client.JSONString;
 import com.google.gwt.storage.client.Storage;
 
 /**
- * Adapter for chrome.sync API.
- * @author jarrod
+ * Apps' adapter for chrome.sync API.
+ * 
+ * @TODO: remove any reference to local storage and replace it with chrome.storage.local API. This app must be CSP compliant.
+ * 
+ * @author Pawel Psztyc
  *
  */
 public class SyncAdapter {
-	
-	private static boolean debug = true;
-	private static boolean history = true;
-	private static boolean notifications = false;
-	private static boolean magicVars = true;
-	private static boolean codeMirrorHeaders = false;
-	private static boolean codeMirrorPayload = false;
-	private static boolean observing = false;
+	/**
+	 * Is debug setting enabled.
+	 */
+	public static boolean debug = true;
+	/**
+	 * Id history setting enabled.
+	 */
+	public static boolean history = true;
+	/**
+	 * Are notifications from developer setting enabled.
+	 */
+	public static boolean notifications = false;
+	/**
+	 * Are magic variables setting enabled.
+	 */
+	public static boolean magicVars = true;
+	/**
+	 * is code mirror support for headers setting enabled.
+	 */
+	public static boolean codeMirrorHeaders = false;
+	/**
+	 * s code mirror support for payload setting enabled.
+	 */
+	public static boolean codeMirrorPayload = false;
+	/**
+	 * True if this adapter already set storage event handlers.
+	 */
+	public static boolean observing = false;
 	
 	public static void sync(){
 		com.google.gwt.chrome.storage.Storage chromeStore = com.google.gwt.chrome.storage.Storage.getStorage();
@@ -115,7 +138,9 @@ public class SyncAdapter {
 			}
 		});
 	}
-	
+	/**
+	 * Observe changes to the storage.
+	 */
 	public static void observe(){
 		if(observing) return;
 		observing = true;
@@ -128,52 +153,5 @@ public class SyncAdapter {
 				}
 			}
 		});
-	}
-	
-
-	public static boolean isDebug() {
-		return debug;
-	}
-
-	public static void setDebug(boolean debug) {
-		SyncAdapter.debug = debug;
-	}
-
-	public static boolean isHistory() {
-		return history;
-	}
-
-	public static void setHistory(boolean history) {
-		SyncAdapter.history = history;
-	}
-
-	public static boolean isNotifications() {
-		return notifications;
-	}
-
-	public static void setNotifications(boolean notifications) {
-		SyncAdapter.notifications = notifications;
-	}
-	
-	public static boolean isMagicVars() {
-		return magicVars;
-	}
-	public static void setMagicVars(boolean magicVars) {
-		SyncAdapter.magicVars = magicVars;
-	}
-
-	public static boolean isCodeMirrorHeaders() {
-		return codeMirrorHeaders;
-	}
-
-	public static void setCodeMirrorHeaders(boolean codeMirrorHeaders) {
-		SyncAdapter.codeMirrorHeaders = codeMirrorHeaders;
-	}
-	
-	public static boolean isCodeMirrorPayload() {
-		return codeMirrorPayload;
-	}
-	public static void setCodeMirrorPayload(boolean codeMirrorPayload) {
-		SyncAdapter.codeMirrorPayload = codeMirrorPayload;
 	}
 }

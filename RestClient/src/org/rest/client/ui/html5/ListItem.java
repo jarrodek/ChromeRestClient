@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class ListItem extends ComplexPanel implements HasHTML, HasText {
 
+	@SuppressWarnings("deprecation")
 	public ListItem() {
 		
 		setElement(DOM.createElement("li"));
@@ -33,33 +34,35 @@ public class ListItem extends ComplexPanel implements HasHTML, HasText {
 		setText(text);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void add(Widget w) {
 		super.add(w, getElement());
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void insert(Widget w, int beforeIndex) {
 		super.insert(w, getElement(), beforeIndex, true);
 	}
 
 	@Override
 	public String getText() {
-		return DOM.getInnerText(getElement());
+		return getElement().getInnerText();
 	}
 
 	@Override
 	public void setText(String text) {
-		DOM.setInnerText(getElement(), (text == null) ? "" : text);
+		getElement().setInnerText((text == null) ? "" : text);
 	}
 
 	@Override
 	public String getHTML() {
-		return DOM.getInnerHTML(getElement());
+		return getElement().getInnerHTML();
 	}
 
 	@Override
 	public void setHTML(String html) {
-		DOM.setInnerHTML(getElement(), (html == null) ? "" : html);
+		getElement().setInnerHTML((html == null) ? "" : html);
 	}
 
 }

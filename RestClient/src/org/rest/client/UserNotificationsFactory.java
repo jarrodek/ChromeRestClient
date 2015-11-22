@@ -57,7 +57,7 @@ public class UserNotificationsFactory {
 	
 	
 	private static void runNotifications(){
-		if(!SyncAdapter.isNotifications()){
+		if(!SyncAdapter.notifications){
 			return;
 		}
 		

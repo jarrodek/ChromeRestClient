@@ -75,39 +75,12 @@ public class SettingsActivity extends AppActivity implements
 	}
 
 	protected void updateView(final SettingsView view) {
-		if(RestClient.isDebug()){
-			view.setDebugEnabled(true);
-		} else {
-			view.setDebugEnabled(false);
-		}
-		
-		if(RestClient.isHistoryEabled()){
-			view.setHistoryEnabled(true);
-		} else {
-			view.setHistoryEnabled(false);
-		}
-		
-		if(SyncAdapter.isNotifications()){
-			view.setNotificationsEnabled(true);
-		} else {
-			view.setNotificationsEnabled(false);
-		}
-		
-		if(SyncAdapter.isMagicVars()){
-			view.setMagicVarsEnabled(true);
-		} else {
-			view.setMagicVarsEnabled(false);
-		}
-		if(SyncAdapter.isCodeMirrorHeaders()){
-			view.setCodeMirrorHeadersEnabled(true);
-		} else {
-			view.setCodeMirrorHeadersEnabled(false);
-		}
-		if(SyncAdapter.isCodeMirrorPayload()){
-			view.setCodeMirrorPayloadEnabled(true);
-		} else {
-			view.setCodeMirrorPayloadEnabled(false);
-		}
+		view.setDebugEnabled(RestClient.isDebug());
+		view.setHistoryEnabled(RestClient.isHistoryEabled());
+		view.setNotificationsEnabled(SyncAdapter.notifications);
+		view.setMagicVarsEnabled(SyncAdapter.magicVars);
+		view.setCodeMirrorHeadersEnabled(SyncAdapter.codeMirrorHeaders);
+		view.setCodeMirrorPayloadEnabled(SyncAdapter.codeMirrorPayload);
 	}
 
 	@Override
@@ -155,11 +128,11 @@ public class SettingsActivity extends AppActivity implements
 				} else if(key.equals(LocalStore.NOTIFICATIONS_ENABLED_KEY)){
 					clientFactory.getEventBus().fireEvent(new NotificationsStateChangeEvent(value));
 				} else if(key.equals(LocalStore.MAGIC_VARS_ENABLED_KEY)){
-					SyncAdapter.setMagicVars(value);
+					SyncAdapter.magicVars = (value);
 				} else if(key.equals(LocalStore.CODE_MIRROR_HEADERS_KEY)){
-					SyncAdapter.setCodeMirrorHeaders(value);
+					SyncAdapter.codeMirrorHeaders = (value);
 				} else if(key.equals(LocalStore.CODE_MIRROR_PAYLOAD_KEY)){
-					SyncAdapter.setCodeMirrorPayload(value);
+					SyncAdapter.codeMirrorPayload = (value);
 				}
 			}
 

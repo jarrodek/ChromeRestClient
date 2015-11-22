@@ -119,9 +119,9 @@ public class RequestActivity extends AppActivity implements
 		
 		this.eventBus = eventBus;
 		super.start(panel, eventBus);
-		if(RestClient.getOpenedProject() > 0){
-			RestClient.setPreviousProject(RestClient.getOpenedProject());
-			RestClient.setOpenedProject(-1);
+		if(RestClient.currentlyOpenedProject > 0){
+			RestClient.previouslyOpenedProject = RestClient.currentlyOpenedProject;
+			RestClient.currentlyOpenedProject = -1;
 		}
 		
 		Storage store = Storage.getSessionStorageIfSupported();
@@ -153,7 +153,7 @@ public class RequestActivity extends AppActivity implements
 		} else if(place.isProject()){
 			try{
 				int projectId = Integer.parseInt(entryId);
-				RestClient.setOpenedProject(projectId);
+				RestClient.currentlyOpenedProject = projectId;
 				restoreRequestFromProject(projectId, -1);
 			} catch(Exception e){
 				if(RestClient.isDebug()){
@@ -410,7 +410,7 @@ public class RequestActivity extends AppActivity implements
 				@Override
 				public void onSuccess(final RequestObject result) {
 					if(result.getProject() > 0){
-						RestClient.setOpenedProject(result.getProject());
+						RestClient.currentlyOpenedProject = result.getProject();
 						projectsStore.getByKey(result.getProject(), new StoreResultCallback<ProjectObject>(){
 	
 							@Override
@@ -481,7 +481,7 @@ public class RequestActivity extends AppActivity implements
 		
 		// if can overwrite current params first restore latest request
 		// and then set parameters.
-		if(RestClient.getOpenedProject() == RestClient.getPreviousProject()){
+		if(RestClient.currentlyOpenedProject == RestClient.previouslyOpenedProject){
 			
 			if(RestClient.isDebug()){
 				Log.debug("Restoring data for the same project as previous.");
@@ -738,7 +738,7 @@ public class RequestActivity extends AppActivity implements
 						ProjectChangeEvent ev = new ProjectChangeEvent(project);
 						eventBus.fireEvent(ev);
 						
-						if(RestClient.getOpenedProject() == project.getId()){
+						if(RestClient.currentlyOpenedProject == project.getId()){
 							requestView.updateProjectMetadata(project);
 						}
 					}
@@ -1066,7 +1066,7 @@ public class RequestActivity extends AppActivity implements
 //		Storage store = Storage.getSessionStorageIfSupported();
 //		String restored = store.getItem(LocalStore.RESTORED_REQUEST);
 //		if(restored != null && !restored.isEmpty()){
-			//TODO: check if anything is changed, if it is changed set warning.  
+			//TODO: check if something is changed, if it is changed set warning.  
 //		}
 		
 		
@@ -1082,7 +1082,7 @@ public class RequestActivity extends AppActivity implements
 		ro.setPayload(requestView.getPayload());
 		ro.setURL(requestView.getUrl());
 		ro.setName(requestView.getRequestName());
-		ro.setProject(RestClient.getOpenedProject());
+		ro.setProject(RestClient.currentlyOpenedProject);
 		Storage store = Storage.getSessionStorageIfSupported();
 		String gDriveFileId = store.getItem(LocalStore.CURRENT_GOOGLE_DRIVE_ITEM);
 		String restoredRequestId = store.getItem(LocalStore.RESTORED_REQUEST);
@@ -1153,8 +1153,8 @@ public class RequestActivity extends AppActivity implements
 	@Override
 	public void fireClearAllEvent() {
 		
-		RestClient.setPreviousProject(RestClient.getOpenedProject());
-		RestClient.setOpenedProject(-1);
+		RestClient.previouslyOpenedProject = RestClient.currentlyOpenedProject;
+		RestClient.currentlyOpenedProject = -1;
 		Storage store = Storage.getLocalStorageIfSupported();
 		store.removeItem(LocalStore.LATEST_REQUEST_KEY);
 		
@@ -1276,7 +1276,7 @@ public class RequestActivity extends AppActivity implements
 					@Override
 					public void onSuccess(Boolean result) {
 						if(result.booleanValue()){
-							goTo(RequestPlace.Tokenizer.fromProjectDefault(RestClient.getOpenedProject()));
+							goTo(RequestPlace.Tokenizer.fromProjectDefault(RestClient.currentlyOpenedProject));
 						} else {
 							if(RestClient.isDebug()){
 								Log.error("Unable delete endpoint. Unknown error.");
@@ -1326,7 +1326,7 @@ public class RequestActivity extends AppActivity implements
 						@Override
 						public void onSuccess(Boolean result) {
 							if(result.booleanValue()){
-								goTo(RequestPlace.Tokenizer.fromProjectDefault(RestClient.getOpenedProject()));
+								goTo(RequestPlace.Tokenizer.fromProjectDefault(RestClient.currentlyOpenedProject));
 							} else {
 								if(RestClient.isDebug()){
 									Log.error("Unable delete endpoint. Unknown error.");
@@ -1381,7 +1381,7 @@ public class RequestActivity extends AppActivity implements
 		
 		if(result.getProject() > 0){
 			showProjectRelatedData(result.getProject(), null);
-			RestClient.setOpenedProject(result.getProject());
+			RestClient.currentlyOpenedProject = result.getProject();
 		} else {
 			//if name is available, set name
 			requestView.setRequestName(result.getName());

@@ -42,6 +42,7 @@ import org.rest.client.task.CreateMenuTask;
 import org.rest.client.task.FirstRunTask;
 import org.rest.client.task.InitializeAppHandlersTask;
 import org.rest.client.task.InitializeDatabaseTask;
+import org.rest.client.task.SetSyncDataTask;
 import org.rest.client.task.TasksLoader;
 import org.rest.client.ui.RequestView;
 import org.rest.client.util.UUID;
@@ -67,68 +68,116 @@ import com.google.gwt.xhr2.client.RequestHeader;
 import com.google.web.bindery.event.shared.EventBus;
 
 /**
- * Entry point classes define <code>onModuleLoad()</code>.
+ * Entry point for the app.
+ * This class will initialize event handlers, 
+ * task workers and will call history state change event 
+ * so the app will run on requested entry point.
  */
+@SuppressWarnings("deprecation")
 public class RestClient implements EntryPoint {
-	
+	/**
+	 * A flag which determine if application is in initializing state.
+	 * If set to false means the app is fully loaded.
+	 */
 	private static boolean initializing = true;
+	/**
+	 * Check if the app is still initializing.
+	 * @return true if the app is initialized.
+	 */
 	public static boolean isInitializing(){ return initializing; }
-	
+	/**
+	 * A default place in the app.
+	 * By default Request view is displayed. To change this behavior change default place class.
+	 * @TODO: determine if this field shouldn't be a method variable (since it is used in one method only) 	 
+	 */
 	private Place defaultPlace = new RequestPlace(null);
+	/**
+	 * App's main widget - a placeholder for all widgets.
+	 * @TODO: determine if this field shouldn't be a method variable (since it is used in one method only) 
+	 */
 	private SimplePanel appWidget = new SimplePanel();
+	/**
+	 * Logger object to console output.
+	 */
 	private static final Logger log = Logger.getLogger(RestClient.class
 			.getName());
+	/**
+	 * Client factory instance.
+	 * It will be initialized automatically by the framework. 
+	 * Client factory implementation class is set in .gwt.xml config file 
+	 * and implementation can vary depending on set conditions.
+	 * This app uses only one implementation.
+	 */
 	private final static ClientFactory clientFactory = GWT
 			.create(ClientFactory.class);
-
+	/**
+	 * App's client factory implementation.
+	 * It has reference to all important app's services and views.
+	 * @return Current client factory implementation.
+	 */
 	public final static ClientFactory getClientFactory() {
 		return clientFactory;
 	}
 	
-	private static int currentOpenedProject = -1;
-	private static int previousOpenedProject = -1;
-	private static String applicationUserId = null;
 	/**
-	 * True if Save request dialog is opened.
+	 * ID of currently opened project.
+	 * By default it's value is -1.
+	 */
+	public static int currentlyOpenedProject = -1;
+	/**
+	 * ID if previously opened project.
+	 * @TODO: it should be array (list) of all opened projects. Last added project is current one. If current is -1 the it means no project is opened.
+	 */
+	public static int previouslyOpenedProject = -1;
+	/**
+	 * This app generates UUID for all users and synchronize it between app's instances on different machines.
+	 * It can be used for tracking (GA) purposes or to sync settings.
+	 * @TODO: This is old way to keep tracking of a user to synchronize setting. The app should use sync storage or sync filesystem 
+	 *    to synchronize settings.
+	 */
+	public static String applicationUserId = null;
+	/**
+	 * Flag determining if save dialog is opened.
+	 * True if it is.
 	 */
 	public static boolean isSaveDialogEnabled = false;
-	/**
-	 * @return current opened project ID or -1 if none
-	 */
-	public final static int getOpenedProject(){
-		return currentOpenedProject;
-	}
-	/**
-	 * @return previously opened project ID or -1 if none
-	 */
-	public final static int getPreviousProject(){
-		return previousOpenedProject;
-	}
-	/**
-	 * @param project current opened project ID or -1 if none
-	 */
-	public final static void setOpenedProject(int project){
-		currentOpenedProject = project;
-	}
-	/**
-	 * 
-	 * @param project previously opened project ID or -1 if none
-	 */
-	public final static void setPreviousProject(int project){
-		previousOpenedProject = project;
-	}
 	
-	
-	public static String getApplicationUserId() {
-		return applicationUserId;
-	}
-	public static void setApplicationUserId(String appUserId) {
-		applicationUserId = appUserId;
-	}
-	
+	/**
+	 * Main method and entry point to the app.
+	 */
 	public void onModuleLoad() {
-		//Log.debug("AAAAAAAAAAAAAAAAAAAAAAAA");
 		
+		setLogging();
+		//app's main event bus. It's used to distribute events in the app.
+		//TODO: why not use DOM events instead?
+		EventBus eventBus = clientFactory.getEventBus();
+		PlaceController placeController = clientFactory.getPlaceController();
+		// Start ActivityManager for the main widget with the ActivityMapper
+		ActivityMapper activityMapper = new AppActivityMapper(clientFactory);
+		ActivityManager activityManager = new ActivityManager(activityMapper,
+				eventBus);
+		//TODO: set id or class name and use CSS instead
+		appWidget.getElement().getStyle().setPaddingBottom(20, Unit.PX);
+		activityManager.setDisplay(appWidget);
+
+		//Create an instance for history mapper. It will map places with history state.
+		AppPlaceHistoryMapper historyMapper = GWT
+				.create(AppPlaceHistoryMapper.class);
+		PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(
+				historyMapper);
+		historyHandler.register(placeController, eventBus, defaultPlace);
+		
+		runTasksQueue(historyHandler);
+	}
+
+
+
+
+	/**
+	 * Set logging properties.
+	 * The app will catch all uncaughted exceptions and present it to the user if nescesary.
+	 */
+	private void setLogging() {
 		GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			@Override
 			public void onUncaughtException(Throwable e) {
@@ -139,39 +188,25 @@ public class RestClient implements EntryPoint {
 		
 		Logger.getLogger("").addHandler(clientFactory.getErrorDialogView().getHandler());
 		Logger.getLogger("").setLevel(Level.WARNING);
-		
-		setSyncData();
-		
-		final EventBus eventBus = clientFactory.getEventBus();
-		final PlaceController placeController = clientFactory.getPlaceController();
-		// Start ActivityManager for the main widget with our ActivityMapper
-		ActivityMapper activityMapper = new AppActivityMapper(clientFactory);
-		ActivityManager activityManager = new ActivityManager(activityMapper,
-				eventBus);
-		appWidget.getElement().getStyle().setPaddingBottom(20, Unit.PX);
-		activityManager.setDisplay(appWidget);
-
-		// Start PlaceHistoryHandler with our PlaceHistoryMapper
-		AppPlaceHistoryMapper historyMapper = GWT
-				.create(AppPlaceHistoryMapper.class);
-		final PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(
-				historyMapper);
-		historyHandler.register(placeController, eventBus, defaultPlace);
-		
-		//
-		// Start up application. 
-		//
-		
+	}
+	
+	/**
+	 * Run initialization tasks.
+	 * Tasks class will handle showing, hiding and updating status in loading screen.
+	 * See {@link TasksLoader} class description for more information.
+	 */
+	private void runTasksQueue(final PlaceHistoryHandler historyHandler){
+		TasksLoader.addTask(new SetSyncDataTask());
 		TasksLoader.addTask(new InitializeDatabaseTask());
 		TasksLoader.addTask(new FirstRunTask());
 		TasksLoader.addTask(new InitializeAppHandlersTask());
+		//@TODO: is menu must be created dynamically?
 		TasksLoader.addTask(new CreateMenuTask());
-		
 		TasksLoader.runTasks(new Callback<Void, Void>() {
 
 			@Override
 			public void onFailure(Void reason) {
-				Log.error("Initialize error...");
+				Log.error("Initialize error... Check previous errors for cause.");
 			}
 
 			@Override
@@ -186,30 +221,31 @@ public class RestClient implements EntryPoint {
 				//
 				if (Window.Location.getHash().startsWith("#import/")) {
 					String importUID = Window.Location.getHash().substring(8);
-					placeController.goTo(ImportExportPlace.fromServerImport(importUID));
+					clientFactory.getPlaceController().goTo(ImportExportPlace.fromServerImport(importUID));
 				} else {
 					historyHandler.handleCurrentHistory();
 				}
 				fixChromeLayout();
-				eventBus.fireEvent(new ApplicationReadyEvent());
+				clientFactory.getEventBus().fireEvent(new ApplicationReadyEvent());
 				initializing = false;
 			}
 		});
 	}
 	
 	
-	
-	
 	/**
-	 * 
+	 * Synchronized between app's instances debug state.
 	 * @return true if debug output is enabled, false otherwise
 	 */
 	public static boolean isDebug() {
-		return SyncAdapter.isDebug();
+		return SyncAdapter.debug;
 	}
-	
+	/**
+	 * Set and sync debug options status.
+	 * @param debug
+	 */
 	public static void setDebug(boolean debug){
-		SyncAdapter.setDebug(debug);
+		SyncAdapter.debug = debug;
 	}
 	
 	
@@ -217,45 +253,11 @@ public class RestClient implements EntryPoint {
 	 * @return true if history feature output is enabled, false otherwise
 	 */
 	public static boolean isHistoryEabled(){
-		return SyncAdapter.isHistory();
+		return SyncAdapter.history;
 	}
 	
 	public static void setHistoryEnabled(boolean historyEnabled){
-		SyncAdapter.setHistory(historyEnabled);
-	}
-
-	/**
-	 * Sets synch data from chrome.storage.sync API
-	 */
-	private static void setSyncData(){
-		final Storage store = Storage.getLocalStorageIfSupported();
-		//first, restore local value, for quick access
-		String debugValue = store.getItem(LocalStore.DEBUG_KEY);
-		String historyValue = store.getItem(LocalStore.HISTORY_KEY);
-		String notificationsValue = store.getItem(LocalStore.NOTIFICATIONS_ENABLED_KEY);
-		String magicVarsValue = store.getItem(LocalStore.MAGIC_VARS_ENABLED_KEY);
-		if(debugValue != null && debugValue.equals("true")){
-			SyncAdapter.setDebug(true);
-		} else {
-			SyncAdapter.setDebug(false);
-		}
-		if(historyValue == null || historyValue.equals("true")){
-			SyncAdapter.setHistory(true);
-		} else {
-			SyncAdapter.setHistory(false);
-		}
-		if(notificationsValue != null && notificationsValue.equals("true")){
-			SyncAdapter.setNotifications(true);
-		} else {
-			SyncAdapter.setNotifications(false);
-		}
-		if(magicVarsValue != null && magicVarsValue.equals("true")){
-			SyncAdapter.setMagicVars(true);
-		} else {
-			SyncAdapter.setMagicVars(false);
-		}
-		SyncAdapter.sync();
-		SyncAdapter.observe();
+		SyncAdapter.history = historyEnabled;
 	}
 	
 	
@@ -503,7 +505,6 @@ public class RestClient implements EntryPoint {
 		}
 		
 		DriveCall.showGoogleForlderPickerDialog(accessToken, new DriveCall.SelectFolderHandler() {
-			
 			@Override
 			public void onSelect(String folderId) {
 				if(folderId == null || folderId.isEmpty()){
@@ -556,7 +557,7 @@ public class RestClient implements EntryPoint {
 	
 	
 	/**
-	 * Sometimes chrome freeze after layout change via javascript (not sure if is it).
+	 * Sometimes chrome freeze after layout change via javascript (just guessing).
 	 * Use this after operations when it's happen.
 	 */
 	public static final native void fixChromeLayout() /*-{
