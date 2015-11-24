@@ -17,6 +17,7 @@ package org.rest.client.activity;
 
 import java.util.ArrayList;
 import java.util.List;
+//import java.util.logging.Logger;
 
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
@@ -44,7 +45,9 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
  */
 public class SavedActivity extends ListActivity implements
 	SavedView.Presenter {
-
+	
+	/*private static final Logger log = Logger.getLogger(SavedActivity.class.getName());*/
+	
 	
 	//final private SavedPlace place;
 	//private EventBus eventBus;
@@ -209,6 +212,7 @@ public class SavedActivity extends ListActivity implements
 		DriveCall.hasSession(new DriveCall.SessionHandler() {
 			@Override
 			public void onResult(DriveAuth result) {
+								
 				if(result == null){
 					//no logged in user
 					DriveCall.auth(new DriveCall.SessionHandler() {

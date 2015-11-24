@@ -52,6 +52,7 @@ public class AdminServlet extends HttpServlet {
 		
 		HashMap<String, String> params = new HashMap<String, String>();
 		
+		@SuppressWarnings("unchecked")
 		Enumeration<String> names = req.getParameterNames();
 		while(names.hasMoreElements()){
 			String key = names.nextElement();

@@ -1,5 +1,7 @@
 package com.google.gwt.chrome.message;
 
+import java.util.logging.Logger;
+
 import com.google.gwt.chrome.def.BackgroundJsCallback;
 import com.google.gwt.chrome.def.BackgroundPageCallback;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -13,6 +15,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 public class BackgroundMessage implements ChromeMessagePassing {
 
 	private final ChromeMessagePassing impl;
+	private static final Logger log = Logger.getLogger(BackgroundMessage.class.getName());
 
 	/**
 	 * Create message passing to background page. If app is compiled an in
@@ -21,8 +24,10 @@ public class BackgroundMessage implements ChromeMessagePassing {
 	 */
 	public BackgroundMessage() {
 		if (isApiAvailable()) {
+			log.info("Chrome API will be used to communicate with background page");
 			impl = new ChromeMessagePassingImpl();
 		} else {
+			log.info("Content script will be used to communicate with background page");
 			impl = new ChromeCSmessagePassingImpl();
 		}
 	}

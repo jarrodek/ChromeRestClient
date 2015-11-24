@@ -22,16 +22,16 @@ function receiveMessage(e){
 	if(data.payload){
 		switch(data.payload){
 			case 'setEnvironment':
-			chrome.extension.sendMessage(data, function(response) {});
+			chrome.runtime.sendMessage(data, function(response) {});
 			break;
 			case "requestBegin": 
-				chrome.extension.sendMessage(data, function(response) {
+				chrome.runtime.sendMessage(data, function(response) {
 					window.postMessage({"source":"dev:cs", "payload":"requestBegin"}, location.href);
 				});
 			break;
 			case "getRequestData":
 			case "getExternalData":
-				chrome.extension.sendMessage(data, function(response) {
+				chrome.runtime.sendMessage(data, function(response) {
 					
 					if(response.payload&&response.data){
 						data.payload = response.payload;
@@ -47,10 +47,10 @@ function receiveMessage(e){
 				});
 			break;
 			case "copyToClipboard":
-				chrome.extension.sendMessage(data, function(response) {});
+				chrome.runtime.sendMessage(data, function(response) {});
 				break;
 			default:
-				chrome.extension.sendMessage(data, function(response) {
+				chrome.runtime.sendMessage(data, function(response) {
 					if(typeof response.payload != 'undefined'){
 						response = response.data;
 					}
