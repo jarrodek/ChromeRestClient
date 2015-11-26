@@ -40,7 +40,7 @@ import org.rest.client.event.RequestStartActionEvent;
 import org.rest.client.event.URLFieldToggleEvent;
 import org.rest.client.event.UrlValueChangeEvent;
 import org.rest.client.gdrive.DriveAuth;
-import org.rest.client.gdrive.DriveCall;
+import org.rest.client.gdrive.DriveApi;
 import org.rest.client.gdrive.DriveFileItem;
 import org.rest.client.jso.ExternalDriveCreateData;
 import org.rest.client.jso.ExternalDriveCreateResponse;
@@ -258,12 +258,12 @@ public class RequestActivity extends AppActivity implements
 		loader.show();
 		loader.center();
 		
-		DriveCall.hasSession(new DriveCall.SessionHandler() {
+		DriveApi.hasSession(new DriveApi.SessionHandler() {
 			@Override
 			public void onResult(DriveAuth result) {
 				if(result == null){
 					//not logged in user
-					DriveCall.auth(new DriveCall.SessionHandler() {
+					DriveApi.auth(new DriveApi.SessionHandler() {
 						@Override
 						public void onResult(DriveAuth result) {
 							if(result == null){
@@ -283,7 +283,7 @@ public class RequestActivity extends AppActivity implements
 	
 	private void getFileMetadataFromDrive(final String fileId, final DialogBox loader){
 		
-		DriveCall.getFileMetadata(fileId, new DriveCall.FileMetadataHandler() {
+		DriveApi.getFileMetadata(fileId, new DriveApi.FileMetadataHandler() {
 			
 			@Override
 			public void onLoad(DriveFileItem response) {
@@ -323,7 +323,7 @@ public class RequestActivity extends AppActivity implements
 		
 		currentRequestEtag = fileEtag;
 		
-		DriveCall.downloadFile(fileUrl, new DriveCall.FileDownloadHandler() {
+		DriveApi.downloadFile(fileUrl, new DriveApi.FileDownloadHandler() {
 			@Override
 			public void onError(JavaScriptException exc) {
 				loader.hide();

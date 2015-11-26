@@ -22,7 +22,7 @@ import java.util.List;
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
 import org.rest.client.gdrive.DriveAuth;
-import org.rest.client.gdrive.DriveCall;
+import org.rest.client.gdrive.DriveApi;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SavedPlace;
 import org.rest.client.storage.StoreResultCallback;
@@ -209,13 +209,13 @@ public class SavedActivity extends ListActivity implements
 
 	@Override
 	public void openFromGoogleDrive() {
-		DriveCall.hasSession(new DriveCall.SessionHandler() {
+		DriveApi.hasSession(new DriveApi.SessionHandler() {
 			@Override
 			public void onResult(DriveAuth result) {
 								
 				if(result == null){
 					//no logged in user
-					DriveCall.auth(new DriveCall.SessionHandler() {
+					DriveApi.auth(new DriveApi.SessionHandler() {
 						@Override
 						public void onResult(DriveAuth result) {
 							if(result == null){
@@ -232,7 +232,7 @@ public class SavedActivity extends ListActivity implements
 		});
 	}
 	private void pickDriveArcFile(final String accessToken){
-		DriveCall.showGoogleSavedFilePickerDialog(accessToken, new DriveCall.SelectFolderHandler() {
+		DriveApi.showSavedFilesPicker(accessToken, new DriveApi.SelectFolderHandler() {
 			@Override
 			public void onSelect(String fileId) {
 				goTo(RequestPlace.Tokenizer.fromDriveFile(fileId));

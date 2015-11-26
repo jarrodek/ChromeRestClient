@@ -526,5 +526,4 @@ function handlePickerLoad() {
 }
 
 
-
 arc.app.drive.initialize();

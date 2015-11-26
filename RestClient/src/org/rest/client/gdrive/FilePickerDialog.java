@@ -34,6 +34,13 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 
+/**
+ * A file picker dialog to select file/folder from Google Drive.
+ * The file
+ * 
+ * @author Pawel Psztyc
+ *
+ */
 public class FilePickerDialog implements KeyDownHandler {
 
 	interface Binder extends UiBinder<DialogBox, FilePickerDialog> {
@@ -157,7 +164,7 @@ public class FilePickerDialog implements KeyDownHandler {
 		requestProgress = true;
 		
 		loader.removeClassName("hidden");
-		DriveCall.getFileList(new DriveCall.FileRequestHandler() {
+		DriveApi.getFileList(new DriveApi.FileRequestHandler() {
 			@Override
 			public void onLoad(DriveFileListResponse response) {
 				
@@ -179,7 +186,7 @@ public class FilePickerDialog implements KeyDownHandler {
 			public void onError(DriveError error) {
 				if(error.getCode() == 401){
 					//Unauthorized
-					DriveCall.auth(new DriveCall.SessionHandler() {
+					DriveApi.auth(new DriveApi.SessionHandler() {
 						@Override
 						public void onResult(DriveAuth result) {
 							if(result == null){

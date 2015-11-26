@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import org.rest.client.RestClient;
 import org.rest.client.analytics.GoogleAnalytics;
+import org.rest.client.gdrive.GoogleDrive;
 import org.rest.client.gdrive.DriveFileItem;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.URLParser;
@@ -397,7 +398,9 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		
 		doSaveGdrive();
 	}
-	
+	/**
+	 * TODO: views shouldn't perform logic actions.
+	 */
 	void doSaveGdrive(){
 		RestClient.collectRequestData(new Callback<RequestObject, Throwable>() {
 			
@@ -419,7 +422,8 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				if(gDriveCreateFolder != null && gDriveCreateFolder.isEmpty()){
 					gDriveCreateFolder = null;
 				}
-				RestClient.saveRequestToGDrive(result, gDriveCreateFolder, new Callback<DriveFileItem, Throwable>() {
+				
+				GoogleDrive.saveRequestFile(result, gDriveCreateFolder, new Callback<DriveFileItem, Throwable>() {
 					
 					@Override
 					public void onSuccess(DriveFileItem result) {

@@ -69,7 +69,7 @@
 			<div class="actions">
 				<h5:HTML5Progress ui:field="progressIndicator" width="200px" height="20px"></h5:HTML5Progress>
 				<g:Button styleName="button" ui:field="clearButton" title="Clear current form settings">Clear</g:Button>
-				<g:Button styleName="button" ui:field="sendButton" title="Send current data">Send</g:Button>
+				<g:Button styleName="sendButton button" ui:field="sendButton" title="Send current data">Send</g:Button>
 			</div>
 		</div>
 	</g:HTMLPanel>

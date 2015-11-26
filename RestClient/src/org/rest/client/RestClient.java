@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012 Paweł Psztyć
+ * Copyright 2012 Pawel Psztyc
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,6 @@ import java.util.logging.Logger;
 import org.rest.client.event.ApplicationReadyEvent;
 import org.rest.client.event.NewProjectAvailableEvent;
 import org.rest.client.event.SavedRequestEvent;
-import org.rest.client.gdrive.DriveAuth;
-import org.rest.client.gdrive.DriveCall;
-import org.rest.client.gdrive.DriveFileItem;
 import org.rest.client.mvp.AppActivityMapper;
 import org.rest.client.mvp.AppPlaceHistoryMapper;
 import org.rest.client.place.ImportExportPlace;
@@ -33,7 +30,6 @@ import org.rest.client.request.FilesObject;
 import org.rest.client.request.HttpMethodOptions;
 import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.LocalStore;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.store.objects.ProjectObject;
@@ -53,7 +49,6 @@ import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.place.shared.Place;
@@ -428,116 +423,6 @@ public class RestClient implements EntryPoint {
 			}
 		});
 	}
-	/**
-	 * Save the request to Google Drive.
-	 * 
-	 * @param obj The request to save. If request object contains gDriveId it will overwrite existing file instead of creating new.
-	 * @param callback
-	 */
-	public static void saveRequestToGDrive(RequestObject obj, Callback<DriveFileItem, Throwable> callback){
-		saveRequestToGDrive(obj, null, callback);
-	}
-	/**
-	 * Save request object in Google Drive.
-	 * @param obj The request to save
-	 * @param parentId If not null (create action from Drive UI) will not show folder selector.
-	 * @param callback
-	 */
-	public static void saveRequestToGDrive(final RequestObject obj, final String parentId, final Callback<DriveFileItem, Throwable> callback){
-		DriveCall.hasSession(new DriveCall.SessionHandler() {
-			@Override
-			public void onResult(DriveAuth result) {
-				if(result == null){
-					//no logged in user
-					DriveCall.auth(new DriveCall.SessionHandler() {
-						@Override
-						public void onResult(DriveAuth result) {
-							if(result == null){
-								callback.onFailure(new Throwable("Authorization required."));
-								return;
-							}
-							doSaveRequestToGDrive(obj, callback, result.getAccessToken(),parentId);
-						}
-					}, false);
-					return;
-				}
-				doSaveRequestToGDrive(obj, callback, result.getAccessToken(),parentId);
-			}
-		});
-	}
-	
-	private static void doSaveRequestToGDrive(final RequestObject obj, 
-			final Callback<DriveFileItem, Throwable> callback, String accessToken, 
-			final String folderId){
-		
-		if(obj.getGDriveId() != null){
-			if(RestClient.isDebug()){
-				Log.debug("Updating Google Drive™ item");
-			}
-			DriveCall.updateFile(obj.getGDriveId(), obj, new DriveCall.FileUploadHandler() {
-				@Override
-				public void onLoad(DriveFileItem response) {
-					clientFactory.getEventBus().fireEvent(new SavedRequestEvent(obj));
-					callback.onSuccess(response);
-				}
-				
-				@Override
-				public void onError(JavaScriptException exc) {
-					callback.onFailure(exc);
-				}
-			});
-			return;
-		}
-		
-		if(folderId != null){
-			DriveCall.insertNewFile(folderId, obj.getName(), obj, new DriveCall.FileUploadHandler() {
-				@Override
-				public void onLoad(DriveFileItem response) {
-					callback.onSuccess(response);
-				}
-				
-				@Override
-				public void onError(JavaScriptException exc) {
-					callback.onFailure(exc);
-				}
-			});
-			return;
-		}
-		
-		DriveCall.showGoogleForlderPickerDialog(accessToken, new DriveCall.SelectFolderHandler() {
-			@Override
-			public void onSelect(String folderId) {
-				if(folderId == null || folderId.isEmpty()){
-					callback.onSuccess(null);
-					return;
-				}
-				Storage storage = Storage.getLocalStorageIfSupported();
-				storage.setItem(LocalStore.LATEST_GDRIVE_FOLDER, folderId);
-				
-				
-				DriveCall.insertNewFile(folderId, obj.getName(), obj, new DriveCall.FileUploadHandler() {
-					@Override
-					public void onLoad(DriveFileItem response) {
-						callback.onSuccess(response);
-					}
-					
-					@Override
-					public void onError(JavaScriptException exc) {
-						callback.onFailure(exc);
-					}
-				});
-			}
-			
-			@Override
-			public void onCancel() {
-				callback.onSuccess(null);
-			}
-		});
-	}
-	
-	
-	
-	
 	
 	
 	/**
