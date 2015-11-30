@@ -3,17 +3,17 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	
 	<g:HTMLPanel ui:field="root">
-		<h1 class="About_View_contentTitle About_View_about">Advanced Rest Client Application</h1>
+		<h1 class="paper-font-title About_View_contentTitle">Advanced Rest Client Application</h1>
 		<section class="About_View_aboutContent">
 			<div ui:field="versionField"></div>
 			<div class="credits">
-				Copyright © 2012 Paweł Psztyć (Poland)
+				Copyright © 2012 Paweł Psztyć (Poland, UK)
 			</div>
 			<div class="source">
 				Source code at
-				<a href="http://code.google.com/p/chrome-rest-client/">Google Code Hosting</a>
+				<a href="https://github.com/jarrodek/ChromeRestClient">GitHub</a>
 				under Apache License.<br/>
-				Report issues at <a target="_blank" href="http://code.google.com/p/chrome-rest-client/issues/list?utm_source=ARC&amp;utm_medium=InsideApplication&amp;utm_campaign=About">app issue list</a> (thanks).<br/>
+				Report issues at <a target="_blank" href="https://github.com/jarrodek/ChromeRestClient/issues?utm_source=ARC&amp;utm_medium=InsideApplication&amp;utm_campaign=About">app issue list</a> (thanks).<br/>
 				Review the application at <a target="_blank" href="https://chrome.google.com/webstore/detail/advanced-rest-client-appl/hgmloofddffdnphfgcellkdfbfbjeloo/reviews?hl=en-US&amp;utm_source=ARC&amp;utm_medium=InsideApplication&amp;utm_campaign=About">Chrome Web Store</a> (double thanks).<br/>
 				The application's blog: <a target="_blank" href="http://restforchrome.blogspot.com/?utm_source=ARC&amp;utm_medium=InsideApplication&amp;utm_campaign=About">Advanced REST client for Google Chrome. Blog for Google Chrome application.</a><br/>
 			</div>
@@ -22,7 +22,7 @@
 			</div>
 		</section>
 		<section class="About_View_aboutContent">
-			<h3>+1 me</h3>
+			<h3 class="paper-font-headline">+1 me</h3>
 			<div class="g-plusone" data-annotation="inline" data-width="400" data-href="https://chrome.google.com/webstore/detail/hgmloofddffdnphfgcellkdfbfbjeloo"></div>
 			
 			<div class="About_View_facebookShare">
@@ -33,11 +33,9 @@
 					<img src="img/twitter-bird-blue-on-white-50.png" alt="Tweet about Rest Client" title="Tweet about Rest Client"/>
 				</a>
 			</div>
-			
-			
 		</section>
 		<section class="About_View_aboutContent">
-			<h3 class="About_View_donateTitle">If you like my work, please donate :)</h3>
+			<h3 class="paper-font-headline">If you like my work, please donate :)</h3>
 			<p>
 				Please, express your gratitude donating my work ;)<br/>
 				<strong>&euro;5</strong> will be OK if each of you donate!
@@ -53,10 +51,18 @@
 					height="1" />
 			</form>
 		</section>
+		
 		<section class="About_View_aboutContent">
-			<h3>Changelog</h3>
-			<p>5/4/2013</p>
-			<ul>
+			<h3 class="paper-font-headline">Changelog</h3>
+			<p class="paper-font-title">11/30/2015</p>
+			<ul class="paper-font-body1">
+			    <li>Fixed Google Drive integration</li>
+			    <li>Added Google File Picker</li>
+			    <li>Removed app name from the main view</li>
+			    <li>Changed font to Roboto</li>
+			</ul>
+			<p class="paper-font-title">5/4/2013</p>
+			<ul class="paper-font-body1">
 				<li>Added ability to export history data as JSON file recognizable by the app</li>
 				<li>"Save request dialog" will open only once pressing CTRL+S couple of times.</li>
 				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=174">Issue 174</a>: If-Modified-Since format now follow RFC.</li>
@@ -66,36 +72,36 @@
 				<li>CodeMirror upgrade to v3.12</li>
 				<li>Added "options page" to app's manifest. Right click on the app icon to enter options page.</li>
 			</ul>
-			<p>4/11/2013</p>
-			<ul>
+			<p class="paper-font-title">4/11/2013</p>
+			<ul class="paper-font-body1">
 				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=155">Issue 155</a>: Default "Content-Type" header can't be saved</li>
 				<li>Changed JSON response view</li>
 			</ul>
-			<p>2/23/2013</p>
-			<ul>
+			<p class="paper-font-title">2/23/2013</p>
+			<ul class="paper-font-body1">
 				<li>Added hide option for response headers.</li>
 				<li>Added options menu for URL panel (hover URL and then setting icon).</li>
 			</ul>
-			<p>1/2/2013</p>
-			<ul>
+			<p class="paper-font-title">1/2/2013</p>
+			<ul class="paper-font-body1">
 				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=137">Issue 137</a>: Escaping &lang; &rang; in header response. </li>
 				<li>Link to "open in JSON tab" is now always visible in "Parsed" tab.</li>
 			</ul>
-			<p>12/22/2012</p>
-			<ul>
+			<p class="paper-font-title">12/22/2012</p>
+			<ul class="paper-font-body1">
 				<li>Fixed issue with handling error during app definition download.</li>
 				<li>Added support for networks where contact to app server is impossible.</li>
 				<li>Fixed Haved and History view when there is no items.</li>
 			</ul>
-			<p>12/15/2012</p>
-			<ul>
+			<p class="paper-font-title">12/15/2012</p>
+			<ul class="paper-font-body1">
 				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=129">Issue 129</a>: Allow deletion and renaming of projects</li>
 				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=121">Issue 121</a>: Project are not exporting</li>
 				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=121">Issue 132</a>: User-Agent changes persists. (Chrome >= beta)</li>
 				<li>Header of the request view now include a request name (if any).</li>
 			</ul>
-			<p>12/09/2012</p>
-			<ul>
+			<p class="paper-font-title">12/09/2012</p>
+			<ul class="paper-font-body1">
 				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=129">Issue 129</a>: Combobox to select requests in project always selects the first item</li>
 				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=128">Issue 128</a>: Mutlipart Boundary not sent in request body when file is not attach using mutlipart/form-data</li>
 				<li>Fixed <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=117">Issue 117</a>: How do you delete a project ?</li>
