@@ -323,6 +323,11 @@ WebRequest.prototype.parseHeaders = function(str) {
 }
 
 
+
+
+
+
+
 function MessageHandling(webRequest){
     this.webRequest = webRequest;
 }
@@ -333,14 +338,14 @@ MessageHandling.prototype.init = function(){
 MessageHandling.prototype.setListeners = function(){
     window.requestAction = function(request, callback){
         callback = callback || new Function();
-        this.handleMessage(request, callback);
+        this.handleMessage(request, callback, null);
     }.bind(this);
 	
     /**
 	 * Registers listener to handle extension message passing from content script.
 	 */
-    chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
-        this.handleMessage(request, sendResponse);
+    chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+        this.handleMessage(request, sendResponse, sender);
         return true;
     }.bind(this));
     
@@ -399,7 +404,7 @@ MessageHandling.prototype.setListeners = function(){
     
 }
 
-MessageHandling.prototype.handleMessage = function(request, sendResponse){
+MessageHandling.prototype.handleMessage = function(request, sendResponse, sender){
     if (typeof request == "string") {
         try{
             request = JSON.parse(request);
@@ -426,9 +431,9 @@ MessageHandling.prototype.handleMessage = function(request, sendResponse){
     }
     var method = request.payload;
     if(this[method]){
-        this[method](request, responseAsObject, sendResponse);
+        this[method](request, responseAsObject, sendResponse, sender);
     } else {
-        this.handleApiDirectCall(request, responseAsObject, sendResponse);
+        this.handleApiDirectCall(request, responseAsObject, sendResponse, sender);
     }
 }
 MessageHandling.prototype.handleApiDirectCall = function(request, responseAsObject, sendResponse){
@@ -704,7 +709,29 @@ MessageHandling.prototype.runApplicationFromGoogleDrive = function(requestDetail
     window.externalDataHolder[uuid] = requestDetails;
     return viewTabUrl;
 }
-
+MessageHandling.prototype.finishOAuth = function(request, responseAsObject, sendResponse, sender){
+	
+	var param = chrome.extension.getURL('oauth2/oauth2.html') + request.data;
+	
+	var url = decodeURIComponent(param.match(/&from=([^&]+)/)[1]);
+	var index = url.indexOf('?');
+	if (index > -1) {
+	  url = url.substring(0, index);
+	}
+	
+	// Derive adapter name from URI and then finish the process.
+	try{
+		var adapterName = OAuth2.lookupAdapterName(url);
+		var finisher = new OAuth2(adapterName, OAuth2.FINISH, param);
+		var senderId = sender ? sender.tab.id : null;
+		if(senderId){
+			chrome.tabs.remove(senderId);
+		}
+	} catch(e){
+		//@TODO: no body in background page
+		document.body.innerHTML = e.message;
+	}
+};
 
 
 
@@ -761,7 +788,7 @@ messageHandling.init();
  * </pre>
  * Via extensions message passing system:
  * <pre>
- * chrome.extension.sendMessage(THIS_APPLICATION_ID_FROM_CHROME_WEB_STORE, message, function(response) {});
+ * chrome.runtime.sendMessage(THIS_APPLICATION_ID_FROM_CHROME_WEB_STORE, message, function(response) {});
  * </pre>
  * Via webIntents:
  * <pre>

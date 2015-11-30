@@ -9,6 +9,7 @@ setTimeout(function(){
 	bouncerate_timer = 1;
 },60000);
 window.onbeforeunload = trackDrop;
+
 (function() {
 	var ga = document.createElement('script');
 	ga.type = 'text/javascript';
@@ -17,7 +18,6 @@ window.onbeforeunload = trackDrop;
 	var s = document.getElementsByTagName('script')[0];
 	s.parentNode.insertBefore(ga, s);
 })();
-window.URL = window.webkitURL || window.URL;
 
 function loadPlusApi(){
 	var ga = document.createElement('script');

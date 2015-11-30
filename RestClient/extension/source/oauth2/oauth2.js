@@ -24,13 +24,13 @@
  * @param {String}
  *            config Alternatively, OAuth2.FINISH for the finish flow
  */
-var OAuth2 = function(adapterName, config) {
+var OAuth2 = function(adapterName, config, url) {
 	this.adapterName = adapterName;
 	var that = this;
 	OAuth2.loadAdapter(adapterName, function() {
 		that.adapter = OAuth2.adapters[adapterName];
 		if (config == OAuth2.FINISH) {
-			that.finishAuth();
+			that.finishAuth(url);
 		} else if (config) {
 			that.updateLocalStorage();
 
@@ -217,7 +217,7 @@ OAuth2.prototype.refreshAccessToken = function(refreshToken, callback) {
  * Extracts authorizationCode from the URL and makes a request to the last leg
  * of the OAuth 2.0 process.
  */
-OAuth2.prototype.finishAuth = function() {
+OAuth2.prototype.finishAuth = function(url) {
 	var authorizationCode = null;
 	var that = this;
 
@@ -225,7 +225,7 @@ OAuth2.prototype.finishAuth = function() {
 	function callback(error) {
 		var views = chrome.extension.getViews();
 		for ( var i = 0, view; view = views[i]; i++) {
-			console.log(view);
+			//console.log(view);
 			if (view['oauth-callback']) {
 				view['oauth-callback'](error);
 				delete view['oauth-callback'];
@@ -241,13 +241,12 @@ OAuth2.prototype.finishAuth = function() {
 
 		// Once we get here, close the current tab and we're good to go.
 		// The following works around bug: crbug.com/84201
-		window.open('', '_self', '');
-		window.close();
+		/*window.open('', '_self', '');
+		window.close();*/
 	}
-
 	try {
 		authorizationCode = this.adapter
-				.parseAuthorizationCode(window.location.href);
+				.parseAuthorizationCode(url ? url : window.location.href);
 		console.log(authorizationCode);
 	} catch (e) {
 		console.error(e);
