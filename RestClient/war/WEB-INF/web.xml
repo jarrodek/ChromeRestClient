@@ -83,6 +83,7 @@
 	
 	<security-constraint>
         <web-resource-collection>
+            <web-resource-name>Admin</web-resource-name>
         	<url-pattern>/admin</url-pattern>
             <url-pattern>/admin/*</url-pattern>
             <url-pattern>/admin.jsp</url-pattern>

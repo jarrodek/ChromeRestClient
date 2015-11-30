@@ -402,6 +402,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	 * TODO: views shouldn't perform logic actions.
 	 */
 	void doSaveGdrive(){
+		this.dialog.setVisible(false);
 		RestClient.collectRequestData(new Callback<RequestObject, Throwable>() {
 			
 			@Override

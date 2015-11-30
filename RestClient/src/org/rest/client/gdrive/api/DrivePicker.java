@@ -1,77 +1,82 @@
 package org.rest.client.gdrive.api;
 
 
-
+/**
+ * A class responsible for handling Google Drive files using 
+ * Google Picker API.
+ * It's a wrapper for native JS library.
+ * 
+ * @example
+ * 
+ * 
+ * @author Pawel Psztyc
+ *
+ */
 public class DrivePicker {
 	
-	public static native Boolean isPickerReady() /*-{
-		return !!($wnd.drivePickerReady);
+	/**
+	 * Check if Picker API is loaded.
+	 * @return True if picker API is available.
+	 */
+	private static final native boolean isLoaded() /*-{
+		if(typeof $wnd.google === "undefined") return false;
+		if(typeof $wnd.google.picker === "undefined") return false;
+		return true;
 	}-*/;
 	
-	
-	public interface PickerHandler {
-		public void handleResponse(PickerResponse response);
-	}
-	
-	
-	public static native void getSpreadsheets(PickerHandler handler) /*-{
-		var callback = $entry(function(data) {
-			if (data[$wnd.google.picker.Response.ACTION] == $wnd.google.picker.Action.PICKED
-			|| data[$wnd.google.picker.Response.ACTION] == $wnd.google.picker.Action.CANCEL) {
-				handler.@org.rest.client.gdrive.api.DrivePicker.PickerHandler::handleResponse(Lorg/rest/client/gdrive/api/PickerResponse;)(data);
-			}
+	/**
+	 * Before Drive file picker can be used the app need to download picker's libraries.
+	 * This function will load required libraries and call event listener when done.
+	 * 
+	 * This method will call arc.app.drive.picker.load function from drive.js library.
+	 *  
+	 * @param handler
+	 */
+	public static final native void loadPicker(LoadPickerHandler handler) /*-{
+		$wnd.arc.app.drive.picker.load(function(){
+			handler.@org.rest.client.gdrive.api.LoadPickerHandler::onLoad()();
 		});
-		var spreadsheetView = new $wnd.google.picker.View($wnd.google.picker.ViewId.SPREADSHEETS);
-		
-        var uploadView = new $wnd.google.picker.DocsUploadView();
-		var picker = new $wnd.google.picker.PickerBuilder()
-			.addView(spreadsheetView)
-			.addView(uploadView)
-			.setCallback(callback)
-			.setAppId('10525470235')
-			.build();
-		picker.setVisible(true);
 	}-*/;
 	
+	/**
+	 * Pick up a folder from Google Drive using Google picker.
+	 * This method will open Picker and allow user to pick up a folder located on their Drive account.
+	 * 
+	 * An access token is required to ensure we have valid session.
+	 * 
+	 * @param handler A callback method to be called after dialog close.
+	 * @param authToken An access token to be used with the request.
+	 */
 	public static native void getFolder(PickerHandler handler, String authToken) /*-{
-		var callback = $entry(function(data) {
-			if (data[$wnd.google.picker.Response.ACTION] == $wnd.google.picker.Action.PICKED
-			|| data[$wnd.google.picker.Response.ACTION] == $wnd.google.picker.Action.CANCEL) {
-				handler.@org.rest.client.gdrive.api.DrivePicker.PickerHandler::handleResponse(Lorg/rest/client/gdrive/api/PickerResponse;)(data);
-			}
-		});
-		var folderView = new $wnd.google.picker.View($wnd.google.picker.ViewId.FOLDERS);
-		var pickerBuilder = new $wnd.google.picker.PickerBuilder()
-			.addView(folderView)
-			.setCallback(callback)
-			.setAppId('10525470235');
-		if(authToken){
-			pickerBuilder.setOAuthToken(authToken);
+		if(!authToken){
+			throw "OAuth token is required to use File Picker.";
 		}
-		var picker = pickerBuilder.build();
-		picker.setVisible(true);
+		var callback = $entry(function(data) {
+			handler.@org.rest.client.gdrive.api.PickerHandler::handleResponse(Lorg/rest/client/gdrive/api/PickerResponse;)(data);
+		});
+		$wnd.arc.app.drive.picker.load(function(){
+			$wnd.arc.app.drive.picker.getFolder(authToken, callback);
+		});
 	}-*/;
 	
-	public static native void getArcRequestFile(PickerHandler handler, String authToken) /*-{
-		var callback = $entry(function(data) {
-			if (data[$wnd.google.picker.Response.ACTION] == $wnd.google.picker.Action.PICKED
-			|| data[$wnd.google.picker.Response.ACTION] == $wnd.google.picker.Action.CANCEL) {
-				handler.@org.rest.client.gdrive.api.DrivePicker.PickerHandler::handleResponse(Lorg/rest/client/gdrive/api/PickerResponse;)(data);
-			}
-		});
-		var view = new $wnd.google.picker.View($wnd.google.picker.ViewId.DOCS);
-      	view.setMimeTypes("application/restclient+data");
-		
-		var pickerBuilder = new $wnd.google.picker.PickerBuilder()
-			//.enableFeature($wnd.google.picker.Feature.NAV_HIDDEN)
-			.setCallback(callback)
-			.addView(view)
-          	.addView(new $wnd.google.picker.DocsUploadView())
-			.setAppId('10525470235');
-		if(authToken){
-			pickerBuilder.setOAuthToken(authToken);
+	/**
+	 * Pick up application's file from Google Drive using Google Picker.
+	 * This method will open Picker and allow user to pick up the file.
+	 * 
+	 * An access token is required to ensure we have valid session.
+	 * 
+	 * @param handler A callback method to be called after dialog close.
+	 * @param authToken An access token to be used with the request.
+	 */
+	public static native void getRequestFile(PickerHandler handler, String authToken) /*-{
+		if(!authToken){
+			throw "OAuth token is required to use File Picker.";
 		}
-		var picker = pickerBuilder.build();
-		picker.setVisible(true);
+		var callback = $entry(function(data) {
+			handler.@org.rest.client.gdrive.api.PickerHandler::handleResponse(Lorg/rest/client/gdrive/api/PickerResponse;)(data);
+		});
+		$wnd.arc.app.drive.picker.load(function(){
+			$wnd.arc.app.drive.picker.getAppFile(authToken, callback);
+		});
 	}-*/;
 }
