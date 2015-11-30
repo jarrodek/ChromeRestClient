@@ -1,0 +1,33 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	
+	<g:HTMLPanel styleName="Socket_View_container">
+		<g:HTMLPanel ui:field="urlPanel" addStyleNames="Socket_View_urlContainer">
+			
+		</g:HTMLPanel>
+		<div class="Socket_View_controlsBar">
+			<div class="Socket_View_connectionStatus">
+				<span class="Socket_View_connectionLabel">Connection status: </span>
+				<span ui:field="statusImage" class="Socket_View_disconnected Socket_View_statusImage"></span>
+				<g:InlineLabel ui:field="connectionStatusDisplay">disconnected</g:InlineLabel>
+			</div>
+			<div class="Socket_View_actionBar">
+				<g:Button styleName="button" ui:field="connectButton">Connect</g:Button>
+				<g:Button styleName="button" ui:field="disconnectButton" visible="false">Disconnect</g:Button>
+			</div>
+		</div>
+		<div class="Socket_View_messagePanel">
+			<g:TextArea ui:field="messageField" width="100%" height="40px"></g:TextArea>
+			<div class="Socket_View_messageActionBar">
+				<g:Button styleName="button" ui:field="sendButton">Send</g:Button>
+			</div>
+		</div>
+		<div class="Socket_View_resultPanel">
+			<span class="Socket_View_outputLabel">Output:</span> 
+			<g:Anchor href="about:blank" ui:field="clearAnchor" styleName="Socket_View_clearAnchor">clear</g:Anchor> 
+			<g:Anchor href="about:blank" ui:field="saveAnchor" styleName="Socket_View_clearAnchor">save as file</g:Anchor>
+			<div ui:field="outputPanel" class="Socket_View_output"></div>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder> 

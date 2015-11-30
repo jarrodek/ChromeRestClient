@@ -1,0 +1,29 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'
+	xmlns:h5="urn:import:org.rest.client.ui.html5">
+	<g:DialogBox ui:field="dialog" modal="true"
+		animationEnabled="true" glassEnabled="true">
+		<g:HTMLPanel ui:field="contents" styleName="container">
+			<div class="dialogTitle">
+				<span>Unable to download application data.</span>
+			</div>
+			<div>
+				Will try again next time.<br/>
+				However, if you can't access application server using this network try following:
+				<ol>
+					<li>change network or connect via VPN to another network</li>
+					<li>download file from <a href="https://chromerestclient.appspot.com/static/definitions.json" target="_blank">https://chromerestclient.appspot.com/static/definitions.json</a></li>
+					<li>use file input below to manually import file</li>
+				</ol>
+			</div>
+			<div class="">
+				<h5:HTML5FileUpload ui:field="fileImport" multiple="false"></h5:HTML5FileUpload>
+			</div>
+			<div class="hidden Add_Encoding_View_errorField" ui:field="errorField"></div>
+			<div class="dialogButtons">
+				<g:Button styleName="button" ui:field="cancel">Close</g:Button>
+				<span class="china-download">Users in China may not be able to download application data</span>
+			</div>
+		</g:HTMLPanel>
+	</g:DialogBox>
+</ui:UiBinder>

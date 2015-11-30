@@ -1,0 +1,19 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	
+	<g:HTMLPanel ui:field="wrapper" styleName="Tutorial_wrapper">
+		<div class="Tutorial_contentWrapper">
+			<g:Anchor ui:field="close" styleName="Tutorial_close Tutorial_anchor">x</g:Anchor>
+			<div class="Tutorial_contentMargin">
+				<g:HTMLPanel ui:field="content" styleName="Tutorial_content"></g:HTMLPanel>
+				<g:HTMLPanel ui:field="controls" styleName="Tutorial_controls hidden">
+					<g:Anchor ui:field="prev" styleName="Tutorial_prev Tutorial_anchor">prev</g:Anchor>
+					<g:Anchor ui:field="next" styleName="Tutorial_next Tutorial_anchor">next</g:Anchor>
+					<g:Anchor ui:field="finish" styleName="Tutorial_finish Tutorial_anchor">finish</g:Anchor>
+				</g:HTMLPanel>
+			</div>
+		</div>
+		<div ui:field="arrow" class="Tutorial_arrow hidden"></div>
+	</g:HTMLPanel>
+</ui:UiBinder> 

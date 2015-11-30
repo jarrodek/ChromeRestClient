@@ -1,0 +1,31 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:h5="urn:import:org.rest.client.ui.html5">
+	
+	<g:HTMLPanel styleName="tabsPanel">
+		
+		<div class="tabs">
+			<div class="inlineButtonsGroup">
+				<g:InlineLabel ui:field="rawTab" styleName="inlineButton inlineButtonChecked">Raw</g:InlineLabel>
+				<g:InlineLabel ui:field="formTab" styleName="inlineButton">Form</g:InlineLabel>
+			</div>
+			<span class="tabCaption">Headers</span>
+			<g:Label styleName="RequestHeaders_Widget_error" ui:field="errorInfo" visible="false">Probably the value you entered is not a valid headers value</g:Label>
+		</div>
+		<div ui:field="tabContent" class="tabsContent">
+			<section data-tab="raw" class="tabContent tabContentCurrent">
+				<g:TextArea ui:field="headersRawInput" styleName="RequestHeaders_Widget_rawInput"></g:TextArea>
+			</section>
+			<section data-tab="form" class="tabContent">
+				
+				<!-- Add new form value button -->
+				<g:Anchor styleName="addValueAnchor" ui:field="addHeader" href="#">Add new header</g:Anchor>
+					
+				<g:HTMLPanel ui:field="headersFormPanel" styleName="RequestHeaders_Widget_headersFormPanel">
+					
+				</g:HTMLPanel>
+			</section>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder>

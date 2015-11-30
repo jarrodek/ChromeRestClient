@@ -1,0 +1,14 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	
+	<g:HTMLPanel styleName="Query_Detailed_Row_row Query_Detailed_Row_flex">
+		<g:SimplePanel ui:field="keyPanel" styleName="Query_Detailed_Row_block Query_Detailed_Row_flex"></g:SimplePanel>
+		<g:SimplePanel ui:field="valuePanel" styleName="Query_Detailed_Row_block Query_Detailed_Row_flex Query_Detailed_Row_valueBlock"></g:SimplePanel>
+		<div class="Query_Detailed_Row_block Query_Detailed_Row_flex">
+			<g:InlineLabel styleName="removeButton" ui:field="removeButton" title="Remove">x</g:InlineLabel>
+			<g:InlineLabel styleName="formCtrl" ui:field="encodeButton" title="Encode query string. Use CTRL to replace + with %20">enc</g:InlineLabel>
+			<g:InlineLabel styleName="formCtrl" ui:field="decodeButton" title="Decode query string. Use CTRL to replace %20 with +">dec</g:InlineLabel>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder> 

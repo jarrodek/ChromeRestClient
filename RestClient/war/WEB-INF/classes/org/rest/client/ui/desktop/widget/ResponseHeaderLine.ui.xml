@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	
+	<g:HTMLPanel styleName="Response_Header_Line_hintWrapper">
+		<div class="Response_Header_Line_hintTitle" >
+			<span ui:field="headerNameTitle" class="Response_Header_Line_headerNameTitle"></span>: 
+			<span ui:field="headerValueTitle"></span>
+			<g:Anchor ui:field="hintHandler" addStyleNames="Response_Header_Line_hintHandler"></g:Anchor>
+		</div>
+		
+		
+		<div class="Response_Header_Line_hintInfo" style="display:none;" ui:field="hintParent">
+			<span class="Response_Header_Line_helpDescItem">
+				<span class="Response_Header_Line_hdName" ui:field="headerName"></span>
+				<br />
+				<span class="Response_Header_Line_hdDesc" ui:field="desc"></span>
+				<span class="Response_Header_Line_hdExample hidden" ui:field="example"></span>
+			</span>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder>

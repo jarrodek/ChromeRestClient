@@ -1,12 +1,8 @@
 /gwt-unitCache/*
 /extras/*
-/lib/*
 .classpath
 .settings/*
-var/WEB-INF/lib/*
-build/
-/lib/
 /gwt-unitCache/
 /extras/
-/extension/
-/target/
+/node_modules
+/node_modules/*
