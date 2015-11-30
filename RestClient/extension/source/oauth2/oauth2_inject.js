@@ -17,7 +17,6 @@
 
 // This script servers as an intermediary between oauth2.js and
 // oauth2.html
-
 // Get all ? params from this URL
 var url = window.location.href;
 var params = '?';
@@ -31,5 +30,13 @@ params += '&from=' + encodeURIComponent(url);
 
 // Redirect back to the extension itself so that we have priveledged
 // access again
-var redirect = chrome.extension.getURL('oauth2/oauth2.html');
-window.location = redirect + params;
+/*var redirect = chrome.extension.getURL('oauth2/oauth2.html');
+window.location = redirect + params;*/
+
+//Fix by Pawel Psztyc.
+var data = {
+		'payload': 'finishOAuth',
+		'response': 'object',
+		'data': params
+}
+chrome.runtime.sendMessage(data, function(response) {});

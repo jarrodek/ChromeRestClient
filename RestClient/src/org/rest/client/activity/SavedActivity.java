@@ -46,21 +46,14 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 public class SavedActivity extends ListActivity implements
 	SavedView.Presenter {
 	
-	/*private static final Logger log = Logger.getLogger(SavedActivity.class.getName());*/
-	
-	
-	//final private SavedPlace place;
-	//private EventBus eventBus;
 	private SavedView view;
 
 	public SavedActivity(SavedPlace place, ClientFactory clientFactory) {
 		super(clientFactory);
-		//this.place = place;
 	}
 
 	@Override
 	public void start(AcceptsOneWidget panel, com.google.gwt.event.shared.EventBus eventBus) {
-		//this.eventBus = eventBus;
 		super.start(panel, eventBus);
 		
 		view = clientFactory.getSavedView();
@@ -212,7 +205,6 @@ public class SavedActivity extends ListActivity implements
 		DriveApi.hasSession(new DriveApi.SessionHandler() {
 			@Override
 			public void onResult(DriveAuth result) {
-								
 				if(result == null){
 					//no logged in user
 					DriveApi.auth(new DriveApi.SessionHandler() {

@@ -31,6 +31,12 @@
  */
 const CLIENT_ID = '10525470235.apps.googleusercontent.com';
 /**
+ * App ID. Required by Drive Picker.
+ */
+const APP_ID = '10525470235';
+const API_KEY_PICKER = 'AIzaSyACzi_VRqOHzLj_Lf7IdJgQAO3jaw5SMNU';	
+
+/**
  * Authorization scopes.
  */
 const SCOPES = 'https://www.googleapis.com/auth/drive.install https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly.metadata';
@@ -488,7 +494,7 @@ arc.app.drive.picker.load = function(callback){
 	arc.app.drive.picker._callbacks.add(callback);
 
 	let script = document.createElement("script");
-	script.src = "https://www.google.com/jsapi?callback=handlePickerLoad";
+	script.src = "https://apis.google.com/js/api.js?onload=handlePickerLoad";
 	script.type = "text/javascript";
 	script.async = true;
 	document.getElementsByTagName("head")[0].appendChild(script);
@@ -505,7 +511,65 @@ arc.app.drive.picker.loadHandler = function(){
 		arc.app.drive.picker._callbacks.delete(clb);
 	}
 };
-
+/**
+ * Construct new Picker object.
+ * 
+ * @param authToken {String} User's auth token
+ * @param callback {Function} A callback function to be called after dialog closes.
+ * @param views {Array} Rest parameter for views that should be attached to the picker.
+ */
+arc.app.drive.picker._constructPicker = function(authToken, callback, ...views){
+	let pickerBuilder = new google.picker.PickerBuilder()
+	.setDeveloperKey(API_KEY_PICKER)
+	.setOAuthToken(authToken)
+	.setCallback(callback)
+	.setAppId(APP_ID)
+	//.setOrigin('http://127.0.0.1:8888')
+	.disableFeature(google.picker.Feature.MULTISELECT_ENABLED);
+	views.forEach(view => pickerBuilder.addView(view));
+	return pickerBuilder; 
+};
+/**
+ * Open picker to select application file.
+ * 
+ * @param authToken {String} An auth token to be used with the picker.
+ * @param callback {Function} A callback function to be called after dialog closes.
+ */
+arc.app.drive.picker.getAppFile = function(authToken, callback){
+	let filesView = new google.picker.View(google.picker.ViewId.DOCS);
+	filesView.setMimeTypes("application/restclient+data");
+	//proxy callback function to react on cancel or select actions.
+	var fn = function(data){
+		if (data[google.picker.Response.ACTION] === google.picker.Action.PICKED || data[google.picker.Response.ACTION] === google.picker.Action.CANCEL) {
+			callback.call(arc, data);
+		}
+	};
+  	let pickerBuilder = arc.app.drive.picker._constructPicker(authToken, fn, filesView);
+  	let picker = pickerBuilder.build();
+	picker.setVisible(true);
+};
+/**
+ * Open picker to select folder from Google Dive.
+ * Folders are user by the app to select app files save location.  
+ * 
+ * @param authToken {String} An auth token to be used with the picker.
+ * @param callback {Function} A callback function to be called after dialog closes.
+ */
+arc.app.drive.picker.getFolder = function(authToken, callback){
+	let foldersView = new google.picker.DocsView(google.picker.ViewId.FOLDERS);
+	foldersView.setSelectFolderEnabled(true);
+	
+	//proxy callback function to react on cancel or select actions.
+	var fn = function(data){
+		if (data[google.picker.Response.ACTION] === google.picker.Action.PICKED || data[google.picker.Response.ACTION] === google.picker.Action.CANCEL) {
+			callback.call(arc, data);
+		}
+	};
+  	let pickerBuilder = arc.app.drive.picker._constructPicker(authToken, fn, foldersView);
+  	pickerBuilder.setTitle('Select a folder');
+  	let picker = pickerBuilder.build();
+	picker.setVisible(true);
+};
 
 
 /**
@@ -520,9 +584,7 @@ function handleDriveClientLoad() {
  * Drive file picker integration. 
  */
 function handlePickerLoad() {
-	google.load("picker", "1", {
-		"callback" : arc.app.drive.picker.loadHandler
-	});
+	gapi.load('picker', {'callback': arc.app.drive.picker.loadHandler});
 }
 
 

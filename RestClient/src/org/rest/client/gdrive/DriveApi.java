@@ -1,13 +1,14 @@
 package org.rest.client.gdrive;
 
 import org.rest.client.gdrive.api.DrivePicker;
+import org.rest.client.gdrive.api.LoadPickerHandler;
+import org.rest.client.gdrive.api.PickerDocument;
+import org.rest.client.gdrive.api.PickerHandler;
+import org.rest.client.gdrive.api.PickerResponse;
 
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.user.client.ui.PopupPanel;
 
 /**
  * A class that represents Google Drive API.
@@ -78,16 +79,7 @@ public class DriveApi {
 		 */
 		void onError(JavaScriptException exc);
 	}
-	/**
-	 * Before file picker can be used it needs to be initialized first.
-	 * The app will load Google loader and load picker library.
-	 */
-	static interface LoadPickerHandler {
-		/**
-		 * Called when Google Drive Picker is ready to use.
-		 */
-		void onLoad();
-	}
+	
 	/**
 	 * Handler to be used when requesting file metadata.
 	 * File metadata will not contain file content but only information about the file.
@@ -150,65 +142,74 @@ public class DriveApi {
 	/**
 	 * Show folder picker dialog.
 	 * The dialog will display all available folders in user's Drive.
-	 * TODO: why do I need a accessToken here? It should call auth method automatically.
+	 * 
+	 * Access token here will ensure that the session state has been checked.
 	 * 
 	 * @param accessToken An access token to be used with the request.
 	 * @param handler Callback handler called on request end.
 	 */
 	public static void showForlderPicker(final String accessToken, final SelectFolderHandler handler){
-		final FilePickerDialog dialog = new FilePickerDialog("application/vnd.google-apps.folder");
-		dialog.addCloseHandler(new CloseHandler<PopupPanel>() {
+		DrivePicker.loadPicker(new LoadPickerHandler() {
 			@Override
-			public void onClose(CloseEvent<PopupPanel> event) {
-				String result = dialog.getResult();
-				if(result == null){
-					handler.onCancel();
-					return;
-				}
-				handler.onSelect(result);
+			public void onLoad() {
+				DrivePicker.getFolder(new PickerHandler() {
+					
+					@Override
+					public void handleResponse(PickerResponse response) {
+						if(response.getAction().equals(PickerResponse.ACTION_CANCEL)){
+							handler.onCancel();
+							return;
+						}
+						JsArray<PickerDocument> docs = response.getDocuments();
+						if(docs == null || docs.length() == 0){
+							handler.onCancel();
+							return;
+						}
+						String fileId = docs.get(0).getId();
+						handler.onSelect(fileId);
+					}
+				}, accessToken);
+				
 			}
 		});
-		dialog.show();
 	}
-	
-	/**
-	 * Get list of files from Google Drive.
-	 * This method supports pagination and file search.
-	 * 
-	 * This method will call arc.app.drive.listFiles function from drive.js library.
-	 * 
-	 * @param handler A callback handler to be called after the request. 
-	 * @param mimeType Requested file mime type. Google Drive supports different mime types and this API can filter the results to specified type.
-	 * @param nextPageToken To be used when paginating over the results.
-	 * @param query File name to be searched for.  
-	 * @param access_token Access token to be used with the request.
-	 * @throws JavaScriptException If there was an error in drive.js file.
-	 * 
-	 * TODO: why do I need a accessToken here? It should call auth method automatically.
-	 */
-	public static native void getFileList(final FileRequestHandler handler, String mimeType, final String nextPageToken, String query, String access_token) throws JavaScriptException /*-{
-		
-		var clb = $entry(function(response){
-			if(response.error){
-				handler.@org.rest.client.gdrive.DriveApi.FileRequestHandler::onError(Lorg/rest/client/gdrive/DriveError;)(response.error);
-				return;
-			}
-			handler.@org.rest.client.gdrive.DriveApi.FileRequestHandler::onLoad(Lorg/rest/client/gdrive/DriveFileListResponse;)(response);
-		});
-		$wnd.arc.app.drive.listFiles(mimeType, nextPageToken, query, clb);
-		
-	}-*/;
+
 	
 	/**
 	 * This method will show a picker dialog with saved on Google Drive app's files.
 	 * 
-	 * TODO: why do I need a accessToken here? It should call auth method automatically.
+	 * Access token here will ensure that the session state has been checked.
 	 * 
 	 * @param accessToken Access token to be used with the request.
 	 * @param handler Callback handler to be called when the request ends.
 	 */
 	public static void showSavedFilesPicker(final String accessToken, final SelectFolderHandler handler){
-		
+		DrivePicker.loadPicker(new LoadPickerHandler() {
+			@Override
+			public void onLoad() {
+				DrivePicker.getRequestFile(new PickerHandler() {
+					
+					@Override
+					public void handleResponse(PickerResponse response) {
+						if(response.getAction().equals(PickerResponse.ACTION_CANCEL)){
+							handler.onCancel();
+							return;
+						}
+						JsArray<PickerDocument> docs = response.getDocuments();
+						if(docs == null || docs.length() == 0){
+							handler.onCancel();
+							return;
+						}
+						String fileId = docs.get(0).getId();
+						handler.onSelect(fileId);
+					}
+				}, accessToken);
+				
+			}
+		});
+	}
+	
+	/*public static void showSavedFilesPicker(final String accessToken, final SelectFolderHandler handler){
 		final FilePickerDialog dialog = new FilePickerDialog("application/restclient+data");
 		dialog.addCloseHandler(new CloseHandler<PopupPanel>() {
 			@Override
@@ -223,7 +224,7 @@ public class DriveApi {
 		});
 		dialog.setAccessToken(accessToken);
 		dialog.show();
-	}
+	}*/
 	
 	/**
 	 * Insert new file to Google Drive.
@@ -311,17 +312,5 @@ public class DriveApi {
 		}
 	}-*/;
 	
-	/**
-	 * Before Drive file picker can be used the app need to download picker's libraries.
-	 * This function will load required libraries and call event listener when done.
-	 * 
-	 * This method will call arc.app.drive.picker.load function from drive.js library.
-	 *  
-	 * @param handler
-	 */
-	private static final native void loadPicker(LoadPickerHandler handler) /*-{
-		$wnd.arc.app.drive.picker.load(function(){
-			handler.@org.rest.client.gdrive.DriveApi.LoadPickerHandler::onLoad()();
-		});
-	}-*/;
+	
 }
