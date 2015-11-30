@@ -85,6 +85,7 @@ public class GoogleDrive {
 			updateRequestFile(obj, accessToken, callback);
 			return;
 		}
+		
 		if(folderId != null){
 			DriveApi.insertNewFile(folderId, obj.getName(), obj, new DriveApi.FileUploadHandler() {
 				@Override
