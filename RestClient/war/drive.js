@@ -452,7 +452,7 @@ arc.app.drive.listFiles = function(mimeType, nextPageToken, query, callback){
 	}
 	let params = {
 		'q' : q,
-		'maxResults' : 25,
+		'maxResults' : 50,
 		'fields' : 'items(createdDate,iconLink,id,title),nextLink,nextPageToken'
 	};
 	if(nextPageToken !== null) {

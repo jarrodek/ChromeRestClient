@@ -3,7 +3,11 @@ package org.rest.client.websocket;
 import com.google.gwt.file.client.Blob;
 
 public class WebSocketImpl implements WebSocket {
+	public WebSocketImpl(){}
+	
 	WebSocketNative impl = null;
+	
+	
 	
 	private WebSocketImpl(String url){
 		impl = WebSocketNative.open(url);
