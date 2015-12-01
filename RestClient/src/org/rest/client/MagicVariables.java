@@ -14,7 +14,11 @@ public class MagicVariables {
 	HashMap<String, String> nowGroupObjects = new HashMap<String, String>();
 	
 	public String apply(String input){
-		if(!SyncAdapter.magicVars) return input;
+		if(!SyncAdapter.magicVars) {
+			Log.debug("Applying Magic variables: function disabled.");
+			Log.warn("This oprion is deprecated and will be removed from settings. \nAll requests will be forced to apply magic variables.");
+			return input;
+		}
 		try{
 			input = applyRandom(input);
 			input = applyTime(input);
@@ -27,7 +31,7 @@ public class MagicVariables {
 	
 	private String applyRandom(String input){
 		input = input.replace("${random}", Random.nextInt(Integer.MAX_VALUE)+"");
-//		Log.debug("==========================================");
+		Log.debug("Applying Magic variables: random strings");
 //		Log.debug("input: " + input);
 		RegExp pattern = RegExp.compile("\\$\\{random:\\d+\\}","gm");
 		for (MatchResult result = pattern.exec(input); result != null; result = pattern.exec(input)) {
@@ -48,7 +52,7 @@ public class MagicVariables {
 	}
 	
 	private String applyTime(String input){
-		
+		Log.debug("Applying Magic variables: time");
 		input = input.replace("${now}", new Date().getTime()+"");
 		
 		RegExp pattern = RegExp.compile("\\$\\{now:(\\d+)\\}","gm");

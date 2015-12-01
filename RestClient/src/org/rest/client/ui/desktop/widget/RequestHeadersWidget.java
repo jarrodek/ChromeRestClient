@@ -34,6 +34,7 @@ import org.rest.client.storage.websql.HeaderRow;
 import org.rest.client.suggestion.HeadersSuggestOracle;
 import org.rest.client.ui.html5.HTML5Element;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -322,7 +323,6 @@ public class RequestHeadersWidget extends Composite implements HasText {
 		}
 	};
 	
-	
 	private void addNewFormRow(String key, String value){
 		
 		final HTMLPanel row = new HTMLPanel("");
@@ -521,7 +521,14 @@ public class RequestHeadersWidget extends Composite implements HasText {
 	 * Ensure that form has at least one row.
 	 */
 	void ensureFormHasRow(){
-		if(headersFormPanel.getWidgetCount() > 0) return;
+		Log.info("ensureFormHasRow");
+		if(headersFormPanel.getWidgetCount() > 0) {
+			FormInputs item = formInputs.get(formInputs.size()-1);
+			if(!item.key.getValue().equals("") || !item.value.getValue().equals("")){
+				addNewFormRow(null, null);
+			}
+			return;
+		}
 		addNewFormRow(null, null);
 	}
 	/**

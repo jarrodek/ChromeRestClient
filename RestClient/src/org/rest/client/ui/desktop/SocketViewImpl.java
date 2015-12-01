@@ -216,6 +216,7 @@ public class SocketViewImpl extends Composite implements SocketView {
 		String url = urlField.getValue();
 		if(url == null || url.isEmpty()){
 			StatusNotification.notify("You must enter socket URL.", StatusNotification.TYPE_NORMAL, StatusNotification.TIME_SHORT);
+			return;
 		}
 		listener.connect(url);
 		connectButton.setEnabled(false);
