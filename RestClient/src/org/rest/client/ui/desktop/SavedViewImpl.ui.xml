@@ -3,9 +3,9 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:h5="urn:import:org.rest.client.ui.html5">
 	
-	<g:HTMLPanel addStyleNames="Saved_View_historyList" ui:field="root">
-		<section class="Saved_View_historyNav">
-			<div class="Saved_View_searchContainer">
+	<g:HTMLPanel addStyleNames="layout vertical flex" ui:field="root">
+		<section class="Saved_View_top_bar layout horizontal flex">
+			<div class="Saved_View_searchContainer flex">
 				<h5:SearchBox ui:field="searchInput"></h5:SearchBox>
 			</div>
 			<div class="Saved_View_searchContainer">
@@ -19,12 +19,12 @@
 				<div class="Saved_View_loaderDot"></div>
 				<div class="Saved_View_loaderDot"></div>
 			</div>
-			
 			<span class="Saved_View_loadingInfo">
 				Please wait. Loading history.
 			</span>
 		</div>
-		<g:HTMLPanel ui:field="list"></g:HTMLPanel>
+		
+		<g:HTMLPanel ui:field="list" addStyleNames="Saved_View_List_container"></g:HTMLPanel>
 		
 		<g:HTMLPanel ui:field="loaderContainer" styleName="Saved_View_loadNextRow">
 			<g:InlineLabel visible="false" ui:field="loader" styleName="loaderImage"></g:InlineLabel>
