@@ -18,6 +18,7 @@ import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.regexp.shared.SplitResult;
 import com.google.gwt.user.client.ui.PopupPanel;
 
+@SuppressWarnings("deprecation")
 public class HeaderSupportAuthorizationImpl implements HeaderSupport {
 	
 	AuthorizeDialog dialog = new AuthorizeDialog();
