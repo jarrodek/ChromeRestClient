@@ -10,7 +10,11 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.http.client.URL;
-
+/**
+ * @deprecated This will be removed in Q1 2016. OAuth2 will be provided instead.
+ * @author Pawel Psztyc
+ *
+ */
 public class OAuth {
 	
 	private OAuth(){}

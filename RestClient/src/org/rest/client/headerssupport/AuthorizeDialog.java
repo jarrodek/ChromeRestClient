@@ -29,7 +29,11 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-
+/**
+ * 
+ * @author Pawel Psztyc
+ */
+@SuppressWarnings("deprecation")
 public class AuthorizeDialog extends DialogBox {
 	final DecoratedTabPanel formPanel;
 	private int selectedTab = 0;

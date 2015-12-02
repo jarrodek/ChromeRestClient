@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.ui.desktop.HeaderSupportAuthorizationImpl;
 import org.rest.client.ui.desktop.HeaderSupportDate;
 import org.rest.client.ui.desktop.W3CHeaderErrorImpl;
+import org.rest.client.ui.desktop.widget.RequestHeadersWidget;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
@@ -236,8 +238,8 @@ public class HeadersFillSupport implements FocusHandler, ClickHandler {
 		if(!supportedHandlers.containsKey(header)){
 			return;
 		}
-		
-		HeaderSupport helper = initalizeHelperClass(supportedHandlers.get(header));
+		Class<? extends HeaderSupport> clazz = supportedHandlers.get(header);
+		HeaderSupport helper = initalizeHelperClass(clazz);
 		if(helper == null){
 			return;
 		}
@@ -256,5 +258,6 @@ public class HeadersFillSupport implements FocusHandler, ClickHandler {
 			@Override
 			public void onFailure(String reason) {}
 		});
+		GoogleAnalytics.sendEvent(RequestHeadersWidget.ANALYTICS_EVENT_CATEGORY, "Fill support", clazz.getName());
 	}
 }
