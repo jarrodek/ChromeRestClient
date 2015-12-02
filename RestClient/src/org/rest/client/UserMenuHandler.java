@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.NewProjectAvailableEvent;
 import org.rest.client.event.ProjectChangeEvent;
 import org.rest.client.event.ProjectDeleteEvent;
@@ -175,11 +176,13 @@ public class UserMenuHandler {
 		clientFactory.getEventBus().addHandler(PlaceChangeEvent.TYPE,
 				new PlaceChangeEvent.Handler() {
 					public void onPlaceChange(PlaceChangeEvent event) {
+						
 						Place newPlace = event.getNewPlace();
+						String gaName = null;
 						
 						if(newPlace instanceof AboutPlace){
 							about.setSelected(true);
-							trackPageview("#AboutPlace:"+((AboutPlace)newPlace).getToken());
+							gaName = "#AboutPlace:"+((AboutPlace)newPlace).getToken(); 
 						} else if(newPlace instanceof RequestPlace){
 							RequestPlace _place = (RequestPlace) newPlace;
 							if(_place.isProject() || _place.isProjectsEndpoint()){
@@ -189,37 +192,39 @@ public class UserMenuHandler {
 							}
 							
 							if(_place.isHistory()){
-								trackPageview("#RequestPlace:history");
+								gaName = "#RequestPlace:history";
 							} else if(_place.isProjectsEndpoint()){
-								trackPageview("#RequestPlace:projectEndpoint");
+								gaName = "#RequestPlace:projectEndpoint";
 							} else if(_place.isProject()){
-								trackPageview("#RequestPlace:project");
+								gaName = "#RequestPlace:project";
 							} else if(_place.isSaved()){
-								trackPageview("#RequestPlace:saved");
+								gaName = "#RequestPlace:saved";
 							} else if(_place.isExternal()){
-								trackPageview("#RequestPlace:external");
+								gaName = "#RequestPlace:external";
 							} else {
-								trackPageview("#RequestPlace:default");
+								gaName = "#RequestPlace:default";
 							}
 						} else if(newPlace instanceof SettingsPlace){
 							settings.setSelected(true);
-							trackPageview("#SettingsPlace:"+((SettingsPlace)newPlace).getToken());
+							gaName = "#SettingsPlace:"+((SettingsPlace)newPlace).getToken();
 						} else if(newPlace instanceof ImportExportPlace){
 							settings.setSelected(true);
-							trackPageview("#ImportExportPlace:"+((ImportExportPlace)newPlace).getToken());
+							gaName = "#ImportExportPlace:"+((ImportExportPlace)newPlace).getToken();
 						} else if(newPlace instanceof ShortcutPlace){
 							settings.setSelected(true);
-							trackPageview("#ShortcutPlace:"+((ShortcutPlace)newPlace).getToken());
+							gaName = "#ShortcutPlace:"+((ShortcutPlace)newPlace).getToken();
 						} else if(newPlace instanceof HistoryPlace){
 							history.setSelected(true);
-							trackPageview("#HistoryPlace:"+((HistoryPlace)newPlace).getToken());
+							gaName = "#HistoryPlace:"+((HistoryPlace)newPlace).getToken();
 						} else if(newPlace instanceof SavedPlace){
 							saved.setSelected(true);
-							trackPageview("#SavedPlace:"+((SavedPlace)newPlace).getToken());
+							gaName = "#SavedPlace:"+((SavedPlace)newPlace).getToken();
 						} else if(newPlace instanceof SocketPlace){
 							socket.setSelected(true);
-							trackPageview("#SocketPlace:"+((SocketPlace)newPlace).getToken());
+							gaName = "#SocketPlace:"+((SocketPlace)newPlace).getToken(); 
 						}
+						trackPageview(gaName);
+						GoogleAnalyticsApp.sendScreen(gaName);
 					}
 			});
 		

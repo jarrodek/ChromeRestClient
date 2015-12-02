@@ -19,6 +19,8 @@ import java.util.ArrayList;
 
 import org.rest.client.RestClient;
 import org.rest.client.SyncAdapter;
+import org.rest.client.analytics.GoogleAnalytics;
+import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.codemirror.CodeMirror;
 import org.rest.client.codemirror.CodeMirrorChangeHandler;
 import org.rest.client.codemirror.CodeMirrorImpl;
@@ -97,6 +99,12 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 	private ArrayList<FormInputs> formInputs = new ArrayList<FormInputs>();
 	private String requestEncoding = "application/x-www-form-urlencoded"; //default
 	private CodeMirror bodyCodeMirror = null;
+	/**
+	 * A category name for Google Analytics events.
+	 * Event will measure how often tabs are switched by the user.
+	 * It will help to decide if different editors are required.
+	 */
+	public final static String ANALYTICS_EVENT_CATEGORY = "Payload editor";
 	
 	public RequestBodyWidget() {
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
@@ -107,8 +115,6 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 				payloadData = payloadRawInput.getValue();
 			}
 		});
-		
-		
 		rawTab.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -129,6 +135,8 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 				}
 				
 				currentTab = TABS.RAW;
+				GoogleAnalytics.sendEvent(ANALYTICS_EVENT_CATEGORY, "Tab switched", "Raw tab");
+				GoogleAnalyticsApp.sendEvent(ANALYTICS_EVENT_CATEGORY, "Tab switched", "Raw tab");
 			}
 		});
 		rawTab.addMouseOverHandler(new MouseOverHandler() {
@@ -166,6 +174,8 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 				contentParent.querySelector("." + "tabsContent" + " ." + "tabContent" + "[data-tab=\"form\"]").getClassList().add("tabContentCurrent");
 		        
 				currentTab = TABS.FORM;
+				GoogleAnalytics.sendEvent(ANALYTICS_EVENT_CATEGORY, "Tab switched", "Form tab");
+				GoogleAnalyticsApp.sendEvent(ANALYTICS_EVENT_CATEGORY, "Tab switched", "Form tab");
 			}
 		});
 		formTab.addMouseOverHandler(new MouseOverHandler() {
@@ -202,6 +212,8 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 				contentParent.querySelector("." + "tabsContent" + " ." + "tabContent" + "[data-tab=\"file\"]").getClassList().add("tabContentCurrent");
 		        
 				currentTab = TABS.FILES;
+				GoogleAnalytics.sendEvent(ANALYTICS_EVENT_CATEGORY, "Tab switched", "Files tab");
+				GoogleAnalyticsApp.sendEvent(ANALYTICS_EVENT_CATEGORY, "Tab switched", "Files tab");
 			}
 		});
 		filesTab.addMouseOverHandler(new MouseOverHandler() {

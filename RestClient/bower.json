@@ -2,6 +2,7 @@
   "name": "Advanced Rest Client",
   
   "dependencies": {
-    "paper-icon-button": "PolymerElements/paper-icon-button#^1.0.0"
+    "paper-icon-button": "PolymerElements/paper-icon-button#^1.0.0",
+    "chrome-platform-analytics": "GoogleChrome/chrome-platform-analytics#ca1.6.0d"
   }
 }
