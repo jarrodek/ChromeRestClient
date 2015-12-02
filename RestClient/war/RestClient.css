@@ -1254,20 +1254,10 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	height: 100px;
 	border:none;
 }
-.RequestHeaders_Widget_hasSupport{
-	
-}
-.RequestHeaders_Widget_headerSupportHint{
-	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAABuwAAAbsBOuzj4gAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAIzSURBVHjajc7BSxRRHAfw3+/N2x2d1V1lZ3OzpNYgpIwiNEgQww56928Iim7hNQrCi9egWzcvdQj0EAl18FIRhRpUGhkVrWu7m9vuzO7Mm3nv/RoPgqy74Afe4f34/b58kYigGe2MMfWzMAOqZxoAOLHKi1iu/yn0vVbQ5FAAfR7K6aK5DMPzGUgMctyb1b9L+DhbhUw4bVzY2Ggf8GyYSyu/Gp6/A0binIUM91Zgj6p/8mJr8wnjypkhyKyK/RMOB6hM5XbQOy61v7KLWLQY70SIkA40ic2GGpzK0tc3szwDc/s3DA4SYsKwryI3bR5LTqSh83qflmXBDKmYmY1jeiRkAZuESFODA3/aFQwbgVteLFRrHvp+jQaOQ53xTBw5B0ic7YZIywaYMJ/Tv1cuUDV0nLLqSTqebYMolNDkuONR430NdPFl2wBmJZ/wctFGJLI6pax7PgApzRgSIJGx/a4Lde1x2wC4+KVi6GAFRT2e6hKB27D4rtMRO3VC1DHwDXSqmzj2Y6t9QASH+2dZPm+TVtQRD7QKBZKSgL9/ZTGdugVNGDRLrwWo1TqCAreh0PEkI5IEfiMPl7aq0IRDCx5PPRTrO0tc97IkxjH45oWmdewmQuQoATceXd6Kqmcnx0dYh2XB278pODkw+GESDmPQgi+Et/2nBN32abg2NQOFQglc15Vw1AapZLeMc75cLJVyi4tLVhDKCufcgVaIqOWLmPfv3X2wsLAwNzo6arXb+w+yQyGZB7r3YgAAAABJRU5ErkJggg==);
-	background-repeat: no-repeat;
-	opacity: 0.2;
-	width: 16px;
-	height: 16px;
-	position: absolute;
-	right: 3px;
-	top: 7px;
-	cursor: pointer;
-	display: none;
+
+.headers-form input[type="text"]{
+	width: 100%;
+	box-sizing: border-box;
 }
 .RequestHeaders_Widget_keyBoxContainer{
 	position: relative;
@@ -1284,34 +1274,13 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	content: "eg. ";
 	font-weight: bold;
 }
-.RequestHeaders_Widget_keyBoxContainer.hasSupport .RequestHeaders_Widget_headerSupportHint{
-	display: block;
-}
 .RequestHeaders_Widget_headersFormPanel{
 	padding-left: 7px;
 	padding-bottom: 7px;
 	padding-right: 7px;
 }
 /*form controls*/
-.RequestHeaders_Widget_flex{
-	display: -webkit-flex;
-	display: -mox-flex;
-	display: -ms-flex;
-	display: -o-flex;
-	display: flex;
-	-webkit-align-items: center;
-}
-.RequestHeaders_Widget_flex input{
-	width: -webkit-calc(100% - 12px);
-	width: calc(100% - 12px);
-}
-.RequestHeaders_Widget_valueBlock{
-	-webkit-flex: 1 0 0;
-	-moz-flex: 1 0 0;
-	-ms-flex: 1 0 0;
-	-o-flex: 1 0 0;
-	flex: 1 0 0;
-}
+
 .RequestHeaders_Widget_error{
 	display: -webkit-box;
 	-webkit-box-pack: start;
