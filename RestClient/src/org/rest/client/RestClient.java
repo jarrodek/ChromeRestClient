@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.ApplicationReadyEvent;
 import org.rest.client.event.NewProjectAvailableEvent;
 import org.rest.client.event.SavedRequestEvent;
@@ -141,8 +142,10 @@ public class RestClient implements EntryPoint {
 	 * Main method and entry point to the app.
 	 */
 	public void onModuleLoad() {
+		GoogleAnalyticsApp.initialize();
 		
 		setLogging();
+		
 		//app's main event bus. It's used to distribute events in the app.
 		//TODO: why not use DOM events instead?
 		EventBus eventBus = clientFactory.getEventBus();
@@ -344,7 +347,7 @@ public class RestClient implements EntryPoint {
 		requestObject.setHeaders(headers);
 		requestObject.setMethod(method);
 		String url = rp.getURL();
-		if(url.startsWith("/") && !GWT.isProdMode()){
+		if(url.startsWith("/") && !isProdMode()){
 			//
 			// DEV mode.
 			//
@@ -362,7 +365,9 @@ public class RestClient implements EntryPoint {
 	
 	
 	
-	
+	private static final native boolean isProdMode() /*-{
+		return !(location.hostname === '127.0.0.1');
+	}-*/; 
 	
 	
 	

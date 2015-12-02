@@ -25,6 +25,7 @@ import org.rest.client.ClientFactory;
 import org.rest.client.ExternalEventsFactory;
 import org.rest.client.RestClient;
 import org.rest.client.analytics.GoogleAnalytics;
+import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.AddEncodingEvent;
 import org.rest.client.event.ClearFormEvent;
 import org.rest.client.event.HttpEncodingChangeEvent;
@@ -640,6 +641,7 @@ public class RequestActivity extends AppActivity implements
 			public void onStart(Date time) {
 				requestView.handleRequestStartActionEvent(time);
 				GoogleAnalytics.sendEvent("Engagement", "Click", "Request start");
+				GoogleAnalyticsApp.sendEvent("Engagement", "Click", "Request start");
 			}
 		});
 		

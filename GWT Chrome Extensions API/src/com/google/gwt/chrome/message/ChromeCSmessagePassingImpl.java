@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import com.google.gwt.chrome.def.BackgroundJsCallback;
 import com.google.gwt.chrome.def.BackgroundPageCallback;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -22,7 +21,7 @@ public class ChromeCSmessagePassingImpl implements ChromeMessagePassing {
 	static boolean isDebug;
 	
 	public ChromeCSmessagePassingImpl() {
-		isDebug = !GWT.isProdMode();
+		isDebug = !isProdMode();
 		
 		
 		handleContentScriptMessages(new ChromeMessageReceiver() {
@@ -209,4 +208,8 @@ public class ChromeCSmessagePassingImpl implements ChromeMessagePassing {
 		respObj.put("response", new JSONString("object"));
 		sendExtensionMessage(respObj.getJavaScriptObject());
 	}
+	
+	private static final native boolean isProdMode() /*-{
+		return !(location.hostname === '127.0.0.1');
+	}-*/; 
 }

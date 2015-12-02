@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import org.rest.client.RestClient;
 import org.rest.client.SyncAdapter;
 import org.rest.client.analytics.GoogleAnalytics;
+import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.codemirror.CodeMirror;
 import org.rest.client.codemirror.CodeMirrorChangeHandler;
 import org.rest.client.codemirror.CodeMirrorImpl;
@@ -239,6 +240,7 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 			headersCodeMirror.refresh();
 		}
 		GoogleAnalytics.sendEvent(ANALYTICS_EVENT_CATEGORY, "Tab switched", "Raw tab");
+		GoogleAnalyticsApp.sendEvent(ANALYTICS_EVENT_CATEGORY, "Tab switched", "Raw tab");
 	}
 	
 	private void openFormTab() {
@@ -262,6 +264,7 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
         
 		currentTab = TABS.FORM;
 		GoogleAnalytics.sendEvent(ANALYTICS_EVENT_CATEGORY, "Tab switched", "Form tab");
+		GoogleAnalyticsApp.sendEvent(ANALYTICS_EVENT_CATEGORY, "Tab switched", "Form tab");
 	}
 	
 	
@@ -485,10 +488,12 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
         headersCodeMirror.on("header-key-selected", function(e){
         	var cat = @org.rest.client.ui.desktop.widget.RequestHeadersWidget::ANALYTICS_EVENT_CATEGORY;
         	@org.rest.client.analytics.GoogleAnalytics::sendEvent(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(cat, "Code mirror", "Suggestion header name picked");
+        	@org.rest.client.analytics.GoogleAnalyticsApp::sendEvent(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(cat, "Code mirror", "Suggestion header name picked");
 		});
 		headersCodeMirror.on("header-value-selected", function(e){
         	var cat = @org.rest.client.ui.desktop.widget.RequestHeadersWidget::ANALYTICS_EVENT_CATEGORY;
         	@org.rest.client.analytics.GoogleAnalytics::sendEvent(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(cat, "Code mirror", "Suggestion header value picked");
+        	@org.rest.client.analytics.GoogleAnalyticsApp::sendEvent(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(cat, "Code mirror", "Suggestion header value picked");
 		});
 	}-*/;
 	

@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.rest.client.RestClient;
+import org.rest.client.analytics.GoogleAnalytics;
+import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.deprecated.ImportListingDialog;
 import org.rest.client.deprecated.ImportRequest;
 import org.rest.client.deprecated.ImportSuggestionsCallback;
@@ -467,6 +469,9 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		// Show dialog
 		final LoaderDialog dialog = new LoaderDialog("Preparing data to download. Please wait.", false);
 		dialog.show();
+		GoogleAnalytics.sendEvent("Settings usage", "Import data", "Import server dialog");
+		GoogleAnalyticsApp.sendEvent("Settings usage", "Import data", "Import server dialog");
+		
 		// Make request
 		ImportRequest.getImportSuggestions("me",
 				new ImportSuggestionsCallback() {

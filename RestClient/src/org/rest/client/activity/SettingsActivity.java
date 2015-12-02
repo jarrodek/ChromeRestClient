@@ -18,6 +18,8 @@ package org.rest.client.activity;
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
 import org.rest.client.SyncAdapter;
+import org.rest.client.analytics.GoogleAnalytics;
+import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.NotificationsStateChangeEvent;
 import org.rest.client.place.SettingsPlace;
 import org.rest.client.request.RequestsHistory;
@@ -96,6 +98,8 @@ public class SettingsActivity extends AppActivity implements
 				StatusNotification.notify("Unable to clear History Store.", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
 			}
 		});
+		GoogleAnalytics.sendEvent("Settings usage", "Clear history", "");
+		GoogleAnalyticsApp.sendEvent("Settings usage", "Clear history", "");
 	}
 	
 	
@@ -141,35 +145,49 @@ public class SettingsActivity extends AppActivity implements
 				StatusNotification.notify("Save error: " + message, StatusNotification.TYPE_CRITICAL, StatusNotification.TIME_SHORT, true);
 			}
 		});
+		GoogleAnalytics.sendEvent("Settings usage", key+" enabled", value+"");
+		GoogleAnalyticsApp.sendEvent("Settings usage", key+" enabled", value+"");
 	}
 	
 	
 	@Override
 	public void changeDebugValue(boolean newValue) {
 		saveSetting(LocalStore.DEBUG_KEY, newValue);
+		GoogleAnalytics.sendEvent("Settings usage", "Debug enabled", newValue+"");
+		GoogleAnalyticsApp.sendEvent("Settings usage", "Debug enabled", newValue+"");
 	}
 
 	@Override
 	public void changeHistoryValue(boolean newValue) {
 		saveSetting(LocalStore.HISTORY_KEY, newValue);
+		GoogleAnalytics.sendEvent("Settings usage", "History enabled", newValue+"");
+		GoogleAnalyticsApp.sendEvent("Settings usage", "History enabled", newValue+"");
 	}
 
 	@Override
 	public void changeNotificationsValue(boolean notificationsEnabled) {
 		saveSetting(LocalStore.NOTIFICATIONS_ENABLED_KEY, notificationsEnabled);
+		GoogleAnalytics.sendEvent("Settings usage", "Notifications enabled", notificationsEnabled+"");
+		GoogleAnalyticsApp.sendEvent("Settings usage", "Notifications enabled", notificationsEnabled+"");
 	}
 
 	@Override
 	public void changeMagicVarsValue(boolean magicVarsEnabled) {
 		saveSetting(LocalStore.MAGIC_VARS_ENABLED_KEY, magicVarsEnabled);
+		GoogleAnalytics.sendEvent("Settings usage", "MagicVars enabled", magicVarsEnabled+"");
+		GoogleAnalyticsApp.sendEvent("Settings usage", "MagicVars enabled", magicVarsEnabled+"");
 	}
 	@Override
 	public void changeCodeMirrorHeadersValue(boolean codeMirrorHeadersEnabled) {
 		saveSetting(LocalStore.CODE_MIRROR_HEADERS_KEY, codeMirrorHeadersEnabled);
+		GoogleAnalytics.sendEvent("Settings usage", "CM headers enabled", codeMirrorHeadersEnabled+"");
+		GoogleAnalyticsApp.sendEvent("Settings usage", "CM headers enabled", codeMirrorHeadersEnabled+"");
 	}
 
 	@Override
 	public void changeCodeMirrorPayloadValue(boolean codeMirrorPayloadEnabled) {
 		saveSetting(LocalStore.CODE_MIRROR_PAYLOAD_KEY, codeMirrorPayloadEnabled);
+		GoogleAnalytics.sendEvent("Settings usage", "CM values enabled", codeMirrorPayloadEnabled+"");
+		GoogleAnalyticsApp.sendEvent("Settings usage", "CM values enabled", codeMirrorPayloadEnabled+"");
 	}
 }

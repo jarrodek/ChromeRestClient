@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.rest.client.analytics.GoogleAnalytics;
+import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.ui.desktop.HeaderSupportAuthorizationImpl;
 import org.rest.client.ui.desktop.HeaderSupportDate;
 import org.rest.client.ui.desktop.W3CHeaderErrorImpl;
@@ -259,5 +260,6 @@ public class HeadersFillSupport implements FocusHandler, ClickHandler {
 			public void onFailure(String reason) {}
 		});
 		GoogleAnalytics.sendEvent(RequestHeadersWidget.ANALYTICS_EVENT_CATEGORY, "Fill support", clazz.getName());
+		GoogleAnalyticsApp.sendEvent(RequestHeadersWidget.ANALYTICS_EVENT_CATEGORY, "Fill support", clazz.getName());
 	}
 }

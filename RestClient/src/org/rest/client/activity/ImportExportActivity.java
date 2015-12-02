@@ -8,6 +8,8 @@ import java.util.Set;
 
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
+import org.rest.client.analytics.GoogleAnalytics;
+import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.deprecated.DataExportImpl;
 import org.rest.client.deprecated.ImportDataCallback;
 import org.rest.client.deprecated.ImportListingDialog;
@@ -144,6 +146,8 @@ public class ImportExportActivity extends AppActivity implements
 				StatusNotification.notify("Unable to collect requests data :/",StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 			}
 		});
+		GoogleAnalytics.sendEvent("Settings usage", "Export data", "Generate file");
+		GoogleAnalyticsApp.sendEvent("Settings usage", "Export data", "Generate file");
 	}
 	
 	@Override
@@ -249,7 +253,8 @@ public class ImportExportActivity extends AppActivity implements
 				callback.onSuccess(true);
 			}
 		});
-		
+		GoogleAnalytics.sendEvent("Settings usage", "Import data", "From file");
+		GoogleAnalyticsApp.sendEvent("Settings usage", "Import data", "From file");
 	}
 	
 	
@@ -361,6 +366,8 @@ public class ImportExportActivity extends AppActivity implements
 		DataExportImpl impl = new DataExportImpl();
 		impl.setEventBus(eventBus);
 		impl.synch();
+		GoogleAnalytics.sendEvent("Settings usage", "Export data", "To server");
+		GoogleAnalyticsApp.sendEvent("Settings usage", "Export data", "To server");
 	}
 
 	@Override
@@ -537,6 +544,8 @@ public class ImportExportActivity extends AppActivity implements
 				dialog.hide();
 			}
 		});
+		GoogleAnalytics.sendEvent("Settings usage", "Import data", "Download from server");
+		GoogleAnalyticsApp.sendEvent("Settings usage", "Import data", "Download from server");
 	}
 
 	private void importData(final String importUid) {
@@ -544,7 +553,9 @@ public class ImportExportActivity extends AppActivity implements
 		final LoaderDialog dialog = new LoaderDialog(
 				"Preparing data to download. Please wait.", false);
 		dialog.show();
-
+		
+		
+		
 		// Make request
 		ImportRequest.getImportSuggestions(importUid,
 				new ImportSuggestionsCallback() {
@@ -591,6 +602,7 @@ public class ImportExportActivity extends AppActivity implements
 //						restoreData.setEnabled(true);
 					}
 				});
+		
 	}
 
 	
