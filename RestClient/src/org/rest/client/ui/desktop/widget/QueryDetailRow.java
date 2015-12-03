@@ -1,14 +1,11 @@
 package org.rest.client.ui.desktop.widget;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.InlineLabel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -20,76 +17,93 @@ public class QueryDetailRow extends Composite {
 	interface QueryDetailRowUiBinder extends UiBinder<Widget, QueryDetailRow> {
 	}
 	
-	@UiField SimplePanel keyPanel;
-	@UiField SimplePanel valuePanel;
-	@UiField InlineLabel removeButton;
-	@UiField InlineLabel encodeButton;
-	@UiField InlineLabel decodeButton;
+	@UiField Element removeButton;
+	@UiField Element encodeButton;
+	@UiField Element decodeButton;
 	
-	private final TextBox keyBox;
-	private final TextBox valueBox;
+	@UiField TextBox nameBox;
+	@UiField TextBox valueBox;
 
-	public QueryDetailRow(TextBox keyBox, TextBox valueBox) {
+	public QueryDetailRow(String paramnName, String paramValue) {
 		initWidget(uiBinder.createAndBindUi(this));
-		this.keyBox = keyBox;
-		this.valueBox = valueBox;
 		
-		keyBox.getElement().setAttribute("placeholder", "key");
+		if(paramnName != null){
+			nameBox.setValue(paramnName, false);
+		}
+		if(paramValue != null){
+			valueBox.setValue(paramValue, false);
+		}
+		
+		nameBox.getElement().setAttribute("placeholder", "name");
 		valueBox.getElement().setAttribute("placeholder", "value");
-		removeButton.getElement().setAttribute("data-remove-row", "true");
-		encodeButton.getElement().setAttribute("data-encode-row", "true");
-		decodeButton.getElement().setAttribute("data-decode-row", "true");
+		removeButton.setAttribute("data-remove-row", "true");
+		encodeButton.setAttribute("data-encode-row", "true");
+		decodeButton.setAttribute("data-decode-row", "true");
 		
-		keyPanel.add(keyBox);
-		valuePanel.add(valueBox);
+		nameBox.getElement().focus();
 		
-		keyBox.getElement().focus();
-	}
-	
-	
-	public void setKeyValue(String keyValue){
-		keyBox.setValue(keyValue);
+		observeRemoveButton(this);
+		observeEncodeButtons(this);
 	}
 	
 	public String getKeyValue(){
-		return keyBox.getValue();
-	}
-	
-	public void setValue(String value){
-		valueBox.setValue(value);
+		return nameBox.getValue();
 	}
 	
 	public String getValue(){
 		return valueBox.getValue();
 	}
 	
-	@UiHandler("removeButton")
-	void onRemove(ClickEvent e){
+	void removeWidget(){
 		this.removeFromParent();
 	}
 	
-	@UiHandler("encodeButton")
-	void onEncode(ClickEvent e){
+	void encodeValue(boolean isCtrl){
 		String value = getValue();
 		if(value.trim().isEmpty()) return;
 		
-		if(e.isControlKeyDown()){
+		if(isCtrl){
 			value = URL.encodePathSegment(value);
 		} else {
 			value = URL.encodeQueryString(value);
 		}
 		valueBox.setValue(value, true);
 	}
-	@UiHandler("decodeButton")
-	void onDecode(ClickEvent e){
+	
+	void decodeValue(boolean isCtrl){
 		String value = getValue();
 		if(value.trim().isEmpty()) return;
 		
-		if(e.isControlKeyDown()){
+		if(isCtrl){
 			value = URL.decodePathSegment(value);
 		} else {
 			value = URL.decodeQueryString(value);
 		}
 		valueBox.setValue(value, true);
 	}
+	
+	private final native void observeRemoveButton(QueryDetailRow context) /*-{
+		var button = this.@org.rest.client.ui.desktop.widget.QueryDetailRow::removeButton;
+		if(!button) return;
+		button.addEventListener('tap', function(e){
+			context.@org.rest.client.ui.desktop.widget.QueryDetailRow::removeWidget()();
+		});
+	}-*/;
+	
+	private final native void observeEncodeButtons(QueryDetailRow context) /*-{
+		var enc = this.@org.rest.client.ui.desktop.widget.QueryDetailRow::encodeButton;
+		if(enc){
+			enc.addEventListener('tap', function(e){
+				var ctrl = e.ctrlKey || false;
+				context.@org.rest.client.ui.desktop.widget.QueryDetailRow::encodeValue(Z)(ctrl);
+			});
+		}
+		var dec = this.@org.rest.client.ui.desktop.widget.QueryDetailRow::decodeButton;
+		if(dec){
+			dec.addEventListener('tap', function(e){
+				var ctrl = e.ctrlKey || false;
+				context.@org.rest.client.ui.desktop.widget.QueryDetailRow::decodeValue(Z)(ctrl);
+			});
+		}
+	}-*/;
 }

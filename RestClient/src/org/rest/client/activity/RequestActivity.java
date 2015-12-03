@@ -110,6 +110,8 @@ public class RequestActivity extends AppActivity implements
 	TutorialFactory tutorialFactory = null;
 	private String currentRequestEtag = null;
 	
+	private final static String ANALYTICS_EVENT_CATEGORY = "Request view";
+	
 	public RequestActivity(RequestPlace place, ClientFactory clientFactory) {
 		super(clientFactory);
 		this.place = place;
@@ -1260,6 +1262,8 @@ public class RequestActivity extends AppActivity implements
 	@Override
 	public void fireUrlToggleEvent(boolean isNowSimpleView) {
 		eventBus.fireEvent(new URLFieldToggleEvent(isNowSimpleView));
+		GoogleAnalytics.sendEvent(ANALYTICS_EVENT_CATEGORY, "URL widget toggle", isNowSimpleView ? "Single line" : "Details form");
+		GoogleAnalyticsApp.sendEvent(ANALYTICS_EVENT_CATEGORY, "URL widget toggle", isNowSimpleView ? "Single line" : "Details form");
 	}
 
 	@Override
@@ -1497,6 +1501,18 @@ public class RequestActivity extends AppActivity implements
 		});
 		
 		
+	}
+
+	@Override
+	public void urlContextMenuOpenedAction() {
+		GoogleAnalytics.sendEvent(ANALYTICS_EVENT_CATEGORY, "URL widget context menu", "Open menu");
+		GoogleAnalyticsApp.sendEvent(ANALYTICS_EVENT_CATEGORY, "URL widget toggle", "Open menu");
+	}
+
+	@Override
+	public void urlContextMenuActionPerformed(String actionName) {
+		GoogleAnalytics.sendEvent(ANALYTICS_EVENT_CATEGORY, "URL widget context menu action", actionName);
+		GoogleAnalyticsApp.sendEvent(ANALYTICS_EVENT_CATEGORY, "URL widget toggle action", actionName);
 	}
 	
 }

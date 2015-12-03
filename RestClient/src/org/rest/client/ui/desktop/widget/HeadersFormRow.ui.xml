@@ -10,7 +10,7 @@
 		</div>
 		<div class="action-panel">
 		    <span ui:field="removeButtonWrapper">
-		    	<paper-icon-button icon="close" ui:field="removeButton"></paper-icon-button>
+		    	<paper-icon-button icon="close" title="Remove header" ui:field="removeButton"></paper-icon-button>
 		    </span>
 		</div>
 	</g:HTMLPanel>

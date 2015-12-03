@@ -1062,81 +1062,20 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 .actions{}
 .actions > *{margin-left: 10px;}
 /* The request URL widget */
-.url_widget_fullWidthRelativeInput{
+.url_widget_urlPanel .url_widget_fullWidthRelativeInput {
 	border-radius: 2px;
-	position: absolute;
-	right: 0px;
-	left: 0px;
-	top: 7px;
 	height: 20px;
-	display: inline-block;
-	width: 98%;
+	width: 100%;
+	box-sizing: border-box;
+    padding: 16px 6px;
 }
-.url_widget_urlInput{
-	left: 15px;
-}
-.url_widget_inputPadding{
-	padding: 5px 4px;
+.url_widget_urlPanel .detailed-panel{
+	padding-left: 40px;
+    padding-right: 54px;
+	margin-top: 4px;
 }
 .url_widget_urlPanel{
-	position: relative;
-	min-height: 50px;
-	width: 100%;
-}
-.url_widget_QuickActions{
-	position: absolute;
-	top: 40px;
-	right: 2px;
-	background-color: #fff;
-	border: 1px rgb(204, 204, 204) solid;
-	padding: 3px 10px;
-	border-bottom-left-radius: 5px;
-	border-bottom-right-radius: 5px;
-	border-top: none;
-	opacity: 0;
-	-webkit-transition: opacity 0.25s linear;
-}
-.url_widget_QuickActions .url_widget_UrlSettings{
-	width: 20px;
-	height: 20px;
-}
-.url_widget_urlPanel:hover .url_widget_QuickActions{
-	opacity: 1;
-}
-.url_widget_UrlSettingsHoverMenu{
-	position: absolute;
-	z-index: 100;
-	top: 28px;
-	left: -171px;
-	background-color: #fff;
-	padding: 5px;
-	border: 1px rgb(197, 197, 197) solid;
-	width: 200px;
-	display: none;
-}
-
-.url_widget_UrlSettingsHoverMenu.visible{
-	display: block !important;
-}
-
-.url_widget_UrlSettingsHoverMenu > li{
-/* 	padding: 5px 0; */
-}
-.url_widget_UrlSettingsHoverMenu > li:hover {
-	background-color: rgb(235, 235, 235);
-}
-.url_widget_UrlSettingsHoverMenu > li a{
-	color: #000;
-	text-decoration: none;
-	display: block;
-	padding: 5px 0;
-}
-.url_widget_UrlSettingsHoverMenu .lpad{
-	padding-left:20px;
-}
-
-
-.url_widget_detailedPanel{
+	margin: 20px 0;
 }
 .url_widget_opened{
 	min-height: 80px;
@@ -1146,8 +1085,7 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	top: 50px;
 }
 .url_widget_paramsSection{
-	position: relative;
-	margin-top: 75px;
+	margin-top: 12px;
 }
 
 .url_widget_sectionTitle{
@@ -1155,10 +1093,14 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	margin-bottom: 4px;
 	margin-left: 2px;
 }
-.url_widget_hashSection{
+.url_widget_hashSection {
 	position: relative;
 	min-height: 40px;
-	margin-top: 10px;
+	margin-bottom: 20px;
+}
+.subhead-layout{
+	display: block;
+    padding: 12px 0;
 }
 .url_widget_addParamAnchor{ margin-left: 7px; }
 .url_widget_urlToggleHandlerImage{
@@ -2444,4 +2386,11 @@ body.rest-client .CodeMirror-hints {
 }
 .inlineButton.actionButton{
 	border-color: #0D47A1;
+}
+.toggle-url-button {
+	transition: transform 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
+    transform: rotateZ(0deg);
+}
+.toggle-url-button.active{
+	transform: rotateZ(90deg);
 }

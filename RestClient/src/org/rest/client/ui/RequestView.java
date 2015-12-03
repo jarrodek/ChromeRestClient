@@ -67,6 +67,15 @@ public interface RequestView extends IsWidget {
 		EditProjectView getEditProjectDialog();
 		void refreshCurrentDriveItem();
 		void changeSavedName(String name, Callback<Boolean, Throwable> callback);
+		/**
+		 * Will be called when user click on URL context menu icon.
+		 */
+		void urlContextMenuOpenedAction();
+		/**
+		 * To be called when user select an action option from URL widget contect menu. 
+		 * @param actionName
+		 */
+		void urlContextMenuActionPerformed(String actionName);
 	}
 	
 	/**

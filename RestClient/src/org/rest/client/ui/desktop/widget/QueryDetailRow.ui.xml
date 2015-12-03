@@ -3,12 +3,16 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	
 	<g:HTMLPanel styleName="Query_Detailed_Row_row Query_Detailed_Row_flex">
-		<g:SimplePanel ui:field="keyPanel" styleName="Query_Detailed_Row_block Query_Detailed_Row_flex"></g:SimplePanel>
-		<g:SimplePanel ui:field="valuePanel" styleName="Query_Detailed_Row_block Query_Detailed_Row_flex Query_Detailed_Row_valueBlock"></g:SimplePanel>
+		<g:SimplePanel styleName="Query_Detailed_Row_block Query_Detailed_Row_flex">
+		    <g:TextBox ui:field="nameBox"></g:TextBox>
+		</g:SimplePanel>
+		<g:SimplePanel styleName="Query_Detailed_Row_block Query_Detailed_Row_flex Query_Detailed_Row_valueBlock">
+		    <g:TextBox ui:field="valueBox"></g:TextBox>
+		</g:SimplePanel>
 		<div class="Query_Detailed_Row_block Query_Detailed_Row_flex">
-			<g:InlineLabel styleName="removeButton" ui:field="removeButton" title="Remove">x</g:InlineLabel>
-			<g:InlineLabel styleName="formCtrl" ui:field="encodeButton" title="Encode query string. Use CTRL to replace + with %20">enc</g:InlineLabel>
-			<g:InlineLabel styleName="formCtrl" ui:field="decodeButton" title="Decode query string. Use CTRL to replace %20 with +">dec</g:InlineLabel>
+			<paper-icon-button icon="close" title="Remove parameter" ui:field="removeButton" data-remove-row="true"></paper-icon-button>
+			<paper-button ui:field="encodeButton" title="Encode query string. Use CTRL to replace + with %20" data-encode-row="true">enc</paper-button>
+			<paper-button ui:field="decodeButton" title="Decode query string. Use CTRL to replace %20 with +" data-decode-row="true">dec</paper-button>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder> 
