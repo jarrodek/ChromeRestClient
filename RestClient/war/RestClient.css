@@ -267,6 +267,7 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	margin-right: 12px;
 	min-height: 40px;
 }
+.JSON_parser_bodyPanel a,
 .CodeMirror a {
     text-transform: none;
 }

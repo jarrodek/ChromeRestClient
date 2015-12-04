@@ -37,8 +37,28 @@ public class TestDataServlet extends HttpServlet {
 		
 		String payload = req.getParameter("p");
 		if (payload == null || payload.equals("")) {
-			resp.addHeader("Location", "/RestClient.html");
-			resp.setStatus(307);
+			StringBuilder sb = new StringBuilder();
+			sb.append("{");
+			sb.append("\"Test servlet\"").append(":").append("Add a \"p\" parameter to your requires with one one the options").append(",");
+			sb.append("\"Options\"").append(":").append("[");
+			sb.append("\"meta\"").append(",");
+			sb.append("\"error\"").append(",");
+			sb.append("\"auth\"").append(",");
+			sb.append("\"xml\"").append(",");
+			sb.append("\"json\"").append(",");
+			sb.append("\"json2\"").append(",");
+			sb.append("\"json3\"").append(",");
+			sb.append("\"cookie\"").append(",");
+			sb.append("\"links\"").append(",");
+			sb.append("\"oneline\"").append(",");
+			sb.append("\"statuscode\"").append(",");
+			sb.append("\"redirect\"").append(",");
+			sb.append("\"redirect2\"");
+			sb.append("]");
+			sb.append("}");
+			resp.setContentType("application/json");
+			resp.setStatus(200);
+			resp.getWriter().println(sb.toString());
 		} else if (payload.equals("meta")) {
 			resp.setContentType("text/html");
 			resp.setStatus(200);
@@ -92,10 +112,12 @@ public class TestDataServlet extends HttpServlet {
 			sb.append("\"link\"").append(":").append("\"https://www.google.pl/webhp?sourceid=chrome-instant&ion=1&ie=UTF-8#hl=en&sclient=psy-ab&q=javascript%20find%20links%20in%20text&oq=&gs_l=&pbx=1&fp=4f8778963b1a64d3&ion=1&bav=on.2,or.r_gc.r_pw.r_cp.r_qf.&biw=1215&bih=938&oq=&gs_l=&pbx=1&fp=4f8778963b1a64d3&ion=1&bav=on.2,or.r_gc.r_pw.r_cp.r_qf.&biw=1215&bih=938&oq=&gs_l=&pbx=1&fp=4f8778963b1a64d3&ion=1&bav=on.2,or.r_gc.r_pw.r_cp.r_qf.&biw=1215&bih=938\"").append(",");
 			sb.append("\"link2\"").append(":").append("\"https://www.google.pl/webhp?sourceid\"").append(",");
 			sb.append("\"link3\"").append(":").append("\"file:///file\"").append(",");
+			sb.append("\"1234567\"").append(":").append("\"Numeric key as string\"").append(",");
 			sb.append("\"link4\"").append(":").append("\"ftp://www.google.pl/webhp?sourceid\"").append(",");
 			sb.append("\"link5\"").append(":").append("\"http://www.google.pl/webhp?sourceid\"").append(",");
 			sb.append("\"link6\"").append(":").append("\"/somepoint.php\"").append(",");
 			sb.append("\"long\"").append(":").append("18014398509481984419").append(",");
+			sb.append("\"long2\"").append(":").append("7329270081369171000").append(",");
 			sb.append("\"array\"").append(":").append("[\"string1\",\"string2\",\"string3 string3 string3 string3 string3 string3\"]").append(",");
 			sb.append("\"deep\"").append(":");
 				sb.append("[");
@@ -226,7 +248,7 @@ public class TestDataServlet extends HttpServlet {
 			resp.setContentType("text/plain");
 			resp.setStatus(200);
 			resp.getWriter().println("Cookie set.");
-		} else if( payload.equals("links") ){
+		} else if( payload.equals("links") ){ 
 			
 			resp.setHeader("X-debug-url1", "http://127.0.1.1:8888/ChromeSMS.html?gwt.codesvr=127.0.1.1:9997#send-sms");
 			resp.setHeader("X-debug-url2", "http://127.0.1.1:8888/ChromeSMS.html?gwt.codesvr=127.0.1.1:9997");
