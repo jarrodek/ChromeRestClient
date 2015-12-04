@@ -2,6 +2,7 @@
 
 var gulp = require('gulp');
 var vulcanize = require('gulp-vulcanize');
+var crisper = require('gulp-crisper');
 
 gulp.task('vulcanize', function () {
     return gulp.src('war/components/elements.html')

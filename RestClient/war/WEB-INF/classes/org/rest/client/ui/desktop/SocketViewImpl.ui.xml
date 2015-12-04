@@ -13,8 +13,8 @@
 				<g:InlineLabel ui:field="connectionStatusDisplay">disconnected</g:InlineLabel>
 			</div>
 			<div class="Socket_View_actionBar">
-				<g:Button styleName="button" ui:field="connectButton">Connect</g:Button>
-				<g:Button styleName="button" ui:field="disconnectButton" visible="false">Disconnect</g:Button>
+				<g:Button styleName="button actionButton" ui:field="connectButton">Connect</g:Button>
+				<g:Button styleName="button actionButton" ui:field="disconnectButton" visible="false">Disconnect</g:Button>
 			</div>
 		</div>
 		<div class="Socket_View_messagePanel">
