@@ -87,12 +87,16 @@ public class Utils {
 	}
 	
 	/**
-	 * Find urls from input and replace it into HTML anchor.
+	 * Find URL's in input and replace it with HTML anchor.
+	 * 
+	 * Corrected regexp from https://github.com/jarrodek/ChromeRestClient/issues/283
+	 * 
 	 * @param input
 	 * @return
 	 */
 	public static String autoLinkUrls(String input){
-		RegExp r = RegExp.compile("(https?:\\/\\/(\\w|\\.)+(\\S+))","gim");
+//		RegExp r = RegExp.compile("(https?:\\/\\/(\\w|\\.)+(\\S+))","gim");
+		RegExp r = RegExp.compile("(https?:\\/\\/([^\" >]*))","gim");
 		return r.replace(input, "<a target=\"_blank\" href=\"$1\">$1</a>");
 	}
 	
