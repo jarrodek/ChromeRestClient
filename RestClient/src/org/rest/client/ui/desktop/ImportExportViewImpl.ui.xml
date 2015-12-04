@@ -5,10 +5,6 @@
 	
 	<g:HTMLPanel>
 		<h1 class="Import_Export_title">Import/Export options</h1>
-		
-		
-		
-		
 		<div class="Import_Export_serverExport">
 		
 			<div ui:field="collapsePanel" class="Import_Export_depricationInfo">
@@ -20,8 +16,7 @@
 				</div>
 				<div class="Import_Export_collapsed">
 					<p>I'm suggest to import all Your remaining data or use a file import/export.</p>
-					<p>This options will be removed from application <span class="Import_Export_highlight">August 1st, 2013</span>.</p>
-					<p>Delay with removing this option is caused by poor integation of Chrome extensions and Google Drive.</p>
+					<p>This options will be removed from application <span class="Import_Export_highlight">Q2 2016</span>.</p>
 				</div>
 			</div>
 			

@@ -1076,7 +1076,7 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	margin-top: 4px;
 }
 .url_widget_urlPanel{
-	margin: 20px 0;
+	/* margin: 20px 0; */
 }
 .url_widget_opened{
 	min-height: 80px;
@@ -2059,11 +2059,10 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	text-decoration: none;
 }
 .licenseDialog {
-	max-width: 60%;
+	
 }
 .licenseText{
-	max-height: 100px;
-	overflow: auto;
+	white-space: pre-line;
 }
 
 /* HISTORY VIEW */
@@ -2227,12 +2226,16 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 .About_View_facebookShare {
 	margin-top: 0.5em;
 }
+.channel-name{
+	margin-left: 8px;
+}
 .About_View_donateMsg {
-	max-width: 250px;
-	margin-left: 30px;
+	/* max-width: 250px;
+	margin-left: 30px; */
+	min-width: 320px;
 }
 .About_View_donateInfo {
-	margin-bottom: 40px;
+	/* margin-bottom: 40px; */
 }
 div.About_View_DonatePopupPanelGlass {
 	background: -webkit-radial-gradient(center, rgba(127, 127, 127, 0), rgba(224, 224, 224, 0.87) 35%, rgba(20, 0, 0, 0.78) );

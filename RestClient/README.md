@@ -23,6 +23,29 @@ As a UX designer and developer I promise to develop easiest to use tool from the
 The app should work as desired. I take it serious if it comes to release and I've prepared complex testing and releasing process so the final release should be free of bugs.
 If you however find a bug in the released version, please, [file a bug report][issue_tracker] on project's Github page. 
 
+##Developing
+If you want to run this project from source code there is some things you need to do before it will work.
+
+You must download GWT and AppEngine SDK. To develop using GWT framework is the best to use [Eclipse][configure_eclipse].
+Note: Right now use GWT version 2.6.0. The app is broken under 2.7.0 version.
+
+You also need [Ant][ant_download] in your PATH.
+
+Library that isn't in Maven repository is gwt-html-database. However WebSQL is deprecated and project will move to IndexedDb soon. Library can be found in /RestClient/lib/.
+
+With Node.js installed, run the following one liner:
+```
+npm install -g gulp bower && npm install && bower install
+```
+
+When you finish your changes then:
+
+1) run `gulp vulcanize` from RestClient directory
+2) run build.xml default task 
+
+Generated extension will be available in RestClient/extension/ directory. 
+Extensions generated files are in RestClient/extension/source/ directory. You can load this folder into Chrome extenstions developer mode to test the app.  
+
 ##Contact
 You can contact me using my [Google+ account][gp_profile]. 
 Also, follow ARC's [profile on Google Plus][gp_appprofile] or read application [blog][app_blog].
@@ -39,3 +62,5 @@ See the LICENSE file for more details.
 [gp_profile]: https://plus.google.com/+PawelPsztyc
 [gp_appprofile]: https://plus.google.com/b/117577071661965941720/117577071661965941720
 [app_blog]: restforchrome.blogspot.com
+[configure_eclipse]: http://www.gwtproject.org/usingeclipse.html
+[ant_download]: configure_eclipse
