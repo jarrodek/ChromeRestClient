@@ -4,7 +4,6 @@ self.onmessage = function(e) {
     if(typeof data == "string"){
     	data = JSON.parse(data);
     }
-    //expected data: {style: {style definitions}, data: data to parse}
     var style = data.style;
     for(var styleName in style){
     	JSONViewer.STYLE[styleName] = style[styleName]; 
@@ -161,7 +160,15 @@ JSONViewer.prototype = {
 			var hasManyChildren = this.elementsCounter - elementNo > 1;
 			
 			result += '<div data-element="'+elementNo+'" style="margin-left: '+JSONViewer.STYLE.leftMargin+'px" class="'+JSONViewer.STYLE.node+'">';
-			result += this.parseKey(key) + ": " + data;
+			var _nan = isNaN(key); 
+			if(_nan){
+				result += '"';
+			}
+			result += this.parseKey(key);
+			if(_nan){
+				result += '"';
+			}
+			result += ": " + data;
 //			if(i+2 != cnt){
 //				result += '<span class="'+JSONViewer.STYLE.punctuation+'">,</span>';
 //			}

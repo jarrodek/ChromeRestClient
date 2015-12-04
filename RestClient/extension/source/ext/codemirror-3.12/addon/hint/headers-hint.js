@@ -65,6 +65,7 @@
                 text: headersStructure[i].key,
                 hint: function(cm, data, completion) {
                     cm.replaceRange(completion.text + ": ", data.from, data.to);
+                    CodeMirror.signal(cm, "header-key-selected", completion.text);
                 }
             });
         }
@@ -82,6 +83,7 @@
                             text: item,
                             hint: function(cm, data, completion) {
                                 cm.replaceRange(completion.text, data.from, data.to);
+                                CodeMirror.signal(cm, "header-value-selected", completion.text);
                             }
                         };
                         keywords.push(completion);
