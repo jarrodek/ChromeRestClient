@@ -1,6 +1,7 @@
 package org.rest.client;
 
 import org.rest.client.analytics.GoogleAnalytics;
+import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.SaveRequestEvent;
 import org.rest.client.ui.SaveRequestDialogView;
 
@@ -18,6 +19,7 @@ public class AppEventsHandlers {
 				SaveRequestDialogView dialog = RestClient.getClientFactory().getSaveRequestDialogView();
 				dialog.show();
 				GoogleAnalytics.sendEvent("Engagement", "Click", "Save action initialization");
+				GoogleAnalyticsApp.sendEvent("Engagement", "Click", "Save action initialization");
 			}
 		});
 		

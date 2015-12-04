@@ -28,6 +28,7 @@
 			<fileset dir="war/">
 				<exclude name="**/WEB-INF/" />
 				<exclude name="**/extension/" />
+				<exclude name="**/components/" />
 				<exclude name="**/static/" />
 				<exclude name="**/*.jsp" />
 				<exclude name="**/favicon.ico" />
@@ -42,6 +43,13 @@
 				<exclude name="**/ext/crypto*" />
 			</fileset>
 		</copy>
+		
+		<mkdir dir="${extension.src}/components" />
+		<copy todir="${extension.src}/components">
+		    <fileset dir="war/components/vulcanized" >
+		    	<filename name="elements.*"/>
+		    </fileset>
+	    </copy>
 		<copy todir="${extension.src}">
 			<fileset dir="${extension.srcdir}">
 				<exclude name="**/manifest.json.old" />

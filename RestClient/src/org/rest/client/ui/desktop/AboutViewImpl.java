@@ -4,15 +4,13 @@ import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.AboutView;
 import org.rest.client.ui.TutorialDialog;
 import org.rest.client.ui.TutorialDialog.Direction;
-import org.rest.client.ui.desktop.widget.LicenseDialog;
 
 import com.google.gwt.chrome.runtime.ManifestDetails;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -25,11 +23,15 @@ public class AboutViewImpl extends Composite implements AboutView {
 	}
 	
 	
-	@UiField DivElement versionField;
+	@UiField SpanElement versionField;
+	@UiField Element licensing;
+	@UiField Element licensingDialog;
+	@UiField Element donateDialog;
 	
 	
 	public AboutViewImpl(){
 		initWidget(uiBinder.createAndBindUi(this));
+		observeLicensingButton(this);
 	}
 	
 	@Override
@@ -64,14 +66,22 @@ public class AboutViewImpl extends Composite implements AboutView {
 
 	@Override
 	public void showDonateDialog() {
-		DonateDialogViewImpl dialog = new DonateDialogViewImpl();
-		dialog.show();
+		_showDonateDialog(this);
+		/*DonateDialogViewImpl dialog = new DonateDialogViewImpl();
+		dialog.show();*/
 	}
-	@UiHandler("licensing")
-	void onLicensingClick(ClickEvent e){
-		e.preventDefault();
-		LicenseDialog dialog = new LicenseDialog();
-		dialog.show();
-	}
-
+	
+	public final native void _showDonateDialog(AboutViewImpl context) /*-{
+		var dialog = this.@org.rest.client.ui.desktop.AboutViewImpl::donateDialog;
+		if(!dialog) return;
+		dialog.open();
+	}-*/;
+	
+	private final native void observeLicensingButton(AboutViewImpl context) /*-{
+		var button = this.@org.rest.client.ui.desktop.AboutViewImpl::licensing;
+		if(!button) return;
+		button.addEventListener('tap', function(){
+			(context.@org.rest.client.ui.desktop.AboutViewImpl::licensingDialog).open();
+		});
+	}-*/;
 }

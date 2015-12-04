@@ -25,6 +25,7 @@ import org.rest.client.ClientFactory;
 import org.rest.client.ExternalEventsFactory;
 import org.rest.client.RestClient;
 import org.rest.client.analytics.GoogleAnalytics;
+import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.AddEncodingEvent;
 import org.rest.client.event.ClearFormEvent;
 import org.rest.client.event.HttpEncodingChangeEvent;
@@ -108,6 +109,8 @@ public class RequestActivity extends AppActivity implements
 	FlowPanel viewFlowPanel;
 	TutorialFactory tutorialFactory = null;
 	private String currentRequestEtag = null;
+	
+	private final static String ANALYTICS_EVENT_CATEGORY = "Request view";
 	
 	public RequestActivity(RequestPlace place, ClientFactory clientFactory) {
 		super(clientFactory);
@@ -640,6 +643,7 @@ public class RequestActivity extends AppActivity implements
 			public void onStart(Date time) {
 				requestView.handleRequestStartActionEvent(time);
 				GoogleAnalytics.sendEvent("Engagement", "Click", "Request start");
+				GoogleAnalyticsApp.sendEvent("Engagement", "Click", "Request start");
 			}
 		});
 		
@@ -1258,6 +1262,8 @@ public class RequestActivity extends AppActivity implements
 	@Override
 	public void fireUrlToggleEvent(boolean isNowSimpleView) {
 		eventBus.fireEvent(new URLFieldToggleEvent(isNowSimpleView));
+		GoogleAnalytics.sendEvent(ANALYTICS_EVENT_CATEGORY, "URL widget toggle", isNowSimpleView ? "Single line" : "Details form");
+		GoogleAnalyticsApp.sendEvent(ANALYTICS_EVENT_CATEGORY, "URL widget toggle", isNowSimpleView ? "Single line" : "Details form");
 	}
 
 	@Override
@@ -1495,6 +1501,18 @@ public class RequestActivity extends AppActivity implements
 		});
 		
 		
+	}
+
+	@Override
+	public void urlContextMenuOpenedAction() {
+		GoogleAnalytics.sendEvent(ANALYTICS_EVENT_CATEGORY, "URL widget context menu", "Open menu");
+		GoogleAnalyticsApp.sendEvent(ANALYTICS_EVENT_CATEGORY, "URL widget toggle", "Open menu");
+	}
+
+	@Override
+	public void urlContextMenuActionPerformed(String actionName) {
+		GoogleAnalytics.sendEvent(ANALYTICS_EVENT_CATEGORY, "URL widget context menu action", actionName);
+		GoogleAnalyticsApp.sendEvent(ANALYTICS_EVENT_CATEGORY, "URL widget toggle action", actionName);
 	}
 	
 }

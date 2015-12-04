@@ -21,6 +21,7 @@ public class HeadersSuggestOracle extends DatabaseSuggestOracle {
 	public HeadersSuggestOracle(HeadersStoreWebSql store, String headerType){
 		this.store = store;
 		this.headerType = headerType;
+//		Log.info("HeadersSuggestOracle::construct for type " + headerType);
 	}
 	
 	@Override
@@ -31,6 +32,7 @@ public class HeadersSuggestOracle extends DatabaseSuggestOracle {
 	@Override
 	void makeQuery(final Request request, final Callback callback) {
 		requestInProgress = true;
+//		Log.info("HeadersSuggestOracle::makeQuery -> " + request.getQuery());
 		runQuery(request, callback);
 	}
 	

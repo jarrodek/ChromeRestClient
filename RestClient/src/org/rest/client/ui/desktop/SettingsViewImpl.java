@@ -25,7 +25,7 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	interface SettingsViewImplUiBinder extends UiBinder<Widget, SettingsViewImpl> {
 	}
 	
-//	@UiField CheckBox notifications;
+	@UiField CheckBox notifications;
 	@UiField CheckBox debug;
 	@UiField CheckBox history;
 	@UiField CheckBox magicVars;
@@ -72,13 +72,12 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	
 	@Override
 	public void setNotificationsEnabled(boolean notificationsEnabled) {
-//		notifications.setValue(notificationsEnabled);
+		notifications.setValue(notificationsEnabled);
 	}
 
 	@Override
 	public boolean isNotificationsEnabled() {
-//		return notifications.getValue().booleanValue();
-		return true;
+		return notifications.getValue().booleanValue();
 	}
 	
 	@Override
@@ -121,22 +120,25 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 		if(RestClient.isDebug()){
 			Log.debug("Debug value changed. Current value is: " + String.valueOf(event.getValue()));
 		}
-		listener.changeDebugValue(event.getValue());
+		Boolean value = event.getValue();
+		listener.changeDebugValue(value);
 	}
 	
-//	@UiHandler("notifications")
-//	void onNotificationsChange(ValueChangeEvent<Boolean> event){
-//		if(RestClient.isDebug()){
-//			Log.debug("Notifications value changed. Current value is: " + String.valueOf(event.getValue()));
-//		}
-//		listener.changeNotificationsValue(event.getValue());
-//	}
+	@UiHandler("notifications")
+	void onNotificationsChange(ValueChangeEvent<Boolean> event){
+		if(RestClient.isDebug()){
+			Log.debug("Notifications value changed. Current value is: " + String.valueOf(event.getValue()));
+		}
+		listener.changeNotificationsValue(event.getValue());
+	}
+	
 	@UiHandler("magicVars")
 	void onMagicVarsChange(ValueChangeEvent<Boolean> event){
 		if(RestClient.isDebug()){
 			Log.debug("Magic vars value changed. Current value is: " + String.valueOf(event.getValue()));
 		}
-		listener.changeMagicVarsValue(event.getValue());
+		Boolean value = event.getValue();
+		listener.changeMagicVarsValue(value);
 	}
 	
 	@UiHandler("codeMirrorHeaders")
@@ -144,14 +146,16 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 		if(RestClient.isDebug()){
 			Log.debug("CodeMirror for headers value changed. Current value is: " + String.valueOf(event.getValue()));
 		}
-		listener.changeCodeMirrorHeadersValue(event.getValue());
+		Boolean value = event.getValue();
+		listener.changeCodeMirrorHeadersValue(value);
 	}
 	@UiHandler("codeMirrorPayload")
 	void onCodeMirrorPayloadChange(ValueChangeEvent<Boolean> event){
 		if(RestClient.isDebug()){
 			Log.debug("CodeMirror for payload value changed. Current value is: " + String.valueOf(event.getValue()));
 		}
-		listener.changeCodeMirrorPayloadValue(event.getValue());
+		Boolean value = event.getValue();
+		listener.changeCodeMirrorPayloadValue(value);
 	}
 	
 	

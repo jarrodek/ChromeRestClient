@@ -3,60 +3,42 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	
 	<g:HTMLPanel styleName="url_widget_urlPanel">
-		<!-- Toggle simple/detailed view -->
-		<g:InlineLabel ui:field="toggleView" styleName="handlerImageClosed handlerImageContainer url_widget_urlToggleHandlerImage"></g:InlineLabel>
-		
-		<!-- Full URL input box with suggestions -->
-		<g:SuggestBox addStyleNames="url_widget_fullWidthRelativeInput url_widget_urlInput url_widget_inputPadding" ui:field="urlField"></g:SuggestBox>
-		
-		<!-- Panel to keep detailed form -->
-		<div ui:field="detailedPanel" class="hidden url_widget_detailedPanel url_widget_opened">
-			
+
+		<div class="layout horizontal center">
+		    <paper-icon-button icon="hardware:keyboard-arrow-right" ui:field="toggleView" class="toggle-url-button"></paper-icon-button>
+			<g:SuggestBox addStyleNames="url_widget_fullWidthRelativeInput  flex" ui:field="urlField"></g:SuggestBox>
 			<!-- Host value text box -->
-			<g:TextBox addStyleNames="url_widget_fullWidthRelativeInput url_widget_urlInput url_widget_inputPadding" ui:field="detailedHostField" title="HOST value"></g:TextBox>
+			<g:TextBox addStyleNames="url_widget_fullWidthRelativeInput url_widget_urlInput url_widget_inputPadding hidden" ui:field="detailedHostField" title="HOST value"></g:TextBox>
+			<paper-menu-button horizontal-align="right"  ui:field="urlContextMenuButton">
+			    <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
+			    <paper-menu class="dropdown-content" ui:field="urlContextMenu">
+			        <paper-item data-action="encParamsAction">Encode parameters</paper-item>
+			        <paper-item data-action="decParamsAction">Decode parameters</paper-item>
+			        <paper-item data-action="replAmpAction">Replace "&amp;" with ";"</paper-item>
+			        <paper-item data-action="replSemiAction">Replace ";" with "&amp;"</paper-item>
+			        <paper-item data-action="openUrlTabAction">Open URL in new tab</paper-item>
+			    </paper-menu>
+			</paper-menu-button>
+		</div>
+		
+		<div ui:field="detailedPanel" class="hidden layout vertical detailed-panel">
 			<!-- PATH value text box -->
 			<g:TextBox addStyleNames="url_widget_fullWidthRelativeInput url_widget_pathInput url_widget_inputPadding" ui:field="detailedPathField" title="PATH value"></g:TextBox>
 			<!-- Query params form section -->
 			<section class="url_widget_paramsSection">
-				<p class="url_widget_sectionTitle">
+				<span class="paper-font-subhead">
 					Query parameters
-					
-					<!-- Add new query param button -->
-					<g:Anchor styleName="url_widget_addParamAnchor" ui:field="addParam" href="#">Add</g:Anchor>
-				</p>
+					<paper-button ui:field="addParam">add</paper-button>
+				</span>
 				<!-- Query params form container -->
-				<g:HTMLPanel ui:field="paramsContainer">
-				
-				</g:HTMLPanel>
-				
+				<g:HTMLPanel ui:field="paramsContainer"></g:HTMLPanel>
 			</section>
-			<!-- Query params form section -->
 			<section class="url_widget_hashSection">
+			    <span class="paper-font-subhead subhead-layout">
+					<label for="detailedHashField">History hash</label>
+				</span>
 				<g:TextBox addStyleNames="url_widget_fullWidthRelativeInput url_widget_inputPadding" ui:field="detailedHashField" title="PATH value"></g:TextBox>
 			</section>
-		</div>
-		<div class="url_widget_QuickActions ">
-		    <span class="androidActionSettingsExpand url_widget_UrlSettings"></span>
-		    <ul class="url_widget_UrlSettingsHoverMenu">
-	            <li class="lpad">
-	            	<a href="about:blank" target="_blank" data-action="encParamsAction" class="contextMenuAction">Encode parameters</a>
-	            </li>
-	            <li class="lpad">
-	            	<a href="about:blank" target="_blank" data-action="decParamsAction" class="contextMenuAction">Decode parameters</a>
-	            </li>
-	            <li class="lpad">
-	            	<a href="about:blank" target="_blank" data-action="replAmpAction" class="contextMenuAction">Replace "&amp;" with ";"</a>
-	            </li>
-<!-- 	            <li> -->
-<!-- 	                <g:CheckBox ui:field="alwaysReplaceAmp" addStyleNames="contextMenuAction">Always replace "&amp;" with ";"</g:CheckBox> -->
-<!-- 	            </li> -->
-	            <li class="lpad">
-	            	<a href="about:blank" target="_blank" data-action="replSemiAction" class="contextMenuAction">Replace ";" with "&amp;"</a>
-	            </li>
-	            <li class="lpad">
-	            	<a href="about:blank" target="_blank" data-action="openUrlTabAction" class="contextMenuAction">Open URL in new tab</a>
-	            </li>
-		    </ul>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>

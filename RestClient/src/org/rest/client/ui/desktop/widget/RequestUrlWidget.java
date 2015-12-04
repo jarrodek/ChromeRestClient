@@ -49,7 +49,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
@@ -78,7 +77,11 @@ public class RequestUrlWidget extends Composite implements HasText {
 	@UiField TextBox detailedHashField;
 	@UiField HTMLPanel paramsContainer;
 	@UiField DivElement detailedPanel;
-	@UiField InlineLabel toggleView;
+	@UiField Element toggleView;
+	@UiField Element addParam;
+	@UiField Element urlContextMenu;
+	@UiField Element urlContextMenuButton;
+	
 	
 	private Presenter listener = null;
 	final private ArrayList<QueryDetailRow> queryParamsList = new ArrayList<QueryDetailRow>();
@@ -102,14 +105,21 @@ public class RequestUrlWidget extends Composite implements HasText {
 		initWidget(GWT.<Binder> create(Binder.class).createAndBindUi(this));
 		
 		detailedHostField.getElement().setAttribute("placeholder", "HOST");
+		detailedHostField.getElement().setAttribute("id","detailedHostField");
 		detailedPathField.getElement().setAttribute("placeholder", "PATH");
+		detailedPathField.getElement().setAttribute("id","detailedPathField");
 		detailedHashField.getElement().setAttribute("placeholder", "HASH");
+		detailedHashField.getElement().setAttribute("id","detailedHashField");
 		
 		setParamsContainerEvents();
+		observeToggleButton(this);
+		observeAddParamButton(this);
+		observeSettingsMenu(this);
+		
 		Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 			@Override
 			public void execute() {
-				observeSettingsMenu();
+				
 			}
 		});
 	}
@@ -144,12 +154,9 @@ public class RequestUrlWidget extends Composite implements HasText {
 				EventTarget et = event.getNativeEvent().getEventTarget();
 				if(Element.is(et)){
 					Element el = Element.as(et);
-					if(el.getNodeName().toLowerCase().equals("span")){
-						if(el.hasAttribute("data-remove-row")
-								|| el.hasAttribute("data-encode-row") 
-								|| el.hasAttribute("data-decode-row")){
-							updateURL();
-						}
+					String nName = el.getNodeName().toLowerCase();
+					if(nName.equals("iron-icon") || nName.equals("paper-button")){
+						updateURL();
 					}
 					
 				}
@@ -218,36 +225,23 @@ public class RequestUrlWidget extends Composite implements HasText {
 		}
 		listener.fireUrlChangeEvent(event.getValue());
 	}
-	
-	@UiHandler("addParam")
-	void onAddParam(ClickEvent e){
-		e.preventDefault();
-		addDetailedQueryParamRow(null, null);
-	}
-	
-	@UiHandler("toggleView")
-	void onToggleView(ClickEvent e){
-		e.preventDefault();
-		toggleView();
-	}
-
 
 	private void toggleView() {
 		boolean isNowSimpleView = true;
-		if(detailedPanel.getClassName().contains("hidden")){
+		if(detailedPanel.getClassName().contains("hidden")){ //opening
 			detailedPanel.removeClassName("hidden");
 			urlField.setVisible(false);
-			toggleView.removeStyleName("handlerImageClosed");
-			toggleView.addStyleName("handlerImageOpened");
+			detailedHostField.removeStyleName("hidden");
 			
 			updateQueryForm();
 			ensureQueryFormHasRow();
 			isNowSimpleView = false;
 		} else {
+			updateURL();
 			detailedPanel.addClassName("hidden");
 			urlField.setVisible(true);
-			toggleView.addStyleName("handlerImageClosed");
-			toggleView.removeStyleName("handlerImageOpened");
+			detailedHostField.addStyleName("hidden");
+			
 		}
 		listener.fireUrlToggleEvent(isNowSimpleView);
 	}
@@ -283,7 +277,6 @@ public class RequestUrlWidget extends Composite implements HasText {
 				return;
 			}
 		}
-		Log.debug("performEnterKeyAction");
 		lastEnterTime = new Date();
 		listener.fireRequestStartActionEvent(lastEnterTime);
 	}
@@ -295,22 +288,13 @@ public class RequestUrlWidget extends Composite implements HasText {
 	 * 	All value change events for this text box are handled on parent container. 
 	 * </p>
 	 */
-	private void addDetailedQueryParamRow(String key, String value){
+	private void addDetailedQueryParamRow(String name, String value){
 		
-		TextBox keyBox = new TextBox();
-		TextBox valueBox = new TextBox();
-		
-		final QueryDetailRow row = new QueryDetailRow(keyBox, valueBox);
+		final QueryDetailRow row = new QueryDetailRow(name, value);
 		
 		paramsContainer.add(row);
-		
-		if(key != null){
-			keyBox.setValue(key);
-		}
-		if(value != null){
-			valueBox.setValue(value);
-		}
 		queryParamsList.add(row);
+		
 		row.asWidget().addAttachHandler(new AttachEvent.Handler() {
 			@Override
 			public void onAttachOrDetach(AttachEvent event) {
@@ -337,7 +321,7 @@ public class RequestUrlWidget extends Composite implements HasText {
 		detailedHashField.setValue(null);
 	}
 	/**
-	 * Get current headers value and fill up form.
+	 * Get current params value and fill up form.
 	 */
 	void updateQueryForm(){
 		clearForm();
@@ -370,7 +354,9 @@ public class RequestUrlWidget extends Composite implements HasText {
 	}
 	
 	void updateURL(){
+		
 		String url = getDetailedAsValue();
+		Log.debug("update url: " + url);
 		urlField.setValue(url);
 		listener.fireUrlChangeEvent(url);
 	}
@@ -425,66 +411,48 @@ public class RequestUrlWidget extends Composite implements HasText {
 	}
 	
 	
-	private final native void observeSettingsMenu() /*-{
-		var container = $doc.querySelector('.url_widget_UrlSettingsHoverMenu');
-		if(!container) return;
-		var context = this;
-		container.addEventListener('click',function(e){
-			e.preventDefault();
-			
-			var action = e.target.dataset['action'];
+	private final native void observeSettingsMenu(RequestUrlWidget context) /*-{
+		var menu = this.@org.rest.client.ui.desktop.widget.RequestUrlWidget::urlContextMenu;
+		if(!menu) return;
+		menu.addEventListener('iron-select',function(e){
+			var action = e.target.selectedItem.dataset['action'];
 			if(!action) return;
-			var isCtrl = !!e.ctrlKey;
-			context.@org.rest.client.ui.desktop.widget.RequestUrlWidget::callMenuAction(Ljava/lang/String;Z)(action,isCtrl);
+			context.@org.rest.client.ui.desktop.widget.RequestUrlWidget::callMenuAction(Ljava/lang/String;Z)(action,false);
 		}, false);
-		
-		
-		var hoveringMenu = false;
-		var dismissTimeout = null;
-		var settingsIcon = $doc.querySelector('.url_widget_UrlSettings');
-		
-		function startHovering(e){
-			hoveringMenu = true;
-			if(dismissTimeout != null){
-				$wnd.clearTimeout(dismissTimeout);
-			}
-			showMenu();
-		}
-		function stopHovering(e){
-			hoveringMenu = false;
-			dismissTimeout = $wnd.setTimeout(function(){
-				dismissMenu();
-			},250);
-		}
-		
-		function showMenu(){
-			container.classList.add('visible');
-		}
-		function dismissMenu(){
-			if(hoveringMenu) return;
-			dismissTimeout = null;
-			container.classList.remove('visible');
-		}
-		
-		settingsIcon.addEventListener('mouseover', startHovering, false);
-		container.addEventListener('mouseover', startHovering, false);
-		settingsIcon.addEventListener('mouseout', stopHovering, false);
-		container.addEventListener('mouseout', stopHovering, false);
+		var button = this.@org.rest.client.ui.desktop.widget.RequestUrlWidget::urlContextMenuButton;
+		if(!button) return;
+		button.addEventListener('iron-overlay-closed',function(e){
+			menu.selected = -1;
+		}, false);
+		button.addEventListener('tap',function(e){
+			context.@org.rest.client.ui.desktop.widget.RequestUrlWidget::urlContectMenuOpened()();
+		}, false);
 	}-*/;
 	
+	private void urlContectMenuOpened(){
+		listener.urlContextMenuOpenedAction();
+	}
 	
 	private void callMenuAction(String action, boolean isCtrl){
+		String actionName = "";
 		if(action.equals("encParamsAction")){
 			performEncodeParamsAction(isCtrl);
+			actionName = "Encode parameters";
 		} else if(action.equals("decParamsAction")){
 			performDecodeParamsAction(isCtrl);
+			actionName = "Decode parameters";
 		} else if(action.equals("replAmpAction")){
 			performReplaceAmpAction();
+			actionName = "Replace & with ;";
 		} else if(action.equals("openUrlTabAction")){
 			performOpenUrlAction(urlField.getValue());
+			actionName = "Replace ; with &";
 		} else if(action.equals("replSemiAction")){
 			performReplaceSemicolonAction();
+			actionName = "Open URL in new tab";
 		}
+		
+		listener.urlContextMenuActionPerformed(actionName);
 	}
 	
 	private void performEncodeParamsAction(boolean isCtrl){
@@ -565,4 +533,25 @@ public class RequestUrlWidget extends Composite implements HasText {
 		}
 	}-*/;
 	
+	private final native void observeToggleButton(RequestUrlWidget context) /*-{
+		var button = this.@org.rest.client.ui.desktop.widget.RequestUrlWidget::toggleView;
+		if(!button) return;
+		button.addEventListener('tap', function(e){
+			if(button.classList.contains('active')){
+				button.classList.remove('active');
+				context.@org.rest.client.ui.desktop.widget.RequestUrlWidget::setToogleView(Z)(false);
+			} else {
+				button.classList.add('active')
+				context.@org.rest.client.ui.desktop.widget.RequestUrlWidget::setToogleView(Z)(true);
+			}
+		});
+	}-*/;
+	
+	private final native void observeAddParamButton(RequestUrlWidget context) /*-{
+		var button = this.@org.rest.client.ui.desktop.widget.RequestUrlWidget::addParam;
+		if(!button) return;
+		button.addEventListener('tap', function(e){
+			context.@org.rest.client.ui.desktop.widget.RequestUrlWidget::addDetailedQueryParamRow(Ljava/lang/String;Ljava/lang/String;)(null, null);
+		});
+	}-*/;
 }

@@ -1,0 +1,17 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:h5="urn:import:org.rest.client.ui.html5">
+	
+	<g:HTMLPanel styleName="headers-form layout horizontal center" ui:field="container">
+		<g:HTMLPanel styleName="header-name flex" ui:field="headerNamePanel"></g:HTMLPanel>
+		<div class="header-value flex-2">
+		    <g:TextBox ui:field="valueBox" styleName="gwt-TextBox"></g:TextBox>
+		</div>
+		<div class="action-panel">
+		    <span ui:field="removeButtonWrapper">
+		    	<paper-icon-button icon="close" title="Remove header" ui:field="removeButton"></paper-icon-button>
+		    </span>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder>

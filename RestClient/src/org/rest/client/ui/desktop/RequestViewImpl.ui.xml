@@ -7,7 +7,7 @@
 	
 	<g:HTMLPanel ui:field="root" styleName="requestPanel">
 	
-		<div ui:field="topRequestPanel" class="topRequestPanel flex">
+		<div ui:field="topRequestPanel" class="topRequestPanel flex layout horizontal">
 			<div class="projectWrapper flex">
 				<!-- Project panel -->
 				<div ui:field="projectPanel" class="projectPanel hidden flex">

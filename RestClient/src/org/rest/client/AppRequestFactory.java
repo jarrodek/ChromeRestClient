@@ -132,11 +132,16 @@ public class AppRequestFactory {
 				saveHistory(data);
 				//save URL for suggestion oracle
 				saveUrl(data.getURL());
-				
+				if(RestClient.isDebug()){
+					Log.debug("Apply magic variables.");
+				}
 				//replace magic variables
 				MagicVariables mv = new MagicVariables();
 				
 				data.setURL(mv.apply(requestUrl));
+				if(RestClient.isDebug()){
+					Log.debug("Magic variables has been applied.");
+				}
 				String headers = data.getHeaders();
 				if(headers != null && !headers.isEmpty()){
 					data.setHeaders(mv.apply(headers));
@@ -522,12 +527,24 @@ public class AppRequestFactory {
 		store.getByUrl(url, new StoreResultCallback<List<UrlRow>>() {
 			@Override
 			public void onSuccess(List<UrlRow> result) {
+				
 				if(result.size() > 0) {
+					if(RestClient.isDebug()){
+						Log.debug("Updating Suggestions table with new time.");
+					}
 					store.updateUrlUseTime(result.get(0).getId(), new Date(), new StoreResultCallback<Boolean>(){
 						@Override
-						public void onSuccess(Boolean result) {}
+						public void onSuccess(Boolean result) {
+							if(RestClient.isDebug()){
+								Log.debug("Suggestions table updated with new time.");
+							}
+						}
 						@Override
-						public void onError(Throwable e) {}
+						public void onError(Throwable e) {
+							if(RestClient.isDebug()){
+								Log.error("Can't update suggestion time.", e);
+							}
+						}
 					});
 					return;
 				}
@@ -538,7 +555,9 @@ public class AppRequestFactory {
 					
 					@Override
 					public void onSuccess(Integer result) {
-						
+						if(RestClient.isDebug()){
+							Log.debug("New value has been added to the Suggestions table.");
+						}
 					}
 					
 					@Override

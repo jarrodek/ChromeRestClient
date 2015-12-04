@@ -1,6 +1,5 @@
 package org.rest.client.request;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.xhr2.client.Request;
 import com.google.gwt.xhr2.client.RequestBuilder;
 /**
@@ -19,7 +18,7 @@ public class ApplicationRequest {
 	public static final String ASSETS_URL;
 	public static final String MESSAGES_URL;
 	static {
-		if (GWT.isProdMode()) {
+		if (isProdMode()) {
 			SERVICE_HOST = "https://chromerestclient.appspot.com/";
 		} else {
 			SERVICE_HOST = "http://127.0.0.1:8888/";
@@ -39,4 +38,7 @@ public class ApplicationRequest {
 		return b;
 	}
 	
+	private static final native boolean isProdMode() /*-{
+		return !(location.hostname === '127.0.0.1');
+	}-*/; 
 }
