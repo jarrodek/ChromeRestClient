@@ -1,6 +1,0 @@
-/gwt-unitCache/*
-/extras/*
-.classpath
-.settings/*
-/gwt-unitCache/
-/extras/
