@@ -18,13 +18,8 @@
 				<g:TextArea ui:field="headersRawInput" styleName="RequestHeaders_Widget_rawInput"></g:TextArea>
 			</section>
 			<section data-tab="form" class="tabContent">
-				
-				<!-- Add new form value button -->
+				<g:HTMLPanel ui:field="headersFormPanel" styleName="RequestHeaders_Widget_headersFormPanel"></g:HTMLPanel>
 				<g:Anchor styleName="addValueAnchor" ui:field="addHeader" href="#">Add new header</g:Anchor>
-					
-				<g:HTMLPanel ui:field="headersFormPanel" styleName="RequestHeaders_Widget_headersFormPanel">
-					
-				</g:HTMLPanel>
 			</section>
 		</div>
 	</g:HTMLPanel>

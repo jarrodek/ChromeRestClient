@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <html><head><meta charset="UTF-8"><!--
 @license
 Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
@@ -23,6 +24,64 @@ The complete set of contributors may be found at http://polymer.github.io/CONTRI
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 --><style>
+=======
+<!-- Iron elements --><html><head><meta charset="UTF-8"><!--
+`iron-meta` is a generic element you can use for sharing information across the DOM tree.
+It uses [monostate pattern](http://c2.com/cgi/wiki?MonostatePattern) such that any
+instance of iron-meta has access to the shared
+information. You can use `iron-meta` to share whatever you want (or create an extension
+[like x-meta] for enhancements).
+
+The `iron-meta` instances containing your actual data can be loaded in an import,
+or constructed in any way you see fit. The only requirement is that you create them
+before you try to access them.
+
+Examples:
+
+If I create an instance like this:
+
+    <iron-meta key="info" value="foo/bar"></iron-meta>
+
+Note that value="foo/bar" is the metadata I've defined. I could define more
+attributes or use child nodes to define additional metadata.
+
+Now I can access that element (and it's metadata) from any iron-meta instance
+via the byKey method, e.g.
+
+    meta.byKey('info').getAttribute('value');
+
+Pure imperative form would be like:
+
+    document.createElement('iron-meta').byKey('info').getAttribute('value');
+
+Or, in a Polymer element, you can include a meta in your template:
+
+    <iron-meta id="meta"></iron-meta>
+    ...
+    this.$.meta.byKey('info').getAttribute('value');
+
+@group Iron Elements
+@demo demo/index.html
+@hero hero.svg
+@element iron-meta
+-->
+
+<!--
+The `<iron-flex-layout>` component provides simple ways to use [CSS flexible box layout](https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Flexible_boxes), also known as flexbox. This component provides two different ways to use flexbox:
+
+1. [Layout classes](https://github.com/PolymerElements/iron-flex-layout/tree/master/classes). The layout class stylesheet provides a simple set of class-based flexbox rules. Layout classes let you specify layout properties directly in markup.
+
+2. [Custom CSS mixins](https://github.com/PolymerElements/iron-flex-layout/blob/master/iron-flex-layout.html). The mixin stylesheet includes custom CSS mixins that can be applied inside a CSS rule using the `@apply` function.
+
+A complete [guide](https://elements.polymer-project.org/guides/flex-layout) to `<iron-flex-layout>` is available.
+
+@group Iron Elements
+@pseudoElement iron-flex-layout
+@demo demo/index.html
+-->
+
+<style>
+>>>>>>> develop
   /* IE 10 support for HTML5 hidden attr */
   [hidden] {
     display: none !important;
@@ -324,6 +383,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   }
 
 </style>
+<<<<<<< HEAD
 
 
 <style is="custom-style">
@@ -353,6 +413,74 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   }
 
 </style>
+=======
+<!--
+
+The `iron-icon` element displays an icon. By default an icon renders as a 24px square.
+
+Example using src:
+
+    <iron-icon src="star.png"></iron-icon>
+
+Example setting size to 32px x 32px:
+
+    <iron-icon class="big" src="big_star.png"></iron-icon>
+
+    <style is="custom-style">
+      .big {
+        --iron-icon-height: 32px;
+        --iron-icon-width: 32px;
+      }
+    </style>
+
+The iron elements include several sets of icons.
+To use the default set of icons, import `iron-icons.html` and use the `icon` attribute to specify an icon:
+
+    <link rel="import" href="/components/iron-icons/iron-icons.html">
+
+    <iron-icon icon="menu"></iron-icon>
+
+To use a different built-in set of icons, import the specific `iron-icons/<iconset>-icons.html`, and
+specify the icon as `<iconset>:<icon>`. For example, to use a communication icon, you would
+use:
+
+    <link rel="import" href="/components/iron-icons/communication-icons.html">
+
+    <iron-icon icon="communication:email"></iron-icon>
+
+You can also create custom icon sets of bitmap or SVG icons.
+
+Example of using an icon named `cherry` from a custom iconset with the ID `fruit`:
+
+    <iron-icon icon="fruit:cherry"></iron-icon>
+
+See [iron-iconset](iron-iconset) and [iron-iconset-svg](iron-iconset-svg) for more information about
+how to create a custom iconset.
+
+See the [iron-icons demo](iron-icons?view=demo:demo/index.html) to see the icons available
+in the various iconsets.
+
+
+### Styling
+
+The following custom properties are available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--iron-icon-width` | Width of the icon | `24px`
+`--iron-icon-height` | Height of the icon | `24px`
+`--iron-icon-fill-color` | Fill color of the svg icon | `currentcolor`
+`--iron-icon-stroke-color` | Stroke color of the svg icon | none
+
+@group Iron Elements
+@element iron-icon
+@demo demo/index.html
+@hero hero.svg
+@homepage polymer.github.io
+-->
+
+<!-- Paper elements -->
+>>>>>>> develop
 <style is="custom-style">
 
   :root {
@@ -406,9 +534,343 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   }
 
 </style>
+<<<<<<< HEAD
 
 
 
+=======
+<!--
+Material design: [Cards](https://www.google.com/design/spec/components/cards.html)
+
+`paper-material` is a container that renders two shadows on top of each other to
+create the effect of a lifted piece of paper.
+
+Example:
+
+    <paper-material elevation="1">
+      ... content ...
+    </paper-material>
+
+@group Paper Elements
+@demo demo/index.html
+-->
+
+<!--
+Material design: [Surface reaction](https://www.google.com/design/spec/animation/responsive-interaction.html#responsive-interaction-surface-reaction)
+
+`paper-ripple` provides a visual effect that other paper elements can
+use to simulate a rippling effect emanating from the point of contact.  The
+effect can be visualized as a concentric circle with motion.
+
+Example:
+
+    <div style="position:relative">
+      <paper-ripple></paper-ripple>
+    </div>
+
+Note, it's important that the parent container of the ripple be relative position, otherwise
+the ripple will emanate outside of the desired container.
+
+`paper-ripple` listens to "mousedown" and "mouseup" events so it would display ripple
+effect when touches on it.  You can also defeat the default behavior and
+manually route the down and up actions to the ripple element.  Note that it is
+important if you call `downAction()` you will have to make sure to call
+`upAction()` so that `paper-ripple` would end the animation loop.
+
+Example:
+
+    <paper-ripple id="ripple" style="pointer-events: none;"></paper-ripple>
+    ...
+    downAction: function(e) {
+      this.$.ripple.downAction({x: e.x, y: e.y});
+    },
+    upAction: function(e) {
+      this.$.ripple.upAction();
+    }
+
+Styling ripple effect:
+
+  Use CSS color property to style the ripple:
+
+    paper-ripple {
+      color: #4285f4;
+    }
+
+  Note that CSS color property is inherited so it is not required to set it on
+  the `paper-ripple` element directly.
+
+By default, the ripple is centered on the point of contact.  Apply the `recenters`
+attribute to have the ripple grow toward the center of its container.
+
+    <paper-ripple recenters></paper-ripple>
+
+You can also  center the ripple inside its container from the start.
+
+    <paper-ripple center></paper-ripple>
+
+Apply `circle` class to make the rippling effect within a circle.
+
+    <paper-ripple class="circle"></paper-ripple>
+
+@group Paper Elements
+@element paper-ripple
+@hero hero.svg
+@demo demo/index.html
+-->
+
+<!--
+Material design: [Buttons](https://www.google.com/design/spec/components/buttons.html)
+
+`paper-button` is a button. When the user touches the button, a ripple effect emanates
+from the point of contact. It may be flat or raised. A raised button is styled with a
+shadow.
+
+Example:
+
+    <paper-button>Flat button</paper-button>
+    <paper-button raised>Raised button</paper-button>
+    <paper-button noink>No ripple effect</paper-button>
+    <paper-button toggles>Toggle-able button</paper-button>
+
+A button that has `toggles` true will remain `active` after being clicked (and
+will have an `active` attribute set). For more information, see the `Polymer.IronButtonState`
+behavior.
+
+You may use custom DOM in the button body to create a variety of buttons. For example, to
+create a button with an icon and some text:
+
+    <paper-button>
+      <iron-icon icon="favorite"></iron-icon>
+      custom button content
+    </paper-button>
+
+### Styling
+
+Style the button with CSS as you would a normal DOM element.
+
+    paper-button.fancy {
+      background: green;
+      color: yellow;
+    }
+
+    paper-button.fancy:hover {
+      background: lime;
+    }
+
+    paper-button[disabled],
+    paper-button[toggles][active] {
+      background: red;
+    }
+
+By default, the ripple is the same color as the foreground at 25% opacity. You may
+customize the color using the `--paper-button-ink-color` custom property.
+
+The following custom properties and mixins are also available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--paper-button-ink-color` | Background color of the ripple | `Based on the button's color`
+`--paper-button` | Mixin applied to the button | `{}`
+`--paper-button-disabled` | Mixin applied to the disabled button. Note that you can also use the `paper-button[disabled]` selector | `{}`
+`--paper-button-flat-keyboard-focus` | Mixin applied to a flat button after it's been focused using the keyboard | `{}`
+`--paper-button-raised-keyboard-focus` | Mixin applied to a raised button after it's been focused using the keyboard | `{}`
+
+@demo demo/index.html
+-->
+
+<!--
+`iron-overlay-backdrop` is a backdrop used by `Polymer.IronOverlayBehavior`. It should be a
+singleton.
+
+### Styling
+
+The following custom properties and mixins are available for styling.
+
+Custom property | Description | Default
+-------------------------------------------|------------------------|---------
+`--iron-overlay-backdrop-background-color` | Backdrop background color                                     | #000
+`--iron-overlay-backdrop-opacity`          | Backdrop opacity                                              | 0.6
+`--iron-overlay-backdrop`                  | Mixin applied to `iron-overlay-backdrop`.                      | {}
+`--iron-overlay-backdrop-opened`           | Mixin applied to `iron-overlay-backdrop` when it is displayed | {}
+-->
+
+<!--
+`<opaque-animation>` makes an element `opacity:1` for the duration of the animation. Used to prevent
+webkit/safari from drawing a frame before an animation for elements that animate from display:none.
+-->
+
+<!--
+`<iron-dropdown>` is a generalized element that is useful when you have
+hidden content (`.dropdown-content`) that is revealed due to some change in
+state that should cause it to do so.
+
+Note that this is a low-level element intended to be used as part of other
+composite elements that cause dropdowns to be revealed.
+
+Examples of elements that might be implemented using an `iron-dropdown`
+include comboboxes, menubuttons, selects. The list goes on.
+
+The `<iron-dropdown>` element exposes attributes that allow the position
+of the `.dropdown-content` relative to the `.dropdown-trigger` to be
+configured.
+
+    <iron-dropdown horizontal-align="right" vertical-align="top">
+      <div class="dropdown-content">Hello!</div>
+    </iron-dropdown>
+
+In the above example, the `<div>` with class `.dropdown-content` will be
+hidden until the dropdown element has `opened` set to true, or when the `open`
+method is called on the element.
+
+@demo demo/index.html
+-->
+
+<style is="custom-style">
+
+  :root {
+
+    --dark-primary-color: #303f9f;
+
+    --default-primary-color: #3f51b5;
+
+    --light-primary-color: #c5cae9;
+
+    --text-primary-color: #ffffff;
+
+    --accent-color: #ff4081;
+
+    --primary-background-color: #ffffff;
+
+    --primary-text-color: #212121;
+
+    --secondary-text-color: #757575;
+
+    --disabled-text-color: #bdbdbd;
+
+    --divider-color: #e0e0e0;
+
+  }
+
+</style>
+<!--
+`<fade-in-animation>` animates the opacity of an element from 0 to 1.
+
+Configuration:
+```
+{
+  name: 'fade-in-animation',
+  node: <node>
+  timing: <animation-timing>
+}
+```
+-->
+
+<!--
+`<fade-out-animation>` animates the opacity of an element from 1 to 0.
+
+Configuration:
+```
+{
+  name: 'fade-out-animation',
+  node: <node>
+  timing: <animation-timing>
+}
+```
+-->
+
+<!--
+`paper-menu-button` allows one to compose a designated "trigger" element with
+another element that represents "content", to create a dropdown menu that
+displays the "content" when the "trigger" is clicked.
+
+The child element with the class `dropdown-trigger` will be used as the
+"trigger" element. The child element with the class `dropdown-content` will be
+used as the "content" element.
+
+The `paper-menu-button` is sensitive to its content's `iron-select` events. If
+the "content" element triggers an `iron-select` event, the `paper-menu-button`
+will close automatically.
+
+Example:
+
+    <paper-menu-button>
+      <paper-icon-button icon="menu" class="dropdown-trigger"></paper-icon-button>
+      <paper-menu class="dropdown-content">
+        <paper-item>Share</paper-item>
+        <paper-item>Settings</paper-item>
+        <paper-item>Help</paper-item>
+      </paper-menu>
+    </paper-menu-button>
+
+### Styling
+
+The following custom properties and mixins are also available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--paper-menu-button-dropdown-background` | Background color of the paper-menu-button dropdown | `#fff`
+`--paper-menu-button` | Mixin applied to the paper-menu-button | `{}`
+`--paper-menu-button-disabled` | Mixin applied to the paper-menu-button when disabled | `{}`
+`--paper-menu-button-dropdown` | Mixin applied to the paper-menu-button dropdown | `{}`
+
+
+@hero hero.svg
+@demo demo/index.html
+-->
+
+<!--
+Material design: [Menus](https://www.google.com/design/spec/components/menus.html)
+
+`<paper-menu>` implements an accessible menu control with Material Design styling. The focused item
+is highlighted, and the selected item has bolded text.
+
+    <paper-menu>
+      <paper-item>Item 1</paper-item>
+      <paper-item>Item 2</paper-item>
+    </paper-menu>
+
+An initial selection can be specified with the `selected` attribute.
+
+    <paper-menu selected="0">
+      <paper-item>Item 1</paper-item>
+      <paper-item>Item 2</paper-item>
+    </paper-menu>
+
+Make a multi-select menu with the `multi` attribute. Items in a multi-select menu can be deselected,
+and multiple item can be selected.
+
+    <paper-menu multi>
+      <paper-item>Item 1</paper-item>
+      <paper-item>Item 2</paper-item>
+    </paper-menu>
+
+### Styling
+
+The following custom properties and mixins are available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--paper-menu-background-color`   | Menu background color                                            | `--primary-background-color`
+`--paper-menu-color`              | Menu foreground color                                            | `--primary-text-color`
+`--paper-menu-disabled-color`     | Foreground color for a disabled item                             | `--disabled-text-color`
+`--paper-menu`                    | Mixin applied to the menu                                        | `{}`
+`--paper-menu-selected-item`      | Mixin applied to the selected item                               | `{}`
+`--paper-menu-focused-item`       | Mixin applied to the focused item                                | `{}`
+`--paper-menu-focused-item-after` | Mixin applied to the ::after pseudo-element for the focused item | `{}`
+
+### Accessibility
+
+`<paper-menu>` has `role="menu"` by default. A multi-select menu will also have
+`aria-multiselectable` set. It implements key bindings to navigate through the menu with the up and
+down arrow keys, esc to exit the menu, and enter to activate a menu item. Typing the first letter
+of a menu item will also focus it.
+
+@group Paper Elements
+@element paper-menu
+@hero hero.svg
+@demo demo/index.html
+-->
+>>>>>>> develop
 
 <style is="custom-style">
 
@@ -731,6 +1193,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   }
 
 </style>
+<<<<<<< HEAD
 
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic,500,500italic,700,700italic">
@@ -949,6 +1412,268 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     };
 
   }
+=======
+<!--
+`PaperItemBehavior` is a convenience behavior shared by <paper-item> and
+<paper-icon-item> that manages the shared control states and attributes of
+the items.
+-->
+
+<!--
+Material design: [Lists](https://www.google.com/design/spec/components/lists.html)
+
+`<paper-item>` is an interactive list item. By default, it is a horizontal flexbox.
+
+    <paper-item>Item</paper-item>
+
+Use this element with `<paper-item-body>` to make Material Design styled two-line and three-line
+items.
+
+    <paper-item>
+      <paper-item-body two-line>
+        <div>Show your status</div>
+        <div secondary>Your status is visible to everyone</div>
+      </paper-item-body>
+      <iron-icon icon="warning"></iron-icon>
+    </paper-item>
+
+### Styling
+
+The following custom properties and mixins are available for styling:
+
+Custom property               | Description                                    | Default
+------------------------------|------------------------------------------------|----------
+`--paper-item-min-height`     | Minimum height of the item                     | `48px`
+`--paper-item`                | Mixin applied to the item                      | `{}`
+`--paper-item-selected-weight`| The font weight of a selected item             | `bold`
+`--paper-item-selected`       | Mixin applied to selected paper-items                | `{}`
+`--paper-item-disabled-color` | The color for disabled paper-items             | `--disabled-text-color`
+`--paper-item-disabled`       | Mixin applied to disabled paper-items        | `{}`
+`--paper-item-focused`        | Mixin applied to focused paper-items         | `{}`
+`--paper-item-focused-before` | Mixin applied to :before focused paper-items | `{}`
+
+### Accessibility
+
+This element has `role="listitem"` by default. Depending on usage, it may be more appropriate to set
+`role="menuitem"`, `role="menuitemcheckbox"` or `role="menuitemradio"`.
+
+    <paper-item role="menuitemcheckbox">
+      <paper-item-body>
+        Show your status
+      </paper-item-body>
+      <paper-checkbox></paper-checkbox>
+    </paper-item>
+
+@group Paper Elements
+@element paper-item
+@demo demo/index.html
+-->
+
+<!--
+Material design: [Icon toggles](https://www.google.com/design/spec/components/buttons.html#buttons-toggle-buttons)
+
+`paper-icon-button` is a button with an image placed at the center. When the user touches
+the button, a ripple effect emanates from the center of the button.
+
+`paper-icon-button` includes a default icon set.  Use `icon` to specify which icon
+from the icon set to use.
+
+    <paper-icon-button icon="menu"></paper-icon-button>
+
+See [`iron-iconset`](#iron-iconset) for more information about
+how to use a custom icon set.
+
+Example:
+
+    <link href="path/to/iron-icons/iron-icons.html" rel="import">
+
+    <paper-icon-button icon="favorite"></paper-icon-button>
+    <paper-icon-button src="star.png"></paper-icon-button>
+
+### Styling
+
+Style the button with CSS as you would a normal DOM element. If you are using the icons
+provided by `iron-icons`, they will inherit the foreground color of the button.
+
+    /* make a red "favorite" button */
+    <paper-icon-button icon="favorite" style="color: red;"></paper-icon-button>
+
+By default, the ripple is the same color as the foreground at 25% opacity. You may
+customize the color using the `--paper-icon-button-ink-color` custom property.
+
+The following custom properties and mixins are available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--paper-icon-button-disabled-text` | The color of the disabled button | `--disabled-text-color`
+`--paper-icon-button-ink-color` | Selected/focus ripple color | `--primary-text-color`
+`--paper-icon-button` | Mixin for a button | `{}`
+`--paper-icon-button-disabled` | Mixin for a disabled button | `{}`
+
+@group Paper Elements
+@element paper-icon-button
+@demo demo/index.html
+-->
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic,500,500italic,700,700italic">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,700">
+<!--
+Typographic styles are provided matching the Material Design standard styles:
+http://www.google.com/design/spec/style/typography.html#typography-standard-styles
+
+To make use of them, apply a `paper-font-<style>` class to elements, matching
+the font style you wish it to inherit.
+
+  <header class="paper-font-display2">Hey there!</header>
+
+Note that these are English/Latin centric styles. You may need to further adjust
+line heights and weights for CJK typesetting. See the notes in the Material
+Design typography section.
+-->
+<style>
+
+.paper-font-display4,
+.paper-font-display3,
+.paper-font-display2,
+.paper-font-display1,
+.paper-font-headline,
+.paper-font-title,
+.paper-font-subhead,
+.paper-font-body2,
+.paper-font-body1,
+.paper-font-caption,
+.paper-font-menu,
+.paper-font-button {
+  font-family: 'Roboto', 'Noto', sans-serif;
+  -webkit-font-smoothing: antialiased;  /* OS X subpixel AA bleed bug */
+}
+
+.paper-font-code2,
+.paper-font-code1 {
+  font-family: 'Roboto Mono', 'Consolas', 'Menlo', monospace;
+  -webkit-font-smoothing: antialiased;  /* OS X subpixel AA bleed bug */
+}
+
+/* Opt for better kerning for headers & other short labels. */
+.paper-font-display4,
+.paper-font-display3,
+.paper-font-display2,
+.paper-font-display1,
+.paper-font-headline,
+.paper-font-title,
+.paper-font-subhead,
+.paper-font-menu,
+.paper-font-button {
+  text-rendering: optimizeLegibility;
+}
+
+/*
+"Line wrapping only applies to Body, Subhead, Headline, and the smaller Display
+styles. All other styles should exist as single lines."
+*/
+.paper-font-display4,
+.paper-font-display3,
+.paper-font-title,
+.paper-font-caption,
+.paper-font-menu,
+.paper-font-button {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.paper-font-display4 {
+  font-size: 112px;
+  font-weight: 300;
+  letter-spacing: -.044em;
+  line-height: 120px;
+}
+
+.paper-font-display3 {
+  font-size: 56px;
+  font-weight: 400;
+  letter-spacing: -.026em;
+  line-height: 60px;
+}
+
+.paper-font-display2 {
+  font-size: 45px;
+  font-weight: 400;
+  letter-spacing: -.018em;
+  line-height: 48px;
+}
+
+.paper-font-display1 {
+  font-size: 34px;
+  font-weight: 400;
+  letter-spacing: -.01em;
+  line-height: 40px;
+}
+
+.paper-font-headline {
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -.012em;
+  line-height: 32px;
+}
+
+.paper-font-title {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 28px;
+}
+
+.paper-font-subhead {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+.paper-font-body2 {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.paper-font-body1 {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.paper-font-caption {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.011em;
+  line-height: 20px;
+}
+
+.paper-font-menu {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.paper-font-button {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.018em;
+  line-height: 24px;
+  text-transform: uppercase;
+}
+
+.paper-font-code2 {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+}
+
+.paper-font-code1 {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+}
+>>>>>>> develop
 
 </style>
 <style>
@@ -1539,6 +2264,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   }
 
 </style>
+<<<<<<< HEAD
 
 <style>
 
@@ -1607,26 +2333,102 @@ styles. All other styles should exist as single lines."
 }
 
 .paper-font-display2 {
+=======
+<style>
+.shadow-transition {
+  transition: box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shadow-elevation-2dp {
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+              0 1px 5px 0 rgba(0, 0, 0, 0.12),
+              0 3px 1px -2px rgba(0, 0, 0, 0.2);
+}
+
+.shadow-elevation-3dp {
+  box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.14),
+              0 1px 8px 0 rgba(0, 0, 0, 0.12),
+              0 3px 3px -2px rgba(0, 0, 0, 0.4);
+}
+
+.shadow-elevation-4dp {
+  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14),
+              0 1px 10px 0 rgba(0, 0, 0, 0.12),
+              0 2px 4px -1px rgba(0, 0, 0, 0.4);
+}
+
+.shadow-elevation-6dp {
+  box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.14),
+              0 1px 18px 0 rgba(0, 0, 0, 0.12),
+              0 3px 5px -1px rgba(0, 0, 0, 0.4);
+}
+
+.shadow-elevation-8dp {
+  box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14),
+              0 3px 14px 2px rgba(0, 0, 0, 0.12),
+              0 5px 5px -3px rgba(0, 0, 0, 0.4);
+}
+
+.shadow-elevation-16dp {
+  box-shadow: 0 16px 24px 2px rgba(0, 0, 0, 0.14),
+              0  6px 30px 5px rgba(0, 0, 0, 0.12),
+              0  8px 10px -5px rgba(0, 0, 0, 0.4);
+}
+
+</style>
+<!--
+A set of base styles that are applied to the document and standard elements that
+match the Material Design spec.
+-->
+<style>
+/*
+Note that there is a lot of style duplication here. The hope is that the Polymer
+0.8 styling solution will allow for inheritance of properties so that we can
+eventually avoid it.
+*/
+
+/* Mixins */
+
+/* [paper-font] */
+body {
+  font-family: 'Roboto', 'Noto', sans-serif;
+  -webkit-font-smoothing: antialiased;  /* OS X subpixel AA bleed bug */
+}
+
+/* [paper-font=display2] */
+h1 {
+>>>>>>> develop
   font-size: 45px;
   font-weight: 400;
   letter-spacing: -.018em;
   line-height: 48px;
 }
 
+<<<<<<< HEAD
 .paper-font-display1 {
+=======
+/* [paper-font=display1] */
+h2 {
+>>>>>>> develop
   font-size: 34px;
   font-weight: 400;
   letter-spacing: -.01em;
   line-height: 40px;
 }
 
+<<<<<<< HEAD
 .paper-font-headline {
+=======
+/* [paper-font=headline] */
+h3 {
+>>>>>>> develop
   font-size: 24px;
   font-weight: 400;
   letter-spacing: -.012em;
   line-height: 32px;
 }
 
+<<<<<<< HEAD
 .paper-font-title {
   font-size: 20px;
   font-weight: 500;
@@ -1634,11 +2436,16 @@ styles. All other styles should exist as single lines."
 }
 
 .paper-font-subhead {
+=======
+/* [paper-font=subhead] */
+h4 {
+>>>>>>> develop
   font-size: 16px;
   font-weight: 400;
   line-height: 24px;
 }
 
+<<<<<<< HEAD
 .paper-font-body2 {
   font-size: 14px;
   font-weight: 500;
@@ -1660,11 +2467,21 @@ styles. All other styles should exist as single lines."
 
 .paper-font-menu {
   font-size: 13px;
+=======
+/* [paper-font=body2] */
+h5, h6 {
+  font-size: 14px;
+>>>>>>> develop
   font-weight: 500;
   line-height: 24px;
 }
 
+<<<<<<< HEAD
 .paper-font-button {
+=======
+/* [paper-font=button] */
+a {
+>>>>>>> develop
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.018em;
@@ -1672,6 +2489,7 @@ styles. All other styles should exist as single lines."
   text-transform: uppercase;
 }
 
+<<<<<<< HEAD
 .paper-font-code2 {
   font-size: 14px;
   font-weight: 700;
@@ -1809,6 +2627,326 @@ a {
 }
 
 </style>
+=======
+/* Overrides */
+
+body, a {
+  color: #212121;
+}
+
+h1, h2, h3, h4, h5, h6, p {
+  margin: 0 0 20px 0;
+}
+
+h1, h2, h3, h4, h5, h6, a {
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  text-decoration: none;
+}
+
+</style>
+<style is="custom-style">
+
+  :root {
+
+    /* Shared Styles */
+
+    /*
+    Unfortunately, we can't use nested rules
+    See https://github.com/Polymer/polymer/issues/1399
+    */
+    --paper-font-common-base: {
+      font-family: 'Roboto', 'Noto', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    };
+
+    --paper-font-common-code: {
+      font-family: 'Roboto Mono', 'Consolas', 'Menlo', monospace;
+      -webkit-font-smoothing: antialiased;
+    };
+
+    --paper-font-common-expensive-kerning: {
+      text-rendering: optimizeLegibility;
+    };
+
+    --paper-font-common-nowrap: {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    };
+
+    /* Material Font Styles */
+
+    --paper-font-display4: {
+      /* @apply(--paper-font-common-base) */
+      font-family: 'Roboto', 'Noto', sans-serif;
+      -webkit-font-smoothing: antialiased;
+
+      /* @apply(--paper-font-common-nowrap); */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      font-size: 112px;
+      font-weight: 300;
+      letter-spacing: -.044em;
+      line-height: 120px;
+    };
+
+    --paper-font-display3: {
+      /* @apply(--paper-font-common-base) */
+      font-family: 'Roboto', 'Noto', sans-serif;
+      -webkit-font-smoothing: antialiased;
+
+      /* @apply(--paper-font-common-nowrap); */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      font-size: 56px;
+      font-weight: 400;
+      letter-spacing: -.026em;
+      line-height: 60px;
+    };
+
+    --paper-font-display2: {
+      /* @apply(--paper-font-common-base) */
+      font-family: 'Roboto', 'Noto', sans-serif;
+      -webkit-font-smoothing: antialiased;
+
+
+      font-size: 45px;
+      font-weight: 400;
+      letter-spacing: -.018em;
+      line-height: 48px;
+    };
+
+    --paper-font-display1: {
+      /* @apply(--paper-font-common-base) */
+      font-family: 'Roboto', 'Noto', sans-serif;
+      -webkit-font-smoothing: antialiased;
+
+
+      font-size: 34px;
+      font-weight: 400;
+      letter-spacing: -.01em;
+      line-height: 40px;
+    };
+
+    --paper-font-headline: {
+      /* @apply(--paper-font-common-base) */
+      font-family: 'Roboto', 'Noto', sans-serif;
+      -webkit-font-smoothing: antialiased;
+
+
+      font-size: 24px;
+      font-weight: 400;
+      letter-spacing: -.012em;
+      line-height: 32px;
+    };
+
+    --paper-font-title: {
+      /* @apply(--paper-font-common-base) */
+      font-family: 'Roboto', 'Noto', sans-serif;
+      -webkit-font-smoothing: antialiased;
+
+      /* @apply(--paper-font-common-nowrap); */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      font-size: 20px;
+      font-weight: 500;
+      line-height: 28px;
+    };
+
+    --paper-font-subhead: {
+      /* @apply(--paper-font-common-base) */
+      font-family: 'Roboto', 'Noto', sans-serif;
+      -webkit-font-smoothing: antialiased;
+
+
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 24px;
+    };
+
+    --paper-font-body2: {
+      /* @apply(--paper-font-common-base) */
+      font-family: 'Roboto', 'Noto', sans-serif;
+      -webkit-font-smoothing: antialiased;
+
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 24px;
+    };
+
+    --paper-font-body1: {
+      /* @apply(--paper-font-common-base) */
+      font-family: 'Roboto', 'Noto', sans-serif;
+      -webkit-font-smoothing: antialiased;
+
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 20px;
+    };
+
+    --paper-font-caption: {
+      /* @apply(--paper-font-common-base) */
+      font-family: 'Roboto', 'Noto', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      /* @apply(--paper-font-common-nowrap); */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.011em;
+      line-height: 20px;
+    };
+
+    --paper-font-menu: {
+      /* @apply(--paper-font-common-base) */
+      font-family: 'Roboto', 'Noto', sans-serif;
+      -webkit-font-smoothing: antialiased;
+
+      /* @apply(--paper-font-common-nowrap); */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 24px;
+    };
+
+    --paper-font-button: {
+      /* @apply(--paper-font-common-base) */
+      font-family: 'Roboto', 'Noto', sans-serif;
+      -webkit-font-smoothing: antialiased;
+
+      /* @apply(--paper-font-common-nowrap); */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.018em;
+      line-height: 24px;
+      text-transform: uppercase;
+    };
+
+    --paper-font-code2: {
+      /* @apply(--paper-font-common-code); */
+      font-family: 'Roboto Mono', 'Consolas', 'Menlo', monospace;
+      -webkit-font-smoothing: antialiased;
+
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 20px;
+    };
+
+    --paper-font-code1: {
+      /* @apply(--paper-font-common-code); */
+      font-family: 'Roboto Mono', 'Consolas', 'Menlo', monospace;
+      -webkit-font-smoothing: antialiased;
+
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 20px;
+    };
+
+  }
+
+</style>
+<!--
+Material design: [Dialogs](https://www.google.com/design/spec/components/dialogs.html)
+
+`<paper-dialog>` is a dialog with Material Design styling and optional animations when it is
+opened or closed. It provides styles for a header, content area, and an action area for buttons.
+You can use the `<paper-dialog-scrollable>` element (in its own repository) if you need a scrolling
+content area. See `Polymer.PaperDialogBehavior` for specifics.
+
+For example, the following code implements a dialog with a header, scrolling content area and
+buttons.
+
+    <paper-dialog>
+      <h2>Header</h2>
+      <paper-dialog-scrollable>
+        Lorem ipsum...
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm>Accept</paper-button>
+      </div>
+    </paper-dialog>
+
+### Styling
+
+See the docs for `Polymer.PaperDialogBehavior` for the custom properties available for styling
+this element.
+
+### Animations
+
+Set the `entry-animation` and/or `exit-animation` attributes to add an animation when the dialog
+is opened or closed. See the documentation in
+[PolymerElements/neon-animation](https://github.com/PolymerElements/neon-animation) for more info.
+
+For example:
+
+    <link rel="import" href="components/neon-animation/animations/scale-up-animation.html">
+    <link rel="import" href="components/neon-animation/animations/fade-out-animation.html">
+
+    <paper-dialog entry-animation="scale-up-animation"
+                  exit-animation="fade-out-animation">
+      <h2>Header</h2>
+      <div>Dialog body</div>
+    </paper-dialog>
+
+### Accessibility
+
+See the docs for `Polymer.PaperDialogBehavior` for accessibility features implemented by this
+element.
+
+@group Paper Elements
+@element paper-dialog
+@hero hero.svg
+@demo demo/index.html
+-->
+
+<!--
+Material design: [Dialogs](https://www.google.com/design/spec/components/dialogs.html)
+
+`paper-dialog-scrollable` implements a scrolling area used in a Material Design dialog. It shows
+a divider at the top and/or bottom indicating more content, depending on scroll position. Use this
+together with elements implementing `Polymer.PaperDialogBehavior`.
+
+    <paper-dialog-impl>
+      <h2>Header</h2>
+      <paper-dialog-scrollable>
+        Lorem ipsum...
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button>OK</paper-button>
+      </div>
+    </paper-dialog-impl>
+
+It shows a top divider after scrolling if it is not the first child in its parent container,
+indicating there is more content above. It shows a bottom divider if it is scrollable and it is not
+the last child in its parent container, indicating there is more content below. The bottom divider
+is hidden if it is scrolled to the bottom.
+
+@group Paper Elements
+@element paper-dialog-scrollable
+@demo demo/index.html
+@hero hero.svg
+-->
+
+>>>>>>> develop
 </head><body><div hidden="" by-vulcanize=""><dom-module id="iron-icon" assetpath="iron-icon/">
 
   <style>
@@ -2149,9 +3287,58 @@ a {
 <g id="watch"><path d="M20 12c0-2.54-1.19-4.81-3.04-6.27L16 0H8l-.95 5.73C5.19 7.19 4 9.45 4 12s1.19 4.81 3.05 6.27L8 24h8l.96-5.73C18.81 16.81 20 14.54 20 12zM6 12c0-3.31 2.69-6 6-6s6 2.69 6 6-2.69 6-6 6-6-2.69-6-6z"></path></g>
 </defs></svg>
 </iron-iconset-svg>
+<<<<<<< HEAD
 <dom-module id="paper-ripple" assetpath="paper-ripple/">
 
   
+=======
+<dom-module id="paper-material" assetpath="paper-material/">
+  <template>
+    <style>
+      :host {
+        display: block;
+        position: relative;
+      }
+
+      :host([animated]) {
+        @apply(--shadow-transition);
+      }
+
+      :host([elevation="1"]) {
+        @apply(--shadow-elevation-2dp);
+      }
+
+      :host([elevation="2"]) {
+        @apply(--shadow-elevation-4dp);
+      }
+
+      :host([elevation="3"]) {
+        @apply(--shadow-elevation-6dp);
+      }
+
+      :host([elevation="4"]) {
+        @apply(--shadow-elevation-8dp);
+      }
+
+      :host([elevation="5"]) {
+        @apply(--shadow-elevation-16dp);
+      }
+    </style>
+
+    <content></content>
+  </template>
+</dom-module>
+<dom-module id="paper-ripple" assetpath="paper-ripple/">
+
+  <!--
+  Fired when the animation finishes. This is useful if you want to wait until the ripple
+  animation finishes to perform some action.
+
+  @event transitionend
+  @param {Object} detail
+  @param {Object} detail.node The animated node
+  -->
+>>>>>>> develop
 
   <template>
     <style>
@@ -2225,6 +3412,7 @@ a {
     <div id="waves"></div>
   </template>
 </dom-module>
+<<<<<<< HEAD
 <dom-module id="paper-icon-button" assetpath="paper-icon-button/">
   <template strip-whitespace="">
     <style>
@@ -2307,6 +3495,8 @@ a {
     <content></content>
   </template>
 </dom-module>
+=======
+>>>>>>> develop
 <dom-module id="paper-button" assetpath="paper-button/">
   <template strip-whitespace="">
 
@@ -2577,6 +3767,55 @@ a {
   </template>
 
   </dom-module>
+<<<<<<< HEAD
+=======
+<dom-module id="paper-icon-button" assetpath="paper-icon-button/">
+  <template strip-whitespace="">
+    <style>
+      :host {
+        display: inline-block;
+        position: relative;
+        padding: 8px;
+        outline: none;
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        cursor: pointer;
+        z-index: 0;
+        line-height: 1;
+        
+        width: 40px;
+        height: 40px;
+
+        /* Because of polymer/2558, this style has lower specificity than * */
+        box-sizing: border-box !important;
+        @apply(--paper-icon-button);
+      }
+
+      :host #ink {
+        color: var(--paper-icon-button-ink-color, --primary-text-color);
+        opacity: 0.6;
+      }
+
+      :host([disabled]) {
+        color: var(--paper-icon-button-disabled-text, --disabled-text-color);
+        pointer-events: none;
+        cursor: auto;
+        @apply(--paper-icon-button-disabled);
+      }
+
+      iron-icon {
+        --iron-icon-width: 100%;
+        --iron-icon-height: 100%;
+      }
+    </style>
+    <iron-icon id="icon" src="[[src]]" icon="[[icon]]" alt$="[[alt]]"></iron-icon>
+  </template>
+
+  </dom-module>
+>>>>>>> develop
 <dom-module id="paper-dialog-shared-styles" assetpath="paper-dialog-behavior/">
   <template>
     <style>
