@@ -8619,7 +8619,6 @@ this.fire('dom-change');
     Polymer.PaperButtonBehaviorImpl
   ];
 /**
-<<<<<<< HEAD
    * `Polymer.PaperInkyFocusBehavior` implements a ripple when the element has keyboard focus.
    *
    * @polymerBehavior Polymer.PaperInkyFocusBehavior
@@ -8657,8 +8656,6 @@ this.fire('dom-change');
     Polymer.PaperInkyFocusBehaviorImpl
   ];
 /**
-=======
->>>>>>> develop
    * `IronResizableBehavior` is a behavior that can be used in Polymer elements to
    * coordinate the flow of resize events between "resizers" (elements that control the
    * size or hidden state of their children) and "resizables" (elements that need to be
@@ -11131,46 +11128,6 @@ Polymer({
     Polymer.PaperItemBehaviorImpl
   ];
 /**
-<<<<<<< HEAD
-=======
-   * `Polymer.PaperInkyFocusBehavior` implements a ripple when the element has keyboard focus.
-   *
-   * @polymerBehavior Polymer.PaperInkyFocusBehavior
-   */
-  Polymer.PaperInkyFocusBehaviorImpl = {
-
-    observers: [
-      '_focusedChanged(receivedFocusFromKeyboard)'
-    ],
-
-    _focusedChanged: function(receivedFocusFromKeyboard) {
-      if (receivedFocusFromKeyboard) {
-        this.ensureRipple();
-      }
-      if (this.hasRipple()) {
-        this._ripple.holdDown = receivedFocusFromKeyboard;
-      }
-    },
-
-    _createRipple: function() {
-      var ripple = Polymer.PaperRippleBehavior._createRipple();
-      ripple.id = 'ink';
-      ripple.setAttribute('center', '');
-      ripple.classList.add('circle');
-      return ripple;
-    }
-
-  };
-
-  /** @polymerBehavior Polymer.PaperInkyFocusBehavior */
-  Polymer.PaperInkyFocusBehavior = [
-    Polymer.IronButtonState,
-    Polymer.IronControlState,
-    Polymer.PaperRippleBehavior,
-    Polymer.PaperInkyFocusBehaviorImpl
-  ];
-/**
->>>>>>> develop
 Use `Polymer.PaperDialogBehavior` and `paper-dialog-shared-styles.html` to implement a Material Design
 dialog.
 
@@ -11567,43 +11524,6 @@ Polymer({
       }
 
     });
-<<<<<<< HEAD
-=======
-Polymer({
-    is: 'paper-material',
-
-    properties: {
-      /**
-       * The z-depth of this element, from 0-5. Setting to 0 will remove the
-       * shadow, and each increasing number greater than 0 will be "deeper"
-       * than the last.
-       *
-       * @attribute elevation
-       * @type number
-       * @default 1
-       */
-      elevation: {
-        type: Number,
-        reflectToAttribute: true,
-        value: 1
-      },
-
-      /**
-       * Set this to true to animate the shadow when setting a new
-       * `elevation` value.
-       *
-       * @attribute animated
-       * @type boolean
-       * @default false
-       */
-      animated: {
-        type: Boolean,
-        reflectToAttribute: true,
-        value: false
-      }
-    }
-  });
->>>>>>> develop
 (function() {
     var Utility = {
       distance: function(x1, y1, x2, y2) {
@@ -12202,7 +12122,6 @@ Polymer({
     });
   })();
 Polymer({
-<<<<<<< HEAD
       is: 'paper-icon-button',
 
       hostAttributes: {
@@ -12285,8 +12204,6 @@ Polymer({
     }
   });
 Polymer({
-=======
->>>>>>> develop
     is: 'paper-button',
 
     behaviors: [
@@ -13044,57 +12961,6 @@ Polymer({
         Polymer.PaperItemBehavior
       ]
     });
-<<<<<<< HEAD
-=======
-Polymer({
-      is: 'paper-icon-button',
-
-      hostAttributes: {
-        role: 'button',
-        tabindex: '0'
-      },
-
-      behaviors: [
-        Polymer.PaperInkyFocusBehavior
-      ],
-
-      properties: {
-        /**
-         * The URL of an image for the icon. If the src property is specified,
-         * the icon property should not be.
-         */
-        src: {
-          type: String
-        },
-
-        /**
-         * Specifies the icon name or index in the set of icons available in
-         * the icon's icon set. If the icon property is specified,
-         * the src property should not be.
-         */
-        icon: {
-          type: String
-        },
-
-        /**
-         * Specifies the alternate text for the button, for accessibility.
-         */
-        alt: {
-          type: String,
-          observer: "_altChanged"
-        }
-      },
-
-      _altChanged: function(newValue, oldValue) {
-        var label = this.getAttribute('aria-label');
-
-        // Don't stomp over a user-set aria-label.
-        if (!label || oldValue == label) {
-          this.setAttribute('aria-label', newValue);
-        }
-      }
-    });
->>>>>>> develop
 (function() {
 
   Polymer({

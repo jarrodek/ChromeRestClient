@@ -20,8 +20,8 @@
 	
 	<!-- This Linker will produce a monolithic JavaScript file. It may be used only when there is a single distinct compilation result. -->
 	<!-- SSO linker must be enabled and xsiframe disabled when biulding an extension. -->
- 	<!-- <add-linker name="sso" /> -->
-	<add-linker name="xsiframe" />
+ 	<add-linker name="sso" />
+	<!-- <add-linker name="xsiframe" /> -->
 
 	<!-- Logging properties -->
 	<!-- To compile at `DEBUG`, `WARN` and `OFF` log levels (with a 3x compile 
