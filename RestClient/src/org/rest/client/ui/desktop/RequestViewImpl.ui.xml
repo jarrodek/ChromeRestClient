@@ -4,13 +4,11 @@
 	xmlns:rcui="urn:import:org.rest.client.ui.desktop.widget"
 	xmlns:h5="urn:import:org.rest.client.ui.html5">
 	
-	
 	<g:HTMLPanel ui:field="root" styleName="requestPanel">
-	
 		<div ui:field="topRequestPanel" class="topRequestPanel flex layout horizontal">
 			<div class="projectWrapper flex">
 				<!-- Project panel -->
-				<div ui:field="projectPanel" class="projectPanel hidden flex">
+				<div ui:field="projectPanel" class="projectPanel hidden flex layout horizontal">
 					<g:InlineLabel ui:field="projectName" styleName="projectName"></g:InlineLabel>
 					<div class="projectEdit">
 						<g:Image url="img/5_content_edit.png" ui:field="editProject" styleName="editProjectAction" title="Edit project data"></g:Image>

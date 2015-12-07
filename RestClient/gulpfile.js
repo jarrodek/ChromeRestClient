@@ -11,8 +11,10 @@ gulp.task('vulcanize', function () {
             excludes: [],
             stripExcludes: false,
             inlineScripts: true,
-            inlineCss: true
+            inlineCss: true,
+            stripComments: true
         }))
+        //.pipe($.rename('elements.vulcanized.html'))
         .pipe(crisper({
             scriptInHead: false, // true is default 
             onlySplit: false
