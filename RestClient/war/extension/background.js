@@ -1,6 +1,6 @@
 /**
  * Background page for Advanced Rest Client.
- * 
+ *
  */
 
 var dev = false;
@@ -40,7 +40,7 @@ function WebRequest(){
     this.responseHeaders = [];
     this.requestHeaders = [];
     this.redirectData = [];
-	
+
     this.requestFilter = {
         urls : ["<all_urls>"],
         types : ["xmlhttprequest"]
@@ -66,17 +66,17 @@ WebRequest.prototype.getRequestData = function(){
         REDIRECT_DATA: this.redirectData,
         ERROR: this.errorData
     };
-    
+
     return requestDetails;
 }
 /**
- * Check if request url match tested URL 
+ * Check if request url match tested URL
  */
 WebRequest.prototype.checkRequestUrl = function(details){
     if(details.url == null || details.url.length == 0){
         return false;
     }
-	
+
     var currentCheckUrl = this.masterURL;
     if(this.redirectURL != null){
         currentCheckUrl = this.redirectURL;
@@ -92,7 +92,7 @@ WebRequest.prototype.checkRequestUrl = function(details){
 /**
  * Called when request's headers has been sent. It filter requests by current
  * set URL. After request filter URL is cleared.
- * 
+ *
  * @param details
  */
 WebRequest.prototype.onHeadersSend = function(details){
@@ -104,14 +104,14 @@ WebRequest.prototype.onHeadersSend = function(details){
 /**
  * Called when the request will be redirected.
  * It is async call. Unable to update declarativeWebRequest filters
- * 
+ *
  * @param details
  */
 WebRequest.prototype.onBeforeRedirect = function(details){
     if(!this.checkRequestUrl(details)){
         return;
     }
-	
+
     var data = {
         fromCache : details.fromCache,
         redirectUrl : details.redirectUrl,
@@ -119,28 +119,28 @@ WebRequest.prototype.onBeforeRedirect = function(details){
         statusLine : details.statusLine,
         responseHeaders : details.responseHeaders
     }
-    
+
     this.redirectData[this.redirectData.length] = data;
     this.redirectURL = details.redirectUrl;
 }
 /**
  * Called when the request complete.
- * 
+ *
  * @param details
  */
 WebRequest.prototype.onRequestCompleted = function(details){
     if(!this.checkRequestUrl(details)){
         return;
     }
-	
+
     this.responseHeaders = details.responseHeaders;
     //
-    // Clean rules or if the user will not call another request all XmlHttpRequest for this URL will be affected. 
+    // Clean rules or if the user will not call another request all XmlHttpRequest for this URL will be affected.
     this.clearRules();
 }
 /**
  * Called when the request complete with error.
- * 
+ *
  * @param details
  */
 WebRequest.prototype.onRequestError = function(details){
@@ -148,9 +148,9 @@ WebRequest.prototype.onRequestError = function(details){
         return;
     }
     //
-    // Clean rules or if the user will not call another request all XmlHttpRequest for this URL will be affected. 
+    // Clean rules or if the user will not call another request all XmlHttpRequest for this URL will be affected.
     this.clearRules();
-    
+
     this.errorData = {
         error: details.error,
         fromCache: details.fromCache,
@@ -201,7 +201,7 @@ WebRequest.prototype.setRules = function(requestData){
             unsupportedHeadersList[unsupportedHeadersList.length] = header;
         }
     }
-	
+
     var requestActions = [];
     // register rules in declarativeRequest to add headers just before
     // request send.
@@ -209,34 +209,34 @@ WebRequest.prototype.setRules = function(requestData){
     if(addActions != null){
         requestActions = requestActions.concat(addActions);
     }
-	
+
     //
     // Here's a trick.
     // Browser, by default, set some headers. We don't want them.
     // Remove all request headers set by browser by default and that are not set by user
     // (can't remove and set headers in one request by this API)
     //
-	
+
     var requestHeadersKeys = [];
     for(i=0; i<requestHeadersLength; i++){
         requestHeadersKeys[requestHeadersKeys.length] = requestHeaders[i].name.toLowerCase();
     }
-	
-    var removeHeaders = this.browserDefaultHeaders.filter(function(element, index, array){ 
-        if(requestHeadersKeys.indexOf(element)!=-1) 
-            return false; 
-        return true 
+
+    var removeHeaders = this.browserDefaultHeaders.filter(function(element, index, array){
+        if(requestHeadersKeys.indexOf(element)!=-1)
+            return false;
+        return true
     });
-	
+
     var removeActions = this.getRemoveHeadersActions(removeHeaders);
     if(removeActions != null){
         requestActions = requestActions.concat(removeActions);
     }
-	
+
     if(requestActions.length == 0){
         return;
     }
-	
+
     var rule = {
         id: null,
         priority: 100,
@@ -246,7 +246,7 @@ WebRequest.prototype.setRules = function(requestData){
         })],
         actions : requestActions
     };
-	
+
     chrome.declarativeWebRequest.onRequest.addRules([rule], function callback(details) {});
 }
 /**
@@ -340,7 +340,7 @@ MessageHandling.prototype.setListeners = function(){
         callback = callback || new Function();
         this.handleMessage(request, callback, null);
     }.bind(this);
-	
+
     /**
 	 * Registers listener to handle extension message passing from content script.
 	 */
@@ -348,11 +348,11 @@ MessageHandling.prototype.setListeners = function(){
         this.handleMessage(request, sendResponse, sender);
         return true;
     }.bind(this));
-    
-    
+
+
    /**
     * External extension communication.
-    * 
+    *
     * @param details:
     *            message - (any data) The message sent by the calling script. It's must be javascript object described in the bottom of this file.
     *            sender - (object): tab - This property will only be present when
@@ -360,11 +360,11 @@ MessageHandling.prototype.setListeners = function(){
     *            extension ID of the extension that opened the connection.
     *            sendResponse - (function) Function to call (at most once) when you
     *            have a response. The argument should be any JSON-ifiable object.
-    * 
+    *
     * To run application from external extension just pass message to it.
-    * 
+    *
     * For message description go to the end of this file.
-    * 
+    *
     * In response callback it will return object with one of values: "success":
     * [true|false], "message": (String, optional) error message
     */
@@ -397,11 +397,11 @@ MessageHandling.prototype.setListeners = function(){
        sendResponse(result);
        return true;
    }.bind(this));
-    
-    
-    
-    
-    
+
+
+
+
+
 }
 
 MessageHandling.prototype.handleMessage = function(request, sendResponse, sender){
@@ -412,6 +412,10 @@ MessageHandling.prototype.handleMessage = function(request, sendResponse, sender
             console.error('Error parse payload data',e);
         }
     }
+
+
+
+
     var responseAsObject = (request.response && request.response == 'object');
     if (!request.payload){
         var data = {
@@ -429,6 +433,10 @@ MessageHandling.prototype.handleMessage = function(request, sendResponse, sender
         });
         return;
     }
+
+    if(request.version && request.version === 2){
+      return this.handleMessage2(request, sendResponse, sender);
+    }
     var method = request.payload;
     if(this[method]){
         this[method](request, responseAsObject, sendResponse, sender);
@@ -436,6 +444,34 @@ MessageHandling.prototype.handleMessage = function(request, sendResponse, sender
         this.handleApiDirectCall(request, responseAsObject, sendResponse, sender);
     }
 }
+
+MessageHandling.prototype.handleMessage2 = function(request, sendResponse, sender){
+  var method = request.payload;
+  if(this[method]){
+      this[method](request, true, sendResponse, sender);
+  } else {
+      this.callApiDirect(request, sendResponse, sender);
+  }
+}
+
+/**
+ * Version 2 API calls handling
+ */
+MessageHandling.prototype.callApiDirect = function(request, sendResponse){
+  var c = request.payload.split('.')
+  var call = chrome;
+  var action = c.pop();
+  for(var i = 0; i<c.length; i++){
+      call = call[c[i]];
+  }
+  var data = request.params;
+  call[action].call(call, data, function(result){
+      sendResponse({
+        'data': result
+      });
+  });
+};
+
 MessageHandling.prototype.handleApiDirectCall = function(request, responseAsObject, sendResponse){
     if(request.payload.indexOf("storage") === 0){
         var c = request.payload.split('.')
@@ -471,7 +507,7 @@ MessageHandling.prototype.handleApiDirectCall = function(request, responseAsObje
             call = call[c[i]];
         }
         var data = request.data ? JSON.parse(request.data) : null;
-        call[action].call(call,data,function(result){			
+        call[action].call(call,data,function(result){
             if(!responseAsObject){
                 if(typeof result == "object"){
                     result.response = responseAsObject ? 'object' : null;
@@ -496,11 +532,11 @@ MessageHandling.prototype.checkDriveAuth = function(request, responseAsObject, s
         window.googleAuth.clear();
         window.googleAuth = null;
     }
-	
+
     if(!window.googleAuth){
         initOauth2Object();
     }
-	
+
     var at = window.googleAuth.getAccessToken();
     if(at && window.googleAuth.isAccessTokenExpired()){
         at = null;
@@ -597,7 +633,7 @@ MessageHandling.prototype.requestBegin = function(request, responseAsObject, sen
 
     sendResponse({
         'payload' : 'requestBegin'
-    });   
+    });
 }
 MessageHandling.prototype.getRequestData = function(request, responseAsObject, sendResponse){
     var data = this.webRequest.getRequestData();
@@ -635,7 +671,7 @@ MessageHandling.prototype.getExternalData = function(request, responseAsObject, 
         });
         return;
     }
-    
+
     data = {
         'error' : false,
         'data' : externalData
@@ -688,7 +724,7 @@ MessageHandling.prototype.runApplication = function(requestDetails) {
 }
 /**
  * Found at http://note19.com/2007/05/27/javascript-guid-generator/
- * 
+ *
  * @returns {String}
  */
 MessageHandling.prototype.guidGenerator = function() {
@@ -710,15 +746,15 @@ MessageHandling.prototype.runApplicationFromGoogleDrive = function(requestDetail
     return viewTabUrl;
 }
 MessageHandling.prototype.finishOAuth = function(request, responseAsObject, sendResponse, sender){
-	
+
 	var param = chrome.extension.getURL('oauth2/oauth2.html') + request.data;
-	
+
 	var url = decodeURIComponent(param.match(/&from=([^&]+)/)[1]);
 	var index = url.indexOf('?');
 	if (index > -1) {
 	  url = url.substring(0, index);
 	}
-	
+
 	// Derive adapter name from URI and then finish the process.
 	try{
 		var adapterName = OAuth2.lookupAdapterName(url);
@@ -733,6 +769,9 @@ MessageHandling.prototype.finishOAuth = function(request, responseAsObject, send
 	}
 };
 
+MessageHandling.prototype.storeLocal = function(request, responseAsObject, sendResponse, sender){
+  debugger;
+};
 
 
 var webRequest = new WebRequest();
@@ -745,7 +784,7 @@ messageHandling.init();
 
 /**
  * External extension communication.
- * 
+ *
  * @param details:
  *            message - (any data) The message sent by the calling script. It's must be javascript object described in the bottom of this file.
  *            sender - (object): tab - This property will only be present when
@@ -753,11 +792,11 @@ messageHandling.init();
  *            extension ID of the extension that opened the connection.
  *            sendResponse - (function) Function to call (at most once) when you
  *            have a response. The argument should be any JSON-ifiable object.
- * 
+ *
  * To run application from external extension just pass message to it.
- * 
+ *
  * For message description go to the end of this file.
- * 
+ *
  * In response callback it will return object with one of values: "success":
  * [true|false], "message": (String, optional) error message
  */
@@ -767,21 +806,21 @@ messageHandling.init();
  * ======================================== External data structure
  * If you want to run this application either from other extension/application or webIntent you need to pass a message object:
  * <ul>
- * <li>"payload" (required) - message payload: "create" to open new application window with values; (other payloads may be available in future). 
+ * <li>"payload" (required) - message payload: "create" to open new application window with values; (other payloads may be available in future).
  * <li>"data" - (required) javascript object with any of values:
- * <ul> 
+ * <ul>
  * 		<li>url - (String) request URL to set</li>
  * 		<li>method - (String) request method to set</li>
- * 		<li>headers - (String) an RFC string representing request headers 
- * 					example: >>> User-Agent: X-Extension 
- * 								 X-header: header value; second value <<< 
- * 		<li>payload - (String) data to pass into payload field. Only for http methods that carry payload data</li> 
+ * 		<li>headers - (String) an RFC string representing request headers
+ * 					example: >>> User-Agent: X-Extension
+ * 								 X-header: header value; second value <<<
+ * 		<li>payload - (String) data to pass into payload field. Only for http methods that carry payload data</li>
  * 		<li>encoding - (String) data form encoding</li>
- * </ul> 
+ * </ul>
  * </ul>
  * <p>Every entry in "data" parameter is optional. Any other parameters are not used by application.</p>
- * 
- * 
+ *
+ *
  * Example of usage:
  * <pre>
  * var message = { 'payload': 'create', 'data': { 'url': 'http://www.google.com/', 'method': 'GET', 'headers': "User-Agent: Chrome-Extension\nX-extension-id: SomeID" } };
@@ -795,7 +834,7 @@ messageHandling.init();
  * window.Intent = window.Intent || window.WebKitIntent;
  * window.navigator.startActivity = window.navigator.startActivity ||
  * window.navigator.webkitStartActivity;
- * 
+ *
  * var params = { "action": "http://webintents.org/view", "type": "application/restclient+data" , "data": message }; var i = new
  * WebKitIntent(params); var onSuccess = function(data) {console.log(data);};
  * var onFailure = function() {console.log('intent error')};

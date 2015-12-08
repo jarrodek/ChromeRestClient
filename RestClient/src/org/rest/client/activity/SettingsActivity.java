@@ -145,8 +145,8 @@ public class SettingsActivity extends AppActivity implements
 				StatusNotification.notify("Save error: " + message, StatusNotification.TYPE_CRITICAL, StatusNotification.TIME_SHORT, true);
 			}
 		});
-		GoogleAnalytics.sendEvent("Settings usage", key+" enabled", value+"");
-		GoogleAnalyticsApp.sendEvent("Settings usage", key+" enabled", value+"");
+		//GoogleAnalytics.sendEvent("Settings usage", key+" enabled", value+"");
+		//GoogleAnalyticsApp.sendEvent("Settings usage", key+" enabled", value+"");
 	}
 	
 	
