@@ -8,11 +8,11 @@ public class StorageImpl {
 	
 	
 	final native boolean isAvailable() /*-{
-		return !!($wnd.chrome.storage);
+		return !!($wnd.chrome.storage && !$wnd.chrome.storage.gwtDev);
 	}-*/;
 	
 	final native String getLastError() /*-{
-		if(!!($wnd.chrome.storage))
+		if(!!($wnd.chrome.storage && !$wnd.chrome.storage.gwtDev))
 			return $wnd.chrome.runtime.lastError || null;
 		return null;
 	}-*/;

@@ -1,14 +1,4 @@
 var _gaq=[['_setAccount','UA-18021184-6'],['_trackPageview'],['_setDomainName', 'none'],['_setAllowLinker', true]];
-var bouncerate_timer=0;
-function trackDrop(){
-    if(bouncerate_timer == 1){
-        _gaq.push(['_trackEvent','Closing', 'Page', location.pathname]);
-    }
-}
-setTimeout(function(){
-	bouncerate_timer = 1;
-},60000);
-window.onbeforeunload = trackDrop;
 
 (function() {
 	var ga = document.createElement('script');

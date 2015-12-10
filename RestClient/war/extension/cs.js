@@ -15,8 +15,16 @@ function receiveMessage(e){
 			data = e.data;
 		}
 	} catch(e){ return; }
-	
+
 	if(!(data && data.source && data.source == "dev:gwt")) return;
+
+	//check communication protocol version
+	if(data.version && data.version === 2){
+		return handleCommunication(data);
+	}
+
+
+
 	//console.log('receiveMessage (ext)', data.data);
 	var responseAsObject = (e.data.response && e.data.response == 'object');
 	if(data.payload){
@@ -24,7 +32,7 @@ function receiveMessage(e){
 			case 'setEnvironment':
 			chrome.runtime.sendMessage(data, function(response) {});
 			break;
-			case "requestBegin": 
+			case "requestBegin":
 				chrome.runtime.sendMessage(data, function(response) {
 					window.postMessage({"source":"dev:cs", "payload":"requestBegin"}, location.href);
 				});
@@ -32,14 +40,14 @@ function receiveMessage(e){
 			case "getRequestData":
 			case "getExternalData":
 				chrome.runtime.sendMessage(data, function(response) {
-					
+
 					if(response.payload&&response.data){
 						data.payload = response.payload;
 						response = response.data;
 					}
 					var result = {
-						"source":"dev:cs", 
-						"payload":data.payload, 
+						"source":"dev:cs",
+						"payload":data.payload,
 						"data": response,
 						"response": responseAsObject ? 'object' : null
 					}
@@ -55,8 +63,8 @@ function receiveMessage(e){
 						response = response.data;
 					}
 					var result = {
-						"source":"dev:cs", 
-						"payload":data.payload, 
+						"source":"dev:cs",
+						"payload":data.payload,
 						"data": response,
 						"response": responseAsObject ? 'object' : null
 					}
@@ -65,4 +73,17 @@ function receiveMessage(e){
 				break;
 		}
 	}
+}
+
+function handleCommunication(data){
+	chrome.runtime.sendMessage(data, function(response) {
+		var result = response.data;
+		var post = {
+			"source": "dev:cs",
+			"version": 2,
+			"result": result,
+			"source-data": data
+		}
+		window.postMessage(post, location.href);
+	});
 }
