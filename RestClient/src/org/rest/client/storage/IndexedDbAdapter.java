@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.rest.client.RestClient;
+import org.rest.client.dom.error.DOMError;
 import org.rest.client.storage.indexeddb.IDBAbortHandler;
-import org.rest.client.storage.indexeddb.IDBBlockedHandler;
 import org.rest.client.storage.indexeddb.IDBCompleteHandler;
 import org.rest.client.storage.indexeddb.IDBCursor;
 import org.rest.client.storage.indexeddb.IDBDatabase;
@@ -37,7 +37,6 @@ import org.rest.client.storage.indexeddb.IDBRequest;
 import org.rest.client.storage.indexeddb.IDBSuccessHandler;
 import org.rest.client.storage.indexeddb.IDBTransaction;
 import org.rest.client.storage.indexeddb.IDBUpdateNeededHandler;
-import org.rest.client.storage.indexeddb.IDBVersionChangeRequest;
 import org.rest.client.storage.store.FormEncodingsStore;
 import org.rest.client.storage.store.HeadersStore;
 import org.rest.client.storage.store.HistoryRequestStore;
@@ -138,7 +137,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 		
 		IDBFactory idb = IDBFactory.getIfSupported();
 		final IDBOpenDBRequest openRequest = idb.open(dbName, databaseVersion);
-		final boolean useSetVersion = openRequest.useSetVersionToUpgrade();
+		
 		openRequest.addSuccessHandler(new IDBSuccessHandler() {
 			@Override
 			public void onSuccess() {
@@ -148,13 +147,9 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 				}
 				db = openRequest.getResult().cast();
 				connectedDatabases.put(dbName, db);
-				if (useSetVersion) {
-					initDB(callback);
-				} else {
-					if (databaseVersion.equals(db.getVersion())) {
-						callback.onSuccess(true);
-						cllbackWaitingOpenRequest(true);
-					}
+				if (databaseVersion.equals(db.getVersion())) {
+					callback.onSuccess(true);
+					cllbackWaitingOpenRequest(true);
 				}
 			}
 		});
@@ -200,68 +195,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 		}
 	}
 	
-	protected void initDB(final StoreResultCallback<Boolean> callback) {
-		if (!databaseVersion.equals(db.getVersion())) {
-			if (RestClient.isDebug()) {
-				Log.debug("Upgrade database: " + db.getVersion()
-						+ " -> " + databaseVersion);
-			}
-			try {
-				IDBVersionChangeRequest versionChange = db.setVersion(databaseVersion);
-				versionChange.addSuccessHandler(new IDBSuccessHandler() {
-					@Override
-					public void onSuccess() {
-						try {
-							if (RestClient.isDebug()) {
-								Log.debug("Success. Update table data....");
-							}
-							setVestion(dbName, db);
-							isReady = true;
-							callback.onSuccess(true);
-							cllbackWaitingOpenRequest(true);
-						} catch (IDBDatabaseException e) {
-							callback.onError(e);
-							cllbackWaitingOpenRequest(e);
-						}
-					}
-				});
-				versionChange.addBlockedHandler(new IDBBlockedHandler() {
-
-					@Override
-					public void onBlocked() {
-						if (RestClient.isDebug()) {
-							Log.error("Blocked error: Unable to set new version of database: "
-									+ dbName + ", store: " + storeName);
-						}
-						callback.onError(null);
-						cllbackWaitingOpenRequest(null);
-					}
-				});
-				versionChange.addErrorHandler(new IDBErrorHandler() {
-					@Override
-					public void onError() {
-						if (RestClient.isDebug()) {
-							Log.error("Unable to set new version of database: "
-									+ dbName + ", store: " + storeName);
-						}
-						callback.onError(null);
-						cllbackWaitingOpenRequest(null);
-					}
-				});
-			} catch (IDBDatabaseException e) {
-				if (RestClient.isDebug()) {
-					Log.error("Unable to complete", e);
-				}
-				e.printStackTrace();
-				callback.onError(e);
-				cllbackWaitingOpenRequest(e);
-			}
-		} else {
-			isReady = true;
-			callback.onSuccess(true);
-			cllbackWaitingOpenRequest(true);
-		}
-	}
+	
 
 	/**
 	 * In Indexed DB you can query for keys only by query for all data from DB.
@@ -278,7 +212,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 	public void put(final V obj, final StoreResultCallback<K> callback) {
 		try {
 			IDBTransaction tx = db.transaction(storeName,
-					IDBTransaction.READ_WRITE_TRANSACTION);
+					IDBTransaction.READ_WRITE);
 			IDBObjectStore<K> store = (IDBObjectStore<K>) tx
 					.objectStore(storeName);
 			final IDBRequest<K> request = (IDBRequest<K>) store.put(obj, null);
@@ -320,7 +254,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 	public void put(final V obj, K key, final StoreResultCallback<K> callback) {
 		try {
 			IDBTransaction tx = db.transaction(storeName,
-					IDBTransaction.READ_WRITE_TRANSACTION);
+					IDBTransaction.READ_WRITE);
 
 			IDBObjectStore<K> store = (IDBObjectStore<K>) tx
 					.objectStore(storeName);
@@ -355,7 +289,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 	public void getByKey(K key, final StoreResultCallback<V> callback) {
 		try {
 			IDBTransaction tx = db.transaction(storeName,
-					IDBTransaction.READ_ONLY_TRANSACTION);
+					IDBTransaction.READ_ONLY);
 			IDBObjectStore<K> store = (IDBObjectStore<K>) tx
 					.objectStore(storeName);
 			final IDBRequest<V> request = (IDBRequest<V>) store.get(key);
@@ -384,7 +318,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 	public void exists(K key, final StoreResultCallback<Boolean> callback) {
 		try {
 			IDBTransaction tx = db.transaction(storeName,
-					IDBTransaction.READ_ONLY_TRANSACTION);
+					IDBTransaction.READ_ONLY);
 
 			IDBObjectStore<K> store = (IDBObjectStore<K>) tx
 					.objectStore(storeName);
@@ -419,7 +353,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 		try {
 			final Map<K, V> result = new HashMap<K, V>();
 			IDBTransaction tx = db.transaction(storeName,
-					IDBTransaction.READ_ONLY_TRANSACTION);
+					IDBTransaction.READ_ONLY);
 			tx.addCompleteHandler(new IDBCompleteHandler() {
 				@Override
 				public void onComplete() {
@@ -441,7 +375,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 			final IDBObjectStore<K> store = (IDBObjectStore<K>) tx
 					.objectStore(storeName);
 			final IDBRequest<V> request = (IDBRequest<V>) store.openCursor(
-					null, IDBCursor.CURSOR_NEXT);
+					null, IDBCursor.NEXT);
 			request.addErrorHandler(new IDBErrorHandler() {
 
 				@Override
@@ -464,8 +398,8 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 							getReq.addErrorHandler(new IDBErrorHandler() {
 								@Override
 								public void onError() {
-									int code = getReq.getErrorCode();
-									Log.error("Has error with code " + code);
+									DOMError code = getReq.getError();
+									Log.error("Has error with code " + code.toString());
 								}
 							});
 							getReq.addSuccessHandler(new IDBSuccessHandler() {
@@ -515,7 +449,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 	public void remove(K key, final StoreResultCallback<Boolean> callback) {
 		try {
 			IDBTransaction tx = db.transaction(storeName,
-					IDBTransaction.READ_WRITE_TRANSACTION);
+					IDBTransaction.READ_WRITE);
 			IDBObjectStore<K> store = (IDBObjectStore<K>) tx
 					.objectStore(storeName);
 			final IDBRequest<Void> request = store.delete(key);
@@ -544,7 +478,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 	public void countAll(final StoreResultCallback<Integer> callback) {
 		try {
 			IDBTransaction tx = db.transaction(storeName,
-					IDBTransaction.READ_ONLY_TRANSACTION);
+					IDBTransaction.READ_ONLY);
 			final IDBObjectStore<String> store = (IDBObjectStore<String>) tx
 					.objectStore(storeName);
 			final IDBRequest<Integer> request = store.count();
@@ -575,7 +509,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 		final Map<K, V> result = new HashMap<K, V>();
 		try {
 			IDBTransaction tx = db.transaction(storeName,
-					IDBTransaction.READ_ONLY_TRANSACTION);
+					IDBTransaction.READ_ONLY);
 			tx.addCompleteHandler(new IDBCompleteHandler() {
 
 				@Override
@@ -590,7 +524,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 			IDBKeyRange range = IDBKeyRange.bound(query.toUpperCase(), query + "z", false,
 					false);
 			final IDBRequest<IDBCursor<K>> cursorRequest = (IDBRequest<IDBCursor<K>>) _index
-					.openCursor(range, IDBCursor.CURSOR_NEXT);
+					.openCursor(range, IDBCursor.NEXT);
 
 			cursorRequest.addSuccessHandler(new IDBSuccessHandler() {
 
