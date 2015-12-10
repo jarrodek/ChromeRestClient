@@ -19,20 +19,38 @@ import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
- * The IDBCursor interface of the IndexedDB API represents a cursor for
+ * <p>
+ * The {@link IDBCursor} interface of the IndexedDB API represents a cursor for
  * traversing or iterating over multiple records in a database.
+ * </p>
  * 
- * About cursors read <a
- * href="https://developer.mozilla.org/en/IndexedDB/IDBCursor"
- * >https://developer.mozilla.org/en/IndexedDB/IDBCursor</a>
+ * <p>
+ * The cursor has a source that indicates which index or object store it is
+ * iterating over. It has a position within the range, and moves in a direction
+ * that is increasing or decreasing in the order of record keys. The cursor
+ * enables an application to asynchronously process all the records in the
+ * cursor's range.
+ * </p>
+ * <p>
+ * You can have an unlimited number of cursors at the same time. You always get
+ * the same {@link IDBCursor} object representing a given cursor. Operations are
+ * performed on the underlying index or object store.
+ * </p>
  * 
- * <p>IDBCursor Constants:</p>
+ * About cursors read
+ * <a href="https://developer.mozilla.org/en/IndexedDB/IDBCursor" >https://
+ * developer.mozilla.org/en/IndexedDB/IDBCursor</a>
+ * 
+ * <p>
+ * IDBCursor Constants:
+ * </p>
  * <ul>
- * 	<li>{@link #CURSOR_NEXT}</li>
- * 	<li>{@link #CURSOR_NEXT_NO_DUPLICATE}</li>
- * 	<li>{@link #CURSOR_PREV}</li>
- * 	<li>{@link #CURSOR_PREV_NO_DUPLICATE}</li>
+ * <li>{@link #NEXT}</li>
+ * <li>{@link #NEXT_UNIQUE}</li>
+ * <li>{@link #PREV}</li>
+ * <li>{@link #PREV_UNIQUE}</li>
  * </ul>
+ * 
  * @author jarrod
  * 
  */
@@ -41,114 +59,51 @@ public class IDBCursor<K> extends JavaScriptObject {
 	}
 
 	/**
-	 * Indicates that this cursor should yield all records, including duplicates
-	 * and its direction is monotonically increasing order of keys.
-	 * @deprecated
+	 * The cursor shows all records, including duplicates. It starts at the
+	 * lower bound of the key range and moves upwards (monotonically increasing
+	 * in the order of keys).
 	 */
-	public static final int NEXT;
+	public static final String NEXT = "next";
 	/**
-	 * Indicates that this cursor should yield all records, including duplicates
-	 * and its direction is monotonically increasing order of keys.
+	 * The cursor shows all records, excluding duplicates. If multiple records
+	 * exist with the same key, only the first one iterated is retrieved. It
+	 * starts at the lower bound of the key range and moves upwards.
 	 */
-	public static final String CURSOR_NEXT = "next";
+	public static final String NEXT_UNIQUE = "nextunique";
 	/**
-	 * Indicates that this cursor should yield all records, not including
-	 * duplicates and its direction is monotonically increasing order of keys.
-	 * For every key with duplicate values, only the first record is yielded.
-	 * @deprecated
+	 * The cursor shows all records, including duplicates. It starts at the
+	 * upper bound of the key range and moves downwards (monotonically
+	 * decreasing in the order of keys).
 	 */
-	public static final int NEXT_NO_DUPLICATE;
+	public static final String PREV = "prev";
 	/**
-	 * Indicates that this cursor should yield all records, not including
-	 * duplicates and its direction is monotonically increasing order of keys.
-	 * For every key with duplicate values, only the first record is yielded.
+	 * The cursor shows all records, excluding duplicates. If multiple records
+	 * exist with the same key, only the first one iterated is retrieved. It
+	 * starts at the upper bound of the key range and moves downwards.
 	 */
-	public static final String CURSOR_NEXT_NO_DUPLICATE = "nextunique";
-	/**
-	 * Indicates that cursor should yield all records, including duplicates and
-	 * its direction is monotonically decreasing order of keys.
-	 * @deprecated
-	 */
-	public static final int PREV;
-	/**
-	 * Indicates that cursor should yield all records, including duplicates and
-	 * its direction is monotonically decreasing order of keys.
-	 */
-	public static final String CURSOR_PREV = "prev";
-	/**
-	 * Indicates that this cursor should yield all records, not including
-	 * duplicates and its direction is monotonically decreasing order of keys.
-	 * For every key with duplicate values, only the first record is yielded.
-	 * @deprecated
-	 */
-	public static final int PREV_NO_DUPLICATE;
-	/**
-	 * Indicates that this cursor should yield all records, not including
-	 * duplicates and its direction is monotonically decreasing order of keys.
-	 * For every key with duplicate values, only the first record is yielded.
-	 */
-	public static final String CURSOR_PREV_NO_DUPLICATE = "prevunique";
-
-	static {
-		setVariables();
-		NEXT = getNextConstant();
-		NEXT_NO_DUPLICATE = getNextNoDuplicateConstant();
-		PREV = getPrevConstant();
-		PREV_NO_DUPLICATE = getPrevNoDuplicateConstant();
-	}
-
-	private static final native void setVariables() /*-{
-		$wnd.IDBCursor = $wnd.IDBCursor || $wnd.webkitIDBCursor;
-	}-*/;
-
-	private static final native int getNextConstant() /*-{
-		return $wnd.IDBCursor.NEXT;
-	}-*/;
-
-	private static final native int getNextNoDuplicateConstant() /*-{
-		return $wnd.IDBCursor.NEXT_NO_DUPLICATE;
-	}-*/;
-
-	private static final native int getPrevConstant() /*-{
-		return $wnd.IDBCursor.PREV;
-	}-*/;
-
-	private static final native int getPrevNoDuplicateConstant() /*-{
-		return $wnd.IDBCursor.PREV_NO_DUPLICATE;
-	}-*/;
+	public static final String PREV_UNIQUE = "prevunique";
 
 	/**
-	 * Returns an IDBRequest object, and, in a separate thread, updates the
-	 * value at the current position of the cursor in the object store. If the
-	 * cursor points to a record that has just been deleted, a new record is
-	 * created.
-	 * 
-	 * @param value
-	 *            The value to be stored
-	 * @return A request object on which subsequent events related to this
-	 *         operation are fired.
-	 * @throws IDBDatabaseException
-	 */
-	public final IDBRequest<?> update(JavaScriptObject value)
-			throws IDBDatabaseException {
-		try {
-			return updateImpl(value);
-		} catch (JavaScriptException e) {
-			throw new IDBDatabaseException(e);
-		}
-	}
-
-	private final native IDBRequest<?> updateImpl(JavaScriptObject value)
-			throws JavaScriptException /*-{
-		return this.update(value);
-	}-*/;
-
-	/**
-	 * Sets the number times a cursor should move its position forward.
+	 * The advance() method of the {@link IDBCursor} interface sets the number
+	 * times a cursor should move its position forward.
 	 * 
 	 * @param count
-	 *            The number of advances forward the cursor should make.
+	 *            The number of times to move the cursor forward.
 	 * @throws JavaScriptException
+	 *             This method may raise a DOMException with a DOMError of one
+	 *             of the following types:
+	 *             <p>
+	 *             TransactionInactiveError - This IDBCursor's transaction is
+	 *             inactive.
+	 *             </p>
+	 *             <p>
+	 *             TypeError - The value passed into the count parameter was
+	 *             zero or a negative number.
+	 *             </p>
+	 *             <p>
+	 *             InvalidStateError - The cursor is currently being iterated or
+	 *             has iterated past its end.
+	 *             </p>
 	 */
 	public final void advance(long count) throws IDBDatabaseException {
 		try {
@@ -158,16 +113,30 @@ public class IDBCursor<K> extends JavaScriptObject {
 		}
 	}
 
-	private final native void advanceImpl(double count)
-			throws JavaScriptException /*-{
+	private final native void advanceImpl(double count) throws JavaScriptException /*-{
 		this.advance(count);
 	}-*/;
 
 	/**
-	 * Advances the cursor to the immediate next position, based on the cursor's
-	 * direction.
+	 * The continue() method of the {@link IDBCursor} interface advances the
+	 * cursor to the next position along its direction, to the item whose key
+	 * matches the optional key parameter. If no key is specified, the cursor
+	 * advances to the immediate next position, based on the its direction.
 	 * 
 	 * @throws IDBDatabaseException
+	 *             This method may raise a DOMException with a DOMError of one
+	 *             of the following types:
+	 * 
+	 *             TransactionInactiveError - This IDBCursor's transaction is
+	 *             inactive.<br/>
+	 *             DataError - The key parameter may have any of the following
+	 *             conditions: The key is not a valid key; The key is less than
+	 *             or equal to this cursor's position and the cursor's direction
+	 *             is next or nextunique.; The key is greater than or equal to
+	 *             this cursor's position and this cursor's direction is prev or
+	 *             prevunique.<br/>
+	 *             InvalidStateError - The cursor is currently being iterated or
+	 *             has iterated past its end.
 	 */
 	public final void cont() throws IDBDatabaseException {
 		try {
@@ -178,13 +147,27 @@ public class IDBCursor<K> extends JavaScriptObject {
 	}
 
 	/**
-	 * Advances the cursor to the next position along its direction, to the item
-	 * whose key matches the optional key parameter. If no key is specified,
-	 * advance to the immediate next position, based on the cursor's direction.
+	 * The continue() method of the {@link IDBCursor} interface advances the
+	 * cursor to the next position along its direction, to the item whose key
+	 * matches the optional key parameter. If no key is specified, the cursor
+	 * advances to the immediate next position, based on the its direction.
 	 * 
 	 * @param key
 	 *            The key to position the cursor at.
 	 * @throws IDBDatabaseException
+	 *             This method may raise a DOMException with a DOMError of one
+	 *             of the following types:
+	 * 
+	 *             TransactionInactiveError - This IDBCursor's transaction is
+	 *             inactive.<br/>
+	 *             DataError - The key parameter may have any of the following
+	 *             conditions: The key is not a valid key; The key is less than
+	 *             or equal to this cursor's position and the cursor's direction
+	 *             is next or nextunique.; The key is greater than or equal to
+	 *             this cursor's position and this cursor's direction is prev or
+	 *             prevunique.<br/>
+	 *             InvalidStateError - The cursor is currently being iterated or
+	 *             has iterated past its end.
 	 */
 	public final void cont(K key) throws IDBDatabaseException {
 		try {
@@ -194,9 +177,8 @@ public class IDBCursor<K> extends JavaScriptObject {
 		}
 	}
 
-	private final native void continueImpl(K key)
-			throws JavaScriptException /*-{
-		if(!key){
+	private final native void continueImpl(K key) throws JavaScriptException /*-{
+		if (!key) {
 			this["continue"]();
 		} else {
 			this["continue"](key);
@@ -204,12 +186,14 @@ public class IDBCursor<K> extends JavaScriptObject {
 	}-*/;
 
 	/**
-	 * Returns an {@link IDBRequest} object, and, in a separate thread, deletes
-	 * the record at the cursor's position, without changing the cursor's
-	 * position. Once the record is deleted, the cursor's value is set to null.
+	 * The delete() method of the {@link IDBCursor} interface returns an
+	 * {@link IDBRequest} object, and, in a separate thread, deletes the record
+	 * at the cursor's position, without changing the cursor's position. Once
+	 * the record is deleted, the cursor's value is set to null.
 	 * 
-	 * @return A request object on which subsequent events related to this
-	 *         operation are fired. The result attribute is set to undefined.
+	 * @return An {@link IDBRequest} object on which subsequent events related
+	 *         to this operation are fired. The result attribute is set to
+	 *         undefined.
 	 * @throws IDBDatabaseException
 	 */
 	public final IDBRequest<Void> delete() throws IDBDatabaseException {
@@ -220,16 +204,43 @@ public class IDBCursor<K> extends JavaScriptObject {
 		}
 	}
 
-	private final native IDBRequest<Void> deleteImpl()
-			throws JavaScriptException /*-{
+	private final native IDBRequest<Void> deleteImpl() throws JavaScriptException /*-{
 		return this["delete"]();
 	}-*/;
 
 	/**
-	 * @return returns the {@link IDBObjectStore} or {@link IDBIndex} that the
-	 *         cursor is iterating. This function never returns null or throws
-	 *         an exception, even if the cursor is currently being iterated, has
-	 *         iterated past its end, or its transaction is not active.
+	 * The update() method of the {@link IDBCursor} interface returns an
+	 * {@link IDBRequest} object, and, in a separate thread, updates the value
+	 * at the current position of the cursor in the object store. If the cursor
+	 * points to a record that has just been deleted, a new record is created.
+	 * 
+	 * @param value
+	 *            The new value to be stored at the current position.
+	 * @return An {@link IDBRequest} object on which subsequent events related
+	 *         to this operation are fired.
+	 * @throws IDBDatabaseException
+	 */
+	public final IDBRequest<?> update(JavaScriptObject value) throws IDBDatabaseException {
+		try {
+			return updateImpl(value);
+		} catch (JavaScriptException e) {
+			throw new IDBDatabaseException(e);
+		}
+	}
+
+	private final native IDBRequest<?> updateImpl(JavaScriptObject value) throws JavaScriptException /*-{
+		return this.update(value);
+	}-*/;
+
+	/**
+	 * The source property of the {@link IDBCursor} interface returns the
+	 * {@link IDBObjectStore} or {@link IDBIndex} that the cursor is iterating
+	 * over. This function never returns null or throws an exception, even if
+	 * the cursor is currently being iterated, has iterated past its end, or its
+	 * transaction is not active.
+	 * 
+	 * @return The {@link IDBObjectStore} or {@link IDBIndex} that the cursor is
+	 *         iterating over.
 	 * 
 	 */
 	public final native JavaScriptObject getSource() /*-{
@@ -237,9 +248,14 @@ public class IDBCursor<K> extends JavaScriptObject {
 	}-*/;
 
 	/**
+	 * The direction property of the {@link IDBCursor} interface is a DOMString
+	 * that returns the direction of traversal of the cursor (set using
+	 * {@link IDBObjectStore#openCursor(IDBKeyRange, String)} for example). See
+	 * the return section below for possible values.
 	 * 
-	 * @return returns the direction of traversal of the cursor. See Constants
-	 *         for possible values.
+	 * @return A string indicating the direction in which the cursor is
+	 *         traversing the data. Possible values are: {@link #NEXT},
+	 *         {@link #NEXT_UNIQUE}, {@link #PREV} or {@link #PREV_UNIQUE}.
 	 */
 	public final native int getDirection() /*-{
 		return this.direction;
@@ -248,7 +264,8 @@ public class IDBCursor<K> extends JavaScriptObject {
 	/**
 	 * 
 	 * @return Returns the key for the record at the cursor's position. If the
-	 *         cursor is outside its range, this is NULL.
+	 *         cursor is outside its range, this is set to NULL. The cursor's
+	 *         key can be any data type.
 	 */
 	public final native K getKey() /*-{
 		if(typeof this.key == 'number'){
@@ -256,15 +273,15 @@ public class IDBCursor<K> extends JavaScriptObject {
 		} else if(typeof this.key == "boolean"){
 			return @java.lang.Boolean::new(Ljava/lang/String;)(this.key.toString());
 		}
-		$wnd.console.log('IDBCursor::Key',typeof this.key, this.key, this);
 		return this.key || null;
 	}-*/;
 
 	/**
 	 * 
-	 * @return Returns the cursor's current effective key. If the cursor is
-	 *         currently being iterated or has iterated outside its range, this
-	 *         is NULL.
+	 * @return Returns the cursor's current effective primary key. If the cursor
+	 *         is currently being iterated or has iterated outside its range,
+	 *         this is set to NULL. The cursor's primary key can be any data
+	 *         type.
 	 */
 	public final native K getPrimaryKey() /*-{
 		if(typeof this.primaryKey == 'number'){
@@ -272,7 +289,6 @@ public class IDBCursor<K> extends JavaScriptObject {
 		} else if(typeof this.primaryKey == "boolean"){
 			return @java.lang.Boolean::new(Ljava/lang/String;)(this.primaryKey.toString());
 		}
-		$wnd.console.log('IDBCursor::PrimaryKey',typeof this.primaryKey, this.primaryKey, this);
 		return this.primaryKey || null;
 	}-*/;
 }
