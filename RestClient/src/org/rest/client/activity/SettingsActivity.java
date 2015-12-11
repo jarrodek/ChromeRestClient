@@ -28,7 +28,6 @@ import org.rest.client.ui.SettingsView;
 import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.google.gwt.chrome.storage.LocalStorageArea;
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
 import com.google.gwt.chrome.storage.SyncStorageArea;
@@ -53,14 +52,12 @@ public class SettingsActivity extends AppActivity implements
 	private EventBus eventBus;
 	
 	final Storage store = Storage.getStorage();
-	final LocalStorageArea localStorage;
 	final SyncStorageArea syncStorage;
 	String latestError = null;
 
 	public SettingsActivity(SettingsPlace place, ClientFactory clientFactory) {
 		super(clientFactory);
 		latestError = store.getLastError();
-		localStorage = store.getLocal();
 		syncStorage = store.getSync();
 	}
 
