@@ -15,8 +15,7 @@
   ],
   "background": {
     "scripts": ["background.js"]
-  }
-  "content_security_policy": "script-src chrome-extension:// chrome-extension-resource:// 'self'; object-src chrome-extension:// chrome-extension-resource:// 'self'; frame-src chrome-extension:// chrome-extension-resource:// 'self' style-src chrome-extension:// chrome-extension-resource:// 'self'",
+  },
   "content_scripts": [{
       "matches": ["http://127.0.0.1:8888/*"],
       "js": ["cs.js"],
