@@ -912,7 +912,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	void onCopy(ClickEvent e){
 		e.preventDefault();
 		String body = response.getResponseText();
-		RestClient.getClientFactory().getChromeMessagePassing().postMessage("copyToClipboard",body);
+		listener.performCopyAction(body);
 	}
 	@UiHandler({"saveAsFileButton1","saveAsFileButton2","saveAsFileButton3","saveAsFileButton4"})
 	void onSaveAsFileClick(ClickEvent e){

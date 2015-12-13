@@ -38,7 +38,16 @@ gwt.dev.background = gwt.dev.background || {};
  */
 gwt.dev.background.handleMessage = function(request, sender, sendResponse){
 	
+	gwt.dev.background.callAction(request, sendResponse);
+	
+	return true; // must return true so the port will not be closed when this function finish.
+};
+/**
+ * Call the API action.
+ */
+gwt.dev.background.callAction = function(request, sendResponse){
 	if (request.payload.indexOf(".") !== -1) {
+		
         let parts = request.payload.split('.');
         let call = chrome; //start with chrome namespace.
         let action = parts.pop(); //last part is the function name to call.
@@ -57,19 +66,25 @@ gwt.dev.background.handleMessage = function(request, sender, sendResponse){
             sendResponse(response);
         };
         if(gwt.dev.background.isSync(request.payload)){
-    		var result = call[action].call(params, data); 
-    		responseFn(result);
+        	if(typeof call[action] !== 'function'){
+        		responseFn(call[action]);
+        	} else {
+	    		var result = call[action].call(call, params); 
+	    		responseFn(result);
+        	}
+    	} else {
+    		call[action].call(call, params, responseFn);
     	}
-        call[action].call(params, data, responseFn);
     }
-	
-	return true; // must return true so the port will not be closed when this function finish.
 };
+
+
 /**
  * Some Chrome APIs are synchronous and it should be called differently. 
  */
 gwt.dev.background.isSync = function(payload){
 	var fns = new Set();
+	fns.add("runtime.id");
 	fns.add("runtime.getManifest");
 	fns.add("runtime.getURL");
 	fns.add("runtime.reload");

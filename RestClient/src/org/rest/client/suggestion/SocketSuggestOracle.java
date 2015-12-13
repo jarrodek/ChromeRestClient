@@ -11,7 +11,7 @@ import org.rest.client.storage.store.WebSocketDataStoreWebSql;
 import org.rest.client.storage.store.objects.WebSocketObject;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.google.gwt.chrome.def.BackgroundPageCallback;
+import com.google.gwt.chrome.def.BackgroundJsCallback;
 import com.google.gwt.chrome.history.History;
 import com.google.gwt.chrome.history.History.Query;
 import com.google.gwt.chrome.history.HistoryItem;
@@ -120,11 +120,13 @@ public class SocketSuggestOracle extends DatabaseSuggestOracle {
 		History h = History.getHistoryIfSupported();
 		if(h == null){ 
 			// Use chrome message passing to background page
-			RestClient.getClientFactory().getChromeMessagePassing().postMessage("history.search", _q.toJSON(), new BackgroundPageCallback() {
+			RestClient.getClientFactory().getChromeMessagePassing().postMessage("history.search", _q.toJSON(), new BackgroundJsCallback() {
 				
 				@Override
-				public void onSuccess(String result) {
-					JsArray<HistoryItem> found = HistoryItem.fromString(result);
+				public void onSuccess(Object result) {
+					
+					@SuppressWarnings("unchecked")
+					JsArray<HistoryItem> found = (JsArray<HistoryItem>) result;
 					chromeQueryEnd = true;
 					if(found != null){
 						int cnt = found.length();

@@ -1,14 +1,14 @@
 package com.google.gwt.chrome.storage;
 
-import com.google.gwt.chrome.def.BackgroundPageCallback;
+import com.google.gwt.chrome.def.BackgroundJsCallback;
 import com.google.gwt.chrome.message.BackgroundMessage;
 import com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
 import com.google.gwt.chrome.storage.StorageArea.StorageUseCallback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONString;
 
 /**
  * Items under the "sync" storage area are synced using Chrome Sync.
@@ -26,18 +26,20 @@ public class SyncStorageAreaWebImpl implements StorageAreaImpl {
 	
 	@Override
 	public void getBytesInUse(String[] keys, final StorageUseCallback callback) {
-		messagePassing.postMessage("storage.sync.getBytesInUse", "", new BackgroundPageCallback() {
+		messagePassing.postMessage("storage.sync.getBytesInUse", new BackgroundJsCallback() {
+			
 			@Override
-			public void onSuccess(String result) {
+			public void onSuccess(Object message) {
 				int _result = -1;
 				try{
-					_result = Integer.parseInt(result); 
+					_result = Integer.parseInt(String.valueOf((String) message)); 
 				} catch(Exception e){
 					callback.onError(e.getMessage());
+					return;
 				}
 				callback.onCalculate(_result);
 			}
-
+			
 			@Override
 			public void onError(String message) {
 				callback.onError(message);
@@ -47,11 +49,12 @@ public class SyncStorageAreaWebImpl implements StorageAreaImpl {
 
 	@Override
 	public void clear(final StorageSimpleCallback callback) {
-		messagePassing.postMessage("storage.sync.clear", "", new BackgroundPageCallback() {
+		messagePassing.postMessage("storage.sync.clear", new BackgroundJsCallback() {
 			@Override
-			public void onSuccess(String result) {
+			public void onSuccess(Object message) {
 				callback.onDone();
 			}
+			
 			@Override
 			public void onError(String message) {
 				callback.onError(message);
@@ -61,12 +64,12 @@ public class SyncStorageAreaWebImpl implements StorageAreaImpl {
 
 	@Override
 	public void set(JavaScriptObject data, final StorageSimpleCallback callback) {
-		JSONObject obj = new JSONObject(data);
-		messagePassing.postMessage("storage.sync.set", obj.toString(), new BackgroundPageCallback() {
+		messagePassing.postMessage("storage.sync.set", data, new BackgroundJsCallback() {
 			@Override
-			public void onSuccess(String result) {
+			public void onSuccess(Object message) {
 				callback.onDone();
 			}
+			
 			@Override
 			public void onError(String message) {
 				callback.onError(message);
@@ -76,11 +79,16 @@ public class SyncStorageAreaWebImpl implements StorageAreaImpl {
 
 	@Override
 	public void remove(String[] keys, final StorageSimpleCallback callback) {
-		messagePassing.postMessage("storage.sync.remove", "", new BackgroundPageCallback() {
+		JSONArray arr = new JSONArray();
+		for(String key : keys){
+			arr.set(arr.size(), new JSONString(key));
+		}
+		messagePassing.postMessage("storage.sync.remove", arr.getJavaScriptObject(), new BackgroundJsCallback() {
 			@Override
-			public void onSuccess(String result) {
+			public void onSuccess(Object message) {
 				callback.onDone();
 			}
+			
 			@Override
 			public void onError(String message) {
 				callback.onError(message);
@@ -91,11 +99,11 @@ public class SyncStorageAreaWebImpl implements StorageAreaImpl {
 	@Override
 	public void get(JavaScriptObject keysWithDefaults,
 			final StorageItemsCallback callback) {
-		JSONObject obj = new JSONObject(keysWithDefaults);
-		messagePassing.postMessage("storage.sync.get", obj.toString(), new BackgroundPageCallback() {
+		
+		messagePassing.postMessage("storage.sync.get", keysWithDefaults, new BackgroundJsCallback() {
 			@Override
-			public void onSuccess(String result) {
-				callback.onResult(JSONParser.parseStrict(result).isObject().getJavaScriptObject());
+			public void onSuccess(Object message) {
+				callback.onResult((JavaScriptObject) message);
 			}
 			@Override
 			public void onError(String message) {
@@ -103,7 +111,4 @@ public class SyncStorageAreaWebImpl implements StorageAreaImpl {
 			}
 		});
 	}
-	
-	
-
 }

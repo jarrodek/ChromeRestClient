@@ -27,7 +27,7 @@ import org.rest.client.ui.ErrorDialogView;
 import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.google.gwt.chrome.def.BackgroundPageCallback;
+import com.google.gwt.chrome.def.BackgroundJsCallback;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -150,22 +150,23 @@ public class AppRequestFactory {
 				if(payload != null && !payload.isEmpty()){
 					data.setPayload(mv.apply(payload));
 				}
-				
-				RestClient.getClientFactory().getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_REQUEST_BEGIN, data.toJSON(), new BackgroundPageCallback() {
+				if(RestClient.isDebug()){
+					Log.debug("Sending start signal to background page.");
+				}
+				RestClient.getClientFactory().getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_REQUEST_BEGIN, data, new BackgroundJsCallback() {
 					@Override
-					public void onSuccess(String result) {
+					public void onSuccess(Object message) {
 						if(RestClient.isDebug()){
 							Log.debug("Message to background page passed.");
 						}
 						startHttpRequest(data);
 					}
-
+					
 					@Override
 					public void onError(String message) {
 						reportFailure("Unknown error occured: " + message,null);
 					}
 				});
-				
 			}
 			
 			@Override

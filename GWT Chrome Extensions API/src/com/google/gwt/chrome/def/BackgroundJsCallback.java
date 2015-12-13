@@ -1,8 +1,19 @@
 package com.google.gwt.chrome.def;
-
-import com.google.gwt.core.client.JavaScriptObject;
-
+/**
+ * A callback from the background page.
+ * @author Pawel Psztyc
+ *
+ */
 public interface BackgroundJsCallback {
-	void onSuccess(JavaScriptObject message);
+	/**
+	 * Called when the request resulted with success.
+	 * Message can be any JavaScript object: Object, String, null, Number etc. It can't be undefined, though. 
+	 * @param message Response from the background page.
+	 */
+	void onSuccess(Object message);
+	/**
+	 * An error callback.
+	 * @param message Error message from the background page.
+	 */
 	void onError(String message);
 }

@@ -40,8 +40,8 @@ import org.rest.client.event.RequestEndEvent;
 import org.rest.client.event.RequestStartActionEvent;
 import org.rest.client.event.URLFieldToggleEvent;
 import org.rest.client.event.UrlValueChangeEvent;
-import org.rest.client.gdrive.DriveAuth;
 import org.rest.client.gdrive.DriveApi;
+import org.rest.client.gdrive.DriveAuth;
 import org.rest.client.gdrive.DriveFileItem;
 import org.rest.client.jso.ExternalDriveCreateData;
 import org.rest.client.jso.ExternalDriveCreateResponse;
@@ -70,7 +70,6 @@ import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.chrome.def.BackgroundJsCallback;
-import com.google.gwt.chrome.def.BackgroundPageCallback;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -78,7 +77,6 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -210,10 +208,10 @@ public class RequestActivity extends AppActivity implements
 		clientFactory.getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_GET_EXTERNAL_REQUEST_DATA, entryId, new BackgroundJsCallback() {
 			
 			@Override
-			public void onSuccess(JavaScriptObject message) {
+			public void onSuccess(Object message) {
 				ExternalDriveCreateResponse response;
 				try{
-					response = message.cast();
+					response = ((JavaScriptObject)message).cast();
 				}catch(Exception e){
 					StatusNotification.notify("Unable to read response from background page", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
 					return;
@@ -682,28 +680,20 @@ public class RequestActivity extends AppActivity implements
 				/**
 				 * Get request and response headers data from Chrome Extensions API
 				 */
-				clientFactory.getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_GET_COLLECTED_REQUEST_DATA, null, new BackgroundPageCallback() {
+				clientFactory.getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_GET_COLLECTED_REQUEST_DATA, new BackgroundJsCallback() {
 					@Override
-					public void onSuccess(String result) {
+					public void onSuccess(Object result) {
 						if(result == null){
 							responseView.setRequestHeadersExternal(null);
 							responseView.setResponseHeadersExternal(null);
 							responseView.scrollToView();
 							return;
 						}
-						JSONObject parsedResponse = null;
-						try{
-							parsedResponse = JSONParser.parseStrict(result).isObject();
-						}catch(Exception e){
-							responseView.setRequestHeadersExternal(null);
-							responseView.setResponseHeadersExternal(null);
-							responseView.scrollToView();
-							return;
-						}
 						
+						JavaScriptObject o = (JavaScriptObject)result;
+						JSONObject parsedResponse = new JSONObject(o);
 						responseView.setRequestHeadersExternal(extractHeadersExternal(parsedResponse, "REQUEST_HEADERS"));
 						responseView.setResponseHeadersExternal(extractHeadersExternal(parsedResponse, "RESPONSE_HEADERS"));
-						
 						
 						//look for redirections
 						JSONValue redirectValue = parsedResponse.get("REDIRECT_DATA");
@@ -713,8 +703,6 @@ public class RequestActivity extends AppActivity implements
 								responseView.setRedirectData(redirects);
 							}
 						}
-						
-						
 						responseView.scrollToView();
 					}
 
@@ -915,23 +903,14 @@ public class RequestActivity extends AppActivity implements
 	
 	
 	private void createExternalRequest(final String requestUUID){
-		clientFactory.getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_GET_EXTERNAL_REQUEST_DATA, requestUUID, new BackgroundPageCallback() {
+		clientFactory.getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_GET_EXTERNAL_REQUEST_DATA, requestUUID, new BackgroundJsCallback() {
 			@Override
-			public void onSuccess(String result) {
-				if(result.isEmpty()){
+			public void onSuccess(Object result) {
+				if(result == null){
 					StatusNotification.notify("Data from external extension is no longer available :(", StatusNotification.TYPE_CRITICAL, StatusNotification.TIME_MEDIUM);
 					return;
 				}
-				JSONValue parsedValue = null;
-				try{
-					parsedValue = JSONParser.parseStrict(result);
-				}catch(Exception e){
-				}
-				if(parsedValue == null){
-					Log.error("Malformed External Data Exception. Passed data: " + result);
-					StatusNotification.notify("Unable to read data from external extension :(", StatusNotification.TYPE_CRITICAL, StatusNotification.TIME_MEDIUM);
-					return;
-				}
+				JSONValue parsedValue = (JSONValue) result;
 				JSONObject obj = parsedValue.isObject();
 				if(obj.containsKey("error")){
 					if(obj.get("error").isBoolean().booleanValue()){
@@ -1513,6 +1492,22 @@ public class RequestActivity extends AppActivity implements
 	public void urlContextMenuActionPerformed(String actionName) {
 		GoogleAnalytics.sendEvent(ANALYTICS_EVENT_CATEGORY, "URL widget context menu action", actionName);
 		GoogleAnalyticsApp.sendEvent(ANALYTICS_EVENT_CATEGORY, "URL widget toggle action", actionName);
+	}
+
+	@Override
+	public void performCopyAction(String body) {
+		
+		clientFactory.getChromeMessagePassing().postMessage("copyToClipboard", body, new BackgroundJsCallback() {
+			@Override
+			public void onSuccess(Object message) {
+				//TODO: add toast confirmation message
+			}
+
+			@Override
+			public void onError(String message) {}
+		});
+		GoogleAnalytics.sendEvent(ANALYTICS_EVENT_CATEGORY, "Copy to clipboard", "Action performed");
+		GoogleAnalyticsApp.sendEvent(ANALYTICS_EVENT_CATEGORY, "Copy to clipboard", "Action performed");
 	}
 	
 }

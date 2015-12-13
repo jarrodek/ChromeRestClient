@@ -119,7 +119,7 @@ gwt.dev.chrome.isLocation = function(e){
 };
 
 /**
- * Throw an error if the call is not having "dev:gwt" value in source key. 
+ * Throw an error if the call is not having "gwt:host" value in source key. 
  */
 gwt.dev.chrome.isSource = function(data){
 	if(!(data && data.source && data.source == "gwt:host")) {

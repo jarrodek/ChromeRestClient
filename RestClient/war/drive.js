@@ -16,13 +16,12 @@
  * The object requires two properties to be available:
  * payload - function name to be called in the background page
  * response - type of expected response; can be "object" or "string"
- * source - must contain "dev:gwt" so the content script will recognize it as a command from dev environment to the background page.
+ * source - must contain "gwt:host" so the content script will recognize it as a command from dev environment to the background page.
  * 
  * @example
  * var payload = {
  * 	'payload': 'checkDriveAuth',
- * 	'response': 'object',
- *  'source': 'dev:gwt'
+ *  'source': 'gwt:host'
  * };
  */
 
@@ -199,25 +198,18 @@ arc.app.drive.handleCSmessage = function(e){
 		return;
 	};
 	let response = e.data;
-	if (!(response && response.source && response.source == "dev:cs"))
+	if (!(response && response.source && response.source == "gwt:cs"))
 		return;
-	if (!(response && response.payload))
+	if (!(response && response['source-data']))
 		return;
-	let responseAsObject = (response.response && response.response == 'object');
-	if(!responseAsObject){
-		//string receiver
-		return;
-	}
 	
-	switch(response.payload){
+	switch(response['source-data'].payload){
 		case 'checkDriveAuth':
-			arc.app.drive.handleDriveAuthResult(response.data);
+			arc.app.drive.handleDriveAuthResult(response.result);
 			break;
 		case 'gdriveAuth':
-			arc.app.drive.handleDriveAuthResult(response.data);
+			arc.app.drive.handleDriveAuthResult(response.result);
 			break;
-		default:
-			console.warn("Unknown response from content script: ", response);
 	}
 }
 
@@ -247,20 +239,19 @@ arc.app.drive.checkDriveAuth = function(callback){
 	}
 	//prepare a message for background page.
 	let payload = {
-		'payload': 'checkDriveAuth',
-		'response': 'object'
+		'payload': 'checkDriveAuth'
 	}
 	if(arc.app.drive.isExtension){
 		chrome.runtime.getBackgroundPage(function(backgroundPage){
 			backgroundPage.requestAction(payload, function(response){
-				var authResult = response.data;
+				var authResult = response.response;
 				arc.app.drive._setAccessToken(authResult);
 				callback.call(arc, authResult);
 			});
 		});
 	} else {
 		arc.app.drive._authCallbacks.add(callback);
-		payload.source = 'dev:gwt';
+		payload.source = 'gwt:host';
 		window.postMessage(payload, window.location.href);
 	}
 };
@@ -286,21 +277,20 @@ arc.app.drive.auth = function(callback, forceNew){
 	
 	let payload = {
 		'payload': 'gdriveAuth',
-		'response': 'object',
 		'forceNew': forceNew
 	}
 	
 	if(arc.app.drive.isExtension){
 		chrome.runtime.getBackgroundPage(function(backgroundPage){
 			backgroundPage.requestAction(payload, function(response){
-				var authResult = response.data;
+				var authResult = response.response;
 				arc.app.drive._setAccessToken(authResult);
 				callback.call(arc, authResult);
 			});
 		});
 	} else {
 		arc.app.drive._authCallbacks.add(callback);
-		payload.source = 'dev:gwt';
+		payload.source = 'gwt:host';
 		window.postMessage(payload, window.location.href);
 	}
 };

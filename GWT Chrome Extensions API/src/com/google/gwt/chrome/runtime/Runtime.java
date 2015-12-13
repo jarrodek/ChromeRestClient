@@ -4,19 +4,7 @@ import com.google.gwt.core.client.GWT;
 
 public class Runtime implements ChromeRuntime {
 	
-	public interface RuntimeHandler {
-		void onActionPerformed();
-	}
 	
-	public interface RuntimeStringHandler {
-		void onResult(String result);
-		void onError(String message);
-	}
-	
-	public interface ManifestHandler {
-		void onManifest(ManifestDetails manifest);
-		void onError(String message);
-	}
 	
 	private final ChromeRuntime impl;
 	public Runtime(){
@@ -30,11 +18,6 @@ public class Runtime implements ChromeRuntime {
 	private final native boolean isApiAvailable() /*-{
 		return !!(chrome.runtime);
 	}-*/;
-
-	@Override
-	public void getLastError(RuntimeStringHandler handler) {
-		impl.getLastError(handler);
-	}
 
 	@Override
 	public void getId(RuntimeStringHandler handler) {
@@ -64,5 +47,37 @@ public class Runtime implements ChromeRuntime {
 	@Override
 	public void addOnSuspendCanceledHandler(RuntimeHandler handler) {
 		impl.addOnSuspendCanceledHandler(handler);
+	}
+
+	@Override
+	public void openOptionsPage(RuntimeHandler handler) {
+		impl.openOptionsPage(handler);
+	}
+
+	@Override
+	public void setUninstallURL(String url, RuntimeHandler handler) {
+		impl.setUninstallURL(url, handler);
+	}
+
+	@Override
+	public void reload() {
+		impl.reload();
+	}
+
+	@Override
+	public void requestUpdateCheck(RuntimeUpdateCheckHandler handler) {
+		impl.requestUpdateCheck(handler);
+	}
+
+	/*@Override
+	public void sendMessage(String extensionId, Object message, JavaScriptObject options,
+			RuntimeJsonObjectHandler handler) {
+		impl.sendMessage(extensionId, message, options, handler);
+		
+	}*/
+
+	@Override
+	public void getPlatformInfo(PlatformInfoHandler handler) {
+		impl.getPlatformInfo(handler);
 	}
 }
