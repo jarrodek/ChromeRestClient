@@ -29,7 +29,7 @@
  * name. For example if you want to call chrome.storage.local.get() function the
  * payload key the will be "storage.local.get".
  * 
- * "source" key must contain value "dev:gwt". This content script will receive
+ * "source" key must contain value "gwt:host". This content script will receive
  * every message sent in the host page. To process only related requests it will
  * use this value to distinguish if this is a gwt to content script message.
  * Data to the host page will be returned in the same way but it will contain
@@ -62,7 +62,7 @@
  * <pre>
  * let message = {
  * 	'payload' : 'runtime.getManifest',
- * 	'source' : 'dev:gwt'
+ * 	'source' : 'gwt:host'
  * };
  * window.postMessage(message, location.href);
  * window.addEventListener(&quot;message&quot;, function(e) {
@@ -71,7 +71,7 @@
  * 	}
  * 	 
  * 	let data = e.data;
- * 	if (!(data &amp;&amp; data.source &amp;&amp; data.source === &quot;dev:cs&quot;))
+ * 	if (!(data &amp;&amp; data.source &amp;&amp; data.source === &quot;gwt:cs&quot;))
  * 		return; //accept only responses from the content script
  * 	let callback = retriveCallbackForCall(data['source-data']);
  * 	//data will contain payload, params, source and response keys. The response contain result from the background page
@@ -122,7 +122,7 @@ gwt.dev.chrome.isLocation = function(e){
  * Throw an error if the call is not having "dev:gwt" value in source key. 
  */
 gwt.dev.chrome.isSource = function(data){
-	if(!(data && data.source && data.source == "dev:gwt")) {
+	if(!(data && data.source && data.source == "gwt:host")) {
 		throw "This is not message to this CS";
 	}
 };
@@ -134,7 +134,7 @@ gwt.dev.chrome.sendMessage = function(data){
 	chrome.runtime.sendMessage(data, function(response) {
 		var result = response.result;
 		var post = {
-			"source": "dev:cs",
+			"source": "gwt:cs",
 			"result": result,
 			"source-data": data
 		}
