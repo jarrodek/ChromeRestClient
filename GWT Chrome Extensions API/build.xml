@@ -19,7 +19,7 @@
 	<property name="module.path.def.src" location="${module.src.root}${file.separator}def" />
 	<property name="module.path.def.tmp" location="${module.tmp.root}${file.separator}def" />
 	
-	<echoproperties destfile="my.properties"/>
+	<!--echoproperties destfile="my.properties"/-->
 	
 	<target name="dist" depends="clean, jar"></target>
 
@@ -61,7 +61,7 @@
 			</fileset>
 		</copy>
 		<!-- DEFAULTS -->
-		<copy todir="${module.path.def.src}">
+		<copy todir="${module.path.def.tmp}">
 			<fileset dir="${module.path.def.src}">
 				<include name="**/*.java" />
 			</fileset>
