@@ -60,4 +60,15 @@ public class SyncStorageAreaImpl implements StorageAreaImpl {
 		}));
 	}-*/;
 
+	@Override
+	public final native void get(StorageItemsCallback callback) /*-{
+		chrome.storage.sync.get(null, $entry(function(items){
+			if(!items){
+				callback.@com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback::onError(Ljava/lang/String;)(chrome.runtime.lastError);
+				return;
+			}
+			callback.@com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback::onResult(Lcom/google/gwt/core/client/JavaScriptObject;)(items);
+		}));
+	}-*/;
+
 }

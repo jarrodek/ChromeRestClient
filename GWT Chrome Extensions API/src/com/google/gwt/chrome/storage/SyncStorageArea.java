@@ -156,4 +156,11 @@ public class SyncStorageArea implements StorageArea {
 		impl.get(keysWithDefaults, callback);
 	}
 
+
+
+	@Override
+	public void get(StorageItemsCallback callback) {
+		impl.get(callback);
+	}
+
 }

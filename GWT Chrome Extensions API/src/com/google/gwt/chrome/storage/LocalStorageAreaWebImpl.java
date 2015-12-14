@@ -91,5 +91,14 @@ public class LocalStorageAreaWebImpl implements StorageAreaImpl {
 	private final native String _get(String key) /*-{
 		return $wnd.localStorage.getItem(key);
 	}-*/;
+	
+	@Override
+	public final native void get(StorageItemsCallback callback) /*-{
+		var res = {};
+		for(var key in localStorage){ 
+			res[key] = localStorage[key];
+		}
+		callback.@com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback::onResult(Lcom/google/gwt/core/client/JavaScriptObject;)(res);
+	}-*/;
 
 }

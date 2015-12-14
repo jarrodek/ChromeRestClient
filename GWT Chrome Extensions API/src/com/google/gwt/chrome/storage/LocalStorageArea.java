@@ -65,13 +65,14 @@ public class LocalStorageArea implements StorageArea {
 	@Override
 	public void get(final String key, final StorageItemCallback callback) {
 		JSONObject obj = new JSONObject();
-		obj.put(key, new JSONString(""));
+		obj.put(key, null);
 		get(obj.getJavaScriptObject(), new StorageItemsCallback() {
-			
 			@Override
 			public void onResult(JavaScriptObject data) {
-				
-				
+				if(data == null){
+					callback.onResult(null);
+					return;
+				}
 				SimpleJSObject obj = data.cast();
 				String[] keys = obj.getKeys();
 				for(String _key : keys){
@@ -80,7 +81,7 @@ public class LocalStorageArea implements StorageArea {
 						return;
 					}
 				}
-				callback.onResult("");
+				callback.onResult(null);
 			}
 			
 			@Override
@@ -103,5 +104,10 @@ public class LocalStorageArea implements StorageArea {
 	public void get(JavaScriptObject keysWithDefaults,
 			StorageItemsCallback callback) {
 		impl.get(keysWithDefaults, callback);
+	}
+
+	@Override
+	public void get(StorageItemsCallback callback) {
+		impl.get(callback);
 	}
 }

@@ -111,4 +111,18 @@ public class SyncStorageAreaWebImpl implements StorageAreaImpl {
 			}
 		});
 	}
+
+	@Override
+	public void get(final StorageItemsCallback callback) {
+		messagePassing.postMessage("storage.sync.get", new BackgroundJsCallback() {
+			@Override
+			public void onSuccess(Object message) {
+				callback.onResult((JavaScriptObject) message);
+			}
+			@Override
+			public void onError(String message) {
+				callback.onError(message);
+			}
+		});
+	}
 }

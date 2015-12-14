@@ -7,6 +7,7 @@ public class SimpleJSObject extends JavaScriptObject {
 	
 	public final native String[] getKeys() /*-{
 	    var i = 0;
+	    var result = [];
 	    for (var key in this) {
 	      if (this.hasOwnProperty(key)) {
 	        result[i++] = key;

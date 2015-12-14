@@ -12,4 +12,5 @@ public interface StorageAreaImpl {
 	void set(JavaScriptObject data, StorageSimpleCallback callback);
 	void remove(String[] keys, StorageSimpleCallback callback);
 	void get(JavaScriptObject keysWithDefaults, StorageItemsCallback callback);
+	void get(StorageItemsCallback callback);
 }

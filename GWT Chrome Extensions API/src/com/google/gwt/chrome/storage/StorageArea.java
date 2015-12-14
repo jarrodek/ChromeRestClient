@@ -153,6 +153,14 @@ public interface StorageArea {
 	 *            chrome.runtime.lastError will be set).
 	 */
 	void get(String key, StorageItemCallback callback);
+	/**
+	 * Gets all items from storage.
+	 * 
+	 * @param callback
+	 *            Callback with storage item, or on failure (in which case
+	 *            chrome.runtime.lastError will be set).
+	 */
+	void get(StorageItemsCallback callback);
 
 	/**
 	 * Gets items from storage.

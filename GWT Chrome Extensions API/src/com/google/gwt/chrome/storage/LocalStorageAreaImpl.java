@@ -60,4 +60,15 @@ public class LocalStorageAreaImpl implements StorageAreaImpl {
 		}));
 	}-*/;
 
+	@Override
+	public final native void get(final StorageItemsCallback callback) /*-{
+		chrome.storage.local.get(null, $entry(function(items){
+			if(!chrome.runtime.lastError){
+				callback.@com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback::onError(Ljava/lang/String;)(chrome.runtime.lastError);
+				return;
+			}
+			callback.@com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback::onResult(Lcom/google/gwt/core/client/JavaScriptObject;)(items);
+		}));
+	}-*/;
+
 }
