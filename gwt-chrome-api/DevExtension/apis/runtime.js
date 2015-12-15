@@ -17,8 +17,6 @@
 
 /* globals chrome, gwt */
 
-chrome.runtime = chrome.runtime || {};
-
 if (!chrome.runtime.getManifest) {
   /**
    * Mock the getManifest function.
@@ -51,76 +49,30 @@ if (!chrome.runtime.getManifest) {
     };
   };
 }
+if (!chrome.runtime.openOptionsPage) {
+  chrome.runtime.lastError = null;
 
-let functions = 'chrome.runtime.openOptionsPage(callback);chrome.runtime.setUninstallURL(url,' +
+  chrome.runtime.getId = function(callback) {
+    let p = {
+      payload: 'runtime.id',
+      params: undefined
+    };
+    gwt.dev.chrome.addCallback(p.payload, p.params, callback);
+    gwt.dev.chrome.postMessage(p);
+  };
+  chrome.runtime.getId((id) => chrome.runtime.id = id);
+
+  let functions = '' +
+  'chrome.runtime.openOptionsPage(callback);chrome.runtime.setUninstallURL(url,' +
   'callback);chrome.runtime.setUninstallURL(url,callback);chrome.runtime.reload();chrome.runtime' +
   '.requestUpdateCheck(callback);chrome.runtime.restart();chrome.runtime.sendMessage(extensionId' +
   ',message,options,callback);chrome.runtime.sendNativeMessage(application,message,callback);' +
-  'chrome.runtime.getPlatformInfo(callback);chrome.runtime.getPackageDirectoryEntry(callback);' + 
+  'chrome.runtime.getPlatformInfo(callback);chrome.runtime.getPackageDirectoryEntry(callback);' +
   'chrome.runtime.onStartup.addListener(callback);chrome.runtime.onInstalled.addListener(' +
-  'callback);chrome.runtime.onSuspend.addListener(callback);chrome.runtime.onSuspendCanceled.' + 
-  'addListener(callback);chrome.runtime.onUpdateAvailable.addListener(callback);chrome.runtime.' + 
+  'callback);chrome.runtime.onSuspend.addListener(callback);chrome.runtime.onSuspendCanceled.' +
+  'addListener(callback);chrome.runtime.onUpdateAvailable.addListener(callback);chrome.runtime.' +
   'onConnect.addListener(callback);chrome.runtime.onConnectExternal.addListener(callback);chrome' +
   '.runtime.onMessage.addListener(callback)';
 
-gwt.dev.chrome.registerAPI(functions.split(';'));
-/*
-if (!chrome.runtime.openOptionsPage) {
-  chrome.runtime.openOptionsPage = function(callback) {
-    let p = {
-      payload: 'chrome.runtime.openOptionsPage',
-      params: undefined
-    };
-    gwt.dev.chrome.addCallback(p.payload, p.params, callback);
-    gwt.dev.chrome.postMessage(p);
-  };
+  gwt.dev.chrome.registerAPI(functions.split(';'));
 }
-if (!chrome.runtime.setUninstallURL) {
-  chrome.runtime.setUninstallURL = function(url, callback) {
-    let p = {
-      payload: 'chrome.runtime.setUninstallURL',
-      params: url
-    };
-    gwt.dev.chrome.addCallback(p.payload, p.params, callback);
-    gwt.dev.chrome.postMessage(p);
-  };
-}
-if (!chrome.runtime.reload) {
-  chrome.runtime.reload = function() {
-    let p = {
-      payload: 'chrome.runtime.reload',
-      params: undefined
-    };
-    gwt.dev.chrome.postMessage(p);
-  };
-}
-if (!chrome.runtime.requestUpdateCheck) {
-  chrome.runtime.requestUpdateCheck = function(callback) {
-    let p = {
-      payload: 'chrome.runtime.requestUpdateCheck',
-      params: undefined
-    };
-    gwt.dev.chrome.addCallback(p.payload, p.params, callback);
-    gwt.dev.chrome.postMessage(p);
-  };
-}
-if (!chrome.runtime.restart) {
-  chrome.runtime.restart = function() {
-    let p = {
-      payload: 'chrome.runtime.restart',
-      params: undefined
-    };
-    gwt.dev.chrome.postMessage(p);
-  };
-}
-if (!chrome.runtime.getPlatformInfo) {
-  chrome.runtime.getPlatformInfo = function(callback) {
-    let p = {
-      payload: 'chrome.runtime.getPlatformInfo',
-      params: undefined
-    };
-    gwt.dev.chrome.addCallback(p.payload, p.params, callback);
-    gwt.dev.chrome.postMessage(p);
-  };
-}
-*/

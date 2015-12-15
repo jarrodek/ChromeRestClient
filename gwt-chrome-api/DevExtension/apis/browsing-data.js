@@ -18,7 +18,6 @@
 /* globals chrome,gwt */
 //mock browsingData API
 if (!chrome.browsingData) {
-  // chrome.browsingData = {};
   let functions = 'chrome.browsingData.settings(callback);chrome.browsingData.remove(options,' + 
     'dataToRemove,callback);chrome.browsingData.removeAppcache(options,callback);chrome.' + 
     'browsingData.removeCache(options,callback);chrome.browsingData.removeCookies(options,' +

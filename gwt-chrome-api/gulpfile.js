@@ -12,16 +12,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 // Include Gulp & tools we'll use
 var gulp = require('gulp');
 var concat = require('gulp-concat');
+var runSequence = require('run-sequence');
 var $ = require('gulp-load-plugins')();
 
 // Lint JavaScript
 gulp.task('lint', function() {
   return gulp.src([
-      'background.js',
-      'cs.js',
-      'host.js',
-      'gulpfile.js',
-      'apis/**.js'
+      'DevExtension/background.js',
+      'DevExtension/cs.js',
+      'DevExtension/host.js',
+      'DevExtension/gulpfile.js',
+      'DevExtension/apis/**.js'
     ])
   // JSCS has not yet a extract option
   .pipe($.jshint())
@@ -32,9 +33,28 @@ gulp.task('lint', function() {
 });
 
 gulp.task('compress', function() {
-  return gulp.src(['./host.js','./apis/*.js'])
+  return gulp.src(['./DevExtension/host.js','./DevExtension/apis/*.js'])
     .pipe(concat('host.all.js'))
-    .pipe(gulp.dest('../../RestClient/war'));
+    .pipe(gulp.dest('./DevExtension'));
+});
+/**
+ * Copy to ARC war directory
+ */
+gulp.task('copy', function() {
+  return gulp.src('./DevExtension/host.all.js')
+    .pipe(gulp.dest('../RestClient/war/'))
+    .pipe($.size({
+      title: 'copy'
+    }));
+});
+
+// Build production files, the default task
+gulp.task('default', function(cb) {
+  runSequence(
+    'lint',
+    'compress',
+    'copy',
+    cb);
 });
 
 // Load custom tasks from the `tasks` directory
