@@ -68,7 +68,7 @@ public interface StorageArea {
 		 * @param data
 		 *            Object with items in their key-value mappings.
 		 */
-		void onResult(String data);
+		void onResult(Object data);
 		/**
 		 * Called when error occurred
 		 * @param message

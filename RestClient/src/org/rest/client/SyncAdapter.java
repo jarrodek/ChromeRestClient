@@ -7,6 +7,7 @@ import com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback;
 import com.google.gwt.chrome.storage.StorageChangeObject;
 import com.google.gwt.chrome.storage.SyncStorageArea;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONObject;
@@ -49,7 +50,7 @@ public class SyncAdapter {
 	public static boolean observing = false;
 	
 	public static void sync(final Callback<Void, Void> callback){
-		Storage chromeStore = Storage.getStorage();
+		Storage chromeStore = GWT.create(Storage.class);
 		SyncStorageArea sync = chromeStore.getSync();
 		
 		JSONObject query = new JSONObject();
@@ -89,7 +90,7 @@ public class SyncAdapter {
 	public static void observe(){
 		if(observing) return;
 		observing = true;
-		Storage chromeStore = Storage.getStorage();
+		Storage chromeStore = GWT.create(Storage.class);
 		chromeStore.addChangeHandler(new Storage.StorageChangeHandler() {
 			@Override
 			public void onChange(StorageChangeObject data, String areaName) {

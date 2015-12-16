@@ -1,84 +1,30 @@
 package com.google.gwt.chrome.tabs;
 
-import com.google.gwt.core.client.JavaScriptObject;
-
 public class Tabs {
-
-	public static class CreateProperties extends JavaScriptObject {
-		protected CreateProperties() {
-		}
-
-		public final native static CreateProperties create()/*-{
-			return {};
-		}-*/;
-
-		/**
-		 * 
-		 * @param windowId
-		 *            The window to create the new tab in. Defaults to the
-		 *            current window.
-		 */
-		public final native CreateProperties setWindowId(int windowId)/*-{
-			this.windowId = windowId;
-			return this;
-		}-*/;
-
-		/**
-		 * 
-		 * @param index
-		 *            The position the tab should take in the window. The
-		 *            provided value will be clamped to between zero and the
-		 *            number of tabs in the window.
-		 * @return CreateProperties instance for chaining
-		 */
-		public final native CreateProperties setIndex(int index)/*-{
-			this.index = index;
-			return this;
-		}-*/;
-
-		/**
-		 * 
-		 * @param url
-		 *            The URL to navigate the tab to initially. Fully-qualified
-		 *            URLs must include a scheme (i.e. 'http://www.google.com',
-		 *            not 'www.google.com'). Relative URLs will be relative to
-		 *            the current page within the extension. Defaults to the New
-		 *            Tab Page.
-		 * @return CreateProperties instance for chaining
-		 */
-		public final native CreateProperties setUrl(String url)/*-{
-			this.url = url;
-			return this;
-		}-*/;
-		/**
-		 * 
-		 * @param active Whether the tab should become the active tab in the window. Defaults to true
-		 * @return CreateProperties instance for chaining
-		 */
-		public final native CreateProperties setActive(boolean active)/*-{
-			this.active = active;
-			return this;
-		}-*/;
-		/**
-		 * 
-		 * @param pinned Whether the tab should be pinned. Defaults to false
-		 * @return CreateProperties instance for chaining
-		 */
-		public final native CreateProperties setPinned(boolean pinned)/*-{
-			this.pinned = pinned;
-			return this;
-		}-*/;
-	}
-
-	private Tabs() {
-	}
-
-	public static Tabs getTabsIfSupported() {
-		if (!isSupported())
-			return null;
-		return new Tabs();
-	}
-
+	/**
+	 * This class can be contructed by GWT.create();
+	 */
+	protected Tabs() {}
+	/**
+	 * Retrieves details about the specified tab.
+	 * @param tabId Tab ID
+	 * @param handler The callback parameter
+	 */
+	public final native void get(int tabId, TabCallback handler)/*-{
+		$wnd.chrome.tabs.get(tabId, $entry(function(tab) {
+			handler.@com.google.gwt.chrome.tabs.TabCallback::onResult(Lcom/google/gwt/chrome/tabs/Tab;)(tab);
+		}));
+	}-*/;
+	/**
+	 * Gets the tab that this script call is being made from. May be undefined if called from a non-tab context (for example: a background page or popup view).
+	 * @param handler The callback parameter
+	 */
+	public final native void getCurrent(TabCallback handler)/*-{
+		$wnd.chrome.tabs.getCurrent($entry(function(tab) {
+			handler.@com.google.gwt.chrome.tabs.TabCallback::onResult(Lcom/google/gwt/chrome/tabs/Tab;)(tab);
+		}));
+	}-*/;
+	
 	/**
 	 * Creates a new tab. <br/>
 	 * <p>Note:<br/>This function can be used without requesting the <b>'tabs'</b> permission
@@ -88,15 +34,45 @@ public class Tabs {
 		var clb = $entry(function(item) {
 			handler.@com.google.gwt.chrome.tabs.TabCallback::onResult(Lcom/google/gwt/chrome/tabs/Tab;)(item);
 		});
-		chrome.tabs.create(props, clb);
+		$wnd.chrome.tabs.create(props, clb);
 	}-*/;
-
+	/**
+	 * Duplicates a tab.
+	 * @param tabId The ID of the tab which is to be duplicated.
+	 * @param handler The callback parameter
+	 */
+	public final native void duplicate(int tabId, TabCallback handler)/*-{
+		$wnd.chrome.tabs.duplicate(tabId, $entry(function(tab) {
+			handler.@com.google.gwt.chrome.tabs.TabCallback::onResult(Lcom/google/gwt/chrome/tabs/Tab;)(tab);
+		}));
+	}-*/;
+	/**
+	 * Duplicates a tab.
+	 * @param tabId The ID of the tab which is to be duplicated.
+	 * @param handler The callback parameter
+	 */
+	public final native void query(TabQuery queryInfo, TabsCallback handler)/*-{
+		$wnd.chrome.tabs.query(queryInfo, $entry(function(result) {
+			handler.@com.google.gwt.chrome.tabs.TabsCallback::onResult(Lcom/google/gwt/core/client/JsArray;)(result);
+		}));
+	}-*/;
+	/**
+	 * Duplicates a tab.
+	 * @param tabId The ID of the tab which is to be duplicated.
+	 * @param handler The callback parameter
+	 */
+	public final native void update(int tabId, TabQuery updateProperties, TabCallback handler)/*-{
+		$wnd.chrome.tabs.update(queryInfo, $entry(function(tab) {
+			handler.@com.google.gwt.chrome.tabs.TabCallback::onResult(Lcom/google/gwt/chrome/tabs/Tab;)(tab);
+		}));
+	}-*/;
+	
 	/**
 	 * Check if API is available.
 	 * 
 	 * @return true if API is available.
 	 */
-	private static final native boolean isSupported()/*-{
-		return !!(chrome.tabs);
+	public static final native boolean isSupported()/*-{
+		return !!($wnd.chrome.tabs);
 	}-*/;
 }

@@ -18,36 +18,29 @@
 /* globals chrome, gwt */
 
 if (!chrome.runtime.getManifest) {
+  let manifest = {
+    version: 'dev-env',
+    permissions: []
+  };
   /**
    * Mock the getManifest function.
-   * Because this function is synchronous it will mock the object with default values.
-   * If you pass a function as a parameter it will call background page to get real data.
-   *
-   * Warning: parameter in this function is only for development purpose. Real API do not
-   * accept argument here.
-   *
-   * @param {Function} asyncFn Optional. If passed a function it will perform and async operation
-   * and call background page to receive real manifest info. It can't be used on real API.
    */
-  chrome.runtime.getManifest = function(asyncFn) {
-    if (asyncFn && typeof asyncFn === 'function') {
-      let callback = (manifest) => {
-        asyncFn.call(asyncFn, manifest);
-      };
-      let p = {
-        payload: 'runtime.getManifest',
-        params: undefined
-      };
-      gwt.dev.chrome.addCallback(p.payload, p.params, callback);
-      gwt.dev.chrome.postMessage(p);
-      return;
-    }
-    //just to be mocked
-    return {
-      version: 'dev-env',
-      permissions: []
-    };
+  chrome.runtime.getManifest = function() {
+    return manifest;
   };
+  chrome.runtime.getManifestAsync = function(callback) {
+    let p = {
+      payload: 'runtime.getManifest',
+      params: undefined
+    };
+    gwt.dev.chrome.addCallback(p.payload, p.params, callback);
+    gwt.dev.chrome.postMessage(p);
+  };
+  chrome.runtime.getManifestAsync(function(result) {
+    if (result) {
+      manifest = result;
+    }
+  });
 }
 if (!chrome.runtime.openOptionsPage) {
   chrome.runtime.lastError = null;

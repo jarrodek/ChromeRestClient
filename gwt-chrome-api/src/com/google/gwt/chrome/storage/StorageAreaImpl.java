@@ -13,4 +13,5 @@ public interface StorageAreaImpl {
 	void remove(String[] keys, StorageSimpleCallback callback);
 	void get(JavaScriptObject keysWithDefaults, StorageItemsCallback callback);
 	void get(StorageItemsCallback callback);
+	int getQuotaBytes();
 }

@@ -12,28 +12,6 @@ import com.google.gwt.core.client.JavaScriptObject;
 public class ChromeCookie extends JavaScriptObject {
 	protected ChromeCookie(){}
 	
-	@SuppressWarnings("javadoc")
-	public static final native ChromeCookie testCreate(String name, String value, 
-			Long exp, String domain, boolean isSecure, boolean httpOnly, 
-			String path, String storeId) /*-{
-		var _this = {};
-		_this.name = name;
-		_this.value = value;
-		if( exp != null){
-			_this.expirationDate = exp;
-			_this.session = false;
-		} else {
-			_this.session = true;
-		}
-		_this.domain = domain;
-		_this.secure = isSecure;
-		_this.httpOnly = httpOnly;
-		_this.path = path;
-		_this.storeId = storeId;
-		return _this;
-	}-*/;
-	
-	// {"domain":"127.0.0.1","hostOnly":true,"httpOnly":false,"name":"cookieName","path":"/","secure":false,"session":true,"storeId":"0","value":"\"cookie value\""}
 	/**
 	 * 
 	 * @return The domain of the cookie (e.g. "www.google.com", "example.com").

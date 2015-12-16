@@ -10,15 +10,8 @@ import com.google.gwt.core.client.JavaScriptObject;
  * 
  */
 public final class ChromeCookieChange extends JavaScriptObject {
-	protected ChromeCookieChange(){}
-	
-	/**
-	 * 
-	 * @return True if a cookie was removed.
-	 */
-	public final native boolean isRemoved()/*-{
-		return this.removed;
-	}-*/;
+	protected ChromeCookieChange() {
+	}
 
 	/**
 	 * 
@@ -39,16 +32,10 @@ public final class ChromeCookieChange extends JavaScriptObject {
 	 * automatically removed due to a "set" call that overwrote it, "cause" will
 	 * be "overwrite". Plan your response accordingly.
 	 * 
-	 * This parameter was added in version 12.0.707.0. You must omit this
-	 * parameter in earlier versions, and you may omit it in any version. If you
-	 * require this parameter, the manifest key minimum_chrome_version can
-	 * ensure that your extension won't be run in an earlier browser version.
-	 * 
-	 * @return enumerated string ["evicted", "expired", "explicit",
-	 *         "expired_overwrite", "overwrite"] or empty string if chrome
-	 *         version is lower than 12.0.707.0
+	 * @return one of "evicted", "expired", "explicit", "expired_overwrite", or
+	 *         "overwrite"
 	 */
 	public final native String getCause()/*-{
-		return this.cause || "";
+		return this.cause || null;
 	}-*/;
 }

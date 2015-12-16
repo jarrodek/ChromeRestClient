@@ -6,38 +6,19 @@ public class StorageImpl {
 	
 	private StorageImpl(){}
 	
-	
-	final native boolean isAvailable() /*-{
-		return !!($wnd.chrome.storage && !$wnd.chrome.storage.gwtDev);
-	}-*/;
-	
-	final native String getLastError() /*-{
-		if(!!($wnd.chrome.storage && !$wnd.chrome.storage.gwtDev))
-			return $wnd.chrome.runtime.lastError || null;
-		return null;
-	}-*/;
-	
-	
-	public void addChangeHandler(StorageChangeHandler handler){
-		if(isAvailable()){
-			addExtensionChangeHandler(handler);
-		} else {
-			addWebChangeHandler(handler);
-		}
-	}
 	/**
-	 * TODO: implement it!
+	 * Check if storage API is available in the browser.
+	 */
+	final native boolean isAvailable() /*-{
+		return !!($wnd.chrome.storage);
+	}-*/;
+	
+	/**
+	 * Add change handler to the storage.
+	 * It will be called everty time when any value in all storage areas will cahnge.
 	 * @param handler
 	 */
-	private final native void addWebChangeHandler(StorageChangeHandler handler) /*-{
-		$wnd.addEventListener("chrome-storage-onchanged", function(e){
-			handler.@com.google.gwt.chrome.storage.Storage.StorageChangeHandler::onChange(Lcom/google/gwt/chrome/storage/StorageChangeObject;Ljava/lang/String;)({oldValue:e.data.changes.oldValue,newValue:e.data.changes.newValue}, e.data.areaName);
-		}, false);
-	}-*/;
-	
-	
-	//
-	private final native void addExtensionChangeHandler(StorageChangeHandler handler) /*-{
+	public final native void addChangeHandler(StorageChangeHandler handler) /*-{
 		$wnd.chrome.storage.onChanged.addListener(function(changes, areaName) {
 			handler.@com.google.gwt.chrome.storage.Storage.StorageChangeHandler::onChange(Lcom/google/gwt/chrome/storage/StorageChangeObject;Ljava/lang/String;)(changes, areaName);
 		});

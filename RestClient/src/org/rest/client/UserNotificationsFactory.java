@@ -13,8 +13,9 @@ import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea;
 import com.google.gwt.chrome.storage.StorageArea.StorageItemCallback;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Timer;
 
@@ -70,14 +71,14 @@ public class UserNotificationsFactory {
 			messageSchedule.cancel();
 		}
 		
-		final Storage store = Storage.getStorage();
+		final Storage store = GWT.create(Storage.class);
 		store.getLocal().get(LocalStore.LATEST_MESSAGE_KEY, new StorageItemCallback() {
 			@Override
-			public void onResult(String sinceValue) {
-				long since = 0;
-				if(sinceValue != null && !sinceValue.isEmpty()){
+			public void onResult(Object sinceValue) {
+				if(sinceValue != null){
+					double since = 0;
 					try{
-						since = Long.parseLong(sinceValue);
+						since = ((double) sinceValue);
 					} catch(Exception e){
 						Log.warn("Error getting User notification chrome storage setting: " + e.getMessage(), e);
 					}
@@ -86,7 +87,7 @@ public class UserNotificationsFactory {
 						public void onMessages(ArrayList<MessageObject> result) {
 							long current = new Date().getTime();
 							JSONObject setObj = new JSONObject();
-							setObj.put(LocalStore.LATEST_MESSAGE_KEY, new JSONString(String.valueOf(current+"")));
+							setObj.put(LocalStore.LATEST_MESSAGE_KEY, new JSONNumber(current));
 							
 							store.getLocal().set(setObj.getJavaScriptObject(), new StorageArea.StorageSimpleCallback() {
 								

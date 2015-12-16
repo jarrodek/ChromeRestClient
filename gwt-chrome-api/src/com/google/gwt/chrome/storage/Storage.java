@@ -12,8 +12,6 @@ public class Storage {
 		 */
 		void onChange(StorageChangeObject data, String areaName);
 	}
-	
-	
 	/**
 	 * Local storage area
 	 */
@@ -22,50 +20,28 @@ public class Storage {
 	 * Sync storage area
 	 */
 	public static final String SYNC = "sync";
-	/**
-	 * Flag if chrome storage API is available. If not it must use different interface implementation.
-	 */
-	private final boolean isAvailable; 
-	
-	private Storage(boolean isAvailable){
-		this.isAvailable = isAvailable;
-	}
 	
 	private static StorageImpl impl = GWT.create(StorageImpl.class);
-	
-	/**
-	 * If extension's storage object if unavailable (is dev mode) it use message passing to background page instead 
-	 * @return Storage object. 
-	 */
-	public static Storage getStorage(){
-		if(impl.isAvailable()){
-			return new Storage(true);
-		}
-		return new Storage(false);
-	}
-	/**
-	 * Details about the error which occurred.
-	 * @return
-	 */
-	public String getLastError(){
-		return impl.getLastError();
-	}
 	
 	/**
 	 * 
 	 * @return Items under the "local" storage area are local to each machine.
 	 */
 	public LocalStorageArea getLocal(){
-		return new LocalStorageArea(isAvailable);
+		return GWT.create(LocalStorageArea.class);
 	}
 	/**
 	 * 
 	 * @return Items under the "sync" storage area are synced using Chrome Sync.
 	 */
 	public SyncStorageArea getSync(){
-		return new SyncStorageArea(isAvailable);
+		return GWT.create(SyncStorageArea.class);
 	}
-	
+	/**
+	 * Add change handler to the storage.
+	 * It will be called everty time when any value in all storage areas will cahnge.
+	 * @param handler A handler to be called.
+	 */
 	public void addChangeHandler(StorageChangeHandler handler){
 		impl.addChangeHandler(handler);
 	}

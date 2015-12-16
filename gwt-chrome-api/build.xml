@@ -4,8 +4,6 @@
 	
 	<property name="module.path.cookie.src" location="${module.src.root}${file.separator}cookie" />
 	<property name="module.path.cookie.tmp" location="${module.tmp.root}${file.separator}cookie" />
-	<property name="module.path.extension.src" location="${module.src.root}${file.separator}extension" />
-	<property name="module.path.extension.tmp" location="${module.tmp.root}${file.separator}extension" />
 	<property name="module.path.history.src" location="${module.src.root}${file.separator}history" />
 	<property name="module.path.history.tmp" location="${module.tmp.root}${file.separator}history" />
 	<property name="module.path.message.src" location="${module.src.root}${file.separator}message" />
@@ -63,12 +61,6 @@
 		<!-- DEFAULTS -->
 		<copy todir="${module.path.def.tmp}">
 			<fileset dir="${module.path.def.src}">
-				<include name="**/*.java" />
-			</fileset>
-		</copy>
-		<!-- EXTENSION -->
-		<copy todir="${module.path.extension.tmp}">
-			<fileset dir="${module.path.extension.src}">
 				<include name="**/*.java" />
 			</fileset>
 		</copy>

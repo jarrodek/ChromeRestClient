@@ -2,7 +2,6 @@
 	<inherits name="com.google.gwt.user.User"/>
 	<source path="cookie" />
 	<source path="def" />
-	<source path="extension" />
 	<source path="history" />
 	<source path="message" />
 	<source path="runtime" />

@@ -1,7 +1,6 @@
 package com.google.gwt.chrome.storage;
 
 import com.google.gwt.chrome.def.SimpleJSObject;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -74,46 +73,49 @@ public class SyncStorageArea implements StorageArea {
 	 */
 	public static final int QUOTA_BYTES_PER_ITEM = 4096;
 	
-	final StorageAreaImpl impl;
-	protected SyncStorageArea(boolean isAvailable){
-		if(isAvailable){
-			impl = GWT.create(SyncStorageAreaImpl.class);
-		} else {
-			impl = GWT.create(SyncStorageAreaWebImpl.class);
-		}
-	}
-	
-	
+	protected SyncStorageArea(){}
 	
 	@Override
 	public void getBytesInUse(String key, StorageUseCallback callback) {
-		impl.getBytesInUse(new String[]{key}, callback);
+		getBytesInUse(new String[]{key}, callback);
 	}
+	
+	@Override
+	public final native void getBytesInUse(String[] keys, StorageUseCallback callback) /*-{
+		$wnd.chrome.storage.sync.getBytesInUse(keys, $entry(function(bytesInUse){
+			if(!bytesInUse && bytesInUse != 0){
+				callback.@com.google.gwt.chrome.storage.StorageArea.StorageUseCallback::onError(Ljava/lang/String;)($wnd.chrome.runtime.lastError);
+				return;
+			}
+			callback.@com.google.gwt.chrome.storage.StorageArea.StorageUseCallback::onCalculate(D)(bytesInUse);
+		}));
+	}-*/;
+	
+	@Override
+	public final native void clear(StorageSimpleCallback callback) /*-{
+		$wnd.chrome.storage.sync.clear($entry(function(){
+			callback.@com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback::onDone()();
+		}));
+	}-*/;
 
 	@Override
-	public void getBytesInUse(String[] keys, StorageUseCallback callback) {
-		impl.getBytesInUse(keys, callback);
-	}
-
-	@Override
-	public void clear(StorageSimpleCallback callback) {
-		impl.clear(callback);
-	}
-
-	@Override
-	public void set(JavaScriptObject data, StorageSimpleCallback callback) {
-		impl.set(data, callback);
-	}
+	public final native void set(JavaScriptObject data, StorageSimpleCallback callback) /*-{
+		$wnd.chrome.storage.sync.set(data, $entry(function(){
+			callback.@com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback::onDone()();
+		}));
+	}-*/;
 
 	@Override
 	public void remove(String key, StorageSimpleCallback callback) {
-		impl.remove(new String[]{key}, callback);
+		remove(new String[]{key}, callback);
 	}
 
 	@Override
-	public void remove(String[] keys, StorageSimpleCallback callback) {
-		impl.remove(keys, callback);
-	}
+	public final native void remove(String[] keys, StorageSimpleCallback callback) /*-{
+		$wnd.chrome.storage.sync.remove(data, $entry(function(){
+			callback.@com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback::onDone()();
+		}));
+	}-*/;
 
 	@Override
 	public void get(final String key, final StorageItemCallback callback) {
@@ -127,7 +129,7 @@ public class SyncStorageArea implements StorageArea {
 				String[] keys = obj.getKeys();
 				for(String _key : keys){
 					if(_key.equals(key)){
-						callback.onResult(obj.getString(_key));
+						callback.onResult(obj);
 						return;
 					}
 				}
@@ -151,16 +153,26 @@ public class SyncStorageArea implements StorageArea {
 	}
 
 	@Override
-	public void get(JavaScriptObject keysWithDefaults,
-			StorageItemsCallback callback) {
-		impl.get(keysWithDefaults, callback);
-	}
-
-
+	public final native void get(JavaScriptObject keysWithDefaults,
+			StorageItemsCallback callback) /*-{
+		$wnd.chrome.storage.sync.get(keysWithDefaults, $entry(function(items){
+			if(!items){
+				callback.@com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback::onError(Ljava/lang/String;)(chrome.runtime.lastError);
+				return;
+			}
+			callback.@com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback::onResult(Lcom/google/gwt/core/client/JavaScriptObject;)(items);
+		}));
+	}-*/;
 
 	@Override
-	public void get(StorageItemsCallback callback) {
-		impl.get(callback);
-	}
+	public final native void get(StorageItemsCallback callback) /*-{
+		$wnd.chrome.storage.sync.get(null, $entry(function(items){
+			if(!items){
+				callback.@com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback::onError(Ljava/lang/String;)(chrome.runtime.lastError);
+				return;
+			}
+			callback.@com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback::onResult(Lcom/google/gwt/core/client/JavaScriptObject;)(items);
+		}));
+	}-*/;
 
 }
