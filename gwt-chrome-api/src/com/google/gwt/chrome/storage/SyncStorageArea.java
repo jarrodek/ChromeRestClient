@@ -1,6 +1,5 @@
 package com.google.gwt.chrome.storage;
 
-import com.google.gwt.chrome.def.SimpleJSObject;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -117,15 +116,17 @@ public class SyncStorageArea implements StorageArea {
 		}));
 	}-*/;
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public void get(final String key, final StorageItemCallback callback) {
 		JSONObject obj = new JSONObject();
 		obj.put(key, new JSONString(""));
 		get(obj.getJavaScriptObject(), new StorageItemsCallback() {
 			
+			@SuppressWarnings("unchecked")
 			@Override
 			public void onResult(JavaScriptObject data) {
-				SimpleJSObject obj = data.cast();
+				StorageResult obj = data.cast();
 				String[] keys = obj.getKeys();
 				for(String _key : keys){
 					if(_key.equals(key)){
@@ -133,7 +134,8 @@ public class SyncStorageArea implements StorageArea {
 						return;
 					}
 				}
-				callback.onResult("");
+				
+				callback.onResult(null);
 			}
 			
 			@Override

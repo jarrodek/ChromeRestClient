@@ -6,13 +6,14 @@ import java.util.Date;
 import org.rest.client.event.NotificationsStateChangeEvent;
 import org.rest.client.request.MessageObject;
 import org.rest.client.request.MessagesRequest;
-import org.rest.client.storage.store.LocalStore;
+import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea;
 import com.google.gwt.chrome.storage.StorageArea.StorageItemCallback;
+import com.google.gwt.chrome.storage.StorageResult;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
@@ -72,13 +73,13 @@ public class UserNotificationsFactory {
 		}
 		
 		final Storage store = GWT.create(Storage.class);
-		store.getLocal().get(LocalStore.LATEST_MESSAGE_KEY, new StorageItemCallback() {
+		store.getLocal().get(StoreKeys.LATEST_MESSAGE_KEY, new StorageItemCallback<Double>() {
 			@Override
-			public void onResult(Object sinceValue) {
+			public void onResult(StorageResult<Double> sinceValue) {
 				if(sinceValue != null){
 					double since = 0;
 					try{
-						since = ((double) sinceValue);
+						since = sinceValue.get(StoreKeys.LATEST_MESSAGE_KEY);
 					} catch(Exception e){
 						Log.warn("Error getting User notification chrome storage setting: " + e.getMessage(), e);
 					}
@@ -87,7 +88,7 @@ public class UserNotificationsFactory {
 						public void onMessages(ArrayList<MessageObject> result) {
 							long current = new Date().getTime();
 							JSONObject setObj = new JSONObject();
-							setObj.put(LocalStore.LATEST_MESSAGE_KEY, new JSONNumber(current));
+							setObj.put(StoreKeys.LATEST_MESSAGE_KEY, new JSONNumber(current));
 							
 							store.getLocal().set(setObj.getJavaScriptObject(), new StorageArea.StorageSimpleCallback() {
 								

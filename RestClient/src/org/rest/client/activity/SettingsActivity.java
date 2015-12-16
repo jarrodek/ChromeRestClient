@@ -23,15 +23,15 @@ import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.NotificationsStateChangeEvent;
 import org.rest.client.place.SettingsPlace;
 import org.rest.client.request.RequestsHistory;
-import org.rest.client.storage.store.LocalStore;
+import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.ui.SettingsView;
 import org.rest.client.ui.desktop.StatusNotification;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
 import com.google.gwt.chrome.storage.SyncStorageArea;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -51,13 +51,11 @@ public class SettingsActivity extends AppActivity implements
 	@SuppressWarnings("unused")
 	private EventBus eventBus;
 	
-	final Storage store = Storage.getStorage();
+	final Storage store = GWT.create(Storage.class);
 	final SyncStorageArea syncStorage;
-	String latestError = null;
 
 	public SettingsActivity(SettingsPlace place, ClientFactory clientFactory) {
 		super(clientFactory);
-		latestError = store.getLastError();
 		syncStorage = store.getSync();
 	}
 
@@ -107,32 +105,24 @@ public class SettingsActivity extends AppActivity implements
 		syncStorage.set(setObj.getJavaScriptObject(), new StorageSimpleCallback() {
 			@Override
 			public void onDone() {
-				String error = store.getLastError();
-				if(error != latestError){
-					latestError = error;
-					StatusNotification.notify("Unable to save value in local storage :( " + error, StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM, true);
-					if(RestClient.isDebug()){
-						Log.debug("Unable to save "+key+" value in sync storage.");
-					}
-					return;
-				}
+				
 				StatusNotification.notify("Settings saved.", StatusNotification.TYPE_NORMAL, StatusNotification.TIME_ULTRA_SHORT, true);
 				
-				if(key.equals(LocalStore.DEBUG_KEY)){
+				if(key.equals(StoreKeys.DEBUG_KEY)){
 					RestClient.setDebug(value);
-				} else if(key.equals(LocalStore.HISTORY_KEY)){
+				} else if(key.equals(StoreKeys.HISTORY_KEY)){
 					if(value == false){
 						clientFactory.getMenuView().hideItem(2);
 					} else {
 						clientFactory.getMenuView().showItem(2);
 					}
-				} else if(key.equals(LocalStore.NOTIFICATIONS_ENABLED_KEY)){
+				} else if(key.equals(StoreKeys.NOTIFICATIONS_ENABLED_KEY)){
 					clientFactory.getEventBus().fireEvent(new NotificationsStateChangeEvent(value));
-				} else if(key.equals(LocalStore.MAGIC_VARS_ENABLED_KEY)){
+				} else if(key.equals(StoreKeys.MAGIC_VARS_ENABLED_KEY)){
 					SyncAdapter.magicVars = (value);
-				} else if(key.equals(LocalStore.CODE_MIRROR_HEADERS_KEY)){
+				} else if(key.equals(StoreKeys.CODE_MIRROR_HEADERS_KEY)){
 					SyncAdapter.codeMirrorHeaders = (value);
-				} else if(key.equals(LocalStore.CODE_MIRROR_PAYLOAD_KEY)){
+				} else if(key.equals(StoreKeys.CODE_MIRROR_PAYLOAD_KEY)){
 					SyncAdapter.codeMirrorPayload = (value);
 				}
 			}
@@ -149,41 +139,41 @@ public class SettingsActivity extends AppActivity implements
 	
 	@Override
 	public void changeDebugValue(boolean newValue) {
-		saveSetting(LocalStore.DEBUG_KEY, newValue);
+		saveSetting(StoreKeys.DEBUG_KEY, newValue);
 		GoogleAnalytics.sendEvent("Settings usage", "Debug enabled", newValue+"");
 		GoogleAnalyticsApp.sendEvent("Settings usage", "Debug enabled", newValue+"");
 	}
 
 	@Override
 	public void changeHistoryValue(boolean newValue) {
-		saveSetting(LocalStore.HISTORY_KEY, newValue);
+		saveSetting(StoreKeys.HISTORY_KEY, newValue);
 		GoogleAnalytics.sendEvent("Settings usage", "History enabled", newValue+"");
 		GoogleAnalyticsApp.sendEvent("Settings usage", "History enabled", newValue+"");
 	}
 
 	@Override
 	public void changeNotificationsValue(boolean notificationsEnabled) {
-		saveSetting(LocalStore.NOTIFICATIONS_ENABLED_KEY, notificationsEnabled);
+		saveSetting(StoreKeys.NOTIFICATIONS_ENABLED_KEY, notificationsEnabled);
 		GoogleAnalytics.sendEvent("Settings usage", "Notifications enabled", notificationsEnabled+"");
 		GoogleAnalyticsApp.sendEvent("Settings usage", "Notifications enabled", notificationsEnabled+"");
 	}
 
 	@Override
 	public void changeMagicVarsValue(boolean magicVarsEnabled) {
-		saveSetting(LocalStore.MAGIC_VARS_ENABLED_KEY, magicVarsEnabled);
+		saveSetting(StoreKeys.MAGIC_VARS_ENABLED_KEY, magicVarsEnabled);
 		GoogleAnalytics.sendEvent("Settings usage", "MagicVars enabled", magicVarsEnabled+"");
 		GoogleAnalyticsApp.sendEvent("Settings usage", "MagicVars enabled", magicVarsEnabled+"");
 	}
 	@Override
 	public void changeCodeMirrorHeadersValue(boolean codeMirrorHeadersEnabled) {
-		saveSetting(LocalStore.CODE_MIRROR_HEADERS_KEY, codeMirrorHeadersEnabled);
+		saveSetting(StoreKeys.CODE_MIRROR_HEADERS_KEY, codeMirrorHeadersEnabled);
 		GoogleAnalytics.sendEvent("Settings usage", "CM headers enabled", codeMirrorHeadersEnabled+"");
 		GoogleAnalyticsApp.sendEvent("Settings usage", "CM headers enabled", codeMirrorHeadersEnabled+"");
 	}
 
 	@Override
 	public void changeCodeMirrorPayloadValue(boolean codeMirrorPayloadEnabled) {
-		saveSetting(LocalStore.CODE_MIRROR_PAYLOAD_KEY, codeMirrorPayloadEnabled);
+		saveSetting(StoreKeys.CODE_MIRROR_PAYLOAD_KEY, codeMirrorPayloadEnabled);
 		GoogleAnalytics.sendEvent("Settings usage", "CM values enabled", codeMirrorPayloadEnabled+"");
 		GoogleAnalyticsApp.sendEvent("Settings usage", "CM values enabled", codeMirrorPayloadEnabled+"");
 	}

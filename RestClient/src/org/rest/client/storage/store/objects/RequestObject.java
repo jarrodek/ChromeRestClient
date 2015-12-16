@@ -17,13 +17,15 @@ package org.rest.client.storage.store.objects;
 
 import java.util.ArrayList;
 
-import org.rest.client.RestClient;
 import org.rest.client.request.FilesObject;
-import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.LocalStore;
+import org.rest.client.storage.store.StoreKeys;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.chrome.storage.Storage;
+import com.google.gwt.chrome.storage.StorageArea.StorageItemCallback;
+import com.google.gwt.chrome.storage.StorageResult;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNumber;
@@ -435,43 +437,29 @@ public class RequestObject extends JavaScriptObject {
 		return to;
 	}
 	
-	
-	
 	/**
 	 * 
 	 * @param clientFactory
 	 * @param callback
 	 */
 	public static void restoreLatest(final Callback<RequestObject, Throwable> callback){
-		
-		final LocalStore store = RestClient.getClientFactory().getLocalStore();
-		store.open(new StoreResultCallback<Boolean>() {
+		Storage store = GWT.create(Storage.class);
+		store.getLocal().get(StoreKeys.LATEST_REQUEST_KEY, new StorageItemCallback<RequestObject>() {
 			
 			@Override
-			public void onSuccess(Boolean result) {
-				if(!result){
-					callback.onFailure(null);
-					return;
-				}
-				store.getByKey(LocalStore.LATEST_REQUEST_KEY, new StoreResultCallback<String>() {
-					
-					@Override
-					public void onSuccess(String result) {
-						RequestObject ro = fromString(result);
-						callback.onSuccess(ro);
-					}
-					
-					@Override
-					public void onError(Throwable e) {
-						Log.error("Error perform getByKey.",e);
-						callback.onFailure(e);
-					}
-				});
+			public void onError(String message) {
+				
 			}
-			
+
 			@Override
-			public void onError(Throwable e) {
-				callback.onFailure(e);
+			public void onResult(StorageResult<RequestObject> data) {
+				RequestObject ro = data.get(StoreKeys.LATEST_REQUEST_KEY);
+				if(ro == null){
+					callback.onSuccess(ro);
+				} else {
+					Log.error("Error perform RequestObject::restoreLatest. Result is null.");
+					callback.onFailure(new Throwable("Error perform RequestObject::restoreLatest. Result is null."));
+				}
 			}
 		});
 	}

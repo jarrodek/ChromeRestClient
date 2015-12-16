@@ -4,13 +4,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import org.rest.client.SyncAdapter;
-import org.rest.client.storage.store.LocalStore;
+import org.rest.client.storage.store.StoreKeys;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea;
 import com.google.gwt.chrome.storage.SyncStorageArea;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONObject;
 
@@ -35,7 +36,7 @@ public class SetSyncDataTask implements LoadTask {
 		
 		HashMap<String, Boolean> oldValues = getOldStoreValues();
 		if(oldValues != null){
-			Storage store = Storage.getStorage();
+			Storage store = GWT.create(Storage.class);
 			SyncStorageArea sync = store.getSync();
 			JSONObject passedValues = new JSONObject();
 			
@@ -107,35 +108,35 @@ public class SetSyncDataTask implements LoadTask {
 	 */
 	private HashMap<String, Boolean> getOldStoreValues(){
 		com.google.gwt.storage.client.Storage localStorage =  com.google.gwt.storage.client.Storage.getLocalStorageIfSupported();
-		String debugValue = localStorage.getItem(LocalStore.DEBUG_KEY);
+		String debugValue = localStorage.getItem(StoreKeys.DEBUG_KEY);
 		if(debugValue == null){
 			//there must be no default previous values.
 			return null;
 		}
 		
-		String historyValue = localStorage.getItem(LocalStore.HISTORY_KEY);
-		String notificationValue = localStorage.getItem(LocalStore.NOTIFICATIONS_ENABLED_KEY);
-		String mvValue = localStorage.getItem(LocalStore.MAGIC_VARS_ENABLED_KEY);
-		String cmhValue = localStorage.getItem(LocalStore.CODE_MIRROR_HEADERS_KEY);
-		String cmpValue = localStorage.getItem(LocalStore.CODE_MIRROR_PAYLOAD_KEY);
+		String historyValue = localStorage.getItem(StoreKeys.HISTORY_KEY);
+		String notificationValue = localStorage.getItem(StoreKeys.NOTIFICATIONS_ENABLED_KEY);
+		String mvValue = localStorage.getItem(StoreKeys.MAGIC_VARS_ENABLED_KEY);
+		String cmhValue = localStorage.getItem(StoreKeys.CODE_MIRROR_HEADERS_KEY);
+		String cmpValue = localStorage.getItem(StoreKeys.CODE_MIRROR_PAYLOAD_KEY);
 		
 		HashMap<String, Boolean> map = new HashMap<>();
-		map.put(LocalStore.DEBUG_KEY, Boolean.valueOf(debugValue));
-		map.put(LocalStore.HISTORY_KEY, Boolean.valueOf(historyValue));
-		map.put(LocalStore.NOTIFICATIONS_ENABLED_KEY, Boolean.valueOf(notificationValue));
-		map.put(LocalStore.MAGIC_VARS_ENABLED_KEY, Boolean.valueOf(mvValue));
-		map.put(LocalStore.CODE_MIRROR_HEADERS_KEY, Boolean.valueOf(cmhValue));
-		map.put(LocalStore.CODE_MIRROR_PAYLOAD_KEY, Boolean.valueOf(cmpValue));
+		map.put(StoreKeys.DEBUG_KEY, Boolean.valueOf(debugValue));
+		map.put(StoreKeys.HISTORY_KEY, Boolean.valueOf(historyValue));
+		map.put(StoreKeys.NOTIFICATIONS_ENABLED_KEY, Boolean.valueOf(notificationValue));
+		map.put(StoreKeys.MAGIC_VARS_ENABLED_KEY, Boolean.valueOf(mvValue));
+		map.put(StoreKeys.CODE_MIRROR_HEADERS_KEY, Boolean.valueOf(cmhValue));
+		map.put(StoreKeys.CODE_MIRROR_PAYLOAD_KEY, Boolean.valueOf(cmpValue));
 		return map;
 	}
 	
 	private void clearOldLocalStorage(){
 		com.google.gwt.storage.client.Storage localStorage =  com.google.gwt.storage.client.Storage.getLocalStorageIfSupported();
-		localStorage.removeItem(LocalStore.DEBUG_KEY);
-		localStorage.removeItem(LocalStore.HISTORY_KEY);
-		localStorage.removeItem(LocalStore.NOTIFICATIONS_ENABLED_KEY);
-		localStorage.removeItem(LocalStore.MAGIC_VARS_ENABLED_KEY);
-		localStorage.removeItem(LocalStore.CODE_MIRROR_HEADERS_KEY);
-		localStorage.removeItem(LocalStore.CODE_MIRROR_PAYLOAD_KEY);
+		localStorage.removeItem(StoreKeys.DEBUG_KEY);
+		localStorage.removeItem(StoreKeys.HISTORY_KEY);
+		localStorage.removeItem(StoreKeys.NOTIFICATIONS_ENABLED_KEY);
+		localStorage.removeItem(StoreKeys.MAGIC_VARS_ENABLED_KEY);
+		localStorage.removeItem(StoreKeys.CODE_MIRROR_HEADERS_KEY);
+		localStorage.removeItem(StoreKeys.CODE_MIRROR_PAYLOAD_KEY);
 	}
 }

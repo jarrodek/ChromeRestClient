@@ -18,7 +18,7 @@ import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.request.RequestPayloadParser;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
-import org.rest.client.storage.store.LocalStore;
+import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.storage.store.objects.HistoryObject;
 import org.rest.client.storage.store.objects.RequestObject;
@@ -28,11 +28,15 @@ import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.def.BackgroundJsCallback;
+import com.google.gwt.chrome.storage.Storage;
+import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.file.client.File;
 import com.google.gwt.file.client.FileList;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.xhr2.client.AbortHandler;
 import com.google.gwt.xhr2.client.ErrorHandler;
@@ -412,17 +416,22 @@ public class AppRequestFactory {
 	 */
 	private static void saveCurrentState(final RequestObject data){
 		try{
-			String saveData = data.toJSON();
-			RestClient.getClientFactory().getLocalStore().put(saveData, LocalStore.LATEST_REQUEST_KEY, new StoreResultCallback<String>() {
+			Storage store = GWT.create(Storage.class);
+			JSONObject jso = new JSONObject();
+			jso.put(StoreKeys.LATEST_REQUEST_KEY, data.toJSONObject());
+			
+			store.getLocal().set(data, new StorageSimpleCallback() {
+				
 				@Override
-				public void onSuccess(String result) {
+				public void onError(String message) {
+					Log.warn("Unable to save current form data in local storage. Restore may not be possible on restart: " + message);
+				}
+				
+				@Override
+				public void onDone() {
 					if(RestClient.isDebug()){
 						Log.debug("Current state has been saved to local storage.");
 					}
-				}
-				@Override
-				public void onError(Throwable e) {
-					Log.warn("Unable to save current form data in local storage. Restore may not be possible on restart.", e);
 				}
 			});
 		} catch(Exception e){

@@ -12,7 +12,7 @@ import org.rest.client.request.AssetStringCallback;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
-import org.rest.client.storage.store.LocalStore;
+import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.StatusesStoreWebSql;
 import org.rest.client.storage.store.objects.HistoryObject;
 import org.rest.client.storage.store.objects.RequestObject;
@@ -334,7 +334,7 @@ public class FirstRunTask implements LoadTask {
 			}
 		}
 		ro.setHeaders(headers);
-		store.setItem(LocalStore.LATEST_REQUEST_KEY, ro.toJSON());
+		store.setItem(StoreKeys.LATEST_REQUEST_KEY, ro.toJSON());
 	}
 	
 	/**
@@ -394,7 +394,7 @@ public class FirstRunTask implements LoadTask {
 		RequestObject ro = RequestObject.createRequest();
 		ro.setMethod("GET");
 		ro.setURL("http://gdata.youtube.com/feeds/api/playlists/56D792A831D0C362/?v=2&alt=json&feature=plcp");
-		store.setItem(LocalStore.LATEST_REQUEST_KEY, ro.toJSON());
+		store.setItem(StoreKeys.LATEST_REQUEST_KEY, ro.toJSON());
 	
 		String[] jsonArray = new String[]{"application/json", "text/json", "text/x-json"};
 		JSONHeadersUtils.store(jsonArray, new Callback<Boolean, Throwable>() {

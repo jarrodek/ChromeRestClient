@@ -1,6 +1,5 @@
 package com.google.gwt.chrome.storage;
 
-import com.google.gwt.chrome.def.SimpleJSObject;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -72,21 +71,22 @@ public class LocalStorageArea implements StorageArea {
 	}-*/;
 
 	@Override
-	public void get(final String key, final StorageItemCallback callback) {
+	public void get(final String key, @SuppressWarnings("rawtypes") final StorageItemCallback callback) {
 		JSONObject obj = new JSONObject();
 		obj.put(key, null);
 		get(obj.getJavaScriptObject(), new StorageItemsCallback() {
+			@SuppressWarnings({ "rawtypes", "unchecked" })
 			@Override
 			public void onResult(JavaScriptObject data) {
 				if(data == null){
 					callback.onResult(null);
 					return;
 				}
-				SimpleJSObject obj = data.cast();
+				StorageResult obj = data.cast();
 				String[] keys = obj.getKeys();
 				for(String _key : keys){
 					if(_key.equals(key)){
-						callback.onResult(obj.getString(_key));
+						callback.onResult(obj);
 						return;
 					}
 				}

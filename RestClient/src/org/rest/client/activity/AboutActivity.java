@@ -25,6 +25,7 @@ import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.runtime.ChromeRuntime;
 import com.google.gwt.chrome.runtime.ManifestDetails;
 import com.google.gwt.chrome.runtime.Runtime;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -77,7 +78,7 @@ public class AboutActivity extends AppActivity implements
 	
 	
 	private void getAppVersion(){
-		Runtime r = new Runtime();
+		Runtime r = GWT.create(Runtime.class);
 		r.getManifest(new ChromeRuntime.ManifestHandler() {
 			
 			@Override

@@ -50,7 +50,7 @@ import org.rest.client.request.RedirectData;
 import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.request.URLParser;
 import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.LocalStore;
+import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.store.objects.FormEncodingObject;
@@ -70,7 +70,9 @@ import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.chrome.def.BackgroundJsCallback;
+import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -126,8 +128,8 @@ public class RequestActivity extends AppActivity implements
 		}
 		
 		Storage store = Storage.getSessionStorageIfSupported();
-		store.removeItem(LocalStore.RESTORED_REQUEST);
-		store.removeItem(LocalStore.CURRENT_GOOGLE_DRIVE_ITEM);
+		store.removeItem(StoreKeys.RESTORED_REQUEST);
+		store.removeItem(StoreKeys.CURRENT_GOOGLE_DRIVE_ITEM);
 		currentRequestEtag = null;
 		
 		requestView = this.clientFactory.getRequestView();
@@ -227,8 +229,8 @@ public class RequestActivity extends AppActivity implements
 				}
 				
 				Storage store = Storage.getSessionStorageIfSupported();
-				store.setItem(LocalStore.GOOGLE_DRIVE_CREATE_FOLDER_ID, data.getFolderId());
-				store.setItem(LocalStore.GOOGLE_DRIVE_CREATE_USER_ID, data.getUserId());
+				store.setItem(StoreKeys.GOOGLE_DRIVE_CREATE_FOLDER_ID, data.getFolderId());
+				store.setItem(StoreKeys.GOOGLE_DRIVE_CREATE_USER_ID, data.getUserId());
 				
 				tutorialFactory = new TutorialFactory("gdriveCreate", true);
 				requestView.setUpDriveTutorial(tutorialFactory);
@@ -358,7 +360,7 @@ public class RequestActivity extends AppActivity implements
 					StatusNotification.notify("Invalid ARC file.", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
 				} else {
 					Storage store = Storage.getSessionStorageIfSupported();
-					store.setItem(LocalStore.CURRENT_GOOGLE_DRIVE_ITEM, fileId);
+					store.setItem(StoreKeys.CURRENT_GOOGLE_DRIVE_ITEM, fileId);
 				}
 				
 				values.setGDriveId(fileId);
@@ -515,7 +517,7 @@ public class RequestActivity extends AppActivity implements
 				.getEncoding(), request.getHeaders());
 		RestClient.fixChromeLayout();
 		Storage store = Storage.getSessionStorageIfSupported();
-		store.setItem(LocalStore.RESTORED_REQUEST, ""+request.getId());
+		store.setItem(StoreKeys.RESTORED_REQUEST, ""+request.getId());
 		
 	}
 	private void restoreProjectEndpointWithLatestData(
@@ -576,7 +578,7 @@ public class RequestActivity extends AppActivity implements
 				.getEncoding(),request.getHeaders());
 		RestClient.fixChromeLayout();
 		Storage store = Storage.getSessionStorageIfSupported();
-		store.setItem(LocalStore.RESTORED_REQUEST, ""+request.getId());
+		store.setItem(StoreKeys.RESTORED_REQUEST, ""+request.getId());
 	}
 	
 	
@@ -956,7 +958,7 @@ public class RequestActivity extends AppActivity implements
 			public void onSuccess(RequestObject result) {
 				
 				Storage store = Storage.getSessionStorageIfSupported();
-				store.setItem(LocalStore.RESTORED_REQUEST, ""+savedId);
+				store.setItem(StoreKeys.RESTORED_REQUEST, ""+savedId);
 				setViewParameters(result);
 				
 			}
@@ -1066,9 +1068,10 @@ public class RequestActivity extends AppActivity implements
 		ro.setURL(requestView.getUrl());
 		ro.setName(requestView.getRequestName());
 		ro.setProject(RestClient.currentlyOpenedProject);
-		Storage store = Storage.getSessionStorageIfSupported();
-		String gDriveFileId = store.getItem(LocalStore.CURRENT_GOOGLE_DRIVE_ITEM);
-		String restoredRequestId = store.getItem(LocalStore.RESTORED_REQUEST);
+		//TODO: !important! replace it with other store method.
+		Storage sessionStore = Storage.getSessionStorageIfSupported();
+		String gDriveFileId = sessionStore.getItem(StoreKeys.CURRENT_GOOGLE_DRIVE_ITEM);
+		String restoredRequestId = sessionStore.getItem(StoreKeys.RESTORED_REQUEST);
 		if(restoredRequestId != null){
 			try{
 				int savedId = Integer.parseInt(restoredRequestId); 
@@ -1079,13 +1082,19 @@ public class RequestActivity extends AppActivity implements
 		if(gDriveFileId != null && !gDriveFileId.isEmpty()){
 			ro.setGDriveId(gDriveFileId);
 		}
-		this.clientFactory.getLocalStore().put(ro.toJSON(),
-			LocalStore.LATEST_REQUEST_KEY,
-			new StoreResultCallback<String>() {
-				@Override public void onSuccess(String result) {}
-				@Override public void onError(Throwable e) {}
-			});
-
+		com.google.gwt.chrome.storage.Storage store = GWT.create(com.google.gwt.chrome.storage.Storage.class);
+		JSONObject jo = new JSONObject();
+		jo.put(StoreKeys.LATEST_REQUEST_KEY, ro.toJSONObject());
+		store.getLocal().set(jo.getJavaScriptObject(), new StorageSimpleCallback() {
+			
+			@Override
+			public void onError(String message) {
+				//TODO: add analytics crash handler.
+			}
+			
+			@Override
+			public void onDone() {}
+		});
 		return null;
 	}
 
@@ -1139,11 +1148,11 @@ public class RequestActivity extends AppActivity implements
 		RestClient.previouslyOpenedProject = RestClient.currentlyOpenedProject;
 		RestClient.currentlyOpenedProject = -1;
 		Storage store = Storage.getLocalStorageIfSupported();
-		store.removeItem(LocalStore.LATEST_REQUEST_KEY);
+		store.removeItem(StoreKeys.LATEST_REQUEST_KEY);
 		
 		Storage sessionStore = Storage.getSessionStorageIfSupported();
-		sessionStore.removeItem(LocalStore.RESTORED_REQUEST);
-		sessionStore.removeItem(LocalStore.CURRENT_GOOGLE_DRIVE_ITEM);
+		sessionStore.removeItem(StoreKeys.RESTORED_REQUEST);
+		sessionStore.removeItem(StoreKeys.CURRENT_GOOGLE_DRIVE_ITEM);
 		
 		eventBus.fireEvent(new ClearFormEvent());
 		
@@ -1354,13 +1363,13 @@ public class RequestActivity extends AppActivity implements
 //			goTo(RequestPlace.Tokenizer.fromDriveFile(result.getGDriveId()));
 //			return;
 			Storage store = Storage.getSessionStorageIfSupported();
-			store.setItem(LocalStore.CURRENT_GOOGLE_DRIVE_ITEM, result.getGDriveId());
+			store.setItem(StoreKeys.CURRENT_GOOGLE_DRIVE_ITEM, result.getGDriveId());
 			requestView.setGDriveConstrols();
 		}
 		
 		if(result.getId()>0){
 			Storage store = Storage.getSessionStorageIfSupported();
-			store.setItem(LocalStore.RESTORED_REQUEST, ""+result.getId());
+			store.setItem(StoreKeys.RESTORED_REQUEST, ""+result.getId());
 		}
 		
 		
@@ -1399,7 +1408,7 @@ public class RequestActivity extends AppActivity implements
 	@Override
 	public void refreshCurrentDriveItem() {
 		Storage store = Storage.getSessionStorageIfSupported();
-		String entryId = store.getItem(LocalStore.CURRENT_GOOGLE_DRIVE_ITEM);
+		String entryId = store.getItem(StoreKeys.CURRENT_GOOGLE_DRIVE_ITEM);
 		if(entryId == null || entryId.isEmpty()){
 			if(RestClient.isDebug()){
 				Log.debug("Not a Google Drive™ item.");
@@ -1417,7 +1426,7 @@ public class RequestActivity extends AppActivity implements
 			callback.onSuccess(false);
 			return;
 		}
-		String restored = store.getItem(LocalStore.RESTORED_REQUEST);
+		String restored = store.getItem(StoreKeys.RESTORED_REQUEST);
 		if(restored != null && !restored.isEmpty()){
 			int savedId = -1;
 			try{
@@ -1457,7 +1466,7 @@ public class RequestActivity extends AppActivity implements
 				RestClient.saveRequestData(result, new Callback<RequestObject, Throwable>() {
 					@Override
 					public void onSuccess(RequestObject result) {
-						store.setItem(LocalStore.RESTORED_REQUEST,""+result.getId());
+						store.setItem(StoreKeys.RESTORED_REQUEST,""+result.getId());
 						callback.onSuccess(true);
 					}
 					

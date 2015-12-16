@@ -62,13 +62,13 @@ public interface StorageArea {
 	 * @author jarrod
 	 * 
 	 */
-	public interface StorageItemCallback {
+	public interface StorageItemCallback<T> {
 		/**
 		 * 
 		 * @param data
 		 *            Object with items in their key-value mappings.
 		 */
-		void onResult(Object data);
+		void onResult(StorageResult<T> data);
 		/**
 		 * Called when error occurred
 		 * @param message
@@ -152,6 +152,7 @@ public interface StorageArea {
 	 *            Callback with storage item, or on failure (in which case
 	 *            chrome.runtime.lastError will be set).
 	 */
+	@SuppressWarnings("rawtypes")
 	void get(String key, StorageItemCallback callback);
 	/**
 	 * Gets all items from storage.

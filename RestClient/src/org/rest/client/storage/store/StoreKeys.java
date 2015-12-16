@@ -15,14 +15,12 @@
  ******************************************************************************/
 package org.rest.client.storage.store;
 
-import org.rest.client.storage.LocalStorageAdapter;
-
 /**
  * Store for latest request data
  * @author jarrod
  *
  */
-public class LocalStore extends LocalStorageAdapter {
+public class StoreKeys {
 	
 	public final static String LATEST_REQUEST_KEY = "latest_request_data";
 	public final static String HEADERS_IMPORT_TIME_KEY = "headers_import_time";
@@ -59,6 +57,6 @@ public class LocalStore extends LocalStorageAdapter {
 	public static final String CURRENT_GOOGLE_DRIVE_ITEM = "currentGdriveItem";
 	public static final String GOOGLE_DRIVE_CREATE_FOLDER_ID = "gdriveCreateParent";
 	public static final String GOOGLE_DRIVE_CREATE_USER_ID = "gdriveCreateUser";
-	public LocalStore() {}
+	public StoreKeys() {}
 
 }

@@ -33,7 +33,7 @@ public class History {
 	 * 
 	 * @return true if API is available.
 	 */
-	public static final native boolean isSupported()/*-{
+	public final native boolean isSupported()/*-{
 		return !!($wnd.chrome.history);
 	}-*/;
 
