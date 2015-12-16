@@ -1,3 +1,20 @@
+'use strict'
+/*******************************************************************************
+ * Copyright 2012 Pawel Psztyc
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+
 /**
  * Background page for Advanced Rest Client.
  *
@@ -615,6 +632,116 @@ messageHandling.init();
 
 
 
+
+/**
+ * Advanced Rest Client namespace
+ */
+var arc = arc || {};
+/**
+ * ARC app's namespace
+ */
+arc.app = arc.app || {};
+/**
+ * A namespace for the background page.
+ */
+arc.app.bg = {};
+/**
+ * A handler to be called when the app is upgraded. 
+ * It should perform an update tasks if necessary.
+ */
+arc.app.bg.onInstalled = function(details){
+    console.log('OnInstall::', details);
+    if(details.reason === 'update'){
+        arc.app.bg.performStorageUpgrade();
+    }
+};
+arc.app.bg.performStorageUpgrade = function(){
+    if (!('localStorage' in window)) {
+        return;
+    }
+    if(localStorage['upgraded_v4']){
+        return;
+    }
+    //set shortcuts values 
+    var save = {};
+    var shortcuts = arc.app.bg.performShortcutsUpgrade();
+    var settings = arc.app.bg.performSettingsUpgrade();
+    if(shortcuts){
+        Object.assign(save, shortcuts);
+    }
+    Object.assign(save, settings);
+    chrome.storage.sync.set(save, function(){
+        console.info('localStorage has been upgraded to chrome.storage.sync');
+    });
+};
+/**
+ * To be called when upgrading to chrome.storage.
+ * Pass shortcuts to the store.
+ */
+arc.app.bg.performShortcutsUpgrade = function(){
+    var shortcuts;
+    try{
+        shortcuts = JSON.parse(localStorage['SHORTCUTS']);
+    } catch(e){
+        return null;
+    }
+    //shortcuts structure changed to:
+    // (boolean) alt
+    // (boolean) ctrl
+    // (boolean) shift
+    // (int) key
+    // (String) type
+    let save = [];
+    shortcuts.forEach((s) => {
+        let shortcut = {
+            'alt': s.a,
+            'ctrl': s.c,
+            'shift': a.s,
+            'key': a.k,
+            'type': a.t
+        };
+        save[save.length] = shortcut;
+    });
+    if(save.length > 0){
+        return save;
+    }
+    return null;
+};
+/**
+ * To be called when upgrading to chrome.storage.
+ * Pass settings data to the store.
+ */
+arc.app.bg.performSettingsUpgrade = function(){
+    var save = {
+        'DEBUG_ENABLED': localStorage['DEBUG_ENABLED'] === "true" ? true : false,
+        'HISTORY_ENABLED': localStorage['HISTORY_ENABLED'] === "true" ? true : false,
+        'MAGICVARS_ENABLED': localStorage['MAGICVARS_ENABLED'] === "true" ? true : false,
+        'NOTIFICATIONS_ENABLED': localStorage['NOTIFICATIONS_ENABLED'] === "true" ? true : false
+    };
+    var fr; 
+    try{
+        fr = parseInt(localStorage['firstrun']);
+    } catch(e) {}
+    if(fr){
+        save.firstrun = fr;
+    }
+    var tutorials;
+    try {
+        tutorials = JSON.parse(localStorage['tutorials']);
+    } catch(e){}
+    if(tutorials){
+        save.tutorials = tutorials;
+    }
+    var lm; 
+    try{
+        lm = parseInt(localStorage['LATESTMSG']);
+    } catch(e) {}
+    if(lm){
+        save.LATESTMSG = lm;
+    }
+    return save;
+};
+chrome.runtime.onInstalled.addListener(arc.app.bg.onInstalled);
 
 /**
  * External extension communication.
