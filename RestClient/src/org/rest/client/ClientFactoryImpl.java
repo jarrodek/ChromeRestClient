@@ -40,7 +40,6 @@ import org.rest.client.ui.ResponseView;
 import org.rest.client.ui.SaveRequestDialogView;
 import org.rest.client.ui.SavedView;
 import org.rest.client.ui.SettingsView;
-import org.rest.client.ui.ShortcutView;
 import org.rest.client.ui.SocketView;
 import org.rest.client.ui.desktop.AboutViewImpl;
 import org.rest.client.ui.desktop.AddEncodingViewImpl;
@@ -56,7 +55,6 @@ import org.rest.client.ui.desktop.ResponseViewImpl;
 import org.rest.client.ui.desktop.SaveRequestDialogViewImpl;
 import org.rest.client.ui.desktop.SavedViewImpl;
 import org.rest.client.ui.desktop.SettingsViewImpl;
-import org.rest.client.ui.desktop.ShortcutViewImpl;
 import org.rest.client.ui.desktop.SocketViewImpl;
 
 import com.google.gwt.chrome.message.BackgroundMessage;
@@ -220,11 +218,6 @@ public class ClientFactoryImpl implements ClientFactory {
 		// }
 		// return settingsView;
 		return GWT.create(SettingsViewImpl.class);
-	}
-
-	@Override
-	public ShortcutView getShortcutView() {
-		return GWT.create(ShortcutViewImpl.class);
 	}
 
 	@Override

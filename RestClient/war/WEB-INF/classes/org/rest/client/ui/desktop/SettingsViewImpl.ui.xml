@@ -44,9 +44,5 @@
 			<p>Load CodeMirror editor in the Payload raw input instead of the standard textarea. 
 				The editor reconfigure itself depending on the Content-type header, selecting the most appropriate editing engine for the content.</p>
 		</section>
-		<section class="Settings_View_optionsSection">
-			<p class="Settings_View_SectionTitle">Shortcuts</p>
-			<g:Button styleName="button" ui:field="shortCutsButton" text="Edit shortcuts"></g:Button>
-		</section>
 	</g:HTMLPanel>
 </ui:UiBinder>

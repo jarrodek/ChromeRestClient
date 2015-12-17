@@ -39,7 +39,6 @@ import org.rest.client.ui.ResponseView;
 import org.rest.client.ui.SaveRequestDialogView;
 import org.rest.client.ui.SavedView;
 import org.rest.client.ui.SettingsView;
-import org.rest.client.ui.ShortcutView;
 import org.rest.client.ui.SocketView;
 
 import com.google.gwt.chrome.message.ChromeMessagePassing;
@@ -78,7 +77,6 @@ public interface ClientFactory {
 	MenuView getMenuView();
 	MenuItemView createMenuItem(org.rest.client.ui.MenuItemView.Presenter presenter);
 	SettingsView getSettingsView();
-	ShortcutView getShortcutView();
 	SaveRequestDialogView getSaveRequestDialogView();
 	ErrorDialogView getErrorDialogView();
 	HistoryView getHistoryView();

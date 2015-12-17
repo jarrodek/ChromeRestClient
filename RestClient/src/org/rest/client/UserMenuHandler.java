@@ -14,7 +14,6 @@ import org.rest.client.place.ImportExportPlace;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SavedPlace;
 import org.rest.client.place.SettingsPlace;
-import org.rest.client.place.ShortcutPlace;
 import org.rest.client.place.SocketPlace;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.ProjectStoreWebSql;
@@ -215,9 +214,6 @@ public class UserMenuHandler {
 						} else if(newPlace instanceof ImportExportPlace){
 							settings.setSelected(true);
 							gaName = "#ImportExportPlace:"+((ImportExportPlace)newPlace).getToken();
-						} else if(newPlace instanceof ShortcutPlace){
-							settings.setSelected(true);
-							gaName = "#ShortcutPlace:"+((ShortcutPlace)newPlace).getToken();
 						} else if(newPlace instanceof HistoryPlace){
 							history.setSelected(true);
 							gaName = "#HistoryPlace:"+((HistoryPlace)newPlace).getToken();
