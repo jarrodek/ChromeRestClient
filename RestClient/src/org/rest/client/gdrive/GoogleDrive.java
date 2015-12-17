@@ -2,7 +2,7 @@ package org.rest.client.gdrive;
 
 import org.rest.client.RestClient;
 import org.rest.client.event.SavedRequestEvent;
-import org.rest.client.storage.store.LocalStore;
+import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.objects.RequestObject;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -111,7 +111,7 @@ public class GoogleDrive {
 				}
 				
 				Storage storage = Storage.getLocalStorageIfSupported();
-				storage.setItem(LocalStore.LATEST_GDRIVE_FOLDER, folderId);
+				storage.setItem(StoreKeys.LATEST_GDRIVE_FOLDER, folderId);
 				
 				DriveApi.insertNewFile(folderId, obj.getName(), obj, new DriveApi.FileUploadHandler() {
 					@Override

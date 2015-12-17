@@ -82,7 +82,7 @@ if(!chrome.storage || chrome.storage.local){
     const ID = "chrome.storage.local.get";
     chrome.storage.local._addCallback(ID, keys, callback);
     var postObject = {
-      source: "dev:gwt",
+      source: "gwt:host",
       version: 2,
       payload: "storage.local.get",
       id: ID,
@@ -95,7 +95,7 @@ if(!chrome.storage || chrome.storage.local){
     const ID = "chrome.storage.local.set";
     chrome.storage.local._addCallback(ID, keys, callback);
     var postObject = {
-      source: "dev:gwt",
+      source: "gwt:host",
       version: 2,
       payload: "storage.local.set",
       id: ID,
@@ -114,7 +114,7 @@ function receiveMessage(e){
   if(e.origin != location.origin){ return; };
   let data = e.data;
   //we don't care about the request, looking for response from Content Script.
-  if(!data.source || data.source !== "dev:cs") return;
+  if(!data.source || data.source !== "gwt:cs") return;
 
   if(!data.version || data.version !== 2){
 		return;

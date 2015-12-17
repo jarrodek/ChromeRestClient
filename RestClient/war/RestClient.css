@@ -92,7 +92,9 @@ body>.ls {
 input[type="checkbox"] {
 	vertical-align: middle;
 }
-
+.app-widget{
+	padding-bottom: 20px;
+}
 .app {
 	-webkit-box-flex: 1;
 }

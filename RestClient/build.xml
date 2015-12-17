@@ -52,7 +52,6 @@
 	    </copy>
 		<copy todir="${extension.src}">
 			<fileset dir="${extension.srcdir}">
-				<exclude name="**/manifest.json.old" />
 				<exclude name="**/cs.js" />
 			</fileset>
 		</copy>

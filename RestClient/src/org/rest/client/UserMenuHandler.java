@@ -17,14 +17,19 @@ import org.rest.client.place.SettingsPlace;
 import org.rest.client.place.ShortcutPlace;
 import org.rest.client.place.SocketPlace;
 import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.LocalStore;
 import org.rest.client.storage.store.ProjectStoreWebSql;
+import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.ui.MenuItemView;
 import org.rest.client.ui.MenuView;
 import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.chrome.storage.Storage;
+import com.google.gwt.chrome.storage.StorageArea;
+import com.google.gwt.chrome.storage.StorageArea.StorageItemCallback;
+import com.google.gwt.chrome.storage.StorageResult;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceChangeEvent;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -228,27 +233,32 @@ public class UserMenuHandler {
 					}
 			});
 		
-		final LocalStore localStore = clientFactory.getLocalStore();
-		localStore.open(new StoreResultCallback<Boolean>() {
+		Storage store = GWT.create(Storage.class);
+		StorageArea syncStore = store.getSync();
+		syncStore.get(StoreKeys.HISTORY_KEY, new StorageItemCallback<Boolean>() {
+			
 			@Override
-			public void onSuccess(Boolean result) {
-				localStore.getByKey(LocalStore.HISTORY_KEY, new StoreResultCallback<String>() {
-					@Override
-					public void onSuccess(String result) {
-						if(result == null || result.isEmpty()){
-							result = "true";
-						}
-						if(!result.equals("true")){
-							mv.hideItem(2);
-						}
-					}
-					@Override
-					public void onError(Throwable e) {}
-				});
-			}
-			@Override
-			public void onError(Throwable e) {
+			public void onError(String message) {
 				StatusNotification.notify("Unable open LocalStore :(", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+			}
+
+			@Override
+			public void onResult(StorageResult<Boolean> data) {
+				Boolean value = true;
+				if(data == null){
+					Log.warn("Unable to cast property from local storage, UserMenuHandler::bind");
+					logNative(data);
+				} else {
+					try{
+						value = data.getBoolean(StoreKeys.HISTORY_KEY);
+					} catch (Exception e) {
+						Log.warn("Unable to cast property from local storage (HISTORY_KEY).", e);
+						logNative(data);
+					}
+				}
+				if(!value){
+					mv.hideItem(2);
+				}
 			}
 		});
 	}
@@ -257,5 +267,8 @@ public class UserMenuHandler {
 		if(!$wnd._gaq) return;
 		if(@org.rest.client.RestClient::isInitializing()()) return;
 		$wnd._gaq.push(['_trackPageview', pageUrl]);
+	}-*/;
+	final native void logNative(Object msg) /*-{
+		console.log(msg, typeof msg);
 	}-*/;
 }

@@ -1,0 +1,33 @@
+{
+  "private": true,
+  "devDependencies": {
+    "glob-all": "^3.0.1",
+    "gulp": "^3.8.5",
+    "gulp-autoprefixer": "^3.1.0",
+    "gulp-cache": "^0.4.0",
+    "gulp-changed": "^1.0.0",
+    "gulp-if": "^2.0.0",
+    "gulp-jscs": "^3.0.0",
+    "gulp-jscs-stylish": "^1.1.2",
+    "gulp-jshint": "^1.6.3",
+    "gulp-load-plugins": "^1.1.0",
+    "gulp-rename": "^1.2.0",
+    "gulp-replace": "^0.5.4",
+    "gulp-size": "^2.0.0",
+    "gulp-uglify": "^1.5.1",
+    "gulp-useref": "^2.1.0",
+    "gulp-vulcanize": "^6.0.0",
+    "jshint-stylish": "^2.0.0",
+    "merge-stream": "^1.0.0",
+    "require-dir": "^0.3.0",
+    "run-sequence": "^1.0.2",
+    "stream-combiner2": "^1.1.1",
+    "gulp-concat": "^2.6.0"
+  },
+  "scripts": {
+    "lint": "gulp lint"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  }
+}

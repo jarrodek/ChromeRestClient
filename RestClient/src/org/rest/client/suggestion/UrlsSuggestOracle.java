@@ -3,17 +3,16 @@ package org.rest.client.suggestion;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.rest.client.RestClient;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.storage.websql.UrlRow;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.google.gwt.chrome.def.BackgroundPageCallback;
 import com.google.gwt.chrome.history.History;
-import com.google.gwt.chrome.history.History.Query;
 import com.google.gwt.chrome.history.HistoryItem;
 import com.google.gwt.chrome.history.HistorySearchCallback;
+import com.google.gwt.chrome.history.Query;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
 
 public class UrlsSuggestOracle extends DatabaseSuggestOracle {
@@ -112,17 +111,14 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 			}
 		});
 		
-		Query _q = Query.create(query);
-		_q.setMaxResults(numberOfDatabaseSuggestions);
-		
-		History h = History.getHistoryIfSupported();
-		if(h == null){ 
-			// Use chrome message passing to background page
-			RestClient.getClientFactory().getChromeMessagePassing().postMessage("history.search", _q.toJSON(), new BackgroundPageCallback() {
-				
+		History h = GWT.create(History.class);
+		if(h.isSupported()){
+			Query _q = GWT.create(Query.class);
+			_q.setText(query);
+			_q.setMaxResults(numberOfDatabaseSuggestions);
+			h.search(_q, new HistorySearchCallback() {
 				@Override
-				public void onSuccess(String result) {
-					JsArray<HistoryItem> found = HistoryItem.fromString(result);
+				public void onResult(JsArray<HistoryItem> found) {
 					chromeQueryEnd = true;
 					if(found != null){
 						int cnt = found.length();
@@ -139,42 +135,10 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 						UrlsSuggestOracle.this.returnSuggestions(callback);
 					}
 				}
-
-				@Override
-				public void onError(String message) {
-					chromeQueryEnd = true;
-					if(databaseQueryEnd){
-						recentDatabaseResult = new DatabaseRequestResponse<UrlSuggestion>(request,
-								numberOfDatabaseSuggestions, _suggestions);
-						UrlsSuggestOracle.this.returnSuggestions(callback);
-					}
-					if(RestClient.isDebug()){
-						Log.error("Unknown error occured: " + message);
-					}
-				}
 			});
 		} else {
-			// Call chrome API (compiled extension)
-			Query q = Query.create(query);
-			q.setMaxResults(numberOfDatabaseSuggestions);
-			h.search(q, new HistorySearchCallback() {
-				@Override
-				public void onResult(JsArray<HistoryItem> found) {
-					chromeQueryEnd = true;
-					int cnt = found.length();
-					for(int i = 0; i<cnt; i++){
-						String url = found.get(i).getUrl();
-						if(url == null || !url.contains("://")) continue;
-						UrlSuggestion s = new UrlSuggestion(url, true);
-						_suggestions.add(s);
-					}
-					if(databaseQueryEnd){
-						recentDatabaseResult = new DatabaseRequestResponse<UrlSuggestion>(request,
-								numberOfDatabaseSuggestions, _suggestions);
-						UrlsSuggestOracle.this.returnSuggestions(callback);
-					}
-				}
-			});
+			chromeQueryEnd = true;
+			UrlsSuggestOracle.this.returnSuggestions(callback);
 		}
 	}
 

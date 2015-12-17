@@ -1,6 +1,6 @@
 package org.rest.client.event;
 
-import org.rest.client.Shortcut;
+import org.rest.client.shortcuts.ShortcutItem;
 
 import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;
@@ -31,9 +31,9 @@ public class ShortcutChangeEvent extends Event<ShortcutChangeEvent.Handler> {
 		void onChange(ShortcutChangeEvent event);
 	}
 
-	private final Shortcut shortcut;
+	private final ShortcutItem shortcut;
 
-	public ShortcutChangeEvent(Shortcut shortcut) {
+	public ShortcutChangeEvent(ShortcutItem shortcut) {
 		this.shortcut = shortcut;
 	}
 
@@ -42,7 +42,7 @@ public class ShortcutChangeEvent extends Event<ShortcutChangeEvent.Handler> {
 		handler.onChange(this);
 	}
 	
-	public Shortcut getShortcut(){
+	public ShortcutItem getShortcut(){
 		return shortcut;
 	}
 	

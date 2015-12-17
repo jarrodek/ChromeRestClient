@@ -1,0 +1,108 @@
+<project name="gwt-extensions-library" default="dist" basedir=".">
+
+	<import file="../common.ant.xml"/>
+	
+	<property name="module.path.cookie.src" location="${module.src.root}${file.separator}cookie" />
+	<property name="module.path.cookie.tmp" location="${module.tmp.root}${file.separator}cookie" />
+	<property name="module.path.history.src" location="${module.src.root}${file.separator}history" />
+	<property name="module.path.history.tmp" location="${module.tmp.root}${file.separator}history" />
+	<property name="module.path.message.src" location="${module.src.root}${file.separator}message" />
+	<property name="module.path.message.tmp" location="${module.tmp.root}${file.separator}message" />
+	<property name="module.path.runtime.src" location="${module.src.root}${file.separator}runtime" />
+	<property name="module.path.runtime.tmp" location="${module.tmp.root}${file.separator}runtime" />
+	<property name="module.path.storage.src" location="${module.src.root}${file.separator}storage" />
+	<property name="module.path.storage.tmp" location="${module.tmp.root}${file.separator}storage" />
+	<property name="module.path.tabs.src" location="${module.src.root}${file.separator}tabs" />
+	<property name="module.path.tabs.tmp" location="${module.tmp.root}${file.separator}tabs" />
+	<property name="module.path.def.src" location="${module.src.root}${file.separator}def" />
+	<property name="module.path.def.tmp" location="${module.tmp.root}${file.separator}def" />
+	
+	<!--echoproperties destfile="my.properties"/-->
+	
+	<target name="dist" depends="clean, jar"></target>
+
+	<target name="clean">
+		<delete failonerror="false">
+			<!-- clean up alle .class files -->
+			<fileset dir="${classes.dir}" includes="**/*"></fileset>
+		</delete>
+		<delete failonerror="false">
+			<!-- clean previous builded jar files -->
+			<fileset dir="${module.jar.dir}" includes="**/${module.jar.filename}"></fileset>
+		</delete>
+	</target>
+
+	<target name="compile">
+		<!-- create classes dir if nessesery -->
+		<mkdir dir="${classes.dir}" />
+		<!-- compile java files -->
+		<javac includeantruntime="false" srcdir="${src.dir}" destdir="${classes.dir}" classpath="${gwt.dev.jar}" />
+	</target>
+	
+	<!-- Creates temp dir to collect all files and create jar file. -->
+	<target name="createtemp">
+		<mkdir dir="${module.tmp.dir}" />
+		<!-- copy all *.class files to temp dir -->
+		<copy todir="${module.tmp.dir}">
+			<fileset dir="${classes.dir}" />
+		</copy>
+		
+		<!-- copy GWT module name to tmp dir -->
+		<copy todir="${module.tmp.root}">
+			<fileset file="${module.path.module.file.src}" />
+		</copy>
+		<!-- copy all source files from client's dir (required for include to another project) -->
+		<!-- COOKIE -->
+		<copy todir="${module.path.cookie.tmp}">
+			<fileset dir="${module.path.cookie.src}">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		<!-- DEFAULTS -->
+		<copy todir="${module.path.def.tmp}">
+			<fileset dir="${module.path.def.src}">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		<!-- HISTORY -->
+		<copy todir="${module.path.history.tmp}">
+			<fileset dir="${module.path.history.src}">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		<!-- MESSAGE -->
+		<copy todir="${module.path.message.tmp}">
+			<fileset dir="${module.path.message.src}">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		<!-- RUNTIME -->
+		<copy todir="${module.path.runtime.tmp}">
+			<fileset dir="${module.path.runtime.src}">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		<!-- STORAGE -->
+		<copy todir="${module.path.storage.tmp}">
+			<fileset dir="${module.path.storage.src}">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		<!-- TABS -->
+		<copy todir="${module.path.tabs.tmp}">
+			<fileset dir="${module.path.tabs.src}">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="jar" depends="compile, createtemp">
+		<mkdir dir="${module.jar.dir}" />
+		<!-- create jar file from all files in tmp dir -->
+		<jar destfile="${module.jar.file}" index="true">
+			<fileset dir="${module.tmp.dir}" />
+		</jar>
+		<!-- now you can delete tmp dir -->
+		<delete dir="${module.tmp.dir}" />
+	</target>
+</project>

@@ -12,7 +12,7 @@ import org.rest.client.gdrive.DriveFileItem;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.URLParser;
 import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.LocalStore;
+import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
@@ -137,9 +137,9 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		//check if it is a restored request. The user may want to overwrite existing request.
 		//
 		Storage store = Storage.getSessionStorageIfSupported();
-		String restored = store.getItem(LocalStore.RESTORED_REQUEST);
-		gDriveItem = store.getItem(LocalStore.CURRENT_GOOGLE_DRIVE_ITEM);
-		gDriveCreateFolder = store.getItem(LocalStore.GOOGLE_DRIVE_CREATE_FOLDER_ID);
+		String restored = store.getItem(StoreKeys.RESTORED_REQUEST);
+		gDriveItem = store.getItem(StoreKeys.CURRENT_GOOGLE_DRIVE_ITEM);
+		gDriveCreateFolder = store.getItem(StoreKeys.GOOGLE_DRIVE_CREATE_FOLDER_ID);
 		
 		if(restored != null && !restored.isEmpty()){
 			int restoredId = -1;
@@ -441,8 +441,8 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 						StatusNotification.notify("File saved", StatusNotification.TYPE_NORMAL, StatusNotification.TIME_SHORT);
 						
 						Storage store = Storage.getSessionStorageIfSupported();
-						store.removeItem(LocalStore.CURRENT_GOOGLE_DRIVE_ITEM);
-						store.removeItem(LocalStore.GOOGLE_DRIVE_CREATE_FOLDER_ID);
+						store.removeItem(StoreKeys.CURRENT_GOOGLE_DRIVE_ITEM);
+						store.removeItem(StoreKeys.GOOGLE_DRIVE_CREATE_FOLDER_ID);
 						
 						RestClient.getClientFactory().getPlaceController().goTo(RequestPlace.Tokenizer.fromDriveFile(result.getId()));
 					}

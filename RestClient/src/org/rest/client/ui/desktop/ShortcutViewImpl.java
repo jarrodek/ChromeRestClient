@@ -4,14 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.rest.client.RestClient;
-import org.rest.client.Shortcut;
 import org.rest.client.ShortcutType;
 import org.rest.client.event.ShortcutChangeEvent;
 import org.rest.client.place.SettingsPlace;
+import org.rest.client.shortcuts.ShortcutItem;
 import org.rest.client.ui.ShortcutView;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -79,9 +80,10 @@ public class ShortcutViewImpl extends Composite implements ShortcutView {
 	}
 
 	@Override
-	public void setShortcuts(List<Shortcut> list) {
-		for(Shortcut item : list){
-			int cc = item.getCharCode();
+	public void setShortcuts(JsArray<ShortcutItem> list) {
+		for (int i = 0; i < list.length(); i++) {
+			ShortcutItem item = list.get(i);
+			int cc = item.getKeyCode();
 			char[] chars = Character.toChars(cc);
 			if(chars.length != 1) continue;
 			
@@ -91,34 +93,34 @@ public class ShortcutViewImpl extends Composite implements ShortcutView {
 				continue;
 			}
 			
-			ShortcutType type = item.getType();
+			String type = item.getType();
 			if(type == null) {
 				Log.warn("Shortcut editor. type is null.");
 				continue;
 			}
 			
-			if(type.equals(ShortcutType.OPEN_REQUEST)){
+			if(type.equals(ShortcutType.OPEN_REQUEST.getType())){
 				openLetter.setValue(charIdentifier);
-				openKeyCode = item.getCharCode();
-				openRequestCtrlToggle.setValue(item.isCtrl());
+				openKeyCode = item.getKeyCode();
+				openRequestCtrlToggle.setValue(item.isControl());
 				openRequestAltToggle.setValue(item.isAlt());
 				openRequestShiftToggle.setValue(item.isShift());
-			} else if(type.equals(ShortcutType.SAVE_REQUEST)){
+			} else if(type.equals(ShortcutType.SAVE_REQUEST.getType())){
 				saveLetter.setValue(charIdentifier);
-				saveKeyCode = item.getCharCode();
-				saveRequestCtrlToggle.setValue(item.isCtrl());
+				saveKeyCode = item.getKeyCode();
+				saveRequestCtrlToggle.setValue(item.isControl());
 				saveRequestAltToggle.setValue(item.isAlt());
 				saveRequestShiftToggle.setValue(item.isShift());
-			} else if(type.equals(ShortcutType.SEND_REQUEST)){
+			} else if(type.equals(ShortcutType.SEND_REQUEST.getType())){
 				sendLetter.setValue(charIdentifier);
-				sendKeyCode = item.getCharCode();
-				sendRequestCtrlToggle.setValue(item.isCtrl());
+				sendKeyCode = item.getKeyCode();
+				sendRequestCtrlToggle.setValue(item.isControl());
 				sendRequestAltToggle.setValue(item.isAlt());
 				sendRequestShiftToggle.setValue(item.isShift());
-			} else if(type.equals(ShortcutType.HISTORY_TAB)){
+			} else if(type.equals(ShortcutType.HISTORY_TAB.getType())){
 				historyLetter.setValue(charIdentifier);
-				historyKeyCode = item.getCharCode();
-				historyCtrlToggle.setValue(item.isCtrl());
+				historyKeyCode = item.getKeyCode();
+				historyCtrlToggle.setValue(item.isControl());
 				historyAltToggle.setValue(item.isAlt());
 				historyShiftToggle.setValue(item.isShift());
 			}
@@ -132,39 +134,39 @@ public class ShortcutViewImpl extends Composite implements ShortcutView {
 	void onMetaChange(ClickEvent e){
 		ToggleButton button = (ToggleButton)e.getSource();
 		
-		Shortcut sc = new Shortcut();
+		ShortcutItem sc = GWT.create(ShortcutItem.class);
 		if(button.equals(openRequestCtrlToggle)
 				|| button.equals(openRequestShiftToggle)
 				|| button.equals(openRequestAltToggle)){
-			sc.setCharCode(openKeyCode);
+			sc.setKeyCode(openKeyCode);
 			sc.setAlt(openRequestAltToggle.getValue().booleanValue());
-			sc.setCtrl(openRequestCtrlToggle.getValue().booleanValue());
+			sc.setControl(openRequestCtrlToggle.getValue().booleanValue());
 			sc.setShift(openRequestShiftToggle.getValue().booleanValue());
-			sc.setType(ShortcutType.OPEN_REQUEST);
+			sc.setType(ShortcutType.OPEN_REQUEST.getType());
 		} else if(button.equals(saveRequestCtrlToggle)
 				|| button.equals(saveRequestShiftToggle)
 				|| button.equals(saveRequestAltToggle)){
-			sc.setCharCode(saveKeyCode);
+			sc.setKeyCode(saveKeyCode);
 			sc.setAlt(saveRequestAltToggle.getValue().booleanValue());
-			sc.setCtrl(saveRequestCtrlToggle.getValue().booleanValue());
+			sc.setControl(saveRequestCtrlToggle.getValue().booleanValue());
 			sc.setShift(saveRequestShiftToggle.getValue().booleanValue());
-			sc.setType(ShortcutType.SAVE_REQUEST);
+			sc.setType(ShortcutType.SAVE_REQUEST.getType());
 		} else if(button.equals(sendRequestCtrlToggle)
 				|| button.equals(sendRequestShiftToggle)
 				|| button.equals(sendRequestAltToggle)){
-			sc.setCharCode(sendKeyCode);
+			sc.setKeyCode(sendKeyCode);
 			sc.setAlt(sendRequestAltToggle.getValue().booleanValue());
-			sc.setCtrl(sendRequestCtrlToggle.getValue().booleanValue());
+			sc.setControl(sendRequestCtrlToggle.getValue().booleanValue());
 			sc.setShift(sendRequestShiftToggle.getValue().booleanValue());
-			sc.setType(ShortcutType.SEND_REQUEST);
+			sc.setType(ShortcutType.SEND_REQUEST.getType());
 		}  else if(button.equals(historyCtrlToggle)
 				|| button.equals(historyShiftToggle)
 				|| button.equals(historyAltToggle)){
-			sc.setCharCode(historyKeyCode);
+			sc.setKeyCode(historyKeyCode);
 			sc.setAlt(historyAltToggle.getValue().booleanValue());
-			sc.setCtrl(historyCtrlToggle.getValue().booleanValue());
+			sc.setControl(historyCtrlToggle.getValue().booleanValue());
 			sc.setShift(historyShiftToggle.getValue().booleanValue());
-			sc.setType(ShortcutType.HISTORY_TAB);
+			sc.setType(ShortcutType.HISTORY_TAB.getType());
 		}
 		
 		ShortcutChangeEvent event = new ShortcutChangeEvent(sc);
@@ -206,33 +208,33 @@ public class ShortcutViewImpl extends Composite implements ShortcutView {
 			Log.debug("Shortcut change to character " + charIdentifier + ", with code: " + cc);
 		}
 		
-		Shortcut sc = new Shortcut();
-		sc.setCharCode(cc);
+		ShortcutItem sc = GWT.create(ShortcutItem.class);
+		sc.setKeyCode(cc);
 		
 		if(boxName.equals("openLetter")){
 			openKeyCode = cc;
 			sc.setAlt(openRequestAltToggle.getValue().booleanValue());
-			sc.setCtrl(openRequestCtrlToggle.getValue().booleanValue());
+			sc.setControl(openRequestCtrlToggle.getValue().booleanValue());
 			sc.setShift(openRequestShiftToggle.getValue().booleanValue());
-			sc.setType(ShortcutType.OPEN_REQUEST);
+			sc.setType(ShortcutType.OPEN_REQUEST.getType());
 		} else if(boxName.equals("saveLetter")){
 			saveKeyCode = cc;
 			sc.setAlt(saveRequestAltToggle.getValue().booleanValue());
-			sc.setCtrl(saveRequestCtrlToggle.getValue().booleanValue());
+			sc.setControl(saveRequestCtrlToggle.getValue().booleanValue());
 			sc.setShift(saveRequestShiftToggle.getValue().booleanValue());
-			sc.setType(ShortcutType.SAVE_REQUEST);
+			sc.setType(ShortcutType.SAVE_REQUEST.getType());
 		} else if(boxName.equals("sendLetter")){
 			sendKeyCode = cc;
 			sc.setAlt(sendRequestAltToggle.getValue().booleanValue());
-			sc.setCtrl(sendRequestCtrlToggle.getValue().booleanValue());
+			sc.setControl(sendRequestCtrlToggle.getValue().booleanValue());
 			sc.setShift(sendRequestShiftToggle.getValue().booleanValue());
-			sc.setType(ShortcutType.SEND_REQUEST);
+			sc.setType(ShortcutType.SEND_REQUEST.getType());
 		} else if(boxName.equals("historyLetter")){
 			historyKeyCode = cc;
 			sc.setAlt(historyAltToggle.getValue().booleanValue());
-			sc.setCtrl(historyCtrlToggle.getValue().booleanValue());
+			sc.setControl(historyCtrlToggle.getValue().booleanValue());
 			sc.setShift(historyShiftToggle.getValue().booleanValue());
-			sc.setType(ShortcutType.HISTORY_TAB);
+			sc.setType(ShortcutType.HISTORY_TAB.getType());
 		}
 		
 		ShortcutChangeEvent e = new ShortcutChangeEvent(sc);

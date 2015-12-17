@@ -1,0 +1,80 @@
+<project name="gwt-IO-library" default="dist" basedir=".">
+
+	<import file="../common.ant.xml"/>
+	
+	<!-- echoproperties destfile="my.properties"/-->
+	
+	<target name="dist" depends="clean, jar"></target>
+	
+	<target name="clean">
+		<delete failonerror="false">
+			<!-- clean up alle .class files -->
+			<fileset dir="${classes.dir}" includes="**/*"></fileset>
+		</delete>
+		<delete failonerror="false">
+			<!-- clean previous builded jar files (fir given version) -->
+			<fileset dir="${jar.dir}" includes="**//${module.jar.filename}"></fileset>
+		</delete>
+	</target>
+
+	<target name="compile">
+		<!-- create classes dir if nessesery -->
+		<mkdir dir="${classes.dir}" />
+		<!-- compile java files -->
+		<javac includeantruntime="false" srcdir="${src.dir}" destdir="${classes.dir}" classpath="${gwt.dev.jar}" />
+	</target>
+	
+	<!-- Creates temp dir to collect all files and create jar file. -->
+	<target name="createtemp">
+		<mkdir dir="${module.tmp.dir}" />
+		<!-- copy all *.class files to temp dir -->
+		<copy todir="${module.tmp.dir}">
+			<fileset dir="${classes.dir}" />
+		</copy>
+		<!-- copy GWT modules files to tmp dir -->
+		<copy todir="${module.tmp.root}">
+			<fileset file="${module.path.module.file.src}" />
+		</copy>
+		<copy todir="${module.tmp.dir}${file.separator}${module.filepath}">
+			<fileset file="${module.src.dir}${file.separator}${module.filepath}${file.separator}${module.filename}" />
+		</copy>
+		<copy todir="${module.tmp.dir}${file.separator}${module.filereaderpath}">
+			<fileset file="${src.dir}${file.separator}${module.filereaderpath}${file.separator}${module.filereadername}" />
+		</copy>
+		<copy todir="${module.tmp.dir}${file.separator}${module.socketpath}">
+			<fileset file="${src.dir}${file.separator}${module.socketpath}${file.separator}${module.socketname}" />
+		</copy>
+		<!-- copy all source files from client dir (required for include to another project) -->
+		<copy todir="${module.tmp.dir}${file.separator}${module.path}${file.separator}client">
+			<fileset dir="${src.dir}${file.separator}${module.path}${file.separator}client">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy todir="${module.tmp.dir}${file.separator}${module.filepath}${file.separator}client">
+			<fileset dir="${src.dir}${file.separator}${module.filepath}${file.separator}client">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy todir="${module.tmp.dir}${file.separator}${module.filereaderpath}${file.separator}client">
+			<fileset dir="${src.dir}${file.separator}${module.filereaderpath}${file.separator}client">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy todir="${module.tmp.dir}${file.separator}${module.socketpath}${file.separator}client">
+			<fileset dir="${src.dir}${file.separator}${module.socketpath}${file.separator}client">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="jar" depends="compile, createtemp">
+		<mkdir dir="${module.jar.dir}" />
+		<!-- create jar file from all files in tmp dir -->
+		<jar destfile="${module.jar.file}" index="true">
+			<fileset dir="${module.tmp.dir}" />
+		</jar>
+		<!-- now you can delete tmp dir -->
+		<delete dir="${module.tmp.dir}" />
+	</target>
+
+</project>

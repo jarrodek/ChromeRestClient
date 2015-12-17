@@ -63,6 +63,11 @@ public interface ResponseView extends IsWidget {
 		 * @param url
 		 */
 		void revokeDownloadData();
+		/**
+		 * Perform a copy action.
+		 * @param body
+		 */
+		void performCopyAction(String body);
 	}
 	/**
 	 * Sets presenter for this view

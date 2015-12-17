@@ -15,16 +15,15 @@
  ******************************************************************************/
 package org.rest.client.activity;
 
-import java.util.List;
-
 import org.rest.client.ClientFactory;
-import org.rest.client.Shortcut;
 import org.rest.client.ShortcutHandlers;
 import org.rest.client.place.ShortcutPlace;
+import org.rest.client.shortcuts.ShortcutItem;
 import org.rest.client.ui.ShortcutView;
 import org.rest.client.ui.desktop.StatusNotification;
 
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -58,9 +57,9 @@ public class ShortcutActivity extends AppActivity implements
 		view.setPresenter(this);
 		panel.setWidget(view.asWidget());
 		
-		ShortcutHandlers.getShortcuts(new Callback<List<Shortcut>, Throwable>() {
+		ShortcutHandlers.getShortcuts(new Callback<JsArray<ShortcutItem>, Throwable>() {
 			@Override
-			public void onSuccess(List<Shortcut> result) {
+			public void onSuccess(JsArray<ShortcutItem> result) {
 				view.setShortcuts(result);
 			}
 			

@@ -22,10 +22,10 @@ import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.AboutView;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.google.gwt.chrome.def.BackgroundPageCallback;
+import com.google.gwt.chrome.runtime.ChromeRuntime;
 import com.google.gwt.chrome.runtime.ManifestDetails;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.chrome.runtime.Runtime;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -78,28 +78,14 @@ public class AboutActivity extends AppActivity implements
 	
 	
 	private void getAppVersion(){
-		clientFactory.getChromeMessagePassing().postMessage("getManifest", "", new BackgroundPageCallback() {
+		Runtime r = GWT.create(Runtime.class);
+		r.getManifest(new ChromeRuntime.ManifestHandler() {
 			
 			@Override
-			public void onSuccess(String result) {
-				try{
-					JSONValue value = JSONParser.parseStrict(result);
-					ManifestDetails manifest = value.isObject().getJavaScriptObject().cast();
-					if(view != null){
-						view.setManifest(manifest);
-					} else {
-						if(RestClient.isDebug()){
-							Log.warn("View is null. cant set manifest data.");
-						}
-					}
-				} catch(Exception e){
-					if(RestClient.isDebug()){
-						Log.warn("Can't parse manifest info",e);
-					}
-				}
-				
+			public void onManifest(ManifestDetails manifest) {
+				view.setManifest(manifest);
 			}
-
+			
 			@Override
 			public void onError(String message) {
 				if(RestClient.isDebug()){

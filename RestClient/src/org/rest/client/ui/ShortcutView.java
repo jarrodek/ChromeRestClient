@@ -15,11 +15,9 @@
  ******************************************************************************/
 package org.rest.client.ui;
 
+import org.rest.client.shortcuts.ShortcutItem;
 
-import java.util.List;
-
-import org.rest.client.Shortcut;
-
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.IsWidget;
 /**
@@ -46,5 +44,5 @@ public interface ShortcutView extends IsWidget {
 	 */
 	void setPresenter(Presenter listener);
 	
-	void setShortcuts(List<Shortcut> result);
+	void setShortcuts(JsArray<ShortcutItem> result);
 }

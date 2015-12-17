@@ -18,7 +18,7 @@ package org.rest.client;
 import org.rest.client.storage.store.FormEncodingStoreWebSql;
 import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
-import org.rest.client.storage.store.LocalStore;
+import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.store.StatusesStoreWebSql;
@@ -54,7 +54,7 @@ public interface ClientFactory {
 	
 	
 	//STORES
-	LocalStore getLocalStore();
+	StoreKeys getLocalStore();
 	RequestDataStoreWebSql getRequestDataStore();
 	HistoryRequestStoreWebSql getHistoryRequestStore();
 	FormEncodingStoreWebSql getFormEncodingStore();

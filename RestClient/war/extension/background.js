@@ -1,3 +1,20 @@
+'use strict'
+/*******************************************************************************
+ * Copyright 2012 Pawel Psztyc
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+
 /**
  * Background page for Advanced Rest Client.
  *
@@ -374,8 +391,8 @@ MessageHandling.prototype.setListeners = function(){
        var availablePayload = "create".split(',');
        if (!message.payload || availablePayload.indexOf(message.payload) == -1) {
            sendResponse({
-               "error" : true,
-               "message" : "Unknown payload"
+               "response" : null,
+               "error" : "Unknown payload"
            });
            return true;
        }
@@ -386,8 +403,8 @@ MessageHandling.prototype.setListeners = function(){
            case 'create':
                if (!message.data) {
                    sendResponse({
-                       "error" : true,
-                       "message" : "Required data parameter is not available."
+                       "response" : null,
+                       "error" : "Required data parameter is not available."
                    });
                    return false;
                }
@@ -397,137 +414,24 @@ MessageHandling.prototype.setListeners = function(){
        sendResponse(result);
        return true;
    }.bind(this));
-
-
-
-
-
 }
 
 MessageHandling.prototype.handleMessage = function(request, sendResponse, sender){
-    if (typeof request == "string") {
-        try{
-            request = JSON.parse(request);
-        }catch(e){
-            console.error('Error parse payload data',e);
-        }
-    }
-
-
-
-
-    var responseAsObject = (request.response && request.response == 'object');
-    if (!request.payload){
-        var data = {
-            'error' : true,
-            'message' : 'Unknown payload.',
-            'data' : null
-        }
-        if(!responseAsObject){
-            data = JSON.stringify(data);
-        }
+    if (!request.payload) {
         sendResponse({
-            'payload' : 'error',
-            'response':responseAsObject ? 'object' : null,
-            'data' : data
+            'payload': request.payload,
+            'response': null,
+            'error': 'Unknown payload.'
         });
         return;
     }
-
-    if(request.version && request.version === 2){
-      return this.handleMessage2(request, sendResponse, sender);
-    }
     var method = request.payload;
     if(this[method]){
-        this[method](request, responseAsObject, sendResponse, sender);
-    } else {
-        this.handleApiDirectCall(request, responseAsObject, sendResponse, sender);
+        this[method](request, sendResponse, sender);
     }
 }
 
-MessageHandling.prototype.handleMessage2 = function(request, sendResponse, sender){
-  var method = request.payload;
-  if(this[method]){
-      this[method](request, true, sendResponse, sender);
-  } else {
-      this.callApiDirect(request, sendResponse, sender);
-  }
-}
-
-/**
- * Version 2 API calls handling
- */
-MessageHandling.prototype.callApiDirect = function(request, sendResponse){
-  var c = request.payload.split('.')
-  var call = chrome;
-  var action = c.pop();
-  for(var i = 0; i<c.length; i++){
-      call = call[c[i]];
-  }
-  var data = request.params;
-  call[action].call(call, data, function(result){
-      sendResponse({
-        'data': result
-      });
-  });
-};
-
-MessageHandling.prototype.handleApiDirectCall = function(request, responseAsObject, sendResponse){
-    if(request.payload.indexOf("storage") === 0){
-        var c = request.payload.split('.')
-        var call = chrome;
-        var action = c.pop();
-        for(var i = 0; i<c.length; i++){
-            call = call[c[i]];
-        }
-        var data = request.data ? JSON.parse(request.data) : null;
-        call[action].call(call,data,function(result){
-            if(!responseAsObject){
-                if(typeof result == "object"){
-                    result.response = responseAsObject ? 'object' : null;
-                    result = JSON.stringify(result);
-                } else {
-                    result = result+"";
-                }
-            } else {
-                if(typeof result != "object"){
-                    result = {
-                        'data':result
-                    }
-                }
-                result.response = responseAsObject ? 'object' : null;
-            }
-            sendResponse(result);
-        });
-    } else if (request.payload.indexOf(".") != -1){
-        var c = request.payload.split('.')
-        var call = chrome;
-        var action = c.pop();
-        for(var i = 0; i<c.length; i++){
-            call = call[c[i]];
-        }
-        var data = request.data ? JSON.parse(request.data) : null;
-        call[action].call(call,data,function(result){
-            if(!responseAsObject){
-                if(typeof result == "object"){
-                    result.response = responseAsObject ? 'object' : null;
-                    result = JSON.stringify(result);
-                } else {
-                    result = result+"";
-                }
-            } else {
-                if(typeof result != "object"){
-                    result = {
-                        'data':result
-                    }
-                }
-                result.response = responseAsObject ? 'object' : null;
-            }
-            sendResponse(result);
-        });
-    }
-}
-MessageHandling.prototype.checkDriveAuth = function(request, responseAsObject, sendResponse){
+MessageHandling.prototype.checkDriveAuth = function(request, sendResponse){
     if(request && request.forceNew){
         window.googleAuth.clear();
         window.googleAuth = null;
@@ -550,11 +454,10 @@ MessageHandling.prototype.checkDriveAuth = function(request, responseAsObject, s
     }
     sendResponse({
         'payload' : 'checkDriveAuth',
-        'response':responseAsObject ? 'object' : null,
-        'data' : data
+        'response' : data
     });
 }
-MessageHandling.prototype.gdriveAuth = function(request, responseAsObject, sendResponse){
+MessageHandling.prototype.gdriveAuth = function(request, sendResponse){
     if(request && request.forceNew){
         window.googleAuth.clear();
         window.googleAuth = null;
@@ -576,15 +479,14 @@ MessageHandling.prototype.gdriveAuth = function(request, responseAsObject, sendR
         }
         sendResponse({
             'payload' : 'checkDriveAuth',
-            'response':responseAsObject ? 'object' : null,
-            'data' : data
+            'response' : data
         });
     });
 }
-MessageHandling.prototype.gdrive = function(request, responseAsObject, sendResponse){
-    var query = request.data;
+MessageHandling.prototype.gdrive = function(request, sendResponse){
+    var query = request.params;
     if(typeof query == 'string'){
-        query = JSON.parse(request.data);
+        query = JSON.parse(request.params);
     }
     var viewTabUrl = null;
     if(query.action == 'create'){
@@ -601,54 +503,38 @@ MessageHandling.prototype.gdrive = function(request, responseAsObject, sendRespo
         sendResponse({assignUrl: viewTabUrl});
     }
 }
-MessageHandling.prototype.setEnvironment = function(request, responseAsObject, sendResponse){
-    var data = JSON.parse(request.data);
+MessageHandling.prototype.setEnvironment = function(request, sendResponse){
+    var data = request.params;
     for (var key in data) {
         window[key] = data[key];
     }
     sendResponse({
         'payload' : 'setEnvironment',
-        'response':responseAsObject ? 'object' : null,
-        'result' : true
+        'response' : true
     });
 }
-MessageHandling.prototype.runFromIntent = function(request, responseAsObject, sendResponse){
-    if (request.intent.action == "http://webintents.org/view" && request.intent.type == "application/restclient+data") {
-        var data = request.intent.data;
-        if (data == null)
-            return;
-        switch (data.payload) {
-            case 'create':
-                runApplication(data.data);
-                break;
-        }
-    }
-}
 
-MessageHandling.prototype.requestBegin = function(request, responseAsObject, sendResponse){
-    var data = JSON.parse(request.data);
+MessageHandling.prototype.requestBegin = function(request, sendResponse){
+    var data = request.params;
     this.webRequest.reset();
     this.webRequest.masterURL = data.url;
     this.webRequest.setRules(data);
 
     sendResponse({
-        'payload' : 'requestBegin'
+        'payload' : 'requestBegin',
+        'response': true
     });
 }
-MessageHandling.prototype.getRequestData = function(request, responseAsObject, sendResponse){
+MessageHandling.prototype.getRequestData = function(request, sendResponse){
     var data = this.webRequest.getRequestData();
-    if(!responseAsObject){
-        data = JSON.stringify(data);
-    }
     this.webRequest.reset();
     sendResponse({
         'payload' : 'getRequestData',
-        'response':responseAsObject ? 'object' : null,
-        'data' : data
+        'response' : data
     });
 }
-MessageHandling.prototype.getExternalData = function(request, responseAsObject, sendResponse){
-    var externalUUid = request.data;
+MessageHandling.prototype.getExternalData = function(request, sendResponse){
+    var externalUUid = request.params;
     var externalData = null;
     if (externalUUid in window.externalDataHolder) {
         externalData = window.externalDataHolder[externalUUid];
@@ -656,61 +542,34 @@ MessageHandling.prototype.getExternalData = function(request, responseAsObject, 
     }
     var data = {};
     if (externalData == null) {
-        data = {
-            'error' : true,
-            'message' : 'No data available :(',
-            'data' : null
-        };
-        if(!responseAsObject){
-            data = JSON.stringify(data);
-        }
         sendResponse({
             'payload' : 'getExternalData',
-            'response':responseAsObject ? 'object' : null,
-            'data' : data
+            'response' : null,
+            'error' : 'No data available :(',
         });
-        return;
+    } else {
+	    sendResponse({
+	        'payload' : 'getExternalData',
+	        'response' : externalData
+	    });
     }
-
-    data = {
-        'error' : false,
-        'data' : externalData
-    };
-    if(!responseAsObject){
-        data = JSON.stringify(data);
-    }
-    sendResponse({
-        'payload' : 'getExternalData',
-        'response':responseAsObject ? 'object' : null,
-        'data' : data
-    });
-}
-MessageHandling.prototype.copyToClipboard = function(request, responseAsObject, sendResponse){
-    var copyData = request.data;
+};
+MessageHandling.prototype.copyToClipboard = function(request, sendResponse){
+    var copyData = request.params;
     var clipboardholder = document.createElement("textarea");
     document.body.appendChild(clipboardholder);
     clipboardholder.value = copyData;
     clipboardholder.select();
     document.execCommand("Copy");
     clipboardholder.parentNode.removeChild(clipboardholder);
-}
-MessageHandling.prototype.getManifest = function(request, responseAsObject, sendResponse){
-    var manifest = chrome.runtime.getManifest();
-    var data = {
-        version: manifest.version,
-        permissions: manifest.permissions,
-        manifest_version: manifest.manifest_version,
-        name: manifest.name
-    };
-    if(!responseAsObject){
-        data = JSON.stringify(data);
-    }
+    sendResponse();
+};
+MessageHandling.prototype.getManifest = function(request, sendResponse){
     sendResponse({
         'payload' : 'getManifest',
-        'response':responseAsObject ? 'object' : null,
-        'data' : data
+        'response': chrome.runtime.getManifest()
     });
-}
+};
 MessageHandling.prototype.runApplication = function(requestDetails) {
     var uuid = this.guidGenerator();
     var viewTabUrl = '';
@@ -745,16 +604,13 @@ MessageHandling.prototype.runApplicationFromGoogleDrive = function(requestDetail
     window.externalDataHolder[uuid] = requestDetails;
     return viewTabUrl;
 }
-MessageHandling.prototype.finishOAuth = function(request, responseAsObject, sendResponse, sender){
-
+MessageHandling.prototype.finishOAuth = function(request, sendResponse, sender){
 	var param = chrome.extension.getURL('oauth2/oauth2.html') + request.data;
-
 	var url = decodeURIComponent(param.match(/&from=([^&]+)/)[1]);
 	var index = url.indexOf('?');
 	if (index > -1) {
 	  url = url.substring(0, index);
 	}
-
 	// Derive adapter name from URI and then finish the process.
 	try{
 		var adapterName = OAuth2.lookupAdapterName(url);
@@ -769,11 +625,6 @@ MessageHandling.prototype.finishOAuth = function(request, responseAsObject, send
 	}
 };
 
-MessageHandling.prototype.storeLocal = function(request, responseAsObject, sendResponse, sender){
-  debugger;
-};
-
-
 var webRequest = new WebRequest();
 webRequest.init();
 var messageHandling = new MessageHandling(webRequest);
@@ -781,6 +632,146 @@ messageHandling.init();
 
 
 
+
+/**
+ * Advanced Rest Client namespace
+ */
+var arc = arc || {};
+/**
+ * ARC app's namespace
+ */
+arc.app = arc.app || {};
+/**
+ * A namespace for the background page.
+ */
+arc.app.bg = {};
+/**
+ * A handler to be called when the app is upgraded. 
+ * It should perform an update tasks if necessary.
+ */
+arc.app.bg.onInstalled = function(details) {
+    switch(details.reason) {
+        case 'update':
+            arc.app.bg.performStorageUpgrade();
+        break;
+        case 'install':
+            arc.app.bg.installApp();
+        break;
+    }
+};
+arc.app.bg.installApp = function() {
+    
+};
+/**
+ * Perform upgrade to newest version
+ */
+arc.app.bg.performStorageUpgrade = function(){
+    if (!('localStorage' in window)) {
+        return;
+    }
+    if(localStorage['upgraded_v4']){
+        return;
+    }
+    //set shortcuts values 
+    var save = {};
+    var shortcuts = arc.app.bg.performShortcutsUpgrade();
+    var settings = arc.app.bg.performSettingsUpgrade();
+    if(shortcuts){
+        Object.assign(save, shortcuts);
+    }
+    Object.assign(save, settings);
+    chrome.storage.sync.set(save, function(){
+        console.info('localStorage has been upgraded to chrome.storage.sync');
+    });
+    var local = arc.app.bg.performLocalDataUpgrade();
+    chrome.storage.local.set(local, function(){
+        console.info('localStorage has been upgraded to chrome.storage.local');
+    });
+    localStorage['upgraded_v4'] = true;
+};
+/**
+ * To be called when upgrading to chrome.storage.
+ * Pass shortcuts to the store.
+ */
+arc.app.bg.performShortcutsUpgrade = function(){
+    var shortcuts;
+    try{
+        shortcuts = JSON.parse(localStorage['SHORTCUTS']);
+    } catch(e){
+        return null;
+    }
+    //shortcuts structure changed to:
+    // (boolean) alt
+    // (boolean) ctrl
+    // (boolean) shift
+    // (int) key
+    // (String) type
+    let save = [];
+    shortcuts.forEach((s) => {
+        let shortcut = {
+            'alt': s.a,
+            'ctrl': s.c,
+            'shift': a.s,
+            'key': a.k,
+            'type': a.t
+        };
+        save[save.length] = shortcut;
+    });
+    if(save.length > 0){
+        return save;
+    }
+    return null;
+};
+/**
+ * To be called when upgrading to chrome.storage.
+ * Pass settings data to the store.
+ */
+arc.app.bg.performSettingsUpgrade = function(){
+    var save = {
+        'DEBUG_ENABLED': localStorage['DEBUG_ENABLED'] === "true" ? true : false,
+        'HISTORY_ENABLED': localStorage['HISTORY_ENABLED'] === "true" ? true : false,
+        'MAGICVARS_ENABLED': localStorage['MAGICVARS_ENABLED'] === "true" ? true : false,
+        'NOTIFICATIONS_ENABLED': localStorage['NOTIFICATIONS_ENABLED'] === "true" ? true : false
+    };
+    var tutorials;
+    try {
+        tutorials = JSON.parse(localStorage['tutorials']);
+    } catch(e){}
+    if(tutorials){
+        save.tutorials = tutorials;
+    }
+    var lm; 
+    try{
+        lm = parseInt(localStorage['LATESTMSG']);
+    } catch(e) {}
+    if(lm){
+        save.LATESTMSG = lm;
+    }
+    return save;
+};
+/**
+ * To be called when upgrading to chrome.storage.
+ * This should return items that should be kept in local storage.
+ */
+arc.app.bg.performLocalDataUpgrade = function(){
+    var save = {};
+    var fr; 
+    try{
+        fr = parseInt(localStorage['firstrun']);
+    } catch(e) {}
+    if(fr){
+        save.firstrun = fr;
+    }
+    var lrd;
+    try {
+        lrd = JSON.parse(localStorage['latest_request_data']);
+    } catch(e) {}
+    if(lrd){
+        save.latest_request_data = lrd;
+    }
+    return save;
+}
+chrome.runtime.onInstalled.addListener(arc.app.bg.onInstalled);
 
 /**
  * External extension communication.
@@ -804,7 +795,7 @@ messageHandling.init();
 
 /**
  * ======================================== External data structure
- * If you want to run this application either from other extension/application or webIntent you need to pass a message object:
+ * If you want to run this application either from other extension/application you need to pass a message object:
  * <ul>
  * <li>"payload" (required) - message payload: "create" to open new application window with values; (other payloads may be available in future).
  * <li>"data" - (required) javascript object with any of values:
@@ -829,15 +820,5 @@ messageHandling.init();
  * <pre>
  * chrome.runtime.sendMessage(THIS_APPLICATION_ID_FROM_CHROME_WEB_STORE, message, function(response) {});
  * </pre>
- * Via webIntents:
- * <pre>
- * window.Intent = window.Intent || window.WebKitIntent;
- * window.navigator.startActivity = window.navigator.startActivity ||
- * window.navigator.webkitStartActivity;
- *
- * var params = { "action": "http://webintents.org/view", "type": "application/restclient+data" , "data": message }; var i = new
- * WebKitIntent(params); var onSuccess = function(data) {console.log(data);};
- * var onFailure = function() {console.log('intent error')};
- * navigator.webkitStartActivity(i, onSuccess, onFailure);
  * </pre>
  */

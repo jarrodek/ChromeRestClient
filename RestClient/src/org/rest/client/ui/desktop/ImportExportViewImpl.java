@@ -22,7 +22,7 @@ import org.rest.client.ui.ImportExportView;
 import org.rest.client.ui.html5.HTML5FileUpload;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.google.gwt.chrome.extension.Extension;
+import com.google.gwt.chrome.tabs.CreateProperties;
 import com.google.gwt.chrome.tabs.Tab;
 import com.google.gwt.chrome.tabs.TabCallback;
 import com.google.gwt.chrome.tabs.Tabs;
@@ -392,12 +392,13 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 			return;
 
 		shareUrlPanel.getStyle().setDisplay(Display.BLOCK);
-		Extension ext = Extension.getExtensionIfSupported();
 		String url = "";
-		if (ext == null) { // DEV mode
+		if (Window.Location.getHost().startsWith("127.")) { // DEV mode
 			url = "http://127.0.0.1:8888/RestClient.html?gwt.codesvr=127.0.0.1:9997";
 		} else {
-			url = ext.getURL("/RestClient.html");
+			//TODO: url = Extension.getURL("/RestClient.html");
+			url = "/RestClient.html";
+			
 		}
 		url += "#ImportExportPlace:import/" + applicationUserId;
 		shareLink.setInnerText(url);
@@ -406,19 +407,22 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 	@UiHandler("connectButton")
 	void onConnectButton(ClickEvent e) {
 		String signInUrl = ApplicationRequest.AUTH_URL + "/signin?ret=";
-		Extension ext = Extension.getExtensionIfSupported();
+		
 		String returnPath = "";
-		if (ext == null) { // DEV MODE
+		if (Window.Location.getHost().startsWith("127.")) { // DEV MODE
 			returnPath = "http://127.0.0.1:8888/auth.html#auth";
 		} else {
-			returnPath = ext.getURL("/auth.html#auth");
+			//TODO: returnPath = Runtime.getURL("/auth.html#auth");
+			returnPath = "/auth.html#auth";
 		}
 		signInUrl = signInUrl + URL.encodeQueryString(returnPath);
-		Tabs tabs = Tabs.getTabsIfSupported();
-		if (tabs == null) { // DEV MODE
+		if (!Tabs.isSupported()) { // DEV MODE
 			Window.open(signInUrl, "_blank", "");
 		} else {
-			tabs.create(Tabs.CreateProperties.create().setUrl(signInUrl),
+			Tabs tabs = GWT.create(Tabs.class);
+			CreateProperties cp = GWT.create(CreateProperties.class);
+			cp.setUrl(signInUrl);
+			tabs.create(cp,
 					new TabCallback() {
 						@Override
 						public void onResult(Tab tab) {

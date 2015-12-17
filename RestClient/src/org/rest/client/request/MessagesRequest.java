@@ -21,7 +21,7 @@ public class MessagesRequest extends ApplicationRequest {
 		void onMessages(ArrayList<MessageObject> result);
 	}
 	
-	public static void getMessages(long since, final MessagesHandler handler){
+	public static void getMessages(double since, final MessagesHandler handler){
 		RequestBuilder b = getApplicationRequestBuilder(MESSAGES_URL+since, "GET");
 		b.setLoadHandler(new LoadHandler() {
 

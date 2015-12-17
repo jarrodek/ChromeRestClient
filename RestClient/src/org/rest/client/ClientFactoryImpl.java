@@ -18,7 +18,7 @@ package org.rest.client;
 import org.rest.client.storage.store.FormEncodingStoreWebSql;
 import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
-import org.rest.client.storage.store.LocalStore;
+import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.store.StatusesStoreWebSql;
@@ -78,7 +78,7 @@ public class ClientFactoryImpl implements ClientFactory {
 	// private static AboutView aboutView = null;
 	private static MenuView menu = null;
 	// private static SettingsView settingsView = null;
-	private static LocalStore latestRequestStore = null;
+	private static StoreKeys latestRequestStore = null;
 	private static RequestDataStoreWebSql requestDataStore = null;
 	private static HistoryRequestStoreWebSql historyRequestStore = null;
 	private static FormEncodingStoreWebSql formEncodingStore = null;
@@ -136,9 +136,9 @@ public class ClientFactoryImpl implements ClientFactory {
 	}
 
 	@Override
-	public LocalStore getLocalStore() {
+	public StoreKeys getLocalStore() {
 		if (latestRequestStore == null) {
-			latestRequestStore = GWT.create(LocalStore.class);
+			latestRequestStore = GWT.create(StoreKeys.class);
 		}
 		return latestRequestStore;
 	}

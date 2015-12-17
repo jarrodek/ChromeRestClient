@@ -87,7 +87,11 @@ public class TasksLoader {
 		new Timer() {
 			@Override
 			public void run() {
-				runTasks();
+				try{
+					runTasks();
+				} catch(Exception e){
+					Log.error("Unable to load tasks.", e);
+				}
 			}
 		}.schedule(300);
 		
