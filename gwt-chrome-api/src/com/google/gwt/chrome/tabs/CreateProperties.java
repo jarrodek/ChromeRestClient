@@ -1,11 +1,24 @@
 package com.google.gwt.chrome.tabs;
 
 import com.google.gwt.core.client.JavaScriptObject;
-
+/**
+ * A window create properties.
+ * To create an instance of this object use {@link CreateProperties#create()} function.
+ * @author Pawel Psztyc
+ *
+ */
 public class CreateProperties extends JavaScriptObject {
 	protected CreateProperties() {
 	}
-
+	/**
+	 * Create an instance of an overlay JS object.
+	 * This is only method to create an instance of this object.
+	 * @return Instance of this object
+	 */
+	public static final native CreateProperties create() /*-{
+		return {};
+	}-*/; 
+	
 	/**
 	 * 
 	 * @param windowId

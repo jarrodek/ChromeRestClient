@@ -14,12 +14,28 @@ public class StatusCodeRow extends JavaScriptObject {
 	 */
 	protected StatusCodeRow() {
 	}
-
+	/**
+	 * Create an instance of an overlay JS object.
+	 * This is only method to create an instance of this object.
+	 * @return Instance of this object
+	 */
 	public static final native StatusCodeRow create() /*-{
 		return {
 			label : null,
 			code : -1,
 			desc : null
+		};
+	}-*/;
+	/**
+	 * Create an instance of an overlay JS object.
+	 * This is only method to create an instance of this object.
+	 * @return Instance of this object
+	 */
+	public static final native StatusCodeRow create(int code, String label, String desc) /*-{
+		return {
+			label: label,
+			code: code,
+			desc: desc
 		};
 	}-*/;
 

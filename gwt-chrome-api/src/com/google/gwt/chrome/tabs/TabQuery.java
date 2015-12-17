@@ -6,12 +6,23 @@ import com.google.gwt.core.client.JavaScriptObject;
  * A queryInfo object to be used with chrome.tabs.query. Use GWT.create to
  * initialize this class. All parameters are optional.
  * 
+ * To create an instance of this object use {@link TabQuery#create()} function.
+ * 
  * @author Pawel Psztyc
  *
  */
 public final class TabQuery extends JavaScriptObject {
 	protected TabQuery() {
 	}
+	
+	/**
+	 * Create an instance of an overlay JS object.
+	 * This is only method to create an instance of this object.
+	 * @return Instance of this object
+	 */
+	public static final native TabQuery create() /*-{
+		return {};
+	}-*/; 
 
 	/**
 	 * Whether the tabs are active in their windows. Optional.

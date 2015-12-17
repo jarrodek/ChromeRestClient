@@ -4,14 +4,22 @@ import com.google.gwt.core.client.JavaScriptObject;
 
 /**
  * Details about the cookie being set.
- * 
+ * To create an instance of this object use {@link ChromeCookieCreateProperties#create()} function.
  * @author Pawel Psztyc
  *
  */
 public final class ChromeCookieCreateProperties extends JavaScriptObject {
 	protected ChromeCookieCreateProperties() {
 	}
-
+	/**
+	 * Create an instance of an overlay JS object.
+	 * This is only method to create an instance of this object.
+	 * @return Instance of this object
+	 */
+	public static final native ChromeCookieCreateProperties create() /*-{
+		return {};
+	}-*/; 
+	
 	public native String getUrl() /*-{
 		return this.url;
 	}-*/;

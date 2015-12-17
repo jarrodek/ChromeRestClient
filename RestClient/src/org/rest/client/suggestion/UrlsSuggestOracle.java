@@ -113,8 +113,7 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 		
 		History h = GWT.create(History.class);
 		if(h.isSupported()){
-			Query _q = GWT.create(Query.class);
-			_q.setText(query);
+			Query _q = Query.create(query);
 			_q.setMaxResults(numberOfDatabaseSuggestions);
 			h.search(_q, new HistorySearchCallback() {
 				@Override

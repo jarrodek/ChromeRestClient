@@ -9,6 +9,7 @@
     "paper-menu-button":"PolymerElements/paper-menu-button#^1.0.0",
     "paper-item":"PolymerElements/paper-item#^1.0.0",
     "paper-dialog":"PolymerElements/paper-dialog#^1.0.0",
-    "paper-dialog-scrollable":"PolymerElements/paper-dialog-scrollable#^1.0.0"
+    "paper-dialog-scrollable":"PolymerElements/paper-dialog-scrollable#^1.0.0",
+    "paper-toast":"PolymerElements/paper-toast#^1.1.1"
   }
 }

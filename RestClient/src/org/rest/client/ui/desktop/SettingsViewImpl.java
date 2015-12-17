@@ -2,7 +2,6 @@ package org.rest.client.ui.desktop;
 
 import org.rest.client.RestClient;
 import org.rest.client.place.ImportExportPlace;
-import org.rest.client.place.ShortcutPlace;
 import org.rest.client.ui.SettingsView;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -164,10 +163,6 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 		listener.clearHistory();
 	}
 	
-	@UiHandler("shortCutsButton")
-	void onShortcutsEdit(ClickEvent e){
-		listener.goTo(new ShortcutPlace("edit"));
-	}
 	@UiHandler("importExportWidget")
 	void onImportExportEdit(ClickEvent e){
 		listener.goTo(new ImportExportPlace("default"));

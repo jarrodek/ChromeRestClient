@@ -420,7 +420,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 			Window.open(signInUrl, "_blank", "");
 		} else {
 			Tabs tabs = GWT.create(Tabs.class);
-			CreateProperties cp = GWT.create(CreateProperties.class);
+			CreateProperties cp = CreateProperties.create();
 			cp.setUrl(signInUrl);
 			tabs.create(cp,
 					new TabCallback() {

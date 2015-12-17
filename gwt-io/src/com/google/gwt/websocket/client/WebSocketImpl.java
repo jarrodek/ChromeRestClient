@@ -5,6 +5,8 @@ import com.google.gwt.file.client.Blob;
 public class WebSocketImpl implements WebSocket {
 	WebSocketNative impl = null;
 	
+	protected WebSocketImpl(){}
+	
 	private WebSocketImpl(String url){
 		impl = WebSocketNative.open(url);
 	}

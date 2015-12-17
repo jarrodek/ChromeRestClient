@@ -1,10 +1,23 @@
 package com.google.gwt.chrome.history;
 
 import com.google.gwt.core.client.JavaScriptObject;
-
+/**
+ * Query details obiect for the chrome.history API.
+ * To create an instance of this object use {@link Query#create()} function.
+ * @author Pawel Psztyc
+ *
+ */
 public class Query extends JavaScriptObject {
 	protected Query() {
 	}
+	/**
+	 * Create an instance of an overlay JS object.
+	 * This is only method to create an instance of this object.
+	 * @return Instance of this object
+	 */
+	public static final native Query create(String query) /*-{
+		return {text: query};
+	}-*/;
 
 	/**
 	 * A free-text query to the history service. Leave empty to retrieve all

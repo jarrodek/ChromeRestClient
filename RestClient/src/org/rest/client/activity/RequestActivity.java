@@ -50,9 +50,9 @@ import org.rest.client.request.RedirectData;
 import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.request.URLParser;
 import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
+import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.objects.FormEncodingObject;
 import org.rest.client.storage.store.objects.HistoryObject;
 import org.rest.client.storage.store.objects.ProjectObject;
@@ -70,9 +70,7 @@ import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.chrome.def.BackgroundJsCallback;
-import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
 import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -1082,18 +1080,16 @@ public class RequestActivity extends AppActivity implements
 		if(gDriveFileId != null && !gDriveFileId.isEmpty()){
 			ro.setGDriveId(gDriveFileId);
 		}
-		com.google.gwt.chrome.storage.Storage store = GWT.create(com.google.gwt.chrome.storage.Storage.class);
-		JSONObject jo = new JSONObject();
-		jo.put(StoreKeys.LATEST_REQUEST_KEY, ro.toJSONObject());
-		store.getLocal().set(jo.getJavaScriptObject(), new StorageSimpleCallback() {
+		ro.storeLastest(new Callback<Void, Throwable>() {
+			@Override
+			public void onSuccess(Void result) {}
 			
 			@Override
-			public void onError(String message) {
-				//TODO: add analytics crash handler.
+			public void onFailure(Throwable reason) {
+				if(RestClient.isDebug()){
+					Log.error("Unable to store latest request data.", reason);
+				}
 			}
-			
-			@Override
-			public void onDone() {}
 		});
 		return null;
 	}
@@ -1107,7 +1103,6 @@ public class RequestActivity extends AppActivity implements
 
 		final RequestView view = this.clientFactory.getRequestView();
 		
-
 		final AddEncodingEvent.Handler handler = new AddEncodingEvent.Handler() {
 			@Override
 			public void onAddEncoding(final String encoding) {

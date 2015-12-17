@@ -115,8 +115,7 @@ public class SocketSuggestOracle extends DatabaseSuggestOracle {
 		
 		History history = GWT.create(History.class);
 		if(history.isSupported()){
-			Query _q = GWT.create(Query.class);
-			_q.setText(query);
+			Query _q = Query.create(query);
 			_q.setMaxResults(numberOfDatabaseSuggestions);
 			
 			history.search(_q, new HistorySearchCallback() {
@@ -143,5 +142,4 @@ public class SocketSuggestOracle extends DatabaseSuggestOracle {
 			SocketSuggestOracle.this.returnSuggestions(callback);
 		}
 	}
-
 }

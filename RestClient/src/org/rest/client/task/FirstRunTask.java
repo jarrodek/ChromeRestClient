@@ -139,21 +139,14 @@ public class FirstRunTask implements LoadTask {
 		int requestSize = requests.length();
 		int responseSize = requests.length();
 		for(int i=0; i<requestSize; i++){
-			HeaderRow row = GWT.create(HeaderRow.class);
 			HeaderDefinitionJso r = requests.get(i);
-			row.setDesc(r.getDesc());
-			row.setExample(r.getExample());
-			row.setName(r.getKey());
-			row.setType("request");
+			HeaderRow row = HeaderRow.create(r.getKey(), r.getDesc(), r.getExample(), "request");
 			save.add(row);
 		}
 		for(int i=0; i<responseSize; i++){
-			HeaderRow row = GWT.create(HeaderRow.class);
+			
 			HeaderDefinitionJso r = responses.get(i);
-			row.setDesc(r.getDesc());
-			row.setExample(r.getExample());
-			row.setName(r.getKey());
-			row.setType("response");
+			HeaderRow row = HeaderRow.create(r.getKey(), r.getDesc(), r.getExample(), "response");
 			save.add(row);
 		}
 		loaderWidget.setText("Saving headers definitions...");
@@ -175,11 +168,8 @@ public class FirstRunTask implements LoadTask {
 		List<StatusCodeRow> save = new ArrayList<StatusCodeRow>();
 		int size = jsArray.length();
 		for(int i=0; i<size; i++){
-			StatusCodeRow row = GWT.create(StatusCodeRow.class);
 			StatusCodeDefinitionJso r = jsArray.get(i);
-			row.setDesc(r.getDesc());
-			row.setCode(r.getKey());
-			row.setLabel(r.getLabel());
+			StatusCodeRow row = StatusCodeRow.create(r.getKey(), r.getLabel(), r.getDesc());
 			save.add(row);
 		}
 		loaderWidget.setText("Saving status codes...");

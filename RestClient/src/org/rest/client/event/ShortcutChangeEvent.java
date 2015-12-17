@@ -10,6 +10,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * Change in body input form
  * 
  */
+@SuppressWarnings("deprecation")
 public class ShortcutChangeEvent extends Event<ShortcutChangeEvent.Handler> {
 	public static final Type<Handler> TYPE = new Type<Handler>();
 	

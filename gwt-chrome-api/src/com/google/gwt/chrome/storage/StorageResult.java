@@ -41,6 +41,14 @@ public class StorageResult<T> extends JavaScriptObject {
 		return new Boolean(this[key]);
 	}-*/;
 	/**
+	 * Get JavaScriptObject value for given key.
+	 * @param key requested key 
+	 * @return
+	 */
+	public final native JavaScriptObject getObject(String key) /*-{
+		return this[key];
+	}-*/;
+	/**
 	 * Get value for given key.
 	 * This method return a value of any Object.
 	 * @param key key requested key.
