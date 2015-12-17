@@ -51,7 +51,6 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.place.shared.PlaceHistoryHandler;
@@ -147,7 +146,6 @@ public class RestClient implements EntryPoint {
 		setLogging();
 		
 		//app's main event bus. It's used to distribute events in the app.
-		//TODO: why not use DOM events instead?
 		EventBus eventBus = clientFactory.getEventBus();
 		PlaceController placeController = clientFactory.getPlaceController();
 		// Start ActivityManager for the main widget with the ActivityMapper
@@ -155,9 +153,8 @@ public class RestClient implements EntryPoint {
 		ActivityManager activityManager = new ActivityManager(activityMapper,
 				eventBus);
 		//TODO: set id or class name and use CSS instead
-		appWidget.getElement().getStyle().setPaddingBottom(20, Unit.PX);
+		appWidget.setStyleName("app-widget");
 		activityManager.setDisplay(appWidget);
-
 		//Create an instance for history mapper. It will map places with history state.
 		AppPlaceHistoryMapper historyMapper = GWT
 				.create(AppPlaceHistoryMapper.class);
@@ -167,9 +164,6 @@ public class RestClient implements EntryPoint {
 		
 		runTasksQueue(historyHandler);
 	}
-
-
-
 
 	/**
 	 * Set logging properties.

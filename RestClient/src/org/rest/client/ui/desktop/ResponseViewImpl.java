@@ -35,7 +35,6 @@ import org.rest.client.ui.desktop.widget.ResponseHeaderLine;
 import org.rest.client.ui.desktop.widget.StatusCodeImage;
 import org.rest.client.ui.desktop.widget.XMLViewer;
 import org.rest.client.ui.html5.HTML5Element;
-import org.rest.client.util.JSONHeadersUtils;
 import org.rest.client.util.Utils;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -483,7 +482,8 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	 * @return
 	 */
 	private boolean isJSONHeader(Header[] headers){
-		String[] jsonHeadersDefinitions = JSONHeadersUtils.getJSONHeadersListSynch();
+		String[] defs = new String[]{"application/json","text/json","text/x-json"};
+
 		for (Header header : headers) {
 			if (header == null) {
 				continue;
@@ -494,7 +494,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 				if(value.contains("+json")){
 					return true;
 				}
-				for(String headerDef : jsonHeadersDefinitions){
+				for(String headerDef : defs){
 					if(value.contains(headerDef)){
 						return true;
 					}

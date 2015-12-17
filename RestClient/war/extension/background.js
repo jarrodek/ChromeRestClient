@@ -649,12 +649,22 @@ arc.app.bg = {};
  * A handler to be called when the app is upgraded. 
  * It should perform an update tasks if necessary.
  */
-arc.app.bg.onInstalled = function(details){
-    console.log('OnInstall::', details);
-    if(details.reason === 'update'){
-        arc.app.bg.performStorageUpgrade();
+arc.app.bg.onInstalled = function(details) {
+    switch(details.reason) {
+        case 'update':
+            arc.app.bg.performStorageUpgrade();
+        break;
+        case 'install':
+            arc.app.bg.installApp();
+        break;
     }
 };
+arc.app.bg.installApp = function() {
+    
+};
+/**
+ * Perform upgrade to newest version
+ */
 arc.app.bg.performStorageUpgrade = function(){
     if (!('localStorage' in window)) {
         return;
@@ -673,6 +683,11 @@ arc.app.bg.performStorageUpgrade = function(){
     chrome.storage.sync.set(save, function(){
         console.info('localStorage has been upgraded to chrome.storage.sync');
     });
+    var local = arc.app.bg.performLocalDataUpgrade();
+    chrome.storage.local.set(local, function(){
+        console.info('localStorage has been upgraded to chrome.storage.local');
+    });
+    localStorage['upgraded_v4'] = true;
 };
 /**
  * To be called when upgrading to chrome.storage.
@@ -718,13 +733,6 @@ arc.app.bg.performSettingsUpgrade = function(){
         'MAGICVARS_ENABLED': localStorage['MAGICVARS_ENABLED'] === "true" ? true : false,
         'NOTIFICATIONS_ENABLED': localStorage['NOTIFICATIONS_ENABLED'] === "true" ? true : false
     };
-    var fr; 
-    try{
-        fr = parseInt(localStorage['firstrun']);
-    } catch(e) {}
-    if(fr){
-        save.firstrun = fr;
-    }
     var tutorials;
     try {
         tutorials = JSON.parse(localStorage['tutorials']);
@@ -741,6 +749,28 @@ arc.app.bg.performSettingsUpgrade = function(){
     }
     return save;
 };
+/**
+ * To be called when upgrading to chrome.storage.
+ * This should return items that should be kept in local storage.
+ */
+arc.app.bg.performLocalDataUpgrade = function(){
+    var save = {};
+    var fr; 
+    try{
+        fr = parseInt(localStorage['firstrun']);
+    } catch(e) {}
+    if(fr){
+        save.firstrun = fr;
+    }
+    var lrd;
+    try {
+        lrd = JSON.parse(localStorage['latest_request_data']);
+    } catch(e) {}
+    if(lrd){
+        save.latest_request_data = lrd;
+    }
+    return save;
+}
 chrome.runtime.onInstalled.addListener(arc.app.bg.onInstalled);
 
 /**
