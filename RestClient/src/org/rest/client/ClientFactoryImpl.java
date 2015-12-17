@@ -18,10 +18,10 @@ package org.rest.client;
 import org.rest.client.storage.store.FormEncodingStoreWebSql;
 import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
-import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.store.StatusesStoreWebSql;
+import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.storage.store.WebSocketDataStoreWebSql;
 import org.rest.client.storage.websql.ExportedDataReferenceService;
@@ -63,8 +63,6 @@ import com.google.gwt.chrome.message.BackgroundMessage;
 import com.google.gwt.chrome.message.ChromeMessagePassing;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.websocket.client.WebSocket;
-import com.google.gwt.websocket.client.WebSocketImpl;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 
@@ -281,11 +279,6 @@ public class ClientFactoryImpl implements ClientFactory {
 	@Override
 	public SocketView getSocketView() {
 		return GWT.create(SocketViewImpl.class);
-	}
-
-	@Override
-	public WebSocket getWebSocket() {
-		return GWT.create(WebSocketImpl.class);
 	}
 
 	@Override

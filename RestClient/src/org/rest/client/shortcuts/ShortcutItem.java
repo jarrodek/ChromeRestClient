@@ -6,14 +6,21 @@ import com.google.gwt.core.client.JavaScriptObject;
  * A single shortcut item stored in the local storage.
  * 
  * TODO: replace it with Chrome API.
- * 
+ * @deprecated this class and whole mechanism will be replaced with Chrome API.
  * @author Pawel Psztyc
  *
  */
 public class ShortcutItem extends JavaScriptObject {
 	protected ShortcutItem() {
 	};
-
+	/**
+	 * Create an instance of an overlay JS object.
+	 * This is only method to create an instance of this object.
+	 * @return Instance of this object
+	 */
+	public static final native ShortcutItem create() /*-{
+		return {};
+	}-*/;
 	/**
 	 * 
 	 * @return true if alt key must be pressed

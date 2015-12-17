@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 
+@SuppressWarnings("deprecation")
 public class ShortcutViewImpl extends Composite implements ShortcutView {
 	
 	private static AboutViewImplUiBinder uiBinder = GWT
@@ -79,6 +80,7 @@ public class ShortcutViewImpl extends Composite implements ShortcutView {
 		this.listener = listener;
 	}
 
+	
 	@Override
 	public void setShortcuts(JsArray<ShortcutItem> list) {
 		for (int i = 0; i < list.length(); i++) {
@@ -134,7 +136,7 @@ public class ShortcutViewImpl extends Composite implements ShortcutView {
 	void onMetaChange(ClickEvent e){
 		ToggleButton button = (ToggleButton)e.getSource();
 		
-		ShortcutItem sc = GWT.create(ShortcutItem.class);
+		ShortcutItem sc = ShortcutItem.create();
 		if(button.equals(openRequestCtrlToggle)
 				|| button.equals(openRequestShiftToggle)
 				|| button.equals(openRequestAltToggle)){
@@ -208,7 +210,7 @@ public class ShortcutViewImpl extends Composite implements ShortcutView {
 			Log.debug("Shortcut change to character " + charIdentifier + ", with code: " + cc);
 		}
 		
-		ShortcutItem sc = GWT.create(ShortcutItem.class);
+		ShortcutItem sc = ShortcutItem.create();
 		sc.setKeyCode(cc);
 		
 		if(boxName.equals("openLetter")){

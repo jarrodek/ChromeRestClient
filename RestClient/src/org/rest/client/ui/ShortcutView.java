@@ -25,6 +25,7 @@ import com.google.gwt.user.client.ui.IsWidget;
  * @author jarrod
  *
  */
+@SuppressWarnings("deprecation")
 public interface ShortcutView extends IsWidget {
 	/**
 	 * Presenter interface

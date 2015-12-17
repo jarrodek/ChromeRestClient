@@ -18,10 +18,10 @@ package org.rest.client;
 import org.rest.client.storage.store.FormEncodingStoreWebSql;
 import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
-import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.store.StatusesStoreWebSql;
+import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.storage.store.WebSocketDataStoreWebSql;
 import org.rest.client.storage.websql.ExportedDataReferenceService;
@@ -44,7 +44,6 @@ import org.rest.client.ui.SocketView;
 
 import com.google.gwt.chrome.message.ChromeMessagePassing;
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.websocket.client.WebSocket;
 import com.google.web.bindery.event.shared.EventBus;
 
 public interface ClientFactory {
@@ -90,6 +89,4 @@ public interface ClientFactory {
 	// Communication with extension
 	ChromeMessagePassing getChromeMessagePassing();
 	SocketView getSocketView();
-	
-	WebSocket getWebSocket();
 }

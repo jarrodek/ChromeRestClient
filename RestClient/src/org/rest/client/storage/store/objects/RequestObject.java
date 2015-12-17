@@ -453,7 +453,11 @@ public class RequestObject extends JavaScriptObject {
 
 			@Override
 			public void onResult(StorageResult<RequestObject> data) {
-				RequestObject ro = data.get(StoreKeys.LATEST_REQUEST_KEY);
+				if(data == null){
+					callback.onSuccess(null);
+					return;
+				}
+				RequestObject ro = data.getObject(StoreKeys.LATEST_REQUEST_KEY).cast();
 				if(ro == null){
 					callback.onSuccess(ro);
 				} else {

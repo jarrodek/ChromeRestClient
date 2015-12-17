@@ -28,9 +28,10 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.web.bindery.event.shared.EventBus;
 
+@SuppressWarnings("deprecation")
 public class ShortcutHandlers {
 
-	private static JsArray<ShortcutItem> shortcuts = GWT.create(JsArray.class);
+	private static JsArray<ShortcutItem> shortcuts = createArray();
 
 	private static boolean hasCtrl = false;
 	private static boolean hasShift = false;
@@ -79,7 +80,7 @@ public class ShortcutHandlers {
 				for (int i = 0; i < ShortcutHandlers.shortcuts.length(); i++) {
 					ShortcutItem item = ShortcutHandlers.shortcuts.get(i);
 					if (item.equals(sh)) {
-						JsArray<ShortcutItem> newArr = GWT.create(JsArray.class);
+						JsArray<ShortcutItem> newArr = createArray();
 						for (int j = 0; j < ShortcutHandlers.shortcuts.length(); j++) {
 							if (ShortcutHandlers.shortcuts.get(j).equals(item)) {
 								continue;
@@ -212,14 +213,14 @@ public class ShortcutHandlers {
 	 * @return
 	 */
 	private static JsArray<ShortcutItem> getDefaultShortcuts() {
-		JsArray<ShortcutItem> result = GWT.create(JsArray.class);
+		JsArray<ShortcutItem> result = createArray();
 
-		ShortcutItem openState = GWT.create(ShortcutItem.class);
+		ShortcutItem openState = ShortcutItem.create();
 		openState.setType(ShortcutType.OPEN_REQUEST.getType());
 		openState.setControl(true);
 		openState.setKeyCode(79); // O
 
-		ShortcutItem saveState = GWT.create(ShortcutItem.class);
+		ShortcutItem saveState = ShortcutItem.create();
 		saveState.setType(ShortcutType.SAVE_REQUEST.getType());
 		saveState.setControl(true);
 		saveState.setKeyCode(83); // S
@@ -305,4 +306,8 @@ public class ShortcutHandlers {
 			RestClient.getClientFactory().getPlaceController().goTo(new HistoryPlace("default"));
 		}
 	}
+	
+	private final static native JsArray<ShortcutItem> createArray() /*-{
+		return [];
+	}-*/;
 }

@@ -2,10 +2,24 @@ package com.google.gwt.chrome.cookie;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
+/**
+ * To create an instance of this object use {@link CookieQuery#create()} function.
+ * @author Pawel Psztyc
+ *
+ */
 public final class CookieQuery extends JavaScriptObject {
 	protected CookieQuery() {
 	}
-
+	
+	/**
+	 * Create an instance of an overlay JS object.
+	 * This is only method to create an instance of this object.
+	 * @return Instance of this object
+	 */
+	public static final native CookieQuery create() /*-{
+		return {};
+	}-*/; 
+	
 	/**
 	 * The URL with which the cookie to retrieve is associated. This argument
 	 * may be a full URL, in which case any data following the URL path (e.g.

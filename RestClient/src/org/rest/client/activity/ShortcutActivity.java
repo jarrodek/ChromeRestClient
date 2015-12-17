@@ -34,6 +34,7 @@ import com.google.web.bindery.event.shared.EventBus;
  * @author Paweł Psztyć
  * 
  */
+@SuppressWarnings("deprecation")
 public class ShortcutActivity extends AppActivity implements
 		ShortcutView.Presenter {
 

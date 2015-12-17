@@ -420,7 +420,7 @@ public class AppRequestFactory {
 			JSONObject jso = new JSONObject();
 			jso.put(StoreKeys.LATEST_REQUEST_KEY, data.toJSONObject());
 			
-			store.getLocal().set(data, new StorageSimpleCallback() {
+			store.getLocal().set(jso.getJavaScriptObject(), new StorageSimpleCallback() {
 				
 				@Override
 				public void onError(String message) {

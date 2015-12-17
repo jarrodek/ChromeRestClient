@@ -21,3 +21,8 @@ gulp.task('vulcanize', function () {
         }))
         .pipe(gulp.dest('war/components/vulcanized'));
 });
+
+
+gulp.task('serve', function () {
+    // java -cp D:\SDK\gwt\gwt-2.7.0\gwt-dev.jar com.google.gwt.dev.DevMode -startupUrl RestClient.html -logLevel INFO -war F:\workspace\ChromeRestClient\RestClient\war -server com.google.appengine.tools.development.gwt.AppEngineLauncher -superDevMode -codeServerPort 9997 -port 8888 org.rest.RestClient -remoteUI "${gwt_remote_ui_server_port}:${unique_id}"
+});
