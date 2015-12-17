@@ -1,4 +1,4 @@
 /.project
 **/gwt-unitCache/*
 **/extras/*
-**/war/WEB-INF/classes/*
+**/war/WEB-INF/classes

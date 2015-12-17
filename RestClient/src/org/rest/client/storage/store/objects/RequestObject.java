@@ -23,6 +23,7 @@ import org.rest.client.storage.store.StoreKeys;
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea.StorageItemCallback;
+import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
 import com.google.gwt.chrome.storage.StorageResult;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
@@ -464,6 +465,29 @@ public class RequestObject extends JavaScriptObject {
 					Log.error("Error perform RequestObject::restoreLatest. Result is null.");
 					callback.onFailure(new Throwable("Error perform RequestObject::restoreLatest. Result is null."));
 				}
+			}
+		});
+	}
+	
+	/**
+	 * Store this request as a latest request
+	 */
+	public final void storeLastest(final Callback<Void, Throwable> callback){
+		Storage store = GWT.create(Storage.class);
+		JSONObject requestData = toJSONObject();
+		JSONObject save = new JSONObject();
+		save.put(StoreKeys.LATEST_REQUEST_KEY, requestData);
+		store.getLocal().set(save.getJavaScriptObject(), new StorageSimpleCallback() {
+			
+			@Override
+			public void onError(String message) {
+				callback.onFailure(new Throwable(message));
+			}
+			
+			@Override
+			public void onDone() {
+				Void v = GWT.create(Void.class);
+				callback.onSuccess(v);
 			}
 		});
 	}

@@ -1,9 +1,0 @@
-<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui">
-	
-	<g:HTMLPanel ui:field="container" styleName="Socket_Response_Line_row">
-		<span ui:field="typeDisplay" class="Socket_Response_Line_type"></span>
-		<span ui:field="messageDisplay" class="Socket_Response_Line_message"></span>
-	</g:HTMLPanel>
-</ui:UiBinder> 
