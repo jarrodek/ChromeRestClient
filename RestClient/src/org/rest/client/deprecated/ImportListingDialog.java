@@ -5,8 +5,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import org.rest.client.StatusNotification;
 import org.rest.client.ui.ImportExportView.Presenter;
-import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.cell.client.Cell.Context;

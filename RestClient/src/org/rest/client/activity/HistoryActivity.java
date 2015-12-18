@@ -21,14 +21,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.rest.client.ClientFactory;
+import org.rest.client.NotificationAction;
 import org.rest.client.RestClient;
+import org.rest.client.StatusNotification;
 import org.rest.client.event.ClearHistoryEvent;
 import org.rest.client.place.HistoryPlace;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.objects.HistoryObject;
 import org.rest.client.ui.HistoryView;
-import org.rest.client.ui.desktop.NotificationAction;
-import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;

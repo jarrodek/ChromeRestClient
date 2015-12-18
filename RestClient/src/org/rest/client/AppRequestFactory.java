@@ -24,7 +24,6 @@ import org.rest.client.storage.store.objects.HistoryObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.storage.websql.UrlRow;
 import org.rest.client.ui.ErrorDialogView;
-import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.def.BackgroundJsCallback;

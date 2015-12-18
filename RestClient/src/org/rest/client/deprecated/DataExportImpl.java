@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.rest.client.RestClient;
+import org.rest.client.StatusNotification;
 import org.rest.client.event.StoreDataEvent;
 import org.rest.client.storage.websql.ExportedDataInsertItem;
-import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;

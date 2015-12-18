@@ -24,6 +24,7 @@ import java.util.Set;
 import org.rest.client.ClientFactory;
 import org.rest.client.ExternalEventsFactory;
 import org.rest.client.RestClient;
+import org.rest.client.StatusNotification;
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.AddEncodingEvent;
@@ -63,7 +64,6 @@ import org.rest.client.ui.AddEncodingView;
 import org.rest.client.ui.EditProjectView;
 import org.rest.client.ui.RequestView;
 import org.rest.client.ui.ResponseView;
-import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;

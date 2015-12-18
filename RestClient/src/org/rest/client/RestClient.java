@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.rest.client.StatusNotification.NotificationCallback;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.ApplicationReadyEvent;
 import org.rest.client.event.NewProjectAvailableEvent;
@@ -42,9 +43,6 @@ import org.rest.client.task.InitializeDatabaseTask;
 import org.rest.client.task.SetSyncDataTask;
 import org.rest.client.task.TasksLoader;
 import org.rest.client.ui.RequestView;
-import org.rest.client.ui.desktop.NotificationAction;
-import org.rest.client.ui.desktop.StatusNotification;
-import org.rest.client.ui.desktop.StatusNotification.NotificationCallback;
 import org.rest.client.util.UUID;
 
 import com.allen_sauer.gwt.log.client.Log;

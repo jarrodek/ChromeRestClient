@@ -6,8 +6,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.rest.client.RestClient;
+import org.rest.client.StatusNotification;
 import org.rest.client.request.ApplicationRequest;
-import org.rest.client.ui.desktop.StatusNotification;
 import org.rest.shared.ServerPaths;
 
 import com.allen_sauer.gwt.log.client.Log;

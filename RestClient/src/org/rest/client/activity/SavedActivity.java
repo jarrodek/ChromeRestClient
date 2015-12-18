@@ -20,7 +20,9 @@ import java.util.List;
 //import java.util.logging.Logger;
 
 import org.rest.client.ClientFactory;
+import org.rest.client.NotificationAction;
 import org.rest.client.RestClient;
+import org.rest.client.StatusNotification;
 import org.rest.client.gdrive.DriveAuth;
 import org.rest.client.gdrive.DriveApi;
 import org.rest.client.place.RequestPlace;
@@ -28,8 +30,6 @@ import org.rest.client.place.SavedPlace;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.SavedView;
-import org.rest.client.ui.desktop.NotificationAction;
-import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;

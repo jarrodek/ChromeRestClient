@@ -2,6 +2,7 @@ package org.rest.client.ui.desktop;
 
 import java.util.Date;
 
+import org.rest.client.StatusNotification;
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.suggestion.SocketSuggestOracle;

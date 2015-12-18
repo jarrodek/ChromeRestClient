@@ -17,6 +17,7 @@ package org.rest.client.activity;
 
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
+import org.rest.client.StatusNotification;
 import org.rest.client.SyncAdapter;
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
@@ -25,7 +26,6 @@ import org.rest.client.place.SettingsPlace;
 import org.rest.client.request.RequestsHistory;
 import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.ui.SettingsView;
-import org.rest.client.ui.desktop.StatusNotification;
 
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;

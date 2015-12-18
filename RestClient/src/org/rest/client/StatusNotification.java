@@ -1,6 +1,4 @@
-package org.rest.client.ui.desktop;
-
-import com.allen_sauer.gwt.log.client.Log;
+package org.rest.client;
 
 /**
  * Notifications system. Create and display User notification as response to
@@ -103,15 +101,15 @@ public class StatusNotification {
 			toast.duration = timeout;
 			toast.className = 'layout horizontal';
 			var label = $doc.createElement('paper-button');
-			label.innerText = isCallback ? callback.@org.rest.client.ui.desktop.NotificationAction::name : 'Close';
+			label.innerText = isCallback ? callback.@org.rest.client.NotificationAction::name : 'Close';
 			//label.className = 'paper-toast-action-label';
 			//label.tabindex = 0;
 			var fn = function(e){
 				label.removeEventListener('click', fn);
 				toast.close();
 				if(isCallback) {
-					var origCallback = callback.@org.rest.client.ui.desktop.NotificationAction::callback;
-					origCallback.@org.rest.client.ui.desktop.StatusNotification.NotificationCallback::onActionPerformed()();
+					var origCallback = callback.@org.rest.client.NotificationAction::callback;
+					origCallback.@org.rest.client.StatusNotification.NotificationCallback::onActionPerformed()();
 				}
 			};
 			label.addEventListener('tap', fn);
@@ -124,13 +122,12 @@ public class StatusNotification {
 				label.removeEventListener('click', fn);
 				toast.close();
 				if(isCallback) {
-					var origCallback = callback.@org.rest.client.ui.desktop.NotificationAction::callback;
-					origCallback.@org.rest.client.ui.desktop.StatusNotification.NotificationCallback::onActionPerformed()();
+					var origCallback = callback.@org.rest.client.NotificationAction::callback;
+					origCallback.@org.rest.client.StatusNotification.NotificationCallback::onActionPerformed()();
 				}
 			};
 			label.addEventListener('tap', fn);
 		}
-		
 		toast.show();
 	}-*/;
 }

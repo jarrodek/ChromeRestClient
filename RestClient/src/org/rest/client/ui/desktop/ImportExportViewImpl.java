@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.rest.client.RestClient;
+import org.rest.client.StatusNotification;
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.deprecated.ImportListingDialog;

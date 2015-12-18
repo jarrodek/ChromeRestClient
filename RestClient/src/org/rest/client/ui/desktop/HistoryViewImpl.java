@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.rest.client.RestClient;
+import org.rest.client.StatusNotification;
 import org.rest.client.event.ClearHistoryEvent;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.storage.store.objects.HistoryObject;

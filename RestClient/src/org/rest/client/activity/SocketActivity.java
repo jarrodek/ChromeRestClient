@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
+import org.rest.client.StatusNotification;
 import org.rest.client.place.SocketPlace;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.WebSocketDataStoreWebSql;
@@ -28,7 +29,6 @@ import org.rest.client.storage.store.objects.WebSocketObject;
 import org.rest.client.suggestion.SocketSuggestOracle;
 import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.SocketView;
-import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;

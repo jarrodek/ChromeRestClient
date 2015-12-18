@@ -21,7 +21,6 @@ import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.ui.MenuItemView;
 import org.rest.client.ui.MenuView;
-import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.storage.Storage;

@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
+import org.rest.client.StatusNotification;
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.deprecated.DataExportImpl;
@@ -30,7 +31,6 @@ import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.storage.websql.ExportedDataInsertItem;
 import org.rest.client.ui.ImportExportView;
 import org.rest.client.ui.ImportExportView.StringCallback;
-import org.rest.client.ui.desktop.StatusNotification;
 import org.rest.client.util.Utils;
 
 import com.allen_sauer.gwt.log.client.Log;
