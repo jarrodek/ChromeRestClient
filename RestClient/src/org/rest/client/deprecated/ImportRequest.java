@@ -37,15 +37,14 @@ public class ImportRequest extends ApplicationRequest {
 	 *            User id - owner of the data. Special uuid is "me" when user
 	 *            want to get his data
 	 */
-	public static void getImportSuggestions(String uuid,
-			final ImportSuggestionsCallback callback) {
+	public static void getImportSuggestions(String uuid, final ImportSuggestionsCallback callback) {
 
 		if (currentRequest != null) {
 			callback.onFailure("Wait until current request ends.", null);
 			return;
 		}
 		String url = SERVICE_URL + ServerPaths.SUGGESTIONS_LISTING + "/" + uuid;
-		
+
 		RequestBuilder builder = getApplicationRequestBuilder(url, "GET");
 		builder.setLoadHandler(new LoadHandler() {
 
@@ -56,9 +55,8 @@ public class ImportRequest extends ApplicationRequest {
 					callback.onFailure("Object not found.", null);
 					return;
 				}
-				
-				List<SuggestionImportItem> result = parseSuggestionsData(response
-						.getResponseText());
+
+				List<SuggestionImportItem> result = parseSuggestionsData(response.getResponseText());
 				if (result == null) {
 					callback.onFailure("Unable to parse response data.", null);
 					return;
@@ -69,9 +67,7 @@ public class ImportRequest extends ApplicationRequest {
 			@Override
 			public void onError(Response r, Throwable exception) {
 				currentRequest = null;
-				callback.onFailure(
-						"Server return error status :( try again later.",
-						exception);
+				callback.onFailure("Server return error status :( try again later.", exception);
 			}
 		});
 		try {
@@ -84,8 +80,7 @@ public class ImportRequest extends ApplicationRequest {
 		}
 	}
 
-	private static List<SuggestionImportItem> parseSuggestionsData(
-			String rawData) {
+	private static List<SuggestionImportItem> parseSuggestionsData(String rawData) {
 		if (rawData == null || rawData.trim().equals("")) {
 			return null;
 		}
@@ -98,8 +93,7 @@ public class ImportRequest extends ApplicationRequest {
 		if (bodyObj != null) {
 			JSONValue errorValue = bodyObj.get("error");
 			if (errorValue != null) {
-				StatusNotification.notify(errorValue.isString().stringValue(),
-						StatusNotification.TYPE_ERROR);
+				StatusNotification.notify(errorValue.isString().stringValue());
 				if (RestClient.isDebug()) {
 					Log.error("Error: " + errorValue.isString().stringValue());
 				}
@@ -138,8 +132,7 @@ public class ImportRequest extends ApplicationRequest {
 			_i.setUrl(itemObj.get("url").isString().stringValue());
 			_i.setKey(itemObj.get("key").isString().stringValue());
 			try {
-				BigInteger bi = new BigInteger(itemObj.get("updated")
-						.toString());
+				BigInteger bi = new BigInteger(itemObj.get("updated").toString());
 				_i.setCreated(new Date(bi.longValue()));
 			} catch (NumberFormatException e) {
 				_i.setCreated(new Date());
@@ -149,14 +142,12 @@ public class ImportRequest extends ApplicationRequest {
 		return result;
 	}
 
-	public static void importData(final String[] keys,
-			final ImportDataCallback callback) {
+	public static void importData(final String[] keys, final ImportDataCallback callback) {
 		if (currentRequest != null) {
 			callback.onFailure("Wait until current request ends.", null);
 			return;
 		}
-		RequestBuilder builder = getApplicationRequestBuilder(SERVICE_URL
-				+ ServerPaths.GET_IMPORT_DATA, "POST");
+		RequestBuilder builder = getApplicationRequestBuilder(SERVICE_URL + ServerPaths.GET_IMPORT_DATA, "POST");
 		String postData = "";
 		for (String key : keys) {
 			postData += "k%5B%5D=" + key + "&";
@@ -175,8 +166,7 @@ public class ImportRequest extends ApplicationRequest {
 					return;
 				}
 				currentRequest = null;
-				List<RestForm> result = parseImportData(response
-						.getResponseText());
+				List<RestForm> result = parseImportData(response.getResponseText());
 				if (result == null) {
 					callback.onFailure("Unable to parse response data.", null);
 					return;
@@ -187,9 +177,7 @@ public class ImportRequest extends ApplicationRequest {
 			@Override
 			public void onError(Response r, Throwable exception) {
 				currentRequest = null;
-				callback.onFailure(
-						"Server return error status :( try again later.",
-						exception);
+				callback.onFailure("Server return error status :( try again later.", exception);
 			}
 		});
 
@@ -265,21 +253,17 @@ public class ImportRequest extends ApplicationRequest {
 				JSONObject headerObj = headerArray.get(j).isObject();
 				JSONObject headerObject = new JSONObject();
 				headerObject.put(headerObj.get("key").isString().stringValue(),
-						new JSONString(headerObj.get("value").isString()
-								.stringValue()));
+						new JSONString(headerObj.get("value").isString().stringValue()));
 				headersArray.set(headersArray.size(), headerObject);
 			}
 			rf.setName(name);
 			rf.setUrl(url);
 			rf.key = jDOKey;
-			JSONString _url = url == null ? new JSONString("null")
-					: new JSONString(url);
+			JSONString _url = url == null ? new JSONString("null") : new JSONString(url);
 			data.put("url", _url);
-			JSONString _post = post == null ? new JSONString("null")
-					: new JSONString(post);
+			JSONString _post = post == null ? new JSONString("null") : new JSONString(post);
 			data.put("post", _post);
-			JSONString _method = method == null ? new JSONString("null")
-					: new JSONString(method);
+			JSONString _method = method == null ? new JSONString("null") : new JSONString(method);
 			data.put("method", _method);
 			data.put("formEncoding", new JSONString(encoding));
 			data.put("headers", headersArray);

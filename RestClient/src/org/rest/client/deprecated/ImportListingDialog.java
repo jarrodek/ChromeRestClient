@@ -38,6 +38,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionModel;
+
 /**
  * 
  * @author Paweł Psztyć
@@ -54,9 +55,12 @@ public class ImportListingDialog {
 	/**
 	 * The pager used to change the range of data.
 	 */
-	@UiField(provided = true) SimplePager pager;
-	@UiField DialogBox dialog;
-	@UiField Button save;
+	@UiField(provided = true)
+	SimplePager pager;
+	@UiField
+	DialogBox dialog;
+	@UiField
+	Button save;
 
 	private final List<SuggestionImportItem> resultList = new ArrayList<SuggestionImportItem>();
 	/**
@@ -72,9 +76,9 @@ public class ImportListingDialog {
 	 */
 	private ListDataProvider<SuggestionImportItem> dataProvider = new ListDataProvider<SuggestionImportItem>();
 	private Presenter listener;
-	
+
 	public ImportListingDialog(Presenter listener) {
-		this.listener = listener; 
+		this.listener = listener;
 
 		// Set a key provider that provides a unique key for each item.
 		cellTable = new CellTable<SuggestionImportItem>(KEY_PROVIDER);
@@ -82,36 +86,33 @@ public class ImportListingDialog {
 
 		// Attach a column sort handler to the ListDataProvider to sort the
 		// list.
-		ListHandler<SuggestionImportItem> sortHandler = new ListHandler<SuggestionImportItem>(
-				dataProvider.getList());
+		ListHandler<SuggestionImportItem> sortHandler = new ListHandler<SuggestionImportItem>(dataProvider.getList());
 		cellTable.addColumnSortHandler(sortHandler);
 
 		// Create a Pager to control the table.
-		SimplePager.Resources pagerResources = GWT
-				.create(SimplePager.Resources.class);
-		pager = new SimplePager(TextLocation.CENTER, pagerResources, false, 0,
-				true);
+		SimplePager.Resources pagerResources = GWT.create(SimplePager.Resources.class);
+		pager = new SimplePager(TextLocation.CENTER, pagerResources, false, 0, true);
 		pager.setDisplay(cellTable);
 
 		// Add a selection model so we can select cells.
 		final SelectionModel<SuggestionImportItem> selectionModel = new MultiSelectionModel<SuggestionImportItem>(
 				KEY_PROVIDER);
 		cellTable.setSelectionModel(selectionModel,
-				DefaultSelectionEventManager
-						.<SuggestionImportItem> createCheckboxManager());
+				DefaultSelectionEventManager.<SuggestionImportItem> createCheckboxManager());
 		// Initialize the columns.
 		initTableColumns(selectionModel, sortHandler);
 
 		// Add the CellList to the adapter in the database.
 		dataProvider.addDataDisplay(cellTable);
 		Binder.BINDER.createAndBindUi(this);
-		//dialog.setPreviewingAllNativeEvents(true);
-		//dialog.setSize("720px", "440px");
+		// dialog.setPreviewingAllNativeEvents(true);
+		// dialog.setSize("720px", "440px");
 	}
 
 	public static class ToggleSelectionCheckboxHeader extends Header<Boolean> {
 		private boolean value;
 		private TableToggleSelectionValueChange changeValue;
+
 		public ToggleSelectionCheckboxHeader(CheckboxCell cell, TableToggleSelectionValueChange changeValue) {
 			super(cell);
 			this.changeValue = changeValue;
@@ -121,10 +122,9 @@ public class ImportListingDialog {
 		public Boolean getValue() {
 			return value;
 		}
-		
+
 		@Override
-		public void onBrowserEvent(Context context, Element elem,
-				NativeEvent event) {
+		public void onBrowserEvent(Context context, Element elem, NativeEvent event) {
 			Event evt = Event.as(event);
 			int eventType = evt.getTypeInt();
 			switch (eventType) {
@@ -147,57 +147,55 @@ public class ImportListingDialog {
 		void changedValue(int columnIndex, Boolean value);
 	}
 
-	private void initTableColumns(
-			final SelectionModel<SuggestionImportItem> selectionModel,
+	private void initTableColumns(final SelectionModel<SuggestionImportItem> selectionModel,
 			ListHandler<SuggestionImportItem> sortHandler) {
 		// Checkbox column. This table will uses a checkbox column for
 		// selection.
 		// Alternatively, you can call cellTable.setSelectionEnabled(true) to
 		// enable
 		// mouse selection.
-		
+
 		CheckboxCell cell = new CheckboxCell();
 		ToggleSelectionCheckboxHeader checkboxHeader = new ToggleSelectionCheckboxHeader(cell,
 				new TableToggleSelectionValueChange() {
-			@Override
-			public void changedValue(int columnIndex, Boolean value) {
-				Log.debug("changedValue");
-				List<SuggestionImportItem> list = dataProvider.getList();
-				SelectionModel<? super SuggestionImportItem> _selectionModel = cellTable.getSelectionModel();
-				for(SuggestionImportItem _item : list){
-					_selectionModel.setSelected(_item, value);
-				}
-				if(value){
-					resultList.addAll(list);
-				} else {
-					resultList.clear();
-				}
-			}
-		});
-		
+					@Override
+					public void changedValue(int columnIndex, Boolean value) {
+						Log.debug("changedValue");
+						List<SuggestionImportItem> list = dataProvider.getList();
+						SelectionModel<? super SuggestionImportItem> _selectionModel = cellTable.getSelectionModel();
+						for (SuggestionImportItem _item : list) {
+							_selectionModel.setSelected(_item, value);
+						}
+						if (value) {
+							resultList.addAll(list);
+						} else {
+							resultList.clear();
+						}
+					}
+				});
+
 		Column<SuggestionImportItem, Boolean> checkColumn = new Column<SuggestionImportItem, Boolean>(
 				new CheckboxCell(true, false)) {
 			@Override
 			public Boolean getValue(SuggestionImportItem object) {
 				// Get the value from the selection model.
 				boolean isSelected = selectionModel.isSelected(object);
-				if(isSelected){
-					if(!resultList.contains(object)){
+				if (isSelected) {
+					if (!resultList.contains(object)) {
 						resultList.add(object);
 					}
 				} else {
-					if(resultList.contains(object)){
+					if (resultList.contains(object)) {
 						resultList.remove(object);
 					}
 				}
 				return isSelected;
 			}
 		};
-		cellTable.addColumn(checkColumn,checkboxHeader);
+		cellTable.addColumn(checkColumn, checkboxHeader);
 		cellTable.setColumnWidth(checkColumn, 40, Unit.PX);
 		// name.
-		Column<SuggestionImportItem, String> nameColumn = new Column<SuggestionImportItem, String>(
-				new TextCell()) {
+		Column<SuggestionImportItem, String> nameColumn = new Column<SuggestionImportItem, String>(new TextCell()) {
 			@Override
 			public String getValue(SuggestionImportItem object) {
 				return object.getName();
@@ -213,8 +211,7 @@ public class ImportListingDialog {
 		// cellTable.setColumnWidth(nameColumn, 200, Unit.PX);
 
 		// URL column
-		Column<SuggestionImportItem, String> urlColumn = new Column<SuggestionImportItem, String>(
-				new TextCell()) {
+		Column<SuggestionImportItem, String> urlColumn = new Column<SuggestionImportItem, String>(new TextCell()) {
 			@Override
 			public String getValue(SuggestionImportItem object) {
 				return object.getUrl();
@@ -231,9 +228,7 @@ public class ImportListingDialog {
 
 		// Date column
 		Column<SuggestionImportItem, Date> dateColumn = new Column<SuggestionImportItem, Date>(
-				new DateCell(
-						DateTimeFormat
-								.getFormat(PredefinedFormat.DATE_TIME_MEDIUM))) {
+				new DateCell(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM))) {
 			@Override
 			public Date getValue(SuggestionImportItem object) {
 				return object.getCreated();
@@ -265,22 +260,23 @@ public class ImportListingDialog {
 
 	@UiHandler("save")
 	void onSave(ClickEvent event) {
-		if(resultList.size() == 0){
-			StatusNotification.notify("Select at least one element from list.", StatusNotification.TYPE_NORMAL, StatusNotification.TIME_SHORT);
+		if (resultList.size() == 0) {
+			StatusNotification.notify("Select at least one element from list.", StatusNotification.TIME_SHORT);
 			return;
 		}
 		int size = resultList.size();
-		
-		if(size > 30){
+
+		if (size > 30) {
 			//
-			// App Engine supports query with 30 subqueries. In one time can import 30 elements.
+			// App Engine supports query with 30 subqueries. In one time can
+			// import 30 elements.
 			//
-			StatusNotification.notify("You can select max 30 items to import", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+			StatusNotification.notify("You can select max 30 items to import", StatusNotification.TIME_SHORT);
 			return;
 		}
-		
+
 		String[] keys = new String[size];
-		for(int i=0; i<size; i++){
+		for (int i = 0; i < size; i++) {
 			SuggestionImportItem item = resultList.get(i);
 			keys[i] = item.getKey();
 		}

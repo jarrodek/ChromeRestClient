@@ -62,39 +62,41 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class ImportExportViewImpl extends Composite implements ImportExportView {
 
-	private static ImportExportViewImplUiBinder uiBinder = GWT
-			.create(ImportExportViewImplUiBinder.class);
+	private static ImportExportViewImplUiBinder uiBinder = GWT.create(ImportExportViewImplUiBinder.class);
 
-	interface ImportExportViewImplUiBinder extends
-			UiBinder<Widget, ImportExportViewImpl> {
+	interface ImportExportViewImplUiBinder extends UiBinder<Widget, ImportExportViewImpl> {
 	}
 
 	private Presenter listener;
 	private ImportResult currentFileImport = null;
-	@UiField Anchor fileDownload;
-	@UiField DivElement downloadFileAnchor;
-	@UiField DivElement collapsePanel;
-	@UiField HTML5FileUpload fileImport;
-	@UiField InlineLabel importFileLog;
-	@UiField HTMLPanel importPreview;
-	
+	@UiField
+	Anchor fileDownload;
+	@UiField
+	DivElement downloadFileAnchor;
+	@UiField
+	DivElement collapsePanel;
+	@UiField
+	HTML5FileUpload fileImport;
+	@UiField
+	InlineLabel importFileLog;
+	@UiField
+	HTMLPanel importPreview;
 
 	public ImportExportViewImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
-		
-		
+
 		setCollapsablePanel(collapsePanel);
 		//
 		// OLD SYSTEM SETUP
 		//
 		statusInfo.setText("Checking connection status...");
 	}
-	
+
 	native void setCollapsablePanel(DivElement panel) /*-{
-//		var actionPanel = panel.querySelector('.Import_Export_expandPanel.');
-		var handler = function(e){
+		//		var actionPanel = panel.querySelector('.Import_Export_expandPanel.');
+		var handler = function(e) {
 			e.preventDefault();
-			if(panel.classList.contains('expanded')){
+			if (panel.classList.contains('expanded')) {
 				panel.classList.remove('expanded');
 			} else {
 				panel.classList.add('expanded');
@@ -102,8 +104,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		};
 		panel.addEventListener('click', handler, false);
 	}-*/;
-	
-	
+
 	@Override
 	public void setPresenter(Presenter listener) {
 		this.listener = listener;
@@ -113,16 +114,16 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 	void onfileExportClick(ClickEvent e) {
 		prepareFileExport();
 	}
-	
+
 	@UiHandler("fileDownload")
 	void onDownloadFileClick(ClickEvent e) {
-		if(!fileDownload.getElement().getAttribute("disabled").isEmpty()){
+		if (!fileDownload.getElement().getAttribute("disabled").isEmpty()) {
 			return;
 		}
 		fileDownload.getElement().setAttribute("disabled", "true");
 		Timer t = new Timer() {
 			@Override
-			public void run() {				
+			public void run() {
 				downloadFileAnchor.addClassName("hidden");
 				fileDownload.setHref("about:blank");
 				listener.revokeDownloadData();
@@ -135,15 +136,16 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		listener.prepareDataToFile(new StringCallback() {
 			@Override
 			public void onResult(final String result) {
-				
+
 				Scheduler.get().scheduleDeferred(new Command() {
 					public void execute() {
 						String fileObjectUrl = listener.createDownloadData(result);
 						fileDownload.setHref(fileObjectUrl);
 						String date = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM).format(new Date());
-						String fileName = "arc-"+date+".json";
+						String fileName = "arc-" + date + ".json";
 						fileDownload.getElement().setAttribute("download", fileName);
-						fileDownload.getElement().setAttribute("data-downloadurl", "application/json:"+fileName+":"+fileObjectUrl);
+						fileDownload.getElement().setAttribute("data-downloadurl",
+								"application/json:" + fileName + ":" + fileObjectUrl);
 						fileDownload.setVisible(true);
 						downloadFileAnchor.removeClassName("hidden");
 					}
@@ -152,32 +154,31 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 			}
 		});
 	}
-	
-	
+
 	@UiHandler("fileImport")
-	void onFileImportChange(ChangeEvent e){
-		
+	void onFileImportChange(ChangeEvent e) {
+
 		FileList files = fileImport.getFiles();
-		if(files.size() == 0) return;
-		
-		
-		if(previewGrid != null){
+		if (files.size() == 0)
+			return;
+
+		if (previewGrid != null) {
 			previewGrid.clear();
 		}
 		importPreview.setVisible(false);
 		fileImport.setEnabled(false);
 		importFileLog.setText("working...");
-		
+
 		File file = files.get(0);
 		FileReader reader = FileReader.create();
-		
+
 		reader.addErrorHandler(new ErrorHandler() {
 			@Override
 			public void onError(File file, FileError error) {
 				fileImport.setEnabled(true);
 				importFileLog.setText("");
 				String msg = "";
-				switch(error.getCode()){
+				switch (error.getCode()) {
 				case FileError.ABORT_ERR:
 					msg += " ABORT_ERR::";
 					break;
@@ -195,10 +196,10 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 					break;
 				}
 				msg += " Unable read file.";
-				if(RestClient.isDebug()){
-					Log.error(msg+" Error code: " + error.getCode());
+				if (RestClient.isDebug()) {
+					Log.error(msg + " Error code: " + error.getCode());
 				}
-				StatusNotification.notify(msg,StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+				StatusNotification.notify(msg, StatusNotification.TIME_MEDIUM);
 			}
 		});
 		reader.addLoadHandler(new LoadHandler() {
@@ -209,44 +210,45 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 				String data = file.getResult();
 				ImportParser parser = new ImportParser(data);
 				parser.parse(new ImportParser.ImportParserHandler() {
-					
+
 					@Override
 					public void onParse(ImportResult result) {
-						if(result == null){
-							StatusNotification.notify("Unable to parse input file.",StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+						if (result == null) {
+							StatusNotification.notify("Unable to parse input file.", StatusNotification.TIME_MEDIUM);
 							return;
 						}
 						showImportTable(result);
 					}
 				});
-				
+
 			}
 		});
 		reader.readAsText(file);
 	}
-	
+
 	private Grid previewGrid = null;
-	private void showImportTable(ImportResult result){
+
+	private void showImportTable(ImportResult result) {
 		ArrayList<ProjectObject> projects = result.getProjects();
 		ArrayList<RequestObject> requests = result.getRequests();
-		
-		if(requests == null || requests.size() == 0){
-			StatusNotification.notify("There is nothing to update",StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+
+		if (requests == null || requests.size() == 0) {
+			StatusNotification.notify("There is nothing to update", StatusNotification.TIME_MEDIUM);
 			return;
 		}
-		
+
 		int len = requests.size();
-		
-		if(previewGrid != null){
+
+		if (previewGrid != null) {
 			previewGrid.clear();
 		} else {
 			previewGrid = new Grid();
 		}
-		previewGrid.resize(len+1, 4);
+		previewGrid.resize(len + 1, 4);
 		previewGrid.setCellPadding(7);
 		previewGrid.setCellSpacing(3);
 		previewGrid.setWidth("100%");
-		
+
 		Label nameLabel = new Label("Name");
 		Label methodLabel = new Label("Method");
 		Label urlLabel = new Label("URL");
@@ -259,89 +261,72 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		previewGrid.setWidget(0, 1, methodLabel);
 		previewGrid.setWidget(0, 2, urlLabel);
 		previewGrid.setWidget(0, 3, projectsLabel);
-		
-		
-		for(int i=0; i< len; i++){
-			RequestObject request = requests.get(i); 
-			previewGrid.setText(i+1, 0, request.getName());
-			previewGrid.setText(i+1, 1, request.getMethod());
-			previewGrid.setText(i+1, 2, request.getURL());
+
+		for (int i = 0; i < len; i++) {
+			RequestObject request = requests.get(i);
+			previewGrid.setText(i + 1, 0, request.getName());
+			previewGrid.setText(i + 1, 1, request.getMethod());
+			previewGrid.setText(i + 1, 2, request.getURL());
 			String projectName = "";
 			int projectId = request.getProject();
-			if(projectId > 0){
-				for(ProjectObject project : projects){
-					if(project.getId() == projectId){
+			if (projectId > 0) {
+				for (ProjectObject project : projects) {
+					if (project.getId() == projectId) {
 						projectName = project.getName();
 						break;
 					}
 				}
 			}
-			previewGrid.setText(i+1, 3, projectName);
+			previewGrid.setText(i + 1, 3, projectName);
 		}
 		importPreview.add(previewGrid);
 		importPreview.setVisible(true);
 		currentFileImport = result;
 	}
-	
-	
-	private void saveCurrentFileImportData(){
-		if(currentFileImport == null){
+
+	private void saveCurrentFileImportData() {
+		if (currentFileImport == null) {
 			cleanUpImportData();
 			return;
 		}
 		listener.saveImportedFileData(currentFileImport, new Callback<Boolean, Void>() {
-			
+
 			@Override
 			public void onSuccess(Boolean result) {
-				if(result != null && result){
+				if (result != null && result) {
 					cleanUpImportData();
-					StatusNotification.notify("Data saved.",StatusNotification.TYPE_NORMAL, StatusNotification.TIME_SHORT);
+					StatusNotification.notify("Data saved.", StatusNotification.TIME_SHORT);
 				} else {
-					StatusNotification.notify("Data save error.",StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+					StatusNotification.notify("Data save error.", StatusNotification.TIME_MEDIUM);
 				}
 			}
-			
+
 			@Override
 			public void onFailure(Void reason) {
-				StatusNotification.notify("Data save error.",StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+				StatusNotification.notify("Data save error.", StatusNotification.TIME_MEDIUM);
 			}
 		});
 	}
-	private void cleanUpImportData(){
-		if(previewGrid != null){
+
+	private void cleanUpImportData() {
+		if (previewGrid != null) {
 			previewGrid.clear();
 		}
 		importPreview.setVisible(false);
 		currentFileImport = null;
 	}
+
 	@UiHandler("saveImportedData")
-	void onSaveImportedData(ClickEvent e){
+	void onSaveImportedData(ClickEvent e) {
 		saveCurrentFileImportData();
 	}
+
 	@UiHandler("backSettings")
-	void onGoBackToSettings(ClickEvent e){
+	void onGoBackToSettings(ClickEvent e) {
 		e.preventDefault();
 		listener.goTo(new SettingsPlace(null));
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 
-	
-	
-	
-	
-	
-	
-	
 	//
 	// OLD SYSTEM
 	//
@@ -396,9 +381,9 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		if (Window.Location.getHost().startsWith("127.")) { // DEV mode
 			url = "http://127.0.0.1:8888/RestClient.html?gwt.codesvr=127.0.0.1:9997";
 		} else {
-			//TODO: url = Extension.getURL("/RestClient.html");
+			// TODO: url = Extension.getURL("/RestClient.html");
 			url = "/RestClient.html";
-			
+
 		}
 		url += "#ImportExportPlace:import/" + applicationUserId;
 		shareLink.setInnerText(url);
@@ -407,12 +392,12 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 	@UiHandler("connectButton")
 	void onConnectButton(ClickEvent e) {
 		String signInUrl = ApplicationRequest.AUTH_URL + "/signin?ret=";
-		
+
 		String returnPath = "";
 		if (Window.Location.getHost().startsWith("127.")) { // DEV MODE
 			returnPath = "http://127.0.0.1:8888/auth.html#auth";
 		} else {
-			//TODO: returnPath = Runtime.getURL("/auth.html#auth");
+			// TODO: returnPath = Runtime.getURL("/auth.html#auth");
 			returnPath = "/auth.html#auth";
 		}
 		signInUrl = signInUrl + URL.encodeQueryString(returnPath);
@@ -422,12 +407,11 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 			Tabs tabs = GWT.create(Tabs.class);
 			CreateProperties cp = CreateProperties.create();
 			cp.setUrl(signInUrl);
-			tabs.create(cp,
-					new TabCallback() {
-						@Override
-						public void onResult(Tab tab) {
-						}
-					});
+			tabs.create(cp, new TabCallback() {
+				@Override
+				public void onResult(Tab tab) {
+				}
+			});
 		}
 	}
 
@@ -446,10 +430,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 	void onStoreDataClick(ClickEvent e) {
 		String applicationUserId = listener.getApplicationUserId();
 		if (applicationUserId == null) {
-			StatusNotification.notify(
-					"Connect to application first (not logged in)",
-					StatusNotification.TYPE_ERROR,
-					StatusNotification.TIME_MEDIUM);
+			StatusNotification.notify("Connect to application first (not logged in)", StatusNotification.TIME_MEDIUM);
 			return;
 		}
 		storeData.setEnabled(false);
@@ -461,10 +442,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 	void onRestoreDataClick(ClickEvent e) {
 		String applicationUserId = listener.getApplicationUserId();
 		if (applicationUserId == null) {
-			StatusNotification.notify(
-					"Connect to application first (not logged in)",
-					StatusNotification.TYPE_ERROR,
-					StatusNotification.TIME_MEDIUM);
+			StatusNotification.notify("Connect to application first (not logged in)", StatusNotification.TIME_MEDIUM);
 			return;
 		}
 
@@ -475,49 +453,47 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		dialog.show();
 		GoogleAnalytics.sendEvent("Settings usage", "Import data", "Import server dialog");
 		GoogleAnalyticsApp.sendEvent("Settings usage", "Import data", "Import server dialog");
-		
+
 		// Make request
-		ImportRequest.getImportSuggestions("me",
-				new ImportSuggestionsCallback() {
+		ImportRequest.getImportSuggestions("me", new ImportSuggestionsCallback() {
 
+			@Override
+			public void onSuccess(List<SuggestionImportItem> result) {
+				dialog.hide();
+				if (result == null) {
+					StatusNotification.notify("Server returns empty data", StatusNotification.TIME_SHORT);
+					restoreData.setEnabled(true);
+					return;
+				}
+				final ImportListingDialog importDialog = new ImportListingDialog(listener);
+				importDialog.append(result);
+				//
+				// delay show dialog for data providers to refresh the
+				// list
+				// and show dialog in it's place (center)
+				//
+				new Timer() {
 					@Override
-					public void onSuccess(List<SuggestionImportItem> result) {
-						dialog.hide();
-						if (result == null) {
-							StatusNotification.notify("Server returns empty data", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
-							restoreData.setEnabled(true);
-							return;
-						}
-						final ImportListingDialog importDialog = new ImportListingDialog(listener);
-						importDialog.append(result);
-						//
-						// delay show dialog for data providers to refresh the
-						// list
-						// and show dialog in it's place (center)
-						//
-						new Timer() {
-							@Override
-							public void run() {
-								importDialog.show();
-							}
-						}.schedule(200);
+					public void run() {
+						importDialog.show();
 					}
+				}.schedule(200);
+			}
 
-					@Override
-					public void onFailure(String message, Throwable exception) {
-						if (RestClient.isDebug()) {
-							if (exception != null) {
-								Log.error(message, exception);
-							} else {
-								Log.error(message);
-							}
-						}
-						StatusNotification.notify(message,
-								StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
-						dialog.hide();
-						storeData.setEnabled(true);
-						restoreData.setEnabled(true);
+			@Override
+			public void onFailure(String message, Throwable exception) {
+				if (RestClient.isDebug()) {
+					if (exception != null) {
+						Log.error(message, exception);
+					} else {
+						Log.error(message);
 					}
-				});
+				}
+				StatusNotification.notify(message, StatusNotification.TIME_MEDIUM);
+				dialog.hide();
+				storeData.setEnabled(true);
+				restoreData.setEnabled(true);
+			}
+		});
 	}
 }

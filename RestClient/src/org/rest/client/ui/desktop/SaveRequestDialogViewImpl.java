@@ -223,7 +223,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				if(RestClient.isDebug()){
 					Log.error("Unable to read stored projects. Error during read operation.", e);
 				}
-				StatusNotification.notify("Unable to set projects data..", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+				StatusNotification.notify("Unable to set projects data..", StatusNotification.TIME_MEDIUM);
 			}
 		});
 			
@@ -318,7 +318,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				parojectId = Integer.parseInt(_projectName);
 			} catch(Exception e){}
 			if(parojectId == -1){
-				StatusNotification.notify("This is not a valid project!", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+				StatusNotification.notify("This is not a valid project!", StatusNotification.TIME_SHORT);
 			}
 		}
 		
@@ -329,7 +329,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	@Override
 	public void show() {
 		if(requestOrygURL == null || requestOrygURL.isEmpty()){
-			StatusNotification.notify("Current request has no URL value :/",StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+			StatusNotification.notify("Current request has no URL value :/", StatusNotification.TIME_SHORT);
 			return;
 		}
 		dialog.show();
@@ -389,7 +389,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		e.preventDefault();
 		
 		if(name.getValue().isEmpty()){
-			StatusNotification.notify("Name can't be empty.", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+			StatusNotification.notify("Name can't be empty.", StatusNotification.TIME_SHORT);
 			save.setEnabled(true);
 			return;
 		}
@@ -438,7 +438,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 						}
 						
 						dialog.hide();
-						StatusNotification.notify("File saved", StatusNotification.TYPE_NORMAL, StatusNotification.TIME_SHORT);
+						StatusNotification.notify("File saved", StatusNotification.TIME_SHORT);
 						
 						Storage store = Storage.getSessionStorageIfSupported();
 						store.removeItem(StoreKeys.CURRENT_GOOGLE_DRIVE_ITEM);
@@ -454,7 +454,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 						if(RestClient.isDebug()){
 							Log.error("Unable to save request data.", reason);
 						}
-						StatusNotification.notify(reason.getMessage(), StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+						StatusNotification.notify(reason.getMessage(), StatusNotification.TIME_MEDIUM);
 					}
 				});
 				
@@ -468,14 +468,14 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				if(RestClient.isDebug()){
 					Log.error("Unable to save request data. Can't collect current request data.", reason);
 				}
-				StatusNotification.notify("Unable to save request data!", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+				StatusNotification.notify("Unable to save request data!", StatusNotification.TIME_MEDIUM);
 			}
 		});
 	}
 	
 	private void doSaveRequest(){
 		if(name.getValue().isEmpty()){
-			StatusNotification.notify("Name can't be empty.", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+			StatusNotification.notify("Name can't be empty.", StatusNotification.TIME_SHORT);
 			save.setEnabled(true);
 			return;
 		}
@@ -516,7 +516,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 						@Override
 						public void onFailure(Throwable reason) {
 							save.setEnabled(true);
-							StatusNotification.notify("Unable to save request data!", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+							StatusNotification.notify("Unable to save request data!", StatusNotification.TIME_MEDIUM);
 						}
 					});
 					return;
@@ -529,7 +529,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 					
 					if(projectId == -1){
 						save.setEnabled(true);
-						StatusNotification.notify("This is not a valid project!", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+						StatusNotification.notify("This is not a valid project!", StatusNotification.TIME_SHORT);
 						if(RestClient.isDebug()){
 							Log.error("Unable to save request data. Selected project has no numeric value.");
 						}
@@ -549,7 +549,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 					@Override
 					public void onFailure(Throwable reason) {
 						save.setEnabled(true);
-						StatusNotification.notify("Unable to save request data!", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+						StatusNotification.notify("Unable to save request data!", StatusNotification.TIME_MEDIUM);
 					}
 				});
 			}
@@ -560,7 +560,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				if(RestClient.isDebug()){
 					Log.error("Unable to save request data. Can't collect current request data.", reason);
 				}
-				StatusNotification.notify("Unable to save request data!", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+				StatusNotification.notify("Unable to save request data!", StatusNotification.TIME_MEDIUM);
 			}
 		});
 	}

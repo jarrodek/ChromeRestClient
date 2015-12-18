@@ -35,38 +35,48 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class HistoryViewImpl extends Composite implements HistoryView {
-	
-	private static HistoryViewImplUiBinder uiBinder = GWT
-			.create(HistoryViewImplUiBinder.class);
+
+	private static HistoryViewImplUiBinder uiBinder = GWT.create(HistoryViewImplUiBinder.class);
 
 	interface HistoryViewImplUiBinder extends UiBinder<Widget, HistoryViewImpl> {
 	}
+
 	class WidgetStyle {
 		final String emptyInfo = "History_View_emptyInfo";
 		String searchBox = "History_View_searchBox";
 	}
+
 	private Presenter listener = null;
 	private boolean loadingNext = false;
 	InlineLabel infoLabel = null;
 	WidgetStyle style = new WidgetStyle();
-	
-	@UiField DivElement loaderInfo;
-	@UiField HTMLPanel root;
-	@UiField HTMLPanel list;
-	@UiField HTMLPanel loaderContainer;
-	
-	@UiField InlineLabel loader;
-	@UiField InlineLabel clearHistory;
-	@UiField InlineLabel exportHistory;
-	@UiField SearchBox searchInput;
-	@UiField Anchor downloadFile;
-	
-	public HistoryViewImpl(){
+
+	@UiField
+	DivElement loaderInfo;
+	@UiField
+	HTMLPanel root;
+	@UiField
+	HTMLPanel list;
+	@UiField
+	HTMLPanel loaderContainer;
+
+	@UiField
+	InlineLabel loader;
+	@UiField
+	InlineLabel clearHistory;
+	@UiField
+	InlineLabel exportHistory;
+	@UiField
+	SearchBox searchInput;
+	@UiField
+	Anchor downloadFile;
+
+	public HistoryViewImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
-		
+
 		searchInput.addStyleName(style.searchBox);
 		searchInput.getElement().setAttribute("placeholder", "search history...");
-		
+
 		ClearHistoryEvent.register(RestClient.getClientFactory().getEventBus(), new ClearHistoryEvent.Handler() {
 			@Override
 			public void onClearForm() {
@@ -74,26 +84,26 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 				emptyInfo();
 			}
 		});
-		
+
 		observeScroll();
 		observeSearch(searchInput.getElement());
 	}
-	
+
 	@Override
 	public void setPresenter(Presenter listener) {
 		this.listener = listener;
 	}
-	
-	private void observeScroll(){
+
+	private void observeScroll() {
 		Window.addWindowScrollHandler(new ScrollHandler() {
 			@Override
 			public void onWindowScroll(ScrollEvent event) {
-				if(loadingNext){
+				if (loadingNext) {
 					return;
 				}
 				int bottom = event.getScrollTop() + Window.getClientHeight();
 				int referenceTop = loaderContainer.getAbsoluteTop();
-				if(bottom >= referenceTop){
+				if (bottom >= referenceTop) {
 					loadingNext = true;
 					loader.setVisible(true);
 					listener.getNextItemsPage();
@@ -101,13 +111,12 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 			}
 		});
 	}
-	
-	
+
 	/**
 	 * Create info message when no data available
 	 */
-	private void emptyInfo(){
-		if(loaderInfo.hasParentElement()){
+	private void emptyInfo() {
+		if (loaderInfo.hasParentElement()) {
 			loaderInfo.removeFromParent();
 		}
 		infoLabel = new InlineLabel();
@@ -115,45 +124,43 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 		infoLabel.addStyleName(style.emptyInfo);
 		root.add(infoLabel);
 	}
-	
-	private void emptyQueryResults(){
+
+	private void emptyQueryResults() {
 		infoLabel = new InlineLabel();
-		infoLabel.setText("No history for query \""+searchInput.getValue()+"\" found.");
+		infoLabel.setText("No history for query \"" + searchInput.getValue() + "\" found.");
 		infoLabel.addStyleName(style.emptyInfo);
 		root.add(infoLabel);
 	}
-	
-	
+
 	@UiHandler("clearHistory")
-	void onClearHistory(ClickEvent e){
+	void onClearHistory(ClickEvent e) {
 		e.preventDefault();
 		listener.onClearHistory();
 	}
-	
-	void startSearch(String query){ 
+
+	void startSearch(String query) {
 		loader.setVisible(true);
 		listener.serach(query);
 	}
-	
+
 	final native void observeSearch(Element element) /*-{
 		var context = this;
-		var callback = $entry(function(e){
+		var callback = $entry(function(e) {
 			var value = e.target.value;
 			context.@org.rest.client.ui.desktop.HistoryViewImpl::startSearch(Ljava/lang/String;)(value);
 		});
-		element.addEventListener('search',callback,false);
+		element.addEventListener('search', callback, false);
 	}-*/;
-	
-	
+
 	@Override
 	public void getHistoryDetails(int historyId, final Callback<HistoryObject, Throwable> callback) {
 		listener.onHistoryItemSelect(historyId, new Callback<HistoryObject, Throwable>() {
-			
+
 			@Override
 			public void onSuccess(HistoryObject result) {
 				callback.onSuccess(result);
 			}
-			
+
 			@Override
 			public void onFailure(Throwable reason) {
 				callback.onFailure(reason);
@@ -168,38 +175,36 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 
 	@Override
 	public void setNoMoreItems() {
-		if(infoLabel != null){
+		if (infoLabel != null) {
 			infoLabel.removeFromParent();
 			infoLabel = null;
 		}
 		loader.setVisible(false);
-		if(list.getWidgetCount() == 0 && searchInput.getValue().isEmpty()){
+		if (list.getWidgetCount() == 0 && searchInput.getValue().isEmpty()) {
 			emptyInfo();
-		} else if(list.getWidgetCount() == 0 && !searchInput.getValue().isEmpty()){
+		} else if (list.getWidgetCount() == 0 && !searchInput.getValue().isEmpty()) {
 			emptyQueryResults();
 		}
 	}
 
-	
-	
 	@Override
 	public void appendResults(List<HistoryObject> data) {
-		if(infoLabel != null){
+		if (infoLabel != null) {
 			infoLabel.removeFromParent();
 			infoLabel = null;
 		}
 		loadingNext = false;
 		loader.setVisible(false);
-		if(loaderInfo.hasParentElement()){
+		if (loaderInfo.hasParentElement()) {
 			loaderInfo.removeFromParent();
 		}
-		if((data == null || data.isEmpty()) && list.getWidgetCount() == 0){
+		if ((data == null || data.isEmpty()) && list.getWidgetCount() == 0) {
 			emptyInfo();
 			return;
 		}
-		//disable repainting
+		// disable repainting
 		list.setVisible(false);
-		for(HistoryObject history : data){
+		for (HistoryObject history : data) {
 			HistoryListItemView item = RestClient.getClientFactory().getHistoryListItemView();
 			item.setPresenter(this);
 			item.setMethod(history.getMethod());
@@ -213,69 +218,73 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 		list.setVisible(true);
 		ensureScrollItems();
 	}
-	
-	public void removeItem(int historyId){
+
+	public void removeItem(int historyId) {
 		listener.removeFromeHistory(historyId);
 	}
-	
-	private void ensureScrollItems(){
+
+	private void ensureScrollItems() {
 		int bottom = Window.getScrollTop() + Window.getClientHeight();
 		int referenceTop = loaderContainer.getAbsoluteTop();
-		if(bottom >= referenceTop){
+		if (bottom >= referenceTop) {
 			loadingNext = true;
 			loader.setVisible(true);
 			listener.getNextItemsPage();
 		}
 	}
-	
+
 	@Override
 	public void clearResultList() {
 		list.clear();
 	}
+
 	@UiHandler("exportHistory")
-	void onExportAllClick(ClickEvent e){
+	void onExportAllClick(ClickEvent e) {
 		e.preventDefault();
 		listener.prepareExportData(new Callback<String, Exception>() {
-			
+
 			@Override
 			public void onSuccess(final String fileObjectUrl) {
 				Scheduler.get().scheduleDeferred(new Command() {
 					public void execute() {
 						exportHistory.setVisible(false);
-						
+
 						String date = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM).format(new Date());
-						String fileName = "arc-"+date+".json";
+						String fileName = "arc-" + date + ".json";
 						downloadFile.getElement().setAttribute("download", fileName);
-						downloadFile.getElement().setAttribute("data-downloadurl", "application/json:"+fileName+":"+fileObjectUrl);
+						downloadFile.getElement().setAttribute("data-downloadurl",
+								"application/json:" + fileName + ":" + fileObjectUrl);
 						downloadFile.setHref(fileObjectUrl);
-						
+
 						downloadFile.setVisible(true);
 					}
 				});
 			}
-			
+
 			@Override
 			public void onFailure(Exception reason) {
 				exportHistory.setVisible(true);
 				downloadFile.setVisible(false);
-				StatusNotification.notify("Unable to generate a file. Unexpected error.", StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM, true);
-				if(RestClient.isDebug()){
-					Log.debug("Unable to generate a file. Unexpected error.",reason);
+				//TODO: view should not decide to show notification
+				StatusNotification.notify("Unable to generate a file. Unexpected error.",
+						StatusNotification.TIME_MEDIUM);
+				if (RestClient.isDebug()) {
+					Log.debug("Unable to generate a file. Unexpected error.", reason);
 				}
 			}
 		});
 	}
-	
+
 	@UiHandler("downloadFile")
-	void onDownloadFileClick(ClickEvent e){
-		if(!downloadFile.getElement().getAttribute("disabled").isEmpty()){
+	void onDownloadFileClick(ClickEvent e) {
+		if (!downloadFile.getElement().getAttribute("disabled").isEmpty()) {
 			return;
 		}
 		downloadFile.getElement().setAttribute("disabled", "true");
-		
+
 		Timer t = new Timer() {
 			@Override
-			public void run() {				
+			public void run() {
 				downloadFile.setVisible(false);
 				downloadFile.setHref("about:blank");
 				exportHistory.setVisible(true);

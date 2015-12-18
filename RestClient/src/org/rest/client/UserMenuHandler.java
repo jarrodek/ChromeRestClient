@@ -35,48 +35,47 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class UserMenuHandler {
-	
+
 	private ClientFactory clientFactory;
 	private boolean created = false;
-	public UserMenuHandler(ClientFactory clientFactory){
-		if(created) return;
+
+	public UserMenuHandler(ClientFactory clientFactory) {
+		if (created)
+			return;
 		this.clientFactory = clientFactory;
 		bind();
 	}
-	
-	protected void bind(){
-		
+
+	protected void bind() {
+
 		final MenuView mv = clientFactory.getMenuView();
-		
+
 		final MenuItemView.Presenter p = new MenuItemView.Presenter() {
 			@Override
 			public void goTo(Place place) {
 				clientFactory.getPlaceController().goTo(place);
 			}
 		};
-		
+
 		final MenuItemView request = clientFactory.createMenuItem(p);
 		request.setText("Request");
 		request.setPlace(new RequestPlace("default"));
 		request.setSelected(true);
 		request.setData("place", "request");
 		mv.addMenuItem(request);
-		
-		
+
 		final MenuItemView socket = clientFactory.createMenuItem(p);
 		socket.setText("Socket");
 		socket.setPlace(new SocketPlace("default"));
 		socket.setData("place", "socket");
 		mv.addMenuItem(socket);
-		
 
 		final MenuItemView projects = clientFactory.createMenuItem(p);
 		projects.setText("Projects");
 		mv.addMenuItem(projects);
 		projects.setData("place", "projects");
 		projects.setOpened(false);
-		
-		
+
 		final MenuItemView saved = clientFactory.createMenuItem(p);
 		saved.setText("Saved");
 		saved.setPlace(new SavedPlace("default"));
@@ -102,14 +101,14 @@ public class UserMenuHandler {
 		mv.addMenuItem(about);
 
 		RootPanel.get("appNavigation").add(mv.asWidget());
-		
+
 		final ArrayList<MenuItemView> projectsMenu = new ArrayList<MenuItemView>();
 		final ProjectStoreWebSql projectsStore = clientFactory.getProjectsStore();
-		projectsStore.all(new StoreResultCallback<Map<Integer,ProjectObject>>() {
+		projectsStore.all(new StoreResultCallback<Map<Integer, ProjectObject>>() {
 			@Override
 			public void onSuccess(Map<Integer, ProjectObject> result) {
 				Collection<ProjectObject> values = result.values();
-				for(ProjectObject obj : values){
+				for (ProjectObject obj : values) {
 					MenuItemView _project = clientFactory.createMenuItem(p);
 					_project.setText(obj.getName());
 					_project.setData("projectid", String.valueOf(obj.getId()));
@@ -120,35 +119,36 @@ public class UserMenuHandler {
 				}
 				projects.setOpened(false);
 			}
-			
+
 			@Override
 			public void onError(Throwable e) {
-				
+
 			}
 		});
-		
+
 		ProjectChangeEvent.register(clientFactory.getEventBus(), new ProjectChangeEvent.Handler() {
 			@Override
 			public void onProjectChange(ProjectObject project) {
-				for(MenuItemView item : projectsMenu){
-					if(item.getData("projectid").equals(project.getId()+"")){
+				for (MenuItemView item : projectsMenu) {
+					if (item.getData("projectid").equals(project.getId() + "")) {
 						item.setText(project.getName());
 						break;
 					}
 				}
 			}
 		});
-		
-		//observe add project event to add new item to menu
+
+		// observe add project event to add new item to menu
 		NewProjectAvailableEvent.register(clientFactory.getEventBus(), new NewProjectAvailableEvent.Handler() {
-			
+
 			@Override
 			public void onNewProject(int projectId) {
-				projectsStore.getByKey(projectId, new StoreResultCallback<ProjectObject>(){
+				projectsStore.getByKey(projectId, new StoreResultCallback<ProjectObject>() {
 
 					@Override
 					public void onSuccess(ProjectObject result) {
-						if(result == null) return;
+						if (result == null)
+							return;
 						MenuItemView _project = clientFactory.createMenuItem(p);
 						_project.setText(result.getName());
 						_project.setPlace(RequestPlace.Tokenizer.fromProjectDefault(result.getId()));
@@ -168,102 +168,104 @@ public class UserMenuHandler {
 		ProjectDeleteEvent.register(clientFactory.getEventBus(), new ProjectDeleteEvent.Handler() {
 			@Override
 			public void onProjectDelete(int projectId) {
-				for(MenuItemView item : projectsMenu){
-					if(item.getData("projectid").equals(projectId+"")){
+				for (MenuItemView item : projectsMenu) {
+					if (item.getData("projectid").equals(projectId + "")) {
 						item.remove();
 						break;
 					}
 				}
 			}
 		});
-		
-		clientFactory.getEventBus().addHandler(PlaceChangeEvent.TYPE,
-				new PlaceChangeEvent.Handler() {
-					public void onPlaceChange(PlaceChangeEvent event) {
-						
-						Place newPlace = event.getNewPlace();
-						String gaName = null;
-						
-						if(newPlace instanceof AboutPlace){
-							about.setSelected(true);
-							gaName = "#AboutPlace:"+((AboutPlace)newPlace).getToken(); 
-						} else if(newPlace instanceof RequestPlace){
-							RequestPlace _place = (RequestPlace) newPlace;
-							if(_place.isProject() || _place.isProjectsEndpoint()){
-								projects.setSelected(true);
-							} else {
-								request.setSelected(true);
-							}
-							
-							if(_place.isHistory()){
-								gaName = "#RequestPlace:history";
-							} else if(_place.isProjectsEndpoint()){
-								gaName = "#RequestPlace:projectEndpoint";
-							} else if(_place.isProject()){
-								gaName = "#RequestPlace:project";
-							} else if(_place.isSaved()){
-								gaName = "#RequestPlace:saved";
-							} else if(_place.isExternal()){
-								gaName = "#RequestPlace:external";
-							} else {
-								gaName = "#RequestPlace:default";
-							}
-						} else if(newPlace instanceof SettingsPlace){
-							settings.setSelected(true);
-							gaName = "#SettingsPlace:"+((SettingsPlace)newPlace).getToken();
-						} else if(newPlace instanceof ImportExportPlace){
-							settings.setSelected(true);
-							gaName = "#ImportExportPlace:"+((ImportExportPlace)newPlace).getToken();
-						} else if(newPlace instanceof HistoryPlace){
-							history.setSelected(true);
-							gaName = "#HistoryPlace:"+((HistoryPlace)newPlace).getToken();
-						} else if(newPlace instanceof SavedPlace){
-							saved.setSelected(true);
-							gaName = "#SavedPlace:"+((SavedPlace)newPlace).getToken();
-						} else if(newPlace instanceof SocketPlace){
-							socket.setSelected(true);
-							gaName = "#SocketPlace:"+((SocketPlace)newPlace).getToken(); 
-						}
-						trackPageview(gaName);
-						GoogleAnalyticsApp.sendScreen(gaName);
+
+		clientFactory.getEventBus().addHandler(PlaceChangeEvent.TYPE, new PlaceChangeEvent.Handler() {
+			public void onPlaceChange(PlaceChangeEvent event) {
+
+				Place newPlace = event.getNewPlace();
+				String gaName = null;
+
+				if (newPlace instanceof AboutPlace) {
+					about.setSelected(true);
+					gaName = "#AboutPlace:" + ((AboutPlace) newPlace).getToken();
+				} else if (newPlace instanceof RequestPlace) {
+					RequestPlace _place = (RequestPlace) newPlace;
+					if (_place.isProject() || _place.isProjectsEndpoint()) {
+						projects.setSelected(true);
+					} else {
+						request.setSelected(true);
 					}
-			});
-		
+
+					if (_place.isHistory()) {
+						gaName = "#RequestPlace:history";
+					} else if (_place.isProjectsEndpoint()) {
+						gaName = "#RequestPlace:projectEndpoint";
+					} else if (_place.isProject()) {
+						gaName = "#RequestPlace:project";
+					} else if (_place.isSaved()) {
+						gaName = "#RequestPlace:saved";
+					} else if (_place.isExternal()) {
+						gaName = "#RequestPlace:external";
+					} else {
+						gaName = "#RequestPlace:default";
+					}
+				} else if (newPlace instanceof SettingsPlace) {
+					settings.setSelected(true);
+					gaName = "#SettingsPlace:" + ((SettingsPlace) newPlace).getToken();
+				} else if (newPlace instanceof ImportExportPlace) {
+					settings.setSelected(true);
+					gaName = "#ImportExportPlace:" + ((ImportExportPlace) newPlace).getToken();
+				} else if (newPlace instanceof HistoryPlace) {
+					history.setSelected(true);
+					gaName = "#HistoryPlace:" + ((HistoryPlace) newPlace).getToken();
+				} else if (newPlace instanceof SavedPlace) {
+					saved.setSelected(true);
+					gaName = "#SavedPlace:" + ((SavedPlace) newPlace).getToken();
+				} else if (newPlace instanceof SocketPlace) {
+					socket.setSelected(true);
+					gaName = "#SocketPlace:" + ((SocketPlace) newPlace).getToken();
+				}
+				trackPageview(gaName);
+				GoogleAnalyticsApp.sendScreen(gaName);
+			}
+		});
+
 		Storage store = GWT.create(Storage.class);
 		StorageArea syncStore = store.getSync();
 		syncStore.get(StoreKeys.HISTORY_KEY, new StorageItemCallback<Boolean>() {
-			
+
 			@Override
 			public void onError(String message) {
-				StatusNotification.notify("Unable open LocalStore :(", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+				StatusNotification.notify("Unable open LocalStore :(", StatusNotification.TIME_SHORT);
 			}
 
 			@Override
 			public void onResult(StorageResult<Boolean> data) {
 				Boolean value = true;
-				if(data == null){
+				if (data == null) {
 					Log.warn("Unable to cast property from local storage, UserMenuHandler::bind");
 					logNative(data);
 				} else {
-					try{
+					try {
 						value = data.getBoolean(StoreKeys.HISTORY_KEY);
 					} catch (Exception e) {
 						Log.warn("Unable to cast property from local storage (HISTORY_KEY).", e);
 						logNative(data);
 					}
 				}
-				if(!value){
+				if (!value) {
 					mv.hideItem(2);
 				}
 			}
 		});
 	}
-	
+
 	final native void trackPageview(String pageUrl) /*-{
-		if(!$wnd._gaq) return;
-		if(@org.rest.client.RestClient::isInitializing()()) return;
-		$wnd._gaq.push(['_trackPageview', pageUrl]);
+		if (!$wnd._gaq)
+			return;
+		if (@org.rest.client.RestClient::isInitializing()())
+			return;
+		$wnd._gaq.push([ '_trackPageview', pageUrl ]);
 	}-*/;
+
 	final native void logNative(Object msg) /*-{
 		console.log(msg, typeof msg);
 	}-*/;

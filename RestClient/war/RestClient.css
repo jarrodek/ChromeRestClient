@@ -1861,118 +1861,19 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 }
 
 /* STATUS NOTIFICATION */
-.Status_Notification_flashMessage{
-	position: fixed;
-	width: 100%;
-	height: auto;
-	z-index: 100;
-	bottom: 2%;
-	left: 0;
-	display: -webkit-flex;
-	-webkit-justify-content: center;
-	-webkit-align-items: center;
-}
-.Status_Notification_dismiss{
-	margin-left: 2em;
-   }
-   
-.Status_Notification_hidden{
-	display: none;
-}
-.Status_Notification_info { }
-.Status_Notification_wrapper{
-	display: -webkit-flex;
-	-webkit-align-items: center;
-	-webkit-justify-content: center;
-	background-color: rgba(0, 0, 0, 0.7);
-	border: 1px #9E9E9E solid;
-	padding: 1em;
-	border-radius: 2px;
-	box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.28);
-	color: white;
-	-webkit-transition: background-color, color 0.3s linear;
-}
-.Status_Notification_common .Status_Notification_wrapper{ min-width: 400px; }
-.Status_Notification_html .Status_Notification_wrapper{
-	background-color: white;
-	color: black;
-}
-.Status_Notification_error .Status_Notification_wrapper{
-	background-color: rgba(255, 255, 0, 0.88);
-	color: red;
-	font-weight: bold;
-}
-.Status_Notification_critical .Status_Notification_wrapper{
-	color: white;
-	font-weight: bold;
-	background-color: rgba(124, 0, 0, 0.81);
-}
-
-.Status_Notification_flashMessage .Status_Notification_dismissAnchor{
-	color: white;
+.paper-toast-action-label {
 	text-decoration: underline;
+	margin-left: 8px;
+	padding-left: 8px;
+	border-left: 1px rgba(255,255,255,0.24) solid;
 }
-.Status_Notification_error .Status_Notification_wrapper .Status_Notification_dismissAnchor,
-.Status_Notification_html .Status_Notification_wrapper .Status_Notification_dismissAnchor{ 
-	color: black; 
+span.paper-toast {
+    flex: 1;
+    align-items: center;
+    display: flex;
 }
-.Status_Notification_actionMessage{
-  	margin-left: 1em;
-}
-.Status_Notification_textHiddable{-webkit-transition: opacity 0.2s linear;opacity: 1;}
-.Status_Notification_textHidden{opacity: 0;}
 
-/* SHOTCUTS PANEL */
-.Shortcut_View_contentTitle {
-	-webkit-padding-end: 24px;
-	-webkit-user-select: none;
-	color: black;
-	font-size: 175%;
-	font-weight: normal;
-	margin: 0;
-	padding-bottom: 14px;
-	padding-top: 13px;
-	text-align: end;
-	cursor: pointer;
-}
-.Shortcut_View_contentTitle.Shortcut_View_about {
-	-webkit-padding-start: 24px;
-	text-align: start;
-}
-.Shortcut_View_aboutContent {
-	-webkit-padding-start: 24px;
-	text-align: start;
-	text-shadow: white 0 1px 2px;
-	border-bottom: 1px solid #eeeeee;
-	margin-top: 17px;
-	padding-bottom: 20px;
-}
-.Shortcut_View_row {
-	margin: 16px 0px;
-}
-.Shortcut_View_label {
-	cursor: pointer;
-	font-weight: bold;
-	font-size: 16px;
-}
-.Shortcut_View_input {
-	
-}
-.Shortcut_View_toggleButton {
-	width: 30px;
-	font-size: 14px;
-	display: inline-block;
-	text-align: center;
-	margin-right: 5px;
-}
-.Shortcut_View_desc{
-	margin: 3px 0px 0px 0px;
-	color: #A5A5A5;
-	font-size: 12px;
-}
-.Shortcut_View_backLink{
-	margin-top: 20px;
-}
+
 /* TUTORIAL */
 .Tutorial_wrapper{
 	position: absolute;

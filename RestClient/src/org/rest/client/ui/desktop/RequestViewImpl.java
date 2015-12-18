@@ -692,7 +692,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 				if(result.booleanValue()){
 					requestNameField.getElement().setAttribute("data-name", name);
 				} else {
-					StatusNotification.notify("You can't change this item name.",StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+					StatusNotification.notify("You can't change this item name.", StatusNotification.TIME_MEDIUM);
 				}
 			}
 			

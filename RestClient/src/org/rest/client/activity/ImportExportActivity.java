@@ -48,23 +48,20 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 
-public class ImportExportActivity extends AppActivity implements
-		ImportExportView.Presenter {
+public class ImportExportActivity extends AppActivity implements ImportExportView.Presenter {
 
 	final private ImportExportPlace place;
 	private EventBus eventBus;
 	private ImportExportView view;
 	private String exportFileObjectUrl = null;
 
-	public ImportExportActivity(ImportExportPlace place,
-			ClientFactory clientFactory) {
+	public ImportExportActivity(ImportExportPlace place, ClientFactory clientFactory) {
 		super(clientFactory);
 		this.place = place;
 	}
 
 	@Override
-	public void start(AcceptsOneWidget panel,
-			com.google.gwt.event.shared.EventBus eventBus) {
+	public void start(AcceptsOneWidget panel, com.google.gwt.event.shared.EventBus eventBus) {
 		this.eventBus = eventBus;
 		super.start(panel, eventBus);
 
@@ -93,134 +90,134 @@ public class ImportExportActivity extends AppActivity implements
 			importData(place.getServerImportApplicationId());
 		}
 	}
-	
-	
+
 	@Override
 	public void prepareDataToFile(final StringCallback callback) {
 		//
 		// Get all request data
 		//
-		clientFactory.getRequestDataStore().all(new StoreResultCallback<Map<Integer,RequestObject>>() {
+		clientFactory.getRequestDataStore().all(new StoreResultCallback<Map<Integer, RequestObject>>() {
 			@Override
 			public void onSuccess(final Map<Integer, RequestObject> requestDataResult) {
 				//
 				// Get project data
 				//
-				clientFactory.getProjectsStore().all(new StoreResultCallback<Map<Integer,ProjectObject>>() {
+				clientFactory.getProjectsStore().all(new StoreResultCallback<Map<Integer, ProjectObject>>() {
 					@Override
 					public void onSuccess(final Map<Integer, ProjectObject> projectDataResult) {
-						
+
 						JSONArray requestsArray = new JSONArray();
 						JSONArray projectsArray = new JSONArray();
 						Set<Integer> keys = requestDataResult.keySet();
-						for(Integer _k : keys){
+						for (Integer _k : keys) {
 							RequestObject ro = requestDataResult.get(_k);
 							requestsArray.set(requestsArray.size(), ro.toJSONObject());
 						}
 						Set<Integer> projectKeys = projectDataResult.keySet();
-						for(Integer _k : projectKeys){
+						for (Integer _k : projectKeys) {
 							ProjectObject pd = projectDataResult.get(_k);
 							projectsArray.set(projectsArray.size(), pd.toJSONObject());
 						}
 						JSONObject result = new JSONObject();
 						result.put("projects", projectsArray);
 						result.put("requests", requestsArray);
-						
+
 						callback.onResult(result.toString());
 					}
+
 					@Override
 					public void onError(Throwable e) {
-						if(RestClient.isDebug()){
+						if (RestClient.isDebug()) {
 							Log.error("Unable to collect requests data :/", e);
 						}
-						StatusNotification.notify("Unable to collect requests data :/",StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+						StatusNotification.notify("Unable to collect requests data :/", StatusNotification.TIME_MEDIUM);
 					}
 				});
 			}
-			
+
 			@Override
 			public void onError(Throwable e) {
-				if(RestClient.isDebug()){
+				if (RestClient.isDebug()) {
 					Log.error("Unable to collect requests data :/", e);
 				}
-				StatusNotification.notify("Unable to collect requests data :/",StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+				StatusNotification.notify("Unable to collect requests data :/", StatusNotification.TIME_MEDIUM);
 			}
 		});
 		GoogleAnalytics.sendEvent("Settings usage", "Export data", "Generate file");
 		GoogleAnalyticsApp.sendEvent("Settings usage", "Export data", "Generate file");
 	}
-	
+
 	@Override
 	public String createDownloadData(String data) {
-		if(exportFileObjectUrl != null){
+		if (exportFileObjectUrl != null) {
 			revokeDownloadData();
 		}
-		exportFileObjectUrl = createDownloadDataImpl(data); 
+		exportFileObjectUrl = createDownloadDataImpl(data);
 		return exportFileObjectUrl;
 	}
-	
+
 	private final native String createDownloadDataImpl(String data) /*-{
-		var blob = new $wnd.Blob([data], {type: 'application/json'});
+		var blob = new $wnd.Blob([ data ], {
+			type : 'application/json'
+		});
 		return $wnd.URL.createObjectURL(blob);
 	}-*/;
-	
 
 	@Override
 	public void revokeDownloadData() {
-		if(exportFileObjectUrl != null){
+		if (exportFileObjectUrl != null) {
 			revokeDownloadDataImpl(exportFileObjectUrl);
 			exportFileObjectUrl = null;
 		}
 	}
+
 	private final native void revokeDownloadDataImpl(String url) /*-{
 		$wnd.URL.revokeObjectURL(url);
 	}-*/;
-	
-	
+
 	@Override
 	public String mayStop() {
 		revokeDownloadData();
 		return super.mayStop();
 	}
-	
-	
+
 	@Override
 	public void saveImportedFileData(ImportResult data, final Callback<Boolean, Void> callback) {
 		final ArrayList<ProjectObject> projects = data.getProjects();
 		final ArrayList<RequestObject> requests = data.getRequests();
-		
-		if(projects != null && projects.size()>0){
-			
+
+		if (projects != null && projects.size() > 0) {
+
 			//
-			// First, save projects data and update referenced requests 
+			// First, save projects data and update referenced requests
 			//
-			
+
 			clientFactory.getProjectsStore().getService().importData(projects, new RowIdListCallback() {
-				
+
 				@Override
 				public void onFailure(DataServiceException error) {
-					if(RestClient.isDebug()){
-						Log.error("Unable insert project data",error);
+					if (RestClient.isDebug()) {
+						Log.error("Unable insert project data", error);
 					}
 					callback.onSuccess(false);
 				}
-				
+
 				@Override
 				public void onSuccess(List<Integer> rowIds) {
-					
-					for(int i=0, len = rowIds.size(); i<len; i++){
+
+					for (int i = 0, len = rowIds.size(); i < len; i++) {
 						int currentProjectId = rowIds.get(i);
 						int exportedProjectId = projects.get(i).getId();
-						//now find all request where project ID is
-						//"exportedProjectId" as an old ID and replace 
-						//it with new one.
-						
-						for(RequestObject r : requests){
-							if(r.getProject() == exportedProjectId){
+						// now find all request where project ID is
+						// "exportedProjectId" as an old ID and replace
+						// it with new one.
+
+						for (RequestObject r : requests) {
+							if (r.getProject() == exportedProjectId) {
 								r.setProject(currentProjectId);
 							}
 						}
-						
+
 					}
 					saveImportedFileData(requests, callback);
 				}
@@ -229,25 +226,25 @@ public class ImportExportActivity extends AppActivity implements
 			saveImportedFileData(requests, callback);
 		}
 	}
-	
-	public void saveImportedFileData(final ArrayList<RequestObject> requests, final Callback<Boolean, Void> callback){
-		if(requests == null || requests.size() == 0){
-			if(RestClient.isDebug()){
+
+	public void saveImportedFileData(final ArrayList<RequestObject> requests, final Callback<Boolean, Void> callback) {
+		if (requests == null || requests.size() == 0) {
+			if (RestClient.isDebug()) {
 				Log.error("Request data is emnpty.");
 			}
 			callback.onSuccess(false);
 			return;
 		}
 		clientFactory.getRequestDataStore().getService().insertFileImportData(requests, new RowIdListCallback() {
-			
+
 			@Override
 			public void onFailure(DataServiceException error) {
-				if(RestClient.isDebug()){
-					Log.error("Unable insert requests data",error);
+				if (RestClient.isDebug()) {
+					Log.error("Unable insert requests data", error);
 				}
 				callback.onSuccess(false);
 			}
-			
+
 			@Override
 			public void onSuccess(List<Integer> rowIds) {
 				callback.onSuccess(true);
@@ -256,50 +253,21 @@ public class ImportExportActivity extends AppActivity implements
 		GoogleAnalytics.sendEvent("Settings usage", "Import data", "From file");
 		GoogleAnalyticsApp.sendEvent("Settings usage", "Import data", "From file");
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	//
 	// OLD SYSTEM
 	// This will be removed in the end of the year
 	//
-	
 
 	private void checkUserSession() {
-		if(RestClient.applicationUserId != null){
+		if (RestClient.applicationUserId != null) {
 			view.setIsUserView();
 			return;
 		}
 		if (RestClient.isDebug()) {
 			Log.debug("Checking session status on applications server.");
 		}
-		
+
 		PingRequest.getSession(new ApplicationSessionCallback() {
 
 			@Override
@@ -317,12 +285,11 @@ public class ImportExportActivity extends AppActivity implements
 				if (RestClient.isDebug()) {
 					Log.error(message, exception);
 				}
-				StatusNotification.notify(message,
-						StatusNotification.TYPE_CRITICAL, StatusNotification.TIME_MEDIUM);
+				StatusNotification.notify(message, StatusNotification.TIME_MEDIUM);
 			}
 		});
 	}
-	
+
 	/**
 	 * @deprecated This shouldn't be here.
 	 * @todo: Remove it from the interface.
@@ -353,8 +320,7 @@ public class ImportExportActivity extends AppActivity implements
 	 * 
 	 * @param handler
 	 */
-	private final native void addNativeStorageEventHandlerandler(
-			StorageEvent.Handler handler) /*-{
+	private final native void addNativeStorageEventHandlerandler(StorageEvent.Handler handler) /*-{
 		var clb = $entry(function(event) {
 			handler.@com.google.gwt.storage.client.StorageEvent.Handler::onStorageChange(Lcom/google/gwt/storage/client/StorageEvent;)(event);
 		});
@@ -374,12 +340,11 @@ public class ImportExportActivity extends AppActivity implements
 	public void doServerImport(String[] keys) {
 		if (keys.length == 0) {
 			StatusNotification.notify("No items to import.",
-					StatusNotification.TYPE_ERROR,
+
 					StatusNotification.TIME_SHORT);
 			return;
 		}
-		final LoaderDialog dialog = new LoaderDialog(
-				"Downloading data. Please wait.", false);
+		final LoaderDialog dialog = new LoaderDialog("Downloading data. Please wait.", false);
 		dialog.show();
 
 		ImportRequest.importData(keys, new ImportDataCallback() {
@@ -387,9 +352,8 @@ public class ImportExportActivity extends AppActivity implements
 			@Override
 			public void onSuccess(final List<RestForm> result) {
 				if (result.size() == 0) {
-					StatusNotification
-							.notify("Something went wrong. There is no data to save :(",
-									StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+					StatusNotification.notify("Something went wrong. There is no data to save :(",
+							StatusNotification.TIME_MEDIUM);
 					dialog.hide();
 					return;
 				}
@@ -417,8 +381,7 @@ public class ImportExportActivity extends AppActivity implements
 					if (url != null) {
 						ro.setURL(url);
 					}
-					String formEncoding = Utils.getJsonString(obj,
-							"formEncoding");
+					String formEncoding = Utils.getJsonString(obj, "formEncoding");
 					if (formEncoding != null) {
 						ro.setEncoding(formEncoding);
 					}
@@ -450,12 +413,9 @@ public class ImportExportActivity extends AppActivity implements
 								if (headerValueJs == null) {
 									continue;
 								}
-								JSONString _headerValueJS = headerValueJs
-										.isString();
-								String headerValue = _headerValueJS
-										.stringValue();
-								headers += headerName + ": " + headerValue
-										+ "\n";
+								JSONString _headerValueJS = headerValueJs.isString();
+								String headerValue = _headerValueJS.stringValue();
+								headers += headerName + ": " + headerValue + "\n";
 							}
 						}
 					}
@@ -464,70 +424,56 @@ public class ImportExportActivity extends AppActivity implements
 					importData.add(ro);
 				}
 
-				clientFactory
-						.getRequestDataStore()
-						.getService()
-						.insertImportData(importData, new Date(),
-								new RowIdListCallback() {
-									@Override
-									public void onFailure(
-											DataServiceException error) {
-										StatusNotification
-												.notify("Unable to save data to local database :(",
-														StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
-										if (RestClient.isDebug()) {
-											Log.error(
-													"Unable to vave data to local database :(",
-													error);
-										}
-										dialog.hide();
-									}
+				clientFactory.getRequestDataStore().getService().insertImportData(importData, new Date(),
+						new RowIdListCallback() {
+					@Override
+					public void onFailure(DataServiceException error) {
+						StatusNotification.notify("Unable to save data to local database :(",
+								StatusNotification.TIME_MEDIUM);
+						if (RestClient.isDebug()) {
+							Log.error("Unable to vave data to local database :(", error);
+						}
+						dialog.hide();
+					}
 
-									@Override
-									public void onSuccess(List<Integer> rowIds) {
-										//
-										// Insert into exported list to prevent
-										// duplicates on server side.
-										//
-										List<ExportedDataInsertItem> exported = new ArrayList<ExportedDataInsertItem>();
-										int i = 0;
-										for (RestForm form : result) {
-											int dbId = rowIds.get(i);
-											ExportedDataInsertItem item = new ExportedDataInsertItem(
-													form.key);
-											item.setReferenceId(dbId);
-											item.setType("form");
-											exported.add(item);
-											i++;
-										}
+					@Override
+					public void onSuccess(List<Integer> rowIds) {
+						//
+						// Insert into exported list to prevent
+						// duplicates on server side.
+						//
+						List<ExportedDataInsertItem> exported = new ArrayList<ExportedDataInsertItem>();
+						int i = 0;
+						for (RestForm form : result) {
+							int dbId = rowIds.get(i);
+							ExportedDataInsertItem item = new ExportedDataInsertItem(form.key);
+							item.setReferenceId(dbId);
+							item.setType("form");
+							exported.add(item);
+							i++;
+						}
 
-										clientFactory
-												.getExportedDataReferenceService()
-												.insertExported(exported,
-														new VoidCallback() {
-															@Override
-															public void onFailure(
-																	DataServiceException error) {
-																if (RestClient
-																		.isDebug()) {
-																	Log.error(
-																			"Unable to insert imported references. During export duplicates may occur.",
-																			error);
-																}
-															}
+						clientFactory.getExportedDataReferenceService().insertExported(exported, new VoidCallback() {
+							@Override
+							public void onFailure(DataServiceException error) {
+								if (RestClient.isDebug()) {
+									Log.error(
+											"Unable to insert imported references. During export duplicates may occur.",
+											error);
+								}
+							}
 
-															@Override
-															public void onSuccess() {
-															}
-														});
+							@Override
+							public void onSuccess() {
+							}
+						});
 
-										StatusNotification.notify(
-												"Saved import data.",
-												StatusNotification.TYPE_NORMAL,
-												StatusNotification.TIME_MEDIUM);
-										dialog.hide();
-									}
-								});
+						StatusNotification.notify("Saved import data.",
+
+								StatusNotification.TIME_MEDIUM);
+						dialog.hide();
+					}
+				});
 			}
 
 			@Override
@@ -539,8 +485,7 @@ public class ImportExportActivity extends AppActivity implements
 						Log.error(message);
 					}
 				}
-				StatusNotification.notify(message,
-						StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
+				StatusNotification.notify(message, StatusNotification.TIME_MEDIUM);
 				dialog.hide();
 			}
 		});
@@ -550,62 +495,52 @@ public class ImportExportActivity extends AppActivity implements
 
 	private void importData(final String importUid) {
 		// Show dialog
-		final LoaderDialog dialog = new LoaderDialog(
-				"Preparing data to download. Please wait.", false);
+		final LoaderDialog dialog = new LoaderDialog("Preparing data to download. Please wait.", false);
 		dialog.show();
-		
-		
-		
+
 		// Make request
-		ImportRequest.getImportSuggestions(importUid,
-				new ImportSuggestionsCallback() {
+		ImportRequest.getImportSuggestions(importUid, new ImportSuggestionsCallback() {
 
+			@Override
+			public void onSuccess(List<SuggestionImportItem> result) {
+				dialog.hide();
+				if (result == null) {
+					StatusNotification.notify("Server returns empty data", StatusNotification.TIME_MEDIUM);
+					// storeData.setEnabled(true);
+					// restoreData.setEnabled(true);
+					return;
+				}
+				final ImportListingDialog importDialog = new ImportListingDialog(ImportExportActivity.this);
+				importDialog.append(result);
+				//
+				// delay show dialog for data providers to refresh the
+				// list
+				// and show dialog in it's place (center)
+				//
+				new Timer() {
 					@Override
-					public void onSuccess(List<SuggestionImportItem> result) {
-						dialog.hide();
-						if (result == null) {
-							StatusNotification.notify(
-									"Server returns empty data",
-									StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
-//							storeData.setEnabled(true);
-//							restoreData.setEnabled(true);
-							return;
-						}
-						final ImportListingDialog importDialog = new ImportListingDialog(ImportExportActivity.this);
-						importDialog.append(result);
-						//
-						// delay show dialog for data providers to refresh the
-						// list
-						// and show dialog in it's place (center)
-						//
-						new Timer() {
-							@Override
-							public void run() {
-								importDialog.show();
-							}
-						}.schedule(200);
+					public void run() {
+						importDialog.show();
 					}
+				}.schedule(200);
+			}
 
-					@Override
-					public void onFailure(String message, Throwable exception) {
-						if (RestClient.isDebug()) {
-							if (exception != null) {
-								Log.error(message, exception);
-							} else {
-								Log.error(message);
-							}
-						}
-						StatusNotification.notify(message,
-								StatusNotification.TYPE_ERROR, StatusNotification.TIME_MEDIUM);
-						dialog.hide();
-//						storeData.setEnabled(true);
-//						restoreData.setEnabled(true);
+			@Override
+			public void onFailure(String message, Throwable exception) {
+				if (RestClient.isDebug()) {
+					if (exception != null) {
+						Log.error(message, exception);
+					} else {
+						Log.error(message);
 					}
-				});
-		
+				}
+				StatusNotification.notify(message, StatusNotification.TIME_MEDIUM);
+				dialog.hide();
+				// storeData.setEnabled(true);
+				// restoreData.setEnabled(true);
+			}
+		});
+
 	}
 
-	
-
-	
 }

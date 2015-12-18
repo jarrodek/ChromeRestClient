@@ -127,7 +127,7 @@ public class SocketActivity extends AppActivity implements
 	@Override
 	public void sendMessage(String message) {
 		if(socket == null){
-			StatusNotification.notify("Socket not ready",StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+			StatusNotification.notify("Socket not ready", StatusNotification.TIME_SHORT);
 			return;
 		}
 		SocketMessage msg = SocketMessage.create(message);
@@ -137,7 +137,7 @@ public class SocketActivity extends AppActivity implements
 		} catch (Exception e) {
 			messages.remove(msg);
 			Log.error("Unable sent socket message",e);
-			StatusNotification.notify("Unable sent socket message.",StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+			StatusNotification.notify("Unable sent socket message.", StatusNotification.TIME_SHORT);
 		}
 	}
 

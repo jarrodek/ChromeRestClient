@@ -139,7 +139,7 @@ public class UserNotificationsFactory {
 			String msgStr = "<strong>"+SafeHtmlUtils.htmlEscape(msg.getTitle())+"</strong><br/>";
 			msgStr += SafeHtmlUtils.htmlEscape(msg.getMessage());
 			
-			StatusNotification.notify(msgStr, StatusNotification.TYPE_HTML, StatusNotification.TIME_INFINITY, false);
+			StatusNotification.notify(msgStr, StatusNotification.TIME_INFINITY);
 		}
 	}
 }

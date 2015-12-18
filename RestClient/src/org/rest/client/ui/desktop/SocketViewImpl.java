@@ -217,7 +217,7 @@ public class SocketViewImpl extends Composite implements SocketView {
 		listener.disconnect();
 		String url = urlField.getValue();
 		if(url == null || url.isEmpty()){
-			StatusNotification.notify("You must enter socket URL.", StatusNotification.TYPE_NORMAL, StatusNotification.TIME_SHORT);
+			StatusNotification.notify("You must enter socket URL.", StatusNotification.TIME_SHORT);
 			return;
 		}
 		listener.connect(url);
@@ -239,7 +239,7 @@ public class SocketViewImpl extends Composite implements SocketView {
 
 	private void doSendMessage() {
 		if(!listener.canSendMessage()){
-			StatusNotification.notify("Socket not ready.",StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+			StatusNotification.notify("Socket not ready.", StatusNotification.TIME_SHORT);
 			return;
 		}
 		

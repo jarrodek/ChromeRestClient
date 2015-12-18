@@ -106,7 +106,7 @@ public class AppRequestFactory {
 		if(RestClient.isDebug()){
 			Log.error(message, reason);
 		}
-		StatusNotification.notify(message, StatusNotification.TYPE_CRITICAL, StatusNotification.TIME_LONG, true);
+		StatusNotification.notify(message, StatusNotification.TIME_LONG);
 		eventBus.fireEvent(new RequestEndEvent(false, null, 0));
 	}
 	

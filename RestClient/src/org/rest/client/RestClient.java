@@ -42,6 +42,9 @@ import org.rest.client.task.InitializeDatabaseTask;
 import org.rest.client.task.SetSyncDataTask;
 import org.rest.client.task.TasksLoader;
 import org.rest.client.ui.RequestView;
+import org.rest.client.ui.desktop.NotificationAction;
+import org.rest.client.ui.desktop.StatusNotification;
+import org.rest.client.ui.desktop.StatusNotification.NotificationCallback;
 import org.rest.client.util.UUID;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -220,6 +223,17 @@ public class RestClient implements EntryPoint {
 				fixChromeLayout();
 				clientFactory.getEventBus().fireEvent(new ApplicationReadyEvent());
 				initializing = false;
+				StatusNotification.notify("Welcome to ARC.", StatusNotification.TIME_INFINITY);
+				NotificationAction na = new NotificationAction();
+				na.name = "Get new version";
+				na.callback = new NotificationCallback() {
+					
+					@Override
+					public void onActionPerformed() {
+						Log.info("Action performed on toast callback");
+					}
+				};
+				StatusNotification.notify("New version is available in the store!", StatusNotification.TIME_LONG, na);
 			}
 		});
 	}

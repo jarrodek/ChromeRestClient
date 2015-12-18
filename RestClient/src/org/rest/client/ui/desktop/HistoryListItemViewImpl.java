@@ -23,29 +23,37 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class HistoryListItemViewImpl extends Composite implements HistoryListItemView {
-	
-	private static HistoryListItemViewImplUiBinder uiBinder = GWT
-			.create(HistoryListItemViewImplUiBinder.class);
+
+	private static HistoryListItemViewImplUiBinder uiBinder = GWT.create(HistoryListItemViewImplUiBinder.class);
 
 	interface HistoryListItemViewImplUiBinder extends UiBinder<Widget, HistoryListItemViewImpl> {
 	}
-	
-	@UiField InlineLabel methodLabel;
-	@UiField InlineLabel urlValue;
-	@UiField InlineLabel dateLabel;
-	@UiField SpanElement encoding;
-	@UiField SpanElement payload;
-	@UiField SpanElement headers;
-	@UiField DivElement detailedPanel;
-	@UiField HTMLPanel urlLabel;
-	@UiField HTMLPanel container;
-	
+
+	@UiField
+	InlineLabel methodLabel;
+	@UiField
+	InlineLabel urlValue;
+	@UiField
+	InlineLabel dateLabel;
+	@UiField
+	SpanElement encoding;
+	@UiField
+	SpanElement payload;
+	@UiField
+	SpanElement headers;
+	@UiField
+	DivElement detailedPanel;
+	@UiField
+	HTMLPanel urlLabel;
+	@UiField
+	HTMLPanel container;
+
 	HistoryView parentList = null;
 	private int historyId = -1;
 	private boolean fullHistoryObject = false;
-	
-	public HistoryListItemViewImpl(){
-		
+
+	public HistoryListItemViewImpl() {
+
 		initWidget(uiBinder.createAndBindUi(this));
 		urlLabel.addDomHandler(new ClickHandler() {
 			@Override
@@ -59,7 +67,7 @@ public class HistoryListItemViewImpl extends Composite implements HistoryListIte
 	@Override
 	public void setPresenter(HistoryView presenter) {
 		this.parentList = presenter;
-	}	
+	}
 
 	@Override
 	public void setMethod(String method) {
@@ -70,60 +78,63 @@ public class HistoryListItemViewImpl extends Composite implements HistoryListIte
 	public void setURL(String url) {
 		this.urlValue.setText(url);
 	}
+
 	@Override
 	public void setItemId(int id) {
 		this.historyId = id;
 	}
-	
-	@UiHandler({"methodLabel"})
-	void onExpand(ClickEvent e){
+
+	@UiHandler({ "methodLabel" })
+	void onExpand(ClickEvent e) {
 		e.preventDefault();
 		doOnExpand();
 	}
+
 	@UiHandler("delete")
-	void onDeleteItem(ClickEvent e){
+	void onDeleteItem(ClickEvent e) {
 		e.preventDefault();
 		parentList.removeItem(historyId);
 		removeFromParent();
 	}
-	
-	private void doOnExpand(){
-		if(detailedPanel.getClassName().contains("hidden")){
+
+	private void doOnExpand() {
+		if (detailedPanel.getClassName().contains("hidden")) {
 			expandDetails();
 		} else {
 			hideDetails();
 		}
 	}
-	
+
 	@UiHandler("select")
-	void onSelectItem(ClickEvent e){
+	void onSelectItem(ClickEvent e) {
 		e.preventDefault();
 		parentList.onSelectedHistoryItem(historyId);
 	}
-	
-	void expandDetails(){ 
-		if(fullHistoryObject == false){
+
+	void expandDetails() {
+		if (fullHistoryObject == false) {
 			parentList.getHistoryDetails(historyId, new Callback<HistoryObject, Throwable>() {
 				@Override
 				public void onSuccess(HistoryObject result) {
-					if(result == null){
-						StatusNotification.notify("Unable to read history data :(",StatusNotification.TYPE_ERROR);
+					if (result == null) {
+						StatusNotification.notify("Unable to read history data :(");
 						return;
 					}
 					fullHistoryObject = true;
-					if(result.getPayload() != null){
+					if (result.getPayload() != null) {
 						payload.setInnerText(result.getPayload());
 					}
-					if(result.getHeaders() != null){
+					if (result.getHeaders() != null) {
 						headers.setInnerText(result.getHeaders());
 					}
-					if(result.getEncoding() != null){
+					if (result.getEncoding() != null) {
 						encoding.setInnerText(result.getEncoding());
 					}
 				}
+
 				@Override
 				public void onFailure(Throwable reason) {
-					StatusNotification.notify("Unable to read history data :(",StatusNotification.TYPE_ERROR);
+					StatusNotification.notify("Unable to read history data :(");
 				}
 			});
 			container.addStyleName("historySelected");
@@ -133,8 +144,8 @@ public class HistoryListItemViewImpl extends Composite implements HistoryListIte
 			detailedPanel.removeClassName("hidden");
 		}
 	}
-	
-	void hideDetails(){
+
+	void hideDetails() {
 		container.removeStyleName("historySelected");
 		detailedPanel.addClassName("hidden");
 	}
@@ -143,5 +154,5 @@ public class HistoryListItemViewImpl extends Composite implements HistoryListIte
 	public void setDate(Date date) {
 		String data = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(date);
 		dateLabel.setText(data);
-	}	
+	}
 }
