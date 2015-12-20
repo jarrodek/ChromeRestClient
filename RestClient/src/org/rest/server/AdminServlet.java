@@ -1,11 +1,12 @@
 package org.rest.server;
 
+import static com.googlecode.objectify.ObjectifyService.ofy;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.HashMap;
 
-import javax.jdo.PersistenceManager;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -71,31 +72,25 @@ public class AdminServlet extends HttpServlet {
 		writer.println();
 		if(payload.equals("message-add")){
 			writer.println("try add");
-			if(addNewDeveloperMessgae(params.get("title"),params.get("message"))){
+			if(addNewDeveloperMessgae(params.get("actionUrl"),params.get("message"))){
 				writer.println("added");
 			}
 		}
 		
-		
-		
-		
 		writer.println("OK");
 	}
 	
-	boolean addNewDeveloperMessgae(String title, String message){
-		
-		PersistenceManager pm = PMF.get().getPersistenceManager();
+	boolean addNewDeveloperMessgae(String actionUrl, String message){
 		try {
 			Message msg = new Message();
-			msg.setReady(true);
-			msg.setTitle(title);
+			if(actionUrl != null){
+				msg.setActionUrl(actionUrl);
+			}
 			msg.setMessage(message);
-			pm.makePersistent(msg);
+			ofy().save().entity(msg).now();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
-		} finally {
-			pm.close();
 		}
 		
 		return true;

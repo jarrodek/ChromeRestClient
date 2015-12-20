@@ -1,17 +1,17 @@
 package org.rest.client.request;
 
 public class MessageObject {
-	private final String title;
+	private final String actionUrl;
 	private final String message;
 	private final String created;
 	
-	public MessageObject(String title, String message, String created){
-		this.title = title;
+	public MessageObject(String actionUrl, String message, String created){
+		this.actionUrl = actionUrl;
 		this.message = message;
 		this.created = created;
 	}
-	public String getTitle() {
-		return title;
+	public String getActionUrl() {
+		return actionUrl;
 	}
 
 	public String getMessage() {

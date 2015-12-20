@@ -1,18 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.5" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee                http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
-
-	<!-- Test servlet -->
-	
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	version="2.5"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+	<filter>
+		<filter-name>ObjectifyFilter</filter-name>
+		<filter-class>com.googlecode.objectify.ObjectifyFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>ObjectifyFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<!-- Test servlet for dev testing -->
 	<servlet>
 		<servlet-name>TestDataServlet</servlet-name>
 		<servlet-class>org.rest.server.TestDataServlet</servlet-class>
 	</servlet>
-
 	<servlet-mapping>
 		<servlet-name>TestDataServlet</servlet-name>
 		<url-pattern>/test</url-pattern>
 	</servlet-mapping>
-	
+
 	<!-- Admin servlet -->
 	<servlet>
 		<servlet-name>AdminServlet</servlet-name>
@@ -34,7 +42,6 @@
 		<servlet-name>MessagesServlet</servlet-name>
 		<url-pattern>/messages/*</url-pattern>
 	</servlet-mapping>
-
 	<!-- Extension entry point servlet -->
 	<servlet>
 		<servlet-name>extensionEntry</servlet-name>
@@ -48,7 +55,7 @@
 		<servlet-name>extensionEntry</servlet-name>
 		<url-pattern>/ext-channel/*</url-pattern>
 	</servlet-mapping>
-	
+
 	<!-- Ping servlet -->
 	<servlet>
 		<servlet-name>pingEntry</servlet-name>
@@ -69,7 +76,7 @@
 		<servlet-name>AuthServlet</servlet-name>
 		<url-pattern>/auth/signin</url-pattern>
 	</servlet-mapping>
-	
+
 	<!-- User data -->
 	<servlet>
 		<servlet-name>UserDataServlet</servlet-name>
@@ -80,21 +87,21 @@
 		<url-pattern>/udata/*</url-pattern>
 	</servlet-mapping>
 
-	
+
 	<security-constraint>
-        <web-resource-collection>
-            <web-resource-name>Admin</web-resource-name>
-        	<url-pattern>/admin</url-pattern>
-            <url-pattern>/admin/*</url-pattern>
-            <url-pattern>/admin.jsp</url-pattern>
-        </web-resource-collection>
-        <auth-constraint>
-            <role-name>admin</role-name>
-        </auth-constraint>
-        <user-data-constraint>
-            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
-        </user-data-constraint>
-    </security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Admin</web-resource-name>
+			<url-pattern>/admin</url-pattern>
+			<url-pattern>/admin/*</url-pattern>
+			<url-pattern>/admin.jsp</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>admin</role-name>
+		</auth-constraint>
+		<user-data-constraint>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+	</security-constraint>
 
 	<!-- <filter> -->
 	<!-- <filter-name>extensionOrginFilter</filter-name> -->
@@ -112,17 +119,18 @@
 		<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>
 
-  <servlet>
-    <servlet-name>SystemServiceServlet</servlet-name>
-    <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
-    <init-param>
-      <param-name>services</param-name>
-      <param-value/>
-    </init-param>
-  </servlet>
+	<servlet>
+		<servlet-name>SystemServiceServlet</servlet-name>
+		<servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
+		<init-param>
+			<param-name>services</param-name>
+			<param-value />
+		</init-param>
+	</servlet>
 
-  <servlet-mapping>
-    <servlet-name>SystemServiceServlet</servlet-name>
-    <url-pattern>/_ah/spi/*</url-pattern>
-  </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>SystemServiceServlet</servlet-name>
+		<url-pattern>/_ah/spi/*</url-pattern>
+	</servlet-mapping>
+
 </web-app>

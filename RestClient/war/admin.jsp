@@ -15,8 +15,8 @@
 	<form action="/admin/message/add" method="post">
 		<input type="hidden" name="payload" value="message-add"/>
 		<div>
-			Title:
-			<input type="text" name="title" value="" placeholder="Title of the message"/>
+			Notification's read more destination:
+			<input type="text" name="actionUrl" value="" placeholder="click URL"/>
 		</div>
 		<div>
 			Message:

@@ -1,43 +1,56 @@
 package org.rest.server;
 
-import java.util.ArrayList;
+import static com.googlecode.objectify.ObjectifyService.ofy;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
 import javax.jdo.annotations.IdGeneratorStrategy;
-import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.gson.annotations.Expose;
+import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
 
-@PersistenceCapable
+@Entity
 public class Message {
 	
 	/**
-	 * key from userID
+	 * key for old system.
 	 */
 	@PrimaryKey
 	@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
 	private Key key;
 	
-	@Expose @Persistent private String title;
-	@Expose @Persistent private String message;
-	@Expose @Persistent private Date created;
-	@Persistent private boolean ready;
+	/**
+	 * New objectify index object.
+	 */
+	@Id Long id;
 	
-	public Message(Key key){
+	@Expose private String message;
+	/**
+	 * A date object when the message was created.
+	 * The app can query on this field.
+	 */
+	@Expose @Index private Long created;
+	/**
+	 * An URL to open when the user click on notification.
+	 */
+	@Expose private String actionUrl;
+	
+	/*public Message(Key key){
 		this.key = key;
-		this.created = new Date();
-	}
+		this.created = new Date().getTime();
+	}*/
 	
 	public Message(){
-		this.created = new Date();
+		this.created = new Date().getTime();
 	}
 
 	/**
@@ -56,81 +69,52 @@ public class Message {
 	
 	
 
-	public String getTitle() {
-		return title;
+	public String getActionUrl() {
+		return actionUrl;
 	}
 
-	public void setTitle(String title) {
-		this.title = title;
+	public void setActionUrl(String actionUrl) {
+		this.actionUrl = actionUrl;
 	}
 
 	public String getMessage() {
-		return message;
+		return actionUrl;
 	}
 
 	public void setMessage(String message) {
 		this.message = message;
 	}
 
-	public Date getCreated() {
+	public Long getCreated() {
 		return created;
 	}
 
-	public void setCreated(Date created) {
+	public void setCreated(Long created) {
 		this.created = created;
 	}
 
-	public boolean isReady() {
-		return ready;
-	}
-
-	public void setReady(boolean ready) {
-		this.ready = ready;
-	}
 	
-	
-
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("AppUser[");
 		sb.append("key=").append(KeyFactory.keyToString(key)).append(", ");
-		sb.append("title=").append(title).append(", ");
+		sb.append("actionUrl=").append(actionUrl).append(", ");
 		sb.append("message=").append(message).append(", ");
 		sb.append("created=").append(created).append(", ");
-		sb.append("ready=").append(ready);
 		sb.append("]");
 		return sb.toString();
 	}
-	
-	public static ArrayList<Message> getMessages(long since){
+	static {
+		//TODO: this can't be here: https://github.com/objectify/objectify/wiki/BestPractices
+		ObjectifyService.register(Message.class); 
+	}
+	public static List<Message> getMessages(long since){
 		if(since <= 0){
 			Calendar now = Calendar.getInstance();
-			now.add(Calendar.DAY_OF_MONTH, -7);
+			now.add(Calendar.DAY_OF_MONTH, -14);
 			since = now.getTimeInMillis();
 		}
-		
-		Date date = new Date(since);
-		PersistenceManager pm = PMF.get().getPersistenceManager();
-		
-		Query query = pm.newQuery(Message.class, "created >= createdParam && ready == true");
-	    query.declareParameters("java.util.Date createdParam");
-	    query.setOrdering("created asc");
-	    ArrayList<Message> result = new ArrayList<Message>();
-	    try {
-	        @SuppressWarnings("unchecked")
-			List<Message> results = (List<Message>) query.execute(date);
-	        if (!results.isEmpty()) {
-	            for (Message e : results) {
-	            	result.add(e);
-	            }
-	        }
-	    } catch (Exception e) {
-	    	e.printStackTrace();
-	    } finally {
-	        query.closeAll();
-	    }
-	    return result;
+		return ofy().load().type(Message.class).filter("created <", since).list();
 	}
-	
 }

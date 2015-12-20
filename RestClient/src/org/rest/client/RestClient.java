@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.rest.client.StatusNotification.NotificationCallback;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.ApplicationReadyEvent;
 import org.rest.client.event.NewProjectAvailableEvent;
@@ -205,8 +204,6 @@ public class RestClient implements EntryPoint {
 			@Override
 			public void onSuccess(Void result) {
 				RootPanel.get("appContainer").add(appWidget);
-				
-				
 				//
 				// Special Tokens
 				// import/{UID} import data from Applications server
@@ -221,17 +218,6 @@ public class RestClient implements EntryPoint {
 				fixChromeLayout();
 				clientFactory.getEventBus().fireEvent(new ApplicationReadyEvent());
 				initializing = false;
-				StatusNotification.notify("Welcome to ARC.", StatusNotification.TIME_INFINITY);
-				NotificationAction na = new NotificationAction();
-				na.name = "Get new version";
-				na.callback = new NotificationCallback() {
-					
-					@Override
-					public void onActionPerformed() {
-						Log.info("Action performed on toast callback");
-					}
-				};
-				StatusNotification.notify("New version is available in the store!", StatusNotification.TIME_LONG, na);
 			}
 		});
 	}
