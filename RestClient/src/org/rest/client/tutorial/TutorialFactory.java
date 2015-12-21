@@ -16,6 +16,7 @@ import com.google.gwt.chrome.storage.StorageResult;
 import com.google.gwt.chrome.storage.SyncStorageArea;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
@@ -64,15 +65,26 @@ public class TutorialFactory {
 			return;
 		}
 		Storage store = GWT.create(Storage.class);
-		store.getSync().get(StoreKeys.TUTORIALS, new StorageArea.StorageItemCallback<JsArrayString>() {
+		JSONObject jo = new JSONObject();
+		jo.put(StoreKeys.TUTORIALS, new JSONArray(null));
+		store.getSync().get(jo.getJavaScriptObject(), new StorageArea.StorageItemsCallback() {
 
 			@Override
-			public void onResult(StorageResult<JsArrayString> data) {
-				if(data == null){
+			public void onError(String message) {
+				if(RestClient.isDebug()){
+					Log.error("TutorialFactory::checkStatus - " + message);
+				}
+				callback.onFailure(new Throwable(message));
+			}
+
+			@Override
+			public void onResult(JavaScriptObject result) {
+				if(result == null){
 					canRun = true;
 					callback.onSuccess(canRun);
 					return;
 				}
+				StorageResult<JsArrayString> data = result.cast();
 				JsArrayString arr = (JsArrayString) data.getObject(StoreKeys.TUTORIALS);
 				if(arr == null){
 					canRun = true;
@@ -83,14 +95,6 @@ public class TutorialFactory {
 					canRun = false;
 				}
 				callback.onSuccess(canRun);
-			}
-
-			@Override
-			public void onError(String message) {
-				if(RestClient.isDebug()){
-					Log.error("TutorialFactory::checkStatus - " + message);
-				}
-				callback.onFailure(new Throwable(message));
 			}
 		});
 	}
@@ -108,16 +112,28 @@ public class TutorialFactory {
 		if(alwaysRun) return;
 		Storage store = GWT.create(Storage.class);
 		final SyncStorageArea sync = store.getSync();
-		sync.get(StoreKeys.TUTORIALS, new StorageArea.StorageItemCallback<JsArrayString>() {
+		JSONObject jo = new JSONObject();
+		jo.put(StoreKeys.TUTORIALS, new JSONArray(null));
+		sync.get(jo.getJavaScriptObject(), new StorageArea.StorageItemsCallback() {
 
 			@Override
-			public void onResult(StorageResult<JsArrayString> data) {
+			public void onError(String message) {
+				if(RestClient.isDebug()){
+					Log.error("TutorialFactory::preserveFuturerTutorials (sync.get) - " + message);
+				}
+			}
+
+			@Override
+			public void onResult(JavaScriptObject result) {
+				StorageResult<JsArrayString> data = result.cast();
 				JSONArray arr = new JSONArray();
 				if(data != null){
 					JsArrayString existing = (JsArrayString) data.getObject(StoreKeys.TUTORIALS);
-					int len = existing.length();
-					for(int i=0; i<len; i++){
-						arr.set(arr.size(), new JSONString(existing.get(i)));
+					if(existing != null){
+						int len = existing.length();
+						for(int i=0; i<len; i++){
+							arr.set(arr.size(), new JSONString(existing.get(i)));
+						}
 					}
 				}
 				arr.set(arr.size(), new JSONString(tutorialName));
@@ -138,13 +154,6 @@ public class TutorialFactory {
 						
 					}
 				});
-			}
-
-			@Override
-			public void onError(String message) {
-				if(RestClient.isDebug()){
-					Log.error("TutorialFactory::preserveFuturerTutorials (sync.get) - " + message);
-				}
 			}
 		});
 	}

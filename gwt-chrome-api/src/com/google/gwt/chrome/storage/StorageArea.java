@@ -143,18 +143,6 @@ public interface StorageArea {
 	void remove(String[] keys, StorageSimpleCallback callback);
 
 	/**
-	 * Gets item from storage.
-	 * 
-	 * @param key
-	 *            A single key to get. Pass in null to get the entire contents
-	 *            of storage.
-	 * @param callback
-	 *            Callback with storage item, or on failure (in which case
-	 *            chrome.runtime.lastError will be set).
-	 */
-	@SuppressWarnings("rawtypes")
-	void get(String key, StorageItemCallback callback);
-	/**
 	 * Gets all items from storage.
 	 * 
 	 * @param callback
@@ -162,18 +150,6 @@ public interface StorageArea {
 	 *            chrome.runtime.lastError will be set).
 	 */
 	void get(StorageItemsCallback callback);
-
-	/**
-	 * Gets items from storage.
-	 * 
-	 * @param keys
-	 *            A list of keys to get. An empty list or object will return an
-	 *            empty result object.
-	 * @param callback
-	 *            Callback with storage items, or on failure (in which case
-	 *            chrome.runtime.lastError will be set).
-	 */
-	void get(String[] keys, StorageItemsCallback callback);
 
 	/**
 	 * Gets items from storage.

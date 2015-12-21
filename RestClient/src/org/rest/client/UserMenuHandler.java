@@ -25,9 +25,11 @@ import org.rest.client.ui.MenuView;
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea;
-import com.google.gwt.chrome.storage.StorageArea.StorageItemCallback;
+import com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback;
 import com.google.gwt.chrome.storage.StorageResult;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceChangeEvent;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -229,7 +231,9 @@ public class UserMenuHandler {
 
 		Storage store = GWT.create(Storage.class);
 		StorageArea syncStore = store.getSync();
-		syncStore.get(StoreKeys.HISTORY_KEY, new StorageItemCallback<Boolean>() {
+		JSONObject jo = new JSONObject();
+		jo.put(StoreKeys.HISTORY_KEY, new JSONObject(null));
+		syncStore.get(jo.getJavaScriptObject(), new StorageItemsCallback() {
 
 			@Override
 			public void onError(String message) {
@@ -237,17 +241,18 @@ public class UserMenuHandler {
 			}
 
 			@Override
-			public void onResult(StorageResult<Boolean> data) {
+			public void onResult(JavaScriptObject result) {
+				StorageResult<Boolean> data = result.cast();
 				Boolean value = true;
 				if (data == null) {
-					Log.warn("Unable to cast property from local storage, UserMenuHandler::bind");
-					logNative(data);
+					if(RestClient.isDebug()){
+						Log.warn("Unable to cast property from local storage, UserMenuHandler::bind");
+					}
 				} else {
 					try {
 						value = data.getBoolean(StoreKeys.HISTORY_KEY);
 					} catch (Exception e) {
 						Log.warn("Unable to cast property from local storage (HISTORY_KEY).", e);
-						logNative(data);
 					}
 				}
 				if (!value) {

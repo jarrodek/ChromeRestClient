@@ -23,6 +23,7 @@ import com.google.gwt.chrome.storage.StorageArea;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
 import com.google.gwt.chrome.storage.StorageResult;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.json.client.JSONNumber;
@@ -64,18 +65,9 @@ public class FirstRunTask implements LoadTask {
 		if(loaderWidget != null){
 			loaderWidget.setText("Initialize...");
 		}
-		
-		localStorage.get(FIRST_RUN_FLAG, new StorageArea.StorageItemCallback<Double>() {
-			@Override
-			public void onResult(StorageResult<Double> data) {
-				if(data != null){
-					callback.onInnerTaskFinished(getTasksCount());
-					callback.onSuccess();
-					return;
-				}
-				callback.onInnerTaskFinished(1);
-				downloadDefinitionsTask();
-			}
+		JSONObject jo = new JSONObject();
+		jo.put(FIRST_RUN_FLAG, new JSONObject(null));
+		localStorage.get(jo.getJavaScriptObject(), new StorageArea.StorageItemsCallback() {
 
 			@Override
 			public void onError(String message) {
@@ -83,6 +75,24 @@ public class FirstRunTask implements LoadTask {
 				Log.error("Nope, something's not right :( " + message);
 				callback.onInnerTaskFinished(getTasksCount());
 				callback.onSuccess();
+			}
+
+			@Override
+			public void onResult(JavaScriptObject result) {
+				if(result != null){
+					StorageResult<Double> data = result.cast();
+					if(data != null){
+						Double d = data.getDouble(FIRST_RUN_FLAG);
+						if(d != null){
+							callback.onInnerTaskFinished(getTasksCount());
+							callback.onSuccess();
+							return;
+						}
+					}
+				}
+				
+				callback.onInnerTaskFinished(1);
+				downloadDefinitionsTask();
 			}
 		});
 	}

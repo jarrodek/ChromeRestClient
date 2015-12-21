@@ -1,8 +1,6 @@
 package com.google.gwt.chrome.storage;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
 
 /**
  * Items under the "local" storage area are local to each machine.
@@ -69,45 +67,6 @@ public class LocalStorageArea implements StorageArea {
 			callback.@com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback::onDone()();
 		}));
 	}-*/;
-
-	@Override
-	public void get(final String key, @SuppressWarnings("rawtypes") final StorageItemCallback callback) {
-		JSONObject obj = new JSONObject();
-		obj.put(key, null);
-		get(obj.getJavaScriptObject(), new StorageItemsCallback() {
-			@SuppressWarnings({ "rawtypes", "unchecked" })
-			@Override
-			public void onResult(JavaScriptObject data) {
-				if(data == null){
-					callback.onResult(null);
-					return;
-				}
-				StorageResult obj = data.cast();
-				String[] keys = obj.getKeys();
-				for(String _key : keys){
-					if(_key.equals(key)){
-						callback.onResult(obj);
-						return;
-					}
-				}
-				callback.onResult(null);
-			}
-			
-			@Override
-			public void onError(String message) {
-				callback.onError(message);
-			}
-		});
-	}
-
-	@Override
-	public void get(String[] keys, StorageItemsCallback callback) {
-		JSONObject obj = new JSONObject();
-		for(String key : keys){
-			obj.put(key, new JSONString(""));
-		}
-		get(obj.getJavaScriptObject(), callback);
-	}
 
 	@Override
 	public final native void get(JavaScriptObject keysWithDefaults,

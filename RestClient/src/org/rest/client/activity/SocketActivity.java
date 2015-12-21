@@ -40,6 +40,7 @@ import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
 import com.google.gwt.chrome.storage.StorageResult;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.shared.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.JSONObject;
@@ -93,23 +94,26 @@ public class SocketActivity extends AppActivity implements
 	
 	private void restoreLatestSocket(){
 		Storage store = GWT.create(Storage.class);
-		store.getSync().get(StoreKeys.LATEST_SOCKET_URL, new StorageArea.StorageItemCallback<String>() {
-
-			@Override
-			public void onResult(StorageResult<String> data) {
-				if(data == null){
-					return;
-				}
-				String latest = data.get(StoreKeys.LATEST_SOCKET_URL);
-				if(latest != null){
-					view.setUrl(socketUrl);
-				}
-			}
+		JSONObject jo = new JSONObject();
+		jo.put(StoreKeys.LATEST_SOCKET_URL, new JSONObject(null));
+		store.getSync().get(jo.getJavaScriptObject(), new StorageArea.StorageItemsCallback() {
 
 			@Override
 			public void onError(String message) {
 				if(RestClient.isDebug()){
 					Log.error("SocketActivity::restoreLatestSocket - " + message);
+				}
+			}
+
+			@Override
+			public void onResult(JavaScriptObject result) {
+				StorageResult<String> data = result.cast();
+				if(data == null){
+					return;
+				}
+				String latest = data.get(StoreKeys.LATEST_SOCKET_URL);
+				if(latest != null){
+					view.setUrl(latest);
 				}
 			}
 		});

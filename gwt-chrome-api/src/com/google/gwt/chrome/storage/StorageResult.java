@@ -30,7 +30,17 @@ public class StorageResult<T> extends JavaScriptObject {
 	 * @return
 	 */
 	public final native Boolean getBoolean(String key) /*-{
-		return new Boolean(this[key]);
+		if(!(key in this) || this[key] === null || this[key] === undefined){
+			return null;
+		}
+		if(typeof this[key] !== 'boolean'){
+			console.warn('Trying to cast ' + key + ' key on object ' , this , ' to boolean but it is a type of ', typeof this[key]);
+			return null;
+		}
+		if(this[key]){
+			return @java.lang.Boolean::TRUE;
+		}
+		return @java.lang.Boolean::FALSE;
 	}-*/;
 	/**
 	 * Get double value for given key.
@@ -38,7 +48,14 @@ public class StorageResult<T> extends JavaScriptObject {
 	 * @return
 	 */
 	public final native Double getDouble(String key) /*-{
-		return new Boolean(this[key]);
+		if(!(key in this) || this[key] === null || this[key] === undefined){
+			return null;
+		}
+		if(typeof this[key] !== 'number'){
+			console.warn('Trying to cast ' + key + ' key on object ' , this , ' to number but it is a type of ', typeof this[key]);
+			return null;
+		}
+		return @java.lang.Double::new(D)(this[key]);
 	}-*/;
 	/**
 	 * Get JavaScriptObject value for given key.

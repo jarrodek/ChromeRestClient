@@ -240,8 +240,8 @@ public class ChromeCSmessagePassingImpl implements ChromeMessagePassing {
 				return;
 			}
 			if(@com.google.gwt.chrome.message.ChromeCSmessagePassingImpl::isDebug){
-				console.log('Full response from background page:', response);
-				console.log('Response from background page (type):', typeof response.result);
+				console.log(response['source-data']['payload'], response['source-data']['params'], response.result);
+				console.log('From background page:', response);
 			}
 			if(response.error){
 				handler.@com.google.gwt.chrome.message.ChromeMessageReceiver::onBackgroundError(Ljava/lang/String;)(response.error);
@@ -264,6 +264,7 @@ public class ChromeCSmessagePassingImpl implements ChromeMessagePassing {
 		JSONObject respObj = new JSONObject();
 		respObj.put("source", new JSONString("gwt:host"));
 		respObj.put("payload", new JSONString(payload));
+		
 		return respObj;
 	}
 	

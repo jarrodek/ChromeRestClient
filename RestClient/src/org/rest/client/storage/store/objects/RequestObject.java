@@ -17,12 +17,13 @@ package org.rest.client.storage.store.objects;
 
 import java.util.ArrayList;
 
+import org.rest.client.RestClient;
 import org.rest.client.request.FilesObject;
 import org.rest.client.storage.store.StoreKeys;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.storage.Storage;
-import com.google.gwt.chrome.storage.StorageArea.StorageItemCallback;
+import com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
 import com.google.gwt.chrome.storage.StorageResult;
 import com.google.gwt.core.client.Callback;
@@ -445,21 +446,26 @@ public class RequestObject extends JavaScriptObject {
 	 */
 	public static void restoreLatest(final Callback<RequestObject, Throwable> callback){
 		Storage store = GWT.create(Storage.class);
-		store.getLocal().get(StoreKeys.LATEST_REQUEST_KEY, new StorageItemCallback<RequestObject>() {
+		JSONObject jo = new JSONObject();
+		jo.put(StoreKeys.LATEST_REQUEST_KEY, new JSONObject(null));
+		store.getLocal().get(jo.getJavaScriptObject(), new StorageItemsCallback() {
 			
 			@Override
 			public void onError(String message) {
-				
+				if(RestClient.isDebug()){
+					Log.error("RequestObject::restoreLatest - " + message);
+				}
 			}
 
 			@Override
-			public void onResult(StorageResult<RequestObject> data) {
-				if(data == null){
+			public void onResult(JavaScriptObject data) {
+				StorageResult<RequestObject> result = data.cast();
+				if(result == null){
 					callback.onSuccess(null);
 					return;
 				}
-				RequestObject ro = data.getObject(StoreKeys.LATEST_REQUEST_KEY).cast();
-				if(ro == null){
+				RequestObject ro = result.getObject(StoreKeys.LATEST_REQUEST_KEY).cast();
+				if(ro != null){
 					callback.onSuccess(ro);
 				} else {
 					Log.error("Error perform RequestObject::restoreLatest. Result is null.");

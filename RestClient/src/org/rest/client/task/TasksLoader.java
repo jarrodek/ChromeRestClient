@@ -153,7 +153,9 @@ public class TasksLoader {
 	}
 	
 	private static void callTask(final LoadTask task, final boolean tryAgainOnFailure){
-		
+		if(RestClient.isDebug()){
+			Log.debug("Calling task: " + task.getClass().getSimpleName());
+		}
 		task.run(new TasksCallback() {
 			
 			@Override
