@@ -1,4 +1,8 @@
-<!-- Indices written at Mon, 21 Dec 2015 06:04:13 GMT -->
+<!-- Indices written at Mon, 21 Dec 2015 13:47:23 GMT -->
 
-<datastore-indexes/>
-
+<datastore-indexes>
+    <!-- Used 2 times in query history -->
+    <datastore-index kind="RequestItem" ancestor="true" source="auto">
+        <property name="createDate" direction="desc"/>
+    </datastore-index>
+</datastore-indexes>

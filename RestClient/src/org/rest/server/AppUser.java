@@ -8,30 +8,24 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.annotations.Element;
 import javax.jdo.annotations.Extension;
 import javax.jdo.annotations.Order;
+import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.User;
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.Index;
-import com.googlecode.objectify.condition.IfNotNull;
 
-@Entity
+@PersistenceCapable
 public class AppUser {
 	/**
 	 * key from userID
 	 */
 	@PrimaryKey
-	@Index(IfNotNull.class) private Key key;
+	@Persistent
+	private Key key;
 	
-	/**
-	 * New objectify index object.
-	 */
-	@Id Long id;
-	
+	@Persistent
     private User user;
 	
 	/**

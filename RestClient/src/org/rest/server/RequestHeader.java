@@ -1,28 +1,23 @@
 package org.rest.server;
 
 import javax.jdo.annotations.IdGeneratorStrategy;
+import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
-
-@Entity
+@PersistenceCapable
 public class RequestHeader {
-	
-	/**
-	 * New objectify index object.
-	 */
-	@Id Long id;
 	
 	@PrimaryKey
     @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
     private Key key;
 	
+	@Persistent
     private String name;
-	private String value;
+	@Persistent
+    private String value;
 	
 	RequestHeader(){}
 	
