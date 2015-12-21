@@ -6,9 +6,13 @@ import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.objects.RequestObject;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.chrome.storage.Storage;
+import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
-import com.google.gwt.storage.client.Storage;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 
 /**
  * This class is responsible for Google Drive integration.
@@ -110,8 +114,22 @@ public class GoogleDrive {
 					return;
 				}
 				
-				Storage storage = Storage.getLocalStorageIfSupported();
-				storage.setItem(StoreKeys.LATEST_GDRIVE_FOLDER, folderId);
+				Storage store = GWT.create(Storage.class);
+				JSONObject jo = new JSONObject();
+				try{
+					jo.put(StoreKeys.LATEST_GDRIVE_FOLDER, new JSONString(folderId));
+				} catch(Exception e){}
+				store.getLocal().set(jo.getJavaScriptObject(), new StorageSimpleCallback() {
+					@Override
+					public void onError(String message) {
+						if(RestClient.isDebug()){
+							Log.debug("GoogleDrive::saveRequestFile > DriveApi.showForlderPicker - " + message);
+						}
+					}
+					
+					@Override
+					public void onDone() {}
+				});
 				
 				DriveApi.insertNewFile(folderId, obj.getName(), obj, new DriveApi.FileUploadHandler() {
 					@Override

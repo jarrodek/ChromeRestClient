@@ -13,7 +13,6 @@ import org.rest.client.gdrive.DriveFileItem;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.URLParser;
 import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
@@ -33,7 +32,6 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -76,8 +74,6 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	String requestOrygURL = "";
 	int overwriteId = -1;
 	boolean forceOverwrite = false;
-	String gDriveItem = null;
-	private String gDriveCreateFolder = null;
 	
 	public SaveRequestDialogViewImpl(){
 		setPreviewURL();
@@ -137,19 +133,10 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		//
 		//check if it is a restored request. The user may want to overwrite existing request.
 		//
-		Storage store = Storage.getSessionStorageIfSupported();
-		String restored = store.getItem(StoreKeys.RESTORED_REQUEST);
-		gDriveItem = store.getItem(StoreKeys.CURRENT_GOOGLE_DRIVE_ITEM);
-		gDriveCreateFolder = store.getItem(StoreKeys.GOOGLE_DRIVE_CREATE_FOLDER_ID);
-		
-		if(restored != null && !restored.isEmpty()){
-			int restoredId = -1;
-			try{
-				restoredId = Integer.parseInt(restored);
-			} catch(Exception e){}
-			if(restoredId > 0){
-				overwriteId = restoredId;
-				RestClient.getClientFactory().getRequestDataStore().getByKey(restoredId, new StoreResultCallback<RequestObject>(){
+		if(RestClient.RESTORED_REQUEST != null){
+			if(RestClient.RESTORED_REQUEST > 0){
+				overwriteId = RestClient.RESTORED_REQUEST;
+				RestClient.getClientFactory().getRequestDataStore().getByKey(RestClient.RESTORED_REQUEST, new StoreResultCallback<RequestObject>(){
 					@Override
 					public void onSuccess(RequestObject result) {
 						if (result == null) {
@@ -169,7 +156,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 					}});
 			}
 		}
-		if(gDriveItem != null && !gDriveItem.isEmpty()){
+		if(RestClient.CURRENT_GOOGLE_DRIVE_ITEM != null && !RestClient.CURRENT_GOOGLE_DRIVE_ITEM.isEmpty()){
 			RestClient.collectRequestData(new Callback<RequestObject, Throwable>() {
 				@Override
 				public void onSuccess(RequestObject result) {
@@ -190,7 +177,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 					}
 				}
 			});
-		} else if(gDriveCreateFolder != null && !gDriveCreateFolder.isEmpty()){
+		} else if(RestClient.GOOGLE_DRIVE_CREATE_FOLDER_ID != null && !RestClient.GOOGLE_DRIVE_CREATE_FOLDER_ID.isEmpty()){
 			overwrite.setVisible(false);
 			save.setVisible(false);
 			addToProject.setEnabled(false);
@@ -353,7 +340,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		overwrite.setEnabled(false);
 		forceOverwrite = true;
 		
-		if(gDriveItem != null && !gDriveItem.isEmpty()){
+		if(RestClient.CURRENT_GOOGLE_DRIVE_ITEM != null && !RestClient.CURRENT_GOOGLE_DRIVE_ITEM.isEmpty()){
 			doSaveGdrive();
 			return;
 		}
@@ -412,7 +399,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				if(!forceOverwrite){
 					result.setName(name.getValue());
 				} else {
-					result.setGDriveId(gDriveItem);
+					result.setGDriveId(RestClient.CURRENT_GOOGLE_DRIVE_ITEM);
 				}
 				result.setSkipHeaders(headersStatus.getValue());
 				result.setSkipHistory(tokenStatus.getValue());
@@ -422,11 +409,11 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				result.setSkipProtocol(protocolStatus.getValue());
 				result.setSkipServer(serverStatus.getValue());
 				result.setSkipPath(pathStatus.getValue());
-				if(gDriveCreateFolder != null && gDriveCreateFolder.isEmpty()){
-					gDriveCreateFolder = null;
+				if(RestClient.GOOGLE_DRIVE_CREATE_FOLDER_ID != null){
+					RestClient.GOOGLE_DRIVE_CREATE_FOLDER_ID = null;
 				}
 				
-				GoogleDrive.saveRequestFile(result, gDriveCreateFolder, new Callback<DriveFileItem, Throwable>() {
+				GoogleDrive.saveRequestFile(result, RestClient.GOOGLE_DRIVE_CREATE_FOLDER_ID, new Callback<DriveFileItem, Throwable>() {
 					
 					@Override
 					public void onSuccess(DriveFileItem result) {
@@ -440,10 +427,8 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 						
 						dialog.hide();
 						StatusNotification.notify("File saved", StatusNotification.TIME_SHORT);
-						
-						Storage store = Storage.getSessionStorageIfSupported();
-						store.removeItem(StoreKeys.CURRENT_GOOGLE_DRIVE_ITEM);
-						store.removeItem(StoreKeys.GOOGLE_DRIVE_CREATE_FOLDER_ID);
+						RestClient.CURRENT_GOOGLE_DRIVE_ITEM = null;
+						RestClient.GOOGLE_DRIVE_CREATE_FOLDER_ID = null;
 						
 						RestClient.getClientFactory().getPlaceController().goTo(RequestPlace.Tokenizer.fromDriveFile(result.getId()));
 					}
@@ -543,7 +528,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 					public void onSuccess(RequestObject result) {
 						save.setEnabled(true);
 						dialog.hide();
-//						if(gDriveItem != null && !gDriveItem.isEmpty()){
+//						if(RestClient.CURRENT_GOOGLE_DRIVE_ITEM != null && !RestClient.CURRENT_GOOGLE_DRIVE_ITEM.isEmpty()){
 						RestClient.getClientFactory().getPlaceController().goTo(RequestPlace.Tokenizer.fromSaved(result.getId()));
 //						}
 					}

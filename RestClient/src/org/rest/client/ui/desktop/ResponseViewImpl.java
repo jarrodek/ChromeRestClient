@@ -45,6 +45,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.PreElement;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -56,13 +57,11 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.ScrollEvent;
@@ -103,8 +102,6 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	private boolean success = false;
 	private Response response;
 	private long requestTime;
-	private final static String COLLAPSED_REQUEST_HEADERS_KEY = "resp_panel_crqhk";
-	private final static String COLLAPSED_RESPONSE_HEADERS_KEY = "resp_panel_crshk";
 	
 	@UiField StatusCodeImage codeImage;
 	@UiField InlineLabel loadingTime;
@@ -177,15 +174,13 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		}, MouseOutEvent.getType());
 		
 		
-		Storage sessionStore = Storage.getSessionStorageIfSupported();
-		String rqhk = sessionStore.getItem(COLLAPSED_REQUEST_HEADERS_KEY);
-		String rshk = sessionStore.getItem(COLLAPSED_RESPONSE_HEADERS_KEY);
-		if(rqhk != null && rqhk.equals("1")){
+		
+		if(RestClient.COLLAPSED_REQUEST_HEADERS){
 			requestHeadersContainer.addStyleName("headersCollapsed");
 			collapseRequestHeaders.removeStyleName(style.collapseButton);
 			collapseRequestHeaders.addStyleName(style.expandButton);
 		}
-		if(rshk != null && rshk.equals("1")){
+		if(RestClient.COLLAPSED_RESPONSE_HEADERS){
 			responseHeadersContainer.addStyleName("headersCollapsed");
 			collapseResponseHeaders.removeStyleName(style.collapseButton);
 			collapseResponseHeaders.addStyleName(style.expandButton);
@@ -971,33 +966,33 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	@UiHandler("collapseResponseHeaders")
 	void onCollapseResponseHeaders(ClickEvent e){
 		e.preventDefault();
-		Storage sessionStore = Storage.getSessionStorageIfSupported();
+		
 		if(responseHeadersContainer.getStyleName().contains("headersCollapsed")){
 			responseHeadersContainer.removeStyleName("headersCollapsed");
 			collapseResponseHeaders.removeStyleName(style.expandButton);
 			collapseResponseHeaders.addStyleName(style.collapseButton);
-			sessionStore.setItem(COLLAPSED_RESPONSE_HEADERS_KEY, "0");
+			RestClient.COLLAPSED_RESPONSE_HEADERS = false;
 		} else {
 			responseHeadersContainer.addStyleName("headersCollapsed");
 			collapseResponseHeaders.removeStyleName(style.collapseButton);
 			collapseResponseHeaders.addStyleName(style.expandButton);
-			sessionStore.setItem(COLLAPSED_RESPONSE_HEADERS_KEY, "1");
+			RestClient.COLLAPSED_RESPONSE_HEADERS = true;
 		}
 	}
 	@UiHandler("collapseRequestHeaders")
 	void onCollapseRequestHeaders(ClickEvent e){
 		e.preventDefault();
-		Storage sessionStore = Storage.getSessionStorageIfSupported();
+		
 		if(requestHeadersContainer.getStyleName().contains("headersCollapsed")){
 			requestHeadersContainer.removeStyleName("headersCollapsed");
 			collapseRequestHeaders.removeStyleName(style.expandButton);
 			collapseRequestHeaders.addStyleName(style.collapseButton);
-			sessionStore.setItem(COLLAPSED_REQUEST_HEADERS_KEY, "0");
+			RestClient.COLLAPSED_REQUEST_HEADERS = false;
 		} else {
 			requestHeadersContainer.addStyleName("headersCollapsed");
 			collapseRequestHeaders.removeStyleName(style.collapseButton);
 			collapseRequestHeaders.addStyleName(style.expandButton);
-			sessionStore.setItem(COLLAPSED_REQUEST_HEADERS_KEY, "1");
+			RestClient.COLLAPSED_REQUEST_HEADERS = true;
 		}
 		
 	}

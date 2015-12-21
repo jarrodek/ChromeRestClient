@@ -13,6 +13,7 @@ import org.rest.client.storage.websql.ExportedDataItem;
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
@@ -123,7 +124,7 @@ public abstract class DataExport {
 			handler.onEmptyData();
 			return;
 		}
-		JSONObject data = new JSONObject();
+		final JSONObject data = new JSONObject();
 		JSONArray arr = new JSONArray();
 		for (RequestObject item : readyToSendList) {
 			RestForm row = new RestForm();
@@ -154,10 +155,23 @@ public abstract class DataExport {
 
 		}
 		data.put("d", arr);
-		data.put("i", new JSONString(RestClient.getAppId()));
 		allDataList = null;
 		excludeList = null;
-		handler.onPrepare(data);
+		
+		RestClient.getAppId(new Callback<String, Throwable>() {
+			
+			@Override
+			public void onSuccess(String result) {
+				data.put("i", new JSONString(result));
+				handler.onPrepare(data);
+			}
+			
+			@Override
+			public void onFailure(Throwable reason) {
+				//TODO: error message to the user.
+				handler.onEmptyData();
+			}
+		});
 	}
 
 	/**

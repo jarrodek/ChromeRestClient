@@ -94,7 +94,7 @@ public class SyncAdapter {
 		chromeStore.addChangeHandler(new Storage.StorageChangeHandler() {
 			@Override
 			public void onChange(StorageChangeObject data, String areaName) {
-				if(areaName.equals(com.google.gwt.chrome.storage.Storage.SYNC)){
+				if(areaName.equals(Storage.SYNC)){
 					sync(new Callback<Void, Void>() {
 
 						@Override

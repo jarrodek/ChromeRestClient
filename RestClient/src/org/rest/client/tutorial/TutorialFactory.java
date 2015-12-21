@@ -2,19 +2,28 @@ package org.rest.client.tutorial;
 
 import java.util.ArrayList;
 
+import org.rest.client.RestClient;
+import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.ui.TutorialDialog;
 import org.rest.client.ui.TutorialDialog.Controls;
 import org.rest.client.ui.desktop.TutorialDialogImpl;
 
+import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.chrome.storage.Storage;
+import com.google.gwt.chrome.storage.StorageArea;
+import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
+import com.google.gwt.chrome.storage.StorageResult;
+import com.google.gwt.chrome.storage.SyncStorageArea;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.ui.RootPanel;
 
 public class TutorialFactory {
-	private final String STORAGE_KEY = "tutorials";
+	
 	private final String tutorialName;
 	private ArrayList<TutorialDialog> items = new ArrayList<TutorialDialog>();
 	private TutorialDialog currentItem = null;
@@ -25,7 +34,6 @@ public class TutorialFactory {
 	public TutorialFactory(String tutorialName) {
 		this.tutorialName = tutorialName;
 		this.alwaysRun = false;
-		checkTutorialStatus();
 	}
 	/**
 	 * Initialize tutorial factory without checking if tutorial has been already seen
@@ -39,8 +47,8 @@ public class TutorialFactory {
 	}
 	
 	
-	public boolean canStartTutorial(){
-		return canRun;
+	public void canStartTutorial(final Callback<Boolean, Throwable> callback){
+		checkStatus(callback);
 	}
 	
 	
@@ -49,31 +57,42 @@ public class TutorialFactory {
 	 * Check if local store contains this tutorial name. If it does, don't show
 	 * tutorial.
 	 */
-	private void checkTutorialStatus() {
+	private void checkStatus(final Callback<Boolean, Throwable> callback) {
 		if(alwaysRun){
 			canRun = true;
+			callback.onSuccess(canRun);
 			return;
 		}
-		Storage store = Storage.getLocalStorageIfSupported();
-		String pastTutorials = store.getItem(STORAGE_KEY);
-		if (pastTutorials == null || pastTutorials.isEmpty()) {
-			canRun = true;
-			return;
-		}
+		Storage store = GWT.create(Storage.class);
+		store.getSync().get(StoreKeys.TUTORIALS, new StorageArea.StorageItemCallback<JsArrayString>() {
 
-		try {
-			JSONArray val = JSONParser.parseStrict(pastTutorials).isArray();
-			int len = val.size();
-			for (int i = 0; i < len; i++) {
-				String _name = val.get(i).isString().stringValue();
-				if (_name == null)
-					continue;
-				if (tutorialName.equals(_name)) {
+			@Override
+			public void onResult(StorageResult<JsArrayString> data) {
+				if(data == null){
+					canRun = true;
+					callback.onSuccess(canRun);
 					return;
 				}
+				JsArrayString arr = (JsArrayString) data.getObject(StoreKeys.TUTORIALS);
+				if(arr == null){
+					canRun = true;
+					callback.onSuccess(canRun);
+					return;
+				}
+				if(arr.join(";").indexOf(tutorialName) != -1){
+					canRun = false;
+				}
+				callback.onSuccess(canRun);
 			}
-		} catch (Exception e) {}
-		canRun = true;
+
+			@Override
+			public void onError(String message) {
+				if(RestClient.isDebug()){
+					Log.error("TutorialFactory::checkStatus - " + message);
+				}
+				callback.onFailure(new Throwable(message));
+			}
+		});
 	}
 
 	public static TutorialDialog createItem() {
@@ -85,23 +104,49 @@ public class TutorialFactory {
 		items.add(item);
 	}
 	
-	
 	private void preserveFuturerTutorials(){
 		if(alwaysRun) return;
-		Storage store = Storage.getLocalStorageIfSupported();
-		String pastTutorials = store.getItem(STORAGE_KEY);
-		JSONArray val = null;
-		if (pastTutorials == null || pastTutorials.isEmpty()) {
-			val = new JSONArray();
-		} else {
-			try {
-				val = JSONParser.parseStrict(pastTutorials).isArray();
-			} catch (Exception e) {
-				val = new JSONArray();
+		Storage store = GWT.create(Storage.class);
+		final SyncStorageArea sync = store.getSync();
+		sync.get(StoreKeys.TUTORIALS, new StorageArea.StorageItemCallback<JsArrayString>() {
+
+			@Override
+			public void onResult(StorageResult<JsArrayString> data) {
+				JSONArray arr = new JSONArray();
+				if(data != null){
+					JsArrayString existing = (JsArrayString) data.getObject(StoreKeys.TUTORIALS);
+					int len = existing.length();
+					for(int i=0; i<len; i++){
+						arr.set(arr.size(), new JSONString(existing.get(i)));
+					}
+				}
+				arr.set(arr.size(), new JSONString(tutorialName));
+				JSONObject jo = new JSONObject();
+				jo.put(StoreKeys.TUTORIALS, arr);
+				sync.set(jo.getJavaScriptObject(), new StorageSimpleCallback() {
+					
+					@Override
+					public void onError(String message) {
+						if(RestClient.isDebug()){
+							Log.error("TutorialFactory::preserveFuturerTutorials (sync.set) - " + message);
+						}
+					}
+					
+					@Override
+					public void onDone() {
+						// TODO Auto-generated method stub
+						
+					}
+				});
 			}
-		}
-		val.set(val.size(), new JSONString(tutorialName));
-		store.setItem(STORAGE_KEY, val.toString());
+
+			@Override
+			public void onError(String message) {
+				if(RestClient.isDebug()){
+					Log.error("TutorialFactory::preserveFuturerTutorials (sync.get) - " + message);
+				}
+			}
+		});
 	}
 	
 	public void start(){

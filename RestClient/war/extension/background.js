@@ -617,7 +617,9 @@ arc.app.bg.performSettingsUpgrade = function() {
     'DEBUG_ENABLED': localStorage['DEBUG_ENABLED'] === 'true' ? true : false,
     'HISTORY_ENABLED': localStorage['HISTORY_ENABLED'] === 'true' ? true : false,
     'MAGICVARS_ENABLED': localStorage['MAGICVARS_ENABLED'] === 'true' ? true : false,
-    'NOTIFICATIONS_ENABLED': localStorage['NOTIFICATIONS_ENABLED'] === 'true' ? true : false
+    'NOTIFICATIONS_ENABLED': localStorage['NOTIFICATIONS_ENABLED'] === 'true' ? true : false,
+	'CMH_ENABLED': localStorage['CMH_ENABLED'] === 'true' ? true : false,
+	'CMP_ENABLED': localStorage['CMP_ENABLED'] === 'true' ? true : false
   };
   var tutorials;
   try {
@@ -632,6 +634,10 @@ arc.app.bg.performSettingsUpgrade = function() {
   } catch (e) {}
   if (lm) {
     save.LATESTMSG = lm;
+  }
+  var ls = localStorage['latstSocket'];
+  if(ls && ls.trim() !== ""){
+	  save.latestSocket = ls;
   }
   return save;
 };
@@ -655,6 +661,11 @@ arc.app.bg.performLocalDataUpgrade = function() {
   if (lrd) {
     save.latest_request_data = lrd;
   }
+  var lgdf = localStorage['LATEST_GDRIVE_FOLDER'];
+  if(lgdf){
+	  save.LATEST_GDRIVE_FOLDER = lgdf; 
+  }
+  
   return save;
 };
 chrome.runtime.onInstalled.addListener(arc.app.bg.onInstalled);
