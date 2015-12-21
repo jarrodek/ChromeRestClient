@@ -75,8 +75,6 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 	@UiField
 	DivElement downloadFileAnchor;
 	@UiField
-	DivElement collapsePanel;
-	@UiField
 	HTML5FileUpload fileImport;
 	@UiField
 	InlineLabel importFileLog;
@@ -85,26 +83,10 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 
 	public ImportExportViewImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
-
-		setCollapsablePanel(collapsePanel);
-		//
-		// OLD SYSTEM SETUP
-		//
 		statusInfo.setText("Checking connection status...");
 	}
 
-	native void setCollapsablePanel(DivElement panel) /*-{
-		//		var actionPanel = panel.querySelector('.Import_Export_expandPanel.');
-		var handler = function(e) {
-			e.preventDefault();
-			if (panel.classList.contains('expanded')) {
-				panel.classList.remove('expanded');
-			} else {
-				panel.classList.add('expanded');
-			}
-		};
-		panel.addEventListener('click', handler, false);
-	}-*/;
+	
 
 	@Override
 	public void setPresenter(Presenter listener) {

@@ -7,20 +7,6 @@
 		<h1 class="Import_Export_title">Import/Export options</h1>
 		<div class="Import_Export_serverExport">
 		
-			<div ui:field="collapsePanel" class="Import_Export_depricationInfo">
-			    <div class="Import_Export_expandPanel">
-					<p>
-					    Import and export via application service will be removed.
-					    <span class="Import_Export_expandIndicator"></span>
-					</p>
-				</div>
-				<div class="Import_Export_collapsed">
-					<p>I'm suggest to import all Your remaining data or use a file import/export.</p>
-					<p>This options will be removed from application <span class="Import_Export_highlight">Q2 2016</span>.</p>
-				</div>
-			</div>
-			
-			
 			<div class="fileExport">
 				<h3>Import/Export to file</h3>
 				<div>
