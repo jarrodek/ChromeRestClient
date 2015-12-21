@@ -72,6 +72,7 @@ public class ExtensionServlet extends HttpServlet {
 			return;
 		}
 		resp.setStatus(200);
+		
 		if(path.startsWith("/list")){
 			String userId = path.substring(6);
 			if(userId == null || userId.length() == 0){

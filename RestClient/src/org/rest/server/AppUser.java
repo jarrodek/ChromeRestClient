@@ -15,17 +15,24 @@ import javax.jdo.annotations.PrimaryKey;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.User;
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
+import com.googlecode.objectify.condition.IfNotNull;
 
-@PersistenceCapable
+@Entity
 public class AppUser {
 	/**
 	 * key from userID
 	 */
 	@PrimaryKey
-	@Persistent
-	private Key key;
+	@Index(IfNotNull.class) private Key key;
 	
-	@Persistent
+	/**
+	 * New objectify index object.
+	 */
+	@Id Long id;
+	
     private User user;
 	
 	/**
