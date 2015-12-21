@@ -1,6 +1,6 @@
 package org.rest.server;
 
-import static com.googlecode.objectify.ObjectifyService.ofy;
+import static org.rest.server.OfyService.ofy;
 
 import java.util.Calendar;
 import java.util.Date;
