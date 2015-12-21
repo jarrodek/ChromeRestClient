@@ -55,8 +55,6 @@ public interface SettingsView extends IsWidget {
 	boolean isDebugEnabled();
 	void setHistoryEnabled(boolean historyEnabled);
 	boolean isHistoryEnabled();
-	void setNotificationsEnabled(boolean notificationsEnabled);
-	boolean isNotificationsEnabled();
 	void setMagicVarsEnabled(boolean magicVarsEnabled);
 	boolean isMagicVarsEnabled();
 	void setCodeMirrorHeadersEnabled(boolean codeMirrorHeadersEnabled);

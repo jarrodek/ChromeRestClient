@@ -12,13 +12,14 @@ import org.rest.client.storage.store.StoreKeys;
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea;
-import com.google.gwt.chrome.storage.StorageArea.StorageItemCallback;
 import com.google.gwt.chrome.storage.StorageResult;
+import com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback;
 import com.google.gwt.chrome.tabs.CreateProperties;
 import com.google.gwt.chrome.tabs.Tab;
 import com.google.gwt.chrome.tabs.TabCallback;
 import com.google.gwt.chrome.tabs.Tabs;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.Timer;
@@ -75,15 +76,22 @@ public class UserNotificationsFactory {
 		}
 		
 		Storage store = GWT.create(Storage.class);
-		store.getLocal().get(StoreKeys.LATEST_MESSAGE_KEY, new StorageItemCallback<Double>() {
+		JSONObject jo = new JSONObject();
+		jo.put(StoreKeys.LATEST_MESSAGE_KEY, new JSONObject(null));
+		store.getLocal().get(jo.getJavaScriptObject(), new StorageItemsCallback() {
+			
 			@Override
-			public void onResult(StorageResult<Double> sinceValue) {
-				if(sinceValue != null){
-					double since = 0;
-					try{
-						since = sinceValue.getDouble(StoreKeys.LATEST_MESSAGE_KEY);
-					} catch(Exception e){
-						Log.warn("Error getting User notification chrome storage setting: " + e.getMessage(), e);
+			public void onError(String message) {
+				Log.warn("Error getting User notification chrome storage setting: " + message);
+			}
+
+			@Override
+			public void onResult(JavaScriptObject result) {
+				if(result != null){
+					StorageResult<Double> data = result.cast();
+					Double since = data.getDouble(StoreKeys.LATEST_MESSAGE_KEY);
+					if(since == null){
+						since = new Double(0);
 					}
 					getMessages(since);
 				} else {
@@ -92,12 +100,6 @@ public class UserNotificationsFactory {
 					time -= 1209600000; //14 days in the past
 					getMessages(time);
 				}
-				
-			}
-			
-			@Override
-			public void onError(String message) {
-				Log.warn("Error getting User notification chrome storage setting: " + message);
 			}
 		});
 		
@@ -110,6 +112,17 @@ public class UserNotificationsFactory {
 		};
 		messageSchedule.schedule(3600000); //1hr
 	}
+	
+	private final static native double getSince(JavaScriptObject result, String key) /*-{
+		var since = 0;
+		if(result === null) return since;
+		if((key in result) && typeof result[key] === "number"){
+			since = result[key];
+		}
+		return since;
+	}-*/;
+	
+	
 	/**
 	 * Download messages from server.
 	 * @param since timestamp from when get the messages list
@@ -163,9 +176,9 @@ public class UserNotificationsFactory {
 						});
 					}
 				};
-				StatusNotification.notify(msg.getMessage(), StatusNotification.TIME_INFINITY, na);
+				StatusNotification.notify(msg.getMessage(), StatusNotification.TIME_LONG, na);
 			} else {
-				StatusNotification.notify(msg.getMessage(), StatusNotification.TIME_INFINITY);
+				StatusNotification.notify(msg.getMessage(), StatusNotification.TIME_LONG);
 			}
 		}
 	}

@@ -33,6 +33,7 @@ import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
+import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.task.CreateMenuTask;
@@ -45,16 +46,22 @@ import org.rest.client.ui.RequestView;
 import org.rest.client.util.UUID;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.activity.shared.ActivityManager;
 import com.google.gwt.activity.shared.ActivityMapper;
+import com.google.gwt.chrome.storage.Storage;
+import com.google.gwt.chrome.storage.StorageArea;
+import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
+import com.google.gwt.chrome.storage.StorageResult;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.place.shared.PlaceHistoryHandler;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -136,6 +143,36 @@ public class RestClient implements EntryPoint {
 	 * True if it is.
 	 */
 	public static boolean isSaveDialogEnabled = false;
+	/**
+	 * Previously sessionStorage has been used to keep this information.
+	 * This will keep an information about restored request database ID.
+	 */
+	public static Integer RESTORED_REQUEST = null;
+	/**
+	 * Previously sessionStorage has been used to keep this information.
+	 * ID of restored Google Drive item.
+	 */
+	public static String CURRENT_GOOGLE_DRIVE_ITEM = null;
+	/**
+	 * Previously sessionStorage has been used to keep this information.
+	 * Id of the parent folder where the item has been created.
+	 */
+	public static String GOOGLE_DRIVE_CREATE_FOLDER_ID = null;
+	/**
+	 * Previously sessionStorage has been used to keep this information.
+	 * Id of the parent folder where the item has been created.
+	 */
+	public static String GOOGLE_DRIVE_CREATE_USER_ID = null;
+	/**
+	 * Previously sessionStorage has been used to keep this information.
+	 * If true request request headers view should be collapsed
+	 */
+	public static boolean COLLAPSED_REQUEST_HEADERS = false;
+	/**
+	 * Previously sessionStorage has been used to keep this information.
+	 * If true response request headers view should be collapsed
+	 */
+	public static boolean COLLAPSED_RESPONSE_HEADERS = false;
 	
 	/**
 	 * Main method and entry point to the app.
@@ -427,14 +464,48 @@ public class RestClient implements EntryPoint {
 	 * 
 	 * @return generated RFC4122 UUID
 	 */
-	public static String getAppId() {
-		Storage storage = Storage.getLocalStorageIfSupported();
-		String uuid = storage.getItem("aapi");
-		if (uuid == null || uuid.equals("")) {
-			uuid = UUID.uuid();
-			storage.setItem("aapi", uuid);
-		}
-		return uuid;
+	public static void getAppId(final Callback<String, Throwable> callback) {
+		final Storage store = GWT.create(Storage.class);
+		JSONObject jo = new JSONObject();
+		try{
+			jo.put(StoreKeys.APPLICATION_ID, new JSONString("null"));
+		} catch(Exception e){}
+		
+		store.getLocal().get(jo.getJavaScriptObject(), new StorageArea.StorageItemsCallback() {
+
+			@Override
+			public void onError(String message) {
+				callback.onFailure(new Throwable(message));
+			}
+
+			@Override
+			public void onResult(JavaScriptObject data) {
+				StorageResult<String> obj = data.cast();
+				String uuid = obj.get(StoreKeys.APPLICATION_ID);
+				if (uuid == null || uuid.equals("null")) {
+					uuid = UUID.uuid();
+					JSONObject jo = new JSONObject();
+					try{
+						jo.put(StoreKeys.APPLICATION_ID, new JSONString(uuid));
+					} catch(Exception e){}
+					final String _saveUuid = uuid;
+					store.getLocal().set(jo.getJavaScriptObject(), new StorageSimpleCallback() {
+						
+						@Override
+						public void onError(String message) {
+							callback.onFailure(new Throwable(message));
+						}
+						
+						@Override
+						public void onDone() {
+							callback.onSuccess(_saveUuid);
+						}
+					});
+				} else {
+					callback.onSuccess(uuid);
+				}
+			}
+		});
 	}
 	
 	

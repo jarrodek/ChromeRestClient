@@ -50,13 +50,15 @@ public class StoreKeys {
 	public static final String CODE_MIRROR_HEADERS_KEY = "CMH_ENABLED";
 	public static final String CODE_MIRROR_PAYLOAD_KEY = "CMP_ENABLED";
 	public static final String LATEST_GDRIVE_FOLDER = "LATEST_GDRIVE_FOLDER";
+	
+	public static final String APPLICATION_ID = "APP_ID";
+	
+	public static final String LATEST_SOCKET_URL = "latestSocket";
 	/**
-	 * Key for restored from DB key in session storage.
+	 * A key for tutorials object.
 	 */
-	public static final String RESTORED_REQUEST = "restoredRequest"; 
-	public static final String CURRENT_GOOGLE_DRIVE_ITEM = "currentGdriveItem";
-	public static final String GOOGLE_DRIVE_CREATE_FOLDER_ID = "gdriveCreateParent";
-	public static final String GOOGLE_DRIVE_CREATE_USER_ID = "gdriveCreateUser";
-	public StoreKeys() {}
+	public static final String TUTORIALS = "tutorials";
+	
+	private StoreKeys() {}
 
 }

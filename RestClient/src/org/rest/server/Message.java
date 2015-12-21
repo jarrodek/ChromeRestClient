@@ -115,6 +115,6 @@ public class Message {
 			now.add(Calendar.DAY_OF_MONTH, -14);
 			since = now.getTimeInMillis();
 		}
-		return ofy().load().type(Message.class).filter("created <", since).list();
+		return ofy().load().type(Message.class).filter("created >", since).list();
 	}
 }

@@ -1,8 +1,6 @@
 package com.google.gwt.chrome.storage;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
 
 /**
  * Items under the "sync" storage area are synced using Chrome Sync.
@@ -115,44 +113,6 @@ public class SyncStorageArea implements StorageArea {
 			callback.@com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback::onDone()();
 		}));
 	}-*/;
-
-	@SuppressWarnings("rawtypes")
-	@Override
-	public void get(final String key, final StorageItemCallback callback) {
-		JSONObject obj = new JSONObject();
-		obj.put(key, new JSONString(""));
-		get(obj.getJavaScriptObject(), new StorageItemsCallback() {
-			
-			@SuppressWarnings("unchecked")
-			@Override
-			public void onResult(JavaScriptObject data) {
-				StorageResult obj = data.cast();
-				String[] keys = obj.getKeys();
-				for(String _key : keys){
-					if(_key.equals(key)){
-						callback.onResult(obj);
-						return;
-					}
-				}
-				
-				callback.onResult(null);
-			}
-			
-			@Override
-			public void onError(String message) {
-				callback.onError(message);
-			}
-		});
-	}
-
-	@Override
-	public void get(String[] keys, StorageItemsCallback callback) {
-		JSONObject obj = new JSONObject();
-		for(String key : keys){
-			obj.put(key, new JSONString(""));
-		}
-		get(obj.getJavaScriptObject(), callback);
-	}
 
 	@Override
 	public final native void get(JavaScriptObject keysWithDefaults,

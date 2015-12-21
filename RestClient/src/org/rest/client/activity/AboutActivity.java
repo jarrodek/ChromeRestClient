@@ -25,6 +25,7 @@ import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.runtime.ChromeRuntime;
 import com.google.gwt.chrome.runtime.ManifestDetails;
 import com.google.gwt.chrome.runtime.Runtime;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
@@ -98,11 +99,18 @@ public class AboutActivity extends AppActivity implements
 	
 	private void activateTutorial() {
 		tutorialFactory = new TutorialFactory("about");
-		
-		if(!tutorialFactory.canStartTutorial()){
-			return;
-		}
-		view.setUpTutorial(tutorialFactory);
+		tutorialFactory.canStartTutorial(new Callback<Boolean, Throwable>() {
+			
+			@Override
+			public void onSuccess(Boolean result) {
+				if(result){
+					view.setUpTutorial(tutorialFactory);
+				}
+			}
+			
+			@Override
+			public void onFailure(Throwable reason) {}
+		});
 	}
 	
 	void initPlusOne(){
