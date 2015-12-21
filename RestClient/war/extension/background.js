@@ -37,187 +37,7 @@ function initOauth2Object() {
 window.externalDataHolder = {};
 
 
-function WebRequest() {
-  this.masterURL = null;
-  this.redirectURL = null;
-  this.responseHeaders = [];
-  this.requestHeaders = [];
-  this.redirectData = [];
 
-  this.requestFilter = {
-    urls: ['<all_urls>'],
-    types: ['xmlhttprequest']
-  };
-}
-
-WebRequest.prototype.reset = function() {
-  this.masterURL = null;
-  this.redirectURL = null;
-  this.responseHeaders = [];
-  this.requestHeaders = [];
-  this.redirectData = [];
-  this.errorData = {};
-  this.clearRules();
-};
-WebRequest.prototype.getRequestData = function() {
-  var requestDetails = {
-    URL: this.masterURL,
-    RESPONSE_HEADERS: this.responseHeaders,
-    REQUEST_HEADERS: this.requestHeaders,
-    REDIRECT_DATA: this.redirectData,
-    ERROR: this.errorData
-  };
-
-  return requestDetails;
-};
-/**
- * Check if request url match tested URL
- */
-WebRequest.prototype.checkRequestUrl = function(details) {
-  if (details.url === null || details.url.length === 0) {
-    return false;
-  }
-
-  var currentCheckUrl = this.masterURL;
-  if (this.redirectURL !== null) {
-    currentCheckUrl = this.redirectURL;
-  }
-  if (currentCheckUrl === null || currentCheckUrl.length === 0) {
-    return false;
-  }
-  if (!(currentCheckUrl === details.url || details.url.indexOf(currentCheckUrl) > -1)) {
-    return false;
-  }
-  return true;
-};
-/**
- * Called when request's headers has been sent. It filter requests by current
- * set URL. After request filter URL is cleared.
- *
- * @param details
- */
-WebRequest.prototype.onHeadersSend = function(details) {
-  if (!this.checkRequestUrl(details)) {
-    return;
-  }
-  this.requestHeaders = details.requestHeaders;
-};
-/**
- * Called when the request will be redirected.
- * It is async call.
- *
- * @param details
- */
-WebRequest.prototype.onBeforeRedirect = function(details) {
-  if (!this.checkRequestUrl(details)) {
-    return;
-  }
-
-  var data = {
-    fromCache: details.fromCache,
-    redirectUrl: details.redirectUrl,
-    statusCode: details.statusCode,
-    statusLine: details.statusLine,
-    responseHeaders: details.responseHeaders
-  };
-
-  this.redirectData[this.redirectData.length] = data;
-  this.redirectURL = details.redirectUrl;
-};
-/**
- * Called when the request complete.
- *
- * @param details
- */
-WebRequest.prototype.onRequestCompleted = function(details) {
-  if (!this.checkRequestUrl(details)) {
-    return;
-  }
-
-  this.responseHeaders = details.responseHeaders;
-  //
-  // Clean rules or if the user will not call another request all XmlHttpRequest for this URL will be affected.
-  this.clearRules();
-};
-/**
- * Called when the request complete with error.
- *
- * @param details
- */
-WebRequest.prototype.onRequestError = function(details) {
-  if (!this.checkRequestUrl(details)) {
-    return;
-  }
-  //
-  // Clean rules or if the user will not call another request all XmlHttpRequest for this URL will be affected.
-  this.clearRules();
-
-  this.errorData = {
-    error: details.error,
-    fromCache: details.fromCache,
-    timeStamp: details.timeStamp,
-    url: details.url
-  };
-};
-
-/**
- * Setup application, set rules, handlers etc.
- */
-WebRequest.prototype.init = function() {
-  /*
-   * Register Web Requests listeners to handle sent/received headers info in
-   * proper way (get all info) See more at <a
-   * href="http://developer.chrome.com/extensions/webRequest.html">http://developer.chrome.com/extensions/webRequest.html</a>
-   */
-  chrome.webRequest.onSendHeaders.addListener(this.onHeadersSend.bind(this), this.requestFilter, ['requestHeaders']);
-  chrome.webRequest.onBeforeRedirect.addListener(this.onBeforeRedirect.bind(this), this.requestFilter, ['responseHeaders']);
-  chrome.webRequest.onCompleted.addListener(this.onRequestCompleted.bind(this), this.requestFilter, ['responseHeaders']);
-  chrome.webRequest.onErrorOccurred.addListener(this.onRequestError.bind(this), this.requestFilter);
-};
-
-
-/**
- * Create URL object from request url for Rule object.
- */
-WebRequest.prototype.getUrlData = function(requestUrl) {
-  var parser = document.createElement('a');
-  parser.href = requestUrl;
-
-  var urlData = {};
-  if (parser.hostname) {
-    urlData.hostEquals = parser.hostname;
-  }
-  if (parser.protocol) {
-    urlData.schemes = [parser.protocol.replace(':', '')];
-  }
-  if (parser.port) {
-    urlData.ports = [parseInt(parser.port)];
-  }
-  if (parser.pathname) {
-    urlData.pathEquals = parser.pathname;
-  }
-  if (parser.search) {
-    urlData.queryEquals = parser.search;
-  }
-  return urlData;
-};
-
-WebRequest.prototype.parseHeaders = function(str) {
-  var result = [];
-  if (!str) {
-    return result;
-  }
-  var headers = str.split(/\n/);
-  for (var i in headers) {
-    var header = headers[i];
-    var headerData = header.split(/:\s?/);
-    result[result.length] = {
-      name: headerData.shift(),
-      value: headerData.join(':')
-    };
-  }
-  return result;
-};
 
 function MessageHandling(webRequest) {
   this.webRequest = webRequest;
@@ -395,8 +215,6 @@ MessageHandling.prototype.requestBegin = function(request, sendResponse) {
   var data = request.params;
   this.webRequest.reset();
   this.webRequest.masterURL = data.url;
-  this.webRequest.setRules(data);
-
   sendResponse({
     'payload': 'requestBegin',
     'response': true
@@ -496,10 +314,7 @@ MessageHandling.prototype.finishOAuth = function(request, sendResponse, sender) 
   }
 };
 
-var webRequest = new WebRequest();
-webRequest.init();
-var messageHandling = new MessageHandling(webRequest);
-messageHandling.init();
+
 
 
 
@@ -667,6 +482,186 @@ arc.app.bg.performLocalDataUpgrade = function() {
   
   return save;
 };
+
+
+
+class WebRequest {
+
+  constructor() {
+    this.masterURL = null;
+    this.redirectURL = null;
+    this.responseHeaders = [];
+    this.requestHeaders = [];
+    this.redirectData = [];
+    this.requestFilter = {
+      urls: ['<all_urls>'],
+      types: ['xmlhttprequest']
+    };
+  }
+  /**
+   * Setup application, set rules, handlers etc.
+   */
+  init() {
+    /*
+     * Register Web Requests listeners to handle sent/received headers info in
+     * proper way (get all info) See more at <a
+     * href="http://developer.chrome.com/extensions/webRequest.html">http://developer.chrome.com/extensions/webRequest.html</a>
+     */
+    chrome.webRequest.onSendHeaders.addListener(this.onHeadersSend.bind(this), this.requestFilter, ['requestHeaders']);
+    chrome.webRequest.onBeforeRedirect.addListener(this.onBeforeRedirect.bind(this), this.requestFilter, ['responseHeaders']);
+    chrome.webRequest.onCompleted.addListener(this.onRequestCompleted.bind(this), this.requestFilter, ['responseHeaders']);
+    chrome.webRequest.onErrorOccurred.addListener(this.onRequestError.bind(this), this.requestFilter);
+  }
+  reset() {
+    this.masterURL = null;
+    this.redirectURL = null;
+    this.responseHeaders = [];
+    this.requestHeaders = [];
+    this.redirectData = [];
+    this.errorData = {};
+  }
+
+  getRequestData() {
+    return {
+      URL: this.masterURL,
+      RESPONSE_HEADERS: this.responseHeaders,
+      REQUEST_HEADERS: this.requestHeaders,
+      REDIRECT_DATA: this.redirectData,
+      ERROR: this.errorData
+    };
+  }
+  /**
+   * Check if request url match tested URL
+   */
+  checkRequestUrl(details) {
+    if (details.url === null || details.url.length === 0) {
+      return false;
+    }
+
+    var currentCheckUrl = this.masterURL;
+    if (this.redirectURL !== null) {
+      currentCheckUrl = this.redirectURL;
+    }
+    if (currentCheckUrl === null || currentCheckUrl.length === 0) {
+      return false;
+    }
+    if (!(currentCheckUrl === details.url || details.url.indexOf(currentCheckUrl) > -1)) {
+      return false;
+    }
+    return true;
+  }
+  /**
+   * Called when request's headers has been sent. It filter requests by current
+   * set URL. After request filter URL is cleared.
+   *
+   * @param details
+   */
+  onHeadersSend(details) {
+    if (!this.checkRequestUrl(details)) {
+      return;
+    }
+    this.requestHeaders = details.requestHeaders;
+  }
+  /**
+   * Called when the request will be redirected.
+   * It is async call.
+   *
+   * @param details
+   */
+  onBeforeRedirect(details) {
+    if (!this.checkRequestUrl(details)) {
+      return;
+    }
+    var data = {
+      fromCache: details.fromCache,
+      redirectUrl: details.redirectUrl,
+      statusCode: details.statusCode,
+      statusLine: details.statusLine,
+      responseHeaders: details.responseHeaders
+    };
+
+    this.redirectData[this.redirectData.length] = data;
+    this.redirectURL = details.redirectUrl;
+  }
+
+  /**
+   * Called when the request complete.
+   *
+   * @param details
+   */
+  onRequestCompleted(details) {
+    if (!this.checkRequestUrl(details)) {
+      return;
+    }
+
+    this.responseHeaders = details.responseHeaders;
+  }
+  /**
+   * Called when the request complete with error.
+   *
+   * @param details
+   */
+  onRequestError(details) {
+    if (!this.checkRequestUrl(details)) {
+      return;
+    }
+
+    this.errorData = {
+      error: details.error,
+      fromCache: details.fromCache,
+      timeStamp: details.timeStamp,
+      url: details.url
+    };
+  }
+  /**
+   * Create URL object from request url for Rule object.
+   */
+  getUrlData(requestUrl) {
+    var parser = document.createElement('a');
+    parser.href = requestUrl;
+
+    var urlData = {};
+    if (parser.hostname) {
+      urlData.hostEquals = parser.hostname;
+    }
+    if (parser.protocol) {
+      urlData.schemes = [parser.protocol.replace(':', '')];
+    }
+    if (parser.port) {
+      urlData.ports = [parseInt(parser.port)];
+    }
+    if (parser.pathname) {
+      urlData.pathEquals = parser.pathname;
+    }
+    if (parser.search) {
+      urlData.queryEquals = parser.search;
+    }
+    return urlData;
+  }
+
+  parseHeaders(str) {
+    var result = [];
+    if (!str) {
+      return result;
+    }
+    var headers = str.split(/\n/);
+    for (var i in headers) {
+      var header = headers[i];
+      var headerData = header.split(/:\s?/);
+      result[result.length] = {
+        name: headerData.shift(),
+        value: headerData.join(':')
+      };
+    }
+    return result;
+  }
+  
+}
+
+var webRequest = new WebRequest();
+webRequest.init();
+var messageHandling = new MessageHandling(webRequest);
+messageHandling.init();
 chrome.runtime.onInstalled.addListener(arc.app.bg.onInstalled);
 
 /**
