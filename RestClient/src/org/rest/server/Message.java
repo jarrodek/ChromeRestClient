@@ -13,7 +13,6 @@ import javax.jdo.annotations.PrimaryKey;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.gson.annotations.Expose;
-import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
@@ -105,10 +104,7 @@ public class Message {
 		sb.append("]");
 		return sb.toString();
 	}
-	static {
-		//TODO: this can't be here: https://github.com/objectify/objectify/wiki/BestPractices
-		ObjectifyService.register(Message.class); 
-	}
+
 	public static List<Message> getMessages(long since){
 		if(since <= 0){
 			Calendar now = Calendar.getInstance();

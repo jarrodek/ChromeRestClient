@@ -14,48 +14,50 @@ import javax.jdo.annotations.PrimaryKey;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.Index;
-import com.googlecode.objectify.condition.IfNotNull;
 
-@Entity
+@PersistenceCapable
 public class RequestItem {
-	/**
-	 * New objectify index object.
-	 */
-	@Id Long id;
 	
 	@PrimaryKey 
     @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
-    @Index(IfNotNull.class) private Key key;
+    private Key key;
 	
+	@Persistent
     private String name;
 	
+	@Persistent
     private Text url;
 	
-	private Text post;
+	@Persistent
+    private Text post;
 	
-	private String method;
+	@Persistent
+    private String method;
 	
+	@Persistent
 	private String encoding;
 	
+	@Persistent(defaultFetchGroup = "true")
     private List<RequestHeader> headers;
 	/**
 	 * Application from where request item has been sent.
 	 */
+	@Persistent
 	private String applicationUUID;
 	/**
 	 * Helper UUID
 	 */
+	@Persistent
 	private String itemUUID;
 	/**
 	 * User - owner of item.
 	 */
+	@Persistent
 	private AppUser appUser;
 	/**
 	 * Date when object has been created
 	 */
+	@Persistent
 	private Date createDate;
 	
 	public RequestItem(){
