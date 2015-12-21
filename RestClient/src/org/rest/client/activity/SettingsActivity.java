@@ -72,7 +72,6 @@ public class SettingsActivity extends AppActivity implements SettingsView.Presen
 	protected void updateView(final SettingsView view) {
 		view.setDebugEnabled(RestClient.isDebug());
 		view.setHistoryEnabled(RestClient.isHistoryEabled());
-		view.setNotificationsEnabled(SyncAdapter.notifications);
 		view.setMagicVarsEnabled(SyncAdapter.magicVars);
 		view.setCodeMirrorHeadersEnabled(SyncAdapter.codeMirrorHeaders);
 		view.setCodeMirrorPayloadEnabled(SyncAdapter.codeMirrorPayload);

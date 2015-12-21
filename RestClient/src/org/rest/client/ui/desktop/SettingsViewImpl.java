@@ -24,7 +24,6 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	interface SettingsViewImplUiBinder extends UiBinder<Widget, SettingsViewImpl> {
 	}
 	
-	@UiField CheckBox notifications;
 	@UiField CheckBox debug;
 	@UiField CheckBox history;
 	@UiField CheckBox magicVars;
@@ -70,16 +69,6 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	}
 	
 	@Override
-	public void setNotificationsEnabled(boolean notificationsEnabled) {
-		notifications.setValue(notificationsEnabled);
-	}
-
-	@Override
-	public boolean isNotificationsEnabled() {
-		return notifications.getValue().booleanValue();
-	}
-	
-	@Override
 	public void setMagicVarsEnabled(boolean magicVarsEnabled) {
 		magicVars.setValue(magicVarsEnabled);
 	}
@@ -121,14 +110,6 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 		}
 		Boolean value = event.getValue();
 		listener.changeDebugValue(value);
-	}
-	
-	@UiHandler("notifications")
-	void onNotificationsChange(ValueChangeEvent<Boolean> event){
-		if(RestClient.isDebug()){
-			Log.debug("Notifications value changed. Current value is: " + String.valueOf(event.getValue()));
-		}
-		listener.changeNotificationsValue(event.getValue());
 	}
 	
 	@UiHandler("magicVars")

@@ -29,10 +29,6 @@ public class SyncAdapter {
 	 */
 	public static boolean history = true;
 	/**
-	 * Are notifications from developer setting enabled.
-	 */
-	public static boolean notifications = true;
-	/**
 	 * Are magic variables setting enabled.
 	 */
 	public static boolean magicVars = true;
@@ -56,7 +52,6 @@ public class SyncAdapter {
 		JSONObject query = new JSONObject();
 		query.put(StoreKeys.DEBUG_KEY, JSONBoolean.getInstance(debug));
 		query.put(StoreKeys.HISTORY_KEY, JSONBoolean.getInstance(history));
-		query.put(StoreKeys.NOTIFICATIONS_ENABLED_KEY, JSONBoolean.getInstance(notifications));
 		query.put(StoreKeys.MAGIC_VARS_ENABLED_KEY, JSONBoolean.getInstance(magicVars));
 		query.put(StoreKeys.CODE_MIRROR_HEADERS_KEY, JSONBoolean.getInstance(codeMirrorHeaders));
 		query.put(StoreKeys.CODE_MIRROR_PAYLOAD_KEY, JSONBoolean.getInstance(codeMirrorPayload));
@@ -71,7 +66,6 @@ public class SyncAdapter {
 				SyncData data = _data.cast();
 				debug = data.getDebug();
 				history = data.getHistory();
-				notifications = data.getNotifications();
 				magicVars = data.getMagicVariables();
 				codeMirrorHeaders = data.getCodeMirrorHeaders();
 				codeMirrorPayload = data.getCodeMirrorPayload();

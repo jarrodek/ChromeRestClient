@@ -617,7 +617,6 @@ arc.app.bg.performSettingsUpgrade = function() {
     'DEBUG_ENABLED': localStorage['DEBUG_ENABLED'] === 'true' ? true : false,
     'HISTORY_ENABLED': localStorage['HISTORY_ENABLED'] === 'true' ? true : false,
     'MAGICVARS_ENABLED': localStorage['MAGICVARS_ENABLED'] === 'true' ? true : false,
-    'NOTIFICATIONS_ENABLED': localStorage['NOTIFICATIONS_ENABLED'] === 'true' ? true : false,
 	'CMH_ENABLED': localStorage['CMH_ENABLED'] === 'true' ? true : false,
 	'CMP_ENABLED': localStorage['CMP_ENABLED'] === 'true' ? true : false
   };

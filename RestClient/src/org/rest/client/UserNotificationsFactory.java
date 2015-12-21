@@ -176,9 +176,9 @@ public class UserNotificationsFactory {
 						});
 					}
 				};
-				StatusNotification.notify(msg.getMessage(), StatusNotification.TIME_INFINITY, na);
+				StatusNotification.notify(msg.getMessage(), StatusNotification.TIME_LONG, na);
 			} else {
-				StatusNotification.notify(msg.getMessage(), StatusNotification.TIME_INFINITY);
+				StatusNotification.notify(msg.getMessage(), StatusNotification.TIME_LONG);
 			}
 		}
 	}
