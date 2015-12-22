@@ -1,0 +1,150 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<dom-module id="server-import-data-table">
+    <style>
+    :host {
+        display: block;
+        min-height: 200px;
+        height: 100%;
+    }
+    .table{
+        
+    }
+    .table-header {
+        height: 64px;
+    }
+    .table-columns{
+        height: 56px;
+        font-family: 'Roboto';
+        font-weight: 500;
+        color: rgba(0,0,0,0.54);
+        font-size: 12px;
+    }
+    .table-values{
+        height: 48px;
+        font-family: 'Roboto';
+        color: rgba(0,0,0,0.87);
+        font-size: 13px;
+    }
+    .checkbox-column,
+    .name-column,
+    .method-column {
+        padding-right: 56px;
+    }
+    .checkbox-column{
+    }
+    .name-column{
+        width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .time-column{
+         width: 110px; 
+        padding-right: 54px;
+    }
+    .url-column{
+
+    }
+    .actionButton{
+        background-color: #4285f4;
+        color: #fff;
+    }
+    h2 {
+        font-size: 20px;
+        color: rgba(0,0,0,0.87);
+        font-family: 'Roboto';
+        font-weight: 400;
+        padding: 0 24px;
+    }
+    .table-values,
+    .table-columns {
+        border-bottom: 1px rgba(0,0,0,0.12) solid;
+        padding: 0 24px;
+    }
+    .table-columns:last-child{
+        border-bottom: 1px rgba(0,0,0,0) solid;
+    }
+    .table-values.checked{
+        background-color: #F5F5F5;
+    }
+    </style>
+    <template>
+        <div class="flex layout vertical table">
+            <div class="table-header layout horizontal center">
+                <h2 class="flex">Import preview</h2>
+                <paper-button raised class="actionButton" on-tap="importTap">import</paper-button>
+                <paper-button on-tap="cancelTap">cancel</paper-button>
+            </div>
+            <div class="table-columns layout horizontal center">
+                <div class="checkbox-column" id="projectColumn"><paper-checkbox checked="{{allChecked}}" on-tap="toggleAll"></div>
+                <div class="name-column" id="nameColumn">Name</div>
+                <div class="time-column" id="timeColumn">Updated</div>
+                <div class="url-column" id="urlColumn">URL</div>
+                <paper-tooltip for="projectColumn">Select data you want to import</paper-tooltip>
+                <paper-tooltip for="nameColumn">The request name added when saving</paper-tooltip>
+                <paper-tooltip for="timeColumn">The request last save time</paper-tooltip>
+                <paper-tooltip for="urlColumn">Full URL saved with the request</paper-tooltip>
+            </div>
+            <template is="dom-repeat" id="requestsList" items="{{requests}}">
+                <div class$="{{_computeTableRowClass(item.checked)}}">
+                    <div class="checkbox-column"><paper-checkbox on-tap="toggleSelection" checked="{{item.checked}}"></paper-checkbox></div>
+                    <div class="name-column">{{item.name}}</div>
+                    <div class="time-column">{{displayDate(item.updated)}}</div>
+                    <div class="url-column">{{item.url}}</div>
+                </div>
+            </template>
+            <div class="table-columns layout horizontal center">
+                <div class="flex"></div>
+                <paper-button raised class="actionButton" on-tap="importTap">import</paper-button>
+                <paper-button on-tap="cancelTap">cancel</paper-button>
+            </div>
+        </div>
+        <array-selector id="selector" items="{{requests}}" selected="{{selected}}" multi toggle></array-selector>
+    </template>
+    <script>
+    Polymer({
+        is: 'server-import-data-table',
+        properties: {
+            requests: Object
+        },
+        importTap: function(){
+            this.fire('import-action',{action: 'import'});
+        },
+        cancelTap: function(){
+            this.fire('import-action',{action: 'cancel'});
+        },
+        toggleSelection: function(event) {
+            var item = this.$.requestsList.itemForElement(event.target);
+            this.$.selector.select(item);
+        },
+
+        toggleAll: function(e, detail){
+            if(this.allChecked){
+                this.requests.forEach((item, i) => this.set('requests.'+i+'.checked', true));
+            } else {
+                this.requests.forEach((item, i) => this.set('requests.'+i+'.checked', false));
+            }
+        },
+
+        displayDate: function(time){
+            var options = {
+              year: 'numeric', month: 'numeric', day: 'numeric',
+              hour: 'numeric', minute: 'numeric',
+              hour12: false
+            };
+            var date = new Date(time);
+            return date.toLocaleString('en-US', options);
+            return new Intl.DateTimeFormat(options).format(new Date(time));
+        },
+
+        _computeTableRowClass: function(checked){
+            var cls = 'table-values layout horizontal center';
+            if(checked){
+                cls += ' checked';
+            }
+            return cls;
+        }
+    });
+    </script>
+</dom-module>

@@ -145,6 +145,14 @@ h1.at {
 	display: none !important;
 }
 
+.section-title{
+	font-family: 'Roboto';
+	font-weight: 500;
+	color: rgba(0,0,0,0.75);
+	font-size: 20px;
+	padding-left: 24px;
+}
+
 /* User menu */
 .menuPanel{
 	margin: 0px;
@@ -1671,21 +1679,18 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 }
 
 /* IMPORT / EXPORT VIEW */
-.Import_Export_depricationInfo{
-	background-color: #FF7735;
-	color: white;
-	font-weight: bold;
-	padding: 6px 8px;
-	margin-bottom: 20px;
+.import-export-view{
+	padding: 20px 0;
 }
-.Import_Export_title{
-	color: black;
-	font-size: 175%;
-	font-weight: normal;
-	margin: 0;
-	padding-bottom: 14px;
-	padding-top: 13px;
-	cursor: pointer;
+.import-file-section{
+	min-height: 200px;
+	margin-bottom: 40px;
+}
+.fileDrop{
+	margin-left: 24px;
+}
+.padding-section{
+	padding-left: 24px;
 }
 .Import_Export_serverExport{}
 .Import_Export_highlight{text-decoration:underline; font-weight: bold;}
@@ -1701,13 +1706,6 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	border: 1px solid rgba(255, 0, 0, 0.2);
 	display: inline-block;
 }
-.Import_Export_storeDataPanel{
-	display: none;
-}
-.Import_Export_shareUrlPanel{
-	display: none;
-}
-.Import_Export_shareLink{}
 
 .Import_Export_downloadFileLink{margin-top: 20px;font-size: large;}
 .Import_Export_importPrevControls{margin-top: 40px;}

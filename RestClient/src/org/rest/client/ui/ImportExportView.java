@@ -16,8 +16,11 @@
 package org.rest.client.ui;
 
 import org.rest.client.importparser.ImportResult;
+import org.rest.client.request.RequestImportListItem;
 
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JsArray;
+import com.google.gwt.file.client.File;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.IsWidget;
 
@@ -70,6 +73,16 @@ public interface ImportExportView extends IsWidget {
 		 */
 		void serverStoreAction();
 		void doServerImport(String[] keys);
+		/**
+		 * Handle file import.
+		 * @param file File selected by the user.
+		 */
+		void importFromFile(File file);
+		/**
+		 * To be called when user click on "download" button in server section.
+		 * @param Uid of the user on which download the data. Set "me" for current user.
+		 */
+		void requestImportSuggestions(String uid);
 	}
 	/**
 	 * Sets presenter for this view
@@ -80,4 +93,26 @@ public interface ImportExportView extends IsWidget {
 	void setIsUserView();
 	void setIsNotUserView();
 	void serverControlsSetEnabled(boolean enabled);
+	/**
+	 * After import file parse, show import confirmation table 
+	 * @param result
+	 */
+	void showImportTable(ImportResult result);
+	/**
+	 * Reset import data view to original state.
+	 */
+	void resetImportView();
+	/**
+	 * Reset export data view to the original state
+	 */
+	void resetExportView();
+	/**
+	 * Display a view where the user can choose the data that he want to import.
+	 * @param items
+	 */
+	void showServerImportTable(JsArray<RequestImportListItem> items);
+	/**
+	 * Update share link when session data arrive.
+	 */
+	void updateShareLink();
 }

@@ -10,6 +10,11 @@
     "paper-item":"PolymerElements/paper-item#^1.0.0",
     "paper-dialog":"PolymerElements/paper-dialog#^1.0.0",
     "paper-dialog-scrollable":"PolymerElements/paper-dialog-scrollable#^1.0.0",
-    "paper-toast":"PolymerElements/paper-toast#^1.1.1"
+    "paper-toast":"PolymerElements/paper-toast#^1.1.1",
+    "paper-progress":"PolymerElements/paper-progress#^1.0.7",
+    "paper-spinner":"PolymerElements/paper-spinner#^1.1.0",
+    "paper-toggle-button":"PolymerElements/paper-toggle-button#^1.0.12",
+    "paper-tooltip":"PolymerElements/paper-tooltip#^1.1.1",
+    "paper-checkbox": "PolymerElements/paper-checkbox#^1.1.0"
   }
 }

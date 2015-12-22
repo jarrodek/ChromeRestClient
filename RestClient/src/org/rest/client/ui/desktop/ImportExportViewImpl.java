@@ -1,64 +1,40 @@
 package org.rest.client.ui.desktop;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
-import org.rest.client.RestClient;
 import org.rest.client.StatusNotification;
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
-import org.rest.client.deprecated.ImportListingDialog;
-import org.rest.client.deprecated.ImportRequest;
-import org.rest.client.deprecated.ImportSuggestionsCallback;
-import org.rest.client.deprecated.LoaderDialog;
-import org.rest.client.deprecated.SuggestionImportItem;
-import org.rest.client.importparser.ImportParser;
 import org.rest.client.importparser.ImportResult;
-import org.rest.client.place.SettingsPlace;
 import org.rest.client.request.ApplicationRequest;
+import org.rest.client.request.RequestImportListItem;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.ImportExportView;
-import org.rest.client.ui.html5.HTML5FileUpload;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.tabs.CreateProperties;
 import com.google.gwt.chrome.tabs.Tab;
 import com.google.gwt.chrome.tabs.TabCallback;
 import com.google.gwt.chrome.tabs.Tabs;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.ParagraphElement;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.PreElement;
 import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.dom.client.Style.FontWeight;
-import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.file.client.File;
-import com.google.gwt.file.client.FileError;
-import com.google.gwt.file.client.FileList;
-import com.google.gwt.filereader.client.ErrorHandler;
-import com.google.gwt.filereader.client.FileReader;
-import com.google.gwt.filereader.client.LoadHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.InlineLabel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ImportExportViewImpl extends Composite implements ImportExportView {
@@ -70,259 +46,304 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 
 	private Presenter listener;
 	private ImportResult currentFileImport = null;
+
 	@UiField
-	Anchor fileDownload;
+	Element fileDrop;
 	@UiField
-	DivElement downloadFileAnchor;
+	DivElement fileImportSpinner;
+	/**
+	 * Custom element to display import data in data table.
+	 */
 	@UiField
-	HTML5FileUpload fileImport;
+	Element importDataTable;
+	/**
+	 * Custom element to display import data in data table for server data.
+	 */
 	@UiField
-	InlineLabel importFileLog;
+	Element serverImportDataTable;
+	/**
+	 * "Prepare data to export" button's container
+	 */
 	@UiField
-	HTMLPanel importPreview;
+	Element dataPrepareContainer;
+	/**
+	 * "Prepare data to export" button
+	 */
+	@UiField
+	Element dataPrepareButton;
+	/**
+	 * Spinner container in data export
+	 */
+	@UiField
+	Element dataDownloadSpinner;
+	/**
+	 * "Download file" button's container
+	 */
+	@UiField
+	Element dataDownload2;
+	/**
+	 * "Download file" button
+	 */
+	@UiField
+	Element dataDownload2Button;
+	/**
+	 * "Cancel" download button
+	 */
+	@UiField
+	Element dataDownloadCancel;
+	/**
+	 * Block of file import section
+	 */
+	@UiField
+	Element fileImportSection;
+	/**
+	 * Block of file export section
+	 */
+	@UiField
+	Element fileExportSection;
+	/**
+	 * Block of file server import/export section
+	 */
+	@UiField
+	Element serverSection;
+	
+	@UiField
+	Element connectActionContainer;
 
 	public ImportExportViewImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
-		statusInfo.setText("Checking connection status...");
-	}
 
-	
+		addFileEventHandler(this);
+		addPreviewTableHandlers(this);
+		addDownloadDataHandlers(this);
+	}
 
 	@Override
 	public void setPresenter(Presenter listener) {
 		this.listener = listener;
 	}
 
-	@UiHandler("fileExport")
-	void onfileExportClick(ClickEvent e) {
-		prepareFileExport();
-	}
-
-	@UiHandler("fileDownload")
-	void onDownloadFileClick(ClickEvent e) {
-		if (!fileDownload.getElement().getAttribute("disabled").isEmpty()) {
-			return;
-		}
-		fileDownload.getElement().setAttribute("disabled", "true");
-		Timer t = new Timer() {
-			@Override
-			public void run() {
-				downloadFileAnchor.addClassName("hidden");
-				fileDownload.setHref("about:blank");
-				listener.revokeDownloadData();
-			}
-		};
-		t.schedule(1500);
-	}
-
+	/**
+	 * Prepare export data to download.
+	 */
 	void prepareFileExport() {
+		setExportState(1);
 		listener.prepareDataToFile(new StringCallback() {
 			@Override
-			public void onResult(final String result) {
-
-				Scheduler.get().scheduleDeferred(new Command() {
-					public void execute() {
-						String fileObjectUrl = listener.createDownloadData(result);
-						fileDownload.setHref(fileObjectUrl);
-						String date = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM).format(new Date());
-						String fileName = "arc-" + date + ".json";
-						fileDownload.getElement().setAttribute("download", fileName);
-						fileDownload.getElement().setAttribute("data-downloadurl",
-								"application/json:" + fileName + ":" + fileObjectUrl);
-						fileDownload.setVisible(true);
-						downloadFileAnchor.removeClassName("hidden");
-					}
-				});
-
+			public void onResult(final String downloadUrl) {
+				setExportState(2);
+				String date = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM).format(new Date());
+				String fileName = "arc-" + date + ".json";
+				dataDownload2Button.setAttribute("download", fileName);
+				dataDownload2Button.setAttribute("href", downloadUrl);
+				dataDownload2Button.setAttribute("data-downloadurl",
+						"application/json:" + fileName + ":" + downloadUrl);
 			}
 		});
 	}
 
-	@UiHandler("fileImport")
-	void onFileImportChange(ChangeEvent e) {
-
-		FileList files = fileImport.getFiles();
-		if (files.size() == 0)
-			return;
-
+	@Override
+	public void resetImportView() {
 		if (previewGrid != null) {
 			previewGrid.clear();
 		}
-		importPreview.setVisible(false);
-		fileImport.setEnabled(false);
-		importFileLog.setText("working...");
+		currentFileImport = null;
+		setImportState(0);
+		resetFileElement(this);
+	}
 
-		File file = files.get(0);
-		FileReader reader = FileReader.create();
+	@Override
+	public void resetExportView() {
+		listener.revokeDownloadData();
+		setExportState(0);
+	}
 
-		reader.addErrorHandler(new ErrorHandler() {
-			@Override
-			public void onError(File file, FileError error) {
-				fileImport.setEnabled(true);
-				importFileLog.setText("");
-				String msg = "";
-				switch (error.getCode()) {
-				case FileError.ABORT_ERR:
-					msg += " ABORT_ERR::";
-					break;
-				case FileError.ENCODING_ERR:
-					msg += " ENCODING_ERR::";
-					break;
-				case FileError.NOT_FOUND_ERR:
-					msg += " NOT_FOUND_ERR::";
-					break;
-				case FileError.NOT_READABLE_ERR:
-					msg += " NOT_READABLE_ERR::";
-					break;
-				case FileError.SECURITY_ERR:
-					msg += " SECURITY_ERR::";
-					break;
-				}
-				msg += " Unable read file.";
-				if (RestClient.isDebug()) {
-					Log.error(msg + " Error code: " + error.getCode());
-				}
-				StatusNotification.notify(msg, StatusNotification.TIME_MEDIUM);
-			}
-		});
-		reader.addLoadHandler(new LoadHandler() {
-			@Override
-			public void onLoad(File file) {
-				fileImport.setEnabled(true);
-				importFileLog.setText("");
-				String data = file.getResult();
-				ImportParser parser = new ImportParser(data);
-				parser.parse(new ImportParser.ImportParserHandler() {
+	/**
+	 * Hide / show controls depending on import state
+	 * 
+	 * @param state
+	 *            Current state. One of:
+	 *            <ul>
+	 *            <li>0 - regular state - ready to import data.</li>
+	 *            <li>1 - reading or parsing data</li>
+	 *            <li>2 - displaying confirmation table</li>
+	 *            <li>3 - importing</li>
+	 *            </ul>
+	 */
+	private void setImportState(int state) {
+		switch (state) {
+		case 0:
+			fileImportSpinner.addClassName("hidden");
+			fileDrop.removeClassName("hidden");
+			importDataTable.addClassName("hidden");
+			serverSection.removeClassName("hidden");
+			fileExportSection.removeClassName("hidden");
+			break;
+		case 1:
+			fileImportSpinner.removeClassName("hidden");
+			fileDrop.addClassName("hidden");
+			importDataTable.addClassName("hidden");
+			serverSection.addClassName("hidden");
+			fileExportSection.addClassName("hidden");
+			break;
+		case 2:
+			fileImportSpinner.addClassName("hidden");
+			fileDrop.addClassName("hidden");
+			importDataTable.removeClassName("hidden");
+			serverSection.addClassName("hidden");
+			fileExportSection.addClassName("hidden");
+			break;
+		case 3:
+			fileImportSpinner.removeClassName("hidden");
+			fileDrop.addClassName("hidden");
+			importDataTable.addClassName("hidden");
+			serverSection.addClassName("hidden");
+			fileExportSection.addClassName("hidden");
+			break;
+		}
+	}
 
-					@Override
-					public void onParse(ImportResult result) {
-						if (result == null) {
-							StatusNotification.notify("Unable to parse input file.", StatusNotification.TIME_MEDIUM);
-							return;
-						}
-						showImportTable(result);
-					}
-				});
+	/**
+	 * Hide / show controls depending on export state
+	 * 
+	 * @param state
+	 *            Current state. One of:
+	 *            <ul>
+	 *            <li>0 - regular state - ready to prepare data to export</li>
+	 *            <li>1 - preparing data</li>
+	 *            <li>2 - displaying download link</li>
+	 *            </ul>
+	 */
+	private void setExportState(int state) {
+		switch (state) {
+		case 0:
+			dataPrepareContainer.removeClassName("hidden");
+			dataDownload2.addClassName("hidden");
+			dataDownloadSpinner.addClassName("hidden");
+			break;
+		case 1:
+			dataPrepareContainer.addClassName("hidden");
+			dataDownload2.addClassName("hidden");
+			dataDownloadSpinner.removeClassName("hidden");
+			break;
+		case 2:
+			dataPrepareContainer.addClassName("hidden");
+			dataDownload2.removeClassName("hidden");
+			dataDownloadSpinner.addClassName("hidden");
+			break;
+		}
+	}
 
-			}
-		});
-		reader.readAsText(file);
+	/**
+	 * Hide / show controls depending on server import/export state
+	 * 
+	 * @param state
+	 *            Current state. One of:
+	 *            <ul>
+	 *            <li>0 - regular state - ready to prepare data to import/export
+	 *            </li>
+	 *            <li>1 - user is not logged in</li>
+	 *            <li>2 - showing preview table</li>
+	 *            <li>3 - loading data</li>
+	 *            </ul>
+	 */
+	private void setServerState(int state) {
+		serverSection.removeClassName("hidden");
+		
+		switch (state) {
+		case 0:
+			fileExportSection.removeClassName("hidden");
+			fileImportSection.removeClassName("hidden");
+			serverImportDataTable.addClassName("hidden");
+			shareUrlPanel.removeClassName("hidden");
+			storeDataPanel.removeClassName("hidden");
+			connectActionContainer.addClassName("hidden");
+			break;
+		case 1:
+			fileExportSection.addClassName("hidden");
+			fileImportSection.addClassName("hidden");
+			serverImportDataTable.addClassName("hidden");
+			shareUrlPanel.addClassName("hidden");
+			storeDataPanel.addClassName("hidden");
+			connectActionContainer.removeClassName("hidden");
+			break;
+		case 2:
+			fileExportSection.addClassName("hidden");
+			fileImportSection.addClassName("hidden");
+			serverImportDataTable.removeClassName("hidden");
+			shareUrlPanel.addClassName("hidden");
+			storeDataPanel.addClassName("hidden");
+			connectActionContainer.addClassName("hidden");
+			break;
+		case 3:
+			fileExportSection.addClassName("hidden");
+			fileImportSection.addClassName("hidden");
+			serverImportDataTable.addClassName("hidden");
+			shareUrlPanel.addClassName("hidden");
+			storeDataPanel.addClassName("hidden");
+			connectActionContainer.addClassName("hidden");
+			break;
+		}
+	}
+
+	void importFromFile(File file) {
+		if (file == null) {
+			resetImportView();
+			return;
+		}
+		setImportState(1);
+		if (previewGrid != null) {
+			previewGrid.clear();
+		}
+		listener.importFromFile(file);
 	}
 
 	private Grid previewGrid = null;
 
-	private void showImportTable(ImportResult result) {
-		ArrayList<ProjectObject> projects = result.getProjects();
-		ArrayList<RequestObject> requests = result.getRequests();
-
-		if (requests == null || requests.size() == 0) {
-			StatusNotification.notify("There is nothing to update", StatusNotification.TIME_MEDIUM);
+	@Override
+	public void showImportTable(ImportResult result) {
+		setImportState(2);
+		JsArray<RequestObject> requests = result.getRequests();
+		if (requests.length() == 0) {
+			StatusNotification.notify("There is nothing to import.", StatusNotification.TIME_MEDIUM);
+			setImportState(0);
 			return;
 		}
-
-		int len = requests.size();
-
-		if (previewGrid != null) {
-			previewGrid.clear();
-		} else {
-			previewGrid = new Grid();
-		}
-		previewGrid.resize(len + 1, 4);
-		previewGrid.setCellPadding(7);
-		previewGrid.setCellSpacing(3);
-		previewGrid.setWidth("100%");
-
-		Label nameLabel = new Label("Name");
-		Label methodLabel = new Label("Method");
-		Label urlLabel = new Label("URL");
-		Label projectsLabel = new Label("Project");
-		nameLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-		methodLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-		urlLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-		projectsLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-		previewGrid.setWidget(0, 0, nameLabel);
-		previewGrid.setWidget(0, 1, methodLabel);
-		previewGrid.setWidget(0, 2, urlLabel);
-		previewGrid.setWidget(0, 3, projectsLabel);
-
-		for (int i = 0; i < len; i++) {
-			RequestObject request = requests.get(i);
-			previewGrid.setText(i + 1, 0, request.getName());
-			previewGrid.setText(i + 1, 1, request.getMethod());
-			previewGrid.setText(i + 1, 2, request.getURL());
-			String projectName = "";
-			int projectId = request.getProject();
-			if (projectId > 0) {
-				for (ProjectObject project : projects) {
-					if (project.getId() == projectId) {
-						projectName = project.getName();
-						break;
-					}
-				}
-			}
-			previewGrid.setText(i + 1, 3, projectName);
-		}
-		importPreview.add(previewGrid);
-		importPreview.setVisible(true);
+		JsArray<ProjectObject> projects = result.getProjects();
+		setDataTable(projects, requests);
 		currentFileImport = result;
 	}
 
-	private void saveCurrentFileImportData() {
+	private void saveFileImportData() {
 		if (currentFileImport == null) {
-			cleanUpImportData();
+			resetImportView();
 			return;
 		}
+		setImportState(3);
 		listener.saveImportedFileData(currentFileImport, new Callback<Boolean, Void>() {
-
 			@Override
 			public void onSuccess(Boolean result) {
 				if (result != null && result) {
-					cleanUpImportData();
+					resetImportView();
 					StatusNotification.notify("Data saved.", StatusNotification.TIME_SHORT);
 				} else {
+					setImportState(2);
 					StatusNotification.notify("Data save error.", StatusNotification.TIME_MEDIUM);
 				}
 			}
 
 			@Override
 			public void onFailure(Void reason) {
+				setImportState(2);
 				StatusNotification.notify("Data save error.", StatusNotification.TIME_MEDIUM);
 			}
 		});
 	}
 
-	private void cleanUpImportData() {
-		if (previewGrid != null) {
-			previewGrid.clear();
-		}
-		importPreview.setVisible(false);
-		currentFileImport = null;
-	}
-
-	@UiHandler("saveImportedData")
-	void onSaveImportedData(ClickEvent e) {
-		saveCurrentFileImportData();
-	}
-
-	@UiHandler("backSettings")
-	void onGoBackToSettings(ClickEvent e) {
-		e.preventDefault();
-		listener.goTo(new SettingsPlace(null));
-	}
-
-	//
-	// OLD SYSTEM
-	//
-	@UiField
-	InlineLabel loggedInInfo;
-	@UiField
-	InlineLabel statusInfo;
 	@UiField
 	DivElement storeDataPanel;
 	@UiField
 	DivElement shareUrlPanel;
-	@UiField
-	ParagraphElement connectNote;
 	@UiField
 	PreElement shareLink;
 
@@ -335,31 +356,17 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 
 	@Override
 	public void setIsUserView() {
-		statusInfo.setText("");
-
-		//
-		// OLD SYSTEM
-		//
-		hideConnectControls();
-		showShareLink();
+		setServerState(0);
+		updateShareLink();
 	}
 
-	/**
-	 * Hide controls like "connect to application"
-	 */
-	private void hideConnectControls() {
-		loggedInInfo.setVisible(true);
-		connectButton.setVisible(false);
-		connectNote.getStyle().setDisplay(Display.NONE);
-		storeDataPanel.getStyle().setDisplay(Display.BLOCK);
-	}
-
-	private void showShareLink() {
+	
+	@Override
+	public void updateShareLink() {
 		String applicationUserId = listener.getApplicationUserId();
 		if (applicationUserId == null)
 			return;
 
-		shareUrlPanel.getStyle().setDisplay(Display.BLOCK);
 		String url = "";
 		if (Window.Location.getHost().startsWith("127.")) { // DEV mode
 			url = "http://127.0.0.1:8888/RestClient.html?gwt.codesvr=127.0.0.1:9997";
@@ -384,23 +391,20 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 			returnPath = "/auth.html#auth";
 		}
 		signInUrl = signInUrl + URL.encodeQueryString(returnPath);
-		if (!Tabs.isSupported()) { // DEV MODE
-			Window.open(signInUrl, "_blank", "");
-		} else {
-			Tabs tabs = GWT.create(Tabs.class);
-			CreateProperties cp = CreateProperties.create();
-			cp.setUrl(signInUrl);
-			tabs.create(cp, new TabCallback() {
-				@Override
-				public void onResult(Tab tab) {
-				}
-			});
-		}
+		Tabs tabs = GWT.create(Tabs.class);
+		CreateProperties cp = CreateProperties.create();
+		cp.setUrl(signInUrl);
+		tabs.create(cp, new TabCallback() {
+			@Override
+			public void onResult(Tab tab) {
+
+			}
+		});
 	}
 
 	@Override
 	public void setIsNotUserView() {
-		statusInfo.setText("");
+		setServerState(1);
 	}
 
 	@Override
@@ -423,60 +427,176 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 
 	@UiHandler("restoreData")
 	void onRestoreDataClick(ClickEvent e) {
-		String applicationUserId = listener.getApplicationUserId();
-		if (applicationUserId == null) {
-			StatusNotification.notify("Connect to application first (not logged in)", StatusNotification.TIME_MEDIUM);
-			return;
-		}
-
-		storeData.setEnabled(false);
-		restoreData.setEnabled(false);
-		// Show dialog
-		final LoaderDialog dialog = new LoaderDialog("Preparing data to download. Please wait.", false);
-		dialog.show();
+		setServerState(3);
+		listener.requestImportSuggestions("me");
 		GoogleAnalytics.sendEvent("Settings usage", "Import data", "Import server dialog");
 		GoogleAnalyticsApp.sendEvent("Settings usage", "Import data", "Import server dialog");
+	}
 
-		// Make request
-		ImportRequest.getImportSuggestions("me", new ImportSuggestionsCallback() {
+	@Override
+	protected void onDetach() {
+		super.onDetach();
+		nativeDetach(this);
+	}
 
-			@Override
-			public void onSuccess(List<SuggestionImportItem> result) {
-				dialog.hide();
-				if (result == null) {
-					StatusNotification.notify("Server returns empty data", StatusNotification.TIME_SHORT);
-					restoreData.setEnabled(true);
-					return;
-				}
-				final ImportListingDialog importDialog = new ImportListingDialog(listener);
-				importDialog.append(result);
-				//
-				// delay show dialog for data providers to refresh the
-				// list
-				// and show dialog in it's place (center)
-				//
-				new Timer() {
-					@Override
-					public void run() {
-						importDialog.show();
-					}
-				}.schedule(200);
-			}
+	private final native void nativeDetach(ImportExportViewImpl context) /*-{
+		var listeners = context._detachListeners;
+		if (!listeners) {
+			return;
+		}
+		listeners.forEach(function(value) {
+			value.element.removeEventListener(value.event, value.fn);
+		});
+		context._detachListeners = null;
+	}-*/;
 
-			@Override
-			public void onFailure(String message, Throwable exception) {
-				if (RestClient.isDebug()) {
-					if (exception != null) {
-						Log.error(message, exception);
-					} else {
-						Log.error(message);
-					}
-				}
-				StatusNotification.notify(message, StatusNotification.TIME_MEDIUM);
-				dialog.hide();
-				storeData.setEnabled(true);
-				restoreData.setEnabled(true);
+	/**
+	 * Add file drop element listeners. This events must be removed on detach.
+	 * 
+	 * @param element
+	 * @param context
+	 */
+	private final native void addFileEventHandler(ImportExportViewImpl context) /*-{
+		var fn = $entry(function(e, detail) {
+			if (e.detail && e.detail.file) {
+				context.@org.rest.client.ui.desktop.ImportExportViewImpl::importFromFile(Lcom/google/gwt/file/client/File;)(e.detail.file);
 			}
 		});
+		var elm = context.@org.rest.client.ui.desktop.ImportExportViewImpl::fileDrop;
+		var listeners = context._detachListeners;
+		if (!listeners) {
+			listeners = new Map();
+		}
+		listeners.set('file-ready', {
+			element : elm,
+			fn : fn,
+			event : 'file-ready'
+		});
+		context._detachListeners = listeners;
+		elm.addEventListener('file-ready', fn);
+	}-*/;
+
+	/**
+	 * Reset drag and drop file element to initial state
+	 */
+	private final native void resetFileElement(ImportExportViewImpl context) /*-{
+		var elm = context.@org.rest.client.ui.desktop.ImportExportViewImpl::fileDrop;
+		elm.reset();
+	}-*/;
+
+	/**
+	 * Add preview table listeners. This events must be removed on detach.
+	 * 
+	 * @param context
+	 */
+	private final native void addPreviewTableHandlers(ImportExportViewImpl context) /*-{
+		var table = this.@org.rest.client.ui.desktop.ImportExportViewImpl::importDataTable;
+		if (!table) {
+			console.error('There is no table???');
+			return;
+		}
+		var importHandler = $entry(function(e) {
+			if (e.detail && e.detail.action) {
+				if (e.detail.action === 'import') {
+					context.@org.rest.client.ui.desktop.ImportExportViewImpl::saveFileImportData()();
+				} else if (e.detail.action === 'cancel') {
+					context.@org.rest.client.ui.desktop.ImportExportViewImpl::resetImportView()();
+				}
+			}
+		});
+		var listeners = context._detachListeners;
+		if (!listeners) {
+			listeners = new Map();
+		}
+		listeners.set('import-action', {
+			element : table,
+			fn : importHandler,
+			event : 'import-action'
+		});
+		context._detachListeners = listeners;
+		table.addEventListener('import-action', importHandler);
+	}-*/;
+
+	/**
+	 * Fill the preview data table with imported data.
+	 * 
+	 * @param projects
+	 * @param requests
+	 */
+	private final native void setDataTable(JsArray<ProjectObject> projects, JsArray<RequestObject> requests) /*-{
+		var table = this.@org.rest.client.ui.desktop.ImportExportViewImpl::importDataTable;
+		if (!table) {
+			console.error('There is no table???');
+			return;
+		}
+		table.requests = requests;
+		table.projects = projects;
+	}-*/;
+
+	private final native void addDownloadDataHandlers(ImportExportViewImpl context) /*-{
+		var prepareButton = this.@org.rest.client.ui.desktop.ImportExportViewImpl::dataPrepareButton;
+		var downloadButton = this.@org.rest.client.ui.desktop.ImportExportViewImpl::dataDownload2Button;
+		var dataDownloadCancel = this.@org.rest.client.ui.desktop.ImportExportViewImpl::dataDownloadCancel;
+		var prepare = $entry(function(e) {
+			context.@org.rest.client.ui.desktop.ImportExportViewImpl::prepareFileExport()();
+		});
+		var download = $entry(function(e) {
+			var link = document.createElement("a");
+			link.download = e.target.getAttribute('download');
+			link.href = e.target.getAttribute('href');
+			link.dataset.downloadurl = e.target.dataset.downloadurl;
+			link.click();
+		});
+		var cancel = $entry(function(e) {
+			context.@org.rest.client.ui.desktop.ImportExportViewImpl::resetExportView()();
+		});
+		prepareButton.addEventListener('tap', prepare);
+		downloadButton.addEventListener('tap', download);
+		dataDownloadCancel.addEventListener('tap', cancel);
+		var listeners = context._detachListeners;
+		if (!listeners) {
+			listeners = new Map();
+		}
+		listeners.set('prepare-button-tap', {
+			element : prepareButton,
+			fn : prepare,
+			event : 'tap'
+		});
+		listeners.set('download-button-tap', {
+			element : downloadButton,
+			fn : download,
+			event : 'tap'
+		});
+		listeners.set('download-cancel-tap', {
+			element : dataDownloadCancel,
+			fn : cancel,
+			event : 'tap'
+		});
+		context._detachListeners = listeners;
+	}-*/;
+
+	@Override
+	public void showServerImportTable(JsArray<RequestImportListItem> items) {
+		if (items.length() == 0) {
+			StatusNotification.notify("There is nothing to import.", StatusNotification.TIME_MEDIUM);
+			setServerState(0);
+			return;
+		}
+		setServerState(2);
+		setServerImportDataTable(items);
 	}
+	/**
+	 * Fill the preview data table with imported data.
+	 * 
+	 * @param projects
+	 * @param requests
+	 */
+	private final native void setServerImportDataTable(JsArray<RequestImportListItem> requests) /*-{
+		var table = this.@org.rest.client.ui.desktop.ImportExportViewImpl::serverImportDataTable;
+		if (!table) {
+			console.error('There is no table???');
+			return;
+		}
+		table.requests = requests;
+	}-*/;
 }

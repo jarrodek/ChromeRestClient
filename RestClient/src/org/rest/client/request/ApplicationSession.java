@@ -1,6 +1,10 @@
 package org.rest.client.request;
 
-public class ApplicationSession {
+import com.google.gwt.core.client.JavaScriptObject;
+
+public class ApplicationSession extends JavaScriptObject {
+	protected ApplicationSession(){}
+	
 	/**
 	 * User is connected to application
 	 */
@@ -14,43 +18,35 @@ public class ApplicationSession {
 	 */
 	public static final int UNKNOWN = 2;
 
-	private final int state;
-	private final String userId;
-
-	/**
-	 * Shortcut method to create session object with unknown state (eg. failure
-	 * to get response from server)
-	 */
-	public ApplicationSession() {
-		this.state = UNKNOWN;
-		this.userId = null;
-	}
-	/**
-	 * Create user session object with known status but without user id
-	 * @param state
-	 */
-	public ApplicationSession(int state) {
-		this(state, null);
-	}
-	/**
-	 * Create session object.
-	 * @param state Session state either {@link #CONNECTED}, {@link #DISCONNECTED} or {@link #UNKNOWN} 
-	 * @param userId application user id or null if unknown
-	 */
-	public ApplicationSession(int state, String userId) {
-		this.state = state;
-		this.userId = userId;
-	}
 	/**
 	 * @return the state
 	 */
-	public final int getState() {
-		return state;
-	}
+	public final native int getState() /*-{
+		return this.state;
+	}-*/;
 	/**
 	 * @return the userId
 	 */
-	public final String getUserId() {
-		return userId;
-	}
+	public final native String getUserId() /*-{
+		return this.userId;
+	}-*/;
+	
+	/**
+	 * @return true if there was an error during the request.
+	 */
+	public final native boolean isError() /*-{
+		if(typeof this.error === 'undefined'){
+			return false;
+		}
+		return this.error;
+	}-*/;
+	/**
+	 * @return the error message if {@link #isError()} return true, null otherwise
+	 */
+	public final native String getMessage() /*-{
+		if(typeof this.message === 'undefined'){
+			return null;
+		}
+		return this.message;
+	}-*/;
 }

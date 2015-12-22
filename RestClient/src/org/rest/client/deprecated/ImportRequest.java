@@ -8,6 +8,7 @@ import java.util.List;
 import org.rest.client.RestClient;
 import org.rest.client.StatusNotification;
 import org.rest.client.request.ApplicationRequest;
+import org.rest.client.request.RequestImportListItem;
 import org.rest.shared.ServerPaths;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -36,8 +37,9 @@ public class ImportRequest extends ApplicationRequest {
 	 * @param uuid
 	 *            User id - owner of the data. Special uuid is "me" when user
 	 *            want to get his data
+	 * @throws Exception 
 	 */
-	public static void getImportSuggestions(String uuid, final ImportSuggestionsCallback callback) {
+	public static void getImportSuggestions(String uuid, final ImportSuggestionsCallback callback) throws Exception {
 
 		if (currentRequest != null) {
 			callback.onFailure("Wait until current request ends.", null);
@@ -45,102 +47,8 @@ public class ImportRequest extends ApplicationRequest {
 		}
 		String url = SERVICE_URL + ServerPaths.SUGGESTIONS_LISTING + "/" + uuid;
 
-		RequestBuilder builder = getApplicationRequestBuilder(url, "GET");
-		builder.setLoadHandler(new LoadHandler() {
-
-			@Override
-			public void onLoaded(Response response, ProgressEvent event) {
-				currentRequest = null;
-				if (response.getStatus() == 404) {
-					callback.onFailure("Object not found.", null);
-					return;
-				}
-
-				List<SuggestionImportItem> result = parseSuggestionsData(response.getResponseText());
-				if (result == null) {
-					callback.onFailure("Unable to parse response data.", null);
-					return;
-				}
-				callback.onSuccess(result);
-			}
-
-			@Override
-			public void onError(Response r, Throwable exception) {
-				currentRequest = null;
-				callback.onFailure("Server return error status :( try again later.", exception);
-			}
-		});
-		try {
-			currentRequest = builder.send();
-		} catch (RequestException e) {
-			if (RestClient.isDebug()) {
-				Log.error("Error make request to server.", e);
-			}
-			callback.onFailure("Error make request to server.", e);
-		}
-	}
-
-	private static List<SuggestionImportItem> parseSuggestionsData(String rawData) {
-		if (rawData == null || rawData.trim().equals("")) {
-			return null;
-		}
-		JSONValue jsonValue = JSONParser.parseStrict(rawData);
-		//
-		// Response is array but first check if it is error response (object
-		// instead of array).
-		//
-		JSONObject bodyObj = jsonValue.isObject();
-		if (bodyObj != null) {
-			JSONValue errorValue = bodyObj.get("error");
-			if (errorValue != null) {
-				StatusNotification.notify(errorValue.isString().stringValue());
-				if (RestClient.isDebug()) {
-					Log.error("Error: " + errorValue.isString().stringValue());
-				}
-				return null;
-			}
-			if (RestClient.isDebug()) {
-				Log.error("Response has no valid data");
-			}
-			return null;
-		}
-		JSONArray bodyArr = jsonValue.isArray();
-		if (bodyArr == null) {
-			if (RestClient.isDebug()) {
-				Log.error("Response has no valid data (not array)");
-			}
-			return null;
-		}
-		int len = bodyArr.size();
-		if (len == 0) {
-			if (RestClient.isDebug()) {
-				Log.error("There is nothing to import this time");
-			}
-			return null;
-		}
-
-		List<SuggestionImportItem> result = new ArrayList<SuggestionImportItem>();
-		for (int i = 0; i < len; i++) {
-			JSONValue itemValue = bodyArr.get(i);
-			if (itemValue == null)
-				continue;
-			JSONObject itemObj = itemValue.isObject();
-			if (itemObj == null)
-				continue;
-			SuggestionImportItem _i = new SuggestionImportItem();
-			_i.setName(itemObj.get("name").isString().stringValue());
-			_i.setUrl(itemObj.get("url").isString().stringValue());
-			_i.setKey(itemObj.get("key").isString().stringValue());
-			try {
-				BigInteger bi = new BigInteger(itemObj.get("updated").toString());
-				_i.setCreated(new Date(bi.longValue()));
-			} catch (NumberFormatException e) {
-				_i.setCreated(new Date());
-			}
-			result.add(_i);
-		}
-		return result;
-	}
+		throw new Exception("remove me");
+	}	
 
 	public static void importData(final String[] keys, final ImportDataCallback callback) {
 		if (currentRequest != null) {

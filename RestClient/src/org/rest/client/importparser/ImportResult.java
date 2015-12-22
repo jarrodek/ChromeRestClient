@@ -1,27 +1,27 @@
 package org.rest.client.importparser;
 
-import java.util.ArrayList;
-
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 
+import com.google.gwt.core.client.JsArray;
+
 public class ImportResult {
-	ArrayList<ProjectObject> projects = null;
-	ArrayList<RequestObject> requests = null;
+	JsArray<ProjectObject> projects = null;
+	JsArray<RequestObject> requests = null;
 	
-	public ArrayList<ProjectObject> getProjects() {
+	public JsArray<ProjectObject> getProjects() {
 		return projects;
 	}
 
-	public void setProjects(ArrayList<ProjectObject> projects) {
+	public void setProjects(JsArray<ProjectObject> projects) {
 		this.projects = projects;
 	}
 
-	public ArrayList<RequestObject> getRequests() {
+	public JsArray<RequestObject> getRequests() {
 		return requests;
 	}
 
-	public void setRequests(ArrayList<RequestObject> requests) {
+	public void setRequests(JsArray<RequestObject> requests) {
 		this.requests = requests;
 	}
 

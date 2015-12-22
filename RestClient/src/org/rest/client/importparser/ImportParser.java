@@ -1,29 +1,28 @@
 package org.rest.client.importparser;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 import org.rest.client.RestClient;
+import org.rest.client.jso.FileImportData;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
-import org.rest.client.util.Utils;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.core.client.JavaScriptException;
+import com.google.gwt.core.client.JsArray;
 
+/**
+ * Parser for imported data from file.
+ * @author Pawel Psztyc
+ *
+ */
 public class ImportParser {
 	
 	
 	public interface ImportParserHandler {
 		void onParse(ImportResult result);
+		void onError(Throwable e);
 	}
-	
 	
 	
 	private final String input;
@@ -33,257 +32,63 @@ public class ImportParser {
 	public ImportParser(String data){
 		this.input = data;
 	}
+	/**
+	 * Use native JSON.parse function to transform data to JavaScriptObject.
+	 * If the file is not an export file an error will be returned by the callback function.
+	 * @param data Input data from file.
+	 * @return Parsed data
+	 * @throws JavaScriptException If the data is not a valid JSON string.
+	 */
+	private final native FileImportData parseData(String data) throws JavaScriptException /*-{
+		return JSON.parse(data);
+	}-*/;
 	
+	/**
+	 * Parse import file content and result with overlay JSNI object.
+	 * The {@link ImportParserHandler#onError(Throwable)} will be called when the file is not containing export data.
+	 * @param callback A callback function to be called after data read.
+	 */
 	public void parse(final ImportParserHandler callback){
 		if(this.input == null) {
-			callback.onParse(null);
+			callback.onError(new Throwable("The file you are trying to import is empty."));
 			return;
 		}
-		JSONValue inputValue = null;
-		try{
-			inputValue = JSONParser.parseStrict(this.input);
+		FileImportData data = null;
+		try {
+			data = parseData(input);
 		} catch(Exception e){
+			callback.onError(new Throwable("The file you are trying to import is invalid."));
 			if(RestClient.isDebug()){
-				Log.error("Unable parse input file.",e);
+				Log.error("Error parse import file", e);
 			}
-			callback.onParse(null);
 			return;
 		}
 		
-		final JSONObject root = inputValue.isObject();
-		if(!(root.containsKey("projects")||root.containsKey("requests"))){
+		if(!data.isValid()){
+			callback.onError(new Throwable("The file you are trying to import is invalid."));
 			if(RestClient.isDebug()){
-				Log.error("File that you trying to import is not a valid ARC file.");
+				Log.error("Imported file is not app's file.");
+				Log.debug(this.input);
 			}
-			callback.onParse(null);
 			return;
 		}
-		
-		
-		if(root.containsKey("requests")){
-			JSONValue requestsValue = root.get("requests");
-			if(requestsValue != null){
-				JSONArray requestsArray = requestsValue.isArray();
-				if(requestsArray != null){
-					parseRequestsList(requestsArray, new Callback<Void, Void>() {
-						
-						@Override
-						public void onSuccess(Void result) {
-							parseProjects(root, callback);
-						}
-						@Override
-						public void onFailure(Void reason) {
-							parseProjects(root, callback);
-						}
-					});
-					
-				} else {
-					parseProjects(root, callback);
-				}
-			} else {
-				parseProjects(root, callback);
+		JsArray<RequestObject> requests = data.getRequests();
+		if(requests.length() == 0){
+			callback.onError(new Throwable("There's nothing to import from the file."));
+			if(RestClient.isDebug()){
+				Log.error("Requests array is empty.");
+				Log.debug(this.input);
 			}
-		} else {
-			parseProjects(root, callback);
-		}
-	}
-	
-	
-	private void parseProjects(JSONObject root, final ImportParserHandler callback){
-		final ImportResult importResult = new ImportResult();
-		importResult.setRequests(requestsResult);
-		boolean returnNow = false;
-		if(root.containsKey("projects")){
-			JSONValue projectsValue = root.get("projects");
-			if(projectsValue != null){
-				JSONArray projectsArray = projectsValue.isArray();
-				if(projectsArray != null){
-					parseProjectsList(projectsArray, new Callback<Void, Void>() {
-						
-						@Override
-						public void onSuccess(Void result) {
-							importResult.setProjects(projectsResult);
-							callback.onParse(importResult);
-						}
-						
-						@Override
-						public void onFailure(Void reason) {
-							callback.onParse(importResult);
-						}
-					});
-				} else {
-					returnNow = true;
-				}
-			} else {
-				returnNow = true;
-			}
-		} else {
-			returnNow = true;
-		}
-		if(returnNow){
-			callback.onParse(importResult);
-		}
-	}
-	
-	private int currentRequestObject = 0;
-	protected void parseRequestsList(final JSONArray requests, final Callback<Void, Void> callback){
-		
-		final int len = requests.size();
-		if(len == 0){
-			callback.onSuccess((Void) GWT.create(Void.class));
 			return;
 		}
+		JsArray<ProjectObject> projects = data.getProjects();
 		
-		
-		Scheduler.RepeatingCommand rc = new Scheduler.RepeatingCommand() {
-			@Override
-			public boolean execute() {
-				JSONValue itemValue = requests.get(currentRequestObject);
-				if(itemValue == null) {
-					currentRequestObject++;
-					return !(currentProjectObject == len);
-				}
-				JSONObject item = itemValue.isObject();
-				if(item == null) {
-					currentRequestObject++;
-					return !(currentProjectObject == len);
-				}
-				
-				RequestObject ro = RequestObject.createRequest();
-				String encoding = Utils.getJsonString(item, "encoding");
-				if(encoding != null){
-					ro.setEncoding(encoding);
-				}
-				String headers = Utils.getJsonString(item, "headers");
-				if(headers != null){
-					ro.setHeaders(headers);
-				}
-				String method = Utils.getJsonString(item, "method");
-				if(method != null){
-					ro.setMethod(method);
-				}
-				String name = Utils.getJsonString(item, "name");
-				if(name != null){
-					ro.setName(name);
-				}
-				String payload = Utils.getJsonString(item, "payload");
-				if(payload != null){
-					ro.setPayload(payload);
-				}
-				String url = Utils.getJsonString(item, "url");
-				if(url != null){
-					ro.setURL(url);
-				}
-				int project = Utils.getJsonInt(item, "project");
-				if(project != -1){
-					ro.setProject(project);
-				}
-				long time = Utils.getJsonLong(item, "time");
-				if(time > 0){
-					ro.setTime(time);
-				}
-				if(project > 0){
-					Boolean skipHeaders = Utils.getJsoniBool(item, "skipHeaders");
-					if(skipHeaders != null){
-						ro.setSkipHeaders(skipHeaders.booleanValue());
-					}
-					Boolean skipHistory = Utils.getJsoniBool(item, "skipHistory");
-					if(skipHistory != null){
-						ro.setSkipHistory(skipHistory.booleanValue());
-					}
-					Boolean skipMethod = Utils.getJsoniBool(item, "skipMethod");
-					if(skipMethod != null){
-						ro.setSkipMethod(skipMethod.booleanValue());
-					}
-					Boolean skipParams = Utils.getJsoniBool(item, "skipParams");
-					if(skipParams != null){
-						ro.setSkipParams(skipParams.booleanValue());
-					}
-					Boolean skipPath = Utils.getJsoniBool(item, "skipPath");
-					if(skipPath != null){
-						ro.setSkipPath(skipPath.booleanValue());
-					}
-					Boolean skipPayload = Utils.getJsoniBool(item, "skipPayload");
-					if(skipPayload != null){
-						ro.setSkipPayload(skipPayload.booleanValue());
-					}
-					Boolean skipProtocol = Utils.getJsoniBool(item, "skipProtocol");
-					if(skipProtocol != null){
-						ro.setSkipProtocol(skipProtocol.booleanValue());
-					}
-					Boolean skipServer = Utils.getJsoniBool(item, "skipServer");
-					if(skipServer != null){
-						ro.setSkipServer(skipServer.booleanValue());
-					}
-				}
-				requestsResult.add(ro);
-				
-				currentRequestObject++;
-				boolean hasMore = !(currentRequestObject == len);
-				if(!hasMore){
-					callback.onSuccess((Void) GWT.create(Void.class));
-				}
-				return hasMore;
-			}
-		};
-		
-		
-		Scheduler.get().scheduleIncremental(rc);
+		ImportResult ir = new ImportResult();
+		ir.projects = projects;
+		ir.requests = requests;
+		callback.onParse(ir);
 	}
-	private int currentProjectObject = 0;
-	protected void parseProjectsList(final JSONArray projects, final Callback<Void, Void> callback){
-		
-		final int len = projects.size();
-		if(len == 0){
-			callback.onSuccess((Void) GWT.create(Void.class));
-			return;
-		}
-		
-		Scheduler.RepeatingCommand rc = new Scheduler.RepeatingCommand() {
-
-			@Override
-			public boolean execute() {
-				JSONValue itemValue = projects.get(currentProjectObject);
-				if(itemValue == null) {
-					currentProjectObject++;
-					return !(currentProjectObject == len);
-				}
-				JSONObject item = itemValue.isObject();
-				if(item == null) {
-					currentRequestObject++;
-					return !(currentProjectObject == len);
-				}
-				String name = Utils.getJsonString(item, "name");
-				int id = Utils.getJsonInt(item, "id");
-				
-				if(name == null || id < 1) {
-					currentRequestObject++;
-					return !(currentProjectObject == len);
-				}
-				ProjectObject project = ProjectObject.create();
-				project.setName(name);
-				project.setId(id);
-				
-				long time = Utils.getJsonLong(item, "time");
-				if(time > 0){
-					project.setCreated(time);
-				}  else {
-					project.setCreated(new Date().getTime());
-				}
-				
-				projectsResult.add(project);
-				
-				currentProjectObject++;
-				boolean hasMore = !(currentProjectObject == len);
-				if(!hasMore){
-					callback.onSuccess((Void) GWT.create(Void.class));
-				}
-				return hasMore;
-			}
-		};
-		
-		Scheduler.get().scheduleIncremental(rc);
-	}
+	
 	
 	
 }

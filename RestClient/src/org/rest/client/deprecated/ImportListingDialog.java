@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.rest.client.StatusNotification;
+import org.rest.client.request.RequestImportListItem;
 import org.rest.client.ui.ImportExportView.Presenter;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -51,7 +52,7 @@ public class ImportListingDialog {
 	}
 
 	@UiField(provided = true)
-	CellTable<SuggestionImportItem> cellTable;
+	CellTable<RequestImportListItem> cellTable;
 	/**
 	 * The pager used to change the range of data.
 	 */
@@ -62,31 +63,31 @@ public class ImportListingDialog {
 	@UiField
 	Button save;
 
-	private final List<SuggestionImportItem> resultList = new ArrayList<SuggestionImportItem>();
+	private final List<RequestImportListItem> resultList = new ArrayList<RequestImportListItem>();
 	/**
 	 * The key provider that provides the unique ID of a contact.
 	 */
-	public static final ProvidesKey<SuggestionImportItem> KEY_PROVIDER = new ProvidesKey<SuggestionImportItem>() {
-		public Object getKey(SuggestionImportItem item) {
+	public static final ProvidesKey<RequestImportListItem> KEY_PROVIDER = new ProvidesKey<RequestImportListItem>() {
+		public Object getKey(RequestImportListItem item) {
 			return item == null ? null : item.getKey();
 		}
 	};
 	/**
 	 * The provider that holds the list of contacts in the database.
 	 */
-	private ListDataProvider<SuggestionImportItem> dataProvider = new ListDataProvider<SuggestionImportItem>();
+	private ListDataProvider<RequestImportListItem> dataProvider = new ListDataProvider<RequestImportListItem>();
 	private Presenter listener;
 
 	public ImportListingDialog(Presenter listener) {
 		this.listener = listener;
 
 		// Set a key provider that provides a unique key for each item.
-		cellTable = new CellTable<SuggestionImportItem>(KEY_PROVIDER);
+		cellTable = new CellTable<RequestImportListItem>(KEY_PROVIDER);
 		cellTable.setWidth("100%", true);
 
 		// Attach a column sort handler to the ListDataProvider to sort the
 		// list.
-		ListHandler<SuggestionImportItem> sortHandler = new ListHandler<SuggestionImportItem>(dataProvider.getList());
+		ListHandler<RequestImportListItem> sortHandler = new ListHandler<RequestImportListItem>(dataProvider.getList());
 		cellTable.addColumnSortHandler(sortHandler);
 
 		// Create a Pager to control the table.
@@ -95,10 +96,10 @@ public class ImportListingDialog {
 		pager.setDisplay(cellTable);
 
 		// Add a selection model so we can select cells.
-		final SelectionModel<SuggestionImportItem> selectionModel = new MultiSelectionModel<SuggestionImportItem>(
+		final SelectionModel<RequestImportListItem> selectionModel = new MultiSelectionModel<RequestImportListItem>(
 				KEY_PROVIDER);
 		cellTable.setSelectionModel(selectionModel,
-				DefaultSelectionEventManager.<SuggestionImportItem> createCheckboxManager());
+				DefaultSelectionEventManager.<RequestImportListItem> createCheckboxManager());
 		// Initialize the columns.
 		initTableColumns(selectionModel, sortHandler);
 
@@ -147,8 +148,8 @@ public class ImportListingDialog {
 		void changedValue(int columnIndex, Boolean value);
 	}
 
-	private void initTableColumns(final SelectionModel<SuggestionImportItem> selectionModel,
-			ListHandler<SuggestionImportItem> sortHandler) {
+	private void initTableColumns(final SelectionModel<RequestImportListItem> selectionModel,
+			ListHandler<RequestImportListItem> sortHandler) {
 		// Checkbox column. This table will uses a checkbox column for
 		// selection.
 		// Alternatively, you can call cellTable.setSelectionEnabled(true) to
@@ -161,9 +162,9 @@ public class ImportListingDialog {
 					@Override
 					public void changedValue(int columnIndex, Boolean value) {
 						Log.debug("changedValue");
-						List<SuggestionImportItem> list = dataProvider.getList();
-						SelectionModel<? super SuggestionImportItem> _selectionModel = cellTable.getSelectionModel();
-						for (SuggestionImportItem _item : list) {
+						List<RequestImportListItem> list = dataProvider.getList();
+						SelectionModel<? super RequestImportListItem> _selectionModel = cellTable.getSelectionModel();
+						for (RequestImportListItem _item : list) {
 							_selectionModel.setSelected(_item, value);
 						}
 						if (value) {
@@ -174,10 +175,10 @@ public class ImportListingDialog {
 					}
 				});
 
-		Column<SuggestionImportItem, Boolean> checkColumn = new Column<SuggestionImportItem, Boolean>(
+		Column<RequestImportListItem, Boolean> checkColumn = new Column<RequestImportListItem, Boolean>(
 				new CheckboxCell(true, false)) {
 			@Override
-			public Boolean getValue(SuggestionImportItem object) {
+			public Boolean getValue(RequestImportListItem object) {
 				// Get the value from the selection model.
 				boolean isSelected = selectionModel.isSelected(object);
 				if (isSelected) {
@@ -195,15 +196,15 @@ public class ImportListingDialog {
 		cellTable.addColumn(checkColumn, checkboxHeader);
 		cellTable.setColumnWidth(checkColumn, 40, Unit.PX);
 		// name.
-		Column<SuggestionImportItem, String> nameColumn = new Column<SuggestionImportItem, String>(new TextCell()) {
+		Column<RequestImportListItem, String> nameColumn = new Column<RequestImportListItem, String>(new TextCell()) {
 			@Override
-			public String getValue(SuggestionImportItem object) {
+			public String getValue(RequestImportListItem object) {
 				return object.getName();
 			}
 		};
 		nameColumn.setSortable(true);
-		sortHandler.setComparator(nameColumn, new Comparator<SuggestionImportItem>() {
-			public int compare(SuggestionImportItem o1, SuggestionImportItem o2) {
+		sortHandler.setComparator(nameColumn, new Comparator<RequestImportListItem>() {
+			public int compare(RequestImportListItem o1, RequestImportListItem o2) {
 				return o1.getName().compareTo(o2.getName());
 			}
 		});
@@ -211,15 +212,15 @@ public class ImportListingDialog {
 		// cellTable.setColumnWidth(nameColumn, 200, Unit.PX);
 
 		// URL column
-		Column<SuggestionImportItem, String> urlColumn = new Column<SuggestionImportItem, String>(new TextCell()) {
+		Column<RequestImportListItem, String> urlColumn = new Column<RequestImportListItem, String>(new TextCell()) {
 			@Override
-			public String getValue(SuggestionImportItem object) {
+			public String getValue(RequestImportListItem object) {
 				return object.getUrl();
 			}
 		};
 		urlColumn.setSortable(true);
-		sortHandler.setComparator(urlColumn, new Comparator<SuggestionImportItem>() {
-			public int compare(SuggestionImportItem o1, SuggestionImportItem o2) {
+		sortHandler.setComparator(urlColumn, new Comparator<RequestImportListItem>() {
+			public int compare(RequestImportListItem o1, RequestImportListItem o2) {
 				return o1.getUrl().compareTo(o2.getUrl());
 			}
 		});
@@ -227,16 +228,16 @@ public class ImportListingDialog {
 		// cellTable.setColumnWidth(urlColumn, 100, Unit.PX);
 
 		// Date column
-		Column<SuggestionImportItem, Date> dateColumn = new Column<SuggestionImportItem, Date>(
+		Column<RequestImportListItem, Date> dateColumn = new Column<RequestImportListItem, Date>(
 				new DateCell(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM))) {
 			@Override
-			public Date getValue(SuggestionImportItem object) {
+			public Date getValue(RequestImportListItem object) {
 				return object.getCreated();
 			}
 		};
 		dateColumn.setSortable(true);
-		sortHandler.setComparator(dateColumn, new Comparator<SuggestionImportItem>() {
-			public int compare(SuggestionImportItem o1, SuggestionImportItem o2) {
+		sortHandler.setComparator(dateColumn, new Comparator<RequestImportListItem>() {
+			public int compare(RequestImportListItem o1, RequestImportListItem o2) {
 				return o1.getCreated().compareTo(o2.getCreated());
 			}
 		});
@@ -244,7 +245,7 @@ public class ImportListingDialog {
 		cellTable.setColumnWidth(dateColumn, 160, Unit.PX);
 	}
 
-	public void append(List<SuggestionImportItem> result) {
+	public void append(List<RequestImportListItem> result) {
 		dataProvider.getList().addAll(result);
 	}
 
@@ -277,7 +278,7 @@ public class ImportListingDialog {
 
 		String[] keys = new String[size];
 		for (int i = 0; i < size; i++) {
-			SuggestionImportItem item = resultList.get(i);
+			RequestImportListItem item = resultList.get(i);
 			keys[i] = item.getKey();
 		}
 		dialog.hide();

@@ -2,6 +2,8 @@ package org.rest.client.deprecated;
 
 import java.util.List;
 
+import org.rest.client.request.RequestImportListItem;
+
 public interface ImportSuggestionsCallback {
 	/**
 	 * Called when error occurred.
@@ -12,5 +14,5 @@ public interface ImportSuggestionsCallback {
 	/**
 	 * Called when data has been successfully retrieved from server
 	 */
-	void onSuccess(List<SuggestionImportItem> result);
+	void onSuccess(List<RequestImportListItem> result);
 }
