@@ -18,6 +18,7 @@ package org.rest.client.storage.store.objects;
 import java.util.ArrayList;
 
 import org.rest.client.RestClient;
+import org.rest.client.jso.RequestDataJso;
 import org.rest.client.request.FilesObject;
 import org.rest.client.storage.store.StoreKeys;
 
@@ -76,7 +77,40 @@ public class RequestObject extends JavaScriptObject {
 		}
 	}-*/;
 	
-	
+	public static final native RequestObject fromImportData(RequestDataJso obj) /*-{
+		var headers = '';
+		if(obj.encoding){
+			headers += 'Content-Type: ' + obj.encoding;
+		}
+		if(obj.headers && obj.headers.length){
+			obj.headers.forEach(function(header){
+				if(header.key && header.value){
+					headers += '\n' + header.key + ': ' + header.value;
+				}
+			});
+		}
+		return {
+			id: -1,
+			name : obj.name,
+			project : 0,
+			url : obj.url,
+			method : obj.method,
+			encoding : null,
+			headers : headers,
+			payload : obj.post,
+			skipProtocol : false,
+			skipServer : false,
+			skipParams : false,
+			skipHistory : false,
+			skipMethod: false,
+			skipPayload: false,
+			skipHeaders: false,
+			skipPath: false,
+			time: Date.now(),
+			//additional, non DB fields
+			driveId: null
+		}
+	}-*/;
 	public final native int getId() /*-{
 		if(isNaN(this.id)){
 			this.id = 0;
@@ -497,5 +531,6 @@ public class RequestObject extends JavaScriptObject {
 			}
 		});
 	}
+	
 	
 }

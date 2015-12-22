@@ -12,14 +12,13 @@ import org.rest.client.StatusNotification;
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.deprecated.DataExportImpl;
-import org.rest.client.deprecated.ImportDataCallback;
-import org.rest.client.deprecated.ImportRequest;
-import org.rest.client.deprecated.RestForm;
 import org.rest.client.event.StoreDataEvent;
 import org.rest.client.importparser.ImportParser;
 import org.rest.client.importparser.ImportResult;
+import org.rest.client.jso.RequestDataJso;
 import org.rest.client.place.ImportExportPlace;
 import org.rest.client.request.ApplicationSession;
+import org.rest.client.request.ImportDataCallback;
 import org.rest.client.request.RequestImportListObject;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.objects.ProjectObject;
@@ -27,7 +26,6 @@ import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.storage.websql.ExportedDataInsertItem;
 import org.rest.client.ui.ImportExportView;
 import org.rest.client.ui.ImportExportView.StringCallback;
-import org.rest.client.util.Utils;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
@@ -42,9 +40,6 @@ import com.google.gwt.filereader.client.FileReader;
 import com.google.gwt.filereader.client.LoadHandler;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -251,151 +246,104 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 	@Override
 	public void doServerImport(String[] keys) {
 		if (keys.length == 0) {
-			StatusNotification.notify("No items to import.",
-
-					StatusNotification.TIME_SHORT);
+			StatusNotification.notify("You must select items to import", StatusNotification.TIME_SHORT);
 			return;
 		}
-		ImportRequest.importData(keys, new ImportDataCallback() {
-
+		importData(keys, new ImportDataCallback() {
 			@Override
-			public void onSuccess(final List<RestForm> result) {
-				if (result.size() == 0) {
-					StatusNotification.notify("Something went wrong. There is no data to save :(",
-							StatusNotification.TIME_MEDIUM);
+			public void onSuccess(final JsArray<RequestDataJso> result) {
+				int size = result.length();
+				if (size == 0) {
+					StatusNotification.notify("Something went wrong. There is no data to save", StatusNotification.TIME_MEDIUM);
 					return;
 				}
-				final ArrayList<RequestObject> importData = new ArrayList<RequestObject>();
-				for (RestForm _i : result) {
-
-					String data = _i.getData();
-					JSONValue value = null;
-					try {
-						value = JSONParser.parseStrict(data);
-					} catch (Exception e) {
-						Log.error("Unable to parse data: " + data, e);
-						continue;
-					}
-					if (value == null) {
-						continue;
-					}
-					JSONObject obj = value.isObject();
-					if (obj == null) {
-						continue;
-					}
-					final RequestObject ro = RequestObject.createRequest();
-
-					String url = Utils.getJsonString(obj, "url");
-					if (url != null) {
-						ro.setURL(url);
-					}
-					String formEncoding = Utils.getJsonString(obj, "formEncoding");
-					if (formEncoding != null) {
-						ro.setEncoding(formEncoding);
-					}
-					String post = Utils.getJsonString(obj, "post");
-					if (post != null) {
-						ro.setPayload(post);
-					}
-					String method = Utils.getJsonString(obj, "method");
-					if (method != null) {
-						ro.setMethod(method);
-					}
-					JSONArray headersArray = obj.get("headers").isArray();
-					String headers = "";
-					if (headersArray != null) {
-						int cnt = headersArray.size();
-						for (int j = 0; j < cnt; j++) {
-							JSONValue _tmp = headersArray.get(j);
-							if (_tmp == null) {
-								continue;
-							}
-							JSONObject _data = _tmp.isObject();
-							if (_data == null) {
-								continue;
-							}
-							Set<String> keys = _data.keySet();
-							if (keys.size() == 1) {
-								String headerName = keys.iterator().next();
-								JSONValue headerValueJs = _data.get(headerName);
-								if (headerValueJs == null) {
-									continue;
-								}
-								JSONString _headerValueJS = headerValueJs.isString();
-								String headerValue = _headerValueJS.stringValue();
-								headers += headerName + ": " + headerValue + "\n";
-							}
-						}
-					}
-					ro.setHeaders(headers);
-					ro.setName(_i.getName());
-					importData.add(ro);
+				ArrayList<RequestObject> importData = new ArrayList<RequestObject>();
+				String[] geaKeys = new String[size];
+				for(int i=0; i<size; i++){
+					RequestDataJso obj = result.get(i);
+					importData.add(RequestObject.fromImportData(obj));
+					geaKeys[i] = obj.getKey();
 				}
-
-				clientFactory.getRequestDataStore().getService().insertImportData(importData, new Date(),
-						new RowIdListCallback() {
-					@Override
-					public void onFailure(DataServiceException error) {
-						StatusNotification.notify("Unable to save data to local database :(",
-								StatusNotification.TIME_MEDIUM);
-						if (RestClient.isDebug()) {
-							Log.error("Unable to vave data to local database :(", error);
-						}
-					}
-
-					@Override
-					public void onSuccess(List<Integer> rowIds) {
-						//
-						// Insert into exported list to prevent
-						// duplicates on server side.
-						//
-						List<ExportedDataInsertItem> exported = new ArrayList<ExportedDataInsertItem>();
-						int i = 0;
-						for (RestForm form : result) {
-							int dbId = rowIds.get(i);
-							ExportedDataInsertItem item = new ExportedDataInsertItem(form.key);
-							item.setReferenceId(dbId);
-							item.setType("form");
-							exported.add(item);
-							i++;
-						}
-
-						clientFactory.getExportedDataReferenceService().insertExported(exported, new VoidCallback() {
-							@Override
-							public void onFailure(DataServiceException error) {
-								if (RestClient.isDebug()) {
-									Log.error(
-											"Unable to insert imported references. During export duplicates may occur.",
-											error);
-								}
-							}
-
-							@Override
-							public void onSuccess() {
-							}
-						});
-
-						StatusNotification.notify("Data restored", StatusNotification.TIME_MEDIUM);
-						view.resetServerView();
-					}
-				});
+				saveImported(importData, geaKeys);
 			}
-
 			@Override
-			public void onFailure(String message, Throwable exception) {
-				if (RestClient.isDebug()) {
-					if (exception != null) {
-						Log.error(message, exception);
-					} else {
-						Log.error(message);
-					}
-				}
+			public void onFailure(String message) {
 				StatusNotification.notify(message, StatusNotification.TIME_MEDIUM);
 			}
 		});
 		GoogleAnalytics.sendEvent("Settings usage", "Import data", "Download from server");
 		GoogleAnalyticsApp.sendEvent("Settings usage", "Import data", "Download from server");
-	}	
+	}
+	
+	/**
+	 * Import data from server using JSNI and method located in libs/app.request.js
+	 * @param keys An array of keys to be imported
+	 * @param callback Function to be called after import.
+	 */
+	private final static native void importData(final String[] keys, final ImportDataCallback callback) /*-{
+		$wnd.arc.app.server.getImportData(keys, $entry(function(result){
+			if(result.error){
+				callback.@org.rest.client.request.ImportDataCallback::onFailure(Ljava/lang/String;)(result.message);
+			} else {
+				callback.@org.rest.client.request.ImportDataCallback::onSuccess(Lcom/google/gwt/core/client/JsArray;)(result);
+			}
+		}));
+	}-*/;
+	/**
+	 * Save imported data into Database.
+	 * @param importData Array to save
+	 * @param original
+	 */
+	private void saveImported(final ArrayList<RequestObject> importData, final String[] geaKeys){
+		clientFactory.getRequestDataStore().getService().insertImportData(importData, new Date(),
+				new RowIdListCallback() {
+			@Override
+			public void onFailure(DataServiceException error) {
+				StatusNotification.notify("Unable to save data to local database :(",
+						StatusNotification.TIME_MEDIUM);
+				if (RestClient.isDebug()) {
+					Log.error("Unable to vave data to local database :(", error);
+				}
+			}
+			@Override
+			public void onSuccess(List<Integer> rowIds) {
+				ArrayList<ExportedDataInsertItem> exported = new ArrayList<ExportedDataInsertItem>();
+				int size = rowIds.size();
+				for (int i = 0; i<size; i++) {
+					int dbId = rowIds.get(i);
+					ExportedDataInsertItem item = new ExportedDataInsertItem(geaKeys[i]);
+					item.setReferenceId(dbId);
+					item.setType("form");
+					exported.add(item);
+				}
+				saveImportedReferences(exported);
+			}
+		});
+	}
+	/**
+	 * Save reference to the AppEngine database in keys storage.
+	 * @param exported
+	 */
+	private void saveImportedReferences(ArrayList<ExportedDataInsertItem> exported){
+		clientFactory.getExportedDataReferenceService().insertExported(exported, new VoidCallback() {
+			@Override
+			public void onFailure(DataServiceException error) {
+				if (RestClient.isDebug()) {
+					Log.error("Unable to insert imported references. During export duplicates may occur.",error);
+				}
+				StatusNotification.notify("Data restored with some errors", StatusNotification.TIME_MEDIUM);
+				view.resetServerView();
+			}
+
+			@Override
+			public void onSuccess() {
+				StatusNotification.notify("Data restored", StatusNotification.TIME_MEDIUM);
+				view.resetServerView();
+			}
+		});
+	}
+	
+	
 	/**
 	 * Called when the user select a file to import data from.
 	 * This method will parse the file and result with import data.

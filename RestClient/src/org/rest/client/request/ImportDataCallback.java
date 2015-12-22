@@ -1,6 +1,8 @@
-package org.rest.client.deprecated;
+package org.rest.client.request;
 
-import java.util.List;
+import org.rest.client.jso.RequestDataJso;
+
+import com.google.gwt.core.client.JsArray;
 
 public interface ImportDataCallback {
 	/**
@@ -8,9 +10,9 @@ public interface ImportDataCallback {
 	 * @param message Message to display to user
 	 * @param exception can be null!
 	 */
-	void onFailure(String message, Throwable exception);
+	void onFailure(String message);
 	/**
 	 * Called when data has been successfully retrieved from server
 	 */
-	void onSuccess(List<RestForm> result);
+	void onSuccess(JsArray<RequestDataJso> result);
 }
