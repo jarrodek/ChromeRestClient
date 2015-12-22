@@ -45,22 +45,26 @@ arc.app.server.request.init = function(){
   arc.app.server.request.MESSAGES_URL = root + 'messages/';
 
   arc.app.server.request.SUGGESTIONS_LISTING = arc.app.server.request.SERVICE_URL + '/list/';
-  arc.app.server.request.GET_IMPORT_DATA = arc.app.server.request.SERVICE_URL + '/get/';
-  arc.app.server.request.EXPORT_DATA = arc.app.server.request.SERVICE_URL + '/put/';
+  arc.app.server.request.GET_IMPORT_DATA = arc.app.server.request.SERVICE_URL + '/get';
+  arc.app.server.request.EXPORT_DATA = arc.app.server.request.SERVICE_URL + '/put';
 };
 
 /**
  * Build a base for the request
  */
-arc.app.server.request.buildRequest = function(url, method) {
-  var headers = new Headers();
-  headers.append('X-Chrome-Extension', 'ChromeRestClient');
+arc.app.server.request.buildRequest = function(url, method, body) {
   var init = { 
     method: method || 'GET',
-    headers: headers,
     credentials: 'include',
     cache: 'no-cache'
   };
+  var headers = new Headers();
+  headers.append('X-Chrome-Extension', 'ChromeRestClient');
+  if(body) {
+    init.body = body;
+    headers.append('Content-Type', 'application/x-www-form-urlencoded');
+  }
+  init.headers = headers;
   return fetch(url, init);
 };
 
@@ -106,6 +110,24 @@ arc.app.server.request.messagesRequest = function(since) {
 arc.app.server.request.importSuggestionsRequest = function(uid){
   uid = uid || 'me';
   return arc.app.server.request.buildRequest(arc.app.server.request.SUGGESTIONS_LISTING + uid)
+  .then((response) =>  response.json())
+  .catch(function(error) {
+    return {
+      'error': true,
+      'message': 'Can\'t get messages list from the server. ('+error.message+')'
+    };
+  });
+};
+/**
+ * Import user data from the server.
+ *
+ * @param {Array} uids An array of uids to import.
+ */
+arc.app.server.request.getImportData = function(uids) {
+  var data = '';
+  uids.forEach((uid) => data += "k%5B%5D=" + uid + "&");
+  data = data.substring(0, data.length - 1);
+  return arc.app.server.request.buildRequest(arc.app.server.request.GET_IMPORT_DATA, 'POST', data)
   .then((response) =>  response.json())
   .catch(function(error) {
     return {

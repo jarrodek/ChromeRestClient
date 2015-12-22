@@ -31,20 +31,22 @@
 		<section class="import-file-section" ui:field="serverSection">
 			<h2 class="section-title">Application server sync</h2>
 			<div ui:field="connectActionContainer" class="padding-section">
-				<g:Button styleName="button" ui:field="connectButton" text="Connect"></g:Button>
+				<paper-button raised="true" ui:field="connectButton">Connect with server</paper-button>
 			</div>
 			<div ui:field="storeDataPanel" class="padding-section">
 				<p class="paper-font-caption">You can store your date an application server and share it between different machines or people.</p>
 				<p>
-					<g:Button styleName="button" ui:field="storeData" text="Store current data on external server"></g:Button>
-					<g:Button styleName="button" ui:field="restoreData" text="Restore my data"></g:Button>
+					<paper-button ui:field="storeDataButton" class="actionButton">Store your data</paper-button>
+					<paper-button ui:field="restoreDataButton" class="actionButton">Restore your data</paper-button>
 				</p>
 			</div>
 			<div ui:field="shareUrlPanel" class="padding-section">
 				<p class="paper-font-caption">You can share all your saved data by giving someone link below:</p>
 				<pre class="Import_Export_shareLink" ui:field="shareLink"></pre>
 			</div>
-			
+			<div ui:field="serverSpinner" class="padding-section hidden">
+				<paper-spinner active="true" alt="Preparing data"></paper-spinner>
+			</div>
 			<server-import-data-table ui:field="serverImportDataTable" class="hidden"></server-import-data-table>
 		</section>
 	</g:HTMLPanel>

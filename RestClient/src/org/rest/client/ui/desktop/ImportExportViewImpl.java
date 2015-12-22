@@ -6,35 +6,24 @@ import org.rest.client.StatusNotification;
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.importparser.ImportResult;
-import org.rest.client.request.ApplicationRequest;
 import org.rest.client.request.RequestImportListItem;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.ImportExportView;
 
-import com.google.gwt.chrome.tabs.CreateProperties;
-import com.google.gwt.chrome.tabs.Tab;
-import com.google.gwt.chrome.tabs.TabCallback;
-import com.google.gwt.chrome.tabs.Tabs;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.PreElement;
-import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.file.client.File;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ImportExportViewImpl extends Composite implements ImportExportView {
@@ -106,9 +95,46 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 	 */
 	@UiField
 	Element serverSection;
-	
+	/**
+	 * A container that keeps "connect" button.
+	 */
 	@UiField
 	Element connectActionContainer;
+	/**
+	 * Server import / export spinner
+	 */
+	@UiField
+	Element serverSpinner;
+	/**
+	 * Panel with server action buttons 
+	 */
+	@UiField
+	DivElement storeDataPanel;
+	/**
+	 * The panel with the field with the URL to share data.
+	 */
+	@UiField
+	DivElement shareUrlPanel;
+	/**
+	 * A field with the URL to share data.
+	 */
+	@UiField
+	PreElement shareLink;
+	/**
+	 * Button to connect to the server
+	 */
+	@UiField
+	Element connectButton;
+	/**
+	 * Button to store data on the server
+	 */
+	@UiField
+	Element storeDataButton;
+	/**
+	 * Button to restore data from the server.
+	 */
+	@UiField
+	Element restoreDataButton;
 
 	public ImportExportViewImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -116,6 +142,8 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		addFileEventHandler(this);
 		addPreviewTableHandlers(this);
 		addDownloadDataHandlers(this);
+		addServerPreviewTableHandlers(this);
+		addServerButtonHandlers(this);
 	}
 
 	@Override
@@ -144,9 +172,6 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 
 	@Override
 	public void resetImportView() {
-		if (previewGrid != null) {
-			previewGrid.clear();
-		}
 		currentFileImport = null;
 		setImportState(0);
 		resetFileElement(this);
@@ -160,7 +185,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 
 	/**
 	 * Hide / show controls depending on import state
-	 * 
+	 * TODO: this should be moved to CSS.
 	 * @param state
 	 *            Current state. One of:
 	 *            <ul>
@@ -205,7 +230,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 
 	/**
 	 * Hide / show controls depending on export state
-	 * 
+	 * TODO: this should be moved to the CSS file
 	 * @param state
 	 *            Current state. One of:
 	 *            <ul>
@@ -236,7 +261,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 
 	/**
 	 * Hide / show controls depending on server import/export state
-	 * 
+	 * TODO: this should be moved to the CSS file
 	 * @param state
 	 *            Current state. One of:
 	 *            <ul>
@@ -249,7 +274,6 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 	 */
 	private void setServerState(int state) {
 		serverSection.removeClassName("hidden");
-		
 		switch (state) {
 		case 0:
 			fileExportSection.removeClassName("hidden");
@@ -258,6 +282,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 			shareUrlPanel.removeClassName("hidden");
 			storeDataPanel.removeClassName("hidden");
 			connectActionContainer.addClassName("hidden");
+			serverSpinner.addClassName("hidden");
 			break;
 		case 1:
 			fileExportSection.addClassName("hidden");
@@ -266,6 +291,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 			shareUrlPanel.addClassName("hidden");
 			storeDataPanel.addClassName("hidden");
 			connectActionContainer.removeClassName("hidden");
+			serverSpinner.addClassName("hidden");
 			break;
 		case 2:
 			fileExportSection.addClassName("hidden");
@@ -274,6 +300,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 			shareUrlPanel.addClassName("hidden");
 			storeDataPanel.addClassName("hidden");
 			connectActionContainer.addClassName("hidden");
+			serverSpinner.addClassName("hidden");
 			break;
 		case 3:
 			fileExportSection.addClassName("hidden");
@@ -282,23 +309,23 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 			shareUrlPanel.addClassName("hidden");
 			storeDataPanel.addClassName("hidden");
 			connectActionContainer.addClassName("hidden");
+			serverSpinner.removeClassName("hidden");
 			break;
 		}
 	}
-
+	
+	/**
+	 * A callback function to be called when the file is ready to read (either by dselecting a file or dropping in into the view).
+	 * @param file
+	 */
 	void importFromFile(File file) {
 		if (file == null) {
 			resetImportView();
 			return;
 		}
 		setImportState(1);
-		if (previewGrid != null) {
-			previewGrid.clear();
-		}
 		listener.importFromFile(file);
 	}
-
-	private Grid previewGrid = null;
 
 	@Override
 	public void showImportTable(ImportResult result) {
@@ -313,7 +340,10 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		setDataTable(projects, requests);
 		currentFileImport = result;
 	}
-
+	
+	/**
+	 * This method is called when the user click on import button in preview table. 
+	 */
 	private void saveFileImportData() {
 		if (currentFileImport == null) {
 			resetImportView();
@@ -340,19 +370,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		});
 	}
 
-	@UiField
-	DivElement storeDataPanel;
-	@UiField
-	DivElement shareUrlPanel;
-	@UiField
-	PreElement shareLink;
-
-	@UiField
-	Button connectButton;
-	@UiField
-	Button storeData;
-	@UiField
-	Button restoreData;
+	
 
 	@Override
 	public void setIsUserView() {
@@ -364,9 +382,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 	@Override
 	public void updateShareLink() {
 		String applicationUserId = listener.getApplicationUserId();
-		if (applicationUserId == null)
-			return;
-
+		
 		String url = "";
 		if (Window.Location.getHost().startsWith("127.")) { // DEV mode
 			url = "http://127.0.0.1:8888/RestClient.html?gwt.codesvr=127.0.0.1:9997";
@@ -379,54 +395,22 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		shareLink.setInnerText(url);
 	}
 
-	@UiHandler("connectButton")
-	void onConnectButton(ClickEvent e) {
-		String signInUrl = ApplicationRequest.AUTH_URL + "/signin?ret=";
-
-		String returnPath = "";
-		if (Window.Location.getHost().startsWith("127.")) { // DEV MODE
-			returnPath = "http://127.0.0.1:8888/auth.html#auth";
-		} else {
-			// TODO: returnPath = Runtime.getURL("/auth.html#auth");
-			returnPath = "/auth.html#auth";
-		}
-		signInUrl = signInUrl + URL.encodeQueryString(returnPath);
-		Tabs tabs = GWT.create(Tabs.class);
-		CreateProperties cp = CreateProperties.create();
-		cp.setUrl(signInUrl);
-		tabs.create(cp, new TabCallback() {
-			@Override
-			public void onResult(Tab tab) {
-
-			}
-		});
-	}
-
 	@Override
 	public void setIsNotUserView() {
 		setServerState(1);
 	}
 
 	@Override
-	public void serverControlsSetEnabled(boolean enabled) {
-		storeData.setEnabled(enabled);
-		restoreData.setEnabled(enabled);
+	public void resetServerView() {
+		setServerState(0);
 	}
 
-	@UiHandler("storeData")
-	void onStoreDataClick(ClickEvent e) {
-		String applicationUserId = listener.getApplicationUserId();
-		if (applicationUserId == null) {
-			StatusNotification.notify("Connect to application first (not logged in)", StatusNotification.TIME_MEDIUM);
-			return;
-		}
-		storeData.setEnabled(false);
-		restoreData.setEnabled(false);
+	void onServerStoreClick() {
+		setServerState(3);
 		listener.serverStoreAction();
 	}
 
-	@UiHandler("restoreData")
-	void onRestoreDataClick(ClickEvent e) {
+	void onServerRestoreClick() {
 		setServerState(3);
 		listener.requestImportSuggestions("me");
 		GoogleAnalytics.sendEvent("Settings usage", "Import data", "Import server dialog");
@@ -438,7 +422,10 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		super.onDetach();
 		nativeDetach(this);
 	}
-
+	/**
+	 * Detach all function that has been attached to the DOM objects via JSNI.
+	 * @param context
+	 */
 	private final native void nativeDetach(ImportExportViewImpl context) /*-{
 		var listeners = context._detachListeners;
 		if (!listeners) {
@@ -598,5 +585,99 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 			return;
 		}
 		table.requests = requests;
+	}-*/;
+	
+	/**
+	 * Add preview table listeners. This events must be removed on detach.
+	 * 
+	 * @param context
+	 */
+	private final native void addServerPreviewTableHandlers(ImportExportViewImpl context) /*-{
+		var table = this.@org.rest.client.ui.desktop.ImportExportViewImpl::serverImportDataTable;
+		if (!table) {
+			console.error('There is no table???');
+			return;
+		}
+		var importHandler = $entry(function(e) {
+			if (e.detail && e.detail.action) {
+				if (e.detail.action === 'import') {
+					context.@org.rest.client.ui.desktop.ImportExportViewImpl::saveServerImportData(Lcom/google/gwt/core/client/JsArray;)(e.detail.items);
+				} else if (e.detail.action === 'cancel') {
+					context.@org.rest.client.ui.desktop.ImportExportViewImpl::resetServerView()();
+				}
+			}
+		});
+		var listeners = context._detachListeners;
+		if (!listeners) {
+			listeners = new Map();
+		}
+		listeners.set('import-server-action', {
+			element : table,
+			fn : importHandler,
+			event : 'import-action'
+		});
+		context._detachListeners = listeners;
+		table.addEventListener('import-action', importHandler);
+	}-*/;
+	
+	/**
+	 * Called after the user chosen items to import.
+	 * This function will download all data from the server and will store it in the local store.
+	 */
+	private void saveServerImportData(JsArray<RequestImportListItem> selected) {
+		int size = selected.length();
+		if(selected.length() == 0){
+			StatusNotification.notify("You haven't selected any item from the import", StatusNotification.TIME_SHORT);
+			return;
+		}
+		setServerState(3);
+		String[] keys = new String[size];
+		for(int i=0; i<size; i++){
+			keys[i] = selected.get(i).getKey();
+		}
+		listener.doServerImport(keys);
+	}
+	/**
+	 * Add server action buttons listeners. 
+	 * This events must be removed on detach.
+	 * 
+	 * @param context
+	 */
+	private final native void addServerButtonHandlers(ImportExportViewImpl context) /*-{
+		var storeData = this.@org.rest.client.ui.desktop.ImportExportViewImpl::storeDataButton;
+		var restoreData = this.@org.rest.client.ui.desktop.ImportExportViewImpl::restoreDataButton;
+		var connectButton = this.@org.rest.client.ui.desktop.ImportExportViewImpl::connectButton;
+		var storeCallback = $entry(function(){
+			context.@org.rest.client.ui.desktop.ImportExportViewImpl::onServerStoreClick()();
+		});
+		var restoreCallback = $entry(function(){
+			context.@org.rest.client.ui.desktop.ImportExportViewImpl::onServerRestoreClick()();
+		});
+		var connectCallback = $entry(function(){
+			$wnd.arc.app.server.auth();
+		});
+		storeData.addEventListener('tap', storeCallback);
+		restoreData.addEventListener('tap', restoreCallback);
+		connectButton.addEventListener('tap', connectCallback);
+		var listeners = context._detachListeners;
+		if (!listeners) {
+			listeners = new Map();
+		}
+		listeners.set('import-server-store-button', {
+			element : storeData,
+			fn : storeCallback,
+			event : 'tap'
+		});
+		listeners.set('import-server-restore-button', {
+			element : restoreData,
+			fn : restoreCallback,
+			event : 'tap'
+		});
+		listeners.set('import-server-connect-button', {
+			element : connectButton,
+			fn : connectCallback,
+			event : 'tap'
+		});
+		context._detachListeners = listeners;
 	}-*/;
 }

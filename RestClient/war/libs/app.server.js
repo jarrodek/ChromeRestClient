@@ -113,11 +113,18 @@ arc.app.server.getMessages = function(since, callback){
 arc.app.server.getImportSuggestions = function(uid, callback){
   arc.app.server.request.importSuggestionsRequest(uid)
     .then(function(result){
+      callback(result);
+    });
+};
 
-      //Object {error: true, code: 404, message: "Not found", time: 1450745875705}
-      //Array [Object {key:"ahBjaHJvbWVyZXN0Y2xpZW50cjoLEgdBcHBVc2VyIhUxODU4MDQ3NjQyMjAxMzkxMjQxMTgMCxILUmVxdWVzdEl0ZW0YgICAgICA3goM", name:"aaaa", updated:1450705657260, url:"http://google.com"}]
-
-
+/**
+ * Get user stored data from the server.
+ *
+ * @param {Array} uids A list of datastore IDs to import
+ */
+arc.app.server.getImportData = function(uids, callback){
+  arc.app.server.request.getImportData(uids)
+    .then(function(result){
       callback(result);
     });
 };

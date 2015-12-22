@@ -14,7 +14,6 @@ import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.deprecated.DataExportImpl;
 import org.rest.client.deprecated.ImportDataCallback;
 import org.rest.client.deprecated.ImportRequest;
-import org.rest.client.deprecated.LoaderDialog;
 import org.rest.client.deprecated.RestForm;
 import org.rest.client.event.StoreDataEvent;
 import org.rest.client.importparser.ImportParser;
@@ -69,21 +68,25 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 		view = clientFactory.getImportExportView();
 		view.setPresenter(this);
 		panel.setWidget(view.asWidget());
-
-		// Old system setup
-		checkServerSession();
+		
 		handleSessionChange();
+		checkServerSession();
+		
 		StoreDataEvent.register(eventBus, new StoreDataEvent.Handler() {
 			@Override
 			public void onSuccess() {
-				if (view != null)
-					view.serverControlsSetEnabled(true);
+				if (view != null){
+					StatusNotification.notify("Your data has been stored to the server", StatusNotification.TIME_MEDIUM);
+					view.resetServerView();
+				}
 			}
 
 			@Override
 			public void onFailure() {
-				if (view != null)
-					view.serverControlsSetEnabled(true);
+				if (view != null){
+					StatusNotification.notify("There was an error when storing your data", StatusNotification.TIME_MEDIUM);
+					view.resetServerView();
+				}
 			}
 		});
 
@@ -253,9 +256,6 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 					StatusNotification.TIME_SHORT);
 			return;
 		}
-		final LoaderDialog dialog = new LoaderDialog("Downloading data. Please wait.", false);
-		dialog.show();
-
 		ImportRequest.importData(keys, new ImportDataCallback() {
 
 			@Override
@@ -263,7 +263,6 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 				if (result.size() == 0) {
 					StatusNotification.notify("Something went wrong. There is no data to save :(",
 							StatusNotification.TIME_MEDIUM);
-					dialog.hide();
 					return;
 				}
 				final ArrayList<RequestObject> importData = new ArrayList<RequestObject>();
@@ -342,7 +341,6 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 						if (RestClient.isDebug()) {
 							Log.error("Unable to vave data to local database :(", error);
 						}
-						dialog.hide();
 					}
 
 					@Override
@@ -377,10 +375,8 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 							}
 						});
 
-						StatusNotification.notify("Saved import data.",
-
-								StatusNotification.TIME_MEDIUM);
-						dialog.hide();
+						StatusNotification.notify("Data restored", StatusNotification.TIME_MEDIUM);
+						view.resetServerView();
 					}
 				});
 			}
@@ -395,7 +391,6 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 					}
 				}
 				StatusNotification.notify(message, StatusNotification.TIME_MEDIUM);
-				dialog.hide();
 			}
 		});
 		GoogleAnalytics.sendEvent("Settings usage", "Import data", "Download from server");
@@ -560,6 +555,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 	public void onDownloadSuggestionsReady(RequestImportListObject list){
 		if(list.isError()){
 			StatusNotification.notify(list.getMessage(), StatusNotification.TIME_MEDIUM);
+			view.resetServerView();
 			return;
 		}
 		view.showServerImportTable(list.getItems());

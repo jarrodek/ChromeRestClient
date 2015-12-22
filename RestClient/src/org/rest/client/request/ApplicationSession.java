@@ -28,7 +28,7 @@ public class ApplicationSession extends JavaScriptObject {
 	 * @return the userId
 	 */
 	public final native String getUserId() /*-{
-		return this.userId;
+		return this.userId || this.uid;
 	}-*/;
 	
 	/**

@@ -92,7 +92,10 @@ public interface ImportExportView extends IsWidget {
 	
 	void setIsUserView();
 	void setIsNotUserView();
-	void serverControlsSetEnabled(boolean enabled);
+	/**
+	 * Reset the server import / export view in case of error.
+	 */
+	void resetServerView();
 	/**
 	 * After import file parse, show import confirmation table 
 	 * @param result

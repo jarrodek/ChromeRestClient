@@ -1,14 +1,10 @@
 package org.rest.client.deprecated;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.rest.client.RestClient;
-import org.rest.client.StatusNotification;
 import org.rest.client.request.ApplicationRequest;
-import org.rest.client.request.RequestImportListItem;
 import org.rest.shared.ServerPaths;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -29,26 +25,7 @@ import com.google.gwt.xhr2.client.Response;
  * @author Paweł Psztyć
  * 
  */
-public class ImportRequest extends ApplicationRequest {
-
-	/**
-	 * Get from server list of available items
-	 * 
-	 * @param uuid
-	 *            User id - owner of the data. Special uuid is "me" when user
-	 *            want to get his data
-	 * @throws Exception 
-	 */
-	public static void getImportSuggestions(String uuid, final ImportSuggestionsCallback callback) throws Exception {
-
-		if (currentRequest != null) {
-			callback.onFailure("Wait until current request ends.", null);
-			return;
-		}
-		String url = SERVICE_URL + ServerPaths.SUGGESTIONS_LISTING + "/" + uuid;
-
-		throw new Exception("remove me");
-	}	
+public class ImportRequest extends ApplicationRequest {	
 
 	public static void importData(final String[] keys, final ImportDataCallback callback) {
 		if (currentRequest != null) {

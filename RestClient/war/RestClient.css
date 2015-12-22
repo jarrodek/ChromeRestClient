@@ -1683,7 +1683,7 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	padding: 20px 0;
 }
 .import-file-section{
-	min-height: 200px;
+	/* min-height: 200px; */
 	margin-bottom: 40px;
 }
 .fileDrop{
