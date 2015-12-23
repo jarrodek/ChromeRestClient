@@ -328,6 +328,7 @@ arc.app.bg = {};
  * It should perform an update tasks if necessary.
  */
 arc.app.bg.onInstalled = function(details) {
+  console.log(details.reason);
   switch (details.reason) {
     case 'update':
       arc.app.bg.performStorageUpgrade();
@@ -336,8 +337,9 @@ arc.app.bg.onInstalled = function(details) {
       arc.app.bg.installApp();
       break;
   }
+  arc.app.bg.installApp();
   // Initialize database tables in here so the app will not do it on every start.
-  arc.app.db.websql.open().then(function(db){
+  arc.app.db.websql.open().then(function(db) {
     console.log('Database has been initialized');
   }).catch((e) => console.error('Error initializing the database', e));
 };
@@ -345,14 +347,40 @@ arc.app.bg.onInstalled = function(details) {
  * //TODO: Upgrade WebSQL to IndexedDb.
  */
 arc.app.bg.installApp = function() {
-  // chrome.storage.local.get('firstrun', function(result){
-  //     if('firstrun' in result){
-  //         return;
-  //     }
-  //     arc.app.bg.downloadDefinitions()
-  //     .then((r) => console.log(r));
-  // });
+  chrome.storage.local.get({
+    'firstrun': false
+  }, function(result) {
+    if (result.firstrun) {
+      return;
+    }
+    arc.app.bg.downloadDefinitions()
+    .then(arc.app.bg.installDefinitions)
+    .then(() => {
+      console.log('App database has been filled with default values.');
+      chrome.storage.local.set({'firstrun': true});
+    })
+    .catch((r) => console.error('There was an error when filling up the database with definitions.', r));
+  });
 };
+/**
+ * Add definitions to the database.
+ */
+arc.app.bg.installDefinitions = function(defs) {
+  if (!defs || !defs.codes || !defs.requests || !defs.responses) {
+    return Promise.reject({'message': 'No definitions found'});
+  }
+  return arc.app.db.websql.insertStatusCodes(defs.codes)
+  .then(function(){
+    defs.requests.forEach((item) => item.type = 'request');
+    defs.responses.forEach((item) => item.type = 'response');
+    let save = defs.requests.concat(defs.responses);
+    return arc.app.db.websql.insertHeadersDefinitions(save);
+  })
+};
+/**
+ * Get ARC's definitions list.
+ * This is stored in the extension folder.
+ */
 arc.app.bg.downloadDefinitions = function() {
   return fetch('/assets/definitions.json').then(function(response) {
     return response.json();
@@ -428,8 +456,8 @@ arc.app.bg.performSettingsUpgrade = function() {
     'DEBUG_ENABLED': localStorage['DEBUG_ENABLED'] === 'true' ? true : false,
     'HISTORY_ENABLED': localStorage['HISTORY_ENABLED'] === 'true' ? true : false,
     'MAGICVARS_ENABLED': localStorage['MAGICVARS_ENABLED'] === 'true' ? true : false,
-	'CMH_ENABLED': localStorage['CMH_ENABLED'] === 'true' ? true : false,
-	'CMP_ENABLED': localStorage['CMP_ENABLED'] === 'true' ? true : false
+    'CMH_ENABLED': localStorage['CMH_ENABLED'] === 'true' ? true : false,
+    'CMP_ENABLED': localStorage['CMP_ENABLED'] === 'true' ? true : false
   };
   var tutorials;
   try {
@@ -446,8 +474,8 @@ arc.app.bg.performSettingsUpgrade = function() {
     save.LATESTMSG = lm;
   }
   var ls = localStorage['latstSocket'];
-  if(ls && ls.trim() !== ""){
-	  save.latestSocket = ls;
+  if (ls && ls.trim() !== "") {
+    save.latestSocket = ls;
   }
   return save;
 };
@@ -472,10 +500,10 @@ arc.app.bg.performLocalDataUpgrade = function() {
     save.latest_request_data = lrd;
   }
   var lgdf = localStorage['LATEST_GDRIVE_FOLDER'];
-  if(lgdf){
-	  save.LATEST_GDRIVE_FOLDER = lgdf; 
+  if (lgdf) {
+    save.LATEST_GDRIVE_FOLDER = lgdf;
   }
-  
+
   return save;
 };
 
@@ -484,19 +512,19 @@ arc.app.bg.performLocalDataUpgrade = function() {
 class WebRequest {
 
   constructor() {
-    this.masterURL = null;
-    this.redirectURL = null;
-    this.responseHeaders = [];
-    this.requestHeaders = [];
-    this.redirectData = [];
-    this.requestFilter = {
-      urls: ['<all_urls>'],
-      types: ['xmlhttprequest']
-    };
-  }
-  /**
-   * Setup application, set rules, handlers etc.
-   */
+      this.masterURL = null;
+      this.redirectURL = null;
+      this.responseHeaders = [];
+      this.requestHeaders = [];
+      this.redirectData = [];
+      this.requestFilter = {
+        urls: ['<all_urls>'],
+        types: ['xmlhttprequest']
+      };
+    }
+    /**
+     * Setup application, set rules, handlers etc.
+     */
   init() {
     /*
      * Register Web Requests listeners to handle sent/received headers info in
@@ -518,52 +546,52 @@ class WebRequest {
   }
 
   getRequestData() {
-    return {
-      URL: this.masterURL,
-      RESPONSE_HEADERS: this.responseHeaders,
-      REQUEST_HEADERS: this.requestHeaders,
-      REDIRECT_DATA: this.redirectData,
-      ERROR: this.errorData
-    };
-  }
-  /**
-   * Check if request url match tested URL
-   */
+      return {
+        URL: this.masterURL,
+        RESPONSE_HEADERS: this.responseHeaders,
+        REQUEST_HEADERS: this.requestHeaders,
+        REDIRECT_DATA: this.redirectData,
+        ERROR: this.errorData
+      };
+    }
+    /**
+     * Check if request url match tested URL
+     */
   checkRequestUrl(details) {
-    if (details.url === null || details.url.length === 0) {
-      return false;
-    }
+      if (details.url === null || details.url.length === 0) {
+        return false;
+      }
 
-    var currentCheckUrl = this.masterURL;
-    if (this.redirectURL !== null) {
-      currentCheckUrl = this.redirectURL;
+      var currentCheckUrl = this.masterURL;
+      if (this.redirectURL !== null) {
+        currentCheckUrl = this.redirectURL;
+      }
+      if (currentCheckUrl === null || currentCheckUrl.length === 0) {
+        return false;
+      }
+      if (!(currentCheckUrl === details.url || details.url.indexOf(currentCheckUrl) > -1)) {
+        return false;
+      }
+      return true;
     }
-    if (currentCheckUrl === null || currentCheckUrl.length === 0) {
-      return false;
-    }
-    if (!(currentCheckUrl === details.url || details.url.indexOf(currentCheckUrl) > -1)) {
-      return false;
-    }
-    return true;
-  }
-  /**
-   * Called when request's headers has been sent. It filter requests by current
-   * set URL. After request filter URL is cleared.
-   *
-   * @param details
-   */
+    /**
+     * Called when request's headers has been sent. It filter requests by current
+     * set URL. After request filter URL is cleared.
+     *
+     * @param details
+     */
   onHeadersSend(details) {
-    if (!this.checkRequestUrl(details)) {
-      return;
+      if (!this.checkRequestUrl(details)) {
+        return;
+      }
+      this.requestHeaders = details.requestHeaders;
     }
-    this.requestHeaders = details.requestHeaders;
-  }
-  /**
-   * Called when the request will be redirected.
-   * It is async call.
-   *
-   * @param details
-   */
+    /**
+     * Called when the request will be redirected.
+     * It is async call.
+     *
+     * @param details
+     */
   onBeforeRedirect(details) {
     if (!this.checkRequestUrl(details)) {
       return;
@@ -586,32 +614,32 @@ class WebRequest {
    * @param details
    */
   onRequestCompleted(details) {
-    if (!this.checkRequestUrl(details)) {
-      return;
-    }
+      if (!this.checkRequestUrl(details)) {
+        return;
+      }
 
-    this.responseHeaders = details.responseHeaders;
-  }
-  /**
-   * Called when the request complete with error.
-   *
-   * @param details
-   */
+      this.responseHeaders = details.responseHeaders;
+    }
+    /**
+     * Called when the request complete with error.
+     *
+     * @param details
+     */
   onRequestError(details) {
-    if (!this.checkRequestUrl(details)) {
-      return;
-    }
+      if (!this.checkRequestUrl(details)) {
+        return;
+      }
 
-    this.errorData = {
-      error: details.error,
-      fromCache: details.fromCache,
-      timeStamp: details.timeStamp,
-      url: details.url
-    };
-  }
-  /**
-   * Create URL object from request url for Rule object.
-   */
+      this.errorData = {
+        error: details.error,
+        fromCache: details.fromCache,
+        timeStamp: details.timeStamp,
+        url: details.url
+      };
+    }
+    /**
+     * Create URL object from request url for Rule object.
+     */
   getUrlData(requestUrl) {
     var parser = document.createElement('a');
     parser.href = requestUrl;
@@ -651,7 +679,7 @@ class WebRequest {
     }
     return result;
   }
-  
+
 }
 
 var webRequest = new WebRequest();

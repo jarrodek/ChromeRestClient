@@ -11,7 +11,7 @@ import org.rest.client.storage.websql.StatusCodesService;
 
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
-import com.google.code.gwt.database.client.service.RowIdListCallback;
+import com.google.gwt.chrome.def.NotImplementedException;
 import com.google.gwt.core.client.GWT;
 
 public class StatusesStoreWebSql extends WebSqlAdapter<Integer, StatusCodeRow> {
@@ -31,7 +31,7 @@ public class StatusesStoreWebSql extends WebSqlAdapter<Integer, StatusCodeRow> {
 	@Override
 	public void put(StatusCodeRow obj, Integer key,
 			StoreResultCallback<Integer> callback) {
-		callback.onError(null);
+		throw new NotImplementedException();
 	}
 
 	@Override
@@ -103,17 +103,6 @@ public class StatusesStoreWebSql extends WebSqlAdapter<Integer, StatusCodeRow> {
 	 */
 	public void putAll(Collection<StatusCodeRow> codeList,
 			final StoreResultCallback<List<Integer>> callback) {
-		service.insertCodes(codeList, new RowIdListCallback() {
-			
-			@Override
-			public void onFailure(DataServiceException error) {
-				callback.onError(error);
-			}
-			
-			@Override
-			public void onSuccess(List<Integer> rowIds) {
-				callback.onSuccess(rowIds);
-			}
-		});
+		throw new NotImplementedException();
 	}
 }

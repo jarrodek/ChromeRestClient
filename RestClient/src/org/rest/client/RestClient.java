@@ -37,7 +37,6 @@ import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.task.CreateMenuTask;
-import org.rest.client.task.FirstRunTask;
 import org.rest.client.task.InitializeAppHandlersTask;
 import org.rest.client.task.SetSyncDataTask;
 import org.rest.client.task.TasksLoader;
@@ -74,7 +73,6 @@ import com.google.web.bindery.event.shared.EventBus;
  * task workers and will call history state change event 
  * so the app will run on requested entry point.
  */
-@SuppressWarnings("deprecation")
 public class RestClient implements EntryPoint {
 	/**
 	 * A flag which determine if application is in initializing state.
@@ -225,7 +223,6 @@ public class RestClient implements EntryPoint {
 	 */
 	private void runTasksQueue(final PlaceHistoryHandler historyHandler){
 		TasksLoader.addTask(new SetSyncDataTask());
-		TasksLoader.addTask(new FirstRunTask());
 		TasksLoader.addTask(new InitializeAppHandlersTask());
 		//@TODO: is menu must be created dynamically?
 		TasksLoader.addTask(new CreateMenuTask());

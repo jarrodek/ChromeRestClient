@@ -167,7 +167,7 @@ arc.app.db.websql._dbUpgrade = function(db) {
  * @param {Array} codesArray A list of objects to be inserted into the database.
  *                StatusCode: {
  *                  'label' (String) - code label
- *                  'code' (Number) - Status code
+ *                  'key' (Number) - Status code
  *                  'desc' (String) - a description of the status code.
  *                }
  */
@@ -177,7 +177,7 @@ arc.app.db.websql.insertStatusCodes = function(codesArray) {
       db.transaction(function(tx) {
         codesArray.forEach(function(item) {
           let sql = 'INSERT INTO statuses (code,label,desc) VALUES (?,?,?)';
-          tx.executeSql(sql, [item.code, item.label, item.desc]);
+          tx.executeSql(sql, [item.key, item.label, item.desc]);
         });
       }, function(tx, error) {
         reject(error);
@@ -194,7 +194,7 @@ arc.app.db.websql.insertStatusCodes = function(codesArray) {
  *
  * @param {Array} headers A list of objects to be inserted into the database.
  *      StatusCode: {
- *        'name' (String) - Name of the header
+ *        'key' (String) - Name of the header
  *        'example' (String) - Header usage example
  *        'desc' (String) - a description of the header
  *        'type' (String) - either `request` or `response` determining where the header may appear.
@@ -206,7 +206,7 @@ arc.app.db.websql.insertHeadersDefinitions = function(headers) {
       db.transaction(function(tx) {
         headers.forEach(function(item) {
           let sql = 'INSERT INTO headers (name,desc,example,type) VALUES (?,?,?,?)';
-          tx.executeSql(sql, [item.name, item.desc, item.example, item.type]);
+          tx.executeSql(sql, [item.key, item.desc, item.example, item.type]);
         });
       }, function(tx, error) {
         reject(error);
