@@ -16,6 +16,8 @@
     "paper-toggle-button":"PolymerElements/paper-toggle-button#^1.0.12",
     "paper-tooltip":"PolymerElements/paper-tooltip#^1.1.1",
     "paper-checkbox": "PolymerElements/paper-checkbox#^1.1.0",
-    "paper-input":"PolymerElements/paper-input#^1.1.3"
+    "paper-input":"PolymerElements/paper-input#^1.1.3",
+    "paper-dialog": "PolymerElements/paper-dialog#^1.0.3",
+    "paper-dialog-scrollable":"PolymerElements/paper-dialog-scrollable#1.1.0"
   }
 }

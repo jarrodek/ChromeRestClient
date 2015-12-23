@@ -1,18 +1,12 @@
 package org.rest.client.ui.desktop;
 
-import org.rest.client.RestClient;
 import org.rest.client.place.ImportExportPlace;
 import org.rest.client.ui.SettingsView;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -24,134 +18,95 @@ public class SettingsViewImpl extends Composite implements SettingsView {
 	interface SettingsViewImplUiBinder extends UiBinder<Widget, SettingsViewImpl> {
 	}
 	
-	@UiField CheckBox debug;
-	@UiField CheckBox history;
-	@UiField CheckBox magicVars;
-	@UiField CheckBox codeMirrorHeaders;
-	@UiField CheckBox codeMirrorPayload;
-	@UiField DivElement historyClear;
-	
+	@UiField Element appSettings;
 	
 	Presenter listener = null;
 	
 	public SettingsViewImpl(){
 		initWidget(uiBinder.createAndBindUi(this));
+		addComponentEventHandlers(this);
 	}
 	
 	@Override
 	public void setPresenter(Presenter listener) {
 		this.listener = listener;
 	}
-
-	@Override
-	public void setDebugEnabled(boolean debugEnabled) {
-		debug.setValue(debugEnabled);
-	}
-
-	@Override
-	public boolean isDebugEnabled() {
-		return debug.getValue();
-	}
-
-	@Override
-	public void setHistoryEnabled(boolean historyEnabled) {
-		if(historyEnabled){
-			historyClear.removeClassName("hidden");
-		} else {			
-			historyClear.addClassName("hidden");
-		}
-		history.setValue(historyEnabled);
-	}
-
-	@Override
-	public boolean isHistoryEnabled() {
-		return history.getValue();
-	}
 	
-	@Override
-	public void setMagicVarsEnabled(boolean magicVarsEnabled) {
-		magicVars.setValue(magicVarsEnabled);
-	}
-
-	@Override
-	public boolean isMagicVarsEnabled() {
-		return magicVars.getValue().booleanValue();
-	}
-	@Override
-	public void setCodeMirrorHeadersEnabled(boolean codeMirrorHeadersEnabled) {
-		codeMirrorHeaders.setValue(codeMirrorHeadersEnabled);
-	}
-	@Override
-	public void setCodeMirrorPayloadEnabled(boolean codeMirrorPayloadEnabled) {
-		codeMirrorPayload.setValue(codeMirrorPayloadEnabled);
-	}
-	
-	@UiHandler("history")
-	void onHistoryChange(ValueChangeEvent<Boolean> event){
-		boolean value = event.getValue();
-		
-		if(RestClient.isDebug()){
-			Log.debug("History value changed. Current value is: " + value);
-		}
-		if(value){
-			historyClear.removeClassName("hidden");
-			history.setValue(true);
-		} else {
-			historyClear.addClassName("hidden");
-			history.setValue(false);
-		}
-		listener.changeHistoryValue(value);
-	}
-	
-	@UiHandler("debug")
-	void onDebugChange(ValueChangeEvent<Boolean> event){
-		if(RestClient.isDebug()){
-			Log.debug("Debug value changed. Current value is: " + String.valueOf(event.getValue()));
-		}
-		Boolean value = event.getValue();
-		listener.changeDebugValue(value);
-	}
-	
-	@UiHandler("magicVars")
-	void onMagicVarsChange(ValueChangeEvent<Boolean> event){
-		if(RestClient.isDebug()){
-			Log.debug("Magic vars value changed. Current value is: " + String.valueOf(event.getValue()));
-		}
-		Boolean value = event.getValue();
-		listener.changeMagicVarsValue(value);
-	}
-	
-	@UiHandler("codeMirrorHeaders")
-	void onCodeMirrorHeadersChange(ValueChangeEvent<Boolean> event){
-		if(RestClient.isDebug()){
-			Log.debug("CodeMirror for headers value changed. Current value is: " + String.valueOf(event.getValue()));
-		}
-		Boolean value = event.getValue();
-		listener.changeCodeMirrorHeadersValue(value);
-	}
-	@UiHandler("codeMirrorPayload")
-	void onCodeMirrorPayloadChange(ValueChangeEvent<Boolean> event){
-		if(RestClient.isDebug()){
-			Log.debug("CodeMirror for payload value changed. Current value is: " + String.valueOf(event.getValue()));
-		}
-		Boolean value = event.getValue();
-		listener.changeCodeMirrorPayloadValue(value);
-	}
-	
-	
-	@UiHandler("clearHistory")
-	void onClearHistory(ClickEvent e){
+	/**
+	 * Called when the user click on "Clear hostroy button"
+	 */
+	void onClearHistory(){
 		listener.clearHistory();
 	}
 	
-	@UiHandler("importExportWidget")
-	void onImportExportEdit(ClickEvent e){
+	/**
+	 * Called when the user click on manage import / export button.
+	 */
+	void onImportExportEdit(){
 		listener.goTo(new ImportExportPlace("default"));
 	}
-
 	
-
-	
-
-	
+	void onSettingsSavedEvent(String key, boolean value){
+		listener.notifySettingChange(key, value);
+	}
+	@Override
+	protected void onDetach() {
+		super.onDetach();
+		nativeDetach(this);
+	}
+	/**
+	 * Detach all function that has been attached to the DOM objects via JSNI.
+	 * @param context
+	 */
+	private final native void nativeDetach(SettingsViewImpl context) /*-{
+		var listeners = context._detachListeners;
+		if (!listeners) {
+			return;
+		}
+		listeners.forEach(function(value) {
+			value.element.removeEventListener(value.event, value.fn);
+		});
+		context._detachListeners = null;
+	}-*/;
+	/**
+	 * Add file drop element listeners. This events must be removed on detach.
+	 * 
+	 * @param element
+	 * @param context
+	 */
+	private final native void addComponentEventHandlers(SettingsViewImpl context) /*-{
+		var elm = this.@org.rest.client.ui.desktop.SettingsViewImpl::appSettings;
+		var settingsSaved = $entry(function(e, detail) {
+			if (e.detail && e.detail.key) {
+				context.@org.rest.client.ui.desktop.SettingsViewImpl::onSettingsSavedEvent(Ljava/lang/String;Z)(e.detail.key, e.detail.value)
+			}
+		});
+		var settingsAction = $entry(function(e, detail) {
+			if (e.detail && e.detail.action) {
+				if(e.detail.action === 'manage-import-export') {
+					context.@org.rest.client.ui.desktop.SettingsViewImpl::onImportExportEdit()();
+				} else if(e.detail.action === 'clear-history') {
+					context.@org.rest.client.ui.desktop.SettingsViewImpl::onClearHistory()();
+				}
+			}
+		});
+		
+		var listeners = context._detachListeners;
+		if (!listeners) {
+			listeners = new Map();
+		}
+		listeners.set('settings-saved', {
+			element : elm,
+			fn : settingsSaved,
+			event : 'settings-saved'
+		});
+		listeners.set('settings-action', {
+			element : elm,
+			fn : settingsAction,
+			event : 'settings-action'
+		});
+		context._detachListeners = listeners;
+		elm.addEventListener('settings-saved', settingsSaved);
+		elm.addEventListener('settings-action', settingsAction);
+	}-*/;
 }

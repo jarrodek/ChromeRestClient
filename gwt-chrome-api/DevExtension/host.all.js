@@ -83,7 +83,7 @@ gwt.dev.chrome.addCallback = function(id, params, callback) {
  * @param {Any} params parameters of the function that has been called. 
  * @param {Any} response Response from the background page
  */
-gwt.dev.chrome.execCallbacks = function(id, params, response) {
+gwt.dev.chrome.execCallbacks = function(id, params, response, multiparam) {
   let key = gwt.dev.chrome.stringifyFunction(id, params);
   let obj = gwt.dev.chrome.callbacks.get(key);
   if (!obj) {
@@ -95,7 +95,11 @@ gwt.dev.chrome.execCallbacks = function(id, params, response) {
     gwt.dev.chrome.callbacks.delete(key);
   }
   for (let item of obj) {
-    item.call(item, response);
+    if (multiparam) {
+      item.call(item, ...response);
+    } else {
+      item.call(item, response);
+    }
   }
 };
 /**
@@ -125,7 +129,8 @@ gwt.dev.chrome.passResponseData = function(data) {
     return;
   }
   let src = data['source-data'];
-  gwt.dev.chrome.execCallbacks(src.id, src.params, data.result);
+  let multiparam = data.multiparam || false;
+  gwt.dev.chrome.execCallbacks(src.id, src.params, data.result, multiparam);
 };
 /**
  * A handler for `window.addEventListener('message')` observer.
@@ -224,7 +229,7 @@ gwt.dev.chrome.parseFunction = function(fnStr) {
   };
   let pn = fnStr.substr(fnStr.indexOf('(') + 1);
   result.params = pn.substr(0, pn.indexOf(')')).split(',');
-  result.callback = (result.params.filter((item) => item === 'callback')).length === 0 ?
+  result.callback = (result.params.filter((item) => item.trim() === 'callback')).length === 0 ?
     false : true;
   result.root = fnStr.substr(0, fnStr.indexOf('('));
   result.path = result.root.split('.');

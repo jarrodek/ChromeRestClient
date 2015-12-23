@@ -40,9 +40,6 @@ public class StoreKeys {
 	 */
 	public static final String MAGIC_VARS_ENABLED_KEY = "MAGICVARS_ENABLED";
 	
-	public static final String JSON_HEADERS_KEY = "JSONHEADERS";
-	public static final String SHORTCUTS_VALUES = "SHORTCUTS";
-	
 	public static final String LATEST_MESSAGE_KEY = "LATESTMSG";
 	/**
 	 * Key for code mirror in headers panel

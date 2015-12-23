@@ -2279,13 +2279,13 @@ body.rest-client .CodeMirror-hints {
 }
 .actionButton,
 .sendButton{
-	background-color: #4285f4;
+	background-color: #2196F3;
 	background-image: none;
 	color: white;
 }
 .actionButton:hover,
 .sendButton:hover{
-	background-color: #3367d6;
+	background-color: #1976D2;
 	background-image: none;
 	color: white;
 }
