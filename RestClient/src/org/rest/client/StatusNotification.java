@@ -99,7 +99,6 @@ public class StatusNotification {
 			var toast = $doc.createElement('paper-toast');
 			toast.text = message;
 			toast.duration = timeout;
-			toast.className = 'layout horizontal';
 			var label = $doc.createElement('paper-button');
 			label.innerText = isCallback ? callback.@org.rest.client.NotificationAction::name : 'Close';
 			//label.className = 'paper-toast-action-label';

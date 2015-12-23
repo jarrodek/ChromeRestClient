@@ -156,7 +156,7 @@ public class UserNotificationsFactory {
 		});
 	}
 	/**
-	 * Notify the user ablut new messages.
+	 * Notify the user about new messages.
 	 * @param messages
 	 */
 	private static void notifyUser(ArrayList<MessageObject> messages){
