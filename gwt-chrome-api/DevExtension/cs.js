@@ -148,9 +148,24 @@ gwt.dev.chrome.sendMessage = function(data) {
     window.postMessage(post, location.href);
   });
 };
-
+/**
+ * This function will be called every time an extension send a message to another part of 
+ * extensions, including content scripts.
+ * Returning messages from event listeners will have `source` property equal 'gwt:bg'
+ */
+gwt.dev.chrome.handleExtensionMessage = function(data) {
+  if (data.source !== 'gwt:bg') {
+    return;
+  }
+  data.source = 'gwt:cs';
+  window.postMessage(data, location.href);
+};
 /**
  * Receive message from the host page and pass it to the background page for
  * further processing.
  */
 window.addEventListener('message', gwt.dev.chrome.handleMessage, false);
+/**
+ * Listen for messages from the background page to react on API's event listeners responses.
+ */
+chrome.runtime.onMessage.addListener(gwt.dev.chrome.handleExtensionMessage);
