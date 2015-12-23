@@ -38,25 +38,16 @@ public interface SettingsView extends IsWidget {
 		 * Clears application requests history
 		 */
 		void clearHistory();
-		
-		void changeDebugValue(boolean newValue);
-		void changeHistoryValue(boolean newValue);
-		void changeNotificationsValue(boolean notificationsEnabled);
-		void changeMagicVarsValue(boolean magicVarsEnabled);
-		void changeCodeMirrorHeadersValue(boolean codeMirrorHeadersEnabled);
-		void changeCodeMirrorPayloadValue(boolean codeMirrorPayloadEnabled);
+		/**
+		 * Called after the change has been saved.
+		 * @param key
+		 * @param value
+		 */
+		void notifySettingChange(String key, boolean value);
 	}
 	/**
 	 * Sets presenter for this view
 	 * @param listener
 	 */
 	void setPresenter(Presenter listener);
-	void setDebugEnabled(boolean debugEnabled);
-	boolean isDebugEnabled();
-	void setHistoryEnabled(boolean historyEnabled);
-	boolean isHistoryEnabled();
-	void setMagicVarsEnabled(boolean magicVarsEnabled);
-	boolean isMagicVarsEnabled();
-	void setCodeMirrorHeadersEnabled(boolean codeMirrorHeadersEnabled);
-	void setCodeMirrorPayloadEnabled(boolean codeMirrorPayloadEnabled);
 }
