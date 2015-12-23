@@ -1,16 +1,7 @@
 package org.rest.client;
 
-import org.rest.client.storage.store.StoreKeys;
-
-import com.google.gwt.chrome.storage.Storage;
-import com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback;
-import com.google.gwt.chrome.storage.StorageChangeObject;
-import com.google.gwt.chrome.storage.SyncStorageArea;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.json.client.JSONBoolean;
-import com.google.gwt.json.client.JSONObject;
 
 /**
  * App's adapter for chrome.sync API.
@@ -43,62 +34,62 @@ public class SyncAdapter {
 	/**
 	 * True if this adapter already set storage event handlers.
 	 */
-	public static boolean observing = false;
+	static boolean observing = false;
 	
-	public static void sync(final Callback<Void, Void> callback){
-		Storage chromeStore = GWT.create(Storage.class);
-		SyncStorageArea sync = chromeStore.getSync();
-		
-		JSONObject query = new JSONObject();
-		query.put(StoreKeys.DEBUG_KEY, JSONBoolean.getInstance(debug));
-		query.put(StoreKeys.HISTORY_KEY, JSONBoolean.getInstance(history));
-		query.put(StoreKeys.MAGIC_VARS_ENABLED_KEY, JSONBoolean.getInstance(magicVars));
-		query.put(StoreKeys.CODE_MIRROR_HEADERS_KEY, JSONBoolean.getInstance(codeMirrorHeaders));
-		query.put(StoreKeys.CODE_MIRROR_PAYLOAD_KEY, JSONBoolean.getInstance(codeMirrorPayload));
-		
-		sync.get(query.getJavaScriptObject(), new StorageItemsCallback() {
+	interface SyncResult {
+		void onSync();
+	}
+	
+	
+	
+	public static final void sync(final Callback<Void, Void> callback){
+		getVars(new SyncResult() {
 			@Override
-			public void onResult(JavaScriptObject _data) {
-				if(_data == null){
-					callback.onFailure(null);
-					return;
-				}
-				SyncData data = _data.cast();
-				debug = data.getDebug();
-				history = data.getHistory();
-				magicVars = data.getMagicVariables();
-				codeMirrorHeaders = data.getCodeMirrorHeaders();
-				codeMirrorPayload = data.getCodeMirrorPayload();
-				callback.onSuccess(null);
-			}
-			
-			@Override
-			public void onError(String message) {
-				callback.onFailure(null);
+			public void onSync() {
+				observe();
+				Void v = GWT.create(Void.class);
+				callback.onSuccess(v);
 			}
 		});
 	}
+	
+	private final native static void getVars(SyncResult fn) /*-{
+		$wnd.arc.app.settings.getConfig()
+		.then(function(data){
+			@org.rest.client.SyncAdapter::debug = data.DEBUG_ENABLED;
+			@org.rest.client.SyncAdapter::history = data.HISTORY_ENABLED;
+			@org.rest.client.SyncAdapter::magicVars = data.MAGICVARS_ENABLED;
+			@org.rest.client.SyncAdapter::codeMirrorHeaders = data.CMH_ENABLED;
+			@org.rest.client.SyncAdapter::codeMirrorPayload = data.CMP_ENABLED;
+			fn.@org.rest.client.SyncAdapter.SyncResult::onSync()();
+		});
+	}-*/;
+	
+	
 	/**
 	 * Observe changes to the storage.
 	 */
-	public static void observe(){
-		if(observing) return;
-		observing = true;
-		Storage chromeStore = GWT.create(Storage.class);
-		chromeStore.addChangeHandler(new Storage.StorageChangeHandler() {
-			@Override
-			public void onChange(StorageChangeObject data, String areaName) {
-				if(areaName.equals(Storage.SYNC)){
-					sync(new Callback<Void, Void>() {
-
-						@Override
-						public void onFailure(Void reason) {}
-
-						@Override
-						public void onSuccess(Void result) {}
-					});
-				}
-			}
+	public static final native void observe() /*-{
+		if(@org.rest.client.SyncAdapter::observing === true){
+			return;
+		}
+		@org.rest.client.SyncAdapter::observing = true;
+		var clb = $entry(function(changes, area){
+			var keys = Object.keys(changes);
+            var accepted = ['DEBUG_ENABLED', 'HISTORY_ENABLED', 'MAGICVARS_ENABLED', 'CMH_ENABLED', 'CMP_ENABLED'];
+            keys.forEach(function(key) {
+                if (accepted.indexOf(key) !== -1) {
+                    switch(key){
+                    	case 'DEBUG_ENABLED': @org.rest.client.SyncAdapter::debug = changes[key].newValue; break;
+                    	case 'HISTORY_ENABLED': @org.rest.client.SyncAdapter::history = changes[key].newValue; break;
+                    	case 'MAGICVARS_ENABLED': @org.rest.client.SyncAdapter::magicVars = changes[key].newValue; break;
+                    	case 'CMH_ENABLED': @org.rest.client.SyncAdapter::codeMirrorHeaders = changes[key].newValue; break;
+                    	case 'CMP_ENABLED': @org.rest.client.SyncAdapter::codeMirrorPayload = changes[key].newValue; break;
+                    	default: return;
+                    }
+                }
+            });
 		});
-	}
+		$wnd.arc.app.settings.observe(clb);
+	}-*/;
 }
