@@ -20,7 +20,6 @@ import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
-import org.rest.client.storage.store.StatusesStoreWebSql;
 import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.storage.store.WebSocketDataStoreWebSql;
@@ -58,7 +57,6 @@ public interface ClientFactory {
 	FormEncodingStoreWebSql getFormEncodingStore();
 	UrlHistoryStoreWebSql getUrlHistoryStore();
 	HeadersStoreWebSql getHeadersStore();
-	StatusesStoreWebSql getStatusesStore();
 	ProjectStoreWebSql getProjectsStore();
 	WebSocketDataStoreWebSql getWebSocketsStore();
 	

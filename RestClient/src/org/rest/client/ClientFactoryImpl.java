@@ -20,7 +20,6 @@ import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
-import org.rest.client.storage.store.StatusesStoreWebSql;
 import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.storage.store.WebSocketDataStoreWebSql;
@@ -80,7 +79,6 @@ public class ClientFactoryImpl implements ClientFactory {
 	private static FormEncodingStoreWebSql formEncodingStore = null;
 	private static UrlHistoryStoreWebSql urlHistoryStore = null;
 	private static HeadersStoreWebSql headersStore = null;
-	private static StatusesStoreWebSql statusesStore = null;
 	private static ProjectStoreWebSql projectsStore = null;
 	private static WebSocketDataStoreWebSql webSocketSqlStore = null;
 	private static ExportedDataReferenceService exportedDataService = null;
@@ -192,14 +190,6 @@ public class ClientFactoryImpl implements ClientFactory {
 			headersStore = GWT.create(HeadersStoreWebSql.class);
 		}
 		return headersStore;
-	}
-
-	@Override
-	public StatusesStoreWebSql getStatusesStore() {
-		if (statusesStore == null) {
-			statusesStore = GWT.create(StatusesStoreWebSql.class);
-		}
-		return statusesStore;
 	}
 
 	@Override

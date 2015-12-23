@@ -58,7 +58,7 @@ arc.app.db.websql.onerror = function(e) {
 arc.app.db.websql.open = function() {
   return new Promise(function(resolve, reject) {
     if (arc.app.db.websql._db) {
-      resolve();
+      resolve(arc.app.db.websql._db);
       return;
     }
     arc.app.db.websql._db = openDatabase('restClient', arc.app.db.websql._dbVersion, 
@@ -216,6 +216,28 @@ arc.app.db.websql.insertHeadersDefinitions = function(headers) {
     }).catch((e) => reject(e));
   });
 };
+/**
+ * Get status code definition by it's code
+ */
+arc.app.db.websql.getStatusCode = function(code) {
+  return new Promise(function(resolve, reject) {
+    arc.app.db.websql.open().then(function(db) {
+      db.transaction(function(tx) {
+        let sql = 'SELECT * FROM statuses WHERE code = ?';
+        tx.executeSql(sql, [code], (tx, result) => {
+          if(result.rows.length === 0) {
+            resolve(null);
+          } else {
+            resolve(result.rows.item(0));
+          }
+        }, function(tx, error) {
+          reject(error);
+        });
+      });
+    }).catch((e) => reject(e));
+  });
+};
+
 /**
  * In dev mode there is no direct connection to the database initialized in the background page.
  * This function must be called in Development environment to initialize WebSQL.
