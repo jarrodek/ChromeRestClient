@@ -111,6 +111,11 @@ arc.app.drive.initialize = function(){
  */
 arc.app.drive._addEventHandlers = function(){
 	window.addEventListener("message", arc.app.drive.handleCSmessage);
+	window['oauth-callback'] = function(){
+		arc.app.drive.checkDriveAuth(function(tokenInfo){
+			arc.app.drive.handleDriveAuthResult(tokenInfo);
+		});
+	};
 };
 
 
@@ -509,7 +514,7 @@ arc.app.drive.picker.loadHandler = function(){
  * @param views {Array} Rest parameter for views that should be attached to the picker.
  */
 arc.app.drive.picker._constructPicker = function(authToken, callback, ...views){
-	let pickerBuilder = new google.picker.PickerBuilder()
+	var pickerBuilder = new google.picker.PickerBuilder()
 	.setDeveloperKey(API_KEY_PICKER)
 	.setOAuthToken(authToken)
 	.setCallback(callback)
@@ -546,7 +551,8 @@ arc.app.drive.picker.getAppFile = function(authToken, callback){
  * @param callback {Function} A callback function to be called after dialog closes.
  */
 arc.app.drive.picker.getFolder = function(authToken, callback){
-	let foldersView = new google.picker.DocsView(google.picker.ViewId.FOLDERS);
+	var foldersView = new google.picker.DocsView(google.picker.ViewId.FOLDERS);
+	foldersView.setIncludeFolders(true);
 	foldersView.setSelectFolderEnabled(true);
 	
 	//proxy callback function to react on cancel or select actions.
@@ -555,9 +561,9 @@ arc.app.drive.picker.getFolder = function(authToken, callback){
 			callback.call(arc, data);
 		}
 	};
-  	let pickerBuilder = arc.app.drive.picker._constructPicker(authToken, fn, foldersView);
+	var pickerBuilder = arc.app.drive.picker._constructPicker(authToken, fn, foldersView);
   	pickerBuilder.setTitle('Select a folder');
-  	let picker = pickerBuilder.build();
+  	var picker = pickerBuilder.build();
 	picker.setVisible(true);
 };
 

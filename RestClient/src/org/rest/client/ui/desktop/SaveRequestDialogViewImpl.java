@@ -386,6 +386,8 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		save.setEnabled(false);
 		
 		doSaveGdrive();
+		GoogleAnalytics.sendEvent("Engagement", "Click", "Save request to Drive");
+		GoogleAnalyticsApp.sendEvent("Engagement", "Click", "Save request to Drive");
 	}
 	/**
 	 * TODO: views shouldn't perform logic actions.

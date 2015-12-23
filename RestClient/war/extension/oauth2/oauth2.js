@@ -247,7 +247,6 @@ OAuth2.prototype.finishAuth = function(url) {
 	try {
 		authorizationCode = this.adapter
 				.parseAuthorizationCode(url ? url : window.location.href);
-		console.log(authorizationCode);
 	} catch (e) {
 		console.error(e);
 		alert('error: ' + e.message);
