@@ -36,9 +36,6 @@ function initOauth2Object() {
 }
 window.externalDataHolder = {};
 
-
-
-
 function MessageHandling(webRequest) {
   this.webRequest = webRequest;
 }
@@ -314,11 +311,6 @@ MessageHandling.prototype.finishOAuth = function(request, sendResponse, sender) 
   }
 };
 
-
-
-
-
-
 /**
  * Advanced Rest Client namespace
  */
@@ -344,6 +336,10 @@ arc.app.bg.onInstalled = function(details) {
       arc.app.bg.installApp();
       break;
   }
+  // Initialize database tables in here so the app will not do it on every start.
+  arc.app.db.websql.open().then(function(db){
+    console.log('Database has been initialized');
+  }).catch((e) => console.error('Error initializing the database', e));
 };
 /**
  * //TODO: Upgrade WebSQL to IndexedDb.

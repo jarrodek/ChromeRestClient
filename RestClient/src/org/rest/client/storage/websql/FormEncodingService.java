@@ -7,7 +7,6 @@ import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.code.gwt.database.client.service.RowIdListCallback;
 import com.google.code.gwt.database.client.service.Select;
 import com.google.code.gwt.database.client.service.Update;
-import com.google.code.gwt.database.client.service.VoidCallback;
 
 /**
  * Class to handle connection to "rest form" database table.
@@ -17,20 +16,6 @@ import com.google.code.gwt.database.client.service.VoidCallback;
  */
 public interface FormEncodingService extends AppDatabase {
 	
-	/**
-	 * Create database table. Schema: <code>name</code> - configuration name
-	 * <code>url</code> - url for configuration (to display in select box)
-	 * <code>data</code> - data to save (Rest params to string).
-	 * <code>time</code> - insert time
-	 * 
-	 * @param callback
-	 *            callback function
-	 */
-	@Update("CREATE TABLE IF NOT EXISTS form_encoding ("
-			+ "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
-			+ "encoding TEXT NOT NULL)")
-	void initTable(VoidCallback callback);
-
 	/**
 	 * Insert new config value.
 	 * 

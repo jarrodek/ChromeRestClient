@@ -12,27 +12,10 @@ import org.rest.client.storage.websql.FormEncodingService;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.code.gwt.database.client.service.RowIdListCallback;
-import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.core.client.GWT;
 
 public class FormEncodingStoreWebSql extends WebSqlAdapter<Integer, FormEncodingObject> {
 	FormEncodingService service = GWT.create(FormEncodingService.class);
-
-	@Override
-	public void open(final StoreResultCallback<Boolean> callback) {
-		service.initTable(new VoidCallback() {
-			
-			@Override
-			public void onFailure(DataServiceException error) {
-				callback.onError(error);
-			}
-			
-			@Override
-			public void onSuccess() {
-				callback.onSuccess(true);
-			}
-		});
-	}
 	/**
 	 * This store do not support this type of query.
 	 */

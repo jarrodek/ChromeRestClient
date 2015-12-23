@@ -1,0 +1,231 @@
+'use strict';
+/*******************************************************************************
+ * Copyright 2012 Pawel Psztyc
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+/* global console */
+/**
+ * Advanced Rest Client namespace
+ */
+var arc = arc || {};
+/**
+ * ARC app's namespace
+ */
+arc.app = arc.app || {};
+/**
+ * A namespace for app database services
+ */
+arc.app.db = arc.app.db || {};
+/**
+ * A namespace for WebSQL store
+ */
+arc.app.db.websql = {};
+/**
+ * A handler to current connection to the database.
+ * @type IDBDatabase
+ */
+arc.app.db.websql._db = null;
+/**
+ * Current database schema version.
+ * @type Number
+ */
+arc.app.db.websql._dbVersion = '';
+/**
+ * Generic error handler.
+ *
+ * @param {Error} e
+ */
+arc.app.db.websql.onerror = function(e) {
+  console.error('app::db:error');
+  console.log(e.message);
+};
+/**
+ * Open the database.
+ *
+ * @returns {Promise} The promise when ready.
+ */
+arc.app.db.websql.open = function() {
+  return new Promise(function(resolve, reject) {
+    if (arc.app.db.websql._db) {
+      resolve();
+      return;
+    }
+    arc.app.db.websql._db = openDatabase('restClient', arc.app.db.websql._dbVersion, 
+      'Rest service database', 10000000);
+    arc.app.db.websql._dbUpgrade(arc.app.db.websql._db).then(function() {
+        resolve(arc.app.db.websql._db);
+      })
+      .catch(function(cause) {
+        reject(cause);
+      });
+  });
+};
+/**
+ * Called when database version change.
+ * 
+ * This function will create new database structure.
+ *
+ * @param {Database} db
+ * @returns {undefined}
+ */
+arc.app.db.websql._dbUpgrade = function(db) {
+  return new Promise(function(resolve, reject) {
+    db.transaction(function(tx) {
+      // exported to the app's server references
+      let sql = 'CREATE TABLE IF NOT EXISTS exported (' +
+        'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, ' +
+        'reference_id INTEGER NOT NULL, ' +
+        'gaeKey TEXT, ' +
+        'type TEXT default \'form\')';
+      tx.executeSql(sql, []);
+
+      // list of user defined form encodings
+      sql = 'CREATE TABLE IF NOT EXISTS form_encoding (' +
+        'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, ' +
+        'encoding TEXT NOT NULL)';
+      tx.executeSql(sql, []);
+
+      // list HTTP headers
+      sql = 'CREATE TABLE IF NOT EXISTS headers (' +
+        'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, ' +
+        'name TEXT NOT NULL, desc TEXT, example TEXT, type TEXT)';
+      tx.executeSql(sql, []);
+
+      //  requests history table
+      sql = 'CREATE TABLE IF NOT EXISTS history (' +
+        'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, ' +
+        'url TEXT NOT NULL, method TEXT NOT NULL, ' +
+        'encoding TEXT NULL, headers TEXT NULL, ' +
+        'payload TEXT NULL, time INTEGER)';
+      tx.executeSql(sql, []);
+
+      //  projects definition table
+      sql = 'CREATE TABLE IF NOT EXISTS projects (' +
+        'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, ' +
+        'name TEXT NOT NULL, ' +
+        'time INTEGER)';
+      tx.executeSql(sql, []);
+
+      // Saved requests table
+      sql = 'CREATE TABLE IF NOT EXISTS request_data (' +
+        'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, ' +
+        'project INTEGER DEFAULT 0, name TEXT NOT NULL, ' +
+        'url TEXT NOT NULL, method TEXT NOT NULL, ' +
+        'encoding TEXT NULL, headers TEXT NULL, ' +
+        'payload TEXT NULL, skipProtocol INTEGER DEFAULT 0, ' +
+        'skipServer INTEGER DEFAULT 0, ' +
+        'skipParams INTEGER DEFAULT 0, ' +
+        'skipHistory INTEGER DEFAULT 0, ' +
+        'skipMethod INTEGER DEFAULT 0, ' +
+        'skipPayload INTEGER DEFAULT 0, ' +
+        'skipHeaders INTEGER DEFAULT 0, ' +
+        'skipPath INTEGER DEFAULT 0, time INTEGER)';
+      tx.executeSql(sql, []);
+
+      // Status codes definitions
+      sql = 'CREATE TABLE IF NOT EXISTS statuses (' +
+        'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, ' +
+        'code INTEGER NOT NULL, label TEXT, desc TEXT)';
+      tx.executeSql(sql, []);
+
+      // Used URL (for autocomplete) table
+      sql = 'CREATE TABLE IF NOT EXISTS urls (' +
+        'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, ' +
+        'time INTEGER, ' +
+        'url TEXT NOT NULL)';
+      tx.executeSql(sql, []);
+
+      // Web socket data table
+      sql = 'CREATE TABLE IF NOT EXISTS websocket_data (' +
+        'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, ' +
+        'url TEXT NOT NULL, ' +
+        'time INTEGER)';
+      tx.executeSql(sql, []);
+    }, function(tx, error) {
+      reject(error);
+    }, function() {
+      resolve();
+    });
+  });
+};
+/**
+ * Insert status codes definitions into database.
+ * This function should be called once, in background page, when the app is installed for 
+ * the first time.
+ *
+ * @param {Array} codesArray A list of objects to be inserted into the database.
+ *                StatusCode: {
+ *                  'label' (String) - code label
+ *                  'code' (Number) - Status code
+ *                  'desc' (String) - a description of the status code.
+ *                }
+ */
+arc.app.db.websql.insertStatusCodes = function(codesArray) {
+  return new Promise(function(resolve, reject) {
+    arc.app.db.websql.open().then(function(db) {
+      db.transaction(function(tx) {
+        codesArray.forEach(function(item) {
+          let sql = 'INSERT INTO statuses (code,label,desc) VALUES (?,?,?)';
+          tx.executeSql(sql, [item.code, item.label, item.desc]);
+        });
+      }, function(tx, error) {
+        reject(error);
+      }, function() {
+        resolve();
+      });
+    }).catch((e) => reject(e));
+  });
+};
+/**
+ * Insert HTTP headers definitions into database.
+ * This function should be called once, in background page, when the app is installed for 
+ * the first time.
+ *
+ * @param {Array} headers A list of objects to be inserted into the database.
+ *      StatusCode: {
+ *        'name' (String) - Name of the header
+ *        'example' (String) - Header usage example
+ *        'desc' (String) - a description of the header
+ *        'type' (String) - either `request` or `response` determining where the header may appear.
+ *      }
+ */
+arc.app.db.websql.insertHeadersDefinitions = function(headers) {
+  return new Promise(function(resolve, reject) {
+    arc.app.db.websql.open().then(function(db) {
+      db.transaction(function(tx) {
+        headers.forEach(function(item) {
+          let sql = 'INSERT INTO headers (name,desc,example,type) VALUES (?,?,?,?)';
+          tx.executeSql(sql, [item.name, item.desc, item.example, item.type]);
+        });
+      }, function(tx, error) {
+        reject(error);
+      }, function() {
+        resolve();
+      });
+    }).catch((e) => reject(e));
+  });
+};
+/**
+ * In dev mode there is no direct connection to the database initialized in the background page.
+ * This function must be called in Development environment to initialize WebSQL.
+ */
+arc.app.db.websql.initDev = function() {
+  if (!arc.app.utils.isProdMode()) {
+    arc.app.db.websql.open().then(function() {
+      console.log('%cDEVMODE::Database has been initialized', 'color: #33691E');
+    }).catch((e) => console.error('DEVMODE::Error initializing the database', e));
+  }
+};
+
+arc.app.db.websql.initDev();

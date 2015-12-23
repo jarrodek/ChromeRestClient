@@ -17,7 +17,7 @@
   ],
   "options_page": "RestClient.html#SettingsPlace:view",
   "background": {
-    "scripts": ["background.js","/oauth2/oauth2.js"]
+    "scripts": ["app.db.websql.js","/oauth2/oauth2.js","background.js"]
   },
   "app": {
     "launch": {

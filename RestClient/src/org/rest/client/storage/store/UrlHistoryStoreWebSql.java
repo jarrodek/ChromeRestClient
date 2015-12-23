@@ -19,22 +19,6 @@ import com.google.gwt.core.client.GWT;
 public class UrlHistoryStoreWebSql extends WebSqlAdapter<Integer, UrlRow> {
 	UrlsService service = GWT.create(UrlsService.class);
 	
-	@Override
-	public void open(final StoreResultCallback<Boolean> callback) {
-		service.initTable(new VoidCallback() {
-			
-			@Override
-			public void onFailure(DataServiceException error) {
-				callback.onError(error);
-			}
-			
-			@Override
-			public void onSuccess() {
-				callback.onSuccess(true);
-			}
-		});
-	}
-	
 	/**
 	 * This database do not support keys listing.
 	 */

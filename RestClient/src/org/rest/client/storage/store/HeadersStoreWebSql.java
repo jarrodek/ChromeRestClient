@@ -12,7 +12,6 @@ import org.rest.client.storage.websql.HeadersService;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.code.gwt.database.client.service.RowIdListCallback;
-import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.core.client.GWT;
 
 public class HeadersStoreWebSql extends WebSqlAdapter<Integer, HeaderRow> {
@@ -25,22 +24,6 @@ public class HeadersStoreWebSql extends WebSqlAdapter<Integer, HeaderRow> {
 	@Override
 	public void keys(StoreResultCallback<List<Integer>> callback) {
 		callback.onError(null);
-	}
-	
-	@Override
-	public void open(final StoreResultCallback<Boolean> callback) {
-		service.initTable(new VoidCallback() {
-			
-			@Override
-			public void onFailure(DataServiceException error) {
-				callback.onError(error);
-			}
-			
-			@Override
-			public void onSuccess() {
-				callback.onSuccess(true);
-			}
-		});
 	}
 	
 	@Override

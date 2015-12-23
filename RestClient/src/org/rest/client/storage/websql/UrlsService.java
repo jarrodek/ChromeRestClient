@@ -14,15 +14,6 @@ import com.google.code.gwt.database.client.service.VoidCallback;
  */
 public interface UrlsService extends AppDatabase {
   /**
-   * Create database table.
-   * @param callback callback function
-   */
-  @Update("CREATE TABLE IF NOT EXISTS urls ("
-      + "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
-      + "time INTEGER, "
-      + "url TEXT NOT NULL)")
-  void initTable(VoidCallback callback);
-  /**
    * Records a URL value, and obtains the ID of the inserted record.
    * @param url URL to save
    * @param upd update time {@link Date} object.

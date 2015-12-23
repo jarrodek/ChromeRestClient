@@ -1,12 +1,11 @@
 package org.rest.client.storage.websql;
 
+import java.util.Collection;
+
 import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.code.gwt.database.client.service.RowIdListCallback;
 import com.google.code.gwt.database.client.service.Select;
 import com.google.code.gwt.database.client.service.Update;
-import com.google.code.gwt.database.client.service.VoidCallback;
-
-import java.util.Collection;
 
 /**
  * Service for database connection with statusCodes table
@@ -15,18 +14,6 @@ import java.util.Collection;
  * 
  */
 public interface StatusCodesService extends AppDatabase {
-	/**
-	 * Create database table. Schema: <code>code</code> - code ID
-	 * <code>label</code> - label for code (response text) <code>desc</code> -
-	 * long desc for code
-	 * 
-	 * @param callback
-	 *            callback function
-	 */
-	@Update("CREATE TABLE IF NOT EXISTS statuses ("
-			+ "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
-			+ "code INTEGER NOT NULL, " + "label TEXT, " + "desc TEXT)")
-	void initTable(VoidCallback callback);
 
 	/**
 	 * Insert header data.

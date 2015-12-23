@@ -120,7 +120,7 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 		return this.isReady;
 	}
 	
-	@Override
+	
 	public void open(final StoreResultCallback<Boolean> callback) {
 		if (isReady || openedDatabasesList.contains(dbName)) {
 			Log.warn("Opening database: " + dbName + ", but it is opened.");

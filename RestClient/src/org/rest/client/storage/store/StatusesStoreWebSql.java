@@ -12,27 +12,10 @@ import org.rest.client.storage.websql.StatusCodesService;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.code.gwt.database.client.service.RowIdListCallback;
-import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.core.client.GWT;
 
 public class StatusesStoreWebSql extends WebSqlAdapter<Integer, StatusCodeRow> {
 	StatusCodesService service = GWT.create(StatusCodesService.class);
-	
-	@Override
-	public void open(final StoreResultCallback<Boolean> callback) {
-		service.initTable(new VoidCallback() {
-			
-			@Override
-			public void onFailure(DataServiceException error) {
-				callback.onError(error);
-			}
-			
-			@Override
-			public void onSuccess() {
-				callback.onSuccess(true);
-			}
-		});
-	}
 	
 	/**
 	 * This database do not support this method.
