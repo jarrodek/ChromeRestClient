@@ -4,192 +4,179 @@
         :host {
             @apply(--layout-vertical);
         }
-        
         .status-row {
             @apply(--layout-horizontal);
-            /*@apply(--layout-center);*/
             @apply(--paper-font-subhead);
+            @apply(--layout-center);
             padding: 0 24px;
             border-bottom: 1px rgba(0, 0, 0, 0.12) solid;
             min-height: 48px;
         }
-        
         .status-label {
             width: 80px;
             margin-top: 8px;
+            @apply(--paper-font-subhead);
         }
-        
         .status-value {
             @apply(--layout-flex);
-        }
-        .header-name {
-          padding-right: 8px;
-          @apply(--paper-font-body2);
-          font-weight: 500;
-        }
-        .header-value{
-          @apply(--paper-font-body1);
-          @apply(--layout-flex);
+            @apply(--layout-horizontal);
+            @apply(--layout-center);
         }
         .response-status-help {
             color: rgba(0, 0, 0, 0.24);
             transition: color 300ms ease-in-out;
         }
+        
         .response-status-help:hover {
             color: rgba(33, 150, 243, 1);
         }
+        
         .status-value.status {
-          padding: 0 16px;
-        }
-        .status-color {
-          color: var(--paper-green-700);
-        }
-        .status-color.warning {
-          color: var(--paper-orange-700);
-        }
-        .status-color.error {
-          color: var(--paper-red-700);
-        }
-        .dialog-header-example{
-          @apply(--paper-font-body1);
-          margin-top: 16px;
-        }
-        .dialog-header-desc{
-          @apply(--paper-font-body2);
+            padding: 0 16px;
         }
         
+        .status-color {
+            color: var(--paper-green-700);
+        }
+        
+        .status-color.warning {
+            color: var(--paper-orange-700);
+        }
+        
+        .status-color.error {
+            color: var(--paper-red-700);
+        }
+        
+        
+        .no-redirects-container{
+          @apply(--layout-vertical);
+          @apply(--layout-center);
+        }
+        .no-redirects-info {
+          @apply(--paper-font-title);
+        }
         </style>
         <div class="status-row">
-            <div class="status-label">Status</div>
+            <div class="status-label">Status:</div>
             <div class="status-value status">
                 <span class$="{{computeStatusClass(statusCode)}}"><span>{{statusCode}}</span>: <span>{{statusMessage}}</span></span>
                 <paper-icon-button on-tap="showStatusInfo" icon="help" class="response-status-help"></paper-icon-button>
                 <span>Loading time: </span><span>{{loadingTime}}</span><span>ms</span>
             </div>
         </div>
-        <div class="status-row">
-            <div class="status-label">Request headers</div>
-            <div class="status-value">
-                <template is="dom-repeat" id="requestsList" items="{{requestHeaders}}">
-                    <paper-item on-dblclick="_displayHeaderInfo" class="layout horizontal">
-                      <span class="header-name">{{item.name}}:</span>
-                      <span class="header-value">{{item.value}}</span>
-                    </paper-item>
-                </template>
-            </div>
-        </div>
-        <div class="status-row">
-            <div class="status-label">Response headers</div>
-            <div class="status-value">
-                <template is="dom-repeat" id="responseList" items="{{responseHeaders}}">
-                    <paper-item on-dblclick="_displayHeaderInfo" class="layout horizontal">
-                        <span class="header-name">{{item.name}}:</span>
-                        <span class="header-value">{{item.value}}</span>
-                    </paper-item>
-                </template>
-            </div>
-        </div>
-        <paper-dialog id="statusCodeInfo">
-          <h2>{{_scd_title}}</h2>
-          <paper-dialog-scrollable>{{_scd_body}}</paper-dialog-scrollable>
-          <div class="buttons"><paper-button dialog-confirm autofocus>Close</paper-button></div>
-        </paper-dialog>
-        <paper-dialog id="headerInfo">
-          <h2>{{_hd_title}}</h2>
-          <paper-dialog-scrollable>
-            <section class="dialog-header-desc">{{_hd_body}}</section>
-            <section class="dialog-header-example">
-              <span>Example: </span>
-              <span>{{_hd_example}}</span>
+        <paper-tabs selected="{{selectedTab}}">
+            <paper-tab>Response headers (<span>{{responseHeaders.length}}</span>)</paper-tab>
+            <paper-tab>Request headers (<span>{{requestHeaders.length}}</span>)</paper-tab>
+            <paper-tab>Redirects (<span>{{redirectData.length}}</span>)</paper-tab>
+        </paper-tabs>
+        <iron-pages selected="{{selectedTab}}">
+            <section>
+                <app-headers-display headers="{{responseHeaders}}"></app-headers-display>
             </section>
-          </paper-dialog-scrollable>
-          <div class="buttons"><paper-button dialog-confirm autofocus>Close</paper-button></div>
+            <section>
+                <app-headers-display headers="{{requestHeaders}}"></app-headers-display>
+            </section>
+            <section>
+              <template is="dom-if" if="{{!redirectData.length}}">
+                <div class="no-redirects-container">
+                  <p class="no-redirects-info">There were no redirects during this request</p>
+                </div>
+              </template>
+              <template is="dom-if" if="{{redirectData.length}}">
+                <template is="dom-repeat" items="{{redirectData}}">
+                  <div class="status-row">
+                    <div class="status-label">#<span>{{index}}</span></div>
+                    <div class="status-value">
+                      <app-headers-display headers="{{item.responseHeaders}}"></app-headers-display>
+                    </div>
+                  </div>
+                </template>
+              </template>
+            </section>
+        </iron-pages>
+        <paper-dialog id="statusCodeInfo">
+            <h2>{{_scdTitle}}</h2>
+            <paper-dialog-scrollable>{{_scdBody}}</paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button dialog-confirm autofocus>Close</paper-button>
+            </div>
         </paper-dialog>
     </template>
     <script>
+    'use strict';
+    /* global arc */
     Polymer({
         is: 'app-response-status',
         properties: {
             statusCode: {
-              type: Number,
-              observer: '_statusCodeChanged'
+                type: Number,
+                observer: '_statusCodeChanged'
             },
             statusMessage: String,
             loadingTime: Number,
             requestHeaders: {
-              type: Array,
-              observer: '_requestHeadersChanged'
+                type: Array,
+                observer: '_requestHeadersChanged'
             },
             responseHeaders: {
-              type: Array,
-              observer: '_responseHeadersChanged'
+                type: Array,
+                observer: '_responseHeadersChanged'
             },
-            redirectData: Array,
-            _scd_title: String,
-            _scd_body: String,
-            _hd_title: String,
-            _hd_body: String,
-            _hd_example: String
+            redirectData: {
+              type: Array,
+              value: []
+            },
+            _scdTitle: String,
+            _scdBody: String,
+            selectedTab: {
+              type: Number,
+              value: 0
+            }
         },
         computeStatusClass: function(code) {
-          var cls = 'status-color';
-          if(code >=500 || code == 0) {
-            cls += ' error';
-          }
-          if(code >= 400 && code < 500) {
-            cls += ' warning';
-          }
-          return cls;
+            var cls = 'status-color';
+            if (code >= 500 || code === 0) {
+                cls += ' error';
+            }
+            if (code >= 400 && code < 500) {
+                cls += ' warning';
+            }
+            return cls;
         },
         _statusCodeChanged: function() {
-          if(this.statusCode === 0) {
-            this._scd_title = 'No response';
-            this._scd_body = 'The response was empty';
-            return;
-          }
-          arc.app.db.websql.getStatusCode(this.statusCode)
-          .then(function(result){
-            if(result && result.label){
-              this._scd_title = this.statusCode + ': ' + result.label;
-            } else {
-              this._scd_title = 'Status code: ' + this.statusCode;
+            if (this.statusCode === 0) {
+                this._scdTitle = 'No response';
+                this._scdBody = 'The response was empty';
+                return;
             }
-            if(result && result.desc) {
-              this._scd_body = result.desc;
-            } else {
-              this._scd_body = 'There is no definition for this status code in the application :(';
-            }
-          }.bind(this), function(cause){
-            this._scd_title = 'Status code: ' + this.statusCode;
-            this._scd_body = 'There is no definition for this status code in the application :(';
-          }.bind(this));
+            arc.app.db.websql.getStatusCode(this.statusCode)
+                .then(function(result) {
+                    if (result && result.label) {
+                        this._scdTitle = this.statusCode + ': ' + result.label;
+                    } else {
+                        this._scdTitle = 'Status code: ' + this.statusCode;
+                    }
+                    if (result && result.desc) {
+                        this._scdBody = result.desc;
+                    } else {
+                        this._scdBody = 'There is no definition for this status code in the application :(';
+                    }
+                }.bind(this), function() {
+                    this._scdTitle = 'Status code: ' + this.statusCode;
+                    this._scdBody = 'There is no definition for this status code in the application :(';
+                }.bind(this));
         },
 
-        showStatusInfo: function(){
-          this.$.statusCodeInfo.open();
+        showStatusInfo: function() {
+            this.$.statusCodeInfo.open();
         },
 
-        _requestHeadersChanged: function(){
-          this.requestHeaders.forEach((item) => item.type = 'request');
+        _requestHeadersChanged: function() {
+            this.requestHeaders.forEach((item) => item.type = 'request');
         },
 
-        _responseHeadersChanged: function(){
-          this.responseHeaders.forEach((item) => item.type = 'response');
-        },
-
-        _displayHeaderInfo: function(e){
-          var item = e.model.get('item');
-          arc.app.db.websql.getHeaderByName(item.name, item.type)
-          .then(function(result){
-            if(result === null){
-              return;
-            }
-            result = result[0];
-            this._hd_title = result.name;
-            this._hd_body = result.desc;
-            this._hd_example = result.example;
-            this.$.headerInfo.open();
-          }.bind(this));
+        _responseHeadersChanged: function() {
+            this.responseHeaders.forEach((item) => item.type = 'response');
         }
     });
     </script>
