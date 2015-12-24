@@ -237,7 +237,27 @@ arc.app.db.websql.getStatusCode = function(code) {
     }).catch((e) => reject(e));
   });
 };
-
+/**
+ * Get header from the storage by it's name and type
+ */
+arc.app.db.websql.getHeaderByName = function(name, type) {
+  return new Promise(function(resolve, reject) {
+    arc.app.db.websql.open().then(function(db) {
+      db.transaction(function(tx) {
+        let sql = 'SELECT * FROM headers WHERE name LIKE (?) AND type=?';
+        tx.executeSql(sql, [name, type], (tx, result) => {
+          if(result.rows.length === 0) {
+            resolve(null);
+          } else {
+            resolve(Array.from(result.rows));
+          }
+        }, function(tx, error) {
+          reject(error);
+        });
+      });
+    }).catch((e) => reject(e));
+  });
+};
 /**
  * In dev mode there is no direct connection to the database initialized in the background page.
  * This function must be called in Development environment to initialize WebSQL.

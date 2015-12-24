@@ -75,7 +75,7 @@ public class RedirectView extends Composite {
 			list.add(headerName);
 			headersPanel.add(rhl);
 		}
-		listener.getResponseHeadersInfo(list, new Callback<List<HeaderRow>, Throwable>() {
+		/*listener.getResponseHeadersInfo(list, new Callback<List<HeaderRow>, Throwable>() {
 			@Override
 			public void onSuccess(List<HeaderRow> result) {
 				for(HeaderRow row : result){
@@ -94,6 +94,6 @@ public class RedirectView extends Composite {
 					Log.debug("Unable to get response headers help.",reason);
 				}
 			}
-		});
+		});*/
 	}
 }

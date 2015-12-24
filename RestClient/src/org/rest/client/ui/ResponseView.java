@@ -16,16 +16,10 @@
 package org.rest.client.ui;
 
 
-import java.util.ArrayList;
-import java.util.List;
+import org.rest.client.jso.ResponseStatusData;
 
-import org.rest.client.request.RedirectData;
-import org.rest.client.storage.websql.HeaderRow;
-
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.xhr2.client.Header;
 import com.google.gwt.xhr2.client.Response;
 
 public interface ResponseView extends IsWidget {
@@ -40,18 +34,6 @@ public interface ResponseView extends IsWidget {
 		 * @param place
 		 */
 		void goTo(Place place);
-		/**
-		 * Get information about given response headers
-		 * @param names
-		 * @param callback
-		 */
-		void getResponseHeadersInfo(ArrayList<String> names, Callback<List<HeaderRow>, Throwable> callback);
-		/**
-		 * Get information about given request headers
-		 * @param names
-		 * @param callback
-		 */
-		void getRequestHeadersInfo(ArrayList<String> names, Callback<List<HeaderRow>, Throwable> callback);
 		/**
 		 * Creates a download URL for this data in browser's filesystem
 		 * @param data Data to be stored
@@ -81,24 +63,10 @@ public interface ResponseView extends IsWidget {
 	 * @param requestTime Time in milliseconds 
 	 */
 	void setResponseData(boolean success, Response response, long requestTime);
-	/**
-	 * Set view data for request headers coming from background page
-	 * @param headers
-	 */
-	void setRequestHeadersExternal(ArrayList<Header> headers);
-	/**
-	 * Set view data for response headers coming from background page
-	 * @param headers
-	 */
-	void setResponseHeadersExternal(ArrayList<Header> headers);
-	/**
-	 * If redirection occurred set redirect data to response view.
-	 * @param redirectData data to set. List must be in redirection occur order.
-	 */
-	void setRedirectData(ArrayList<RedirectData> redirectData);
 	
 	/**
-	 * Scroll view to this widget
+	 * Set data that has been received from the background page
+	 * @param data
 	 */
-	void scrollToView();
+	void setBackgroundResponseData(ResponseStatusData data);
 }

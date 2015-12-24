@@ -15,24 +15,17 @@
  ******************************************************************************/
 package org.rest.client.ui.desktop;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 
 import org.rest.client.RestClient;
 import org.rest.client.dom.worker.WebWorkerError;
 import org.rest.client.dom.worker.Worker;
 import org.rest.client.dom.worker.WorkerMessageHandler;
 import org.rest.client.event.OverwriteUrlEvent;
-import org.rest.client.request.RedirectData;
+import org.rest.client.jso.ResponseStatusData;
 import org.rest.client.storage.store.objects.RequestObject;
-import org.rest.client.storage.websql.HeaderRow;
 import org.rest.client.ui.ResponseView;
 import org.rest.client.ui.desktop.widget.JSONViewer;
-import org.rest.client.ui.desktop.widget.RedirectView;
-import org.rest.client.ui.desktop.widget.ResponseHeaderLine;
-import org.rest.client.ui.desktop.widget.StatusCodeImage;
 import org.rest.client.ui.desktop.widget.XMLViewer;
 import org.rest.client.ui.html5.HTML5Element;
 import org.rest.client.util.Utils;
@@ -47,7 +40,6 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.PreElement;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -64,16 +56,11 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.Window.ScrollEvent;
-import com.google.gwt.user.client.Window.ScrollHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xhr2.client.Header;
 import com.google.gwt.xhr2.client.Response;
@@ -103,14 +90,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	private Response response;
 	private long requestTime;
 	
-	@UiField StatusCodeImage codeImage;
-	@UiField InlineLabel loadingTime;
-	@UiField InlineLabel codeContainer;
-	@UiField HTMLPanel headersPanel;
-	@UiField HTMLPanel requestHeadersPanel;
 	@UiField HTMLPanel responsePayloadContainer;
-	@UiField HTMLPanel requestHeadersContainer;
-	@UiField HTMLPanel responseHeadersContainer;
 	@UiField InlineLabel rawTab;
 	@UiField InlineLabel xmlTab;
 	@UiField InlineLabel jsonTab;
@@ -120,74 +100,18 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	@UiField HTML plainBody;
 	@UiField Anchor parsedOpen;
 	@UiField Anchor forceOpenAsJSON;
-	@UiField Anchor collapseRequestHeaders;
-	@UiField Anchor collapseResponseHeaders;
 	@UiField Anchor forceOpenAsXML;
 	@UiField PreElement parsedBody;
 	@UiField HTMLPanel xmlPanel;
 	@UiField HTMLPanel imagePanel;
 	@UiField HTMLPanel jsonPanel;
-	@UiField HTMLPanel redirects;
-	@UiField DivElement scrollContainer;
+	@UiField Element statusComponent;
 	WidgetStyle style = new WidgetStyle();
 	
 	
 	public ResponseViewImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
-		setHeadersPanelCollapsable();
 	}
-	
-	
-	private void setHeadersPanelCollapsable(){
-		requestHeadersContainer.addDomHandler(new MouseOverHandler() {
-			@Override
-			public void onMouseOver(MouseOverEvent event) {
-				if(collapseRequestHeaders.getStyleName().contains(" visible")){
-					return;
-				}
-				collapseRequestHeaders.addStyleName("visible");
-			}
-		}, MouseOverEvent.getType());
-		
-		requestHeadersContainer.addDomHandler(new MouseOutHandler() {
-			@Override
-			public void onMouseOut(MouseOutEvent event) {
-				collapseRequestHeaders.removeStyleName("visible");
-			}
-		}, MouseOutEvent.getType());
-		
-		responseHeadersContainer.addDomHandler(new MouseOverHandler() {
-			@Override
-			public void onMouseOver(MouseOverEvent event) {
-				if(collapseResponseHeaders.getStyleName().contains(" visible")){
-					return;
-				}
-				collapseResponseHeaders.addStyleName("visible");
-			}
-		}, MouseOverEvent.getType());
-		
-		responseHeadersContainer.addDomHandler(new MouseOutHandler() {
-			@Override
-			public void onMouseOut(MouseOutEvent event) {
-				collapseResponseHeaders.removeStyleName("visible");
-			}
-		}, MouseOutEvent.getType());
-		
-		
-		
-		if(RestClient.COLLAPSED_REQUEST_HEADERS){
-			requestHeadersContainer.addStyleName("headersCollapsed");
-			collapseRequestHeaders.removeStyleName(style.collapseButton);
-			collapseRequestHeaders.addStyleName(style.expandButton);
-		}
-		if(RestClient.COLLAPSED_RESPONSE_HEADERS){
-			responseHeadersContainer.addStyleName("headersCollapsed");
-			collapseResponseHeaders.removeStyleName(style.collapseButton);
-			collapseResponseHeaders.addStyleName(style.expandButton);
-		}
-	}
-	
-	
 	
 	@Override
 	public void setPresenter(ResponsePresenter listener) {
@@ -220,135 +144,16 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	}
 	
 	void cleanupErrorResponse(){
-		codeContainer.getElement().setInnerHTML("An error occured during the request.");
-		codeContainer.getElement().addClassName(style.error);
-		loadingTime.setText("0");
 		responsePayloadContainer.setVisible(false);
-		responseHeadersContainer.setVisible(false);
-		requestHeadersContainer.setVisible(false);
-		scrollContainer.addClassName(style.onTop);
 	}
 	
 	private void setResponseStatus() {
-		//
-		// Set status code
-		//
 		int code = response.getStatus();
 		String msg = response.getStatusText();
-		if(code >=500 || code == 0){
-			codeContainer.getElement().addClassName(style.error);
-		} else if( code >= 400 && code < 500 ){
-			codeContainer.getElement().addClassName(style.warning);
-		}
-		String txt = "<strong>" + code + "</strong>";
-		if (msg != null && !msg.equals("")) {
-			txt += " " + msg;
-		} else if (code == 0) {
-			txt += " NO RESPONSE";
-		}
-		codeContainer.getElement().setInnerHTML(txt);
-		codeImage.setCode(code);
-		
-		
-		//
-		// Set request time
-		//
-		loadingTime.getElement().setInnerText(String.valueOf(requestTime));
-	}
-	
-	
-	
-	@Override
-	public void setRequestHeadersExternal(ArrayList<Header> headers) {
-		final HashMap<String, ResponseHeaderLine> map = new HashMap<String, ResponseHeaderLine>();
-		ArrayList<String> list = new ArrayList<String>();
-		if(headers != null){
-			for(Header header : headers){
-				String headerName = header.getName(); 
-				ResponseHeaderLine rhl = new ResponseHeaderLine(header);
-				map.put(headerName, rhl);
-				list.add(headerName);
-				requestHeadersPanel.add(rhl);
-			}
-		}
-		listener.getRequestHeadersInfo(list, new Callback<List<HeaderRow>, Throwable>() {
-			@Override
-			public void onSuccess(List<HeaderRow> result) {
-				for(HeaderRow row : result){
-					String name = row.getName();
-					if(map.containsKey(name)){
-						ResponseHeaderLine line = map.get(name);
-						line.updateDesc(row.getDesc());
-						line.updateExample(row.getExample());
-						line.updateName(name);
-					}
-				}
-			}
-			@Override
-			public void onFailure(Throwable reason) {
-				if(RestClient.isDebug()){
-					Log.debug("Unable to get request headers help.",reason);
-				}
-			}
-		});
-	}
 
-	@Override
-	public void setResponseHeadersExternal(ArrayList<Header> headers) {
-		final HashMap<String, ResponseHeaderLine> map = new HashMap<String, ResponseHeaderLine>();
-		ArrayList<String> list = new ArrayList<String>();
-		for(Header header : headers){
-			String headerName = header.getName(); 
-			ResponseHeaderLine rhl = new ResponseHeaderLine(header);
-			map.put(headerName, rhl);
-			list.add(headerName);
-			headersPanel.add(rhl);
-		}
-		
-		listener.getResponseHeadersInfo(list, new Callback<List<HeaderRow>, Throwable>() {
-			@Override
-			public void onSuccess(List<HeaderRow> result) {
-				for(HeaderRow row : result){
-					String name = row.getName();
-					if(map.containsKey(name)){
-						ResponseHeaderLine line = map.get(name);
-						line.updateDesc(row.getDesc());
-						line.updateExample(row.getExample());
-						line.updateName(name);
-					}
-				}
-			}
-			@Override
-			public void onFailure(Throwable reason) {
-				if(RestClient.isDebug()){
-					Log.debug("Unable to get response headers help.",reason);
-				}
-			}
-		});
-	}
-	
-	@Override
-	public void setRedirectData(ArrayList<RedirectData> redirectData) {
-		if(redirectData == null) return;
-		boolean addNumber = false;
-		int size = redirectData.size();
-		if(size > 1) addNumber = true;
-		
-		for(int i=0; i<size; i++){
-			RedirectData data = redirectData.get(i);
-			
-			FlowPanel wrapper = new FlowPanel();
-			wrapper.setStyleName(style.responseRow);
-			Label redirectLabel = new Label("Redirect" + ( addNumber ? " #"+(i+1) : "" ));
-			redirectLabel.setStyleName(style.label);
-			wrapper.add(redirectLabel);
-			SimplePanel result = new SimplePanel();
-			result.setStyleName(style.result);
-			wrapper.add(result);
-			RedirectView view = new RedirectView(data, listener);
-			result.add(view);
-			redirects.add(wrapper);
-		}
+		statusComponent.setAttribute("status-code", String.valueOf(code));
+		statusComponent.setAttribute("status-message", msg);
+		statusComponent.setAttribute("loading-time", String.valueOf(requestTime));
 	}
 	
 	private void setResponseBody() {
@@ -429,10 +234,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 					Log.warn("Unable to load CodeMirror.",e );
 				}
 			}
-			
-//			if(isJavaScriptHeader(headers)){
-				forceOpenAsJSON.removeStyleName("hidden");
-//			}
+			forceOpenAsJSON.removeStyleName("hidden");
 		}
 		if(isJSON){
 			setTabOpened(TABS.JSON, jsonTab);
@@ -443,20 +245,6 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			setTabOpened(TABS.XML, xmlTab);
 			new XMLViewer(body, xmlPanel, xml);
 			setTabVisible(TABS.XML, xmlTab);
-		}
-		if(isImage){
-			
-//			setTabOpened(TABS.IMAGE, imageTab);
-//			setTabVisible(TABS.IMAGE, imageTab);
-//			final Image img = new Image();
-//			img.addLoadHandler(new LoadHandler() {
-//				@Override
-//				public void onLoad(LoadEvent event) {
-//					revokeImageUrl(img.getUrl());
-//				}
-//			});
-//			img.setUrl(createImageUrl(response.getRequest(),"image/png"));
-//			imagePanel.add(img);
 		}
 		if(RestClient.isDebug()){
 			Log.debug("Response panel has been filled with new data");
@@ -822,68 +610,6 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		return defaultEncodeing;
 	}
 	
-	private int initialScrollTop = -1;
-	private int initialOffsetTop = -1;
-	private final int marginOffset = 25;
-	private int lastEndPosition = -1;
-	@Override
-	public void scrollToView() {
-		_scrollIntoView(this.getElement());
-		Window.addWindowScrollHandler(new ScrollHandler() {
-			@Override
-			public void onWindowScroll(ScrollEvent event) {
-				int top = event.getScrollTop();
-				
-				if(Math.abs(top) < 20){
-					scrollContainer.addClassName(style.onTop);
-				} else {
-					scrollContainer.removeClassName(style.onTop);
-				}
-				
-				
-				int scrollTop = scrollContainer.getAbsoluteTop();
-				
-				int nextPos = initialOffsetTop+marginOffset+(top-initialScrollTop);
-				boolean canMove = false;
-				if(top+marginOffset > scrollTop){
-					if(initialOffsetTop == -1){
-						initialOffsetTop = scrollContainer.getOffsetTop();
-						initialScrollTop = scrollTop;
-						nextPos = initialOffsetTop+marginOffset+(top-initialScrollTop);
-					}
-					canMove = true;
-				} else if(nextPos<lastEndPosition){
-					if(top > initialScrollTop){
-						canMove = true;
-					} else {
-						if(scrollTop != initialScrollTop){
-							nextPos = initialOffsetTop;
-							canMove = true;
-						}
-					}
-				}
-				if(canMove){
-					lastEndPosition = nextPos;
-					scrollContainer.getStyle().setTop(nextPos, Unit.PX);
-				}
-				
-			}
-		});
-	}
-	@UiHandler("scrollButton")
-	void onscrollButton(ClickEvent e){
-		e.preventDefault();
-		_scrollToStart();
-	}
-	
-	private final native void _scrollToStart() /*-{
-		$wnd.scrollTo(0,0);
-	}-*/;
-	
-	private final native void _scrollIntoView(Element element) /*-{
-		element.scrollIntoView();
-//		element.scrollIntoViewIfNeeded();
-	}-*/;
 	
 	@UiHandler("wrapContentButton")
 	void onWrapContent(ClickEvent e){
@@ -961,41 +687,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		new JSONViewer(body, jsonPanel);
 		setTabVisible(TABS.JSON, jsonTab);
 	}
-
 	
-	@UiHandler("collapseResponseHeaders")
-	void onCollapseResponseHeaders(ClickEvent e){
-		e.preventDefault();
-		
-		if(responseHeadersContainer.getStyleName().contains("headersCollapsed")){
-			responseHeadersContainer.removeStyleName("headersCollapsed");
-			collapseResponseHeaders.removeStyleName(style.expandButton);
-			collapseResponseHeaders.addStyleName(style.collapseButton);
-			RestClient.COLLAPSED_RESPONSE_HEADERS = false;
-		} else {
-			responseHeadersContainer.addStyleName("headersCollapsed");
-			collapseResponseHeaders.removeStyleName(style.collapseButton);
-			collapseResponseHeaders.addStyleName(style.expandButton);
-			RestClient.COLLAPSED_RESPONSE_HEADERS = true;
-		}
-	}
-	@UiHandler("collapseRequestHeaders")
-	void onCollapseRequestHeaders(ClickEvent e){
-		e.preventDefault();
-		
-		if(requestHeadersContainer.getStyleName().contains("headersCollapsed")){
-			requestHeadersContainer.removeStyleName("headersCollapsed");
-			collapseRequestHeaders.removeStyleName(style.expandButton);
-			collapseRequestHeaders.addStyleName(style.collapseButton);
-			RestClient.COLLAPSED_REQUEST_HEADERS = false;
-		} else {
-			requestHeadersContainer.addStyleName("headersCollapsed");
-			collapseRequestHeaders.removeStyleName(style.collapseButton);
-			collapseRequestHeaders.addStyleName(style.expandButton);
-			RestClient.COLLAPSED_REQUEST_HEADERS = true;
-		}
-		
-	}
 	
 	@UiHandler("forceOpenAsXML")
 	void onForceOpenAsXML(ClickEvent e){
@@ -1006,4 +698,19 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		new XMLViewer(body, xmlPanel, response.getResponseXML());
 		setTabVisible(TABS.JSON, xmlTab);
 	}
+
+
+	@Override
+	public final native void setBackgroundResponseData(ResponseStatusData data) /*-{
+		var cmp = this.@org.rest.client.ui.desktop.ResponseViewImpl::statusComponent;
+		if(data === null) {
+			cmp.requestHeaders = [];
+			cmp.responseHeaders = [];
+			cmp.redirectData = [];
+		} else {
+			cmp.requestHeaders = data.REQUEST_HEADERS;
+			cmp.responseHeaders = data.RESPONSE_HEADERS;
+			cmp.redirectData = data.REDIRECT_DATA;
+		}
+	}-*/;
 }

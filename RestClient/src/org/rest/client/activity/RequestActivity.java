@@ -46,6 +46,7 @@ import org.rest.client.gdrive.DriveAuth;
 import org.rest.client.gdrive.DriveFileItem;
 import org.rest.client.jso.ExternalDriveCreateData;
 import org.rest.client.jso.ExternalDriveCreateResponse;
+import org.rest.client.jso.ResponseStatusData;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.RedirectData;
 import org.rest.client.request.RequestHeadersParser;
@@ -58,7 +59,6 @@ import org.rest.client.storage.store.objects.FormEncodingObject;
 import org.rest.client.storage.store.objects.HistoryObject;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
-import org.rest.client.storage.websql.HeaderRow;
 import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.AddEncodingView;
 import org.rest.client.ui.EditProjectView;
@@ -673,28 +673,10 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 					@Override
 					public void onSuccess(Object result) {
 						if (result == null) {
-							responseView.setRequestHeadersExternal(null);
-							responseView.setResponseHeadersExternal(null);
-							responseView.scrollToView();
-							return;
+							responseView.setBackgroundResponseData(null);
+						} else {
+							responseView.setBackgroundResponseData((ResponseStatusData) result);
 						}
-
-						JavaScriptObject o = (JavaScriptObject) result;
-						JSONObject parsedResponse = new JSONObject(o);
-						responseView
-								.setRequestHeadersExternal(extractHeadersExternal(parsedResponse, "REQUEST_HEADERS"));
-						responseView
-								.setResponseHeadersExternal(extractHeadersExternal(parsedResponse, "RESPONSE_HEADERS"));
-
-						// look for redirections
-						JSONValue redirectValue = parsedResponse.get("REDIRECT_DATA");
-						if (redirectValue != null) {
-							ArrayList<RedirectData> redirects = getRedirectData(redirectValue.isArray());
-							if (redirects != null && redirects.size() > 0) {
-								responseView.setRedirectData(redirects);
-							}
-						}
-						responseView.scrollToView();
 					}
 
 					@Override
@@ -1135,7 +1117,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 		GoogleAnalytics.sendEvent("Engagement", "Click", "Clear request form");
 	}
 
-	@Override
+	/*@Override
 	public void getResponseHeadersInfo(ArrayList<String> names, final Callback<List<HeaderRow>, Throwable> callback) {
 
 		clientFactory.getHeadersStore().getResponseHeadersByName(names, new StoreResultCallback<List<HeaderRow>>() {
@@ -1166,7 +1148,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 				callback.onFailure(e);
 			}
 		});
-	}
+	}*/
 
 	private String exportFileObjectUrl = null;
 

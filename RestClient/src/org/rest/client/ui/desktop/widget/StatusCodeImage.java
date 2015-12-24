@@ -3,15 +3,11 @@ package org.rest.client.ui.desktop.widget;
 import org.rest.client.storage.store.StatusesStoreWebSql;
 import org.rest.client.storage.websql.StatusCodeRow;
 
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeUri;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Image;
 
-@SuppressWarnings("deprecation")
 public class StatusCodeImage extends Image implements ClickHandler {
 	
 	int statusCode;
@@ -41,65 +37,53 @@ public class StatusCodeImage extends Image implements ClickHandler {
 
 	@Override
 	public void onClick(ClickEvent event) {
-		
-		if (statusCode == 0 || requestedCodeData != null) {
-			Element dialog = buildDialog();
-			openDialog(dialog);
-			return;
-		}
-		
-		
-		StatusesStoreWebSql.get(statusCode, new StatusesStoreWebSql.StoreResultCallback() {
-			
-			@Override
-			public void onSuccess(StatusCodeRow result) {
-				requestedCodeData = result;
-				Element dialog = buildDialog();
-				openDialog(dialog);
-			}
-			
-			@Override
-			public void onError(Throwable e) {
-				StatusCodeInfo dialog = new StatusCodeInfo();
-				dialog.setHTML("Status Code: " + statusCode);
-				dialog.setInfoText("Unable to find explanation");
-				dialog.center();
-				dialog.show();
-			}
-		});
-	}
-	
-	Element buildDialog() {
-		String titleText = statusCode+"";
-		if(requestedCodeData != null && requestedCodeData.getLabel() != null){
-			titleText += ": " + requestedCodeData.getLabel();
+		if (statusCode == 0){
+			displayDialog(0, "No response", "The response was empty");
+		} else if (requestedCodeData != null) {
+			String titleText = statusCode + ": " + requestedCodeData.getLabel();
+			displayDialog(statusCode, titleText, requestedCodeData.getDesc());
 		} else {
-			titleText += ": No response";
+			StatusesStoreWebSql.get(statusCode, new StatusesStoreWebSql.StoreResultCallback() {
+				@Override
+				public void onSuccess(StatusCodeRow result) {
+					requestedCodeData = result;
+					String titleText = statusCode + ": " + result.getLabel();
+					displayDialog(statusCode, titleText, result.getDesc());
+				}
+				@Override
+				public void onError(Throwable e) {
+					displayDialog(statusCode, "Status code: " + statusCode, "There is no definition for this code in the applicaion :(");
+				}
+			});
 		}
-		Element dialog = DOM.createElement("paper-dialog");
-		Element title = DOM.createElement("h2");
-		Element content = DOM.createElement("paper-dialog-scrollable");
-		Element actions = DOM.createDiv();
-		actions.addClassName("buttons");
-		Element button = DOM.createElement("paper-button");
-		button.setAttribute("dialog-confirm", "");
-		button.setAttribute("autofocus", "");
-		button.setInnerText("Close");
-		title.setInnerText(titleText);
-		if(requestedCodeData != null && requestedCodeData.getDesc() != null){
-			content.setInnerHTML(requestedCodeData.getDesc());
-		} else {
-			content.setInnerText("No response data");
-		}
-		actions.appendChild(button);
-		dialog.appendChild(title);
-		dialog.appendChild(content);
-		dialog.appendChild(actions);
-		Document.get().getBody().appendChild(dialog);
-		return dialog;
 	}
-	
-	private final native void openDialog(Element dialog) /*-{
+	/**
+	 * Display a dialog with status code explanation.
+	 * @param code Status code 
+	 * @param title Title for the dialog
+	 * @param desc Description for status code.
+	 */
+	private native void displayDialog(int code, String title, String desc) /*-{
+		var dialog = $doc.querySelector('paper-dialog[data-code="'+code+'"]');
+		if(!dialog) {
+			dialog = $doc.createElement('paper-dialog');
+			dialog.setAttribute('data-code', code);
+			var h2 = $doc.createElement('h2');
+			var content = $doc.createElement('paper-dialog-scrollable');
+			var actions = $doc.createElement('div');
+			actions.classList.add("buttons");
+			var button = $doc.createElement('paper-button');
+			button.setAttribute('dialog-confirm', '');
+			button.setAttribute('autofocus', '');
+			button.innerText = 'Close';
+			h2.innerText = title;
+			content.innerHTML = desc;
+			actions.appendChild(button);
+			dialog.appendChild(h2);
+			dialog.appendChild(content);
+			dialog.appendChild(actions);
+			$doc.body.appendChild(dialog);
+		}
 		dialog.open();
 	}-*/;
 }
