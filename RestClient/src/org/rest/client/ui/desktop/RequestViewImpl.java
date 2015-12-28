@@ -16,8 +16,8 @@
 package org.rest.client.ui.desktop;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import org.rest.client.RestClient;
@@ -31,7 +31,6 @@ import org.rest.client.event.SavedRequestEvent;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SavedPlace;
 import org.rest.client.request.FilesObject;
-import org.rest.client.request.HttpContentTypeHelper;
 import org.rest.client.request.HttpMethodOptions;
 import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.storage.store.objects.ProjectObject;
@@ -47,9 +46,11 @@ import org.rest.client.ui.desktop.widget.RequestHeadersWidget;
 import org.rest.client.ui.desktop.widget.RequestUrlWidget;
 import org.rest.client.ui.html5.HTML5Element;
 import org.rest.client.ui.html5.HTML5Progress;
+
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -59,7 +60,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -95,8 +95,6 @@ public class RequestViewImpl extends Composite implements RequestView {
 	@UiField RadioButton radioPatch;
 	@UiField RadioButton radioOther;
 	@UiField TextBox otherMethodValue;
-	@UiField ListBox contentTypeInput;
-	@UiField DivElement contentTypeContainer;
 	@UiField HTML5Progress progressIndicator;
 	@UiField Button sendButton;
 	@UiField Button saveButton;
@@ -109,7 +107,6 @@ public class RequestViewImpl extends Composite implements RequestView {
 
 	private List<IsHideable> hidableList = new ArrayList<IsHideable>();
 	private String currentSelectedMethod = "GET";
-	private String latestSelectedContentType = "";
 
 	private ProjectObject openedProject;
 
@@ -120,7 +117,6 @@ public class RequestViewImpl extends Composite implements RequestView {
 		
 		requestNameField.getElement().setAttribute("placeholder", "[Unnamed]");
 		
-		createContentTypeValues(null);
 		hidableList.add(requestBody);
 	}
 	
@@ -138,36 +134,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 		});
 	}
 	
-	private void createContentTypeValues(String[] userValues) {
-		String[] ctValues = HttpContentTypeHelper.getAllValues();
-		String[] allValues = org.rest.client.util.ArraysUtils.concat(ctValues,
-				userValues);
-		Arrays.sort(allValues);
-		contentTypeInput.clear();
-		contentTypeInput.addItem("Add new...", "");
-
-		for (String contentType : allValues) {
-			contentTypeInput.addItem(contentType, contentType);
-		}
-		String defaultSelectedContentTypeValue = HttpContentTypeHelper
-				.getDefaulSelected();
-		selectContentTypeValue(defaultSelectedContentTypeValue);
-	}
-
-	private void selectContentTypeValue(String value) {
-		int cnt = contentTypeInput.getItemCount();
-		for (int i = 0; i < cnt; i++) {
-			String itemValue = contentTypeInput.getItemText(i);
-			if (itemValue.equals(value)) {
-				contentTypeInput.setSelectedIndex(i);
-				latestSelectedContentType = itemValue;
-				RestClient.getClientFactory().getEventBus()
-						.fireEvent(new HttpEncodingChangeEvent(itemValue));
-				break;
-			}
-		}
-	}
-
+	
 	@Override
 	public void setPresenter(Presenter listener) {
 		this.listener = listener;
@@ -198,36 +165,47 @@ public class RequestViewImpl extends Composite implements RequestView {
 			for (IsHideable _i : hidableList) {
 				_i.show();
 			}
-			contentTypeContainer.removeClassName("hidden");
+			setContentTypeHeader(true);
 		} else {
 			for (IsHideable _i : hidableList) {
 				_i.hide();
 			}
-			contentTypeContainer.addClassName("hidden");
+			setContentTypeHeader(false);
 		}
 
 		RestClient.getClientFactory().getEventBus()
 				.fireEvent(new HttpMethodChangeEvent(currentSelectedMethod));
 	}
-
 	/**
-	 * Content Type change event.
-	 * 
-	 * @param event
+	 * Add or remove default content type header when the user switch to / from request that contains a body.
+	 * @param show true to add default content type header and false if it should be removed
 	 */
-	@UiHandler("contentTypeInput")
-	void oncontentTypeInputChange(ChangeEvent event) {
-		if (listener == null) {
-			return;
+	private void setContentTypeHeader(boolean show) {
+		ArrayList<RequestHeader> list = RequestHeadersParser.stringToHeaders(requestHeaders.getText());
+		Iterator<RequestHeader> it = list.iterator();
+		String latestSelectedContentType = null;
+		while(it.hasNext()) {
+			RequestHeader header = it.next();
+			if(header.getName().toLowerCase().equals("content-type")) {
+				if(show) {
+					//no change
+					return;
+				} else {
+					latestSelectedContentType = header.getValue();
+					list.remove(header);
+				}
+			}
 		}
-		String currentValue = contentTypeInput.getValue(contentTypeInput
-				.getSelectedIndex());
-		if (currentValue.equals("")) {
-			listener.requestAddEncodingDialog(latestSelectedContentType);
-		} else {
-			latestSelectedContentType = currentValue;
-			listener.fireEncodingChangeEvent(currentValue);
+		if(latestSelectedContentType == null) {
+			//there were no CT header.
+			if(show) {
+				list.add(new RequestHeader("Content-Type", "application/x-www-form-urlencoded"));
+			}
 		}
+		
+		setHeaders(RequestHeadersParser.headersListToString(list));
+		RestClient.getClientFactory().getEventBus().fireEvent(
+				new HttpEncodingChangeEvent(latestSelectedContentType));
 	}
 
 	@UiHandler("clearButton")
@@ -251,7 +229,6 @@ public class RequestViewImpl extends Composite implements RequestView {
 		requestHeaders.clear();
 		requestBody.clear();
 		radioGet.setEnabled(true);
-		selectContentTypeValue(HttpContentTypeHelper.getDefaulSelected());
 		
 		openedProject = null;
 		refreshDriveButton.setEnabled(true);
@@ -379,7 +356,15 @@ public class RequestViewImpl extends Composite implements RequestView {
 
 	@Override
 	public String getEncoding() {
-		return contentTypeInput.getValue(contentTypeInput.getSelectedIndex());
+		ArrayList<RequestHeader> list = RequestHeadersParser.stringToHeaders(requestHeaders.getText());
+		Iterator<RequestHeader> it = list.iterator();
+		while(it.hasNext()) {
+			RequestHeader header = it.next();
+			if(header.getName().toLowerCase().equals("content-type")) {
+				return header.getValue();
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -390,52 +375,37 @@ public class RequestViewImpl extends Composite implements RequestView {
 		
 		ArrayList<RequestHeader> requerstHeadersList = RequestHeadersParser
 				.stringToHeaders(getHeaders());
+		
 		boolean headersListchanged = false;
-		RequestHeader possiblyToRemoveHeader = null;
-		for (RequestHeader h : requerstHeadersList) {
-			if (h.getName().toLowerCase().equals("content-type")) {
-				possiblyToRemoveHeader = h;
-				encoding = h.getValue(); 
-				break;
-			}
-		}
-		boolean hasBoudary = false;
+		String latestSelectedContentType = null;
 		if(encoding.contains("multipart/form-data;")){ //"multipart/form-data" with boudary
 			encoding = "multipart/form-data";
-			hasBoudary = true;
 		}
-		
-		int cnt = contentTypeInput.getItemCount();
-		for (int i = 0; i < cnt; i++) {
-			if (contentTypeInput.getValue(i).equals(encoding)) {
-				contentTypeInput.setSelectedIndex(i);
-				latestSelectedContentType = contentTypeInput.getValue(i);
-				RestClient
-						.getClientFactory()
-						.getEventBus()
-						.fireEvent(
-								new HttpEncodingChangeEvent(
-										latestSelectedContentType));
-				if(!hasBoudary){
-					requerstHeadersList.remove(possiblyToRemoveHeader);
+		ArrayList<RequestHeader> list = RequestHeadersParser.stringToHeaders(requestHeaders.getText());
+		Iterator<RequestHeader> it = list.iterator();
+		while(it.hasNext()) {
+			RequestHeader header = it.next();
+			if(header.getName().toLowerCase().equals("content-type")) {
+				if(header.getValue().equals(encoding)) {
+					return;
 				}
+				latestSelectedContentType = header.getValue();
+				header.setValue(encoding);
 				headersListchanged = true;
-				break;
 			}
 		}
-		if (headersListchanged) {
-			setHeaders(RequestHeadersParser.headersListToString(requerstHeadersList));
+		if(!headersListchanged){
+			list.add(new RequestHeader("Content-Type", encoding));
+			headersListchanged = true;
 		}
+		setHeaders(RequestHeadersParser.headersListToString(requerstHeadersList));
+		RestClient.getClientFactory().getEventBus().fireEvent(
+				new HttpEncodingChangeEvent(latestSelectedContentType));
 	}
 
 	@Override
 	public ArrayList<FilesObject> getFiles() {
 		return requestBody.getInputFiles();
-	}
-
-	@Override
-	public void appendEncodingValues(String[] values) {
-		createContentTypeValues(values);
 	}
 
 	@UiHandler("sendButton")

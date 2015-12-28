@@ -1,16 +1,11 @@
 package org.rest.client.ui.desktop.widget;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
-import org.rest.client.RestClient;
 import org.rest.client.request.RedirectData;
-import org.rest.client.storage.websql.HeaderRow;
 import org.rest.client.ui.ResponseView.ResponsePresenter;
 import org.rest.client.util.Utils;
 
-import com.allen_sauer.gwt.log.client.Log;
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;

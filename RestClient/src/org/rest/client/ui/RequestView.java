@@ -43,11 +43,6 @@ public interface RequestView extends IsWidget {
 		 */
 		void goTo(Place place);
 		/**
-		 * Request app to open Add Encoding Dialog.
-		 * @param previousEncoding Previously selected encoding
-		 */
-		void requestAddEncodingDialog(String previousEncoding);
-		/**
 		 * Fire event for clear form action
 		 */
 		void fireClearAllEvent();
@@ -103,12 +98,11 @@ public interface RequestView extends IsWidget {
 	void setMethod(String method);
 	void setHeaders(String header);
 	void setPayload(String payload);
-	void setEncoding(String encoding);
 	/**
-	 * Append user defined encoding list to defult list
-	 * @param values
+	 * @deprecated the encoding value is deprecated and its support will be removed.
+	 * @param encoding
 	 */
-	void appendEncodingValues(String[] values);
+	void setEncoding(String encoding);
 	
 	void setProjectData(ProjectObject project, List<RequestObject> requests, int currentEndpoint);
 	/**
