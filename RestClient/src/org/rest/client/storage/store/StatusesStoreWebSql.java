@@ -5,7 +5,6 @@ import org.rest.client.storage.websql.StatusCodeRow;
 public class StatusesStoreWebSql {
 	
 	public interface StoreResultCallback {
-		
 		void onSuccess(StatusCodeRow result);
 		void onError(Throwable e);
 	}

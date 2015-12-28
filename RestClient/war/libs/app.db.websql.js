@@ -259,6 +259,61 @@ arc.app.db.websql.getHeaderByName = function(name, type) {
   });
 };
 /**
+ * Add new URL history value to the `urls` table.
+ */
+arc.app.db.websql.addUrlHistory = function(url, time) {
+  return new Promise(function(resolve, reject) {
+    arc.app.db.websql.open().then(function(db) {
+      db.transaction(function(tx) {
+        let sql = 'INSERT INTO urls (url,time) VALUES (?,?)';
+        tx.executeSql(sql, [url, time], (tx, result) => {
+          resolve();
+        }, function(tx, error) {
+          reject(error);
+        });
+      });
+    }).catch((e) => reject(e));
+  });
+};
+/**
+ * Update a value in a `urls` table.
+ */
+arc.app.db.websql.updateUrlHistory = function(id, time) {
+  return new Promise(function(resolve, reject) {
+    arc.app.db.websql.open().then(function(db) {
+      db.transaction(function(tx) {
+        let sql = 'UPDATE urls SET time = ? WHERE ID = ?';
+        tx.executeSql(sql, [time, id], (tx, result) => {
+          resolve();
+        }, function(tx, error) {
+          reject(error);
+        });
+      });
+    }).catch((e) => reject(e));
+  });
+};
+/**
+ * Get url values from the `urls` table matching `query`.
+ */
+arc.app.db.websql.getHistoryUrls = function(query) {
+  return new Promise(function(resolve, reject) {
+    arc.app.db.websql.open().then(function(db) {
+      db.transaction(function(tx) {
+        let sql = 'SELECT url FROM urls WHERE url LIKE ? ORDER BY time';
+        tx.executeSql(sql, [query], (tx, result) => {
+          if(result.rows.length === 0) {
+            resolve(null);
+          } else {
+            resolve(Array.from(result.rows));
+          }
+        }, function(tx, error) {
+          reject(error);
+        });
+      });
+    }).catch((e) => reject(e));
+  });
+};
+/**
  * In dev mode there is no direct connection to the database initialized in the background page.
  * This function must be called in Development environment to initialize WebSQL.
  */

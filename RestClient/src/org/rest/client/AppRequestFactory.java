@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import org.rest.client.event.RequestChangeEvent;
 import org.rest.client.event.RequestEndEvent;
 import org.rest.client.event.RequestStartActionEvent;
+import org.rest.client.jso.UrlRow;
 import org.rest.client.request.FilesObject;
 import org.rest.client.request.FormPayloadData;
 import org.rest.client.request.HttpMethodOptions;
@@ -20,9 +21,9 @@ import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
+import org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultsCallback;
 import org.rest.client.storage.store.objects.HistoryObject;
 import org.rest.client.storage.store.objects.RequestObject;
-import org.rest.client.storage.websql.UrlRow;
 import org.rest.client.ui.ErrorDialogView;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -31,6 +32,7 @@ import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.file.client.File;
@@ -532,22 +534,23 @@ public class AppRequestFactory {
 			Log.debug("Save URL value into suggestions table.");
 		}
 		final UrlHistoryStoreWebSql store = RestClient.getClientFactory().getUrlHistoryStore();
-		
-		store.getByUrl(url, new StoreResultCallback<List<UrlRow>>() {
+		store.getByUrl(url, new StoreResultsCallback() {
+			
 			@Override
-			public void onSuccess(List<UrlRow> result) {
-				
-				if(result.size() > 0) {
+			public void onSuccess(JsArray<UrlRow> result) {
+				if(result.length() > 0) {
 					if(RestClient.isDebug()){
 						Log.debug("Updating Suggestions table with new time.");
 					}
-					store.updateUrlUseTime(result.get(0).getId(), new Date(), new StoreResultCallback<Boolean>(){
+					store.updateUrlUseTime(result.get(0).getId(), (double) new Date().getTime(), new org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultCallback() {
+						
 						@Override
-						public void onSuccess(Boolean result) {
+						public void onSuccess(UrlRow result) {
 							if(RestClient.isDebug()){
 								Log.debug("Suggestions table updated with new time.");
 							}
 						}
+						
 						@Override
 						public void onError(Throwable e) {
 							if(RestClient.isDebug()){
@@ -560,19 +563,19 @@ public class AppRequestFactory {
 				UrlRow row = UrlRow.create();
 				row.setUrl(url);
 				row.setTime(new Date().getTime());
-				store.put(row, null, new StoreResultCallback<Integer>() {
-					
-					@Override
-					public void onSuccess(Integer result) {
-						if(RestClient.isDebug()){
-							Log.debug("New value has been added to the Suggestions table.");
-						}
-					}
+				store.put(row, new org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultCallback() {
 					
 					@Override
 					public void onError(Throwable e) {
 						if(RestClient.isDebug()){
 							Log.error("There was a problem inserting URL value (used in request).", e);
+						}
+					}
+
+					@Override
+					public void onSuccess(UrlRow result) {
+						if(RestClient.isDebug()){
+							Log.debug("New value has been added to the Suggestions table.");
 						}
 					}
 				});
