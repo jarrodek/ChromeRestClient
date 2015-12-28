@@ -16,6 +16,10 @@
  ******************************************************************************/
 
 /**
+ * Library for making a requests to the app's API.
+ */
+
+/**
  * Advanced Rest Client namespace
  */
 var arc = arc || {};

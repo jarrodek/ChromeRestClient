@@ -1,0 +1,37 @@
+{
+  "name": "unibabel",
+  "main": "index.js",
+  "version": "2.1.3",
+  "homepage": "https://github.com/coolaj86/unibabel-js",
+  "authors": [
+    "AJ ONeal <awesome@coolaj86.com>"
+  ],
+  "description": "Convert between UTF8, TypedArrays, and Base64",
+  "moduleType": [
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "ascii",
+    "binary",
+    "utf8",
+    "utf-8",
+    "ArrayBuffer",
+    "TypedArrays",
+    "TypedArray",
+    "Uint",
+    "Uint8Array",
+    "Base64",
+    "b64",
+    "Base32",
+    "b32"
+  ],
+  "license": "Apache-2.0",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
