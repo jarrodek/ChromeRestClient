@@ -21,27 +21,6 @@ import com.google.code.gwt.database.client.service.VoidCallback;
  */
 public interface RequestDataService extends AppDatabase {
 
-	/**
-	 * Create database table.
-	 * 
-	 * @param callback
-	 *            callback function
-	 */
-	@Update("CREATE TABLE IF NOT EXISTS request_data ("
-			+ "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
-			+ "project INTEGER DEFAULT 0, " + "name TEXT NOT NULL, "
-			+ "url TEXT NOT NULL, " + "method TEXT NOT NULL, "
-			+ "encoding TEXT NULL, " + "headers TEXT NULL, "
-			+ "payload TEXT NULL, " + "skipProtocol INTEGER DEFAULT 0, "
-			+ "skipServer INTEGER DEFAULT 0, "
-			+ "skipParams INTEGER DEFAULT 0, "
-			+ "skipHistory INTEGER DEFAULT 0, "
-			+ "skipMethod INTEGER DEFAULT 0, "
-			+ "skipPayload INTEGER DEFAULT 0, "
-			+ "skipHeaders INTEGER DEFAULT 0, "
-			+ "skipPath INTEGER DEFAULT 0, " + "time INTEGER)")
-	void initTable(VoidCallback callback);
-
 	@Update("INSERT INTO request_data (project, name, url, method, encoding, headers, "
 			+ "payload, skipProtocol, skipServer, skipParams, skipHistory, skipMethod, "
 			+ "skipPayload, skipHeaders, skipPath, time) VALUES ("

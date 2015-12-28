@@ -15,18 +15,15 @@
  ******************************************************************************/
 package org.rest.client;
 
-import org.rest.client.storage.store.FormEncodingStoreWebSql;
 import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
-import org.rest.client.storage.store.StatusesStoreWebSql;
 import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.storage.store.WebSocketDataStoreWebSql;
 import org.rest.client.storage.websql.ExportedDataReferenceService;
 import org.rest.client.ui.AboutView;
-import org.rest.client.ui.AddEncodingView;
 import org.rest.client.ui.EditProjectView;
 import org.rest.client.ui.ErrorDialogView;
 import org.rest.client.ui.HistoryListItemView;
@@ -42,7 +39,6 @@ import org.rest.client.ui.SavedView;
 import org.rest.client.ui.SettingsView;
 import org.rest.client.ui.SocketView;
 import org.rest.client.ui.desktop.AboutViewImpl;
-import org.rest.client.ui.desktop.AddEncodingViewImpl;
 import org.rest.client.ui.desktop.EditProjectViewImpl;
 import org.rest.client.ui.desktop.ErrorDialogViewImpl;
 import org.rest.client.ui.desktop.HistoryListItemViewImpl;
@@ -77,10 +73,8 @@ public class ClientFactoryImpl implements ClientFactory {
 	private static StoreKeys latestRequestStore = null;
 	private static RequestDataStoreWebSql requestDataStore = null;
 	private static HistoryRequestStoreWebSql historyRequestStore = null;
-	private static FormEncodingStoreWebSql formEncodingStore = null;
 	private static UrlHistoryStoreWebSql urlHistoryStore = null;
 	private static HeadersStoreWebSql headersStore = null;
-	private static StatusesStoreWebSql statusesStore = null;
 	private static ProjectStoreWebSql projectsStore = null;
 	private static WebSocketDataStoreWebSql webSocketSqlStore = null;
 	private static ExportedDataReferenceService exportedDataService = null;
@@ -164,21 +158,6 @@ public class ClientFactoryImpl implements ClientFactory {
 	}
 
 	@Override
-	public AddEncodingView getAddEncodingView(EventBus eventBus) {
-		AddEncodingView dialog = GWT.create(AddEncodingViewImpl.class);
-		dialog.setEventBus(eventBus);
-		return dialog;
-	}
-
-	@Override
-	public FormEncodingStoreWebSql getFormEncodingStore() {
-		if (formEncodingStore == null) {
-			formEncodingStore = GWT.create(FormEncodingStoreWebSql.class);
-		}
-		return formEncodingStore;
-	}
-
-	@Override
 	public UrlHistoryStoreWebSql getUrlHistoryStore() {
 		if (urlHistoryStore == null) {
 			urlHistoryStore = GWT.create(UrlHistoryStoreWebSql.class);
@@ -192,14 +171,6 @@ public class ClientFactoryImpl implements ClientFactory {
 			headersStore = GWT.create(HeadersStoreWebSql.class);
 		}
 		return headersStore;
-	}
-
-	@Override
-	public StatusesStoreWebSql getStatusesStore() {
-		if (statusesStore == null) {
-			statusesStore = GWT.create(StatusesStoreWebSql.class);
-		}
-		return statusesStore;
 	}
 
 	@Override

@@ -1,11 +1,10 @@
 package org.rest.client.suggestion;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import org.rest.client.storage.StoreResultCallback;
+import org.rest.client.jso.UrlRow;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
-import org.rest.client.storage.websql.UrlRow;
+import org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultsCallback;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.history.History;
@@ -76,24 +75,28 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 		_suggestions = new ArrayList<UrlSuggestion>();
 
 		final String query = request.getQuery();
-		
-		store.getByUrl("%" + query + "%", new StoreResultCallback<List<UrlRow>>() {
+		store.getByUrl(query, new StoreResultsCallback() {
 			
 			@Override
-			public void onSuccess(List<UrlRow> result) {
+			public void onSuccess(JsArray<UrlRow> result) {
 				requestInProgress = false;
 				databaseQueryEnd = true;
-				String lowerQuery = query.toLowerCase();
-				for(UrlRow row : result){
-					String url = row.getUrl();
-					if(url == null){
-						continue;
+				if(result != null){
+					String lowerQuery = query.toLowerCase();
+					int size = result.length();
+					
+					for(int i=0; i<size; i++){
+						UrlRow row = result.get(i);
+						String url = row.getUrl();
+						if(url == null){
+							continue;
+						}
+						if(!url.toLowerCase().startsWith(lowerQuery)){
+							continue;
+						}
+						UrlSuggestion s = new UrlSuggestion(url, false);
+						_suggestions.add(s);
 					}
-					if(!url.toLowerCase().startsWith(lowerQuery)){
-						continue;
-					}
-					UrlSuggestion s = new UrlSuggestion(url, false);
-					_suggestions.add(s);
 				}
 				if(chromeQueryEnd){
 					Log.debug("chromeQueryEnd");

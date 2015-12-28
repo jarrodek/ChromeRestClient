@@ -1,0 +1,75 @@
+<dom-module id="app-headers-display">
+  <template>
+    <style>
+    :host {
+      display: block;
+      --paper-item-min-height: 32px;
+    }
+    .header-name {
+      padding-right: 8px;
+      @apply(--paper-font-body2);
+      font-weight: 200 !important;
+    }
+    .header-value {
+      @apply(--paper-font-body1);
+      @apply(--layout-flex);
+    }
+    .dialog-header-example {
+      @apply(--paper-font-body1);
+      margin-top: 16px;
+    }
+    .dialog-header-desc {
+      @apply(--paper-font-body2);
+    }
+    </style>
+    <template is="dom-repeat" items="{{headers}}">
+      <paper-item on-dblclick="_displayHeaderInfo" class="layout horizontal">
+        <span class="header-name">{{item.name}}:</span>
+        <span class="header-value">{{_autoLink(item.value)}}</span>
+      </paper-item>
+    </template>
+    <paper-dialog id="headerInfo">
+      <h2>{{_hdTitle}}</h2>
+      <paper-dialog-scrollable>
+        <section class="dialog-header-desc">{{_hdBody}}</section>
+        <section class="dialog-header-example">
+          <span>Example: </span>
+          <span>{{_hdExample}}</span>
+        </section>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-confirm autofocus>Close</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+  <script>
+  'use strict';
+  /* global arc */
+  Polymer({
+      is: 'app-headers-display',
+      properties: {
+        headers: Array,
+        _hdTitle: String,
+        _hdBody: String,
+        _hdExample: String,
+      },
+      _displayHeaderInfo: function(e) {
+        var item = e.model.get('item');
+        arc.app.db.websql.getHeaderByName(item.name, item.type)
+        .then(function(result) {
+          if (result === null) {
+              return;
+          }
+          result = result[0];
+          this._hdTitle = result.name;
+          this._hdBody = result.desc;
+          this._hdExample = result.example;
+          this.$.headerInfo.open();
+        }.bind(this));
+      },
+      _autoLink: function(input){
+        return arc.app.utils.autoLink(input);
+      }
+  });
+  </script>
+</dom-module>

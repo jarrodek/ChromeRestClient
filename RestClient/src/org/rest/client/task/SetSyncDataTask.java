@@ -31,14 +31,12 @@ public class SetSyncDataTask implements LoadTask {
 
 			@Override
 			public void onFailure(Void reason) {
-				SyncAdapter.observe();
 				callback.onInnerTaskFinished(1);
 				callback.onSuccess();
 			}
 
 			@Override
 			public void onSuccess(Void result) {
-				SyncAdapter.observe();
 				callback.onInnerTaskFinished(1);
 				callback.onSuccess();
 			}

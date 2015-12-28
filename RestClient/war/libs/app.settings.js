@@ -37,7 +37,14 @@ arc.app.settings.getConfig = function(){
       'CMH_ENABLED': true,
       'CMP_ENABLED': true
     };
-    chrome.storage.sync.get(values, resolve);
+    try {
+      chrome.storage.sync.get(values, function(result){
+        resolve(result);
+      });
+    } catch(e) {
+      console.error('arc.app.settings.getConfig', e);
+      resolve(values);
+    }
   });
 };
 arc.app.settings.saveConfig = function(key, value){
@@ -46,4 +53,7 @@ arc.app.settings.saveConfig = function(key, value){
     o[key] = value;
     chrome.storage.sync.set(o, resolve);
   });
+};
+arc.app.settings.observe = function(callback){
+  chrome.storage.onChanged.addListener((changes, area) => callback(changes, area));
 };

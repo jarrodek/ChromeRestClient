@@ -47,3 +47,12 @@ arc.app.utils.uuid = function(){
 arc.app.utils.isProdMode = function(){
   return !(location.hostname === '127.0.0.1');
 };
+/**
+ * This function will search for links in the `input` and replace it with anchor.
+ *
+ * @param {String} input A search string
+ */
+arc.app.utils.autoLink = function(input){
+	var r = new RegExp('(https?:\\/\\/([^" >]*))','gim');
+	return input.replace(r,'<a target="_blank" class="auto-link" href="$1">$1</a>');
+}

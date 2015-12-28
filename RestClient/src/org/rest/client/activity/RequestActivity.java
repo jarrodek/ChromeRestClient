@@ -18,8 +18,6 @@ package org.rest.client.activity;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.rest.client.ClientFactory;
 import org.rest.client.ExternalEventsFactory;
@@ -27,7 +25,6 @@ import org.rest.client.RestClient;
 import org.rest.client.StatusNotification;
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
-import org.rest.client.event.AddEncodingEvent;
 import org.rest.client.event.ClearFormEvent;
 import org.rest.client.event.HttpEncodingChangeEvent;
 import org.rest.client.event.HttpMethodChangeEvent;
@@ -46,21 +43,18 @@ import org.rest.client.gdrive.DriveAuth;
 import org.rest.client.gdrive.DriveFileItem;
 import org.rest.client.jso.ExternalDriveCreateData;
 import org.rest.client.jso.ExternalDriveCreateResponse;
+import org.rest.client.jso.ResponseStatusData;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.RedirectData;
-import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.request.URLParser;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.store.StoreKeys;
-import org.rest.client.storage.store.objects.FormEncodingObject;
 import org.rest.client.storage.store.objects.HistoryObject;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
-import org.rest.client.storage.websql.HeaderRow;
 import org.rest.client.tutorial.TutorialFactory;
-import org.rest.client.ui.AddEncodingView;
 import org.rest.client.ui.EditProjectView;
 import org.rest.client.ui.RequestView;
 import org.rest.client.ui.ResponseView;
@@ -86,10 +80,8 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.xhr2.client.Header;
-import com.google.gwt.xhr2.client.RequestHeader;
 import com.google.gwt.xhr2.client.Response;
 import com.google.web.bindery.event.shared.EventBus;
-import com.google.web.bindery.event.shared.HandlerRegistration;
 
 /**
  * Activities typically restore state ("wake up"), perform initialization (
@@ -473,6 +465,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 				});
 	}
 
+	@SuppressWarnings("deprecation")
 	private void restoreProjectEndpoint(final ProjectObject project, final RequestObject request) {
 		showProjectRelatedData(project.getId(), project);
 
@@ -507,11 +500,11 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 		requestView.setEncoding(request.getEncoding());
 		requestView.setUrl(request.getURL());
 
-		setUserDefinedContentEncodingValues(request.getEncoding(), request.getHeaders());
 		RestClient.fixChromeLayout();
 		RestClient.RESTORED_REQUEST = request.getId();
 	}
 
+	@SuppressWarnings("deprecation")
 	private void restoreProjectEndpointWithLatestData(RequestObject lesteSavedRequest, final ProjectObject project,
 			final RequestObject request, final RequestView requestView) {
 
@@ -564,7 +557,6 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 
 		requestView.setUrl(urlData.toString());
 
-		setUserDefinedContentEncodingValues(request.getEncoding(), request.getHeaders());
 		RestClient.fixChromeLayout();
 		RestClient.RESTORED_REQUEST = request.getId();
 	}
@@ -673,28 +665,10 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 					@Override
 					public void onSuccess(Object result) {
 						if (result == null) {
-							responseView.setRequestHeadersExternal(null);
-							responseView.setResponseHeadersExternal(null);
-							responseView.scrollToView();
-							return;
+							responseView.setBackgroundResponseData(null);
+						} else {
+							responseView.setBackgroundResponseData((ResponseStatusData) result);
 						}
-
-						JavaScriptObject o = (JavaScriptObject) result;
-						JSONObject parsedResponse = new JSONObject(o);
-						responseView
-								.setRequestHeadersExternal(extractHeadersExternal(parsedResponse, "REQUEST_HEADERS"));
-						responseView
-								.setResponseHeadersExternal(extractHeadersExternal(parsedResponse, "RESPONSE_HEADERS"));
-
-						// look for redirections
-						JSONValue redirectValue = parsedResponse.get("REDIRECT_DATA");
-						if (redirectValue != null) {
-							ArrayList<RedirectData> redirects = getRedirectData(redirectValue.isArray());
-							if (redirects != null && redirects.size() > 0) {
-								responseView.setRedirectData(redirects);
-							}
-						}
-						responseView.scrollToView();
 					}
 
 					@Override
@@ -874,7 +848,6 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 						requestView.setMethod(result.getMethod());
 						requestView.setHeaders(result.getHeaders());
 						requestView.setPayload(result.getPayload());
-						setUserDefinedContentEncodingValues(result.getEncoding(), result.getHeaders());
 
 						Date date = new Date((long) result.getTime());
 						String lastUseDate = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_FULL).format(date);
@@ -895,6 +868,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 	private void createExternalRequest(final String requestUUID) {
 		clientFactory.getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_GET_EXTERNAL_REQUEST_DATA,
 				requestUUID, new BackgroundJsCallback() {
+					@SuppressWarnings("deprecation")
 					@Override
 					public void onSuccess(Object result) {
 						if (result == null) {
@@ -979,55 +953,6 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 		});
 	}
 
-	/**
-	 * 
-	 * @param selectCurrentEncoding
-	 * @param headers
-	 */
-	private void setUserDefinedContentEncodingValues(String _selectCurrentEncoding, String headers) {
-
-		if (headers != null) {
-			ArrayList<RequestHeader> requerstHeadersList = RequestHeadersParser.stringToHeaders(headers);
-			for (RequestHeader h : requerstHeadersList) {
-				if (h.getName().toLowerCase().equals("content-type")) {
-					_selectCurrentEncoding = h.getValue();
-				}
-			}
-		}
-
-		final String selectCurrentEncoding = _selectCurrentEncoding;
-		clientFactory.getFormEncodingStore().all(new StoreResultCallback<Map<Integer, FormEncodingObject>>() {
-
-			@Override
-			public void onSuccess(Map<Integer, FormEncodingObject> result) {
-				final RequestView view = clientFactory.getRequestView();
-				String encodingToSelect = selectCurrentEncoding;
-
-				if (selectCurrentEncoding == null) {
-					encodingToSelect = view.getEncoding();
-				}
-
-				String[] values = new String[result.size()];
-				Set<Integer> keys = result.keySet();
-				int i = 0;
-				for (Integer k : keys) {
-					FormEncodingObject dbvalue = result.get(k);
-					if (dbvalue != null)
-						values[i] = dbvalue.getEncoding();
-					i++;
-				}
-				view.appendEncodingValues(values);
-				view.setEncoding(encodingToSelect);
-			}
-
-			@Override
-			public void onError(Throwable e) {
-				e.printStackTrace();
-				Log.error("getFormEncodingsStore.all in RequestActivity", e);
-			}
-		});
-	}
-
 	@Override
 	public String mayStop() {
 		
@@ -1037,7 +962,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 		}
 
 		RequestObject ro = RequestObject.createRequest();
-		ro.setEncoding(requestView.getEncoding());
+		//ro.setEncoding(requestView.getEncoding());
 		ro.setHeaders(requestView.getHeaders());
 		ro.setMethod(requestView.getMethod());
 		ro.setPayload(requestView.getPayload());
@@ -1067,50 +992,6 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 		return null;
 	}
 
-	private static HandlerRegistration addDialogRegistrtion = null;
-
-	@Override
-	public void requestAddEncodingDialog(final String previousEncoding) {
-		AddEncodingView dialog = clientFactory.getAddEncodingView(eventBus);
-		dialog.show();
-
-		final RequestView view = this.clientFactory.getRequestView();
-
-		final AddEncodingEvent.Handler handler = new AddEncodingEvent.Handler() {
-			@Override
-			public void onAddEncoding(final String encoding) {
-				addDialogRegistrtion.removeHandler();
-				if (encoding == null || encoding.isEmpty()) {
-					view.setEncoding(previousEncoding);
-				} else {
-					FormEncodingObject feo = FormEncodingObject.create();
-					feo.setEncoding(encoding);
-					clientFactory.getFormEncodingStore().put(feo, null, new StoreResultCallback<Integer>() {
-						@Override
-						public void onSuccess(Integer result) {
-							setUserDefinedContentEncodingValues(encoding, null);
-						}
-
-						@Override
-						public void onError(Throwable e) {
-							e.printStackTrace();
-							if (RestClient.isDebug()) {
-								Log.error(
-										"RequestActivity::requestAddEncodingDialog->AddEncodingEvent.Handler->store::put",
-										e);
-							}
-							view.setEncoding(previousEncoding);
-						}
-					});
-				}
-
-				addDialogRegistrtion = null;
-			}
-		};
-
-		addDialogRegistrtion = AddEncodingEvent.register(eventBus, handler);
-	}
-
 	@Override
 	public void fireClearAllEvent() {
 
@@ -1135,7 +1016,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 		GoogleAnalytics.sendEvent("Engagement", "Click", "Clear request form");
 	}
 
-	@Override
+	/*@Override
 	public void getResponseHeadersInfo(ArrayList<String> names, final Callback<List<HeaderRow>, Throwable> callback) {
 
 		clientFactory.getHeadersStore().getResponseHeadersByName(names, new StoreResultCallback<List<HeaderRow>>() {
@@ -1166,7 +1047,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 				callback.onFailure(e);
 			}
 		});
-	}
+	}*/
 
 	private String exportFileObjectUrl = null;
 
@@ -1344,7 +1225,6 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 			requestView.setMethod(null);
 			requestView.setHeaders(null);
 			requestView.setPayload(null);
-			requestView.setEncoding(null);
 			requestView.setRequestName(null);
 			return;
 		}
@@ -1389,7 +1269,6 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 		requestView.setMethod(result.getMethod());
 		requestView.setHeaders(result.getHeaders());
 		requestView.setPayload(result.getPayload());
-		setUserDefinedContentEncodingValues(result.getEncoding(), result.getHeaders());
 		RestClient.fixChromeLayout();
 	}
 

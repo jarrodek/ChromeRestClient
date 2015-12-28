@@ -54,15 +54,6 @@
 		<!-- Payload widget  -->
 		<rcui:RequestBodyWidget ui:field="requestBody"></rcui:RequestBodyWidget>
 		
-		<!-- Content type -->
-		<div ui:field="contentTypeContainer" class="contentTypeSection">
-			<g:ListBox ui:field="contentTypeInput" title="Select form encoding" styleName="selectControl">
-			</g:ListBox>
-			<span class="inlineNote">
-				Set "Content-Type" header to overwrite this value.
-			</span>
-		</div>
-		
 		<div class="actionBar">
 			<div class="actions">
 				<h5:HTML5Progress ui:field="progressIndicator" width="200px" height="20px"></h5:HTML5Progress>

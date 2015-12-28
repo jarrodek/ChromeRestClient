@@ -1442,7 +1442,6 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 .XML_parser_bodyPanel div[data-expanded="false"] div[collapse-indicator]{display: inline-block !important;}
 
 /* THE RESPONSE VIEW */
-.Response_View_root{margin-top: 15px;position: relative;margin-bottom: 20px;}
 .Response_View_responseRow{
 	display: -webkit-box;
 	margin: 5px 0px;

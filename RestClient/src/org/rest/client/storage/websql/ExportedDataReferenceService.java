@@ -16,21 +16,6 @@ import java.util.List;
  * 
  */
 public interface ExportedDataReferenceService extends AppDatabase {
-	/**
-	 * Create database table. <br>
-	 * Schema: <br>
-	 * <code>reference_id</code> - ID of form state from rest_forms table
-	 * <code>type</code> - default "form" for future use.
-	 * 
-	 * @param callback
-	 *            callback function
-	 */
-	@Update("CREATE TABLE IF NOT EXISTS exported ("
-			+ "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
-			+ "reference_id INTEGER NOT NULL, "
-			+ "gaeKey TEXT, "
-			+ "type TEXT default 'form')")
-	void initTable(VoidCallback callback);
 
 	/**
 	 * Insert data.

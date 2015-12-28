@@ -37,16 +37,13 @@ import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.task.CreateMenuTask;
-import org.rest.client.task.FirstRunTask;
 import org.rest.client.task.InitializeAppHandlersTask;
-import org.rest.client.task.InitializeDatabaseTask;
 import org.rest.client.task.SetSyncDataTask;
 import org.rest.client.task.TasksLoader;
 import org.rest.client.ui.RequestView;
 import org.rest.client.util.UUID;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.activity.shared.ActivityManager;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.chrome.storage.Storage;
@@ -58,6 +55,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
@@ -75,7 +73,6 @@ import com.google.web.bindery.event.shared.EventBus;
  * task workers and will call history state change event 
  * so the app will run on requested entry point.
  */
-@SuppressWarnings("deprecation")
 public class RestClient implements EntryPoint {
 	/**
 	 * A flag which determine if application is in initializing state.
@@ -226,8 +223,6 @@ public class RestClient implements EntryPoint {
 	 */
 	private void runTasksQueue(final PlaceHistoryHandler historyHandler){
 		TasksLoader.addTask(new SetSyncDataTask());
-		TasksLoader.addTask(new InitializeDatabaseTask());
-		TasksLoader.addTask(new FirstRunTask());
 		TasksLoader.addTask(new InitializeAppHandlersTask());
 		//@TODO: is menu must be created dynamically?
 		TasksLoader.addTask(new CreateMenuTask());

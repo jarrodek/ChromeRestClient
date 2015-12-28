@@ -8,9 +8,9 @@ import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.ui.desktop.HeaderSupportAuthorizationImpl;
 import org.rest.client.ui.desktop.HeaderSupportDate;
-import org.rest.client.ui.desktop.W3CHeaderErrorImpl;
 import org.rest.client.ui.desktop.widget.RequestHeadersWidget;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -30,6 +30,7 @@ public class HeadersFillSupport implements FocusHandler, ClickHandler {
 		//core support
 		registerSupport(new String[]{"expires","if-modified-since","if-unmodified-since","last-modified","retry-after","if-range"}, HeaderSupportDate.class);
 		registerSupport("authorization", HeaderSupportAuthorizationImpl.class);
+		registerSupport("content-type",ContentTypeDialog.class);
 	}
 	
 	private static HeaderSupport initalizeHelperClass(Class<? extends HeaderSupport> clazz){
@@ -38,6 +39,8 @@ public class HeadersFillSupport implements FocusHandler, ClickHandler {
 			helper = GWT.create(HeaderSupportAuthorizationImpl.class);
 		} else if(clazz.equals(HeaderSupportDate.class)){
 			helper = GWT.create(HeaderSupportDate.class);
+		} else if(clazz.equals(ContentTypeDialog.class)){
+			helper = GWT.create(ContentTypeDialog.class);
 		}
 		return helper;
 	}
@@ -230,18 +233,19 @@ public class HeadersFillSupport implements FocusHandler, ClickHandler {
 		}
 		String header = currentHeader.toLowerCase();
 		
-		if(NOT_SUPPORTED_W3C.contains(header)){
+		/*if(NOT_SUPPORTED_W3C.contains(header)){
 			W3CHeaderErrorImpl dialog = GWT.create(W3CHeaderErrorImpl.class);
 			dialog.openDialog();
 			return;
-		}
-		
+		}*/
 		if(!supportedHandlers.containsKey(header)){
+			Log.debug("no header support  " + header);
 			return;
 		}
 		Class<? extends HeaderSupport> clazz = supportedHandlers.get(header);
 		HeaderSupport helper = initalizeHelperClass(clazz);
 		if(helper == null){
+			Log.debug("Helper not registered  " + clazz.getSimpleName());
 			return;
 		}
 		
