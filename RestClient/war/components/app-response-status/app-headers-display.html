@@ -8,7 +8,7 @@
     .header-name {
       padding-right: 8px;
       @apply(--paper-font-body2);
-      font-weight: 500;
+      font-weight: 200 !important;
     }
     .header-value {
       @apply(--paper-font-body1);
@@ -25,7 +25,7 @@
     <template is="dom-repeat" items="{{headers}}">
       <paper-item on-dblclick="_displayHeaderInfo" class="layout horizontal">
         <span class="header-name">{{item.name}}:</span>
-        <span class="header-value">{{item.value}}</span>
+        <span class="header-value">{{_autoLink(item.value)}}</span>
       </paper-item>
     </template>
     <paper-dialog id="headerInfo">
@@ -66,6 +66,9 @@
           this._hdExample = result.example;
           this.$.headerInfo.open();
         }.bind(this));
+      },
+      _autoLink: function(input){
+        return arc.app.utils.autoLink(input);
       }
   });
   </script>

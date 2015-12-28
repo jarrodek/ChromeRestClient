@@ -34,6 +34,11 @@
         .status-value.status {
             padding: 0 16px;
         }
+
+        .redirect-value {
+            margin-top: 12px;
+            @apply(--layout-flex);
+        }
         
         .status-color {
             color: var(--paper-green-700);
@@ -54,6 +59,9 @@
         }
         .no-redirects-info {
           @apply(--paper-font-title);
+        }
+        app-headers-display{
+            margin-top: 12px;
         }
         </style>
         <div class="status-row">
@@ -85,8 +93,15 @@
               <template is="dom-if" if="{{redirectData.length}}">
                 <template is="dom-repeat" items="{{redirectData}}">
                   <div class="status-row">
-                    <div class="status-label">#<span>{{index}}</span></div>
-                    <div class="status-value">
+                    <div class="status-label">#<span>{{computeIndexName(index)}}</span></div>
+                    <div class="redirect-value">
+                        <div class="status-value status">
+                            <span>To: <span><a href="{{item.redirectUrl}}" class="auto-link">{{item.redirectUrl}}</a></span> with status <span>{{item.statusLine}}</span></span>
+                            <!--paper-icon-button on-tap="showStatusInfo" icon="help" class="response-status-help"></paper-icon-button-->
+                            <template is="dom-if" if="{{item.fromCache}}">
+                                <span>Cached data has been used with this response</span>
+                            </template>
+                        </div>
                       <app-headers-display headers="{{item.responseHeaders}}"></app-headers-display>
                     </div>
                   </div>
@@ -177,6 +192,12 @@
 
         _responseHeadersChanged: function() {
             this.responseHeaders.forEach((item) => item.type = 'response');
+        },
+        computeIndexName: function (index){
+            return index+1;
+        },
+        _autoLink: function(input){
+          return arc.app.utils.autoLink(input);
         }
     });
     </script>
