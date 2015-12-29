@@ -32,7 +32,8 @@ arc.app.db = arc.app.db || {};
  */
 arc.app.db.websql = {};
 /**
- * A handler to current connection to the database.
+ * A handler to current connection t
+o the database.
  * @type IDBDatabase
  */
 arc.app.db.websql._db = null;
@@ -61,7 +62,7 @@ arc.app.db.websql.open = function() {
       resolve(arc.app.db.websql._db);
       return;
     }
-    arc.app.db.websql._db = openDatabase('restClient', arc.app.db.websql._dbVersion, 
+    arc.app.db.websql._db = openDatabase('restClient', arc.app.db.websql._dbVersion,
       'Rest service database', 10000000);
     arc.app.db.websql._dbUpgrade(arc.app.db.websql._db).then(function() {
         resolve(arc.app.db.websql._db);
@@ -225,7 +226,7 @@ arc.app.db.websql.getStatusCode = function(code) {
       db.transaction(function(tx) {
         let sql = 'SELECT * FROM statuses WHERE code = ?';
         tx.executeSql(sql, [code], (tx, result) => {
-          if(result.rows.length === 0) {
+          if (result.rows.length === 0) {
             resolve(null);
           } else {
             resolve(result.rows.item(0));
@@ -246,7 +247,7 @@ arc.app.db.websql.getHeaderByName = function(name, type) {
       db.transaction(function(tx) {
         let sql = 'SELECT * FROM headers WHERE name LIKE (?) AND type=?';
         tx.executeSql(sql, [name, type], (tx, result) => {
-          if(result.rows.length === 0) {
+          if (result.rows.length === 0) {
             resolve(null);
           } else {
             resolve(Array.from(result.rows));
@@ -267,7 +268,7 @@ arc.app.db.websql.addUrlHistory = function(url, time) {
       db.transaction(function(tx) {
         let sql = 'INSERT INTO urls (url,time) VALUES (?,?)';
         tx.executeSql(sql, [url, time], (tx, result) => {
-          resolve();
+          resolve(result);
         }, function(tx, error) {
           reject(error);
         });
@@ -284,7 +285,7 @@ arc.app.db.websql.updateUrlHistory = function(id, time) {
       db.transaction(function(tx) {
         let sql = 'UPDATE urls SET time = ? WHERE ID = ?';
         tx.executeSql(sql, [time, id], (tx, result) => {
-          resolve();
+          resolve(result);
         }, function(tx, error) {
           reject(error);
         });
@@ -301,7 +302,7 @@ arc.app.db.websql.getHistoryUrls = function(query) {
       db.transaction(function(tx) {
         let sql = 'SELECT url FROM urls WHERE url LIKE ? ORDER BY time';
         tx.executeSql(sql, [query], (tx, result) => {
-          if(result.rows.length === 0) {
+          if (result.rows.length === 0) {
             resolve(null);
           } else {
             resolve(Array.from(result.rows));
@@ -318,7 +319,7 @@ arc.app.db.websql.getHistoryUrls = function(query) {
  * This function must be called in Development environment to initialize WebSQL.
  */
 arc.app.db.websql.initDev = function() {
-  if (!arc.app.utils.isProdMode()) {
+  if (arc.app.utils && !arc.app.utils.isProdMode()) {
     arc.app.db.websql.open().then(function() {
       console.log('%cDEVMODE::Database has been initialized', 'color: #33691E');
     }).catch((e) => console.error('DEVMODE::Error initializing the database', e));

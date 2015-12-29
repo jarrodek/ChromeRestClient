@@ -12,6 +12,7 @@
  * this script will mock Chrome API and pass the information to the
  * background page and eventually to the background page for execution.
  */
+/* global chrome */
 
 chrome.runtime = chrome.runtime || {};
 

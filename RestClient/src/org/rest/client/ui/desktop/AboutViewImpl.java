@@ -23,15 +23,8 @@ public class AboutViewImpl extends Composite implements AboutView {
 	}
 	
 	
-	@UiField SpanElement versionField;
-	@UiField Element licensing;
-	@UiField Element licensingDialog;
-	@UiField Element donateDialog;
-	
-	
 	public AboutViewImpl(){
 		initWidget(uiBinder.createAndBindUi(this));
-		observeLicensingButton(this);
 	}
 	
 	@Override
