@@ -2,7 +2,6 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:h5="urn:import:org.rest.client.ui.html5">
-	
 	<g:HTMLPanel ui:field="root">
 		<app-settings ui:field="appSettings"></app-settings>
 	</g:HTMLPanel>

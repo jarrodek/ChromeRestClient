@@ -15,11 +15,3 @@ if (_gaq) {
     s.parentNode.insertBefore(ga, s);
   })();
 }
-/*
-function loadPlusApi() {
-  var ga = document.createElement('script');
-  ga.type = 'text/javascript';
-  ga.src = 'https://apis.google.com/js/plusone.js';
-  var s = document.getElementsByTagName('script')[0];
-  s.parentNode.insertBefore(ga, s);
-}*/

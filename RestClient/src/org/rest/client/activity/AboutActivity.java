@@ -16,19 +16,11 @@
 package org.rest.client.activity;
 
 import org.rest.client.ClientFactory;
-import org.rest.client.RestClient;
 import org.rest.client.place.AboutPlace;
 import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.AboutView;
 
-import com.allen_sauer.gwt.log.client.Log;
-import com.google.gwt.chrome.runtime.ChromeRuntime;
-import com.google.gwt.chrome.runtime.ManifestDetails;
-import com.google.gwt.chrome.runtime.Runtime;
-import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.web.bindery.event.shared.EventBus;
 
 /**
  * Activities typically restore state ("wake up"), perform initialization
@@ -42,7 +34,6 @@ public class AboutActivity extends AppActivity implements
 
 	
 	final private AboutPlace place;
-	private EventBus eventBus;
 	AboutView view = null;
 	TutorialFactory tutorialFactory = null;
 
@@ -53,17 +44,11 @@ public class AboutActivity extends AppActivity implements
 
 	@Override
 	public void start(AcceptsOneWidget panel, com.google.gwt.event.shared.EventBus eventBus) {
-		this.eventBus = eventBus;
 		super.start(panel, eventBus);
 		
 		view = clientFactory.getAboutView();
 		view.setPresenter(this);
 		panel.setWidget(view.asWidget());
-		getAppVersion();
-		initPlusOne();
-		activateTutorial();
-		
-		
 		if(place.getToken().equals("donate")){
 			view.showDonateDialog();
 		}
@@ -76,62 +61,4 @@ public class AboutActivity extends AppActivity implements
 		}
 		return null;
 	}
-	
-	
-	private void getAppVersion(){
-		Runtime r = GWT.create(Runtime.class);
-		r.getManifest(new ChromeRuntime.ManifestHandler() {
-			
-			@Override
-			public void onManifest(ManifestDetails manifest) {
-				view.setManifest(manifest);
-			}
-			
-			@Override
-			public void onError(String message) {
-				if(RestClient.isDebug()){
-					Log.error("Unknown error occured: " + message);
-				}
-			}
-		});
-	}
-	
-	
-	private void activateTutorial() {
-		tutorialFactory = new TutorialFactory("about");
-		tutorialFactory.canStartTutorial(new Callback<Boolean, Throwable>() {
-			
-			@Override
-			public void onSuccess(Boolean result) {
-				if(result){
-					view.setUpTutorial(tutorialFactory);
-				}
-			}
-			
-			@Override
-			public void onFailure(Throwable reason) {}
-		});
-	}
-	
-	void initPlusOne(){
-		if(!isPlusLoaded()){
-			loadPlus();
-		} else {
-			_initPlusOneButton();
-		}
-	}
-	
-	private final native boolean isPlusLoaded()/*-{
-		return !!($wnd.gapi);
-	}-*/;
-	private final native void loadPlus()/*-{
-		$wnd.loadPlusApi();
-	}-*/;
-	private final native void _initPlusOneButton()/*-{
-		try{
-			$wnd.gapi.plusone.go();
-		} catch(e){
-			window.console.error(e);
-		}
-	}-*/;
 }

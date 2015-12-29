@@ -33,7 +33,12 @@
     "vulcanize": ">= 1.4.2",
     "web-component-tester": "^3.4.0",
     "gulp-crisper": "^1.0.0",
-    "gulp-preprocess": "^2.0.0"
+    "gulp-preprocess": "^2.0.0",
+    "gulp-util": "^3.0.7",
+    "gulp-zip": "^3.0.2",
+    "gulp-bump": "^1.0.0",
+    "del": "^2.2.0",
+    "vinyl-paths": "^2.1.0"
   },
   "scripts": {
     "test": "gulp test:local",

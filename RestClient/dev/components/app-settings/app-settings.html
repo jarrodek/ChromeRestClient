@@ -110,6 +110,10 @@
                 value: function() {
                     return this._onStorageChanged.bind(this);
                 }
+            },
+            initialized: {
+                type: Boolean,
+                value: false
             }
         },
         observers: [
@@ -122,6 +126,7 @@
             arc.app.settings.getConfig()
                 .then(function(values) {
                     this.set('values', values);
+                    this.initialized = true;
                 }.bind(this));
 
             chrome.storage.onChanged.addListener(this._storageObserver);
@@ -144,6 +149,9 @@
          * A function called when any value change.
          */
         _onValueChange: function(changeRecord) {
+            if (!this.initialized) {
+                return;
+            }
             var key = changeRecord.path.replace('values.', '');
             var value = changeRecord.value;
             arc.app.settings.saveConfig(key, value);
@@ -151,6 +159,7 @@
               'key': key,
               'value': value
             };
+            console.log('Setting changed', key, value);
             this.fire('settings-saved', o);
         },
         /**

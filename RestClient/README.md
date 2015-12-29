@@ -37,11 +37,11 @@ With Node.js installed, run the following one liner:
 ```
 npm install -g gulp bower && npm install && bower install
 ```
+To develop ARC you need to run `gulp dev` task in RestClient directory. It will watch for changes in relevant files in `dev/` folder and copy it to the `war/` folder. After you recompile the project (refresh the page) it will use new, precompiled files.
 
-When you finish your changes then:
+When you finish your changes then you must to compile the project using GWT compiler and:
 
-1) run `gulp vulcanize` from RestClient directory
-2) run build.xml default task 
+Run `gulp build:dev` `gulp build:beta` or `gulp build:stable` (depends on build type) from RestClient directory
 
 Generated extension will be available in RestClient/extension/ directory. 
 Extensions generated files are in RestClient/extension/source/ directory. You can load this folder into Chrome extenstions developer mode to test the app.  

@@ -111,6 +111,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	
 	public ResponseViewImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
+		setResponseStatusHandlers(this);
 	}
 	
 	@Override
@@ -712,5 +713,48 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			cmp.responseHeaders = data.RESPONSE_HEADERS;
 			cmp.redirectData = data.REDIRECT_DATA;
 		}
+	}-*/;
+	
+	private final native void setResponseStatusHandlers(ResponseViewImpl context) /*-{
+		var cmp = this.@org.rest.client.ui.desktop.ResponseViewImpl::statusComponent;
+		if(!cmp) {
+			console.error('There were no response status component. It should be.');
+			return;
+		}
+		var linkHandler = $entry(function(e){
+			var url = e.detail.link;
+			if(!url) return;
+			context.@org.rest.client.ui.desktop.ResponseViewImpl::fireUrlChangeEvent(Ljava/lang/String;)(url);
+		});
+		cmp.addEventListener('action-link', linkHandler);
+		var listeners = context._detachListeners;
+		if (!listeners) {
+			listeners = new Map();
+		}
+		listeners.set('action-link', {
+			element : cmp,
+			fn : linkHandler,
+			event : 'action-link'
+		});
+		context._detachListeners = listeners;
+	}-*/;
+	@Override
+	protected void onDetach() {
+		super.onDetach();
+		nativeDetach(this);
+	}
+	/**
+	 * Detach all function that has been attached to the DOM objects via JSNI.
+	 * @param context
+	 */
+	private final native void nativeDetach(ResponseViewImpl context) /*-{
+		var listeners = context._detachListeners;
+		if (!listeners) {
+			return;
+		}
+		listeners.forEach(function(value) {
+			value.element.removeEventListener(value.event, value.fn);
+		});
+		context._detachListeners = null;
 	}-*/;
 }

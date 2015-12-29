@@ -1922,48 +1922,6 @@ span.paper-toast {
 .Tutorial_prev{}
 .Tutorial_next{}
 .Tutorial_finish{}
-/* ABOUT VIEW */
-.About_View_contentTitle {
-	padding-left: 24px;
-}
-
-.About_View_contentTitle.About_View_about {
-	-webkit-padding-start: 24px;
-	text-align: start;
-}
-
-.About_View_aboutContent {
-	-webkit-padding-start: 24px;
-	text-align: start;
-	text-shadow: white 0 1px 2px;
-	border-bottom: 1px solid #eeeeee;
-	margin-top: 17px;
-	padding-bottom: 20px;
-}
-
-.About_View_aboutContent>div {
-	margin-bottom: 7px;
-}
-.About_View_aboutContent > ul {
-	margin-bottom: 24px;
-}
-
-.About_View_donateTitle {
-	font-weight: bold;
-	font-size: 130%;
-}
-.About_View_facebookShare img {
-	vertical-align: middle;
-}
-.About_View_facebookShare a {
-	text-decoration: none;
-}
-.licenseDialog {
-	
-}
-.licenseText{
-	white-space: pre-line;
-}
 
 /* HISTORY VIEW */
 .History_View_loadingWrapper{min-height: 100px;}

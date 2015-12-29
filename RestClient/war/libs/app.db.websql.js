@@ -319,7 +319,7 @@ arc.app.db.websql.getHistoryUrls = function(query) {
  * This function must be called in Development environment to initialize WebSQL.
  */
 arc.app.db.websql.initDev = function() {
-  if (arc.app.utils && !arc.app.utils.isProdMode()) {
+  if (!arc.app.utils.isProdMode()) {
     arc.app.db.websql.open().then(function() {
       console.log('%cDEVMODE::Database has been initialized', 'color: #33691E');
     }).catch((e) => console.error('DEVMODE::Error initializing the database', e));

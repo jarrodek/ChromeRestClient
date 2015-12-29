@@ -17,10 +17,30 @@
     --paper-toggle-button-checked-button-color: var(--paper-blue-500);
     --paper-tabs-selection-bar-color: var(--default-primary-color);
     --paper-tab-ink: var(--light-primary-color);
-}
-h1.page-title {
-    @apply(--paper-font-headline);
-    padding: 0 16px;
-}
 
+    --page-title-text: {
+        @apply(--paper-font-headline);
+        padding: 0 16px;
+    };
+    --page-section-container: {
+        border-bottom: 1px var(--paper-grey-100) solid;
+        padding-bottom: 20px;
+    }
+    --page-section-title: {
+        @apply(--paper-font-title);
+        padding: 0 16px;
+    };
+    --page-section-item: {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        @apply(--paper-font-body1);
+        padding: 0 16px;
+        min-height: 36px;
+    };
+    --page-section-item-simple: {
+        @apply(--paper-font-body1);
+        padding: 0 16px;
+        min-height: 36px;
+    };
+}
 </style>
