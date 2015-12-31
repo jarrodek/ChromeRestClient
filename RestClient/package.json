@@ -38,7 +38,11 @@
     "gulp-zip": "^3.0.2",
     "gulp-bump": "^1.0.0",
     "del": "^2.2.0",
-    "vinyl-paths": "^2.1.0"
+    "vinyl-paths": "^2.1.0",
+    "gulp-babel": "^6.1.1",
+    "babel-preset-es2015": "^6.3.13",
+    "gulp-sourcemaps":"^1.6.0",
+    "gulp-concat": "^2.6.0"
   },
   "scripts": {
     "test": "gulp test:local",

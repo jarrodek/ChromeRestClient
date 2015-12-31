@@ -14,12 +14,14 @@ var del = require('del');
 var runSequence = require('run-sequence');
 var bump = require('gulp-bump');
 var zip = require('gulp-zip');
+var babel = require('gulp-babel');
+var concat = require('gulp-concat');
 
 /**
  * Tasks that build different version should use this switched to 
  * switch between `dev`, `beta`, and `stable` versions.
  */
-var mode = 'dev';
+var mode = 'debug';
 
 // Ensure that we are not missing required files for the project
 // "dot" files are specifically tricky due to them being hidden on
@@ -114,7 +116,7 @@ gulp.task('copy:devsources', ['copy:images'], function() {
 gulp.task('copy:dist', function() {
   var root = gulp.src([
     'war/*',
-    '!war/**/*.jsp',
+    '!war/*.jsp',
     '!war/components',
     '!war/static',
     '!war/WEB-INF',
@@ -126,31 +128,30 @@ gulp.task('copy:dist', function() {
     '!war/Starter.css',
     '!war/starter.js',
     '!war/ext/*_uncompressed.js',
-    '!**/.DS_Store'
+    '!**/.DS_Store',
+    '!war/manifest.json'
   ], { 
     dot: true
   })
   .pipe(gulp.dest('dist/sources/'));
-  var components = gulp.src([
-    'war/components/vulcanized/*'
-  ], { 
-    dot: true
-  })
-  .pipe(gulp.dest('dist/sources/components/'));
-  var manifest = gulp.src([
-    'manifest.json'
-  ], { 
-    dot: true
-  })
-  .pipe(gulp.dest('dist/sources/'));
-  return merge(root, components, manifest)
+  var components = gulp.src('war/components/vulcanized/*', {dot: true}).pipe(gulp.dest('dist/sources/components/'));
+  var manifest = gulp.src('./manifest.json').pipe(gulp.dest('dist/sources/'));
+  var assets = gulp.src('war/assets/**/*').pipe(gulp.dest('dist/sources/assets'));
+  var ext = gulp.src('war/ext/**/*', {dot: true}).pipe(gulp.dest('dist/sources/ext'));
+  var libs = gulp.src('war/libs/app.db.websql.js').pipe(gulp.dest('dist/sources/libs'));
+  var oauth2 = gulp.src('war/oauth2/**/*').pipe(gulp.dest('dist/sources/oauth2'));
+  var restclient = gulp.src('war/restclient/**/*', {dot: true}).pipe(gulp.dest('dist/sources/restclient'));
+  var roboto = gulp.src('war/roboto/**/*').pipe(gulp.dest('dist/sources/roboto'));
+  var workers = gulp.src('war/workers/**/*').pipe(gulp.dest('dist/sources/workers'));
+  var img = gulp.src('war/img/**/*').pipe(gulp.dest('dist/sources/img'));
+  return merge(root, components, manifest, assets, ext, /*libs,*/ oauth2, restclient, roboto, workers, img)
   .pipe($.size({
     title: 'copy'
   }));
 });
 
 gulp.task('zip', function() {
-  return gulp.src('dist/sources/*').pipe(zip('extension.zip')).pipe(gulp.dest('dist'));
+  return gulp.src('dist/sources/**/*').pipe(zip('extension.zip')).pipe(gulp.dest('dist'));
 });
 /**
  * Copy development files on change.
@@ -174,7 +175,7 @@ var copySourceFile = function(obj) {
  * It will include separate js libraries into the index page and put it in the extension 
  * environment.
  */
-gulp.task('dev', ['mode:dev', 'lint', 'copy:devsources'], function() {
+gulp.task('dev', ['mode:debug', 'lint', 'copy:devsources'], function() {
   gulp.watch('dev/**/*.html', copySourceFile);
   gulp.watch('dev/**/*.js', copySourceFile);
   gulp.watch('dev/**/*.jsp', copySourceFile);
@@ -190,12 +191,24 @@ gulp.task('clean:dist', function () {
 gulp.task('mode:dev', function() {
   mode = 'dev';
 });
+gulp.task('mode:debug', function() {
+  mode = 'debug';
+});
 
 gulp.task('bump-dev-build', function() {
   return gulp.src('./manifest.json')
   .pipe(bump({type: 'patch'}))
   .pipe(bump({key: 'version_name', type: 'prerelease', 'preid':'dev'}))
   .pipe(gulp.dest('./'));
+});
+gulp.task('libs', function() {
+  return gulp.src(['war/libs/app.utils.js','war/libs/*.js','!war/libs/app.utils.js','!war/libs/app_db.js'])
+    .pipe(babel({
+      presets: ['es2015'],
+      comments: false
+    }))
+    .pipe(concat('libs.js'))
+    .pipe(gulp.dest('dist/sources/libs/'));
 });
 gulp.task('build:dev', function(callback) {
   runSequence(
@@ -205,6 +218,7 @@ gulp.task('build:dev', function(callback) {
     'vulcanize',
     'bump-dev-build',
     'copy:dist',
+    'libs',
     'zip',
     function (error) {
       if (error) {

@@ -5,8 +5,8 @@
     "16": "img/arc_icon_16.png",
     "128": "img/arc_icon_128.png"
   },
-  "version": "4.1.6",
-  "version_name": "4.1.1-dev.5",
+  "version": "4.1.19",
+  "version_name": "4.1.1-dev.18",
   "manifest_version": 2,
   "permissions": [
     "webRequest",
@@ -19,8 +19,8 @@
   "options_page": "RestClient.html#SettingsPlace:view",
   "background": {
     "scripts": [
-      "app.db.websql.js",
-      "/oauth2/oauth2.js",
+      "libs/app.db.websql.js",
+      "oauth2/oauth2.js",
       "background.js"
     ]
   },
