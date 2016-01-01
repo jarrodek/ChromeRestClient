@@ -101,10 +101,16 @@ public class ChromeMessagePassingImpl implements ChromeMessagePassing {
 	private final native void sendExtensionMessage(JavaScriptObject data, BackgroundJsCallback handler) throws JavaScriptException /*-{
 		chrome.runtime.getBackgroundPage($entry(function(backgroundPage){
 			var receiver = $entry(function(result) {
-				handler.@com.google.gwt.chrome.def.BackgroundJsCallback::onSuccess(Ljava/lang/Object;)(result);
+				handler.@com.google.gwt.chrome.def.BackgroundJsCallback::onSuccess(Ljava/lang/Object;)(result.response);
 			});
 			try{
-				backgroundPage.gwt.dev.background.callAction(data, receiver);
+				if(backgroundPage.messageHandling){
+					backgroundPage.messageHandling.handleMessage(data, receiver)
+				} else if (backgroundPage.gwt && backgroundPage.gwt.dev) {
+					backgroundPage.gwt.dev.background.callAction(data, receiver);
+				} else {
+					throw new Error("Unknown background page communication system @com.google.gwt.chrome.messag.ChromeMessagePassingImpl::sendExtensionMessage");
+				}
 			} catch(e){
 				handler.@com.google.gwt.chrome.def.BackgroundJsCallback::onError(Ljava/lang/String;)(e.message);
 			}

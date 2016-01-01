@@ -200,12 +200,12 @@ public class RequestViewImpl extends Composite implements RequestView {
 			//there were no CT header.
 			if(show) {
 				list.add(new RequestHeader("Content-Type", "application/x-www-form-urlencoded"));
+				latestSelectedContentType = "application/x-www-form-urlencoded";
 			}
 		}
 		
 		setHeaders(RequestHeadersParser.headersListToString(list));
-		RestClient.getClientFactory().getEventBus().fireEvent(
-				new HttpEncodingChangeEvent(latestSelectedContentType));
+		listener.fireEncodingChangeEvent(latestSelectedContentType);
 	}
 
 	@UiHandler("clearButton")

@@ -109,7 +109,7 @@ public class SyncStorageArea implements StorageArea {
 
 	@Override
 	public final native void remove(String[] keys, StorageSimpleCallback callback) /*-{
-		$wnd.chrome.storage.sync.remove(data, $entry(function(){
+		$wnd.chrome.storage.sync.remove(keys, $entry(function(){
 			callback.@com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback::onDone()();
 		}));
 	}-*/;
@@ -119,6 +119,7 @@ public class SyncStorageArea implements StorageArea {
 			StorageItemsCallback callback) /*-{
 		$wnd.chrome.storage.sync.get(keysWithDefaults, $entry(function(items){
 			if(!items){
+				console.warn('$wnd.chrome.storage.sync.get resulted with no values where some values should be available.', chrome.runtime.lastError);
 				callback.@com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback::onError(Ljava/lang/String;)(chrome.runtime.lastError);
 				return;
 			}
@@ -129,7 +130,7 @@ public class SyncStorageArea implements StorageArea {
 	@Override
 	public final native void get(StorageItemsCallback callback) /*-{
 		$wnd.chrome.storage.sync.get(null, $entry(function(items){
-			if(!items){
+			if(chrome.runtime.lastError){
 				callback.@com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback::onError(Ljava/lang/String;)(chrome.runtime.lastError);
 				return;
 			}

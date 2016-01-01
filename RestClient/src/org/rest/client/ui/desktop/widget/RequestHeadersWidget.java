@@ -30,6 +30,7 @@ import org.rest.client.event.BoundaryChangeEvent;
 import org.rest.client.event.HeaderBlurEvent;
 import org.rest.client.event.HeaderRemoveEvent;
 import org.rest.client.event.HeaderValueChangeEvent;
+import org.rest.client.event.HttpEncodingChangeEvent;
 import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.suggestion.HeadersSuggestOracle;
@@ -476,7 +477,9 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 	 * @param headersCodeMirror
 	 */
 	private final native void setHeadersEditorCallback(CodeMirrorImpl headersCodeMirror) /*-{
+		var context = this;
 		headersCodeMirror.on("change", function(cm, changeObj) {
+			context.@org.rest.client.ui.desktop.widget.RequestHeadersWidget::codeMirrorChanged(Ljava/lang/String;)(cm.getValue());
             if(changeObj.origin === "setValue" || changeObj.origin === undefined || (changeObj.origin === "+input" && changeObj.text[0] === "")){
                 //do not show proposition on ENTER.
                 return;
@@ -529,4 +532,29 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 			ensureFormHasRow();
 		}
 	};
+	/**
+	 * A function to be called when any header change.
+	 * This function should look for "Content-Type" header and fire content type change event when changed.
+	 * @param key Header name
+	 * @param value Header value
+	 */
+	void onHeaderChange(String key, String value) {
+		if(key == null || key.isEmpty()){
+			return;
+		}
+		if(key.trim().toLowerCase().equals("content-type")){
+			if(value == null){
+				value = "";
+			}
+			RestClient.getClientFactory().getEventBus().fireEvent(
+					new HttpEncodingChangeEvent(value));
+		}
+	}
+	
+	void codeMirrorChanged(String value) {
+		ArrayList<RequestHeader> list = RequestHeadersParser.stringToHeaders(value);
+		for(RequestHeader header : list){
+			onHeaderChange(header.getName(), header.getValue());
+		}
+	}
 }

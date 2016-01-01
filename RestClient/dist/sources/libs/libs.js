@@ -451,6 +451,36 @@ var arc = arc || {};
 
 arc.app = arc.app || {};
 
+arc.app.utils = {};
+
+arc.app.utils.uuid = function () {
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+  }
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+};
+
+arc.app.utils.isProdMode = function () {
+  return location.hostname !== '127.0.0.1';
+};
+
+arc.app.utils.autoLink = function (input) {
+  var r = new RegExp('(https?:\\/\\/([^" >]*))', 'gim');
+  return input.replace(r, '<a target="_blank" class="auto-link" href="$1">$1</a>');
+};
+
+arc.app.utils.encodeHtml = function (input) {
+  if (typeof input !== 'string') {
+    return input;
+  }
+  return input.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+};
+'use strict';
+
+var arc = arc || {};
+
+arc.app = arc.app || {};
+
 arc.app.xhr = arc.app.xhr || {};
 
 arc.app.xhr.requests = new Map();

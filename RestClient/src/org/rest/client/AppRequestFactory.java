@@ -538,7 +538,7 @@ public class AppRequestFactory {
 			
 			@Override
 			public void onSuccess(JsArray<UrlRow> result) {
-				if(result.length() > 0) {
+				if(result != null && result.length() > 0) {
 					if(RestClient.isDebug()){
 						Log.debug("Updating Suggestions table with new time.");
 					}

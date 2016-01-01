@@ -574,7 +574,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 
 					@Override
 					public void onSuccess(final List<RequestObject> request) {
-						if (request.size() == 0) {
+						if (request == null || request.size() == 0) {
 							return;
 						}
 						int _endpointId = -1;
@@ -798,6 +798,9 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 
 	private ArrayList<Header> extractHeadersExternal(JSONObject response, String key) {
 		ArrayList<Header> headers = new ArrayList<Header>();
+		if(response == null) {
+			return headers;
+		}
 		JSONValue valuesValue = response.get(key);
 		if (valuesValue == null) {
 			return headers;
@@ -844,6 +847,9 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 
 					@Override
 					public void onSuccess(HistoryObject result) {
+						if(result == null){
+							return;
+						}
 						requestView.setUrl(result.getURL());
 						requestView.setMethod(result.getMethod());
 						requestView.setHeaders(result.getHeaders());
@@ -955,21 +961,21 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 
 	@Override
 	public String mayStop() {
-		
+
 		revokeDownloadData();
 		if (tutorialFactory != null) {
 			tutorialFactory.clear();
 		}
 
 		RequestObject ro = RequestObject.createRequest();
-		//ro.setEncoding(requestView.getEncoding());
+		// ro.setEncoding(requestView.getEncoding());
 		ro.setHeaders(requestView.getHeaders());
 		ro.setMethod(requestView.getMethod());
 		ro.setPayload(requestView.getPayload());
 		ro.setURL(requestView.getUrl());
 		ro.setName(requestView.getRequestName());
 		ro.setProject(RestClient.currentlyOpenedProject);
-		
+
 		if (RestClient.RESTORED_REQUEST != null) {
 			ro.setId(RestClient.RESTORED_REQUEST);
 		}
@@ -997,57 +1003,52 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 
 		RestClient.previouslyOpenedProject = RestClient.currentlyOpenedProject;
 		RestClient.currentlyOpenedProject = -1;
-		
+
 		Storage store = GWT.create(Storage.class);
 		store.getLocal().remove(StoreKeys.LATEST_REQUEST_KEY, new StorageSimpleCallback() {
-			
+
 			@Override
-			public void onError(String message) {}
-			
+			public void onError(String message) {
+				Log.warn("Error clearing the form: " + message);
+			}
+
 			@Override
-			public void onDone() {}
+			public void onDone() {
+			}
 		});
 		RestClient.RESTORED_REQUEST = null;
 		RestClient.CURRENT_GOOGLE_DRIVE_ITEM = null;
-		
+
 		eventBus.fireEvent(new ClearFormEvent());
 
 		goTo(new RequestPlace("default"));
 		GoogleAnalytics.sendEvent("Engagement", "Click", "Clear request form");
 	}
 
-	/*@Override
-	public void getResponseHeadersInfo(ArrayList<String> names, final Callback<List<HeaderRow>, Throwable> callback) {
-
-		clientFactory.getHeadersStore().getResponseHeadersByName(names, new StoreResultCallback<List<HeaderRow>>() {
-
-			@Override
-			public void onSuccess(List<HeaderRow> result) {
-				callback.onSuccess(result);
-			}
-
-			@Override
-			public void onError(Throwable e) {
-				callback.onFailure(e);
-			}
-		});
-	}
-
-	@Override
-	public void getRequestHeadersInfo(ArrayList<String> names, final Callback<List<HeaderRow>, Throwable> callback) {
-		clientFactory.getHeadersStore().getRequestHeadersByName(names, new StoreResultCallback<List<HeaderRow>>() {
-
-			@Override
-			public void onSuccess(List<HeaderRow> result) {
-				callback.onSuccess(result);
-			}
-
-			@Override
-			public void onError(Throwable e) {
-				callback.onFailure(e);
-			}
-		});
-	}*/
+	/*
+	 * @Override public void getResponseHeadersInfo(ArrayList<String> names,
+	 * final Callback<List<HeaderRow>, Throwable> callback) {
+	 * 
+	 * clientFactory.getHeadersStore().getResponseHeadersByName(names, new
+	 * StoreResultCallback<List<HeaderRow>>() {
+	 * 
+	 * @Override public void onSuccess(List<HeaderRow> result) {
+	 * callback.onSuccess(result); }
+	 * 
+	 * @Override public void onError(Throwable e) { callback.onFailure(e); } });
+	 * }
+	 * 
+	 * @Override public void getRequestHeadersInfo(ArrayList<String> names,
+	 * final Callback<List<HeaderRow>, Throwable> callback) {
+	 * clientFactory.getHeadersStore().getRequestHeadersByName(names, new
+	 * StoreResultCallback<List<HeaderRow>>() {
+	 * 
+	 * @Override public void onSuccess(List<HeaderRow> result) {
+	 * callback.onSuccess(result); }
+	 * 
+	 * @Override public void onError(Throwable e) { callback.onFailure(e); } });
+	 * }
+	 */
 
 	private String exportFileObjectUrl = null;
 
@@ -1083,16 +1084,17 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 		tutorialFactory = new TutorialFactory("request");
 
 		tutorialFactory.canStartTutorial(new Callback<Boolean, Throwable>() {
-			
+
 			@Override
 			public void onSuccess(Boolean result) {
-				if(result){
+				if (result) {
 					requestView.setUpTutorial(tutorialFactory);
 				}
 			}
-			
+
 			@Override
-			public void onFailure(Throwable reason) {}
+			public void onFailure(Throwable reason) {
+			}
 		});
 	}
 
@@ -1286,26 +1288,27 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 
 	@Override
 	public void changeSavedName(final String name, final Callback<Boolean, Throwable> callback) {
-				if (place.isGdrive() || place.isProject() || place.isProjectsEndpoint()) {
+		if (place.isGdrive() || place.isProject() || place.isProjectsEndpoint()) {
 			callback.onSuccess(false);
 			return;
 		}
 		if (RestClient.RESTORED_REQUEST != null) {
-			clientFactory.getRequestDataStore().getService().updateName(name, RestClient.RESTORED_REQUEST, new VoidCallback() {
-				@Override
-				public void onFailure(DataServiceException error) {
-					if (RestClient.isDebug()) {
-						Log.error("Unable to change name :(", error);
-					}
-					StatusNotification.notify("Unable to change name :(", StatusNotification.TIME_SHORT);
-					callback.onFailure(error);
-				}
+			clientFactory.getRequestDataStore().getService().updateName(name, RestClient.RESTORED_REQUEST,
+					new VoidCallback() {
+						@Override
+						public void onFailure(DataServiceException error) {
+							if (RestClient.isDebug()) {
+								Log.error("Unable to change name :(", error);
+							}
+							StatusNotification.notify("Unable to change name :(", StatusNotification.TIME_SHORT);
+							callback.onFailure(error);
+						}
 
-				@Override
-				public void onSuccess() {
-					callback.onSuccess(true);
-				}
-			});
+						@Override
+						public void onSuccess() {
+							callback.onSuccess(true);
+						}
+					});
 
 			return;
 		}

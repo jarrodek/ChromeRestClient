@@ -276,6 +276,7 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 .CodeMirror {
 	margin-right: 12px;
 	min-height: 40px;
+	font-size: 15px;
 }
 .JSON_parser_bodyPanel a,
 .CodeMirror a {

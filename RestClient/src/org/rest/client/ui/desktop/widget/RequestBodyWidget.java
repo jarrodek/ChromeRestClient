@@ -37,6 +37,7 @@ import org.rest.client.ui.html5.ListItem;
 import org.rest.client.ui.html5.ListPanel;
 import org.rest.client.util.Units;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.InputElement;
@@ -240,7 +241,7 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 			public void onChange(String method) {
 				requestEncoding = method;
 				setEditorCurrentMode();
-				
+				Log.info("Setting content type for payload encoding to " + method);
 			}
 		});
 		
@@ -596,7 +597,7 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 	}
 	
 	private void setEditorCurrentMode(){
-		if(bodyCodeMirror == null) return;
+		if(bodyCodeMirror == null || requestEncoding == null) return;
 		
 		//translate mode
 		String mode = "";

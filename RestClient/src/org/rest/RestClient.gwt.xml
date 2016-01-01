@@ -20,7 +20,7 @@
 	
 	<!-- This Linker will produce a monolithic JavaScript file. It may be used only when there is a single distinct compilation result. -->
 	<!-- SSO linker must be enabled and xsiframe disabled when biulding an extension. -->
- 	<!--  <add-linker name="sso" />  -->
+ 	<!--  <add-linker name="sso" />   -->
 	<add-linker name="xsiframe" />
 
 	<!-- Logging properties -->
@@ -35,7 +35,7 @@
 	<!-- Compile for Chrome only -->
 	<set-property name="user.agent" value="safari" />
 	<!-- Removes client-side stack trace info (can reduce size up to 15%) -->
-	<set-property name="compiler.stackMode" value="strip"/>
+	<!-- <set-property name="compiler.stackMode" value="strip"/>  -->
 	<!-- (only use if you’re not using enums as String values) -->
 	<!-- <set-configuration-property name="compiler.enum.obfuscate.names" value="true"/> -->
 	<set-configuration-property name="CssResource.obfuscationPrefix" value="empty"/>

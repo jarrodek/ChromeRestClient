@@ -17,7 +17,7 @@ public class UrlHistoryStoreWebSql {
 	}
 	
 	public final native void put(UrlRow obj, StoreResultCallback callback) /*-{
-		$wnd.arc.app.db.websql.addUrlHistory(obj.url, url.time)
+		$wnd.arc.app.db.websql.addUrlHistory(obj.url, obj.time)
 		.then(function(result){
 			callback.@org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultCallback::onSuccess(Lorg/rest/client/jso/UrlRow;)(result);
 		}, function(cause){

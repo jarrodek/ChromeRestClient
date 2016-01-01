@@ -63,7 +63,7 @@ public class LocalStorageArea implements StorageArea {
 
 	@Override
 	public final native void remove(String[] keys, StorageSimpleCallback callback) /*-{
-		$wnd.chrome.storage.local.remove(data, $entry(function(){
+		$wnd.chrome.storage.local.remove(keys, $entry(function(){
 			callback.@com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback::onDone()();
 		}));
 	}-*/;
@@ -73,6 +73,7 @@ public class LocalStorageArea implements StorageArea {
 			StorageItemsCallback callback) /*-{
 		$wnd.chrome.storage.local.get(keysWithDefaults, $entry(function(items){
 			if(!items){
+				console.warn('$wnd.chrome.storage.local.get resulted with no values where some values should be available.', chrome.runtime.lastError);
 				callback.@com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback::onError(Ljava/lang/String;)(chrome.runtime.lastError);
 				return;
 			}
@@ -83,7 +84,7 @@ public class LocalStorageArea implements StorageArea {
 	@Override
 	public final native void get(final StorageItemsCallback callback) /*-{
 		$wnd.chrome.storage.local.get(null, $entry(function(items){
-			if(!chrome.runtime.lastError){
+			if(chrome.runtime.lastError){
 				callback.@com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback::onError(Ljava/lang/String;)(chrome.runtime.lastError);
 				return;
 			}

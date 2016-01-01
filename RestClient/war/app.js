@@ -15,3 +15,5 @@ if (_gaq) {
     s.parentNode.insertBefore(ga, s);
   })();
 }
+window.Polymer = window.Polymer || {};
+window.Polymer.dom = 'shadow';

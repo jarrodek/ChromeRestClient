@@ -56,3 +56,12 @@ arc.app.utils.autoLink = function(input) {
   var r = new RegExp('(https?:\\/\\/([^" >]*))', 'gim');
   return input.replace(r, '<a target="_blank" class="auto-link" href="$1">$1</a>');
 };
+/**
+ * Escape characters to display HTML code.
+ */
+arc.app.utils.encodeHtml = function(input) {
+  if (typeof input !== 'string') {
+    return input;
+  }
+  return input.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+};

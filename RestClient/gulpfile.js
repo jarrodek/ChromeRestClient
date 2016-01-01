@@ -82,72 +82,86 @@ gulp.task('vulcanize', function() {
  * Copy images from the dev/components to it's corresponding folders in war/
  */
 gulp.task('copy:images', function() {
-  return gulp.src('dev/**/*.png', {base: 'dev'})
+  return gulp.src('dev/**/*.png', {
+      base: 'dev'
+    })
     .pipe($.imagemin({
       progressive: true,
       interlaced: true
     }))
     .pipe(gulp.dest('war/'))
-    .pipe($.size({title: 'images'}));
+    .pipe($.size({
+      title: 'images'
+    }));
 });
 // Copy all files at the root level (war)
 gulp.task('copy:devsources', ['copy:images'], function() {
   return gulp.src([
-    'dev/*',
-    'dev/**/*',
-    '!dev/dirinfo.md',
-    '!**/.DS_Store',
-    '!**/*.png'
-  ], {
-    base: 'dev', 
-    dot: true
-  })
-  .pipe(preprocess({
-    context: {
-      NODE_ENV: mode
-    }
-  }))
-  .pipe(gulp.dest('war/'))
-  .pipe($.size({
-    title: 'copy'
-  }));
+      'dev/*',
+      'dev/**/*',
+      '!dev/dirinfo.md',
+      '!**/.DS_Store',
+      '!**/*.png'
+    ], {
+      base: 'dev',
+      dot: true
+    })
+    .pipe(preprocess({
+      context: {
+        NODE_ENV: mode
+      }
+    }))
+    .pipe(gulp.dest('war/'))
+    .pipe($.size({
+      title: 'copy'
+    }));
 });
 //copy sources to the `dist` folder
 gulp.task('copy:dist', function() {
   var root = gulp.src([
-    'war/*',
-    '!war/*.jsp',
-    '!war/components',
-    '!war/static',
-    '!war/WEB-INF',
-    '!war/cs.js',
-    '!war/dev.js',
-    '!war/GDrive.html',
-    '!war/host.all.js',
-    '!war/oauth2callback.html',
-    '!war/Starter.css',
-    '!war/starter.js',
-    '!war/ext/*_uncompressed.js',
-    '!**/.DS_Store',
-    '!war/manifest.json'
-  ], { 
-    dot: true
-  })
-  .pipe(gulp.dest('dist/sources/'));
-  var components = gulp.src('war/components/vulcanized/*', {dot: true}).pipe(gulp.dest('dist/sources/components/'));
+      'war/*',
+      '!war/*.jsp',
+      '!war/components',
+      '!war/static',
+      '!war/WEB-INF',
+      '!war/cs.js',
+      '!war/dev.js',
+      '!war/GDrive.html',
+      '!war/host.all.js',
+      '!war/oauth2callback.html',
+      '!war/Starter.css',
+      '!war/starter.js',
+      '!war/ext/*_uncompressed.js',
+      '!**/.DS_Store',
+      '!war/manifest.json'
+    ], {
+      dot: true
+    })
+    .pipe(gulp.dest('dist/sources/'));
+  var components = gulp.src('war/components/vulcanized/*', {
+      dot: true
+    })
+    .pipe(gulp.dest('dist/sources/components/'));
   var manifest = gulp.src('./manifest.json').pipe(gulp.dest('dist/sources/'));
   var assets = gulp.src('war/assets/**/*').pipe(gulp.dest('dist/sources/assets'));
-  var ext = gulp.src('war/ext/**/*', {dot: true}).pipe(gulp.dest('dist/sources/ext'));
+  var ext = gulp.src('war/ext/**/*', {
+    dot: true
+  }).pipe(gulp.dest('dist/sources/ext'));
   var libs = gulp.src('war/libs/app.db.websql.js').pipe(gulp.dest('dist/sources/libs'));
   var oauth2 = gulp.src('war/oauth2/**/*').pipe(gulp.dest('dist/sources/oauth2'));
-  var restclient = gulp.src('war/restclient/**/*', {dot: true}).pipe(gulp.dest('dist/sources/restclient'));
+  var restclient = gulp.src('war/restclient/**/*', {
+      dot: true
+    })
+    .pipe(gulp.dest('dist/sources/restclient'));
   var roboto = gulp.src('war/roboto/**/*').pipe(gulp.dest('dist/sources/roboto'));
   var workers = gulp.src('war/workers/**/*').pipe(gulp.dest('dist/sources/workers'));
   var img = gulp.src('war/img/**/*').pipe(gulp.dest('dist/sources/img'));
-  return merge(root, components, manifest, assets, ext, /*libs,*/ oauth2, restclient, roboto, workers, img)
-  .pipe($.size({
-    title: 'copy'
-  }));
+  return merge(
+      root, components, manifest, assets, ext, libs, oauth2,
+      restclient, roboto, workers, img)
+    .pipe($.size({
+      title: 'copy'
+    }));
 });
 
 gulp.task('zip', function() {
@@ -158,16 +172,19 @@ gulp.task('zip', function() {
  */
 var copySourceFile = function(obj) {
   //gutil.log('copyDev called');
-  return gulp.src(obj.path, {base: 'dev', dot: true})
-  .pipe($.if('!*.png', preprocess({
-    context: {
-      NODE_ENV: mode
-    }
-  })))
-  .pipe(gulp.dest('war/'))
-  .pipe($.size({
-    title: 'copy '+mode+' file '
-  }));
+  return gulp.src(obj.path, {
+      base: 'dev',
+      dot: true
+    })
+    .pipe($.if('!*.png', preprocess({
+      context: {
+        NODE_ENV: mode
+      }
+    })))
+    .pipe(gulp.dest('war/'))
+    .pipe($.size({
+      title: 'copy ' + mode + ' file '
+    }));
 };
 
 /**
@@ -181,28 +198,43 @@ gulp.task('dev', ['mode:debug', 'lint', 'copy:devsources'], function() {
   gulp.watch('dev/**/*.jsp', copySourceFile);
   gulp.watch('dev/**/*.css', copySourceFile);
 });
-
-
-gulp.task('clean:dist', function () {
+/**
+ * Clean the dist folder.
+ */
+gulp.task('clean:dist', function() {
   return gulp.src('dist/*')
     .pipe(vinylPaths(del));
 });
-
+/**
+ * Set mode to dev
+ */
 gulp.task('mode:dev', function() {
   mode = 'dev';
 });
+/**
+ * Set mode to debug
+ */
 gulp.task('mode:debug', function() {
   mode = 'debug';
 });
 
 gulp.task('bump-dev-build', function() {
   return gulp.src('./manifest.json')
-  .pipe(bump({type: 'patch'}))
-  .pipe(bump({key: 'version_name', type: 'prerelease', 'preid':'dev'}))
-  .pipe(gulp.dest('./'));
+    .pipe(bump({
+      type: 'patch'
+    }))
+    .pipe(bump({
+      key: 'version_name',
+      type: 'prerelease',
+      'preid': 'dev'
+    }))
+    .pipe(gulp.dest('./'));
 });
+/**
+ * Generate libs.js file from all libraries.
+ */
 gulp.task('libs', function() {
-  return gulp.src(['war/libs/app.utils.js','war/libs/*.js','!war/libs/app.utils.js','!war/libs/app_db.js'])
+  return gulp.src(['war/libs/*.js', '!war/libs/app_db.js'])
     .pipe(babel({
       presets: ['es2015'],
       comments: false
@@ -210,17 +242,20 @@ gulp.task('libs', function() {
     .pipe(concat('libs.js'))
     .pipe(gulp.dest('dist/sources/libs/'));
 });
+/**
+ * Create a DEV build.
+ */
 gulp.task('build:dev', function(callback) {
   runSequence(
     'mode:dev',
     'clean:dist',
-    'copy:devsources', 
+    'copy:devsources',
     'vulcanize',
     'bump-dev-build',
     'copy:dist',
     'libs',
     'zip',
-    function (error) {
+    function(error) {
       if (error) {
         gutil.log(error.message);
       } else {
