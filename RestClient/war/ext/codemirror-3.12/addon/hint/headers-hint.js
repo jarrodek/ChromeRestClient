@@ -83,7 +83,7 @@
                             text: item,
                             hint: function(cm, data, completion) {
                                 cm.replaceRange(completion.text, data.from, data.to);
-                                CodeMirror.signal(cm, "header-value-selected", completion.text);
+                                CodeMirror.signal(cm, 'header-value-selected', completion.text);
                             }
                         };
                         keywords.push(completion);
@@ -180,7 +180,7 @@
                     return e.getTokenAt(cur);
                 });
                 showHints(hints);
-            }, 1);
+            }, 0);
             return;
         }
 

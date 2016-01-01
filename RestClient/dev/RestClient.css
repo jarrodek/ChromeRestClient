@@ -288,6 +288,7 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	border: 1px #D1D1D1 solid;
 	border-top: none;
 	clip: initial !important;
+	z-index: 10;
 }
 .gwt-SuggestBoxPopup table {
 	border-spacing: 0;

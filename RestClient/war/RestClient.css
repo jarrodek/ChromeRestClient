@@ -60,6 +60,9 @@
 }
 body.rest-client {
 	margin: 0px;
+  font-family: 'Roboto', 'Noto', sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  font-size: 15px !important;
 }
 .rest-client:hover {
 	background-color: rgba(254, 254, 254, 0.99);
@@ -277,6 +280,8 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	margin-right: 12px;
 	min-height: 40px;
 	font-size: 15px;
+  font-family: roboto;
+  line-height: inherit;
 }
 .JSON_parser_bodyPanel a,
 .CodeMirror a {
@@ -288,6 +293,7 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 	border: 1px #D1D1D1 solid;
 	border-top: none;
 	clip: initial !important;
+	z-index: 10;
 }
 .gwt-SuggestBoxPopup table {
 	border-spacing: 0;
@@ -2225,7 +2231,7 @@ div.About_View_DonatePopupPanelGlass {
 .headersCollapsed .Response_View_headersHiddenInfo{
 	display: block;
 }
-
+/*
 body.rest-client .CodeMirror-hint {
 	padding: 1px 4px;
 }
@@ -2235,6 +2241,7 @@ body.rest-client .CodeMirror-hints {
 	border-radius: 0px;
 	border: 1px solid rgb(204, 204, 204);
 }
+*/
 .actionButton,
 .sendButton{
 	background-color: #2196F3;
