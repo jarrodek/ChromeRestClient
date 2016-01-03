@@ -11,6 +11,9 @@ import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.ImportExportView;
 
+import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.chrome.runtime.ChromeRuntime.RuntimeStringHandler;
+import com.google.gwt.chrome.runtime.Runtime;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
@@ -382,17 +385,26 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 	@Override
 	public void updateShareLink() {
 		String applicationUserId = listener.getApplicationUserId();
+		final String relative = "/RestClient.html#ImportExportPlace:import/" + applicationUserId;
 		
-		String url = "";
 		if (Window.Location.getHost().startsWith("127.")) { // DEV mode
-			url = "http://127.0.0.1:8888/RestClient.html?gwt.codesvr=127.0.0.1:9997";
+			String url = "http://127.0.0.1:8888" + relative;
+			shareLink.setInnerText(url);
 		} else {
-			// TODO: url = Extension.getURL("/RestClient.html");
-			url = "/RestClient.html";
-
+			Runtime runtime = GWT.create(Runtime.class);
+			runtime.getURL(relative, new RuntimeStringHandler() {
+				
+				@Override
+				public void onResult(String result) {
+					shareLink.setInnerText(result);
+				}
+				
+				@Override
+				public void onError(String message) {
+					Log.error("Unable to construct sharable link. " + message);
+				}
+			});
 		}
-		url += "#ImportExportPlace:import/" + applicationUserId;
-		shareLink.setInnerText(url);
 	}
 
 	@Override

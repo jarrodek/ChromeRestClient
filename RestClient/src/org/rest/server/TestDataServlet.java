@@ -30,7 +30,6 @@ public class TestDataServlet extends HttpServlet {
 	}
 	
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
@@ -298,7 +297,6 @@ public class TestDataServlet extends HttpServlet {
 		resp.getWriter().println(jb.toString());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {

@@ -314,6 +314,109 @@ arc.app.db.websql.getHistoryUrls = function(query) {
     }).catch((e) => reject(e));
   });
 };
+/**
+ * Add new project data to the `projects` table.
+ */
+arc.app.db.websql.addProject = function(name, time) {
+  return new Promise(function(resolve, reject) {
+    arc.app.db.websql.open().then(function(db) {
+      db.transaction(function(tx) {
+        let sql = 'INSERT INTO projects (name, time) VALUES (?,?)';
+        tx.executeSql(sql, [name, time], (tx, result) => {
+          resolve(result);
+        }, function(tx, error) {
+          reject(error);
+        });
+      });
+    }).catch((e) => reject(e));
+  });
+};
+/**
+ * Insert list of projects data into the `projects` table.
+ *
+ * @param {Array} projectsArray A list of objects to be inserted into the database.
+ *      ProjectObject: {
+ *        'name' (String) - Project name
+ *        'time' (Number) - Creation time.
+ *      }
+ */
+arc.app.db.websql.importProjects = function(projectsArray) {
+  return new Promise(function(resolve, reject) {
+    arc.app.db.websql.open().then(function(db) {
+      db.transaction(function(tx) {
+        projectsArray.forEach(function(item) {
+          let sql = 'INSERT INTO projects (name, time) VALUES (?,?)';
+          tx.executeSql(sql, [item.name, item.time]);
+        });
+      }, function(tx, error) {
+        reject(error);
+      }, function() {
+        resolve();
+      });
+    }).catch((e) => reject(e));
+  });
+};
+/**
+ * Update project data in `projects` table.
+ */
+arc.app.db.websql.updateProject = function(name, time, id) {
+  return new Promise(function(resolve, reject) {
+    arc.app.db.websql.open().then(function(db) {
+      db.transaction(function(tx) {
+        let sql = 'UPDATE projects SET name = ?, time = ? WHERE ID = ?';
+        tx.executeSql(sql, [name, time, id], (tx, result) => {
+          resolve(result);
+        }, function(tx, error) {
+          reject(error);
+        });
+      });
+    }).catch((e) => reject(e));
+  });
+};
+/**
+ * List entries from the `projects` table.
+ * This function will result null if projects table is empty.
+ */
+arc.app.db.websql.listProjects = function() {
+  return new Promise(function(resolve, reject) {
+    arc.app.db.websql.open().then(function(db) {
+      db.transaction(function(tx) {
+        let sql = 'SELECT * FROM projects WHERE 1';
+        tx.executeSql(sql, [], (tx, result) => {
+          if (result.rows.length === 0) {
+            resolve(null);
+          } else {
+            resolve(Array.from(result.rows));
+          }
+        }, function(tx, error) {
+          reject(error);
+        });
+      });
+    }).catch((e) => reject(e));
+  });
+};
+/**
+ * Get project data from the store.
+ * This function will result null if entry for given [id] is not found.
+ */
+arc.app.db.websql.getProject = function(id) {
+  return new Promise(function(resolve, reject) {
+    arc.app.db.websql.open().then(function(db) {
+      db.transaction(function(tx) {
+        let sql = 'SELECT * FROM projects WHERE ID = ?';
+        tx.executeSql(sql, [id], (tx, result) => {
+          if (result.rows.length === 0) {
+            resolve(null);
+          } else {
+            resolve(Array.from(result.rows));
+          }
+        }, function(tx, error) {
+          reject(error);
+        });
+      });
+    }).catch((e) => reject(e));
+  });
+};
 // @if NODE_ENV='debug'
 /**
  * In dev mode there is no direct connection to the database initialized in the background page.

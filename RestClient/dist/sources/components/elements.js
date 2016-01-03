@@ -14285,6 +14285,256 @@ Polymer({
       });
     })();
 Polymer({
+
+    is: 'iron-collapse',
+
+    properties: {
+
+      /**
+       * If true, the orientation is horizontal; otherwise is vertical.
+       *
+       * @attribute horizontal
+       */
+      horizontal: {
+        type: Boolean,
+        value: false,
+        observer: '_horizontalChanged'
+      },
+
+      /**
+       * Set opened to true to show the collapse element and to false to hide it.
+       *
+       * @attribute opened
+       */
+      opened: {
+        type: Boolean,
+        value: false,
+        notify: true,
+        observer: '_openedChanged'
+      }
+
+    },
+
+    hostAttributes: {
+      role: 'group',
+      'aria-expanded': 'false'
+    },
+
+    listeners: {
+      transitionend: '_transitionEnd'
+    },
+
+    ready: function() {
+      // Avoid transition at the beginning e.g. page loads and enable
+      // transitions only after the element is rendered and ready.
+      this._enableTransition = true;
+    },
+
+    /**
+     * Toggle the opened state.
+     *
+     * @method toggle
+     */
+    toggle: function() {
+      this.opened = !this.opened;
+    },
+
+    show: function() {
+      this.opened = true;    
+    },
+
+    hide: function() {
+      this.opened = false;    
+    },
+
+    updateSize: function(size, animated) {
+      this.enableTransition(animated);
+      var s = this.style;
+      var nochange = s[this.dimension] === size;
+      s[this.dimension] = size;
+      if (animated && nochange) {
+        this._transitionEnd();
+      }
+    },
+
+    enableTransition: function(enabled) {
+      this.style.transitionDuration = (enabled && this._enableTransition) ? '' : '0s';
+    },
+
+    _horizontalChanged: function() {
+      this.dimension = this.horizontal ? 'width' : 'height';
+      this.style.transitionProperty = this.dimension;
+    },
+
+    _openedChanged: function() {
+      if (this.opened) {
+        this.setAttribute('aria-expanded', 'true');
+        this.setAttribute('aria-hidden', 'false');
+
+        this.toggleClass('iron-collapse-closed', false);
+        this.updateSize('auto', false);
+        var s = this._calcSize();
+        this.updateSize('0px', false);
+        // force layout to ensure transition will go
+        /** @suppress {suspiciousCode} */ this.offsetHeight;
+        this.updateSize(s, true);
+        // focus the current collapse
+        this.focus();
+      } else {
+        this.setAttribute('aria-expanded', 'false');
+        this.setAttribute('aria-hidden', 'true');
+
+        this.toggleClass('iron-collapse-opened', false);
+        this.updateSize(this._calcSize(), false);
+        // force layout to ensure transition will go
+        /** @suppress {suspiciousCode} */ this.offsetHeight;
+        this.updateSize('0px', true);
+      }
+    },
+
+    _transitionEnd: function() {
+      if (this.opened) {
+        this.updateSize('auto', false);
+      }
+      this.toggleClass('iron-collapse-closed', !this.opened);
+      this.toggleClass('iron-collapse-opened', this.opened);
+      this.enableTransition(false);
+    },
+
+    _calcSize: function() {
+      return this.getBoundingClientRect()[this.dimension] + 'px';
+    },
+
+
+  });
+(function() {
+      Polymer({
+        is: 'paper-submenu',
+
+        properties: {
+          /**
+           * Fired when the submenu is opened.
+           *
+           * @event paper-submenu-open
+           */
+
+          /**
+           * Fired when the submenu is closed.
+           *
+           * @event paper-submenu-close
+           */
+
+          /**
+           * Set opened to true to show the collapse element and to false to hide it.
+           *
+           * @attribute opened
+           */
+          opened: {
+            type: Boolean,
+            value: false,
+            notify: true,
+            observer: '_openedChanged'
+          }
+        },
+
+        behaviors: [
+          Polymer.IronControlState
+        ],
+
+        get __parent() {
+          return Polymer.dom(this).parentNode;
+        },
+
+        get __trigger() {
+          return Polymer.dom(this.$.trigger).getDistributedNodes()[0];
+        },
+
+        attached: function() {
+          this.listen(this.__parent, 'iron-activate', '_onParentIronActivate');
+        },
+
+        dettached: function() {
+          this.unlisten(this.__parent, 'iron-activate', '_onParentIronActivate');
+        },
+
+        /**
+         * Expand the submenu content.
+         */
+        open: function() {
+          if (this.disabled)
+            return;
+          this.$.collapse.show();
+          this._active = true;
+          this.__trigger.classList.add('iron-selected');
+        },
+
+        /**
+         * Collapse the submenu content.
+         */
+        close: function() {
+          this.$.collapse.hide();
+          this._active = false;
+          this.__trigger.classList.remove('iron-selected');
+        },
+
+        /**
+         * A handler that is called when the trigger is tapped.
+         */
+        _onTap: function() {
+          if (this.disabled)
+            return;
+          this.$.collapse.toggle();
+        },
+
+        /**
+         * Toggles the submenu content when the trigger is tapped.
+         */
+        _openedChanged: function(opened, oldOpened) {
+          if (opened) {
+            this.fire('paper-submenu-open');
+          } else if (oldOpened != null) {
+            this.fire('paper-submenu-close');
+          }
+        },
+
+        /**
+         * A handler that is called when `iron-activate` is fired.
+         *
+         * @param {CustomEvent} event An `iron-activate` event.
+         */
+        _onParentIronActivate: function(event) {
+          if (Polymer.Gestures.findOriginalTarget(event) !== this.__parent) {
+            return;
+          }
+
+          // The activated item can either be this submenu, in which case it
+          // should be expanded, or any of the other sibling submenus, in which
+          // case this submenu should be collapsed.
+          if (event.detail.item == this) {
+            if (this._active)
+              return;
+            this.open();
+          } else {
+            this.close();
+          }
+        },
+
+        /**
+         * If the dropdown is open when disabled becomes true, close the
+         * dropdown.
+         *
+         * @param {boolean} disabled True if disabled, otherwise false.
+         */
+        _disabledChanged: function(disabled) {
+          Polymer.IronControlState._disabledChanged.apply(this, arguments);
+          if (disabled && this._active) {
+            this.close();
+
+          }
+        }
+      });
+    })();
+Polymer({
       is: 'paper-item',
 
       behaviors: [
@@ -15970,82 +16220,95 @@ Polymer({
 
   });
 Polymer({
-        is: 'app-settings',
-        properties: {
-            values: {
-                type: Object
-            },
-            _storageObserver: {
-                type: Function,
-                value: function() {
-                    return this._onStorageChanged.bind(this);
-                }
-            },
-            initialized: {
-                type: Boolean,
-                value: false
-            }
-        },
-        observers: [
-            '_onValueChange(values.*)'
-        ],
-        attached: function() {
-            if (!arc.app.settings || !arc.app.settings.getConfig) {
-                throw new Error("The arc.app.settings library not ready");
-            }
-            arc.app.settings.getConfig()
-                .then(function(values) {
-                    this.set('values', values);
-                    this.initialized = true;
-                }.bind(this));
-
-            chrome.storage.onChanged.addListener(this._storageObserver);
-        },
-        /**
-         * A callback called when the value of any storage change.
-         * This view should handle external changes to the store.
-         */
-        _onStorageChanged: function(changes, area) {
-            var keys = Object.keys(changes);
-            var accepted = ['DEBUG_ENABLED', 'HISTORY_ENABLED', 'MAGICVARS_ENABLED', 'CMH_ENABLED', 'CMP_ENABLED'];
-            keys.forEach(function(key) {
-                if (accepted.indexOf(key) !== -1 && this.values[key] !== changes[key].newValue) {
-                    this.set('values.' + key, changes[key].newValue);
-                }
-            }.bind(this));
-        },
-
-        /**
-         * A function called when any value change.
-         */
-        _onValueChange: function(changeRecord) {
-            if (!this.initialized) {
-                return;
-            }
-            var key = changeRecord.path.replace('values.', '');
-            var value = changeRecord.value;
-            arc.app.settings.saveConfig(key, value);
-            var o = {
-              'key': key,
-              'value': value
-            };
-            console.log('Setting changed', key, value);
-            this.fire('settings-saved', o);
-        },
-        /**
-         * Open the dialog with magic variables explanation.
-         */
-        openMagicVariablesDialog: function(){
-          this.$.magicVatDialog.open();
-        },
-
-        manageClick: function(){
-          this.fire('settings-action', {action:'manage-import-export'});
-        },
-        historyClearClick: function(){
-          this.fire('settings-action', {action:'clear-history'});
+    is: 'app-settings',
+    properties: {
+      values: {
+        type: Object
+      },
+      _storageObserver: {
+        type: Function,
+        value: function() {
+          return this._onStorageChanged.bind(this);
         }
-    });
+      },
+      initialized: {
+        type: Boolean,
+        value: false
+      }
+    },
+    observers: [
+      '_onValueChange(values.*)'
+    ],
+    ready: function() {
+      if (!arc.app.settings || !arc.app.settings.getConfig) {
+        throw new Error("The arc.app.settings library not ready");
+      }
+      arc.app.settings.getConfig()
+        .then(function(values) {
+          this.set('values', values);
+          //propagate value changes first on initialize time.
+          window.setTimeout(function() {
+            this.initialized = true;
+          }.bind(this), 0);
+        }.bind(this));
+
+      chrome.storage.onChanged.addListener(this._storageObserver);
+    },
+    /**
+     * A callback called when the value of any storage change.
+     * This view should handle external changes to the store.
+     */
+    _onStorageChanged: function(changes, area) {
+      var keys = Object.keys(changes);
+      var accepted = ['DEBUG_ENABLED', 'HISTORY_ENABLED', 'MAGICVARS_ENABLED', 'CMH_ENABLED', 'CMP_ENABLED'];
+      keys.forEach(function(key) {
+        if (accepted.indexOf(key) !== -1 && this.values[key] !== changes[key].newValue) {
+          this.set('values.' + key, changes[key].newValue);
+        }
+      }.bind(this));
+    },
+
+    /**
+     * A function called when any value change.
+     */
+    _onValueChange: function(changeRecord) {
+      if (!this.initialized) {
+        return;
+      }
+      var key = changeRecord.path.replace('values.', '');
+      var value = changeRecord.value;
+      arc.app.settings.saveConfig(key, value);
+      var o = {
+        'key': key,
+        'value': value
+      };
+      console.log('Setting changed', key, value);
+      this.fire('settings-saved', o);
+    },
+    /**
+     * Open the dialog with magic variables explanation.
+     */
+    openMagicVariablesDialog: function() {
+      this.$.magicVatDialog.open();
+    },
+
+    manageClick: function() {
+      this.fire('settings-action', {
+        action: 'manage-import-export'
+      });
+    },
+    historyClearClick: function() {
+      this.$.historyClearDialog.open();
+    },
+    onClearDialogResult: function(e) {
+      if (e.detail.canceled || !e.detail.confirmed) {
+        return;
+      }
+      this.fire('settings-action', {
+        action: 'clear-history'
+      });
+    }
+  });
 Polymer({
     is: 'file-drop',
     listeners: {
@@ -16458,6 +16721,150 @@ Polymer({
         	this.set('selected', this.defaults.indexOf(this.value));
         }
     });
+Polymer({
+    is: 'arc-menu',
+    properties: {
+      _hashchangeFn: {
+        type: Function,
+        value: function() {
+          return this._onHashChange.bind(this);
+        }
+      },
+      _historyObserver: {
+      	type: Function,
+      	value: function() {
+      		return this._onStorageChange.bind(this);
+      	}
+      },
+      hash: String,
+      projects: Array,
+      noHistory: {
+      	type: Boolean,
+      	value: false
+      }
+    },
+    ready: function() {
+      this._setCurrentHash();
+      this._observeHash();
+      this._observeHistoryEnabled();
+      this._updateHistoryStatus();
+    },
+    attached: function() {
+      this._restoreProjects();
+    },
+    _observeHash: function() {
+      window.addEventListener('hashchange', this._hashchangeFn);
+    },
+    _itemTap: function(e) {
+      e = Polymer.dom(e);
+      if (e.rootTarget.dataset.place) {
+        window.location.hash = e.rootTarget.dataset.place;
+      }
+    },
+    _onHashChange: function(e) {
+      this.hash = e.newURL.substr(e.newURL.indexOf('#'));
+    },
+    _setCurrentHash: function() {
+      var href = window.location.href;
+      this.hash = href.substr(href.indexOf('#'));
+    },
+    _restoreProjects: function() {
+      arc.app.db.websql.listProjects()
+        .then(function(list) {
+          this.projects = list;
+        }.bind(this));
+    },
+    _observeHistoryEnabled: function(){
+    	chrome.storage.onChanged.addListener(this._historyObserver);
+    },
+    computeSort: function(projects) {
+      return function(a, b) {
+        if (a.name > b.name) {
+          return 1;
+        }
+        if (a.name < b.name) {
+          return -1;
+        }
+        if (a.name === b.name) {
+          return 0;
+        }
+      };
+    },
+    _computeEnpointParameter: function(id) {
+    	return '#RequestPlace:project/' + id;
+    },
+    /** 
+     * Update project name in the UI.
+     *
+     * @param {Number} projectId A project id from the database
+     * @param {String} projectName Project new name
+     */
+    updateProjectName: function(projectId, projectName) {
+    	if (this.project === null) {
+    		console.warn('Trying to update a project name when project list is empty. ' +
+    			'Try insert new project first.');
+    		return;
+    	}
+    	var context = this;
+    	this.projects.forEach((project, i) => {
+    		if(project.id === projectId) {
+    			context.set('projects.' + i + '.name', projectName);
+    		}
+    	});
+    },
+    /**
+     * Add newly created project to the list.
+     *
+     * @param {Number} projectId Database id for the project
+     */
+    appendProject: function(projectId) {
+    	arc.app.db.websql.getProject(projectId)
+        .then(function(project) {
+        	if(project === null) {
+        		console.warn('No project found for given ID ', projectId);
+        		return;
+        	}
+          this.push('projects', project[0]);
+        }.bind(this));
+    },
+    /**
+     * Remove project from the UI.
+     */
+    removeProject: function(projectId) {
+    	if (this.project === null) {
+    		console.warn('Trying to remove a project when project list is empty. ' +
+    			'Try insert new project first.');
+    		return;
+    	}
+    	var context = this;
+    	this.projects.forEach((project, i) => {
+    		if(project.id === projectId){
+    			context.splice('projects', i, 1);
+    		}
+    	});
+    },
+
+    _updateHistoryStatus: function(){
+    	chrome.storage.sync.get({HISTORY_ENABLED: true}, function(result){
+    		if(!result.HISTORY_ENABLED) {
+    			this.noHistory = true;
+    		} else {
+    			this.noHistory = false;
+    		}
+    	});
+    },
+
+    _onStorageChange: function(change) {
+    	var keys = Object.keys(change);
+    	if(keys.indexOf('HISTORY_ENABLED') !== -1){
+    		if(!change.HISTORY_ENABLED.newValue) {
+    			this.noHistory = true;
+    		} else {
+    			this.noHistory = false;
+    		}
+    	}
+    }
+  });
 Polymer({
     is: 'app-about',
     properties: {

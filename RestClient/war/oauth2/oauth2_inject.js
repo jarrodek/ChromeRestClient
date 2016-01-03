@@ -39,4 +39,5 @@ var data = {
 		'response': 'object',
 		'data': params
 }
+debugger;
 chrome.runtime.sendMessage(data, function(response) {});

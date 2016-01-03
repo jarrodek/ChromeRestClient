@@ -203,6 +203,101 @@ arc.app.db.websql.getHistoryUrls = function (query) {
     });
   });
 };
+
+arc.app.db.websql.addProject = function (name, time) {
+  return new Promise(function (resolve, reject) {
+    arc.app.db.websql.open().then(function (db) {
+      db.transaction(function (tx) {
+        var sql = 'INSERT INTO projects (name, time) VALUES (?,?)';
+        tx.executeSql(sql, [name, time], function (tx, result) {
+          resolve(result);
+        }, function (tx, error) {
+          reject(error);
+        });
+      });
+    }).catch(function (e) {
+      return reject(e);
+    });
+  });
+};
+
+arc.app.db.websql.importProjects = function (projectsArray) {
+  return new Promise(function (resolve, reject) {
+    arc.app.db.websql.open().then(function (db) {
+      db.transaction(function (tx) {
+        projectsArray.forEach(function (item) {
+          var sql = 'INSERT INTO projects (name, time) VALUES (?,?)';
+          tx.executeSql(sql, [item.name, item.time]);
+        });
+      }, function (tx, error) {
+        reject(error);
+      }, function () {
+        resolve();
+      });
+    }).catch(function (e) {
+      return reject(e);
+    });
+  });
+};
+
+arc.app.db.websql.updateProject = function (name, time, id) {
+  return new Promise(function (resolve, reject) {
+    arc.app.db.websql.open().then(function (db) {
+      db.transaction(function (tx) {
+        var sql = 'UPDATE projects SET name = ?, time = ? WHERE ID = ?';
+        tx.executeSql(sql, [name, time, id], function (tx, result) {
+          resolve(result);
+        }, function (tx, error) {
+          reject(error);
+        });
+      });
+    }).catch(function (e) {
+      return reject(e);
+    });
+  });
+};
+
+arc.app.db.websql.listProjects = function () {
+  return new Promise(function (resolve, reject) {
+    arc.app.db.websql.open().then(function (db) {
+      db.transaction(function (tx) {
+        var sql = 'SELECT * FROM projects WHERE 1';
+        tx.executeSql(sql, [], function (tx, result) {
+          if (result.rows.length === 0) {
+            resolve(null);
+          } else {
+            resolve(Array.from(result.rows));
+          }
+        }, function (tx, error) {
+          reject(error);
+        });
+      });
+    }).catch(function (e) {
+      return reject(e);
+    });
+  });
+};
+
+arc.app.db.websql.getProject = function (id) {
+  return new Promise(function (resolve, reject) {
+    arc.app.db.websql.open().then(function (db) {
+      db.transaction(function (tx) {
+        var sql = 'SELECT * FROM projects WHERE ID = ?';
+        tx.executeSql(sql, [id], function (tx, result) {
+          if (result.rows.length === 0) {
+            resolve(null);
+          } else {
+            resolve(Array.from(result.rows));
+          }
+        }, function (tx, error) {
+          reject(error);
+        });
+      });
+    }).catch(function (e) {
+      return reject(e);
+    });
+  });
+};
 'use strict';
 
 var arc = arc || {};

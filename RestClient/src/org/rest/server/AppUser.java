@@ -96,11 +96,11 @@ public class AppUser {
 		sb.append("items cnt=").append(getItemsSet().size());
 		sb.append("]");
 		return sb.toString();
-	}
+	} 
 	
 	public static AppUser getUserById(String userId){
 		Key _key = KeyFactory.createKey(AppUser.class.getSimpleName(), userId);
-		PersistenceManager pm = PMF.get().getPersistenceManager();
+		PersistenceManager pm = PMF.get().getPersistenceManager(); 
 		AppUser appUser = null;
 		try {
 			appUser = pm.getObjectById(AppUser.class, _key);

@@ -17,11 +17,11 @@
  * payload - function name to be called in the background page
  * response - type of expected response; can be "object" or "string"
  * source - must contain "gwt:host" so the content script will recognize it as a command from dev 
- * 		environment to the background page.
+ *    environment to the background page.
  * 
  * @example
  * var payload = {
- * 	'payload': 'checkDriveAuth',
+ *  'payload': 'checkDriveAuth',
  *  'source': 'gwt:host'
  * };
  */
@@ -198,14 +198,14 @@ arc.app.drive.loadDriveApi = function() {
  * the app.
  * 
  * @param {MessageEvent} e Message event 
- * 		(https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent).
+ *    (https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent).
  * 
  *  @example Following represents example response from content script (event.data)
  *  {
- *  	"source": "dev:cs",
- *  	"payload": "function name to be called",
- *  	"response": "object | string" // this function will accept "object" value only.
- *  	"data" : Any //actual response from the background page
+ *    "source": "dev:cs",
+ *    "payload": "function name to be called",
+ *    "response": "object | string" // this function will accept "object" value only.
+ *    "data" : Any //actual response from the background page
  *  }
  */
 arc.app.drive.handleCSmessage = function(e) {
@@ -238,12 +238,12 @@ arc.app.drive.handleCSmessage = function(e) {
  * 
  * @example 
  * var fn = function(authResult){
- * 	if(!authResult){
- * 		// the app is not authorized by the user
- * 	} else {
- *		let access_token = authResult.access_token;
- *		// use token.
- * 	}
+ *  if(!authResult){
+ *    // the app is not authorized by the user
+ *  } else {
+ *    let access_token = authResult.access_token;
+ *    // use token.
+ *  }
  * }
  */
 arc.app.drive.checkDriveAuth = function(callback) {
@@ -314,7 +314,7 @@ arc.app.drive.auth = function(callback, forceNew) {
  * It will call all callback function from `arc.app.drive._authCallbacks` set.
  * 
  * @param {Object|null} authResult An auth response containing access token information or null 
- *  			if request is not authorized.
+ *        if request is not authorized.
  */
 arc.app.drive.handleDriveAuthResult = function(authResult) {
   arc.app.drive._setAccessToken(authResult);
@@ -327,10 +327,10 @@ arc.app.drive.handleDriveAuthResult = function(authResult) {
  * Set access token to be used by Google OAuth library.
  */
 arc.app.drive._setAccessToken = function(authResult) {
-	// jscs:disable
+  // jscs:disable
   if (authResult && authResult.access_token) {
     gapi.auth.setToken({
-    	// jscs:disable
+      // jscs:disable
       'access_token': authResult.access_token
     });
   }
@@ -343,7 +343,7 @@ arc.app.drive._setAccessToken = function(authResult) {
  * @param {String} parentId Id of parent folder in Google Drive. Null to keep files in root folder.
  * @param {String} filename File name visible in Drive interface.
  * @param {String|Object} content Content to be saved in the file. Anything else then String will 
- * 				be passed to JSON.stringify function.
+ *        be passed to JSON.stringify function.
  * @param {Function} callback A callback function to be called after insert.
  */
 arc.app.drive.insertFile = function(parentId, filename, content, callback) {
@@ -387,7 +387,7 @@ arc.app.drive.insertFile = function(parentId, filename, content, callback) {
  * 
  * @param {String} fileId Google Drive file id.
  * @param {String|Object} content Content to be saved in the file. Anything else then String 
- *						will be passed to JSON.stringify function.
+ *            will be passed to JSON.stringify function.
  * @param {Function} callback A callback function to be called after patch.
  */
 arc.app.drive.updateFile = function(fileId, content, callback) {

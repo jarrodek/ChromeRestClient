@@ -36,6 +36,14 @@ if (!chrome.runtime.getManifest) {
     gwt.dev.chrome.addCallback(p.payload, p.params, callback);
     gwt.dev.chrome.postMessage(p);
   };
+  chrome.runtime.getUrlAsync = function(path, callback) {
+    let p = {
+      payload: 'runtime.getURL',
+      params: path
+    };
+    gwt.dev.chrome.addCallback(p.payload, p.params, callback);
+    gwt.dev.chrome.postMessage(p);
+  };
   chrome.runtime.getManifestAsync(function(result) {
     if (result) {
       manifest = result;

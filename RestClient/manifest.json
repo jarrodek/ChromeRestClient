@@ -5,8 +5,8 @@
     "16": "img/arc_icon_16.png",
     "128": "img/arc_icon_128.png"
   },
-  "version": "4.1.30",
-  "version_name": "4.1.1-dev.29",
+  "version": "4.1.39",
+  "version_name": "4.1.1-dev.38",
   "manifest_version": 2,
   "permissions": [
     "webRequest",

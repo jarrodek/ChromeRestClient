@@ -80,20 +80,14 @@ public class SettingsActivity extends AppActivity implements SettingsView.Presen
 		StatusNotification.notify("Settings saved.", StatusNotification.TIME_SHORT);
 		if (key.equals(StoreKeys.DEBUG_KEY)) {
 			RestClient.setDebug(value);
-		} else if (key.equals(StoreKeys.HISTORY_KEY)) {
-			if (value == false) {
-				clientFactory.getMenuView().hideItem(2);
-			} else {
-				clientFactory.getMenuView().showItem(2);
-			}
 		} else if (key.equals(StoreKeys.NOTIFICATIONS_ENABLED_KEY)) {
 			clientFactory.getEventBus().fireEvent(new NotificationsStateChangeEvent(value));
 		} else if (key.equals(StoreKeys.MAGIC_VARS_ENABLED_KEY)) {
-			SyncAdapter.magicVars = (value);
+			SyncAdapter.magicVars = value;
 		} else if (key.equals(StoreKeys.CODE_MIRROR_HEADERS_KEY)) {
-			SyncAdapter.codeMirrorHeaders = (value);
+			SyncAdapter.codeMirrorHeaders = value;
 		} else if (key.equals(StoreKeys.CODE_MIRROR_PAYLOAD_KEY)) {
-			SyncAdapter.codeMirrorPayload = (value);
+			SyncAdapter.codeMirrorPayload = value;
 		}
 		GoogleAnalytics.sendEvent("Settings usage", key + " enabled", value + "");
 		GoogleAnalyticsApp.sendEvent("Settings usage", key + " enabled", value + "");

@@ -1815,48 +1815,52 @@ a {
 </style>
 <style is="custom-style">
 :root {
-    --dark-primary-color: var(--paper-blue-700);
-    --default-primary-color: var(--paper-blue-500);
-    --light-primary-color: var(--paper-blue-50);
-    --text-primary-color: rgba(0, 0, 0, 0.87);
-    /*text/icons*/
-    --accent-color: #FF4081;
-    --primary-background-color: #ffffff;
-    --primary-text-color: #212121;
-    --secondary-text-color: #727272;
-    --disabled-text-color: #bdbdbd;
-    --divider-color: #B6B6B6;
+  --dark-primary-color: var(--paper-blue-700);
+  --default-primary-color: var(--paper-blue-500);
+  --light-primary-color: var(--paper-blue-50);
+  --text-primary-color: rgba(0, 0, 0, 0.87);
+  /*text/icons*/
+  --accent-color: #FF4081;
+  --primary-background-color: #ffffff;
+  --primary-text-color: #212121;
+  --secondary-text-color: #727272;
+  --disabled-text-color: #bdbdbd;
+  --divider-color: #B6B6B6;
+  --paper-menu-background-color: #fff;
+  --paper-toggle-button-checked-button-color: var(--paper-blue-500);
+  --paper-tabs-selection-bar-color: var(--default-primary-color);
+  --paper-tab-ink: var(--light-primary-color);
+  --page-title-text: {
+    @apply(--paper-font-headline);
+    padding: 0 16px;
+  };
+  --page-section-container: {
+    border-bottom: 1px var(--paper-grey-100) solid;
+    padding-bottom: 20px;
+  };
+  --page-section-title: {
+    @apply(--paper-font-title);
+    padding: 0 16px;
+  };
+  --page-section-item: {
+    @apply(--layout-horizontal);
+    @apply(--layout-center);
+    @apply(--paper-font-body1);
+    padding: 0 16px;
+    min-height: 36px;
+  };
+  --page-section-item-simple: {
+    @apply(--paper-font-body1);
+    padding: 0 16px;
+    min-height: 36px;
+  };
+}
 
-
-    --paper-menu-background-color: #fff;
-    --paper-toggle-button-checked-button-color: var(--paper-blue-500);
-    --paper-tabs-selection-bar-color: var(--default-primary-color);
-    --paper-tab-ink: var(--light-primary-color);
-
-    --page-title-text: {
-        @apply(--paper-font-headline);
-        padding: 0 16px;
-    };
-    --page-section-container: {
-        border-bottom: 1px var(--paper-grey-100) solid;
-        padding-bottom: 20px;
-    }
-    --page-section-title: {
-        @apply(--paper-font-title);
-        padding: 0 16px;
-    };
-    --page-section-item: {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        @apply(--paper-font-body1);
-        padding: 0 16px;
-        min-height: 36px;
-    };
-    --page-section-item-simple: {
-        @apply(--paper-font-body1);
-        padding: 0 16px;
-        min-height: 36px;
-    };
+html,
+body.rest-client {
+  font-family: 'Roboto', 'Noto', sans-serif;
+  font-size: 15px;
+  height: 100%;
 }
 </style>
 </head><body><div hidden="" by-vulcanize=""><dom-module id="iron-icon" assetpath="iron-icon/">
@@ -2592,6 +2596,46 @@ a {
     <div class="selectable-content">
       <content></content>
     </div>
+  </template>
+
+  </dom-module>
+<dom-module id="iron-collapse" assetpath="iron-collapse/">
+
+  <style>
+
+    :host {
+      display: block;
+      transition-duration: 300ms;
+    }
+
+    :host(.iron-collapse-closed) {
+      display: none;
+    }
+
+    :host(:not(.iron-collapse-opened)) {
+      overflow: hidden;
+    }
+
+  </style>
+
+  <template>
+
+    <content></content>
+
+  </template>
+
+</dom-module>
+
+<dom-module id="paper-submenu" assetpath="paper-menu/">
+  <template>
+    <style include="paper-menu-shared-styles"></style>
+
+    <div class="selectable-content" on-tap="_onTap">
+      <content id="trigger" select=".menu-trigger"></content>
+    </div>
+    <iron-collapse id="collapse" opened="{{opened}}">
+      <content select=".menu-content"></content>
+    </iron-collapse>
   </template>
 
   </dom-module>
@@ -4302,105 +4346,116 @@ a {
 </dom-module>
 
 <dom-module id="app-settings" assetpath="app-settings/">
-    <template>
-        <style>
-        :host {
-            display: block;
-        }
-        .help-icon {
-            height: 36px;
-            width: 36px;
-            color: var(--paper-grey-500);
-        }
-        
-        .settings-section {
-            border-bottom: 1px var(--paper-grey-100) solid;
-        }
-        </style>
-        <h1 class="page-title">Settings</h1>
-        <section class="settings-section">
-            <paper-item>
-                <paper-item-body two-line="">
-                    <div>Import / export
-                    </div>
-                    <div secondary="">Import or export data you saved in the app</div>
-                </paper-item-body>
-                <paper-button on-tap="manageClick">Manage</paper-button>
-            </paper-item>
-        </section>
-        <section class="settings-section">
-            <paper-item>
-                <paper-item-body two-line="">
-                    <div>Debug</div>
-                    <div secondary="">Enable debug messages in chrome console output</div>
-                </paper-item-body>
-                <paper-toggle-button checked="{{values.DEBUG_ENABLED}}"></paper-toggle-button>
-            </paper-item>
-        </section>
-        <section class="settings-section">
-            <paper-item>
-                <paper-item-body two-line="">
-                    <div>History</div>
-                    <div secondary="true">Save list of requests made by the app in local storage</div>
-                </paper-item-body>
-                <paper-toggle-button checked="{{values.HISTORY_ENABLED}}"></paper-toggle-button>
-            </paper-item>
-        </section>
-        <section class="settings-section">
-            <paper-item>
-                <paper-item-body>
-                    <div>Clear history</div>
-                </paper-item-body>
-                <paper-button on-tap="historyClearClick">Clear</paper-button>
-            </paper-item>
-        </section>
-        <section class="settings-section">
-            <paper-item>
-                <paper-item-body>
-                    <div>
-                      Magic variables
-                      <paper-icon-button icon="help" class="help-icon" on-tap="openMagicVariablesDialog"></paper-icon-button>
-                    </div>
-                </paper-item-body>
-                <paper-toggle-button checked="{{values.MAGICVARS_ENABLED}}"></paper-toggle-button>
-            </paper-item>
-        </section>
-        <section class="settings-section">
-            <paper-item>
-                <paper-item-body two-line="">
-                    <div>CodeMirror for headers</div>
-                    <div secondary="">Enable CodeMirror editor in headers panel</div>
-                </paper-item-body>
-                <paper-toggle-button checked="{{values.CMH_ENABLED}}"></paper-toggle-button>
-            </paper-item>
-        </section>
-        <section class="settings-section">
-            <paper-item>
-                <paper-item-body two-line="">
-                    <div>CodeMirror for payload</div>
-                    <div secondary="">Enable CodeMirror editor in payload panel</div>
-                </paper-item-body>
-                <paper-toggle-button checked="{{values.CMP_ENABLED}}"></paper-toggle-button>
-            </paper-item>
-        </section>
-        <paper-dialog id="magicVatDialog">
-            <h2>Magic variables</h2>
-            <paper-dialog-scrollable>
-              <p>Now you use the Magic Variables. Currently it is two special strings that will be replaced just before sending a request:</p>
-              <p>${random} - generate random number from 0 to Number.MAX_VALUE</p>
-              <p>${now} - insert current time (in ms)</p>
-              <p>You can place it in the URL, in headers list or in payload.</p>
-              <p>Furthermore, if you'd like to group generated numbers and use them more than once using the same generated value:</p>
-              <p>${random:[group_number]} where [group_number] is a number of the group.</p>
-              <p>For example you can use ${random:1} more than once and the same value will be placed anywhere when you put this string.</p>
-              <p>Learn more on blog post: <a href="http://restforchrome.blogspot.co.uk/2012/11/introduce-magic-variables.html" target="_blank">Introduce: Magic Variables</a></p>
-            </paper-dialog-scrollable>
-            <div class="buttons">
-              <paper-button dialog-confirm="">Close</paper-button>
-            </div>
-        </paper-dialog>
-    </template>
-    </dom-module>
+  <template>
+    <style>
+    :host {
+      display: block;
+    }
+    h1 {
+      @apply(--page-title-text);
+    }
+    .help-icon {
+      height: 36px;
+      width: 36px;
+      color: var(--paper-grey-500);
+    }
+    
+    .settings-section {
+      border-bottom: 1px var(--paper-grey-100) solid;
+    }
+    </style>
+    <h1 class="page-title">Settings</h1>
+    <section class="settings-section">
+      <paper-item on-tap="manageClick">
+        <paper-item-body two-line="">
+          <div>Import / export
+          </div>
+          <div secondary="">Import or export data you saved in the app</div>
+        </paper-item-body>
+      </paper-item>
+    </section>
+    <section class="settings-section">
+      <paper-item on-tap="historyClearClick">
+        <paper-item-body>
+          <div>Clear history</div>
+        </paper-item-body>
+      </paper-item>
+    </section>
+    <section class="settings-section">
+      <paper-item>
+        <paper-item-body two-line="">
+          <div>Debug</div>
+          <div secondary="">Enable debug messages in chrome console output</div>
+        </paper-item-body>
+        <paper-toggle-button checked="{{values.DEBUG_ENABLED}}"></paper-toggle-button>
+      </paper-item>
+    </section>
+    <section class="settings-section">
+      <paper-item>
+        <paper-item-body two-line="">
+          <div>History</div>
+          <div secondary="true">Save list of requests made by the app in local storage</div>
+        </paper-item-body>
+        <paper-toggle-button checked="{{values.HISTORY_ENABLED}}"></paper-toggle-button>
+      </paper-item>
+    </section>
+    <section class="settings-section">
+      <paper-item>
+        <paper-item-body>
+          <div>
+            Magic variables
+            <paper-icon-button icon="help" class="help-icon" on-tap="openMagicVariablesDialog"></paper-icon-button>
+          </div>
+        </paper-item-body>
+        <paper-toggle-button checked="{{values.MAGICVARS_ENABLED}}"></paper-toggle-button>
+      </paper-item>
+    </section>
+    <section class="settings-section">
+      <paper-item>
+        <paper-item-body two-line="">
+          <div>CodeMirror for headers</div>
+          <div secondary="">Enable CodeMirror editor in headers panel</div>
+        </paper-item-body>
+        <paper-toggle-button checked="{{values.CMH_ENABLED}}"></paper-toggle-button>
+      </paper-item>
+    </section>
+    <section class="settings-section">
+      <paper-item>
+        <paper-item-body two-line="">
+          <div>CodeMirror for payload</div>
+          <div secondary="">Enable CodeMirror editor in payload panel</div>
+        </paper-item-body>
+        <paper-toggle-button checked="{{values.CMP_ENABLED}}"></paper-toggle-button>
+      </paper-item>
+    </section>
+    <paper-dialog id="historyClearDialog" on-iron-overlay-closed="onClearDialogResult">
+      <h2>Clear history</h2>
+      <paper-dialog-scrollable>
+        <p>This will remove all data from the history store. Would you like to continue?</p>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss="">Cancel</paper-button>
+        <paper-button dialog-confirm="" autofocus="">Clear</paper-button>
+      </div>
+    </paper-dialog>
+    <paper-dialog id="magicVatDialog">
+      <h2>Magic variables</h2>
+      <paper-dialog-scrollable>
+        <p>Now you use the Magic Variables. Currently it is two special strings that will be replaced just before sending a request:</p>
+        <p>${random} - generate random number from 0 to Number.MAX_VALUE</p>
+        <p>${now} - insert current time (in ms)</p>
+        <p>You can place it in the URL, in headers list or in payload.</p>
+        <p>Furthermore, if you'd like to group generated numbers and use them more than once using the same generated value:</p>
+        <p>${random:[group_number]} where [group_number] is a number of the group.</p>
+        <p>For example you can use ${random:1} more than once and the same value will be placed anywhere when you put this string.</p>
+        <p>Learn more on blog post: <a href="http://restforchrome.blogspot.co.uk/2012/11/introduce-magic-variables.html" target="_blank">Introduce: Magic Variables</a></p>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-confirm="">Close</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+  </dom-module>
 <dom-module id="file-drop" assetpath="file-drop/">
   <style>
   :host {
@@ -4913,6 +4968,40 @@ a {
         </paper-dialog>
     </template>
     </dom-module>
+<dom-module id="arc-menu" assetpath="arc-menu/">
+  <template>
+    <style>
+    :host {
+      display: block;
+    }
+    .sublist {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+    </style>
+    <paper-menu selected="{{hash}}" attr-for-selected="data-place" on-tap="_itemTap">
+      <paper-item data-place="#RequestPlace:default">Request</paper-item>
+      <paper-item data-place="#SocketPlace:default">Socket</paper-item>
+      <paper-submenu>
+        <paper-item class="menu-trigger">Projects</paper-item>
+        <paper-menu class="menu-content sublist" selected="{{hash}}" attr-for-selected="data-place" on-tap="_itemTap">
+          <template is="dom-if" if="{{!projects}}">
+            <paper-item>No projects here</paper-item>
+          </template>
+          <template is="dom-repeat" items="{{projects}}" sort="{{computeSort(projects)}}">
+            <paper-item data-place$="{{_computeEnpointParameter(item.id)}}">{{item.name}}</paper-item>
+          </template>
+        </paper-menu>
+      </paper-submenu>
+      <paper-item data-place="#SavedPlace:default">Saved</paper-item>
+      <template is="dom-if" if="{{!noHistory}}">
+      	<paper-item data-place="#HistoryPlace:default">History</paper-item>
+      </template>
+      <paper-item data-place="#SettingsPlace:view">Settings</paper-item>
+      <paper-item data-place="#AboutPlace:view">About</paper-item>
+    </paper-menu>
+  </template>
+  </dom-module>
 <dom-module id="app-about" assetpath="app-about/">
   <template>
     <style>

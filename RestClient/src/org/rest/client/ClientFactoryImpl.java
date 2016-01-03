@@ -29,9 +29,6 @@ import org.rest.client.ui.ErrorDialogView;
 import org.rest.client.ui.HistoryListItemView;
 import org.rest.client.ui.HistoryView;
 import org.rest.client.ui.ImportExportView;
-import org.rest.client.ui.MenuItemView;
-import org.rest.client.ui.MenuItemView.Presenter;
-import org.rest.client.ui.MenuView;
 import org.rest.client.ui.RequestView;
 import org.rest.client.ui.ResponseView;
 import org.rest.client.ui.SaveRequestDialogView;
@@ -44,8 +41,6 @@ import org.rest.client.ui.desktop.ErrorDialogViewImpl;
 import org.rest.client.ui.desktop.HistoryListItemViewImpl;
 import org.rest.client.ui.desktop.HistoryViewImpl;
 import org.rest.client.ui.desktop.ImportExportViewImpl;
-import org.rest.client.ui.desktop.MenuItemViewImpl;
-import org.rest.client.ui.desktop.MenuViewImpl;
 import org.rest.client.ui.desktop.RequestViewImpl;
 import org.rest.client.ui.desktop.ResponseViewImpl;
 import org.rest.client.ui.desktop.SaveRequestDialogViewImpl;
@@ -68,7 +63,6 @@ public class ClientFactoryImpl implements ClientFactory {
 	private static RequestView requestView = null;
 	// private static ResponseView responseView = null;
 	// private static AboutView aboutView = null;
-	private static MenuView menu = null;
 	// private static SettingsView settingsView = null;
 	private static StoreKeys latestRequestStore = null;
 	private static RequestDataStoreWebSql requestDataStore = null;
@@ -108,21 +102,6 @@ public class ClientFactoryImpl implements ClientFactory {
 		// }
 		// return responseView;
 		return GWT.create(ResponseViewImpl.class);
-	}
-
-	@Override
-	public MenuView getMenuView() {
-		if (menu == null) {
-			menu = new MenuViewImpl();
-		}
-		return menu;
-	}
-
-	@Override
-	public MenuItemView createMenuItem(Presenter presenter) {
-		MenuItemViewImpl menu = GWT.create(MenuItemViewImpl.class);
-		menu.setPresenter(presenter);
-		return menu;
 	}
 
 	@Override

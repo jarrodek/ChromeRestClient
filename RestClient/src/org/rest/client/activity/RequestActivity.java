@@ -687,6 +687,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 				if (project == null) {
 					return;
 				}
+				
 				ProjectStoreWebSql store = clientFactory.getProjectsStore();
 				store.put(project, project.getId(), new StoreResultCallback<Integer>() {
 

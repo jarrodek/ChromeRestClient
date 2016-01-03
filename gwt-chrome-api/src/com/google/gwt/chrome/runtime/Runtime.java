@@ -20,7 +20,14 @@ public class Runtime implements ChromeRuntime {
 
 	@Override
 	public final native void getURL(String path, RuntimeStringHandler handler) throws JavaScriptException /*-{
-		throw new Error("Not yet implemented.");
+		if(chrome.runtime.getUrlAsync) {
+			var clb = $entry(function(url) {
+				handler.@com.google.gwt.chrome.runtime.ChromeRuntime.RuntimeStringHandler::onResult(Ljava/lang/String;)(url);
+			});
+			$wnd.chrome.runtime.getUrlAsync(path, clb);
+		} else {
+			handler.@com.google.gwt.chrome.runtime.ChromeRuntime.RuntimeStringHandler::onResult(Ljava/lang/String;)($wnd.chrome.runtime.getURL(path));
+		}
 	}-*/;
 
 	@Override
