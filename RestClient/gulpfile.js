@@ -217,6 +217,12 @@ gulp.task('mode:dev', function() {
 gulp.task('mode:debug', function() {
   mode = 'debug';
 });
+gulp.task('mode:beta', function() {
+  mode = 'beta';
+});
+gulp.task('mode:stable', function() {
+  mode = 'stable';
+});
 
 gulp.task('bump-dev-build', function() {
   return gulp.src('./manifest.json')
@@ -227,6 +233,18 @@ gulp.task('bump-dev-build', function() {
       key: 'version_name',
       type: 'prerelease',
       'preid': 'dev'
+    }))
+    .pipe(gulp.dest('./'));
+});
+gulp.task('bump-beta-build', function() {
+  return gulp.src('./manifest.json')
+    .pipe(bump({
+      type: 'patch'
+    }))
+    .pipe(bump({
+      key: 'version_name',
+      type: 'prerelease',
+      'preid': 'beta'
     }))
     .pipe(gulp.dest('./'));
 });
@@ -265,7 +283,26 @@ gulp.task('build:dev', function(callback) {
     }
   );
 });
-/*
-
-
-*/
+/**
+ * Create a BETA build.
+ */
+gulp.task('build:beta', function(callback) {
+  runSequence(
+    'mode:beta',
+    'clean:dist',
+    'copy:devsources',
+    'vulcanize',
+    'bump-beta-build',
+    'copy:dist',
+    'libs',
+    'zip',
+    function(error) {
+      if (error) {
+        gutil.log(error.message);
+      } else {
+        gutil.log('RELEASE FINISHED SUCCESSFULLY');
+      }
+      callback(error);
+    }
+  );
+});
