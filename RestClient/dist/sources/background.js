@@ -335,20 +335,19 @@ arc.app.bg = {};
  * It should perform an update tasks if necessary.
  */
 arc.app.bg.onInstalled = function(details) {
-  console.log(details.reason);
   switch (details.reason) {
     case 'update':
       arc.app.bg.performStorageUpgrade();
       break;
     case 'install':
-      arc.app.bg.installApp();
+      //initialize WebSQL tables.
+      arc.app.db.websql.open().then(function() {
+        console.log('Database has been initialized');
+        arc.app.bg.installApp();
+      }).catch((e) => console.error('Error initializing the database.', e));
+      //error here potentially will break the app since it is fired only during the install.
       break;
   }
-  arc.app.bg.installApp();
-  // Initialize database tables in here so the app will not do it on every start.
-  arc.app.db.websql.open().then(function() {
-    console.log('Database has been initialized');
-  }).catch((e) => console.error('Error initializing the database', e));
 };
 /**
  * //TODO: Upgrade WebSQL to IndexedDb.
@@ -399,65 +398,53 @@ arc.app.bg.downloadDefinitions = function() {
   });
 };
 /**
- * Perform upgrade to newest version
+ * Perform upgrade to the newest version
  */
 arc.app.bg.performStorageUpgrade = function() {
-  if (!('localStorage' in window)) {
+  try {
+    window.localStorage;
+  } catch(e) {
     return;
   }
-  if (localStorage['upgraded.v4']) {
-    return;
-  }
-  //set shortcuts values 
-  var save = {};
-  var shortcuts = arc.app.bg.performShortcutsUpgrade();
-  var settings = arc.app.bg.performSettingsUpgrade();
-  if (shortcuts) {
-    Object.assign(save, shortcuts);
-  }
-  Object.assign(save, settings);
-  chrome.storage.sync.set(save, function() {
-    console.info('localStorage has been upgraded to chrome.storage.sync');
+  chrome.storage.local.get({'upgraded': {
+    'v4': false
+  }}, (r) => {
+    if (r.upgraded.v4) {
+      return;
+    }
+    arc.app.bg.performShortcutsUpgrade();
+    var save = {};
+    var settings = arc.app.bg.performSettingsUpgrade();
+    Object.assign(save, settings);
+    chrome.storage.sync.set(save, function() {
+      console.info('localStorage has been upgraded to chrome.storage.sync');
+      delete localStorage.tutorials;
+      delete localStorage.LATESTMSG;
+      delete localStorage.latstSocket;
+      delete localStorage.DEBUG_ENABLED;
+      delete localStorage.HISTORY_ENABLED;
+      delete localStorage.MAGICVARS_ENABLED;
+      delete localStorage.CMH_ENABLED;
+      delete localStorage.CMP_ENABLED;
+    });
+    var local = arc.app.bg.performLocalDataUpgrade();
+    chrome.storage.local.set(local, function() {
+      console.info('localStorage has been upgraded to chrome.storage.local');
+      delete localStorage.firstrun;
+      delete localStorage.latest_request_data;
+      delete localStorage.LATEST_GDRIVE_FOLDER;
+    });
+    r.upgraded.v4 = true;
+    chrome.storage.local.get(r, () => console.log('Storage upgraded'));
   });
-  var local = arc.app.bg.performLocalDataUpgrade();
-  chrome.storage.local.set(local, function() {
-    console.info('localStorage has been upgraded to chrome.storage.local');
-  });
-  localStorage['upgraded.v4'] = true;
 };
 /**
- * To be called when upgrading to chrome.storage.
- * Pass shortcuts to the store.
+ * Custom shortcuts support has been removed from the app.
  */
 arc.app.bg.performShortcutsUpgrade = function() {
-  var shortcuts;
   try {
-    let v = 'SHORTCUTS';
-    shortcuts = JSON.parse(localStorage[v]);
-  } catch (e) {
-    return null;
-  }
-  //shortcuts structure changed to:
-  // (boolean) alt
-  // (boolean) ctrl
-  // (boolean) shift
-  // (int) key
-  // (String) type
-  let save = [];
-  shortcuts.forEach((s) => {
-    let shortcut = {
-      'alt': s.a,
-      'ctrl': s.c,
-      'shift': s.s,
-      'key': s.k,
-      'type': s.t
-    };
-    save[save.length] = shortcut;
-  });
-  if (save.length > 0) {
-    return save;
-  }
-  return null;
+    delete localStorage.SHORTCUTS;
+  } catch (e) {}
 };
 /**
  * To be called when upgrading to chrome.storage.
