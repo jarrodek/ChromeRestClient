@@ -1,9 +1,9 @@
 package org.rest.client.task;
 
 import org.rest.client.SyncAdapter;
-import org.rest.client.storage.store.LocalStore;
 
-import com.google.gwt.storage.client.Storage;
+import com.google.gwt.core.client.Callback;
+
 /**
  * Read locally saved data (from LocalStorage) and set up SyncAdapter values.
  * The values will be overrided when SyncAdapter will sync all data.
@@ -14,55 +14,42 @@ import com.google.gwt.storage.client.Storage;
  */
 public class SetSyncDataTask implements LoadTask {
 	LoaderWidget loaderWidget;
+	TasksCallback callback;
 	
 	@Override
-	public void run(TasksCallback callback, boolean lastRun) {
+	public void run(final TasksCallback callback, final boolean lastRun) {
 		if(loaderWidget != null){
 			loaderWidget.setText("Setting up synced values");
 		}
-		
-		final Storage store = Storage.getLocalStorageIfSupported();
-		//first, restore local value, for quick access
-		String debugValue = store.getItem(LocalStore.DEBUG_KEY);
-		String historyValue = store.getItem(LocalStore.HISTORY_KEY);
-		String notificationsValue = store.getItem(LocalStore.NOTIFICATIONS_ENABLED_KEY);
-		String magicVarsValue = store.getItem(LocalStore.MAGIC_VARS_ENABLED_KEY);
-		if(debugValue != null && debugValue.equals("true")){
-			SyncAdapter.debug = true;
-		} else {
-			SyncAdapter.debug = (false);
-		}
-		if(historyValue == null || historyValue.equals("true")){
-			SyncAdapter.history = (true);
-		} else {
-			SyncAdapter.history = (false);
-		}
-		if(notificationsValue != null && notificationsValue.equals("true")){
-			SyncAdapter.notifications = (true);
-		} else {
-			SyncAdapter.notifications = (false);
-		}
-		if(magicVarsValue != null && magicVarsValue.equals("true")){
-			SyncAdapter.magicVars = (true);
-		} else {
-			SyncAdapter.magicVars = (false);
-		}
-		callback.onInnerTaskFinished(1);
-		SyncAdapter.sync();
-		SyncAdapter.observe();
-		
-		callback.onInnerTaskFinished(1);
-		callback.onSuccess();
+		this.callback = callback;
+		runSyncAdapter();
+	}
+	
+	
+	private void runSyncAdapter(){
+		SyncAdapter.sync(new Callback<Void, Void>() {
+
+			@Override
+			public void onFailure(Void reason) {
+				callback.onInnerTaskFinished(1);
+				callback.onSuccess();
+			}
+
+			@Override
+			public void onSuccess(Void result) {
+				callback.onInnerTaskFinished(1);
+				callback.onSuccess();
+			}
+		});
 	}
 
 	@Override
 	public int getTasksCount() {
-		return 2;
+		return 1;
 	}
 
 	@Override
 	public void setLoader(LoaderWidget loaderWidget) {
 		this.loaderWidget = loaderWidget;
 	}
-
 }

@@ -1,0 +1,266 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<dom-module id="server-import-data-table">
+  <style>
+  :host {
+    display: block;
+    min-height: 200px;
+    height: 100%;
+  }
+  
+  .table {}
+  
+  .table-header {
+    height: 64px;
+  }
+  
+  .table-columns {
+    height: 56px;
+    font-family: 'Roboto';
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.54);
+    font-size: 12px;
+  }
+  
+  .table-columns [data-sortoption] {
+    color: rgba(0, 0, 0, 0.87);
+  }
+  
+  .table-columns iron-icon {
+    opacity: 0;
+    width: 16px;
+    height: 16px;
+    transition: opacity 300ms cubic-bezier(0.65, 0.05, 0.36, 1), transform 400ms cubic-bezier(0.65, 0.05, 0.36, 1);
+  }
+  
+  .table-columns [data-sortoption] iron-icon {
+    opacity: 1;
+  }
+  
+  .table-columns [data-sortoption="asc"] iron-icon {
+    transform: rotate(0deg);
+  }
+  
+  .table-columns [data-sortoption="desc"] iron-icon {
+    transform: rotate(180deg);
+  }
+  
+  .table-values {
+    height: 48px;
+    font-family: 'Roboto';
+    color: rgba(0, 0, 0, 0.87);
+    font-size: 13px;
+  }
+  
+  .table-columns .name-column,
+  .table-columns .url-column,
+  .table-columns .time-column {
+    position: relative;
+    height: 100%;
+  }
+  
+  .table-columns .name-column,
+  .table-columns .time-column,
+  .table-columns .url-column {
+    padding-right: 16px;
+  }
+  
+  .name-column,
+  .url-column,
+  .time-column {
+    padding-left: 40px;
+  }
+  
+  .table-values .name-column,
+  .table-values .url-column,
+  .table-values .time-column {
+    padding-left: 56px;
+  }
+  
+  .checkbox-column {}
+  
+  .name-column {
+    min-width: 120px;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .time-column {
+    min-width: 110px;
+    max-width: 110px;
+  }
+  
+  .url-column {}
+  
+  .actionButton {
+    background-color: #4285f4;
+    color: #fff;
+  }
+  
+  h2 {
+    font-size: 20px;
+    color: rgba(0, 0, 0, 0.87);
+    font-family: 'Roboto';
+    font-weight: 400;
+    padding: 0 24px;
+  }
+  
+  .table-values,
+  .table-columns {
+    border-bottom: 1px rgba(0, 0, 0, 0.12) solid;
+    padding: 0 24px;
+  }
+  
+  .table-columns:last-child {
+    border-bottom: 1px rgba(0, 0, 0, 0) solid;
+  }
+  
+  .table-values.checked {
+    background-color: #F5F5F5;
+  }
+  </style>
+  <template>
+    <div class="flex layout vertical table">
+      <div class="table-header layout horizontal center">
+        <h2>Import preview</h2>
+        <span class="flex"></span>
+        <paper-button raised class="actionButton" on-tap="importTap">import</paper-button>
+        <paper-button on-tap="cancelTap">cancel</paper-button>
+      </div>
+      <div class="table-columns layout horizontal center">
+        <div class="checkbox-column" id="projectColumn">
+          <paper-checkbox checked="{{allChecked}}" on-tap="toggleAll">
+        </div>
+        <div on-tap="sortColumn" data-sort="name" class="name-column sort layout horizontal center" id="nameColumn" data-sortoption$="{{computeSortColumn(sort,dir,'name')}}">
+          <iron-icon icon="arrow-drop-down"></iron-icon>Name
+          <paper-ripple recenters></paper-ripple>
+        </div>
+        <div on-tap="sortColumn" data-sort="updated" class="time-column layout horizontal center" id="timeColumn" data-sortoption$="{{computeSortColumn(sort,dir,'updated')}}">
+          <iron-icon icon="arrow-drop-down"></iron-icon>Updated
+          <paper-ripple recenters></paper-ripple>
+        </div>
+        <div on-tap="sortColumn" data-sort="url" class="url-column layout horizontal center flex" id="urlColumn" data-sortoption$="{{computeSortColumn(sort,dir,'url')}}">
+          <iron-icon icon="arrow-drop-down"></iron-icon>URL
+          <paper-ripple recenters></paper-ripple>
+        </div>
+        <paper-tooltip for="projectColumn">Select data you want to import</paper-tooltip>
+        <paper-tooltip for="nameColumn">The request name added when saving</paper-tooltip>
+        <paper-tooltip for="timeColumn">The request last save time</paper-tooltip>
+        <paper-tooltip for="urlColumn">Full URL saved with the request</paper-tooltip>
+      </div>
+      <template is="dom-repeat" id="requestsList" items="{{requests}}" sort="{{computeSort(sort,dir)}}">
+        <div class$="{{_computeTableRowClass(item.checked)}}">
+          <div class="checkbox-column">
+            <paper-checkbox on-tap="toggleSelection" checked="{{item.checked}}"></paper-checkbox>
+          </div>
+          <div class="name-column">{{item.name}}</div>
+          <div class="time-column">{{displayDate(item.updated)}}</div>
+          <div class="url-column">{{item.url}}</div>
+        </div>
+      </template>
+      <div class="table-columns layout horizontal center">
+        <div class="flex"></div>
+        <paper-button raised class="actionButton" on-tap="importTap">import</paper-button>
+        <paper-button on-tap="cancelTap">cancel</paper-button>
+      </div>
+    </div>
+    <array-selector id="selector" items="{{requests}}" selected="{{selected}}" multi toggle></array-selector>
+  </template>
+  <script>
+  Polymer({
+    is: 'server-import-data-table',
+    properties: {
+      requests: Object,
+      selected: Object,
+      sort: String,
+      dir: String
+    },
+    importTap: function() {
+      var selected = this.requests.filter((item) => item.checked === true);
+      this.fire('import-action', {
+        action: 'import',
+        'items': selected
+      });
+    },
+    cancelTap: function() {
+      this.fire('import-action', {
+        action: 'cancel'
+      });
+    },
+    toggleSelection: function(event) {
+      var item = this.$.requestsList.itemForElement(event.target);
+      this.$.selector.select(item);
+    },
+
+    toggleAll: function() {
+      if (this.allChecked) {
+        this.requests.forEach((item, i) => this.set('requests.' + i + '.checked', true));
+      } else {
+        this.requests.forEach((item, i) => this.set('requests.' + i + '.checked', false));
+      }
+    },
+
+    displayDate: function(time) {
+      var options = {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: false
+      };
+      var date = new Date(time);
+      return date.toLocaleString('en-US', options);
+      //return new Intl.DateTimeFormat(options).format(new Date(time));
+    },
+
+    _computeTableRowClass: function(checked) {
+      var cls = 'table-values layout horizontal center';
+      if (checked) {
+        cls += ' checked';
+      }
+      return cls;
+    },
+    sortColumn: function(e) {
+      e = Polymer.dom(e);
+      if (!e.rootTarget.dataset.sort) {
+        return;
+      }
+      var sortOpt = e.rootTarget.dataset.sort;
+      var dir = 'asc';
+      if (this.sort === sortOpt) {
+        dir = this.dir === 'asc' ? 'desc' : 'asc';
+      }
+      this.set('sort', sortOpt);
+      this.set('dir', dir);
+
+    },
+    computeSort: function(sortOpt, dir) {
+      return function(a, b) {
+        if (a[sortOpt] > b[sortOpt]) {
+          return dir === 'asc' ? 1 : -1;
+        }
+        if (a[sortOpt] < b[sortOpt]) {
+          return dir === 'asc' ? -1 : 1;
+        }
+        if (a[sortOpt] === b[sortOpt]) {
+          return 0;
+        }
+      };
+    },
+
+    /**
+     * Compute if adding data-sort attribute to the column name is required.
+     * 
+     */
+    computeSortColumn: function(sort, dir, column) {
+      if (column !== sort) {
+        return null;
+      }
+      return dir;
+    }
+  });
+  </script>
+</dom-module>

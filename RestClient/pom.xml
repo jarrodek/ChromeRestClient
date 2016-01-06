@@ -17,5 +17,10 @@
 			<artifactId>gwt-log</artifactId>
 			<version>3.3.2</version>
 		</dependency>
+		<dependency>
+			<groupId>com.googlecode.objectify</groupId>
+			<artifactId>objectify</artifactId>
+			<version>5.1.9</version>
+		</dependency>
 	</dependencies>
 </project>

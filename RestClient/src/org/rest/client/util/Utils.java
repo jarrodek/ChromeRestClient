@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.google.gwt.core.client.JavaScriptException;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
@@ -139,4 +141,13 @@ public class Utils {
 		}
 		return result;
 	}
+	/**
+	 * Parse JSON string using native JSON.parse function.
+	 * It will result with arbitrary JavaScript object that can be casted or transformed to any Java object.
+	 * @param json
+	 * @return
+	 */
+	public static final native JavaScriptObject parseJSON(String json) throws JavaScriptException /*-{
+		return JSON.parse(json);
+	}-*/;
 }

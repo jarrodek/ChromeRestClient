@@ -21,22 +21,30 @@ import java.util.List;
 
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
+import org.rest.client.StatusNotification;
 import org.rest.client.place.SocketPlace;
 import org.rest.client.storage.StoreResultCallback;
+import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.WebSocketDataStoreWebSql;
 import org.rest.client.storage.store.objects.WebSocketObject;
 import org.rest.client.suggestion.SocketSuggestOracle;
 import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.SocketView;
-import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
+import com.google.gwt.chrome.storage.Storage;
+import com.google.gwt.chrome.storage.StorageArea;
+import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
+import com.google.gwt.chrome.storage.StorageResult;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.shared.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.storage.client.Storage;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.websocket.client.SocketCloseHandler;
 import com.google.gwt.websocket.client.SocketErrorHandler;
@@ -85,11 +93,31 @@ public class SocketActivity extends AppActivity implements
 	}
 	
 	private void restoreLatestSocket(){
-		Storage store = Storage.getLocalStorageIfSupported();
-		String socketUrl = store.getItem("latstSocket");
-		if(socketUrl != null && !socketUrl.isEmpty()){
-			view.setUrl(socketUrl);
-		}
+		Storage store = GWT.create(Storage.class);
+		JSONObject jo = new JSONObject();
+		jo.put(StoreKeys.LATEST_SOCKET_URL, new JSONObject(null));
+		store.getSync().get(jo.getJavaScriptObject(), new StorageArea.StorageItemsCallback() {
+
+			@Override
+			public void onError(String message) {
+				if(RestClient.isDebug()){
+					Log.error("SocketActivity::restoreLatestSocket - " + message);
+				}
+			}
+
+			@Override
+			public void onResult(JavaScriptObject result) {
+				StorageResult<String> data = result.cast();
+				if(data == null){
+					return;
+				}
+				String latest = data.get(StoreKeys.LATEST_SOCKET_URL);
+				if(latest != null){
+					view.setUrl(latest);
+				}
+			}
+		});
+		
 	}
 	
 	
@@ -101,8 +129,21 @@ public class SocketActivity extends AppActivity implements
 		}
 		
 		if(socketUrl != null){
-			Storage store = Storage.getLocalStorageIfSupported();
-			store.setItem("latstSocket", socketUrl);
+			JSONObject jo = new JSONObject();
+			jo.put(StoreKeys.LATEST_SOCKET_URL, new JSONString(socketUrl));
+			Storage store = GWT.create(Storage.class);
+			store.getSync().set(jo.getJavaScriptObject(), new StorageSimpleCallback() {
+				
+				@Override
+				public void onError(String message) {
+					if(RestClient.isDebug()){
+						Log.error("SocketActivity::mayStop - " + message);
+					}
+				}
+				
+				@Override
+				public void onDone() {}
+			});
 		}
 		
 		if(socket != null){
@@ -118,16 +159,24 @@ public class SocketActivity extends AppActivity implements
 	private void activateTutorial() {
 		tutorialFactory = new TutorialFactory("socket");
 		
-		if(!tutorialFactory.canStartTutorial()){
-			return;
-		}
-		view.setUpTutorial(tutorialFactory);
+		tutorialFactory.canStartTutorial(new Callback<Boolean, Throwable>() {
+			
+			@Override
+			public void onSuccess(Boolean result) {
+				if(result){
+					view.setUpTutorial(tutorialFactory);
+				}
+			}
+			
+			@Override
+			public void onFailure(Throwable reason) {}
+		});
 	}
 
 	@Override
 	public void sendMessage(String message) {
 		if(socket == null){
-			StatusNotification.notify("Socket not ready",StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+			StatusNotification.notify("Socket not ready", StatusNotification.TIME_SHORT);
 			return;
 		}
 		SocketMessage msg = SocketMessage.create(message);
@@ -137,7 +186,7 @@ public class SocketActivity extends AppActivity implements
 		} catch (Exception e) {
 			messages.remove(msg);
 			Log.error("Unable sent socket message",e);
-			StatusNotification.notify("Unable sent socket message.",StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+			StatusNotification.notify("Unable sent socket message.", StatusNotification.TIME_SHORT);
 		}
 	}
 

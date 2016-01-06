@@ -17,18 +17,6 @@ import com.google.code.gwt.database.client.service.VoidCallback;
  */
 public interface WebSocketDataService extends AppDatabase {
 
-	/**
-	 * Create database table.
-	 * 
-	 * @param callback
-	 *            callback function
-	 */
-	@Update("CREATE TABLE IF NOT EXISTS websocket_data ("
-			+ "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
-			+ "url TEXT NOT NULL, " 
-			+ "time INTEGER)")
-	void initTable(VoidCallback callback);
-
 	@Update("INSERT INTO websocket_data (url, time) VALUES ("
 			+ "{data.getURL()},{data.getTime()})")
 	void insertData(WebSocketObject data, RowIdListCallback callback);

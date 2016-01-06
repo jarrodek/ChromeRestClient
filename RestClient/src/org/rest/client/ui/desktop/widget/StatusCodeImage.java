@@ -1,7 +1,6 @@
 package org.rest.client.ui.desktop.widget;
 
-import org.rest.client.RestClient;
-import org.rest.client.storage.StoreResultCallback;
+import org.rest.client.storage.store.StatusesStoreWebSql;
 import org.rest.client.storage.websql.StatusCodeRow;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -38,45 +37,53 @@ public class StatusCodeImage extends Image implements ClickHandler {
 
 	@Override
 	public void onClick(ClickEvent event) {
-		if (statusCode == 0) {
-			StatusCodeInfo dialog = new StatusCodeInfo();
-			dialog.setHTML("Status Code: " + statusCode);
-			dialog.setInfoText("No response data.");
-			dialog.center();
-			dialog.show();
-			return;
+		if (statusCode == 0){
+			displayDialog(0, "No response", "The response was empty");
+		} else if (requestedCodeData != null) {
+			String titleText = statusCode + ": " + requestedCodeData.getLabel();
+			displayDialog(statusCode, titleText, requestedCodeData.getDesc());
+		} else {
+			StatusesStoreWebSql.get(statusCode, new StatusesStoreWebSql.StoreResultCallback() {
+				@Override
+				public void onSuccess(StatusCodeRow result) {
+					requestedCodeData = result;
+					String titleText = statusCode + ": " + result.getLabel();
+					displayDialog(statusCode, titleText, result.getDesc());
+				}
+				@Override
+				public void onError(Throwable e) {
+					displayDialog(statusCode, "Status code: " + statusCode, "There is no definition for this code in the applicaion :(");
+				}
+			});
 		}
-		
-		if(requestedCodeData != null){
-			buildDataDialog();
-			return;
-		}
-		RestClient.getClientFactory().getStatusesStore().getByKey(statusCode, new StoreResultCallback<StatusCodeRow>(){
-			@Override
-			public void onSuccess(StatusCodeRow code) {
-				requestedCodeData = code;
-				buildDataDialog();
-			}
-
-			@Override
-			public void onError(Throwable e) {
-				StatusCodeInfo dialog = new StatusCodeInfo();
-				dialog.setHTML("Status Code: " + statusCode);
-				dialog.setInfoText("Unable to find explanation");
-				dialog.center();
-				dialog.show();
-			}});
 	}
-	
-	void buildDataDialog(){
-		String html = "<b>Status Code: " + statusCode;
-		if(requestedCodeData.getLabel() != null){
-			html += " - " + requestedCodeData.getLabel() + " ";
+	/**
+	 * Display a dialog with status code explanation.
+	 * @param code Status code 
+	 * @param title Title for the dialog
+	 * @param desc Description for status code.
+	 */
+	private native void displayDialog(int code, String title, String desc) /*-{
+		var dialog = $doc.querySelector('paper-dialog[data-code="'+code+'"]');
+		if(!dialog) {
+			dialog = $doc.createElement('paper-dialog');
+			dialog.setAttribute('data-code', code);
+			var h2 = $doc.createElement('h2');
+			var content = $doc.createElement('paper-dialog-scrollable');
+			var actions = $doc.createElement('div');
+			actions.classList.add("buttons");
+			var button = $doc.createElement('paper-button');
+			button.setAttribute('dialog-confirm', '');
+			button.setAttribute('autofocus', '');
+			button.innerText = 'Close';
+			h2.innerText = title;
+			content.innerHTML = desc;
+			actions.appendChild(button);
+			dialog.appendChild(h2);
+			dialog.appendChild(content);
+			dialog.appendChild(actions);
+			$doc.body.appendChild(dialog);
 		}
-		html += "</b><br/><br/>"+requestedCodeData.getDesc();
-		StatusCodeInfo dialog = new StatusCodeInfo();
-		dialog.setInfoText(html);
-		dialog.center();
-		dialog.show();
-	}
+		dialog.open();
+	}-*/;
 }

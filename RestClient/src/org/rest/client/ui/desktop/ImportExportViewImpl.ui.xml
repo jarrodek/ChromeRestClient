@@ -3,81 +3,51 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:h5="urn:import:org.rest.client.ui.html5">
 	
-	<g:HTMLPanel>
-		<h1 class="Import_Export_title">Import/Export options</h1>
-		<div class="Import_Export_serverExport">
+	<g:HTMLPanel styleName="layout vertical import-export-view">
 		
-			<div ui:field="collapsePanel" class="Import_Export_depricationInfo">
-			    <div class="Import_Export_expandPanel">
-					<p>
-					    Import and export via application service will be removed.
-					    <span class="Import_Export_expandIndicator"></span>
-					</p>
-				</div>
-				<div class="Import_Export_collapsed">
-					<p>I'm suggest to import all Your remaining data or use a file import/export.</p>
-					<p>This options will be removed from application <span class="Import_Export_highlight">Q2 2016</span>.</p>
-				</div>
+		<section class="import-file-section" ui:field="fileImportSection">
+			<h2 class="section-title">Import from file</h2>
+			<file-drop ui:field="fileDrop" class="fileDrop"></file-drop>
+			<div ui:field="fileImportSpinner" class="hidden">
+				<paper-spinner active="true" alt="Preparing data"></paper-spinner>
 			</div>
-			
-			
-			<div class="fileExport">
-				<h3>Import/Export to file</h3>
-				<div>
-					<g:Button styleName="button" ui:field="fileExport" text="Generate a file"></g:Button>
-					<h5:HTML5FileUpload ui:field="fileImport" multiple="false"></h5:HTML5FileUpload>
-				</div>
-				<div class="Import_Export_downloadFileLink hidden" ui:field="downloadFileAnchor">
-					Now you can <g:Anchor ui:field="fileDownload" text="Download file"></g:Anchor>
-				</div>
+			<import-data-table ui:field="importDataTable" class="hidden"></import-data-table>
+		</section>
+		<section class="import-file-section" ui:field="fileExportSection">
+			<h2 class="section-title">Export to file</h2>
+			<div ui:field="dataPrepareContainer" class="padding-section">
+				<p class="paper-font-caption">Prepare data to export first and wait until ready.</p>
+				<paper-button ui:field="dataPrepareButton" class="actionButton">Prepare data to export</paper-button>
 			</div>
-			
-			<div class="fileImport">
-				<g:InlineLabel ui:field="importFileLog"></g:InlineLabel>
-				<g:HTMLPanel ui:field="importPreview" visible="false">
-					<div class="Import_Export_importPrevControls">
-						<span class="Import_Export_importPrevTitle">Import preview</span>
-						<g:Button styleName="button" ui:field="saveImportedData" text="Save imported data"></g:Button>
-					</div>
-				</g:HTMLPanel>
+			<div class="hidden padding-section" ui:field="dataDownloadSpinner">
+				<paper-spinner active="true" alt="Preparing data"></paper-spinner>
 			</div>
-			
-			
-			
-			<h3>Application server export</h3>
-			<p>First step is to connect with server.<br/>When you install application on other machine you will be able to download all data.</p>
-			<p>
-				<g:Button styleName="button" ui:field="connectButton" text="Connect"></g:Button>
-				<g:InlineLabel styleName="Import_Export_connectedInfo" ui:field="loggedInInfo" text="You are already connected" visible="false"></g:InlineLabel>
-				<g:InlineLabel styleName="Import_Export_connectedInfo" ui:field="statusInfo" text=""></g:InlineLabel>
-			</p>
-			<p ui:field="connectNote" class="Import_Export_note">
-				This actually doesn't do nothing.<br/>
-				Requests are not automatically synchronized with server. Still you need press "Export" button. 
-			</p>
-			<div ui:field="storeDataPanel" class="Import_Export_storeDataPanel">
+			<div class="hidden padding-section" ui:field="dataDownload2">
+				<p class="paper-font-caption">Click on a button below to download your data.</p>
+				<paper-button raised="true" class="actionButton" ui:field="dataDownload2Button">Download file</paper-button>
+				<paper-button ui:field="dataDownloadCancel">Cancel</paper-button>
+			</div>
+		</section>
+		<section class="import-file-section" ui:field="serverSection">
+			<h2 class="section-title">Application server sync</h2>
+			<div ui:field="connectActionContainer" class="padding-section">
+				<paper-button raised="true" ui:field="connectButton">Connect with server</paper-button>
+			</div>
+			<div ui:field="storeDataPanel" class="padding-section">
+				<p class="paper-font-caption">You can store your date an application server and share it between different machines or people.</p>
 				<p>
-					Now you can store or restore your data.<br/>
-				</p>
-				<p>
-					<g:Button styleName="button" ui:field="storeData" text="Store current data on external server"></g:Button>
-					<g:Button styleName="button" ui:field="restoreData" text="Restore my data"></g:Button>
+					<paper-button ui:field="storeDataButton" class="actionButton">Store your data</paper-button>
+					<paper-button ui:field="restoreDataButton" class="actionButton">Restore your data</paper-button>
 				</p>
 			</div>
-			<div ui:field="shareUrlPanel" class="Import_Export_shareUrlPanel">
-				<p>
-					You can share all your saved requests data by giving someone link below
-				</p>
-				<pre class="Import_Export_shareLink" ui:field="shareLink">
-					
-				</pre>
+			<div ui:field="shareUrlPanel" class="padding-section">
+				<p class="paper-font-caption">You can share all your saved data by giving someone link below:</p>
+				<pre class="Import_Export_shareLink" ui:field="shareLink"></pre>
 			</div>
-		</div>
-		
-		
-		
-		<div class="Import_Export_backButton">
-			<g:Anchor ui:field="backSettings" href="about:blank">Back to settings</g:Anchor>
-		</div>
+			<div ui:field="serverSpinner" class="padding-section hidden">
+				<paper-spinner active="true" alt="Preparing data"></paper-spinner>
+			</div>
+			<server-import-data-table ui:field="serverImportDataTable" class="hidden"></server-import-data-table>
+		</section>
 	</g:HTMLPanel>
 </ui:UiBinder> 

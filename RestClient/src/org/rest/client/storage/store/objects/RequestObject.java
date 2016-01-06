@@ -18,12 +18,17 @@ package org.rest.client.storage.store.objects;
 import java.util.ArrayList;
 
 import org.rest.client.RestClient;
+import org.rest.client.jso.RequestDataJso;
 import org.rest.client.request.FilesObject;
-import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.LocalStore;
+import org.rest.client.storage.store.StoreKeys;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.chrome.storage.Storage;
+import com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback;
+import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
+import com.google.gwt.chrome.storage.StorageResult;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNumber;
@@ -72,7 +77,40 @@ public class RequestObject extends JavaScriptObject {
 		}
 	}-*/;
 	
-	
+	public static final native RequestObject fromImportData(RequestDataJso obj) /*-{
+		var headers = '';
+		if(obj.encoding){
+			headers += 'Content-Type: ' + obj.encoding;
+		}
+		if(obj.headers && obj.headers.length){
+			obj.headers.forEach(function(header){
+				if(header.key && header.value){
+					headers += '\n' + header.key + ': ' + header.value;
+				}
+			});
+		}
+		return {
+			id: -1,
+			name : obj.name,
+			project : 0,
+			url : obj.url,
+			method : obj.method,
+			encoding : null,
+			headers : headers,
+			payload : obj.post,
+			skipProtocol : false,
+			skipServer : false,
+			skipParams : false,
+			skipHistory : false,
+			skipMethod: false,
+			skipPayload: false,
+			skipHeaders: false,
+			skipPath: false,
+			time: Date.now(),
+			//additional, non DB fields
+			driveId: null
+		}
+	}-*/;
 	public final native int getId() /*-{
 		if(isNaN(this.id)){
 			this.id = 0;
@@ -435,45 +473,64 @@ public class RequestObject extends JavaScriptObject {
 		return to;
 	}
 	
-	
-	
 	/**
 	 * 
 	 * @param clientFactory
 	 * @param callback
 	 */
 	public static void restoreLatest(final Callback<RequestObject, Throwable> callback){
-		
-		final LocalStore store = RestClient.getClientFactory().getLocalStore();
-		store.open(new StoreResultCallback<Boolean>() {
+		Storage store = GWT.create(Storage.class);
+		JSONObject jo = new JSONObject();
+		jo.put(StoreKeys.LATEST_REQUEST_KEY, new JSONObject(null));
+		store.getLocal().get(jo.getJavaScriptObject(), new StorageItemsCallback() {
 			
 			@Override
-			public void onSuccess(Boolean result) {
-				if(!result){
-					callback.onFailure(null);
+			public void onError(String message) {
+				if(RestClient.isDebug()){
+					Log.error("RequestObject::restoreLatest - " + message);
+				}
+			}
+
+			@Override
+			public void onResult(JavaScriptObject data) {
+				StorageResult<RequestObject> result = data.cast();
+				if(result == null){
+					callback.onSuccess(null);
 					return;
 				}
-				store.getByKey(LocalStore.LATEST_REQUEST_KEY, new StoreResultCallback<String>() {
-					
-					@Override
-					public void onSuccess(String result) {
-						RequestObject ro = fromString(result);
-						callback.onSuccess(ro);
-					}
-					
-					@Override
-					public void onError(Throwable e) {
-						Log.error("Error perform getByKey.",e);
-						callback.onFailure(e);
-					}
-				});
-			}
-			
-			@Override
-			public void onError(Throwable e) {
-				callback.onFailure(e);
+				RequestObject ro = result.getObject(StoreKeys.LATEST_REQUEST_KEY).cast();
+				if(ro != null){
+					callback.onSuccess(ro);
+				} else {
+					Log.error("Error perform RequestObject::restoreLatest. Result is null.");
+					callback.onFailure(new Throwable("Error perform RequestObject::restoreLatest. Result is null."));
+				}
 			}
 		});
 	}
+	
+	/**
+	 * Store this request as a latest request
+	 */
+	public final void storeLastest(final Callback<Void, Throwable> callback){
+		Storage store = GWT.create(Storage.class);
+		JSONObject requestData = toJSONObject();
+		JSONObject save = new JSONObject();
+		save.put(StoreKeys.LATEST_REQUEST_KEY, requestData);
+		store.getLocal().set(save.getJavaScriptObject(), new StorageSimpleCallback() {
+			
+			@Override
+			public void onError(String message) {
+				callback.onFailure(new Throwable(message));
+			}
+			
+			@Override
+			public void onDone() {
+				Void v = GWT.create(Void.class);
+				callback.onSuccess(v);
+			}
+		});
+	}
+	
 	
 }

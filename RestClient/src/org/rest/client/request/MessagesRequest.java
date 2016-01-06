@@ -21,7 +21,7 @@ public class MessagesRequest extends ApplicationRequest {
 		void onMessages(ArrayList<MessageObject> result);
 	}
 	
-	public static void getMessages(long since, final MessagesHandler handler){
+	public static void getMessages(double since, final MessagesHandler handler){
 		RequestBuilder b = getApplicationRequestBuilder(MESSAGES_URL+since, "GET");
 		b.setLoadHandler(new LoadHandler() {
 
@@ -67,10 +67,10 @@ public class MessagesRequest extends ApplicationRequest {
 					JSONValue itemValue = bodyArr.get(i);
 					JSONObject obj = itemValue.isObject();
 					if(obj == null) continue;
-					String title = obj.get("title").isString().stringValue();
+					String actionUrl = obj.get("actionUrl").isString().stringValue();
 					String message = obj.get("message").isString().stringValue();
 					String created = obj.get("created").isString().stringValue();
-					MessageObject nEvent = new MessageObject(title, message, created);
+					MessageObject nEvent = new MessageObject(actionUrl, message, created);
 					result.add(nEvent);
 				}
 				handler.onMessages(result);

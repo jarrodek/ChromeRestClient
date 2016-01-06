@@ -65,6 +65,7 @@ public class TasksLoader {
 	 * @param callback
 	 */
 	public static void runTasks(Callback<Void, Void> callback){
+		//time("Tasks loader");
 		Void v = GWT.create(Void.class);
 		if(!hasMoreTasks()){
 			callback.onSuccess(v);
@@ -87,9 +88,13 @@ public class TasksLoader {
 		new Timer() {
 			@Override
 			public void run() {
-				runTasks();
+				try{
+					runTasks();
+				} catch(Exception e){
+					Log.error("Unable to load tasks.", e);
+				}
 			}
-		}.schedule(300);
+		}.schedule(0);
 		
 	}
 	/**
@@ -139,6 +144,7 @@ public class TasksLoader {
 				public void execute() {
 					Void v = GWT.create(Void.class);
 					appCallback.onSuccess(v);
+					//timeEnd("Tasks loader");
 				}
 			});
 			return;
@@ -149,7 +155,11 @@ public class TasksLoader {
 	}
 	
 	private static void callTask(final LoadTask task, final boolean tryAgainOnFailure){
-		
+		if(RestClient.isDebug()){
+			Log.debug("Calling task: " + task.getClass().getSimpleName());
+		}
+		//final String timeName = "Starting task: " + task.getClass().getSimpleName();
+		//time(timeName);
 		task.run(new TasksCallback() {
 			
 			@Override
@@ -158,9 +168,10 @@ public class TasksLoader {
 				new Timer() {
 					@Override
 					public void run() {
+						//timeEnd(timeName);
 						runTasks();
 					}
-				}.schedule(200);
+				}.schedule(0);
 			}
 			
 			@Override
@@ -172,10 +183,12 @@ public class TasksLoader {
 			@Override
 			public void onFailure(int finished) {
 				if(tryAgainOnFailure){
+					//timeEnd(timeName);
 					callTask(task, false);
 					return;
 				}
 				taskFinished += task.getTasksCount() - finished;
+				//timeEnd(timeName);
 				removeTask(task);
 				updateLoader();
 				runTasks();
@@ -188,4 +201,11 @@ public class TasksLoader {
 
 		}, !tryAgainOnFailure);
 	}
+	
+	private final native static void time(String name) /*-{
+		console.time(name);
+	}-*/;
+	private final native static void timeEnd(String name) /*-{
+		console.timeEnd(name);
+	}-*/;
 }

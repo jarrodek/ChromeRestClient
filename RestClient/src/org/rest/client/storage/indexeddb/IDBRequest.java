@@ -15,23 +15,35 @@
  ******************************************************************************/
 package org.rest.client.storage.indexeddb;
 
+import org.rest.client.dom.error.DOMError;
+
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
+ * <p>
  * The IDBRequest interface of the IndexedDB API provides access to results of
  * asynchronous requests to databases and database objects using event handler
  * attributes. Each reading and writing operation on a database is done using a
  * request.
- * 
+ * </p>
+ * <p>
  * The request object does not initially contain any information about the
  * result of the operation, but once information becomes available, an event is
  * fired on the request, and the information becomes available through the
  * properties of the IDBRequest instance.
- * 
+ * </p>
+ * <p>
+ * All asynchronous operations immediately return an IDBRequest instance. Each
+ * request has a readyState that is set to the pending state; this changes to
+ * done when the request is completed or fails. When the state is set to done,
+ * every request returns a result and an error, and an event is fired on the
+ * request. When the state is still pending, any attempt to access the result or
+ * error raises an InvalidStateError exception.
+ * </p>
+ * <p>
  * See <a href="https://developer.mozilla.org/en/IndexedDB/IDBRequest">https://
  * developer.mozilla.org/en/IndexedDB/IDBRequest</a>
- * 
- * <br/>
+ * </p>
  * 
  * <b>Example</b>
  * 
@@ -51,78 +63,106 @@ import com.google.gwt.core.client.JavaScriptObject;
  * <code>
  * </pre>
  * 
- * @author jarrod
- * @param T expected result type
+ * @author Pawel Psztyc
+ * @param T
+ *            expected result type
  */
 public class IDBRequest<T> extends JavaScriptObject {
-	public static final int LOADING = 1;
+	public static final int PENDING = 1;
 	public static final int DONE = 2;
 
 	protected IDBRequest() {
 	}
 
 	/**
-	 * The following error codes are returned under certain conditions:
-	 * <ul>
-	 * <li>ABORT_ERR — If you abort the transaction, then all requests still in
-	 * progress receive this error.</li>
-	 * <li>CONSTRAINT_ERR — If you insert data that doesn't conform to a
-	 * constraint. It's an exception type for creating stores and indexes. You
-	 * get this error, for example, if you try to add a new key that already
-	 * exists in the record.</li>
-	 * <li>QUOTA_ERR — If you run out of disk quota and the user declined to
-	 * grant you more space.</li>
-	 * <li>UNKNOWN_ERR — If the operation failed for reasons unrelated to the
-	 * database itself. A failure due to disk IO errors is such an example.</li>
-	 * <li>NO_ERR — If the request succeeds.</li>
-	 * <li>VERSION_ERR — If you try to open a database with a version lower than
-	 * the one it already has.</li>
+	 * The error property of the {@link IDBRequest} interface returns the error
+	 * in the event of an unsuccessful request.
 	 * 
-	 * In addition to the error codes sent to the IDBRequest object,
-	 * asynchronous operations can also raise exceptions. The list describes
-	 * problems that could occur when the request is being executed, but you
-	 * might also encounter other problems when the request is being made. For
-	 * more information on all error codes that could occur, see
-	 * {@link IDBDatabaseException}.
-	 * <p>
-	 * See <a
-	 * href="https://developer.mozilla.org/en/IndexedDB/IDBRequest">https:
-	 * //developer.mozilla.org/en/IndexedDB/IDBRequest</a> for more details
-	 * </p>
+	 * @return A DOMError containing the relevant error. See
+	 *         {@link org.rest.client.dom.error} package for available errors.
+	 * 
+	 *         The following error codes are returned under certain conditions:
+	 *         <p>
+	 *         AbortError - If you abort the transaction, then all requests
+	 *         still in progress receive this error.
+	 *         </p>
+	 *         <p>
+	 *         ConstraintError - If you insert data that doesn't conform to a
+	 *         constraint. It's an exception type for creating stores and
+	 *         indexes. You get this error, for example, if you try to add a new
+	 *         key that already exists in the record.
+	 *         </p>
+	 *         <p>
+	 *         QuotaExceededError - If you run out of disk quota and the user
+	 *         declined to grant you more space.
+	 *         </p>
+	 *         <p>
+	 *         UnknownError - If the operation failed for reasons unrelated to
+	 *         the database itself. A failure due to disk IO errors is such an
+	 *         example.
+	 *         </p>
+	 *         <p>
+	 *         NoError - If the request succeeds.
+	 *         </p>
+	 *         <p>
+	 *         VersionError - If you try to open a database with a version lower
+	 *         than the one it already has.
+	 *         </p>
+	 * 
+	 *         In addition to the error codes sent to the IDBRequest object,
+	 *         asynchronous operations can also raise exceptions. The list
+	 *         describes problems that could occur when the request is being
+	 *         executed, but you might also encounter other problems when the
+	 *         request is being made. For example, if the the request failed and
+	 *         the result is not available, the InvalidStateError exception is
+	 *         thrown.
 	 */
-	public final native int getErrorCode() /*-{
-		return this.errorCode;
+	public final native DOMError getError() /*-{
+		return this.error;
 	}-*/;
 
 	/**
-	 * Every request starts in the LOADING state. The state changes to DONE when
-	 * the request completes successfully or when an error occurs.
 	 * <p>
-	 * See <a
-	 * href="https://developer.mozilla.org/en/IndexedDB/IDBRequest">https:
+	 * The readyState property of the IDBRequest interface returns the state of
+	 * the request.
+	 * </p>
+	 * 
+	 * <p>
+	 * Every request starts in the pending state. The state changes to done when
+	 * the request completes successfully or when an error occurs.
+	 * </p>
+	 * 
+	 * <p>
+	 * See
+	 * <a href="https://developer.mozilla.org/en/IndexedDB/IDBRequest">https:
 	 * //developer.mozilla.org/en/IndexedDB/IDBRequest</a> for more details
 	 * </p>
 	 * 
-	 * @return The state of the request.
+	 * @return The IDBRequestReadyState of the request, which takes one of the
+	 *         following two values: {@link #PENDING} - The request is pending.
+	 *         <br/>
+	 *         {@link #DONE} - The request is done.
 	 */
 	public final native int getReadyState() /*-{
 		return this.readyState;
 	}-*/;
 
 	/**
-	 * Returns the result of the request. If the the request failed and the
-	 * result is not available, the NOT_ALLOWED_ERR exception is thrown.
+	 * The result property of the {@link IDBRequest} interface returns the
+	 * result of the request. If the the request failed and the result is not
+	 * available, an {@link InvalidStateError} exception is thrown.
 	 * <p>
-	 * See <a
-	 * href="https://developer.mozilla.org/en/IndexedDB/IDBRequest">https:
+	 * See
+	 * <a href="https://developer.mozilla.org/en/IndexedDB/IDBRequest">https:
 	 * //developer.mozilla.org/en/IndexedDB/IDBRequest</a> for more details
 	 * </p>
 	 * 
 	 * <p>
-	 * 	If numeric data is returned (eg {@link T} class is Long) this method returns Long value. 
+	 * If numeric data is returned (eg {@link T} class is Long) this method
+	 * returns Long value.
 	 * </p>
 	 * 
-	 * @return the result of the request.
+	 * @return An IDBObjectStore containing the result of the request.
 	 */
 	public final native T getResult() /*-{
 		if(typeof this.result == 'number'){
@@ -135,21 +175,24 @@ public class IDBRequest<T> extends JavaScriptObject {
 	}-*/;
 
 	/**
+	 * The source property of the {@link IDBRequest} interface returns the
+	 * source of the request, such as an Index or an object store. If no source
+	 * exists (such as when calling {@link IDBFactory#open(String)}), it returns
+	 * null.
 	 * 
-	 * @return The source of the request, such as an Index or a ObjectStore. If
-	 *         no source exists (such as when calling indexedDB.open()), it
-	 *         returns null.
+	 * @return An object representing the source of the request, such as an
+	 *         IDBIndex, IDBObjectStore or IDBCursor.
 	 */
 	public final native IDBFactory getSource() /*-{
 		return this.source;
 	}-*/;
 
 	/**
+	 * The transaction property of the {@link IDBRequest} interface returns the
+	 * transaction for the request, that is, the transaction the request is
+	 * being made inside.
 	 * 
-	 * @return The transaction for the request. This property can be null for
-	 *         certain requests, such as for request returned from
-	 *         IDBFactory.open (You're just connecting to a database, so there
-	 *         is no transaction to return).
+	 * @return An {@link IDBTransaction}.
 	 */
 	public final native IDBTransaction getTransaction() /*-{
 		return this.transaction;
@@ -175,12 +218,5 @@ public class IDBRequest<T> extends JavaScriptObject {
 		this.onsuccess = function() {
 			handler.@org.rest.client.storage.indexeddb.IDBSuccessHandler::onSuccess()();
 		}
-	}-*/;
-	/**
-	 * Determine if should use setVersion function or open() with version value
-	 * @return if true you need use setVersion function
-	 */
-	public final native boolean useSetVersionToUpgrade()/*-{
-		return !('onupgradeneeded' in this);
 	}-*/;
 }

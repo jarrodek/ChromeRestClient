@@ -18,21 +18,6 @@ import com.google.code.gwt.database.client.service.VoidCallback;
  * 
  */
 public interface HistoryService extends AppDatabase {
-	/**
-	 * Create database table. Schema: <br/>
-	 * <code>url</code> - Requests url<br/>
-	 * <code>data</code> - data to save (Rest params to string). <br/>
-	 * <code>time</code> - insert time <br/>
-	 * 
-	 * @param callback
-	 *            callback function
-	 */
-	@Update("CREATE TABLE IF NOT EXISTS history ("
-			+ "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
-			+ "url TEXT NOT NULL, " + "method TEXT NOT NULL, "
-			+ "encoding TEXT NULL, " + "headers TEXT NULL, "
-			+ "payload TEXT NULL, " + "time INTEGER)")
-	void initTable(VoidCallback callback);
 
 	/**
 	 * Insert header data.

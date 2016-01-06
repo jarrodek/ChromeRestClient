@@ -14,27 +14,7 @@ public class StatusCodeRow extends JavaScriptObject {
 	 */
 	protected StatusCodeRow() {
 	}
-
-	public static final native StatusCodeRow create() /*-{
-		return {
-			label : null,
-			code : -1,
-			desc : null
-		};
-	}-*/;
-
-	public final native void setLabel(String label) /*-{
-		this.label = label;
-	}-*/;
-
-	public final native void setCode(int code) /*-{
-		this.code = code;
-	}-*/;
-
-	public final native void setDesc(String desc) /*-{
-		this.desc = desc;
-	}-*/;
-
+	
 	/**
 	 * Return label field.
 	 * 

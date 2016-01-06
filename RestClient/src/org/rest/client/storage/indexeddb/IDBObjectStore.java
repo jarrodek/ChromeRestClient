@@ -21,14 +21,15 @@ import com.google.gwt.core.client.JavaScriptObject;
 /**
  * The IDBObjectStore interface of the IndexedDB API represents an object store
  * in a database. Records within an object store are sorted according to their
- * keys. This sorting enable fast insertion, look-up, and ordered retrieval.
+ * keys. This sorting enables fast insertion, look-up, and ordered retrieval.
  * 
- * See <a
- * href="https://developer.mozilla.org/en/IndexedDB/IDBObjectStore">https:
+ * See
+ * <a href="https://developer.mozilla.org/en/IndexedDB/IDBObjectStore">https:
  * //developer.mozilla.org/en/IndexedDB/IDBObjectStore</a>
  * 
  * @author jarrod
- * @param K key type used in datastore
+ * @param K
+ *            key type used in datastore
  */
 public class IDBObjectStore<K> extends JavaScriptObject {
 	protected IDBObjectStore() {
@@ -43,9 +44,9 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 * transaction set to the transaction in which this object store is opened.
 	 * If a record already exists in the object store with the key parameter as
 	 * its key, then an error event is fired on the returned request object,
-	 * with code set to {@link IDBDatabaseException#CONSTRAINT_ERR} See <a
-	 * href="https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#add"
-	 * >https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#add</a>
+	 * with code set to {@link IDBDatabaseException#CONSTRAINT_ERR} See
+	 * <a href="https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#add" >
+	 * https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#add</a>
 	 * 
 	 * @param value
 	 *            The value to be stored.
@@ -53,9 +54,9 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 * @throws IDBDatabaseException
 	 */
 	public final IDBRequest<?> add(JavaScriptObject value) throws IDBDatabaseException {
-		try{
+		try {
 			return addImpl(value, null);
-		} catch(JavaScriptException e){
+		} catch (JavaScriptException e) {
 			throw new IDBDatabaseException(e);
 		}
 	}
@@ -71,9 +72,9 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 * its key, then an error event is fired on the returned request object,
 	 * with code set to {@link IDBDatabaseException#CONSTRAINT_ERR}
 	 * 
-	 * See <a
-	 * href="https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#add"
-	 * >https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#add</a>
+	 * See
+	 * <a href="https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#add" >
+	 * https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#add</a>
 	 * 
 	 * @param value
 	 *            The value to be stored.
@@ -83,18 +84,16 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 * @return
 	 * @throws IDBDatabaseException
 	 */
-	public final IDBRequest<?> add(JavaScriptObject value, Object key)
-			throws IDBDatabaseException {
-		try{
+	public final IDBRequest<?> add(JavaScriptObject value, Object key) throws IDBDatabaseException {
+		try {
 			return addImpl(value, key);
-		} catch(JavaScriptException e){
+		} catch (JavaScriptException e) {
 			throw new IDBDatabaseException(e);
 		}
 	}
 
-	private final native IDBRequest<?> addImpl(JavaScriptObject value, Object key)
-			throws JavaScriptException /*-{
-		if(!key){
+	private final native IDBRequest<?> addImpl(JavaScriptObject value, Object key) throws JavaScriptException /*-{
+		if (!key) {
 			return this.add(value);
 		}
 		return this.add(value, key);
@@ -108,32 +107,32 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 * creates and immediately returns an {@link IDBRequest} object, and clears
 	 * this object store in a separate thread. Clearing an object store consists
 	 * of removing all records from the object store and removing all records in
-	 * indexes that reference the object store. See <a
-	 * href="https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#clear"
+	 * indexes that reference the object store. See
+	 * <a href="https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#clear"
 	 * >https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#clear</a>
 	 * 
 	 * @return
 	 * @throws IDBDatabaseException
 	 */
 	public final IDBRequest<Void> clear() throws IDBDatabaseException {
-		try{
+		try {
 			return clearImpl();
-		} catch(JavaScriptException e){
+		} catch (JavaScriptException e) {
 			throw new IDBDatabaseException(e);
 		}
 	}
-	
+
 	private final native IDBRequest<Void> clearImpl() throws JavaScriptException /*-{
 		return this.clear();
 	}-*/;
-	
+
 	/**
 	 * Immediately returns an {@link IDBRequest} object and asynchronously count
 	 * the amount of objects in the object store that match the parameter, a key
 	 * or a key range. If the parameter is not valid returns an exception.
 	 * 
-	 * See <a
-	 * href="https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#count"
+	 * See
+	 * <a href="https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#count"
 	 * >https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#count</a>
 	 * 
 	 * @return A request object on which subsequent events related to this
@@ -141,20 +140,20 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 * @throws IDBDatabaseException
 	 */
 	public final IDBRequest<Integer> count() throws IDBDatabaseException {
-		try{
+		try {
 			return countImpl(null);
-		} catch(JavaScriptException e){
+		} catch (JavaScriptException e) {
 			throw new IDBDatabaseException(e);
 		}
 	}
-	
+
 	/**
 	 * Immediately returns an {@link IDBRequest} object and asynchronously count
 	 * the amount of objects in the object store that match the parameter, a key
 	 * or a key range. If the parameter is not valid returns an exception.
 	 * 
-	 * See <a
-	 * href="https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#count"
+	 * See
+	 * <a href="https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#count"
 	 * >https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#count</a>
 	 * 
 	 * @param key
@@ -165,24 +164,25 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 * @throws IDBDatabaseException
 	 */
 	public final IDBRequest<Integer> count(K key) throws IDBDatabaseException {
-		try{
+		try {
 			return countImpl(key);
-		} catch(JavaScriptException e){
+		} catch (JavaScriptException e) {
 			throw new IDBDatabaseException(e);
 		}
 	}
-	
+
 	private final native IDBRequest<Integer> countImpl(K key) throws JavaScriptException /*-{
 		return this.count(key);
 	}-*/;
+
 	/**
 	 * Creates and returns a new index in the connected database. Note that this
 	 * method must be called only from a {@link IDBTransaction#VERSION_CHANGE}
 	 * transaction callback.
 	 * 
 	 * See <a href=
-	 * "https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#createIndex"
-	 * >https
+	 * "https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#createIndex" >
+	 * https
 	 * ://developer.mozilla.org/en/IndexedDB/IDBObjectStore#createIndex</a>
 	 * 
 	 * @param name
@@ -194,20 +194,21 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 * @throws IDBDatabaseException
 	 */
 	public final IDBIndex<K> createIndex(String name, String keyPath) throws IDBDatabaseException {
-		try{
+		try {
 			return createIndexImpl(name, keyPath, null);
-		} catch(JavaScriptException e){
+		} catch (JavaScriptException e) {
 			throw new IDBDatabaseException(e);
 		}
 	}
+
 	/**
 	 * Creates and returns a new index in the connected database. Note that this
 	 * method must be called only from a {@link IDBTransaction#VERSION_CHANGE}
 	 * transaction callback.
 	 * 
 	 * See <a href=
-	 * "https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#createIndex"
-	 * >https
+	 * "https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#createIndex" >
+	 * https
 	 * ://developer.mozilla.org/en/IndexedDB/IDBObjectStore#createIndex</a>
 	 * 
 	 * @param name
@@ -230,20 +231,20 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 * @return The newly created index.
 	 * @throws IDBDatabaseException
 	 */
-	public final IDBIndex<K> createIndex(String name, String keyPath,
-			IDBIndexParameters parameters) throws IDBDatabaseException {
-		try{
+	public final IDBIndex<K> createIndex(String name, String keyPath, IDBIndexParameters parameters)
+			throws IDBDatabaseException {
+		try {
 			return createIndexImpl(name, keyPath, parameters);
-		} catch(JavaScriptException e){
+		} catch (JavaScriptException e) {
 			throw new IDBDatabaseException(e);
 		}
 	}
-	
-	private final native IDBIndex<K> createIndexImpl(String name, String keyPath,
-			IDBIndexParameters parameters) throws JavaScriptException /*-{
+
+	private final native IDBIndex<K> createIndexImpl(String name, String keyPath, IDBIndexParameters parameters)
+			throws JavaScriptException /*-{
 		return this.createIndex(name, keyPath, parameters);
 	}-*/;
-	
+
 	/**
 	 * Immediately returns an {@link IDBRequest} object, and removes the record
 	 * specified by the given key from this object store, and any indexes that
@@ -256,9 +257,9 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 * the result set to undefined, and transaction set to the transaction in
 	 * which this object store is opened.
 	 * 
-	 * See <a
-	 * href="https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#delete"
-	 * >https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#delete</a>
+	 * See <a href=
+	 * "https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#delete" >https
+	 * ://developer.mozilla.org/en/IndexedDB/IDBObjectStore#delete</a>
 	 * 
 	 * @param key
 	 *            The key to use to identify the record.
@@ -267,30 +268,34 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 * @throws IDBDatabaseException
 	 */
 	public final IDBRequest<Void> delete(K key) throws IDBDatabaseException {
-		try{
-			if(key instanceof Long){
-				return deleteNumericImpl(((Long)key).doubleValue());
+		try {
+			if (key instanceof Long) {
+				return deleteNumericImpl(((Long) key).doubleValue());
 			}
 			return deleteImpl(key);
-		} catch(JavaScriptException e){
+		} catch (JavaScriptException e) {
 			throw new IDBDatabaseException(e);
 		}
 	}
-	private final native IDBRequest<Void> deleteNumericImpl(double key) throws JavaScriptException /*-{
-		
+
+	private final native IDBRequest<Void> deleteNumericImpl(double key)
+			throws JavaScriptException /*-{
+
 		return this["delete"](key);
 	}-*/;
+
 	private final native IDBRequest<Void> deleteImpl(K key) throws JavaScriptException /*-{
 		return this["delete"](key);
 	}-*/;
+
 	/**
 	 * Destroys the index with the specified name in the connected database.
 	 * Note that this method must be called only from a
 	 * {@link IDBTransaction#VERSION_CHANGE} transaction callback.
 	 * 
 	 * See <a href=
-	 * "https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#deleteIndex"
-	 * >https
+	 * "https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#deleteIndex" >
+	 * https
 	 * ://developer.mozilla.org/en/IndexedDB/IDBObjectStore#deleteIndex</a>
 	 * 
 	 * @param indexName
@@ -298,15 +303,17 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 * @throws IDBDatabaseException
 	 */
 	public final void deleteIndex(String indexName) throws IDBDatabaseException {
-		try{
+		try {
 			deleteIndexImpl(indexName);
-		} catch(JavaScriptException e){
+		} catch (JavaScriptException e) {
 			throw new IDBDatabaseException(e);
 		}
 	}
+
 	private final native void deleteIndexImpl(String indexName) throws JavaScriptException /*-{
 		this.deleteIndex(indexName);
 	}-*/;
+
 	/**
 	 * Immediately returns an {@link IDBRequest} object, and retrieves the
 	 * requested record from the object store in a separate thread. If the
@@ -325,9 +332,9 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 * cursor if the record exists, and not if it does not.
 	 * </p>
 	 * 
-	 * See <a
-	 * href="https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#get"
-	 * >https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#get</a>
+	 * See
+	 * <a href="https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#get" >
+	 * https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#get</a>
 	 * 
 	 * @param key
 	 *            The key identifying the record to retrieve.
@@ -336,26 +343,29 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 * @throws IDBDatabaseException
 	 */
 	public final IDBRequest<?> get(K key) throws IDBDatabaseException {
-		try{
-			if(key instanceof Long){
-				return getNumericImpl(((Long)key).doubleValue());
+		try {
+			if (key instanceof Long) {
+				return getNumericImpl(((Long) key).doubleValue());
 			}
 			return getImpl(key);
-		} catch(JavaScriptException e){
+		} catch (JavaScriptException e) {
 			throw new IDBDatabaseException(e);
 		}
 	}
+
 	private final native IDBRequest<?> getNumericImpl(double key) throws JavaScriptException /*-{
 		return this.get(key);
 	}-*/;
+
 	private final native IDBRequest<?> getImpl(K key) throws JavaScriptException /*-{
 		return this.get(key);
 	}-*/;
+
 	/**
 	 * Opens the named index in this object store.
 	 * 
-	 * See <a
-	 * href="https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#index"
+	 * See
+	 * <a href="https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#index"
 	 * >https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#index</a>
 	 * 
 	 * @param name
@@ -364,15 +374,19 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 * @throws IDBDatabaseException
 	 */
 	public final IDBIndex<K> index(String name) throws IDBDatabaseException {
-		try{
+		try {
 			return indexImpl(name);
-		} catch(JavaScriptException e){
+		} catch (JavaScriptException e) {
 			throw new IDBDatabaseException(e);
 		}
 	}
+
 	private final native IDBIndex<K> indexImpl(String name) throws JavaScriptException /*-{
 		return this.index(name);
 	}-*/;
+
+	
+
 	/**
 	 * Immediately returns an {@link IDBRequest} object, and creates a cursor
 	 * over the records in this object store, in a separate thread. If there is
@@ -383,42 +397,8 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 * result set to null.
 	 * 
 	 * See <a href=
-	 * "https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#openCursor"
-	 * >https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#openCursor</a>
-	 * 
-	 * @param range
-	 *            The key range to use as the cursor's range. If this parameter
-	 *            is unspecified or null, then the range includes all the
-	 *            records in the object store.
-	 * @param direction
-	 *            The cursor's direction. One of {@link IDBCursor#NEXT},
-	 *            {@link IDBCursor#NEXT_NO_DUPLICATE}, {@link IDBCursor#PREV} or
-	 *            {@link IDBCursor#PREV_NO_DUPLICATE}
-	 * @return A request object on which subsequent events related to this
-	 *         operation are fired.
-	 * @throws IDBDatabaseException
-	 * @deprecated
-	 */
-	public final IDBRequest<?> openCursor(IDBKeyRange range, int direction)
-			throws IDBDatabaseException {
-		try{
-			return openCursorImpl(range, direction);
-		} catch(JavaScriptException e){
-			throw new IDBDatabaseException(e);
-		}
-	}
-	/**
-	 * Immediately returns an {@link IDBRequest} object, and creates a cursor
-	 * over the records in this object store, in a separate thread. If there is
-	 * even a single record that matches the key range, then a success event is
-	 * fired on the returned object, with its result set to the
-	 * {@link IDBCursor} object for the new cursor. If no records match the key
-	 * range, then a success event is fired on the returned object, with its
-	 * result set to null.
-	 * 
-	 * See <a href=
-	 * "https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#openCursor"
-	 * >https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#openCursor</a>
+	 * "https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#openCursor" >
+	 * https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#openCursor</a>
 	 * 
 	 * @param range
 	 *            The key range to use as the cursor's range. If this parameter
@@ -426,36 +406,35 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 *            records in the object store.
 	 * @param direction
 	 *            The cursor's direction. One of {@link IDBCursor#CURSOR_NEXT},
-	 *            {@link IDBCursor#CURSOR_NEXT_NO_DUPLICATE}, {@link IDBCursor#CURSOR_PREV} or
+	 *            {@link IDBCursor#CURSOR_NEXT_NO_DUPLICATE},
+	 *            {@link IDBCursor#CURSOR_PREV} or
 	 *            {@link IDBCursor#CURSOR_PREV_NO_DUPLICATE}
 	 * @return A request object on which subsequent events related to this
 	 *         operation are fired.
 	 * @throws IDBDatabaseException
 	 */
-	public final IDBRequest<?> openCursor(IDBKeyRange range, String direction)
-			throws IDBDatabaseException {
-		try{
+	public final IDBRequest<?> openCursor(IDBKeyRange range, String direction) throws IDBDatabaseException {
+		try {
 			return openCursorImpl(range, direction);
-		} catch(JavaScriptException e){
+		} catch (JavaScriptException e) {
 			throw new IDBDatabaseException(e);
 		}
 	}
-	/**
-	 * @deprecated use new API implementation {@link IDBObjectStore#openCursorImpl(IDBKeyRange, String)} instead.
-	 */
-	private final native IDBRequest<?> openCursorImpl(IDBKeyRange range, int direction) throws JavaScriptException /*-{
-		return this.openCursor(range, direction);
-	}-*/;
+
+	
 	/**
 	 * Native implementation of open cursor.
+	 * 
 	 * @param range
 	 * @param direction
 	 * @return
 	 * @throws JavaScriptException
 	 */
-	private final native IDBRequest<?> openCursorImpl(IDBKeyRange range, String direction) throws JavaScriptException /*-{
+	private final native IDBRequest<?> openCursorImpl(IDBKeyRange range, String direction)
+			throws JavaScriptException /*-{
 		return this.openCursor(range, direction);
 	}-*/;
+
 	/**
 	 * Returns an {@link IDBRequest} object, and, in a separate thread, creates
 	 * a structured clone of the value, and stores the cloned value in the
@@ -464,9 +443,9 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 * interface, with the result set to the key for the stored record, and
 	 * transaction set to the transaction in which this object store is opened.
 	 * 
-	 * See <a
-	 * href="https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#put"
-	 * >https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#put</a>
+	 * See
+	 * <a href="https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#put" >
+	 * https://developer.mozilla.org/en/IndexedDB/IDBObjectStore#put</a>
 	 * 
 	 * @param value
 	 *            The value to be stored.
@@ -477,14 +456,14 @@ public class IDBObjectStore<K> extends JavaScriptObject {
 	 *         operation are fired.
 	 * @throws IDBDatabaseException
 	 */
-	public final IDBRequest<?> put(JavaScriptObject value, K key)
-			throws IDBDatabaseException {
-		try{
+	public final IDBRequest<?> put(JavaScriptObject value, K key) throws IDBDatabaseException {
+		try {
 			return putImpl(value, key);
-		} catch(JavaScriptException e){
+		} catch (JavaScriptException e) {
 			throw new IDBDatabaseException(e);
 		}
 	}
+
 	private final native IDBRequest<?> putImpl(JavaScriptObject value, K key) throws JavaScriptException /*-{
 		if(!key){
 			return this.put(value);

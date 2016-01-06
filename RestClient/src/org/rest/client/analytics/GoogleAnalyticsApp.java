@@ -31,12 +31,11 @@ public class GoogleAnalyticsApp {
 	 * @return GA service as a javascript object.
 	 */
 	private final native static JavaScriptObject initService() /*-{
-		if (typeof $wnd.goog === 'undefined' || typeof $wnd.goog.require === 'undefined') {
+		if (typeof $wnd.analytics === 'undefined' || typeof $wnd.analytics.getService === 'undefined') {
 			console
 					.error('Google Analytics code not ready. Maybe you forgot to include library?');
 			return null;
 		}
-		$wnd.goog.require('analytics.getService');
 		return $wnd.analytics.getService('AdvancedRestClient');
 	}-*/;
 
@@ -85,7 +84,7 @@ public class GoogleAnalyticsApp {
 		if (!tracker) {
 			return null;
 		}
-		tracker.sendAppView(name);
+		tracker.sendEvent(category, action, label);
 	}-*/;
 
 	/**
@@ -102,6 +101,7 @@ public class GoogleAnalyticsApp {
 		if (!tracker) {
 			return null;
 		}
+		
 		tracker.sendAppView(name);
 	}-*/;
 	

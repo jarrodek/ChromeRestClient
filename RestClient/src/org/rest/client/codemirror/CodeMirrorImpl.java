@@ -20,7 +20,10 @@ public class CodeMirrorImpl extends JavaScriptObject {
 			}
 		});
 		var inst = $wnd.CodeMirror.fromTextArea(element, options);
-		$wnd.rca__lastcminstance = inst;
+		if(!$wnd.arc__cainstances){
+			$wnd.arc__cainstances = [];
+		}
+		$wnd.arc__cainstances.push(inst);
 		return inst;
 	}-*/;
 

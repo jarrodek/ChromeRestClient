@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import org.rest.client.event.RequestChangeEvent;
 import org.rest.client.event.RequestEndEvent;
 import org.rest.client.event.RequestStartActionEvent;
+import org.rest.client.jso.UrlRow;
 import org.rest.client.request.FilesObject;
 import org.rest.client.request.FormPayloadData;
 import org.rest.client.request.HttpMethodOptions;
@@ -18,21 +19,25 @@ import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.request.RequestPayloadParser;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
-import org.rest.client.storage.store.LocalStore;
+import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
+import org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultsCallback;
 import org.rest.client.storage.store.objects.HistoryObject;
 import org.rest.client.storage.store.objects.RequestObject;
-import org.rest.client.storage.websql.UrlRow;
 import org.rest.client.ui.ErrorDialogView;
-import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.google.gwt.chrome.def.BackgroundPageCallback;
+import com.google.gwt.chrome.def.BackgroundJsCallback;
+import com.google.gwt.chrome.storage.Storage;
+import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.file.client.File;
 import com.google.gwt.file.client.FileList;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.xhr2.client.AbortHandler;
 import com.google.gwt.xhr2.client.ErrorHandler;
@@ -102,7 +107,7 @@ public class AppRequestFactory {
 		if(RestClient.isDebug()){
 			Log.error(message, reason);
 		}
-		StatusNotification.notify(message, StatusNotification.TYPE_CRITICAL, StatusNotification.TIME_LONG, true);
+		StatusNotification.notify(message, StatusNotification.TIME_LONG);
 		eventBus.fireEvent(new RequestEndEvent(false, null, 0));
 	}
 	
@@ -150,22 +155,23 @@ public class AppRequestFactory {
 				if(payload != null && !payload.isEmpty()){
 					data.setPayload(mv.apply(payload));
 				}
-				
-				RestClient.getClientFactory().getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_REQUEST_BEGIN, data.toJSON(), new BackgroundPageCallback() {
+				if(RestClient.isDebug()){
+					Log.debug("Sending start signal to background page.");
+				}
+				RestClient.getClientFactory().getChromeMessagePassing().postMessage(ExternalEventsFactory.EXT_REQUEST_BEGIN, data, new BackgroundJsCallback() {
 					@Override
-					public void onSuccess(String result) {
+					public void onSuccess(Object message) {
 						if(RestClient.isDebug()){
 							Log.debug("Message to background page passed.");
 						}
 						startHttpRequest(data);
 					}
-
+					
 					@Override
 					public void onError(String message) {
 						reportFailure("Unknown error occured: " + message,null);
 					}
 				});
-				
 			}
 			
 			@Override
@@ -411,17 +417,22 @@ public class AppRequestFactory {
 	 */
 	private static void saveCurrentState(final RequestObject data){
 		try{
-			String saveData = data.toJSON();
-			RestClient.getClientFactory().getLocalStore().put(saveData, LocalStore.LATEST_REQUEST_KEY, new StoreResultCallback<String>() {
+			Storage store = GWT.create(Storage.class);
+			JSONObject jso = new JSONObject();
+			jso.put(StoreKeys.LATEST_REQUEST_KEY, data.toJSONObject());
+			
+			store.getLocal().set(jso.getJavaScriptObject(), new StorageSimpleCallback() {
+				
 				@Override
-				public void onSuccess(String result) {
+				public void onError(String message) {
+					Log.warn("Unable to save current form data in local storage. Restore may not be possible on restart: " + message);
+				}
+				
+				@Override
+				public void onDone() {
 					if(RestClient.isDebug()){
 						Log.debug("Current state has been saved to local storage.");
 					}
-				}
-				@Override
-				public void onError(Throwable e) {
-					Log.warn("Unable to save current form data in local storage. Restore may not be possible on restart.", e);
 				}
 			});
 		} catch(Exception e){
@@ -523,22 +534,23 @@ public class AppRequestFactory {
 			Log.debug("Save URL value into suggestions table.");
 		}
 		final UrlHistoryStoreWebSql store = RestClient.getClientFactory().getUrlHistoryStore();
-		
-		store.getByUrl(url, new StoreResultCallback<List<UrlRow>>() {
+		store.getByUrl(url, new StoreResultsCallback() {
+			
 			@Override
-			public void onSuccess(List<UrlRow> result) {
-				
-				if(result.size() > 0) {
+			public void onSuccess(JsArray<UrlRow> result) {
+				if(result != null && result.length() > 0) {
 					if(RestClient.isDebug()){
 						Log.debug("Updating Suggestions table with new time.");
 					}
-					store.updateUrlUseTime(result.get(0).getId(), new Date(), new StoreResultCallback<Boolean>(){
+					store.updateUrlUseTime(result.get(0).getId(), (double) new Date().getTime(), new org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultCallback() {
+						
 						@Override
-						public void onSuccess(Boolean result) {
+						public void onSuccess(UrlRow result) {
 							if(RestClient.isDebug()){
 								Log.debug("Suggestions table updated with new time.");
 							}
 						}
+						
 						@Override
 						public void onError(Throwable e) {
 							if(RestClient.isDebug()){
@@ -551,19 +563,19 @@ public class AppRequestFactory {
 				UrlRow row = UrlRow.create();
 				row.setUrl(url);
 				row.setTime(new Date().getTime());
-				store.put(row, null, new StoreResultCallback<Integer>() {
-					
-					@Override
-					public void onSuccess(Integer result) {
-						if(RestClient.isDebug()){
-							Log.debug("New value has been added to the Suggestions table.");
-						}
-					}
+				store.put(row, new org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultCallback() {
 					
 					@Override
 					public void onError(Throwable e) {
 						if(RestClient.isDebug()){
 							Log.error("There was a problem inserting URL value (used in request).", e);
+						}
+					}
+
+					@Override
+					public void onSuccess(UrlRow result) {
+						if(RestClient.isDebug()){
+							Log.debug("New value has been added to the Suggestions table.");
 						}
 					}
 				});

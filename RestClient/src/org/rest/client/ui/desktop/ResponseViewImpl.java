@@ -15,27 +15,19 @@
  ******************************************************************************/
 package org.rest.client.ui.desktop;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 
 import org.rest.client.RestClient;
 import org.rest.client.dom.worker.WebWorkerError;
 import org.rest.client.dom.worker.Worker;
 import org.rest.client.dom.worker.WorkerMessageHandler;
 import org.rest.client.event.OverwriteUrlEvent;
-import org.rest.client.request.RedirectData;
+import org.rest.client.jso.ResponseStatusData;
 import org.rest.client.storage.store.objects.RequestObject;
-import org.rest.client.storage.websql.HeaderRow;
 import org.rest.client.ui.ResponseView;
 import org.rest.client.ui.desktop.widget.JSONViewer;
-import org.rest.client.ui.desktop.widget.RedirectView;
-import org.rest.client.ui.desktop.widget.ResponseHeaderLine;
-import org.rest.client.ui.desktop.widget.StatusCodeImage;
 import org.rest.client.ui.desktop.widget.XMLViewer;
 import org.rest.client.ui.html5.HTML5Element;
-import org.rest.client.util.JSONHeadersUtils;
 import org.rest.client.util.Utils;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -46,8 +38,8 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.PreElement;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -57,25 +49,18 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.Window.ScrollEvent;
-import com.google.gwt.user.client.Window.ScrollHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xhr2.client.Header;
 import com.google.gwt.xhr2.client.Response;
@@ -104,17 +89,8 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	private boolean success = false;
 	private Response response;
 	private long requestTime;
-	private final static String COLLAPSED_REQUEST_HEADERS_KEY = "resp_panel_crqhk";
-	private final static String COLLAPSED_RESPONSE_HEADERS_KEY = "resp_panel_crshk";
 	
-	@UiField StatusCodeImage codeImage;
-	@UiField InlineLabel loadingTime;
-	@UiField InlineLabel codeContainer;
-	@UiField HTMLPanel headersPanel;
-	@UiField HTMLPanel requestHeadersPanel;
 	@UiField HTMLPanel responsePayloadContainer;
-	@UiField HTMLPanel requestHeadersContainer;
-	@UiField HTMLPanel responseHeadersContainer;
 	@UiField InlineLabel rawTab;
 	@UiField InlineLabel xmlTab;
 	@UiField InlineLabel jsonTab;
@@ -124,76 +100,19 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	@UiField HTML plainBody;
 	@UiField Anchor parsedOpen;
 	@UiField Anchor forceOpenAsJSON;
-	@UiField Anchor collapseRequestHeaders;
-	@UiField Anchor collapseResponseHeaders;
 	@UiField Anchor forceOpenAsXML;
 	@UiField PreElement parsedBody;
 	@UiField HTMLPanel xmlPanel;
 	@UiField HTMLPanel imagePanel;
 	@UiField HTMLPanel jsonPanel;
-	@UiField HTMLPanel redirects;
-	@UiField DivElement scrollContainer;
+	@UiField Element statusComponent;
 	WidgetStyle style = new WidgetStyle();
 	
 	
 	public ResponseViewImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
-		setHeadersPanelCollapsable();
+		setResponseStatusHandlers(this);
 	}
-	
-	
-	private void setHeadersPanelCollapsable(){
-		requestHeadersContainer.addDomHandler(new MouseOverHandler() {
-			@Override
-			public void onMouseOver(MouseOverEvent event) {
-				if(collapseRequestHeaders.getStyleName().contains(" visible")){
-					return;
-				}
-				collapseRequestHeaders.addStyleName("visible");
-			}
-		}, MouseOverEvent.getType());
-		
-		requestHeadersContainer.addDomHandler(new MouseOutHandler() {
-			@Override
-			public void onMouseOut(MouseOutEvent event) {
-				collapseRequestHeaders.removeStyleName("visible");
-			}
-		}, MouseOutEvent.getType());
-		
-		responseHeadersContainer.addDomHandler(new MouseOverHandler() {
-			@Override
-			public void onMouseOver(MouseOverEvent event) {
-				if(collapseResponseHeaders.getStyleName().contains(" visible")){
-					return;
-				}
-				collapseResponseHeaders.addStyleName("visible");
-			}
-		}, MouseOverEvent.getType());
-		
-		responseHeadersContainer.addDomHandler(new MouseOutHandler() {
-			@Override
-			public void onMouseOut(MouseOutEvent event) {
-				collapseResponseHeaders.removeStyleName("visible");
-			}
-		}, MouseOutEvent.getType());
-		
-		
-		Storage sessionStore = Storage.getSessionStorageIfSupported();
-		String rqhk = sessionStore.getItem(COLLAPSED_REQUEST_HEADERS_KEY);
-		String rshk = sessionStore.getItem(COLLAPSED_RESPONSE_HEADERS_KEY);
-		if(rqhk != null && rqhk.equals("1")){
-			requestHeadersContainer.addStyleName("headersCollapsed");
-			collapseRequestHeaders.removeStyleName(style.collapseButton);
-			collapseRequestHeaders.addStyleName(style.expandButton);
-		}
-		if(rshk != null && rshk.equals("1")){
-			responseHeadersContainer.addStyleName("headersCollapsed");
-			collapseResponseHeaders.removeStyleName(style.collapseButton);
-			collapseResponseHeaders.addStyleName(style.expandButton);
-		}
-	}
-	
-	
 	
 	@Override
 	public void setPresenter(ResponsePresenter listener) {
@@ -226,135 +145,16 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	}
 	
 	void cleanupErrorResponse(){
-		codeContainer.getElement().setInnerHTML("An error occured during the request.");
-		codeContainer.getElement().addClassName(style.error);
-		loadingTime.setText("0");
 		responsePayloadContainer.setVisible(false);
-		responseHeadersContainer.setVisible(false);
-		requestHeadersContainer.setVisible(false);
-		scrollContainer.addClassName(style.onTop);
 	}
 	
 	private void setResponseStatus() {
-		//
-		// Set status code
-		//
 		int code = response.getStatus();
 		String msg = response.getStatusText();
-		if(code >=500 || code == 0){
-			codeContainer.getElement().addClassName(style.error);
-		} else if( code >= 400 && code < 500 ){
-			codeContainer.getElement().addClassName(style.warning);
-		}
-		String txt = "<strong>" + code + "</strong>";
-		if (msg != null && !msg.equals("")) {
-			txt += " " + msg;
-		} else if (code == 0) {
-			txt += " NO RESPONSE";
-		}
-		codeContainer.getElement().setInnerHTML(txt);
-		codeImage.setCode(code);
-		
-		
-		//
-		// Set request time
-		//
-		loadingTime.getElement().setInnerText(String.valueOf(requestTime));
-	}
-	
-	
-	
-	@Override
-	public void setRequestHeadersExternal(ArrayList<Header> headers) {
-		final HashMap<String, ResponseHeaderLine> map = new HashMap<String, ResponseHeaderLine>();
-		ArrayList<String> list = new ArrayList<String>();
-		if(headers != null){
-			for(Header header : headers){
-				String headerName = header.getName(); 
-				ResponseHeaderLine rhl = new ResponseHeaderLine(header);
-				map.put(headerName, rhl);
-				list.add(headerName);
-				requestHeadersPanel.add(rhl);
-			}
-		}
-		listener.getRequestHeadersInfo(list, new Callback<List<HeaderRow>, Throwable>() {
-			@Override
-			public void onSuccess(List<HeaderRow> result) {
-				for(HeaderRow row : result){
-					String name = row.getName();
-					if(map.containsKey(name)){
-						ResponseHeaderLine line = map.get(name);
-						line.updateDesc(row.getDesc());
-						line.updateExample(row.getExample());
-						line.updateName(name);
-					}
-				}
-			}
-			@Override
-			public void onFailure(Throwable reason) {
-				if(RestClient.isDebug()){
-					Log.debug("Unable to get request headers help.",reason);
-				}
-			}
-		});
-	}
 
-	@Override
-	public void setResponseHeadersExternal(ArrayList<Header> headers) {
-		final HashMap<String, ResponseHeaderLine> map = new HashMap<String, ResponseHeaderLine>();
-		ArrayList<String> list = new ArrayList<String>();
-		for(Header header : headers){
-			String headerName = header.getName(); 
-			ResponseHeaderLine rhl = new ResponseHeaderLine(header);
-			map.put(headerName, rhl);
-			list.add(headerName);
-			headersPanel.add(rhl);
-		}
-		
-		listener.getResponseHeadersInfo(list, new Callback<List<HeaderRow>, Throwable>() {
-			@Override
-			public void onSuccess(List<HeaderRow> result) {
-				for(HeaderRow row : result){
-					String name = row.getName();
-					if(map.containsKey(name)){
-						ResponseHeaderLine line = map.get(name);
-						line.updateDesc(row.getDesc());
-						line.updateExample(row.getExample());
-						line.updateName(name);
-					}
-				}
-			}
-			@Override
-			public void onFailure(Throwable reason) {
-				if(RestClient.isDebug()){
-					Log.debug("Unable to get response headers help.",reason);
-				}
-			}
-		});
-	}
-	
-	@Override
-	public void setRedirectData(ArrayList<RedirectData> redirectData) {
-		if(redirectData == null) return;
-		boolean addNumber = false;
-		int size = redirectData.size();
-		if(size > 1) addNumber = true;
-		
-		for(int i=0; i<size; i++){
-			RedirectData data = redirectData.get(i);
-			
-			FlowPanel wrapper = new FlowPanel();
-			wrapper.setStyleName(style.responseRow);
-			Label redirectLabel = new Label("Redirect" + ( addNumber ? " #"+(i+1) : "" ));
-			redirectLabel.setStyleName(style.label);
-			wrapper.add(redirectLabel);
-			SimplePanel result = new SimplePanel();
-			result.setStyleName(style.result);
-			wrapper.add(result);
-			RedirectView view = new RedirectView(data, listener);
-			result.add(view);
-			redirects.add(wrapper);
-		}
+		statusComponent.setAttribute("status-code", String.valueOf(code));
+		statusComponent.setAttribute("status-message", msg);
+		statusComponent.setAttribute("loading-time", String.valueOf(requestTime));
 	}
 	
 	private void setResponseBody() {
@@ -435,10 +235,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 					Log.warn("Unable to load CodeMirror.",e );
 				}
 			}
-			
-//			if(isJavaScriptHeader(headers)){
-				forceOpenAsJSON.removeStyleName("hidden");
-//			}
+			forceOpenAsJSON.removeStyleName("hidden");
 		}
 		if(isJSON){
 			setTabOpened(TABS.JSON, jsonTab);
@@ -449,20 +246,6 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 			setTabOpened(TABS.XML, xmlTab);
 			new XMLViewer(body, xmlPanel, xml);
 			setTabVisible(TABS.XML, xmlTab);
-		}
-		if(isImage){
-			
-//			setTabOpened(TABS.IMAGE, imageTab);
-//			setTabVisible(TABS.IMAGE, imageTab);
-//			final Image img = new Image();
-//			img.addLoadHandler(new LoadHandler() {
-//				@Override
-//				public void onLoad(LoadEvent event) {
-//					revokeImageUrl(img.getUrl());
-//				}
-//			});
-//			img.setUrl(createImageUrl(response.getRequest(),"image/png"));
-//			imagePanel.add(img);
 		}
 		if(RestClient.isDebug()){
 			Log.debug("Response panel has been filled with new data");
@@ -483,7 +266,8 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	 * @return
 	 */
 	private boolean isJSONHeader(Header[] headers){
-		String[] jsonHeadersDefinitions = JSONHeadersUtils.getJSONHeadersListSynch();
+		String[] defs = new String[]{"application/json","text/json","text/x-json"};
+
 		for (Header header : headers) {
 			if (header == null) {
 				continue;
@@ -494,7 +278,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 				if(value.contains("+json")){
 					return true;
 				}
-				for(String headerDef : jsonHeadersDefinitions){
+				for(String headerDef : defs){
 					if(value.contains(headerDef)){
 						return true;
 					}
@@ -827,68 +611,6 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		return defaultEncodeing;
 	}
 	
-	private int initialScrollTop = -1;
-	private int initialOffsetTop = -1;
-	private final int marginOffset = 25;
-	private int lastEndPosition = -1;
-	@Override
-	public void scrollToView() {
-		_scrollIntoView(this.getElement());
-		Window.addWindowScrollHandler(new ScrollHandler() {
-			@Override
-			public void onWindowScroll(ScrollEvent event) {
-				int top = event.getScrollTop();
-				
-				if(Math.abs(top) < 20){
-					scrollContainer.addClassName(style.onTop);
-				} else {
-					scrollContainer.removeClassName(style.onTop);
-				}
-				
-				
-				int scrollTop = scrollContainer.getAbsoluteTop();
-				
-				int nextPos = initialOffsetTop+marginOffset+(top-initialScrollTop);
-				boolean canMove = false;
-				if(top+marginOffset > scrollTop){
-					if(initialOffsetTop == -1){
-						initialOffsetTop = scrollContainer.getOffsetTop();
-						initialScrollTop = scrollTop;
-						nextPos = initialOffsetTop+marginOffset+(top-initialScrollTop);
-					}
-					canMove = true;
-				} else if(nextPos<lastEndPosition){
-					if(top > initialScrollTop){
-						canMove = true;
-					} else {
-						if(scrollTop != initialScrollTop){
-							nextPos = initialOffsetTop;
-							canMove = true;
-						}
-					}
-				}
-				if(canMove){
-					lastEndPosition = nextPos;
-					scrollContainer.getStyle().setTop(nextPos, Unit.PX);
-				}
-				
-			}
-		});
-	}
-	@UiHandler("scrollButton")
-	void onscrollButton(ClickEvent e){
-		e.preventDefault();
-		_scrollToStart();
-	}
-	
-	private final native void _scrollToStart() /*-{
-		$wnd.scrollTo(0,0);
-	}-*/;
-	
-	private final native void _scrollIntoView(Element element) /*-{
-		element.scrollIntoView();
-//		element.scrollIntoViewIfNeeded();
-	}-*/;
 	
 	@UiHandler("wrapContentButton")
 	void onWrapContent(ClickEvent e){
@@ -912,7 +634,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 	void onCopy(ClickEvent e){
 		e.preventDefault();
 		String body = response.getResponseText();
-		RestClient.getClientFactory().getChromeMessagePassing().postMessage("copyToClipboard",body);
+		listener.performCopyAction(body);
 	}
 	@UiHandler({"saveAsFileButton1","saveAsFileButton2","saveAsFileButton3","saveAsFileButton4"})
 	void onSaveAsFileClick(ClickEvent e){
@@ -966,41 +688,7 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		new JSONViewer(body, jsonPanel);
 		setTabVisible(TABS.JSON, jsonTab);
 	}
-
 	
-	@UiHandler("collapseResponseHeaders")
-	void onCollapseResponseHeaders(ClickEvent e){
-		e.preventDefault();
-		Storage sessionStore = Storage.getSessionStorageIfSupported();
-		if(responseHeadersContainer.getStyleName().contains("headersCollapsed")){
-			responseHeadersContainer.removeStyleName("headersCollapsed");
-			collapseResponseHeaders.removeStyleName(style.expandButton);
-			collapseResponseHeaders.addStyleName(style.collapseButton);
-			sessionStore.setItem(COLLAPSED_RESPONSE_HEADERS_KEY, "0");
-		} else {
-			responseHeadersContainer.addStyleName("headersCollapsed");
-			collapseResponseHeaders.removeStyleName(style.collapseButton);
-			collapseResponseHeaders.addStyleName(style.expandButton);
-			sessionStore.setItem(COLLAPSED_RESPONSE_HEADERS_KEY, "1");
-		}
-	}
-	@UiHandler("collapseRequestHeaders")
-	void onCollapseRequestHeaders(ClickEvent e){
-		e.preventDefault();
-		Storage sessionStore = Storage.getSessionStorageIfSupported();
-		if(requestHeadersContainer.getStyleName().contains("headersCollapsed")){
-			requestHeadersContainer.removeStyleName("headersCollapsed");
-			collapseRequestHeaders.removeStyleName(style.expandButton);
-			collapseRequestHeaders.addStyleName(style.collapseButton);
-			sessionStore.setItem(COLLAPSED_REQUEST_HEADERS_KEY, "0");
-		} else {
-			requestHeadersContainer.addStyleName("headersCollapsed");
-			collapseRequestHeaders.removeStyleName(style.collapseButton);
-			collapseRequestHeaders.addStyleName(style.expandButton);
-			sessionStore.setItem(COLLAPSED_REQUEST_HEADERS_KEY, "1");
-		}
-		
-	}
 	
 	@UiHandler("forceOpenAsXML")
 	void onForceOpenAsXML(ClickEvent e){
@@ -1011,4 +699,62 @@ public class ResponseViewImpl extends Composite implements ResponseView {
 		new XMLViewer(body, xmlPanel, response.getResponseXML());
 		setTabVisible(TABS.JSON, xmlTab);
 	}
+
+
+	@Override
+	public final native void setBackgroundResponseData(ResponseStatusData data) /*-{
+		var cmp = this.@org.rest.client.ui.desktop.ResponseViewImpl::statusComponent;
+		if(data === null) {
+			cmp.requestHeaders = [];
+			cmp.responseHeaders = [];
+			cmp.redirectData = [];
+		} else {
+			cmp.requestHeaders = data.REQUEST_HEADERS;
+			cmp.responseHeaders = data.RESPONSE_HEADERS;
+			cmp.redirectData = data.REDIRECT_DATA;
+		}
+	}-*/;
+	
+	private final native void setResponseStatusHandlers(ResponseViewImpl context) /*-{
+		var cmp = this.@org.rest.client.ui.desktop.ResponseViewImpl::statusComponent;
+		if(!cmp) {
+			console.error('There were no response status component. It should be.');
+			return;
+		}
+		var linkHandler = $entry(function(e){
+			var url = e.detail.link;
+			if(!url) return;
+			context.@org.rest.client.ui.desktop.ResponseViewImpl::fireUrlChangeEvent(Ljava/lang/String;)(url);
+		});
+		cmp.addEventListener('action-link', linkHandler);
+		var listeners = context._detachListeners;
+		if (!listeners) {
+			listeners = new Map();
+		}
+		listeners.set('action-link', {
+			element : cmp,
+			fn : linkHandler,
+			event : 'action-link'
+		});
+		context._detachListeners = listeners;
+	}-*/;
+	@Override
+	protected void onDetach() {
+		super.onDetach();
+		nativeDetach(this);
+	}
+	/**
+	 * Detach all function that has been attached to the DOM objects via JSNI.
+	 * @param context
+	 */
+	private final native void nativeDetach(ResponseViewImpl context) /*-{
+		var listeners = context._detachListeners;
+		if (!listeners) {
+			return;
+		}
+		listeners.forEach(function(value) {
+			value.element.removeEventListener(value.event, value.fn);
+		});
+		context._detachListeners = null;
+	}-*/;
 }

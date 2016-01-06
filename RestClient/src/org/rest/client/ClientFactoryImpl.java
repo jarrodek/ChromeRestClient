@@ -15,56 +15,43 @@
  ******************************************************************************/
 package org.rest.client;
 
-import org.rest.client.storage.store.FormEncodingStoreWebSql;
 import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
-import org.rest.client.storage.store.LocalStore;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
-import org.rest.client.storage.store.StatusesStoreWebSql;
+import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.storage.store.WebSocketDataStoreWebSql;
 import org.rest.client.storage.websql.ExportedDataReferenceService;
 import org.rest.client.ui.AboutView;
-import org.rest.client.ui.AddEncodingView;
 import org.rest.client.ui.EditProjectView;
 import org.rest.client.ui.ErrorDialogView;
 import org.rest.client.ui.HistoryListItemView;
 import org.rest.client.ui.HistoryView;
 import org.rest.client.ui.ImportExportView;
-import org.rest.client.ui.MenuItemView;
-import org.rest.client.ui.MenuItemView.Presenter;
-import org.rest.client.ui.MenuView;
 import org.rest.client.ui.RequestView;
 import org.rest.client.ui.ResponseView;
 import org.rest.client.ui.SaveRequestDialogView;
 import org.rest.client.ui.SavedView;
 import org.rest.client.ui.SettingsView;
-import org.rest.client.ui.ShortcutView;
 import org.rest.client.ui.SocketView;
 import org.rest.client.ui.desktop.AboutViewImpl;
-import org.rest.client.ui.desktop.AddEncodingViewImpl;
 import org.rest.client.ui.desktop.EditProjectViewImpl;
 import org.rest.client.ui.desktop.ErrorDialogViewImpl;
 import org.rest.client.ui.desktop.HistoryListItemViewImpl;
 import org.rest.client.ui.desktop.HistoryViewImpl;
 import org.rest.client.ui.desktop.ImportExportViewImpl;
-import org.rest.client.ui.desktop.MenuItemViewImpl;
-import org.rest.client.ui.desktop.MenuViewImpl;
 import org.rest.client.ui.desktop.RequestViewImpl;
 import org.rest.client.ui.desktop.ResponseViewImpl;
 import org.rest.client.ui.desktop.SaveRequestDialogViewImpl;
 import org.rest.client.ui.desktop.SavedViewImpl;
 import org.rest.client.ui.desktop.SettingsViewImpl;
-import org.rest.client.ui.desktop.ShortcutViewImpl;
 import org.rest.client.ui.desktop.SocketViewImpl;
 
 import com.google.gwt.chrome.message.BackgroundMessage;
 import com.google.gwt.chrome.message.ChromeMessagePassing;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.websocket.client.WebSocket;
-import com.google.gwt.websocket.client.WebSocketImpl;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 
@@ -76,15 +63,12 @@ public class ClientFactoryImpl implements ClientFactory {
 	private static RequestView requestView = null;
 	// private static ResponseView responseView = null;
 	// private static AboutView aboutView = null;
-	private static MenuView menu = null;
 	// private static SettingsView settingsView = null;
-	private static LocalStore latestRequestStore = null;
+	private static StoreKeys latestRequestStore = null;
 	private static RequestDataStoreWebSql requestDataStore = null;
 	private static HistoryRequestStoreWebSql historyRequestStore = null;
-	private static FormEncodingStoreWebSql formEncodingStore = null;
 	private static UrlHistoryStoreWebSql urlHistoryStore = null;
 	private static HeadersStoreWebSql headersStore = null;
-	private static StatusesStoreWebSql statusesStore = null;
 	private static ProjectStoreWebSql projectsStore = null;
 	private static WebSocketDataStoreWebSql webSocketSqlStore = null;
 	private static ExportedDataReferenceService exportedDataService = null;
@@ -121,24 +105,9 @@ public class ClientFactoryImpl implements ClientFactory {
 	}
 
 	@Override
-	public MenuView getMenuView() {
-		if (menu == null) {
-			menu = new MenuViewImpl();
-		}
-		return menu;
-	}
-
-	@Override
-	public MenuItemView createMenuItem(Presenter presenter) {
-		MenuItemViewImpl menu = GWT.create(MenuItemViewImpl.class);
-		menu.setPresenter(presenter);
-		return menu;
-	}
-
-	@Override
-	public LocalStore getLocalStore() {
+	public StoreKeys getLocalStore() {
 		if (latestRequestStore == null) {
-			latestRequestStore = GWT.create(LocalStore.class);
+			latestRequestStore = GWT.create(StoreKeys.class);
 		}
 		return latestRequestStore;
 	}
@@ -168,21 +137,6 @@ public class ClientFactoryImpl implements ClientFactory {
 	}
 
 	@Override
-	public AddEncodingView getAddEncodingView(EventBus eventBus) {
-		AddEncodingView dialog = GWT.create(AddEncodingViewImpl.class);
-		dialog.setEventBus(eventBus);
-		return dialog;
-	}
-
-	@Override
-	public FormEncodingStoreWebSql getFormEncodingStore() {
-		if (formEncodingStore == null) {
-			formEncodingStore = GWT.create(FormEncodingStoreWebSql.class);
-		}
-		return formEncodingStore;
-	}
-
-	@Override
 	public UrlHistoryStoreWebSql getUrlHistoryStore() {
 		if (urlHistoryStore == null) {
 			urlHistoryStore = GWT.create(UrlHistoryStoreWebSql.class);
@@ -196,14 +150,6 @@ public class ClientFactoryImpl implements ClientFactory {
 			headersStore = GWT.create(HeadersStoreWebSql.class);
 		}
 		return headersStore;
-	}
-
-	@Override
-	public StatusesStoreWebSql getStatusesStore() {
-		if (statusesStore == null) {
-			statusesStore = GWT.create(StatusesStoreWebSql.class);
-		}
-		return statusesStore;
 	}
 
 	@Override
@@ -222,11 +168,6 @@ public class ClientFactoryImpl implements ClientFactory {
 		// }
 		// return settingsView;
 		return GWT.create(SettingsViewImpl.class);
-	}
-
-	@Override
-	public ShortcutView getShortcutView() {
-		return GWT.create(ShortcutViewImpl.class);
 	}
 
 	@Override
@@ -281,11 +222,6 @@ public class ClientFactoryImpl implements ClientFactory {
 	@Override
 	public SocketView getSocketView() {
 		return GWT.create(SocketViewImpl.class);
-	}
-
-	@Override
-	public WebSocket getWebSocket() {
-		return GWT.create(WebSocketImpl.class);
 	}
 
 	@Override

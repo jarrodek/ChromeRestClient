@@ -23,22 +23,6 @@ public class HistoryRequestStoreWebSql extends WebSqlAdapter<Integer, HistoryObj
 	
 	HistoryService service = GWT.create(HistoryService.class);
 	
-	@Override
-	public void open(final StoreResultCallback<Boolean> callback) {
-		service.initTable(new VoidCallback() {
-			
-			@Override
-			public void onFailure(DataServiceException error) {
-				callback.onError(error);
-			}
-			
-			@Override
-			public void onSuccess() {
-				callback.onSuccess(true);
-			}
-		});
-	}
-
 	/**
 	 * This database do not support keys listing.
 	 */

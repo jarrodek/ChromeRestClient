@@ -11,8 +11,7 @@ import org.rest.client.storage.websql.HeadersService;
 
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
-import com.google.code.gwt.database.client.service.RowIdListCallback;
-import com.google.code.gwt.database.client.service.VoidCallback;
+import com.google.gwt.chrome.def.NotImplementedException;
 import com.google.gwt.core.client.GWT;
 
 public class HeadersStoreWebSql extends WebSqlAdapter<Integer, HeaderRow> {
@@ -28,35 +27,8 @@ public class HeadersStoreWebSql extends WebSqlAdapter<Integer, HeaderRow> {
 	}
 	
 	@Override
-	public void open(final StoreResultCallback<Boolean> callback) {
-		service.initTable(new VoidCallback() {
-			
-			@Override
-			public void onFailure(DataServiceException error) {
-				callback.onError(error);
-			}
-			
-			@Override
-			public void onSuccess() {
-				callback.onSuccess(true);
-			}
-		});
-	}
-	
-	@Override
 	public void put(HeaderRow obj, Integer key, final StoreResultCallback<Integer> callback) {
-		service.insertHeader(obj, new RowIdListCallback() {
-			
-			@Override
-			public void onFailure(DataServiceException error) {
-				callback.onError(error);
-			}
-			
-			@Override
-			public void onSuccess(List<Integer> rowIds) {
-				callback.onSuccess(rowIds.get(0));
-			}
-		});
+		throw new NotImplementedException();
 	}
 	/**
 	 * This type of query is not available for this table.
@@ -107,18 +79,7 @@ public class HeadersStoreWebSql extends WebSqlAdapter<Integer, HeaderRow> {
 	 * @param callback
 	 */
 	public void putAll(Collection<HeaderRow> list, final StoreResultCallback<List<Integer>> callback){
-		service.insertHeaders(list, new RowIdListCallback() {
-			
-			@Override
-			public void onFailure(DataServiceException error) {
-				callback.onError(error);
-			}
-			
-			@Override
-			public void onSuccess(List<Integer> rowIds) {
-				callback.onSuccess(rowIds);
-			}
-		});
+		throw new NotImplementedException();
 	}
 	/**
 	 * Find headers name by name. Wildcards are valid for "LIKE" query.

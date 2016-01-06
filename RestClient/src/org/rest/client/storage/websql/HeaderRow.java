@@ -15,15 +15,6 @@ public class HeaderRow extends JavaScriptObject {
 	protected HeaderRow() {
 	}
 	
-	public static final native HeaderRow create() /*-{
-		return {name:null, desc: null, example: null, type:null};
-	}-*/;
-	
-	public final native void setName(String name) /*-{ this.name = name; }-*/;
-	public final native void setDesc(String desc) /*-{ this.desc = desc; }-*/;
-	public final native void setExample(String example) /*-{ this.example = example; }-*/;
-	public final native void setType(String type) /*-{ this.type = type; }-*/;
-	
 	/**
 	 * @return header name
 	 */

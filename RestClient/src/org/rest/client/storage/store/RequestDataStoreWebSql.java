@@ -26,22 +26,6 @@ public class RequestDataStoreWebSql extends
 	}
 
 	@Override
-	public void open(final StoreResultCallback<Boolean> callback) {
-		service.initTable(new VoidCallback() {
-
-			@Override
-			public void onFailure(DataServiceException error) {
-				callback.onError(error);
-			}
-
-			@Override
-			public void onSuccess() {
-				callback.onSuccess(true);
-			}
-		});
-	}
-
-	@Override
 	public void keys(StoreResultCallback<List<Integer>> callback) {
 		callback.onError(null);
 	}

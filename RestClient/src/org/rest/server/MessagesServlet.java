@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.TimeZone;
 
 import javax.servlet.ServletException;
@@ -20,6 +20,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.google.gson.LongSerializationPolicy;
 
 public class MessagesServlet extends AppServlet {
 
@@ -53,11 +54,12 @@ public class MessagesServlet extends AppServlet {
 			return;
 		}
 
-		ArrayList<Message> result = Message.getMessages(since);
+		List<Message> result = Message.getMessages(since);
 		GsonBuilder gsonBuilder = new GsonBuilder();
 		gsonBuilder.serializeNulls();
 		gsonBuilder.registerTypeAdapter(Key.class, new MessageKeySerializer());
-		gsonBuilder.setPrettyPrinting();
+		//gsonBuilder.setPrettyPrinting();
+		gsonBuilder.setLongSerializationPolicy(LongSerializationPolicy.STRING);
 		gsonBuilder.setDateFormat(DateFormat.FULL);
 		gsonBuilder.excludeFieldsWithoutExposeAnnotation();
 		Gson gson = gsonBuilder.create();

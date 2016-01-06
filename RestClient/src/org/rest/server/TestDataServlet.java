@@ -30,7 +30,6 @@ public class TestDataServlet extends HttpServlet {
 	}
 	
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
@@ -39,7 +38,7 @@ public class TestDataServlet extends HttpServlet {
 		if (payload == null || payload.equals("")) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("{");
-			sb.append("\"Test servlet\"").append(":").append("Add a \"p\" parameter to your requires with one one the options").append(",");
+			sb.append("\"Test servlet\"").append(":").append("\"Add a \\\"p\\\" parameter to your requires with one one the options\"").append(",");
 			sb.append("\"Options\"").append(":").append("[");
 			sb.append("\"meta\"").append(",");
 			sb.append("\"error\"").append(",");
@@ -66,7 +65,7 @@ public class TestDataServlet extends HttpServlet {
 			resp.getWriter().println("abc");
 		} else if (payload.equals("error")) {
 			resp.setContentType("application/x-custom+json; version=1");
-			resp.setStatus(200);
+			resp.setStatus(408);
 			String json = "\n{\n\"companies\": \"http://localhost:8080/companies/\"\n}\n";
 			resp.getWriter().println(json);
 		} else if (payload.equals("json")) {
@@ -298,7 +297,6 @@ public class TestDataServlet extends HttpServlet {
 		resp.getWriter().println(jb.toString());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {

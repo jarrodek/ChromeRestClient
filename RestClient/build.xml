@@ -1,28 +1,103 @@
 <project name="rest_client_app" default="dist" basedir=".">
+	<!-- Arguments to gwtc and devmode targets -->
+	<property name="gwt.args" value="" />
+	
+	<property name="gwt.root" location="." />
+	<property environment="env" />
+	<!-- try from system properties set GWT SDK location -->
+	<condition property="gwt.sdk" value="${env.GWT_HOME}">
+		<isset property="env.GWT_HOME" />
+	</condition>
+	<!-- But override if there is SDK location set in properties file. -->
+	<condition property="gwt.sdk" value="${GWT_HOME}">
+		<isset property="GWT_HOME" />
+	</condition>
+	<!-- Report an error if there is no SDK available. -->
+	<fail unless="gwt.sdk" message="You need to set env value 'GWT_HOME' that's point to GWTs sdk home dir. Use command: export GWT_HOME=./gwt/home/path/ (${gwt.sdk})" />
+	
+	<path id="project.class.path">
+		<pathelement location="war/WEB-INF/classes" />
+		<pathelement location="${gwt.sdk}/gwt-user.jar" />
+		<pathelement location="${gwt.sdk}/gwt-dev.jar" />
+		<pathelement location="${gwt.sdk}/validation-api-1.0.0.GA.jar" />
+		<pathelement location="${gwt.sdk}/validation-api-1.0.0.GA-sources.jar" />
+		<fileset dir="war/WEB-INF/lib" includes="**/*.jar" />
+		<!-- Add any additional non-server libs (such as JUnit) here -->
+	</path>
+
 	<property name="extension.dir" value="extension" />
 	<property name="extension.src" value="${extension.dir}/source" />
-	
 	<property name="extension.srcdir" value="war/extension" />
-	
+
+	<target name="libs" description="Copy libs to WEB-INF/lib">
+		<mkdir dir="war/WEB-INF/lib" />
+		<copy todir="war/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet.jar" />
+		<copy todir="war/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet-deps.jar" />
+		<!-- Add any additional server libs that need to be copied -->
+	</target>
+
+	<target name="javac" depends="libs" description="Compile java source to bytecode">
+		<mkdir dir="war/WEB-INF/classes" />
+		<javac srcdir="src" includes="**" encoding="utf-8" destdir="war/WEB-INF/classes" source="1.8" target="1.8" nowarn="true" debug="true" debuglevel="lines,vars,source">
+			<classpath refid="project.class.path" />
+		</javac>
+		<copy todir="war/WEB-INF/classes">
+			<fileset dir="src" excludes="**/*.java" />
+		</copy>
+	</target>
+
+	<target name="gwtc" depends="javac" description="GWT compile to JavaScript (production mode)">
+		<java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler" maxmemory="256m">
+			<classpath>
+				<pathelement location="src" />
+				<path refid="project.class.path" />
+			</classpath>
+			<arg line="-war" />
+			<arg value="war" />
+			<!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
+			<arg line="${gwt.args}" />
+			<arg value="org.rest.RestClient" />
+		</java>
+	</target>
+
+	<target name="devmode" depends="javac" description="Run development mode (pass -Dgwt.args=-nosuperDevMode to fallback to classic DevMode)">
+		<java failonerror="true" fork="true" classname="com.google.gwt.dev.DevMode" maxmemory="1g">
+			<classpath>
+				<pathelement location="src" />
+				<path refid="project.class.path" />
+				<pathelement location="${gwt.sdk}/gwt-codeserver.jar" />
+			</classpath>
+			<arg value="-startupUrl" />
+			<arg value="RestClient.html" />
+			<arg line="-war" />
+			<arg value="war" />
+			<!-- Additional arguments like -style PRETTY, -logLevel DEBUG or -nosuperDevMode -->
+			<arg line="${gwt.args}" />
+			<arg value="org.rest.RestClient" />
+			<arg value="org.rest.RestClient" />
+		</java>
+	</target>
+
 	<!-- Crate dist rirectories -->
 	<target name="createRequiredDirectories" description="Create extenstions directory set.">
 		<mkdir dir="${extension.dir}" />
 		<mkdir dir="${extension.src}" />
 	</target>
-	
-	<target name="dist" depends="createRequiredDirectories, clean, sources, extension" description="Run the distributions"></target>
-	
+
+	<target name="dist" depends="createRequiredDirectories, clean, sources, extension" description="Run the distributions">
+	</target>
+
 	<target name="clean">
 		<delete includeemptydirs="true">
 			<fileset dir="${extension.src}" includes="**/*" />
 		</delete>
 	</target>
-	
+
 	<!-- ZIP extension -->
 	<target name="extension">
 		<zip destfile="${extension.dir}/restclient.zip" basedir="${extension.src}" />
 	</target>
-	
+
 	<target name="sources">
 		<copy todir="${extension.src}">
 			<fileset dir="war/">
@@ -39,27 +114,27 @@
 				<exclude name="**/restclient/gwt/clean/images/vborder_ie6.png" />
 				<!-- Do not copy uncompressed javascripts -->
 				<exclude name="**/ext/*_uncompressed.js" />
-			    <!-- Other files -->
+				<!-- Other files -->
 				<exclude name="**/ext/crypto*" />
 			</fileset>
 		</copy>
-		
+
 		<mkdir dir="${extension.src}/components" />
 		<copy todir="${extension.src}/components">
-		    <fileset dir="war/components/vulcanized" >
-		    	<filename name="elements.*"/>
-		    </fileset>
-	    </copy>
+			<fileset dir="war/components/vulcanized">
+				<filename name="elements.*" />
+			</fileset>
+		</copy>
 		<copy todir="${extension.src}">
 			<fileset dir="${extension.srcdir}">
-				<exclude name="**/manifest.json.old" />
 				<exclude name="**/cs.js" />
 			</fileset>
 		</copy>
-<!-- 		<exec executable="./manifestversion.sh"/> -->
+		<!-- 		<exec executable="./manifestversion.sh"/> -->
 		<copy todir="${extension.src}" overwrite="true">
-			<fileset file="manifest.json"></fileset>
+			<fileset file="manifest.json">
+			</fileset>
 		</copy>
 	</target>
-	
+
 </project>

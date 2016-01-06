@@ -1,0 +1,160 @@
+#%RAML 1.0
+title: Advanced Rest Client
+version: v1
+baseUri: https://chromerestclient.appspot.com
+description: A kind of response.
+mediaType:  application/json
+resourceTypes:
+  - collection:
+      description: Collection of available request saved by the user
+      get:
+        description: Get a list of all user requests
+        responses:
+          200:
+            body:
+              application/json:
+                example: |
+                  {
+                    "kind": "kind#RequestItemList",
+                    "data": [{
+                      "id":"1234567890",
+                      "aid":"1",
+                      "url": "http://www.google.com",
+                      "method": "GET",
+                      "headers": [{"Connection": "close"}],
+                      "payload": ""
+                    }]
+                  }
+          401:
+            body:
+              application/json:
+                example: |
+                  {
+                    "message": "You are unathorized to see this collection"
+                  }
+      post:
+        description: Add new items to the app storage.
+        responses:
+          200:
+            body:
+              application/json:
+                example: |
+                  {
+                    "kind": "kind#RequestItemList",
+                    "data": [{"id":"1234567890","aid":"1"}]
+                  }
+  - collection-item:
+      description: Entity representing a <<resourcePathName|!singularize>>
+      get:
+        description: |
+          Get the <<resourcePathName|!singularize>>
+          with <<resourcePathName|!singularize>>Id =
+          {<<resourcePathName|!singularize>>Id}
+        responses:
+          200:
+            body:
+              application/json:
+          404:
+            body:
+              application/json:
+                example: |
+                  {
+                    "message": "<<resourcePathName|!singularize>> not found."
+                  }
+      put:
+      delete:
+types:
+  AppResponse:
+    type: object
+    description: |
+      App response is a base response object from the server.
+      Every other response from the serwer must extend this base object.
+    properties:
+      kind:
+        type: string
+        description: A type representation for the response object. Kind values are have kind# prefix and datastore class name.
+      nextPageToken?:
+        type: string
+        description: List response may have this parameter pointing to the next results page.
+
+  SessionState:
+    type: object
+    description: |
+      Session state represents an information if the user have session set on server.
+      The response is kind#SessionState
+    properties:
+      uid:
+        type: string
+        description: User database ID
+      hasSession:
+        type: boolean
+        description: A flag indicating if the user have active session.
+  ResponseError:
+    type: AppResponse
+    description: If there was an error during the request there will be error property set to true.
+    properties:
+      error:
+        type: boolean
+        default: true
+        required: true
+        description: A flag set to response indicating that this is error message.
+      code:
+        type: number
+        required: true
+        description: Error code ID.
+      message?:
+        type: string
+        description: Optional message explaining the error.
+  RequestItem:
+    type: object
+    properties:
+      id: number
+      name:
+        type: string
+        description: A name for the request item
+      url:
+        type: string
+        description: An URL for the request item
+      payload:
+        type: string
+        description: A payload value for the request item
+      method:
+        type: string
+        description: HTTP method name
+      aid:
+        type: string
+        description: |
+          Application uuid.
+          Every apllication has own generated UUID. This value will be used to to associate items with the app.
+  RequestListItem:
+    type: AppResponse
+    description: Short list of RequestItem properties for listing.
+    properties:
+      id:
+        type: string
+        description: In old system it is key to string representation. In new it is numeric value for the database entry. Always presented as string.
+      name:
+        type: string
+        description: User entered request name
+      url:
+        type: string
+        description: URL used in this response.
+/session:
+  description: An information about current user session.
+  get:
+    protocols: HTTPS
+    responses:
+      200:
+        body:
+          application/json:
+            type: SessionState
+/requests:
+  type: collection
+  description: An endpoint used to read, store or delete user data from the server
+  get:
+  post:
+  /{requestId}:
+    type: collection-item
+    get:
+    put:
+    delete:

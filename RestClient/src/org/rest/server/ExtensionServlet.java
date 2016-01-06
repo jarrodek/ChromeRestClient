@@ -72,8 +72,16 @@ public class ExtensionServlet extends HttpServlet {
 			return;
 		}
 		resp.setStatus(200);
+		
 		if(path.startsWith("/list")){
-			String userId = path.substring(6);
+			String userId = null;
+			if(path.equals("/list")){
+				userId = "me";
+			} else {
+				try{
+					userId = path.substring(6);
+				} catch(Exception e){}
+			}
 			if(userId == null || userId.length() == 0){
 				resp.setStatus(400);
 				resp.getWriter().print(
@@ -90,7 +98,6 @@ public class ExtensionServlet extends HttpServlet {
 					return;
 				}
 				userId = user.getUserId();
-				System.out.println(userId);
 			}
 			AppUser appUser = AppUser.getUserById(userId);
 			if(appUser == null){

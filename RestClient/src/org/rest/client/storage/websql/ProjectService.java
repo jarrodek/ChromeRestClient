@@ -19,18 +19,6 @@ import com.google.code.gwt.database.client.service.VoidCallback;
  */
 public interface ProjectService extends AppDatabase {
 
-	/**
-	 * Create database table.
-	 * 
-	 * @param callback
-	 *            callback function
-	 */
-	@Update("CREATE TABLE IF NOT EXISTS projects ("
-			+ "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
-			+ "name TEXT NOT NULL, " 
-			+ "time INTEGER)")
-	void initTable(VoidCallback callback);
-
 	@Update("INSERT INTO projects (name, time) VALUES ("
 			+ "{data.getName()},{data.getCreated()})")
 	void insert(ProjectObject data, RowIdListCallback callback);

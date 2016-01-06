@@ -31,14 +31,6 @@ import java.util.Map;
  */
 public interface Store<K, V> {
 	/**
-	 * Open storage implementation. As a asynchronous nature of many storage
-	 * implementation result will be passed to callback function.
-	 * 
-	 * @param callback
-	 */
-	void open(StoreResultCallback<Boolean> callback);
-
-	/**
 	 * Returns in callback list of all available keys.
 	 * <p>
 	 * By keys I mean list of the key value of key-value pair.

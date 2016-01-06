@@ -20,7 +20,9 @@ import java.util.List;
 //import java.util.logging.Logger;
 
 import org.rest.client.ClientFactory;
+import org.rest.client.NotificationAction;
 import org.rest.client.RestClient;
+import org.rest.client.StatusNotification;
 import org.rest.client.gdrive.DriveAuth;
 import org.rest.client.gdrive.DriveApi;
 import org.rest.client.place.RequestPlace;
@@ -28,8 +30,6 @@ import org.rest.client.place.SavedPlace;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.SavedView;
-import org.rest.client.ui.desktop.NotificationAction;
-import org.rest.client.ui.desktop.StatusNotification;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
@@ -37,15 +37,14 @@ import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 /**
- * Activities typically restore state ("wake up"), perform initialization
- * ("set up"), and load a corresponding UI ("show up")
+ * Activities typically restore state ("wake up"), perform initialization (
+ * "set up"), and load a corresponding UI ("show up")
  * 
  * @author Paweł Psztyć
  * 
  */
-public class SavedActivity extends ListActivity implements
-	SavedView.Presenter {
-	
+public class SavedActivity extends ListActivity implements SavedView.Presenter {
+
 	private SavedView view;
 
 	public SavedActivity(SavedPlace place, ClientFactory clientFactory) {
@@ -55,39 +54,39 @@ public class SavedActivity extends ListActivity implements
 	@Override
 	public void start(AcceptsOneWidget panel, com.google.gwt.event.shared.EventBus eventBus) {
 		super.start(panel, eventBus);
-		
+
 		view = clientFactory.getSavedView();
 		view.setPresenter(this);
 		panel.setWidget(view.asWidget());
-		
+
 		performQuery();
 	}
-	
+
 	@Override
 	public void removeFromSaved(final RequestObject request) {
-		clientFactory.getRequestDataStore().remove(request.getId(), new StoreResultCallback<Boolean>(){
+		clientFactory.getRequestDataStore().remove(request.getId(), new StoreResultCallback<Boolean>() {
 
 			@Override
 			public void onSuccess(Boolean result) {
-				if(result != null && result.booleanValue()){
+				if (result != null && result.booleanValue()) {
 					notifyRemoveAndRestore(request);
 				} else {
-					StatusNotification.notify("Unknown error occured :(",StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+					StatusNotification.notify("Unknown error occured :(", StatusNotification.TIME_SHORT);
 				}
 			}
 
 			@Override
 			public void onError(Throwable e) {
-				if(RestClient.isDebug()){
-					Log.error("Unable remove saved request.",e);
+				if (RestClient.isDebug()) {
+					Log.error("Unable remove saved request.", e);
 				}
-				StatusNotification.notify("Unable remove saved request :(",StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
-			}});
+				StatusNotification.notify("Unable remove saved request :(", StatusNotification.TIME_SHORT);
+			}
+		});
 	}
-	
-	
-	private void notifyRemoveAndRestore(final RequestObject request){
-		
+
+	private void notifyRemoveAndRestore(final RequestObject request) {
+
 		NotificationAction action = new NotificationAction();
 		action.name = "Undo";
 		action.callback = new StatusNotification.NotificationCallback() {
@@ -95,28 +94,28 @@ public class SavedActivity extends ListActivity implements
 			public void onActionPerformed() {
 				final RequestObject save = RequestObject.copyNew(request);
 				clientFactory.getRequestDataStore().put(save, null, new StoreResultCallback<Integer>() {
-					
+
 					@Override
 					public void onSuccess(Integer result) {
-						
+
 						save.setId(result.intValue());
 						ArrayList<RequestObject> list = new ArrayList<RequestObject>();
 						list.add(save);
-						
+
 						view.appendResults(list);
 					}
-					
+
 					@Override
 					public void onError(Throwable e) {
-						if(RestClient.isDebug()){
-							Log.error("Unable to restore the request.",e);
+						if (RestClient.isDebug()) {
+							Log.error("Unable to restore the request.", e);
 						}
-						StatusNotification.notify("Unable to restore the request :(",StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+						StatusNotification.notify("Unable to restore the request :(", StatusNotification.TIME_SHORT);
 					}
 				});
 			}
-		}; 
-		StatusNotification.notify("The Request has been deleted.",StatusNotification.TYPE_NORMAL, 30000, true, action);
+		};
+		StatusNotification.notify("The Request has been deleted.", 30000, action);
 	}
 
 	@Override
@@ -124,12 +123,12 @@ public class SavedActivity extends ListActivity implements
 		clientFactory.getRequestDataStore().getService().deleteSaved(new VoidCallback() {
 			@Override
 			public void onFailure(DataServiceException error) {
-				
+
 			}
-			
+
 			@Override
 			public void onSuccess() {
-				
+
 			}
 		});
 	}
@@ -137,31 +136,31 @@ public class SavedActivity extends ListActivity implements
 	@Override
 	public void changeSavedName(String newName, int savedId) {
 		clientFactory.getRequestDataStore().getService().updateName(newName, savedId, new VoidCallback() {
-			
+
 			@Override
 			public void onFailure(DataServiceException error) {
-				if(RestClient.isDebug()){
+				if (RestClient.isDebug()) {
 					Log.error("Unable to change name :(", error);
 				}
-				StatusNotification.notify("Unable to change name :(",StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
+				StatusNotification.notify("Unable to change name :(", StatusNotification.TIME_SHORT);
 			}
-			
+
 			@Override
 			public void onSuccess() {
-				
+
 			}
 		});
 	}
-	
+
 	@Override
-	public void getNextItemsPage(){
+	public void getNextItemsPage() {
 		current_page++;
 		performQuery();
 	}
 
 	@Override
 	public void serach(String query) {
-		recentQuery = "%"+query+"%";
+		recentQuery = "%" + query + "%";
 		current_page = 0;
 		view.clearResultList();
 		performQuery();
@@ -169,35 +168,36 @@ public class SavedActivity extends ListActivity implements
 
 	@Override
 	void performQuery() {
-		if(fetchingNextPage){
+		if (fetchingNextPage) {
 			return;
 		}
 		fetchingNextPage = true;
-		
-		
+
 		final String q = (recentQuery != null && recentQuery.length() > 2) ? recentQuery : null;
 		int offset = current_page * PAGE_SIZE;
-		clientFactory.getRequestDataStore().queryWithLimit(q, PAGE_SIZE, offset, new StoreResultCallback<List<RequestObject>>() {
+		clientFactory.getRequestDataStore().queryWithLimit(q, PAGE_SIZE, offset,
+				new StoreResultCallback<List<RequestObject>>() {
 
-			@Override
-			public void onSuccess(final List<RequestObject> result) {
-				fetchingNextPage = false;
-				if(result.size() == 0){
-					view.setNoMoreItems();
-					return;
-				}
-				view.appendResults(result);
-			}
+					@Override
+					public void onSuccess(final List<RequestObject> result) {
+						fetchingNextPage = false;
+						if (result.size() == 0) {
+							view.setNoMoreItems();
+							return;
+						}
+						view.appendResults(result);
+					}
 
-			@Override
-			public void onError(Throwable e) {
-				fetchingNextPage = false;
-				if(RestClient.isDebug()){
-					Log.error("Database error. Unable read history data.", e);
-				}
-				StatusNotification.notify("Database error. Unable read history data.", StatusNotification.TYPE_ERROR, StatusNotification.TIME_SHORT);
-			}
-		});
+					@Override
+					public void onError(Throwable e) {
+						fetchingNextPage = false;
+						if (RestClient.isDebug()) {
+							Log.error("Database error. Unable read history data.", e);
+						}
+						StatusNotification.notify("Database error. Unable read history data.",
+								StatusNotification.TIME_SHORT);
+					}
+				});
 	}
 
 	@Override
@@ -205,12 +205,12 @@ public class SavedActivity extends ListActivity implements
 		DriveApi.hasSession(new DriveApi.SessionHandler() {
 			@Override
 			public void onResult(DriveAuth result) {
-				if(result == null){
-					//no logged in user
+				if (result == null) {
+					// no logged in user
 					DriveApi.auth(new DriveApi.SessionHandler() {
 						@Override
 						public void onResult(DriveAuth result) {
-							if(result == null){
+							if (result == null) {
 								view.setDriveButtonEnabled(true);
 								return;
 							}
@@ -223,7 +223,8 @@ public class SavedActivity extends ListActivity implements
 			}
 		});
 	}
-	private void pickDriveArcFile(final String accessToken){
+
+	private void pickDriveArcFile(final String accessToken) {
 		DriveApi.showSavedFilesPicker(accessToken, new DriveApi.SelectFolderHandler() {
 			@Override
 			public void onSelect(String fileId) {
@@ -233,6 +234,7 @@ public class SavedActivity extends ListActivity implements
 			@Override
 			public void onCancel() {
 				view.setDriveButtonEnabled(true);
-			}});
+			}
+		});
 	}
 }
