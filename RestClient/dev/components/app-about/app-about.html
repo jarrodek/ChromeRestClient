@@ -1,3 +1,9 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-styles/classes/typography.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../paper-button/paper-button.html">
+
 <dom-module id="app-about">
   <template>
     <style>
@@ -44,7 +50,7 @@
     <h1 class="page-title">Advanced Rest Client Application</h1>
     <section class="about-section">
       <div class="about-row">
-        <span class="versionField"><span>Application version: </span><span>{{version}}</span></span>
+        <span class="versionField"><span>Application version: </span><span id="appVersion">{{version}}</span></span>
         <!-- @if NODE_ENV='stable' -->
         <span class="channel-name">Stable</span>
         <!-- @endif -->
@@ -605,7 +611,7 @@
       version: String
     },
     attached: function() {
-      this.version = chrome.runtime.getManifest().version;
+      this.version = (chrome && chrome.runtime) ? chrome.runtime.getManifest().version : 'Unknown';
     },
     showLicensing: function() {
       this.$.licensingDialog.open();

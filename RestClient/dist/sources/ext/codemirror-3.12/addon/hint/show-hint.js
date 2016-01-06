@@ -89,6 +89,7 @@ CodeMirror.showHint = function(cm, getHints, options) {
     function changeActive() {
       i = container.selected;
       if (selectedHint == i) return;
+      selectedHint = i;
       var node = container.childNodes[i];
       if (i === 0 || i === 1 || i === completions.length - 1) {
         node.scrollIntoView(false);

@@ -26,7 +26,6 @@ import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.suggestion.UrlsSuggestOracle;
 import org.rest.client.ui.RequestView.Presenter;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
@@ -354,9 +353,8 @@ public class RequestUrlWidget extends Composite implements HasText {
 	}
 	
 	void updateURL(){
-		
 		String url = getDetailedAsValue();
-		Log.debug("update url: " + url);
+		//Log.debug("update url: " + url);
 		urlField.setValue(url);
 		listener.fireUrlChangeEvent(url);
 	}

@@ -16871,7 +16871,7 @@ Polymer({
       version: String
     },
     attached: function() {
-      this.version = chrome.runtime.getManifest().version;
+      this.version = (chrome && chrome.runtime) ? chrome.runtime.getManifest().version : 'Unknown';
     },
     showLicensing: function() {
       this.$.licensingDialog.open();

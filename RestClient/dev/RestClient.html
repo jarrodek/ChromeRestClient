@@ -9,6 +9,18 @@
 <!-- @if NODE_ENV='debug' -->
 <script type="text/javascript" src="host.all.js"></script>
 <!-- @endif -->
+<!-- @if NODE_ENV='debug' -->
+<script type="text/javascript" src="libs/app.utils.js"></script>
+<script type="text/javascript" src="libs/app.db.websql.js"></script>
+<script type="text/javascript" src="libs/app.js"></script>
+<script type="text/javascript" src="libs/app.server.js"></script>
+<script type="text/javascript" src="libs/app.request.js"></script>
+<script type="text/javascript" src="libs/app.settings.js"></script>
+<script type="text/javascript" src="components/unibabel-js/unibabel.base32.js"></script>
+<!-- @endif -->
+<!-- @if NODE_ENV!='debug' -->
+<script type="text/javascript" src="libs/libs.js"></script>
+<!-- @endif -->
 <script type="text/javascript" src="app.js"></script>
 <link rel="import" href="components/elements.html">
 
@@ -58,18 +70,7 @@
 	<script src="/ext/oauth.js" type="text/javascript"></script>
 	<script src="/ext/sha1.js" type="text/javascript"></script>
 	<script type="text/javascript" src="drive.js"></script>
-	<!-- @if NODE_ENV='debug' -->
-	<script type="text/javascript" src="libs/app.utils.js"></script>
-	<script type="text/javascript" src="libs/app.db.websql.js"></script>
-	<script type="text/javascript" src="libs/app.js"></script>
-	<script type="text/javascript" src="libs/app.server.js"></script>
-	<script type="text/javascript" src="libs/app.request.js"></script>
-	<script type="text/javascript" src="libs/app.settings.js"></script>
-	<script type="text/javascript" src="components/unibabel-js/unibabel.base32.js"></script>
-	<!-- @endif -->
-	<!-- @if NODE_ENV!='debug' -->
-	<script type="text/javascript" src="libs/libs.js"></script>
-	<!-- @endif -->
+	
 	<script type="text/javascript" src="restclient/restclient.nocache.js"></script>
 	
 </body>

@@ -322,6 +322,9 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
   min-height: 40px;
   font-size: 15px;
 }
+[data-tab="parsed"] .CodeMirror pre {
+    white-space: pre-wrap;
+}
 
 .JSON_parser_bodyPanel a,
 .CodeMirror a {
