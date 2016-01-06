@@ -4526,19 +4526,22 @@ body.rest-client {
         padding-right: 24px;
     }
     .project-column{
-        width: 120px;
+        min-width: 120px;
+        max-width: 120px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
     .name-column{
-        width: 120px;
+        min-width: 120px;
+        max-width: 120px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
     .method-column{
-        width: 100px;
+        min-width: 100px;
+        max-width: 100px;
     }
     .url-column{
 
@@ -5048,8 +5051,8 @@ body.rest-client {
     <h1 class="page-title">Advanced Rest Client Application</h1>
     <section class="about-section">
       <div class="about-row">
-        <span class="versionField"><span>Application version: </span><span>{{version}}</span></span>
-        <span class="channel-name">Beta</span>
+        <span class="versionField"><span>Application version: </span><span id="appVersion">{{version}}</span></span>
+        <span class="channel-name">Stable</span>
       </div>
       <div class="about-row">
         Copyright © 2012 Paweł Psztyć (Poland || UK)

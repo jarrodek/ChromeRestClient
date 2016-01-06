@@ -241,7 +241,9 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 			public void onChange(String method) {
 				requestEncoding = method;
 				setEditorCurrentMode();
-				Log.info("Setting content type for payload encoding to " + method);
+				if(RestClient.isDebug()) {
+					Log.info("Setting content type for payload encoding to " + method);
+				}
 			}
 		});
 		

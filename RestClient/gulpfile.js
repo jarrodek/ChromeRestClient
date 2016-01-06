@@ -248,6 +248,18 @@ gulp.task('bump-beta-build', function() {
     }))
     .pipe(gulp.dest('./'));
 });
+gulp.task('bump-stable-build', function() {
+  return gulp.src('./manifest.json')
+    .pipe(bump({
+      type: 'minor'
+    }))
+    .pipe(bump({
+      key: 'version_name',
+      type: 'prerelease',
+      'preid': 'stable'
+    }))
+    .pipe(gulp.dest('./'));
+});
 /**
  * Generate libs.js file from all libraries.
  */
@@ -293,6 +305,27 @@ gulp.task('build:beta', function(callback) {
     'copy:devsources',
     'vulcanize',
     'bump-beta-build',
+    'copy:dist',
+    'libs',
+    'zip',
+    function(error) {
+      if (error) {
+        gutil.log(error.message);
+      } else {
+        gutil.log('RELEASE FINISHED SUCCESSFULLY');
+      }
+      callback(error);
+    }
+  );
+});
+
+gulp.task('build:stable', function(callback) {
+  runSequence(
+    'mode:stable',
+    'clean:dist',
+    'copy:devsources',
+    'vulcanize',
+    'bump-stable-build',
     'copy:dist',
     'libs',
     'zip',

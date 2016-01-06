@@ -141,8 +141,9 @@ MessageHandling.prototype.checkDriveAuth = function(request, sendResponse) {
   if (at) {
     data = {
       'access_token': at,
-      'expires_in': 3600 /*window.googleAuth.get('expiresIn') - 
-        (~~((Date.now() - window.googleAuth.get('accessTokenDate')) / 1000))*/
+      'expires_in': 3600
+        /*window.googleAuth.get('expiresIn') - 
+               (~~((Date.now() - window.googleAuth.get('accessTokenDate')) / 1000))*/
     };
   }
   sendResponse({
@@ -167,8 +168,9 @@ MessageHandling.prototype.gdriveAuth = function(request, sendResponse) {
     if (at) {
       data = {
         'access_token': at,
-        'expires_in': 3600 /*window.googleAuth.get('expiresIn') - (~~((Date.now() - 
-          window.googleAuth.get('accessTokenDate')) / 1000))*/
+        'expires_in': 3600
+          /*window.googleAuth.get('expiresIn') - (~~((Date.now() - 
+                   window.googleAuth.get('accessTokenDate')) / 1000))*/
       };
     }
     sendResponse({
@@ -340,7 +342,6 @@ arc.app.bg.onInstalled = function(details) {
       arc.app.bg.performStorageUpgrade();
       break;
     case 'install':
-      //initialize WebSQL tables.
       arc.app.db.websql.open().then(function() {
         console.log('Database has been initialized');
         arc.app.bg.installApp();
@@ -403,12 +404,14 @@ arc.app.bg.downloadDefinitions = function() {
 arc.app.bg.performStorageUpgrade = function() {
   try {
     window.localStorage;
-  } catch(e) {
+  } catch (e) {
     return;
   }
-  chrome.storage.local.get({'upgraded': {
-    'v4': false
-  }}, (r) => {
+  chrome.storage.local.get({
+    'upgraded': {
+      'v4': false
+    }
+  }, (r) => {
     if (r.upgraded.v4) {
       return;
     }
@@ -531,13 +534,13 @@ class WebRequest {
      * proper way (get all info) See more at <a
      * href="http://developer.chrome.com/extensions/webRequest.html">http://developer.chrome.com/extensions/webRequest.html</a>
      */
-    chrome.webRequest.onSendHeaders.addListener(this.onHeadersSend.bind(this), 
+    chrome.webRequest.onSendHeaders.addListener(this.onHeadersSend.bind(this),
       this.requestFilter, ['requestHeaders']);
-    chrome.webRequest.onBeforeRedirect.addListener(this.onBeforeRedirect.bind(this), 
+    chrome.webRequest.onBeforeRedirect.addListener(this.onBeforeRedirect.bind(this),
       this.requestFilter, ['responseHeaders']);
-    chrome.webRequest.onCompleted.addListener(this.onRequestCompleted.bind(this), 
+    chrome.webRequest.onCompleted.addListener(this.onRequestCompleted.bind(this),
       this.requestFilter, ['responseHeaders']);
-    chrome.webRequest.onErrorOccurred.addListener(this.onRequestError.bind(this), 
+    chrome.webRequest.onErrorOccurred.addListener(this.onRequestError.bind(this),
       this.requestFilter);
   }
   reset() {
@@ -695,13 +698,13 @@ chrome.runtime.onInstalled.addListener(arc.app.bg.onInstalled);
  * External extension communication.
  *
  * @param details:
- *            message - (any data) The message sent by the calling script. It's must be 
- *                      javascript object described in the bottom of this file.
- *            sender - (object): tab - This property will only be present when
- *            the connection was opened from a tab or content script; id - The
- *            extension ID of the extension that opened the connection.
- *            sendResponse - (function) Function to call (at most once) when you
- *            have a response. The argument should be any JSON-ifiable object.
+ *  message - (any data) The message sent by the calling script. It's must be 
+ *    javascript object described in the bottom of this file.
+ *  sender - (object): tab - This property will only be present when
+ *    the connection was opened from a tab or content script; id - The
+ *    extension ID of the extension that opened the connection.
+ *  sendResponse - (function) Function to call (at most once) when you
+ *    have a response. The argument should be any JSON-ifiable object.
  *
  * To run application from external extension just pass message to it.
  *
@@ -719,14 +722,13 @@ chrome.runtime.onInstalled.addListener(arc.app.bg.onInstalled);
  *                            (other payloads may be available in future).
  * <li>"data" - (required) javascript object with any of values:
  * <ul>
- *      <li>url - (String) request URL to set</li>
- *      <li>method - (String) request method to set</li>
- *      <li>headers - (String) an RFC string representing request headers
- *                  example: >>> User-Agent: X-Extension
- *                               X-header: header value; second value <<<
- *      <li>payload - (String) data to pass into payload field. Only for http methods that carry 
- *                     payload data</li>
- *      <li>encoding - (String) data form encoding</li>
+ * <li>url - (String) request URL to set</li>
+ * <li>method - (String) request method to set</li>
+ * <li>headers - (String) an RFC string representing request headers
+ * example: >>> User-Agent: X-Extension X-header: header value; second value <<< </li>
+ * <li>payload - (String) data to pass into payload field. Only for http methods that carry
+ * payload data</li>
+ * <li>encoding - (String) data form encoding</li>
  * </ul>
  * </ul>
  * <p>
@@ -741,8 +743,7 @@ chrome.runtime.onInstalled.addListener(arc.app.bg.onInstalled);
  * </pre>
  * Via extensions message passing system:
  * <pre>
- * chrome.runtime.sendMessage(THIS_APPLICATION_ID_FROM_CHROME_WEB_STORE, message, 
- *    function(response) {});
+ * chrome.runtime.sendMessage(THIS_APPLICATION_ID_FROM_CHROME_WEB_STORE, message, function(response) {});
  * </pre>
  * </pre>
  */

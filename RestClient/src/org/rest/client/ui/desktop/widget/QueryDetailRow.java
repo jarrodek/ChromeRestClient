@@ -42,8 +42,7 @@ public class QueryDetailRow extends Composite {
 		
 		nameBox.getElement().focus();
 		
-		observeRemoveButton(this);
-		observeEncodeButtons(this);
+		observeButtons(this);
 	}
 	
 	public String getKeyValue(){
@@ -82,28 +81,66 @@ public class QueryDetailRow extends Composite {
 		valueBox.setValue(value, true);
 	}
 	
-	private final native void observeRemoveButton(QueryDetailRow context) /*-{
-		var button = this.@org.rest.client.ui.desktop.widget.QueryDetailRow::removeButton;
-		if(!button) return;
-		button.addEventListener('tap', function(e){
-			context.@org.rest.client.ui.desktop.widget.QueryDetailRow::removeWidget()();
+	@Override
+	protected void onDetach() {
+		super.onDetach();
+		nativeDetach(this);
+	}
+	
+	/**
+	 * Detach all function that has been attached to the DOM objects via JSNI.
+	 * @param context
+	 */
+	private final native void nativeDetach(QueryDetailRow context) /*-{
+		var listeners = context._detachListeners;
+		if (!listeners) {
+			return;
+		}
+		listeners.forEach(function(value) {
+			value.element.removeEventListener(value.event, value.fn);
 		});
+		context._detachListeners = null;
 	}-*/;
 	
-	private final native void observeEncodeButtons(QueryDetailRow context) /*-{
+	private final native void observeButtons(QueryDetailRow context) /*-{
+		var button = this.@org.rest.client.ui.desktop.widget.QueryDetailRow::removeButton;
 		var enc = this.@org.rest.client.ui.desktop.widget.QueryDetailRow::encodeButton;
-		if(enc){
-			enc.addEventListener('tap', function(e){
-				var ctrl = e.ctrlKey || false;
-				context.@org.rest.client.ui.desktop.widget.QueryDetailRow::encodeValue(Z)(ctrl);
-			});
-		}
 		var dec = this.@org.rest.client.ui.desktop.widget.QueryDetailRow::decodeButton;
-		if(dec){
-			dec.addEventListener('tap', function(e){
-				var ctrl = e.ctrlKey || false;
-				context.@org.rest.client.ui.desktop.widget.QueryDetailRow::decodeValue(Z)(ctrl);
-			});
+		var remFn = $entry(function(e){
+			context.@org.rest.client.ui.desktop.widget.QueryDetailRow::removeWidget()();
+		});
+		var encFn = $entry(function(e){
+			var ctrl = e.ctrlKey || false;
+			context.@org.rest.client.ui.desktop.widget.QueryDetailRow::encodeValue(Z)(ctrl);
+		});
+		var decFn = $entry(function(e){
+			var ctrl = e.ctrlKey || false;
+			context.@org.rest.client.ui.desktop.widget.QueryDetailRow::decodeValue(Z)(ctrl);
+		});
+		
+		button.addEventListener('tap', remFn);
+		enc.addEventListener('tap', encFn);
+		dec.addEventListener('tap', decFn);
+		
+		var listeners = context._detachListeners;
+		if (!listeners) {
+			listeners = new Map();
 		}
+		listeners.set('remove', {
+			element : button,
+			fn : remFn,
+			event : 'tap'
+		});
+		listeners.set('encode', {
+			element : enc,
+			fn : encFn,
+			event : 'tap'
+		});
+		listeners.set('decode', {
+			element : dec,
+			fn : decFn,
+			event : 'tap'
+		});
+		context._detachListeners = listeners;
 	}-*/;
 }

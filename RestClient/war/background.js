@@ -141,8 +141,9 @@ MessageHandling.prototype.checkDriveAuth = function(request, sendResponse) {
   if (at) {
     data = {
       'access_token': at,
-      'expires_in': 3600 /*window.googleAuth.get('expiresIn') - 
-        (~~((Date.now() - window.googleAuth.get('accessTokenDate')) / 1000))*/
+      'expires_in': 3600
+        /*window.googleAuth.get('expiresIn') - 
+               (~~((Date.now() - window.googleAuth.get('accessTokenDate')) / 1000))*/
     };
   }
   sendResponse({
@@ -167,8 +168,9 @@ MessageHandling.prototype.gdriveAuth = function(request, sendResponse) {
     if (at) {
       data = {
         'access_token': at,
-        'expires_in': 3600 /*window.googleAuth.get('expiresIn') - (~~((Date.now() - 
-          window.googleAuth.get('accessTokenDate')) / 1000))*/
+        'expires_in': 3600
+          /*window.googleAuth.get('expiresIn') - (~~((Date.now() - 
+                   window.googleAuth.get('accessTokenDate')) / 1000))*/
       };
     }
     sendResponse({
@@ -335,20 +337,18 @@ arc.app.bg = {};
  * It should perform an update tasks if necessary.
  */
 arc.app.bg.onInstalled = function(details) {
-  console.log(details.reason);
   switch (details.reason) {
     case 'update':
       arc.app.bg.performStorageUpgrade();
       break;
     case 'install':
-      arc.app.bg.installApp();
+      arc.app.db.websql.open().then(function() {
+        console.log('Database has been initialized');
+        arc.app.bg.installApp();
+      }).catch((e) => console.error('Error initializing the database.', e));
+      //error here potentially will break the app since it is fired only during the install.
       break;
   }
-  arc.app.bg.installApp();
-  // Initialize database tables in here so the app will not do it on every start.
-  arc.app.db.websql.open().then(function() {
-    console.log('Database has been initialized');
-  }).catch((e) => console.error('Error initializing the database', e));
 };
 /**
  * //TODO: Upgrade WebSQL to IndexedDb.
@@ -399,65 +399,55 @@ arc.app.bg.downloadDefinitions = function() {
   });
 };
 /**
- * Perform upgrade to newest version
+ * Perform upgrade to the newest version
  */
 arc.app.bg.performStorageUpgrade = function() {
-  if (!('localStorage' in window)) {
+  try {
+    window.localStorage;
+  } catch (e) {
     return;
   }
-  if (localStorage['upgraded.v4']) {
-    return;
-  }
-  //set shortcuts values 
-  var save = {};
-  var shortcuts = arc.app.bg.performShortcutsUpgrade();
-  var settings = arc.app.bg.performSettingsUpgrade();
-  if (shortcuts) {
-    Object.assign(save, shortcuts);
-  }
-  Object.assign(save, settings);
-  chrome.storage.sync.set(save, function() {
-    console.info('localStorage has been upgraded to chrome.storage.sync');
+  chrome.storage.local.get({
+    'upgraded': {
+      'v4': false
+    }
+  }, (r) => {
+    if (r.upgraded.v4) {
+      return;
+    }
+    arc.app.bg.performShortcutsUpgrade();
+    var save = {};
+    var settings = arc.app.bg.performSettingsUpgrade();
+    Object.assign(save, settings);
+    chrome.storage.sync.set(save, function() {
+      console.info('localStorage has been upgraded to chrome.storage.sync');
+      delete localStorage.tutorials;
+      delete localStorage.LATESTMSG;
+      delete localStorage.latstSocket;
+      delete localStorage.DEBUG_ENABLED;
+      delete localStorage.HISTORY_ENABLED;
+      delete localStorage.MAGICVARS_ENABLED;
+      delete localStorage.CMH_ENABLED;
+      delete localStorage.CMP_ENABLED;
+    });
+    var local = arc.app.bg.performLocalDataUpgrade();
+    chrome.storage.local.set(local, function() {
+      console.info('localStorage has been upgraded to chrome.storage.local');
+      delete localStorage.firstrun;
+      delete localStorage.latest_request_data;
+      delete localStorage.LATEST_GDRIVE_FOLDER;
+    });
+    r.upgraded.v4 = true;
+    chrome.storage.local.get(r, () => console.log('Storage upgraded'));
   });
-  var local = arc.app.bg.performLocalDataUpgrade();
-  chrome.storage.local.set(local, function() {
-    console.info('localStorage has been upgraded to chrome.storage.local');
-  });
-  localStorage['upgraded.v4'] = true;
 };
 /**
- * To be called when upgrading to chrome.storage.
- * Pass shortcuts to the store.
+ * Custom shortcuts support has been removed from the app.
  */
 arc.app.bg.performShortcutsUpgrade = function() {
-  var shortcuts;
   try {
-    let v = 'SHORTCUTS';
-    shortcuts = JSON.parse(localStorage[v]);
-  } catch (e) {
-    return null;
-  }
-  //shortcuts structure changed to:
-  // (boolean) alt
-  // (boolean) ctrl
-  // (boolean) shift
-  // (int) key
-  // (String) type
-  let save = [];
-  shortcuts.forEach((s) => {
-    let shortcut = {
-      'alt': s.a,
-      'ctrl': s.c,
-      'shift': s.s,
-      'key': s.k,
-      'type': s.t
-    };
-    save[save.length] = shortcut;
-  });
-  if (save.length > 0) {
-    return save;
-  }
-  return null;
+    delete localStorage.SHORTCUTS;
+  } catch (e) {}
 };
 /**
  * To be called when upgrading to chrome.storage.
@@ -544,13 +534,13 @@ class WebRequest {
      * proper way (get all info) See more at <a
      * href="http://developer.chrome.com/extensions/webRequest.html">http://developer.chrome.com/extensions/webRequest.html</a>
      */
-    chrome.webRequest.onSendHeaders.addListener(this.onHeadersSend.bind(this), 
+    chrome.webRequest.onSendHeaders.addListener(this.onHeadersSend.bind(this),
       this.requestFilter, ['requestHeaders']);
-    chrome.webRequest.onBeforeRedirect.addListener(this.onBeforeRedirect.bind(this), 
+    chrome.webRequest.onBeforeRedirect.addListener(this.onBeforeRedirect.bind(this),
       this.requestFilter, ['responseHeaders']);
-    chrome.webRequest.onCompleted.addListener(this.onRequestCompleted.bind(this), 
+    chrome.webRequest.onCompleted.addListener(this.onRequestCompleted.bind(this),
       this.requestFilter, ['responseHeaders']);
-    chrome.webRequest.onErrorOccurred.addListener(this.onRequestError.bind(this), 
+    chrome.webRequest.onErrorOccurred.addListener(this.onRequestError.bind(this),
       this.requestFilter);
   }
   reset() {
@@ -708,13 +698,13 @@ chrome.runtime.onInstalled.addListener(arc.app.bg.onInstalled);
  * External extension communication.
  *
  * @param details:
- *            message - (any data) The message sent by the calling script. It's must be 
- *                      javascript object described in the bottom of this file.
- *            sender - (object): tab - This property will only be present when
- *            the connection was opened from a tab or content script; id - The
- *            extension ID of the extension that opened the connection.
- *            sendResponse - (function) Function to call (at most once) when you
- *            have a response. The argument should be any JSON-ifiable object.
+ *  message - (any data) The message sent by the calling script. It's must be 
+ *    javascript object described in the bottom of this file.
+ *  sender - (object): tab - This property will only be present when
+ *    the connection was opened from a tab or content script; id - The
+ *    extension ID of the extension that opened the connection.
+ *  sendResponse - (function) Function to call (at most once) when you
+ *    have a response. The argument should be any JSON-ifiable object.
  *
  * To run application from external extension just pass message to it.
  *
@@ -732,14 +722,13 @@ chrome.runtime.onInstalled.addListener(arc.app.bg.onInstalled);
  *                            (other payloads may be available in future).
  * <li>"data" - (required) javascript object with any of values:
  * <ul>
- *      <li>url - (String) request URL to set</li>
- *      <li>method - (String) request method to set</li>
- *      <li>headers - (String) an RFC string representing request headers
- *                  example: >>> User-Agent: X-Extension
- *                               X-header: header value; second value <<<
- *      <li>payload - (String) data to pass into payload field. Only for http methods that carry 
- *                     payload data</li>
- *      <li>encoding - (String) data form encoding</li>
+ * <li>url - (String) request URL to set</li>
+ * <li>method - (String) request method to set</li>
+ * <li>headers - (String) an RFC string representing request headers
+ * example: >>> User-Agent: X-Extension X-header: header value; second value <<< </li>
+ * <li>payload - (String) data to pass into payload field. Only for http methods that carry
+ * payload data</li>
+ * <li>encoding - (String) data form encoding</li>
  * </ul>
  * </ul>
  * <p>
@@ -754,8 +743,7 @@ chrome.runtime.onInstalled.addListener(arc.app.bg.onInstalled);
  * </pre>
  * Via extensions message passing system:
  * <pre>
- * chrome.runtime.sendMessage(THIS_APPLICATION_ID_FROM_CHROME_WEB_STORE, message, 
- *    function(response) {});
+ * chrome.runtime.sendMessage(THIS_APPLICATION_ID_FROM_CHROME_WEB_STORE, message, function(response) {});
  * </pre>
  * </pre>
  */
