@@ -37,6 +37,8 @@ import org.rest.client.suggestion.HeadersSuggestOracle;
 import org.rest.client.ui.html5.HTML5Element;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -306,7 +308,13 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 		headersData = data;
 		if(headersCodeMirror != null){
 			headersCodeMirror.setValue(data);
-			headersCodeMirror.refresh();
+			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+				@Override
+				public void execute() {
+					headersCodeMirror.refresh();
+					//RestClient.fixChromeLayout();
+				}
+			});
 		}
 	}
 	
