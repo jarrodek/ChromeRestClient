@@ -1,4 +1,19 @@
 'use strict';
+/*******************************************************************************
+ * Copyright 2012 Pawel Psztyc
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
 
 /**
  * Communicating with background page.
@@ -109,23 +124,6 @@ arc.app.drive.picker.initialized = false;
 arc.app.drive.picker._callbacks = new Set();
 
 /**
- * Initialize Drive integration API.
- */
-arc.app.drive.initialize = function() {
-  arc.app.drive._addEventHandlers();
-};
-/**
- * Attach event handlers to required events.
- */
-arc.app.drive._addEventHandlers = function() {
-  window.addEventListener('message', arc.app.drive.handleCSmessage);
-  window['oauth-callback'] = function() {
-    arc.app.drive.checkDriveAuth(function(tokenInfo) {
-      arc.app.drive.handleDriveAuthResult(tokenInfo);
-    });
-  };
-};
-/**
  * Add loader to the UI.
  *
  * TODO: This DOM operation is too expensive. Should be appended to DOM at page load.
@@ -183,53 +181,6 @@ arc.app.drive.loadDriveApi = function() {
   });
 };
 /**
- * This event handler function will be used to communicate with background page 
- * in development mode. 
- * 
- * This library instead of calling chrome.* APIs (unavailable during development)
- * will call content script function to pass the message to the background page.
- * The response will be handled by this handler.
- * Response from background page passed via content script has always appended
- * source == dev:cs to the response object.
- * The response need to have "payload" property which describes how to handle 
- * the response. All response data must be placed in "data" property.
- * 
- * This handler will be called every time when window.postMessage function will be called within 
- * the app.
- * 
- * @param {MessageEvent} e Message event 
- *    (https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent).
- * 
- *  @example Following represents example response from content script (event.data)
- *  {
- *    "source": "dev:cs",
- *    "payload": "function name to be called",
- *    "response": "object | string" // this function will accept "object" value only.
- *    "data" : Any //actual response from the background page
- *  }
- */
-arc.app.drive.handleCSmessage = function(e) {
-  if (e.origin !== location.origin) {
-    return;
-  }
-  let response = e.data;
-  if (!(response && response.source && response.source === 'gwt:cs')) {
-    return;
-  }
-  if (!(response && response['source-data'])) {
-    return;
-  }
-
-  switch (response['source-data'].payload) {
-    case 'checkDriveAuth':
-      arc.app.drive.handleDriveAuthResult(response.result);
-      break;
-    case 'gdriveAuth':
-      arc.app.drive.handleDriveAuthResult(response.result);
-      break;
-  }
-};
-/**
  * Check if current user have authorized application.
  * Callback function will contain auth result object (if user have authorized application)
  * with token data or null if not authorized.
@@ -247,29 +198,7 @@ arc.app.drive.handleCSmessage = function(e) {
  * }
  */
 arc.app.drive.checkDriveAuth = function(callback) {
-  if (!arc.app.drive._initialized) {
-    arc.app.drive.loadApi(function() {
-      arc.app.drive.checkDriveAuth(callback);
-    });
-    return;
-  }
-  //prepare a message for background page.
-  var payload = {
-    'payload': 'checkDriveAuth'
-  };
-  if (arc.app.drive.isExtension) {
-    chrome.runtime.getBackgroundPage(function(backgroundPage) {
-      backgroundPage.requestAction(payload, function(response) {
-        var authResult = response.response;
-        arc.app.drive._setAccessToken(authResult);
-        callback.call(arc, authResult);
-      });
-    });
-  } else {
-    arc.app.drive._authCallbacks.add(callback);
-    payload.source = 'gwt:host';
-    window.postMessage(payload, window.location.href);
-  }
+  arc.app.drive.auth(callback);
 };
 /**
  * Authorize the app in Google Drive service.
@@ -281,48 +210,9 @@ arc.app.drive.checkDriveAuth = function(callback) {
  * @param {Boolean} forceNew True if the app should force show auth dialog.
  */
 arc.app.drive.auth = function(callback, forceNew) {
-  forceNew = forceNew || false;
-
-  if (!arc.app.drive._initialized) {
-    arc.app.drive.loadApi(function() {
-      arc.app.drive.auth(callback);
-    });
-    return;
-  }
-
-  var payload = {
-    'payload': 'gdriveAuth',
-    'forceNew': forceNew
-  };
-
-  if (arc.app.drive.isExtension) {
-    chrome.runtime.getBackgroundPage(function(backgroundPage) {
-      backgroundPage.requestAction(payload, function(response) {
-        var authResult = response.response;
-        arc.app.drive._setAccessToken(authResult);
-        callback.call(arc, authResult);
-      });
-    });
-  } else {
-    arc.app.drive._authCallbacks.add(callback);
-    payload.source = 'gwt:host';
-    window.postMessage(payload, window.location.href);
-  }
+  chrome.identity.getAuthToken({'interactive': true}, callback);
 };
-/**
- * This function will be called in response to content script message passing.
- * It will call all callback function from `arc.app.drive._authCallbacks` set.
- * 
- * @param {Object|null} authResult An auth response containing access token information or null 
- *        if request is not authorized.
- */
-arc.app.drive.handleDriveAuthResult = function(authResult) {
-  arc.app.drive._setAccessToken(authResult);
-  for (let clb of arc.app.drive._authCallbacks) {
-    clb.call(arc, authResult);
-    arc.app.drive._authCallbacks.delete(clb);
-  }
-};
+
 /**
  * Set access token to be used by Google OAuth library.
  */
@@ -616,5 +506,3 @@ window.handlePickerLoad = function() {
     'callback': arc.app.drive.picker.loadHandler
   });
 };
-
-arc.app.drive.initialize();
