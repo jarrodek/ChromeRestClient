@@ -13,8 +13,17 @@
     "history",
     "background",
     "storage",
-    "clipboardWrite"
+    "clipboardWrite",
+    "identity"
   ],
+  "oauth2": {
+    "client_id": "10525470235-a0k5lkrar3rkq8mgedaq1kbqqpdeaqmc.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/drive.install",
+      "https://www.googleapis.com/auth/drive.file",
+      "https://www.googleapis.com/auth/drive.readonly.metadata"
+    ]
+  },
   "options_page": "RestClient.html?gwt.codesvr=127.0.0.1:9997#SettingsPlace:view",
   "background": {
     "scripts": ["libs/app.db.websql.js","/oauth2/oauth2.js","background.js"]
