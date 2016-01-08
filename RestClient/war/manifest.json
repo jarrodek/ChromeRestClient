@@ -24,9 +24,10 @@
       "https://www.googleapis.com/auth/drive.readonly.metadata"
     ]
   },
+  "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCcwog3RvKBNlbE9nxa06ruwxAKR2kauzTVWYN4e1uFK8g3ScGxqG08gvuzgbOlbIO0TNHXdkJzf6DY0EPH0w8wUYDNlyav4DToaB2pdJAjcHOPsvUwktc0N0Y6ABrnreww23ZvNfqHuF0+u/Zzn3vGEFjHIcG2LGMXgP3R0QgdDQIDAQAB",
   "options_page": "RestClient.html?gwt.codesvr=127.0.0.1:9997#SettingsPlace:view",
   "background": {
-    "scripts": ["libs/app.db.websql.js","/oauth2/oauth2.js","background.js"]
+    "scripts": ["libs/app.db.websql.js","background.js"]
   },
   "app": {
     "launch": {
@@ -43,11 +44,6 @@
     {
     	"matches": ["http://127.0.0.1:8888/GDrive.html*"],
     	"js": ["gdriveinit.js"]
-    },
-    {
-    	"matches": ["https://chromerestclient.appspot.com/oauth2callback.html*"],
-	    "js": ["oauth2/oauth2_inject.js"],
-	    "run_at": "document_start"
     }
   ]
 }

@@ -11,11 +11,21 @@
     "background",
     "storage",
     "clipboardRead",
-    "clipboardWrite"
+    "clipboardWrite",
+    "identity"
   ],
   "background": {
     "scripts": ["background.js"]
   },
+  "oauth2": {
+    "client_id": "10525470235-95jsoe8j8ceraka7rf6iko0r9et82o8q.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/drive.install",
+      "https://www.googleapis.com/auth/drive.file",
+      "https://www.googleapis.com/auth/drive.readonly.metadata"
+    ]
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4DYRZbH+8gBIkljTS9hdU+EhxmNWs/xcDXTJ662xh7TlLQWLdbNeP5UfFJhcnTyLIQXh+6/9woep60UI5hfA3M+gGmmkNAuhML+ZvEdSh3TjgsBFat2DHFrMQhP9bNnG9igSX9dV3lRrvPnybZqUHLqiNJ/xyBYjYTjZacBWRk0mmuCaSsvajXSY0LZN0sSNAYlY+7qy4PZLMISxmCQxDT1ST7F5q8d0QG5SMuUPF6nMb8VSBfIwxC9l42hRWVYhW8h97ZlrKLyPtdk2Irl+UTCZonD2n+tUfb3OIBBBH6AoeRAN8Z31mpzTKgXjq9CetkLpesXjKrpEZyljn28LBwIDAQAB",
   "content_scripts": [{
       "matches": ["http://127.0.0.1:8888/*"],
       "js": ["cs.js"],

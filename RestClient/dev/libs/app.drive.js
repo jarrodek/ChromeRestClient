@@ -198,7 +198,7 @@ arc.app.drive.loadDriveApi = function() {
  * }
  */
 arc.app.drive.checkDriveAuth = function(callback) {
-  carc.app.drive.auth(callback);
+  arc.app.drive.auth(callback);
 };
 /**
  * Authorize the app in Google Drive service.
