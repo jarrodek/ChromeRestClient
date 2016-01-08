@@ -28,23 +28,28 @@ arc.app = arc.app || {};
 /**
  * A namespace for the database scripts.
  */
-arc.app.db = {};
+arc.app.db = arc.app.db || {};
+
+/**
+ * A namespace for IndexedDB scripts.
+ */
+arc.app.db.idb = {};
 /**
  * A handler to current connection to the database.
  * @type IDBDatabase
  */
-arc.app.db._db = null;
+arc.app.db.idb._db = null;
 /**
  * Current database schema version.
  * @type Number
  */
-arc.app.db._dbVersion = 1;
+arc.app.db.idb._dbVersion = 1;
 /**
  * Generic error handler.
  *
  * @param {Error} e
  */
-arc.app.db.onerror = function(e) {
+arc.app.db.idb.onerror = function(e) {
   console.error('app::db:error');
   console.log(e.message);
 };
@@ -53,16 +58,16 @@ arc.app.db.onerror = function(e) {
  *
  * @returns {Promise} The promise when ready.
  */
-arc.app.db.open = function() {
+arc.app.db.idb.open = function() {
   return new Promise(function(resolve, reject) {
-    if (arc.app.db._db) {
+    if (arc.app.db.idb._db) {
       resolve();
       return;
     }
-    var request = indexedDB.open('arc', arc.app.db._dbVersion);
-    request.onupgradeneeded = arc.app.db._dbUpgrade;
+    var request = indexedDB.open('arc', arc.app.db.idb._dbVersion);
+    request.onupgradeneeded = arc.app.db.idb._dbUpgrade;
     request.onsuccess = function(e) {
-      arc.app.db._db = e.target.result;
+      arc.app.db.idb._db = e.target.result;
       resolve();
     };
     request.onerror = function(e) {
@@ -77,12 +82,12 @@ arc.app.db.open = function() {
  *
  * @param {Event} e 
  */
-arc.app.db._dbUpgrade = function(e) {
+arc.app.db.idb._dbUpgrade = function(e) {
   console.group('Database upgrade');
-  console.info('Upgrading the database to version %d.', arc.app.db._dbVersion);
+  console.info('Upgrading the database to version %d.', arc.app.db.idb._dbVersion);
 
   var db = e.target.result;
-  e.target.transaction.onerror = arc.app.db.onerror;
+  e.target.transaction.onerror = arc.app.db.idb.onerror;
 
   //headers store
   if (db.objectStoreNames.contains('headers')) {
@@ -166,22 +171,22 @@ arc.app.db._dbUpgrade = function(e) {
 /**
  * Close a connection to the database.
  */
-arc.app.db.close = function() {
-  if (arc.app.db._db === null) {
+arc.app.db.idb.close = function() {
+  if (arc.app.db.idb._db === null) {
     return;
   }
-  arc.app.db._db.close();
-  arc.app.db._db = null;
+  arc.app.db.idb._db.close();
+  arc.app.db.idb._db = null;
 };
 /**
  * 
  * @param {String} date A YYYY-mm-dd date representation.
  * @returns {Promise} Resolved with an entry.
  */
-arc.app.db.getCdno = function(date) {
-  return arc.app.db.open().then(function() {
+arc.app.db.idb.getCdno = function(date) {
+  return arc.app.db.idb.open().then(function() {
     return new Promise(function(resolve, reject) {
-      var transaction = arc.app.db._db.transaction(['cdno']);
+      var transaction = arc.app.db.idb._db.transaction(['cdno']);
       transaction.onerror = function(e) {
         reject(e);
       };
@@ -197,7 +202,7 @@ arc.app.db.getCdno = function(date) {
       };
     });
   }).catch(function(e) {
-    console.error('can\'t call arc.app.db.open');
+    console.error('can\'t call arc.app.db.idb.open');
     throw e;
   });
 };
