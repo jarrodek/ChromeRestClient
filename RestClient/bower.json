@@ -22,7 +22,8 @@
     "paper-tabs":"PolymerElements/paper-tabs#^1.2.4",
     "paper-listbox": "PolymerElements/paper-listbox#^1.1.0",
     "iron-pages":"PolymerElements/iron-pages#^1.0.5",
-    "unibabel-js":"coolaj86/unibabel-js#2.1.3"
+    "unibabel-js":"coolaj86/unibabel-js#2.1.3",
+    "dexie-js": "dfahlander/Dexie.js#latest"
   },
   "devDependencies": {
     "web-component-tester": "*"

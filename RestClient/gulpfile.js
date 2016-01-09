@@ -147,7 +147,8 @@ gulp.task('copy:dist', function() {
   var ext = gulp.src('war/ext/**/*', {
     dot: true
   }).pipe(gulp.dest('dist/sources/ext'));
-  var libs = gulp.src('war/libs/app.db.websql.js').pipe(gulp.dest('dist/sources/libs'));
+  var libs = gulp.src(['war/libs/app.db.websql.js','war/libs/app.db.idb.js'])
+  .pipe(gulp.dest('dist/sources/libs'));
   var oauth2 = gulp.src('war/oauth2/**/*').pipe(gulp.dest('dist/sources/oauth2'));
   var restclient = gulp.src('war/restclient/**/*', {
       dot: true
@@ -192,11 +193,24 @@ var copySourceFile = function(obj) {
  * It will include separate js libraries into the index page and put it in the extension 
  * environment.
  */
-gulp.task('dev', ['mode:debug', 'lint', 'copy:devsources'], function() {
-  gulp.watch('dev/**/*.html', copySourceFile);
-  gulp.watch('dev/**/*.js', copySourceFile);
-  gulp.watch('dev/**/*.jsp', copySourceFile);
-  gulp.watch('dev/**/*.css', copySourceFile);
+gulp.task('dev', function(callback) {
+  runSequence(
+    'mode:debug',
+    'lint',
+    'copy:devsources',
+    function(error) {
+      if (error) {
+        gutil.log(error.message);
+        callback(error);
+      } else {
+        gulp.watch('dev/**/*.html', copySourceFile);
+        gulp.watch('dev/**/*.js', copySourceFile);
+        gulp.watch('dev/**/*.jsp', copySourceFile);
+        gulp.watch('dev/**/*.css', copySourceFile);
+        gutil.log('You are ready to develop the app. Good luck!');
+      }
+    }
+  );  
 });
 /**
  * Clean the dist folder.
@@ -264,7 +278,7 @@ gulp.task('bump-stable-build', function() {
  * Generate libs.js file from all libraries.
  */
 gulp.task('libs', function() {
-  return gulp.src(['war/libs/*.js', '!war/libs/app_db.js'])
+  return gulp.src(['war/libs/*.js'])
     .pipe(babel({
       presets: ['es2015'],
       comments: false

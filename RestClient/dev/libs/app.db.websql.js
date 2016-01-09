@@ -425,7 +425,7 @@ arc.app.db.websql.getProject = function(id) {
 arc.app.db.websql.initDev = function() {
   if (arc.app.utils && !arc.app.utils.isProdMode()) {
     arc.app.db.websql.open().then(function() {
-      console.log('%cDEVMODE::Database has been initialized', 'color: #33691E');
+      console.log('%cDEVMODE::WebSQL has been initialized', 'color: #33691E');
     }).catch((e) => console.error('DEVMODE::Error initializing the database', e));
   }
 };

@@ -20,6 +20,7 @@
   "background": {
     "scripts": [
       "libs/app.db.websql.js",
+      "libs/app.db.idb.js",
       "oauth2/oauth2.js",
       "background.js"
     ]
