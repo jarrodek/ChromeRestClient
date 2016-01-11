@@ -104,7 +104,7 @@ public class AppUser {
 		PersistenceManager pm = PMF.get().getPersistenceManager(); 
 		AppUser appUser = null;
 		try {
-			appUser = pm.getObjectById(AppUser.class, _key);
+			appUser = pm.getObjectById(AppUser.class, _key); 
 			return pm.detachCopy(appUser);
 		} catch (Exception e) {
 			e.printStackTrace();
