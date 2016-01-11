@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.ApplicationReadyEvent;
 import org.rest.client.event.NewProjectAvailableEvent;
@@ -176,6 +177,7 @@ public class RestClient implements EntryPoint {
 	 */
 	public void onModuleLoad() {
 		GoogleAnalyticsApp.initialize();
+		GoogleAnalytics.initialize();
 		
 		setLogging();
 		
@@ -209,11 +211,12 @@ public class RestClient implements EntryPoint {
 			public void onUncaughtException(Throwable e) {
 				log.log(Level.SEVERE, e.getMessage(), e);
 				Log.error("Application error", e);
+				GoogleAnalytics.sendException("RestClient::Application error::"+e.getMessage());
 			}
 		});
 		
 		Logger.getLogger("").addHandler(clientFactory.getErrorDialogView().getHandler());
-		Logger.getLogger("").setLevel(Level.WARNING);
+		Logger.getLogger("").setLevel(Level.ALL);
 	}
 	
 	/**
