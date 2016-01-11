@@ -81,6 +81,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 				if (view != null){
 					StatusNotification.notify("There was an error when storing your data", StatusNotification.TIME_MEDIUM);
 					view.resetServerView();
+					GoogleAnalytics.sendException("ImportExportActivity::StoreDataEvent::onFailure::Couldn't store data.");
 				}
 			}
 		});
@@ -130,6 +131,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 							Log.error("Unable to collect requests data :/", e);
 						}
 						StatusNotification.notify("Unable to collect requests data :/", StatusNotification.TIME_MEDIUM);
+						GoogleAnalytics.sendException("ImportExportActivity::prepareDataToFile::Unable to collect requests data::" + e.getMessage());
 					}
 				});
 			}
@@ -140,6 +142,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 					Log.error("Unable to collect requests data :/", e);
 				}
 				StatusNotification.notify("Unable to collect requests data :/", StatusNotification.TIME_MEDIUM);
+				GoogleAnalytics.sendException("ImportExportActivity::prepareDataToFile::Unable to collect requests data::" + e.getMessage());
 			}
 		});
 		GoogleAnalytics.sendEvent("Settings usage", "Export data", "Generate file");
@@ -255,6 +258,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 				int size = result.length();
 				if (size == 0) {
 					StatusNotification.notify("Something went wrong. There is no data to save", StatusNotification.TIME_MEDIUM);
+					GoogleAnalytics.sendException("ImportExportActivity::doServerImport::There is no data to save");
 					return;
 				}
 				ArrayList<RequestObject> importData = new ArrayList<RequestObject>();
@@ -269,6 +273,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 			@Override
 			public void onFailure(String message) {
 				StatusNotification.notify(message, StatusNotification.TIME_MEDIUM);
+				GoogleAnalytics.sendException("ImportExportActivity::doServerImport::Failure handler::" + message);
 			}
 		});
 		GoogleAnalytics.sendEvent("Settings usage", "Import data", "Download from server");
@@ -302,8 +307,9 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 				StatusNotification.notify("Unable to save data to local database :(",
 						StatusNotification.TIME_MEDIUM);
 				if (RestClient.isDebug()) {
-					Log.error("Unable to vave data to local database :(", error);
+					Log.error("Unable to save data to local database :(", error);
 				}
+				GoogleAnalytics.sendException("ImportExportActivity::saveImported::Failure handler::" + error);
 			}
 			@Override
 			public void onSuccess(List<Integer> rowIds) {
@@ -333,6 +339,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 				}
 				StatusNotification.notify("Data restored with some errors", StatusNotification.TIME_MEDIUM);
 				view.resetServerView();
+				GoogleAnalytics.sendException("ImportExportActivity::saveImportedReferences::Failure handler::" + error.getMessage());
 			}
 
 			@Override
@@ -378,6 +385,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 				}
 				StatusNotification.notify(msg, StatusNotification.TIME_MEDIUM);
 				view.resetImportView();
+				GoogleAnalytics.sendException("ImportExportActivity::importFromFile::FileReader::" + msg);
 			}
 		});
 		reader.addLoadHandler(new LoadHandler() {
@@ -429,6 +437,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 					if (RestClient.isDebug()) {
 						Log.error("Unable insert project data", error);
 					}
+					GoogleAnalytics.sendException("ImportExportActivity::saveImportedFileData::Service error handler::" + error.getMessage());
 					callback.onSuccess(false);
 				}
 
@@ -477,6 +486,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 				if (RestClient.isDebug()) {
 					Log.error("Unable insert requests data", error);
 				}
+				GoogleAnalytics.sendException("ImportExportActivity::saveImportedFileData2::Service error handler::" + error.getMessage());
 				callback.onSuccess(false);
 			}
 

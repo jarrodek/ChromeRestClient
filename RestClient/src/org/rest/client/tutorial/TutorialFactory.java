@@ -3,6 +3,8 @@ package org.rest.client.tutorial;
 import java.util.ArrayList;
 
 import org.rest.client.RestClient;
+import org.rest.client.analytics.GoogleAnalytics;
+import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.ui.TutorialDialog;
 import org.rest.client.ui.TutorialDialog.Controls;
@@ -231,12 +233,13 @@ public class TutorialFactory {
 		}
 		currentItem = null;
 		int itemsSize = items.size();
+		int value = 0;
 		if(itemsSize > 1 && itemsSize == current+1){
-			pushGAEvent("Tutorial","Break up", tutorialName, current);
-		} else {
-			pushGAEvent("Tutorial","Finished", tutorialName, 0);
+			value = current;
 		}
 		items.clear();
+		GoogleAnalytics.sendEvent("Tutorial","Break up", tutorialName, value);
+		GoogleAnalyticsApp.sendEvent("Tutorial","Break up", tutorialName, value);
 	}
 	
 	public void clear(){
@@ -244,8 +247,4 @@ public class TutorialFactory {
 			breakUpTutorial();
 		}
 	}
-	
-	private final native void pushGAEvent(String category, String action, String label, int value)/*-{
-		$wnd._gaq.push(['_trackEvent', category, action, label, value]);
-	}-*/;
 }

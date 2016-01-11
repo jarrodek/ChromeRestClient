@@ -1,5 +1,6 @@
 package org.rest.client;
 
+import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.NewProjectAvailableEvent;
 import org.rest.client.event.ProjectChangeEvent;
@@ -35,6 +36,7 @@ public class UserMenuHandler {
 		var menu = $doc.querySelector('arc-menu');
 		if(!menu) {
 			console.error('arc-menu element not found in the DOM.');
+			@org.rest.client.analytics.GoogleAnalytics::sendException(Ljava/lang/String;)('UserMenuHandler::handleProjectChange::arc-menu element not found in the DOM.');
 			return;
 		}
 		menu.updateProjectName(project.id, project.name);
@@ -47,6 +49,7 @@ public class UserMenuHandler {
 		var menu = $doc.querySelector('arc-menu');
 		if(!menu) {
 			console.error('arc-menu element not found in the DOM.');
+			@org.rest.client.analytics.GoogleAnalytics::sendException(Ljava/lang/String;)('UserMenuHandler::handleAddProject::arc-menu element not found in the DOM.');
 			return;
 		}
 		menu.appendProject(projectId);
@@ -56,6 +59,7 @@ public class UserMenuHandler {
 		var menu = $doc.querySelector('arc-menu');
 		if(!menu) {
 			console.error('arc-menu element not found in the DOM.');
+			@org.rest.client.analytics.GoogleAnalytics::sendException(Ljava/lang/String;)('UserMenuHandler::handleRemoveProject::arc-menu element not found in the DOM.');
 			return;
 		}
 		menu.removeProject(projectId);
@@ -121,24 +125,9 @@ public class UserMenuHandler {
 				} else if (newPlace instanceof SocketPlace) {
 					gaName = "#SocketPlace:" + ((SocketPlace) newPlace).getToken();
 				}
-				trackPageview(gaName);
+				GoogleAnalytics.sendPageView(gaName);
 				GoogleAnalyticsApp.sendScreen(gaName);
 			}
 		});
 	}
-	
-	
-	
-	
-	final native void trackPageview(String pageUrl) /*-{
-		if (!$wnd._gaq)
-			return;
-		if (@org.rest.client.RestClient::isInitializing()())
-			return;
-		$wnd._gaq.push([ '_trackPageview', pageUrl ]);
-	}-*/;
-
-	final native void logNative(Object msg) /*-{
-		console.log(msg, typeof msg);
-	}-*/;
 }

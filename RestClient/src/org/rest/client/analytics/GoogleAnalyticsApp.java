@@ -33,7 +33,7 @@ public class GoogleAnalyticsApp {
 	private final native static JavaScriptObject initService() /*-{
 		if (typeof $wnd.analytics === 'undefined' || typeof $wnd.analytics.getService === 'undefined') {
 			console
-					.error('Google Analytics code not ready. Maybe you forgot to include library?');
+					.warn('Google Analytics code not ready. Maybe you forgot to include library?');
 			return null;
 		}
 		return $wnd.analytics.getService('AdvancedRestClient');
@@ -49,8 +49,29 @@ public class GoogleAnalyticsApp {
 		if (!service) {
 			return null;
 		}
-		return service
+		var tracker = service
 				.getTracker(@org.rest.client.analytics.GoogleAnalyticsApp::UA_ID);
+		tracker.set('appId', 'org.rest.client');
+		var version = ($wnd.chrome && $wnd.chrome.runtime && $wnd.chrome.runtime.getManifest) ? $wnd.chrome.runtime.getManifest().version : 'Unknown';
+		tracker.set('dimension2', version);
+		var raw = $wnd.navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
+		var chromeVer = raw ? raw[2] : '(not set)';
+		tracker.set('dimension1', chromeVer);
+		if ($wnd.chrome && $wnd.chrome.storage && $wnd.chrome.storage.sync) {
+		  $wnd.chrome.storage.sync.get({
+		    'appuid': null
+		  }, function(data) {
+		    if (data.appuid) {
+		      tracker.set('userId', data.appuid);
+		    } else {
+		      data.appuid = $wnd.arc.app.utils.uuid();
+		      $wnd.chrome.storage.sync.set(data, function() {
+		        tracker.set('userId', data.appuid);
+		      });
+		    }
+		  });
+		}
+		return tracker;
 	}-*/;
 	
 	/**
@@ -86,7 +107,28 @@ public class GoogleAnalyticsApp {
 		}
 		tracker.sendEvent(category, action, label);
 	}-*/;
-
+	/**
+	 * Track user actions using an
+	 * {@link https://support.google.com/analytics/answer/1033068} Event. Events
+	 * have an optional numeric value that is averaged together by Google
+	 * Analytics.
+	 * 
+	 * @param category
+	 *            Event category
+	 * @param action
+	 *            Event action
+	 * @param label
+	 *            Event label
+	 * @param value
+	 * 			  Event value
+	 */
+	public final static native void sendEvent(String category, String action, String label, int value) /*-{
+		var tracker = @org.rest.client.analytics.GoogleAnalyticsApp::tracker;
+		if (!tracker) {
+			return null;
+		}
+		tracker.sendEvent(category, action, label, value);
+	}-*/;
 	/**
 	 * When starting your app, or changing "places" in your app, you should
 	 * always send an AppView hit. AppView information appears in the
