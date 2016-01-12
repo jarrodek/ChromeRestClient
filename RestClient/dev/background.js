@@ -31,8 +31,7 @@ MessageHandling.prototype.init = function() {
 
 MessageHandling.prototype.setListeners = function() {
   window.requestAction = function(request, callback) {
-    let f = () => {};
-    callback = callback || f;
+    callback = callback || function() {};
     this.handleMessage(request, callback, null);
   }.bind(this);
 
@@ -252,7 +251,9 @@ arc.app.bg.onInstalled = function(details) {
       arc.app.db.websql.open().then(function() {
         console.log('Database has been initialized');
         arc.app.bg.installApp();
-      }).catch((e) => console.error('Error initializing the database.', e));
+      }).catch(function(e) {
+        console.error('Error initializing the database.', e);
+      });
       //error here potentially will break the app since it is fired only during the install.
       break;
   }
@@ -269,14 +270,15 @@ arc.app.bg.installApp = function() {
     }
     arc.app.bg.downloadDefinitions()
       .then(arc.app.bg.installDefinitions)
-      .then(() => {
+      .then(function() {
         console.log('App database has been filled with default values.');
         chrome.storage.local.set({
           'firstrun': true
         });
       })
-      .catch((r) => console.error('There was an error when filling up the database with ' +
-        'definitions.', r));
+      .catch(function(r) {
+        console.error('There was an error when filling up the database with definitions.', r);
+      });
   });
 };
 /**
@@ -290,8 +292,12 @@ arc.app.bg.installDefinitions = function(defs) {
   }
   return arc.app.db.websql.insertStatusCodes(defs.codes)
     .then(function() {
-      defs.requests.forEach((item) => item.type = 'request');
-      defs.responses.forEach((item) => item.type = 'response');
+      defs.requests.forEach(function(item) {
+        item.type = 'request';
+      });
+      defs.responses.forEach(function(item) {
+        item.type = 'response';
+      });
       let save = defs.requests.concat(defs.responses);
       return arc.app.db.websql.insertHeadersDefinitions(save);
     });
@@ -318,7 +324,7 @@ arc.app.bg.performStorageUpgrade = function() {
     'upgraded': {
       'v4': false
     }
-  }, (r) => {
+  }, function(r) {
     if (r.upgraded.v4) {
       return;
     }
@@ -345,7 +351,9 @@ arc.app.bg.performStorageUpgrade = function() {
       delete localStorage.LATEST_GDRIVE_FOLDER;
     });
     r.upgraded.v4 = true;
-    chrome.storage.local.get(r, () => console.log('Storage upgraded'));
+    chrome.storage.local.get(r, function() {
+      console.log('Storage upgraded');
+    });
   });
 };
 /**

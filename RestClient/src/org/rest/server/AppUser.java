@@ -17,7 +17,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.User;
 
 @PersistenceCapable
-public class AppUser { 
+public class AppUser {
 	/**
 	 * key from userID
 	 */
