@@ -28,7 +28,6 @@ public class AppUser {
 	@Persistent
     private User user;
 	
-	
 	/**
 	 * User saved requests
 	 */

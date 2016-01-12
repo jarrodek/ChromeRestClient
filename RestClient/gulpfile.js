@@ -353,6 +353,18 @@ gulp.task('build:stable', function(callback) {
     }
   );
 });
+/** 
+ * Build a HAR library and copy it to /war directory.
+ */
+gulp.task('build:har', function(callback) {
+  return gulp.src(['dev/components/har/lib/index.js'])
+    .pipe(babel({
+      presets: ['es2015'],
+      comments: false
+    }))
+    .pipe(concat('har.js'))
+    .pipe(gulp.dest('war/ext/'));
+});
 // Load tasks for web-component-tester
 // Adds tasks for `gulp test:local` and `gulp test:remote`
 require('web-component-tester').gulp.init(gulp);
