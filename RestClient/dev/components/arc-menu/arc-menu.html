@@ -167,7 +167,7 @@
                 return;
             }
             var context = this;
-            this.projects.forEach((project, i) => {
+            this.projects.forEach(function (project, i) {
                 if (project.id === projectId) {
                     context.set('projects.' + i + '.name', projectName);
                 }
@@ -198,7 +198,7 @@
                 return;
             }
             var context = this;
-            this.projects.forEach((project, i) => {
+            this.projects.forEach(function (project, i) {
                 if (project.id === projectId) {
                     context.splice('projects', i, 1);
                 }

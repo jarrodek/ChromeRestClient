@@ -372,20 +372,24 @@ public class RequestViewImpl extends Composite implements RequestView {
 		if (encoding == null) {
 			return;
 		}
-		
-		ArrayList<RequestHeader> requerstHeadersList = RequestHeadersParser
-				.stringToHeaders(getHeaders());
-		
+		boolean hasBody = HttpMethodOptions.hasBody(currentSelectedMethod);
 		boolean headersListchanged = false;
 		String latestSelectedContentType = null;
-		if(encoding.contains("multipart/form-data;")){ //"multipart/form-data" with boudary
+		if(encoding.contains("multipart/form-data;")){
 			encoding = "multipart/form-data";
 		}
-		ArrayList<RequestHeader> list = RequestHeadersParser.stringToHeaders(requestHeaders.getText());
+		
+		ArrayList<RequestHeader> list = RequestHeadersParser.stringToHeaders(getHeaders());
 		Iterator<RequestHeader> it = list.iterator();
 		while(it.hasNext()) {
 			RequestHeader header = it.next();
 			if(header.getName().toLowerCase().equals("content-type")) {
+				if(!hasBody){
+					//remove header.
+					list.remove(header);
+					headersListchanged = true;
+					break;
+				}
 				if(header.getValue().equals(encoding)) {
 					return;
 				}
@@ -394,13 +398,15 @@ public class RequestViewImpl extends Composite implements RequestView {
 				headersListchanged = true;
 			}
 		}
-		if(!headersListchanged){
+		if(!headersListchanged && hasBody){
 			list.add(new RequestHeader("Content-Type", encoding));
 			headersListchanged = true;
 		}
-		setHeaders(RequestHeadersParser.headersListToString(requerstHeadersList));
-		RestClient.getClientFactory().getEventBus().fireEvent(
-				new HttpEncodingChangeEvent(latestSelectedContentType));
+		if(headersListchanged){
+			setHeaders(RequestHeadersParser.headersListToString(list));
+			RestClient.getClientFactory().getEventBus().fireEvent(
+					new HttpEncodingChangeEvent(latestSelectedContentType));
+		}
 	}
 
 	@Override

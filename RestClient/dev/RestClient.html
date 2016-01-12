@@ -22,6 +22,9 @@
 <script type="text/javascript" src="libs/libs.js"></script>
 <!-- @endif -->
 <script type="text/javascript" src="app.js"></script>
+<!-- @if NODE_ENV!='debug' -->
+<script src="components/webcomponents-lite.js"></script>
+<!-- @endif -->
 <link rel="import" href="components/elements.html">
 
 </head>
