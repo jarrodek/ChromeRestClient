@@ -5,6 +5,7 @@ import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.SaveRequestEvent;
 import org.rest.client.ui.SaveRequestDialogView;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.web.bindery.event.shared.EventBus;
 
 public class AppEventsHandlers {
@@ -14,8 +15,10 @@ public class AppEventsHandlers {
 		SaveRequestEvent.register(eventBus, new SaveRequestEvent.Handler() {
 			@Override
 			public void onSave() {
-				if(RestClient.isSaveDialogEnabled) return;
-				
+				if(RestClient.isSaveDialogEnabled) {
+					Log.info("Save dialog is currently displayed.");
+					return;
+				}
 				SaveRequestDialogView dialog = RestClient.getClientFactory().getSaveRequestDialogView();
 				dialog.show();
 				GoogleAnalytics.sendEvent("Engagement", "Click", "Save action initialization");

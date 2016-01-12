@@ -7716,184 +7716,6 @@ this.fire('dom-change');
     }
 
   });
-/**
-   * `IronResizableBehavior` is a behavior that can be used in Polymer elements to
-   * coordinate the flow of resize events between "resizers" (elements that control the
-   * size or hidden state of their children) and "resizables" (elements that need to be
-   * notified when they are resized or un-hidden by their parents in order to take
-   * action on their new measurements).
-   * Elements that perform measurement should add the `IronResizableBehavior` behavior to
-   * their element definition and listen for the `iron-resize` event on themselves.
-   * This event will be fired when they become showing after having been hidden,
-   * when they are resized explicitly by another resizable, or when the window has been
-   * resized.
-   * Note, the `iron-resize` event is non-bubbling.
-   *
-   * @polymerBehavior Polymer.IronResizableBehavior
-   * @demo demo/index.html
-   **/
-  Polymer.IronResizableBehavior = {
-    properties: {
-      /**
-       * The closest ancestor element that implements `IronResizableBehavior`.
-       */
-      _parentResizable: {
-        type: Object,
-        observer: '_parentResizableChanged'
-      },
-
-      /**
-       * True if this element is currently notifying its descedant elements of
-       * resize.
-       */
-      _notifyingDescendant: {
-        type: Boolean,
-        value: false
-      }
-    },
-
-    listeners: {
-      'iron-request-resize-notifications': '_onIronRequestResizeNotifications'
-    },
-
-    created: function() {
-      // We don't really need property effects on these, and also we want them
-      // to be created before the `_parentResizable` observer fires:
-      this._interestedResizables = [];
-      this._boundNotifyResize = this.notifyResize.bind(this);
-    },
-
-    attached: function() {
-      this.fire('iron-request-resize-notifications', null, {
-        node: this,
-        bubbles: true,
-        cancelable: true
-      });
-
-      if (!this._parentResizable) {
-        window.addEventListener('resize', this._boundNotifyResize);
-        this.notifyResize();
-      }
-    },
-
-    detached: function() {
-      if (this._parentResizable) {
-        this._parentResizable.stopResizeNotificationsFor(this);
-      } else {
-        window.removeEventListener('resize', this._boundNotifyResize);
-      }
-
-      this._parentResizable = null;
-    },
-
-    /**
-     * Can be called to manually notify a resizable and its descendant
-     * resizables of a resize change.
-     */
-    notifyResize: function() {
-      if (!this.isAttached) {
-        return;
-      }
-
-      this._interestedResizables.forEach(function(resizable) {
-        if (this.resizerShouldNotify(resizable)) {
-          this._notifyDescendant(resizable);
-        }
-      }, this);
-
-      this._fireResize();
-    },
-
-    /**
-     * Used to assign the closest resizable ancestor to this resizable
-     * if the ancestor detects a request for notifications.
-     */
-    assignParentResizable: function(parentResizable) {
-      this._parentResizable = parentResizable;
-    },
-
-    /**
-     * Used to remove a resizable descendant from the list of descendants
-     * that should be notified of a resize change.
-     */
-    stopResizeNotificationsFor: function(target) {
-      var index = this._interestedResizables.indexOf(target);
-
-      if (index > -1) {
-        this._interestedResizables.splice(index, 1);
-        this.unlisten(target, 'iron-resize', '_onDescendantIronResize');
-      }
-    },
-
-    /**
-     * This method can be overridden to filter nested elements that should or
-     * should not be notified by the current element. Return true if an element
-     * should be notified, or false if it should not be notified.
-     *
-     * @param {HTMLElement} element A candidate descendant element that
-     * implements `IronResizableBehavior`.
-     * @return {boolean} True if the `element` should be notified of resize.
-     */
-    resizerShouldNotify: function(element) { return true; },
-
-    _onDescendantIronResize: function(event) {
-      if (this._notifyingDescendant) {
-        event.stopPropagation();
-        return;
-      }
-
-      // NOTE(cdata): In ShadowDOM, event retargetting makes echoing of the
-      // otherwise non-bubbling event "just work." We do it manually here for
-      // the case where Polymer is not using shadow roots for whatever reason:
-      if (!Polymer.Settings.useShadow) {
-        this._fireResize();
-      }
-    },
-
-    _fireResize: function() {
-      this.fire('iron-resize', null, {
-        node: this,
-        bubbles: false
-      });
-    },
-
-    _onIronRequestResizeNotifications: function(event) {
-      var target = event.path ? event.path[0] : event.target;
-
-      if (target === this) {
-        return;
-      }
-
-      if (this._interestedResizables.indexOf(target) === -1) {
-        this._interestedResizables.push(target);
-        this.listen(target, 'iron-resize', '_onDescendantIronResize');
-      }
-
-      target.assignParentResizable(this);
-      this._notifyDescendant(target);
-
-      event.stopPropagation();
-    },
-
-    _parentResizableChanged: function(parentResizable) {
-      if (parentResizable) {
-        window.removeEventListener('resize', this._boundNotifyResize);
-      }
-    },
-
-    _notifyDescendant: function(descendant) {
-      // NOTE(cdata): In IE10, attached is fired on children first, so it's
-      // important not to notify them if the parent is not attached yet (or
-      // else they will get redundantly notified when the parent attaches).
-      if (!this.isAttached) {
-        return;
-      }
-
-      this._notifyingDescendant = true;
-      descendant.notifyResize();
-      this._notifyingDescendant = false;
-    }
-  };
 (function() {
     'use strict';
 
@@ -8388,6 +8210,628 @@ this.fire('dom-change');
       }
     }
 
+  };
+/**
+   * @demo demo/index.html
+   * @polymerBehavior Polymer.IronButtonState
+   */
+  Polymer.IronButtonStateImpl = {
+
+    properties: {
+
+      /**
+       * If true, the user is currently holding down the button.
+       */
+      pressed: {
+        type: Boolean,
+        readOnly: true,
+        value: false,
+        reflectToAttribute: true,
+        observer: '_pressedChanged'
+      },
+
+      /**
+       * If true, the button toggles the active state with each tap or press
+       * of the spacebar.
+       */
+      toggles: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true
+      },
+
+      /**
+       * If true, the button is a toggle and is currently in the active state.
+       */
+      active: {
+        type: Boolean,
+        value: false,
+        notify: true,
+        reflectToAttribute: true
+      },
+
+      /**
+       * True if the element is currently being pressed by a "pointer," which
+       * is loosely defined as mouse or touch input (but specifically excluding
+       * keyboard input).
+       */
+      pointerDown: {
+        type: Boolean,
+        readOnly: true,
+        value: false
+      },
+
+      /**
+       * True if the input device that caused the element to receive focus
+       * was a keyboard.
+       */
+      receivedFocusFromKeyboard: {
+        type: Boolean,
+        readOnly: true
+      },
+
+      /**
+       * The aria attribute to be set if the button is a toggle and in the
+       * active state.
+       */
+      ariaActiveAttribute: {
+        type: String,
+        value: 'aria-pressed',
+        observer: '_ariaActiveAttributeChanged'
+      }
+    },
+
+    listeners: {
+      down: '_downHandler',
+      up: '_upHandler',
+      tap: '_tapHandler'
+    },
+
+    observers: [
+      '_detectKeyboardFocus(focused)',
+      '_activeChanged(active, ariaActiveAttribute)'
+    ],
+
+    keyBindings: {
+      'enter:keydown': '_asyncClick',
+      'space:keydown': '_spaceKeyDownHandler',
+      'space:keyup': '_spaceKeyUpHandler',
+    },
+
+    _mouseEventRe: /^mouse/,
+
+    _tapHandler: function() {
+      if (this.toggles) {
+       // a tap is needed to toggle the active state
+        this._userActivate(!this.active);
+      } else {
+        this.active = false;
+      }
+    },
+
+    _detectKeyboardFocus: function(focused) {
+      this._setReceivedFocusFromKeyboard(!this.pointerDown && focused);
+    },
+
+    // to emulate native checkbox, (de-)activations from a user interaction fire
+    // 'change' events
+    _userActivate: function(active) {
+      if (this.active !== active) {
+        this.active = active;
+        this.fire('change');
+      }
+    },
+
+    _downHandler: function(event) {
+      this._setPointerDown(true);
+      this._setPressed(true);
+      this._setReceivedFocusFromKeyboard(false);
+    },
+
+    _upHandler: function() {
+      this._setPointerDown(false);
+      this._setPressed(false);
+    },
+
+    /**
+     * @param {!KeyboardEvent} event .
+     */
+    _spaceKeyDownHandler: function(event) {
+      var keyboardEvent = event.detail.keyboardEvent;
+      var target = Polymer.dom(keyboardEvent).localTarget;
+
+      // Ignore the event if this is coming from a focused light child, since that
+      // element will deal with it.
+      if (this.isLightDescendant(target))
+        return;
+
+      keyboardEvent.preventDefault();
+      keyboardEvent.stopImmediatePropagation();
+      this._setPressed(true);
+    },
+
+    /**
+     * @param {!KeyboardEvent} event .
+     */
+    _spaceKeyUpHandler: function(event) {
+      var keyboardEvent = event.detail.keyboardEvent;
+      var target = Polymer.dom(keyboardEvent).localTarget;
+
+      // Ignore the event if this is coming from a focused light child, since that
+      // element will deal with it.
+      if (this.isLightDescendant(target))
+        return;
+
+      if (this.pressed) {
+        this._asyncClick();
+      }
+      this._setPressed(false);
+    },
+
+    // trigger click asynchronously, the asynchrony is useful to allow one
+    // event handler to unwind before triggering another event
+    _asyncClick: function() {
+      this.async(function() {
+        this.click();
+      }, 1);
+    },
+
+    // any of these changes are considered a change to button state
+
+    _pressedChanged: function(pressed) {
+      this._changedButtonState();
+    },
+
+    _ariaActiveAttributeChanged: function(value, oldValue) {
+      if (oldValue && oldValue != value && this.hasAttribute(oldValue)) {
+        this.removeAttribute(oldValue);
+      }
+    },
+
+    _activeChanged: function(active, ariaActiveAttribute) {
+      if (this.toggles) {
+        this.setAttribute(this.ariaActiveAttribute,
+                          active ? 'true' : 'false');
+      } else {
+        this.removeAttribute(this.ariaActiveAttribute);
+      }
+      this._changedButtonState();
+    },
+
+    _controlStateChanged: function() {
+      if (this.disabled) {
+        this._setPressed(false);
+      } else {
+        this._changedButtonState();
+      }
+    },
+
+    // provide hook for follow-on behaviors to react to button-state
+
+    _changedButtonState: function() {
+      if (this._buttonStateChanged) {
+        this._buttonStateChanged(); // abstract
+      }
+    }
+
+  };
+
+  /** @polymerBehavior */
+  Polymer.IronButtonState = [
+    Polymer.IronA11yKeysBehavior,
+    Polymer.IronButtonStateImpl
+  ];
+/**
+   * `Polymer.PaperRippleBehavior` dynamically implements a ripple
+   * when the element has focus via pointer or keyboard.
+   *
+   * NOTE: This behavior is intended to be used in conjunction with and after
+   * `Polymer.IronButtonState` and `Polymer.IronControlState`.
+   *
+   * @polymerBehavior Polymer.PaperRippleBehavior
+   */
+  Polymer.PaperRippleBehavior = {
+
+    properties: {
+      /**
+       * If true, the element will not produce a ripple effect when interacted
+       * with via the pointer.
+       */
+      noink: {
+        type: Boolean,
+        observer: '_noinkChanged'
+      },
+
+      /**
+       * @type {Element|undefined}
+       */
+      _rippleContainer: {
+        type: Object,
+      }
+    },
+
+    /**
+     * Ensures a `<paper-ripple>` element is available when the element is
+     * focused.
+     */
+    _buttonStateChanged: function() {
+      if (this.focused) {
+        this.ensureRipple();
+      }
+    },
+
+    /**
+     * In addition to the functionality provided in `IronButtonState`, ensures
+     * a ripple effect is created when the element is in a `pressed` state.
+     */
+    _downHandler: function(event) {
+      Polymer.IronButtonStateImpl._downHandler.call(this, event);
+      if (this.pressed) {
+        this.ensureRipple(event);
+      }
+    },
+
+    /**
+     * Ensures this element contains a ripple effect. For startup efficiency
+     * the ripple effect is dynamically on demand when needed.
+     * @param {!Event=} optTriggeringEvent (optional) event that triggered the
+     * ripple.
+     */
+    ensureRipple: function(optTriggeringEvent) {
+      if (!this.hasRipple()) {
+        this._ripple = this._createRipple();
+        this._ripple.noink = this.noink;
+        var rippleContainer = this._rippleContainer || this.root;
+        if (rippleContainer) {
+          Polymer.dom(rippleContainer).appendChild(this._ripple);
+        }
+        if (optTriggeringEvent) {
+          // Check if the event happened inside of the ripple container
+          // Fall back to host instead of the root because distributed text
+          // nodes are not valid event targets
+          var domContainer = Polymer.dom(this._rippleContainer || this);
+          var target = Polymer.dom(optTriggeringEvent).rootTarget;
+          if (domContainer.deepContains( /** @type {Node} */(target))) {
+            this._ripple.uiDownAction(optTriggeringEvent);
+          }
+        }
+      }
+    },
+
+    /**
+     * Returns the `<paper-ripple>` element used by this element to create
+     * ripple effects. The element's ripple is created on demand, when
+     * necessary, and calling this method will force the
+     * ripple to be created.
+     */
+    getRipple: function() {
+      this.ensureRipple();
+      return this._ripple;
+    },
+
+    /**
+     * Returns true if this element currently contains a ripple effect.
+     * @return {boolean}
+     */
+    hasRipple: function() {
+      return Boolean(this._ripple);
+    },
+
+    /**
+     * Create the element's ripple effect via creating a `<paper-ripple>`.
+     * Override this method to customize the ripple element.
+     * @return {!PaperRippleElement} Returns a `<paper-ripple>` element.
+     */
+    _createRipple: function() {
+      return /** @type {!PaperRippleElement} */ (
+          document.createElement('paper-ripple'));
+    },
+
+    _noinkChanged: function(noink) {
+      if (this.hasRipple()) {
+        this._ripple.noink = noink;
+      }
+    }
+
+  };
+/** @polymerBehavior Polymer.PaperButtonBehavior */
+  Polymer.PaperButtonBehaviorImpl = {
+
+    properties: {
+
+      /**
+       * The z-depth of this element, from 0-5. Setting to 0 will remove the
+       * shadow, and each increasing number greater than 0 will be "deeper"
+       * than the last.
+       *
+       * @attribute elevation
+       * @type number
+       * @default 1
+       */
+      elevation: {
+        type: Number,
+        reflectToAttribute: true,
+        readOnly: true
+      }
+
+    },
+
+    observers: [
+      '_calculateElevation(focused, disabled, active, pressed, receivedFocusFromKeyboard)',
+      '_computeKeyboardClass(receivedFocusFromKeyboard)'
+    ],
+
+    hostAttributes: {
+      role: 'button',
+      tabindex: '0',
+      animated: true
+    },
+
+    _calculateElevation: function() {
+      var e = 1;
+      if (this.disabled) {
+        e = 0;
+      } else if (this.active || this.pressed) {
+        e = 4;
+      } else if (this.receivedFocusFromKeyboard) {
+        e = 3;
+      }
+      this._setElevation(e);
+    },
+
+    _computeKeyboardClass: function(receivedFocusFromKeyboard) {
+      this.classList.toggle('keyboard-focus', receivedFocusFromKeyboard);
+    },
+
+    /**
+     * In addition to `IronButtonState` behavior, when space key goes down,
+     * create a ripple down effect.
+     *
+     * @param {!KeyboardEvent} event .
+     */
+    _spaceKeyDownHandler: function(event) {
+      Polymer.IronButtonStateImpl._spaceKeyDownHandler.call(this, event);
+      if (this.hasRipple()) {
+        this._ripple.uiDownAction();
+      }
+    },
+
+    /**
+     * In addition to `IronButtonState` behavior, when space key goes up,
+     * create a ripple up effect.
+     *
+     * @param {!KeyboardEvent} event .
+     */
+    _spaceKeyUpHandler: function(event) {
+      Polymer.IronButtonStateImpl._spaceKeyUpHandler.call(this, event);
+      if (this.hasRipple()) {
+        this._ripple.uiUpAction();
+      }
+    }
+
+  };
+
+  /** @polymerBehavior */
+  Polymer.PaperButtonBehavior = [
+    Polymer.IronButtonState,
+    Polymer.IronControlState,
+    Polymer.PaperRippleBehavior,
+    Polymer.PaperButtonBehaviorImpl
+  ];
+/**
+   * `Polymer.PaperInkyFocusBehavior` implements a ripple when the element has keyboard focus.
+   *
+   * @polymerBehavior Polymer.PaperInkyFocusBehavior
+   */
+  Polymer.PaperInkyFocusBehaviorImpl = {
+
+    observers: [
+      '_focusedChanged(receivedFocusFromKeyboard)'
+    ],
+
+    _focusedChanged: function(receivedFocusFromKeyboard) {
+      if (receivedFocusFromKeyboard) {
+        this.ensureRipple();
+      }
+      if (this.hasRipple()) {
+        this._ripple.holdDown = receivedFocusFromKeyboard;
+      }
+    },
+
+    _createRipple: function() {
+      var ripple = Polymer.PaperRippleBehavior._createRipple();
+      ripple.id = 'ink';
+      ripple.setAttribute('center', '');
+      ripple.classList.add('circle');
+      return ripple;
+    }
+
+  };
+
+  /** @polymerBehavior Polymer.PaperInkyFocusBehavior */
+  Polymer.PaperInkyFocusBehavior = [
+    Polymer.IronButtonState,
+    Polymer.IronControlState,
+    Polymer.PaperRippleBehavior,
+    Polymer.PaperInkyFocusBehaviorImpl
+  ];
+/**
+   * `IronResizableBehavior` is a behavior that can be used in Polymer elements to
+   * coordinate the flow of resize events between "resizers" (elements that control the
+   * size or hidden state of their children) and "resizables" (elements that need to be
+   * notified when they are resized or un-hidden by their parents in order to take
+   * action on their new measurements).
+   * Elements that perform measurement should add the `IronResizableBehavior` behavior to
+   * their element definition and listen for the `iron-resize` event on themselves.
+   * This event will be fired when they become showing after having been hidden,
+   * when they are resized explicitly by another resizable, or when the window has been
+   * resized.
+   * Note, the `iron-resize` event is non-bubbling.
+   *
+   * @polymerBehavior Polymer.IronResizableBehavior
+   * @demo demo/index.html
+   **/
+  Polymer.IronResizableBehavior = {
+    properties: {
+      /**
+       * The closest ancestor element that implements `IronResizableBehavior`.
+       */
+      _parentResizable: {
+        type: Object,
+        observer: '_parentResizableChanged'
+      },
+
+      /**
+       * True if this element is currently notifying its descedant elements of
+       * resize.
+       */
+      _notifyingDescendant: {
+        type: Boolean,
+        value: false
+      }
+    },
+
+    listeners: {
+      'iron-request-resize-notifications': '_onIronRequestResizeNotifications'
+    },
+
+    created: function() {
+      // We don't really need property effects on these, and also we want them
+      // to be created before the `_parentResizable` observer fires:
+      this._interestedResizables = [];
+      this._boundNotifyResize = this.notifyResize.bind(this);
+    },
+
+    attached: function() {
+      this.fire('iron-request-resize-notifications', null, {
+        node: this,
+        bubbles: true,
+        cancelable: true
+      });
+
+      if (!this._parentResizable) {
+        window.addEventListener('resize', this._boundNotifyResize);
+        this.notifyResize();
+      }
+    },
+
+    detached: function() {
+      if (this._parentResizable) {
+        this._parentResizable.stopResizeNotificationsFor(this);
+      } else {
+        window.removeEventListener('resize', this._boundNotifyResize);
+      }
+
+      this._parentResizable = null;
+    },
+
+    /**
+     * Can be called to manually notify a resizable and its descendant
+     * resizables of a resize change.
+     */
+    notifyResize: function() {
+      if (!this.isAttached) {
+        return;
+      }
+
+      this._interestedResizables.forEach(function(resizable) {
+        if (this.resizerShouldNotify(resizable)) {
+          this._notifyDescendant(resizable);
+        }
+      }, this);
+
+      this._fireResize();
+    },
+
+    /**
+     * Used to assign the closest resizable ancestor to this resizable
+     * if the ancestor detects a request for notifications.
+     */
+    assignParentResizable: function(parentResizable) {
+      this._parentResizable = parentResizable;
+    },
+
+    /**
+     * Used to remove a resizable descendant from the list of descendants
+     * that should be notified of a resize change.
+     */
+    stopResizeNotificationsFor: function(target) {
+      var index = this._interestedResizables.indexOf(target);
+
+      if (index > -1) {
+        this._interestedResizables.splice(index, 1);
+        this.unlisten(target, 'iron-resize', '_onDescendantIronResize');
+      }
+    },
+
+    /**
+     * This method can be overridden to filter nested elements that should or
+     * should not be notified by the current element. Return true if an element
+     * should be notified, or false if it should not be notified.
+     *
+     * @param {HTMLElement} element A candidate descendant element that
+     * implements `IronResizableBehavior`.
+     * @return {boolean} True if the `element` should be notified of resize.
+     */
+    resizerShouldNotify: function(element) { return true; },
+
+    _onDescendantIronResize: function(event) {
+      if (this._notifyingDescendant) {
+        event.stopPropagation();
+        return;
+      }
+
+      // NOTE(cdata): In ShadowDOM, event retargetting makes echoing of the
+      // otherwise non-bubbling event "just work." We do it manually here for
+      // the case where Polymer is not using shadow roots for whatever reason:
+      if (!Polymer.Settings.useShadow) {
+        this._fireResize();
+      }
+    },
+
+    _fireResize: function() {
+      this.fire('iron-resize', null, {
+        node: this,
+        bubbles: false
+      });
+    },
+
+    _onIronRequestResizeNotifications: function(event) {
+      var target = event.path ? event.path[0] : event.target;
+
+      if (target === this) {
+        return;
+      }
+
+      if (this._interestedResizables.indexOf(target) === -1) {
+        this._interestedResizables.push(target);
+        this.listen(target, 'iron-resize', '_onDescendantIronResize');
+      }
+
+      target.assignParentResizable(this);
+      this._notifyDescendant(target);
+
+      event.stopPropagation();
+    },
+
+    _parentResizableChanged: function(parentResizable) {
+      if (parentResizable) {
+        window.removeEventListener('resize', this._boundNotifyResize);
+      }
+    },
+
+    _notifyDescendant: function(descendant) {
+      // NOTE(cdata): In IE10, attached is fired on children first, so it's
+      // important not to notify them if the parent is not attached yet (or
+      // else they will get redundantly notified when the parent attaches).
+      if (!this.isAttached) {
+        return;
+      }
+
+      this._notifyingDescendant = true;
+      descendant.notifyResize();
+      this._notifyingDescendant = false;
+    }
   };
 /**
 Polymer.IronFitBehavior fits an element in another element using `max-height` and `max-width`, and
@@ -9723,6 +10167,134 @@ Polymer({
       }
     };
   })();
+Polymer({
+
+    is: 'fade-in-animation',
+
+    behaviors: [
+      Polymer.NeonAnimationBehavior
+    ],
+
+    configure: function(config) {
+      var node = config.node;
+      this._effect = new KeyframeEffect(node, [
+        {'opacity': '0'},
+        {'opacity': '1'}
+      ], this.timingFromConfig(config));
+      return this._effect;
+    }
+
+  });
+Polymer({
+
+    is: 'fade-out-animation',
+
+    behaviors: [
+      Polymer.NeonAnimationBehavior
+    ],
+
+    configure: function(config) {
+      var node = config.node;
+      this._effect = new KeyframeEffect(node, [
+        {'opacity': '1'},
+        {'opacity': '0'}
+      ], this.timingFromConfig(config));
+      return this._effect;
+    }
+
+  });
+Polymer({
+    is: 'paper-menu-grow-height-animation',
+
+    behaviors: [
+      Polymer.NeonAnimationBehavior
+    ],
+
+    configure: function(config) {
+      var node = config.node;
+      var rect = node.getBoundingClientRect();
+      var height = rect.height;
+
+      this._effect = new KeyframeEffect(node, [{
+        height: (height / 2) + 'px'
+      }, {
+        height: height + 'px'
+      }], this.timingFromConfig(config));
+
+      return this._effect;
+    }
+  });
+
+  Polymer({
+    is: 'paper-menu-grow-width-animation',
+
+    behaviors: [
+      Polymer.NeonAnimationBehavior
+    ],
+
+    configure: function(config) {
+      var node = config.node;
+      var rect = node.getBoundingClientRect();
+      var width = rect.width;
+
+      this._effect = new KeyframeEffect(node, [{
+        width: (width / 2) + 'px'
+      }, {
+        width: width + 'px'
+      }], this.timingFromConfig(config));
+
+      return this._effect;
+    }
+  });
+
+  Polymer({
+    is: 'paper-menu-shrink-width-animation',
+
+    behaviors: [
+      Polymer.NeonAnimationBehavior
+    ],
+
+    configure: function(config) {
+      var node = config.node;
+      var rect = node.getBoundingClientRect();
+      var width = rect.width;
+
+      this._effect = new KeyframeEffect(node, [{
+        width: width + 'px'
+      }, {
+        width: width - (width / 20) + 'px'
+      }], this.timingFromConfig(config));
+
+      return this._effect;
+    }
+  });
+
+  Polymer({
+    is: 'paper-menu-shrink-height-animation',
+
+    behaviors: [
+      Polymer.NeonAnimationBehavior
+    ],
+
+    configure: function(config) {
+      var node = config.node;
+      var rect = node.getBoundingClientRect();
+      var height = rect.height;
+      var top = rect.top;
+
+      this.setPrefixedProperty(node, 'transformOrigin', '0 0');
+
+      this._effect = new KeyframeEffect(node, [{
+        height: height + 'px',
+        transform: 'translateY(0)'
+      }, {
+        height: height / 2 + 'px',
+        transform: 'translateY(-20px)'
+      }], this.timingFromConfig(config));
+
+      return this._effect;
+    }
+  });
 /**
    * @param {!Function} selectCallback
    * @constructor
@@ -10131,578 +10703,6 @@ Polymer({
     }
 
   };
-/**
-   * @demo demo/index.html
-   * @polymerBehavior Polymer.IronButtonState
-   */
-  Polymer.IronButtonStateImpl = {
-
-    properties: {
-
-      /**
-       * If true, the user is currently holding down the button.
-       */
-      pressed: {
-        type: Boolean,
-        readOnly: true,
-        value: false,
-        reflectToAttribute: true,
-        observer: '_pressedChanged'
-      },
-
-      /**
-       * If true, the button toggles the active state with each tap or press
-       * of the spacebar.
-       */
-      toggles: {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true
-      },
-
-      /**
-       * If true, the button is a toggle and is currently in the active state.
-       */
-      active: {
-        type: Boolean,
-        value: false,
-        notify: true,
-        reflectToAttribute: true
-      },
-
-      /**
-       * True if the element is currently being pressed by a "pointer," which
-       * is loosely defined as mouse or touch input (but specifically excluding
-       * keyboard input).
-       */
-      pointerDown: {
-        type: Boolean,
-        readOnly: true,
-        value: false
-      },
-
-      /**
-       * True if the input device that caused the element to receive focus
-       * was a keyboard.
-       */
-      receivedFocusFromKeyboard: {
-        type: Boolean,
-        readOnly: true
-      },
-
-      /**
-       * The aria attribute to be set if the button is a toggle and in the
-       * active state.
-       */
-      ariaActiveAttribute: {
-        type: String,
-        value: 'aria-pressed',
-        observer: '_ariaActiveAttributeChanged'
-      }
-    },
-
-    listeners: {
-      down: '_downHandler',
-      up: '_upHandler',
-      tap: '_tapHandler'
-    },
-
-    observers: [
-      '_detectKeyboardFocus(focused)',
-      '_activeChanged(active, ariaActiveAttribute)'
-    ],
-
-    keyBindings: {
-      'enter:keydown': '_asyncClick',
-      'space:keydown': '_spaceKeyDownHandler',
-      'space:keyup': '_spaceKeyUpHandler',
-    },
-
-    _mouseEventRe: /^mouse/,
-
-    _tapHandler: function() {
-      if (this.toggles) {
-       // a tap is needed to toggle the active state
-        this._userActivate(!this.active);
-      } else {
-        this.active = false;
-      }
-    },
-
-    _detectKeyboardFocus: function(focused) {
-      this._setReceivedFocusFromKeyboard(!this.pointerDown && focused);
-    },
-
-    // to emulate native checkbox, (de-)activations from a user interaction fire
-    // 'change' events
-    _userActivate: function(active) {
-      if (this.active !== active) {
-        this.active = active;
-        this.fire('change');
-      }
-    },
-
-    _downHandler: function(event) {
-      this._setPointerDown(true);
-      this._setPressed(true);
-      this._setReceivedFocusFromKeyboard(false);
-    },
-
-    _upHandler: function() {
-      this._setPointerDown(false);
-      this._setPressed(false);
-    },
-
-    /**
-     * @param {!KeyboardEvent} event .
-     */
-    _spaceKeyDownHandler: function(event) {
-      var keyboardEvent = event.detail.keyboardEvent;
-      var target = Polymer.dom(keyboardEvent).localTarget;
-
-      // Ignore the event if this is coming from a focused light child, since that
-      // element will deal with it.
-      if (this.isLightDescendant(target))
-        return;
-
-      keyboardEvent.preventDefault();
-      keyboardEvent.stopImmediatePropagation();
-      this._setPressed(true);
-    },
-
-    /**
-     * @param {!KeyboardEvent} event .
-     */
-    _spaceKeyUpHandler: function(event) {
-      var keyboardEvent = event.detail.keyboardEvent;
-      var target = Polymer.dom(keyboardEvent).localTarget;
-
-      // Ignore the event if this is coming from a focused light child, since that
-      // element will deal with it.
-      if (this.isLightDescendant(target))
-        return;
-
-      if (this.pressed) {
-        this._asyncClick();
-      }
-      this._setPressed(false);
-    },
-
-    // trigger click asynchronously, the asynchrony is useful to allow one
-    // event handler to unwind before triggering another event
-    _asyncClick: function() {
-      this.async(function() {
-        this.click();
-      }, 1);
-    },
-
-    // any of these changes are considered a change to button state
-
-    _pressedChanged: function(pressed) {
-      this._changedButtonState();
-    },
-
-    _ariaActiveAttributeChanged: function(value, oldValue) {
-      if (oldValue && oldValue != value && this.hasAttribute(oldValue)) {
-        this.removeAttribute(oldValue);
-      }
-    },
-
-    _activeChanged: function(active, ariaActiveAttribute) {
-      if (this.toggles) {
-        this.setAttribute(this.ariaActiveAttribute,
-                          active ? 'true' : 'false');
-      } else {
-        this.removeAttribute(this.ariaActiveAttribute);
-      }
-      this._changedButtonState();
-    },
-
-    _controlStateChanged: function() {
-      if (this.disabled) {
-        this._setPressed(false);
-      } else {
-        this._changedButtonState();
-      }
-    },
-
-    // provide hook for follow-on behaviors to react to button-state
-
-    _changedButtonState: function() {
-      if (this._buttonStateChanged) {
-        this._buttonStateChanged(); // abstract
-      }
-    }
-
-  };
-
-  /** @polymerBehavior */
-  Polymer.IronButtonState = [
-    Polymer.IronA11yKeysBehavior,
-    Polymer.IronButtonStateImpl
-  ];
-/**
-   * `Polymer.PaperRippleBehavior` dynamically implements a ripple
-   * when the element has focus via pointer or keyboard.
-   *
-   * NOTE: This behavior is intended to be used in conjunction with and after
-   * `Polymer.IronButtonState` and `Polymer.IronControlState`.
-   *
-   * @polymerBehavior Polymer.PaperRippleBehavior
-   */
-  Polymer.PaperRippleBehavior = {
-
-    properties: {
-      /**
-       * If true, the element will not produce a ripple effect when interacted
-       * with via the pointer.
-       */
-      noink: {
-        type: Boolean,
-        observer: '_noinkChanged'
-      },
-
-      /**
-       * @type {Element|undefined}
-       */
-      _rippleContainer: {
-        type: Object,
-      }
-    },
-
-    /**
-     * Ensures a `<paper-ripple>` element is available when the element is
-     * focused.
-     */
-    _buttonStateChanged: function() {
-      if (this.focused) {
-        this.ensureRipple();
-      }
-    },
-
-    /**
-     * In addition to the functionality provided in `IronButtonState`, ensures
-     * a ripple effect is created when the element is in a `pressed` state.
-     */
-    _downHandler: function(event) {
-      Polymer.IronButtonStateImpl._downHandler.call(this, event);
-      if (this.pressed) {
-        this.ensureRipple(event);
-      }
-    },
-
-    /**
-     * Ensures this element contains a ripple effect. For startup efficiency
-     * the ripple effect is dynamically on demand when needed.
-     * @param {!Event=} optTriggeringEvent (optional) event that triggered the
-     * ripple.
-     */
-    ensureRipple: function(optTriggeringEvent) {
-      if (!this.hasRipple()) {
-        this._ripple = this._createRipple();
-        this._ripple.noink = this.noink;
-        var rippleContainer = this._rippleContainer || this.root;
-        if (rippleContainer) {
-          Polymer.dom(rippleContainer).appendChild(this._ripple);
-        }
-        if (optTriggeringEvent) {
-          // Check if the event happened inside of the ripple container
-          // Fall back to host instead of the root because distributed text
-          // nodes are not valid event targets
-          var domContainer = Polymer.dom(this._rippleContainer || this);
-          var target = Polymer.dom(optTriggeringEvent).rootTarget;
-          if (domContainer.deepContains( /** @type {Node} */(target))) {
-            this._ripple.uiDownAction(optTriggeringEvent);
-          }
-        }
-      }
-    },
-
-    /**
-     * Returns the `<paper-ripple>` element used by this element to create
-     * ripple effects. The element's ripple is created on demand, when
-     * necessary, and calling this method will force the
-     * ripple to be created.
-     */
-    getRipple: function() {
-      this.ensureRipple();
-      return this._ripple;
-    },
-
-    /**
-     * Returns true if this element currently contains a ripple effect.
-     * @return {boolean}
-     */
-    hasRipple: function() {
-      return Boolean(this._ripple);
-    },
-
-    /**
-     * Create the element's ripple effect via creating a `<paper-ripple>`.
-     * Override this method to customize the ripple element.
-     * @return {!PaperRippleElement} Returns a `<paper-ripple>` element.
-     */
-    _createRipple: function() {
-      return /** @type {!PaperRippleElement} */ (
-          document.createElement('paper-ripple'));
-    },
-
-    _noinkChanged: function(noink) {
-      if (this.hasRipple()) {
-        this._ripple.noink = noink;
-      }
-    }
-
-  };
-/** @polymerBehavior Polymer.PaperButtonBehavior */
-  Polymer.PaperButtonBehaviorImpl = {
-
-    properties: {
-
-      /**
-       * The z-depth of this element, from 0-5. Setting to 0 will remove the
-       * shadow, and each increasing number greater than 0 will be "deeper"
-       * than the last.
-       *
-       * @attribute elevation
-       * @type number
-       * @default 1
-       */
-      elevation: {
-        type: Number,
-        reflectToAttribute: true,
-        readOnly: true
-      }
-
-    },
-
-    observers: [
-      '_calculateElevation(focused, disabled, active, pressed, receivedFocusFromKeyboard)',
-      '_computeKeyboardClass(receivedFocusFromKeyboard)'
-    ],
-
-    hostAttributes: {
-      role: 'button',
-      tabindex: '0',
-      animated: true
-    },
-
-    _calculateElevation: function() {
-      var e = 1;
-      if (this.disabled) {
-        e = 0;
-      } else if (this.active || this.pressed) {
-        e = 4;
-      } else if (this.receivedFocusFromKeyboard) {
-        e = 3;
-      }
-      this._setElevation(e);
-    },
-
-    _computeKeyboardClass: function(receivedFocusFromKeyboard) {
-      this.classList.toggle('keyboard-focus', receivedFocusFromKeyboard);
-    },
-
-    /**
-     * In addition to `IronButtonState` behavior, when space key goes down,
-     * create a ripple down effect.
-     *
-     * @param {!KeyboardEvent} event .
-     */
-    _spaceKeyDownHandler: function(event) {
-      Polymer.IronButtonStateImpl._spaceKeyDownHandler.call(this, event);
-      if (this.hasRipple()) {
-        this._ripple.uiDownAction();
-      }
-    },
-
-    /**
-     * In addition to `IronButtonState` behavior, when space key goes up,
-     * create a ripple up effect.
-     *
-     * @param {!KeyboardEvent} event .
-     */
-    _spaceKeyUpHandler: function(event) {
-      Polymer.IronButtonStateImpl._spaceKeyUpHandler.call(this, event);
-      if (this.hasRipple()) {
-        this._ripple.uiUpAction();
-      }
-    }
-
-  };
-
-  /** @polymerBehavior */
-  Polymer.PaperButtonBehavior = [
-    Polymer.IronButtonState,
-    Polymer.IronControlState,
-    Polymer.PaperRippleBehavior,
-    Polymer.PaperButtonBehaviorImpl
-  ];
-/**
-   * `Polymer.PaperInkyFocusBehavior` implements a ripple when the element has keyboard focus.
-   *
-   * @polymerBehavior Polymer.PaperInkyFocusBehavior
-   */
-  Polymer.PaperInkyFocusBehaviorImpl = {
-
-    observers: [
-      '_focusedChanged(receivedFocusFromKeyboard)'
-    ],
-
-    _focusedChanged: function(receivedFocusFromKeyboard) {
-      if (receivedFocusFromKeyboard) {
-        this.ensureRipple();
-      }
-      if (this.hasRipple()) {
-        this._ripple.holdDown = receivedFocusFromKeyboard;
-      }
-    },
-
-    _createRipple: function() {
-      var ripple = Polymer.PaperRippleBehavior._createRipple();
-      ripple.id = 'ink';
-      ripple.setAttribute('center', '');
-      ripple.classList.add('circle');
-      return ripple;
-    }
-
-  };
-
-  /** @polymerBehavior Polymer.PaperInkyFocusBehavior */
-  Polymer.PaperInkyFocusBehavior = [
-    Polymer.IronButtonState,
-    Polymer.IronControlState,
-    Polymer.PaperRippleBehavior,
-    Polymer.PaperInkyFocusBehaviorImpl
-  ];
-Polymer({
-
-    is: 'fade-in-animation',
-
-    behaviors: [
-      Polymer.NeonAnimationBehavior
-    ],
-
-    configure: function(config) {
-      var node = config.node;
-      this._effect = new KeyframeEffect(node, [
-        {'opacity': '0'},
-        {'opacity': '1'}
-      ], this.timingFromConfig(config));
-      return this._effect;
-    }
-
-  });
-Polymer({
-
-    is: 'fade-out-animation',
-
-    behaviors: [
-      Polymer.NeonAnimationBehavior
-    ],
-
-    configure: function(config) {
-      var node = config.node;
-      this._effect = new KeyframeEffect(node, [
-        {'opacity': '1'},
-        {'opacity': '0'}
-      ], this.timingFromConfig(config));
-      return this._effect;
-    }
-
-  });
-Polymer({
-    is: 'paper-menu-grow-height-animation',
-
-    behaviors: [
-      Polymer.NeonAnimationBehavior
-    ],
-
-    configure: function(config) {
-      var node = config.node;
-      var rect = node.getBoundingClientRect();
-      var height = rect.height;
-
-      this._effect = new KeyframeEffect(node, [{
-        height: (height / 2) + 'px'
-      }, {
-        height: height + 'px'
-      }], this.timingFromConfig(config));
-
-      return this._effect;
-    }
-  });
-
-  Polymer({
-    is: 'paper-menu-grow-width-animation',
-
-    behaviors: [
-      Polymer.NeonAnimationBehavior
-    ],
-
-    configure: function(config) {
-      var node = config.node;
-      var rect = node.getBoundingClientRect();
-      var width = rect.width;
-
-      this._effect = new KeyframeEffect(node, [{
-        width: (width / 2) + 'px'
-      }, {
-        width: width + 'px'
-      }], this.timingFromConfig(config));
-
-      return this._effect;
-    }
-  });
-
-  Polymer({
-    is: 'paper-menu-shrink-width-animation',
-
-    behaviors: [
-      Polymer.NeonAnimationBehavior
-    ],
-
-    configure: function(config) {
-      var node = config.node;
-      var rect = node.getBoundingClientRect();
-      var width = rect.width;
-
-      this._effect = new KeyframeEffect(node, [{
-        width: width + 'px'
-      }, {
-        width: width - (width / 20) + 'px'
-      }], this.timingFromConfig(config));
-
-      return this._effect;
-    }
-  });
-
-  Polymer({
-    is: 'paper-menu-shrink-height-animation',
-
-    behaviors: [
-      Polymer.NeonAnimationBehavior
-    ],
-
-    configure: function(config) {
-      var node = config.node;
-      var rect = node.getBoundingClientRect();
-      var height = rect.height;
-      var top = rect.top;
-
-      this.setPrefixedProperty(node, 'transformOrigin', '0 0');
-
-      this._effect = new KeyframeEffect(node, [{
-        height: height + 'px',
-        transform: 'translateY(0)'
-      }, {
-        height: height / 2 + 'px',
-        transform: 'translateY(-20px)'
-      }], this.timingFromConfig(config));
-
-      return this._effect;
-    }
-  });
 /** @polymerBehavior Polymer.IronMultiSelectableBehavior */
   Polymer.IronMultiSelectableBehaviorImpl = {
     properties: {
@@ -11348,1306 +11348,6 @@ The `aria-labelledby` attribute will be set to the header element, if one exists
 
   /** @polymerBehavior */
   Polymer.PaperDialogBehavior = [Polymer.IronOverlayBehavior, Polymer.PaperDialogBehaviorImpl];
-/** @polymerBehavior */
-  Polymer.PaperSpinnerBehavior = {
-
-    listeners: {
-      'animationend': '__reset',
-      'webkitAnimationEnd': '__reset'
-    },
-
-    properties: {
-      /**
-       * Displays the spinner.
-       */
-      active: {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true,
-        observer: '__activeChanged'
-      },
-
-      /**
-       * Alternative text content for accessibility support.
-       * If alt is present, it will add an aria-label whose content matches alt when active.
-       * If alt is not present, it will default to 'loading' as the alt value.
-       */
-      alt: {
-        type: String,
-        value: 'loading',
-        observer: '__altChanged'
-      },
-
-      __coolingDown: {
-        type: Boolean,
-        value: false
-      }
-    },
-
-    __computeContainerClasses: function(active, coolingDown) {
-      return [
-        active || coolingDown ? 'active' : '',
-        coolingDown ? 'cooldown' : ''
-      ].join(' ');
-    },
-
-    __activeChanged: function(active, old) {
-      this.__setAriaHidden(!active);
-      this.__coolingDown = !active && old;
-    },
-
-    __altChanged: function(alt) {
-      // user-provided `aria-label` takes precedence over prototype default
-      if (alt === this.getPropertyInfo('alt').value) {
-        this.alt = this.getAttribute('aria-label') || alt;
-      } else {
-        this.__setAriaHidden(alt==='');
-        this.setAttribute('aria-label', alt);
-      }
-    },
-
-    __setAriaHidden: function(hidden) {
-      var attr = 'aria-hidden';
-      if (hidden) {
-        this.setAttribute(attr, 'true');
-      } else {
-        this.removeAttribute(attr);
-      }
-    },
-
-    __reset: function() {
-      this.active = false;
-      this.__coolingDown = false;
-    }
-  };
-/**
- * `iron-range-behavior` provides the behavior for something with a minimum to maximum range.
- *
- * @demo demo/index.html
- * @polymerBehavior
- */
- Polymer.IronRangeBehavior = {
-
-  properties: {
-
-    /**
-     * The number that represents the current value.
-     */
-    value: {
-      type: Number,
-      value: 0,
-      notify: true,
-      reflectToAttribute: true
-    },
-
-    /**
-     * The number that indicates the minimum value of the range.
-     */
-    min: {
-      type: Number,
-      value: 0,
-      notify: true
-    },
-
-    /**
-     * The number that indicates the maximum value of the range.
-     */
-    max: {
-      type: Number,
-      value: 100,
-      notify: true
-    },
-
-    /**
-     * Specifies the value granularity of the range's value.
-     */
-    step: {
-      type: Number,
-      value: 1,
-      notify: true
-    },
-
-    /**
-     * Returns the ratio of the value.
-     */
-    ratio: {
-      type: Number,
-      value: 0,
-      readOnly: true,
-      notify: true
-    },
-  },
-
-  observers: [
-    '_update(value, min, max, step)'
-  ],
-
-  _calcRatio: function(value) {
-    return (this._clampValue(value) - this.min) / (this.max - this.min);
-  },
-
-  _clampValue: function(value) {
-    return Math.min(this.max, Math.max(this.min, this._calcStep(value)));
-  },
-
-  _calcStep: function(value) {
-   /**
-    * if we calculate the step using
-    * `Math.round(value / step) * step` we may hit a precision point issue
-    * eg. 0.1 * 0.2 =  0.020000000000000004
-    * http://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html
-    *
-    * as a work around we can divide by the reciprocal of `step`
-    */
-    // polymer/issues/2493
-    value = parseFloat(value);
-    return this.step ? (Math.round((value + this.min) / this.step) -
-        (this.min / this.step)) / (1 / this.step) : value;
-  },
-
-  _validateValue: function() {
-    var v = this._clampValue(this.value);
-    this.value = this.oldValue = isNaN(v) ? this.oldValue : v;
-    return this.value !== v;
-  },
-
-  _update: function() {
-    this._validateValue();
-    this._setRatio(this._calcRatio(this.value) * 100);
-  }
-
-};
-/**
-   * `Use Polymer.IronValidatableBehavior` to implement an element that validates user input.
-   * Use the related `Polymer.IronValidatorBehavior` to add custom validation logic to an iron-input.
-   *
-   * By default, an `<iron-form>` element validates its fields when the user presses the submit button.
-   * To validate a form imperatively, call the form's `validate()` method, which in turn will
-   * call `validate()` on all its children. By using `Polymer.IronValidatableBehavior`, your
-   * custom element will get a public `validate()`, which
-   * will return the validity of the element, and a corresponding `invalid` attribute,
-   * which can be used for styling.
-   *
-   * To implement the custom validation logic of your element, you must override
-   * the protected `_getValidity()` method of this behaviour, rather than `validate()`.
-   * See [this](https://github.com/PolymerElements/iron-form/blob/master/demo/simple-element.html)
-   * for an example.
-   *
-   * ### Accessibility
-   *
-   * Changing the `invalid` property, either manually or by calling `validate()` will update the
-   * `aria-invalid` attribute.
-   *
-   * @demo demo/index.html
-   * @polymerBehavior
-   */
-  Polymer.IronValidatableBehavior = {
-
-    properties: {
-
-      /**
-       * Namespace for this validator.
-       */
-      validatorType: {
-        type: String,
-        value: 'validator'
-      },
-
-      /**
-       * Name of the validator to use.
-       */
-      validator: {
-        type: String
-      },
-
-      /**
-       * True if the last call to `validate` is invalid.
-       */
-      invalid: {
-        notify: true,
-        reflectToAttribute: true,
-        type: Boolean,
-        value: false
-      },
-
-      _validatorMeta: {
-        type: Object
-      }
-
-    },
-
-    observers: [
-      '_invalidChanged(invalid)'
-    ],
-
-    get _validator() {
-      return this._validatorMeta && this._validatorMeta.byKey(this.validator);
-    },
-
-    ready: function() {
-      this._validatorMeta = new Polymer.IronMeta({type: this.validatorType});
-    },
-
-    _invalidChanged: function() {
-      if (this.invalid) {
-        this.setAttribute('aria-invalid', 'true');
-      } else {
-        this.removeAttribute('aria-invalid');
-      }
-    },
-
-    /**
-     * @return {boolean} True if the validator `validator` exists.
-     */
-    hasValidator: function() {
-      return this._validator != null;
-    },
-
-    /**
-     * Returns true if the `value` is valid, and updates `invalid`. If you want
-     * your element to have custom validation logic, do not override this method;
-     * override `_getValidity(value)` instead.
-
-     * @param {Object} value The value to be validated. By default, it is passed
-     * to the validator's `validate()` function, if a validator is set.
-     * @return {boolean} True if `value` is valid.
-     */
-    validate: function(value) {
-      this.invalid = !this._getValidity(value);
-      return !this.invalid;
-    },
-
-    /**
-     * Returns true if `value` is valid.  By default, it is passed
-     * to the validator's `validate()` function, if a validator is set. You
-     * should override this method if you want to implement custom validity
-     * logic for your element.
-     *
-     * @param {Object} value The value to be validated.
-     * @return {boolean} True if `value` is valid.
-     */
-
-    _getValidity: function(value) {
-      if (this.hasValidator()) {
-        return this._validator.validate(value);
-      }
-      return true;
-    }
-  };
-/**
-  Polymer.IronFormElementBehavior enables a custom element to be included
-  in an `iron-form`.
-
-  @demo demo/index.html
-  @polymerBehavior
-  */
-  Polymer.IronFormElementBehavior = {
-
-    properties: {
-      /**
-       * Fired when the element is added to an `iron-form`.
-       *
-       * @event iron-form-element-register
-       */
-
-      /**
-       * Fired when the element is removed from an `iron-form`.
-       *
-       * @event iron-form-element-unregister
-       */
-
-      /**
-       * The name of this element.
-       */
-      name: {
-        type: String
-      },
-
-      /**
-       * The value for this element.
-       */
-      value: {
-        notify: true,
-        type: String
-      },
-
-      /**
-       * Set to true to mark the input as required. If used in a form, a
-       * custom element that uses this behavior should also use
-       * Polymer.IronValidatableBehavior and define a custom validation method.
-       * Otherwise, a `required` element will always be considered valid.
-       * It's also strongly recommended to provide a visual style for the element
-       * when its value is invalid.
-       */
-      required: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * The form that the element is registered to.
-       */
-      _parentForm: {
-        type: Object
-      }
-    },
-
-    attached: function() {
-      // Note: the iron-form that this element belongs to will set this
-      // element's _parentForm property when handling this event.
-      this.fire('iron-form-element-register');
-    },
-
-    detached: function() {
-      if (this._parentForm) {
-        this._parentForm.fire('iron-form-element-unregister', {target: this});
-      }
-    }
-
-  };
-/**
-   * Use `Polymer.IronCheckedElementBehavior` to implement a custom element
-   * that has a `checked` property, which can be used for validation if the
-   * element is also `required`. Element instances implementing this behavior
-   * will also be registered for use in an `iron-form` element.
-   *
-   * @demo demo/index.html
-   * @polymerBehavior Polymer.IronCheckedElementBehavior
-   */
-  Polymer.IronCheckedElementBehaviorImpl = {
-
-    properties: {
-      /**
-       * Fired when the checked state changes.
-       *
-       * @event iron-change
-       */
-
-      /**
-       * Gets or sets the state, `true` is checked and `false` is unchecked.
-       */
-      checked: {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true,
-        notify: true,
-        observer: '_checkedChanged'
-      },
-
-      /**
-       * If true, the button toggles the active state with each tap or press
-       * of the spacebar.
-       */
-      toggles: {
-        type: Boolean,
-        value: true,
-        reflectToAttribute: true
-      },
-
-      /* Overriden from Polymer.IronFormElementBehavior */
-      value: {
-        type: String,
-        value: 'on',
-        observer: '_valueChanged'
-      }
-    },
-
-    observers: [
-      '_requiredChanged(required)'
-    ],
-
-    created: function() {
-      // Used by `iron-form` to handle the case that an element with this behavior
-      // doesn't have a role of 'checkbox' or 'radio', but should still only be
-      // included when the form is serialized if `this.checked === true`.
-      this._hasIronCheckedElementBehavior = true;
-    },
-
-    /**
-     * Returns false if the element is required and not checked, and true otherwise.
-     * @return {boolean} true if `required` is false, or if `required` and `checked` are both true.
-     */
-    _getValidity: function(_value) {
-      return this.disabled || !this.required || (this.required && this.checked);
-    },
-
-    /**
-     * Update the aria-required label when `required` is changed.
-     */
-    _requiredChanged: function() {
-      if (this.required) {
-        this.setAttribute('aria-required', 'true');
-      } else {
-        this.removeAttribute('aria-required');
-      }
-    },
-
-    /**
-     * Fire `iron-changed` when the checked state changes.
-     */
-    _checkedChanged: function() {
-      this.active = this.checked;
-      this.fire('iron-change');
-    },
-
-    /**
-     * Reset value to 'on' if it is set to `undefined`.
-     */
-    _valueChanged: function() {
-      if (this.value === undefined || this.value === null) {
-        this.value = 'on';
-      }
-    }
-  };
-
-  /** @polymerBehavior Polymer.IronCheckedElementBehavior */
-  Polymer.IronCheckedElementBehavior = [
-    Polymer.IronFormElementBehavior,
-    Polymer.IronValidatableBehavior,
-    Polymer.IronCheckedElementBehaviorImpl
-  ];
-/**
-   * Use `Polymer.PaperCheckedElementBehavior` to implement a custom element
-   * that has a `checked` property similar to `Polymer.IronCheckedElementBehavior`
-   * and is compatible with having a ripple effect.
-   * @polymerBehavior Polymer.PaperCheckedElementBehavior
-   */
-  Polymer.PaperCheckedElementBehaviorImpl = {
-
-    /**
-     * Synchronizes the element's checked state with its ripple effect.
-     */
-    _checkedChanged: function() {
-      Polymer.IronCheckedElementBehaviorImpl._checkedChanged.call(this);
-      if (this.hasRipple()) {
-        if (this.checked) {
-          this._ripple.setAttribute('checked', '');
-        } else {
-          this._ripple.removeAttribute('checked');
-        }
-      }
-    },
-
-    /**
-     * Synchronizes the element's `active` and `checked` state.
-     */
-    _buttonStateChanged: function() {
-      Polymer.PaperRippleBehavior._buttonStateChanged.call(this);
-      if (this.disabled) {
-        return;
-      }
-      if (this.isAttached) {
-        this.checked = this.active;
-      }
-    }
-
-  };
-
-  /** @polymerBehavior Polymer.PaperCheckedElementBehavior */
-  Polymer.PaperCheckedElementBehavior = [
-    Polymer.PaperInkyFocusBehavior,
-    Polymer.IronCheckedElementBehavior,
-    Polymer.PaperCheckedElementBehaviorImpl
-  ];
-/*
-`<iron-input>` adds two-way binding and custom validators using `Polymer.IronValidatorBehavior`
-to `<input>`.
-
-### Two-way binding
-
-By default you can only get notified of changes to an `input`'s `value` due to user input:
-
-    <input value="{{myValue::input}}">
-
-`iron-input` adds the `bind-value` property that mirrors the `value` property, and can be used
-for two-way data binding. `bind-value` will notify if it is changed either by user input or by script.
-
-    <input is="iron-input" bind-value="{{myValue}}">
-
-### Custom validators
-
-You can use custom validators that implement `Polymer.IronValidatorBehavior` with `<iron-input>`.
-
-    <input is="iron-input" validator="my-custom-validator">
-
-### Stopping invalid input
-
-It may be desirable to only allow users to enter certain characters. You can use the
-`prevent-invalid-input` and `allowed-pattern` attributes together to accomplish this. This feature
-is separate from validation, and `allowed-pattern` does not affect how the input is validated.
-
-    <!-- only allow characters that match [0-9] -->
-    <input is="iron-input" prevent-invalid-input allowed-pattern="[0-9]">
-
-@hero hero.svg
-@demo demo/index.html
-*/
-
-  Polymer({
-
-    is: 'iron-input',
-
-    extends: 'input',
-
-    behaviors: [
-      Polymer.IronValidatableBehavior
-    ],
-
-    properties: {
-
-      /**
-       * Use this property instead of `value` for two-way data binding.
-       */
-      bindValue: {
-        observer: '_bindValueChanged',
-        type: String
-      },
-
-      /**
-       * Set to true to prevent the user from entering invalid input. The new input characters are
-       * matched with `allowedPattern` if it is set, otherwise it will use the `pattern` attribute if
-       * set, or the `type` attribute (only supported for `type=number`).
-       */
-      preventInvalidInput: {
-        type: Boolean
-      },
-
-      /**
-       * Regular expression to match valid input characters.
-       */
-      allowedPattern: {
-        type: String,
-        observer: "_allowedPatternChanged"
-      },
-
-      _previousValidInput: {
-        type: String,
-        value: ''
-      },
-
-      _patternAlreadyChecked: {
-        type: Boolean,
-        value: false
-      }
-
-    },
-
-    listeners: {
-      'input': '_onInput',
-      'keypress': '_onKeypress'
-    },
-
-    get _patternRegExp() {
-      var pattern;
-      if (this.allowedPattern) {
-        pattern = new RegExp(this.allowedPattern);
-      } else if (this.pattern) {
-        pattern = new RegExp(this.pattern);
-      } else {
-        switch (this.type) {
-          case 'number':
-            pattern = /[0-9.,e-]/;
-            break;
-        }
-      }
-      return pattern;
-    },
-
-    ready: function() {
-      this.bindValue = this.value;
-    },
-
-    /**
-     * @suppress {checkTypes}
-     */
-    _bindValueChanged: function() {
-      if (this.value !== this.bindValue) {
-        this.value = !(this.bindValue || this.bindValue === 0) ? '' : this.bindValue;
-      }
-      // manually notify because we don't want to notify until after setting value
-      this.fire('bind-value-changed', {value: this.bindValue});
-    },
-
-    _allowedPatternChanged: function() {
-      // Force to prevent invalid input when an `allowed-pattern` is set
-      this.preventInvalidInput = this.allowedPattern ? true : false;
-    },
-
-    _onInput: function() {
-      // Need to validate each of the characters pasted if they haven't
-      // been validated inside `_onKeypress` already.
-      if (this.preventInvalidInput && !this._patternAlreadyChecked) {
-        var valid = this._checkPatternValidity();
-        if (!valid) {
-          this.value = this._previousValidInput;
-        }
-      }
-
-      this.bindValue = this.value;
-      this._previousValidInput = this.value;
-      this._patternAlreadyChecked = false;
-    },
-
-    _isPrintable: function(event) {
-      // What a control/printable character is varies wildly based on the browser.
-      // - most control characters (arrows, backspace) do not send a `keypress` event
-      //   in Chrome, but the *do* on Firefox
-      // - in Firefox, when they do send a `keypress` event, control chars have
-      //   a charCode = 0, keyCode = xx (for ex. 40 for down arrow)
-      // - printable characters always send a keypress event.
-      // - in Firefox, printable chars always have a keyCode = 0. In Chrome, the keyCode
-      //   always matches the charCode.
-      // None of this makes any sense.
-
-      // For these keys, ASCII code == browser keycode.
-      var anyNonPrintable =
-        (event.keyCode == 8)   ||  // backspace
-        (event.keyCode == 9)   ||  // tab
-        (event.keyCode == 13)  ||  // enter
-        (event.keyCode == 27);     // escape
-
-      // For these keys, make sure it's a browser keycode and not an ASCII code.
-      var mozNonPrintable =
-        (event.keyCode == 19)  ||  // pause
-        (event.keyCode == 20)  ||  // caps lock
-        (event.keyCode == 45)  ||  // insert
-        (event.keyCode == 46)  ||  // delete
-        (event.keyCode == 144) ||  // num lock
-        (event.keyCode == 145) ||  // scroll lock
-        (event.keyCode > 32 && event.keyCode < 41)   || // page up/down, end, home, arrows
-        (event.keyCode > 111 && event.keyCode < 124); // fn keys
-
-      return !anyNonPrintable && !(event.charCode == 0 && mozNonPrintable);
-    },
-
-    _onKeypress: function(event) {
-      if (!this.preventInvalidInput && this.type !== 'number') {
-        return;
-      }
-      var regexp = this._patternRegExp;
-      if (!regexp) {
-        return;
-      }
-
-      // Handle special keys and backspace
-      if (event.metaKey || event.ctrlKey || event.altKey)
-        return;
-
-      // Check the pattern either here or in `_onInput`, but not in both.
-      this._patternAlreadyChecked = true;
-
-      var thisChar = String.fromCharCode(event.charCode);
-      if (this._isPrintable(event) && !regexp.test(thisChar)) {
-        event.preventDefault();
-      }
-    },
-
-    _checkPatternValidity: function() {
-      var regexp = this._patternRegExp;
-      if (!regexp) {
-        return true;
-      }
-      for (var i = 0; i < this.value.length; i++) {
-        if (!regexp.test(this.value[i])) {
-          return false;
-        }
-      }
-      return true;
-    },
-
-    /**
-     * Returns true if `value` is valid. The validator provided in `validator` will be used first,
-     * then any constraints.
-     * @return {boolean} True if the value is valid.
-     */
-    validate: function() {
-      // Empty, non-required input is valid.
-      if (!this.required && this.value == '') {
-        this.invalid = false;
-        return true;
-      }
-
-      var valid;
-      if (this.hasValidator()) {
-        valid = Polymer.IronValidatableBehavior.validate.call(this, this.value);
-      } else {
-        this.invalid = !this.validity.valid;
-        valid = this.validity.valid;
-      }
-      this.fire('iron-input-validate');
-      return valid;
-    }
-
-  });
-
-  /*
-  The `iron-input-validate` event is fired whenever `validate()` is called.
-  @event iron-input-validate
-  */
-/**
-   * Use `Polymer.PaperInputBehavior` to implement inputs with `<paper-input-container>`. This
-   * behavior is implemented by `<paper-input>`. It exposes a number of properties from
-   * `<paper-input-container>` and `<input is="iron-input">` and they should be bound in your
-   * template.
-   *
-   * The input element can be accessed by the `inputElement` property if you need to access
-   * properties or methods that are not exposed.
-   * @polymerBehavior Polymer.PaperInputBehavior
-   */
-  Polymer.PaperInputBehaviorImpl = {
-    properties: {
-      /**
-       * Fired when the input changes due to user interaction.
-       *
-       * @event change
-       */
-
-      /**
-       * The label for this input. Bind this to `<label>`'s content and `hidden` property, e.g.
-       * `<label hidden$="[[!label]]">[[label]]</label>` in your `template`
-       */
-      label: {
-        type: String
-      },
-
-      /**
-       * The value for this input. Bind this to the `<input is="iron-input">`'s `bindValue`
-       * property, or the value property of your input that is `notify:true`.
-       */
-      value: {
-        notify: true,
-        type: String
-      },
-
-      /**
-       * Set to true to disable this input. Bind this to both the `<paper-input-container>`'s
-       * and the input's `disabled` property.
-       */
-      disabled: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * Returns true if the value is invalid. Bind this to both the `<paper-input-container>`'s
-       * and the input's `invalid` property.
-       */
-      invalid: {
-        type: Boolean,
-        value: false,
-        notify: true
-      },
-
-      /**
-       * Set to true to prevent the user from entering invalid input. Bind this to the
-       * `<input is="iron-input">`'s `preventInvalidInput` property.
-       */
-      preventInvalidInput: {
-        type: Boolean
-      },
-
-      /**
-       * Set this to specify the pattern allowed by `preventInvalidInput`. Bind this to the
-       * `<input is="iron-input">`'s `allowedPattern` property.
-       */
-      allowedPattern: {
-        type: String
-      },
-
-      /**
-       * The type of the input. The supported types are `text`, `number` and `password`. Bind this
-       * to the `<input is="iron-input">`'s `type` property.
-       */
-      type: {
-        type: String
-      },
-
-      /**
-       * The datalist of the input (if any). This should match the id of an existing `<datalist>`. Bind this
-       * to the `<input is="iron-input">`'s `list` property.
-       */
-      list: {
-        type: String
-      },
-
-      /**
-       * A pattern to validate the `input` with. Bind this to the `<input is="iron-input">`'s
-       * `pattern` property.
-       */
-      pattern: {
-        type: String
-      },
-
-      /**
-       * Set to true to mark the input as required. Bind this to the `<input is="iron-input">`'s
-       * `required` property.
-       */
-      required: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * The error message to display when the input is invalid. Bind this to the
-       * `<paper-input-error>`'s content, if using.
-       */
-      errorMessage: {
-        type: String
-      },
-
-      /**
-       * Set to true to show a character counter.
-       */
-      charCounter: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * Set to true to disable the floating label. Bind this to the `<paper-input-container>`'s
-       * `noLabelFloat` property.
-       */
-      noLabelFloat: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * Set to true to always float the label. Bind this to the `<paper-input-container>`'s
-       * `alwaysFloatLabel` property.
-       */
-      alwaysFloatLabel: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * Set to true to auto-validate the input value. Bind this to the `<paper-input-container>`'s
-       * `autoValidate` property.
-       */
-      autoValidate: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * Name of the validator to use. Bind this to the `<input is="iron-input">`'s `validator`
-       * property.
-       */
-      validator: {
-        type: String
-      },
-
-      // HTMLInputElement attributes for binding if needed
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `autocomplete` property.
-       */
-      autocomplete: {
-        type: String,
-        value: 'off'
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `autofocus` property.
-       */
-      autofocus: {
-        type: Boolean
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `inputmode` property.
-       */
-      inputmode: {
-        type: String
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `minlength` property.
-       */
-      minlength: {
-        type: Number
-      },
-
-      /**
-       * The maximum length of the input value. Bind this to the `<input is="iron-input">`'s
-       * `maxlength` property.
-       */
-      maxlength: {
-        type: Number
-      },
-
-      /**
-       * The minimum (numeric or date-time) input value.
-       * Bind this to the `<input is="iron-input">`'s `min` property.
-       */
-      min: {
-        type: String
-      },
-
-      /**
-       * The maximum (numeric or date-time) input value.
-       * Can be a String (e.g. `"2000-1-1"`) or a Number (e.g. `2`).
-       * Bind this to the `<input is="iron-input">`'s `max` property.
-       */
-      max: {
-        type: String
-      },
-
-      /**
-       * Limits the numeric or date-time increments.
-       * Bind this to the `<input is="iron-input">`'s `step` property.
-       */
-      step: {
-        type: String
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `name` property.
-       */
-      name: {
-        type: String
-      },
-
-      /**
-       * A placeholder string in addition to the label. If this is set, the label will always float.
-       */
-      placeholder: {
-        type: String,
-        // need to set a default so _computeAlwaysFloatLabel is run
-        value: ''
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `readonly` property.
-       */
-      readonly: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `size` property.
-       */
-      size: {
-        type: Number
-      },
-
-      // Nonstandard attributes for binding if needed
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `autocapitalize` property.
-       */
-      autocapitalize: {
-        type: String,
-        value: 'none'
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `autocorrect` property.
-       */
-      autocorrect: {
-        type: String,
-        value: 'off'
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `autosave` property, used with type=search.
-       */
-      autosave: {
-        type: String
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `results` property, used with type=search.
-       */
-      results: {
-        type: Number
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `accept` property, used with type=file.
-       */
-      accept: {
-        type: String
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `multiple` property, used with type=file.
-       */
-      multiple: {
-        type: Boolean
-      },
-
-      _ariaDescribedBy: {
-        type: String,
-        value: ''
-      },
-
-      _ariaLabelledBy: {
-        type: String,
-        value: ''
-      }
-
-    },
-
-    listeners: {
-      'addon-attached': '_onAddonAttached',
-      'focus': '_onFocus'
-    },
-
-    observers: [
-      '_focusedControlStateChanged(focused)'
-    ],
-
-    keyBindings: {
-      'shift+tab:keydown': '_onShiftTabDown'
-    },
-
-    hostAttributes: {
-      tabindex: 0
-    },
-
-    /**
-     * Returns a reference to the input element.
-     */
-    get inputElement() {
-      return this.$.input;
-    },
-
-    /**
-     * Returns a reference to the focusable element.
-     */
-    get _focusableElement() {
-      return this.inputElement;
-    },
-
-    attached: function() {
-      this._updateAriaLabelledBy();
-    },
-
-    _appendStringWithSpace: function(str, more) {
-      if (str) {
-        str = str + ' ' + more;
-      } else {
-        str = more;
-      }
-      return str;
-    },
-
-    _onAddonAttached: function(event) {
-      var target = event.path ? event.path[0] : event.target;
-      if (target.id) {
-        this._ariaDescribedBy = this._appendStringWithSpace(this._ariaDescribedBy, target.id);
-      } else {
-        var id = 'paper-input-add-on-' + Math.floor((Math.random() * 100000));
-        target.id = id;
-        this._ariaDescribedBy = this._appendStringWithSpace(this._ariaDescribedBy, id);
-      }
-    },
-
-    /**
-     * Validates the input element and sets an error style if needed.
-     *
-     * @return {boolean}
-     */
-    validate: function() {
-      return this.inputElement.validate();
-    },
-
-    /**
-     * Forward focus to inputElement
-     */
-    _onFocus: function() {
-      if (!this._shiftTabPressed) {
-        this._focusableElement.focus();
-      }
-    },
-
-    /**
-     * Handler that is called when a shift+tab keypress is detected by the menu.
-     *
-     * @param {CustomEvent} event A key combination event.
-     */
-    _onShiftTabDown: function(event) {
-      var oldTabIndex = this.getAttribute('tabindex');
-      this._shiftTabPressed = true;
-      this.setAttribute('tabindex', '-1');
-      this.async(function() {
-        this.setAttribute('tabindex', oldTabIndex);
-        this._shiftTabPressed = false;
-      }, 1);
-    },
-
-    /**
-     * If `autoValidate` is true, then validates the element.
-     */
-    _handleAutoValidate: function() {
-      if (this.autoValidate)
-        this.validate();
-    },
-
-    /**
-     * Restores the cursor to its original position after updating the value.
-     * @param {string} newValue The value that should be saved.
-     */
-    updateValueAndPreserveCaret: function(newValue) {
-      // Not all elements might have selection, and even if they have the
-      // right properties, accessing them might throw an exception (like for
-      // <input type=number>)
-      try {
-        var start = this.inputElement.selectionStart;
-        this.value = newValue;
-
-        // The cursor automatically jumps to the end after re-setting the value,
-        // so restore it to its original position.
-        this.inputElement.selectionStart = start;
-        this.inputElement.selectionEnd = start;
-      } catch (e) {
-        // Just set the value and give up on the caret.
-        this.value = newValue;
-      }
-    },
-
-    _computeAlwaysFloatLabel: function(alwaysFloatLabel, placeholder) {
-      return placeholder || alwaysFloatLabel;
-    },
-
-    _focusedControlStateChanged: function(focused) {
-      // IronControlState stops the focus and blur events in order to redispatch them on the host
-      // element, but paper-input-container listens to those events. Since there are more
-      // pending work on focus/blur in IronControlState, I'm putting in this hack to get the
-      // input focus state working for now.
-      if (!this.$.container) {
-        this.$.container = Polymer.dom(this.root).querySelector('paper-input-container');
-        if (!this.$.container) {
-          return;
-        }
-      }
-      if (focused) {
-        this.$.container._onFocus();
-      } else {
-        this.$.container._onBlur();
-      }
-    },
-
-    _updateAriaLabelledBy: function() {
-      var label = Polymer.dom(this.root).querySelector('label');
-      if (!label) {
-        this._ariaLabelledBy = '';
-        return;
-      }
-      var labelledBy;
-      if (label.id) {
-        labelledBy = label.id;
-      } else {
-        labelledBy = 'paper-input-label-' + new Date().getUTCMilliseconds();
-        label.id = labelledBy;
-      }
-      this._ariaLabelledBy = labelledBy;
-    },
-
-    _onChange:function(event) {
-      // In the Shadow DOM, the `change` event is not leaked into the
-      // ancestor tree, so we must do this manually.
-      // See https://w3c.github.io/webcomponents/spec/shadow/#events-that-are-not-leaked-into-ancestor-trees.
-      if (this.shadowRoot) {
-        this.fire(event.type, {sourceEvent: event}, {
-          node: this,
-          bubbles: event.bubbles,
-          cancelable: event.cancelable
-        });
-      }
-    }
-  };
-
-  /** @polymerBehavior */
-  Polymer.PaperInputBehavior = [
-    Polymer.IronControlState,
-    Polymer.IronA11yKeysBehavior,
-    Polymer.PaperInputBehaviorImpl
-  ];
-/**
-   * Use `Polymer.PaperInputAddonBehavior` to implement an add-on for `<paper-input-container>`. A
-   * add-on appears below the input, and may display information based on the input value and
-   * validity such as a character counter or an error message.
-   * @polymerBehavior
-   */
-  Polymer.PaperInputAddonBehavior = {
-
-    hostAttributes: {
-      'add-on': ''
-    },
-
-    attached: function() {
-      this.fire('addon-attached');
-    },
-
-    /**
-     * The function called by `<paper-input-container>` when the input value or validity changes.
-     * @param {{
-     *   inputElement: (Node|undefined),
-     *   value: (string|undefined),
-     *   invalid: (boolean|undefined)
-     * }} state All properties are optional -
-     *     inputElement: The input element.
-     *     value: The input value.
-     *     invalid: True if the input value is invalid.
-     */
-    update: function(state) {
-    }
-
-  };
-/**
-   * `Polymer.IronMenubarBehavior` implements accessible menubar behavior.
-   *
-   * @polymerBehavior Polymer.IronMenubarBehavior
-   */
-  Polymer.IronMenubarBehaviorImpl = {
-
-    hostAttributes: {
-      'role': 'menubar'
-    },
-
-    keyBindings: {
-      'left': '_onLeftKey',
-      'right': '_onRightKey'
-    },
-
-    _onUpKey: function(event) {
-      this.focusedItem.click();
-      event.detail.keyboardEvent.preventDefault();
-    },
-
-    _onDownKey: function(event) {
-      this.focusedItem.click();
-      event.detail.keyboardEvent.preventDefault();
-    },
-
-    _onLeftKey: function() {
-      this._focusPrevious();
-    },
-
-    _onRightKey: function() {
-      this._focusNext();
-    },
-
-    _onKeydown: function(event) {
-      if (this.keyboardEventMatchesKeys(event, 'up down left right esc')) {
-        return;
-      }
-
-      // all other keys focus the menu item starting with that character
-      this._focusWithKeyboardEvent(event);
-    }
-
-  };
-
-  /** @polymerBehavior Polymer.IronMenubarBehavior */
-  Polymer.IronMenubarBehavior = [
-    Polymer.IronMenuBehavior,
-    Polymer.IronMenubarBehaviorImpl
-  ];
 (function() { 'use strict';var h,aa=aa||{},k=this,m=function(a){return void 0!==a},ba=function(){},ca=function(a){var b=typeof a;if("object"==b)if(a){if(a instanceof Array)return"array";if(a instanceof Object)return b;var c=Object.prototype.toString.call(a);if("[object Window]"==c)return"object";if("[object Array]"==c||"number"==typeof a.length&&"undefined"!=typeof a.splice&&"undefined"!=typeof a.propertyIsEnumerable&&!a.propertyIsEnumerable("splice"))return"array";if("[object Function]"==c||"undefined"!=typeof a.call&&
 "undefined"!=typeof a.propertyIsEnumerable&&!a.propertyIsEnumerable("call"))return"function"}else return"null";else if("function"==b&&"undefined"==typeof a.call)return"object";return b},n=function(a){return"array"==ca(a)},da=function(a){var b=ca(a);return"array"==b||"object"==b&&"number"==typeof a.length},p=function(a){return"string"==typeof a},ea=function(a){return"number"==typeof a},q=function(a){return"function"==ca(a)},r=function(a){var b=typeof a;return"object"==b&&null!=a||"function"==b},fa=
 function(a,b,c){return a.call.apply(a.bind,arguments)},ga=function(a,b,c){if(!a)throw Error();if(2<arguments.length){var d=Array.prototype.slice.call(arguments,2);return function(){var c=Array.prototype.slice.call(arguments);Array.prototype.unshift.apply(c,d);return a.apply(b,c)}}return function(){return a.apply(b,arguments)}},t=function(a,b,c){t=Function.prototype.bind&&-1!=Function.prototype.bind.toString().indexOf("native code")?fa:ga;return t.apply(null,arguments)},ha=function(a,b){var c=Array.prototype.slice.call(arguments,
@@ -12824,490 +11524,6 @@ Polymer({
       }
 
     });
-(function() {
-
-  Polymer({
-
-    is: 'iron-overlay-backdrop',
-
-    properties: {
-
-      /**
-       * Returns true if the backdrop is opened.
-       */
-      opened: {
-        readOnly: true,
-        reflectToAttribute: true,
-        type: Boolean,
-        value: false
-      },
-
-      _manager: {
-        type: Object,
-        value: Polymer.IronOverlayManager
-      }
-
-    },
-
-    /**
-     * Appends the backdrop to document body and sets its `z-index` to be below the latest overlay.
-     */
-    prepare: function() {
-      if (!this.parentNode) {
-        Polymer.dom(document.body).appendChild(this);
-        this.style.zIndex = this._manager.currentOverlayZ() - 1;
-      }
-    },
-
-    /**
-     * Shows the backdrop if needed.
-     */
-    open: function() {
-      // only need to make the backdrop visible if this is called by the first overlay with a backdrop
-      if (this._manager.getBackdrops().length < 2) {
-        this._setOpened(true);
-      }
-    },
-
-    /**
-     * Hides the backdrop if needed.
-     */
-    close: function() {
-      // only need to make the backdrop invisible if this is called by the last overlay with a backdrop
-      if (this._manager.getBackdrops().length < 2) {
-        this._setOpened(false);
-      }
-    },
-
-    /**
-     * Removes the backdrop from document body if needed.
-     */
-    complete: function() {
-      // only remove the backdrop if there are no more overlays with backdrops
-      if (this._manager.getBackdrops().length === 0 && this.parentNode) {
-        Polymer.dom(this.parentNode).removeChild(this);
-      }
-    }
-
-  });
-
-})();
-(function() {
-      'use strict';
-
-      Polymer({
-        is: 'iron-dropdown',
-
-        behaviors: [
-          Polymer.IronControlState,
-          Polymer.IronA11yKeysBehavior,
-          Polymer.IronOverlayBehavior,
-          Polymer.NeonAnimationRunnerBehavior
-        ],
-
-        properties: {
-          /**
-           * The orientation against which to align the dropdown content
-           * horizontally relative to the dropdown trigger.
-           */
-          horizontalAlign: {
-            type: String,
-            value: 'left',
-            reflectToAttribute: true
-          },
-
-          /**
-           * The orientation against which to align the dropdown content
-           * vertically relative to the dropdown trigger.
-           */
-          verticalAlign: {
-            type: String,
-            value: 'top',
-            reflectToAttribute: true
-          },
-
-          /**
-           * A pixel value that will be added to the position calculated for the
-           * given `horizontalAlign`. Use a negative value to offset to the
-           * left, or a positive value to offset to the right.
-           */
-          horizontalOffset: {
-            type: Number,
-            value: 0,
-            notify: true
-          },
-
-          /**
-           * A pixel value that will be added to the position calculated for the
-           * given `verticalAlign`. Use a negative value to offset towards the
-           * top, or a positive value to offset towards the bottom.
-           */
-          verticalOffset: {
-            type: Number,
-            value: 0,
-            notify: true
-          },
-
-          /**
-           * The element that should be used to position the dropdown when
-           * it is opened.
-           */
-          positionTarget: {
-            type: Object,
-            observer: '_positionTargetChanged'
-          },
-
-          /**
-           * An animation config. If provided, this will be used to animate the
-           * opening of the dropdown.
-           */
-          openAnimationConfig: {
-            type: Object
-          },
-
-          /**
-           * An animation config. If provided, this will be used to animate the
-           * closing of the dropdown.
-           */
-          closeAnimationConfig: {
-            type: Object
-          },
-
-          /**
-           * If provided, this will be the element that will be focused when
-           * the dropdown opens.
-           */
-          focusTarget: {
-            type: Object
-          },
-
-          /**
-           * Set to true to disable animations when opening and closing the
-           * dropdown.
-           */
-          noAnimations: {
-            type: Boolean,
-            value: false
-          },
-
-          /**
-           * By default, the dropdown will constrain scrolling on the page
-           * to itself when opened.
-           * Set to true in order to prevent scroll from being constrained
-           * to the dropdown when it opens.
-           */
-          allowOutsideScroll: {
-            type: Boolean,
-            value: false
-          },
-
-          /**
-           * We memoize the positionTarget bounding rectangle so that we can
-           * limit the number of times it is queried per resize / relayout.
-           * @type {?Object}
-           */
-          _positionRectMemo: {
-            type: Object
-          }
-        },
-
-        listeners: {
-          'neon-animation-finish': '_onNeonAnimationFinish'
-        },
-
-        observers: [
-          '_updateOverlayPosition(verticalAlign, horizontalAlign, verticalOffset, horizontalOffset)'
-        ],
-
-        attached: function() {
-          if (this.positionTarget === undefined) {
-            this.positionTarget = this._defaultPositionTarget;
-          }
-        },
-
-        /**
-         * The element that is contained by the dropdown, if any.
-         */
-        get containedElement() {
-          return Polymer.dom(this.$.content).getDistributedNodes()[0];
-        },
-
-        /**
-         * The element that should be focused when the dropdown opens.
-         */
-        get _focusTarget() {
-          return this.focusTarget || this.containedElement;
-        },
-
-        /**
-         * The element that should be used to position the dropdown when
-         * it opens, if no position target is configured.
-         */
-        get _defaultPositionTarget() {
-          var parent = Polymer.dom(this).parentNode;
-
-          if (parent.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
-            parent = parent.host;
-          }
-
-          return parent;
-        },
-
-        /**
-         * The bounding rect of the position target.
-         */
-        get _positionRect() {
-          if (!this._positionRectMemo && this.positionTarget) {
-            this._positionRectMemo = this.positionTarget.getBoundingClientRect();
-          }
-
-          return this._positionRectMemo;
-        },
-
-        /**
-         * The horizontal offset value used to position the dropdown.
-         */
-        get _horizontalAlignTargetValue() {
-          var target;
-
-          if (this.horizontalAlign === 'right') {
-            target = document.documentElement.clientWidth - this._positionRect.right;
-          } else {
-            target = this._positionRect.left;
-          }
-
-          target += this.horizontalOffset;
-
-          return Math.max(target, 0);
-        },
-
-        /**
-         * The vertical offset value used to position the dropdown.
-         */
-        get _verticalAlignTargetValue() {
-          var target;
-
-          if (this.verticalAlign === 'bottom') {
-            target = document.documentElement.clientHeight - this._positionRect.bottom;
-          } else {
-            target = this._positionRect.top;
-          }
-
-          target += this.verticalOffset;
-
-          return Math.max(target, 0);
-        },
-
-        /**
-         * Called when the value of `opened` changes.
-         *
-         * @param {boolean} opened True if the dropdown is opened.
-         */
-        _openedChanged: function(opened) {
-          if (opened && this.disabled) {
-            this.cancel();
-          } else {
-            this.cancelAnimation();
-            this._prepareDropdown();
-            Polymer.IronOverlayBehaviorImpl._openedChanged.apply(this, arguments);
-          }
-
-          if (this.opened) {
-            this._focusContent();
-          }
-        },
-
-        /**
-         * Overridden from `IronOverlayBehavior`.
-         */
-        _renderOpened: function() {
-          if (!this.allowOutsideScroll) {
-            Polymer.IronDropdownScrollManager.pushScrollLock(this);
-          }
-
-          if (!this.noAnimations && this.animationConfig && this.animationConfig.open) {
-            this.$.contentWrapper.classList.add('animating');
-            this.playAnimation('open');
-          } else {
-            Polymer.IronOverlayBehaviorImpl._renderOpened.apply(this, arguments);
-          }
-        },
-
-        /**
-         * Overridden from `IronOverlayBehavior`.
-         */
-        _renderClosed: function() {
-          Polymer.IronDropdownScrollManager.removeScrollLock(this);
-          if (!this.noAnimations && this.animationConfig && this.animationConfig.close) {
-            this.$.contentWrapper.classList.add('animating');
-            this.playAnimation('close');
-          } else {
-            Polymer.IronOverlayBehaviorImpl._renderClosed.apply(this, arguments);
-          }
-        },
-
-        /**
-         * Called when animation finishes on the dropdown (when opening or
-         * closing). Responsible for "completing" the process of opening or
-         * closing the dropdown by positioning it or setting its display to
-         * none.
-         */
-        _onNeonAnimationFinish: function() {
-          this.$.contentWrapper.classList.remove('animating');
-          if (this.opened) {
-            Polymer.IronOverlayBehaviorImpl._renderOpened.apply(this);
-          } else {
-            Polymer.IronOverlayBehaviorImpl._renderClosed.apply(this);
-          }
-        },
-
-        /**
-         * Called when an `iron-resize` event fires.
-         */
-        _onIronResize: function() {
-          var containedElement = this.containedElement;
-          var scrollTop;
-          var scrollLeft;
-
-          if (containedElement) {
-            scrollTop = containedElement.scrollTop;
-            scrollLeft = containedElement.scrollLeft;
-          }
-
-          if (this.opened) {
-            this._updateOverlayPosition();
-          }
-
-          Polymer.IronOverlayBehaviorImpl._onIronResize.apply(this, arguments);
-
-          if (containedElement) {
-            containedElement.scrollTop = scrollTop;
-            containedElement.scrollLeft = scrollLeft;
-          }
-        },
-
-        /**
-         * Called when the `positionTarget` property changes.
-         */
-        _positionTargetChanged: function() {
-          this._updateOverlayPosition();
-        },
-
-        /**
-         * Constructs the final animation config from different properties used
-         * to configure specific parts of the opening and closing animations.
-         */
-        _updateAnimationConfig: function() {
-          var animationConfig = {};
-          var animations = [];
-
-          if (this.openAnimationConfig) {
-            // NOTE(cdata): When making `display:none` elements visible in Safari,
-            // the element will paint once in a fully visible state, causing the
-            // dropdown to flash before it fades in. We prepend an
-            // `opaque-animation` to fix this problem:
-            animationConfig.open = [{
-              name: 'opaque-animation',
-            }].concat(this.openAnimationConfig);
-            animations = animations.concat(animationConfig.open);
-          }
-
-          if (this.closeAnimationConfig) {
-            animationConfig.close = this.closeAnimationConfig;
-            animations = animations.concat(animationConfig.close);
-          }
-
-          animations.forEach(function(animation) {
-            animation.node = this.containedElement;
-          }, this);
-
-          this.animationConfig = animationConfig;
-        },
-
-        /**
-         * Prepares the dropdown for opening by updating measured layout
-         * values.
-         */
-        _prepareDropdown: function() {
-          this.sizingTarget = this.containedElement || this.sizingTarget;
-          this._updateAnimationConfig();
-          this._updateOverlayPosition();
-        },
-
-        /**
-         * Updates the overlay position based on configured horizontal
-         * and vertical alignment, and re-memoizes these values for the sake
-         * of behavior in `IronFitBehavior`.
-         */
-        _updateOverlayPosition: function() {
-          this._positionRectMemo = null;
-
-          if (!this.positionTarget) {
-            return;
-          }
-
-          this.style[this.horizontalAlign] =
-            this._horizontalAlignTargetValue + 'px';
-
-          this.style[this.verticalAlign] =
-            this._verticalAlignTargetValue + 'px';
-
-          // NOTE(cdata): We re-memoize inline styles here, otherwise
-          // calling `refit` from `IronFitBehavior` will reset inline styles
-          // to whatever they were when the dropdown first opened.
-          if (this._fitInfo) {
-            this._fitInfo.inlineStyle[this.horizontalAlign] =
-              this.style[this.horizontalAlign];
-
-            this._fitInfo.inlineStyle[this.verticalAlign] =
-              this.style[this.verticalAlign];
-          }
-        },
-
-        /**
-         * Focuses the configured focus target.
-         */
-        _focusContent: function() {
-          // NOTE(cdata): This is async so that it can attempt the focus after
-          // `display: none` is removed from the element.
-          this.async(function() {
-            if (this._focusTarget) {
-              this._focusTarget.focus();
-            }
-          });
-        }
-      });
-    })();
-Polymer({
-
-    is: 'iron-pages',
-
-    behaviors: [
-      Polymer.IronResizableBehavior,
-      Polymer.IronSelectableBehavior
-    ],
-
-    properties: {
-
-      // as the selected page is the only one visible, activateEvent
-      // is both non-sensical and problematic; e.g. in cases where a user
-      // handler attempts to change the page and the activateEvent
-      // handler immediately changes it back
-      activateEvent: {
-        type: String,
-        value: null
-      }
-
-    },
-
-    observers: [
-      '_selectedPageChanged(selected)'
-    ],
-
-    _selectedPageChanged: function(selected, old) {
-      this.async(this.notifyResize);
-    }
-  });
 (function() {
     var Utility = {
       distance: function(x1, y1, x2, y2) {
@@ -14024,6 +12240,460 @@ Polymer({
     */
   });
 (function() {
+
+  Polymer({
+
+    is: 'iron-overlay-backdrop',
+
+    properties: {
+
+      /**
+       * Returns true if the backdrop is opened.
+       */
+      opened: {
+        readOnly: true,
+        reflectToAttribute: true,
+        type: Boolean,
+        value: false
+      },
+
+      _manager: {
+        type: Object,
+        value: Polymer.IronOverlayManager
+      }
+
+    },
+
+    /**
+     * Appends the backdrop to document body and sets its `z-index` to be below the latest overlay.
+     */
+    prepare: function() {
+      if (!this.parentNode) {
+        Polymer.dom(document.body).appendChild(this);
+        this.style.zIndex = this._manager.currentOverlayZ() - 1;
+      }
+    },
+
+    /**
+     * Shows the backdrop if needed.
+     */
+    open: function() {
+      // only need to make the backdrop visible if this is called by the first overlay with a backdrop
+      if (this._manager.getBackdrops().length < 2) {
+        this._setOpened(true);
+      }
+    },
+
+    /**
+     * Hides the backdrop if needed.
+     */
+    close: function() {
+      // only need to make the backdrop invisible if this is called by the last overlay with a backdrop
+      if (this._manager.getBackdrops().length < 2) {
+        this._setOpened(false);
+      }
+    },
+
+    /**
+     * Removes the backdrop from document body if needed.
+     */
+    complete: function() {
+      // only remove the backdrop if there are no more overlays with backdrops
+      if (this._manager.getBackdrops().length === 0 && this.parentNode) {
+        Polymer.dom(this.parentNode).removeChild(this);
+      }
+    }
+
+  });
+
+})();
+(function() {
+      'use strict';
+
+      Polymer({
+        is: 'iron-dropdown',
+
+        behaviors: [
+          Polymer.IronControlState,
+          Polymer.IronA11yKeysBehavior,
+          Polymer.IronOverlayBehavior,
+          Polymer.NeonAnimationRunnerBehavior
+        ],
+
+        properties: {
+          /**
+           * The orientation against which to align the dropdown content
+           * horizontally relative to the dropdown trigger.
+           */
+          horizontalAlign: {
+            type: String,
+            value: 'left',
+            reflectToAttribute: true
+          },
+
+          /**
+           * The orientation against which to align the dropdown content
+           * vertically relative to the dropdown trigger.
+           */
+          verticalAlign: {
+            type: String,
+            value: 'top',
+            reflectToAttribute: true
+          },
+
+          /**
+           * A pixel value that will be added to the position calculated for the
+           * given `horizontalAlign`. Use a negative value to offset to the
+           * left, or a positive value to offset to the right.
+           */
+          horizontalOffset: {
+            type: Number,
+            value: 0,
+            notify: true
+          },
+
+          /**
+           * A pixel value that will be added to the position calculated for the
+           * given `verticalAlign`. Use a negative value to offset towards the
+           * top, or a positive value to offset towards the bottom.
+           */
+          verticalOffset: {
+            type: Number,
+            value: 0,
+            notify: true
+          },
+
+          /**
+           * The element that should be used to position the dropdown when
+           * it is opened.
+           */
+          positionTarget: {
+            type: Object,
+            observer: '_positionTargetChanged'
+          },
+
+          /**
+           * An animation config. If provided, this will be used to animate the
+           * opening of the dropdown.
+           */
+          openAnimationConfig: {
+            type: Object
+          },
+
+          /**
+           * An animation config. If provided, this will be used to animate the
+           * closing of the dropdown.
+           */
+          closeAnimationConfig: {
+            type: Object
+          },
+
+          /**
+           * If provided, this will be the element that will be focused when
+           * the dropdown opens.
+           */
+          focusTarget: {
+            type: Object
+          },
+
+          /**
+           * Set to true to disable animations when opening and closing the
+           * dropdown.
+           */
+          noAnimations: {
+            type: Boolean,
+            value: false
+          },
+
+          /**
+           * By default, the dropdown will constrain scrolling on the page
+           * to itself when opened.
+           * Set to true in order to prevent scroll from being constrained
+           * to the dropdown when it opens.
+           */
+          allowOutsideScroll: {
+            type: Boolean,
+            value: false
+          },
+
+          /**
+           * We memoize the positionTarget bounding rectangle so that we can
+           * limit the number of times it is queried per resize / relayout.
+           * @type {?Object}
+           */
+          _positionRectMemo: {
+            type: Object
+          }
+        },
+
+        listeners: {
+          'neon-animation-finish': '_onNeonAnimationFinish'
+        },
+
+        observers: [
+          '_updateOverlayPosition(verticalAlign, horizontalAlign, verticalOffset, horizontalOffset)'
+        ],
+
+        attached: function() {
+          if (this.positionTarget === undefined) {
+            this.positionTarget = this._defaultPositionTarget;
+          }
+        },
+
+        /**
+         * The element that is contained by the dropdown, if any.
+         */
+        get containedElement() {
+          return Polymer.dom(this.$.content).getDistributedNodes()[0];
+        },
+
+        /**
+         * The element that should be focused when the dropdown opens.
+         */
+        get _focusTarget() {
+          return this.focusTarget || this.containedElement;
+        },
+
+        /**
+         * The element that should be used to position the dropdown when
+         * it opens, if no position target is configured.
+         */
+        get _defaultPositionTarget() {
+          var parent = Polymer.dom(this).parentNode;
+
+          if (parent.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+            parent = parent.host;
+          }
+
+          return parent;
+        },
+
+        /**
+         * The bounding rect of the position target.
+         */
+        get _positionRect() {
+          if (!this._positionRectMemo && this.positionTarget) {
+            this._positionRectMemo = this.positionTarget.getBoundingClientRect();
+          }
+
+          return this._positionRectMemo;
+        },
+
+        /**
+         * The horizontal offset value used to position the dropdown.
+         */
+        get _horizontalAlignTargetValue() {
+          var target;
+
+          if (this.horizontalAlign === 'right') {
+            target = document.documentElement.clientWidth - this._positionRect.right;
+          } else {
+            target = this._positionRect.left;
+          }
+
+          target += this.horizontalOffset;
+
+          return Math.max(target, 0);
+        },
+
+        /**
+         * The vertical offset value used to position the dropdown.
+         */
+        get _verticalAlignTargetValue() {
+          var target;
+
+          if (this.verticalAlign === 'bottom') {
+            target = document.documentElement.clientHeight - this._positionRect.bottom;
+          } else {
+            target = this._positionRect.top;
+          }
+
+          target += this.verticalOffset;
+
+          return Math.max(target, 0);
+        },
+
+        /**
+         * Called when the value of `opened` changes.
+         *
+         * @param {boolean} opened True if the dropdown is opened.
+         */
+        _openedChanged: function(opened) {
+          if (opened && this.disabled) {
+            this.cancel();
+          } else {
+            this.cancelAnimation();
+            this._prepareDropdown();
+            Polymer.IronOverlayBehaviorImpl._openedChanged.apply(this, arguments);
+          }
+
+          if (this.opened) {
+            this._focusContent();
+          }
+        },
+
+        /**
+         * Overridden from `IronOverlayBehavior`.
+         */
+        _renderOpened: function() {
+          if (!this.allowOutsideScroll) {
+            Polymer.IronDropdownScrollManager.pushScrollLock(this);
+          }
+
+          if (!this.noAnimations && this.animationConfig && this.animationConfig.open) {
+            this.$.contentWrapper.classList.add('animating');
+            this.playAnimation('open');
+          } else {
+            Polymer.IronOverlayBehaviorImpl._renderOpened.apply(this, arguments);
+          }
+        },
+
+        /**
+         * Overridden from `IronOverlayBehavior`.
+         */
+        _renderClosed: function() {
+          Polymer.IronDropdownScrollManager.removeScrollLock(this);
+          if (!this.noAnimations && this.animationConfig && this.animationConfig.close) {
+            this.$.contentWrapper.classList.add('animating');
+            this.playAnimation('close');
+          } else {
+            Polymer.IronOverlayBehaviorImpl._renderClosed.apply(this, arguments);
+          }
+        },
+
+        /**
+         * Called when animation finishes on the dropdown (when opening or
+         * closing). Responsible for "completing" the process of opening or
+         * closing the dropdown by positioning it or setting its display to
+         * none.
+         */
+        _onNeonAnimationFinish: function() {
+          this.$.contentWrapper.classList.remove('animating');
+          if (this.opened) {
+            Polymer.IronOverlayBehaviorImpl._renderOpened.apply(this);
+          } else {
+            Polymer.IronOverlayBehaviorImpl._renderClosed.apply(this);
+          }
+        },
+
+        /**
+         * Called when an `iron-resize` event fires.
+         */
+        _onIronResize: function() {
+          var containedElement = this.containedElement;
+          var scrollTop;
+          var scrollLeft;
+
+          if (containedElement) {
+            scrollTop = containedElement.scrollTop;
+            scrollLeft = containedElement.scrollLeft;
+          }
+
+          if (this.opened) {
+            this._updateOverlayPosition();
+          }
+
+          Polymer.IronOverlayBehaviorImpl._onIronResize.apply(this, arguments);
+
+          if (containedElement) {
+            containedElement.scrollTop = scrollTop;
+            containedElement.scrollLeft = scrollLeft;
+          }
+        },
+
+        /**
+         * Called when the `positionTarget` property changes.
+         */
+        _positionTargetChanged: function() {
+          this._updateOverlayPosition();
+        },
+
+        /**
+         * Constructs the final animation config from different properties used
+         * to configure specific parts of the opening and closing animations.
+         */
+        _updateAnimationConfig: function() {
+          var animationConfig = {};
+          var animations = [];
+
+          if (this.openAnimationConfig) {
+            // NOTE(cdata): When making `display:none` elements visible in Safari,
+            // the element will paint once in a fully visible state, causing the
+            // dropdown to flash before it fades in. We prepend an
+            // `opaque-animation` to fix this problem:
+            animationConfig.open = [{
+              name: 'opaque-animation',
+            }].concat(this.openAnimationConfig);
+            animations = animations.concat(animationConfig.open);
+          }
+
+          if (this.closeAnimationConfig) {
+            animationConfig.close = this.closeAnimationConfig;
+            animations = animations.concat(animationConfig.close);
+          }
+
+          animations.forEach(function(animation) {
+            animation.node = this.containedElement;
+          }, this);
+
+          this.animationConfig = animationConfig;
+        },
+
+        /**
+         * Prepares the dropdown for opening by updating measured layout
+         * values.
+         */
+        _prepareDropdown: function() {
+          this.sizingTarget = this.containedElement || this.sizingTarget;
+          this._updateAnimationConfig();
+          this._updateOverlayPosition();
+        },
+
+        /**
+         * Updates the overlay position based on configured horizontal
+         * and vertical alignment, and re-memoizes these values for the sake
+         * of behavior in `IronFitBehavior`.
+         */
+        _updateOverlayPosition: function() {
+          this._positionRectMemo = null;
+
+          if (!this.positionTarget) {
+            return;
+          }
+
+          this.style[this.horizontalAlign] =
+            this._horizontalAlignTargetValue + 'px';
+
+          this.style[this.verticalAlign] =
+            this._verticalAlignTargetValue + 'px';
+
+          // NOTE(cdata): We re-memoize inline styles here, otherwise
+          // calling `refit` from `IronFitBehavior` will reset inline styles
+          // to whatever they were when the dropdown first opened.
+          if (this._fitInfo) {
+            this._fitInfo.inlineStyle[this.horizontalAlign] =
+              this.style[this.horizontalAlign];
+
+            this._fitInfo.inlineStyle[this.verticalAlign] =
+              this.style[this.verticalAlign];
+          }
+        },
+
+        /**
+         * Focuses the configured focus target.
+         */
+        _focusContent: function() {
+          // NOTE(cdata): This is async so that it can attempt the focus after
+          // `display: none` is removed from the element.
+          this.async(function() {
+            if (this._focusTarget) {
+              this._focusTarget.focus();
+            }
+          });
+        }
+      });
+    })();
+(function() {
     'use strict';
 
     var PaperMenuButton = Polymer({
@@ -14285,264 +12955,11 @@ Polymer({
       });
     })();
 Polymer({
-
-    is: 'iron-collapse',
-
-    properties: {
-
-      /**
-       * If true, the orientation is horizontal; otherwise is vertical.
-       *
-       * @attribute horizontal
-       */
-      horizontal: {
-        type: Boolean,
-        value: false,
-        observer: '_horizontalChanged'
-      },
-
-      /**
-       * Set opened to true to show the collapse element and to false to hide it.
-       *
-       * @attribute opened
-       */
-      opened: {
-        type: Boolean,
-        value: false,
-        notify: true,
-        observer: '_openedChanged'
-      }
-
-    },
-
-    hostAttributes: {
-      role: 'group',
-      'aria-expanded': 'false'
-    },
-
-    listeners: {
-      transitionend: '_transitionEnd'
-    },
-
-    ready: function() {
-      // Avoid transition at the beginning e.g. page loads and enable
-      // transitions only after the element is rendered and ready.
-      this._enableTransition = true;
-    },
-
-    /**
-     * Toggle the opened state.
-     *
-     * @method toggle
-     */
-    toggle: function() {
-      this.opened = !this.opened;
-    },
-
-    show: function() {
-      this.opened = true;    
-    },
-
-    hide: function() {
-      this.opened = false;    
-    },
-
-    updateSize: function(size, animated) {
-      this.enableTransition(animated);
-      var s = this.style;
-      var nochange = s[this.dimension] === size;
-      s[this.dimension] = size;
-      if (animated && nochange) {
-        this._transitionEnd();
-      }
-    },
-
-    enableTransition: function(enabled) {
-      this.style.transitionDuration = (enabled && this._enableTransition) ? '' : '0s';
-    },
-
-    _horizontalChanged: function() {
-      this.dimension = this.horizontal ? 'width' : 'height';
-      this.style.transitionProperty = this.dimension;
-    },
-
-    _openedChanged: function() {
-      if (this.opened) {
-        this.setAttribute('aria-expanded', 'true');
-        this.setAttribute('aria-hidden', 'false');
-
-        this.toggleClass('iron-collapse-closed', false);
-        this.updateSize('auto', false);
-        var s = this._calcSize();
-        this.updateSize('0px', false);
-        // force layout to ensure transition will go
-        /** @suppress {suspiciousCode} */ this.offsetHeight;
-        this.updateSize(s, true);
-        // focus the current collapse
-        this.focus();
-      } else {
-        this.setAttribute('aria-expanded', 'false');
-        this.setAttribute('aria-hidden', 'true');
-
-        this.toggleClass('iron-collapse-opened', false);
-        this.updateSize(this._calcSize(), false);
-        // force layout to ensure transition will go
-        /** @suppress {suspiciousCode} */ this.offsetHeight;
-        this.updateSize('0px', true);
-      }
-    },
-
-    _transitionEnd: function() {
-      if (this.opened) {
-        this.updateSize('auto', false);
-      }
-      this.toggleClass('iron-collapse-closed', !this.opened);
-      this.toggleClass('iron-collapse-opened', this.opened);
-      this.enableTransition(false);
-    },
-
-    _calcSize: function() {
-      return this.getBoundingClientRect()[this.dimension] + 'px';
-    },
-
-
-  });
-(function() {
-      Polymer({
-        is: 'paper-submenu',
-
-        properties: {
-          /**
-           * Fired when the submenu is opened.
-           *
-           * @event paper-submenu-open
-           */
-
-          /**
-           * Fired when the submenu is closed.
-           *
-           * @event paper-submenu-close
-           */
-
-          /**
-           * Set opened to true to show the collapse element and to false to hide it.
-           *
-           * @attribute opened
-           */
-          opened: {
-            type: Boolean,
-            value: false,
-            notify: true,
-            observer: '_openedChanged'
-          }
-        },
-
-        behaviors: [
-          Polymer.IronControlState
-        ],
-
-        get __parent() {
-          return Polymer.dom(this).parentNode;
-        },
-
-        get __trigger() {
-          return Polymer.dom(this.$.trigger).getDistributedNodes()[0];
-        },
-
-        attached: function() {
-          this.listen(this.__parent, 'iron-activate', '_onParentIronActivate');
-        },
-
-        dettached: function() {
-          this.unlisten(this.__parent, 'iron-activate', '_onParentIronActivate');
-        },
-
-        /**
-         * Expand the submenu content.
-         */
-        open: function() {
-          if (this.disabled)
-            return;
-          this.$.collapse.show();
-          this._active = true;
-          this.__trigger.classList.add('iron-selected');
-        },
-
-        /**
-         * Collapse the submenu content.
-         */
-        close: function() {
-          this.$.collapse.hide();
-          this._active = false;
-          this.__trigger.classList.remove('iron-selected');
-        },
-
-        /**
-         * A handler that is called when the trigger is tapped.
-         */
-        _onTap: function() {
-          if (this.disabled)
-            return;
-          this.$.collapse.toggle();
-        },
-
-        /**
-         * Toggles the submenu content when the trigger is tapped.
-         */
-        _openedChanged: function(opened, oldOpened) {
-          if (opened) {
-            this.fire('paper-submenu-open');
-          } else if (oldOpened != null) {
-            this.fire('paper-submenu-close');
-          }
-        },
-
-        /**
-         * A handler that is called when `iron-activate` is fired.
-         *
-         * @param {CustomEvent} event An `iron-activate` event.
-         */
-        _onParentIronActivate: function(event) {
-          if (Polymer.Gestures.findOriginalTarget(event) !== this.__parent) {
-            return;
-          }
-
-          // The activated item can either be this submenu, in which case it
-          // should be expanded, or any of the other sibling submenus, in which
-          // case this submenu should be collapsed.
-          if (event.detail.item == this) {
-            if (this._active)
-              return;
-            this.open();
-          } else {
-            this.close();
-          }
-        },
-
-        /**
-         * If the dropdown is open when disabled becomes true, close the
-         * dropdown.
-         *
-         * @param {boolean} disabled True if disabled, otherwise false.
-         */
-        _disabledChanged: function(disabled) {
-          Polymer.IronControlState._disabledChanged.apply(this, arguments);
-          if (disabled && this._active) {
-            this.close();
-
-          }
-        }
-      });
-    })();
-Polymer({
       is: 'paper-item',
 
       behaviors: [
         Polymer.PaperItemBehavior
       ]
-    });
-Polymer({
-      is: 'paper-item-body'
     });
 (function() {
 
@@ -14645,2308 +13062,3 @@ Polymer({
   })
 
 })();
-(function() {
-      'use strict';
-
-      Polymer.IronA11yAnnouncer = Polymer({
-        is: 'iron-a11y-announcer',
-
-        properties: {
-
-          /**
-           * The value of mode is used to set the `aria-live` attribute
-           * for the element that will be announced. Valid values are: `off`,
-           * `polite` and `assertive`.
-           */
-          mode: {
-            type: String,
-            value: 'polite'
-          },
-
-          _text: {
-            type: String,
-            value: ''
-          }
-        },
-
-        created: function() {
-          if (!Polymer.IronA11yAnnouncer.instance) {
-            Polymer.IronA11yAnnouncer.instance = this;
-          }
-
-          document.body.addEventListener('iron-announce', this._onIronAnnounce.bind(this));
-        },
-
-        /**
-         * Cause a text string to be announced by screen readers.
-         *
-         * @param {string} text The text that should be announced.
-         */
-        announce: function(text) {
-          this._text = '';
-          this.async(function() {
-            this._text = text;
-          }, 100);
-        },
-
-        _onIronAnnounce: function(event) {
-          if (event.detail && event.detail.text) {
-            this.announce(event.detail.text);
-          }
-        }
-      });
-
-      Polymer.IronA11yAnnouncer.instance = null;
-
-      Polymer.IronA11yAnnouncer.requestAvailability = function() {
-        if (!Polymer.IronA11yAnnouncer.instance) {
-          Polymer.IronA11yAnnouncer.instance = document.createElement('iron-a11y-announcer');
-        }
-
-        document.body.appendChild(Polymer.IronA11yAnnouncer.instance);
-      };
-    })();
-(function() {
-      // Keeps track of the toast currently opened.
-      var currentToast = null;
-
-      Polymer({
-        is: 'paper-toast',
-
-        behaviors: [
-          Polymer.IronOverlayBehavior
-        ],
-
-        properties: {
-          /**
-           * The duration in milliseconds to show the toast.
-           * Set to `0`, a negative number, or `Infinity`, to disable the
-           * toast auto-closing.
-           */
-          duration: {
-            type: Number,
-            value: 3000
-          },
-
-          /**
-           * The text to display in the toast.
-           */
-          text: {
-            type: String,
-            value: ''
-          },
-
-          /**
-           * Overridden from `IronOverlayBehavior`.
-           * Set to false to enable closing of the toast by clicking outside it.
-           */
-          noCancelOnOutsideClick: {
-            type: Boolean,
-            value: true
-          },
-        },
-
-        /**
-         * Read-only. Deprecated. Use `opened` from `IronOverlayBehavior`.
-         * @property visible
-         * @deprecated
-         */
-        get visible() {
-          console.warn('`visible` is deprecated, use `opened` instead');
-          return this.opened;
-        },
-
-        /**
-         * Read-only. Can auto-close if duration is a positive finite number.
-         * @property _canAutoClose
-         */
-        get _canAutoClose() {
-          return this.duration > 0 && this.duration !== Infinity;
-        },
-
-        created: function() {
-          Polymer.IronA11yAnnouncer.requestAvailability();
-        },
-
-        /**
-         * Show the toast. Same as `open()` from `IronOverlayBehavior`.
-         */
-        show: function() {
-          this.open();
-        },
-
-        /**
-         * Hide the toast. Same as `close()` from `IronOverlayBehavior`.
-         */
-        hide: function() {
-          this.close();
-        },
-
-        /**
-         * Overridden from `IronOverlayBehavior`.
-         * Called when the value of `opened` changes.
-         */
-        _openedChanged: function() {
-          if (this.opened) {
-            if (currentToast && currentToast !== this) {
-              currentToast.close();
-            }
-            currentToast = this;
-            this.fire('iron-announce', {
-              text: this.text
-            });
-            if (this._canAutoClose) {
-              this.debounce('close', this.close, this.duration);
-            }
-          } else if (currentToast === this) {
-            currentToast = null;
-          }
-          Polymer.IronOverlayBehaviorImpl._openedChanged.apply(this, arguments);
-        },
-
-        /**
-         * Overridden from `IronOverlayBehavior`.
-         */
-        _renderOpened: function() {
-          this.classList.add('paper-toast-open');
-        },
-
-        /**
-         * Overridden from `IronOverlayBehavior`.
-         */
-        _renderClosed: function() {
-          this.classList.remove('paper-toast-open');
-        },
-
-        /**
-         * Overridden from `IronOverlayBehavior`.
-         * iron-fit-behavior will set the inline style position: static, which
-         * causes the toast to be rendered incorrectly when opened by default.
-         */
-        _onIronResize: function() {
-          Polymer.IronOverlayBehaviorImpl._onIronResize.apply(this, arguments);
-          if (this.opened) {
-            // Make sure there is no inline style for position.
-            this.style.position = '';
-          }
-        }
-
-        /**
-         * Fired when `paper-toast` is opened.
-         *
-         * @event 'iron-announce'
-         * @param {Object} detail
-         * @param {String} detail.text The text that will be announced.
-         */
-      });
-    })();
-Polymer({
-      is: 'paper-spinner',
-
-      behaviors: [
-        Polymer.PaperSpinnerBehavior
-      ]
-    });
-Polymer({
-
-    is: 'paper-progress',
-
-    behaviors: [
-      Polymer.IronRangeBehavior
-    ],
-
-    properties: {
-
-      /**
-       * The number that represents the current secondary progress.
-       */
-      secondaryProgress: {
-        type: Number,
-        value: 0
-      },
-
-      /**
-       * The secondary ratio
-       */
-      secondaryRatio: {
-        type: Number,
-        value: 0,
-        readOnly: true
-      },
-
-      /**
-       * Use an indeterminate progress indicator.
-       */
-      indeterminate: {
-        type: Boolean,
-        value: false,
-        observer: '_toggleIndeterminate'
-      },
-
-      /**
-       * True if the progress is disabled.
-       */
-      disabled: {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true,
-        observer: '_disabledChanged'
-      }
-    },
-
-    observers: [
-      '_progressChanged(secondaryProgress, value, min, max)'
-    ],
-
-    hostAttributes: {
-      role: 'progressbar'
-    },
-
-    _toggleIndeterminate: function(indeterminate) {
-      // If we use attribute/class binding, the animation sometimes doesn't translate properly
-      // on Safari 7.1. So instead, we toggle the class here in the update method.
-      this.toggleClass('indeterminate', indeterminate, this.$.primaryProgress);
-    },
-
-    _transformProgress: function(progress, ratio) {
-      var transform = 'scaleX(' + (ratio / 100) + ')';
-      progress.style.transform = progress.style.webkitTransform = transform;
-    },
-
-    _mainRatioChanged: function(ratio) {
-      this._transformProgress(this.$.primaryProgress, ratio);
-    },
-
-    _progressChanged: function(secondaryProgress, value, min, max) {
-      secondaryProgress = this._clampValue(secondaryProgress);
-      value = this._clampValue(value);
-
-      var secondaryRatio = this._calcRatio(secondaryProgress) * 100;
-      var mainRatio = this._calcRatio(value) * 100;
-
-      this._setSecondaryRatio(secondaryRatio);
-      this._transformProgress(this.$.secondaryProgress, secondaryRatio);
-      this._transformProgress(this.$.primaryProgress, mainRatio);
-
-      this.secondaryProgress = secondaryProgress;
-
-      this.setAttribute('aria-valuenow', value);
-      this.setAttribute('aria-valuemin', min);
-      this.setAttribute('aria-valuemax', max);
-    },
-
-    _disabledChanged: function(disabled) {
-      this.setAttribute('aria-disabled', disabled ? 'true' : 'false');
-    },
-
-    _hideSecondaryProgress: function(secondaryRatio) {
-      return secondaryRatio === 0;
-    }
-
-  });
-Polymer({
-      is: 'paper-tooltip',
-
-      hostAttributes: {
-        role: 'tooltip',
-        tabindex: -1
-      },
-
-      behaviors: [
-        Polymer.NeonAnimationRunnerBehavior
-      ],
-
-      properties: {
-        /**
-         * The id of the element that the tooltip is anchored to. This element
-         * must be a sibling of the tooltip.
-         */
-        for: {
-          type: String,
-          observer: '_forChanged'
-        },
-
-        /**
-         * Positions the tooltip to the top, right, bottom, left of its content.
-         */
-        position: {
-          type: String,
-          value: 'bottom'
-        },
-
-        /**
-         * If true, no parts of the tooltip will ever be shown offscreen.
-         */
-        fitToVisibleBounds: {
-          type: Boolean,
-          value: false
-        },
-
-        /**
-         * The spacing between the top of the tooltip and the element it is
-         * anchored to.
-         */
-        offset: {
-          type: Number,
-          value: 14
-        },
-
-        /**
-         * This property is deprecated, but left over so that it doesn't
-         * break exiting code. Please use `offset` instead. If both `offset` and
-         * `marginTop` are provided, `marginTop` will be ignored.
-         * @deprecated since version 1.0.3
-         */
-        marginTop: {
-          type: Number,
-          value: 14
-        },
-
-        /**
-         * The delay that will be applied before the `entry` animation is
-         * played when showing the tooltip.
-         */
-        animationDelay: {
-          type: Number,
-          value: 500
-        },
-
-        /**
-         * The entry and exit animations that will be played when showing and
-         * hiding the tooltip. If you want to override this, you must ensure
-         * that your animationConfig has the exact format below.
-         */
-        animationConfig: {
-          type: Object,
-          value: function() {
-            return {
-              'entry': [{
-                name: 'fade-in-animation',
-                node: this,
-                timing: {delay: 0}
-              }],
-              'exit': [{
-                name: 'fade-out-animation',
-                node: this
-              }]
-            }
-          }
-        },
-
-        _showing: {
-          type: Boolean,
-          value: false
-        }
-      },
-
-      listeners: {
-        'neon-animation-finish': '_onAnimationFinish',
-        'mouseenter': 'hide'
-      },
-
-      /**
-       * Returns the target element that this tooltip is anchored to. It is
-       * either the element given by the `for` attribute, or the immediate parent
-       * of the tooltip.
-       */
-      get target () {
-        var parentNode = Polymer.dom(this).parentNode;
-        // If the parentNode is a document fragment, then we need to use the host.
-        var ownerRoot = Polymer.dom(this).getOwnerRoot();
-
-        var target;
-        if (this.for) {
-          target = Polymer.dom(ownerRoot).querySelector('#' + this.for);
-        } else {
-          target = parentNode.nodeType == Node.DOCUMENT_FRAGMENT_NODE ?
-              ownerRoot.host : parentNode;
-        }
-
-        return target;
-      },
-
-      attached: function() {
-        this._target = this.target;
-
-        this.listen(this._target, 'mouseenter', 'show');
-        this.listen(this._target, 'focus', 'show');
-        this.listen(this._target, 'mouseleave', 'hide');
-        this.listen(this._target, 'blur', 'hide');
-        this.listen(this._target, 'tap', 'hide');
-      },
-
-      detached: function() {
-        if (this._target) {
-          this.unlisten(this._target, 'mouseenter', 'show');
-          this.unlisten(this._target, 'focus', 'show');
-          this.unlisten(this._target, 'mouseleave', 'hide');
-          this.unlisten(this._target, 'blur', 'hide');
-          this.unlisten(this._target, 'tap', 'hide');
-        }
-      },
-
-      show: function() {
-        // If the tooltip is already showing, there's nothing to do.
-        if (this._showing)
-          return;
-
-        if (Polymer.dom(this).textContent.trim() === '')
-          return;
-
-
-        this.cancelAnimation();
-        this._showing = true;
-        this.toggleClass('hidden', false, this.$.tooltip);
-        this.updatePosition();
-
-        this.animationConfig.entry[0].timing.delay = this.animationDelay;
-        this._animationPlaying = true;
-        this.playAnimation('entry');
-      },
-
-      hide: function() {
-        // If the tooltip is already hidden, there's nothing to do.
-        if (!this._showing) {
-          return;
-        }
-
-        // If the entry animation is still playing, don't try to play the exit
-        // animation since this will reset the opacity to 1. Just end the animation.
-        if (this._animationPlaying) {
-          this.cancelAnimation();
-          this._showing = false;
-          this._onAnimationFinish();
-          return;
-        }
-
-        this._showing = false;
-        this._animationPlaying = true;
-        this.playAnimation('exit');
-      },
-
-      _forChanged: function() {
-        this._target = this.target;
-      },
-
-      updatePosition: function() {
-        if (!this._target)
-          return;
-
-        var offset = this.offset;
-        // If a marginTop has been provided by the user (pre 1.0.3), use it.
-        if (this.marginTop != 14 && this.offset == 14)
-          offset = this.marginTop;
-
-        var parentRect = this.offsetParent.getBoundingClientRect();
-        var targetRect = this._target.getBoundingClientRect();
-        var thisRect = this.getBoundingClientRect();
-
-        var horizontalCenterOffset = (targetRect.width - thisRect.width) / 2;
-        var verticalCenterOffset = (targetRect.height - thisRect.height) / 2;
-
-        var targetLeft = targetRect.left - parentRect.left;
-        var targetTop = targetRect.top - parentRect.top;
-
-        var tooltipLeft, tooltipTop;
-
-        switch (this.position) {
-          case 'top':
-            tooltipLeft = targetLeft + horizontalCenterOffset;
-            tooltipTop = targetTop - thisRect.height - offset;
-            break;
-          case 'bottom':
-            tooltipLeft = targetLeft + horizontalCenterOffset;
-            tooltipTop = targetTop + targetRect.height + offset;
-            break;
-          case 'left':
-            tooltipLeft = targetLeft - thisRect.width - offset;
-            tooltipTop = targetTop + verticalCenterOffset;
-            break;
-          case 'right':
-            tooltipLeft = targetLeft + targetRect.width + offset;
-            tooltipTop = targetTop + verticalCenterOffset;
-            break;
-        }
-
-        // TODO(noms): This should use IronFitBehavior if possible.
-        if (this.fitToVisibleBounds) {
-          // Clip the left/right side.
-          if (tooltipLeft + thisRect.width > window.innerWidth) {
-            this.style.right = '0px';
-            this.style.left = 'auto';
-          } else {
-            this.style.left = Math.max(0, tooltipLeft) + 'px';
-            this.style.right = 'auto';
-          }
-
-          // Clip the top/bottom side.
-          if (tooltipTop + thisRect.height > window.innerHeight) {
-            this.style.bottom = '0px';
-            this.style.top = 'auto';
-          } else {
-            this.style.top = Math.max(0, tooltipTop) + 'px';
-            this.style.bottom = 'auto';
-          }
-        } else {
-          this.style.left = tooltipLeft + 'px';
-          this.style.top = tooltipTop + 'px';
-        }
-
-      },
-
-      _onAnimationFinish: function() {
-        this._animationPlaying = false;
-        if (!this._showing) {
-          this.toggleClass('hidden', true, this.$.tooltip);
-        }
-      },
-    });
-Polymer({
-      is: 'paper-checkbox',
-
-      behaviors: [
-        Polymer.PaperCheckedElementBehavior
-      ],
-
-      hostAttributes: {
-        role: 'checkbox',
-        'aria-checked': false,
-        tabindex: 0
-      },
-
-      properties: {
-        /**
-         * Fired when the checked state changes due to user interaction.
-         *
-         * @event change
-         */
-
-        /**
-         * Fired when the checked state changes.
-         *
-         * @event iron-change
-         */
-        ariaActiveAttribute: {
-          type: String,
-          value: 'aria-checked'
-        }
-      },
-
-      _computeCheckboxClass: function(checked, invalid) {
-        var className = '';
-        if (checked) {
-          className += 'checked ';
-        }
-        if (invalid) {
-          className += 'invalid';
-        }
-        return className;
-      },
-
-      _computeCheckmarkClass: function(checked) {
-        return checked ? '' : 'hidden';
-      },
-
-      // create ripple inside the checkboxContainer
-      _createRipple: function() {
-        this._rippleContainer = this.$.checkboxContainer;
-        return Polymer.PaperInkyFocusBehaviorImpl._createRipple.call(this);
-      }
-
-    });
-Polymer({
-    is: 'paper-input-char-counter',
-
-    behaviors: [
-      Polymer.PaperInputAddonBehavior
-    ],
-
-    properties: {
-      _charCounterStr: {
-        type: String,
-        value: '0'
-      }
-    },
-
-    update: function(state) {
-      if (!state.inputElement) {
-        return;
-      }
-
-      state.value = state.value || '';
-
-      // Account for the textarea's new lines.
-      var str = state.value.replace(/(\r\n|\n|\r)/g, '--').length;
-
-      if (state.inputElement.hasAttribute('maxlength')) {
-        str += '/' + state.inputElement.getAttribute('maxlength');
-      }
-      this._charCounterStr = str;
-    }
-  });
-Polymer({
-    is: 'paper-input-container',
-
-    properties: {
-      /**
-       * Set to true to disable the floating label. The label disappears when the input value is
-       * not null.
-       */
-      noLabelFloat: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * Set to true to always float the floating label.
-       */
-      alwaysFloatLabel: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * The attribute to listen for value changes on.
-       */
-      attrForValue: {
-        type: String,
-        value: 'bind-value'
-      },
-
-      /**
-       * Set to true to auto-validate the input value when it changes.
-       */
-      autoValidate: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * True if the input is invalid. This property is set automatically when the input value
-       * changes if auto-validating, or when the `iron-input-validate` event is heard from a child.
-       */
-      invalid: {
-        observer: '_invalidChanged',
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * True if the input has focus.
-       */
-      focused: {
-        readOnly: true,
-        type: Boolean,
-        value: false,
-        notify: true
-      },
-
-      _addons: {
-        type: Array
-        // do not set a default value here intentionally - it will be initialized lazily when a
-        // distributed child is attached, which may occur before configuration for this element
-        // in polyfill.
-      },
-
-      _inputHasContent: {
-        type: Boolean,
-        value: false
-      },
-
-      _inputSelector: {
-        type: String,
-        value: 'input,textarea,.paper-input-input'
-      },
-
-      _boundOnFocus: {
-        type: Function,
-        value: function() {
-          return this._onFocus.bind(this);
-        }
-      },
-
-      _boundOnBlur: {
-        type: Function,
-        value: function() {
-          return this._onBlur.bind(this);
-        }
-      },
-
-      _boundOnInput: {
-        type: Function,
-        value: function() {
-          return this._onInput.bind(this);
-        }
-      },
-
-      _boundValueChanged: {
-        type: Function,
-        value: function() {
-          return this._onValueChanged.bind(this);
-        }
-      }
-    },
-
-    listeners: {
-      'addon-attached': '_onAddonAttached',
-      'iron-input-validate': '_onIronInputValidate'
-    },
-
-    get _valueChangedEvent() {
-      return this.attrForValue + '-changed';
-    },
-
-    get _propertyForValue() {
-      return Polymer.CaseMap.dashToCamelCase(this.attrForValue);
-    },
-
-    get _inputElement() {
-      return Polymer.dom(this).querySelector(this._inputSelector);
-    },
-
-    get _inputElementValue() {
-      return this._inputElement[this._propertyForValue] || this._inputElement.value;
-    },
-
-    ready: function() {
-      if (!this._addons) {
-        this._addons = [];
-      }
-      this.addEventListener('focus', this._boundOnFocus, true);
-      this.addEventListener('blur', this._boundOnBlur, true);
-      if (this.attrForValue) {
-        this._inputElement.addEventListener(this._valueChangedEvent, this._boundValueChanged);
-      } else {
-        this.addEventListener('input', this._onInput);
-      }
-    },
-
-    attached: function() {
-      // Only validate when attached if the input already has a value.
-      if (this._inputElementValue != '') {
-        this._handleValueAndAutoValidate(this._inputElement);
-      } else {
-        this._handleValue(this._inputElement);
-      }
-    },
-
-    _onAddonAttached: function(event) {
-      if (!this._addons) {
-        this._addons = [];
-      }
-      var target = event.target;
-      if (this._addons.indexOf(target) === -1) {
-        this._addons.push(target);
-        if (this.isAttached) {
-          this._handleValue(this._inputElement);
-        }
-      }
-    },
-
-    _onFocus: function() {
-      this._setFocused(true);
-    },
-
-    _onBlur: function() {
-      this._setFocused(false);
-      this._handleValueAndAutoValidate(this._inputElement);
-    },
-
-    _onInput: function(event) {
-      this._handleValueAndAutoValidate(event.target);
-    },
-
-    _onValueChanged: function(event) {
-      this._handleValueAndAutoValidate(event.target);
-    },
-
-    _handleValue: function(inputElement) {
-      var value = this._inputElementValue;
-
-      // type="number" hack needed because this.value is empty until it's valid
-      if (value || value === 0 || (inputElement.type === 'number' && !inputElement.checkValidity())) {
-        this._inputHasContent = true;
-      } else {
-        this._inputHasContent = false;
-      }
-
-      this.updateAddons({
-        inputElement: inputElement,
-        value: value,
-        invalid: this.invalid
-      });
-    },
-
-    _handleValueAndAutoValidate: function(inputElement) {
-      if (this.autoValidate) {
-        var valid;
-        if (inputElement.validate) {
-          valid = inputElement.validate(this._inputElementValue);
-        } else {
-          valid = inputElement.checkValidity();
-        }
-        this.invalid = !valid;
-      }
-
-      // Call this last to notify the add-ons.
-      this._handleValue(inputElement);
-    },
-
-    _onIronInputValidate: function(event) {
-      this.invalid = this._inputElement.invalid;
-    },
-
-    _invalidChanged: function() {
-      if (this._addons) {
-        this.updateAddons({invalid: this.invalid});
-      }
-    },
-
-    /**
-     * Call this to update the state of add-ons.
-     * @param {Object} state Add-on state.
-     */
-    updateAddons: function(state) {
-      for (var addon, index = 0; addon = this._addons[index]; index++) {
-        addon.update(state);
-      }
-    },
-
-    _computeInputContentClass: function(noLabelFloat, alwaysFloatLabel, focused, invalid, _inputHasContent) {
-      var cls = 'input-content';
-      if (!noLabelFloat) {
-        var label = this.querySelector('label');
-
-        if (alwaysFloatLabel || _inputHasContent) {
-          cls += ' label-is-floating';
-          // If the label is floating, ignore any offsets that may have been
-          // applied from a prefix element.
-          this.$.labelAndInputContainer.style.position = 'static';
-
-          if (invalid) {
-            cls += ' is-invalid';
-          } else if (focused) {
-            cls += " label-is-highlighted";
-          }
-        } else {
-          // When the label is not floating, it should overlap the input element.
-          if (label) {
-            this.$.labelAndInputContainer.style.position = 'relative';
-          }
-        }
-      } else {
-        if (_inputHasContent) {
-          cls += ' label-is-hidden';
-        }
-      }
-      return cls;
-    },
-
-    _computeUnderlineClass: function(focused, invalid) {
-      var cls = 'underline';
-      if (invalid) {
-        cls += ' is-invalid';
-      } else if (focused) {
-        cls += ' is-highlighted'
-      }
-      return cls;
-    },
-
-    _computeAddOnContentClass: function(focused, invalid) {
-      var cls = 'add-on-content';
-      if (invalid) {
-        cls += ' is-invalid';
-      } else if (focused) {
-        cls += ' is-highlighted'
-      }
-      return cls;
-    }
-  });
-Polymer({
-    is: 'paper-input-error',
-
-    behaviors: [
-      Polymer.PaperInputAddonBehavior
-    ],
-
-    properties: {
-      /**
-       * True if the error is showing.
-       */
-      invalid: {
-        readOnly: true,
-        reflectToAttribute: true,
-        type: Boolean
-      }
-    },
-
-    update: function(state) {
-      this._setInvalid(state.invalid);
-    }
-  });
-Polymer({
-    is: 'paper-input',
-
-    behaviors: [
-      Polymer.IronFormElementBehavior,
-      Polymer.PaperInputBehavior
-    ]
-  });
-Polymer({
-      is: 'paper-toggle-button',
-
-      behaviors: [
-        Polymer.PaperCheckedElementBehavior
-      ],
-
-      hostAttributes: {
-        role: 'button',
-        'aria-pressed': 'false',
-        tabindex: 0
-      },
-
-      properties: {
-        /**
-         * Fired when the checked state changes due to user interaction.
-         *
-         * @event change
-         */
-        /**
-         * Fired when the checked state changes.
-         *
-         * @event iron-change
-         */
-      },
-
-      listeners: {
-        track: '_ontrack'
-      },
-
-      _ontrack: function(event) {
-        var track = event.detail;
-        if (track.state === 'start') {
-          this._trackStart(track);
-        } else if (track.state === 'track') {
-          this._trackMove(track);
-        } else if (track.state === 'end') {
-          this._trackEnd(track);
-        }
-      },
-
-      _trackStart: function(track) {
-        this._width = this.$.toggleBar.offsetWidth / 2;
-        /*
-         * keep an track-only check state to keep the dragging behavior smooth
-         * while toggling activations
-         */
-        this._trackChecked = this.checked;
-        this.$.toggleButton.classList.add('dragging');
-      },
-
-      _trackMove: function(track) {
-        var dx = track.dx;
-        this._x = Math.min(this._width,
-            Math.max(0, this._trackChecked ? this._width + dx : dx));
-        this.translate3d(this._x + 'px', 0, 0, this.$.toggleButton);
-        this._userActivate(this._x > (this._width / 2));
-      },
-
-      _trackEnd: function(track) {
-        this.$.toggleButton.classList.remove('dragging');
-        this.transform('', this.$.toggleButton);
-      },
-
-      // customize the element's ripple
-      _createRipple: function() {
-        this._rippleContainer = this.$.toggleButton;
-        var ripple = Polymer.PaperRippleBehavior._createRipple();
-        ripple.id = 'ink';
-        ripple.setAttribute('recenters', '');
-        ripple.classList.add('circle', 'toggle-ink');
-        return ripple;
-      }
-
-    });
-Polymer({
-      is: 'paper-tab',
-
-      behaviors: [
-        Polymer.IronControlState,
-        Polymer.IronButtonState,
-        Polymer.PaperRippleBehavior
-      ],
-
-      hostAttributes: {
-        role: 'tab'
-      },
-
-      listeners: {
-        down: '_updateNoink'
-      },
-
-      ready: function() {
-        var ripple = this.getRipple();
-        ripple.initialOpacity = 0.95;
-        ripple.opacityDecayVelocity = 0.98;
-      },
-
-      attached: function() {
-        this._updateNoink();
-      },
-
-      get _parentNoink () {
-        var parent = Polymer.dom(this).parentNode;
-        return !!parent && !!parent.noink;
-      },
-
-      _updateNoink: function() {
-        this.noink = !!this.noink || !!this._parentNoink;
-      }
-    });
-Polymer({
-      is: 'paper-tabs',
-
-      behaviors: [
-        Polymer.IronResizableBehavior,
-        Polymer.IronMenubarBehavior
-      ],
-
-      properties: {
-        /**
-         * If true, ink ripple effect is disabled. When this property is changed,
-         * all descendant `<paper-tab>` elements have their `noink` property
-         * changed to the new value as well.
-         */
-        noink: {
-          type: Boolean,
-          value: false,
-          observer: '_noinkChanged'
-        },
-
-        /**
-         * If true, the bottom bar to indicate the selected tab will not be shown.
-         */
-        noBar: {
-          type: Boolean,
-          value: false
-        },
-
-        /**
-         * If true, the slide effect for the bottom bar is disabled.
-         */
-        noSlide: {
-          type: Boolean,
-          value: false
-        },
-
-        /**
-         * If true, tabs are scrollable and the tab width is based on the label width.
-         */
-        scrollable: {
-          type: Boolean,
-          value: false
-        },
-
-        /**
-         * If true, dragging on the tabs to scroll is disabled.
-         */
-        disableDrag: {
-          type: Boolean,
-          value: false
-        },
-
-        /**
-         * If true, scroll buttons (left/right arrow) will be hidden for scrollable tabs.
-         */
-        hideScrollButtons: {
-          type: Boolean,
-          value: false
-        },
-
-        /**
-         * If true, the tabs are aligned to bottom (the selection bar appears at the top).
-         */
-        alignBottom: {
-          type: Boolean,
-          value: false
-        },
-
-        /**
-         * Gets or sets the selected element. The default is to use the index of the item.
-         */
-        selected: {
-          type: String,
-          notify: true
-        },
-
-        selectable: {
-          type: String,
-          value: 'paper-tab'
-        },
-
-        _step: {
-          type: Number,
-          value: 10
-        },
-
-        _holdDelay: {
-          type: Number,
-          value: 1
-        },
-
-        _leftHidden: {
-          type: Boolean,
-          value: false
-        },
-
-        _rightHidden: {
-          type: Boolean,
-          value: false
-        },
-
-        _previousTab: {
-          type: Object
-        }
-      },
-
-      hostAttributes: {
-        role: 'tablist'
-      },
-
-      listeners: {
-        'iron-resize': '_onResize',
-        'iron-select': '_onIronSelect',
-        'iron-deselect': '_onIronDeselect'
-      },
-
-      created: function() {
-        this._holdJob = null;
-      },
-
-      ready: function() {
-        this.setScrollDirection('y', this.$.tabsContainer);
-      },
-
-      _noinkChanged: function(noink) {
-        var childTabs = Polymer.dom(this).querySelectorAll('paper-tab');
-        childTabs.forEach(noink ? this._setNoinkAttribute : this._removeNoinkAttribute);
-      },
-
-      _setNoinkAttribute: function(element) {
-        element.setAttribute('noink', '');
-      },
-
-      _removeNoinkAttribute: function(element) {
-        element.removeAttribute('noink');
-      },
-
-      _computeScrollButtonClass: function(hideThisButton, scrollable, hideScrollButtons) {
-        if (!scrollable || hideScrollButtons) {
-          return 'hidden';
-        }
-
-        if (hideThisButton) {
-          return 'not-visible';
-        }
-
-        return '';
-      },
-
-      _computeTabsContentClass: function(scrollable) {
-        return scrollable ? 'scrollable' : 'horizontal';
-      },
-
-      _computeSelectionBarClass: function(noBar, alignBottom) {
-        if (noBar) {
-          return 'hidden';
-        } else if (alignBottom) {
-          return 'align-bottom';
-        }
-
-        return '';
-      },
-
-      // TODO(cdata): Add `track` response back in when gesture lands.
-
-      _onResize: function() {
-        this.debounce('_onResize', function() {
-          this._scroll();
-          this._tabChanged(this.selectedItem);
-        }, 10);
-      },
-
-      _onIronSelect: function(event) {
-        this._tabChanged(event.detail.item, this._previousTab);
-        this._previousTab = event.detail.item;
-        this.cancelDebouncer('tab-changed');
-      },
-
-      _onIronDeselect: function(event) {
-        this.debounce('tab-changed', function() {
-          this._tabChanged(null, this._previousTab);
-        // See polymer/polymer#1305
-        }, 1);
-      },
-
-      get _tabContainerScrollSize () {
-        return Math.max(
-          0,
-          this.$.tabsContainer.scrollWidth -
-            this.$.tabsContainer.offsetWidth
-        );
-      },
-
-
-      _scroll: function(e, detail) {
-        if (!this.scrollable) {
-          return;
-        }
-
-        var ddx = (detail && -detail.ddx) || 0;
-        this._affectScroll(ddx);
-      },
-
-      _down: function(e) {
-        // go one beat async to defeat IronMenuBehavior
-        // autorefocus-on-no-selection timeout
-        this.async(function() {
-          if (this._defaultFocusAsync) {
-            this.cancelAsync(this._defaultFocusAsync);
-            this._defaultFocusAsync = null;
-          }
-        }, 1);
-      },
-
-      _affectScroll: function(dx) {
-        this.$.tabsContainer.scrollLeft += dx;
-
-        var scrollLeft = this.$.tabsContainer.scrollLeft;
-
-        this._leftHidden = scrollLeft === 0;
-        this._rightHidden = scrollLeft === this._tabContainerScrollSize;
-      },
-
-      _onLeftScrollButtonDown: function() {
-        this._scrollToLeft();
-        this._holdJob = setInterval(this._scrollToLeft.bind(this), this._holdDelay);
-      },
-
-      _onRightScrollButtonDown: function() {
-        this._scrollToRight();
-        this._holdJob = setInterval(this._scrollToRight.bind(this), this._holdDelay);
-      },
-
-      _onScrollButtonUp: function() {
-        clearInterval(this._holdJob);
-        this._holdJob = null;
-      },
-
-      _scrollToLeft: function() {
-        this._affectScroll(-this._step);
-      },
-
-      _scrollToRight: function() {
-        this._affectScroll(this._step);
-      },
-
-      _tabChanged: function(tab, old) {
-        if (!tab) {
-          this._positionBar(0, 0);
-          return;
-        }
-
-        var r = this.$.tabsContent.getBoundingClientRect();
-        var w = r.width;
-        var tabRect = tab.getBoundingClientRect();
-        var tabOffsetLeft = tabRect.left - r.left;
-
-        this._pos = {
-          width: this._calcPercent(tabRect.width, w),
-          left: this._calcPercent(tabOffsetLeft, w)
-        };
-
-        if (this.noSlide || old == null) {
-          // position bar directly without animation
-          this._positionBar(this._pos.width, this._pos.left);
-          return;
-        }
-
-        var oldRect = old.getBoundingClientRect();
-        var oldIndex = this.items.indexOf(old);
-        var index = this.items.indexOf(tab);
-        var m = 5;
-
-        // bar animation: expand
-        this.$.selectionBar.classList.add('expand');
-
-        if (oldIndex < index) {
-          this._positionBar(this._calcPercent(tabRect.left + tabRect.width - oldRect.left, w) - m,
-              this._left);
-        } else {
-          this._positionBar(this._calcPercent(oldRect.left + oldRect.width - tabRect.left, w) - m,
-              this._calcPercent(tabOffsetLeft, w) + m);
-        }
-
-        if (this.scrollable) {
-          this._scrollToSelectedIfNeeded(tabRect.width, tabOffsetLeft);
-        }
-      },
-
-      _scrollToSelectedIfNeeded: function(tabWidth, tabOffsetLeft) {
-        var l = tabOffsetLeft - this.$.tabsContainer.scrollLeft;
-        if (l < 0) {
-          this.$.tabsContainer.scrollLeft += l;
-        } else {
-          l += (tabWidth - this.$.tabsContainer.offsetWidth);
-          if (l > 0) {
-            this.$.tabsContainer.scrollLeft += l;
-          }
-        }
-      },
-
-      _calcPercent: function(w, w0) {
-        return 100 * w / w0;
-      },
-
-      _positionBar: function(width, left) {
-        width = width || 0;
-        left = left || 0;
-
-        this._width = width;
-        this._left = left;
-        this.transform(
-            'translate3d(' + left + '%, 0, 0) scaleX(' + (width / 100) + ')',
-            this.$.selectionBar);
-      },
-
-      _onBarTransitionEnd: function(e) {
-        var cl = this.$.selectionBar.classList;
-        // bar animation: expand -> contract
-        if (cl.contains('expand')) {
-          cl.remove('expand');
-          cl.add('contract');
-          this._positionBar(this._pos.width, this._pos.left);
-        // bar animation done
-        } else if (cl.contains('contract')) {
-          cl.remove('contract');
-        }
-      }
-    });
-(function() {
-      Polymer({
-        is: 'paper-listbox',
-
-        behaviors: [
-          Polymer.IronMenuBehavior
-        ],
-
-        hostAttributes: {
-          role: 'listbox'
-        }
-      });
-    })();
-(function() {
-
-  Polymer({
-
-    is: 'neon-animated-pages',
-
-    behaviors: [
-      Polymer.IronResizableBehavior,
-      Polymer.IronSelectableBehavior,
-      Polymer.NeonAnimationRunnerBehavior
-    ],
-
-    properties: {
-
-      activateEvent: {
-        type: String,
-        value: ''
-      },
-
-      // if true, the initial page selection will also be animated according to its animation config.
-      animateInitialSelection: {
-        type: Boolean,
-        value: false
-      }
-
-    },
-
-    observers: [
-      '_selectedChanged(selected)'
-    ],
-
-    listeners: {
-      'neon-animation-finish': '_onNeonAnimationFinish'
-    },
-
-    _selectedChanged: function(selected) {
-
-      var selectedPage = this.selectedItem;
-      var oldPage = this._valueToItem(this._prevSelected) || false;
-      this._prevSelected = selected;
-
-      // on initial load and if animateInitialSelection is negated, simply display selectedPage.
-      if (!oldPage && !this.animateInitialSelection) {
-        this._completeSelectedChanged();
-        return;
-      }
-
-      // insert safari fix.
-      this.animationConfig = [{
-        name: 'opaque-animation',
-        node: selectedPage
-      }];
-
-      // configure selectedPage animations.
-      if (this.entryAnimation) {
-        this.animationConfig.push({
-          name: this.entryAnimation,
-          node: selectedPage
-        });
-      } else {
-        if (selectedPage.getAnimationConfig) {
-          this.animationConfig.push({
-            animatable: selectedPage,
-            type: 'entry'
-          });
-        }
-      }
-
-      // configure oldPage animations iff exists.
-      if (oldPage) {
-
-        // cancel the currently running animation if one is ongoing.
-        if (oldPage.classList.contains('neon-animating')) {
-          this._squelchNextFinishEvent = true;
-          this.cancelAnimation();
-          this._completeSelectedChanged();
-          this._squelchNextFinishEvent = false;
-        }
-
-        // configure the animation.
-        if (this.exitAnimation) {
-          this.animationConfig.push({
-            name: this.exitAnimation,
-            node: oldPage
-          });
-        } else {
-          if (oldPage.getAnimationConfig) {
-            this.animationConfig.push({
-              animatable: oldPage,
-              type: 'exit'
-            });
-          }
-        }
-
-        // display the oldPage during the transition.
-        oldPage.classList.add('neon-animating');
-      }
-
-      // display the selectedPage during the transition.
-      selectedPage.classList.add('neon-animating');
-
-      // actually run the animations.
-      if (this.animationConfig.length > 1) {
-
-        // on first load, ensure we run animations only after element is attached.
-        if (!this.isAttached) {
-          this.async(function () {
-            this.playAnimation(undefined, {
-              fromPage: null,
-              toPage: selectedPage
-            });
-          });
-
-        } else {
-          this.playAnimation(undefined, {
-            fromPage: oldPage,
-            toPage: selectedPage
-          });
-        }
-
-      } else {
-        this._completeSelectedChanged(oldPage, selectedPage);
-      }
-    },
-
-    /**
-     * @param {Object=} oldPage
-     * @param {Object=} selectedPage
-     */
-    _completeSelectedChanged: function(oldPage, selectedPage) {
-      if (selectedPage) {
-        selectedPage.classList.remove('neon-animating');
-      }
-      if (oldPage) {
-        oldPage.classList.remove('neon-animating');
-      }
-      if (!selectedPage || !oldPage) {
-        var nodes = Polymer.dom(this.$.content).getDistributedNodes();
-        for (var node, index = 0; node = nodes[index]; index++) {
-          node.classList && node.classList.remove('neon-animating');
-        }
-      }
-      this.async(this._notifyPageResize);
-    },
-
-    _onNeonAnimationFinish: function(event) {
-      if (this._squelchNextFinishEvent) {
-        this._squelchNextFinishEvent = false;
-        return;
-      }
-      this._completeSelectedChanged(event.detail.fromPage, event.detail.toPage);
-    },
-
-    _notifyPageResize: function() {
-      var selectedPage = this.selectedItem;
-      this.resizerShouldNotify = function(element) {
-        return element == selectedPage;
-      }
-      this.notifyResize();
-    }
-
-  })
-
-})();
-Polymer({
-
-    is: 'neon-animatable',
-
-    behaviors: [
-      Polymer.NeonAnimatableBehavior,
-      Polymer.IronResizableBehavior
-    ]
-
-  });
-Polymer({
-    is: 'app-settings',
-    properties: {
-      values: {
-        type: Object
-      },
-      _storageObserver: {
-        type: Function,
-        value: function() {
-          return this._onStorageChanged.bind(this);
-        }
-      },
-      initialized: {
-        type: Boolean,
-        value: false
-      }
-    },
-    observers: [
-      '_onValueChange(values.*)'
-    ],
-    ready: function() {
-      if (!arc.app.settings || !arc.app.settings.getConfig) {
-        throw new Error("The arc.app.settings library not ready");
-      }
-      arc.app.settings.getConfig()
-        .then(function(values) {
-          this.set('values', values);
-          //propagate value changes first on initialize time.
-          window.setTimeout(function() {
-            this.initialized = true;
-          }.bind(this), 0);
-        }.bind(this));
-
-      chrome.storage.onChanged.addListener(this._storageObserver);
-    },
-    /**
-     * A callback called when the value of any storage change.
-     * This view should handle external changes to the store.
-     */
-    _onStorageChanged: function(changes, area) {
-      var keys = Object.keys(changes);
-      var accepted = ['DEBUG_ENABLED', 'HISTORY_ENABLED', 'MAGICVARS_ENABLED', 'CMH_ENABLED', 'CMP_ENABLED'];
-      keys.forEach(function(key) {
-        if (accepted.indexOf(key) !== -1 && this.values[key] !== changes[key].newValue) {
-          this.set('values.' + key, changes[key].newValue);
-        }
-      }.bind(this));
-    },
-
-    /**
-     * A function called when any value change.
-     */
-    _onValueChange: function(changeRecord) {
-      if (!this.initialized) {
-        return;
-      }
-      var key = changeRecord.path.replace('values.', '');
-      var value = changeRecord.value;
-      arc.app.settings.saveConfig(key, value);
-      var o = {
-        'key': key,
-        'value': value
-      };
-      console.log('Setting changed', key, value);
-      this.fire('settings-saved', o);
-    },
-    /**
-     * Open the dialog with magic variables explanation.
-     */
-    openMagicVariablesDialog: function() {
-      this.$.magicVatDialog.open();
-    },
-
-    manageClick: function() {
-      this.fire('settings-action', {
-        action: 'manage-import-export'
-      });
-    },
-    historyClearClick: function() {
-      this.$.historyClearDialog.open();
-    },
-    onClearDialogResult: function(e) {
-      if (e.detail.canceled || !e.detail.confirmed) {
-        return;
-      }
-      this.fire('settings-action', {
-        action: 'clear-history'
-      });
-    }
-  });
-Polymer({
-    is: 'file-drop',
-    listeners: {
-      'dragenter': '_onDragEnter',
-      'dragleave': '_onDragLeave',
-      'dragover': '_onDragOver',
-      'drop': '_onDrop',
-      'neon-animation-finish': '_onNeonAnimationFinish'
-    },
-    behaviors: [
-      Polymer.NeonAnimationRunnerBehavior
-    ],
-    properties: {
-      _dragging: {
-        type: Boolean,
-        value: false
-      },
-      _dropSectionClass: {
-        type: String,
-        computed: '_computeDropSectionClassName(_dragging)'
-      },
-      file: {
-        type: Object,
-        value: null
-      },
-      hasFile: {
-        type: Boolean,
-        value: false,
-        computed: '_computeHasFile(file)'
-      },
-      animationConfig: {
-        value: function() {
-          return {
-            'entry': {
-              name: 'fade-out-animation',
-              node: this.$.dropSection,
-              timing: {
-                duration: 700
-              }
-            },
-            'exit': {
-              name: 'fade-in-animation',
-              node: this.$.dropSection,
-              timing: {
-                duration: 700
-              }
-            }
-          };
-        }
-      }
-    },
-    selectFile: function() {
-      Polymer.dom(this.root).querySelector('#file').click();
-    },
-    _onDragEnter: function(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      this._dragging = true;
-    },
-    _onDragLeave: function(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      this._dragging = false;
-    },
-    _onDragOver: function(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      this._dragging = true;
-    },
-    _onDrop: function(e) {
-      this._dragging = false;
-      e.stopPropagation();
-      e.preventDefault();
-      var dt = e.dataTransfer;
-      var files = dt.files;
-      for (var i = 0; i < files.length; i++) {
-        var file = files[i];
-        this._processFile(file);
-        return;
-      }
-    },
-    _manualSelected: function() {
-      var input = Polymer.dom(this.root).querySelector('#file');
-      if (input.files.length) {
-        this._processFile(input.files[0]);
-      }
-    },
-    _processFile: function(file) {
-      this.file = file;
-      this.fire('file-ready', {
-        file: file
-      });
-      this.playAnimation('entry');
-    },
-
-    _computeDropSectionClassName: function(dragging) {
-      var cls = 'drop-zone layout vertical center';
-      if (dragging) {
-        cls += ' active';
-      }
-      return cls;
-    },
-
-    _computeHasFile: function(file) {
-      return !!file;
-    },
-
-    reset: function() {
-      this.file = null;
-      var input = Polymer.dom(this.root).querySelector('#file');
-      input.value = null;
-      this.cancelAnimation();
-      var section = Polymer.dom(this.root).querySelector('#dropSection');
-      if (section.classList.contains('with-file')) {
-        section.classList.remove('with-file');
-      }
-      this.playAnimation('exit');
-    },
-
-    _onNeonAnimationFinish: function() {
-      var section = Polymer.dom(this.root).querySelector('#dropSection');
-      if (this.file) {
-        if (!section.classList.contains('with-file')) {
-          section.classList.add('with-file');
-        }
-        section.classList.remove('without-file');
-      } else {
-        if (section.classList.contains('with-file')) {
-          section.classList.remove('with-file');
-        }
-        section.classList.add('without-file');
-      }
-    }
-  });
-Polymer({
-        is: 'import-data-table',
-        properties: {
-        	projects: Object,
-            requests: Object
-        },
-        _computeProjectName: function(item, projects){
-            if(!item.project || isNaN(item.project)){
-                return 'none';
-            }
-            if(!projects.length){
-                return 'none';
-            }
-            for(var i=0, length = projects.length; i<length; i++){
-                if(projects[i].id === item.project){
-                    return projects[i].name;
-                }
-            }
-            return 'none';
-        },
-
-        importTap: function(){
-            this.fire('import-action',{action: 'import'});
-        },
-        cancelTap: function(){
-            this.fire('import-action',{action: 'cancel'});
-        }
-    });
-'use strict';
-    /* global arc */
-    Polymer({
-        is: 'app-response-status',
-        properties: {
-            statusCode: {
-                type: Number,
-                observer: '_statusCodeChanged'
-            },
-            statusMessage: String,
-            loadingTime: Number,
-            requestHeaders: {
-                type: Array,
-                observer: '_requestHeadersChanged'
-            },
-            responseHeaders: {
-                type: Array,
-                observer: '_responseHeadersChanged'
-            },
-            redirectData: {
-                type: Array,
-                value: []
-            },
-            _scdTitle: String,
-            _scdBody: String,
-            selectedTab: {
-                type: Number,
-                value: 0
-            }
-        },
-        computeStatusClass: function(code) {
-            var cls = 'status-color';
-            if (code >= 500 || code === 0) {
-                cls += ' error';
-            }
-            if (code >= 400 && code < 500) {
-                cls += ' warning';
-            }
-            return cls;
-        },
-        _statusCodeChanged: function() {
-            if (this.statusCode === 0) {
-                this._scdTitle = 'No response';
-                this._scdBody = 'The response was empty';
-                return;
-            }
-            arc.app.db.websql.getStatusCode(this.statusCode)
-                .then(function(result) {
-                    if (result && result.label) {
-                        this._scdTitle = this.statusCode + ': ' + result.label;
-                    } else {
-                        this._scdTitle = 'Status code: ' + this.statusCode;
-                    }
-                    if (result && result.desc) {
-                        this._scdBody = result.desc;
-                    } else {
-                        this._scdBody = 'There is no definition for this status code in the application :(';
-                    }
-                }.bind(this), function() {
-                    this._scdTitle = 'Status code: ' + this.statusCode;
-                    this._scdBody = 'There is no definition for this status code in the application :(';
-                }.bind(this));
-        },
-
-        showStatusInfo: function() {
-            this.$.statusCodeInfo.open();
-        },
-
-        _requestHeadersChanged: function() {
-            this.requestHeaders.forEach(function(item) {
-                item.type = 'request'
-            });
-        },
-
-        _responseHeadersChanged: function() {
-            this.responseHeaders.forEach(function(item) {
-                item.type = 'response'
-            });
-        },
-        computeIndexName: function(index) {
-            return index + 1;
-        },
-        _handleLink: function(e) {
-            var e2 = Polymer.dom(e);
-            e.preventDefault();
-            if (e2.rootTarget.nodeName === "A") {
-                this.fire('action-link', {
-                    link: e2.rootTarget.href
-                });
-            }
-        }
-    });
-'use strict';
-  /* global arc */
-  Polymer({
-      is: 'app-headers-display',
-      properties: {
-        headers: Array,
-        _hdTitle: String,
-        _hdBody: String,
-        _hdExample: String,
-      },
-      _displayHeaderInfo: function(e) {
-        var item = e.model.get('item');
-        arc.app.db.websql.getHeaderByName(item.name, item.type)
-        .then(function(result) {
-          if (result === null) {
-              return;
-          }
-          result = result[0];
-          this._hdTitle = result.name;
-          this._hdBody = result.desc;
-          this._hdExample = result.example;
-          this.$.headerInfo.open();
-        }.bind(this));
-      }
-  });
-Polymer({
-			is: 'app-header-value-display',
-			properties: {
-				value: {
-					type: String,
-					observer: '_valueChanged'
-				}
-			},
-			_valueChanged: function(){
-				this.$.display.innerHTML = arc.app.utils.autoLink(arc.app.utils.encodeHtml(this.value));
-			}
-		});
-Polymer({
-    is: 'server-import-data-table',
-    properties: {
-      requests: Object,
-      selected: Object,
-      sort: String,
-      dir: String
-    },
-    importTap: function() {
-      var selected = this.requests.filter(function(item) {
-        return item.checked === true;
-      });
-      this.fire('import-action', {
-        action: 'import',
-        'items': selected
-      });
-    },
-    cancelTap: function() {
-      this.fire('import-action', {
-        action: 'cancel'
-      });
-    },
-    toggleSelection: function(event) {
-      var item = this.$.requestsList.itemForElement(event.target);
-      this.$.selector.select(item);
-    },
-
-    toggleAll: function() {
-      if (this.allChecked) {
-        this.requests.forEach(function(item, i) {
-          this.set('requests.' + i + '.checked', true);
-        });
-      } else {
-        this.requests.forEach(function(item, i) {
-          this.set('requests.' + i + '.checked', false);
-        });
-      }
-    },
-
-    displayDate: function(time) {
-      var options = {
-        year: 'numeric',
-        month: 'numeric',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-        hour12: false
-      };
-      var date = new Date(time);
-      return date.toLocaleString('en-US', options);
-      //return new Intl.DateTimeFormat(options).format(new Date(time));
-    },
-
-    _computeTableRowClass: function(checked) {
-      var cls = 'table-values layout horizontal center';
-      if (checked) {
-        cls += ' checked';
-      }
-      return cls;
-    },
-    sortColumn: function(e) {
-      e = Polymer.dom(e);
-      if (!e.rootTarget.dataset.sort) {
-        return;
-      }
-      var sortOpt = e.rootTarget.dataset.sort;
-      var dir = 'asc';
-      if (this.sort === sortOpt) {
-        dir = this.dir === 'asc' ? 'desc' : 'asc';
-      }
-      this.set('sort', sortOpt);
-      this.set('dir', dir);
-    },
-    computeSort: function(sortOpt, dir) {
-      return function(a, b) {
-        if (a[sortOpt] > b[sortOpt]) {
-          return dir === 'asc' ? 1 : -1;
-        }
-        if (a[sortOpt] < b[sortOpt]) {
-          return dir === 'asc' ? -1 : 1;
-        }
-        if (a[sortOpt] === b[sortOpt]) {
-          return 0;
-        }
-      };
-    },
-
-    /**
-     * Compute if adding data-sort attribute to the column name is required.
-     * 
-     */
-    computeSortColumn: function(sort, dir, column) {
-      if (column !== sort) {
-        return null;
-      }
-      return dir;
-    }
-  });
-Polymer({
-        is: 'app-contenttype-headers-support',
-        properties: {
-          value: {
-          	type: String,
-          	overver: '_valueChanged'
-          },
-          selected: {
-          	type: Number,
-          	value: -1
-          },
-          defaults: {
-          	type: Array,
-          	value: function(){
-          		return ['multipart-form-data','application/x-www-form-urlencoded','application/json','application/xml','application/base64','application/octet-stream','text/plain','text/css','text/html','application/javascript'];
-          	}
-          }
-        },
-
-        open: function(){
-        	this.$.dialog.open();
-        },
-
-        _onClosed: function(e, detail){
-        	if(typeof detail.confirmed !== 'undefined' || this.selected === -1) {
-        		return;
-        	}
-        	this.fire('value-selected', {value: this.defaults[this.selected]});
-        },
-
-        _valueChanged: function(){
-        	this.set('selected', this.defaults.indexOf(this.value));
-        }
-    });
-Polymer({
-        is: 'arc-menu',
-        properties: {
-            _hashchangeFn: {
-                type: Function,
-                value: function() {
-                    return this._onHashChange.bind(this);
-                }
-            },
-            _historyObserver: {
-                type: Function,
-                value: function() {
-                    return this._onStorageChange.bind(this);
-                }
-            },
-            hash: String,
-            projects: Array,
-            noHistory: {
-                type: Boolean,
-                value: false
-            }
-        },
-        ready: function() {
-            try {
-                this._setCurrentHash();
-                this._observeHash();
-                this._observeHistoryEnabled();
-                this._updateHistoryStatus();
-            } catch (e) {
-                console.error('Error occurred constructing the arc-menu', e);
-                ga('legacy.send', 'exception', {
-                    'exDescription': 'arc-menu::ready::' + e.message,
-                    'exFatal': false
-                });
-            }
-        },
-        attached: function() {
-            this._restoreProjects();
-            console.info('arc-menu has been attached');
-        },
-        _observeHash: function() {
-            try {
-                window.addEventListener('hashchange', this._hashchangeFn);
-            } catch (e) {
-                console.error('Error setting up hash listener', e);
-                ga('legacy.send', 'exception', {
-                    'exDescription': 'arc-menu::_observeHash::' + e.message,
-                    'exFatal': false
-                });
-            }
-        },
-        _itemTap: function(e) {
-            e = Polymer.dom(e);
-            if (e.rootTarget.dataset.place) {
-                window.location.hash = e.rootTarget.dataset.place;
-            }
-        },
-        _onHashChange: function(e) {
-            try {
-              this.hash = e.newURL.substr(e.newURL.indexOf('#'));
-            } catch (e) {
-                console.error('Error setting up current hash', e);
-                ga('legacy.send', 'exception', {
-                    'exDescription': 'arc-menu::_onHashChange::' + e.message,
-                    'exFatal': false
-                });
-            }
-        },
-        _setCurrentHash: function() {
-            try {
-                var href = window.location.href;
-                this.hash = href.substr(href.indexOf('#'));
-            } catch (e) {
-                console.error('Error setting up current hash', e);
-                ga('legacy.send', 'exception', {
-                    'exDescription': 'arc-menu::_setCurrentHash::' + e.message,
-                    'exFatal': false
-                });
-            }
-        },
-        _restoreProjects: function() {
-            try {
-                arc.app.db.websql.listProjects()
-                    .then(function(list) {
-                        this.projects = list;
-                    }.bind(this));
-            } catch (e) {
-                console.error('Error setting up storage listener', e);
-                ga('legacy.send', 'exception', {
-                    'exDescription': 'arc-menu::_restoreProjects::' + e.message,
-                    'exFatal': false
-                });
-            }
-        },
-        _observeHistoryEnabled: function() {
-            try {
-                chrome.storage.onChanged.addListener(this._historyObserver);
-            } catch (e) {
-                console.error('Error setting up storage listener', e);
-                ga('legacy.send', 'exception', {
-                    'exDescription': 'arc-menu::_observeHistoryEnabled::' + e.message,
-                    'exFatal': false
-                });
-            }
-        },
-        computeSort: function(projects) {
-            return function(a, b) {
-                if (a.name > b.name) {
-                    return 1;
-                }
-                if (a.name < b.name) {
-                    return -1;
-                }
-                if (a.name === b.name) {
-                    return 0;
-                }
-            };
-        },
-        _computeEnpointParameter: function(id) {
-            return '#RequestPlace:project/' + id;
-        },
-        /** 
-         * Update project name in the UI.
-         *
-         * @param {Number} projectId A project id from the database
-         * @param {String} projectName Project new name
-         */
-        updateProjectName: function(projectId, projectName) {
-            if (this.project === null) {
-                console.warn('Trying to update a project name when project list is empty. ' +
-                    'Try insert new project first.');
-                return;
-            }
-            var context = this;
-            this.projects.forEach(function (project, i) {
-                if (project.id === projectId) {
-                    context.set('projects.' + i + '.name', projectName);
-                }
-            });
-        },
-        /**
-         * Add newly created project to the list.
-         *
-         * @param {Number} projectId Database id for the project
-         */
-        appendProject: function(projectId) {
-            arc.app.db.websql.getProject(projectId)
-                .then(function(project) {
-                    if (project === null) {
-                        console.warn('No project found for given ID ', projectId);
-                        return;
-                    }
-                    this.push('projects', project[0]);
-                }.bind(this));
-        },
-        /**
-         * Remove project from the UI.
-         */
-        removeProject: function(projectId) {
-            if (this.project === null) {
-                console.warn('Trying to remove a project when project list is empty. ' +
-                    'Try insert new project first.');
-                return;
-            }
-            var context = this;
-            this.projects.forEach(function (project, i) {
-                if (project.id === projectId) {
-                    context.splice('projects', i, 1);
-                }
-            });
-        },
-
-        _updateHistoryStatus: function() {
-            try {
-                chrome.storage.sync.get({
-                    HISTORY_ENABLED: true
-                }, function(result) {
-                    if (!result.HISTORY_ENABLED) {
-                        this.noHistory = true;
-                    } else {
-                        this.noHistory = false;
-                    }
-                });
-            } catch (e) {
-                console.error('Error setting up storage listener', e);
-                ga('legacy.send', 'exception', {
-                    'exDescription': 'arc-menu::_updateHistoryStatus::' + e.message,
-                    'exFatal': false
-                });
-            }
-        },
-
-        _onStorageChange: function(change) {
-            var keys = Object.keys(change);
-            if (keys.indexOf('HISTORY_ENABLED') !== -1) {
-                if (!change.HISTORY_ENABLED.newValue) {
-                    this.noHistory = true;
-                } else {
-                    this.noHistory = false;
-                }
-            }
-        }
-    });
-Polymer({
-    is: 'app-about',
-    properties: {
-      version: String
-    },
-    attached: function() {
-      this.version = (chrome && chrome.runtime) ? chrome.runtime.getManifest().version : 'Unknown';
-    },
-    showLicensing: function() {
-      this.$.licensingDialog.open();
-    },
-    showDonate: function() {
-      this.$.donateDialog.open();
-    }
-  });
