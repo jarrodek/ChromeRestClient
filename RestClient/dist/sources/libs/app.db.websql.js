@@ -185,7 +185,9 @@ arc.app.db.websql.insertStatusCodes = function(codesArray) {
       }, function() {
         resolve();
       });
-    }).catch((e) => reject(e));
+    }).catch(function(e) {
+      reject(e);
+    });
   });
 };
 /**
@@ -214,7 +216,9 @@ arc.app.db.websql.insertHeadersDefinitions = function(headers) {
       }, function() {
         resolve();
       });
-    }).catch((e) => reject(e));
+    }).catch(function(e) {
+      reject(e);
+    });
   });
 };
 /**
@@ -225,7 +229,7 @@ arc.app.db.websql.getStatusCode = function(code) {
     arc.app.db.websql.open().then(function(db) {
       db.transaction(function(tx) {
         let sql = 'SELECT * FROM statuses WHERE code = ?';
-        tx.executeSql(sql, [code], (tx, result) => {
+        tx.executeSql(sql, [code], function(tx, result) {
           if (result.rows.length === 0) {
             resolve(null);
           } else {
@@ -235,7 +239,9 @@ arc.app.db.websql.getStatusCode = function(code) {
           reject(error);
         });
       });
-    }).catch((e) => reject(e));
+    }).catch(function(e) {
+      reject(e);
+    });
   });
 };
 /**
@@ -246,7 +252,7 @@ arc.app.db.websql.getHeaderByName = function(name, type) {
     arc.app.db.websql.open().then(function(db) {
       db.transaction(function(tx) {
         let sql = 'SELECT * FROM headers WHERE name LIKE (?) AND type=?';
-        tx.executeSql(sql, [name, type], (tx, result) => {
+        tx.executeSql(sql, [name, type], function(tx, result) {
           if (result.rows.length === 0) {
             resolve(null);
           } else {
@@ -256,7 +262,9 @@ arc.app.db.websql.getHeaderByName = function(name, type) {
           reject(error);
         });
       });
-    }).catch((e) => reject(e));
+    }).catch(function(e) {
+      reject(e);
+    });
   });
 };
 /**
@@ -267,13 +275,15 @@ arc.app.db.websql.addUrlHistory = function(url, time) {
     arc.app.db.websql.open().then(function(db) {
       db.transaction(function(tx) {
         let sql = 'INSERT INTO urls (url,time) VALUES (?,?)';
-        tx.executeSql(sql, [url, time], (tx, result) => {
+        tx.executeSql(sql, [url, time], function(tx, result) {
           resolve(result);
         }, function(tx, error) {
           reject(error);
         });
       });
-    }).catch((e) => reject(e));
+    }).catch(function(e) {
+      reject(e);
+    });
   });
 };
 /**
@@ -284,13 +294,15 @@ arc.app.db.websql.updateUrlHistory = function(id, time) {
     arc.app.db.websql.open().then(function(db) {
       db.transaction(function(tx) {
         let sql = 'UPDATE urls SET time = ? WHERE ID = ?';
-        tx.executeSql(sql, [time, id], (tx, result) => {
+        tx.executeSql(sql, [time, id], function(tx, result) {
           resolve(result);
         }, function(tx, error) {
           reject(error);
         });
       });
-    }).catch((e) => reject(e));
+    }).catch(function(e) {
+      reject(e);
+    });
   });
 };
 /**
@@ -301,7 +313,7 @@ arc.app.db.websql.getHistoryUrls = function(query) {
     arc.app.db.websql.open().then(function(db) {
       db.transaction(function(tx) {
         let sql = 'SELECT url FROM urls WHERE url LIKE ? ORDER BY time';
-        tx.executeSql(sql, [query], (tx, result) => {
+        tx.executeSql(sql, [query], function(tx, result) {
           if (result.rows.length === 0) {
             resolve(null);
           } else {
@@ -311,7 +323,9 @@ arc.app.db.websql.getHistoryUrls = function(query) {
           reject(error);
         });
       });
-    }).catch((e) => reject(e));
+    }).catch(function(e) {
+      reject(e);
+    });
   });
 };
 /**
@@ -322,13 +336,15 @@ arc.app.db.websql.addProject = function(name, time) {
     arc.app.db.websql.open().then(function(db) {
       db.transaction(function(tx) {
         let sql = 'INSERT INTO projects (name, time) VALUES (?,?)';
-        tx.executeSql(sql, [name, time], (tx, result) => {
+        tx.executeSql(sql, [name, time], function(tx, result) {
           resolve(result);
         }, function(tx, error) {
           reject(error);
         });
       });
-    }).catch((e) => reject(e));
+    }).catch(function(e) {
+      reject(e);
+    });
   });
 };
 /**
@@ -353,7 +369,9 @@ arc.app.db.websql.importProjects = function(projectsArray) {
       }, function() {
         resolve();
       });
-    }).catch((e) => reject(e));
+    }).catch(function(e) {
+      reject(e);
+    });
   });
 };
 /**
@@ -364,13 +382,15 @@ arc.app.db.websql.updateProject = function(name, time, id) {
     arc.app.db.websql.open().then(function(db) {
       db.transaction(function(tx) {
         let sql = 'UPDATE projects SET name = ?, time = ? WHERE ID = ?';
-        tx.executeSql(sql, [name, time, id], (tx, result) => {
+        tx.executeSql(sql, [name, time, id], function(tx, result) {
           resolve(result);
         }, function(tx, error) {
           reject(error);
         });
       });
-    }).catch((e) => reject(e));
+    }).catch(function(e) {
+      reject(e);
+    });
   });
 };
 /**
@@ -382,7 +402,7 @@ arc.app.db.websql.listProjects = function() {
     arc.app.db.websql.open().then(function(db) {
       db.transaction(function(tx) {
         let sql = 'SELECT * FROM projects WHERE 1';
-        tx.executeSql(sql, [], (tx, result) => {
+        tx.executeSql(sql, [], function(tx, result) {
           if (result.rows.length === 0) {
             resolve(null);
           } else {
@@ -392,7 +412,9 @@ arc.app.db.websql.listProjects = function() {
           reject(error);
         });
       });
-    }).catch((e) => reject(e));
+    }).catch(function(e) {
+      reject(e);
+    });
   });
 };
 /**
@@ -404,7 +426,7 @@ arc.app.db.websql.getProject = function(id) {
     arc.app.db.websql.open().then(function(db) {
       db.transaction(function(tx) {
         let sql = 'SELECT * FROM projects WHERE ID = ?';
-        tx.executeSql(sql, [id], (tx, result) => {
+        tx.executeSql(sql, [id], function(tx, result) {
           if (result.rows.length === 0) {
             resolve(null);
           } else {
@@ -414,6 +436,8 @@ arc.app.db.websql.getProject = function(id) {
           reject(error);
         });
       });
-    }).catch((e) => reject(e));
+    }).catch(function(e) {
+      reject(e);
+    });
   });
 };

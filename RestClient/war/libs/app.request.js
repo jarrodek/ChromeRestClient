@@ -72,11 +72,13 @@ arc.app.server.request.buildRequest = function(url, method, body) {
 
 arc.app.server.request.pingRequest = function() {
   return arc.app.server.request.buildRequest(arc.app.server.request.PING_URL)
-    .then((response) => response.json())
+    .then(function(response) {
+      return response.json();
+    })
     .catch(function(error) {
       return {
         'error': true,
-        'message': 'Error to load response from server. Session state unknown. (' + 
+        'message': 'Error to load response from server. Session state unknown. (' +
           error.message + ')'
       };
     });
@@ -86,7 +88,9 @@ arc.app.server.request.pingRequest = function() {
  */
 arc.app.server.request.messagesRequest = function(since) {
   return arc.app.server.request.buildRequest(arc.app.server.request.MESSAGES_URL + since)
-    .then((response) => response.json())
+    .then(function(response) {
+      return response.json();
+    })
     .then(function(json) {
       var data = [];
       json.forEach(function(item) {
@@ -114,7 +118,9 @@ arc.app.server.request.messagesRequest = function(since) {
 arc.app.server.request.importSuggestionsRequest = function(uid) {
   uid = uid || 'me';
   return arc.app.server.request.buildRequest(arc.app.server.request.SUGGESTIONS_LISTING + uid)
-    .then((response) => response.json())
+    .then(function(response) {
+      return response.json();
+    })
     .catch(function(error) {
       return {
         'error': true,
@@ -129,10 +135,14 @@ arc.app.server.request.importSuggestionsRequest = function(uid) {
  */
 arc.app.server.request.getImportData = function(uids) {
   var data = '';
-  uids.forEach((uid) => data += 'k%5B%5D=' + uid + '&');
+  uids.forEach(function(uid) {
+    return data += 'k%5B%5D=' + uid + '&';
+  });
   data = data.substring(0, data.length - 1);
   return arc.app.server.request.buildRequest(arc.app.server.request.GET_IMPORT_DATA, 'POST', data)
-    .then((response) => response.json())
+    .then(function(response) {
+      return response.json();
+    })
     .catch(function(error) {
       return {
         'error': true,

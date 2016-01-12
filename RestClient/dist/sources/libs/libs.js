@@ -83,7 +83,7 @@ arc.app.db.websql.insertStatusCodes = function (codesArray) {
         resolve();
       });
     }).catch(function (e) {
-      return reject(e);
+      reject(e);
     });
   });
 };
@@ -102,7 +102,7 @@ arc.app.db.websql.insertHeadersDefinitions = function (headers) {
         resolve();
       });
     }).catch(function (e) {
-      return reject(e);
+      reject(e);
     });
   });
 };
@@ -123,7 +123,7 @@ arc.app.db.websql.getStatusCode = function (code) {
         });
       });
     }).catch(function (e) {
-      return reject(e);
+      reject(e);
     });
   });
 };
@@ -144,7 +144,7 @@ arc.app.db.websql.getHeaderByName = function (name, type) {
         });
       });
     }).catch(function (e) {
-      return reject(e);
+      reject(e);
     });
   });
 };
@@ -161,7 +161,7 @@ arc.app.db.websql.addUrlHistory = function (url, time) {
         });
       });
     }).catch(function (e) {
-      return reject(e);
+      reject(e);
     });
   });
 };
@@ -178,7 +178,7 @@ arc.app.db.websql.updateUrlHistory = function (id, time) {
         });
       });
     }).catch(function (e) {
-      return reject(e);
+      reject(e);
     });
   });
 };
@@ -199,7 +199,7 @@ arc.app.db.websql.getHistoryUrls = function (query) {
         });
       });
     }).catch(function (e) {
-      return reject(e);
+      reject(e);
     });
   });
 };
@@ -216,7 +216,7 @@ arc.app.db.websql.addProject = function (name, time) {
         });
       });
     }).catch(function (e) {
-      return reject(e);
+      reject(e);
     });
   });
 };
@@ -235,7 +235,7 @@ arc.app.db.websql.importProjects = function (projectsArray) {
         resolve();
       });
     }).catch(function (e) {
-      return reject(e);
+      reject(e);
     });
   });
 };
@@ -252,7 +252,7 @@ arc.app.db.websql.updateProject = function (name, time, id) {
         });
       });
     }).catch(function (e) {
-      return reject(e);
+      reject(e);
     });
   });
 };
@@ -273,7 +273,7 @@ arc.app.db.websql.listProjects = function () {
         });
       });
     }).catch(function (e) {
-      return reject(e);
+      reject(e);
     });
   });
 };
@@ -294,7 +294,7 @@ arc.app.db.websql.getProject = function (id) {
         });
       });
     }).catch(function (e) {
-      return reject(e);
+      reject(e);
     });
   });
 };
@@ -537,7 +537,7 @@ arc.app.settings.saveConfig = function (key, value) {
 };
 arc.app.settings.observe = function (callback) {
   chrome.storage.onChanged.addListener(function (changes, area) {
-    return callback(changes, area);
+    callback(changes, area);
   });
 };
 'use strict';
@@ -652,7 +652,7 @@ arc.app.xhr._createRequest = function (request) {
   var method = request.method || 'GET';
   if (request.headers && request.headers.length) {
     request.headers.forEach(function (header) {
-      return headers.append(header.name, header.value);
+      headers.append(header.name, header.value);
     });
   }
   var init = {

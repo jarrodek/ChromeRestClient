@@ -138,7 +138,10 @@ gulp.task('copy:dist', function() {
       dot: true
     })
     .pipe(gulp.dest('dist/sources/'));
-  var components = gulp.src('war/components/vulcanized/*', {
+  var components = gulp.src([
+      'war/components/vulcanized/*',
+      'war/components/webcomponentsjs/webcomponents-lite.js'
+    ], {
       dot: true
     })
     .pipe(gulp.dest('dist/sources/components/'));

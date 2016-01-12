@@ -16472,91 +16472,97 @@ Polymer({
         }
     });
 'use strict';
-  /* global arc */
-  Polymer({
-    is: 'app-response-status',
-    properties: {
-      statusCode: {
-        type: Number,
-        observer: '_statusCodeChanged'
-      },
-      statusMessage: String,
-      loadingTime: Number,
-      requestHeaders: {
-        type: Array,
-        observer: '_requestHeadersChanged'
-      },
-      responseHeaders: {
-        type: Array,
-        observer: '_responseHeadersChanged'
-      },
-      redirectData: {
-        type: Array,
-        value: []
-      },
-      _scdTitle: String,
-      _scdBody: String,
-      selectedTab: {
-        type: Number,
-        value: 0
-      }
-    },
-    computeStatusClass: function(code) {
-      var cls = 'status-color';
-      if (code >= 500 || code === 0) {
-        cls += ' error';
-      }
-      if (code >= 400 && code < 500) {
-        cls += ' warning';
-      }
-      return cls;
-    },
-    _statusCodeChanged: function() {
-      if (this.statusCode === 0) {
-        this._scdTitle = 'No response';
-        this._scdBody = 'The response was empty';
-        return;
-      }
-      arc.app.db.websql.getStatusCode(this.statusCode)
-        .then(function(result) {
-          if (result && result.label) {
-            this._scdTitle = this.statusCode + ': ' + result.label;
-          } else {
-            this._scdTitle = 'Status code: ' + this.statusCode;
-          }
-          if (result && result.desc) {
-            this._scdBody = result.desc;
-          } else {
-            this._scdBody = 'There is no definition for this status code in the application :(';
-          }
-        }.bind(this), function() {
-          this._scdTitle = 'Status code: ' + this.statusCode;
-          this._scdBody = 'There is no definition for this status code in the application :(';
-        }.bind(this));
-    },
+    /* global arc */
+    Polymer({
+        is: 'app-response-status',
+        properties: {
+            statusCode: {
+                type: Number,
+                observer: '_statusCodeChanged'
+            },
+            statusMessage: String,
+            loadingTime: Number,
+            requestHeaders: {
+                type: Array,
+                observer: '_requestHeadersChanged'
+            },
+            responseHeaders: {
+                type: Array,
+                observer: '_responseHeadersChanged'
+            },
+            redirectData: {
+                type: Array,
+                value: []
+            },
+            _scdTitle: String,
+            _scdBody: String,
+            selectedTab: {
+                type: Number,
+                value: 0
+            }
+        },
+        computeStatusClass: function(code) {
+            var cls = 'status-color';
+            if (code >= 500 || code === 0) {
+                cls += ' error';
+            }
+            if (code >= 400 && code < 500) {
+                cls += ' warning';
+            }
+            return cls;
+        },
+        _statusCodeChanged: function() {
+            if (this.statusCode === 0) {
+                this._scdTitle = 'No response';
+                this._scdBody = 'The response was empty';
+                return;
+            }
+            arc.app.db.websql.getStatusCode(this.statusCode)
+                .then(function(result) {
+                    if (result && result.label) {
+                        this._scdTitle = this.statusCode + ': ' + result.label;
+                    } else {
+                        this._scdTitle = 'Status code: ' + this.statusCode;
+                    }
+                    if (result && result.desc) {
+                        this._scdBody = result.desc;
+                    } else {
+                        this._scdBody = 'There is no definition for this status code in the application :(';
+                    }
+                }.bind(this), function() {
+                    this._scdTitle = 'Status code: ' + this.statusCode;
+                    this._scdBody = 'There is no definition for this status code in the application :(';
+                }.bind(this));
+        },
 
-    showStatusInfo: function() {
-      this.$.statusCodeInfo.open();
-    },
+        showStatusInfo: function() {
+            this.$.statusCodeInfo.open();
+        },
 
-    _requestHeadersChanged: function() {
-      this.requestHeaders.forEach((item) => item.type = 'request');
-    },
+        _requestHeadersChanged: function() {
+            this.requestHeaders.forEach(function(item) {
+                item.type = 'request'
+            });
+        },
 
-    _responseHeadersChanged: function() {
-      this.responseHeaders.forEach((item) => item.type = 'response');
-    },
-    computeIndexName: function(index) {
-      return index + 1;
-    },
-    _handleLink: function(e) {
-      var e2 = Polymer.dom(e);
-      e.preventDefault();
-      if (e2.rootTarget.nodeName === "A") {
-        this.fire('action-link', {link: e2.rootTarget.href});
-      }
-    }
-  });
+        _responseHeadersChanged: function() {
+            this.responseHeaders.forEach(function(item) {
+                item.type = 'response'
+            });
+        },
+        computeIndexName: function(index) {
+            return index + 1;
+        },
+        _handleLink: function(e) {
+            var e2 = Polymer.dom(e);
+            e.preventDefault();
+            if (e2.rootTarget.nodeName === "A") {
+                this.fire('action-link', {
+                    link: e2.rootTarget.href
+                });
+            }
+        }
+    });
 'use strict';
   /* global arc */
   Polymer({
@@ -16603,7 +16609,9 @@ Polymer({
       dir: String
     },
     importTap: function() {
-      var selected = this.requests.filter((item) => item.checked === true);
+      var selected = this.requests.filter(function(item) {
+        return item.checked === true;
+      });
       this.fire('import-action', {
         action: 'import',
         'items': selected
@@ -16621,9 +16629,13 @@ Polymer({
 
     toggleAll: function() {
       if (this.allChecked) {
-        this.requests.forEach((item, i) => this.set('requests.' + i + '.checked', true));
+        this.requests.forEach(function(item, i) {
+          this.set('requests.' + i + '.checked', true);
+        });
       } else {
-        this.requests.forEach((item, i) => this.set('requests.' + i + '.checked', false));
+        this.requests.forEach(function(item, i) {
+          this.set('requests.' + i + '.checked', false);
+        });
       }
     },
 
@@ -16660,7 +16672,6 @@ Polymer({
       }
       this.set('sort', sortOpt);
       this.set('dir', dir);
-
     },
     computeSort: function(sortOpt, dir) {
       return function(a, b) {
@@ -16855,7 +16866,7 @@ Polymer({
                 return;
             }
             var context = this;
-            this.projects.forEach((project, i) => {
+            this.projects.forEach(function (project, i) {
                 if (project.id === projectId) {
                     context.set('projects.' + i + '.name', projectName);
                 }
@@ -16886,7 +16897,7 @@ Polymer({
                 return;
             }
             var context = this;
-            this.projects.forEach((project, i) => {
+            this.projects.forEach(function (project, i) {
                 if (project.id === projectId) {
                     context.splice('projects', i, 1);
                 }

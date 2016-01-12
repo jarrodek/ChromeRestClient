@@ -115,7 +115,9 @@ arc.app.xhr._getRequestInfo = function(id) {
       });
       return;
     }
-    let filtered = har.log.entries.filter((item) => item.pageref === refId);
+    let filtered = har.log.entries.filter(function(item) {
+      return item.pageref === refId;
+    });
     if (!filtered.length) {
       reject({
         'message': 'HAR object do not contain information about the request.'
@@ -132,7 +134,9 @@ arc.app.xhr._createRequest = function(request) {
   var headers = new Headers();
   var method = request.method || 'GET';
   if (request.headers && request.headers.length) {
-    request.headers.forEach((header) => headers.append(header.name, header.value));
+    request.headers.forEach(function(header) {
+      headers.append(header.name, header.value);
+    });
   }
   var init = {
     'method': method,
@@ -143,7 +147,7 @@ arc.app.xhr._createRequest = function(request) {
     if (post.params) {
       //post.params can only be available if this should be send as a FormData object
       var fd = FormData();
-      post.params.forEach((item) => {
+      post.params.forEach(function(item) {
         if (item.fileName) {
           fd.append(item.name, item.value, item.fileName);
         } else {

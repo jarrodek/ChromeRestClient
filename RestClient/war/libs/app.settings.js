@@ -55,5 +55,7 @@ arc.app.settings.saveConfig = function(key, value) {
   });
 };
 arc.app.settings.observe = function(callback) {
-  chrome.storage.onChanged.addListener((changes, area) => callback(changes, area));
+  chrome.storage.onChanged.addListener(function(changes, area) {
+    callback(changes, area);
+  });
 };
