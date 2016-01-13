@@ -545,7 +545,7 @@ arc.app.drive.picker.loadHandler = function() {
  * @param {Function} callback A callback function to be called after dialog closes.
  * @param {Array} views Rest parameter for views that should be attached to the picker.
  */
-arc.app.drive.picker._constructPicker = function(authToken, callback, ...views) {
+arc.app.drive.picker._constructPicker = function(authToken, callback, views) {
   var pickerBuilder = new google.picker.PickerBuilder()
     .setDeveloperKey(API_KEY_PICKER)
     .setOAuthToken(authToken)
@@ -572,7 +572,7 @@ arc.app.drive.picker.getAppFile = function(authToken, callback) {
       callback.call(arc, data);
     }
   };
-  let pickerBuilder = arc.app.drive.picker._constructPicker(authToken, fn, filesView);
+  let pickerBuilder = arc.app.drive.picker._constructPicker(authToken, fn, [filesView]);
   let picker = pickerBuilder.build();
   picker.setVisible(true);
 };
@@ -595,7 +595,7 @@ arc.app.drive.picker.getFolder = function(authToken, callback) {
       callback.call(arc, data);
     }
   };
-  var pickerBuilder = arc.app.drive.picker._constructPicker(authToken, fn, foldersView);
+  var pickerBuilder = arc.app.drive.picker._constructPicker(authToken, fn, [foldersView]);
   pickerBuilder.setTitle('Select a folder');
   var picker = pickerBuilder.build();
   picker.setVisible(true);
