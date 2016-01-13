@@ -28,6 +28,12 @@ arc.app = arc.app || {};
  */
 arc.app.arc = {};
 /**
+ * Minimum supported version of Chrome.
+ * The script will use manifest.minimum_chrome_version to determine minimum version.
+ * It will use higher number to determine if Chrome is compatible.
+ */
+arc.app.arc.minSupportedVersion = 45;
+/**
  * Get application's App ID
  */
 arc.app.arc.getAppId = function(callback) {
@@ -43,4 +49,21 @@ arc.app.arc.getAppId = function(callback) {
       callback(result.APP_ID);
     }
   });
+};
+/**
+ * Check if current Chrome version is compatible with the app.
+ */
+arc.app.arc.checkCompatybility = function(){
+  var version = arc.app.utils.getChromeVersion();
+  var manifest = chrome.runtime.getManifest();
+  var manifestMin = 0;
+  if(manifest && manifest.minimum_chrome_version) {
+    manifestMin = new Number(manifest.minimum_chrome_version);
+  }
+  var supported = Math.max(manifestMin, arc.app.arc.minSupportedVersion);
+  if(new Number(version.match(/(\d+)\./)[1]) < supported) {
+    window.setTimeout(function(){
+      document.querySelector('#incompatibleVersionDialog').open();
+    }, 2000);
+  }
 };

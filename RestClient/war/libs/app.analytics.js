@@ -101,22 +101,13 @@ arc.app.analytics._getTrackerNames = function() {
   });
 };
 /**
- * Get Chrome full version.
- *
- * @return {String} A full version or `(not set)` is can't find.
- */
-arc.app.analytics.getChromeVersion = function() {
-  var raw = navigator.userAgent.match(/Chrom[e|ium]\/([0-9\.]+)/);
-  return raw ? raw[1] : '(not set)';
-};
-/**
  * Initialize and set up custom dimmenstion that are used by the app.
  */
 arc.app.analytics._setCustomDimmensions = function() {
   var names = arc.app.analytics._getTrackerNames();
   var appVersion = (chrome && chrome.runtime && chrome.runtime.getManifest) ?
     chrome.runtime.getManifest().version : 'Unknown';
-  var chromeVer = arc.app.analytics.getChromeVersion();
+  var chromeVer = arc.app.utils.getChromeVersion();
   names.forEach(function(name) {
     ga(name + '.set', 'appVersion', appVersion);
     ga(name + '.set', 'dimension2', appVersion);
@@ -167,7 +158,7 @@ arc.app.analytics._setChromeChannel = function() {
       if (!(obj instanceof Array)) {
         return;
       }
-      let version = arc.app.analytics.getChromeVersion();
+      let version = arc.app.utils.getChromeVersion();
       for (let i = 0, size = obj[1].length; i < size; i++) {
         let item = obj[1][i];
         if (item.current_version === version ||
