@@ -204,8 +204,8 @@ gulp.task('dev', function() {
       if (error) {
         gutil.log(error.message);
       } else {
-        gulp.watch('dev/**/*.html', ['lint', copySourceFile]);
-        gulp.watch('dev/**/*.js', ['lint', copySourceFile]);
+        gulp.watch('dev/**/*.html', copySourceFile);
+        gulp.watch('dev/**/*.js', copySourceFile);
         gulp.watch('dev/**/*.jsp', copySourceFile);
         gulp.watch('dev/**/*.css', copySourceFile);
         gutil.log(gutil.colors.green('The app is ready to develop. Good luck!'));
