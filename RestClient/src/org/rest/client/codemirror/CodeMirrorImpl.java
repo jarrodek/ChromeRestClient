@@ -34,6 +34,10 @@ public class CodeMirrorImpl extends JavaScriptObject {
 	
 	public final native String setValue(String value) /*-{
 		this.setValue(value);
+		var editor = this;
+		$wnd.setTimeout(function() {
+        	editor.refresh();
+        }, 100);
 	}-*/;
 
 

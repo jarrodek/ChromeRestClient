@@ -109,7 +109,7 @@ public class ChromeMessagePassingImpl implements ChromeMessagePassing {
 				} else if (backgroundPage.gwt && backgroundPage.gwt.dev) {
 					backgroundPage.gwt.dev.background.callAction(data, receiver);
 				} else {
-					throw new Error("Unknown background page communication system @com.google.gwt.chrome.messag.ChromeMessagePassingImpl::sendExtensionMessage");
+					throw new Error("Unknown background page communication system (ChromeMessagePassingImpl).");
 				}
 			} catch(e){
 				handler.@com.google.gwt.chrome.def.BackgroundJsCallback::onError(Ljava/lang/String;)(e.message);

@@ -15,6 +15,7 @@
  * the License.
  ******************************************************************************/
 /* global chrome, OAuth2, fetch, console */
+"function"!=typeof Object.assign&&!function(){Object.assign=function(n){"use strict";if(void 0===n||null===n)throw new TypeError("Cannot convert undefined or null to object");for(var t=Object(n),r=1;r<arguments.length;r++){var e=arguments[r];if(void 0!==e&&null!==e)for(var o in e)e.hasOwnProperty(o)&&(t[o]=e[o])}return t}}();
 /**
  * Background page for Advanced Rest Client.
  *
@@ -400,9 +401,28 @@ arc.app.bg.installDefinitions = function(defs) {
  * This is stored in the extension folder.
  */
 arc.app.bg.downloadDefinitions = function() {
-  return fetch('/assets/definitions.json').then(function(response) {
-    return response.json();
+  return new Promise(function(resolve, reject) {
+    let xhr = new XMLHttpRequest();
+    xhr.open('GET', '/assets/definitions.json', true);
+    xhr.addEventListener('load', function(e){
+      let raw = e.target.response;
+      if(!raw){
+        reject({
+          'message': 'Response was empty'
+        });
+        return;
+      }
+      let data = JSON.parse(e.target.response);
+      resolve(data);
+    });
+    xhr.addEventListener('error', function(e){
+      reject(e.target);
+    });
+    xhr.send(null);
   });
+  /*return fetch('/assets/definitions.json').then(function(response) {
+    return response.json();
+  });*/
 };
 /**
  * Perform upgrade to the newest version

@@ -288,8 +288,8 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 			serverSpinner.addClassName("hidden");
 			break;
 		case 1:
-			fileExportSection.addClassName("hidden");
-			fileImportSection.addClassName("hidden");
+			fileExportSection.removeClassName("hidden");
+			fileImportSection.removeClassName("hidden");
 			serverImportDataTable.addClassName("hidden");
 			shareUrlPanel.addClassName("hidden");
 			storeDataPanel.addClassName("hidden");

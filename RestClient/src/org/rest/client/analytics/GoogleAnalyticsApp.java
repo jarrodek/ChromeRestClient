@@ -143,9 +143,23 @@ public class GoogleAnalyticsApp {
 		if (!tracker) {
 			return null;
 		}
-		
 		tracker.sendAppView(name);
 	}-*/;
 	
-	
+	/**
+	 * Send an exception information to the GA server.
+	 * It will be analyzed how often different exceptions occurred.
+	 * Notice:
+	 * This method must not send any request / response / user data
+	 * to GA server.
+	 * 
+	 * @param message An exception message to be send.
+	 */
+	public final static native void sendException(String message) /*-{
+		var tracker = @org.rest.client.analytics.GoogleAnalyticsApp::tracker;
+		if (!tracker) {
+			return null;
+		}
+		tracker.sendException(message);
+	}-*/;
 }

@@ -1,0 +1,72 @@
+<!--
+This element is to fix an issue #347
+https://github.com/jarrodek/ChromeRestClient/issues/347
+
+When the app is using paper-item as a line for header line it is impossible to 
+copy header line text in one line because it is copied in two lines (HTML behavior).
+And because of it the user can't properly paste headers into notepad / headers input in the app.
+
+This element will imitate paper-item but without using flex layout.
+-->
+<dom-module id="arc-header-line-display">
+    <template>
+        <style>
+        :host {
+            @apply(--paper-font-subhead);
+            min-height: 24px;
+            padding: 0px 16px;
+            display: block;
+        }
+        
+        :host(.iron-selected) {
+            font-weight: var(--paper-item-selected-weight, bold);
+            @apply(--paper-item-selected);
+        }
+        
+        :host([disabled]) {
+            color: var(--paper-item-disabled-color, --disabled-text-color);
+            @apply(--paper-item-disabled);
+        }
+        
+        :host(:focus) {
+            position: relative;
+            outline: 0;
+            @apply(--paper-item-focused);
+        }
+        
+        :host(:focus):before {
+            @apply(--layout-fit);
+            content: '';
+            background: currentColor;
+            opacity: var(--dark-divider-opacity);
+            pointer-events: none;
+            @apply(--paper-item-focused-before);
+        }
+        
+        .header-name {
+            padding-right: 8px;
+            @apply(--paper-font-body2);
+        }
+        
+        .header-value {
+            @apply(--paper-font-body1);
+            @apply(--layout-flex);
+            word-break: break-all;
+        }
+        </style>
+        <span class="header-name">{{headerName}}:</span>
+        <app-header-value-display class="header-value" value="[[headerValue]]"></app-header-value-display>
+    </template>
+    <script>
+    Polymer({
+        is: 'arc-header-line-display',
+        properties: {
+            headerName: String,
+            headerValue: String
+        },
+        behaviors: [
+            Polymer.PaperItemBehavior
+        ]
+    });
+    </script>
+</dom-module>

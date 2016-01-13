@@ -65,3 +65,12 @@ arc.app.utils.encodeHtml = function(input) {
   }
   return input.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 };
+/**
+ * Get Chrome full version.
+ *
+ * @return {String} A full version or `(not set)` is can't find.
+ */
+arc.app.utils.getChromeVersion = function() {
+  var raw = navigator.userAgent.match(/Chrom[e|ium]\/([0-9\.]+)/);
+  return raw ? raw[1] : '(not set)';
+};

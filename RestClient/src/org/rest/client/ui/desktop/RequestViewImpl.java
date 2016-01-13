@@ -389,13 +389,10 @@ public class RequestViewImpl extends Composite implements RequestView {
 					list.remove(header);
 					headersListchanged = true;
 					break;
-				}
-				if(header.getValue().equals(encoding)) {
+				} else {
+					// C-T type header overrides encoding.
 					return;
 				}
-				latestSelectedContentType = header.getValue();
-				header.setValue(encoding);
-				headersListchanged = true;
 			}
 		}
 		if(!headersListchanged && hasBody){

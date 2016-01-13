@@ -212,6 +212,7 @@ public class RestClient implements EntryPoint {
 				log.log(Level.SEVERE, e.getMessage(), e);
 				Log.error("Application error", e);
 				GoogleAnalytics.sendException("RestClient::Application error::"+e.getMessage());
+				GoogleAnalyticsApp.sendException("RestClient::Application error::"+e.getMessage());
 			}
 		});
 		
@@ -301,7 +302,7 @@ public class RestClient implements EntryPoint {
 			
 			RequestObject rp = RequestObject.createRequest(); 
 			rp.setFiles(requestView.getFiles());
-			rp.setEncoding(requestView.getEncoding());
+			//rp.setEncoding(requestView.getEncoding());
 			rp.setHeaders(requestView.getHeaders());
 			rp.setMethod(requestView.getMethod());
 			rp.setPayload(requestView.getPayload());
