@@ -37,6 +37,7 @@ public class UserMenuHandler {
 		if(!menu) {
 			console.error('arc-menu element not found in the DOM.');
 			@org.rest.client.analytics.GoogleAnalytics::sendException(Ljava/lang/String;)('UserMenuHandler::handleProjectChange::arc-menu element not found in the DOM.');
+			@org.rest.client.analytics.GoogleAnalyticsApp::sendException(Ljava/lang/String;)('UserMenuHandler::handleProjectChange::arc-menu element not found in the DOM.');
 			return;
 		}
 		menu.updateProjectName(project.id, project.name);
@@ -50,6 +51,7 @@ public class UserMenuHandler {
 		if(!menu) {
 			console.error('arc-menu element not found in the DOM.');
 			@org.rest.client.analytics.GoogleAnalytics::sendException(Ljava/lang/String;)('UserMenuHandler::handleAddProject::arc-menu element not found in the DOM.');
+			@org.rest.client.analytics.GoogleAnalyticsApp::sendException(Ljava/lang/String;)('UserMenuHandler::handleAddProject::arc-menu element not found in the DOM.');
 			return;
 		}
 		menu.appendProject(projectId);
@@ -60,6 +62,7 @@ public class UserMenuHandler {
 		if(!menu) {
 			console.error('arc-menu element not found in the DOM.');
 			@org.rest.client.analytics.GoogleAnalytics::sendException(Ljava/lang/String;)('UserMenuHandler::handleRemoveProject::arc-menu element not found in the DOM.');
+			@org.rest.client.analytics.GoogleAnalyticsApp::sendException(Ljava/lang/String;)('UserMenuHandler::handleRemoveProject::arc-menu element not found in the DOM.');
 			return;
 		}
 		menu.removeProject(projectId);

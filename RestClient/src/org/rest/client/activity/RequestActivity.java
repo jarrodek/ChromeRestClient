@@ -500,7 +500,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 		requestView.setEncoding(request.getEncoding());
 		requestView.setUrl(request.getURL());
 
-		RestClient.fixChromeLayout();
+		//RestClient.fixChromeLayout();
 		RestClient.RESTORED_REQUEST = request.getId();
 	}
 
@@ -912,7 +912,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 								requestView.setEncoding(dataObj.get("encoding").isString().stringValue());
 							}
 						}
-						RestClient.fixChromeLayout();
+						//RestClient.fixChromeLayout();
 					}
 
 					@Override
@@ -1272,7 +1272,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 		requestView.setMethod(result.getMethod());
 		requestView.setHeaders(result.getHeaders());
 		requestView.setPayload(result.getPayload());
-		RestClient.fixChromeLayout();
+		//RestClient.fixChromeLayout();
 	}
 
 	@Override

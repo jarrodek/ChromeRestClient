@@ -4,6 +4,186 @@ var arc = arc || {};
 
 arc.app = arc.app || {};
 
+arc.app.analytics = arc.app.analytics || {};
+
+arc.app.analytics._trackersConfig = [{
+  'trackingId': 'UA-18021184-6',
+  'cookieDomain': 'auto',
+  'name': 'legacy'
+}];
+
+arc.app.analytics.init = function () {
+  arc.app.analytics._loadLibrary();
+  arc.app.analytics._initTranckers();
+  arc.app.analytics._setCustomDimmensions();
+  arc.app.analytics._setAppUid();
+  arc.app.analytics._setChromeChannel();
+};
+
+arc.app.analytics._loadLibrary = function () {
+  (function (i, s, o, g, r, a, m) {
+    i['GoogleAnalyticsObject'] = r;
+    i[r] = i[r] || function () {
+      (i[r].q = i[r].q || []).push(arguments);
+    }, i[r].l = 1 * new Date();
+    a = s.createElement(o), m = s.getElementsByTagName(o)[0];
+    a.async = 1;
+    a.src = g;
+    m.parentNode.insertBefore(a, m);
+  })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+};
+
+arc.app.analytics._initTranckers = function () {
+  arc.app.analytics._trackersConfig.forEach(function (item) {
+    ga('create', item);
+    if (!item.name) {
+      return;
+    }
+    ga(item.name + '.set', 'checkProtocolTask', null);
+    ga(item.name + '.set', 'appName', 'ARC');
+    ga(item.name + '.set', 'appId', 'org.rest.client');
+  });
+};
+
+arc.app.analytics._getTrackerNames = function () {
+  var names = arc.app.analytics._trackersConfig.map(function (item) {
+    if (!!item.name) {
+      return item.name;
+    }
+  });
+  return names.filter(function (item) {
+    return !!item;
+  });
+};
+
+arc.app.analytics._setCustomDimmensions = function () {
+  var names = arc.app.analytics._getTrackerNames();
+  var appVersion = chrome && chrome.runtime && chrome.runtime.getManifest ? chrome.runtime.getManifest().version : 'Unknown';
+  var chromeVer = arc.app.utils.getChromeVersion();
+  names.forEach(function (name) {
+    ga(name + '.set', 'appVersion', appVersion);
+    ga(name + '.set', 'dimension2', appVersion);
+    ga(name + '.set', 'dimension1', chromeVer);
+  });
+};
+
+arc.app.analytics._setAppUid = function () {
+  var setUid = function setUid(uuid) {
+    var names = arc.app.analytics._getTrackerNames();
+    names.forEach(function (name) {
+      ga(name + '.set', 'userId', uuid);
+    });
+  };
+  if (chrome && chrome.storage && chrome.storage.sync) {
+    chrome.storage.sync.get({
+      'appuid': null
+    }, function (data) {
+      if (data.appuid) {
+        setUid(data.appuid);
+      } else {
+        data.appuid = arc.app.utils.uuid();
+        chrome.storage.sync.set(data, function () {
+          setUid(data.appuid);
+        });
+      }
+    });
+  }
+};
+
+arc.app.analytics._setChromeChannel = function () {
+  if (!window.navigator.onLine) {
+    return;
+  }
+  arc.app.analytics._loadCSV().then(function (obj) {
+    if (!(obj instanceof Array)) {
+      return;
+    }
+    var version = arc.app.utils.getChromeVersion();
+    for (var i = 0, size = obj[1].length; i < size; i++) {
+      var item = obj[1][i];
+
+      if (item.current_version === version || item.previous_version === version) {
+        var channel = item.channel;
+        var names = arc.app.analytics._getTrackerNames();
+        for (var j = 0, namesSize = names.length; j < namesSize; j++) {
+          var name = names[j];
+          ga(name + '.set', 'dimension3', channel);
+        }
+        return;
+      }
+    }
+  }).catch(function (cause) {});
+};
+
+arc.app.analytics._loadCSV = function () {
+  var init = {
+    mode: 'no-cors',
+    cache: 'force-cache'
+  };
+  return fetch('https://omahaproxy.appspot.com/all?csv=1', init).then(function (response) {
+    return response.text();
+  }).then(function (data) {
+    return data.split('\n');
+  }).then(function (lines) {
+    var keys = lines[0].split(',');
+    var data = [];
+    for (var i = 1; i < lines.length; ++i) {
+      var line = lines[i];
+      if (!line.length) {
+        continue;
+      }
+      var columns = line.split(',');
+      var row = {};
+      for (var j = 0; j < columns.length; ++j) {
+        row[keys[j]] = columns[j];
+      }
+      data.push(row);
+    }
+    return [keys, data];
+  });
+};
+
+arc.app.analytics.sendEvent = function (category, action, label, value) {
+  var names = arc.app.analytics._getTrackerNames();
+  var config = {
+    hitType: 'event',
+    eventCategory: category,
+    eventAction: action,
+    eventLabel: label
+  };
+  if (typeof value !== 'undefined') {
+    config.eventValue = value;
+  }
+  names.forEach(function (name) {
+    ga(name + '.send', config);
+  });
+};
+
+arc.app.analytics.sendScreen = function (screenName) {
+  var names = arc.app.analytics._getTrackerNames();
+  names.forEach(function (name) {
+    ga(name + '.send', 'pageview', screenName);
+  });
+};
+
+arc.app.analytics.sendException = function (exception, isFatal) {
+  var names = arc.app.analytics._getTrackerNames();
+  var value = {
+    'exDescription': '' + exception
+  };
+  if (typeof isFatal !== 'undefined') {
+    value.exFatal = isFatal;
+  }
+  names.forEach(function (name) {
+    ga(name + '.send', 'exception', value);
+  });
+};
+'use strict';
+
+var arc = arc || {};
+
+arc.app = arc.app || {};
+
 arc.app.db = arc.app.db || {};
 
 arc.app.db.websql = {};
@@ -306,6 +486,8 @@ arc.app = arc.app || {};
 
 arc.app.arc = {};
 
+arc.app.arc.minSupportedVersion = 45;
+
 arc.app.arc.getAppId = function (callback) {
   chrome.storage.local.get({
     'APP_ID': null
@@ -320,6 +502,91 @@ arc.app.arc.getAppId = function (callback) {
     }
   });
 };
+
+arc.app.arc.checkCompatybility = function () {
+  var version = arc.app.utils.getChromeVersion();
+  var manifest = chrome.runtime.getManifest();
+  var manMin = 0;
+
+  if (manifest && manifest.minimum_chrome_version) {
+    manMin = Number(manifest.minimum_chrome_version);
+  }
+
+  var supported = Math.max(manMin, arc.app.arc.minSupportedVersion);
+  if (Number(version.match(/(\d+)\./)[1]) < supported) {
+    window.setTimeout(function () {
+      document.querySelector('#incompatibleVersionDialog').open();
+    }, 2000);
+  }
+};
+'use strict';
+
+if (!Array.from) {
+  Array.from = function () {
+    var toStr = Object.prototype.toString;
+    var isCallable = function isCallable(fn) {
+      return typeof fn === 'function' || toStr.call(fn) === '[object Function]';
+    };
+    var toInteger = function toInteger(value) {
+      var number = Number(value);
+      if (isNaN(number)) {
+        return 0;
+      }
+      if (number === 0 || !isFinite(number)) {
+        return number;
+      }
+      return (number > 0 ? 1 : -1) * Math.floor(Math.abs(number));
+    };
+    var maxSafeInteger = Math.pow(2, 53) - 1;
+    var toLength = function toLength(value) {
+      var len = toInteger(value);
+      return Math.min(Math.max(len, 0), maxSafeInteger);
+    };
+
+    return function from(arrayLike) {
+      var C = this;
+
+      var items = Object(arrayLike);
+
+      if (arrayLike === null) {
+        throw new TypeError('Array.from requires an array-like object - not null or undefined');
+      }
+
+      var mapFn = arguments.length > 1 ? arguments[1] : void undefined;
+      var T;
+      if (typeof mapFn !== 'undefined') {
+        if (!isCallable(mapFn)) {
+          throw new TypeError('Array.from: when provided, the second argument must be a function');
+        }
+
+        if (arguments.length > 2) {
+          T = arguments[2];
+        }
+      }
+
+      var len = toLength(items.length);
+
+      var A = isCallable(C) ? Object(new C(len)) : new Array(len);
+
+      var k = 0;
+
+      var kValue;
+      while (k < len) {
+        kValue = items[k];
+        if (mapFn) {
+          A[k] = typeof T === 'undefined' ? mapFn(kValue, k) : mapFn.call(T, kValue, k);
+        } else {
+          A[k] = kValue;
+        }
+        k += 1;
+      }
+
+      A.length = len;
+
+      return A;
+    };
+  }();
+}
 'use strict';
 
 var arc = arc || {};
@@ -471,7 +738,7 @@ arc.app.server.auth = function () {
 };
 
 arc.app.server.authStateMayChanged = function (changes) {
-  if (Object.keys(changes).indexOf('applogin')) {
+  if (Object.keys(changes).indexOf('applogin') !== -1) {
     arc.app.server.hasSession(function (session) {
       if (window.arcGwtCallbacks && 'sessionchange' in window.arcGwtCallbacks) {
         window.arcGwtCallbacks.sessionchange(session);
@@ -569,6 +836,11 @@ arc.app.utils.encodeHtml = function (input) {
     return input;
   }
   return input.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+};
+
+arc.app.utils.getChromeVersion = function () {
+  var raw = navigator.userAgent.match(/Chrom[e|ium]\/([0-9\.]+)/);
+  return raw ? raw[1] : '(not set)';
 };
 'use strict';
 

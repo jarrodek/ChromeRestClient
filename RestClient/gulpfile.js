@@ -195,11 +195,24 @@ var copySourceFile = function(obj) {
  * It will include separate js libraries into the index page and put it in the extension 
  * environment.
  */
-gulp.task('dev', ['mode:debug', 'lint', 'copy:devsources'], function() {
-  gulp.watch('dev/**/*.html', copySourceFile);
-  gulp.watch('dev/**/*.js', copySourceFile);
-  gulp.watch('dev/**/*.jsp', copySourceFile);
-  gulp.watch('dev/**/*.css', copySourceFile);
+gulp.task('dev', function() {
+  runSequence(
+    'mode:debug',
+    'lint',
+    'copy:devsources',
+    function(error) {
+      if (error) {
+        gutil.log(error.message);
+      } else {
+        gulp.watch('dev/**/*.html', copySourceFile);
+        gulp.watch('dev/**/*.js', copySourceFile);
+        gulp.watch('dev/**/*.jsp', copySourceFile);
+        gulp.watch('dev/**/*.css', copySourceFile);
+        gutil.log(gutil.colors.green('The app is ready to develop. Good luck!'));
+        gutil.beep();
+      }
+    }
+  );
 });
 /**
  * Clean the dist folder.
@@ -234,6 +247,10 @@ gulp.task('bump-dev-build', function() {
     }))
     .pipe(bump({
       key: 'version_name',
+      type: 'patch'
+    }))
+    .pipe(bump({
+      key: 'version_name',
       type: 'prerelease',
       'preid': 'dev'
     }))
@@ -246,6 +263,10 @@ gulp.task('bump-beta-build', function() {
     }))
     .pipe(bump({
       key: 'version_name',
+      type: 'patch'
+    }))
+    .pipe(bump({
+      key: 'version_name',
       type: 'prerelease',
       'preid': 'beta'
     }))
@@ -254,6 +275,10 @@ gulp.task('bump-beta-build', function() {
 gulp.task('bump-stable-build', function() {
   return gulp.src('./manifest.json')
     .pipe(bump({
+      type: 'minor'
+    }))
+    .pipe(bump({
+      key: 'version_name',
       type: 'minor'
     }))
     .pipe(bump({
