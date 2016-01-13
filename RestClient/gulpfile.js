@@ -247,6 +247,10 @@ gulp.task('bump-dev-build', function() {
     }))
     .pipe(bump({
       key: 'version_name',
+      type: 'patch'
+    }))
+    .pipe(bump({
+      key: 'version_name',
       type: 'prerelease',
       'preid': 'dev'
     }))
@@ -259,6 +263,10 @@ gulp.task('bump-beta-build', function() {
     }))
     .pipe(bump({
       key: 'version_name',
+      type: 'patch'
+    }))
+    .pipe(bump({
+      key: 'version_name',
       type: 'prerelease',
       'preid': 'beta'
     }))
@@ -267,6 +275,10 @@ gulp.task('bump-beta-build', function() {
 gulp.task('bump-stable-build', function() {
   return gulp.src('./manifest.json')
     .pipe(bump({
+      type: 'minor'
+    }))
+    .pipe(bump({
+      key: 'version_name',
       type: 'minor'
     }))
     .pipe(bump({
