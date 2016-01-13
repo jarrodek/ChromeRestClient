@@ -86,7 +86,7 @@ arc.app.server.auth = function() {
  * Listen for changes in storage and check if auth object changed.
  */
 arc.app.server.authStateMayChanged = function(changes) {
-  if (Object.keys(changes).indexOf('applogin')) {
+  if (Object.keys(changes).indexOf('applogin') !== -1) {
     arc.app.server.hasSession(function(session) {
       if (window.arcGwtCallbacks && ('sessionchange' in window.arcGwtCallbacks)) {
         window.arcGwtCallbacks.sessionchange(session);

@@ -553,7 +553,9 @@ arc.app.drive.picker._constructPicker = function(authToken, callback, views) {
     .setAppId(APP_ID)
     //.setOrigin('http://127.0.0.1:8888')
     .disableFeature(google.picker.Feature.MULTISELECT_ENABLED);
-  views.forEach(view => pickerBuilder.addView(view));
+  views.forEach(function(view) {
+    pickerBuilder.addView(view);
+  });
   return pickerBuilder;
 };
 /**

@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
-/* global ga, chrome */
+/* global ga, chrome, fetch */
 /**
  * Advanced Rest Client namespace
  */
@@ -161,19 +161,23 @@ arc.app.analytics._setChromeChannel = function() {
       let version = arc.app.utils.getChromeVersion();
       for (let i = 0, size = obj[1].length; i < size; i++) {
         let item = obj[1][i];
+        /*jshint camelcase: false */
+        // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
         if (item.current_version === version ||
           item.previous_version === version) {
+          // jscs:enable requireCamelCaseOrUpperCaseIdentifiers
+          /*jshint camelcase: true */
           let channel = item.channel;
           let names = arc.app.analytics._getTrackerNames();
-          names.forEach(function(name) {
+          for (let j = 0, namesSize = names.length; j < namesSize; j++) {
+            let name = names[j];
             ga(name + '.set', 'dimension3', channel);
-          });
+          }
           return;
         }
       }
     })
     .catch(function(cause) {
-      console.info('Unable to download Chrome channels list', cause);
     });
 };
 /**
@@ -186,7 +190,7 @@ arc.app.analytics._loadCSV = function() {
     mode: 'no-cors',
     cache: 'force-cache'
   };
-  return fetch('https://omahaproxy.appspot.com/all?csv=1').then(function(response) {
+  return fetch('https://omahaproxy.appspot.com/all?csv=1', init).then(function(response) {
     return response.text();
   }).then(function(data) {
     return data.split('\n');
@@ -254,7 +258,7 @@ arc.app.analytics.sendException = function(exception, isFatal) {
     'exDescription': '' + exception
   };
   if (typeof isFatal !== 'undefined') {
-    config.exFatal = isFatal;
+    value.exFatal = isFatal;
   }
   names.forEach(function(name) {
     ga(name + '.send', 'exception', value);

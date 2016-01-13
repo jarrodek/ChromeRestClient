@@ -53,16 +53,20 @@ arc.app.arc.getAppId = function(callback) {
 /**
  * Check if current Chrome version is compatible with the app.
  */
-arc.app.arc.checkCompatybility = function(){
+arc.app.arc.checkCompatybility = function() {
   var version = arc.app.utils.getChromeVersion();
   var manifest = chrome.runtime.getManifest();
-  var manifestMin = 0;
-  if(manifest && manifest.minimum_chrome_version) {
-    manifestMin = new Number(manifest.minimum_chrome_version);
+  var manMin = 0;
+  /*jshint camelcase: false */
+  if (manifest &&
+    manifest.minimum_chrome_version) { // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
+    manMin =
+      Number(manifest.minimum_chrome_version); //jscs:disable requireCamelCaseOrUpperCaseIdentifiers
   }
-  var supported = Math.max(manifestMin, arc.app.arc.minSupportedVersion);
-  if(new Number(version.match(/(\d+)\./)[1]) < supported) {
-    window.setTimeout(function(){
+  /*jshint camelcase: true */
+  var supported = Math.max(manMin, arc.app.arc.minSupportedVersion);
+  if (Number(version.match(/(\d+)\./)[1]) < supported) {
+    window.setTimeout(function() {
       document.querySelector('#incompatibleVersionDialog').open();
     }, 2000);
   }
