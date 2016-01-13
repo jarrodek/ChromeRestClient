@@ -307,6 +307,7 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 	 */
 	private void updateHeadersRawData(final String data){
 		headersData = data;
+		
 		if(headersCodeMirror != null){
 			headersCodeMirror.setValue(data);
 			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
@@ -320,6 +321,7 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 				}
 			});
 		}
+		headersRawInput.setValue(headersData, true);
 	}
 	
 	/**
@@ -375,7 +377,6 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 	 */
 	void propagateCurrentHeaders(){
 		updateHeadersRawData(headersData);
-		headersRawInput.setValue(headersData, true);
 		updateForm();
 	}
 	/**
