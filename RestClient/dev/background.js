@@ -400,9 +400,28 @@ arc.app.bg.installDefinitions = function(defs) {
  * This is stored in the extension folder.
  */
 arc.app.bg.downloadDefinitions = function() {
-  return fetch('/assets/definitions.json').then(function(response) {
-    return response.json();
+  return new Promise(function(resolve, reject) {
+    let xhr = new XMLHttpRequest();
+    xhr.open('GET', '/assets/definitions.json', true);
+    xhr.addEventListener('load', function(e){
+      let raw = e.target.response;
+      if(!raw){
+        reject({
+          'message': 'Response was empty'
+        });
+        return;
+      }
+      let data = JSON.parse(e.target.response);
+      resolve(data);
+    });
+    xhr.addEventListener('error', function(e){
+      reject(e.target);
+    });
+    xhr.send(null);
   });
+  /*return fetch('/assets/definitions.json').then(function(response) {
+    return response.json();
+  });*/
 };
 /**
  * Perform upgrade to the newest version
