@@ -36,6 +36,7 @@ import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.suggestion.HeadersSuggestOracle;
 import org.rest.client.ui.html5.HTML5Element;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -304,7 +305,7 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 	 * If CodeMirror is running refresh it's instance.
 	 * @param data
 	 */
-	private void updateHeadersRawData(String data){
+	private void updateHeadersRawData(final String data){
 		headersData = data;
 		if(headersCodeMirror != null){
 			headersCodeMirror.setValue(data);
@@ -312,6 +313,9 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 				@Override
 				public void execute() {
 					headersCodeMirror.refresh();
+					if(RestClient.isDebug()){
+						Log.info("Updating headers value: " + data);
+					}
 					//RestClient.fixChromeLayout();
 				}
 			});
@@ -432,7 +436,7 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 			
 			if(headersCodeMirror != null) {
 				headersCodeMirror.refresh();
-				RestClient.fixChromeLayout();
+				//RestClient.fixChromeLayout();
 				return;
 			}
 			
@@ -460,7 +464,7 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 			});
 			setHeadersEditorCallback(headersCodeMirror.getInstance());
 			headersCodeMirror.refresh();
-			RestClient.fixChromeLayout();
+			//RestClient.fixChromeLayout();
 		} else {
 			if(headersCodeMirror != null){
 				headersCodeMirror.toTextArea();

@@ -212,6 +212,7 @@ public class RestClient implements EntryPoint {
 				log.log(Level.SEVERE, e.getMessage(), e);
 				Log.error("Application error", e);
 				GoogleAnalytics.sendException("RestClient::Application error::"+e.getMessage());
+				GoogleAnalyticsApp.sendException("RestClient::Application error::"+e.getMessage());
 			}
 		});
 		

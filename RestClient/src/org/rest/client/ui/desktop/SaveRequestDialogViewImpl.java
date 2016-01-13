@@ -379,6 +379,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 			public void onFailure(Throwable reason) {
 				StatusNotification.notify("An error occurred. It was reported.", StatusNotification.TIME_MEDIUM);
 				GoogleAnalytics.sendException("SaveRequestDialogViewImpl::Request restore::" + reason.getMessage());
+				GoogleAnalyticsApp.sendException("SaveRequestDialogViewImpl::Request restore::" + reason.getMessage());
 				Log.error("Unable restore proper URL.", reason);
 			}
 		});
