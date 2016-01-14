@@ -311,9 +311,9 @@ arc.app.bg.downloadDefinitions = function() {
   return new Promise(function(resolve, reject) {
     let xhr = new XMLHttpRequest();
     xhr.open('GET', '/assets/definitions.json', true);
-    xhr.addEventListener('load', function(e){
+    xhr.addEventListener('load', function(e) {
       let raw = e.target.response;
-      if(!raw){
+      if (!raw) {
         reject({
           'message': 'Response was empty'
         });
@@ -322,7 +322,7 @@ arc.app.bg.downloadDefinitions = function() {
       let data = JSON.parse(e.target.response);
       resolve(data);
     });
-    xhr.addEventListener('error', function(e){
+    xhr.addEventListener('error', function(e) {
       reject(e.target);
     });
     xhr.send(null);
@@ -340,19 +340,31 @@ arc.app.bg.performStorageUpgrade = function() {
   } catch (e) {
     return;
   }
+
   chrome.storage.local.get({
     'upgraded': {
-      'v4': false
+      'v4': false,
+      'v4p6': false
     }
-  }, function(r) {
-    if (r.upgraded.v4) {
-      return;
+  }, function(state) {
+    if (!state.upgraded.v4) {
+      arc.app.bg.storageUpgradeV4(state)
+      .then(function(){
+        if (!state.upgraded.v4p6) {
+          return arc.app.bg.storageUpgradeV4p6(state);
+        }
+      });
+    } else if (!state.upgraded.v4p6) {
+      arc.app.bg.storageUpgradeV4p6(state);
     }
-    arc.app.bg.performShortcutsUpgrade();
-    var save = {};
-    var settings = arc.app.bg.performSettingsUpgrade();
-    Object.assign(save, settings);
-    chrome.storage.sync.set(save, function() {
+  });
+};
+
+arc.app.bg.storageUpgradeV4 = function(state) {
+  arc.app.bg.performShortcutsUpgrade();
+  var sync = new Promise(function(resolve) {
+    let syncSave = arc.app.bg.performSettingsUpgrade();
+    chrome.storage.sync.set(syncSave, function() {
       console.info('localStorage has been upgraded to chrome.storage.sync');
       delete localStorage.tutorials;
       delete localStorage.LATESTMSG;
@@ -362,17 +374,45 @@ arc.app.bg.performStorageUpgrade = function() {
       delete localStorage.MAGICVARS_ENABLED;
       delete localStorage.CMH_ENABLED;
       delete localStorage.CMP_ENABLED;
+      resolve();
     });
-    var local = arc.app.bg.performLocalDataUpgrade();
-    chrome.storage.local.set(local, function() {
+  });
+  var local = new Promise(function(resolve) {
+    var localSave = arc.app.bg.performLocalDataUpgrade();
+    chrome.storage.local.set(localSave, function() {
       console.info('localStorage has been upgraded to chrome.storage.local');
       delete localStorage.firstrun;
       delete localStorage.latest_request_data;
       delete localStorage.LATEST_GDRIVE_FOLDER;
+      resolve();
     });
-    r.upgraded.v4 = true;
-    chrome.storage.local.get(r, function() {
+  });
+  var updateState = new Promise(function(resolve) {
+    state.upgraded.v4 = true;
+    chrome.storage.local.set(state, function() {
       console.log('Storage upgraded');
+      resolve();
+    });
+  });
+  return Promise.all([sync, local, updateState]);
+};
+arc.app.bg.storageUpgradeV4p6 = function(state) {
+  // fix previous upgrade override 
+  return new Promise(function(resolve) {
+    let save = {
+      'DEBUG_ENABLED': true,
+      'HISTORY_ENABLED': true,
+      'MAGICVARS_ENABLED': true,
+      'CMH_ENABLED': true,
+      'CMP_ENABLED': true
+    };
+    chrome.storage.sync.set(save, function() {
+      console.info('Default values has been restored');
+      state.upgraded.v4p6 = true;
+      chrome.storage.local.set(state, function() {
+        console.log('Storage upgraded');
+        resolve();
+      });
     });
   });
 };
@@ -390,11 +430,11 @@ arc.app.bg.performShortcutsUpgrade = function() {
  */
 arc.app.bg.performSettingsUpgrade = function() {
   var save = {
-    'DEBUG_ENABLED': localStorage.DEBUG_ENABLED === 'true' ? true : false,
-    'HISTORY_ENABLED': localStorage.HISTORY_ENABLED === 'true' ? true : false,
-    'MAGICVARS_ENABLED': localStorage.MAGICVARS_ENABLED === 'true' ? true : false,
-    'CMH_ENABLED': localStorage.CMH_ENABLED === 'true' ? true : false,
-    'CMP_ENABLED': localStorage.CMP_ENABLED === 'true' ? true : false
+    'DEBUG_ENABLED': localStorage.DEBUG_ENABLED === 'false' ? false : true,
+    'HISTORY_ENABLED': localStorage.HISTORY_ENABLED === 'false' ? false : true,
+    'MAGICVARS_ENABLED': localStorage.MAGICVARS_ENABLED === 'false' ? false : true,
+    'CMH_ENABLED': localStorage.CMH_ENABLED === 'false' ? false : true,
+    'CMP_ENABLED': localStorage.CMP_ENABLED === 'false' ? false : true
   };
   var tutorials;
   try {
