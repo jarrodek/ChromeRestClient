@@ -94,8 +94,10 @@ gulp.task('copy:images', function() {
       title: 'images'
     }));
 });
-// Copy all files at the root level (war)
-gulp.task('copy:devsources', ['copy:images'], function() {
+gulp.task('clean:war-components', function() {
+  return gulp.src('war/components/*').pipe(vinylPaths(del));
+});
+gulp.task('copy:war-copy-dev', function() {
   return gulp.src([
       'dev/*',
       'dev/**/*',
@@ -116,6 +118,23 @@ gulp.task('copy:devsources', ['copy:images'], function() {
       title: 'copy'
     }));
 });
+// Copy all files to the root level (war)
+gulp.task('copy:devsources', function(callback) {
+  runSequence(
+    'copy:images',
+    'clean:war-components',
+    'copy:war-copy-dev',
+    function(error) {
+      if (error) {
+        gutil.log(error.message);
+      } else {
+        gutil.log('Copy finished');
+      }
+      callback(error);
+    }
+  );
+});
+
 //copy sources to the `dist` folder
 gulp.task('copy:dist', function() {
   var root = gulp.src([
@@ -145,13 +164,29 @@ gulp.task('copy:dist', function() {
       dot: true
     })
     .pipe(gulp.dest('dist/sources/components/'));
+  var har = gulp.src('war/components/har/build/*')
+    .pipe(gulp.dest('dist/sources/components/har/build'));
+  var hpa = gulp.src([
+      'war/components/chrome-platform-analytics/google-analytics-bundle.js',
+      'war/components/chrome-platform-analytics/LICENSE'
+    ])
+    .pipe(gulp.dest('dist/sources/components/chrome-platform-analytics/'));
   var manifest = gulp.src('./manifest.json').pipe(gulp.dest('dist/sources/'));
   var assets = gulp.src('war/assets/**/*').pipe(gulp.dest('dist/sources/assets'));
   var ext = gulp.src('war/ext/**/*', {
     dot: true
   }).pipe(gulp.dest('dist/sources/ext'));
-  var libs = gulp.src('war/libs/app.db.websql.js').pipe(gulp.dest('dist/sources/libs'));
-  var oauth2 = gulp.src('war/oauth2/**/*').pipe(gulp.dest('dist/sources/oauth2'));
+  var libs = gulp.src([
+      'war/libs/app.db.websql.js',
+      'war/libs/app.db.idb.js'
+    ])
+    .pipe(gulp.dest('dist/sources/libs'));
+  var dexie = gulp.src([
+      'war/components/dexie-js/**/*',
+      '!war/components/dexie-js/*.json',
+      '!war/components/dexie-js/*.md'
+    ])
+    .pipe(gulp.dest('dist/sources/components/dexie-js/'));
   var restclient = gulp.src('war/restclient/**/*', {
       dot: true
     })
@@ -159,9 +194,10 @@ gulp.task('copy:dist', function() {
   var roboto = gulp.src('war/roboto/**/*').pipe(gulp.dest('dist/sources/roboto'));
   var workers = gulp.src('war/workers/**/*').pipe(gulp.dest('dist/sources/workers'));
   var img = gulp.src('war/img/**/*').pipe(gulp.dest('dist/sources/img'));
+
   return merge(
-      root, components, manifest, assets, ext, libs, oauth2,
-      restclient, roboto, workers, img)
+      root, components, manifest, assets, ext, libs, dexie,
+      restclient, roboto, workers, img, har, hpa)
     .pipe($.size({
       title: 'copy'
     }));
@@ -292,7 +328,7 @@ gulp.task('bump-stable-build', function() {
  * Generate libs.js file from all libraries.
  */
 gulp.task('libs', function() {
-  return gulp.src(['war/libs/*.js', '!war/libs/app_db.js'])
+  return gulp.src(['war/libs/*.js'])
     .pipe(babel({
       presets: ['es2015'],
       comments: false

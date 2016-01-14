@@ -20,15 +20,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
 
     <script src="../../web-component-tester/browser.js"></script>
-    <script src="../../test-fixture/test-fixture-mocha.js"></script>
     <script src="../../iron-test-helpers/mock-interactions.js"></script>
 
-    <link rel="import" href="../../test-fixture/test-fixture.html">
     <link rel="import" href="../../paper-item/paper-item.html">
     <link rel="import" href="../paper-menu.html">
     <link rel="import" href="../paper-submenu.html">
 
   </head>
+  <style>
+    paper-item {
+      font-weight: normal;
+    }
+  </style>
   <body>
 
     <test-fixture id="basic">
@@ -144,6 +147,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var item1 = sub1.querySelector('.menu-content').querySelector('paper-item');
 
           MockInteractions.tap(trigger1);
+          // Nothing is initially selected.
           assert.equal(getComputedStyle(item1).fontWeight, getComputedStyle(normalDiv).fontWeight);
           MockInteractions.tap(item1);
 
@@ -181,6 +185,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           assert.equal(getComputedStyle(trigger1).fontWeight, getComputedStyle(normalDiv).fontWeight);
           assert.equal(getComputedStyle(trigger2).fontWeight, getComputedStyle(boldDiv).fontWeight);
           assert.equal(getComputedStyle(trigger3).fontWeight, getComputedStyle(normalDiv).fontWeight);
+        });
+
+        test('focus a submenu should redirect focus to the trigger', function(done) {
+          MockInteractions.focus(sub1);
+          flush(function() {
+            assert.equal(sub1.shadowRoot ? sub1.shadowRoot.activeElement :
+                document.activeElement, sub1.__trigger);
+            done();
+          });
         });
       });
 

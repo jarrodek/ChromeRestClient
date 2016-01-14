@@ -1,0 +1,14 @@
+{
+  "name": "har",
+  "homepage": "https://github.com/jarrodek/har",
+  "version": "1.1.1",
+  "_release": "1.1.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.1.1",
+    "commit": "fe740ff22d76489cbb4ae51eccbdae785348f7e5"
+  },
+  "_source": "git://github.com/jarrodek/har.git",
+  "_target": "*",
+  "_originalSource": "jarrodek/har"
+}

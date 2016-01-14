@@ -7949,6 +7949,15 @@ this.fire('dom-change');
     };
 
     /**
+     * KeyboardEvent.key is mostly represented by printable character made by
+     * the keyboard, with unprintable keys labeled nicely.
+     *
+     * However, on OS X, Alt+char can make a Unicode character that follows an
+     * Apple-specific mapping. In this case, we fall back to .keyCode.
+     */
+    var KEY_CHAR = /[a-z0-9*]/;
+
+    /**
      * Matches a keyIdentifier string.
      */
     var IDENT_CHAR = /U\+/;
@@ -7964,14 +7973,22 @@ this.fire('dom-change');
      */
     var SPACE_KEY = /^space(bar)?/;
 
-    function transformKey(key) {
+    /**
+     * Transforms the key.
+     * @param {string} key The KeyBoardEvent.key
+     * @param {Boolean} [noSpecialChars] Limits the transformation to
+     * alpha-numeric characters.
+     */
+    function transformKey(key, noSpecialChars) {
       var validKey = '';
       if (key) {
         var lKey = key.toLowerCase();
         if (lKey === ' ' || SPACE_KEY.test(lKey)) {
           validKey = 'space';
         } else if (lKey.length == 1) {
-          validKey = lKey;
+          if (!noSpecialChars || KEY_CHAR.test(lKey)) {
+            validKey = lKey;
+          }
         } else if (ARROW_KEY.test(lKey)) {
           validKey = lKey.replace('arrow', '');
         } else if (lKey == 'multiply') {
@@ -8022,17 +8039,29 @@ this.fire('dom-change');
       return validKey;
     }
 
-    function normalizedKeyForEvent(keyEvent) {
-      // fall back from .key, to .keyIdentifier, to .keyCode, and then to
-      // .detail.key to support artificial keyboard events
-      return transformKey(keyEvent.key) ||
+    /**
+      * Calculates the normalized key for a KeyboardEvent.
+      * @param {KeyboardEvent} keyEvent
+      * @param {Boolean} [noSpecialChars] Set to true to limit keyEvent.key
+      * transformation to alpha-numeric chars. This is useful with key
+      * combinations like shift + 2, which on FF for MacOS produces
+      * keyEvent.key = @
+      * To get 2 returned, set noSpecialChars = true
+      * To get @ returned, set noSpecialChars = false
+     */
+    function normalizedKeyForEvent(keyEvent, noSpecialChars) {
+      // Fall back from .key, to .keyIdentifier, to .keyCode, and then to
+      // .detail.key to support artificial keyboard events.
+      return transformKey(keyEvent.key, noSpecialChars) ||
         transformKeyIdentifier(keyEvent.keyIdentifier) ||
         transformKeyCode(keyEvent.keyCode) ||
-        transformKey(keyEvent.detail.key) || '';
+        transformKey(keyEvent.detail.key, noSpecialChars) || '';
     }
 
-    function keyComboMatchesEvent(keyCombo, event, eventKey) {
-      return eventKey === keyCombo.key &&
+    function keyComboMatchesEvent(keyCombo, event) {
+      // For combos with modifiers we support only alpha-numeric keys
+      var keyEvent = normalizedKeyForEvent(event, keyCombo.hasModifiers);
+      return keyEvent === keyCombo.key &&
         (!keyCombo.hasModifiers || (
           !!event.shiftKey === !!keyCombo.shiftKey &&
           !!event.ctrlKey === !!keyCombo.ctrlKey &&
@@ -8169,9 +8198,8 @@ this.fire('dom-change');
 
       keyboardEventMatchesKeys: function(event, eventString) {
         var keyCombos = parseEventString(eventString);
-        var eventKey = normalizedKeyForEvent(event);
         for (var i = 0; i < keyCombos.length; ++i) {
-          if (keyComboMatchesEvent(keyCombos[i], event, eventKey)) {
+          if (keyComboMatchesEvent(keyCombos[i], event)) {
             return true;
           }
         }
@@ -8271,11 +8299,10 @@ this.fire('dom-change');
           return;
         }
 
-        var eventKey = normalizedKeyForEvent(event);
         for (var i = 0; i < keyBindings.length; i++) {
           var keyCombo = keyBindings[i][0];
           var handlerName = keyBindings[i][1];
-          if (keyComboMatchesEvent(keyCombo, event, eventKey)) {
+          if (keyComboMatchesEvent(keyCombo, event)) {
             this._triggerKeyHandler(keyCombo, handlerName, event);
             // exit the loop if eventDefault was prevented
             if (event.defaultPrevented) {
@@ -8856,7 +8883,6 @@ context. You should place this element as a child of `<body>` whenever possible.
     },
 
     listeners: {
-      'tap': '_onClick',
       'iron-resize': '_onIronResize'
     },
 
@@ -8878,6 +8904,10 @@ context. You should place this element as a child of `<body>` whenever possible.
 
     ready: function() {
       this._ensureSetup();
+    },
+
+    attached: function() {
+      // Call _openedChanged here so that position can be computed correctly.
       if (this._callOpenedWhenReady) {
         this._openedChanged();
       }
@@ -9109,20 +9139,10 @@ context. You should place this element as a child of `<body>` whenever possible.
     },
 
     _onCaptureClick: function(event) {
-      // attempt to close asynchronously and prevent the close of a tap event is immediately heard
-      // on target. This is because in shadow dom due to event retargetting event.target is not
-      // useful.
-      if (!this.noCancelOnOutsideClick && (this._manager.currentOverlay() == this)) {
-        this._cancelJob = this.async(function() {
-          this.cancel();
-        }, 10);
-      }
-    },
-
-    _onClick: function(event) {
-      if (this._cancelJob) {
-        this.cancelAsync(this._cancelJob);
-        this._cancelJob = null;
+      if (!this.noCancelOnOutsideClick &&
+          this._manager.currentOverlay() === this &&
+          Polymer.dom(event).path.indexOf(this) === -1) {
+        this.cancel();
       }
     },
 
@@ -9131,6 +9151,7 @@ context. You should place this element as a child of `<body>` whenever possible.
       if (!this.noCancelOnEscKey && (event.keyCode === ESC)) {
         this.cancel();
         event.stopPropagation();
+        event.stopImmediatePropagation();
       }
     },
 
@@ -9401,7 +9422,7 @@ Polymer({
      * or a map of animation type to array of configuration objects.
      */
     getAnimationConfig: function(type) {
-      var map = [];
+      var map = {};
       var allConfigs = [];
       this._getAnimationConfigRecursive(type, map, allConfigs);
       // append the configurations saved in the map to the array
@@ -9545,6 +9566,10 @@ Polymer({
        */
       elementIsScrollLocked: function(element) {
         var currentLockingElement = this.currentLockingElement;
+
+        if (currentLockingElement === undefined)
+          return false;
+
         var scrollLocked;
 
         if (this._hasCachedLockedElement(element)) {
@@ -10262,7 +10287,7 @@ Polymer({
 
       // Ignore the event if this is coming from a focused light child, since that
       // element will deal with it.
-      if (this.isLightDescendant(target))
+      if (this.isLightDescendant(/** @type {Node} */(target)))
         return;
 
       keyboardEvent.preventDefault();
@@ -10279,7 +10304,7 @@ Polymer({
 
       // Ignore the event if this is coming from a focused light child, since that
       // element will deal with it.
-      if (this.isLightDescendant(target))
+      if (this.isLightDescendant(/** @type {Node} */(target)))
         return;
 
       if (this.pressed) {
@@ -11123,8 +11148,8 @@ Polymer({
 
   /** @polymerBehavior */
   Polymer.PaperItemBehavior = [
-    Polymer.IronControlState,
     Polymer.IronButtonState,
+    Polymer.IronControlState,
     Polymer.PaperItemBehaviorImpl
   ];
 /**
@@ -11765,6 +11790,7 @@ The `aria-labelledby` attribute will be set to the header element, if one exists
 
     /**
      * Returns false if the element is required and not checked, and true otherwise.
+     * @param {*=} _value Ignored.
      * @return {boolean} true if `required` is false, or if `required` and `checked` are both true.
      */
     _getValidity: function(_value) {
@@ -11905,15 +11931,17 @@ is separate from validation, and `allowed-pattern` does not affect how the input
 
       /**
        * Set to true to prevent the user from entering invalid input. The new input characters are
-       * matched with `allowedPattern` if it is set, otherwise it will use the `pattern` attribute if
-       * set, or the `type` attribute (only supported for `type=number`).
+       * matched with `allowedPattern` if it is set, otherwise it will use the `type` attribute (only
+       * supported for `type=number`).
        */
       preventInvalidInput: {
         type: Boolean
       },
 
       /**
-       * Regular expression to match valid input characters.
+       * Regular expression expressing a set of characters to enforce the validity of input characters.
+       * The recommended value should follow this format: `[a-ZA-Z0-9.+-!;:]` that list the characters 
+       * allowed as input.
        */
       allowedPattern: {
         type: String,
@@ -11941,8 +11969,6 @@ is separate from validation, and `allowed-pattern` does not affect how the input
       var pattern;
       if (this.allowedPattern) {
         pattern = new RegExp(this.allowedPattern);
-      } else if (this.pattern) {
-        pattern = new RegExp(this.pattern);
       } else {
         switch (this.type) {
           case 'number':
@@ -11962,7 +11988,7 @@ is separate from validation, and `allowed-pattern` does not affect how the input
      */
     _bindValueChanged: function() {
       if (this.value !== this.bindValue) {
-        this.value = !(this.bindValue || this.bindValue === 0) ? '' : this.bindValue;
+        this.value = !(this.bindValue || this.bindValue === 0 || this.bindValue === false) ? '' : this.bindValue;
       }
       // manually notify because we don't want to notify until after setting value
       this.fire('bind-value-changed', {value: this.bindValue});
@@ -12071,8 +12097,8 @@ is separate from validation, and `allowed-pattern` does not affect how the input
       if (this.hasValidator()) {
         valid = Polymer.IronValidatableBehavior.validate.call(this, this.value);
       } else {
-        this.invalid = !this.validity.valid;
-        valid = this.validity.valid;
+        valid = this.checkValidity();
+        this.invalid = !valid;
       }
       this.fire('iron-input-validate');
       return valid;
@@ -12131,6 +12157,9 @@ is separate from validation, and `allowed-pattern` does not affect how the input
       /**
        * Returns true if the value is invalid. Bind this to both the `<paper-input-container>`'s
        * and the input's `invalid` property.
+       * 
+       * If `autoValidate` is true, the `invalid` attribute is managed automatically,
+       * which can clobber attempts to manage it manually.
        */
       invalid: {
         type: Boolean,
@@ -12928,8 +12957,17 @@ Polymer({
 
           /**
            * A pixel value that will be added to the position calculated for the
-           * given `horizontalAlign`. Use a negative value to offset to the
-           * left, or a positive value to offset to the right.
+           * given `horizontalAlign`, in the direction of alignment. You can think
+           * of it as increasing or decreasing the distance to the side of the
+           * screen given by `horizontalAlign`.
+           *
+           * If `horizontalAlign` is "left", this offset will increase or decrease
+           * the distance to the left side of the screen: a negative offset will
+           * move the dropdown to the left; a positive one, to the right.
+           *
+           * Conversely if `horizontalAlign` is "right", this offset will increase
+           * or decrease the distance to the right side of the screen: a negative
+           * offset will move the dropdown to the right; a positive one, to the left.
            */
           horizontalOffset: {
             type: Number,
@@ -12939,8 +12977,17 @@ Polymer({
 
           /**
            * A pixel value that will be added to the position calculated for the
-           * given `verticalAlign`. Use a negative value to offset towards the
-           * top, or a positive value to offset towards the bottom.
+           * given `verticalAlign`, in the direction of alignment. You can think
+           * of it as increasing or decreasing the distance to the side of the
+           * screen given by `verticalAlign`.
+           *
+           * If `verticalAlign` is "top", this offset will increase or decrease
+           * the distance to the top side of the screen: a negative offset will
+           * move the dropdown upwards; a positive one, downwards.
+           *
+           * Conversely if `verticalAlign` is "bottom", this offset will increase
+           * or decrease the distance to the bottom side of the screen: a negative
+           * offset will move the dropdown downwards; a positive one, upwards.
            */
           verticalOffset: {
             type: Number,
@@ -13040,6 +13087,13 @@ Polymer({
         },
 
         /**
+         * Whether the text direction is RTL
+         */
+        _isRTL: function() {
+          return window.getComputedStyle(this).direction == 'rtl';
+        },
+
+        /**
          * The element that should be used to position the dropdown when
          * it opens, if no position target is configured.
          */
@@ -13070,7 +13124,10 @@ Polymer({
         get _horizontalAlignTargetValue() {
           var target;
 
-          if (this.horizontalAlign === 'right') {
+          // In RTL, the direction flips, so what is "right" in LTR becomes "left".
+          var isRTL = this._isRTL();
+          if ((!isRTL && this.horizontalAlign === 'right') ||
+              (isRTL && this.horizontalAlign === 'left')) {
             target = document.documentElement.clientWidth - this._positionRect.right;
           } else {
             target = this._positionRect.left;
@@ -13096,6 +13153,18 @@ Polymer({
           target += this.verticalOffset;
 
           return Math.max(target, 0);
+        },
+
+        /**
+         * The horizontal align value, accounting for the RTL/LTR text direction.
+         */
+        get _localeHorizontalAlign() {
+          // In RTL, "left" becomes "right".
+          if (this._isRTL()) {
+            return this.horizontalAlign === 'right' ? 'left' : 'right';
+          } else {
+            return this.horizontalAlign;
+          }
         },
 
         /**
@@ -13246,7 +13315,7 @@ Polymer({
             return;
           }
 
-          this.style[this.horizontalAlign] =
+          this.style[this._localeHorizontalAlign] =
             this._horizontalAlignTargetValue + 'px';
 
           this.style[this.verticalAlign] =
@@ -14008,7 +14077,7 @@ Polymer({
 
     _calculateElevation: function() {
       if (!this.raised) {
-        this.elevation = 0;
+        this._setElevation(0);
       } else {
         Polymer.PaperButtonBehaviorImpl._calculateElevation.apply(this);
       }
@@ -14311,12 +14380,22 @@ Polymer({
         value: false,
         notify: true,
         observer: '_openedChanged'
-      }
+      },
+
+      /**
+       * Set noAnimation to true to disable animations
+       *
+       * @attribute noAnimation
+       */
+      noAnimation: {
+        type: Boolean
+      },
 
     },
 
     hostAttributes: {
       role: 'group',
+      'aria-hidden': 'true',
       'aria-expanded': 'false'
     },
 
@@ -14324,10 +14403,9 @@ Polymer({
       transitionend: '_transitionEnd'
     },
 
-    ready: function() {
-      // Avoid transition at the beginning e.g. page loads and enable
-      // transitions only after the element is rendered and ready.
-      this._enableTransition = true;
+    attached: function() {
+      // It will take care of setting correct classes and styles.
+      this._transitionEnd();
     },
 
     /**
@@ -14340,25 +14418,56 @@ Polymer({
     },
 
     show: function() {
-      this.opened = true;    
+      this.opened = true;
     },
 
     hide: function() {
-      this.opened = false;    
+      this.opened = false;
     },
 
     updateSize: function(size, animated) {
-      this.enableTransition(animated);
-      var s = this.style;
-      var nochange = s[this.dimension] === size;
-      s[this.dimension] = size;
-      if (animated && nochange) {
-        this._transitionEnd();
+      // No change!
+      if (this.style[this.dimension] === size) {
+        return;
       }
+
+      this._updateTransition(false);
+      // If we can animate, must do some prep work.
+      if (animated && !this.noAnimation) {
+        // Animation will start at the current size.
+        var startSize = this._calcSize();
+        // For `auto` we must calculate what is the final size for the animation.
+        // After the transition is done, _transitionEnd will set the size back to `auto`.
+        if (size === 'auto') {
+          this.style[this.dimension] = size;
+          size = this._calcSize();
+        }
+        // Go to startSize without animation.
+        this.style[this.dimension] = startSize;
+        // Force layout to ensure transition will go. Set offsetHeight to itself
+        // so that compilers won't remove it.
+        this.offsetHeight = this.offsetHeight;
+        // Enable animation.
+        this._updateTransition(true);
+      }
+      // Set the final size.
+      this.style[this.dimension] = size;
     },
 
+    /**
+     * enableTransition() is deprecated, but left over so it doesn't break existing code.
+     * Please use `noAnimation` property instead.
+     *
+     * @method enableTransition
+     * @deprecated since version 1.0.4
+     */
     enableTransition: function(enabled) {
-      this.style.transitionDuration = (enabled && this._enableTransition) ? '' : '0s';
+      console.warn('`enableTransition()` is deprecated, use `noAnimation` instead.');
+      this.noAnimation = !enabled;
+    },
+
+    _updateTransition: function(enabled) {
+      this.style.transitionDuration = (enabled && !this.noAnimation) ? '' : '0s';
     },
 
     _horizontalChanged: function() {
@@ -14367,173 +14476,192 @@ Polymer({
     },
 
     _openedChanged: function() {
+      this.setAttribute('aria-expanded', this.opened);
+      this.setAttribute('aria-hidden', !this.opened);
+
+      this.toggleClass('iron-collapse-closed', false);
+      this.toggleClass('iron-collapse-opened', false);
+      this.updateSize(this.opened ? 'auto' : '0px', true);
+
+      // Focus the current collapse.
       if (this.opened) {
-        this.setAttribute('aria-expanded', 'true');
-        this.setAttribute('aria-hidden', 'false');
-
-        this.toggleClass('iron-collapse-closed', false);
-        this.updateSize('auto', false);
-        var s = this._calcSize();
-        this.updateSize('0px', false);
-        // force layout to ensure transition will go
-        /** @suppress {suspiciousCode} */ this.offsetHeight;
-        this.updateSize(s, true);
-        // focus the current collapse
         this.focus();
-      } else {
-        this.setAttribute('aria-expanded', 'false');
-        this.setAttribute('aria-hidden', 'true');
-
-        this.toggleClass('iron-collapse-opened', false);
-        this.updateSize(this._calcSize(), false);
-        // force layout to ensure transition will go
-        /** @suppress {suspiciousCode} */ this.offsetHeight;
-        this.updateSize('0px', true);
+      }
+      if (this.noAnimation) {
+        this._transitionEnd();
       }
     },
 
     _transitionEnd: function() {
       if (this.opened) {
-        this.updateSize('auto', false);
+        this.style[this.dimension] = 'auto';
       }
       this.toggleClass('iron-collapse-closed', !this.opened);
       this.toggleClass('iron-collapse-opened', this.opened);
-      this.enableTransition(false);
+      this._updateTransition(false);
     },
 
     _calcSize: function() {
       return this.getBoundingClientRect()[this.dimension] + 'px';
-    },
-
+    }
 
   });
 (function() {
-      Polymer({
-        is: 'paper-submenu',
 
-        properties: {
-          /**
-           * Fired when the submenu is opened.
-           *
-           * @event paper-submenu-open
-           */
+    Polymer({
 
-          /**
-           * Fired when the submenu is closed.
-           *
-           * @event paper-submenu-close
-           */
+      is: 'paper-submenu',
 
-          /**
-           * Set opened to true to show the collapse element and to false to hide it.
-           *
-           * @attribute opened
-           */
-          opened: {
-            type: Boolean,
-            value: false,
-            notify: true,
-            observer: '_openedChanged'
-          }
-        },
-
-        behaviors: [
-          Polymer.IronControlState
-        ],
-
-        get __parent() {
-          return Polymer.dom(this).parentNode;
-        },
-
-        get __trigger() {
-          return Polymer.dom(this.$.trigger).getDistributedNodes()[0];
-        },
-
-        attached: function() {
-          this.listen(this.__parent, 'iron-activate', '_onParentIronActivate');
-        },
-
-        dettached: function() {
-          this.unlisten(this.__parent, 'iron-activate', '_onParentIronActivate');
-        },
+      properties: {
+        /**
+         * Fired when the submenu is opened.
+         *
+         * @event paper-submenu-open
+         */
 
         /**
-         * Expand the submenu content.
+         * Fired when the submenu is closed.
+         *
+         * @event paper-submenu-close
          */
-        open: function() {
-          if (this.disabled)
-            return;
+
+        /**
+         * Set opened to true to show the collapse element and to false to hide it.
+         *
+         * @attribute opened
+         */
+        opened: {
+          type: Boolean,
+          value: false,
+          notify: true,
+          observer: '_openedChanged'
+        }
+      },
+
+      behaviors: [
+        Polymer.IronControlState
+      ],
+
+      listeners: {
+        'focus': '_onFocus'
+      },
+
+      get __parent() {
+        return Polymer.dom(this).parentNode;
+      },
+
+      get __trigger() {
+        return Polymer.dom(this.$.trigger).getDistributedNodes()[0];
+      },
+
+      get __content() {
+        return Polymer.dom(this.$.content).getDistributedNodes()[0];
+      },
+
+      attached: function() {
+        this.listen(this.__parent, 'iron-activate', '_onParentIronActivate');
+      },
+
+      dettached: function() {
+        this.unlisten(this.__parent, 'iron-activate', '_onParentIronActivate');
+      },
+
+      /**
+       * Expand the submenu content.
+       */
+      open: function() {
+        if (!this.disabled && !this._active) {
           this.$.collapse.show();
           this._active = true;
-          this.__trigger.classList.add('iron-selected');
-        },
+          this.__trigger && this.__trigger.classList.add('iron-selected');
+          this.__content && this.__content.focus();
+        }
+      },
 
-        /**
-         * Collapse the submenu content.
-         */
-        close: function() {
+      /**
+       * Collapse the submenu content.
+       */
+      close: function() {
+        if (this._active) {
           this.$.collapse.hide();
           this._active = false;
-          this.__trigger.classList.remove('iron-selected');
-        },
+          this.__trigger && this.__trigger.classList.remove('iron-selected');
+        }
+      },
 
-        /**
-         * A handler that is called when the trigger is tapped.
-         */
-        _onTap: function() {
-          if (this.disabled)
-            return;
-          this.$.collapse.toggle();
-        },
+      /**
+       * Toggle the submenu.
+       */
+      toggle: function() {
+        if (this._active) {
+          this.close();
+        } else {
+          this.open();
+        }
+      },
 
-        /**
-         * Toggles the submenu content when the trigger is tapped.
-         */
-        _openedChanged: function(opened, oldOpened) {
-          if (opened) {
-            this.fire('paper-submenu-open');
-          } else if (oldOpened != null) {
-            this.fire('paper-submenu-close');
-          }
-        },
+      /**
+       * A handler that is called when the trigger is tapped.
+       */
+      _onTap: function(e) {
+        if (!this.disabled) {
+          this.toggle();
+        }
+      },
 
-        /**
-         * A handler that is called when `iron-activate` is fired.
-         *
-         * @param {CustomEvent} event An `iron-activate` event.
-         */
-        _onParentIronActivate: function(event) {
-          if (Polymer.Gestures.findOriginalTarget(event) !== this.__parent) {
-            return;
-          }
+      /**
+       * Toggles the submenu content when the trigger is tapped.
+       */
+      _openedChanged: function(opened, oldOpened) {
+        if (opened) {
+          this.fire('paper-submenu-open');
+        } else if (oldOpened != null) {
+          this.fire('paper-submenu-close');
+        }
+      },
 
+      /**
+       * A handler that is called when `iron-activate` is fired.
+       *
+       * @param {CustomEvent} event An `iron-activate` event.
+       */
+      _onParentIronActivate: function(event) {
+        var parent = this.__parent;
+        if (Polymer.dom(event).localTarget === parent) {
           // The activated item can either be this submenu, in which case it
           // should be expanded, or any of the other sibling submenus, in which
           // case this submenu should be collapsed.
-          if (event.detail.item == this) {
-            if (this._active)
-              return;
-            this.open();
-          } else {
+          if (event.detail.item !== this && !parent.multi) {
             this.close();
-          }
-        },
-
-        /**
-         * If the dropdown is open when disabled becomes true, close the
-         * dropdown.
-         *
-         * @param {boolean} disabled True if disabled, otherwise false.
-         */
-        _disabledChanged: function(disabled) {
-          Polymer.IronControlState._disabledChanged.apply(this, arguments);
-          if (disabled && this._active) {
-            this.close();
-
           }
         }
-      });
-    })();
+      },
+
+      /**
+       * If the dropdown is open when disabled becomes true, close the
+       * dropdown.
+       *
+       * @param {boolean} disabled True if disabled, otherwise false.
+       */
+      _disabledChanged: function(disabled) {
+        Polymer.IronControlState._disabledChanged.apply(this, arguments);
+        if (disabled && this._active) {
+          this.close();
+        }
+      },
+
+      /**
+       * Handler that is called when the menu receives focus.
+       *
+       * @param {FocusEvent} event A focus event.
+       */
+      _onFocus: function(event) {
+        this.__trigger && this.__trigger.focus();
+      }
+
+    });
+
+  })();
 Polymer({
       is: 'paper-item',
 
@@ -14848,7 +14976,6 @@ Polymer({
       ]
     });
 Polymer({
-
     is: 'paper-progress',
 
     behaviors: [
@@ -14856,7 +14983,6 @@ Polymer({
     ],
 
     properties: {
-
       /**
        * The number that represents the current secondary progress.
        */
@@ -14942,7 +15068,6 @@ Polymer({
     _hideSecondaryProgress: function(secondaryRatio) {
       return secondaryRatio === 0;
     }
-
   });
 Polymer({
       is: 'paper-tooltip',
@@ -15682,12 +15807,6 @@ Polymer({
 
       listeners: {
         down: '_updateNoink'
-      },
-
-      ready: function() {
-        var ripple = this.getRipple();
-        ripple.initialOpacity = 0.95;
-        ripple.opacityDecayVelocity = 0.98;
       },
 
       attached: function() {

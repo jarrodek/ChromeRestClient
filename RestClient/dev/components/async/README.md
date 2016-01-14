@@ -985,6 +985,52 @@ async.waterfall([
     // result now equals 'done'
 });
 ```
+Or, with named functions:
+
+```js
+async.waterfall([
+    myFirstFunction,
+    mySecondFunction,
+    myLastFunction,
+], function (err, result) {
+    // result now equals 'done'
+});
+function myFirstFunction(callback) {
+  callback(null, 'one', 'two');
+}
+function mySecondFunction(arg1, arg2, callback) {
+  // arg1 now equals 'one' and arg2 now equals 'two'
+  callback(null, 'three');
+}
+function myLastFunction(arg1, callback) {
+  // arg1 now equals 'three'
+  callback(null, 'done');
+}
+```
+
+Or, if you need to pass any argument to the first function:
+
+```js
+async.waterfall([
+    async.apply(myFirstFunction, 'zero'),
+    mySecondFunction,
+    myLastFunction,
+], function (err, result) {
+    // result now equals 'done'
+});
+function myFirstFunction(arg1, callback) {
+  // arg1 now equals 'zero'
+  callback(null, 'one', 'two');
+}
+function mySecondFunction(arg1, arg2, callback) {
+  // arg1 now equals 'one' and arg2 now equals 'two'
+  callback(null, 'three');
+}
+function myLastFunction(arg1, callback) {
+  // arg1 now equals 'three'
+  callback(null, 'done');
+}
+```
 
 ---------------------------------------
 <a name="compose" />
@@ -1399,8 +1445,10 @@ result (if any) of the final attempt.
 
 __Arguments__
 
-* `opts` - Can be either an object with `times` and `interval` or a number. `times` is how many attempts should be made before giving up. `interval` is how long to wait inbetween attempts. Defaults to {times: 5, interval: 0}
-  * if a number is passed in it sets `times` only (with `interval` defaulting to 0).
+* `opts` - Can be either an object with `times` and `interval` or a number.
+  * `times` - The number of attempts to make before giving up.  The default is `5`.
+  * `interval` - The time to wait between retries, in milliseconds.  The default is `0`.
+  * If `opts` is a number, the number specifies the number of times to retry, with the default interval of `0`. 
 * `task(callback, results)` - A function which receives two arguments: (1) a `callback(err, result)`
   which must be called when finished, passing `err` (which can be `null`) and the `result` of
   the function's execution, and (2) a `results` object, containing the results of
@@ -1408,17 +1456,25 @@ __Arguments__
 * `callback(err, results)` - An optional callback which is called when the
   task has succeeded, or after the final failed attempt. It receives the `err` and `result` arguments of the last attempt at completing the `task`.
 
-The [`retry`](#retry) function can be used as a stand-alone control flow by passing a
-callback, as shown below:
+The [`retry`](#retry) function can be used as a stand-alone control flow by passing a callback, as shown below:
 
 ```js
+// try calling apiMethod 3 times
 async.retry(3, apiMethod, function(err, result) {
     // do something with the result
 });
 ```
 
 ```js
+// try calling apiMethod 3 times, waiting 200 ms between each retry 
 async.retry({times: 3, interval: 200}, apiMethod, function(err, result) {
+    // do something with the result
+});
+```
+
+```js
+// try calling apiMethod the default 5 times no delay between each retry 
+async.retry(apiMethod, function(err, result) {
     // do something with the result
 });
 ```
@@ -1725,6 +1781,32 @@ async.waterfall([
     // If there was a parsing error, it would have been caught.
   }
 ], callback)
+```
+
+If the function passed to `asyncify` returns a Promise, that promises's resolved/rejected state will be used to call the callback, rather than simply the synchronous return value.  Example:
+
+```js
+async.waterfall([
+  async.apply(fs.readFile, filename, "utf8"),
+  async.asyncify(function (contents) {
+    return db.model.create(contents);
+  }),
+  function (model, next) {
+    // `model` is the instantiated model object. 
+    // If there was an error, this function would be skipped.
+  }
+], callback)
+```
+
+This also means you can asyncify ES2016 `async` functions.
+
+```js
+var q = async.queue(async.asyncify(async function (file) {
+  var intermediateStep = await processFile(file);
+  return await somePromise(intermediateStep)
+}));
+
+q.push(files);
 ```
 
 ---------------------------------------

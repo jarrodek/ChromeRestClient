@@ -1,6 +1,6 @@
 {
   "name": "paper-menu",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "description": "Implements an accessible material design menu",
   "authors": "The Polymer Authors",
   "keywords": [
@@ -33,14 +33,14 @@
     "iron-test-helpers": "PolymerElements/iron-test-helpers#^1.0.0",
     "paper-item": "PolymerElements/paper-item#^1.0.0",
     "test-fixture": "PolymerElements/test-fixture#^1.0.0",
-    "web-component-tester": "*",
+    "web-component-tester": "^4.0.0",
     "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
   },
-  "_release": "1.2.0",
+  "_release": "1.2.2",
   "_resolution": {
     "type": "version",
-    "tag": "v1.2.0",
-    "commit": "c5f184ce4f337912deae53b345a4260f333f5412"
+    "tag": "v1.2.2",
+    "commit": "f31a1dbc5b594a84c8c01eca0f23f9bcb8f6ba76"
   },
   "_source": "git://github.com/PolymerElements/paper-menu.git",
   "_target": "^1.0.0",

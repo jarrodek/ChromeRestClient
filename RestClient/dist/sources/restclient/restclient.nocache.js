@@ -1,3 +1,70 @@
+/*
+ * Copyright 2014 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+/**
+ * This startup script is used when we run superdevmode from an app server.
+ */
+(function($wnd, $doc){
+  // document.head does not exist in IE8
+  var $head = $doc.head || $doc.getElementsByTagName('head')[0];
+  // Compute some codeserver urls so as the user does not need bookmarklets
+  var hostName = $wnd.location.hostname;
+  var serverUrl = 'http://' + hostName + ':9876';
+  var module = 'restclient';
+  var nocacheUrl = serverUrl + '/recompile-requester/' + module;
+
+  // Insert the superdevmode nocache script in the first position of the head
+  var devModeScript = $doc.createElement('script');
+  devModeScript.src = nocacheUrl;
+
+  // Everybody except IE8 does fire an error event
+  // This means that we do not detect a non running SDM with IE8.
+  if (devModeScript.addEventListener) {
+    var callback = function() {
+      // Don't show the confirmation dialogue twice (multimodule)
+      if (!$wnd.__gwt__sdm__confirmed &&
+           (!$wnd.__gwt_sdm__recompiler || !$wnd.__gwt_sdm__recompiler.loaded)) {
+        $wnd.__gwt__sdm__confirmed = true;
+        if ($wnd.confirm(
+            "Couldn't load " +  module + " from Super Dev Mode\n" +
+            "server at " + serverUrl + ".\n" +
+            "Please make sure this server is ready.\n" +
+            "Do you want to try again?")) {
+          $wnd.location.reload();
+        }
+      }
+    };
+    devModeScript.addEventListener("error", callback, true);
+  }
+
+  var injectScriptTag = function(){
+    $head.insertBefore(devModeScript, $head.firstElementChild || $head.children[0]);
+  };
+
+  if (/loaded|complete/.test($doc.readyState)) {
+    injectScriptTag();
+  } else {
+    //defer app script insertion until the body is ready
+    if($wnd.addEventListener){
+      $wnd.addEventListener('load', injectScriptTag, false);
+    } else{
+      $wnd.attachEvent('onload', injectScriptTag);
+    }
+  }
+})(window, document);
 function restclient(){var tb='',ub=0,vb='gwt.codesvr=',wb='gwt.hosted=',xb='gwt.hybrid',yb='restclient',zb='__gwt_marker_restclient',Ab='<script id="',Bb='"><\/script>',Cb='SCRIPT',Db='#',Eb='?',Fb='/',Gb=1,Hb='base',Ib='img',Jb='clear.cache.gif',Kb='meta',Lb='name',Mb='gwt:property',Nb='content',Ob='=',Pb='gwt:onPropertyErrorFn',Qb='Bad handler "',Rb='" for "gwt:onPropertyErrorFn"',Sb='gwt:onLoadErrorFn',Tb='" for "gwt:onLoadErrorFn"',Ub='Single-script hosted mode not yet implemented. See issue ',Vb='http://code.google.com/p/google-web-toolkit/issues/detail?id=2079',Wb='5415452496D6F28061D909F999D64E03',Xb=':',Yb='gwt/clean/clean.css',Zb='link',$b='rel',_b='stylesheet',ac='href',bc='head',cc='DOMContentLoaded',dc=50;var k=tb,l=ub,m=vb,n=wb,o=xb,p=yb,q=zb,r=Ab,s=Bb,t=Cb,u=Db,v=Eb,w=Fb,A=Gb,B=Hb,C=Ib,D=Jb,F=Kb,G=Lb,H=Mb,I=Nb,J=Ob,K=Pb,L=Qb,M=Rb,N=Sb,O=Tb,P=Ub,Q=Vb,R=Wb,S=Xb,T=Yb,U=Zb,V=$b,W=_b,X=ac,Y=bc,Z=cc,$=dc;var _=window,ab=document,bb,cb,db=k,eb={},fb=[],gb=[],hb=[],ib=l,jb,kb;if(!_.__gwt_stylesLoaded){_.__gwt_stylesLoaded={}}if(!_.__gwt_scriptsLoaded){_.__gwt_scriptsLoaded={}}function lb(){var b=false;try{var c=_.location.search;return (c.indexOf(m)!=-1||(c.indexOf(n)!=-1||_.external&&_.external.gwtOnLoad))&&c.indexOf(o)==-1}catch(a){}lb=function(){return b};return b}
 function mb(){if(bb&&cb){bb(jb,p,db,ib)}}
 function nb(){var e,f=q,g;ab.write(r+f+s);g=ab.getElementById(f);e=g&&g.previousSibling;while(e&&e.tagName!=t){e=e.previousSibling}function h(a){var b=a.lastIndexOf(u);if(b==-1){b=a.length}var c=a.indexOf(v);if(c==-1){c=a.length}var d=a.lastIndexOf(w,Math.min(c,b));return d>=l?a.substring(l,d+A):k}

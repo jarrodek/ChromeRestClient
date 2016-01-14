@@ -11,6 +11,9 @@
 		<filter-name>ObjectifyFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
+	<listener>
+	  <listener-class>org.rest.server.OfyHelper</listener-class>
+	</listener>
 	<!-- Test servlet for dev testing -->
 	<servlet>
 		<servlet-name>TestDataServlet</servlet-name>

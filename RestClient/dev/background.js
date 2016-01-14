@@ -249,7 +249,7 @@ arc.app.bg.onInstalled = function(details) {
       arc.app.bg.performStorageUpgrade();
       break;
     case 'install':
-      arc.app.db.websql.open().then(function() {
+      arc.app.db.idb.open().then(function() {
         console.log('Database has been initialized');
         arc.app.bg.installApp();
       }).catch(function(e) {
@@ -260,27 +260,16 @@ arc.app.bg.onInstalled = function(details) {
   }
 };
 /**
- * //TODO: Upgrade WebSQL to IndexedDb.
+ * 
  */
 arc.app.bg.installApp = function() {
-  chrome.storage.local.get({
-    'firstrun': false
-  }, function(result) {
-    if (result.firstrun) {
-      return;
-    }
-    arc.app.bg.downloadDefinitions()
-      .then(arc.app.bg.installDefinitions)
-      .then(function() {
-        console.log('App database has been filled with default values.');
-        chrome.storage.local.set({
-          'firstrun': true
-        });
-      })
-      .catch(function(r) {
-        console.error('There was an error when filling up the database with definitions.', r);
-      });
-  });
+  arc.app.bg.downloadDefinitions()
+  .then(arc.app.bg.installDefinitions)
+  .then(() => {
+    console.log('App database has been filled with default values.');
+  })
+  .catch((r) => console.error('There was an error when filling up the database with ' +
+    'definitions.', r));
 };
 /**
  * Add definitions to the database.
@@ -291,7 +280,7 @@ arc.app.bg.installDefinitions = function(defs) {
       'message': 'No definitions found'
     });
   }
-  return arc.app.db.websql.insertStatusCodes(defs.codes)
+  return arc.app.db.idb.insertStatusCodes(defs.codes)
     .then(function() {
       defs.requests.forEach(function(item) {
         item.type = 'request';
@@ -300,7 +289,7 @@ arc.app.bg.installDefinitions = function(defs) {
         item.type = 'response';
       });
       let save = defs.requests.concat(defs.responses);
-      return arc.app.db.websql.insertHeadersDefinitions(save);
+      return arc.app.db.idb.insertHeadersDefinitions(save);
     });
 };
 /**
@@ -462,13 +451,6 @@ arc.app.bg.performSettingsUpgrade = function() {
  */
 arc.app.bg.performLocalDataUpgrade = function() {
   var save = {};
-  var fr;
-  try {
-    fr = parseInt(localStorage.firstrun);
-  } catch (e) {}
-  if (fr) {
-    save.firstrun = fr;
-  }
   var lrd;
   try {
     // jscs:disable

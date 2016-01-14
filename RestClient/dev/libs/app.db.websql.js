@@ -28,6 +28,11 @@ arc.app = arc.app || {};
  */
 arc.app.db = arc.app.db || {};
 /**
+ * An adapter that the app should use to work with the database.
+ * This will be switched to `indexeddb` after successful upgrade.
+ */
+arc.app.db._adapter = arc.app.db._adapter || 'websql';
+/**
  * A namespace for WebSQL store
  */
 arc.app.db.websql = {};
@@ -455,6 +460,5 @@ arc.app.db.websql.initDev = function() {
     });
   }
 };
-
 arc.app.db.websql.initDev();
 // @endif

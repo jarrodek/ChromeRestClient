@@ -207,9 +207,8 @@ arc.app.drive.checkDriveAuth = function(callback) {
  * with token data or null if user resign with authentication.
  * 
  * @param {Function} callback Callback function to be called after authorization.
- * @param {Boolean} forceNew True if the app should force show auth dialog.
  */
-arc.app.drive.auth = function(callback, forceNew) {
+arc.app.drive.auth = function(callback) {
   chrome.identity.getAuthToken({'interactive': true}, callback);
 };
 
