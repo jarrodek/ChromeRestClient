@@ -41,15 +41,19 @@ arc.app.db.idb = {};
  */
 arc.app.db.idb.open = function() {
   return new Promise(function(resolve, reject) {
-    var db = new Dexie('advrestclient');
+    var db = new Dexie('arc');
     db.version(1).stores({
-      headers: '++id,&[key+type]',
-      statuses: 'key',
-      historyUrls: 'url',
-      historySockets: 'url',
-      requestObject: '++id,url,method,driveId,&[url+method]'
+      headers: '&[key+type]',
+      statuses: '&key',
+      historyUrls: '&url',
+      historySockets: '&url',
+      requestObject: '++id,url,method,[url+method]',
+      driveObjects: '[requestId+requestId],driveId,requestId',
+      serverExportObjects: '[serverId+requestId],serverId,requestId',
+      projectObjects: '++id,*requestIds'
     });
     db.on('ready', function() {
+      arc.app.db.idb._db = db;
       arc.app.db.idb.appVer = chrome.runtime.getManifest().version;
       return db.statuses.count(function(count) {
           if (count === 0) {
@@ -76,12 +80,39 @@ arc.app.db.idb.open = function() {
               });
           }
         })
-        .then(arc.app.db.idb._getSQLdata)
-        .then(function(data) {
-          console.log(data);
-          return data;
+        .then(function(){
+          return new Dexie.Promise(function(resolve) {
+            let upgrade = {
+              upgraded: {
+                indexeddb: false
+              }
+            };
+            chrome.storage.local.get(upgrade, (upgrade) => {
+              if(upgrade.upgraded.indexeddb) {
+                arc.app.db._adapter = 'indexeddb';
+              }
+              resolve(upgrade.upgraded.indexeddb);
+            });
+          });
         })
-        .then(arc.app.db.idb._converSqlIdb);
+        .then(arc.app.db.idb._getSQLdata)
+        .then(arc.app.db.idb._converSqlIdb)
+        .then(arc.app.db.idb._storeUpgrade)
+        .then(function(result) {
+          if(result === null) {
+            return;
+          }
+          console.info('Database has been upgraded from WebSQL to IndexedDB.');
+          arc.app.db._adapter = 'indexeddb';
+          let upgrade = {
+            upgraded: {
+              indexeddb: true
+            }
+          };
+          chrome.storage.local.set(upgrade, () => {
+            console.info('Upgrade finished.');
+          });
+        });
     });
     db.open()
       .then(function() {
@@ -133,8 +164,15 @@ arc.app.db.idb._upgradeWebSQL = function() {
 };
 /**
  * Get all WebSQL data.
+ *
+ * @param {Boolean} dontUpgrade Used in promise chain. Don't upgrade it IndexedDB has been 
+ * already upgraded
  */
-arc.app.db.idb._getSQLdata = function() {
+arc.app.db.idb._getSQLdata = function(dontUpgrade) {
+  if(dontUpgrade) {
+    return null;
+  }
+
   const data = {};
   return new Dexie.Promise(function(resolve, reject) {
     arc.app.db.websql.open().then(function(db) {
@@ -188,15 +226,145 @@ arc.app.db.createRequestKey = function(method, url) {
  * Convert all data from WebSQL structure to the IndexedDB structure.
  */
 arc.app.db.idb._converSqlIdb = function(data) {
-  //requestData
+  if(!data) {
+    return null;
+  }
   const requests = [];
+  const urlHistory = [];
+  const socketHistory = [];
+  const exportedSize = data.exported.length;
   data.requestData.forEach((item) => {
     let obj = arc.app.db.idb._createHARfromSql.call(this, item);
-
+    obj.type = 'saved';
+    //just for upgrade, to be removed before save. 
+    if (item.project) {
+      obj.project = item.project;
+    }
+    for (let i = 0; i < exportedSize; i++) {
+      if (data.exported[i].reference_id === item.id) {
+        //just for upgrade, to be removed before save. 
+        obj.exported = i;
+        break;
+      }
+    }
     requests.push(obj);
   });
+  data.history.forEach((item) => {
+    let obj = arc.app.db.idb._createHARfromSql.call(this, item);
+    requests.push(obj);
+  });
+  data.urls.forEach((item) => {
+    let obj = new HistoryUrlObject({
+      url: item.url,
+      time: item.time,
+    });
+    urlHistory.push(obj);
+  });
+  data.websocketData.forEach((item) => {
+    let obj = new HistorySocketObject({
+      url: item.url,
+      time: item.time,
+    });
+    socketHistory.push(obj);
+  });
 
+  return {
+    indexeddb: {
+      requests: requests,
+      urlHistory: urlHistory,
+      socketHistory: socketHistory
+    },
+    websql: data
+  };
 };
+/**
+ * Store upgraded from webSQL storage data in IndexedDb storage.
+ */
+arc.app.db.idb._storeUpgrade = function(data) {
+  if(!data) {
+    return null;
+  }
+  let db = arc.app.db.idb._db;
+  console.info('Upgrading webSQL to IndexedDb');
+  return db.transaction('rw', db.historyUrls, db.historySockets, db.requestObject,
+    db.serverExportObjects, db.projectObjects,
+    function() {
+      console.info('Entered transaction. Ready to save data.');
+      console.info('Inserting URL history');
+      data.indexeddb.urlHistory.forEach((item) => {
+        db.historyUrls.put(item);
+      });
+      console.info('Inserting Socket URL history');
+      data.indexeddb.socketHistory.forEach((item) => {
+        db.historySockets.put(item);
+      });
+      const projects = {};
+      const exported = [];
+      let promises = [];
+
+      let insertRequest = (db, item) => {
+        let referencedProjectId = item.project;
+        let referencedExported = item.exported;
+        delete item.project;
+        delete item.exported;
+        return db.requestObject.add(item).then(function(requestId) {
+          if (referencedProjectId) {
+            if (!(referencedProjectId in projects)) {
+              let _projects = data.websql.projects.filter(
+                (project) => project.id === referencedProjectId);
+              if (_projects.length === 1) {
+                let project = new ProjectObject({
+                  time: _projects[0].time,
+                  name: _projects[0].name,
+                  requestIds: [requestId]
+                });
+                projects[referencedProjectId] = project;
+              } else if (_projects.length > 1) {
+                console.warn('Projects filtered array has more than one element ' +
+                  'and it should not happen.');
+              }
+            } else {
+              projects[referencedProjectId].addRequest(requestId);
+            }
+          }
+          if (referencedExported) {
+            let exportData = data.websql.exported[referencedExported];
+            let exportObject = new ServerExportedObject({
+              serverId: exportData.gaeKey,
+              requestId: requestId
+            });
+            exported.push(exportObject);
+          }
+        });
+      };
+
+      console.info('Inserting requests');
+      data.indexeddb.requests.forEach((item) => {
+        promises.push(insertRequest(db, item));
+      });
+
+      return Promise.all(promises).then(() => {
+        let promises = [];
+        console.info('Exported items to be inserted: %d, projects items to be inserted: %d', exported.length, Object.keys(projects).length);
+        if (Object.keys(projects).length > 0) {
+          console.info('Inserting projects');
+          Object.keys(projects).forEach((projectKey) => {
+            db.projectObjects.add(projects[projectKey]).then((id) => console.log('projects item inserted', id)).catch((cause) => console.error('projects item not inserted', cause));
+          });
+        }
+        if (exported.length > 0) {
+          console.info('Inserting exported');
+          exported.forEach((item) => {
+            db.serverExportObjects.add(item).then((id) => console.log('Exported item inserted', id)).catch((cause) => console.error('Exported item not inserted', cause));
+          });
+        }
+      });
+    });
+};
+
+/**
+ * Create a RequestObject from the SQL data
+ */
 arc.app.db.idb._createHARfromSql = function(item) {
   var creator = new HAR.Creator({
     name: 'Advanced REST client',
@@ -249,12 +417,12 @@ arc.app.db.idb._createHARfromSql = function(item) {
   log.addPage(page);
   log.addEntry(entry, page.id);
 
-  var obj = {
+  var obj = new RequestObject({
     'har': log,
     'url': item.url,
     'method': item.method,
-    'type': 'saved'
-  };
+    'type': 'history'
+  });
   return obj;
 };
 /**
