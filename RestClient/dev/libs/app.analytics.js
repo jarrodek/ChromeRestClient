@@ -80,8 +80,8 @@ arc.app.analytics._initTranckers = function() {
       return;
     }
     ga(item.name + '.set', 'checkProtocolTask', null);
-    ga(item.name + '.set', 'appName', 'ARC');
-    ga(item.name + '.set', 'appId', 'org.rest.client');
+    //ga(item.name + '.set', 'appName', 'ARC');
+    //ga(item.name + '.set', 'appId', 'org.rest.client');
   });
 };
 /**
@@ -109,7 +109,7 @@ arc.app.analytics._setCustomDimmensions = function() {
     chrome.runtime.getManifest().version : 'Unknown';
   var chromeVer = arc.app.utils.getChromeVersion();
   names.forEach(function(name) {
-    ga(name + '.set', 'appVersion', appVersion);
+    //ga(name + '.set', 'appVersion', appVersion);
     ga(name + '.set', 'dimension2', appVersion);
     ga(name + '.set', 'dimension1', chromeVer);
   });
