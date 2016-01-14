@@ -247,11 +247,15 @@ arc.app.bg.onInstalled = function(details) {
   switch (details.reason) {
     case 'update':
       arc.app.bg.performStorageUpgrade();
+      arc.app.db.idb.open().then(function() {
+        console.log('Database has been initialized');
+      }).catch(function(e) {
+        console.error('Error initializing the database.', e);
+      });
       break;
     case 'install':
       arc.app.db.idb.open().then(function() {
         console.log('Database has been initialized');
-        arc.app.bg.installApp();
       }).catch(function(e) {
         console.error('Error initializing the database.', e);
       });
@@ -259,67 +263,7 @@ arc.app.bg.onInstalled = function(details) {
       break;
   }
 };
-/**
- * 
- */
-arc.app.bg.installApp = function() {
-  arc.app.bg.downloadDefinitions()
-  .then(arc.app.bg.installDefinitions)
-  .then(() => {
-    console.log('App database has been filled with default values.');
-  })
-  .catch((r) => console.error('There was an error when filling up the database with ' +
-    'definitions.', r));
-};
-/**
- * Add definitions to the database.
- */
-arc.app.bg.installDefinitions = function(defs) {
-  if (!defs || !defs.codes || !defs.requests || !defs.responses) {
-    return Promise.reject({
-      'message': 'No definitions found'
-    });
-  }
-  return arc.app.db.idb.insertStatusCodes(defs.codes)
-    .then(function() {
-      defs.requests.forEach(function(item) {
-        item.type = 'request';
-      });
-      defs.responses.forEach(function(item) {
-        item.type = 'response';
-      });
-      let save = defs.requests.concat(defs.responses);
-      return arc.app.db.idb.insertHeadersDefinitions(save);
-    });
-};
-/**
- * Get ARC's definitions list.
- * This is stored in the extension folder.
- */
-arc.app.bg.downloadDefinitions = function() {
-  return new Promise(function(resolve, reject) {
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', '/assets/definitions.json', true);
-    xhr.addEventListener('load', function(e) {
-      let raw = e.target.response;
-      if (!raw) {
-        reject({
-          'message': 'Response was empty'
-        });
-        return;
-      }
-      let data = JSON.parse(e.target.response);
-      resolve(data);
-    });
-    xhr.addEventListener('error', function(e) {
-      reject(e.target);
-    });
-    xhr.send(null);
-  });
-  /*return fetch('/assets/definitions.json').then(function(response) {
-    return response.json();
-  });*/
-};
+
 /**
  * Perform upgrade to the newest version
  */

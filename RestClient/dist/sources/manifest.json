@@ -6,8 +6,8 @@
     "16": "img/arc_icon_16.png",
     "128": "img/arc_icon_128.png"
   },
-  "version": "4.6.1",
-  "version_name": "4.6.2-dev.0",
+  "version": "4.6.13",
+  "version_name": "4.6.13-dev.0",
   "manifest_version": 2,
   "minimum_chrome_version": "45",
   "permissions": [
@@ -21,9 +21,11 @@
   "options_page": "RestClient.html#SettingsPlace:view",
   "background": {
     "scripts": [
+      "components/dexie-js/dist/latest/Dexie.min.js",
+      "components/har/build/har.js",
+      "libs/libs.js",
       "libs/app.db.websql.js",
       "libs/app.db.idb.js",
-      "oauth2/oauth2.js",
       "background.js"
     ]
   },
@@ -41,15 +43,6 @@
       "js": [
         "gdriveinit.js"
       ]
-    },
-    {
-      "matches": [
-        "https://chromerestclient.appspot.com/oauth2callback.html*"
-      ],
-      "js": [
-        "oauth2/oauth2_inject.js"
-      ],
-      "run_at": "document_start"
     }
   ]
 }
