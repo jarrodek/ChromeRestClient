@@ -15,7 +15,7 @@
  * the License.
  ******************************************************************************/
 
-/* global Dexie */
+/* global Dexie, chrome, HAR */
 
 /**
  * Advanced Rest Client namespace
@@ -50,6 +50,7 @@ arc.app.db.idb.open = function() {
       requestObject: '++id,url,method,driveId,&[url+method]'
     });
     db.on('ready', function() {
+      arc.app.db.idb.appVer = chrome.runtime.getManifest().version;
       return db.statuses.count(function(count) {
           if (count === 0) {
             console.log('The statuses database is empty. Populating it...');
@@ -76,9 +77,11 @@ arc.app.db.idb.open = function() {
           }
         })
         .then(arc.app.db.idb._getSQLdata)
-        .then(function(data){
+        .then(function(data) {
           console.log(data);
-        });
+          return data;
+        })
+        .then(arc.app.db.idb._converSqlIdb);
     });
     db.open()
       .then(function() {
@@ -117,6 +120,7 @@ arc.app.db.idb._upgradeWebSQL = function() {
   return new Dexie.Promise(function(resolve, reject) {
     if (!arc.app.db.websql) {
       resolve();
+      reject();
       return;
     }
 
@@ -127,8 +131,9 @@ arc.app.db.idb._upgradeWebSQL = function() {
 
   });
 };
-
-
+/**
+ * Get all WebSQL data.
+ */
 arc.app.db.idb._getSQLdata = function() {
   const data = {};
   return new Dexie.Promise(function(resolve, reject) {
@@ -139,7 +144,7 @@ arc.app.db.idb._getSQLdata = function() {
           data.urls = Array.from(result.rows);
           sql = 'SELECT * FROM websocket_data WHERE 1';
           tx.executeSql(sql, [], (tx, result) => {
-            data.websocket_data = Array.from(result.rows);
+            data.websocketData = Array.from(result.rows);
             sql = 'SELECT * FROM history WHERE 1';
             tx.executeSql(sql, [], (tx, result) => {
               data.history = Array.from(result.rows);
@@ -148,7 +153,7 @@ arc.app.db.idb._getSQLdata = function() {
                 data.projects = Array.from(result.rows);
                 sql = 'SELECT * FROM request_data WHERE 1';
                 tx.executeSql(sql, [], (tx, result) => {
-                  data.request_data = Array.from(result.rows);
+                  data.requestData = Array.from(result.rows);
                   sql = 'SELECT * FROM exported WHERE 1';
                   tx.executeSql(sql, [], (tx, result) => {
                     data.exported = Array.from(result.rows);
@@ -163,7 +168,95 @@ arc.app.db.idb._getSQLdata = function() {
     });
   });
 };
+/**
+ * Creates IndexedDB key for a RequestObject.
+ * The main key is a combination of [HTTP METHOD]:[URL]
+ *
+ * @param {String} method A HTTP method
+ * @param {String} url An URL of the request.
+ * @return {String} a key for the Request object
+ */
+arc.app.db.createRequestKey = function(method, url) {
+  var args = Array.from(arguments);
+  if (args.length !== 2) {
+    throw new Error('Number of arguments requires is 2 but ' + args.length +
+      ' has been provided');
+  }
+  return method + ':' + url;
+};
+/**
+ * Convert all data from WebSQL structure to the IndexedDB structure.
+ */
+arc.app.db.idb._converSqlIdb = function(data) {
+  //requestData
+  const requests = [];
+  data.requestData.forEach((item) => {
+    let obj = arc.app.db.idb._createHARfromSql.call(this, item);
 
+    requests.push(obj);
+  });
+
+};
+arc.app.db.idb._createHARfromSql = function(item) {
+  var creator = new HAR.Creator({
+    name: 'Advanced REST client',
+    version: arc.app.db.idb.appVer,
+    comment: 'Created during WebSQL update to IndexedDB'
+  });
+  var browser = new HAR.Browser({
+    name: 'Chrome',
+    version: 'unknown'
+  });
+  var log = new HAR.Log({
+    'comment': 'Imported from WebSQL implementation',
+    'version': 1.2,
+    'creator': creator,
+    'browser': browser
+  });
+  var requestHeaders = arc.app.db.headers.toJSON(item.headers);
+  var request = new HAR.Request({
+    url: item.url,
+    httpVersion: 'HTTP/1.1',
+    method: item.method
+  });
+  if (['GET', 'HEAD'].indexOf(item.method) === -1) {
+    //Do not pass encoding for not-payload requests
+    arc.app.db.headers._oldCombine(requestHeaders, item.encoding);
+    var contentType = arc.app.db.headers.getContentType(requestHeaders) ||
+      'application/x-www-form-urlencoded';
+    var post = new HAR.PostData({
+      mimeType: contentType,
+      text: item.payload
+    });
+    request.postData = post;
+  }
+  request.headers = requestHeaders;
+  var page = new HAR.Page({
+    id: arc.app.db.createRequestKey(item.method, item.url),
+    title: item.name,
+    startedDateTime: new Date(item.time),
+    pageTimings: {}
+  });
+  var entry = new HAR.Entry({
+    startedDateTime: new Date(item.time),
+    request: request,
+    response: {
+      status: '0',
+      statusText: 'No response'
+    }
+  });
+  entry.setPage(page);
+  log.addPage(page);
+  log.addEntry(entry, page.id);
+
+  var obj = {
+    'har': log,
+    'url': item.url,
+    'method': item.method,
+    'type': 'saved'
+  };
+  return obj;
+};
 /**
  * Updgrade URL's history.
  */

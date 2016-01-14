@@ -20,6 +20,7 @@
   "background": {
     "scripts": [
       "libs/app.db.websql.js",
+      "libs/app.db.idb.js",
       "oauth2/oauth2.js",
       "background.js"
     ]
@@ -29,7 +30,7 @@
       "local_path": "RestClient.html"
     }
   },
-  "content_security_policy": "script-src 'self' https://apis.google.com https://ssl.google-analytics.com https://chromerestclient.appspot.com https://www-onepick-opensocial.googleusercontent.com; object-src 'self'",
+  "content_security_policy": "script-src 'self' https://apis.google.com https://www.google-analytics.com https://chromerestclient.appspot.com https://www-onepick-opensocial.googleusercontent.com; object-src 'self'",
   "content_scripts": [
     {
       "matches": [

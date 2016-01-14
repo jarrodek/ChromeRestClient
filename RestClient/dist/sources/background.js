@@ -14,27 +14,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
-/* global chrome, OAuth2, fetch, console */
+/* global chrome, fetch, console */
 /**
  * Background page for Advanced Rest Client.
  *
  */
 var dev = false;
-const CLIENT_ID = '10525470235.apps.googleusercontent.com';
-const CLIENT_SECRET = '4DERCyUerlYZDmc7qbneQlgf';
-const SCOPES = 'https://www.googleapis.com/auth/drive.install ' +
-  'https://www.googleapis.com/auth/drive.file ' +
-  'https://www.googleapis.com/auth/drive.readonly.metadata';
-
-window.googleAuth = null;
-
-function initOauth2Object() {
-  window.googleAuth = new OAuth2('google', {
-    'client_id': CLIENT_ID,
-    'client_secret': CLIENT_SECRET,
-    'api_scope': SCOPES
-  });
-}
 window.externalDataHolder = {};
 
 function MessageHandling(webRequest) {
@@ -121,63 +106,6 @@ MessageHandling.prototype.handleMessage = function(request, sendResponse, sender
   if (this[method]) {
     this[method](request, sendResponse, sender);
   }
-};
-
-MessageHandling.prototype.checkDriveAuth = function(request, sendResponse) {
-  if (request && request.forceNew) {
-    window.googleAuth.clear();
-    window.googleAuth = null;
-  }
-
-  if (!window.googleAuth) {
-    initOauth2Object();
-  }
-
-  var at = window.googleAuth.getAccessToken();
-  if (at && window.googleAuth.isAccessTokenExpired()) {
-    at = null;
-  }
-  var data = null;
-  if (at) {
-    data = {
-      'access_token': at,
-      'expires_in': 3600
-        /*window.googleAuth.get('expiresIn') - 
-               (~~((Date.now() - window.googleAuth.get('accessTokenDate')) / 1000))*/
-    };
-  }
-  sendResponse({
-    'payload': 'checkDriveAuth',
-    'response': data
-  });
-};
-MessageHandling.prototype.gdriveAuth = function(request, sendResponse) {
-  if (request && request.forceNew) {
-    window.googleAuth.clear();
-    window.googleAuth = null;
-  }
-  if (!window.googleAuth) {
-    initOauth2Object();
-  }
-  window.googleAuth.authorize(function() {
-    var at = window.googleAuth.getAccessToken();
-    if (at && window.googleAuth.isAccessTokenExpired()) {
-      at = null;
-    }
-    var data = null;
-    if (at) {
-      data = {
-        'access_token': at,
-        'expires_in': 3600
-          /*window.googleAuth.get('expiresIn') - (~~((Date.now() - 
-                   window.googleAuth.get('accessTokenDate')) / 1000))*/
-      };
-    }
-    sendResponse({
-      'payload': 'checkDriveAuth',
-      'response': data
-    });
-  });
 };
 MessageHandling.prototype.gdrive = function(request, sendResponse) {
   var query = request.params;
@@ -299,27 +227,6 @@ MessageHandling.prototype.runApplicationFromGoogleDrive = function(requestDetail
   window.externalDataHolder[uuid] = requestDetails;
   return viewTabUrl;
 };
-MessageHandling.prototype.finishOAuth = function(request, sendResponse, sender) {
-  var param = chrome.extension.getURL('oauth2/oauth2.html') + request.data;
-  var url = decodeURIComponent(param.match(/&from=([^&]+)/)[1]);
-  var index = url.indexOf('?');
-  if (index > -1) {
-    url = url.substring(0, index);
-  }
-  // Derive adapter name from URI and then finish the process.
-  try {
-    let adapterName = OAuth2.lookupAdapterName(url);
-    new OAuth2(adapterName, OAuth2.FINISH, param);
-    let senderId = sender ? sender.tab.id : null;
-    if (senderId) {
-      chrome.tabs.remove(senderId);
-    }
-  } catch (e) {
-    //@TODO: no body in background page
-    document.body.innerHTML = e.message;
-  }
-};
-
 /**
  * Advanced Rest Client namespace
  */
@@ -342,7 +249,7 @@ arc.app.bg.onInstalled = function(details) {
       arc.app.bg.performStorageUpgrade();
       break;
     case 'install':
-      arc.app.db.websql.open().then(function() {
+      arc.app.db.idb.open().then(function() {
         console.log('Database has been initialized');
         arc.app.bg.installApp();
       }).catch((e) => console.error('Error initializing the database.', e));
@@ -351,26 +258,16 @@ arc.app.bg.onInstalled = function(details) {
   }
 };
 /**
- * //TODO: Upgrade WebSQL to IndexedDb.
+ * 
  */
 arc.app.bg.installApp = function() {
-  chrome.storage.local.get({
-    'firstrun': false
-  }, function(result) {
-    if (result.firstrun) {
-      return;
-    }
-    arc.app.bg.downloadDefinitions()
-      .then(arc.app.bg.installDefinitions)
-      .then(() => {
-        console.log('App database has been filled with default values.');
-        chrome.storage.local.set({
-          'firstrun': true
-        });
-      })
-      .catch((r) => console.error('There was an error when filling up the database with ' +
-        'definitions.', r));
-  });
+  arc.app.bg.downloadDefinitions()
+  .then(arc.app.bg.installDefinitions)
+  .then(() => {
+    console.log('App database has been filled with default values.');
+  })
+  .catch((r) => console.error('There was an error when filling up the database with ' +
+    'definitions.', r));
 };
 /**
  * Add definitions to the database.
@@ -381,12 +278,12 @@ arc.app.bg.installDefinitions = function(defs) {
       'message': 'No definitions found'
     });
   }
-  return arc.app.db.websql.insertStatusCodes(defs.codes)
+  return arc.app.db.idb.insertStatusCodes(defs.codes)
     .then(function() {
       defs.requests.forEach((item) => item.type = 'request');
       defs.responses.forEach((item) => item.type = 'response');
       let save = defs.requests.concat(defs.responses);
-      return arc.app.db.websql.insertHeadersDefinitions(save);
+      return arc.app.db.idb.insertHeadersDefinitions(save);
     });
 };
 /**
@@ -487,13 +384,6 @@ arc.app.bg.performSettingsUpgrade = function() {
  */
 arc.app.bg.performLocalDataUpgrade = function() {
   var save = {};
-  var fr;
-  try {
-    fr = parseInt(localStorage.firstrun);
-  } catch (e) {}
-  if (fr) {
-    save.firstrun = fr;
-  }
   var lrd;
   try {
     // jscs:disable

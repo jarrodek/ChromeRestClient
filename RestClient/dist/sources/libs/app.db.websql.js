@@ -417,3 +417,16 @@ arc.app.db.websql.getProject = function(id) {
     }).catch((e) => reject(e));
   });
 };
+/**
+ * In dev mode there is no direct connection to the database initialized in the background page.
+ * This function must be called in Development environment to initialize WebSQL.
+ */
+arc.app.db.websql.initDev = function() {
+  if (arc.app.utils && !arc.app.utils.isProdMode()) {
+    arc.app.db.websql.open().then(function() {
+      console.log('%cDEVMODE::WebSQL has been initialized', 'color: #33691E');
+    }).catch((e) => console.error('DEVMODE::Error initializing the database', e));
+  }
+};
+
+arc.app.db.websql.initDev();

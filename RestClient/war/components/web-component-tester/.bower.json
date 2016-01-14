@@ -33,13 +33,13 @@
     "accessibility-developer-tools": "^2.10.0",
     "test-fixture": "polymerelements/test-fixture#^1.0.0"
   },
-  "version": "4.0.3",
+  "version": "4.1.0",
   "homepage": "https://github.com/Polymer/web-component-tester",
-  "_release": "4.0.3",
+  "_release": "4.1.0",
   "_resolution": {
     "type": "version",
-    "tag": "v4.0.3",
-    "commit": "f5688d78dae2dc90c3649c2fd377b4dae1a4af58"
+    "tag": "v4.1.0",
+    "commit": "21d24d4e5c74c54c8377b077ec787956e5e0c83e"
   },
   "_source": "git://github.com/Polymer/web-component-tester.git",
   "_target": "*",

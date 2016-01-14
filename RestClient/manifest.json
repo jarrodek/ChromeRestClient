@@ -1,5 +1,6 @@
 {
   "name": "Advanced REST client",
+  "short_name": "ARC",
   "description": "The web developers helper program to create and test custom HTTP requests.",
   "icons": {
     "16": "img/arc_icon_16.png",
@@ -8,6 +9,7 @@
   "version": "4.1.0",
   "version_name": "4.0.0-stable.1",
   "manifest_version": 2,
+  "minimum_chrome_version": "45",
   "permissions": [
     "webRequest",
     "<all_urls>",
