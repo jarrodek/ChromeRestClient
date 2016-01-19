@@ -92,7 +92,7 @@ app.arc.utils._appVer = null;
  *
  * @return {String} An ARC version. 
  */
-app.arc.utils.appVer = function() {
+arc.app.utils.appVer = function() {
   if(app.arc.utils._appVer) {
     return;
   }
