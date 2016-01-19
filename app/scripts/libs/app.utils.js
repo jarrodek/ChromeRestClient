@@ -31,6 +31,7 @@ arc.app.utils = {};
  * Generate a RFC4122, version 4 ID. Example:
  * "92329D39-6F5C-4520-ABFC-AAB64544E172"
  * http://stackoverflow.com/a/21963136/1127848
+ * @return {String} The UUID string.
  */
 arc.app.utils.uuid = function() {
   // jscs:disable
@@ -55,15 +56,10 @@ arc.app.utils.uuid = function() {
   /* jshint ignore:end */
 };
 /**
- * Check if the app is running in production mode.
- */
-arc.app.utils.isProdMode = function() {
-  return location.hostname !== '127.0.0.1';
-};
-/**
  * This function will search for links in the `input` and replace it with anchor.
  *
  * @param {String} input A search string
+ * @return {String} Parsed string.
  */
 arc.app.utils.autoLink = function(input) {
   var r = new RegExp('(https?:\\/\\/([^" >]*))', 'gim');
@@ -71,6 +67,8 @@ arc.app.utils.autoLink = function(input) {
 };
 /**
  * Escape characters to display HTML code.
+ *
+ * @return {String} Encoded string.
  */
 arc.app.utils.encodeHtml = function(input) {
   if (typeof input !== 'string') {
@@ -87,3 +85,17 @@ arc.app.utils.getChromeVersion = function() {
   var raw = navigator.userAgent.match(/Chrom[e|ium]\/([0-9\.]+)/);
   return raw ? raw[1] : '(not set)';
 };
+
+app.arc.utils._appVer = null;
+/**
+ * Get ARC version from the manifest file.
+ *
+ * @return {String} An ARC version. 
+ */
+app.arc.utils.appVer = function() {
+  if(app.arc.utils._appVer) {
+    return;
+  }
+  app.arc.utils._appVer = chrome.runtime.getManifest().version;
+  return app.arc.utils._appVer;
+}
