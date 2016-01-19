@@ -76,14 +76,19 @@ arc.app.utils.encodeHtml = function(input) {
   }
   return input.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 };
+arc.app.utils._chromeVersion = null;
 /**
  * Get Chrome full version.
  *
  * @return {String} A full version or `(not set)` is can't find.
  */
 arc.app.utils.getChromeVersion = function() {
+  if(arc.app.utils._chromeVersion) {
+    return arc.app.utils._chromeVersion;
+  }
   var raw = navigator.userAgent.match(/Chrom[e|ium]\/([0-9\.]+)/);
-  return raw ? raw[1] : '(not set)';
+  arc.app.utils._chromeVersion = raw ? raw[1] : '(not set)';
+  return arc.app.utils._chromeVersion;
 };
 
 arc.app.utils._appVer = null;
