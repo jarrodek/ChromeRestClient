@@ -86,7 +86,7 @@ arc.app.utils.getChromeVersion = function() {
   return raw ? raw[1] : '(not set)';
 };
 
-app.arc.utils._appVer = null;
+arc.app.utils._appVer = null;
 /**
  * Get ARC version from the manifest file.
  *
