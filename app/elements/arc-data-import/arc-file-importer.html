@@ -4,12 +4,15 @@
     :host {
       @apply(--layout-vertical);
     }
+    h2 {
+      @apply(--section-title);
+    }
     #fileDrop {
       margin-left: 24px;
     }
     </style>
     <template is="dom-if" if="{{!isFileImport}}">
-      <section class="import-file-section" id="fileImportSection">
+      <section id="fileImportSection">
         <h2 class="section-title">Import from file</h2>
         <file-drop id="fileDrop" on-file-ready="_onImportFile"></file-drop>
       </section>

@@ -20,26 +20,14 @@
       </div>
     </template>
     <template is="dom-if" if="{{!loading}}">
-      <arc-file-importer class="import-file-section" importing="{{_fileImporting}}" on-import="_importFileData"></arc-file-importer>
+      <template is="dom-if" if="{{_showFileImport}}">
+        <arc-file-importer class="import-file-section" importing="{{_fileImporting}}" on-import="_importFileData"></arc-file-importer>
+      </template>
+      <template is="dom-if" if="{{_showFileExport}}">
+        <arc-file-exporter class="import-file-section" exporting="{{_fileExporting}}"></arc-file-exporter>
+      </template>
     </template>
-    <template is="dom-if" if="{{_canShowFileExportSection(_fileImporting)}}">
-      <section class="import-file-section" id="fileExportSection">
-        <h2 class="section-title">Export to file</h2>
-        <div id="dataPrepareContainer" class="padding-section">
-          <p class="paper-font-caption">Prepare data to export first and wait until ready.</p>
-          <paper-button id="dataPrepareButton" class="actionButton">Prepare data to export</paper-button>
-        </div>
-        <div class="hidden padding-section" id="dataDownloadSpinner">
-          <paper-spinner active="true" alt="Preparing data"></paper-spinner>
-        </div>
-        <div class="hidden padding-section" id="dataDownload2">
-          <p class="paper-font-caption">Click on a button below to download your data.</p>
-          <paper-button raised="true" class="actionButton" id="dataDownload2Button">Download file</paper-button>
-          <paper-button id="dataDownloadCancel">Cancel</paper-button>
-        </div>
-      </section>
-    </template>
-    <template is="dom-if" if="{{_canShowServerSection(_fileImporting)}}">
+    <template is="dom-if" if="{{_showServerOptions}}">
       <section class="import-file-section" id="serverSection">
         <h2 class="section-title">Application server sync</h2>
         <div id="connectActionContainer" class="padding-section">

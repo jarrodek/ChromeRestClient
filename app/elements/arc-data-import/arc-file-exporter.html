@@ -1,0 +1,48 @@
+<dom-module id="arc-file-exporter">
+  <template>
+    <style>
+    :host {
+      @apply(--layout-vertical);
+    }
+    h2 {
+      @apply(--section-title);
+    }
+    .padding-section {
+      @apply(--section-padding);
+    }
+    .action-button {
+      @apply(--action-button);
+    }
+    .action-button:hover {
+      @apply(--action-button-hover);
+    }
+    p {
+      @apply(--paper-font-caption);
+    }
+    </style>
+    
+      <h2 class="section-title">Export to file</h2>
+      <template is="dom-if" if="{{loading}}">
+        <div class="padding-section">
+          <paper-spinner active="true" alt="Preparing data"></paper-spinner>
+        </div>
+      </template>
+      <template is="dom-if" if="{{!loading}}">
+        <template is="dom-if" if="{{!dataReady}}">
+          <div class="padding-section">
+            <p>Prepare data to export first and wait until ready.</p>
+            <paper-button class="action-button" on-transitionend="_prepareDataClick">Prepare data to export</paper-button>
+          </div>
+        </template>
+        <template is="dom-if" if="{{dataReady}}">
+          <div class="padding-section" id="dataDownload2">
+            <p>Click on a button below to download your data.</p>
+            <paper-button raised="true" class="action-button" id="dataDownload2Button">Download file</paper-button>
+            <paper-button id="dataDownloadCancel">Cancel</paper-button>
+          </div>
+        </template>
+      </template>
+    
+  </template>
+  <script src="arc-file-exporter.js"></script>
+</dom-module>

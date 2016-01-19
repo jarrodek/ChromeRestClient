@@ -1,0 +1,65 @@
+{
+  "id": "https://advancedrestclient.com/schemas/har/response.json",
+  "title": "Detailed info about the response",
+  "description": "This object contains detailed info about the response.",
+  "type": "object",
+  "required": [
+    "status",
+    "statusText",
+    "httpVersion",
+    "cookies",
+    "headers",
+    "content",
+    "redirectURL",
+    "headersSize",
+    "bodySize"
+  ],
+  "properties": {
+    "status": {
+      "type": "integer",
+      "description": "Response status."
+    },
+    "statusText": {
+      "type": "string",
+      "description": "Response status description."
+    },
+    "httpVersion": {
+      "type": "string",
+      "description": "Response HTTP Version."
+    },
+    "cookies": {
+      "type": "array",
+      "items": {
+        "$ref": "#cookie"
+      },
+      "description": "List of cookie objects."
+    },
+    "headers": {
+      "type": "array",
+      "items": {
+        "$ref": "#record"
+      },
+      "description": "List of header objects."
+    },
+    "content": {
+      "$ref": "#content",
+      "description": "Details about the response body."
+    },
+    "redirectURL": {
+      "type": "string",
+      "description": "Redirection target URL from the Location response header."
+    },
+    "headersSize": {
+      "type": "integer",
+      "description": "Total number of bytes from the start of the HTTP response message until (and including) the double CRLF before the body. Set to -1 if the info is not available."
+    },
+    "bodySize": {
+      "type": "integer",
+      "description": "Size of the received response body in bytes. Set to zero in case of responses coming from the cache (304). Set to -1 if the info is not available."
+    },
+    "comment": {
+      "type": "string",
+      "description": "A comment provided by the user or the application."
+    }
+  }
+}

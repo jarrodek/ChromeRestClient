@@ -178,3 +178,36 @@ arc.app.importer._createHARfromSql = function(item) {
   });
   return obj;
 };
+/**
+ * Prepare data for export.
+ */
+arc.app.importer.prepareExport = function() {
+  var db;
+  const result = {
+    requests: [],
+    projects: []
+  };
+  return arc.app.db.idb.open()
+    .then(function(_db) {
+      db = _db;
+      return db.requestObject.toArray();
+    })
+    .then(function(requests){
+      requests.forEach((item) => result.requests.push(new RequestObject(item)));
+      return db.projectObjects.toArray();
+    })
+    .then(function(projects){
+      projects.forEach((item) => result.projects.push(new ProjectObject(item)));
+      
+    })
+    .then(function(){
+      let exportObject = new FileExport({
+        requests: result.requests,
+        projects: result.projects
+      });
+      return exportObject;
+    })
+    .finally(function(){
+      db.close();
+    });
+};

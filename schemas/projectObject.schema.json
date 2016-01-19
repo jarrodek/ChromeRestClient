@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "https://advancedrestclient.com/schemas/projectObject.schema.json",
+  "title": "ARC project object",
+  "description": "An object representing project information.",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "String",
+      "id": "http://jsonschema.net/kind",
+      "default": "ARC#requestsProject",
+      "description": "Project namespace"
+    },
+    "id": {
+      "type": "number",
+      "description": "A database id. Can be undefined / null it the object wasn't saved yet."
+    },
+    "created": {
+      "type": "String",
+      "id": "http://jsonschema.net/createdAt",
+      "description": "A date of creation in RTF format."
+    },
+    "name": {
+      "type": "string",
+      "id": "http://jsonschema.net/name",
+      "description": "Name of the request"
+    },
+    "order": {
+      "id": "http://jsonschema.net/order",
+      "type": "number",
+      "title": "An order number on the list of projects."
+    },
+    "requestIds": {
+      "id": "http://jsonschema.net/requestIds",
+      "type": "array",
+      "title": "A list of ids to exported requests.",
+      "items": {
+        "type": "number",
+        "description": "A reference to the object in ARC#requestsDataExport#requests list"
+      }
+    }
+  }
+}

@@ -44,6 +44,22 @@ class BaseObject {
     }
   }
 
+  /**
+   * Override toJSON behaviour so it will eliminate
+   * all _* properies and replace it with a proper ones.
+   */
+  toJSON() {
+    var copy = Object.assign({}, this);
+    var keys = Object.keys(copy);
+    var under = keys.filter((key) => key.indexOf('_') === 0);
+    under.forEach((key) => {
+      let realKey = key.substr(1);
+      copy[realKey] = copy[key];
+      delete copy[key];
+    });
+    return copy;
+  }
+
 }
 
 /** 
@@ -56,6 +72,14 @@ class RequestObject extends BaseObject {
     super();
     super.assertRequiredKeys(['url', 'method', 'type'], opts);
 
+    if(opts.id) {
+      /**
+       * A database ID.
+       * It can be null / undefined if the object wasn't saved yet.
+       */
+      this.id = opts.id;
+    }
+
     /**
      * A HAR object containing request info.
      * To initialize this object use helper class HAR:
@@ -63,7 +87,8 @@ class RequestObject extends BaseObject {
      *
      * @type {HAR}
      */
-    this._har = null;
+    this._har = opts._har ? (opts._har instanceof HAR.Log) ? opts._har :
+      new HAR.Log(opts._har) : null;
     /**
      * Request URL. It's an index and part of keyPath in the database. Therefore it's required.
      *
@@ -85,7 +110,9 @@ class RequestObject extends BaseObject {
      */
     this.type = opts.type ? opts.type : null;
 
-    this.har = opts.har ? opts.har : null;
+    if (opts.har) {
+      this.har = opts.har;
+    }
   }
 
   set har(har) {
@@ -98,6 +125,10 @@ class RequestObject extends BaseObject {
 
   get har() {
     return this._har;
+  }
+
+  toJSON() {
+    return super.toJSON();
   }
 }
 /** 
@@ -114,6 +145,9 @@ class SavedRequestObject extends RequestObject {
     opts.type = 'saved';
     super(opts);
   }
+  toJSON() {
+    return super.toJSON();
+  }
 }
 /** 
  * A class of history requests objects.
@@ -129,6 +163,9 @@ class HistoryRequestObject extends RequestObject {
     opts.type = 'history';
     super(opts);
   }
+  toJSON() {
+    return super.toJSON();
+  }
 }
 /**
  * A class representing an entity in the data store with information about 
@@ -139,7 +176,7 @@ class DriveObject extends BaseObject {
 
   constructor(opts) {
     super();
-    
+
     super.assertRequiredKeys(['driveId', 'requestId'], opts);
     /**
      * A Google Drive item id.
@@ -226,49 +263,49 @@ class OrderedList extends BaseObject {
 
   constructor(opts) {
 
-    super();
+      super();
 
+      /**
+       * Project order on projects list
+       *
+       * @type {Number}
+       */
+      this.order = opts.order || 0;
+    }
     /**
-     * Project order on projects list
+     * Change the order of the element.
+     * This method will change the order of the element depending on arguments.
+     * Note that this method don't care on which list item is. Program should perform this operation
+     * only on elements that are already on the list.
+     * Object that is changing position can also be changed using this method so it's safe to use 
+     * it on all list elements.
+     * For example if you want to move element from position 7 to position 2 the function should 
+     * look as follows:
+     * ```
+     *  let list = [OrderedList1, OrderedList2, OrderedList3, OrderedList4, OrderedList5, 
+     *    OrderedList6, OrderedList7];
+     *  list.forEach((item) => {
+     *    item.changeOrder('up', 2, list[6], list[6].order);
+     *  });
+     *  // now list is:
+     *  // [OrderedList1, OrderedList2, OrderedList7, OrderedList3, OrderedList4, OrderedList5, 
+     *     OrderedList6]
+     * ```
+     * Note: positions (order) are zero-based.
      *
-     * @type {Number}
+     * @param {String} dir 
+     *                 The direction of the change. Set to `up` if the element should go up 
+     *                 on the list or `down` (default) otherwise.
+     * @param {Number} change 
+     *                 A target position of the moved element. If the element should finally 
+     *                 be at position 2 this value should be 2.
+     * @param {OrderedList} moved 
+     *                      A moved OrderedList object as a reference to compare if current object 
+     *                      is moved object.
+     * @param {Number} movedOrder 
+     *                 A base position of the moved element. If moved element previously was 
+     *                 at position 7 this value should be 7.
      */
-    this.order = opts.order || 0;
-  }
-  /**
-   * Change the order of the element.
-   * This method will change the order of the element depending on arguments.
-   * Note that this method don't care on which list item is. Program should perform this operation
-   * only on elements that are already on the list.
-   * Object that is changing position can also be changed using this method so it's safe to use 
-   * it on all list elements.
-   * For example if you want to move element from position 7 to position 2 the function should 
-   * look as follows:
-   * ```
-   *  let list = [OrderedList1, OrderedList2, OrderedList3, OrderedList4, OrderedList5, 
-   *    OrderedList6, OrderedList7];
-   *  list.forEach((item) => {
-   *    item.changeOrder('up', 2, list[6], list[6].order);
-   *  });
-   *  // now list is:
-   *  // [OrderedList1, OrderedList2, OrderedList7, OrderedList3, OrderedList4, OrderedList5, 
-   *     OrderedList6]
-   * ```
-   * Note: positions (order) are zero-based.
-   *
-   * @param {String} dir 
-   *                 The direction of the change. Set to `up` if the element should go up 
-   *                 on the list or `down` (default) otherwise.
-   * @param {Number} change 
-   *                 A target position of the moved element. If the element should finally 
-   *                 be at position 2 this value should be 2.
-   * @param {OrderedList} moved 
-   *                      A moved OrderedList object as a reference to compare if current object 
-   *                      is moved object.
-   * @param {Number} movedOrder 
-   *                 A base position of the moved element. If moved element previously was 
-   *                 at position 7 this value should be 7.
-   */
   changeOrder(dir, change, moved, movedOrder) {
     if (dir === 'up') {
       if (this.order === 0) {
@@ -329,6 +366,13 @@ class ProjectObject extends OrderedList {
     if (!(opts.requestIds instanceof Array)) {
       throw new Error('`requestIds` property must be an array of ids of request objects');
     }
+    if(opts.id) {
+      /**
+       * A database ID.
+       * It can be null / undefined if the object wasn't saved yet.
+       */
+      this.id = opts.id;
+    }
     /**
      * A list of all endpoints (RequestObjects) referenced to this project.
      *
@@ -359,5 +403,31 @@ class ProjectObject extends OrderedList {
       throw new Error('Request ID must be set.');
     }
     this.requestIds.push(requestIds);
+  }
+}
+/**
+ * A class representing data export object.
+ * This object will be used to export data to file as a structure wrapper.
+ */
+class FileExport extends BaseObject {
+  constructor(opts) {
+    super();
+    this.kind = 'ARC#requestsDataExport';
+    this.createdAt = new Date();
+    this.version = arc.app.utils.appVer();
+
+    if(!(opts.requests instanceof Array)) {
+      console.warn('The opts.requests is not an array. Overriding');
+      opts.requests = [];
+    }
+    if(!(opts.projects instanceof Array)) {
+      console.warn('The opts.projects is not an array. Overriding');
+      opts.projects = [];
+    }
+    opts.requests.forEach((item) => item.kind = 'ARC#requestsRequestObject');
+    opts.projects.forEach((item) => item.kind = 'ARC#requestsProject');
+
+    this.requests = opts.requests;
+    this.projects = opts.projects;
   }
 }
