@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<!-- arctest.app@gmail.com -->
+<html>
+
+<head>
+    <title>Advanced REST client</title>
+    <meta name="theme-color" content="#2E3AA1">
+    <link rel="stylesheet" href="styles/main.css">
+    <script src="scripts/head.js"></script>
+    <script src="/bower_components/webcomponentsjs/webcomponents.js"></script>
+    <link rel="import" href="elements/elements.html">
+    <style is="custom-style" include="shared-styles"></style>
+</head>
+
+<body unresolved>
+    <template is="dom-bind" id="app">
+        <arc-loader-screen id="appLOader" opened></arc-loader-screen>
+        <paper-drawer-panel responsive-width="1000px" id="paperDrawerPanel">
+            <paper-header-panel drawer>
+                <!-- Drawer Toolbar -->
+                <paper-toolbar>
+                    <div class="title">Title</div>
+                    <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
+                </paper-toolbar>
+                <!-- App Menu -->
+                <arc-menu route="[[route]]" base-url="[[baseUrl]]"></arc-menu>
+            </paper-header-panel>
+            <!-- Main Area -->
+            <paper-scroll-header-panel main id="headerPanelMain">
+                <!-- Main Toolbar -->
+                <paper-toolbar>
+                    <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
+                    <div class="flex title">Title</div>
+                    <paper-icon-button icon="search"></paper-icon-button>
+                    <paper-icon-button icon="more-vert"></paper-icon-button>
+                </paper-toolbar>
+                <!-- Main Content -->
+                <div class="content">
+                    <neon-animated-pages id="pages" attr-for-selected="data-route" selected-attribute="opened" selected="[[route]]" entry-animation="slide-from-right-animation" exit-animation="slide-left-animation">
+                        <neon-animatable data-route="request" on-iron-activate="_testEvent">
+                            <div class="rrr">
+                                Request
+                                <user-image profile-image="{{profileUrl}}" id="userImage"></user-image>
+                            </div>
+                        </neon-animatable>
+                        <neon-animatable data-route="socket" on-iron-activate="_testEvent">Socket</neon-animatable>
+                        <neon-animatable data-route="project">Project</neon-animatable>
+                        <neon-animatable data-route="history">History</neon-animatable>
+                        <neon-animatable data-route="saved">Saved</neon-animatable>
+                        <arc-data-import data-route="dataimport"></arc-data-import>
+                        <arc-settings data-route="settings"></arc-settings>
+                        <arc-about data-route="about"></arc-about>
+                    </neon-animated-pages>
+                </div>
+            </paper-scroll-header-panel>
+        </paper-drawer-panel>
+        <user-provider id="userProvider" profile-image="{{profileUrl}}"></user-provider>
+    </template>
+    
+    <script src="../bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
+    <script src="../bower_components/dexie-js/dist/latest/Dexie.min.js"></script>
+    <script src="../bower_components/har/build/har.js"></script>
+    <script src="scripts/libs/app.utils.js"></script>
+    <script src="scripts/libs/app.types.js"></script>
+    <script src="scripts/libs/app.headers.js"></script>
+    <script src="scripts/libs/app.db.idb.js"></script>
+    <script src="scripts/libs/app.js"></script>
+    <script src="scripts/libs/app.server.js"></script>
+    <script src="scripts/libs/app.request.js"></script>
+    <script src="scripts/libs/app.settings.js"></script>
+    <script src="scripts/libs/app.drive.js"></script>
+    <script src="scripts/libs/app.analytics.js"></script>
+    <script src="scripts/main.js"></script>
+</body>
+
+</html>

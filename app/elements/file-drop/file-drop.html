@@ -1,0 +1,40 @@
+
+<dom-module id="file-drop">
+  <style>
+  :host {
+    display: block;
+    min-height: 200px;
+    height: 100%;
+  }
+  .drop-zone {
+    max-width: 700px;
+    min-width: 320px;
+    width: 100%;
+    padding: 40px 120px;
+    border: 2px dashed var(--paper-lime-300);
+  }
+  .drop-zone.active {
+    border-color: red;
+  }
+  #file {
+    display: none;
+  }
+  .with-file {
+    opacity: 0;
+  }
+  .without-file {
+    opacity: 1;
+  }
+  </style>
+  <template>
+    <div id="main" class="layout vertical">
+      <section id="dropSection" class$="{{_dropSectionClass}}">
+        <p>Drop file here</p>
+        <p>or select from your device</p>
+        <paper-button raised on-tap="selectFile">Select</paper-button>
+        <input type="file" id="file" on-change="_manualSelected" />
+      </section>
+    </div>
+  </template>
+  <script src="file-drop.js"></script>
+</dom-module>

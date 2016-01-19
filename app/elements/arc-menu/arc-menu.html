@@ -1,0 +1,37 @@
+<html><head></head><body><dom-module id="arc-menu">
+    <template>
+        <style>
+        :host {
+            display: block;
+        }
+        
+        .sublist {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        </style>
+        <paper-menu selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap">
+            <paper-item data-route="request" data-place$="{{baseUrl}}">Request</paper-item>
+            <paper-item data-route="socket" data-place$="{{baseUrl}}socket">Socket</paper-item>
+            <paper-submenu>
+                <paper-item class="menu-trigger">Projects</paper-item>
+                <paper-menu class="menu-content sublist" selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap">
+                    <template is="dom-if" if="{{!projects}}">
+                        <paper-item>No projects here</paper-item>
+                    </template>
+                    <template is="dom-repeat" items="{{projects}}" sort="{{computeSort(projects)}}">
+                        <paper-item data-route$="{{baseUrl}}project/{{item.id}}" data-place$="{{_computeEnpointParameter(item.id)}}">{{item.name}}</paper-item>
+                    </template>
+                </paper-menu>
+            </paper-submenu>
+            <paper-item data-route="saved" data-place$="{{baseUrl}}saved">Saved</paper-item>
+            <template is="dom-if" if="{{!noHistory}}">
+                <paper-item data-route="history" data-place$="{{baseUrl}}history">History</paper-item>
+            </template>
+            <paper-item data-route="settings" data-place$="{{baseUrl}}settings">Settings</paper-item>
+            <paper-item data-route="about" data-place$="{{baseUrl}}about">About</paper-item>
+        </paper-menu>
+    </template>
+    <script src="arc-menu.html.0.js"></script>
+</dom-module>
+</body></html>

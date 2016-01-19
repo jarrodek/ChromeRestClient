@@ -1,0 +1,29 @@
+<dom-module id="user-image">
+    <template>
+        <style>
+        :host {
+            position: relative;
+            display: inline-block;
+            --iron-image-width: 40px;
+            --iron-image-height: 40px;
+        }
+        
+        iron-image {
+            border-radius: 50%;
+        }
+        
+        paper-ripple {
+            color: #EDEDED;
+        }
+        </style>
+        <template is="dom-if" if="{{hasImage}}">
+            <iron-image src="{{_pictureObjectUrl}}"></iron-image>
+            <paper-ripple class="circle" fit></paper-ripple>
+        </template>
+        <template is="dom-if" if="{{!hasImage}}">
+          <paper-icon-button icon="account-circle" alt="Profile"></paper-icon-button>
+        </template>
+        <iron-ajax id="fileRequest" handle-as="blob" method="GET" on-error="_userPictureError" on-response="_userPictureResponse" url="{{profileImage}}"></iron-ajax>
+    </template>
+    <script src="user-image.js"></script>
+</dom-module>

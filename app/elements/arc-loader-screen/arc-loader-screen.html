@@ -1,0 +1,38 @@
+<html><head></head><body><dom-module id="arc-loader-screen">
+  <template>
+    <style>
+      :host {
+        @apply(--layout-fit);
+        @apply(--layout-vertical);
+        @apply(--layout-center-center);
+        background-color: rgb(0, 30, 70);
+        color: white;
+        font-family: roboto;
+        z-index: 10;
+        --paper-spinner-color: var(--google-blue-500);
+      }
+      paper-spinner-lite {
+        margin-top: 20px;
+        width: 16px;
+        height: 16px;
+      }
+      #container{
+        @apply(--layout-vertical);
+        @apply(--layout-center-center);
+      }
+      .splash-status-message {
+        @apply(--paper-font-headline);
+      }
+    </style>
+    <div id="container">
+      <div class="splash-image">
+        <img src="/assets/arc_icon_128.png" alt="Loading" width="128" height="128">
+      </div>
+      <div class="splash-status">
+        <span class="splash-status-message">Advanced REST client</span>
+      </div>
+      <paper-spinner-lite active$="{{opened}}"></paper-spinner-lite>
+    </div>
+  </template>
+  <script src="arc-loader-screen.html.0.js"></script>
+</dom-module></body></html>

@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "devDependencies": {
+    "gulp": "^3.8.5",
+    "gulp-connect": "^2.3.1"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  }
+}
