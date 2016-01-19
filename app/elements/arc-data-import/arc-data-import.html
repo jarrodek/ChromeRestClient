@@ -1,76 +1,68 @@
 <dom-module id="arc-data-import">
-    <template>
-        <style>
-        :host {
-            @apply(--layout-vertical);
-            padding: 20px 0;
-        }
-        
-        .import-file-section {
-            margin-bottom: 40px;
-        }
-        
-        #fileDrop {
-            margin-left: 24px;
-        }
-        
-        .padding-section {
-            padding-left: 24px;
-        }
-        </style>
-        <section class="import-file-section" id="fileImportSection">
-            <h2 class="section-title">Import from file</h2>
-            <template is="dom-if" if="{{!isFileImport}}">
-                <file-drop id="fileDrop" on-file-ready="_onImportFile"></file-drop>
-                <div id="fileImportSpinner" class="hidden">
-                    <paper-spinner active="true" alt="Preparing data"></paper-spinner>
-                </div>
-            </template>
-            <template is="dom-if" if="{{isFileImport}}">
-                <arc-import-data-table projects="{{importData.projects}}" requests="{{importData.requests}}"></arc-import-data-table>
-            </template>
-        </section>
-        <template is="dom-if" if="{{_canShowFileExportSection(importData)}}">
-            <section class="import-file-section" id="fileExportSection">
-                <h2 class="section-title">Export to file</h2>
-                <div id="dataPrepareContainer" class="padding-section">
-                    <p class="paper-font-caption">Prepare data to export first and wait until ready.</p>
-                    <paper-button id="dataPrepareButton" class="actionButton">Prepare data to export</paper-button>
-                </div>
-                <div class="hidden padding-section" id="dataDownloadSpinner">
-                    <paper-spinner active="true" alt="Preparing data"></paper-spinner>
-                </div>
-                <div class="hidden padding-section" id="dataDownload2">
-                    <p class="paper-font-caption">Click on a button below to download your data.</p>
-                    <paper-button raised="true" class="actionButton" id="dataDownload2Button">Download file</paper-button>
-                    <paper-button id="dataDownloadCancel">Cancel</paper-button>
-                </div>
-            </section>
-        </template>
-        <template is="dom-if" if="{{_canShowServerSection(importData)}}">
-            <section class="import-file-section" id="serverSection">
-                <h2 class="section-title">Application server sync</h2>
-                <div id="connectActionContainer" class="padding-section">
-                    <paper-button raised="true" id="connectButton">Connect with server</paper-button>
-                </div>
-                <div id="storeDataPanel" class="padding-section">
-                    <p class="paper-font-caption">You can store your date an application server and share it between different machines or people.</p>
-                    <p>
-                        <paper-button id="storeDataButton" class="actionButton">Store your data</paper-button>
-                        <paper-button id="restoreDataButton" class="actionButton">Restore your data</paper-button>
-                    </p>
-                </div>
-                <div id="shareUrlPanel" class="padding-section">
-                    <p class="paper-font-caption">You can share all your saved data by giving someone link below:</p>
-                    <pre class="Import_Export_shareLink" id="shareLink"></pre>
-                </div>
-                <div id="serverSpinner" class="padding-section hidden">
-                    <paper-spinner active="true" alt="Preparing data"></paper-spinner>
-                </div>
-                <server-import-data-table id="serverImportDataTable" class="hidden"></server-import-data-table>
-            </section>
-        </template>
-        <file-reader id="fileReader" readAs="text" on-file-read="_importFileReady" on-file-error="_importFileError" auto></file-reader>
+  <template>
+    <style>
+    :host {
+      @apply(--layout-vertical);
+      padding: 20px 0;
+    }
+    
+    .import-file-section {
+      margin-bottom: 40px;
+    }
+    
+    .padding-section {
+      padding-left: 24px;
+    }
+    </style>
+    <template is="dom-if" if="{{loading}}">
+      <div class="hidden padding-section" id="dataDownloadSpinner">
+        <paper-spinner active="true" alt="Preparing data"></paper-spinner>
+      </div>
     </template>
-    <script src="arc-data-import.js"></script>
+    <template is="dom-if" if="{{!loading}}">
+      <arc-file-importer class="import-file-section" importing="{{_fileImporting}}" on-import="_importFileData"></arc-file-importer>
+    </template>
+    <template is="dom-if" if="{{_canShowFileExportSection(_fileImporting)}}">
+      <section class="import-file-section" id="fileExportSection">
+        <h2 class="section-title">Export to file</h2>
+        <div id="dataPrepareContainer" class="padding-section">
+          <p class="paper-font-caption">Prepare data to export first and wait until ready.</p>
+          <paper-button id="dataPrepareButton" class="actionButton">Prepare data to export</paper-button>
+        </div>
+        <div class="hidden padding-section" id="dataDownloadSpinner">
+          <paper-spinner active="true" alt="Preparing data"></paper-spinner>
+        </div>
+        <div class="hidden padding-section" id="dataDownload2">
+          <p class="paper-font-caption">Click on a button below to download your data.</p>
+          <paper-button raised="true" class="actionButton" id="dataDownload2Button">Download file</paper-button>
+          <paper-button id="dataDownloadCancel">Cancel</paper-button>
+        </div>
+      </section>
+    </template>
+    <template is="dom-if" if="{{_canShowServerSection(_fileImporting)}}">
+      <section class="import-file-section" id="serverSection">
+        <h2 class="section-title">Application server sync</h2>
+        <div id="connectActionContainer" class="padding-section">
+          <paper-button raised="true" id="connectButton">Connect with server</paper-button>
+        </div>
+        <div id="storeDataPanel" class="padding-section">
+          <p class="paper-font-caption">You can store your date an application server and share it between different machines or people.</p>
+          <p>
+            <paper-button id="storeDataButton" class="actionButton">Store your data</paper-button>
+            <paper-button id="restoreDataButton" class="actionButton">Restore your data</paper-button>
+          </p>
+        </div>
+        <div id="shareUrlPanel" class="padding-section">
+          <p class="paper-font-caption">You can share all your saved data by giving someone link below:</p>
+          <pre class="Import_Export_shareLink" id="shareLink"></pre>
+        </div>
+        <div id="serverSpinner" class="padding-section hidden">
+          <paper-spinner active="true" alt="Preparing data"></paper-spinner>
+        </div>
+        <server-import-data-table id="serverImportDataTable" class="hidden"></server-import-data-table>
+      </section>
+    </template>
+    
+  </template>
+  <script src="arc-data-import.js"></script>
 </dom-module>

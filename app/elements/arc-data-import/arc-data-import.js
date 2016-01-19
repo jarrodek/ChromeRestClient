@@ -5,68 +5,42 @@ Polymer({
   ],
 
   properties: {
-    importData: {
-      type: Object,
-      value: {
-        projects: [],
-        requests: []
-      }
-    },
-    isFileImport: {
+    /**
+     * True if some data are computed.
+     */
+    loading: {
+      notify: true,
+      readOnly: true,
       type: Boolean,
-      computed: '_computeFileImportPreview(importData)'
-    }
+      value: false
+    },
+    /**
+     * A flag set by `arc-file-importer` to determine if there is file import ongoing.
+     */
+    _fileImporting: Boolean
   },
 
-  /**
-   * Restore import view to regular state.
-   */
-  resetImportView: function() {
-
+  _canShowFileExportSection: function(_fileImporting) {
+    return !_fileImporting;
   },
 
-
-  _onImportFile: function(e) {
-    var file = e.detail.file;
-    if (!file) {
-      return;
-    }
-    this.$.fileReader.blob = file;
+  _canShowServerSection: function(_fileImporting) {
+    return !_fileImporting;
   },
 
-  _importFileReady: function(e) {
-    if (e.detail.result) {
-      try {
-        this.importData = JSON.parse(e.detail.result);
-      } catch (e) {
-        //TODO: add status message
-        console.error('arc-data-import::_importFileReady::JSON.parse::error', e);
-        var fileDrop = Polymer.dom(this.root).querySelector('#fileDrop');
-        if (fileDrop) {
-          fileDrop.reset();
-        }
-      }
-    }
-  },
-
-  _importFileError: function(e) {
-    //TODO: add status message
-    console.error('arc-data-import::_importFileError', e);
-    var fileDrop = Polymer.dom(this.root).querySelector('#fileDrop');
-    if (fileDrop) {
-      fileDrop.reset();
-    }
-  },
-
-  _computeFileImportPreview: function(importData) {
-    return importData.projects.length || importData.requests.length;
-  },
-
-  _canShowFileExportSection: function(importData) {
-    return !(importData.projects.length || importData.requests.length);
-  },
-
-  _canShowServerSection: function(importData) {
-    return !(importData.projects.length || importData.requests.length);
+  _importFileData: function(e) {
+    this._setLoading(true);
+    arc.app.importer.saveFileData(e.detail.data)
+      .then(function() {
+        //TODO: notify the user.
+        console.info('Data imported.');
+      }.bind(this))
+      .catch(function(cause) {
+        console.info('Data import error.', cause);
+      })
+      .finally(function() {
+        this._setLoading(false);
+      }.bind(this));
+    console.log('_importFileData', e.detail);
   }
 });
