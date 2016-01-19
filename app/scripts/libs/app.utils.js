@@ -93,9 +93,9 @@ arc.app.utils._appVer = null;
  * @return {String} An ARC version. 
  */
 arc.app.utils.appVer = function() {
-  if(app.arc.utils._appVer) {
-    return;
+  if(arc.app.utils._appVer) {
+    return arc.app.utils._appVer;
   }
-  app.arc.utils._appVer = chrome.runtime.getManifest().version;
-  return app.arc.utils._appVer;
+  arc.app.utils._appVer = chrome.runtime.getManifest().version;
+  return arc.app.utils._appVer;
 }
