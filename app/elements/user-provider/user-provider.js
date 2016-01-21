@@ -1,3 +1,5 @@
+'use strict';
+
 Polymer({
   is: 'user-provider',
 
@@ -19,10 +21,6 @@ Polymer({
      * User profile image. The information will be retreived from the Google API
      * after successfoul authorization.
      * It can be use by different element to display user image.
-     *
-     * @attribute profileImage
-     * @type String
-     * @default null
      */
     profileImage: {
       type: String,
@@ -89,8 +87,8 @@ Polymer({
   /**
    * Authorize the user using Chrome Identity API for Google Accounts.
    *
-   * @param {Bool} interactive 
-   *    if true user will see confirmation dialog if the user is not logged in. 
+   * @param {Bool} interactive
+   *    if true user will see confirmation dialog if the user is not logged in.
    *    If false dialog will never show and function will result with token == null.
    */
   authorize: function(interactive) {
@@ -139,7 +137,7 @@ Polymer({
   /**
    * A function to be called when the token has been revoked.
    */
-  _tokenRevokedHandler: function(e) {
+  _tokenRevokedHandler: function() {
     this._clearCache().then(function() {
       this._setAuthorized(false);
     }.bind(this));
@@ -147,7 +145,7 @@ Polymer({
   /**
    * Revoke error handler.
    */
-  _tokenRevokeError: function(e) {
+  _tokenRevokeError: function() {
     console.warn('Token revoke failed.');
   },
   /**
@@ -173,8 +171,12 @@ Polymer({
    */
   _tokenInfoHandler: function(e) {
     var tokenInfo = e.detail.response;
-    if (!tokenInfo) return;
+    if (!tokenInfo) {
+      return;
+    }
+    //jscs: disable
     if (tokenInfo.expires_in <= 0) {
+      //jscs: enable
       this._setAuthorized(false);
     }
   },
@@ -198,7 +200,7 @@ Polymer({
       this.profileImage = resp.response.picture;
     }
   },
-  
+
   _userDataError: function(error) {
     //TODO: error handling
     console.error('user-account::userDataError:', error);

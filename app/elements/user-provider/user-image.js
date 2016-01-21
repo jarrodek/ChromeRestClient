@@ -1,3 +1,5 @@
+'use strict';
+
 Polymer({
   is: 'user-image',
 
@@ -43,8 +45,9 @@ Polymer({
    * Called when profileImage attribute change. Then it will process the image.
    */
   _observeProfileImage: function() {
-    if (!this.profileImage || this._pictureObjectUrl)
+    if (!this.profileImage || this._pictureObjectUrl) {
       return;
+    }
     this._processLocalImage();
   },
   /**
@@ -57,7 +60,7 @@ Polymer({
     filename = filename.replace(/\//g, '_') + '.' + ext;
 
     this._filename = filename;
-    window.webkitRequestFileSystem(PERSISTENT, 1024 * 1024, function(fs) {
+    window.webkitRequestFileSystem(window.PERSISTENT, 1024 * 1024, function(fs) {
       var fsURL = fs.root.toURL() + this._path + '/' + this._filename;
       window.webkitResolveLocalFileSystemURL(fsURL, function(entry) {
         this._pictureObjectUrl = entry.toURL();
@@ -108,7 +111,7 @@ Polymer({
         console.warn('Error write user\'s thumbnail in filesystem', e);
         reject(e);
       };
-      window.webkitRequestFileSystem(PERSISTENT, 1024 * 1024, function(fs) {
+      window.webkitRequestFileSystem(window.PERSISTENT, 1024 * 1024, function(fs) {
         fs.root.getDirectory(this.FOLDERNAME, {
           create: true
         }, function(dirEntry) {

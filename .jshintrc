@@ -2,7 +2,7 @@
   "esnext": true,
   "node": true,
   "browser": true,
-  "bitwise": true,
+  "bitwise": false,
   "camelcase": false,
   "curly": true,
   "eqeqeq": true,
@@ -18,8 +18,20 @@
     "wrap": true,
     "unwrap": true,
     "Polymer": true,
-    "Platform": true,
     "page": true,
-    "app": true
+    "arc": true,
+    "ArcBehaviors": true,
+    "chrome": true,
+    "KeyframeEffect": true,
+    "StatusNotification": true,
+    "HAR": true,
+    "HistoryUrlObject": true,
+    "HistorySocketObject": true,
+    "ProjectObject": true,
+    "ServerExportedObject": true,
+    "RequestObject": true,
+    "fetch": true,
+    "Dexie": true,
+    "FileExport": true
   }
 }

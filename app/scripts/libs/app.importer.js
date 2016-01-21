@@ -1,22 +1,19 @@
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
-
-/* global Dexie, chrome, HAR, HistoryUrlObject, HistorySocketObject, ProjectObject, 
-ServerExportedObject, RequestObject */
 
 /**
  * Advanced Rest Client namespace
@@ -39,7 +36,7 @@ arc.app.importer.saveFileData = function(data) {
   data.requests.forEach((item) => {
     try {
       let obj = arc.app.importer._createHARfromSql(item);
-      //just for import, to be removed before save. 
+      //just for import, to be removed before save.
       if (item.project) {
         obj.project = item.project;
       }
@@ -107,7 +104,7 @@ arc.app.importer.saveFileData = function(data) {
 /**
  * To be used to transform old system data to new data structure.
  *
- * @param {Object} item 
+ * @param {Object} item
  *  {
  *    "url": "Request URL",
  *    "method": "Request HTTP method",
@@ -192,22 +189,22 @@ arc.app.importer.prepareExport = function() {
       db = _db;
       return db.requestObject.toArray();
     })
-    .then(function(requests){
+    .then(function(requests) {
       requests.forEach((item) => result.requests.push(new RequestObject(item)));
       return db.projectObjects.toArray();
     })
-    .then(function(projects){
+    .then(function(projects) {
       projects.forEach((item) => result.projects.push(new ProjectObject(item)));
-      
+
     })
-    .then(function(){
+    .then(function() {
       let exportObject = new FileExport({
         requests: result.requests,
         projects: result.projects
       });
       return exportObject;
     })
-    .finally(function(){
+    .finally(function() {
       db.close();
     });
 };

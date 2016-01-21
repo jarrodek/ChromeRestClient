@@ -1,13 +1,13 @@
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -27,7 +27,7 @@ class BaseObject {
 
   /**
    * Check if [passed] object contains all required properties declared in [required] array.
-   * This method will throw an [Error] when required parameter is missing. 
+   * This method will throw an [Error] when required parameter is missing.
    *
    * @param {Array<String>} required An array of required parameters.
    * @param {Object} passed An object on which test properties
@@ -62,7 +62,7 @@ class BaseObject {
 
 }
 
-/** 
+/**
  * A base class for request object.
  * This object will be stored in the database.
  */
@@ -72,7 +72,7 @@ class RequestObject extends BaseObject {
     super();
     super.assertRequiredKeys(['url', 'method', 'type'], opts);
 
-    if(opts.id) {
+    if (opts.id) {
       /**
        * A database ID.
        * It can be null / undefined if the object wasn't saved yet.
@@ -96,7 +96,7 @@ class RequestObject extends BaseObject {
      */
     this.url = opts.url;
     /**
-     * Request HTTP method. 
+     * Request HTTP method.
      * It's an index and part of keyPath in the database. Therefore it's required.
      *
      * @type {String}
@@ -131,7 +131,7 @@ class RequestObject extends BaseObject {
     return super.toJSON();
   }
 }
-/** 
+/**
  * A class of saved requests objects.
  * It's just a shorthand class, enlivenment for:
  * ```
@@ -149,7 +149,7 @@ class SavedRequestObject extends RequestObject {
     return super.toJSON();
   }
 }
-/** 
+/**
  * A class of history requests objects.
  * It's just a shorthand class, enlivenment for:
  * ```
@@ -168,7 +168,7 @@ class HistoryRequestObject extends RequestObject {
   }
 }
 /**
- * A class representing an entity in the data store with information about 
+ * A class representing an entity in the data store with information about
  * Google Drive referenced items.
  */
 // jshint unused:false
@@ -193,7 +193,7 @@ class DriveObject extends BaseObject {
   }
 }
 /**
- * A class representing an entity in the data store with information 
+ * A class representing an entity in the data store with information
  * about export to app server.
  */
 // jshint unused:false
@@ -262,7 +262,6 @@ class HistorySocketObject extends UrlObject {
 class OrderedList extends BaseObject {
 
   constructor(opts) {
-
       super();
 
       /**
@@ -277,33 +276,33 @@ class OrderedList extends BaseObject {
      * This method will change the order of the element depending on arguments.
      * Note that this method don't care on which list item is. Program should perform this operation
      * only on elements that are already on the list.
-     * Object that is changing position can also be changed using this method so it's safe to use 
+     * Object that is changing position can also be changed using this method so it's safe to use
      * it on all list elements.
-     * For example if you want to move element from position 7 to position 2 the function should 
+     * For example if you want to move element from position 7 to position 2 the function should
      * look as follows:
      * ```
-     *  let list = [OrderedList1, OrderedList2, OrderedList3, OrderedList4, OrderedList5, 
+     *  let list = [OrderedList1, OrderedList2, OrderedList3, OrderedList4, OrderedList5,
      *    OrderedList6, OrderedList7];
      *  list.forEach((item) => {
      *    item.changeOrder('up', 2, list[6], list[6].order);
      *  });
      *  // now list is:
-     *  // [OrderedList1, OrderedList2, OrderedList7, OrderedList3, OrderedList4, OrderedList5, 
+     *  // [OrderedList1, OrderedList2, OrderedList7, OrderedList3, OrderedList4, OrderedList5,
      *     OrderedList6]
      * ```
      * Note: positions (order) are zero-based.
      *
-     * @param {String} dir 
-     *                 The direction of the change. Set to `up` if the element should go up 
+     * @param {String} dir
+     *                 The direction of the change. Set to `up` if the element should go up
      *                 on the list or `down` (default) otherwise.
-     * @param {Number} change 
-     *                 A target position of the moved element. If the element should finally 
+     * @param {Number} change
+     *                 A target position of the moved element. If the element should finally
      *                 be at position 2 this value should be 2.
-     * @param {OrderedList} moved 
-     *                      A moved OrderedList object as a reference to compare if current object 
+     * @param {OrderedList} moved
+     *                      A moved OrderedList object as a reference to compare if current object
      *                      is moved object.
-     * @param {Number} movedOrder 
-     *                 A base position of the moved element. If moved element previously was 
+     * @param {Number} movedOrder
+     *                 A base position of the moved element. If moved element previously was
      *                 at position 7 this value should be 7.
      */
   changeOrder(dir, change, moved, movedOrder) {
@@ -366,7 +365,7 @@ class ProjectObject extends OrderedList {
     if (!(opts.requestIds instanceof Array)) {
       throw new Error('`requestIds` property must be an array of ids of request objects');
     }
-    if(opts.id) {
+    if (opts.id) {
       /**
        * A database ID.
        * It can be null / undefined if the object wasn't saved yet.
@@ -416,11 +415,11 @@ class FileExport extends BaseObject {
     this.createdAt = new Date();
     this.version = arc.app.utils.appVer();
 
-    if(!(opts.requests instanceof Array)) {
+    if (!(opts.requests instanceof Array)) {
       console.warn('The opts.requests is not an array. Overriding');
       opts.requests = [];
     }
-    if(!(opts.projects instanceof Array)) {
+    if (!(opts.projects instanceof Array)) {
       console.warn('The opts.projects is not an array. Overriding');
       opts.projects = [];
     }

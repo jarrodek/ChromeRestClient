@@ -1,0 +1,75 @@
+<!--
+@license
+Copyright 2016 Pawel Psztyc, The ARC team
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+--><!--
+This element is to fix an issue #347
+https://github.com/jarrodek/ChromeRestClient/issues/347
+
+When the app is using paper-item as a line for header line it is impossible to
+copy header line text in one line because it is copied in two lines (HTML behavior).
+And because of it the user can't properly paste headers into notepad / headers input in the app.
+
+This element will imitate paper-item but without using flex layout.
+--><html><head></head><body><dom-module id="arc-header-line-display-view">
+    <template>
+        <style>
+        :host {
+            @apply(--paper-font-subhead);
+            min-height: 24px;
+            padding: 0px 16px;
+            display: block;
+        }
+
+        :host(.iron-selected) {
+            font-weight: var(--paper-item-selected-weight, bold);
+            @apply(--paper-item-selected);
+        }
+
+        :host([disabled]) {
+            color: var(--paper-item-disabled-color, --disabled-text-color);
+            @apply(--paper-item-disabled);
+        }
+
+        :host(:focus) {
+            position: relative;
+            outline: 0;
+            @apply(--paper-item-focused);
+        }
+
+        :host(:focus):before {
+            @apply(--layout-fit);
+            content: '';
+            background: currentColor;
+            opacity: var(--dark-divider-opacity);
+            pointer-events: none;
+            @apply(--paper-item-focused-before);
+        }
+
+        .header-name {
+            padding-right: 8px;
+            @apply(--paper-font-body2);
+        }
+
+        .header-value {
+            @apply(--paper-font-body1);
+            @apply(--layout-flex);
+            word-break: break-all;
+        }
+        </style>
+        <span class="header-name">{{headerName}}:</span>
+        <arc-header-value-display-view class="header-value" value="[[headerValue]]"></arc-header-value-display-view>
+    </template>
+    </dom-module>
+<script src="arc-header-line-display-view.js"></script></body></html>

@@ -28,6 +28,4 @@
     app.$.paperDrawerPanel.closeDrawer();
   };
 
-
-
 })(document, window);

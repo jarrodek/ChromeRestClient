@@ -1,3 +1,5 @@
+'use strict';
+
 Polymer({
   is: 'file-drop',
   listeners: {

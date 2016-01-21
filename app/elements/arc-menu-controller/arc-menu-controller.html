@@ -1,0 +1,58 @@
+<!--
+@license
+Copyright 2016 Pawel Psztyc, The ARC team
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+--><html><head></head>
+
+<body>
+  <dom-module id="arc-menu-controller">
+    <template>
+      <style>
+      :host {
+        display: block;
+      }
+
+      .sublist {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+      </style>
+      <paper-menu selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap">
+        <paper-item data-route="request" data-place$="{{baseUrl}}">Request</paper-item>
+        <paper-item data-route="socket" data-place$="{{baseUrl}}socket">Socket</paper-item>
+        <paper-submenu>
+          <paper-item class="menu-trigger">Projects</paper-item>
+          <paper-menu class="menu-content sublist" selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap">
+            <template is="dom-if" if="{{!projects}}">
+              <paper-item>No projects here</paper-item>
+            </template>
+            <template is="dom-repeat" items="{{projects}}" sort="{{computeSort(projects)}}">
+              <paper-item data-route$="{{baseUrl}}project/{{item.id}}" data-place$="{{_computeEnpointParameter(item.id)}}">{{item.name}}</paper-item>
+            </template>
+          </paper-menu>
+        </paper-submenu>
+        <paper-item data-route="saved" data-place$="{{baseUrl}}saved">Saved</paper-item>
+        <template is="dom-if" if="{{!noHistory}}">
+          <paper-item data-route="history" data-place$="{{baseUrl}}history">History</paper-item>
+        </template>
+        <paper-item data-route="settings" data-place$="{{baseUrl}}settings">Settings</paper-item>
+        <paper-item data-route="about" data-place$="{{baseUrl}}about">About</paper-item>
+      </paper-menu>
+    </template>
+  </dom-module>
+  <script src="arc-menu-controller.js"></script>
+
+
+
+</body></html>

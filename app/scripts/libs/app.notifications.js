@@ -1,13 +1,13 @@
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -18,9 +18,9 @@
 /**
  * A base object for all types with helper methods.
  */
-class StatusNotification {  
+class StatusNotification {
   /**
-   * Special type of notification when the user see a message and have more than one option 
+   * Special type of notification when the user see a message and have more than one option
    * to click. Status element will always include "dismiss" message.
    *
    * @param {Object} opts Initialization object:
@@ -32,10 +32,10 @@ class StatusNotification {
    * @param {Function} callback Optional function to call when the user click on the action button.
    */
   static notify(opts, callback) {
-    if(callback && !opts.actionName) {
+    if (callback && !opts.actionName) {
       throw new Error('You need to set `actionName` option when setting callback');
     }
-    if(!opts.timeout && opts.timeout !== 0) {
+    if (!opts.timeout && opts.timeout !== 0) {
       opts.timeout = StatusNotification.TIME_SHORT;
     }
     var toast;
@@ -52,7 +52,7 @@ class StatusNotification {
       toast.duration = opts.timeout;
       let label = document.createElement('paper-button');
       label.innerText = isCallback ? opts.actionName : 'Close';
-      let fn = function(e) {
+      let fn = function() {
         label.removeEventListener('click', fn);
         toast.close();
         if (isCallback) {
@@ -66,7 +66,7 @@ class StatusNotification {
       //replace action
       let label = Polymer.dom(toast.root)
         .querySelector('paper-button');
-      let fn = function(e) {
+      let fn = function() {
         label.removeEventListener('click', fn);
         toast.close();
         if (isCallback) {

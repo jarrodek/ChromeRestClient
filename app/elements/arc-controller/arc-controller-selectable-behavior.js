@@ -1,3 +1,5 @@
+'use strict';
+
 window.ArcBehaviors = window.ArcBehaviors || {};
 /** @polymerBehavior */
 ArcBehaviors.ArcControllerSelectableBehaviorImpl = {
@@ -25,7 +27,7 @@ ArcBehaviors.ArcControllerSelectableBehaviorImpl = {
   },
   /**
    * A handler to be called when the controller selection change.
-   * If the controller is deselected, `onHide` function will be called only when 
+   * If the controller is deselected, `onHide` function will be called only when
    * `mayStop` function return true.
    */
   _onOpenedChanged: function() {

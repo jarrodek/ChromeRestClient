@@ -23,7 +23,7 @@
                     <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
                 </paper-toolbar>
                 <!-- App Menu -->
-                <arc-menu route="[[route]]" base-url="[[baseUrl]]"></arc-menu>
+                <arc-menu-controller route="[[route]]" base-url="[[baseUrl]]"></arc-menu-controller>
             </paper-header-panel>
             <!-- Main Area -->
             <paper-scroll-header-panel main id="headerPanelMain">
@@ -47,16 +47,16 @@
                         <neon-animatable data-route="project">Project</neon-animatable>
                         <neon-animatable data-route="history">History</neon-animatable>
                         <neon-animatable data-route="saved">Saved</neon-animatable>
-                        <arc-data-import data-route="dataimport"></arc-data-import>
-                        <arc-settings data-route="settings"></arc-settings>
-                        <arc-about data-route="about"></arc-about>
+                        <arc-data-import-controller data-route="dataimport"></arc-data-import-controller>
+                        <arc-settings-controller data-route="settings"></arc-settings-controller>
+                        <arc-about-controller data-route="about"></arc-about-controller>
                     </neon-animated-pages>
                 </div>
             </paper-scroll-header-panel>
         </paper-drawer-panel>
         <user-provider id="userProvider" profile-image="{{profileUrl}}"></user-provider>
     </template>
-    
+
     <script src="../bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
     <script src="../bower_components/dexie-js/dist/latest/Dexie.min.js"></script>
     <script src="../bower_components/har/build/har.js"></script>

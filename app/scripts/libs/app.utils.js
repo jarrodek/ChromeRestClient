@@ -1,13 +1,13 @@
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -45,9 +45,9 @@ arc.app.utils.uuid = function() {
     var d1 = Math.random() * 0xffffffff | 0;
     var d2 = Math.random() * 0xffffffff | 0;
     var d3 = Math.random() * 0xffffffff | 0;
-    return lut[d0 & 0xff] + lut[d0 >> 8 & 0xff] + lut[d0 >> 16 & 0xff] + 
-      lut[d0 >> 24 & 0xff] + '-' + lut[d1 & 0xff] + lut[d1 >> 8 & 0xff] + '-' + 
-      lut[d1 >> 16 & 0x0f | 0x40] + lut[d1 >> 24 & 0xff] + '-' + lut[d2 & 0x3f | 0x80] + 
+    return lut[d0 & 0xff] + lut[d0 >> 8 & 0xff] + lut[d0 >> 16 & 0xff] +
+      lut[d0 >> 24 & 0xff] + '-' + lut[d1 & 0xff] + lut[d1 >> 8 & 0xff] + '-' +
+      lut[d1 >> 16 & 0x0f | 0x40] + lut[d1 >> 24 & 0xff] + '-' + lut[d2 & 0x3f | 0x80] +
       lut[d2 >> 8 & 0xff] + '-' + lut[d2 >> 16 & 0xff] + lut[d2 >> 24 & 0xff] +
       lut[d3 & 0xff] + lut[d3 >> 8 & 0xff] + lut[d3 >> 16 & 0xff] + lut[d3 >> 24 & 0xff];
   };
@@ -83,7 +83,7 @@ arc.app.utils._chromeVersion = null;
  * @return {String} A full version or `(not set)` is can't find.
  */
 arc.app.utils.getChromeVersion = function() {
-  if(arc.app.utils._chromeVersion) {
+  if (arc.app.utils._chromeVersion) {
     return arc.app.utils._chromeVersion;
   }
   var raw = navigator.userAgent.match(/Chrom[e|ium]\/([0-9\.]+)/);
@@ -95,12 +95,12 @@ arc.app.utils._appVer = null;
 /**
  * Get ARC version from the manifest file.
  *
- * @return {String} An ARC version. 
+ * @return {String} An ARC version.
  */
 arc.app.utils.appVer = function() {
-  if(arc.app.utils._appVer) {
+  if (arc.app.utils._appVer) {
     return arc.app.utils._appVer;
   }
   arc.app.utils._appVer = chrome.runtime.getManifest().version;
   return arc.app.utils._appVer;
-}
+};
