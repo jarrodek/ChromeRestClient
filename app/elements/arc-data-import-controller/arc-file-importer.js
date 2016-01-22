@@ -74,9 +74,12 @@ Polymer({
    */
   _importFileError: function(e) {
     this._setImporting(false);
-    //TODO: add status message
-    console.error('arc-data-import::_importFileError', e);
+    StatusNotification.notify({
+      message: 'File read error.'
+    });
     this._resetFileDrop();
+    console.error('arc-data-import::_importFileError', e);
+    arc.app.analytics.sendException(e.detail.message, true);
   },
   /** Compute is file is being imported. */
   _computeFileImportPreview: function(importData) {
@@ -84,7 +87,7 @@ Polymer({
   },
 
   /**
-   * A handler to be called when the user decide to import from file or cancel the operation.
+   * This handler is called when the user decide to import from file or cancel the operation.
    */
   _importTableAction: function(e) {
     var action = e.detail.action;

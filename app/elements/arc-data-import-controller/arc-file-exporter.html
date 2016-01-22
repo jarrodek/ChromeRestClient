@@ -66,12 +66,13 @@ Example:
       <template is="dom-if" if="{{dataReady}}">
         <div class="padding-section" id="dataDownload2">
           <p>Click on a button below to download your data.</p>
-          <paper-button raised="true" class="action-button" id="dataDownload2Button">Download file</paper-button>
-          <paper-button id="dataDownloadCancel">Cancel</paper-button>
+          <paper-button raised="true" class="action-button" on-tap="_saveData">Download file</paper-button>
+          <paper-button on-tap="_cancelExport">Cancel</paper-button>
         </div>
       </template>
     </template>
+    <chrome-app-filesystem id="writer" content="[[_writableContent]]" mime="application/json" read-as="json" file-name="[[_fileSuggestedName]]" on-error="_saveFileError" on-file-save="_fileSavedHandler"></chrome-app-filesystem>
   </template>
-  <script src="arc-file-exporter.js"></script>
 </dom-module>
+<script src="arc-file-exporter.js"></script>
 </body></html>

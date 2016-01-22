@@ -38,7 +38,7 @@ the License.
               <paper-item>No projects here</paper-item>
             </template>
             <template is="dom-repeat" items="{{projects}}" sort="{{computeSort(projects)}}">
-              <paper-item data-route$="{{baseUrl}}project/{{item.id}}" data-place$="{{_computeEnpointParameter(item.id)}}">{{item.name}}</paper-item>
+              <paper-item data-route$="request/project/{{item.id}}" data-place$="{{baseUrl}}request/project/{{item.id}}">{{item.name}}</paper-item>
             </template>
           </paper-menu>
         </paper-submenu>
@@ -52,7 +52,4 @@ the License.
     </template>
   </dom-module>
   <script src="arc-menu-controller.js"></script>
-
-
-
 </body></html>

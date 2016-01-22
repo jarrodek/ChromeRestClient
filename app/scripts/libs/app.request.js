@@ -1,13 +1,13 @@
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -40,9 +40,7 @@ arc.app.server.request = {};
  */
 arc.app.server.request.init = function() {
   var root = 'https://chromerestclient.appspot.com/';
-  // @if NODE_ENV='debug'
-  root = 'http://127.0.0.1:8888/';
-  // @endif
+  //root = 'http://127.0.0.1:8888/';
   arc.app.server.request.SERVICE_URL = root + 'ext-channel';
   arc.app.server.request.PING_URL = root + 'ping/session';
   arc.app.server.request.AUTH_URL = root + 'auth';
@@ -115,7 +113,7 @@ arc.app.server.request.messagesRequest = function(since) {
  * During the data import first it will download a list of suggestions.
  * This list contain a projection of user data stored on the server.
  *
- * @param {String} uid Uid of the user to import data from. Default to "me" which means logged in 
+ * @param {String} uid Uid of the user to import data from. Default to "me" which means logged in
  *                used data.
  */
 arc.app.server.request.importSuggestionsRequest = function(uid) {

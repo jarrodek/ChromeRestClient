@@ -96,6 +96,10 @@ Polymer({
       try {
         let options = this._authOptions(interactive);
         chrome.identity.getAuthToken(options, function(token) {
+          if (chrome.runtime.lastError) {
+            reject(chrome.runtime.lastError);
+            return;
+          }
           resolve(token);
         }.bind(this));
       } catch (e) {

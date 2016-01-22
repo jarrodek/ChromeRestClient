@@ -51,31 +51,10 @@ Example:
       <template is="dom-if" if="{{_showFileExport}}">
         <arc-file-exporter class="import-file-section" exporting="{{_fileExporting}}"></arc-file-exporter>
       </template>
+      <template is="dom-if" if="{{_showServerOptions}}">
+        <arc-server-exporter></arc-server-exporter>
+      </template>
     </template>
-    <template is="dom-if" if="{{_showServerOptions}}">
-      <section class="import-file-section" id="serverSection">
-        <h2 class="section-title">Application server sync</h2>
-        <div id="connectActionContainer" class="padding-section">
-          <paper-button raised="true" id="connectButton">Connect with server</paper-button>
-        </div>
-        <div id="storeDataPanel" class="padding-section">
-          <p class="paper-font-caption">You can store your date an application server and share it between different machines or people.</p>
-          <p>
-            <paper-button id="storeDataButton" class="actionButton">Store your data</paper-button>
-            <paper-button id="restoreDataButton" class="actionButton">Restore your data</paper-button>
-          </p>
-        </div>
-        <div id="shareUrlPanel" class="padding-section">
-          <p class="paper-font-caption">You can share all your saved data by giving someone link below:</p>
-          <pre class="Import_Export_shareLink" id="shareLink"></pre>
-        </div>
-        <div id="serverSpinner" class="padding-section hidden">
-          <paper-spinner active="true" alt="Preparing data"></paper-spinner>
-        </div>
-        <server-import-data-table id="serverImportDataTable" class="hidden"></server-import-data-table>
-      </section>
-    </template>
-
   </template>
   <script src="arc-data-import-controller.js"></script>
 </dom-module>

@@ -24,16 +24,20 @@ Polymer({
       readOnly: true,
       type: Boolean,
       value: false
-    }
+    },
+    _writableContent: Object,
+    _fileSuggestedName: String
   },
   /**
    * A handler for click on a "prepare data" button.
    */
   _prepareDataClick: function() {
+    this._setExporting(true);
+    this._setLoading(true);
+    this._setDataReady(false);
     this.debounce('export-click', function() {
-      this._setExporting(true);
-      this._setLoading(true);
       this._prepareData();
+      arc.app.analytics.sendEvent('Settings usage', 'Export data', 'Generate file');
     }, 50);
   },
   /**
@@ -44,20 +48,54 @@ Polymer({
   _prepareData: function() {
     arc.app.importer.prepareExport()
       .then(function(data) {
-        let toExport;
-        try {
-          toExport = JSON.stringify(data);
-        } catch (e) {
-          console.error('Unable to prepare data to export.', e.message);
-          throw e;
-        }
+        this._writableContent = data;
         this._setLoading(false);
         this._setDataReady(true);
-        console.log(data, toExport);
       }.bind(this))
       .catch((cause) => {
         console.error(cause);
-        arc.app.analytics.sendException(cause.message, true);
+        StatusNotification.notify({
+          message: cause.message
+        });
+        arc.app.analytics.sendException(cause.message, false);
       });
+  },
+  _saveData: function() {
+    var date = new Date();
+    var day = date.getDate();
+    var year = date.getFullYear();
+    var month = date.getMonth() + 1;
+    this._fileSuggestedName = 'arc-' + day + '-' + month + '-' + year + '-export.json';
+    this.$.writer.write();
+  },
+
+  _saveFileError: function(e) {
+    this._setDataReady(true);
+    this._setLoading(false);
+    this._setExporting(true);
+    StatusNotification.notify({
+      message: e.detail.message
+    });
+    arc.app.analytics.sendException(e.detail.message, true);
+    console.error('_saveFileError', e);
+  },
+
+  _fileSavedHandler: function() {
+    this._setDataReady(false);
+    this._setLoading(false);
+    this._setExporting(false);
+    this._writableContent = null;
+    this._fileSuggestedName = null;
+    StatusNotification.notify({
+      message: 'Data exported'
+    });
+  },
+
+  _cancelExport: function() {
+    this._setDataReady(false);
+    this._setLoading(false);
+    this._setExporting(false);
+    this._writableContent = null;
+    this._fileSuggestedName = null;
   }
 });

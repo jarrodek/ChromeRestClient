@@ -1,13 +1,13 @@
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -63,14 +63,17 @@ arc.app.server.hasSession = function(callback) {
 arc.app.server._authTab = null;
 /**
  * Authorize the user in the app.
+ * TODO: This needs new approach:
+ * - Redirect the user to the server's auth callback
+ * - from the page call chrome.runtime.sendExtensionMessage
+ * - handle message in the background page and call the app
+ * - listen (here) for message form BG page and change session state if nescessary.
+ * TODO 02: Use AppEngine Oauth provider and use chrome.identity API for server authentication.   
  */
 arc.app.server.auth = function() {
   var returnPath = '';
-  if (arc.app.utils.isProdMode()) {
-    returnPath = 'chrome-extension://' + chrome.runtime.id + '/auth.html#auth';
-  } else {
-    returnPath = 'http://127.0.0.1:8888/auth.html#auth';
-  }
+  returnPath = 'chrome-extension://' + chrome.runtime.id + '/auth.html#auth';
+  returnPath = 'http://127.0.0.1:8888/auth.html#auth';
   var url = arc.app.server.request.AUTH_URL;
   url += '/signin?ret=';
   var regexp = /%20/g;

@@ -215,3 +215,15 @@ arc.app.db.idb.getHistoryUrls = function(query) {
         });
     });
 };
+/**
+ * List entries from the `projects` table.
+ * This function will result null if projects table is empty.
+ */
+arc.app.db.idb.listProjects = function() {
+  return arc.app.db.idb.open()
+  .then((db) => {
+    let projects = db.projectObjects.toArray();
+    db.close();
+    return projects;
+  });
+};

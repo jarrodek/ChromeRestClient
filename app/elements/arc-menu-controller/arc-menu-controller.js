@@ -27,8 +27,8 @@ Polymer({
     }
   },
   attached: function() {
-    //this._restoreProjects();
-    console.info('arc-menu has been attached');
+    this._restoreProjects();
+    //console.info('arc-menu has been attached');
   },
 
   _itemTap: function(e) {
@@ -39,7 +39,7 @@ Polymer({
   },
   _restoreProjects: function() {
     try {
-      arc.app.db.websql.listProjects()
+      arc.app.db.idb.listProjects()
         .then(function(list) {
           this.projects = list;
         }.bind(this));

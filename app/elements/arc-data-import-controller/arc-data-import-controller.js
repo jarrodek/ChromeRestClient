@@ -41,6 +41,25 @@ Polymer({
     }
   },
   /**
+   * Ping server for session state on show.
+   */
+  onShow: function() {
+    this.checkServerSession();
+  },
+  /**
+   * Ask server about user session.
+   */
+  checkServerSession: function() {
+    arc.app.server.hasSession(function(session) {
+      let ase = Polymer.dom(this.root).querySelector('arc-server-exporter');
+      if (session.error) {
+        ase.serverError = true;
+        return;
+      }
+      ase.session = session;
+    }.bind(this));
+  },
+  /**
    * to be removed?
    */
   _canShowFileImport: function(_fileExporting) {
@@ -77,10 +96,11 @@ Polymer({
             'to the developer.',
           timeout: StatusNotification.TIME_SHORT
         });
+        arc.app.analytics.sendException(cause.message, false);
       })
       .finally(function() {
         this._setLoading(false);
       }.bind(this));
-    //console.log('_importFileData', e.detail);
+    arc.app.analytics.sendEvent('Settings usage', 'Import data', 'From file');
   }
 });
