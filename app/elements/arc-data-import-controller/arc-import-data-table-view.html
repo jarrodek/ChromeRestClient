@@ -13,7 +13,8 @@ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
---><!--
+-->
+<!--
 The `arc-import-data-table-view` is an element to display table with file import data.
 
 It is not responsible for import logic. This element is just a view.
@@ -24,119 +25,127 @@ Example:
 
 @group Arc Elements
 @element arc-import-data-table-view
---><html><head></head><body><dom-module id="arc-import-data-table-view">
-  <style>
-  :host {
-    display: block;
-    min-height: 200px;
-    height: 100%;
-  }
+-->
+<html>
 
-  .table {}
+<head></head>
 
-  .table-header {
-    height: 64px;
-  }
+<body>
+  <dom-module id="arc-import-data-table-view">
+    <style>
+    :host {
+      display: block;
+      min-height: 200px;
+      height: 100%;
+    }
 
-  .table-columns {
-    height: 56px;
-    font-family: 'Roboto';
-    font-weight: 500;
-    color: rgba(0, 0, 0, 0.54);
-    font-size: 12px;
-  }
+    .table {}
 
-  .table-values {
-    height: 48px;
-    font-family: 'Roboto';
-    color: rgba(0, 0, 0, 0.87);
-    font-size: 13px;
-  }
+    .table-header {
+      height: 64px;
+    }
 
-  .project-column,
-  .name-column,
-  .method-column {
-    padding-right: 24px;
-  }
+    .table-columns {
+      height: 56px;
+      font-family: 'Roboto';
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.54);
+      font-size: 12px;
+    }
 
-  .project-column {
-    min-width: 120px;
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+    .table-values {
+      height: 48px;
+      font-family: 'Roboto';
+      color: rgba(0, 0, 0, 0.87);
+      font-size: 13px;
+    }
 
-  .name-column {
-    min-width: 120px;
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+    .project-column,
+    .name-column,
+    .method-column {
+      padding-right: 24px;
+    }
 
-  .method-column {
-    min-width: 100px;
-    max-width: 100px;
-  }
+    .project-column {
+      min-width: 120px;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
-  .url-column {}
+    .name-column {
+      min-width: 120px;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
-  .actionButton {
-    background-color: #4285f4;
-    color: #fff;
-  }
+    .method-column {
+      min-width: 100px;
+      max-width: 100px;
+    }
 
-  h2 {
-    font-size: 20px;
-    color: rgba(0, 0, 0, 0.87);
-    font-family: 'Roboto';
-    font-weight: 400;
-    padding: 0 24px;
-  }
+    .url-column {}
 
-  .table-values,
-  .table-columns {
-    border-bottom: 1px rgba(0, 0, 0, 0.12) solid;
-    padding: 0 24px;
-  }
+    .actionButton {
+      background-color: #4285f4;
+      color: #fff;
+    }
 
-  .table-columns:last-child {
-    border-bottom: 1px rgba(0, 0, 0, 0) solid;
-  }
-  </style>
-  <template>
-    <div class="flex layout vertical table">
-      <div class="table-header layout horizontal center">
-        <h2 class="flex">Import preview</h2>
-        <paper-button raised="" class="actionButton" on-tap="importTap">import</paper-button>
-        <paper-button on-tap="cancelTap">cancel</paper-button>
-      </div>
-      <div class="table-columns layout horizontal center">
-        <div class="project-column" id="projectColumn">Project</div>
-        <div class="name-column" id="nameColumn">Name</div>
-        <div class="method-column" id="methodColumn">Method</div>
-        <div class="url-column" id="urlColumn">URL</div>
-        <paper-tooltip for="projectColumn">If the request has been added to the project it will display project name</paper-tooltip>
-        <paper-tooltip for="nameColumn">The request name added when saving</paper-tooltip>
-        <paper-tooltip for="methodColumn">The request HTTP method</paper-tooltip>
-        <paper-tooltip for="urlColumn">Full URL saved with the request</paper-tooltip>
-      </div>
-      <template is="dom-repeat" items="{{requests}}">
-        <div class="table-values layout horizontal center">
-          <div class="project-column">{{_computeProjectName(item, projects)}}</div>
-          <div class="name-column">{{item.name}}</div>
-          <div class="method-column">{{item.method}}</div>
-          <div class="url-column">{{item.url}}</div>
+    h2 {
+      font-size: 20px;
+      color: rgba(0, 0, 0, 0.87);
+      font-family: 'Roboto';
+      font-weight: 400;
+      padding: 0 24px;
+    }
+
+    .table-values,
+    .table-columns {
+      border-bottom: 1px rgba(0, 0, 0, 0.12) solid;
+      padding: 0 24px;
+    }
+
+    .table-columns:last-child {
+      border-bottom: 1px rgba(0, 0, 0, 0) solid;
+    }
+    </style>
+    <template>
+      <div class="flex layout vertical table">
+        <div class="table-header layout horizontal center">
+          <h2 class="flex">Import preview</h2>
+          <paper-button raised="" class="actionButton" on-tap="importTap">import</paper-button>
+          <paper-button on-tap="cancelTap">cancel</paper-button>
         </div>
-      </template>
-      <div class="table-columns layout horizontal center">
-        <div class="flex"></div>
-        <paper-button raised="" class="actionButton" on-tap="importTap">import</paper-button>
-        <paper-button on-tap="cancelTap">cancel</paper-button>
+        <div class="table-columns layout horizontal center">
+          <div class="project-column" id="projectColumn">Project</div>
+          <div class="name-column" id="nameColumn">Name</div>
+          <div class="method-column" id="methodColumn">Method</div>
+          <div class="url-column" id="urlColumn">URL</div>
+          <paper-tooltip for="projectColumn">If the request has been added to the project it will display project name</paper-tooltip>
+          <paper-tooltip for="nameColumn">The request name added when saving</paper-tooltip>
+          <paper-tooltip for="methodColumn">The request HTTP method</paper-tooltip>
+          <paper-tooltip for="urlColumn">Full URL saved with the request</paper-tooltip>
+        </div>
+        <template is="dom-repeat" items="{{requests}}">
+          <div class="table-values layout horizontal center">
+            <div class="project-column">{{_computeProjectName(item, projects)}}</div>
+            <div class="name-column">{{item.name}}</div>
+            <div class="method-column">{{item.method}}</div>
+            <div class="url-column">{{item.url}}</div>
+          </div>
+        </template>
+        <div class="table-columns layout horizontal center">
+          <div class="flex"></div>
+          <paper-button raised="" class="actionButton" on-tap="importTap">import</paper-button>
+          <paper-button on-tap="cancelTap">cancel</paper-button>
+        </div>
       </div>
-    </div>
-  </template>
-  <script src="arc-import-data-table-view.js"></script>
-</dom-module>
-</body></html>
+    </template>
+    <script src="arc-import-data-table-view.js"></script>
+  </dom-module>
+</body>
+
+</html>
