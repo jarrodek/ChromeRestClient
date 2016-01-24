@@ -65,11 +65,7 @@ Polymer({
         this._setAuthorized(false);
         return;
       }
-      this.authHeaders = {
-        'Authorization': 'Bearer ' + accessToken
-      };
-      this.accessToken = accessToken;
-      this._setAuthorized(true);
+      this._setTokenData(accessToken);
     }.bind(this)).catch(function(e) {
       console.error('user-provider::restore', e);
     });
@@ -84,6 +80,14 @@ Polymer({
     }
   },
 
+  _setTokenData: function(accessToken) {
+    this.authHeaders = {
+      'Authorization': 'Bearer ' + accessToken
+    };
+    this.accessToken = accessToken;
+    this._setAuthorized(true);
+  },
+
   /**
    * Authorize the user using Chrome Identity API for Google Accounts.
    *
@@ -95,12 +99,14 @@ Polymer({
     return new Promise(function(resolve, reject) {
       try {
         let options = this._authOptions(interactive);
-        chrome.identity.getAuthToken(options, function(token) {
+        chrome.identity.getAuthToken(options, function(accessToken) {
           if (chrome.runtime.lastError) {
+            this._setAuthorized(false);
             reject(chrome.runtime.lastError);
             return;
           }
-          resolve(token);
+          this._setTokenData(accessToken);
+          resolve(accessToken);
         }.bind(this));
       } catch (e) {
         console.error(e);

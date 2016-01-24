@@ -52,10 +52,11 @@ Example:
         <arc-file-exporter class="import-file-section" exporting="{{_fileExporting}}"></arc-file-exporter>
       </template>
       <template is="dom-if" if="{{_showServerOptions}}">
-        <arc-server-exporter></arc-server-exporter>
+        <arc-server-exporter on-connect="_connectAppServer" authorized="[[authorized]]"></arc-server-exporter>
       </template>
     </template>
+    <user-provider id="userProvider" authorized="{{authorized}}"></user-provider>
   </template>
-  <script src="arc-data-import-controller.js"></script>
 </dom-module>
+<script src="arc-data-import-controller.js"></script>
 </body></html>

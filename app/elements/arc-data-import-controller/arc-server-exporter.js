@@ -22,19 +22,23 @@ Polymer({
       type: Boolean,
       readOnly: true,
       value: false,
-      computed: '_canShowConnect(session.state)'
+      computed: '_canShowConnect(authorized)'
     },
     /** True if import/export options should be visible */
     showActions: {
       type: Boolean,
       readOnly: true,
       value: false,
-      computed: '_canShowActions(session.state)'
+      computed: '_canShowActions(authorized)'
     },
     /** True when loader should be shown. */
     loading: {
       type: Boolean,
       readOnly: true,
+      value: false
+    },
+    authorized: {
+      type: Boolean,
       value: false
     }
   },
@@ -47,11 +51,11 @@ Polymer({
     return state < 1;
   },
   /** Compute if can show import / export actions */
-  _canShowActions: function(state) {
-    return state > 0;
+  _canShowActions: function(authorized) {
+    return authorized;
   },
   /** Connect with the server */
   connect: function() {
-    
+    this.fire('connect');
   }
 });

@@ -45,6 +45,15 @@
 		<servlet-name>MessagesServlet</servlet-name>
 		<url-pattern>/messages/*</url-pattern>
 	</servlet-mapping>
+	<!-- Data import / export -->
+	<servlet>
+		<servlet-name>dataImportExport</servlet-name>
+		<servlet-class>org.rest.server.DataImportExportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>dataImportExport</servlet-name>
+		<url-pattern>/api/*</url-pattern>
+	</servlet-mapping>
 	<!-- Extension entry point servlet -->
 	<servlet>
 		<servlet-name>extensionEntry</servlet-name>

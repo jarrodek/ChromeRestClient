@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
 	<application>chromerestclient</application>
-	<version>2-rc</version>
+	<version>3-rc</version>
 
 	<!-- By default, App Engine sends requests serially to a given web server. 
 		To allow App Engine to send multiple requests in parallel specify: <threadsafe>true</threadsafe> -->

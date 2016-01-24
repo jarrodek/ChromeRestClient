@@ -44,20 +44,7 @@ Polymer({
    * Ping server for session state on show.
    */
   onShow: function() {
-    this.checkServerSession();
-  },
-  /**
-   * Ask server about user session.
-   */
-  checkServerSession: function() {
-    arc.app.server.hasSession(function(session) {
-      let ase = Polymer.dom(this.root).querySelector('arc-server-exporter');
-      if (session.error) {
-        ase.serverError = true;
-        return;
-      }
-      ase.session = session;
-    }.bind(this));
+
   },
   /**
    * to be removed?
@@ -90,17 +77,30 @@ Polymer({
         });
       }.bind(this))
       .catch(function(cause) {
-        console.info('Data import error.', cause);
+        console.error('Data import error.', cause);
         StatusNotification.notify({
           message: 'Unable to import data. Error details has been send ' +
             'to the developer.',
           timeout: StatusNotification.TIME_SHORT
         });
-        arc.app.analytics.sendException(cause.message, false);
+        arc.app.analytics.sendException('arc-data-import-controller::connectAppServer' +
+          cause.message, false);
       })
       .finally(function() {
         this._setLoading(false);
       }.bind(this));
     arc.app.analytics.sendEvent('Settings usage', 'Import data', 'From file');
+  },
+  /** Authorize the app. */
+  _connectAppServer: function() {
+    this.$.userProvider.authorize(true)
+    .catch((err) => {
+      StatusNotification.notify({
+        message: 'Unable to authorize.',
+        timeout: StatusNotification.TIME_SHORT
+      });
+      arc.app.analytics.sendException('arc-data-import-controller::connectAppServer' +
+        err, false);
+    });
   }
 });

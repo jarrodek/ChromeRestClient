@@ -1,0 +1,46 @@
+<dom-module id="arc-saved-list-item">
+  <template>
+    <style>
+    :host {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      @apply(--table-list-item);
+      position: relative;
+      overflow: visible;
+    }
+    :host([checked]) {
+      background-color: var(--table-background-color-selected, #F5F5F5);
+    }
+    .checkbox-column {
+      @apply(--table-checkbox-value);
+    }
+    .name-column {
+      @apply(--table-name-value);
+    }
+    .method-column {
+      @apply(--table-method-value);
+    }
+    .url-column {
+      @apply(--table-url-value);
+    }
+    .action-column {
+      @apply(--table-action-value);
+    }
+    paper-dialog {
+      position: absolute;
+      top: -24px;
+      left: 24px;
+    }
+    </style>
+    <div class="checkbox-column">
+      <paper-checkbox checked="{{checked}}"></paper-checkbox>
+    </div>
+    <div class="name-column" on-tap="_editName" id="nameColumn">
+      <span>[[arrayItem(request.har.pages.*, 0, 'title')]]</span>
+    </div>
+    <div class="method-column">{{request.method}}</div>
+    <div class="url-column">{{request.url}}</div>
+    <div class="action-column">Actions</div>
+  </template>
+  <script src="arc-saved-list-item.js"></script>
+</dom-module>

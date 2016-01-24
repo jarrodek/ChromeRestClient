@@ -68,20 +68,30 @@ arc.app.server._authTab = null;
  * - from the page call chrome.runtime.sendExtensionMessage
  * - handle message in the background page and call the app
  * - listen (here) for message form BG page and change session state if nescessary.
- * TODO 02: Use AppEngine Oauth provider and use chrome.identity API for server authentication.   
+ * TODO 02: Use AppEngine Oauth provider and use chrome.identity API for server authentication.
  */
 arc.app.server.auth = function() {
-  var returnPath = '';
-  returnPath = 'chrome-extension://' + chrome.runtime.id + '/auth.html#auth';
-  returnPath = 'http://127.0.0.1:8888/auth.html#auth';
-  var url = arc.app.server.request.AUTH_URL;
-  url += '/signin?ret=';
-  var regexp = /%20/g;
-  url = url + encodeURIComponent(returnPath).replace(regexp, '+');
-  chrome.tabs.create({
-    url: url
-  }, function(tab) {
-    arc.app.server._authTab = tab.id;
+  return new Promise(function(resolve, reject) {
+    var returnPath = 'https://' + chrome.runtime.id + '.chromiumapp.org/appengine_auth';
+    var url = arc.app.server.request.AUTH_URL;
+    url += '/signin?ret=';
+    var regexp = /%20/g;
+    url = url + encodeURIComponent(returnPath).replace(regexp, '+');
+    chrome.identity.launchWebAuthFlow({
+      'url': url,
+      'interactive': true
+    }, function(redirectUrl) {
+      if(chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      } else {
+        let index = redirectUrl.indexOf('auth=1');
+        if(index !== -1) {
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      }
+    });
   });
 };
 /**

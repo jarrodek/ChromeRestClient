@@ -18,6 +18,7 @@ import com.google.appengine.api.users.User;
 
 @PersistenceCapable
 public class AppUser {
+	
 	/**
 	 * key from userID
 	 */
