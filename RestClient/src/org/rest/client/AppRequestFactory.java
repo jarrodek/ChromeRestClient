@@ -58,12 +58,6 @@ public class AppRequestFactory {
 	private static boolean requestInProgress = false;
 	
 	/**
-	 * @return true if some request is already in progress.
-	 */
-	public static boolean isRequestInProgress(){
-		return requestInProgress;
-	}
-	/**
 	 * Initialize class.
 	 * @param ev
 	 */
@@ -281,7 +275,7 @@ public class AppRequestFactory {
 		}
 	}
 	
-	protected static void onSuccesRequest(final Response response) {
+	private static void onSuccesRequest(final Response response) {
 		if(RestClient.isDebug()){
 			Log.debug("Request sent successfully. Building response view.");
 		}
@@ -396,7 +390,7 @@ public class AppRequestFactory {
 		});
 	}
 	
-	protected static void onFailureRequest(final Response response) {
+	private static void onFailureRequest(final Response response) {
 		requestInProgress = false;
 		ScheduledCommand sc = new ScheduledCommand() {
 			@Override

@@ -21,11 +21,11 @@ import com.google.gwt.user.client.ui.PopupPanel;
 @SuppressWarnings("deprecation")
 public class HeaderSupportAuthorizationImpl implements HeaderSupport {
 	
-	AuthorizeDialog dialog = new AuthorizeDialog();
+	private AuthorizeDialog dialog = new AuthorizeDialog();
 	private Callback<String, String> callback;
-	String value = null;
-	String[] baseParams = null;
-	List<OauthParam> oauthParams = null;
+	private String value = null;
+	private String[] baseParams = null;
+	private List<OauthParam> oauthParams = null;
 	
 	public HeaderSupportAuthorizationImpl(){
 		this.value = null;

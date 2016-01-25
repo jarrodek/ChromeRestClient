@@ -1,6 +1,6 @@
 package org.rest.client.gdrive.api;
 
-public class DriveItem extends DriveObject {
+class DriveItem extends DriveObject {
 	protected DriveItem(){}
 	/**
 	 * ETag of the file.

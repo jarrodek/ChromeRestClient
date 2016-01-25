@@ -8,7 +8,7 @@ public class PickerResponse extends JavaScriptObject {
 	}
 	
 	public static final String ACTION_CANCEL = "cancel";
-	public static final String ACTION_PICKED = "picked";
+	
 	
 	/**
 	 * Action is an enumerated type representing the action taken by the user to

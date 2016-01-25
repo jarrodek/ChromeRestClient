@@ -65,8 +65,8 @@ public class SocketActivity extends AppActivity implements
 	
 	final private SocketPlace place;
 	private EventBus eventBus;
-	SocketView view = null;
-	TutorialFactory tutorialFactory = null;
+	private SocketView view = null;
+	private TutorialFactory tutorialFactory = null;
 	private WebSocket socket = null;
 	private String socketUrl = null;
 	private final ArrayList<SocketMessage> messages = new ArrayList<SocketMessage>();

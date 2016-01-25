@@ -475,7 +475,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 		}
 	}
 
-	public void saveImportedFileData(JsArray<RequestObject> requests, final Callback<Boolean, Void> callback) {
+	private void saveImportedFileData(JsArray<RequestObject> requests, final Callback<Boolean, Void> callback) {
 		if (requests == null || requests.length() == 0) {
 			if (RestClient.isDebug()) {
 				Log.error("Request data is emnpty.");
@@ -516,7 +516,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 	 * Called when the app download stored data from the server.
 	 * @param list
 	 */
-	public void onDownloadSuggestionsReady(RequestImportListObject list){
+	public void onDownloadSuggestionsReady(RequestImportListObject list){ // NO_UCD (unused code)
 		if(list.isError()){
 			StatusNotification.notify(list.getMessage(), StatusNotification.TIME_MEDIUM);
 			view.resetServerView();

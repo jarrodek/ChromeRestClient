@@ -255,7 +255,7 @@ public class HistoryActivity extends ListActivity implements HistoryView.Present
 
 	}
 
-	public String createDownloadData(String data) {
+	private String createDownloadData(String data) {
 		if (exportFileObjectUrl != null) {
 			revokeDownloadData();
 		}

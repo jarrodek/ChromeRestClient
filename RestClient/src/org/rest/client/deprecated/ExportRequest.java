@@ -23,9 +23,9 @@ import com.google.gwt.xhr2.client.Response;
  * @author Paweł Psztyć
  *
  */
-public class ExportRequest extends ApplicationRequest {
+class ExportRequest extends ApplicationRequest {
 	
-	public static void export(JSONObject data, final ExportCallback callback){
+	static void export(JSONObject data, final ExportCallback callback){
 		if(currentRequest != null){
 			callback.onFailure("Wait until current request ends.", null);
 			return;
@@ -33,7 +33,7 @@ public class ExportRequest extends ApplicationRequest {
 		export(data.toString(), callback);
 	}
 	
-	public static void export(String data, final ExportCallback callback){
+	private static void export(String data, final ExportCallback callback){
 		
 		if(currentRequest != null){
 			callback.onFailure("Wait until current request ends.", null);

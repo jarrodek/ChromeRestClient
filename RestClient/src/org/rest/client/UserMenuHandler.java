@@ -68,7 +68,7 @@ public class UserMenuHandler {
 		menu.removeProject(projectId);
 	}-*/;
 
-	protected void bind() {
+	private void bind() {
 		ProjectChangeEvent.register(clientFactory.getEventBus(), new ProjectChangeEvent.Handler() {
 			@Override
 			public void onProjectChange(ProjectObject project) {

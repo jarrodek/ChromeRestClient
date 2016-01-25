@@ -53,7 +53,6 @@ import com.google.gwt.chrome.storage.StorageResult;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -78,16 +77,6 @@ public class RestClient implements EntryPoint {
 	 * false means the app is fully loaded.
 	 */
 	private static boolean initializing = true;
-
-	/**
-	 * Check if the app is still initializing.
-	 * 
-	 * @return true if the app is initialized.
-	 */
-	public static boolean isInitializing() {
-		return initializing;
-	}
-
 	/**
 	 * A default place in the app. By default Request view is displayed. To
 	 * change this behavior change default place class.
@@ -171,16 +160,6 @@ public class RestClient implements EntryPoint {
 	 * the parent folder where the item has been created.
 	 */
 	public static String GOOGLE_DRIVE_CREATE_USER_ID = null;
-	/**
-	 * Previously sessionStorage has been used to keep this information. If true
-	 * request request headers view should be collapsed
-	 */
-	public static boolean COLLAPSED_REQUEST_HEADERS = false;
-	/**
-	 * Previously sessionStorage has been used to keep this information. If true
-	 * response request headers view should be collapsed
-	 */
-	public static boolean COLLAPSED_RESPONSE_HEADERS = false;
 
 	/**
 	 * Main method and entry point to the app.
@@ -190,6 +169,8 @@ public class RestClient implements EntryPoint {
 		GoogleAnalytics.initialize();
 
 		setLogging();
+		exportCollectRequestData();
+		
 		// app's main event bus. It's used to distribute events in the app.
 		EventBus eventBus = clientFactory.getEventBus();
 		PlaceController placeController = clientFactory.getPlaceController();
@@ -213,7 +194,7 @@ public class RestClient implements EntryPoint {
 	 * present it to the user if nescesary.
 	 */
 	private void setLogging() {
-		GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+		/*GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			@Override
 			public void onUncaughtException(Throwable e) {
 				log.log(Level.SEVERE, e.getMessage(), e);
@@ -221,7 +202,7 @@ public class RestClient implements EntryPoint {
 				GoogleAnalytics.sendException("RestClient::Application error::" + e.getMessage());
 				GoogleAnalyticsApp.sendException("RestClient::Application error::" + e.getMessage());
 			}
-		});
+		});*/
 
 		Logger.getLogger("").addHandler(clientFactory.getErrorDialogView().getHandler());
 		Logger.getLogger("").setLevel(Level.ALL);
@@ -286,13 +267,11 @@ public class RestClient implements EntryPoint {
 	/**
 	 * @return true if history feature output is enabled, false otherwise
 	 */
-	public static boolean isHistoryEabled() {
+	static boolean isHistoryEabled() {
 		return SyncAdapter.history;
 	}
 
-	public static void setHistoryEnabled(boolean historyEnabled) {
-		SyncAdapter.history = historyEnabled;
-	}
+	
 
 	/**
 	 * Get request data from current form. If current view is not request view
@@ -329,7 +308,7 @@ public class RestClient implements EntryPoint {
 		}
 	}
 
-	public static final void collectRequestData(final Object callback) {
+	public static final void collectRequestData(final Object callback) { // NO_UCD (unused code)
 		collectRequestData(new Callback<RequestObject, Throwable>() {
 
 			@Override
@@ -350,14 +329,14 @@ public class RestClient implements EntryPoint {
 	}-*/;
 
 	private final native void exportCollectRequestData() /*-{
-															$wnd.RestClient = $wnd.RestClient || {};
-															$wnd.RestClient.collectRequestData = function(callback) {
-															@org.rest.client.RestClient::collectRequestData(Ljava/lang/Object;)(function(){
-															var params = Array.from(arguments);
-															callback(params);
-															});
-															};
-															}-*/;
+		$wnd.RestClient = $wnd.RestClient || {};
+		$wnd.RestClient.collectRequestData = function(callback) {
+			@org.rest.client.RestClient::collectRequestData(Ljava/lang/Object;)(function(){
+				var params = Array.from(arguments);
+				callback(params);
+			});
+		};
+	}-*/;
 
 	/**
 	 * Prepare request data. It set (if request include payload) content-type

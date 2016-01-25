@@ -29,24 +29,24 @@ import com.google.web.bindery.event.shared.EventBus;
  * 
  * @author Paweł Psztyć
  */
-public abstract class DataExport {
+abstract class DataExport {
 
 	EventBus eventBus = null;
 	/**
 	 * All data retrieved from database
 	 */
-	protected JsArray<RequestObject> allDataList;
+	private JsArray<RequestObject> allDataList;
 	/**
 	 * All already synch items id's
 	 */
-	protected List<Integer> excludeList = new ArrayList<Integer>();
+	private List<Integer> excludeList = new ArrayList<Integer>();
 	/**
 	 * List of ID's of items that will be saved on server. After successful send
 	 * it should be saved in Database
 	 */
 	protected List<Integer> includeList = new ArrayList<Integer>();
 
-	public static interface PrepareDataHanler {
+	static interface PrepareDataHanler {
 		/**
 		 * Called when user data has been prepared to send.
 		 * 
@@ -61,7 +61,7 @@ public abstract class DataExport {
 		void onEmptyData();
 	}
 
-	public static interface ExportItemCallback {
+	static interface ExportItemCallback {
 		void onSuccess(ExportedDataInsertItem item);
 
 		void onFailure(String message);
@@ -110,7 +110,7 @@ public abstract class DataExport {
 		});
 	}
 
-	protected void synchPrepareData(final PrepareDataHanler handler) {
+	private void synchPrepareData(final PrepareDataHanler handler) {
 		List<RequestObject> readyToSendList = new ArrayList<RequestObject>();
 		for (int i = 0; i < allDataList.length(); i++) {
 			RequestObject item = allDataList.get(i);

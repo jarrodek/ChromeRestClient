@@ -30,7 +30,7 @@ public class DriveApi {
 		 * Session check result.
 		 * @param result {@link DriveAuth} object or null if the app is not authorized to use Drive API.
 		 */
-		void onResult(DriveAuth result);
+		void onResult(DriveAuth result); // NO_UCD (unused code)
 	}
 	/**
 	 * A handler used with {@link DrivePicker} to select folder from Google Drive. 
@@ -47,37 +47,22 @@ public class DriveApi {
 		 */
 		void onCancel();
 	}
-	/**
-	 * Handler to be called when called for files list from Google Drive.
-	 * The response will contain {@link DriveFileListResponse} object with {@link JsArray} of requested files. 
-	 */
-	public static interface FileRequestHandler {
-		/**
-		 * Called when results has been loaded.
-		 * @param response A {@link DriveFileListResponse} object with {@link JsArray} of requested files.
-		 */
-		void onLoad(DriveFileListResponse response);
-		/**
-		 * Called when error occurred during the request. 
-		 * @param error A {@link DriveError} object with error details.
-		 */
-		void onError(DriveError error);
-	}
+	
 	/**
 	 * Handler to be used when uploading a file to Google Drive.
 	 * A onLoad method will be called when file has been uploaded successfully or onError otherwise. 
 	 */
-	public static interface FileUploadHandler {
+	static interface FileUploadHandler {
 		/**
 		 * Method called after successful file upload to Google Drive. 
 		 * @param response A {@link DriveFileItem} object with file details. 
 		 */
-		void onLoad(DriveFileItem response);
+		void onLoad(DriveFileItem response); // NO_UCD (unused code)
 		/**
 		 * Called when error occurred.
 		 * @param exc A {@link JavaScriptException} object with error details.
 		 */
-		void onError(JavaScriptException exc);
+		void onError(JavaScriptException exc); // NO_UCD (unused code)
 	}
 	
 	/**
@@ -90,12 +75,12 @@ public class DriveApi {
 		 * Method to be called when file metadata has been loaded.
 		 * @param response A {@link DriveFileItem} object with file details.
 		 */
-		void onLoad(DriveFileItem response);
+		void onLoad(DriveFileItem response); // NO_UCD (unused code)
 		/**
 		 * Called when error occurred.
 		 * @param A {@link JavaScriptException} object with error details.
 		 */
-		void onError(JavaScriptException exc);
+		void onError(JavaScriptException exc); // NO_UCD (unused code)
 	}
 	/**
 	 * Handler to be used when requesting a file content from Google Drive.
@@ -106,12 +91,12 @@ public class DriveApi {
 		 * This app supports only text files. 
 		 * @param content File's content. 
 		 */
-		void onDownload(String content);
+		void onDownload(String content); // NO_UCD (unused code)
 		/**
 		 * Called when error occurred.
 		 * @param A {@link JavaScriptException} object with error details.
 		 */
-		void onError(JavaScriptException exc);
+		void onError(JavaScriptException exc); // NO_UCD (unused code)
 	}
 	
 	/**
@@ -148,7 +133,7 @@ public class DriveApi {
 	 * @param accessToken An access token to be used with the request.
 	 * @param handler Callback handler called on request end.
 	 */
-	public static void showForlderPicker(final String accessToken, final SelectFolderHandler handler){
+	static void showForlderPicker(final String accessToken, final SelectFolderHandler handler){
 		DrivePicker.loadPicker(new LoadPickerHandler() {
 			@Override
 			public void onLoad() {
@@ -236,7 +221,7 @@ public class DriveApi {
 	 * @param obj The request object to be saved.
 	 * @param handler Callback handler to be called when the request ends.
 	 */
-	public static final native void insertNewFile(String parentId, String filename, JavaScriptObject obj, FileUploadHandler handler) /*-{
+	static final native void insertNewFile(String parentId, String filename, JavaScriptObject obj, FileUploadHandler handler) /*-{
 		try{
 			$wnd.arc.app.drive.insertFile(parentId, filename, obj, function(result){
 				if(result.error){
@@ -258,7 +243,7 @@ public class DriveApi {
 	 * @param obj The request object to be saved.
 	 * @param handler Callback handler to be called when the request ends.
 	 */
-	public static final native void updateFile(String fileId, JavaScriptObject obj, FileUploadHandler handler) /*-{
+	static final native void updateFile(String fileId, JavaScriptObject obj, FileUploadHandler handler) /*-{
 		try{
 			$wnd.arc.app.drive.updateFile(fileId, obj, function(result){
 				if(result.error){

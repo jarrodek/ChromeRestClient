@@ -5,7 +5,7 @@ import java.util.Date;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 
-public class Entry extends JavaScriptObject{
+class Entry extends JavaScriptObject{
 	protected Entry(){}
 	
 	public final native String getId() /*-{ return this.id.$t; }-*/;

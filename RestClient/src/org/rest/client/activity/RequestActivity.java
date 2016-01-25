@@ -91,10 +91,10 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 
 	final private RequestPlace place;
 	private EventBus eventBus;
-	protected ResponseView responseView;
-	protected RequestView requestView;
-	FlowPanel viewFlowPanel;
-	TutorialFactory tutorialFactory = null;
+	private ResponseView responseView;
+	private RequestView requestView;
+	private FlowPanel viewFlowPanel;
+	private TutorialFactory tutorialFactory = null;
 	private String currentRequestEtag = null;
 
 	private final static String ANALYTICS_EVENT_CATEGORY = "Request view";

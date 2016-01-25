@@ -35,13 +35,13 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  */
 @SuppressWarnings("deprecation")
 public class AuthorizeDialog extends DialogBox {
-	final DecoratedTabPanel formPanel;
+	private final DecoratedTabPanel formPanel;
 	private int selectedTab = 0;
-	final TextBox loginTextBox;
-	final PasswordTextBox passBox;
+	private final TextBox loginTextBox;
+	private final PasswordTextBox passBox;
 
-	String oauthRequestType = "Request Token";
-	String oauthSignMethod = "HMAC-SHA1";
+	private String oauthRequestType = "Request Token";
+	private String oauthSignMethod = "HMAC-SHA1";
 	
 	private String result = null;
 	private TextBox oauth_consumer_key_box;

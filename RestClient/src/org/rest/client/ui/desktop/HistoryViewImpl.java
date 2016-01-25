@@ -39,38 +39,38 @@ public class HistoryViewImpl extends Composite implements HistoryView {
 
 	private static HistoryViewImplUiBinder uiBinder = GWT.create(HistoryViewImplUiBinder.class);
 
-	interface HistoryViewImplUiBinder extends UiBinder<Widget, HistoryViewImpl> {
+	interface HistoryViewImplUiBinder extends UiBinder<Widget, HistoryViewImpl> { // NO_UCD (use private)
 	}
 
-	class WidgetStyle {
-		final String emptyInfo = "History_View_emptyInfo";
-		String searchBox = "History_View_searchBox";
+	private class WidgetStyle {
+		private final String emptyInfo = "History_View_emptyInfo";
+		private String searchBox = "History_View_searchBox";
 	}
 
 	private Presenter listener = null;
 	private boolean loadingNext = false;
-	InlineLabel infoLabel = null;
-	WidgetStyle style = new WidgetStyle();
+	private InlineLabel infoLabel = null;
+	private WidgetStyle style = new WidgetStyle();
 
 	@UiField
-	DivElement loaderInfo;
+	DivElement loaderInfo; // NO_UCD (use private)
 	@UiField
-	HTMLPanel root;
+	HTMLPanel root; // NO_UCD (use private)
 	@UiField
-	HTMLPanel list;
+	HTMLPanel list; // NO_UCD (use private)
 	@UiField
-	HTMLPanel loaderContainer;
+	HTMLPanel loaderContainer; // NO_UCD (use private)
 
 	@UiField
-	InlineLabel loader;
+	InlineLabel loader; // NO_UCD (use private)
 	@UiField
-	InlineLabel clearHistory;
+	InlineLabel clearHistory; // NO_UCD (unused code)
 	@UiField
-	InlineLabel exportHistory;
+	InlineLabel exportHistory; // NO_UCD (use private)
 	@UiField
-	SearchBox searchInput;
+	SearchBox searchInput; // NO_UCD (use private)
 	@UiField
-	Anchor downloadFile;
+	Anchor downloadFile; // NO_UCD (use private)
 
 	public HistoryViewImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
