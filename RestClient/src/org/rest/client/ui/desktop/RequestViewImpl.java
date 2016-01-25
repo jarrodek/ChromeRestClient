@@ -104,7 +104,10 @@ public class RequestViewImpl extends Composite implements RequestView {
 	@UiField InlineLabel projectName;
 	@UiField HTMLPanel endpointsContainer;
 	@UiField TextBox requestNameField;
-
+	/**
+	 * To restore previously selected content type header when the user switching between tabs.
+	 */
+	String lastSetContentType = null;
 	private List<IsHideable> hidableList = new ArrayList<IsHideable>();
 	private String currentSelectedMethod = "GET";
 
@@ -176,6 +179,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 		RestClient.getClientFactory().getEventBus()
 				.fireEvent(new HttpMethodChangeEvent(currentSelectedMethod));
 	}
+	
 	/**
 	 * Add or remove default content type header when the user switch to / from request that contains a body.
 	 * @param show true to add default content type header and false if it should be removed
@@ -191,7 +195,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 					//no change
 					return;
 				} else {
-					latestSelectedContentType = header.getValue();
+					lastSetContentType = latestSelectedContentType = header.getValue();
 					list.remove(header);
 				}
 			}
@@ -199,8 +203,8 @@ public class RequestViewImpl extends Composite implements RequestView {
 		if(latestSelectedContentType == null) {
 			//there were no CT header.
 			if(show) {
-				list.add(new RequestHeader("Content-Type", "application/x-www-form-urlencoded"));
-				latestSelectedContentType = "application/x-www-form-urlencoded";
+				latestSelectedContentType = lastSetContentType == null ? "application/x-www-form-urlencoded" : lastSetContentType;
+				list.add(new RequestHeader("Content-Type", latestSelectedContentType));
 			}
 		}
 		
@@ -217,6 +221,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 	
 	@Override
 	public void reset() {
+		lastSetContentType = null;
 		projectPanel.addClassName("hidden");
 		sendButton.setEnabled(false);
 		progressIndicator.setStyleName("hidden");
@@ -229,6 +234,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 		requestHeaders.clear();
 		requestBody.clear();
 		radioGet.setEnabled(true);
+		radioGet.setValue(true);
 		
 		openedProject = null;
 		refreshDriveButton.setEnabled(true);
