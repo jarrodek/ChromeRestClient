@@ -331,7 +331,7 @@ arc.app.db.websql.updateUrlHistory = function(id, time) {
       .then(function(db) {
         db.transaction(function(tx) {
           let sql = 'UPDATE urls SET time = ? WHERE ID = ?';
-          tx.executeSql(sql, [time, id], function(tx, result) {
+          tx.executeSql(sql, [time, id], function() {
             resolve();
           }, function(tx, error) {
             reject(error);
@@ -745,6 +745,44 @@ arc.app.db.websql.updateHistoryTime = function(id, time) {
         db.transaction(function(tx) {
           let sql = 'UPDATE history SET time = ? WHERE ID = ?';
           tx.executeSql(sql, [time, id], function() {
+            resolve();
+          }, function(tx, error) {
+            reject(error);
+          });
+        });
+      })
+      .catch(function(e) {
+        reject(e);
+      });
+  });
+};
+arc.app.db.websql.insertWebsocketData = function(url, time) {
+  return new Promise(function(resolve, reject) {
+    arc.app.db.websql.open()
+      .then(function(db) {
+        db.transaction(function(tx) {
+          let sql = 'INSERT INTO websocket_data (url, time) VALUES (?,?)';
+          tx.executeSql(sql, [url, time],
+            function(tx, result) {
+              resolve(result.insertId);
+            },
+            function(tx, error) {
+              reject(error);
+            });
+        });
+      })
+      .catch(function(e) {
+        reject(e);
+      });
+  });
+};
+arc.app.db.websql.queryWebsocketData = function(url) {
+  return new Promise(function(resolve, reject) {
+    arc.app.db.websql.open()
+      .then(function(db) {
+        db.transaction(function(tx) {
+          let sql = 'SELECT * FROM websocket_data WHERE url LIKE ?';
+          tx.executeSql(sql, [url], function() {
             resolve();
           }, function(tx, error) {
             reject(error);

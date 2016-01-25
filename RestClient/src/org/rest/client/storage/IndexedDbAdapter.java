@@ -36,14 +36,6 @@ import org.rest.client.storage.indexeddb.IDBOpenDBRequest;
 import org.rest.client.storage.indexeddb.IDBRequest;
 import org.rest.client.storage.indexeddb.IDBSuccessHandler;
 import org.rest.client.storage.indexeddb.IDBTransaction;
-import org.rest.client.storage.indexeddb.IDBUpdateNeededHandler;
-import org.rest.client.storage.store.FormEncodingsStore;
-import org.rest.client.storage.store.HeadersStore;
-import org.rest.client.storage.store.HistoryRequestStore;
-import org.rest.client.storage.store.ProjectsStore;
-import org.rest.client.storage.store.RequestDataStore;
-import org.rest.client.storage.store.StatusesStore;
-import org.rest.client.storage.store.UrlHistoryStore;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -67,33 +59,6 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 	protected final static String databaseVersion = "0.63";
 	protected final static ArrayList<String> openInProgressDatabasesList = new ArrayList<String>();
 	protected final static ArrayList<String> openedDatabasesList = new ArrayList<String>();
-	
-	/**
-	 * This method will be used when DB version is changed. Use
-	 * {@link IndexedDbAdapter#db} to do some operations on opened database.
-	 * 
-	 * Heres should be 
-	 * 
-	 * @throws IDBDatabaseException
-	 */
-	private static void setVestion(String databaseName, IDBDatabase db) throws IDBDatabaseException {
-		
-		if(databaseName.equals("rest_client")){
-			// call setVersion on:
-			// - UrlHistoryStore
-			// - FormEncodingsStore
-			// - HistoryRequestStore
-			// - RequestDataStore
-			// - HeadersStore
-			UrlHistoryStore.setVestion(db);
-			FormEncodingsStore.setVestion(db);
-			HistoryRequestStore.setVestion(db);
-			RequestDataStore.setVestion(db);
-			HeadersStore.setVestion(db);
-			StatusesStore.setVestion(db);
-			ProjectsStore.setVestion(db);
-		}
-	}
 	
 	protected final String dbName;
 	protected final String storeName;
@@ -158,23 +123,6 @@ public abstract class IndexedDbAdapter<K, V extends JavaScriptObject>
 			public void onError() {
 				callback.onError(null);
 				cllbackWaitingOpenRequest(null);
-			}
-		});
-		openRequest.addUpdateNeededHandler(new IDBUpdateNeededHandler() {
-
-			@Override
-			public void onUpdateNeeded() {
-				try {
-					setVestion(dbName, db);
-					isReady = true;
-					callback.onSuccess(true);
-					cllbackWaitingOpenRequest(true);
-				} catch (IDBDatabaseException e) {
-					e.printStackTrace();
-					callback.onError(e);
-					cllbackWaitingOpenRequest(e);
-				}
-
 			}
 		});
 	}
