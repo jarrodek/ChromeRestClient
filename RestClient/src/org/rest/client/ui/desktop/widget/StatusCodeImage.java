@@ -1,7 +1,7 @@
 package org.rest.client.ui.desktop.widget;
 
+import org.rest.client.jso.StatusCodeRow;
 import org.rest.client.storage.store.StatusesStoreWebSql;
-import org.rest.client.storage.websql.StatusCodeRow;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

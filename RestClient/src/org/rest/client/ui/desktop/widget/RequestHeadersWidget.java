@@ -315,7 +315,7 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 				public void execute() {
 					headersCodeMirror.refresh();
 					if(RestClient.isDebug()){
-						Log.info("Updating headers value: " + data);
+						Log.info("Updated headers value: " + data);
 					}
 					//RestClient.fixChromeLayout();
 				}

@@ -259,12 +259,37 @@ arc.app.db.websql.getHeaderByName = function(name, type) {
     arc.app.db.websql.open()
       .then(function(db) {
         db.transaction(function(tx) {
-          let sql = 'SELECT * FROM headers WHERE name LIKE (?) AND type=?';
+          let sql = 'SELECT * FROM headers WHERE name LIKE (?) AND type LIKE ?';
           tx.executeSql(sql, [name, type], function(tx, result) {
             if (result.rows.length === 0) {
               resolve([]);
             } else {
               resolve(result.rows.item(0));
+            }
+          }, function(tx, error) {
+            reject(error);
+          });
+        });
+      })
+      .catch(function(e) {
+        reject(e);
+      });
+  });
+};
+/**
+ * Get list of headers by name and type
+ */
+arc.app.db.websql.getHeadersByName = function(name, type) {
+  return new Promise(function(resolve, reject) {
+    arc.app.db.websql.open()
+      .then(function(db) {
+        db.transaction(function(tx) {
+          let sql = 'SELECT * FROM headers WHERE name LIKE (?) AND type LIKE ?';
+          tx.executeSql(sql, [name, type], function(tx, result) {
+            if (result.rows.length === 0) {
+              resolve([]);
+            } else {
+              resolve(Array.from(result.rows));
             }
           }, function(tx, error) {
             reject(error);
