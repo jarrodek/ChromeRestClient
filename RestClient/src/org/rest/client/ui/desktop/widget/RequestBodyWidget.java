@@ -268,6 +268,7 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		if(bodyCodeMirror != null){
 			bodyCodeMirror.setValue("");
 		}
+		loadCodeMirrorForBody();
 	}
 	
 	
