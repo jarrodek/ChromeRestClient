@@ -21,8 +21,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.rest.client.event.RequestChangeEvent;
+import org.rest.client.jso.ProjectObject;
 import org.rest.client.request.FilesObject;
-import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.tutorial.TutorialFactory;
 

@@ -15,7 +15,7 @@
  ******************************************************************************/
 package org.rest.client.ui;
 
-import org.rest.client.storage.store.objects.ProjectObject;
+import org.rest.client.jso.ProjectObject;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.web.bindery.event.shared.EventBus;

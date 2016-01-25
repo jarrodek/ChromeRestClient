@@ -1,26 +1,23 @@
 package org.rest.client.ui.desktop;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.rest.client.RestClient;
 import org.rest.client.StatusNotification;
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
-import org.rest.client.gdrive.GoogleDrive;
 import org.rest.client.gdrive.DriveFileItem;
+import org.rest.client.gdrive.GoogleDrive;
+import org.rest.client.jso.ProjectObject;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.URLParser;
 import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.ProjectStoreWebSql;
-import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.SaveRequestDialogView;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -199,14 +196,11 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 
 	private void setProjectsList() {
 		final ProjectStoreWebSql store = RestClient.getClientFactory().getProjectsStore();
-		store.all(new StoreResultCallback<Map<Integer, ProjectObject>>() {
+		store.all(new ProjectStoreWebSql.StoreResultsCallback() {
 			@Override
-			public void onSuccess(Map<Integer, ProjectObject> result) {
-
-				Iterator<Entry<Integer, ProjectObject>> it = result.entrySet().iterator();
-				while (it.hasNext()) {
-					Entry<Integer, ProjectObject> set = it.next();
-					ProjectObject project = set.getValue();
+			public void onSuccess(final JsArray<ProjectObject> result) {
+				for (int i = 0; i < result.length(); i++) {
+					ProjectObject project = result.get(i);
 					if (project == null) {
 						continue;
 					}

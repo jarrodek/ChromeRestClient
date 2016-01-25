@@ -1,6 +1,6 @@
 package org.rest.client.importparser;
 
-import org.rest.client.storage.store.objects.ProjectObject;
+import org.rest.client.jso.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 
 import com.google.gwt.core.client.JsArray;

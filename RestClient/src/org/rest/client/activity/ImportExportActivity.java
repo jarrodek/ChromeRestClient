@@ -15,13 +15,14 @@ import org.rest.client.deprecated.DataExportImpl;
 import org.rest.client.event.StoreDataEvent;
 import org.rest.client.importparser.ImportParser;
 import org.rest.client.importparser.ImportResult;
+import org.rest.client.jso.ProjectObject;
 import org.rest.client.jso.RequestDataJso;
 import org.rest.client.place.ImportExportPlace;
 import org.rest.client.request.ApplicationSession;
 import org.rest.client.request.ImportDataCallback;
 import org.rest.client.request.RequestImportListObject;
 import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.objects.ProjectObject;
+import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.storage.websql.ExportedDataInsertItem;
 import org.rest.client.ui.ImportExportView;
@@ -33,6 +34,7 @@ import com.google.code.gwt.database.client.service.RowIdListCallback;
 import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.JsArrayInteger;
 import com.google.gwt.file.client.File;
 import com.google.gwt.file.client.FileError;
 import com.google.gwt.filereader.client.ErrorHandler;
@@ -103,9 +105,9 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 				//
 				// Get project data
 				//
-				clientFactory.getProjectsStore().all(new StoreResultCallback<Map<Integer, ProjectObject>>() {
+				clientFactory.getProjectsStore().all(new ProjectStoreWebSql.StoreResultsCallback() {
 					@Override
-					public void onSuccess(final Map<Integer, ProjectObject> projectDataResult) {
+					public void onSuccess(final JsArray<ProjectObject> projectDataResult) {
 
 						JSONArray requestsArray = new JSONArray();
 						JSONArray projectsArray = new JSONArray();
@@ -114,11 +116,12 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 							RequestObject ro = requestDataResult.get(_k);
 							requestsArray.set(requestsArray.size(), ro.toJSONObject());
 						}
-						Set<Integer> projectKeys = projectDataResult.keySet();
-						for (Integer _k : projectKeys) {
-							ProjectObject pd = projectDataResult.get(_k);
+						
+						for (int i = 0; i < projectDataResult.length(); i++) {
+							ProjectObject pd = projectDataResult.get(i);
 							projectsArray.set(projectsArray.size(), pd.toJSONObject());
 						}
+						
 						JSONObject result = new JSONObject();
 						result.put("projects", projectsArray);
 						result.put("requests", requestsArray);
@@ -434,15 +437,11 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 			//
 			// First, save projects data and update referenced requests
 			//
-			ArrayList<ProjectObject> save = new ArrayList<ProjectObject>();
-			int size = projects.length();
-			for(int i=0; i<size; i++){
-				save.add(projects.get(i));
-			}
-			clientFactory.getProjectsStore().getService().importData(save, new RowIdListCallback() {
+			
+			clientFactory.getProjectsStore().importData(projects, new ProjectStoreWebSql.StoreInsertListCallback() {
 
 				@Override
-				public void onFailure(DataServiceException error) {
+				public void onError(Throwable error) {
 					if (RestClient.isDebug()) {
 						Log.error("Unable insert project data", error);
 					}
@@ -452,9 +451,9 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 				}
 
 				@Override
-				public void onSuccess(List<Integer> rowIds) {
+				public void onSuccess(JsArrayInteger rowIds) {
 
-					for (int i = 0, len = rowIds.size(); i < len; i++) {
+					for (int i = 0, len = rowIds.length(); i < len; i++) {
 						int currentProjectId = rowIds.get(i);
 						int exportedProjectId = projects.get(i).getId();
 						// now find all request where project ID is

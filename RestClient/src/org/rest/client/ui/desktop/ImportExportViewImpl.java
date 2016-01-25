@@ -6,8 +6,8 @@ import org.rest.client.StatusNotification;
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.importparser.ImportResult;
+import org.rest.client.jso.ProjectObject;
 import org.rest.client.request.RequestImportListItem;
-import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.ImportExportView;
 

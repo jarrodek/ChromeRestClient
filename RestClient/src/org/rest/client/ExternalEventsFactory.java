@@ -30,7 +30,7 @@ import org.rest.client.event.RequestEndEvent;
 import org.rest.client.event.RequestStartActionEvent;
 import org.rest.client.event.URLFieldToggleEvent;
 import org.rest.client.event.UrlValueChangeEvent;
-import org.rest.client.storage.store.objects.ProjectObject;
+import org.rest.client.jso.ProjectObject;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONBoolean;

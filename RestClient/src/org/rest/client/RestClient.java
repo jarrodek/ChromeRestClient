@@ -24,6 +24,7 @@ import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.ApplicationReadyEvent;
 import org.rest.client.event.NewProjectAvailableEvent;
 import org.rest.client.event.SavedRequestEvent;
+import org.rest.client.jso.ProjectObject;
 import org.rest.client.mvp.AppActivityMapper;
 import org.rest.client.mvp.AppPlaceHistoryMapper;
 import org.rest.client.place.ImportExportPlace;
@@ -35,7 +36,6 @@ import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.store.StoreKeys;
-import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.task.CreateMenuTask;
 import org.rest.client.task.InitializeAppHandlersTask;
@@ -180,6 +180,7 @@ public class RestClient implements EntryPoint {
 		GoogleAnalytics.initialize();
 		
 		setLogging();
+		exportCollectRequestData();
 		
 		//app's main event bus. It's used to distribute events in the app.
 		EventBus eventBus = clientFactory.getEventBus();
@@ -326,6 +327,34 @@ public class RestClient implements EntryPoint {
 		}
 	}
 	
+	public static final void collectRequestData(final Object callback) {
+		collectRequestData(new Callback<RequestObject, Throwable>() {
+			
+			@Override
+			public void onSuccess(RequestObject result) {
+				callback(callback, result);
+			}
+			
+			@Override
+			public void onFailure(Throwable reason) {
+				callback(callback, reason);
+			}
+		});
+		
+	}
+	private final static native void callback(Object callback, Object ...params) /*-{
+		callback(params);
+	}-*/;
+	private final native void exportCollectRequestData() /*-{
+		$wnd.RestClient = $wnd.RestClient || {};
+		$wnd.RestClient.collectRequestData = function(callback) {
+			@org.rest.client.RestClient::collectRequestData(Ljava/lang/Object;)(function(){
+				var params = Array.from(arguments);
+				callback(params);
+			});
+		};
+	}-*/;
+	
 	/**
 	 * Prepare request data.
 	 * It set (if request include payload) content-type header according to user preferences
@@ -409,12 +438,13 @@ public class RestClient implements EntryPoint {
 		final ProjectStoreWebSql store = clientFactory.getProjectsStore();
 		ProjectObject project = ProjectObject.create();
 		project.setName(newProjectName);
-		store.put(project, null, new StoreResultCallback<Integer>() {
+		
+		store.add(project, new ProjectStoreWebSql.StoreInsertCallback() {
 
 			@Override
-			public void onSuccess(Integer result) {
-				obj.setProject(result.intValue());
-				clientFactory.getEventBus().fireEvent(new NewProjectAvailableEvent(result.intValue()));
+			public void onSuccess(int result) {
+				obj.setProject(result);
+				clientFactory.getEventBus().fireEvent(new NewProjectAvailableEvent(result));
 				saveRequestData(obj, callback);
 			}
 

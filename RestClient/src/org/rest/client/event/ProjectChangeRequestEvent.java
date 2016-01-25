@@ -15,7 +15,7 @@
  ******************************************************************************/
 package org.rest.client.event;
 
-import org.rest.client.storage.store.objects.ProjectObject;
+import org.rest.client.jso.ProjectObject;
 
 import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;

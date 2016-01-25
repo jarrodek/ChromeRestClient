@@ -3,7 +3,7 @@ package org.rest.client.ui.desktop;
 import java.util.Date;
 
 import org.rest.client.StatusNotification;
-import org.rest.client.storage.store.objects.HistoryObject;
+import org.rest.client.jso.HistoryObject;
 import org.rest.client.ui.HistoryListItemView;
 import org.rest.client.ui.HistoryView;
 

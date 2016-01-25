@@ -2,7 +2,6 @@ package org.rest.client;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -11,18 +10,17 @@ import java.util.logging.Logger;
 import org.rest.client.event.RequestChangeEvent;
 import org.rest.client.event.RequestEndEvent;
 import org.rest.client.event.RequestStartActionEvent;
+import org.rest.client.jso.HistoryObject;
 import org.rest.client.jso.UrlRow;
 import org.rest.client.request.FilesObject;
 import org.rest.client.request.FormPayloadData;
 import org.rest.client.request.HttpMethodOptions;
 import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.request.RequestPayloadParser;
-import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultsCallback;
-import org.rest.client.storage.store.objects.HistoryObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.ErrorDialogView;
 
@@ -446,6 +444,7 @@ public class AppRequestFactory {
 	 */
 	private static void saveHistory(RequestObject _data){
 		final HistoryObject data = HistoryObject.copyRequestObject(_data);
+		Log.info(data.toJSONObject().toString());
 		
 		if(!RestClient.isHistoryEabled()){
 			return;
@@ -454,22 +453,24 @@ public class AppRequestFactory {
 			Log.debug("Try to save new item in history.");
 		}
 		final HistoryRequestStoreWebSql store = RestClient.getClientFactory().getHistoryRequestStore();
-		store.getHistoryItem(data.getURL(), data.getMethod(), new StoreResultCallback<List<HistoryObject>>() {
+		store.getHistoryItem(data.getURL(), data.getMethod(), new HistoryRequestStoreWebSql.StoreResultsCallback() {
 			@Override
-			public void onSuccess(List<HistoryObject> result) {
+			public void onSuccess(JsArray<HistoryObject> result) {
 				boolean found = false;
 				HistoryObject old = null;
-				for(HistoryObject item : result){
-					String enc = item.getEncoding();
-					if(enc != null && !enc.equals(data.getEncoding())){
-						continue;
-					}
+				for (int i = 0; i < result.length(); i++) {
+					HistoryObject item = result.get(i);
+					
 					String itemHeaders = item.getHeaders();
 					if(itemHeaders != null && !itemHeaders.equals(data.getHeaders())){
+						continue;
+					} else if (itemHeaders == null && data.getHeaders() != null) {
 						continue;
 					}
 					String itemPayload = item.getPayload();
 					if(itemPayload != null && !itemPayload.equals(data.getPayload())){
+						continue;
+					} else if(itemPayload == null && data.getPayload() != null){
 						continue;
 					}
 					found = true;
@@ -477,9 +478,9 @@ public class AppRequestFactory {
 					break;
 				}
 				if(!found){
-					store.put(data, null, new StoreResultCallback<Integer>() {
+					store.put(data, new HistoryRequestStoreWebSql.StoreInsertCallback() {
 						@Override
-						public void onSuccess(Integer result) {
+						public void onSuccess(int result) {
 							if(RestClient.isDebug()){
 								Log.debug("Saved new item in history.");
 							}
@@ -495,11 +496,11 @@ public class AppRequestFactory {
 					if(RestClient.isDebug()){
 						Log.debug("Item already exists in history");
 					}
-					store.updateHistoryItemTime(old.getId(), new Date(), new StoreResultCallback<Boolean>() {
+					store.updateHistoryItemTime(old.getId(), new Date().getTime(), new HistoryRequestStoreWebSql.StoreSimpleCallback () {
 						@Override
-						public void onSuccess(Boolean result) {
+						public void onSuccess() {
 							if(RestClient.isDebug()){
-								Log.debug("History item saved.");
+								Log.debug("History item updated.");
 							}
 						}
 						
@@ -542,7 +543,7 @@ public class AppRequestFactory {
 					if(RestClient.isDebug()){
 						Log.debug("Updating Suggestions table with new time.");
 					}
-					store.updateUrlUseTime(result.get(0).getId(), (double) new Date().getTime(), new org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultCallback() {
+					store.updateUrlUseTime(result.get(0).getId(), (double) new Date().getTime(), new UrlHistoryStoreWebSql.StoreResultCallback() {
 						
 						@Override
 						public void onSuccess(UrlRow result) {
@@ -563,7 +564,7 @@ public class AppRequestFactory {
 				UrlRow row = UrlRow.create();
 				row.setUrl(url);
 				row.setTime(new Date().getTime());
-				store.put(row, new org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultCallback() {
+				store.put(row, new UrlHistoryStoreWebSql.StoreResultCallback() {
 					
 					@Override
 					public void onError(Throwable e) {

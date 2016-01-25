@@ -43,16 +43,17 @@ import org.rest.client.gdrive.DriveAuth;
 import org.rest.client.gdrive.DriveFileItem;
 import org.rest.client.jso.ExternalDriveCreateData;
 import org.rest.client.jso.ExternalDriveCreateResponse;
+import org.rest.client.jso.HistoryObject;
+import org.rest.client.jso.ProjectObject;
 import org.rest.client.jso.ResponseStatusData;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.RedirectData;
 import org.rest.client.request.URLParser;
 import org.rest.client.storage.StoreResultCallback;
+import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.store.StoreKeys;
-import org.rest.client.storage.store.objects.HistoryObject;
-import org.rest.client.storage.store.objects.ProjectObject;
 import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.EditProjectView;
@@ -377,10 +378,14 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 		}
 		final ProjectStoreWebSql projectsStore = clientFactory.getProjectsStore();
 		if (endpointId == -1) {
-			projectsStore.getByKey(projectId, new StoreResultCallback<ProjectObject>() {
+			projectsStore.getByKey(projectId, new ProjectStoreWebSql.StoreResultCallback() {
 
 				@Override
 				public void onSuccess(ProjectObject result) {
+					if (result == null) {
+						StatusNotification.notify("Unable read project data. Database resulted with empty record.");
+						return;
+					}
 					restoreDefaultRequestFromProject(result, requestView);
 				}
 
@@ -396,12 +401,20 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 			clientFactory.getRequestDataStore().getByKey(endpointId, new StoreResultCallback<RequestObject>() {
 				@Override
 				public void onSuccess(final RequestObject result) {
+					if(result == null) {
+						StatusNotification.notify("Unable read project's endpoint data");
+						return;
+					}
 					if (result.getProject() > 0) {
 						RestClient.currentlyOpenedProject = result.getProject();
-						projectsStore.getByKey(result.getProject(), new StoreResultCallback<ProjectObject>() {
+						projectsStore.getByKey(result.getProject(), new ProjectStoreWebSql.StoreResultCallback() {
 
 							@Override
 							public void onSuccess(ProjectObject project) {
+								if (project == null) {
+									StatusNotification.notify("Project does not contain selected endpoint or database resulted with empty record.");
+									return;
+								}
 								restoreProjectEndpoint(project, result);
 							}
 
@@ -440,6 +453,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 			StatusNotification.notify("No such project.");
 			return;
 		}
+		Log.warn("GETTING DATAAAAAAAAAAAAA FOR PROJECT " + project.getId());
 		clientFactory.getRequestDataStore().getService().getProjectDefaultRequests(project.getId(),
 				new ListCallback<RequestObject>() {
 
@@ -588,7 +602,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 
 						if (project == null) {
 							ProjectStoreWebSql projectsStore = clientFactory.getProjectsStore();
-							projectsStore.getByKey(projectId, new StoreResultCallback<ProjectObject>() {
+							projectsStore.getByKey(projectId, new ProjectStoreWebSql.StoreResultCallback() {
 
 								@Override
 								public void onSuccess(ProjectObject project) {
@@ -689,10 +703,10 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 				}
 				
 				ProjectStoreWebSql store = clientFactory.getProjectsStore();
-				store.put(project, project.getId(), new StoreResultCallback<Integer>() {
+				store.put(project, new ProjectStoreWebSql.StoreResultCallback() {
 
 					@Override
-					public void onSuccess(Integer result) {
+					public void onSuccess(ProjectObject result) {
 						ProjectChangeEvent ev = new ProjectChangeEvent(project);
 						eventBus.fireEvent(ev);
 
@@ -716,18 +730,10 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 			@Override
 			public void onProjectDelete(final int projectId) {
 				ProjectStoreWebSql projectStore = clientFactory.getProjectsStore();
-				projectStore.remove(projectId, new StoreResultCallback<Boolean>() {
+				projectStore.remove(projectId, new ProjectStoreWebSql.StoreSimpleCallback() {
 
 					@Override
-					public void onSuccess(Boolean result) {
-						if (!result.booleanValue()) {
-							if (RestClient.isDebug()) {
-								Log.error("Unable to delete project data");
-							}
-							StatusNotification.notify("Unable to delete project data", StatusNotification.TIME_SHORT);
-							return;
-						}
-
+					public void onSuccess() {
 						RequestDataStoreWebSql requestsStore = clientFactory.getRequestDataStore();
 						requestsStore.getService().deleteFromProject(projectId, new VoidCallback() {
 
@@ -844,7 +850,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 	 */
 	private void restoreRequestFromHistory(int historyId) {
 		RestClient.getClientFactory().getHistoryRequestStore().getByKey(historyId,
-				new StoreResultCallback<HistoryObject>() {
+				new HistoryRequestStoreWebSql.StoreResultCallback() {
 
 					@Override
 					public void onSuccess(HistoryObject result) {

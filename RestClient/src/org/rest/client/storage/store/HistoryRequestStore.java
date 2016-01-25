@@ -15,13 +15,13 @@
  ******************************************************************************/
 package org.rest.client.storage.store;
 
+import org.rest.client.jso.HistoryObject;
 import org.rest.client.storage.IndexedDbAdapter;
 import org.rest.client.storage.indexeddb.IDBDatabase;
 import org.rest.client.storage.indexeddb.IDBDatabaseException;
 import org.rest.client.storage.indexeddb.IDBIndexParameters;
 import org.rest.client.storage.indexeddb.IDBObjectStore;
 import org.rest.client.storage.indexeddb.IDBObjectStoreParameters;
-import org.rest.client.storage.store.objects.HistoryObject;
 
 import com.allen_sauer.gwt.log.client.Log;
 

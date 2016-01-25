@@ -1,143 +1,111 @@
 package org.rest.client.storage.store;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.rest.client.jso.ProjectObject;
 
-import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.WebSqlAdapter;
-import org.rest.client.storage.store.objects.ProjectObject;
-import org.rest.client.storage.websql.ProjectService;
+import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.JsArrayInteger;
 
-import com.allen_sauer.gwt.log.client.Log;
-import com.google.code.gwt.database.client.service.DataServiceException;
-import com.google.code.gwt.database.client.service.ListCallback;
-import com.google.code.gwt.database.client.service.RowIdListCallback;
-import com.google.code.gwt.database.client.service.VoidCallback;
-import com.google.gwt.core.client.GWT;
-
-public class ProjectStoreWebSql extends WebSqlAdapter<Integer, ProjectObject> {
+public class ProjectStoreWebSql {
 	
-	ProjectService service = GWT.create(ProjectService.class);
+	public interface StoreResultCallback {
+		void onSuccess(ProjectObject result);
+		void onError(Throwable e);
+	}
 	
+	public interface StoreInsertCallback {
+		void onSuccess(int inserId);
+		void onError(Throwable e);
+	}
 	
+	public interface StoreInsertListCallback {
+		void onSuccess(JsArrayInteger inserId);
+		void onError(Throwable e);
+	}
 	
-	public ProjectService getService(){
-		return service;
+	public interface StoreResultsCallback {
+		void onSuccess(JsArray<ProjectObject> result);
+		void onError(Throwable e);
 	}
-
-	@Override
-	public void keys(StoreResultCallback<List<Integer>> callback) {
-		callback.onError(null);
+	
+	public interface StoreSimpleCallback {
+		void onSuccess();
+		void onError(Throwable e);
 	}
-
-	@Override
-	public void put(ProjectObject obj, Integer key,
-			final StoreResultCallback<Integer> callback) {
-		if(key == null){
-			service.insert(obj, new RowIdListCallback() {
-				
-				@Override
-				public void onFailure(DataServiceException error) {
-					callback.onError(error);
-				}
-				
-				@Override
-				public void onSuccess(List<Integer> rowIds) {
-					if(rowIds.size() == 0){
-						callback.onError(null);
-						return;
-					}
-					callback.onSuccess(rowIds.get(0));
-				}
-			});
-		} else {
-			service.update(obj, key.intValue(), new VoidCallback() {
-				
-				@Override
-				public void onFailure(DataServiceException error) {
-					callback.onError(error);
-				}
-				
-				@Override
-				public void onSuccess() {
-					Log.debug("Update object: success");
-					callback.onSuccess(null);
-				}
-			});
-		}
-	}
-
-	@Override
-	public void getByKey(Integer key,
-			final StoreResultCallback<ProjectObject> callback) {
-		service.get(key, new ListCallback<ProjectObject>(){
-
-			@Override
-			public void onFailure(DataServiceException error) {
-				callback.onError(error);
-			}
-
-			@Override
-			public void onSuccess(List<ProjectObject> result) {
-				if(result.size() == 0){
-					callback.onSuccess(null);
-					return;
-				}
-				callback.onSuccess(result.get(0));
-			}});
-	}
-
-	@Override
-	public void exists(Integer key, StoreResultCallback<Boolean> callback) {
-		callback.onError(null);
-	}
-
-	@Override
-	public void all(final StoreResultCallback<Map<Integer, ProjectObject>> callback) {
-		service.all(new ListCallback<ProjectObject>() {
-			
-			@Override
-			public void onFailure(DataServiceException error) {
-				callback.onError(error);
-			}
-			
-			@Override
-			public void onSuccess(List<ProjectObject> result) {
-				HashMap<Integer, ProjectObject> res = new HashMap<Integer, ProjectObject>();
-				for(ProjectObject obj : result){
-					res.put(obj.getId(), obj);
-				}
-				callback.onSuccess(res);
-			}
+	/**
+	 * Create
+	 * @param obj
+	 * @param key
+	 * @param callback
+	 */
+	public final native void add(ProjectObject obj, final StoreInsertCallback callback) /*-{
+		$wnd.arc.app.db.websql.addProject(obj.name, obj.time)
+		.then(function(result){
+			callback.@org.rest.client.storage.store.ProjectStoreWebSql.StoreInsertCallback::onSuccess(I)(result);
+		}, function(cause){
+			callback.@org.rest.client.storage.store.ProjectStoreWebSql.StoreInsertCallback::onError(Ljava/lang/Throwable;)(cause);
 		});
-	}
-
-	@Override
-	public void remove(Integer key, final StoreResultCallback<Boolean> callback) {
-		service.delete(key.intValue(), new VoidCallback() {
-			
-			@Override
-			public void onFailure(DataServiceException error) {
-				callback.onError(error);
-			}
-			
-			@Override
-			public void onSuccess() {
-				callback.onSuccess(true);
-			}
+	}-*/;
+	/**
+	 * Update
+	 * @param obj
+	 * @param callback
+	 */
+	public final native void put(ProjectObject obj, final StoreResultCallback callback) /*-{
+		$wnd.arc.app.db.websql.updateProject(obj.name, obj.time, obj.id)
+		.then(function(){
+			callback.@org.rest.client.storage.store.ProjectStoreWebSql.StoreResultCallback::onSuccess(Lorg/rest/client/jso/ProjectObject;)(obj);
+		}, function(cause){
+			callback.@org.rest.client.storage.store.ProjectStoreWebSql.StoreResultCallback::onError(Ljava/lang/Throwable;)(cause);
 		});
-	}
+	}-*/;
 
-	@Override
-	public void countAll(StoreResultCallback<Integer> callback) {
-		callback.onError(null);
-	}
-
-	@Override
-	public void query(String query, String index,
-			StoreResultCallback<Map<Integer, ProjectObject>> callback) {
-		callback.onError(null);
-	}
-
+	/**
+	 * Read
+	 * @param key
+	 * @param callback
+	 */
+	public final native void getByKey(int key, final StoreResultCallback callback) /*-{
+		$wnd.arc.app.db.websql.getProject(key)
+		.then(function(obj){
+			console.info('$wnd.arc.app.db.websql.getProject(key)', key, obj);
+			callback.@org.rest.client.storage.store.ProjectStoreWebSql.StoreResultCallback::onSuccess(Lorg/rest/client/jso/ProjectObject;)(obj);
+		}, function(cause){
+			callback.@org.rest.client.storage.store.ProjectStoreWebSql.StoreResultCallback::onError(Ljava/lang/Throwable;)(cause);
+		});
+	}-*/;
+	/**
+	 * List
+	 * @param callback
+	 */
+	public final native void all(final StoreResultsCallback callback) /*-{
+		$wnd.arc.app.db.websql.listProjects()
+		.then(function(result){
+			callback.@org.rest.client.storage.store.ProjectStoreWebSql.StoreResultsCallback::onSuccess(Lcom/google/gwt/core/client/JsArray;)(result);
+		}, function(cause){
+			callback.@org.rest.client.storage.store.ProjectStoreWebSql.StoreResultsCallback::onError(Ljava/lang/Throwable;)(cause);
+		});
+	}-*/;
+	/**
+	 * Delete
+	 * @param key
+	 * @param callback
+	 */
+	public final native void remove(int key, StoreSimpleCallback callback) /*-{
+		$wnd.arc.app.db.websql.deleteProject(key)
+		.then(function(){
+			callback.@org.rest.client.storage.store.ProjectStoreWebSql.StoreSimpleCallback::onSuccess()();
+		}, function(cause){
+			callback.@org.rest.client.storage.store.ProjectStoreWebSql.StoreSimpleCallback::onError(Ljava/lang/Throwable;)(cause);
+		});
+	}-*/;
+	
+	public final native void importData(JsArray<ProjectObject> projects, StoreInsertListCallback callback) /*-{
+		$wnd.arc.app.db.websql.importProjects2(projects)
+		.then(function(result){
+			callback.@org.rest.client.storage.store.ProjectStoreWebSql.StoreInsertListCallback::onSuccess(Lcom/google/gwt/core/client/JsArrayInteger;)(result);
+		}, function(cause){
+			callback.@org.rest.client.storage.store.ProjectStoreWebSql.StoreInsertListCallback::onError(Ljava/lang/Throwable;)(cause);
+		});
+	}-*/;
+	
 }
