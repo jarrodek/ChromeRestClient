@@ -42,7 +42,6 @@ public class SavedListItemViewImpl extends Composite {
 	@UiField TextBox nameInput;
 	@UiField DivElement detailedPanel;
 	@UiField HTMLPanel urlLabel;
-	@UiField SpanElement encoding;
 	@UiField SpanElement payload;
 	@UiField SpanElement headers;
 	@UiField HTMLPanel container;
@@ -72,14 +71,17 @@ public class SavedListItemViewImpl extends Composite {
 		this.methodLabel.setText(requestObject.getMethod());
 		this.urlValue.setText(requestObject.getURL());
 		
-		if(requestObject.getPayload() != null){
-			payload.setInnerText(requestObject.getPayload());
+		String payloadValue = requestObject.getPayload();
+		String headersValue = requestObject.getHeaders();
+		if (payloadValue != null && !payloadValue.isEmpty()) {
+			payload.setInnerText(payloadValue);
+		} else {
+			payload.setInnerHTML("<span class=\"empty-info\">No saved payload</span>");
 		}
-		if(requestObject.getHeaders() != null){
-			headers.setInnerText(requestObject.getHeaders());
-		}
-		if(requestObject.getEncoding() != null){
-			encoding.setInnerText(requestObject.getEncoding());
+		if (headersValue != null && !headersValue.isEmpty()) {
+			headers.setInnerText(headersValue);
+		} else {
+			headers.setInnerHTML("<span class=\"empty-info\">No saved headers</span>");
 		}
 		
 		container.getElement().setAttribute("data-request-id", ""+requestObject.getId());

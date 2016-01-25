@@ -14,10 +14,9 @@
 				<g:Button ui:field="delete" styleName="inlineButton historySelectButton">Delete</g:Button>
 			</span>
 		</div>
-		<div class="hidden historyDetailed" ui:field="detailedPanel">
-			<span class="historyEncoding flex " ui:field="encoding"></span>
-			<span class="historyPayload flex historyFlex1" ui:field="payload"></span>
-			<span class="historyHeaders flex historyFlex1" ui:field="headers"></span>
+		<div class="hidden historyDetailed layout horizontal" ui:field="detailedPanel">
+			<span class="historyPayload flex" ui:field="payload"></span>
+			<span class="historyHeaders flex" ui:field="headers"></span>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>
