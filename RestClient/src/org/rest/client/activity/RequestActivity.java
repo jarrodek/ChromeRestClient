@@ -482,9 +482,8 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 		// if can overwrite current params first restore latest request
 		// and then set parameters.
 		if (RestClient.currentlyOpenedProject == RestClient.previouslyOpenedProject) {
-
 			if (RestClient.isDebug()) {
-				Log.debug("Restoring data for the same project as previous.");
+				Log.debug("Restoring data for the same project as previous. Current: ", RestClient.currentlyOpenedProject, ", previous: ", RestClient.previouslyOpenedProject);
 			}
 
 			RequestObject.restoreLatest(new Callback<RequestObject, Throwable>() {

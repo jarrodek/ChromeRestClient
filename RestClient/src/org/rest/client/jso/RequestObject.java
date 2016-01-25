@@ -269,6 +269,9 @@ public class RequestObject extends JavaScriptObject {
 	 *         instead)
 	 */
 	public final native boolean isSkipProtocol() /*-{
+		if(typeof this.skipProtocol === 'string'){
+			return this.skipProtocol === 'true' ? true : false;
+		}
 		return !!(this.skipProtocol);
 	}-*/;
 	
@@ -299,6 +302,9 @@ public class RequestObject extends JavaScriptObject {
 	 *         instead)
 	 */
 	public final native boolean isSkipServer() /*-{
+		if(typeof this.skipServer === 'string'){
+			return this.skipServer === 'true' ? true : false;
+		}
 		return !!(this.skipServer);
 	}-*/;
 	public final native int getSkipServer() /*-{
@@ -323,6 +329,9 @@ public class RequestObject extends JavaScriptObject {
 	 *         restored (use current form value instead)
 	 */
 	public final native boolean isSkipParams() /*-{
+		if(typeof this.skipParams === 'string'){
+			return this.skipParams === 'true' ? true : false;
+		}
 		return !!(this.skipParams);
 	}-*/;
 	public final native int getSkipParams() /*-{
@@ -338,6 +347,9 @@ public class RequestObject extends JavaScriptObject {
 	}-*/;
 
 	public final native boolean isSkipHistory() /*-{
+		if(typeof this.skipHistory === 'string'){
+			return this.skipHistory === 'true' ? true : false;
+		}
 		return !!(this.skipHistory);
 	}-*/;
 	public final native int getSkipHistory() /*-{
@@ -353,6 +365,9 @@ public class RequestObject extends JavaScriptObject {
 	}-*/;
 
 	public final native boolean isSkipMethod() /*-{
+		if(typeof this.skipMethod === 'string'){
+			return this.skipMethod === 'true' ? true : false;
+		}
 		return !!(this.skipMethod);
 	}-*/;
 	public final native int getSkipMethod() /*-{
@@ -368,6 +383,9 @@ public class RequestObject extends JavaScriptObject {
 	}-*/;
 
 	public final native boolean isSkipPayload() /*-{
+		if(typeof this.skipPayload === 'string'){
+			return this.skipPayload === 'true' ? true : false;
+		}
 		return !!(this.skipPayload);
 	}-*/;
 	public final native int getSkipPayload() /*-{
@@ -383,6 +401,9 @@ public class RequestObject extends JavaScriptObject {
 	}-*/;
 	
 	public final native boolean isSkipHeaders() /*-{
+		if(typeof this.skipHeaders === 'string'){
+			return this.skipHeaders === 'true' ? true : false;
+		}
 		return !!(this.skipHeaders);
 	}-*/;
 	public final native int getSkipHeaders() /*-{
@@ -398,6 +419,9 @@ public class RequestObject extends JavaScriptObject {
 	}-*/;
 	
 	public final native boolean isSkipPath() /*-{
+		if(typeof this.skipPath === 'string'){
+			return this.skipPath === 'true' ? true : false;
+		}
 		return !!(this.skipPath);
 	}-*/;
 	public final native int getSkipPath() /*-{
