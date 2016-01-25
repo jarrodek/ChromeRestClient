@@ -317,11 +317,11 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 					if(RestClient.isDebug()){
 						Log.info("Updated headers value: " + data);
 					}
-					//RestClient.fixChromeLayout();
 				}
 			});
 		}
 		headersRawInput.setValue(headersData, true);
+		rawEditorChanged(headersData);
 	}
 	
 	/**
@@ -437,7 +437,6 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 			
 			if(headersCodeMirror != null) {
 				headersCodeMirror.refresh();
-				//RestClient.fixChromeLayout();
 				return;
 			}
 			
@@ -461,6 +460,7 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 				public void onChage() {
 					headersData = headersCodeMirror.getValue();
 					headersRawInput.setValue(headersData);
+					Log.info("Code mirror change fired actually now::" + headersData);
 				}
 			});
 			setHeadersEditorCallback(headersCodeMirror.getInstance());
@@ -492,7 +492,7 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 	private final native void setHeadersEditorCallback(CodeMirrorImpl headersCodeMirror) /*-{
 		var context = this;
 		headersCodeMirror.on("change", function(cm, changeObj) {
-			context.@org.rest.client.ui.desktop.widget.RequestHeadersWidget::codeMirrorChanged(Ljava/lang/String;)(cm.getValue());
+			context.@org.rest.client.ui.desktop.widget.RequestHeadersWidget::rawEditorChanged(Ljava/lang/String;)(cm.getValue());
             if(changeObj.origin === "setValue" || changeObj.origin === undefined || (changeObj.origin === "+input" && changeObj.text[0] === "")){
                 //do not show proposition on ENTER.
                 return;
@@ -545,6 +545,7 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 			ensureFormHasRow();
 		}
 	};
+	String lastSendContentTypeChangeValue = null;
 	/**
 	 * A function to be called when any header change.
 	 * This function should look for "Content-Type" header and fire content type change event when changed.
@@ -559,12 +560,24 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 			if(value == null){
 				value = "";
 			}
-			RestClient.getClientFactory().getEventBus().fireEvent(
-					new HttpEncodingChangeEvent(value));
+			String ct = value;
+			if(ct.indexOf(";") != -1) {
+				ct = ct.substring(0, ct.indexOf(";"));
+			}
+			if((lastSendContentTypeChangeValue == null) || 
+					(lastSendContentTypeChangeValue != null && !lastSendContentTypeChangeValue.equals(ct))) {
+				lastSendContentTypeChangeValue = ct;
+				if(RestClient.isDebug()) {
+					Log.info("Content-type changed to: ", ct);
+				}
+				RestClient.getClientFactory().getEventBus().fireEvent(
+						new HttpEncodingChangeEvent(ct));
+			}
 		}
 	}
 	
-	void codeMirrorChanged(String value) {
+	
+	void rawEditorChanged(String value) {
 		ArrayList<RequestHeader> list = RequestHeadersParser.stringToHeaders(value);
 		for(RequestHeader header : list){
 			onHeaderChange(header.getName(), header.getValue());
