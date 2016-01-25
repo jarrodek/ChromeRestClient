@@ -36,7 +36,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * </p>
  */
 public class HttpEncodingChangeEvent extends Event<HttpEncodingChangeEvent.Handler> {
-	public static final Type<Handler> TYPE = new Type<Handler>();
+	private static final Type<Handler> TYPE = new Type<Handler>();
 
 	/**
 	 * Register an handler for this event.
@@ -60,7 +60,7 @@ public class HttpEncodingChangeEvent extends Event<HttpEncodingChangeEvent.Handl
 		void onChange(String method);
 	}
 	
-	public final String encoding;
+	private final String encoding;
 	
 	public HttpEncodingChangeEvent(String encoding){
 		this.encoding = encoding;

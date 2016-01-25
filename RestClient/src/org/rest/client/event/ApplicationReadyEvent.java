@@ -36,7 +36,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * </p>
  */
 public class ApplicationReadyEvent extends Event<ApplicationReadyEvent.Handler> {
-	public static final Type<Handler> TYPE = new Type<Handler>();
+	private static final Type<Handler> TYPE = new Type<Handler>();
 
 	/**
 	 * Register an handler for this event.

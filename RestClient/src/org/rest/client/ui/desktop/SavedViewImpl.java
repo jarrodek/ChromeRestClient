@@ -2,7 +2,7 @@ package org.rest.client.ui.desktop;
 
 import java.util.List;
 
-import org.rest.client.storage.store.objects.RequestObject;
+import org.rest.client.jso.RequestObject;
 import org.rest.client.ui.SavedView;
 import org.rest.client.ui.html5.SearchBox;
 

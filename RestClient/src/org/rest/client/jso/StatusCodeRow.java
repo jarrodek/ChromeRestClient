@@ -1,4 +1,4 @@
-package org.rest.client.storage.websql;
+package org.rest.client.jso;
 
 import com.google.gwt.core.client.JavaScriptObject;
 

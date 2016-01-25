@@ -14,11 +14,11 @@ public class SyncAdapter {
 	/**
 	 * Is debug setting enabled.
 	 */
-	public static boolean debug = true;
+	static boolean debug = true;
 	/**
 	 * Id history setting enabled.
 	 */
-	public static boolean history = true;
+	static boolean history = true;
 	/**
 	 * Are magic variables setting enabled.
 	 */
@@ -34,10 +34,10 @@ public class SyncAdapter {
 	/**
 	 * True if this adapter already set storage event handlers.
 	 */
-	static boolean observing = false;
+	static boolean observing = false; // NO_UCD (unused code)
 	
-	interface SyncResult {
-		void onSync();
+	private interface SyncResult {
+		void onSync(); // NO_UCD (unused code)
 	}
 	
 	
@@ -69,7 +69,7 @@ public class SyncAdapter {
 	/**
 	 * Observe changes to the storage.
 	 */
-	public static final native void observe() /*-{
+	private static final native void observe() /*-{
 		if(@org.rest.client.SyncAdapter::observing === true){
 			return;
 		}

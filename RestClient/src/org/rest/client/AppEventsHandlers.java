@@ -3,9 +3,9 @@ package org.rest.client;
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.SaveRequestEvent;
+import org.rest.client.log.Log;
 import org.rest.client.ui.SaveRequestDialogView;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.web.bindery.event.shared.EventBus;
 
 public class AppEventsHandlers {

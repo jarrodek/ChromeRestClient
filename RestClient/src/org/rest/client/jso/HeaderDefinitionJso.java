@@ -1,7 +1,11 @@
 package org.rest.client.jso;
 
 import com.google.gwt.core.client.JavaScriptObject;
-
+/**
+ * Header definition from definitions.json file.
+ * @author Pawel Psztyc
+ *
+ */
 public class HeaderDefinitionJso extends JavaScriptObject {
 	protected HeaderDefinitionJso(){}
 	/**

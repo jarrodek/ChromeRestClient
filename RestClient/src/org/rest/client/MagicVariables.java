@@ -3,17 +3,18 @@ package org.rest.client;
 import java.util.Date;
 import java.util.HashMap;
 
-import com.allen_sauer.gwt.log.client.Log;
+import org.rest.client.log.Log;
+
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Random;
 
-public class MagicVariables {
+class MagicVariables {
 	
-	HashMap<String, String> randGroupObjects = new HashMap<String, String>();
-	HashMap<String, String> nowGroupObjects = new HashMap<String, String>();
+	private HashMap<String, String> randGroupObjects = new HashMap<String, String>();
+	private HashMap<String, String> nowGroupObjects = new HashMap<String, String>();
 	
-	public String apply(String input){
+	String apply(String input){
 		if(!SyncAdapter.magicVars) {
 			Log.debug("Applying Magic variables: function disabled.");
 			Log.warn("This oprion is deprecated and will be removed from settings. \nAll requests will be forced to apply magic variables.");

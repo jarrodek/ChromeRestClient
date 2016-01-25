@@ -2,7 +2,7 @@ package org.rest.client.gdrive.api;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
-public class Person extends JavaScriptObject{
+class Person extends JavaScriptObject{
 	protected Person(){}
 	
 	

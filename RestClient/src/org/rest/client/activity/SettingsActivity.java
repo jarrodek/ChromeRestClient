@@ -23,11 +23,10 @@ import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.NotificationsStateChangeEvent;
 import org.rest.client.place.SettingsPlace;
-import org.rest.client.request.RequestsHistory;
+import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.ui.SettingsView;
 
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -60,15 +59,16 @@ public class SettingsActivity extends AppActivity implements SettingsView.Presen
 
 	@Override
 	public void clearHistory() {
-		RequestsHistory.clearHistory(new Callback<Boolean, Throwable>() {
+		clientFactory.getHistoryRequestStore().deleteHistory(new HistoryRequestStoreWebSql.StoreSimpleCallback() {
+			
 			@Override
-			public void onSuccess(Boolean result) {
+			public void onSuccess() {
 				StatusNotification.notify("History cleared.", StatusNotification.TIME_SHORT);
 			}
-
+			
 			@Override
-			public void onFailure(Throwable reason) {
-				StatusNotification.notify("Unable to clear History Store.");
+			public void onError(Throwable e) {
+				StatusNotification.notify("Unable to clear history store.");
 			}
 		});
 		GoogleAnalytics.sendEvent("Settings usage", "Clear history", "");

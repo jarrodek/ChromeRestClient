@@ -2,7 +2,7 @@ package org.rest.client.gdrive;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
-public final class DriveError extends JavaScriptObject {
+final class DriveError extends JavaScriptObject {
 	protected DriveError(){}
 	
 	public native int getCode() /*-{

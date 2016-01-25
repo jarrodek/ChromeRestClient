@@ -3,7 +3,7 @@ package org.rest.client.gdrive;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 
-public final class DriveFileListResponse extends JavaScriptObject {
+final class DriveFileListResponse extends JavaScriptObject {
 	protected DriveFileListResponse(){}
 	
 	public native String getNextPageToken() /*-{

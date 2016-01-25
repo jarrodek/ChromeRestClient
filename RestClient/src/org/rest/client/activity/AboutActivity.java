@@ -34,8 +34,8 @@ public class AboutActivity extends AppActivity implements
 
 	
 	final private AboutPlace place;
-	AboutView view = null;
-	TutorialFactory tutorialFactory = null;
+	private AboutView view = null;
+	private TutorialFactory tutorialFactory = null;
 
 	public AboutActivity(AboutPlace place, ClientFactory clientFactory) {
 		super(clientFactory);

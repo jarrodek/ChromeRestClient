@@ -27,6 +27,7 @@ import org.rest.client.codemirror.CodeMirrorImpl;
 import org.rest.client.codemirror.CodeMirrorOptions;
 import org.rest.client.event.BoundaryChangeEvent;
 import org.rest.client.event.HttpEncodingChangeEvent;
+import org.rest.client.log.Log;
 import org.rest.client.request.FilesObject;
 import org.rest.client.request.FormPayloadData;
 import org.rest.client.request.RequestPayloadParser;
@@ -37,8 +38,9 @@ import org.rest.client.ui.html5.ListItem;
 import org.rest.client.ui.html5.ListPanel;
 import org.rest.client.util.Units;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.Style.Display;
@@ -114,6 +116,9 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
 				payloadData = payloadRawInput.getValue();
+				if(RestClient.isDebug()) {
+					Log.info("Payload changed via raw tab");
+				}
 			}
 		});
 		rawTab.addClickHandler(new ClickHandler() {
@@ -263,6 +268,7 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		if(bodyCodeMirror != null){
 			bodyCodeMirror.setValue("");
 		}
+		loadCodeMirrorForBody();
 	}
 	
 	
@@ -457,7 +463,17 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		payloadRawInput.setValue(payloadData);
 		if(bodyCodeMirror != null){
 			bodyCodeMirror.setValue(payloadData);
-			bodyCodeMirror.refresh();
+			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+				@Override
+				public void execute() {
+					bodyCodeMirror.refresh();
+					if(RestClient.isDebug()){
+						Log.info("Updated payload value");
+					}
+					//RestClient.fixChromeLayout();
+				}
+			});
+			
 		}
 		updateForm();
 	}
@@ -592,6 +608,9 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 			public void onChage() {
 				payloadData = bodyCodeMirror.getValue();
 				payloadRawInput.setValue(payloadData);
+				if(RestClient.isDebug()) {
+					Log.info("Payload changed via raw tab with CodeMirror");
+				}
 			}
 		});
 		bodyCodeMirror.refresh();

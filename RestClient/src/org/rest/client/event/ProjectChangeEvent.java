@@ -15,7 +15,7 @@
  ******************************************************************************/
 package org.rest.client.event;
 
-import org.rest.client.storage.store.objects.ProjectObject;
+import org.rest.client.jso.ProjectObject;
 
 import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;
@@ -43,7 +43,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * @author Paweł Psztyć
  */
 public class ProjectChangeEvent extends Event<ProjectChangeEvent.Handler> {
-	public static final Type<Handler> TYPE = new Type<Handler>();
+	private static final Type<Handler> TYPE = new Type<Handler>();
 
 	/**
 	 * Register an handler for this event.

@@ -19,7 +19,6 @@ import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
-import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.storage.store.WebSocketDataStoreWebSql;
 import org.rest.client.storage.websql.ExportedDataReferenceService;
@@ -61,10 +60,6 @@ public class ClientFactoryImpl implements ClientFactory {
 	private static final PlaceController placeController = new PlaceController(
 			eventBus);
 	private static RequestView requestView = null;
-	// private static ResponseView responseView = null;
-	// private static AboutView aboutView = null;
-	// private static SettingsView settingsView = null;
-	private static StoreKeys latestRequestStore = null;
 	private static RequestDataStoreWebSql requestDataStore = null;
 	private static HistoryRequestStoreWebSql historyRequestStore = null;
 	private static UrlHistoryStoreWebSql urlHistoryStore = null;
@@ -102,14 +97,6 @@ public class ClientFactoryImpl implements ClientFactory {
 		// }
 		// return responseView;
 		return GWT.create(ResponseViewImpl.class);
-	}
-
-	@Override
-	public StoreKeys getLocalStore() {
-		if (latestRequestStore == null) {
-			latestRequestStore = GWT.create(StoreKeys.class);
-		}
-		return latestRequestStore;
 	}
 
 	@Override

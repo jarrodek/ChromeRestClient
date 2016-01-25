@@ -3,11 +3,11 @@ package org.rest.client.suggestion;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.rest.client.storage.StoreResultCallback;
+import org.rest.client.jso.HeaderRow;
+import org.rest.client.log.Log;
 import org.rest.client.storage.store.HeadersStoreWebSql;
-import org.rest.client.storage.websql.HeaderRow;
 
-import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.core.client.JsArray;
 
 public class HeadersSuggestOracle extends DatabaseSuggestOracle {
 	private final HeadersStoreWebSql store;
@@ -39,27 +39,28 @@ public class HeadersSuggestOracle extends DatabaseSuggestOracle {
 	
 	private void runQuery(final Request request, final Callback callback){
 		final String query = request.getQuery();
-		store.getHeaders("%" + query + "%", headerType, new StoreResultCallback<List<HeaderRow>>() {
+		store.getHeaders("%" + query + "%", headerType, new HeadersStoreWebSql.StoreResultsCallback() {
 			
 			@Override
-			public void onSuccess(List<HeaderRow> result) {
+			public void onSuccess(JsArray<HeaderRow> result) {
 				String lowerQuery = query.toLowerCase();
 				
 				requestInProgress = false;
 				List<HeaderSuggestion> suggestions = new ArrayList<HeaderSuggestion>();
-				
-				for(HeaderRow row : result){
-					String headerName = row.getName();
-					if(headerName == null){
-						continue;
+				if(result != null) {
+					for (int i = 0; i < result.length(); i++) {
+						HeaderRow row = result.get(i);
+						String headerName = row.getName();
+						if(headerName == null){
+							continue;
+						}
+						if(!headerName.toLowerCase().startsWith(lowerQuery)){
+							continue;
+						}
+						HeaderSuggestion s = new HeaderSuggestion(headerName);
+						suggestions.add(s);
 					}
-					if(!headerName.toLowerCase().startsWith(lowerQuery)){
-						continue;
-					}
-					HeaderSuggestion s = new HeaderSuggestion(headerName);
-					suggestions.add(s);
 				}
-				
 				recentDatabaseResult = new DatabaseRequestResponse<HeaderSuggestion>(request,
 						numberOfDatabaseSuggestions, suggestions);
 				HeadersSuggestOracle.this.returnSuggestions(callback);

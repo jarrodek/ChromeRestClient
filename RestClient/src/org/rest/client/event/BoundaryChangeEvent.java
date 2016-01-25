@@ -25,7 +25,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * 
  */
 public class BoundaryChangeEvent extends Event<BoundaryChangeEvent.Handler> {
-	public static final Type<Handler> TYPE = new Type<Handler>();
+	private static final Type<Handler> TYPE = new Type<Handler>();
 
 	/**
 	 * Register an handler for this event.
@@ -49,7 +49,7 @@ public class BoundaryChangeEvent extends Event<BoundaryChangeEvent.Handler> {
 		void onChange(String boundary);
 	}
 	
-	public final String boudary;
+	private final String boudary;
 	
 	public BoundaryChangeEvent(String boudary){
 		this.boudary = boudary;

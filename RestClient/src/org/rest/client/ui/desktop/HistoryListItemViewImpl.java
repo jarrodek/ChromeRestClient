@@ -3,7 +3,7 @@ package org.rest.client.ui.desktop;
 import java.util.Date;
 
 import org.rest.client.StatusNotification;
-import org.rest.client.storage.store.objects.HistoryObject;
+import org.rest.client.jso.HistoryObject;
 import org.rest.client.ui.HistoryListItemView;
 import org.rest.client.ui.HistoryView;
 
@@ -36,8 +36,6 @@ public class HistoryListItemViewImpl extends Composite implements HistoryListIte
 	InlineLabel urlValue;
 	@UiField
 	InlineLabel dateLabel;
-	@UiField
-	SpanElement encoding;
 	@UiField
 	SpanElement payload;
 	@UiField
@@ -122,14 +120,17 @@ public class HistoryListItemViewImpl extends Composite implements HistoryListIte
 						return;
 					}
 					fullHistoryObject = true;
-					if (result.getPayload() != null) {
-						payload.setInnerText(result.getPayload());
+					String payloadValue = result.getPayload();
+					String headersValue = result.getHeaders();
+					if (payloadValue != null && !payloadValue.isEmpty()) {
+						payload.setInnerText(payloadValue);
+					} else {
+						payload.setInnerHTML("<span class=\"empty-info\">No saved payload</span>");
 					}
-					if (result.getHeaders() != null) {
-						headers.setInnerText(result.getHeaders());
-					}
-					if (result.getEncoding() != null) {
-						encoding.setInnerText(result.getEncoding());
+					if (headersValue != null && !headersValue.isEmpty()) {
+						headers.setInnerText(headersValue);
+					} else {
+						headers.setInnerHTML("<span class=\"empty-info\">No saved headers</span>");
 					}
 				}
 
