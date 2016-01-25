@@ -1181,20 +1181,3 @@ arc.app.db.websql.deleteRequestByProject = function(projectId) {
       });
   });
 };
-/**
- * In dev mode there is no direct connection to the database initialized in the background page.
- * This function must be called in Development environment to initialize WebSQL.
- */
-arc.app.db.websql.initDev = function() {
-  if (arc.app.utils && !arc.app.utils.isProdMode()) {
-    arc.app.db.websql.open()
-      .then(function() {
-        console.log('%cDEVMODE::Database has been initialized', 'color: #33691E');
-      })
-      .catch(function(e) {
-        console.error('DEVMODE::Error initializing the database', e);
-      });
-  }
-};
-
-arc.app.db.websql.initDev();
