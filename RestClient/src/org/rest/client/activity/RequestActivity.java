@@ -46,6 +46,7 @@ import org.rest.client.jso.HistoryObject;
 import org.rest.client.jso.ProjectObject;
 import org.rest.client.jso.RequestObject;
 import org.rest.client.jso.ResponseStatusData;
+import org.rest.client.log.Log;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.RedirectData;
 import org.rest.client.request.URLParser;
@@ -58,7 +59,6 @@ import org.rest.client.ui.EditProjectView;
 import org.rest.client.ui.RequestView;
 import org.rest.client.ui.ResponseView;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.def.BackgroundJsCallback;
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
@@ -127,7 +127,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 		panel.setWidget(viewFlowPanel);
 
 		String entryId = place.getEntryId();
-
+		
 		if (place.isHistory()) {
 			try {
 				int historyId = Integer.parseInt(entryId);

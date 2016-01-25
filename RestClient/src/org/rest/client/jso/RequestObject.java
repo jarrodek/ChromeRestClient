@@ -18,10 +18,10 @@ package org.rest.client.jso;
 import java.util.ArrayList;
 
 import org.rest.client.RestClient;
+import org.rest.client.log.Log;
 import org.rest.client.request.FilesObject;
 import org.rest.client.storage.store.StoreKeys;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;

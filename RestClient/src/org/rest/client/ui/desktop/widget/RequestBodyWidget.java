@@ -27,6 +27,7 @@ import org.rest.client.codemirror.CodeMirrorImpl;
 import org.rest.client.codemirror.CodeMirrorOptions;
 import org.rest.client.event.BoundaryChangeEvent;
 import org.rest.client.event.HttpEncodingChangeEvent;
+import org.rest.client.log.Log;
 import org.rest.client.request.FilesObject;
 import org.rest.client.request.FormPayloadData;
 import org.rest.client.request.RequestPayloadParser;
@@ -37,7 +38,6 @@ import org.rest.client.ui.html5.ListItem;
 import org.rest.client.ui.html5.ListPanel;
 import org.rest.client.util.Units;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.InputElement;

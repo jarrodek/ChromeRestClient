@@ -26,6 +26,7 @@ import org.rest.client.event.NewProjectAvailableEvent;
 import org.rest.client.event.SavedRequestEvent;
 import org.rest.client.jso.ProjectObject;
 import org.rest.client.jso.RequestObject;
+import org.rest.client.log.Log;
 import org.rest.client.mvp.AppActivityMapper;
 import org.rest.client.mvp.AppPlaceHistoryMapper;
 import org.rest.client.place.ImportExportPlace;
@@ -43,7 +44,6 @@ import org.rest.client.task.TasksLoader;
 import org.rest.client.ui.RequestView;
 import org.rest.client.util.UUID;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.activity.shared.ActivityManager;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.chrome.storage.Storage;
@@ -190,8 +190,6 @@ public class RestClient implements EntryPoint {
 		GoogleAnalytics.initialize();
 
 		setLogging();
-		exportCollectRequestData();
-
 		// app's main event bus. It's used to distribute events in the app.
 		EventBus eventBus = clientFactory.getEventBus();
 		PlaceController placeController = clientFactory.getPlaceController();
@@ -389,8 +387,7 @@ public class RestClient implements EntryPoint {
 				if (key.toLowerCase().equals("content-type")) {
 					encoding = item.getValue();
 					if (RestClient.isDebug()) {
-						Log.debug("Found Content-Type header in headers list. Overwrite content-type value to "
-								+ encoding);
+						Log.debug("Found Content-Type header in headers list. Overwrite content-type value to ", encoding);
 					}
 					// Temporarily remove it from headers list
 					headersList.remove(i);

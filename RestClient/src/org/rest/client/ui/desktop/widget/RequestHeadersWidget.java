@@ -31,12 +31,12 @@ import org.rest.client.event.HeaderBlurEvent;
 import org.rest.client.event.HeaderRemoveEvent;
 import org.rest.client.event.HeaderValueChangeEvent;
 import org.rest.client.event.HttpEncodingChangeEvent;
+import org.rest.client.log.Log;
 import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.suggestion.HeadersSuggestOracle;
 import org.rest.client.ui.html5.HTML5Element;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;

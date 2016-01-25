@@ -6,8 +6,8 @@ import org.rest.client.RestClient;
 import org.rest.client.jso.FileImportData;
 import org.rest.client.jso.ProjectObject;
 import org.rest.client.jso.RequestObject;
+import org.rest.client.log.Log;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JsArray;
 

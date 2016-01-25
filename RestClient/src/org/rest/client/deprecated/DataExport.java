@@ -6,12 +6,12 @@ import java.util.List;
 import org.rest.client.RestClient;
 import org.rest.client.StatusNotification;
 import org.rest.client.jso.RequestObject;
+import org.rest.client.log.Log;
 import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.websql.ExportedDataInsertItem;
 import org.rest.client.storage.websql.ExportedDataItem;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.gwt.core.client.Callback;

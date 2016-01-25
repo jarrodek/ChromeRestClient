@@ -8,9 +8,9 @@ import org.rest.client.headerssupport.AuthorizeDialog;
 import org.rest.client.headerssupport.Base64Coder;
 import org.rest.client.headerssupport.HeaderSupport;
 import org.rest.client.headerssupport.OAuth.OauthParam;
+import org.rest.client.log.Log;
 import org.rest.client.ui.RequestView;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;

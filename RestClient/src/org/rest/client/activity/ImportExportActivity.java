@@ -14,6 +14,7 @@ import org.rest.client.importparser.ImportResult;
 import org.rest.client.jso.ProjectObject;
 import org.rest.client.jso.RequestDataJso;
 import org.rest.client.jso.RequestObject;
+import org.rest.client.log.Log;
 import org.rest.client.place.ImportExportPlace;
 import org.rest.client.request.ApplicationSession;
 import org.rest.client.request.ImportDataCallback;
@@ -24,7 +25,6 @@ import org.rest.client.storage.websql.ExportedDataInsertItem;
 import org.rest.client.ui.ImportExportView;
 import org.rest.client.ui.ImportExportView.StringCallback;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.core.client.Callback;

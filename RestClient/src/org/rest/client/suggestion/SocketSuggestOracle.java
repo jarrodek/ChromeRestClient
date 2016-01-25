@@ -3,9 +3,9 @@ package org.rest.client.suggestion;
 import java.util.ArrayList;
 
 import org.rest.client.jso.WebSocketObject;
+import org.rest.client.log.Log;
 import org.rest.client.storage.store.WebSocketDataStoreWebSql;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.history.History;
 import com.google.gwt.chrome.history.HistoryItem;
 import com.google.gwt.chrome.history.HistorySearchCallback;

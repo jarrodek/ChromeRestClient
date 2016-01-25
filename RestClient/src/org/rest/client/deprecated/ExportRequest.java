@@ -3,10 +3,10 @@ package org.rest.client.deprecated;
 import java.util.HashMap;
 
 import org.rest.client.RestClient;
+import org.rest.client.log.Log;
 import org.rest.client.request.ApplicationRequest;
 import org.rest.shared.ServerPaths;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;

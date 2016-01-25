@@ -8,10 +8,10 @@ import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.importparser.ImportResult;
 import org.rest.client.jso.ProjectObject;
 import org.rest.client.jso.RequestObject;
+import org.rest.client.log.Log;
 import org.rest.client.request.RequestImportListItem;
 import org.rest.client.ui.ImportExportView;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.runtime.ChromeRuntime.RuntimeStringHandler;
 import com.google.gwt.chrome.runtime.Runtime;
 import com.google.gwt.core.client.Callback;

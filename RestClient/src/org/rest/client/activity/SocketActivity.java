@@ -22,6 +22,7 @@ import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
 import org.rest.client.StatusNotification;
 import org.rest.client.jso.WebSocketObject;
+import org.rest.client.log.Log;
 import org.rest.client.place.SocketPlace;
 import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.WebSocketDataStoreWebSql;
@@ -29,7 +30,6 @@ import org.rest.client.suggestion.SocketSuggestOracle;
 import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.SocketView;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;

@@ -3,7 +3,8 @@ package org.rest.client;
 import java.util.Date;
 import java.util.HashMap;
 
-import com.allen_sauer.gwt.log.client.Log;
+import org.rest.client.log.Log;
+
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Random;

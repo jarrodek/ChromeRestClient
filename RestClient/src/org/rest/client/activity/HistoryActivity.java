@@ -25,11 +25,11 @@ import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.ClearHistoryEvent;
 import org.rest.client.jso.HistoryObject;
+import org.rest.client.log.Log;
 import org.rest.client.place.HistoryPlace;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.ui.HistoryView;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.json.client.JSONArray;

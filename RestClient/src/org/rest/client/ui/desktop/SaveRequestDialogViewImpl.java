@@ -8,13 +8,13 @@ import org.rest.client.gdrive.DriveFileItem;
 import org.rest.client.gdrive.GoogleDrive;
 import org.rest.client.jso.ProjectObject;
 import org.rest.client.jso.RequestObject;
+import org.rest.client.log.Log;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.URLParser;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.ui.SaveRequestDialogView;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;

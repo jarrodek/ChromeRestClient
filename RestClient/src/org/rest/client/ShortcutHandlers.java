@@ -8,11 +8,11 @@ import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.RequestStartActionEvent;
 import org.rest.client.event.SaveRequestEvent;
+import org.rest.client.log.Log;
 import org.rest.client.place.HistoryPlace;
 import org.rest.client.place.SavedPlace;
 import org.rest.client.shortcuts.ShortcutItem;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;

@@ -3,9 +3,9 @@ package org.rest.client.gdrive;
 import org.rest.client.RestClient;
 import org.rest.client.event.SavedRequestEvent;
 import org.rest.client.jso.RequestObject;
+import org.rest.client.log.Log;
 import org.rest.client.storage.store.StoreKeys;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
 import com.google.gwt.core.client.Callback;

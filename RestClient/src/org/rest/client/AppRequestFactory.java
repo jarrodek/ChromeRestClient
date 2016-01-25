@@ -13,6 +13,7 @@ import org.rest.client.event.RequestStartActionEvent;
 import org.rest.client.jso.HistoryObject;
 import org.rest.client.jso.RequestObject;
 import org.rest.client.jso.UrlRow;
+import org.rest.client.log.Log;
 import org.rest.client.request.FilesObject;
 import org.rest.client.request.FormPayloadData;
 import org.rest.client.request.HttpMethodOptions;
@@ -24,7 +25,6 @@ import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultsCallback;
 import org.rest.client.ui.ErrorDialogView;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.def.BackgroundJsCallback;
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;

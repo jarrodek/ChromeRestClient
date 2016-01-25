@@ -24,13 +24,13 @@ import org.rest.client.dom.worker.WorkerMessageHandler;
 import org.rest.client.event.OverwriteUrlEvent;
 import org.rest.client.jso.RequestObject;
 import org.rest.client.jso.ResponseStatusData;
+import org.rest.client.log.Log;
 import org.rest.client.ui.ResponseView;
 import org.rest.client.ui.desktop.widget.JSONViewer;
 import org.rest.client.ui.desktop.widget.XMLViewer;
 import org.rest.client.ui.html5.HTML5Element;
 import org.rest.client.util.Utils;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;

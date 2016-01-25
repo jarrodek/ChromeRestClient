@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.rest.client.jso.HeaderRow;
+import org.rest.client.log.Log;
 import org.rest.client.storage.store.HeadersStoreWebSql;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.JsArray;
 
 public class HeadersSuggestOracle extends DatabaseSuggestOracle {

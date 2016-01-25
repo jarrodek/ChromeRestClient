@@ -8,9 +8,9 @@ import java.util.Map.Entry;
 import org.rest.client.RestClient;
 import org.rest.client.StatusNotification;
 import org.rest.client.event.StoreDataEvent;
+import org.rest.client.log.Log;
 import org.rest.client.storage.websql.ExportedDataInsertItem;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.core.client.Callback;

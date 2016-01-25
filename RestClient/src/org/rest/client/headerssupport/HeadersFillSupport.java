@@ -6,11 +6,11 @@ import java.util.List;
 
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
+import org.rest.client.log.Log;
 import org.rest.client.ui.desktop.HeaderSupportAuthorizationImpl;
 import org.rest.client.ui.desktop.HeaderSupportDate;
 import org.rest.client.ui.desktop.widget.RequestHeadersWidget;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

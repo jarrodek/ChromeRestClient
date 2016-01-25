@@ -7,12 +7,12 @@ import org.rest.client.RestClient;
 import org.rest.client.StatusNotification;
 import org.rest.client.event.ClearHistoryEvent;
 import org.rest.client.jso.HistoryObject;
+import org.rest.client.log.Log;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.ui.HistoryListItemView;
 import org.rest.client.ui.HistoryView;
 import org.rest.client.ui.html5.SearchBox;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
