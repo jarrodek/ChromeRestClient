@@ -903,8 +903,15 @@ arc.app.db.websql.insertRequestObject = function(data) {
             'skipPayload, skipHeaders, skipPath, time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
           let values = [
             data.project, data.name, data.url, data.method, data.headers, data.payload,
-            data.skipProtocol, data.skipServer, data.skipParams, data.skipHistory,
-            data.skipMethod, data.skipPayload, data.skipHeaders, data.skipPath, data.time
+            arc.app.db.websql._getIntValue(data.skipProtocol), 
+            arc.app.db.websql._getIntValue(data.skipServer), 
+            arc.app.db.websql._getIntValue(data.skipParams), 
+            arc.app.db.websql._getIntValue(data.skipHistory),
+            arc.app.db.websql._getIntValue(data.skipMethod), 
+            arc.app.db.websql._getIntValue(data.skipPayload), 
+            arc.app.db.websql._getIntValue(data.skipHeaders), 
+            arc.app.db.websql._getIntValue(data.skipPath), 
+            data.time
           ];
           tx.executeSql(sql, values,
             function(tx, result) {
@@ -922,6 +929,22 @@ arc.app.db.websql.insertRequestObject = function(data) {
       });
   });
 };
+/**
+ * Fix for issue with saving data without transformation from boolean values to numbers.
+ */
+arc.app.db.websql._getIntValue = function(value) {
+  var type = typeof value;
+  if (type === 'string') {
+    return value === 'true' ? 1 : 0;
+  }
+  if (type === 'boolean') {
+    return value ? 1 : 0;
+  }
+  if (type === 'number') {
+    return value;
+  }
+  return 0;
+};
 arc.app.db.websql.updateRequestObject = function(data) {
   return new Promise(function(resolve, reject) {
     arc.app.db.websql.open()
@@ -935,9 +958,15 @@ arc.app.db.websql.updateRequestObject = function(data) {
             'WHERE ID=?';
           let values = [
             data.project, data.name, data.url, data.method, data.headers, data.payload,
-            data.skipProtocol, data.skipServer, data.skipParams, data.skipHistory,
-            data.skipMethod, data.skipPayload, data.skipHeaders, data.skipPath, data.time,
-            data.id
+            arc.app.db.websql._getIntValue(data.skipProtocol), 
+            arc.app.db.websql._getIntValue(data.skipServer), 
+            arc.app.db.websql._getIntValue(data.skipParams), 
+            arc.app.db.websql._getIntValue(data.skipHistory),
+            arc.app.db.websql._getIntValue(data.skipMethod), 
+            arc.app.db.websql._getIntValue(data.skipPayload), 
+            arc.app.db.websql._getIntValue(data.skipHeaders), 
+            arc.app.db.websql._getIntValue(data.skipPath), 
+            data.time, data.id
           ];
           tx.executeSql(sql, values,
             function() {

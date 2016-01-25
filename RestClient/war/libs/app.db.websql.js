@@ -903,8 +903,15 @@ arc.app.db.websql.insertRequestObject = function(data) {
             'skipPayload, skipHeaders, skipPath, time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
           let values = [
             data.project, data.name, data.url, data.method, data.headers, data.payload,
-            data.skipProtocol, data.skipServer, data.skipParams, data.skipHistory,
-            data.skipMethod, data.skipPayload, data.skipHeaders, data.skipPath, data.time
+            arc.app.db.websql._getIntValue(data.skipProtocol), 
+            arc.app.db.websql._getIntValue(data.skipServer), 
+            arc.app.db.websql._getIntValue(data.skipParams), 
+            arc.app.db.websql._getIntValue(data.skipHistory),
+            arc.app.db.websql._getIntValue(data.skipMethod), 
+            arc.app.db.websql._getIntValue(data.skipPayload), 
+            arc.app.db.websql._getIntValue(data.skipHeaders), 
+            arc.app.db.websql._getIntValue(data.skipPath), 
+            data.time
           ];
           tx.executeSql(sql, values,
             function(tx, result) {
@@ -933,7 +940,7 @@ arc.app.db.websql._getIntValue = function(value) {
   if (type === 'boolean') {
     return value ? 1 : 0;
   }
-  if(type === 'number'){
+  if (type === 'number') {
     return value;
   }
   return 0;
@@ -1203,20 +1210,3 @@ arc.app.db.websql.deleteRequestByProject = function(projectId) {
       });
   });
 };
-/**
- * In dev mode there is no direct connection to the database initialized in the background page.
- * This function must be called in Development environment to initialize WebSQL.
- */
-arc.app.db.websql.initDev = function() {
-  if (arc.app.utils && !arc.app.utils.isProdMode()) {
-    arc.app.db.websql.open()
-      .then(function() {
-        console.log('%cDEVMODE::Database has been initialized', 'color: #33691E');
-      })
-      .catch(function(e) {
-        console.error('DEVMODE::Error initializing the database', e);
-      });
-  }
-};
-
-arc.app.db.websql.initDev();

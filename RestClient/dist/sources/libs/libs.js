@@ -177,6 +177,8 @@ arc.app.analytics.sendException = function (exception, isFatal) {
 };
 'use strict';
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 var arc = arc || {};
 
 arc.app = arc.app || {};
@@ -838,7 +840,7 @@ arc.app.db.websql.insertRequestObject = function (data) {
       db.transaction(function (tx) {
         data.project = data.project || 0;
         var sql = 'INSERT INTO request_data (project, name, url, method, headers,' + 'payload, skipProtocol, skipServer, skipParams, skipHistory, skipMethod, ' + 'skipPayload, skipHeaders, skipPath, time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
-        var values = [data.project, data.name, data.url, data.method, data.headers, data.payload, data.skipProtocol, data.skipServer, data.skipParams, data.skipHistory, data.skipMethod, data.skipPayload, data.skipHeaders, data.skipPath, data.time];
+        var values = [data.project, data.name, data.url, data.method, data.headers, data.payload, arc.app.db.websql._getIntValue(data.skipProtocol), arc.app.db.websql._getIntValue(data.skipServer), arc.app.db.websql._getIntValue(data.skipParams), arc.app.db.websql._getIntValue(data.skipHistory), arc.app.db.websql._getIntValue(data.skipMethod), arc.app.db.websql._getIntValue(data.skipPayload), arc.app.db.websql._getIntValue(data.skipHeaders), arc.app.db.websql._getIntValue(data.skipPath), data.time];
         tx.executeSql(sql, values, function (tx, result) {
           resolve(result.insertId);
         }, function (tx, e) {
@@ -852,6 +854,20 @@ arc.app.db.websql.insertRequestObject = function (data) {
     });
   });
 };
+
+arc.app.db.websql._getIntValue = function (value) {
+  var type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
+  if (type === 'string') {
+    return value === 'true' ? 1 : 0;
+  }
+  if (type === 'boolean') {
+    return value ? 1 : 0;
+  }
+  if (type === 'number') {
+    return value;
+  }
+  return 0;
+};
 arc.app.db.websql.updateRequestObject = function (data) {
   return new Promise(function (resolve, reject) {
     arc.app.db.websql.open().then(function (db) {
@@ -859,7 +875,7 @@ arc.app.db.websql.updateRequestObject = function (data) {
         data.time = data.time || Date.now();
         data.project = data.project || 0;
         var sql = 'UPDATE request_data SET project=?,name=?,' + 'url=?,method=?,headers=?,payload=?,skipProtocol=?,skipServer=?,skipParams=?, ' + 'skipHistory=?,skipMethod=?,skipPayload=?,skipHeaders=?,skipPath=?,time=? ' + 'WHERE ID=?';
-        var values = [data.project, data.name, data.url, data.method, data.headers, data.payload, data.skipProtocol, data.skipServer, data.skipParams, data.skipHistory, data.skipMethod, data.skipPayload, data.skipHeaders, data.skipPath, data.time, data.id];
+        var values = [data.project, data.name, data.url, data.method, data.headers, data.payload, arc.app.db.websql._getIntValue(data.skipProtocol), arc.app.db.websql._getIntValue(data.skipServer), arc.app.db.websql._getIntValue(data.skipParams), arc.app.db.websql._getIntValue(data.skipHistory), arc.app.db.websql._getIntValue(data.skipMethod), arc.app.db.websql._getIntValue(data.skipPayload), arc.app.db.websql._getIntValue(data.skipHeaders), arc.app.db.websql._getIntValue(data.skipPath), data.time, data.id];
         tx.executeSql(sql, values, function () {
           resolve();
         }, function (tx, e) {
