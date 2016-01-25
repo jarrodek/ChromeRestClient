@@ -167,9 +167,10 @@ public class RestClient implements EntryPoint {
 	public void onModuleLoad() {
 		GoogleAnalyticsApp.initialize();
 		GoogleAnalytics.initialize();
-
-		setLogging();
 		exportCollectRequestData();
+		Log.exportSetTrace();
+		
+		setLogging();
 		
 		// app's main event bus. It's used to distribute events in the app.
 		EventBus eventBus = clientFactory.getEventBus();

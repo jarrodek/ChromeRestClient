@@ -5,6 +5,15 @@ import com.google.gwt.core.client.JavaScriptObject;
 public final class Log extends JavaScriptObject {
 	protected Log() {
 	}
+	
+	private static boolean trace = false;
+	
+	public static final native void exportSetTrace() /*-{
+		$wnd.RestClient = $wnd.RestClient || {};
+		$wnd.RestClient.setTrace = function(value){
+			@org.rest.client.log.Log::trace = value;
+		};
+	}-*/;
 
 	/**
 	 * Clears the console.
@@ -62,6 +71,10 @@ public final class Log extends JavaScriptObject {
 	 */
 	public static native void error(Object... obj) /*-{
 		$wnd.console.error.apply($wnd.console, obj);
+		if(@org.rest.client.log.Log::trace){
+			console.log('caller: ', arguments.callee.caller.displayName);
+			console.trace();
+		}
 	}-*/;
 
 	/**
@@ -103,6 +116,9 @@ public final class Log extends JavaScriptObject {
 	 */
 	public static native void info(Object... obj) /*-{
 		$wnd.console.info.apply($wnd.console, obj);
+		if(@org.rest.client.log.Log::trace){
+			console.trace();
+		}
 	}-*/;
 
 	/**
@@ -129,6 +145,10 @@ public final class Log extends JavaScriptObject {
 	 */
 	public static native void log(Object... obj) /*-{
 		$wnd.console.log.apply($wnd.console, obj);
+		if(@org.rest.client.log.Log::trace){
+			console.log('caller: ', arguments.callee.caller.displayName);
+			console.trace();
+		}
 	}-*/;
 
 	/**
@@ -146,7 +166,7 @@ public final class Log extends JavaScriptObject {
 	 * and prints the report to the Profiles panel.
 	 */
 	public static native void profileEnd() /*-{
-		$wnd.console.profile(label);
+		$wnd.console.profileEnd(label);
 	}-*/;
 
 	/**
@@ -158,7 +178,7 @@ public final class Log extends JavaScriptObject {
 	 * @param label
 	 */
 	public static native void time(String label) /*-{
-		$wnd.console.profile(label);
+		$wnd.console.time(label);
 	}-*/;
 
 	/**
@@ -167,7 +187,7 @@ public final class Log extends JavaScriptObject {
 	 * @param label
 	 */
 	public static native void timeEnd(String label) /*-{
-		$wnd.console.profile(label);
+		$wnd.console.timeEnd(label);
 	}-*/;
 
 	/**
@@ -180,7 +200,7 @@ public final class Log extends JavaScriptObject {
 	 * @param label
 	 */
 	public static native void timeStamp(String label) /*-{
-		$wnd.console.profile(label);
+		$wnd.console.timeStamp(label);
 	}-*/;
 
 	/**
@@ -203,9 +223,17 @@ public final class Log extends JavaScriptObject {
 	 */
 	public static native void warn(Object... obj) /*-{
 		$wnd.console.warn.apply($wnd.console, obj);
+		if(@org.rest.client.log.Log::trace){
+			console.log('caller: ', arguments.callee.caller.displayName);
+			console.trace();
+		}
 	}-*/;
 
 	public static native void debug(Object... obj) /*-{
 		$wnd.console.debug.apply($wnd.console, obj);
+		if(@org.rest.client.log.Log::trace){
+			console.log('caller: ', arguments.callee.caller.displayName);
+			console.trace();
+		}
 	}-*/;
 }
