@@ -79,15 +79,20 @@ public class RequestObject extends JavaScriptObject {
 	
 	public static final native RequestObject fromImportData(RequestDataJso obj) /*-{
 		var headers = '';
-		if(obj.encoding){
-			headers += 'Content-Type: ' + obj.encoding;
-		}
+		
+		var haveCt = false;
 		if(obj.headers && obj.headers.length){
 			obj.headers.forEach(function(header){
 				if(header.key && header.value){
 					headers += '\n' + header.key + ': ' + header.value;
+					if(header.key.toLowerCase() === 'content-type') {
+						haveCt = true;
+					}
 				}
 			});
+		}
+		if(obj.encoding && !haveCt){
+			headers += 'Content-Type: ' + obj.encoding;
 		}
 		return {
 			id: -1,
@@ -161,14 +166,9 @@ public class RequestObject extends JavaScriptObject {
 		return this.method || "GET";
 	}-*/;
 
-	
-	public final native void setEncoding(String encoding) /*-{
-		this.encoding = encoding;
-	}-*/;
-
 	//"application/x-www-form-urlencoded";
 	public final native String getEncoding() /*-{
-		return this.encoding || "application/x-www-form-urlencoded";
+		return this.encoding || null;
 	}-*/;
 
 	
@@ -414,7 +414,7 @@ public class RequestObject extends JavaScriptObject {
 	public final JSONObject toJSONObject(){
 		JSONObject obj = new JSONObject();
 		obj.put("id", new JSONNumber(getId()));
-		obj.put("encoding", new JSONString(getEncoding() == null ? "" : getEncoding()));
+		obj.put("encoding", new JSONString(""));
 		obj.put("headers", new JSONString(getHeaders() == null ? "" : getHeaders()));
 		obj.put("method", new JSONString(getMethod() == null ? "" : getMethod()));
 		obj.put("name", new JSONString(getName() == null ? "" : getName()));
@@ -452,7 +452,6 @@ public class RequestObject extends JavaScriptObject {
 	 */
 	public static RequestObject copyNew(RequestObject from){
 		RequestObject to = RequestObject.createRequest();
-		to.setEncoding(from.getEncoding());
 		to.setFiles(from.getFiles());
 		to.setHeaders(from.getHeaders());
 		to.setMethod(from.getMethod());

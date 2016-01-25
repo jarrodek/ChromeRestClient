@@ -303,7 +303,6 @@ public class RestClient implements EntryPoint {
 			
 			RequestObject rp = RequestObject.createRequest(); 
 			rp.setFiles(requestView.getFiles());
-			//rp.setEncoding(requestView.getEncoding());
 			rp.setHeaders(requestView.getHeaders());
 			rp.setMethod(requestView.getMethod());
 			rp.setPayload(requestView.getPayload());
@@ -414,7 +413,6 @@ public class RestClient implements EntryPoint {
 		requestObject.setURL(url);
 		if(hasPayload){
 			requestObject.setPayload(rp.getPayload());
-			requestObject.setEncoding(null);
 			requestObject.setFiles(files);
 		}
 		return requestObject;
