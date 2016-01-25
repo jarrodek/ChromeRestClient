@@ -18,15 +18,15 @@ package org.rest.client.ui;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.rest.client.event.RequestChangeEvent;
 import org.rest.client.jso.ProjectObject;
+import org.rest.client.jso.RequestObject;
 import org.rest.client.request.FilesObject;
-import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.tutorial.TutorialFactory;
 
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.IsWidget;
 
@@ -104,7 +104,7 @@ public interface RequestView extends IsWidget {
 	 */
 	void setEncoding(String encoding);
 	
-	void setProjectData(ProjectObject project, List<RequestObject> requests, int currentEndpoint);
+	void setProjectData(ProjectObject project, JsArray<RequestObject> requests, int currentEndpoint);
 	/**
 	 * Sets the request name. Name can be from saved requests or from GDrive file name.
 	 * When project is displayed the name should not appear (it is in "endpoints" input anyway).

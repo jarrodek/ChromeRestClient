@@ -1,10 +1,6 @@
 package org.rest.client.activity;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
@@ -17,20 +13,19 @@ import org.rest.client.importparser.ImportParser;
 import org.rest.client.importparser.ImportResult;
 import org.rest.client.jso.ProjectObject;
 import org.rest.client.jso.RequestDataJso;
+import org.rest.client.jso.RequestObject;
 import org.rest.client.place.ImportExportPlace;
 import org.rest.client.request.ApplicationSession;
 import org.rest.client.request.ImportDataCallback;
 import org.rest.client.request.RequestImportListObject;
-import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.ProjectStoreWebSql;
-import org.rest.client.storage.store.objects.RequestObject;
+import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.websql.ExportedDataInsertItem;
 import org.rest.client.ui.ImportExportView;
 import org.rest.client.ui.ImportExportView.StringCallback;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
-import com.google.code.gwt.database.client.service.RowIdListCallback;
 import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JsArray;
@@ -99,9 +94,9 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 		//
 		// Get all request data
 		//
-		clientFactory.getRequestDataStore().all(new StoreResultCallback<Map<Integer, RequestObject>>() {
+		clientFactory.getRequestDataStore().all(new RequestDataStoreWebSql.StoreResultsCallback() {
 			@Override
-			public void onSuccess(final Map<Integer, RequestObject> requestDataResult) {
+			public void onSuccess(final JsArray<RequestObject> requestDataResult) {
 				//
 				// Get project data
 				//
@@ -111,9 +106,9 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 
 						JSONArray requestsArray = new JSONArray();
 						JSONArray projectsArray = new JSONArray();
-						Set<Integer> keys = requestDataResult.keySet();
-						for (Integer _k : keys) {
-							RequestObject ro = requestDataResult.get(_k);
+						
+						for (int i = 0; i < requestDataResult.length(); i++) {
+							RequestObject ro = requestDataResult.get(i);
 							requestsArray.set(requestsArray.size(), ro.toJSONObject());
 						}
 						
@@ -309,10 +304,15 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 	 * @param original
 	 */
 	private void saveImported(final ArrayList<RequestObject> importData, final String[] geaKeys){
-		clientFactory.getRequestDataStore().getService().insertImportData(importData, new Date(),
-				new RowIdListCallback() {
+		@SuppressWarnings("unchecked")
+		JsArray<RequestObject> arr = (JsArray<RequestObject>) JsArray.createArray();
+		for (int i = 0; i < importData.size(); i++) {
+			arr.set(arr.length(), importData.get(i));
+		}
+		
+		clientFactory.getRequestDataStore().importRequests(arr, new RequestDataStoreWebSql.StoreInsertListCallback() {
 			@Override
-			public void onFailure(DataServiceException error) {
+			public void onError(Throwable error) {
 				StatusNotification.notify("Unable to save data to local database :(",
 						StatusNotification.TIME_MEDIUM);
 				if (RestClient.isDebug()) {
@@ -322,9 +322,9 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 				GoogleAnalyticsApp.sendException("ImportExportActivity::saveImported::Failure handler::" + error);
 			}
 			@Override
-			public void onSuccess(List<Integer> rowIds) {
+			public void onSuccess(JsArrayInteger rowIds) {
 				ArrayList<ExportedDataInsertItem> exported = new ArrayList<ExportedDataInsertItem>();
-				int size = rowIds.size();
+				int size = rowIds.length();
 				for (int i = 0; i<size; i++) {
 					int dbId = rowIds.get(i);
 					ExportedDataInsertItem item = new ExportedDataInsertItem(geaKeys[i]);
@@ -475,7 +475,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 		}
 	}
 
-	public void saveImportedFileData(final JsArray<RequestObject> requests, final Callback<Boolean, Void> callback) {
+	public void saveImportedFileData(JsArray<RequestObject> requests, final Callback<Boolean, Void> callback) {
 		if (requests == null || requests.length() == 0) {
 			if (RestClient.isDebug()) {
 				Log.error("Request data is emnpty.");
@@ -483,15 +483,11 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 			callback.onSuccess(false);
 			return;
 		}
-		ArrayList<RequestObject> save = new ArrayList<RequestObject>();
-		int size = requests.length();
-		for(int i=0; i<size; i++){
-			save.add(requests.get(i));
-		}
-		clientFactory.getRequestDataStore().getService().insertFileImportData(save, new RowIdListCallback() {
+		
+		clientFactory.getRequestDataStore().importRequests(requests, new RequestDataStoreWebSql.StoreInsertListCallback() {
 
 			@Override
-			public void onFailure(DataServiceException error) {
+			public void onError(Throwable error) {
 				if (RestClient.isDebug()) {
 					Log.error("Unable insert requests data", error);
 				}
@@ -501,7 +497,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 			}
 
 			@Override
-			public void onSuccess(List<Integer> rowIds) {
+			public void onSuccess(JsArrayInteger rowIds) {
 				callback.onSuccess(true);
 			}
 		});

@@ -5,8 +5,9 @@ import java.util.List;
 
 import org.rest.client.RestClient;
 import org.rest.client.StatusNotification;
+import org.rest.client.jso.RequestObject;
 import org.rest.client.request.RequestHeadersParser;
-import org.rest.client.storage.store.objects.RequestObject;
+import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.websql.ExportedDataInsertItem;
 import org.rest.client.storage.websql.ExportedDataItem;
 
@@ -14,6 +15,7 @@ import com.allen_sauer.gwt.log.client.Log;
 import com.google.code.gwt.database.client.service.DataServiceException;
 import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
@@ -33,7 +35,7 @@ public abstract class DataExport {
 	/**
 	 * All data retrieved from database
 	 */
-	protected List<RequestObject> allDataList = new ArrayList<RequestObject>();
+	protected JsArray<RequestObject> allDataList;
 	/**
 	 * All already synch items id's
 	 */
@@ -69,22 +71,23 @@ public abstract class DataExport {
 	 * Collect data from database and remove items already exported.
 	 */
 	protected void prepareExportData(final PrepareDataHanler handler) {
-		RestClient.getClientFactory().getRequestDataStore().getService().getAllData(new ListCallback<RequestObject>() {
+		RestClient.getClientFactory().getRequestDataStore().all(new RequestDataStoreWebSql.StoreResultsCallback() {
 			@Override
-			public void onFailure(DataServiceException error) {
+			public void onError(Throwable e) {
 				if (RestClient.isDebug()) {
-					Log.error("Failure to prepare Form data from DB service", error);
+					Log.error("Failure to prepare Form data from DB service", e);
 				}
 				StatusNotification.notify("Failure to prepare Form data from local database");
 			}
 
 			@Override
-			public void onSuccess(final List<RequestObject> result) {
+			public void onSuccess(final JsArray<RequestObject> result) {
 				final ArrayList<Integer> formIdsList = new ArrayList<Integer>();
-				for (RequestObject item : result) {
+				for (int i = 0; i < result.length(); i++) {
+					RequestObject item = result.get(i);
 					formIdsList.add(item.getId());
 				}
-
+				
 				allDataList = result;
 				RestClient.getClientFactory().getExportedDataReferenceService()
 						.getExportedFormByReferenceId(formIdsList, new ListCallback<ExportedDataItem>() {
@@ -109,8 +112,8 @@ public abstract class DataExport {
 
 	protected void synchPrepareData(final PrepareDataHanler handler) {
 		List<RequestObject> readyToSendList = new ArrayList<RequestObject>();
-
-		for (RequestObject item : allDataList) {
+		for (int i = 0; i < allDataList.length(); i++) {
+			RequestObject item = allDataList.get(i);
 			if (excludeList.contains(item.getId()))
 				continue;
 			readyToSendList.add(item);

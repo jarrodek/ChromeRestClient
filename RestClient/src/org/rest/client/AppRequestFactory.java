@@ -11,6 +11,7 @@ import org.rest.client.event.RequestChangeEvent;
 import org.rest.client.event.RequestEndEvent;
 import org.rest.client.event.RequestStartActionEvent;
 import org.rest.client.jso.HistoryObject;
+import org.rest.client.jso.RequestObject;
 import org.rest.client.jso.UrlRow;
 import org.rest.client.request.FilesObject;
 import org.rest.client.request.FormPayloadData;
@@ -21,7 +22,6 @@ import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultsCallback;
-import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.ErrorDialogView;
 
 import com.allen_sauer.gwt.log.client.Log;

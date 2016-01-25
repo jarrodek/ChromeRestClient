@@ -2,8 +2,8 @@ package org.rest.client.ui.desktop;
 
 import java.sql.Date;
 
+import org.rest.client.jso.RequestObject;
 import org.rest.client.place.RequestPlace;
-import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.SavedView.Presenter;
 
 import com.google.gwt.core.client.GWT;

@@ -5,8 +5,8 @@ import org.rest.client.dom.worker.WebWorkerError;
 import org.rest.client.dom.worker.Worker;
 import org.rest.client.dom.worker.WorkerMessageHandler;
 import org.rest.client.event.OverwriteUrlEvent;
+import org.rest.client.jso.RequestObject;
 import org.rest.client.request.URLParser;
-import org.rest.client.storage.store.objects.RequestObject;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;

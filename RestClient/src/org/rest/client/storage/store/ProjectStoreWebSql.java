@@ -67,7 +67,6 @@ public class ProjectStoreWebSql {
 	public final native void getByKey(int key, final StoreResultCallback callback) /*-{
 		$wnd.arc.app.db.websql.getProject(key)
 		.then(function(obj){
-			console.info('$wnd.arc.app.db.websql.getProject(key)', key, obj);
 			callback.@org.rest.client.storage.store.ProjectStoreWebSql.StoreResultCallback::onSuccess(Lorg/rest/client/jso/ProjectObject;)(obj);
 		}, function(cause){
 			callback.@org.rest.client.storage.store.ProjectStoreWebSql.StoreResultCallback::onError(Ljava/lang/Throwable;)(cause);

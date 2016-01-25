@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package org.rest.client.storage.store.objects;
+package org.rest.client.jso;
 
 import java.util.ArrayList;
 
 import org.rest.client.RestClient;
-import org.rest.client.jso.RequestDataJso;
 import org.rest.client.request.FilesObject;
 import org.rest.client.storage.store.StoreKeys;
 

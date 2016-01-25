@@ -29,12 +29,12 @@ import org.rest.client.event.RequestStartActionEvent;
 import org.rest.client.event.SaveRequestEvent;
 import org.rest.client.event.SavedRequestEvent;
 import org.rest.client.jso.ProjectObject;
+import org.rest.client.jso.RequestObject;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SavedPlace;
 import org.rest.client.request.FilesObject;
 import org.rest.client.request.HttpMethodOptions;
 import org.rest.client.request.RequestHeadersParser;
-import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.EditProjectView;
 import org.rest.client.ui.IsHideable;
@@ -49,6 +49,7 @@ import org.rest.client.ui.html5.HTML5Progress;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -426,7 +427,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 
 	@Override
 	public void setProjectData(ProjectObject project,
-			List<RequestObject> requests, int currentEndpoint) {
+			JsArray<RequestObject> requests, int currentEndpoint) {
 		this.openedProject = project;
 		projectPanel.removeClassName("hidden");
 		requestNamePanel.addClassName("hidden");
@@ -434,15 +435,15 @@ public class RequestViewImpl extends Composite implements RequestView {
 		
 		final ListBox lb = new ListBox();
 		lb.setStyleName("selectControl");
-		int i = 0;
 		int endpointPosition = 0;
-		for (final RequestObject r : requests) {
+		for (int j = 0; j < requests.length(); j++) {
+			RequestObject r = requests.get(j);
 			lb.addItem(r.getName(), r.getId()+"");
 			if(r.getId() == currentEndpoint){
-				endpointPosition = i;
+				endpointPosition = j;
 			}
-			i++;
 		}
+		
 		lb.setSelectedIndex(endpointPosition);
 		endpointsContainer.add(lb);
 		lb.addChangeHandler(new ChangeHandler() {

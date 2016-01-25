@@ -7,11 +7,11 @@ import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.gdrive.DriveFileItem;
 import org.rest.client.gdrive.GoogleDrive;
 import org.rest.client.jso.ProjectObject;
+import org.rest.client.jso.RequestObject;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.URLParser;
-import org.rest.client.storage.StoreResultCallback;
 import org.rest.client.storage.store.ProjectStoreWebSql;
-import org.rest.client.storage.store.objects.RequestObject;
+import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.ui.SaveRequestDialogView;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -145,7 +145,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 			if (RestClient.RESTORED_REQUEST > 0) {
 				overwriteId = RestClient.RESTORED_REQUEST;
 				RestClient.getClientFactory().getRequestDataStore().getByKey(RestClient.RESTORED_REQUEST,
-						new StoreResultCallback<RequestObject>() {
+						new RequestDataStoreWebSql.StoreResultCallback() {
 							@Override
 							public void onSuccess(RequestObject result) {
 								if (result == null) {
