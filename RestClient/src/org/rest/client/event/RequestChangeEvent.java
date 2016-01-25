@@ -26,7 +26,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * </p>
  */
 public class RequestChangeEvent extends Event<RequestChangeEvent.Handler> {
-	public static final Type<Handler> TYPE = new Type<Handler>();
+	private static final Type<Handler> TYPE = new Type<Handler>();
 	
 	public static final int UPLOAD_START = 0;
 	public static final int UPLOAD_PROGRESS = 1;

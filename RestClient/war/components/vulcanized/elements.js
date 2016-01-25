@@ -16683,30 +16683,29 @@ Polymer({
         }
     });
 'use strict';
-    /* global arc */
-    Polymer({
-        is: 'app-headers-display',
-        properties: {
-            headers: Array,
-            _hdTitle: String,
-            _hdBody: String,
-            _hdExample: String,
-        },
-        _displayHeaderInfo: function(e) {
-            var item = e.model.get('item');
-            arc.app.db.websql.getHeaderByName(item.name, item.type)
-                .then(function(result) {
-                    if (result === null) {
-                        return;
-                    }
-                    result = result[0];
-                    this._hdTitle = result.name;
-                    this._hdBody = result.desc;
-                    this._hdExample = result.example;
-                    this.$.headerInfo.open();
-                }.bind(this));
-        }
-    });
+  /* global arc */
+  Polymer({
+    is: 'app-headers-display',
+    properties: {
+      headers: Array,
+      _hdTitle: String,
+      _hdBody: String,
+      _hdExample: String,
+    },
+    _displayHeaderInfo: function(e) {
+      var item = e.model.get('item');
+      arc.app.db.websql.getHeaderByName(item.name, item.type)
+        .then(function(result) {
+          if (result === null || result.length === 0) {
+            return;
+          }
+          this._hdTitle = result.name;
+          this._hdBody = result.desc;
+          this._hdExample = result.example;
+          this.$.headerInfo.open();
+        }.bind(this));
+    }
+  });
 Polymer({
         is: 'arc-header-line-display',
         properties: {
@@ -16968,6 +16967,9 @@ Polymer({
         },
         computeSort: function(projects) {
             return function(a, b) {
+                if (!a || !b) {
+                    return 1;
+                }
                 if (a.name > b.name) {
                     return 1;
                 }
@@ -17013,7 +17015,7 @@ Polymer({
                         console.warn('No project found for given ID ', projectId);
                         return;
                     }
-                    this.push('projects', project[0]);
+                    this.push('projects', project);
                 }.bind(this));
         },
         /**

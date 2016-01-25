@@ -10,5 +10,5 @@ public interface LoadPickerHandler {
 	/**
 	 * Called when Google Drive Picker is ready to use.
 	 */
-	void onLoad();
+	void onLoad(); // NO_UCD (unused code)
 }

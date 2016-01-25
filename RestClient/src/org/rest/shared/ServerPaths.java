@@ -8,11 +8,11 @@ public class ServerPaths {
 	/**
 	 * Get suggestion data list.
 	 */
-	public static final String SUGGESTIONS_LISTING = "/list";
+	public static final String SUGGESTIONS_LISTING = "/list"; // NO_UCD (unused code)
 	/**
 	 * Download import data
 	 */
-	public static final String GET_IMPORT_DATA = "/get";
+	public static final String GET_IMPORT_DATA = "/get"; // NO_UCD (unused code)
 	/**
 	 * Send data to server
 	 */

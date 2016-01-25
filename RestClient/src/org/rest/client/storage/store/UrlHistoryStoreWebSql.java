@@ -33,8 +33,8 @@ public class UrlHistoryStoreWebSql {
 	 */
 	public final native void updateUrlUseTime(int rowId, double updateTime, final StoreResultCallback callback) /*-{
 		$wnd.arc.app.db.websql.updateUrlHistory(rowId, updateTime)
-		.then(function(result){
-			callback.@org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultCallback::onSuccess(Lorg/rest/client/jso/UrlRow;)(result);
+		.then(function(){
+			callback.@org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultCallback::onSuccess(Lorg/rest/client/jso/UrlRow;)(null);
 		}, function(cause){
 			callback.@org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultCallback::onError(Ljava/lang/Throwable;)(cause);
 		});

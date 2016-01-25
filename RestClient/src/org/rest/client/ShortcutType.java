@@ -1,6 +1,6 @@
 package org.rest.client;
 
-public enum ShortcutType {
+enum ShortcutType {
 	/**
 	 * Shortcut for open request dialog.
 	 */

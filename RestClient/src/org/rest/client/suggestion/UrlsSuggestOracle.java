@@ -3,10 +3,10 @@ package org.rest.client.suggestion;
 import java.util.ArrayList;
 
 import org.rest.client.jso.UrlRow;
+import org.rest.client.log.Log;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultsCallback;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.history.History;
 import com.google.gwt.chrome.history.HistoryItem;
 import com.google.gwt.chrome.history.HistorySearchCallback;
@@ -99,7 +99,6 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 					}
 				}
 				if(chromeQueryEnd){
-					Log.debug("chromeQueryEnd");
 					recentDatabaseResult = new DatabaseRequestResponse<UrlSuggestion>(request,
 							numberOfDatabaseSuggestions, _suggestions);
 					UrlsSuggestOracle.this.returnSuggestions(callback);

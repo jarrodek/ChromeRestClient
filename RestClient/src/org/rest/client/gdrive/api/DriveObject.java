@@ -2,7 +2,7 @@ package org.rest.client.gdrive.api;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
-public class DriveObject extends JavaScriptObject {
+class DriveObject extends JavaScriptObject {
 	protected DriveObject(){}
 	/**
 	 * The type of file. This is always drive#file for file.

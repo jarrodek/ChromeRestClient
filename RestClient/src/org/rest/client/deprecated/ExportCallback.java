@@ -2,7 +2,7 @@ package org.rest.client.deprecated;
 
 import java.util.HashMap;
 
-public interface ExportCallback {
+interface ExportCallback {
 	/**
 	 * Called when data has been saved on server
 	 * @param gaeKeys Key - local database item ID, Value - Google App Engine Key as string

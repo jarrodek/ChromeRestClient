@@ -12,7 +12,7 @@ import com.google.gwt.core.client.JavaScriptObject;
  * @author Pawel Psztyc
  *
  */
-public class GoogleAnalyticsConfig extends JavaScriptObject { 
+class GoogleAnalyticsConfig extends JavaScriptObject { 
 	protected GoogleAnalyticsConfig(){}
 	/**
 	 * Check if user disallowed tracking in app.

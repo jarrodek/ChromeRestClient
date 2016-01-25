@@ -61,6 +61,10 @@ public class AuthServlet extends HttpServlet {
             String regExChrome = "chrome-extension://[a-z]+" + (signIn ? "/auth\\.html#auth" : "/signed_out\\.html");
             if (extRet.matches(regExChrome)) {
             	resp.getWriter().println("<meta http-equiv=\"refresh\" content=\"0;url=" + extRet + "\">");
+            } else if(extRet.indexOf(".chromiumapp.org") != -1){
+            	//https://' + chrome.runtime.id + '.chromiumapp.org/appengine_auth
+            	resp.sendRedirect(extRet+"#auth=1");
+        		return;
             } else {
             	String regDevModel = "http://127\\.0\\.0\\.1:8888+" + (signIn ? "/auth\\.html#auth" : "/signed_out\\.html");
             	if (extRet.matches(regDevModel)) {

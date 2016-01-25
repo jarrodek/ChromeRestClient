@@ -1,8 +1,5 @@
 package org.rest.client.jso;
 
-import org.rest.client.storage.store.objects.ProjectObject;
-import org.rest.client.storage.store.objects.RequestObject;
-
 import com.google.gwt.core.client.JavaScriptObject;
 /**
  * A class representing data read from import file.
