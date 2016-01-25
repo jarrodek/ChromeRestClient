@@ -18,7 +18,7 @@ public class HeadersStoreWebSql {
 	 * @param callback
 	 */
 	public final native void getHeaders(String name, String type, final StoreResultsCallback callback) /*-{
-		arc.app.db.websql.getHeadersByName(name, type)
+		$wnd.arc.app.db.websql.getHeadersByName(name, type)
 		.then(function(result){
 			callback.@org.rest.client.storage.store.HeadersStoreWebSql.StoreResultsCallback::onSuccess(Lcom/google/gwt/core/client/JsArray;)(result);
 		}, function(cause){
