@@ -17,7 +17,6 @@ package org.rest.client;
 
 import java.util.Date;
 
-import org.rest.client.event.AddEncodingEvent;
 import org.rest.client.event.ApplicationReadyEvent;
 import org.rest.client.event.ClearFormEvent;
 import org.rest.client.event.ClearHistoryEvent;
@@ -30,7 +29,7 @@ import org.rest.client.event.RequestEndEvent;
 import org.rest.client.event.RequestStartActionEvent;
 import org.rest.client.event.URLFieldToggleEvent;
 import org.rest.client.event.UrlValueChangeEvent;
-import org.rest.client.storage.store.objects.ProjectObject;
+import org.rest.client.jso.ProjectObject;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONBoolean;
@@ -59,7 +58,7 @@ import com.google.web.bindery.event.shared.EventBus;
  */
 public class ExternalEventsFactory {
 	
-	public final static String EXT_REQUEST_BEGIN = "requestBegin";
+	final static String EXT_REQUEST_BEGIN = "requestBegin";
 	public final static String EXT_GET_COLLECTED_REQUEST_DATA = "getRequestData";
 	public final static String EXT_GET_EXTERNAL_REQUEST_DATA = "getExternalData";
 	
@@ -78,12 +77,6 @@ public class ExternalEventsFactory {
 			@Override
 			public void onReady() {
 				fireDocumentEvent(CustomEvent.APPLICATION_READY.getValue());
-			}
-		});
-		AddEncodingEvent.register(eventBus, new AddEncodingEvent.Handler() {
-			@Override
-			public void onAddEncoding(String encoding) {
-				fireDocumentEvent(CustomEvent.ADD_ENCODING.getValue(), encoding);
 			}
 		});
 		UrlValueChangeEvent.register(eventBus, new UrlValueChangeEvent.Handler() {

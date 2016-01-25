@@ -18,7 +18,7 @@ package org.rest.client.ui;
 
 import java.util.List;
 
-import org.rest.client.storage.store.objects.RequestObject;
+import org.rest.client.jso.RequestObject;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.IsWidget;

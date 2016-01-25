@@ -2,7 +2,7 @@ package org.rest.client.activity;
 
 import org.rest.client.ClientFactory;
 
-public abstract class ListActivity extends AppActivity {
+abstract class ListActivity extends AppActivity {
 	
 	protected final static int PAGE_SIZE = 30;
 	protected int current_page = 0;

@@ -2,7 +2,7 @@ package org.rest.client.headerssupport;
 
 import com.google.gwt.core.client.Callback;
 
-public class ContentTypeDialog implements HeaderSupport {
+class ContentTypeDialog implements HeaderSupport {
 	
 	private String value;
 	private Callback<String, String> callback;

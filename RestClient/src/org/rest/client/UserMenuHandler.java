@@ -5,6 +5,7 @@ import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.NewProjectAvailableEvent;
 import org.rest.client.event.ProjectChangeEvent;
 import org.rest.client.event.ProjectDeleteEvent;
+import org.rest.client.jso.ProjectObject;
 import org.rest.client.place.AboutPlace;
 import org.rest.client.place.HistoryPlace;
 import org.rest.client.place.ImportExportPlace;
@@ -12,7 +13,6 @@ import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SavedPlace;
 import org.rest.client.place.SettingsPlace;
 import org.rest.client.place.SocketPlace;
-import org.rest.client.storage.store.objects.ProjectObject;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceChangeEvent;
@@ -68,7 +68,7 @@ public class UserMenuHandler {
 		menu.removeProject(projectId);
 	}-*/;
 
-	protected void bind() {
+	private void bind() {
 		ProjectChangeEvent.register(clientFactory.getEventBus(), new ProjectChangeEvent.Handler() {
 			@Override
 			public void onProjectChange(ProjectObject project) {

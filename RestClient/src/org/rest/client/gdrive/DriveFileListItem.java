@@ -2,7 +2,7 @@ package org.rest.client.gdrive;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
-public final class DriveFileListItem extends JavaScriptObject {
+final class DriveFileListItem extends JavaScriptObject {
 	protected DriveFileListItem(){}
 	
 	public native String getCreatedDate() /*-{

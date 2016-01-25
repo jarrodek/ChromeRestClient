@@ -6,14 +6,14 @@ import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class RestForm implements IsSerializable {
+class RestForm implements IsSerializable {
 
 	private int id;
 	private String name;
 	private String url;
 	private String data;
 	private long time = 0;
-	public String key;
+	
 
 	public RestForm() {
 	}
@@ -107,7 +107,7 @@ public class RestForm implements IsSerializable {
 		return time;
 	}
 	
-	public JSONObject toJSON(){
+	JSONObject toJSON(){
 		
 		JSONValue dataValue = null;
 		JSONObject obj = null;

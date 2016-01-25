@@ -21,10 +21,5 @@ public final class DriveAuth extends JavaScriptObject {
 		} catch(e){}
 		return value; 
 	}-*/;
-	public native String toJsonString() /*-{
-		
-		var res = JSON.stringify(this);
-		return res;
-		
-	}-*/;
+	
 }

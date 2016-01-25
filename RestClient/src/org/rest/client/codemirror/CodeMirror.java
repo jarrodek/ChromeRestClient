@@ -6,7 +6,7 @@ public class CodeMirror {
 	private final CodeMirrorImpl impl;
 	
 	
-	protected CodeMirror(CodeMirrorImpl inst) {
+	private CodeMirror(CodeMirrorImpl inst) {
 		impl = inst;
 	}
 	
@@ -14,19 +14,7 @@ public class CodeMirror {
 		return impl;
 	}
 
-	/**
-	 * Initialize CodeMirror library.
-	 * 
-	 * @param element
-	 * @param options
-	 *            it is safe to pass a NULL for default values.
-	 * @return
-	 */
-	public static CodeMirror fromTextArea(Element element,
-			CodeMirrorOptions options) {
-		CodeMirrorImpl inst = CodeMirrorImpl.fromTextArea(element, options);
-		return new CodeMirror(inst);
-	}
+	
 	
 	/**
 	 * Initialize CodeMirror library.
@@ -57,7 +45,7 @@ public class CodeMirror {
 	 * @param separator Specify the string to be used to separate lines (defaults to "\n").
 	 * @return
 	 */
-	public String getValue(String separator) {
+	private String getValue(String separator) {
 		return impl.getValue(separator);
 	}
 	/**

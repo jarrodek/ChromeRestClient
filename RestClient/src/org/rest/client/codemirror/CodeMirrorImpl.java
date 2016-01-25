@@ -7,7 +7,7 @@ public class CodeMirrorImpl extends JavaScriptObject {
 	protected CodeMirrorImpl(){}
 	
 	
-	public static final native CodeMirrorImpl fromTextArea(Element element, JavaScriptObject options) /*-{
+	static final native CodeMirrorImpl fromTextArea(Element element, JavaScriptObject options) /*-{
 		return $wnd.CodeMirror.fromTextArea(element, options);
 	}-*/;
 	
@@ -28,11 +28,11 @@ public class CodeMirrorImpl extends JavaScriptObject {
 	}-*/;
 
 
-	public final native String getValue(String separator) /*-{
+	final native String getValue(String separator) /*-{
 		return this.getValue(separator);
 	}-*/;
 	
-	public final native String setValue(String value) /*-{
+	final native String setValue(String value) /*-{
 		this.setValue(value);
 		var editor = this;
 		$wnd.setTimeout(function() {
@@ -41,20 +41,18 @@ public class CodeMirrorImpl extends JavaScriptObject {
 	}-*/;
 
 
-	public final native void refresh() /*-{
+	final native void refresh() /*-{
 		this.refresh();
 	}-*/;
 
 
-	public final native void toTextArea() /*-{
+	final native void toTextArea() /*-{
 		this.toTextArea();
 	}-*/;
 	
-	public final native void setOption(String option, String value) /*-{
+	final native void setOption(String option, String value) /*-{
 		this.setOption(option, value);
 	}-*/;
 	
-	public final native void setOption(String option, JavaScriptObject value) /*-{
-		this.setOption(option, value);
-	}-*/;
+	
 }

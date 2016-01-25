@@ -25,7 +25,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * @author Paweł Psztyć
  */
 public class OverwriteUrlEvent extends Event<OverwriteUrlEvent.Handler> {
-	public static final Type<Handler> TYPE = new Type<Handler>();
+	private static final Type<Handler> TYPE = new Type<Handler>();
 
 	/**
 	 * Register an handler for this event.

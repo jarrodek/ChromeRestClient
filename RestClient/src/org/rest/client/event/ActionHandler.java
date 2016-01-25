@@ -7,7 +7,7 @@ import com.google.gwt.event.shared.EventHandler;
  * @author Paweł Psztyć
  *
  */
-public interface ActionHandler extends EventHandler {
+interface ActionHandler extends EventHandler {
 	/**
 	 * Perform the action.
 	 */

@@ -7,8 +7,8 @@ import org.rest.client.dom.XMLNode;
 import org.rest.client.dom.worker.WebWorkerError;
 import org.rest.client.dom.worker.Worker;
 import org.rest.client.dom.worker.WorkerMessageHandler;
+import org.rest.client.log.Log;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Document;

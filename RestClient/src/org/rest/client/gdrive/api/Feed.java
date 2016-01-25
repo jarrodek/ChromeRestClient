@@ -3,7 +3,7 @@ package org.rest.client.gdrive.api;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 
-public class Feed extends JavaScriptObject{
+class Feed extends JavaScriptObject{
 	protected Feed(){}
 	
 	

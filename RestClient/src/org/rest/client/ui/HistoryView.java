@@ -17,7 +17,7 @@ package org.rest.client.ui;
 
 import java.util.List;
 
-import org.rest.client.storage.store.objects.HistoryObject;
+import org.rest.client.jso.HistoryObject;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.place.shared.Place;

@@ -6,11 +6,11 @@ import java.util.List;
 
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
+import org.rest.client.log.Log;
 import org.rest.client.ui.desktop.HeaderSupportAuthorizationImpl;
 import org.rest.client.ui.desktop.HeaderSupportDate;
 import org.rest.client.ui.desktop.widget.RequestHeadersWidget;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -56,7 +56,7 @@ public class HeadersFillSupport implements FocusHandler, ClickHandler {
 	 * @param clazz
 	 *            Class to initialize to provide support.
 	 */
-	public static void registerSupport(String headerName,
+	private static void registerSupport(String headerName,
 			Class<? extends HeaderSupport> clazz) {
 		
 		if (supportedHandlers.containsKey(headerName)) {
@@ -74,7 +74,7 @@ public class HeadersFillSupport implements FocusHandler, ClickHandler {
 	 * @param clazz
 	 *            Class to initialize to provide support.
 	 */
-	public static void registerSupport(String[] headerNames,
+	private static void registerSupport(String[] headerNames,
 			Class<? extends HeaderSupport> clazz) {
 
 		for (String headerName : headerNames) {
@@ -90,7 +90,7 @@ public class HeadersFillSupport implements FocusHandler, ClickHandler {
 	 * href="http://www.w3.org/TR/XMLHttpRequest/#the-setrequestheader-method"
 	 * >http://www.w3.org/TR/XMLHttpRequest/#the-setrequestheader-method</a>
 	 */
-	public final static List<String> NOT_SUPPORTED_W3C;
+	private final static List<String> NOT_SUPPORTED_W3C;
 	static {
 		NOT_SUPPORTED_W3C = new ArrayList<String>();
 //		NOT_SUPPORTED_W3C.add("accept-charset");
@@ -141,26 +141,9 @@ public class HeadersFillSupport implements FocusHandler, ClickHandler {
 		return false;
 	}
 
-	/**
-	 * Returns true if header is not allowed to set via XMLHttpRequest by
-	 * specification.
-	 * 
-	 * @param header
-	 * @return
-	 */
-	public final static boolean isNotSupportedW3C(String header) {
-		if (header == null) {
-			return false;
-		}
-		header = header.toLowerCase();
-		return NOT_SUPPORTED_W3C.contains(header);
-	}
-	
-	
-	
-	final boolean w3cError;
-	final String currentHeader;
-	final TextBox textBox;
+	private final boolean w3cError;
+	private final String currentHeader;
+	private final TextBox textBox;
 	
 	public HeadersFillSupport(String header, TextBox box){
 		currentHeader = header;

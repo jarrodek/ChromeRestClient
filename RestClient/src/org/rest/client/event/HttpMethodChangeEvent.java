@@ -36,7 +36,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * </p>
  */
 public class HttpMethodChangeEvent extends Event<HttpMethodChangeEvent.Handler> {
-	public static final Type<Handler> TYPE = new Type<Handler>();
+	private static final Type<Handler> TYPE = new Type<Handler>();
 
 	/**
 	 * Register an handler for this event.
@@ -60,7 +60,7 @@ public class HttpMethodChangeEvent extends Event<HttpMethodChangeEvent.Handler> 
 		void onMethodChange(String method);
 	}
 	
-	public final String method;
+	private final String method;
 	
 	public HttpMethodChangeEvent(String method){
 		this.method = method;

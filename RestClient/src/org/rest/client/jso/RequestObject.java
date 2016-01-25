@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package org.rest.client.storage.store.objects;
+package org.rest.client.jso;
 
 import java.util.ArrayList;
 
 import org.rest.client.RestClient;
-import org.rest.client.jso.RequestDataJso;
+import org.rest.client.log.Log;
 import org.rest.client.request.FilesObject;
 import org.rest.client.storage.store.StoreKeys;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea.StorageItemsCallback;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
@@ -79,15 +78,20 @@ public class RequestObject extends JavaScriptObject {
 	
 	public static final native RequestObject fromImportData(RequestDataJso obj) /*-{
 		var headers = '';
-		if(obj.encoding){
-			headers += 'Content-Type: ' + obj.encoding;
-		}
+		
+		var haveCt = false;
 		if(obj.headers && obj.headers.length){
 			obj.headers.forEach(function(header){
 				if(header.key && header.value){
 					headers += '\n' + header.key + ': ' + header.value;
+					if(header.key.toLowerCase() === 'content-type') {
+						haveCt = true;
+					}
 				}
 			});
+		}
+		if(obj.encoding && !haveCt){
+			headers += 'Content-Type: ' + obj.encoding;
 		}
 		return {
 			id: -1,
@@ -161,14 +165,9 @@ public class RequestObject extends JavaScriptObject {
 		return this.method || "GET";
 	}-*/;
 
-	
-	public final native void setEncoding(String encoding) /*-{
-		this.encoding = encoding;
-	}-*/;
-
 	//"application/x-www-form-urlencoded";
 	public final native String getEncoding() /*-{
-		return this.encoding || "application/x-www-form-urlencoded";
+		return this.encoding || null;
 	}-*/;
 
 	
@@ -270,6 +269,9 @@ public class RequestObject extends JavaScriptObject {
 	 *         instead)
 	 */
 	public final native boolean isSkipProtocol() /*-{
+		if(typeof this.skipProtocol === 'string'){
+			return this.skipProtocol === 'true' ? true : false;
+		}
 		return !!(this.skipProtocol);
 	}-*/;
 	
@@ -300,6 +302,9 @@ public class RequestObject extends JavaScriptObject {
 	 *         instead)
 	 */
 	public final native boolean isSkipServer() /*-{
+		if(typeof this.skipServer === 'string'){
+			return this.skipServer === 'true' ? true : false;
+		}
 		return !!(this.skipServer);
 	}-*/;
 	public final native int getSkipServer() /*-{
@@ -324,6 +329,9 @@ public class RequestObject extends JavaScriptObject {
 	 *         restored (use current form value instead)
 	 */
 	public final native boolean isSkipParams() /*-{
+		if(typeof this.skipParams === 'string'){
+			return this.skipParams === 'true' ? true : false;
+		}
 		return !!(this.skipParams);
 	}-*/;
 	public final native int getSkipParams() /*-{
@@ -339,6 +347,9 @@ public class RequestObject extends JavaScriptObject {
 	}-*/;
 
 	public final native boolean isSkipHistory() /*-{
+		if(typeof this.skipHistory === 'string'){
+			return this.skipHistory === 'true' ? true : false;
+		}
 		return !!(this.skipHistory);
 	}-*/;
 	public final native int getSkipHistory() /*-{
@@ -354,6 +365,9 @@ public class RequestObject extends JavaScriptObject {
 	}-*/;
 
 	public final native boolean isSkipMethod() /*-{
+		if(typeof this.skipMethod === 'string'){
+			return this.skipMethod === 'true' ? true : false;
+		}
 		return !!(this.skipMethod);
 	}-*/;
 	public final native int getSkipMethod() /*-{
@@ -369,6 +383,9 @@ public class RequestObject extends JavaScriptObject {
 	}-*/;
 
 	public final native boolean isSkipPayload() /*-{
+		if(typeof this.skipPayload === 'string'){
+			return this.skipPayload === 'true' ? true : false;
+		}
 		return !!(this.skipPayload);
 	}-*/;
 	public final native int getSkipPayload() /*-{
@@ -384,6 +401,9 @@ public class RequestObject extends JavaScriptObject {
 	}-*/;
 	
 	public final native boolean isSkipHeaders() /*-{
+		if(typeof this.skipHeaders === 'string'){
+			return this.skipHeaders === 'true' ? true : false;
+		}
 		return !!(this.skipHeaders);
 	}-*/;
 	public final native int getSkipHeaders() /*-{
@@ -399,6 +419,9 @@ public class RequestObject extends JavaScriptObject {
 	}-*/;
 	
 	public final native boolean isSkipPath() /*-{
+		if(typeof this.skipPath === 'string'){
+			return this.skipPath === 'true' ? true : false;
+		}
 		return !!(this.skipPath);
 	}-*/;
 	public final native int getSkipPath() /*-{
@@ -414,7 +437,7 @@ public class RequestObject extends JavaScriptObject {
 	public final JSONObject toJSONObject(){
 		JSONObject obj = new JSONObject();
 		obj.put("id", new JSONNumber(getId()));
-		obj.put("encoding", new JSONString(getEncoding() == null ? "" : getEncoding()));
+		obj.put("encoding", new JSONString(""));
 		obj.put("headers", new JSONString(getHeaders() == null ? "" : getHeaders()));
 		obj.put("method", new JSONString(getMethod() == null ? "" : getMethod()));
 		obj.put("name", new JSONString(getName() == null ? "" : getName()));
@@ -452,7 +475,6 @@ public class RequestObject extends JavaScriptObject {
 	 */
 	public static RequestObject copyNew(RequestObject from){
 		RequestObject to = RequestObject.createRequest();
-		to.setEncoding(from.getEncoding());
 		to.setFiles(from.getFiles());
 		to.setHeaders(from.getHeaders());
 		to.setMethod(from.getMethod());

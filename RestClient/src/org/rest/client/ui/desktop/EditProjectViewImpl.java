@@ -18,7 +18,7 @@ package org.rest.client.ui.desktop;
 import org.rest.client.event.ProjectChangeRequestEvent;
 import org.rest.client.event.ProjectDeleteEvent;
 import org.rest.client.event.ProjectDeleteRequestEvent;
-import org.rest.client.storage.store.objects.ProjectObject;
+import org.rest.client.jso.ProjectObject;
 import org.rest.client.ui.EditProjectView;
 
 import com.google.gwt.core.client.GWT;

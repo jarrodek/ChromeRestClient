@@ -140,6 +140,9 @@
         },
         computeSort: function(projects) {
             return function(a, b) {
+                if (!a || !b) {
+                    return 1;
+                }
                 if (a.name > b.name) {
                     return 1;
                 }
@@ -185,7 +188,7 @@
                         console.warn('No project found for given ID ', projectId);
                         return;
                     }
-                    this.push('projects', project[0]);
+                    this.push('projects', project);
                 }.bind(this));
         },
         /**

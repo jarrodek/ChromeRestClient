@@ -3,8 +3,8 @@ package org.rest.client.request;
 import java.util.ArrayList;
 
 import org.rest.client.RestClient;
+import org.rest.client.log.Log;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;

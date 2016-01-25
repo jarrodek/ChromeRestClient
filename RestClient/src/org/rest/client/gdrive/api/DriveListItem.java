@@ -5,7 +5,7 @@ import java.util.Date;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 
-public class DriveListItem extends DriveItem {
+class DriveListItem extends DriveItem {
 	protected DriveListItem() {
 	}
 
@@ -212,24 +212,6 @@ public class DriveListItem extends DriveItem {
 	}-*/;
 
 	/**
-	 * Whether the file can be edited by the current user.
-	 * 
-	 * @return value or NULL if excluded from response
-	 */
-	public final native Boolean isEditable() /*-{
-		return !!(this.editable)
-	}-*/;
-
-	/**
-	 * Whether writers can share the document with other users.
-	 * 
-	 * @return value or NULL if excluded from response
-	 */
-	public final native Boolean isWritersCanShare() /*-{
-		return !!(this.writersCanShare)
-	}-*/;
-
-	/**
 	 * Whether this file has been explicitly trashed, as opposed to recursively
 	 * trashed. This will only be populated if the file is trashed.
 	 * 
@@ -259,15 +241,6 @@ public class DriveListItem extends DriveItem {
 	}-*/;
 
 	/**
-	 * A group of labels for the file.
-	 * 
-	 * @return value or NULL if excluded from response
-	 */
-	public final native DriveLabels getLabels() /*-{
-		return this.labels || null
-	}-*/;
-
-	/**
 	 * Collection of parent folders which contain this file. Setting this field
 	 * will put the file in all of the provided folders. On insert, if no
 	 * folders are provided, the file will be placed in the default root folder.
@@ -291,44 +264,4 @@ public class DriveListItem extends DriveItem {
 	public final native JavaScriptObject getExportLinks() /*-{
 		return this.exportLinks || null;
 	}-*/;
-
-	// "userPermission": permissions Resource,
-	// example:
-	// "userPermission": {
-	// "kind": "drive#permission",
-	// "etag": "\"uZ1AIUC0pgPmSVr-o7JbttiNnkw/rAtqHUdjRdYB6Fcykl0Erg-6WII\"",
-	// "id": "me",
-	// "selfLink":
-	// "https://www.googleapis.com/drive/v2/files/0AqOAKhuJe43VdGVvTXpTMGdFRnkySmljb3lGT3RWcGc/permissions/me",
-	// "role": "owner",
-	// "type": "user"
-	// },
-	// API:
-	// {
-	// "kind": "drive#permission",
-	// "etag": etag,
-	// "id": string,
-	// "selfLink": string,
-	// "name": string,
-	// "role": string,
-	// "additionalRoles": [
-	// string
-	// ],
-	// "type": string,
-	// "value": string,
-	// "authKey": string,
-	// "withLink": boolean,
-	// "photoLink": string
-	// }
-
-	// "imageMediaMetadata": {
-	// "width": integer,
-	// "height": integer,
-	// "rotation": integer,
-	// "location": {
-	// "latitude": double,
-	// "longitude": double,
-	// "altitude": double
-	// }
-	// }
 }
