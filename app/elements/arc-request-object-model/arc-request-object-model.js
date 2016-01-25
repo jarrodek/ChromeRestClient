@@ -109,7 +109,7 @@ Polymer({
             }
           }.bind(this))
           .then(() => {
-            this.fire('saved', {
+            this.fire('save', {
               data: this.data
             });
           })
@@ -122,10 +122,9 @@ Polymer({
             db.close();
           });
       }.bind(this));
-    console.info('save data', this.data);
   },
   /** Save data if auto is enabled.*/
-  _dataChanged: function(e) {
+  _dataChanged: function() {
     if (this.auto) {
       this.save();
     }
@@ -137,27 +136,27 @@ Polymer({
     arc.app.db.idb.open()
       .then(function(db) {
         db.transaction('rw', db.requestObject, function() {
-          if (this.data instanceof Array) {
-            let promises = [];
-            this.data.forEach((item, i) => {
-              promises.push(db.requestObject.delete(item.id));
+            if (this.data instanceof Array) {
+              let promises = [];
+              this.data.forEach((item) => {
+                promises.push(db.requestObject.delete(item.id));
+              });
+              return Dexie.Promise.all(promises);
+            }
+            return db.requestObject.delete(this.data.id);
+          }.bind(this))
+          .then(() => {
+            this.set('data', null);
+            this.fire('deleted');
+          })
+          .catch((e) => {
+            this.fire('error', {
+              error: e
             });
-            return Dexie.Promise.all(promises);
-          }
-          return db.requestObject.delete(this.data.id);
-        }.bind(this))
-        .then(() => {
-          this.set('data', null);
-          this.fire('deleted');
-        })
-        .catch((e) => {
-          this.fire('error', {
-            error: e
+          })
+          .finally(function() {
+            db.close();
           });
-        })
-        .finally(function() {
-          db.close();
-        });
-    }.bind(this));
+      }.bind(this));
   }
 });

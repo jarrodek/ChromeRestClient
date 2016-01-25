@@ -2,7 +2,9 @@
 
 Polymer({
   is: 'arc-file-exporter',
-
+  behaviors: [
+    ArcBehaviors.ArcFileExportBehavior
+  ],
   properties: {
     /** True if user started exporting data to a file. */
     exporting: {
@@ -48,7 +50,7 @@ Polymer({
   _prepareData: function() {
     arc.app.importer.prepareExport()
       .then(function(data) {
-        this._writableContent = data;
+        this.exportContent = data;
         this._setLoading(false);
         this._setDataReady(true);
       }.bind(this))
@@ -65,11 +67,23 @@ Polymer({
     var day = date.getDate();
     var year = date.getFullYear();
     var month = date.getMonth() + 1;
-    this._fileSuggestedName = 'arc-' + day + '-' + month + '-' + year + '-export.json';
-    this.$.writer.write();
+    this.fileSuggestedName = 'arc-export-' + day + '-' + month + '-' + year + '-export.json';
+    this.exportMime = 'json';
+    this.exportData();
   },
 
-  _saveFileError: function(e) {
+  onFileSaved: function() {
+    this.exportContent = null;
+    this._setDataReady(false);
+    this._setLoading(false);
+    this._setExporting(false);
+    StatusNotification.notify({
+      message: 'Data exported'
+    });
+  },
+
+  onFileError: function() {
+    this.exportContent = null;
     this._setDataReady(true);
     this._setLoading(false);
     this._setExporting(true);
@@ -78,17 +92,6 @@ Polymer({
     });
     arc.app.analytics.sendException(e.detail.message, true);
     console.error('_saveFileError', e);
-  },
-
-  _fileSavedHandler: function() {
-    this._setDataReady(false);
-    this._setLoading(false);
-    this._setExporting(false);
-    this._writableContent = null;
-    this._fileSuggestedName = null;
-    StatusNotification.notify({
-      message: 'Data exported'
-    });
   },
 
   _cancelExport: function() {

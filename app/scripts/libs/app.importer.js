@@ -190,21 +190,59 @@ arc.app.importer.prepareExport = function() {
       return db.requestObject.toArray();
     })
     .then(function(requests) {
-      requests.forEach((item) => result.requests.push(new RequestObject(item)));
+      result.requests = arc.app.importer.translateExportItems({
+        'type': 'request',
+        'items': requests
+      });
       return db.projectObjects.toArray();
     })
     .then(function(projects) {
-      projects.forEach((item) => result.projects.push(new ProjectObject(item)));
-
+      result.projects = arc.app.importer.translateExportItems({
+        'type': 'project',
+        'items': projects
+      });
     })
     .then(function() {
-      let exportObject = new FileExport({
-        requests: result.requests,
-        projects: result.projects
-      });
-      return exportObject;
+      return arc.app.importer.createExportObject(result);
     })
     .finally(function() {
       db.close();
     });
+};
+/**
+ * Translate raw object to the proper type.
+ * If the object is already its target type it will be overwritten.
+ *
+ * @param {Object} opts
+ *  type - Required, `request` or `project`
+ *  items - Required, list of items to translate
+ */
+arc.app.importer.translateExportItems = function(opts) {
+  if (!opts.type) {
+    throw new Error('Type is required.');
+  }
+  var result = [];
+  switch (opts.type) {
+    case 'request':
+      opts.items.forEach((item) => result.push(new RequestObject(item)));
+    break;
+    case 'project':
+      opts.items.forEach((item) => result.push(new ProjectObject(item)));
+    break;
+  }
+  return result;
+};
+/**
+ * Create a proper export object that have required export definitions.
+ *
+ * @param {Object} opts 
+ *  requests - A list of requests to be exported
+ *  projects - A list of projects to be exported
+ */
+arc.app.importer.createExportObject = function(opts) {
+  let exportObject = new FileExport({
+    requests: opts.requests,
+    projects: opts.projects
+  });
+  return exportObject;
 };

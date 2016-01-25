@@ -46,8 +46,8 @@ class StatusNotification {
     if (!toast) {
       toast = document.createElement('paper-toast');
       toast.classList.add('status-toast');
-      toast.autoFitOnAttach = true;
-      toast.withBackdrop = true;
+      //toast.autoFitOnAttach = true;
+      //toast.withBackdrop = true;
       toast.text = opts.message;
       toast.duration = opts.timeout;
       let label = document.createElement('paper-button');

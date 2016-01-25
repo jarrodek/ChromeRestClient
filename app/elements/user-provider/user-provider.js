@@ -197,7 +197,7 @@ Polymer({
     switch (e.detail.xhr.status) {
       case 400:
         //bad request - accessToken not ready.
-        break;
+      break;
       default:
         console.log('tokenInfoError', e);
     }

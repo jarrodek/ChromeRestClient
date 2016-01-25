@@ -56,6 +56,8 @@
       --table-url-column: {
         @apply(--table-base-cell);
         @apply(--layout-flex);
+        text-overflow: ellipsis;
+        overflow: hidden;
       }
       ;
       --table-url-value: {
@@ -66,11 +68,13 @@
       ;
       --table-action-column: {
         @apply(--table-base-cell);
+        padding-right: 24px;
       }
       ;
       --table-action-value: {
         @apply(--table-action-column);
         padding-left: 56px;
+        padding-right: 16px;
         height: auto;
       }
       ;
@@ -78,9 +82,8 @@
     
     h1 {
       @apply(--page-title-text);
-      @apply(--layout-flex);
     }
-    
+
     .table {
       @apply(--layout-vertical);
     }
@@ -89,6 +92,28 @@
       @apply(--layout-horizontal);
       @apply(--layout-center);
       height: 64px;
+      transition: background-color 500ms ease-out;
+    }
+
+    .table-header.active {
+      background-color: var(--paper-blue-50);
+    }
+
+    .table-header.active h1 {
+      color: var(--paper-blue-700);
+      font-weight: 300;
+    }
+
+    .table-header-info{
+      @apply(--layout-flex);
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .selected-actions {
+      padding-right: 16px;
+      color: rgba(0,0,0,.57);
     }
     
     .table-columns {
@@ -149,14 +174,33 @@
     }
     </style>
     <div class="table">
-      <div class="table-header">
-        <h1>Saved requests</h2>
-        <paper-menu-button horizontal-align="right">
-          <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
-          <paper-menu class="dropdown-content">
-            <paper-item on-tap="_confirmClearSaved">Remove all</paper-item>
-          </paper-menu>
-        </paper-menu-button>
+      <div class$="{{_computeTableHeaderClass(selected.*)}}">
+        <div class="table-header-info">
+          <neon-animated-pages id="tableTitle" selected="[[tableHeaderState]]" entry-animation="slide-from-right-animation" exit-animation="slide-left-animation">
+            <neon-animatable>
+              <h1>Saved requests</h1>
+            </neon-animatable>
+            <neon-animatable>
+              <h1>{{selected.length}} items selected</h1>
+            </neon-animatable>
+          </neon-animated-pages>
+        </div>
+        <template is="dom-if" if="[[hasSelectedItems]]">
+          <div class="selected-actions">
+            <paper-icon-button icon="file-download" id="exportSelected" on-tap="exportSelected"></paper-icon-button>
+            <paper-icon-button icon="delete" id="deleteSelected" on-tap="deleteSelected"></paper-icon-button>
+            <paper-tooltip for="exportSelected">Export selected to file</paper-tooltip>
+            <paper-tooltip for="deleteSelected">Delete selected</paper-tooltip>
+          </div>
+        </template>
+        <template is="dom-if" if="[[!hasSelectedItems]]">
+          <paper-menu-button horizontal-align="right">
+            <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
+            <paper-menu class="dropdown-content">
+              <paper-item on-tap="_confirmClearSaved">Remove all</paper-item>
+            </paper-menu>
+          </paper-menu-button>
+        </template>
       </div>
       <div class="table-columns">
         <div class="checkbox-column" id="projectColumn">
@@ -180,8 +224,8 @@
         <paper-tooltip for="urlColumn">Full URL saved with the request</paper-tooltip>
       </div>
 
-      <template is="dom-repeat" items="{{requests}}" sort="{{computeSort(sort,dir)}}">
-        <arc-saved-list-item request="{{item}}" checked="{{item.checked}}"></arc-saved-list-item>
+      <template is="dom-repeat" items="{{requests}}" sort="{{computeSort(sort,dir)}}" observe="request.har.pages.0.title" id="requestList">
+        <arc-saved-list-item request="{{item}}" selected="{{item.selected}}" on-selected-changed="_onItemToggle"></arc-saved-list-item>
       </template>
 
       <div class="table-columns">
@@ -198,6 +242,9 @@
         <paper-button dialog-confirm autofocus>Clear</paper-button>
       </div>
     </paper-dialog>
+    <array-selector id="selector" items="{{requests}}" selected="{{selected}}"  multi></array-selector>
+    <paper-toast text="Select request first." id="noSelectionToast"></paper-toast>
+
   </template>
   <script src="arc-saved-list-view.js"></script>
 </dom-module>

@@ -1,24 +1,115 @@
+'use strict';
+
 Polymer({
   is: 'arc-saved-list-view',
   properties: {
+    /**
+     * A list of requests to display.
+     */
     requests: {
       type: Array,
       notify: true
     },
+    /**
+     * A list of selected items.
+     */
     selected: Object,
-    sort: String,
-    dir: String
+    /**
+     * Table sort property.
+     * Name property requires special treatment since the `title` property for the object
+     * is deep inside HAR object.
+     */
+    sort: {
+      type: String,
+      value: 'title'
+    },
+    /**
+     * Table sort direction
+     */
+    dir: {
+      type: String,
+      value: 'asc'
+    },
+    /**
+     * Determined which header state to show.
+     */
+    tableHeaderState: {
+      type: Number,
+      value: 0,
+      computed: '_computeTableHeaderState(hasSelectedItems)'
+    },
+    /**
+     * True if there are some items selected.
+     */
+    hasSelectedItems: {
+      type: Boolean,
+      value: false,
+      computed: '_computeHasSelected(selected.length)'
+    },
+
+    headerAnimationConfig: {
+      value: function() {
+        return {
+          'entry': {
+            name: 'slide-from-right-animation',
+            node: this.$.tableTitle,
+            timing: {
+              delay: 0,
+              duration: 150
+            }
+          },
+          'exit': {
+            name: 'slide-left-animation',
+            node: this.$.tableTitle
+          }
+        };
+      }
+    }
   },
+  /** Toggle all checkboxes in the list */
   toggleAll: function() {
     if (this.allChecked) {
       this.requests.forEach((item, i) => {
-        this.set('requests.' + i + '.checked', true);
+        this.set('requests.' + i + '.selected', true);
+        this.$.selector.select(this.requests[i]);
       });
     } else {
       this.requests.forEach((item, i) => {
-        this.set('requests.' + i + '.checked', false);
+        this.set('requests.' + i + '.selected', false);
+        this.$.selector.deselect(this.requests[i]);
       });
     }
+  },
+  /** Called on selection change. It will select / deselect an item in an ArraySelector. */
+  _onItemToggle: function(e) {
+    var item = this.$.requestList.itemForElement(e.target);
+    if (typeof item.selected === 'undefined') {
+      item.selected = true;
+    }
+    if (item.selected) {
+      this.$.selector.select(item);
+    } else {
+      this.$.selector.deselect(item);
+    }
+  },
+  /** Compute, based on number of `selected` if action header should be shown */
+  _computeTableHeaderState: function() {
+    return this.hasSelectedItems ? 1 : 0;
+  },
+  /**
+   * Compute table header class name.
+   * If there are some selected items it should have `selected` state.
+   */
+  _computeTableHeaderClass: function() {
+    var cls = 'table-header';
+    if (this.selected && this.selected.length > 0) {
+      cls += ' active';
+    }
+    return cls;
+  },
+  /** Set attribute `hasSelectedItems` when the user selected items. */
+  _computeHasSelected: function(len) {
+    return len;
   },
   /**
    * Handler for column name click.
@@ -44,7 +135,7 @@ Polymer({
       let isName = sortOpt === 'title';
       let aProp = isName ? a.har.pages[0][sortOpt] : a[sortOpt];
       let bProp = isName ? b.har.pages[0][sortOpt] : b[sortOpt];
-      
+
       if (aProp > bProp) {
         return dir === 'asc' ? 1 : -1;
       }
@@ -58,7 +149,6 @@ Polymer({
   },
   /**
    * Compute if adding data-sort attribute to the column name is required.
-   *
    */
   computeSortColumn: function(sort, dir, column) {
     if (column !== sort) {
@@ -66,15 +156,42 @@ Polymer({
     }
     return dir;
   },
-
+  /**
+   * Open a dialog box with confirmation message before clearing the storage.
+   */
   _confirmClearSaved: function() {
     this.$.dataClearDialog.open();
   },
-
+  /**
+   * User confirm removing all data.
+   * Send an event to the controller to remove all items.
+   */
   onClearDialogResult: function(e) {
     if (e.detail.canceled || !e.detail.confirmed) {
       return;
     }
     this.fire('clear-saved');
+  },
+  /**
+   * Export selected items to file.
+   */
+  exportSelected: function() {
+    if (this.selected.length === 0) {
+      this.$.noSelectionToast.open();
+      return;
+    }
+    this.fire('export-requested', {
+      data: this.selected
+    });
+  },
+
+  deleteSelected: function() {
+    if (this.selected.length === 0) {
+      this.$.noSelectionToast.open();
+      return;
+    }
+    this.fire('delete-requested', {
+      data: this.selected
+    });
   }
 });

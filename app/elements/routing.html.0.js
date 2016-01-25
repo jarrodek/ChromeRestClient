@@ -25,6 +25,19 @@ window.addEventListener('initializeRouting', function() {
   page('/', function() {
     app.route = 'request';
   });
+  page('/request/saved/:savedId', function() {
+    app.route = 'request';
+    app.params = ctx.params;
+  });
+  page('/request/history/:historyId', function() {
+    app.route = 'request';
+    app.params = ctx.params;
+  });
+  page('/request/project/:projectid', function(ctx) {
+    app.route = 'request';
+    app.params = ctx.params;
+  });
+
   page('/history', function() {
     app.route = 'history';
   });
@@ -40,10 +53,7 @@ window.addEventListener('initializeRouting', function() {
   page('/saved', function() {
     app.route = 'saved';
   });
-  page('/project/:projectid', function(ctx) {
-    app.route = 'project';
-    app.params = ctx.params;
-  });
+  
   page('/dataimport', function() {
     app.route = 'dataimport';
   });

@@ -81,11 +81,11 @@ arc.app.server.auth = function() {
       'url': url,
       'interactive': true
     }, function(redirectUrl) {
-      if(chrome.runtime.lastError) {
+      if (chrome.runtime.lastError) {
         reject(chrome.runtime.lastError);
       } else {
         let index = redirectUrl.indexOf('auth=1');
-        if(index !== -1) {
+        if (index !== -1) {
           resolve(true);
         } else {
           resolve(false);

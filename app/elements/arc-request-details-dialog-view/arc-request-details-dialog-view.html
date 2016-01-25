@@ -1,0 +1,70 @@
+<dom-module id="arc-request-details-dialog-view">
+  <template>
+    <style>
+    :host {
+      @apply(--layout-vertical);
+      display: block;
+    }
+    
+    .url-group {
+      @apply(--layout-horizontal);
+    }
+    
+    .method {
+      @apply(--paper-font-subhead);
+      margin-right: 8px;
+    }
+    
+    .method::after {
+      content: ':';
+    }
+    
+    .url {
+      @apply(--paper-font-subhead);
+      white-space: normal;
+      word-wrap: break-word;
+    }
+    
+    .camption {
+      @apply(--paper-font-caption);
+      color: rgba(0, 0, 0, 0.57);
+    }
+    
+    .headers {
+      margin-top: 24px;
+    }
+    
+    .headers,
+    .payload {
+      margin-bottom: 24px;
+    }
+    
+    pre {
+      white-space: pre-wrap;
+      word-break: break-all;
+      -webkit-user-select: text;
+      line-height: 16px;
+      padding: 8px;
+      cursor: text;
+
+      background-color: var(--code-snippet-background-color, #FFF8E1);
+      @apply(--code-snippet);
+    }
+    </style>
+    <div class="url-group">
+      <span class="method">{{request.method}}</span>
+      <span class="url">{{request.url}}</span>
+    </div>
+    <div class="headers">
+      <div class="camption">Headers</div>
+      <pre>[[_computeHeaders(request)]]</pre>
+    </div>
+    <template is="dom-if" if="[[_hasPayload]]">
+      <div class="payload">
+        <div class="camption">Payload</div>
+        <pre>[[request.har.entries.0.request.postData.text]]</pre>
+      </div>
+    </template>
+  </template>
+  <script src="arc-request-details-dialog-view.js"></script>
+</dom-module>

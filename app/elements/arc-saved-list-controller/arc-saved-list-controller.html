@@ -1,19 +1,19 @@
 <dom-module id="arc-saved-list-controller">
   <template>
     <style>
-      :host {
-        display: block;
-      }
-      
+    :host {
+      display: block;
+    }
     </style>
     <template is="dom-if" if="{{hasRequests}}">
-      <arc-saved-list-view requests="{{requests}}" on-name-changed="_requestNameChanged" on-clear-saved="_clearSavedStore"></arc-saved-list-view>
+      <arc-saved-list-view requests="{{requests}}" on-name-changed="_requestNameChanged" on-clear-saved="_clearSavedStore" on-export-requested="_onExportRequested" on-delete-requested="_onDeleteRequested"></arc-saved-list-view>
     </template>
     <template is="dom-if" if="{{!hasRequests}}">
       <arc-saved-list-empty></arc-saved-list-empty>
     </template>
     <arc-request-object-model id="model" data="{{requests}}" on-error="_dbError"></arc-request-object-model>
-    <arc-request-object-model id="saveModel" auto></arc-request-object-model>
+    <arc-request-object-model id="saveModel" auto on-save="_requestSaved"></arc-request-object-model>
+    <arc-request-object-model id="deleteModel" on-deleted="_selectedRemoved" on-error="_selectedRemoveError"></arc-request-object-model>
   </template>
   <script src="arc-saved-list-controller.js"></script>
 </dom-module>
