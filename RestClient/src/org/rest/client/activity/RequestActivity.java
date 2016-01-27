@@ -52,6 +52,7 @@ import org.rest.client.request.RedirectData;
 import org.rest.client.request.URLParser;
 import org.rest.client.storage.StoreKeys;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
+import org.rest.client.storage.store.ProjectIdb;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.tutorial.TutorialFactory;
@@ -363,7 +364,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 	 *            -1 for default endpoint (first one)
 	 * @param requestView
 	 */
-	private void restoreRequestFromProject(int projectId, int endpointId) {
+	private void restoreRequestFromProject(final int projectId, int endpointId) {
 		if (projectId == -1 && endpointId == -1) {
 			if (RestClient.isDebug()) {
 				Log.error("Project ID and endpoint ID can't be -1 at once.");
@@ -383,6 +384,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 						return;
 					}
 					restoreDefaultRequestFromProject(result, requestView);
+					ProjectIdb.getByLegacyKey(projectId);
 				}
 
 				@Override
@@ -412,6 +414,8 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 									return;
 								}
 								restoreProjectEndpoint(project, result);
+								// New DB test
+								ProjectIdb.getByLegacyKey(project.getId());
 							}
 
 							@Override
@@ -422,6 +426,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 								StatusNotification.notify("Unable read project data");
 							}
 						});
+						
 					} else {
 						if (RestClient.isDebug()) {
 							Log.error("Project does not contain selected endpoint.");
@@ -602,6 +607,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 								@Override
 								public void onSuccess(ProjectObject project) {
 									requestView.setProjectData(project, requests, endpointId);
+									ProjectIdb.getByLegacyKey(projectId);
 								}
 
 								@Override
@@ -612,6 +618,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 									StatusNotification.notify("Unable read project related data");
 								}
 							});
+							//ProjectIdb.getByKey(projectId);
 						} else {
 							requestView.setProjectData(project, requests, endpointId);
 						}
@@ -708,6 +715,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 						if (RestClient.currentlyOpenedProject == project.getId()) {
 							requestView.updateProjectMetadata(project);
 						}
+						ProjectIdb.updateProject(project);
 					}
 
 					@Override
@@ -718,6 +726,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 						StatusNotification.notify("Unable to update project data", StatusNotification.TIME_SHORT);
 					}
 				});
+				
 			}
 		});
 		ProjectDeleteRequestEvent.register(eventBus, new ProjectDeleteRequestEvent.Handler() {
@@ -749,7 +758,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 								goTo(new RequestPlace(null));
 							}
 						});
-
+						ProjectIdb.remove(projectId);
 					}
 
 					@Override
@@ -760,6 +769,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 						StatusNotification.notify("Unable to delete project data", StatusNotification.TIME_SHORT);
 					}
 				});
+
 			}
 		});
 	}
@@ -1304,7 +1314,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 			@Override
 			public void onSuccess(final RequestObject result) {
 				result.setName(name);
-				RestClient.saveRequestData(result, new Callback<RequestObject, Throwable>() {
+				RestClient.saveRequestData(result, null, new Callback<RequestObject, Throwable>() {
 					@Override
 					public void onSuccess(RequestObject result) {
 						RestClient.RESTORED_REQUEST = result.getId();

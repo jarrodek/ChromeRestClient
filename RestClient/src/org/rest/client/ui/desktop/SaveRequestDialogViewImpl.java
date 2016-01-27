@@ -11,6 +11,7 @@ import org.rest.client.jso.RequestObject;
 import org.rest.client.log.Log;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.URLParser;
+import org.rest.client.storage.store.ProjectIdb;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.ui.SaveRequestDialogView;
@@ -221,7 +222,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				StatusNotification.notify("Unable to set projects data..", StatusNotification.TIME_MEDIUM);
 			}
 		});
-
+		ProjectIdb.all();
 	}
 
 	/**
@@ -549,13 +550,13 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				if (_projectName.equals("__new__")) {
 					String newProjectName = projectName.getValue();
 					// add new project
-					RestClient.saveRequestData(result, newProjectName, new Callback<RequestObject, Throwable>() {
+					RestClient.saveRequestDataWithProject(result, newProjectName, new Callback<RequestObject, Throwable>() {
 						@Override
 						public void onSuccess(RequestObject result) {
 							save.setEnabled(true);
 
 							RestClient.getClientFactory().getPlaceController()
-									.goTo(RequestPlace.Tokenizer.fromSaved(result.getId()));
+									.goTo(RequestPlace.Tokenizer.fromProject(result.getId()));
 							dialog.hide();
 						}
 
@@ -584,7 +585,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 					}
 					result.setProject(projectId);
 				}
-				RestClient.saveRequestData(result, new Callback<RequestObject, Throwable>() {
+				RestClient.saveRequestData(result, null, new Callback<RequestObject, Throwable>() {
 					@Override
 					public void onSuccess(RequestObject result) {
 						save.setEnabled(true);

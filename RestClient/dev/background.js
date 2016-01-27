@@ -37,6 +37,10 @@ function initOauth2Object() {
 }
 window.externalDataHolder = {};
 
+/**
+ *
+ * @constructor
+ */
 function MessageHandling(webRequest) {
   this.webRequest = webRequest;
 }

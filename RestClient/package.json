@@ -44,7 +44,8 @@
     "gulp-sourcemaps":"^1.6.0",
     "gulp-concat": "^2.6.0",
     "mocha": "^2.4.1",
-    "should": "^8.2.0"
+    "should": "^8.2.0",
+    "gulp-run": "^1.6.12"
   },
   "scripts": {
     "test": "mocha test",

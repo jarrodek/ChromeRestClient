@@ -21,6 +21,7 @@ import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.request.RequestPayloadParser;
 import org.rest.client.storage.StoreKeys;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
+import org.rest.client.storage.store.UrlHistoryIdb;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultsCallback;
 import org.rest.client.ui.ErrorDialogView;
@@ -528,6 +529,31 @@ public class AppRequestFactory {
 		if(RestClient.isDebug()){
 			Log.debug("Save URL value into suggestions table.");
 		}
+		
+		UrlHistoryIdb.put(url, (double) new Date().getTime(), new UrlHistoryIdb.StoreCallback() {
+			
+			@Override
+			public void onSuccess() {
+				if(RestClient.isDebug()){
+					Log.debug("Suggestions table updated with new time.");
+				}
+			}
+			
+			@Override
+			public void onError(Throwable e) {
+				Log.warn("IDB url add error", e);
+				updateUrllegacy(url);
+			}
+		});
+		
+		
+		
+	}
+
+	/**
+	 * @param url
+	 */
+	private static void updateUrllegacy(final String url) {
 		final UrlHistoryStoreWebSql store = RestClient.getClientFactory().getUrlHistoryStore();
 		store.getByUrl(url, new StoreResultsCallback() {
 			
@@ -537,10 +563,10 @@ public class AppRequestFactory {
 					if(RestClient.isDebug()){
 						Log.debug("Updating Suggestions table with new time.");
 					}
-					store.updateUrlUseTime(result.get(0).getId(), (double) new Date().getTime(), new UrlHistoryStoreWebSql.StoreResultCallback() {
+					store.updateUrlUseTime(result.get(0).getId(), (double) new Date().getTime(), new UrlHistoryStoreWebSql.StoreCallback() {
 						
 						@Override
-						public void onSuccess(UrlRow result) {
+						public void onSuccess() {
 							if(RestClient.isDebug()){
 								Log.debug("Suggestions table updated with new time.");
 							}

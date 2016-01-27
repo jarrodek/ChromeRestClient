@@ -16,11 +16,6 @@ public class WebSocketDataStoreWebSql {
 		void onError(Throwable e);
 	}
 	
-	public interface StoreSimpleCallback {
-		void onSuccess();
-		void onError(Throwable e);
-	}
-	
 	/**
 	 * Create
 	 * @param obj

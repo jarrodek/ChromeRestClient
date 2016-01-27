@@ -35,6 +35,7 @@ import org.rest.client.request.FilesObject;
 import org.rest.client.request.HttpMethodOptions;
 import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.storage.StoreKeys;
+import org.rest.client.storage.store.ProjectIdb;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.task.CreateMenuTask;
@@ -419,19 +420,22 @@ public class RestClient implements EntryPoint {
 	 *            Project name to save
 	 * @param callback
 	 */
-	public static void saveRequestData(final RequestObject obj, final String newProjectName,
+	public static void saveRequestDataWithProject(final RequestObject obj, final String newProjectName,
 			final Callback<RequestObject, Throwable> callback) {
 		final ProjectStoreWebSql store = clientFactory.getProjectsStore();
 		ProjectObject project = ProjectObject.create();
 		project.setName(newProjectName);
-
+		
 		store.add(project, new ProjectStoreWebSql.StoreInsertCallback() {
 
 			@Override
 			public void onSuccess(int result) {
 				obj.setProject(result);
 				clientFactory.getEventBus().fireEvent(new NewProjectAvailableEvent(result));
-				saveRequestData(obj, callback);
+				ProjectObject po = ProjectObject.create();
+				po.setId(result);
+				po.setName(newProjectName);
+				saveRequestData(obj, po, callback);
 			}
 
 			@Override
@@ -446,11 +450,11 @@ public class RestClient implements EntryPoint {
 
 	/**
 	 * Save new request data.
-	 * 
+	 * isLegacy - is just for a test.
 	 * @param obj
 	 * @param callback
 	 */
-	public static void saveRequestData(final RequestObject obj, final Callback<RequestObject, Throwable> callback) {
+	public static void saveRequestData(final RequestObject obj, final ProjectObject createdProject, final Callback<RequestObject, Throwable> callback) {
 		final RequestDataStoreWebSql store = clientFactory.getRequestDataStore();
 		if (obj.getId() > 0) {
 			store.update(obj, new RequestDataStoreWebSql.StoreSimpleCallback() {
@@ -458,6 +462,12 @@ public class RestClient implements EntryPoint {
 				public void onSuccess() {
 					clientFactory.getEventBus().fireEvent(new SavedRequestEvent(obj));
 					callback.onSuccess(obj);
+					// new system test
+					if(createdProject == null) {
+						//TODO: insert request in new system.
+					} else {
+						ProjectIdb.addWithRequest(createdProject, obj);
+					}
 				}
 
 				@Override
@@ -475,6 +485,12 @@ public class RestClient implements EntryPoint {
 					obj.setId(inserId);
 					clientFactory.getEventBus().fireEvent(new SavedRequestEvent(obj));
 					callback.onSuccess(obj);
+					// new system test
+					if(createdProject == null) {
+						//TODO: insert request in new system.
+					} else {
+						ProjectIdb.addWithRequest(createdProject, obj);
+					}
 				}
 				
 				@Override

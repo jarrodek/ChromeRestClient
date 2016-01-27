@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.rest.client.jso.UrlRow;
 import org.rest.client.log.Log;
+import org.rest.client.storage.store.UrlHistoryIdb;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultsCallback;
 
@@ -75,7 +76,7 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 		_suggestions = new ArrayList<UrlSuggestion>();
 
 		final String query = request.getQuery();
-		store.getByUrl(query, new StoreResultsCallback() {
+		UrlHistoryIdb.getByUrl(query, new UrlHistoryIdb.StoreResultsCallback() {
 			
 			@Override
 			public void onSuccess(JsArray<UrlRow> result) {
@@ -84,7 +85,6 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 				if(result != null){
 					String lowerQuery = query.toLowerCase();
 					int size = result.length();
-					
 					for(int i=0; i<size; i++){
 						UrlRow row = result.get(i);
 						String url = row.getUrl();
@@ -107,11 +107,44 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 			
 			@Override
 			public void onError(Throwable e) {
-				requestInProgress = false;
-				databaseQueryEnd = true;
-				Log.error("UrlsSuggestOracle - databaseService open error:", e);
+				Log.info("URL indexeddb query failed");
+				store.getByUrl(query+"%", new StoreResultsCallback() {
+					@Override
+					public void onSuccess(JsArray<UrlRow> result) {
+						requestInProgress = false;
+						databaseQueryEnd = true;
+						if(result != null){
+							String lowerQuery = query.toLowerCase();
+							int size = result.length();
+							for(int i=0; i<size; i++){
+								UrlRow row = result.get(i);
+								String url = row.getUrl();
+								if(url == null){
+									continue;
+								}
+								if(!url.toLowerCase().startsWith(lowerQuery)){
+									continue;
+								}
+								UrlSuggestion s = new UrlSuggestion(url, false);
+								_suggestions.add(s);
+							}
+						}
+						if(chromeQueryEnd){
+							recentDatabaseResult = new DatabaseRequestResponse<UrlSuggestion>(request,
+									numberOfDatabaseSuggestions, _suggestions);
+							UrlsSuggestOracle.this.returnSuggestions(callback);
+						}
+					}
+					@Override
+					public void onError(Throwable e) {
+						requestInProgress = false;
+						databaseQueryEnd = true;
+						Log.error("UrlsSuggestOracle - databaseService open error:", e);
+					}
+				});
 			}
 		});
+		
 		
 		History h = GWT.create(History.class);
 		if(h.isSupported()){

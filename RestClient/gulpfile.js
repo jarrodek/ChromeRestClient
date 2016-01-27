@@ -17,6 +17,7 @@ var bump = require('gulp-bump');
 var zip = require('gulp-zip');
 var babel = require('gulp-babel');
 var concat = require('gulp-concat');
+var run = require('gulp-run');
 
 /**
  * Tasks that build different version should use this switched to 
@@ -226,7 +227,10 @@ var copySourceFile = function(obj) {
       title: 'copy ' + mode + ' file '
     }));
 };
-
+var updateDevDocs = function() {
+  run('jsdoc dev/libs -r -d docs/dev/libs').exec();
+  //run('jsdoc dev -r -d docs/dev -c dev/jsdoc.json').exec();
+};
 /**
  * Prepare development environment.
  * It will include separate js libraries into the index page and put it in the extension 
@@ -243,6 +247,11 @@ gulp.task('dev', function() {
       } else {
         gulp.watch('dev/**/*.html', copySourceFile);
         gulp.watch('dev/**/*.js', copySourceFile);
+        gulp.watch([
+          'dev/libs/**/*.js'/*,
+          '!dev/components',
+          '!dev/workers'*/
+        ], updateDevDocs);
         gulp.watch('dev/**/*.jsp', copySourceFile);
         gulp.watch('dev/**/*.css', copySourceFile);
         gutil.log(gutil.colors.green('The app is ready to develop. Good luck!'));

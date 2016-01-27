@@ -17,34 +17,44 @@
 /* global console */
 /**
  * Advanced Rest Client namespace
+ *
+ * @namespace
  */
 var arc = arc || {};
 /**
  * ARC app's namespace
+ *
+ * @namespace
  */
 arc.app = arc.app || {};
 /**
  * A namespace for app database services
+ *
+ * @namespace
  */
 arc.app.db = arc.app.db || {};
 /**
  * An adapter that the app should use to work with the database.
  * This will be switched to `indexeddb` after successful upgrade.
+ *
+ * @type {String}
  */
 arc.app.db._adapter = arc.app.db._adapter || 'websql';
 /**
  * A namespace for WebSQL store
+ *
+ * @namespace
  */
 arc.app.db.websql = {};
 /**
- * A handler to current connection t
-o the database.
- * @type IDBDatabase
+ * A handler to current connection to the database.
+ *
+ * @type {IDBDatabase}
  */
 arc.app.db.websql._db = null;
 /**
  * Current database schema version.
- * @type Number
+ * @type {Number}
  */
 arc.app.db.websql._dbVersion = '';
 /**
@@ -508,8 +518,8 @@ arc.app.db.websql.updateProject = function(name, time, id) {
   });
 };
 /**
- * List entries from the `projects` table.
- * This function will result null if projects table is empty.
+ * List entries from the `projects` table. This function will result null if
+ * projects table is empty.
  */
 arc.app.db.websql.listProjects = function() {
   return new Promise(function(resolve, reject) {
@@ -536,8 +546,8 @@ arc.app.db.websql.listProjects = function() {
   });
 };
 /**
- * Get project data from the store.
- * This function will result null if entry for given [id] is not found.
+ * Get project data from the store. This function will result null if entry
+ * for given [id] is not found.
  */
 arc.app.db.websql.getProject = function(id) {
   return new Promise(function(resolve, reject) {
@@ -564,8 +574,8 @@ arc.app.db.websql.getProject = function(id) {
   });
 };
 /**
- * Get project data from the store.
- * This function will result null if entry for given [id] is not found.
+ * Get project data from the store. This function will result null if entry
+ * for given [id] is not found.
  */
 arc.app.db.websql.deleteProject = function(id) {
   return new Promise(function(resolve, reject) {
@@ -1217,6 +1227,9 @@ arc.app.db.websql.deleteRequestByProject = function(projectId) {
 };
 /**
  * Insert data into the exported table.
+ *
+ * @param {Array<ServerExportedObject>} exportedArray A list of {@link
+ * ServerExportedObject} to insert into the store.
  */
 arc.app.db.websql.insertExported = function(exportedArray) {
   return new Promise(function(resolve, reject) {
@@ -1246,7 +1259,12 @@ arc.app.db.websql.insertExported = function(exportedArray) {
             let data = exportedArray[i];
             let sql = 'INSERT INTO exported (reference_id, gaeKey, type) VALUES (?,?,?)';
             let values = [
-              data.reference_id, data.type, data.gaeKey
+              // jscs:disable
+              /* jshint ignore:start */
+              data.reference_id, 
+              // jscs:enable
+              /* jshint ignore:end */
+              data.type, data.gaeKey
             ];
             tx.executeSql(sql, values, success, error);
           }
@@ -1298,7 +1316,7 @@ arc.app.db.websql.getExportedByReferenceIds = function(list) {
  * This function must be called in Development environment to initialize WebSQL.
  */
 arc.app.db.websql.initDev = function() {
-  if (location.hostname !== '127.0.0.1' || location.port !== '8080') {
+  if (location.hostname !== '127.0.0.1' || location.port !== '8888') {
     return;
   }
   arc.app.db.websql.open()

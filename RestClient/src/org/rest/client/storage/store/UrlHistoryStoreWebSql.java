@@ -16,6 +16,11 @@ public class UrlHistoryStoreWebSql {
 		void onError(Throwable e);
 	}
 	
+	public interface StoreCallback {
+		void onSuccess();
+		void onError(Throwable e);
+	}
+	
 	public final native void put(UrlRow obj, StoreResultCallback callback) /*-{
 		$wnd.arc.app.db.websql.addUrlHistory(obj.url, obj.time)
 		.then(function(result){
@@ -31,12 +36,12 @@ public class UrlHistoryStoreWebSql {
 	 * @param updateTime Event time
 	 * @param callback 
 	 */
-	public final native void updateUrlUseTime(int rowId, double updateTime, final StoreResultCallback callback) /*-{
+	public final native void updateUrlUseTime(int rowId, double updateTime, final StoreCallback callback) /*-{
 		$wnd.arc.app.db.websql.updateUrlHistory(rowId, updateTime)
 		.then(function(){
-			callback.@org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultCallback::onSuccess(Lorg/rest/client/jso/UrlRow;)(null);
+			callback.@org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreCallback::onSuccess()();
 		}, function(cause){
-			callback.@org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultCallback::onError(Ljava/lang/Throwable;)(cause);
+			callback.@org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreCallback::onError(Ljava/lang/Throwable;)(cause);
 		});
 	}-*/;
 	/**

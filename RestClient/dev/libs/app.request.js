@@ -21,18 +21,26 @@
 
 /**
  * Advanced Rest Client namespace
+ *
+ * @namespace
  */
 var arc = arc || {};
 /**
  * ARC app's namespace
+ *
+ * @namespace
  */
 arc.app = arc.app || {};
 /**
  * A namespace for the app server API
+ *
+ * @namespace
  */
 arc.app.server = arc.app.server || {};
 /**
  * A namespace for request object builder.
+ *
+ * @namespace
  */
 arc.app.server.request = {};
 /**
