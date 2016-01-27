@@ -47,7 +47,7 @@ window.addEventListener('load', function() {
         //query.folderId && 
         chrome.extension.sendMessage({
           'payload': 'gdrive',
-          'data': query
+          'params': query
         }, function(response) {
           if (response.assignUrl) {
             window.location.assign(response.assignUrl);
@@ -57,7 +57,7 @@ window.addEventListener('load', function() {
       case 'open':
         chrome.extension.sendMessage({
           'payload': 'gdrive',
-          'data': query
+          'params': query
         }, function(response) {
           if (response.assignUrl) {
             window.location.assign(response.assignUrl);

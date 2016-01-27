@@ -245,7 +245,9 @@ public class ExtensionServlet extends HttpServlet {
 					"Not logged in", 401));
 		}
 		
+		System.out.println("Query for user ");
 		AppUser appUser = AppUser.getOrCreateUser(user);
+		System.out.println("Got AppUser:: " + appUser.toString());
 		
 		JsonParser parser = new JsonParser();
 		JsonObject obj = parser.parse(payloadData).getAsJsonObject();

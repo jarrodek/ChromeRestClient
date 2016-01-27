@@ -1,0 +1,38 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Mocha Tests</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+</head>
+<body>
+  <div id="mocha"></div>
+  
+  <script src="../node_modules/should/should.js"></script>
+  <script src="../node_modules/mocha/mocha.js"></script>
+
+  <script>mocha.setup({
+    ui: 'bdd',
+    globals: ['arc','Dexie']
+  })</script>
+  <script src="../war/components/dexie-js/dist/latest/Dexie.min.js"></script>
+  <script src="../war/components/har/build/har.js"></script>
+  <script src="../war/libs/app.utils.js"></script>
+  <script src="../war/libs/app.types.js"></script>
+  <script src="../war/libs/app.db.websql.js"></script>
+  <script src="../war/libs/app.headers.js"></script>
+  <script src="../war/libs/app.db.idb.js"></script>
+  <script src="../war/libs/app.js"></script>
+  <script src="../war/libs/app.server.js"></script>
+  <script src="../war/libs/app.request.js"></script>
+  <script src="../war/libs/app.settings.js"></script>
+  <script src="../war/libs/app.drive.js"></script>
+  <script src="../war/libs/app.analytics.js"></script>
+  
+  <script src="test.idb.js"></script>
+  <script>
+    mocha.run();
+  </script>
+</body>
+</html>

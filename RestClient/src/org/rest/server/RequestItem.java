@@ -17,8 +17,7 @@ import com.google.appengine.api.datastore.Text;
 
 
 @PersistenceCapable
-public class RequestItem { 
-	
+public class RequestItem {
 	@PrimaryKey 
     @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
     private Key key;

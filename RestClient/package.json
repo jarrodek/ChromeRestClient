@@ -42,10 +42,12 @@
     "gulp-babel": "^6.1.1",
     "babel-preset-es2015": "^6.3.13",
     "gulp-sourcemaps":"^1.6.0",
-    "gulp-concat": "^2.6.0"
+    "gulp-concat": "^2.6.0",
+    "mocha": "^2.4.1",
+    "should": "^8.2.0"
   },
   "scripts": {
-    "test": "gulp test:local",
+    "test": "mocha test",
     "start": "gulp serve",
     "lint": "gulp lint"
   },

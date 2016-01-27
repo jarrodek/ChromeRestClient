@@ -5,17 +5,16 @@ import java.util.List;
 
 import org.rest.client.RestClient;
 import org.rest.client.StatusNotification;
+import org.rest.client.jso.ExportedDataItem;
 import org.rest.client.jso.RequestObject;
 import org.rest.client.log.Log;
 import org.rest.client.request.RequestHeadersParser;
+import org.rest.client.storage.store.ExportedWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
-import org.rest.client.storage.websql.ExportedDataInsertItem;
-import org.rest.client.storage.websql.ExportedDataItem;
 
-import com.google.code.gwt.database.client.service.DataServiceException;
-import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.JsArrayInteger;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
@@ -62,7 +61,7 @@ abstract class DataExport {
 	}
 
 	static interface ExportItemCallback {
-		void onSuccess(ExportedDataInsertItem item);
+		void onSuccess(ExportedDataItem item);
 
 		void onFailure(String message);
 	}
@@ -82,27 +81,26 @@ abstract class DataExport {
 
 			@Override
 			public void onSuccess(final JsArray<RequestObject> result) {
-				final ArrayList<Integer> formIdsList = new ArrayList<Integer>();
+				JsArrayInteger formIdsList = (JsArrayInteger) JsArrayInteger.createArray();
 				for (int i = 0; i < result.length(); i++) {
 					RequestObject item = result.get(i);
-					formIdsList.add(item.getId());
+					formIdsList.set(i, item.getId());
 				}
 				
 				allDataList = result;
-				RestClient.getClientFactory().getExportedDataReferenceService()
-						.getExportedFormByReferenceId(formIdsList, new ListCallback<ExportedDataItem>() {
+				RestClient.getClientFactory().getExportedStore()
+						.getExportedByReferenceIds(formIdsList, new ExportedWebSql.StoreResultsCallback() {
 					@Override
-					public void onFailure(DataServiceException error) {
+					public void onError(Throwable e) {
 						synchPrepareData(handler);
 					}
 
 					@Override
-					public void onSuccess(List<ExportedDataItem> res) {
+					public void onSuccess(JsArray<ExportedDataItem> res) {
 						excludeList = new ArrayList<Integer>();
-						for (ExportedDataItem _item : res) {
-							excludeList.add(_item.getReferenceId());
+						for (int i = 0; i < res.length(); i++) {
+							excludeList.add(res.get(i).getReferenceId());
 						}
-
 						synchPrepareData(handler);
 					}
 				});

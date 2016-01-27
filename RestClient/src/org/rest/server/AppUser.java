@@ -7,6 +7,7 @@ import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.annotations.Element;
 import javax.jdo.annotations.Extension;
+import javax.jdo.annotations.IdGeneratorStrategy;
 import javax.jdo.annotations.Order;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
@@ -22,7 +23,7 @@ public class AppUser {
 	 * key from userID
 	 */
 	@PrimaryKey
-	@Persistent
+	@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
 	private Key key;
 	
 	@Persistent
@@ -40,7 +41,6 @@ public class AppUser {
 		this.key = key;
 		itemsSet = new ArrayList<RequestItem>();
 	}
-
 	/**
 	 * @return the key
 	 */
@@ -75,6 +75,9 @@ public class AppUser {
 	public final List<RequestItem> getItemsSet() {
 		if(itemsSet != null){
 			itemsSet.size();
+			if(itemsSet == null){
+				return new ArrayList<RequestItem>();
+			}
 			return itemsSet;
 		}
 		return new ArrayList<RequestItem>();

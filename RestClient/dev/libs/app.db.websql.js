@@ -28,6 +28,11 @@ arc.app = arc.app || {};
  */
 arc.app.db = arc.app.db || {};
 /**
+ * An adapter that the app should use to work with the database.
+ * This will be switched to `indexeddb` after successful upgrade.
+ */
+arc.app.db._adapter = arc.app.db._adapter || 'websql';
+/**
  * A namespace for WebSQL store
  */
 arc.app.db.websql = {};
@@ -903,14 +908,14 @@ arc.app.db.websql.insertRequestObject = function(data) {
             'skipPayload, skipHeaders, skipPath, time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
           let values = [
             data.project, data.name, data.url, data.method, data.headers, data.payload,
-            arc.app.db.websql._getIntValue(data.skipProtocol), 
-            arc.app.db.websql._getIntValue(data.skipServer), 
-            arc.app.db.websql._getIntValue(data.skipParams), 
+            arc.app.db.websql._getIntValue(data.skipProtocol),
+            arc.app.db.websql._getIntValue(data.skipServer),
+            arc.app.db.websql._getIntValue(data.skipParams),
             arc.app.db.websql._getIntValue(data.skipHistory),
-            arc.app.db.websql._getIntValue(data.skipMethod), 
-            arc.app.db.websql._getIntValue(data.skipPayload), 
-            arc.app.db.websql._getIntValue(data.skipHeaders), 
-            arc.app.db.websql._getIntValue(data.skipPath), 
+            arc.app.db.websql._getIntValue(data.skipMethod),
+            arc.app.db.websql._getIntValue(data.skipPayload),
+            arc.app.db.websql._getIntValue(data.skipHeaders),
+            arc.app.db.websql._getIntValue(data.skipPath),
             data.time
           ];
           tx.executeSql(sql, values,
@@ -958,14 +963,14 @@ arc.app.db.websql.updateRequestObject = function(data) {
             'WHERE ID=?';
           let values = [
             data.project, data.name, data.url, data.method, data.headers, data.payload,
-            arc.app.db.websql._getIntValue(data.skipProtocol), 
-            arc.app.db.websql._getIntValue(data.skipServer), 
-            arc.app.db.websql._getIntValue(data.skipParams), 
+            arc.app.db.websql._getIntValue(data.skipProtocol),
+            arc.app.db.websql._getIntValue(data.skipServer),
+            arc.app.db.websql._getIntValue(data.skipParams),
             arc.app.db.websql._getIntValue(data.skipHistory),
-            arc.app.db.websql._getIntValue(data.skipMethod), 
-            arc.app.db.websql._getIntValue(data.skipPayload), 
-            arc.app.db.websql._getIntValue(data.skipHeaders), 
-            arc.app.db.websql._getIntValue(data.skipPath), 
+            arc.app.db.websql._getIntValue(data.skipMethod),
+            arc.app.db.websql._getIntValue(data.skipPayload),
+            arc.app.db.websql._getIntValue(data.skipHeaders),
+            arc.app.db.websql._getIntValue(data.skipPath),
             data.time, data.id
           ];
           tx.executeSql(sql, values,
@@ -1210,22 +1215,99 @@ arc.app.db.websql.deleteRequestByProject = function(projectId) {
       });
   });
 };
+/**
+ * Insert data into the exported table.
+ */
+arc.app.db.websql.insertExported = function(exportedArray) {
+  return new Promise(function(resolve, reject) {
+    arc.app.db.websql.open()
+      .then(function(db) {
+
+        let size = exportedArray.length;
+        let left = exportedArray.length;
+        let results = [];
+        let callOnEnd = function() {
+          if (left <= 0) {
+            resolve(results);
+          }
+        };
+        let success = function(result) {
+          left--;
+          results.push(result.insertId);
+          callOnEnd();
+        };
+        let error = function() {
+          left--;
+          callOnEnd();
+        };
+
+        db.transaction(function(tx) {
+          for (let i = 0; i < size; i++) {
+            let data = exportedArray[i];
+            let sql = 'INSERT INTO exported (reference_id, gaeKey, type) VALUES (?,?,?)';
+            let values = [
+              data.reference_id, data.type, data.gaeKey
+            ];
+            tx.executeSql(sql, values, success, error);
+          }
+        }, function(tx, e) {
+          arc.app.db.websql.onerror(e);
+          reject(e);
+        });
+      })
+      .catch(function(e) {
+        arc.app.db.websql.onerror(e);
+        reject(e);
+      });
+  });
+};
+/**
+ * Get the list of exported items by their IDs
+ * that are in the `list`
+ *
+ * @param {Array<Number>} list A list of referenceIds.
+ */
+arc.app.db.websql.getExportedByReferenceIds = function(list) {
+  return new Promise(function(resolve, reject) {
+    arc.app.db.websql.open()
+      .then(function(db) {
+        db.transaction(function(tx) {
+          let sql = 'SELECT * FROM exported WHERE reference_id IN (?) AND type=\'form\'';
+          let param = list.join(',');
+          tx.executeSql(sql, [param], function(tx, result) {
+            if (result.rows.length === 0) {
+              resolve([]);
+            } else {
+              resolve(Array.from(result.rows));
+            }
+          }, function(tx, e) {
+            arc.app.db.websql.onerror(e);
+            reject(e);
+          });
+        });
+      })
+      .catch(function(e) {
+        arc.app.db.websql.onerror(e);
+        reject(e);
+      });
+  });
+};
 // @if NODE_ENV='debug'
 /**
  * In dev mode there is no direct connection to the database initialized in the background page.
  * This function must be called in Development environment to initialize WebSQL.
  */
 arc.app.db.websql.initDev = function() {
-  if (arc.app.utils && !arc.app.utils.isProdMode()) {
-    arc.app.db.websql.open()
-      .then(function() {
-        console.log('%cDEVMODE::Database has been initialized', 'color: #33691E');
-      })
-      .catch(function(e) {
-        console.error('DEVMODE::Error initializing the database', e);
-      });
+  if (location.hostname !== '127.0.0.1' || location.port !== '8080') {
+    return;
   }
+  arc.app.db.websql.open()
+    .then(function() {
+      console.log('%cDEVMODE::Database has been initialized', 'color: #33691E');
+    })
+    .catch(function(e) {
+      console.error('DEVMODE::Error initializing the database', e);
+    });
 };
-
 arc.app.db.websql.initDev();
 // @endif

@@ -4,7 +4,7 @@ import org.rest.client.RestClient;
 import org.rest.client.event.SavedRequestEvent;
 import org.rest.client.jso.RequestObject;
 import org.rest.client.log.Log;
-import org.rest.client.storage.store.StoreKeys;
+import org.rest.client.storage.StoreKeys;
 
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;

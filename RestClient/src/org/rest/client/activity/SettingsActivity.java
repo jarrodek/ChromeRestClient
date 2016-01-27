@@ -23,8 +23,8 @@ import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.NotificationsStateChangeEvent;
 import org.rest.client.place.SettingsPlace;
+import org.rest.client.storage.StoreKeys;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
-import org.rest.client.storage.store.StoreKeys;
 import org.rest.client.ui.SettingsView;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;

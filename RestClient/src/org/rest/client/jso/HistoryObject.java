@@ -15,8 +15,6 @@
  ******************************************************************************/
 package org.rest.client.jso;
 
-import org.rest.client.storage.store.objects.History;
-
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
@@ -28,7 +26,7 @@ import com.google.gwt.json.client.JSONString;
  * @author Paweł Psztyć
  * 
  */
-public class HistoryObject extends JavaScriptObject implements History {
+public class HistoryObject extends JavaScriptObject {
 	protected HistoryObject() {
 	}
 	
@@ -48,23 +46,18 @@ public class HistoryObject extends JavaScriptObject implements History {
 		}
 	}-*/;
 	
-	@Override
 	public final native int getId() /*-{
 		return this.id;
 	}-*/;
 	
-	
-	@Override
 	public final native void setId(int id) /*-{
 		this.id = id;
 	}-*/;
 	
-	@Override
 	public final native void setTime(double time) /*-{
 		this.time = time;
 	}-*/;
 	
-	@Override
 	public final native double getTime() /*-{
 		if(typeof this.time == 'number'){
 			return this.time;
@@ -76,52 +69,42 @@ public class HistoryObject extends JavaScriptObject implements History {
 		return this.time.getTime();
 	}-*/;
 	
-	@Override
 	public final native void setURL(String url) /*-{
 		this.url = url;
 	}-*/;
 
-	@Override
 	public final native String getURL() /*-{
 		return this.url;
 	}-*/;
 
-	@Override
 	public final native void setMethod(String method) /*-{
 		this.method = method;
 	}-*/;
 
-	@Override
 	public final native String getMethod() /*-{
 		return this.method;
 	}-*/;
 
-	@Override
 	public final native void setEncoding(String encoding) /*-{
 		this.encoding = encoding;
 	}-*/;
 
-	@Override
 	public final native String getEncoding() /*-{
 		return this.encoding;
 	}-*/;
 
-	@Override
 	public final native void setHeaders(String headers) /*-{
 		this.headers = headers;
 	}-*/;
 
-	@Override
 	public final native String getHeaders() /*-{
 		return this.headers || null;
 	}-*/;
 
-	@Override
 	public final native void setPayload(String payload) /*-{
 		this.payload = payload;
 	}-*/;
 
-	@Override
 	public final native String getPayload() /*-{
 		return this.payload;
 	}-*/;

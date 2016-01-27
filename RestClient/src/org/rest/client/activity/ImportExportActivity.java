@@ -11,6 +11,7 @@ import org.rest.client.deprecated.DataExportImpl;
 import org.rest.client.event.StoreDataEvent;
 import org.rest.client.importparser.ImportParser;
 import org.rest.client.importparser.ImportResult;
+import org.rest.client.jso.ExportedDataItem;
 import org.rest.client.jso.ProjectObject;
 import org.rest.client.jso.RequestDataJso;
 import org.rest.client.jso.RequestObject;
@@ -19,14 +20,12 @@ import org.rest.client.place.ImportExportPlace;
 import org.rest.client.request.ApplicationSession;
 import org.rest.client.request.ImportDataCallback;
 import org.rest.client.request.RequestImportListObject;
+import org.rest.client.storage.store.ExportedWebSql;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
-import org.rest.client.storage.websql.ExportedDataInsertItem;
 import org.rest.client.ui.ImportExportView;
 import org.rest.client.ui.ImportExportView.StringCallback;
 
-import com.google.code.gwt.database.client.service.DataServiceException;
-import com.google.code.gwt.database.client.service.VoidCallback;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.JsArrayInteger;
@@ -323,14 +322,16 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 			}
 			@Override
 			public void onSuccess(JsArrayInteger rowIds) {
-				ArrayList<ExportedDataInsertItem> exported = new ArrayList<ExportedDataInsertItem>();
+				@SuppressWarnings("unchecked")
+				JsArray<ExportedDataItem> exported = (JsArray<ExportedDataItem>) JsArray.createArray();
 				int size = rowIds.length();
 				for (int i = 0; i<size; i++) {
 					int dbId = rowIds.get(i);
-					ExportedDataInsertItem item = new ExportedDataInsertItem(geaKeys[i]);
+					ExportedDataItem item = ExportedDataItem.create();
+					item.setAppEngineKey(geaKeys[i]);
 					item.setReferenceId(dbId);
 					item.setType("form");
-					exported.add(item);
+					exported.set(i, item);
 				}
 				saveImportedReferences(exported);
 			}
@@ -340,21 +341,21 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 	 * Save reference to the AppEngine database in keys storage.
 	 * @param exported
 	 */
-	private void saveImportedReferences(ArrayList<ExportedDataInsertItem> exported){
-		clientFactory.getExportedDataReferenceService().insertExported(exported, new VoidCallback() {
+	private void saveImportedReferences(JsArray<ExportedDataItem> exported){
+		clientFactory.getExportedStore().insertExported(exported, new ExportedWebSql.StoreInsertListCallback() {
 			@Override
-			public void onFailure(DataServiceException error) {
+			public void onError(Throwable e) {
 				if (RestClient.isDebug()) {
-					Log.error("Unable to insert imported references. During export duplicates may occur.",error);
+					Log.error("Unable to insert imported references. During export duplicates may occur.", e);
 				}
 				StatusNotification.notify("Data restored with some errors", StatusNotification.TIME_MEDIUM);
 				view.resetServerView();
-				GoogleAnalytics.sendException("ImportExportActivity::saveImportedReferences::Failure handler::" + error.getMessage());
-				GoogleAnalyticsApp.sendException("ImportExportActivity::saveImportedReferences::Failure handler::" + error.getMessage());
+				GoogleAnalytics.sendException("ImportExportActivity::saveImportedReferences::Failure handler::" + e.getMessage());
+				GoogleAnalyticsApp.sendException("ImportExportActivity::saveImportedReferences::Failure handler::" + e.getMessage());
 			}
 
 			@Override
-			public void onSuccess() {
+			public void onSuccess(JsArrayInteger insertedIds) {
 				StatusNotification.notify("Data restored", StatusNotification.TIME_MEDIUM);
 				view.resetServerView();
 			}

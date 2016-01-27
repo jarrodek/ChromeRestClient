@@ -8,7 +8,7 @@ import org.rest.client.event.NotificationsStateChangeEvent;
 import org.rest.client.log.Log;
 import org.rest.client.request.MessageObject;
 import org.rest.client.request.MessagesRequest;
-import org.rest.client.storage.store.StoreKeys;
+import org.rest.client.storage.StoreKeys;
 
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea;

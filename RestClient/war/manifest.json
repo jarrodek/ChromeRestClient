@@ -1,5 +1,5 @@
 {
-  "name": "Dev 3 - Advanced REST client",
+  "name": "Dev - Advanced REST client",
   "description": "Helper for web developers for creating custom HTTP requests and to test REST API.",
   "icons": {
     "16": "img/arc_icon_16.png",
@@ -17,7 +17,14 @@
   ],
   "options_page": "RestClient.html?gwt.codesvr=127.0.0.1:9997#SettingsPlace:view",
   "background": {
-    "scripts": ["libs/app.db.websql.js","/oauth2/oauth2.js","background.js"]
+    "scripts": [
+      "oauth2/oauth2.js",
+      "components/dexie-js/dist/latest/Dexie.min.js",
+      "components/har/build/har.js",
+      "libs/app.db.websql.js",
+      "libs/app.db.idb.js",
+      "background.js"
+    ]
   },
   "app": {
     "launch": {
@@ -25,20 +32,17 @@
     }
   },
   "content_security_policy": "script-src 'self' https://apis.google.com https://ssl.google-analytics.com https://chromerestclient.appspot.com https://www-onepick-opensocial.googleusercontent.com; object-src 'self'",
-  "content_scripts": [
-  	{
-      "matches": ["http://127.0.0.1:8888/RestClient*"],
-      "js": ["cs.js"],
-	  "run_at": "document_start"
-    },
-    {
-    	"matches": ["http://127.0.0.1:8888/GDrive.html*"],
-    	"js": ["gdriveinit.js"]
-    },
-    {
-    	"matches": ["https://chromerestclient.appspot.com/oauth2callback.html*"],
-	    "js": ["oauth2/oauth2_inject.js"],
-	    "run_at": "document_start"
-    }
-  ]
+  "content_scripts": [{
+    "matches": ["http://127.0.0.1:8888/RestClient*"],
+    "js": ["cs.js"],
+    "run_at": "document_start"
+  }, {
+    "matches": ["http://127.0.0.1:8888/GDrive.html*"],
+    "js": ["gdriveinit.js"],
+    "run_at": "document_start"
+  }, {
+    "matches": ["https://chromerestclient.appspot.com/oauth2callback.html*"],
+    "js": ["oauth2/oauth2_inject.js"],
+    "run_at": "document_start"
+  }]
 }

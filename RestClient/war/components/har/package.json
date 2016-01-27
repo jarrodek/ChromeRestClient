@@ -1,0 +1,79 @@
+{
+	"name": "har",
+	"version": "1.1.3",
+	"description": "HTTP Archive (HAR) Dynamic Object",
+	"keywords": [
+		"har",
+		"http",
+		"archive"
+	],
+	"homepage": "https://github.com/ahmadnassri/har",
+	"bugs": {
+		"url": "https://github.com/ahmadnassri/har/issues"
+	},
+	"license": "MIT",
+	"author": "Ahmad Nassri <ahmad@ahmadnassri.com> (https://www.ahmadnassri.com/)",
+	"files": [
+		"lib"
+	],
+	"main": "lib/index.js",
+	"repository": {},
+	"scripts": {
+		"pretest": "standard && echint",
+		"test": "mocha",
+		"posttest": "npm run coverage",
+		"coverage": "istanbul cover --dir coverage _mocha -- -R dot",
+		"codeclimate": "codeclimate < coverage/lcov.info"
+	},
+	"dependencies": {
+		"commander": "^2.8.1",
+		"debug": "^2.1.3",
+		"har-validator": "^1.7.0"
+	},
+	"devDependencies": {
+		"babel-plugin-transform-es2015-modules-commonjs": "^6.4.0",
+		"babel-preset-es2015": "^6.3.13",
+		"babel-preset-react": "^6.3.13",
+		"babelify": "^7.2.0",
+		"codeclimate-test-reporter": "0.0.4",
+		"echint": "^1.1.1",
+		"glob-all": "^3.0.1",
+		"gulp": "^3.8.5",
+		"gulp-babel": "^6.1.1",
+		"gulp-browserify": "^0.5.1",
+		"gulp-concat": "^2.6.0",
+		"gulp-jscs": "^3.0.0",
+		"gulp-jscs-stylish": "^1.1.2",
+		"gulp-jshint": "^1.6.3",
+		"gulp-load-plugins": "^1.1.0",
+		"gulp-rename": "^1.2.2",
+		"gulp-util": "^3.0.7",
+		"istanbul": "^0.3.13",
+		"jshint-stylish": "^2.0.0",
+		"mocha": "^2.2.4",
+		"run-sequence": "^1.0.2",
+		"should": "^6.0.1",
+		"standard": "^5.0.0"
+	},
+	"engines": {
+		"node": ">=0.10"
+	},
+	"echint": {
+		"ignore": [
+			"coverage/**"
+		]
+	},
+	"browserify": {
+		"transform": [
+			[
+				"babelify",
+				{
+					"presets": [
+						"es2015",
+						"react"
+					]
+				}
+			]
+		]
+	}
+}

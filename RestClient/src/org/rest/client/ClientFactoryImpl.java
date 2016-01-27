@@ -15,13 +15,13 @@
  ******************************************************************************/
 package org.rest.client;
 
+import org.rest.client.storage.store.ExportedWebSql;
 import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.storage.store.ProjectStoreWebSql;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.storage.store.WebSocketDataStoreWebSql;
-import org.rest.client.storage.websql.ExportedDataReferenceService;
 import org.rest.client.ui.AboutView;
 import org.rest.client.ui.EditProjectView;
 import org.rest.client.ui.ErrorDialogView;
@@ -66,7 +66,7 @@ public class ClientFactoryImpl implements ClientFactory {
 	private static HeadersStoreWebSql headersStore = null;
 	private static ProjectStoreWebSql projectsStore = null;
 	private static WebSocketDataStoreWebSql webSocketSqlStore = null;
-	private static ExportedDataReferenceService exportedDataService = null;
+	private static ExportedWebSql exportedDataService = null;
 	/**
 	 * It must be cached and created only once!
 	 */
@@ -198,10 +198,10 @@ public class ClientFactoryImpl implements ClientFactory {
 	}
 
 	@Override
-	public ExportedDataReferenceService getExportedDataReferenceService() {
+	public ExportedWebSql getExportedStore() {
 		if(exportedDataService == null){
 			exportedDataService = GWT
-					.create(ExportedDataReferenceService.class);
+					.create(ExportedWebSql.class);
 		}
 		return exportedDataService;
 	}
