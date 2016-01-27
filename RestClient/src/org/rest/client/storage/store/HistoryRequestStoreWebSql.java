@@ -107,7 +107,7 @@ public class HistoryRequestStoreWebSql {
 		});
 	}-*/;
 	
-	public final native void getHistoryItem(String url, String method, final StoreResultsCallback callback)/*-{
+	public final native void getHistoryItems(String url, String method, final StoreResultsCallback callback)/*-{
 		$wnd.arc.app.db.websql.getHistoryItems(url, method)
 		.then(function(result){
 			callback.@org.rest.client.storage.store.HistoryRequestStoreWebSql.StoreResultsCallback::onSuccess(Lcom/google/gwt/core/client/JsArray;)(result);

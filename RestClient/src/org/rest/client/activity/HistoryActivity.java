@@ -28,12 +28,15 @@ import org.rest.client.jso.HistoryObject;
 import org.rest.client.log.Log;
 import org.rest.client.place.HistoryPlace;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
+import org.rest.client.storage.store.RequestIdb;
 import org.rest.client.ui.HistoryView;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -121,6 +124,16 @@ public class HistoryActivity extends ListActivity implements HistoryView.Present
 						ArrayList<HistoryObject> list = new ArrayList<HistoryObject>();
 						list.add(save);
 						view.appendResults(list);
+						
+						JSONObject obj = save.toJSONObject();
+						obj.put("type", new JSONString("save"));
+						obj.put("oldId", new JSONNumber(result));
+						RequestIdb.put((HistoryObject) obj.getJavaScriptObject(), new RequestIdb.StoreInsertCallback() {
+							@Override
+							public void onSuccess(int inserId) {}
+							@Override
+							public void onError(Throwable e) {}
+						});
 					}
 
 					@Override

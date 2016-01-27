@@ -44,6 +44,13 @@ arc.app.db = arc.app.db || {};
  */
 arc.app.db.idb = {};
 /**
+ * A flag to be set to true if the datastore has been upgraded from WebSQL successfully.
+ * This flag will be used to speed up database open operation.
+ * 
+ * @type {Boolean}
+ */
+arc.app.db.idb.upgraded = false;
+/**
  * Open the database.
  *
  * @returns {Dexie.Promise} The promise when ready.
@@ -70,38 +77,45 @@ arc.app.db.idb.open = function() {
     db.historyUrls.mapToClass(HistoryUrlObject);
     db.statuses.mapToClass(HttpStatusObject);
     db.headers.mapToClass(HttpHeaderObject);
+
     db.on('error', function(error) {
       console.error('IndexedDB global error', error);
     });
     db.on('populate', function() {
-      return new Dexie.Promise(function(resolve, reject) {
-          return arc.app.db.idb.downloadDefinitions()
-            .catch(function() {
-              console.warn('Definitions wasn\'t there. skipping definitions installation.');
-            })
-            .then(function(defs) {
-              if (!defs) {
-                return Dexie.Promise.resolve();
-              }
-              return db.transaction('rw', db.statuses, db.headers, function() {
-                let codes = defs.codes;
-                defs.requests.forEach((item) => item.type = 'request');
-                defs.responses.forEach((item) => item.type = 'response');
-                let headers = defs.requests.concat(defs.responses);
-                codes.forEach(function(item) {
-                  db.statuses.add(item);
-                });
-                headers.forEach(function(item) {
-                  db.headers.add(item);
-                });
-              });
-            });
-        })
-        .then(function() {
-          console.log('The database has been populated with data.');
+      return arc.app.db.idb.downloadDefinitions()
+      .catch(function() {
+        console.warn('Definitions wasn\'t there. skipping definitions installation.');
+        return Dexie.Promise.resolve();
+      })
+      .then(function(defs) {
+        if (!defs) {
+          return Dexie.Promise.resolve();
+        }
+        return db.transaction('rw', db.statuses, db.headers, function() {
+          let promises = [];
+
+          let codes = defs.codes;
+          defs.requests.forEach((item) => item.type = 'request');
+          defs.responses.forEach((item) => item.type = 'response');
+          let headers = defs.requests.concat(defs.responses);
+          codes.forEach(function(item) {
+            promises.push(db.statuses.add(item));
+          });
+          headers.forEach(function(item) {
+            promises.push(db.headers.add(item));
+          });
+
+          return Dexie.Promise.all(promises);
         });
+      })
+      .then(function() {
+        console.log('The database has been populated with data.');
+      });
     });
     db.on('ready', function() {
+      if (arc.app.db.idb.upgraded) {
+        return;
+      }
       arc.app.db.idb._db = db;
       arc.app.db.idb.appVer = chrome.runtime.getManifest ? chrome.runtime.getManifest()
         .version : 'tests case';
@@ -113,12 +127,14 @@ arc.app.db.idb.open = function() {
             }
           };
           if (!chrome.storage) { //tests
+            arc.app.db.idb.upgraded = true;
             resolve(false);
             return;
           }
           chrome.storage.local.get(upgrade, (upgrade) => {
             if (upgrade.upgraded.indexeddb) {
               arc.app.db._adapter = 'indexeddb';
+              arc.app.db.idb.upgraded = true;
             }
             resolve(upgrade.upgraded.indexeddb);
           });
@@ -137,6 +153,7 @@ arc.app.db.idb.open = function() {
               indexeddb: true
             }
           };
+          arc.app.db.idb.upgraded = true;
           if (chrome.storage) { //tests
             chrome.storage.local.set(upgrade, () => {
               console.info('Upgrade finished.');
@@ -809,7 +826,7 @@ arc.app.db.idb.deleteProjectLegacy = function(legacyId) {
   return arc.app.db.idb.getProjectLegacy(legacyId)
     .then(function(project) {
       if (!project) {
-        throw new Error("Project not found in legacy list");
+        throw new Error('Project not found in legacy list');
       }
       _projectId = project.id;
     })
@@ -926,7 +943,7 @@ arc.app.db.idb.deleteProjectRecursiveLegacy = function(legacyProjectId) {
   return arc.app.db.idb.getProjectLegacy(legacyProjectId)
     .then(function(project) {
       if (!project) {
-        throw new Error("No project found.");
+        throw new Error('No project found.');
       }
       _project = project;
     })
@@ -941,6 +958,40 @@ arc.app.db.idb.deleteProjectRecursiveLegacy = function(legacyProjectId) {
           });
           return Dexie.Promise.all(promises);
         })
+        .finally(function() {
+          db.close();
+        });
+    });
+};
+/**
+ * Get history items by it's URL and HTTP method values.
+ *
+ * @param {String} url And URL to query for
+ * @param {String} method A HTTP method to query for.
+ */
+arc.app.db.idb.getRequestObjectsQueryArrayKey = function(url, method) {
+  return arc.app.db.idb.open()
+    .then(function(db) {
+      return db.requestObject.where('[url+method]').equals(url + ':' + method)
+      .finally(function() {
+        db.close();
+      });
+    });
+};
+/**
+ * Get a request object by it's legacy ID.
+ *
+ * @param {Number} legacyId An id of the referenced request form WebSQL
+ * @return {Promise} When fulfilled the promise result with Array of items or 
+ * empty array of there were no entries.
+ */
+arc.app.db.idb.getRequestObjectsByLegacyId = function(legacyId) {
+  return arc.app.db.idb.open()
+    .then(function(db) {
+      return db.requestObject
+        .where('oldId')
+        .equals(legacyId)
+        .toArray()
         .finally(function() {
           db.close();
         });
