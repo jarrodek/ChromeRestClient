@@ -519,7 +519,7 @@ public class AppRequestFactory {
 							}
 						}
 					});
-					RequestIdb.getByLegacyId(oldId, new RequestIdb.StoreResultCallback() {
+					RequestIdb.getByLegacyId(oldId, "history", new RequestIdb.StoreResultCallback() {
 						
 						@Override
 						public void onSuccess(HistoryObject result) {

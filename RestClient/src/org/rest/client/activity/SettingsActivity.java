@@ -25,6 +25,7 @@ import org.rest.client.event.NotificationsStateChangeEvent;
 import org.rest.client.place.SettingsPlace;
 import org.rest.client.storage.StoreKeys;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
+import org.rest.client.storage.store.RequestIdb;
 import org.rest.client.ui.SettingsView;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -64,6 +65,7 @@ public class SettingsActivity extends AppActivity implements SettingsView.Presen
 			@Override
 			public void onSuccess() {
 				StatusNotification.notify("History cleared.", StatusNotification.TIME_SHORT);
+				RequestIdb.deleteHistory();
 			}
 			
 			@Override

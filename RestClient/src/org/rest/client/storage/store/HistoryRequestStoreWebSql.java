@@ -64,9 +64,7 @@ public class HistoryRequestStoreWebSql {
 			callback.@org.rest.client.storage.store.HistoryRequestStoreWebSql.StoreResultsCallback::onError(Ljava/lang/Throwable;)(cause);
 		});
 	}-*/;
-	/**
-	 * This type of query is not available for this table.
-	 */
+	
 	public final native void remove(int key, final StoreSimpleCallback callback) /*-{
 		$wnd.arc.app.db.websql.removeHistoryObject(key)
 		.then(function(){
@@ -75,9 +73,6 @@ public class HistoryRequestStoreWebSql {
 			callback.@org.rest.client.storage.store.HistoryRequestStoreWebSql.StoreSimpleCallback::onError(Ljava/lang/Throwable;)(cause);
 		});
 	}-*/;
-	/**
-	 * This type of query is not available for this table.
-	 */
 	
 	public final native void deleteHistory(final StoreSimpleCallback callback) /*-{
 		$wnd.arc.app.db.websql.truncateHistoryTable()

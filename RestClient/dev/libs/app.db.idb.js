@@ -64,7 +64,7 @@ arc.app.db.idb.open = function() {
         statuses: '&key',
         historyUrls: '&url',
         historySockets: '&url',
-        requestObject: '++id,url,method,[url+method],oldId',
+        requestObject: '++id,url,method,[url+method],type,oldId',
         driveObjects: '[driveId+requestId],driveId,requestId',
         serverExportObjects: '[serverId+requestId],serverId,requestId,oldId',
         projectObjects: '++id,*requestIds,oldId'
@@ -83,34 +83,34 @@ arc.app.db.idb.open = function() {
     });
     db.on('populate', function() {
       return arc.app.db.idb.downloadDefinitions()
-      .catch(function() {
-        console.warn('Definitions wasn\'t there. skipping definitions installation.');
-        return Dexie.Promise.resolve();
-      })
-      .then(function(defs) {
-        if (!defs) {
+        .catch(function() {
+          console.warn('Definitions wasn\'t there. skipping definitions installation.');
           return Dexie.Promise.resolve();
-        }
-        return db.transaction('rw', db.statuses, db.headers, function() {
-          let promises = [];
+        })
+        .then(function(defs) {
+          if (!defs) {
+            return Dexie.Promise.resolve();
+          }
+          return db.transaction('rw', db.statuses, db.headers, function() {
+            let promises = [];
 
-          let codes = defs.codes;
-          defs.requests.forEach((item) => item.type = 'request');
-          defs.responses.forEach((item) => item.type = 'response');
-          let headers = defs.requests.concat(defs.responses);
-          codes.forEach(function(item) {
-            promises.push(db.statuses.add(item));
-          });
-          headers.forEach(function(item) {
-            promises.push(db.headers.add(item));
-          });
+            let codes = defs.codes;
+            defs.requests.forEach((item) => item.type = 'request');
+            defs.responses.forEach((item) => item.type = 'response');
+            let headers = defs.requests.concat(defs.responses);
+            codes.forEach(function(item) {
+              promises.push(db.statuses.add(item));
+            });
+            headers.forEach(function(item) {
+              promises.push(db.headers.add(item));
+            });
 
-          return Dexie.Promise.all(promises);
+            return Dexie.Promise.all(promises);
+          });
+        })
+        .then(function() {
+          console.log('The database has been populated with data.');
         });
-      })
-      .then(function() {
-        console.log('The database has been populated with data.');
-      });
     });
     db.on('ready', function() {
       if (arc.app.db.idb.upgraded) {
@@ -969,34 +969,121 @@ arc.app.db.idb.deleteProjectRecursiveLegacy = function(legacyProjectId) {
  * @param {String} url And URL to query for
  * @param {String} method A HTTP method to query for.
  */
-arc.app.db.idb.getRequestObjectsQueryArrayKey = function(url, method) {
-  return arc.app.db.idb.open()
-    .then(function(db) {
-      return db.requestObject.where('[url+method]').equals(url + ':' + method)
-      .finally(function() {
-        db.close();
-      });
-    });
-};
-/**
- * Get a request object by it's legacy ID.
- *
- * @param {Number} legacyId An id of the referenced request form WebSQL
- * @return {Promise} When fulfilled the promise result with Array of items or 
- * empty array of there were no entries.
- */
-arc.app.db.idb.getRequestObjectsByLegacyId = function(legacyId) {
+arc.app.db.idb.getRequestObjectsQueryArrayKey = function(url, method, type) {
   return arc.app.db.idb.open()
     .then(function(db) {
       return db.requestObject
-        .where('oldId')
-        .equals(legacyId)
+        .where('[url+method]').equals(url + ':' + method)
+        .and((item) => item.type === type)
         .toArray()
         .finally(function() {
           db.close();
         });
     });
 };
+/**
+ * Get a request object by it's legacy ID.
+ *
+ * @param {Number} legacyId An id of the referenced request form WebSQL
+ * @param {String} type Either `history` or `saved`. 
+ * @return {Promise} When fulfilled the promise result with Array of items or 
+ * empty array of there were no entries.
+ */
+arc.app.db.idb.getRequestObjectsByLegacyId = function(legacyId, type) {
+  return arc.app.db.idb.open()
+    .then(function(db) {
+      return db.requestObject
+        .where('oldId')
+        .equals(legacyId)
+        .and((item) => item.type === type)
+        .toArray()
+        .finally(function() {
+          db.close();
+        });
+    });
+};
+/**
+ * Remove the {@link RequestObject} by legacy id and its type.
+ *
+ * @param  {Number} legacyId Old database ID
+ * @param  {String} type Either `history` or `saved`. 
+ * @return {Dexie.Promise} Fulfilled promise when deleted.
+ */
+arc.app.db.idb.removeRequestObjectsByLegacyId = function(legacyId, type) {
+  var theRequest;
+  arc.app.db.idb.getRequestObjectsByLegacyId(legacyId, type)
+    .then(function(result) {
+      if (result && result.length) {
+        theRequest = result[0];
+      } else {
+        throw 'No request found for given legacy key and type';
+      }
+    })
+    .then(arc.app.db.idb.open)
+    .then(function(db) {
+      return db.transaction('rw', db.requestObject, db.projectObjects, function() {
+          return db.requestObject.delete(theRequest.id)
+            .then(arc.app.db.idb.getProjectByRequest(theRequest.id))
+            .then(function(project) {
+              if (!project) {
+                return Dexie.Promise.resolve();
+              }
+              var referencePosition = project.requestIds.indexOf(theRequest.id);
+              if (referencePosition == -1) {
+                return Dexie.Promise.resolve();
+              }
+              project.requestIds.splice(referencePosition, 1);
+              return db.projectObjects.put(project);
+            });
+        })
+        .finally(function() {
+          db.close();
+        });
+    });
+};
+/**
+ * Get a project associated with a request identified by requestId
+ *
+ * @param  {Number} requestId A request id (New system in indexed DB)
+ * @return {Dexie.Promise} Promise fulfilled with a {@link ProjectObject} or null if not found.
+ */
+arc.app.db.idb.getProjectByRequest = function(requestId) {
+  return arc.app.db.idb.open()
+    .then(function(db) {
+      return db.projectObjects
+        .where('requestIds').equals(requestId).toArray()
+        .then(function(objs) {
+          return (objs && objs.length) ? objs[0] : null;
+        })
+        .finally(function() {
+          db.close();
+        });
+    });
+};
+/**
+ * Delete all request objects by type.
+ *
+ * @param  {String} type Either `saved` or `history`.
+ * @return {Dexie.Promise} When fulfilled all requests has been removed from the store.
+ */
+arc.app.db.idb.deleteRequestObjects = function(type) {
+  return arc.app.db.idb.open()
+    .then(function(db) {
+      return db.requestObject.where('type').equals(type).toArray()
+      .then(function (requests) {
+        return db.transaction('rw', db.requestObject, function() {
+          let promises = [];
+          requests.forEach((request) => {
+            promises.push(db.requestObject.delete(request.id));
+          });
+          return Dexie.Promise.all(promises);
+        });
+      })
+      .finally(function() {
+        db.close();
+      });
+    });
+}
 // @if NODE_ENV='debug'
 /**
  * In dev mode there is no direct connection to the database initialized in the background page.

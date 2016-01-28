@@ -88,6 +88,7 @@ public class HistoryActivity extends ListActivity implements HistoryView.Present
 					@Override
 					public void onSuccess() {
 						notifyRemoveAndRestore(removedObject);
+						RequestIdb.removeByLegacyId(historyId, "history");
 					}
 					@Override
 					public void onError(Throwable e) {
@@ -174,6 +175,7 @@ public class HistoryActivity extends ListActivity implements HistoryView.Present
 			public void onSuccess() {
 				ClearHistoryEvent ev = new ClearHistoryEvent();
 				eventBus.fireEvent(ev);
+				RequestIdb.deleteHistory();
 			}
 
 			@Override
