@@ -62,8 +62,8 @@ public class RequestDataStoreWebSql {
 	 * List
 	 * @param callback
 	 */
-	public final native void getForProject(int projectId, final StoreResultsCallback callback) /*-{
-		$wnd.arc.app.db.websql.getProjectRequests(projectId)
+	public final native static void getForProject(int projectId, final StoreResultsCallback callback) /*-{
+		$wnd.arc.app.db.requests.getProjectRequests(projectId)
 		.then(function(result){
 			callback.@org.rest.client.storage.store.RequestDataStoreWebSql.StoreResultsCallback::onSuccess(Lcom/google/gwt/core/client/JsArray;)(result);
 		}, function(cause){

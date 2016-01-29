@@ -44,9 +44,9 @@
     },
     _displayHeaderInfo: function(e) {
       var item = e.model.get('item');
-      arc.app.db.websql.getHeaderByName(item.name, item.type)
+      arc.app.db.headers.getHeader(item.name, item.type)
         .then(function(result) {
-          if (result === null || result.length === 0) {
+          if (result === null) {
             return;
           }
           this._hdTitle = result.name;

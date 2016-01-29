@@ -12,7 +12,6 @@ import org.rest.client.event.RequestEndEvent;
 import org.rest.client.event.RequestStartActionEvent;
 import org.rest.client.jso.HistoryObject;
 import org.rest.client.jso.RequestObject;
-import org.rest.client.jso.UrlRow;
 import org.rest.client.log.Log;
 import org.rest.client.request.FilesObject;
 import org.rest.client.request.FormPayloadData;
@@ -22,9 +21,7 @@ import org.rest.client.request.RequestPayloadParser;
 import org.rest.client.storage.StoreKeys;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.storage.store.RequestIdb;
-import org.rest.client.storage.store.UrlHistoryIdb;
-import org.rest.client.storage.store.UrlHistoryStoreWebSql;
-import org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultsCallback;
+import org.rest.client.storage.store.UrlHistoryStore;
 import org.rest.client.ui.ErrorDialogView;
 
 import com.google.gwt.chrome.def.BackgroundJsCallback;
@@ -567,8 +564,7 @@ public class AppRequestFactory {
 		if(RestClient.isDebug()){
 			Log.debug("Save URL value into suggestions table.");
 		}
-		
-		UrlHistoryIdb.put(url, (double) new Date().getTime(), new UrlHistoryIdb.StoreCallback() {
+		UrlHistoryStore.put(url, (double) new Date().getTime(), new UrlHistoryStore.StoreCallback() {
 			
 			@Override
 			public void onSuccess() {
@@ -580,71 +576,6 @@ public class AppRequestFactory {
 			@Override
 			public void onError(Throwable e) {
 				Log.warn("IDB url add error", e);
-				updateUrllegacy(url);
-			}
-		});
-		
-		
-		
-	}
-
-	/**
-	 * @param url
-	 */
-	private static void updateUrllegacy(final String url) {
-		final UrlHistoryStoreWebSql store = RestClient.getClientFactory().getUrlHistoryStore();
-		store.getByUrl(url, new StoreResultsCallback() {
-			
-			@Override
-			public void onSuccess(JsArray<UrlRow> result) {
-				if(result != null && result.length() > 0) {
-					if(RestClient.isDebug()){
-						Log.debug("Updating Suggestions table with new time.");
-					}
-					store.updateUrlUseTime(result.get(0).getId(), (double) new Date().getTime(), new UrlHistoryStoreWebSql.StoreCallback() {
-						
-						@Override
-						public void onSuccess() {
-							if(RestClient.isDebug()){
-								Log.debug("Suggestions table updated with new time.");
-							}
-						}
-						
-						@Override
-						public void onError(Throwable e) {
-							if(RestClient.isDebug()){
-								Log.error("Can't update suggestion time.", e);
-							}
-						}
-					});
-					return;
-				}
-				UrlRow row = UrlRow.create();
-				row.setUrl(url);
-				row.setTime(new Date().getTime());
-				store.put(row, new UrlHistoryStoreWebSql.StoreResultCallback() {
-					
-					@Override
-					public void onError(Throwable e) {
-						if(RestClient.isDebug()){
-							Log.error("There was a problem inserting URL value (used in request).", e);
-						}
-					}
-
-					@Override
-					public void onSuccess(UrlRow result) {
-						if(RestClient.isDebug()){
-							Log.debug("New value has been added to the Suggestions table.");
-						}
-					}
-				});
-			}
-			
-			@Override
-			public void onError(Throwable e) {
-				if(RestClient.isDebug()){
-					Log.error("There was a problem inserting URL value (used in request). Unable to read previous URL's data.", e);
-				}
 			}
 		});
 	}

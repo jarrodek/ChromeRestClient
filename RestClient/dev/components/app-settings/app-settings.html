@@ -82,6 +82,23 @@
         <paper-toggle-button checked="{{values.CMP_ENABLED}}"></paper-toggle-button>
       </paper-item>
     </section>
+    <h1 class="page-title">Experiments</h1>
+    <section class="settings-section">
+      <paper-item>
+        <paper-item-body two-line>
+          <div>Use IndexedDB</div>
+          <div secondary>Disable WebSQL and use IndexedDB</div>
+        </paper-item-body>
+        <paper-toggle-button checked="{{values.useIdb}}"></paper-toggle-button>
+      </paper-item>
+    </section>
+    <section class="settings-section">
+      <paper-item on-tap="importIndexedDB">
+        <paper-item-body>
+          <div>Clear IndexedDB and import data from WebSQL</div>
+        </paper-item-body>
+      </paper-item>
+    </section>
     <paper-dialog id="historyClearDialog" on-iron-overlay-closed="onClearDialogResult">
       <h2>Clear history</h2>
       <paper-dialog-scrollable>
@@ -108,6 +125,8 @@
         <paper-button dialog-confirm>Close</paper-button>
       </div>
     </paper-dialog>
+    <paper-toast text="Database recreated" id="dbRecreate"></paper-toast>
+    <paper-toast text="There was an error recreating the database" id="dbRecreateError"></paper-toast>
   </template>
   <script>
   Polymer({
@@ -198,6 +217,18 @@
       this.fire('settings-action', {
         action: 'clear-history'
       });
+    },
+    importIndexedDB: function() {
+      arc.app.db.idb.deleteDatabase()
+      .then(arc.app.db.idb.open)
+      .then(function(db){
+        db.close();
+        this.$.dbRecreate.open();
+      }.bind(this))
+      .catch(function(cause){
+        this.$.dbRecreateError.open();
+        console.error('Upgrade database error', cause);
+      }.bind(this));
     }
   });
   </script>

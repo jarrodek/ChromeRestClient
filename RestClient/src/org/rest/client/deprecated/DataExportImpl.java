@@ -8,7 +8,7 @@ import org.rest.client.StatusNotification;
 import org.rest.client.event.StoreDataEvent;
 import org.rest.client.jso.ExportedDataItem;
 import org.rest.client.log.Log;
-import org.rest.client.storage.store.ExportedWebSql;
+import org.rest.client.storage.store.ExportedStore;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JsArray;
@@ -44,8 +44,8 @@ public class DataExportImpl extends DataExport {
 							_insert.setReferenceId(_i);
 							databaseSave.set(databaseSave.length(), _insert);
 						}
-						RestClient.getClientFactory().getExportedStore().insertExported(databaseSave,
-								new ExportedWebSql.StoreInsertListCallback() {
+						ExportedStore.insertExported(databaseSave,
+								new ExportedStore.StoreInsertListCallback() {
 							@Override
 							public void onError(Throwable e) {
 								includeList.clear();
@@ -119,8 +119,8 @@ public class DataExportImpl extends DataExport {
 						_insert.setReferenceId(it.getKey());
 						databaseSave.set(0, _insert);
 						
-						RestClient.getClientFactory().getExportedStore().insertExported(databaseSave,
-								new ExportedWebSql.StoreInsertListCallback() {
+						ExportedStore.insertExported(databaseSave,
+								new ExportedStore.StoreInsertListCallback() {
 							@Override
 							public void onError(Throwable e) {
 								if (RestClient.isDebug()) {

@@ -9,7 +9,7 @@ import org.rest.client.jso.ExportedDataItem;
 import org.rest.client.jso.RequestObject;
 import org.rest.client.log.Log;
 import org.rest.client.request.RequestHeadersParser;
-import org.rest.client.storage.store.ExportedWebSql;
+import org.rest.client.storage.store.ExportedStore;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 
 import com.google.gwt.core.client.Callback;
@@ -88,8 +88,7 @@ abstract class DataExport {
 				}
 				
 				allDataList = result;
-				RestClient.getClientFactory().getExportedStore()
-						.getExportedByReferenceIds(formIdsList, new ExportedWebSql.StoreResultsCallback() {
+				ExportedStore.getExportedByReferenceIds(formIdsList, new ExportedStore.StoreResultsCallback() {
 					@Override
 					public void onError(Throwable e) {
 						synchPrepareData(handler);

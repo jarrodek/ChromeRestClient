@@ -38,7 +38,8 @@ public final class ProjectObject extends JavaScriptObject {
 		return {
 			id: -1,
 			name: null,
-			time: new Date().getTime()
+			created: new Date(),
+			requestIds: []
 		}
 	}-*/;
 	
@@ -54,14 +55,14 @@ public final class ProjectObject extends JavaScriptObject {
 	}-*/;
 	
 	public final native void setCreated(double created) /*-{
-		this.time = created;
+		this.created = new Date(created);
 	}-*/;
 
 	public final native double getCreated() /*-{
-		if(!this.time){
-			this.time = new Date().getTime();
+		if(!this.created){
+			this.created = new Date();
 		}
-		return this.time;
+		return this.created.getTime();
 	}-*/;
 	/**
 	 * Sets project name
@@ -86,7 +87,7 @@ public final class ProjectObject extends JavaScriptObject {
 		return {
 			id: obj.id,
 			name: obj.name,
-			time: obj.time
+			created: obj.created
 		}
 	}-*/;
 	
@@ -97,7 +98,7 @@ public final class ProjectObject extends JavaScriptObject {
 		JSONObject obj = new JSONObject();
 		obj.put("id", new JSONNumber(getId()));
 		obj.put("name", new JSONString(getName() == null ? "" : getName()));
-		obj.put("time", new JSONNumber(getCreated()));
+		obj.put("created", new JSONNumber(getCreated()));
 		return obj;
 	}
 }

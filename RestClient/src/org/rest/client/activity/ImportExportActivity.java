@@ -20,8 +20,8 @@ import org.rest.client.place.ImportExportPlace;
 import org.rest.client.request.ApplicationSession;
 import org.rest.client.request.ImportDataCallback;
 import org.rest.client.request.RequestImportListObject;
-import org.rest.client.storage.store.ExportedWebSql;
-import org.rest.client.storage.store.ProjectStoreWebSql;
+import org.rest.client.storage.store.ExportedStore;
+import org.rest.client.storage.store.ProjectsStore;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.ui.ImportExportView;
 import org.rest.client.ui.ImportExportView.StringCallback;
@@ -99,7 +99,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 				//
 				// Get project data
 				//
-				clientFactory.getProjectsStore().all(new ProjectStoreWebSql.StoreResultsCallback() {
+				ProjectsStore.all(new ProjectsStore.StoreResultsCallback() {
 					@Override
 					public void onSuccess(final JsArray<ProjectObject> projectDataResult) {
 
@@ -342,7 +342,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 	 * @param exported
 	 */
 	private void saveImportedReferences(JsArray<ExportedDataItem> exported){
-		clientFactory.getExportedStore().insertExported(exported, new ExportedWebSql.StoreInsertListCallback() {
+		ExportedStore.insertExported(exported, new ExportedStore.StoreInsertListCallback() {
 			@Override
 			public void onError(Throwable e) {
 				if (RestClient.isDebug()) {
@@ -439,7 +439,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 			// First, save projects data and update referenced requests
 			//
 			
-			clientFactory.getProjectsStore().importData(projects, new ProjectStoreWebSql.StoreInsertListCallback() {
+			clientFactory.getProjectsStore().importData(projects, new ProjectsStore.StoreInsertListCallback() {
 
 				@Override
 				public void onError(Throwable error) {

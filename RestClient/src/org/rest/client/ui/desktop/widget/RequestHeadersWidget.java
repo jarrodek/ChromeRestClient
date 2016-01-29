@@ -33,7 +33,6 @@ import org.rest.client.event.HeaderValueChangeEvent;
 import org.rest.client.event.HttpEncodingChangeEvent;
 import org.rest.client.log.Log;
 import org.rest.client.request.RequestHeadersParser;
-import org.rest.client.storage.store.HeadersStoreWebSql;
 import org.rest.client.suggestion.HeadersSuggestOracle;
 import org.rest.client.ui.html5.HTML5Element;
 
@@ -125,8 +124,7 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 		//
 		// Initialize Suggest Oracle for headers
 		//
-		HeadersStoreWebSql store = RestClient.getClientFactory().getHeadersStore();
-		suggestOracle = new HeadersSuggestOracle(store, "request");
+		suggestOracle = new HeadersSuggestOracle("request");
 		headersRawInput.addKeyUpHandler(new KeyUpHandler() {
 			@Override
 			public void onKeyUp(KeyUpEvent event) {

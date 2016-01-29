@@ -4,9 +4,8 @@ import java.util.ArrayList;
 
 import org.rest.client.jso.UrlRow;
 import org.rest.client.log.Log;
-import org.rest.client.storage.store.UrlHistoryIdb;
-import org.rest.client.storage.store.UrlHistoryStoreWebSql;
-import org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultsCallback;
+import org.rest.client.storage.store.UrlHistoryStore;
+import org.rest.client.storage.store.UrlHistoryStore.StoreResultsCallback;
 
 import com.google.gwt.chrome.history.History;
 import com.google.gwt.chrome.history.HistoryItem;
@@ -21,7 +20,6 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 	 * Allow to perform query
 	 */
 	private boolean allowQuery = true;
-	final private UrlHistoryStoreWebSql store;
 	private boolean databaseQueryEnd = true;
 	private boolean chromeQueryEnd = true;
 	ArrayList<UrlSuggestion> _suggestions = new ArrayList<UrlSuggestion>();
@@ -49,8 +47,8 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 		return allowQuery;
 	}
 
-	public UrlsSuggestOracle(UrlHistoryStoreWebSql store) {
-		this.store = store;
+	public UrlsSuggestOracle() {
+		
 	}
 
 	/**
@@ -76,8 +74,7 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 		_suggestions = new ArrayList<UrlSuggestion>();
 
 		final String query = request.getQuery();
-		UrlHistoryIdb.getByUrl(query, new UrlHistoryIdb.StoreResultsCallback() {
-			
+		UrlHistoryStore.query(query, new StoreResultsCallback() {
 			@Override
 			public void onSuccess(JsArray<UrlRow> result) {
 				requestInProgress = false;
@@ -104,47 +101,13 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 					UrlsSuggestOracle.this.returnSuggestions(callback);
 				}
 			}
-			
 			@Override
 			public void onError(Throwable e) {
-				Log.info("URL indexeddb query failed");
-				store.getByUrl(query+"%", new StoreResultsCallback() {
-					@Override
-					public void onSuccess(JsArray<UrlRow> result) {
-						requestInProgress = false;
-						databaseQueryEnd = true;
-						if(result != null){
-							String lowerQuery = query.toLowerCase();
-							int size = result.length();
-							for(int i=0; i<size; i++){
-								UrlRow row = result.get(i);
-								String url = row.getUrl();
-								if(url == null){
-									continue;
-								}
-								if(!url.toLowerCase().startsWith(lowerQuery)){
-									continue;
-								}
-								UrlSuggestion s = new UrlSuggestion(url, false);
-								_suggestions.add(s);
-							}
-						}
-						if(chromeQueryEnd){
-							recentDatabaseResult = new DatabaseRequestResponse<UrlSuggestion>(request,
-									numberOfDatabaseSuggestions, _suggestions);
-							UrlsSuggestOracle.this.returnSuggestions(callback);
-						}
-					}
-					@Override
-					public void onError(Throwable e) {
-						requestInProgress = false;
-						databaseQueryEnd = true;
-						Log.error("UrlsSuggestOracle - databaseService open error:", e);
-					}
-				});
+				requestInProgress = false;
+				databaseQueryEnd = true;
+				Log.error("UrlsSuggestOracle - databaseService open error:", e);
 			}
 		});
-		
 		
 		History h = GWT.create(History.class);
 		if(h.isSupported()){

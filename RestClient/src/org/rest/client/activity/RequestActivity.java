@@ -49,11 +49,9 @@ import org.rest.client.jso.ResponseStatusData;
 import org.rest.client.log.Log;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.RedirectData;
-import org.rest.client.request.URLParser;
 import org.rest.client.storage.StoreKeys;
 import org.rest.client.storage.store.HistoryRequestStoreWebSql;
-import org.rest.client.storage.store.ProjectIdb;
-import org.rest.client.storage.store.ProjectStoreWebSql;
+import org.rest.client.storage.store.ProjectsStore;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.EditProjectView;
@@ -373,9 +371,8 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 			restoreLatestRequest();
 			return;
 		}
-		final ProjectStoreWebSql projectsStore = clientFactory.getProjectsStore();
 		if (endpointId == -1) {
-			projectsStore.getByKey(projectId, new ProjectStoreWebSql.StoreResultCallback() {
+			ProjectsStore.getByKey(projectId, new ProjectsStore.StoreResultCallback() {
 
 				@Override
 				public void onSuccess(ProjectObject result) {
@@ -384,7 +381,6 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 						return;
 					}
 					restoreDefaultRequestFromProject(result, requestView);
-					ProjectIdb.getByLegacyKey(projectId);
 				}
 
 				@Override
@@ -405,7 +401,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 					}
 					if (result.getProject() > 0) {
 						RestClient.currentlyOpenedProject = result.getProject();
-						projectsStore.getByKey(result.getProject(), new ProjectStoreWebSql.StoreResultCallback() {
+						ProjectsStore.getByKey(result.getProject(), new ProjectsStore.StoreResultCallback() {
 
 							@Override
 							public void onSuccess(ProjectObject project) {
@@ -414,8 +410,6 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 									return;
 								}
 								restoreProjectEndpoint(project, result);
-								// New DB test
-								ProjectIdb.getByLegacyKey(project.getId());
 							}
 
 							@Override
@@ -522,61 +516,20 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 	private void restoreProjectEndpointWithLatestData(RequestObject lesteSavedRequest, final ProjectObject project,
 			final RequestObject request, final RequestView requestView) {
 
-		if (request.isSkipHeaders()) {
-			requestView.setHeaders(lesteSavedRequest.getHeaders());
-		} else {
-			requestView.setHeaders(request.getHeaders());
-		}
-		if (request.isSkipMethod()) {
-			requestView.setMethod(lesteSavedRequest.getMethod());
-		} else {
-			requestView.setMethod(request.getMethod());
-		}
-		if (request.isSkipPayload()) {
-			requestView.setPayload(lesteSavedRequest.getPayload());
-		} else {
-			requestView.setPayload(request.getPayload());
-		}
+		requestView.setHeaders(request.getHeaders());
+		requestView.setMethod(request.getMethod());
+		requestView.setPayload(request.getPayload());
 		requestView.setEncoding(request.getEncoding());
 		if (RestClient.isDebug()) {
 			Log.debug("Restoring encoding to ." + request.getEncoding());
 		}
-
-		String oldUrl = lesteSavedRequest.getURL();
-
-		String newUrl = request.getURL();
-		URLParser urlData = new URLParser().parse(newUrl);
-		URLParser oldUrlData = new URLParser().parse(oldUrl);
-
-		if (request.isSkipHistory()) {
-			// remove hash from restored and get one from latest
-			urlData.setAnchor(oldUrlData.getAnchor());
-		}
-		if (request.isSkipParams()) {
-			// remove query string from restored and get one from latest
-			urlData.setQuery(oldUrlData.getQuery());
-		}
-		if (request.isSkipPath()) {
-			// remove path from restored and get one from latest
-			urlData.setPath(oldUrlData.getPath());
-		}
-		if (request.isSkipProtocol()) {
-			// remove hash from restored and get one from latest
-			urlData.setProtocol(oldUrlData.getProtocol());
-		}
-		if (request.isSkipServer()) {
-			// remove hash from restored and get one from latest
-			urlData.setAuthority(oldUrlData.getAuthority());
-		}
-
-		requestView.setUrl(urlData.toString());
-
+		requestView.setUrl(request.getURL());
 		RestClient.fixChromeLayout();
 		RestClient.RESTORED_REQUEST = request.getId();
 	}
 
 	private void showProjectRelatedData(final int projectId, final ProjectObject project) {
-		clientFactory.getRequestDataStore().getForProject(projectId,
+		RequestDataStoreWebSql.getForProject(projectId,
 				new RequestDataStoreWebSql.StoreResultsCallback() {
 
 					@Override
@@ -601,13 +554,10 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 						final int endpointId = _endpointId;
 
 						if (project == null) {
-							ProjectStoreWebSql projectsStore = clientFactory.getProjectsStore();
-							projectsStore.getByKey(projectId, new ProjectStoreWebSql.StoreResultCallback() {
-
+							ProjectsStore.getByKey(projectId, new ProjectsStore.StoreResultCallback() {
 								@Override
 								public void onSuccess(ProjectObject project) {
 									requestView.setProjectData(project, requests, endpointId);
-									ProjectIdb.getByLegacyKey(projectId);
 								}
 
 								@Override
@@ -618,7 +568,6 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 									StatusNotification.notify("Unable read project related data");
 								}
 							});
-							//ProjectIdb.getByKey(projectId);
 						} else {
 							requestView.setProjectData(project, requests, endpointId);
 						}
@@ -703,19 +652,14 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 				if (project == null) {
 					return;
 				}
-				
-				ProjectStoreWebSql store = clientFactory.getProjectsStore();
-				store.put(project, new ProjectStoreWebSql.StoreResultCallback() {
-
+				ProjectsStore.update(project, new ProjectsStore.StoreResultCallback() {
 					@Override
 					public void onSuccess(ProjectObject result) {
 						ProjectChangeEvent ev = new ProjectChangeEvent(project);
 						eventBus.fireEvent(ev);
-
 						if (RestClient.currentlyOpenedProject == project.getId()) {
 							requestView.updateProjectMetadata(project);
 						}
-						ProjectIdb.updateProject(project);
 					}
 
 					@Override
@@ -733,8 +677,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 
 			@Override
 			public void onProjectDelete(final int projectId) {
-				ProjectStoreWebSql projectStore = clientFactory.getProjectsStore();
-				projectStore.remove(projectId, new ProjectStoreWebSql.StoreSimpleCallback() {
+				ProjectsStore.remove(projectId, new ProjectsStore.StoreSimpleCallback() {
 
 					@Override
 					public void onSuccess() {
@@ -758,7 +701,6 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 								goTo(new RequestPlace(null));
 							}
 						});
-						ProjectIdb.remove(projectId);
 					}
 
 					@Override

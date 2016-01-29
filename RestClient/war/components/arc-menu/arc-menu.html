@@ -115,7 +115,7 @@
         },
         _restoreProjects: function() {
             try {
-                arc.app.db.websql.listProjects()
+                arc.app.db.projects.list()
                     .then(function(list) {
                         this.projects = list;
                     }.bind(this));
@@ -182,7 +182,7 @@
          * @param {Number} projectId Database id for the project
          */
         appendProject: function(projectId) {
-            arc.app.db.websql.getProject(projectId)
+            arc.app.db.projects.getProject(projectId)
                 .then(function(project) {
                     if (project === null) {
                         console.warn('No project found for given ID ', projectId);

@@ -62,13 +62,6 @@ arc.app = arc.app || {};
  */
 arc.app.db = arc.app.db || {};
 /**
- * An adapter that the app should use to work with the database.
- * This will be switched to `indexeddb` after successful upgrade.
- *
- * @type {String}
- */
-arc.app.db._adapter = arc.app.db._adapter || 'websql';
-/**
  * A namespace for WebSQL store
  *
  * @namespace
@@ -169,14 +162,8 @@ arc.app.db.websql._dbUpgrade = function(db) {
         'project INTEGER DEFAULT 0, name TEXT NOT NULL, ' +
         'url TEXT NOT NULL, method TEXT NOT NULL, ' +
         'encoding TEXT NULL, headers TEXT NULL, ' +
-        'payload TEXT NULL, skipProtocol INTEGER DEFAULT 0, ' +
-        'skipServer INTEGER DEFAULT 0, ' +
-        'skipParams INTEGER DEFAULT 0, ' +
-        'skipHistory INTEGER DEFAULT 0, ' +
-        'skipMethod INTEGER DEFAULT 0, ' +
-        'skipPayload INTEGER DEFAULT 0, ' +
-        'skipHeaders INTEGER DEFAULT 0, ' +
-        'skipPath INTEGER DEFAULT 0, time INTEGER)';
+        'payload TEXT NULL, ' +
+        'time INTEGER)';
       tx.executeSql(sql, []);
 
       // Status codes definitions
@@ -382,13 +369,13 @@ arc.app.db.websql.addUrlHistory = function(url, time) {
 /**
  * Update a value in a `urls` table.
  */
-arc.app.db.websql.updateUrlHistory = function(id, time) {
+arc.app.db.websql.updateUrlHistory = function(url, time) {
   return new Promise(function(resolve, reject) {
     arc.app.db.websql.open()
       .then(function(db) {
         db.transaction(function(tx) {
-          let sql = 'UPDATE urls SET time = ? WHERE ID = ?';
-          tx.executeSql(sql, [time, id], function() {
+          let sql = 'UPDATE urls SET time = ? WHERE url LIKE ?';
+          tx.executeSql(sql, [time, url], function() {
             resolve();
           }, function(tx, e) {
             arc.app.db.websql.onerror(e);
@@ -559,7 +546,9 @@ arc.app.db.websql.listProjects = function() {
             if (result.rows.length === 0) {
               resolve([]);
             } else {
-              resolve(Array.from(result.rows));
+              let list = Array.from(result.rows);
+              list.forEach((item) => item.created = new Date(item.time));
+              resolve(list);
             }
           }, function(tx, e) {
             arc.app.db.websql.onerror(e);
@@ -587,7 +576,9 @@ arc.app.db.websql.getProject = function(id) {
             if (result.rows.length === 0) {
               resolve([]);
             } else {
-              resolve(Array.from(result.rows)[0]);
+              let item = Array.from(result.rows)[0];
+              item.created = new Date(item.time);
+              resolve(item);
             }
           }, function(tx, e) {
             arc.app.db.websql.onerror(e);
@@ -942,19 +933,9 @@ arc.app.db.websql.insertRequestObject = function(data) {
         db.transaction(function(tx) {
           data.project = data.project || 0;
           let sql = 'INSERT INTO request_data (project, name, url, method, headers,' +
-            'payload, skipProtocol, skipServer, skipParams, skipHistory, skipMethod, ' +
-            'skipPayload, skipHeaders, skipPath, time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+            'payload, time) VALUES (?,?,?,?,?,?,?)';
           let values = [
-            data.project, data.name, data.url, data.method, data.headers, data.payload,
-            arc.app.db.websql._getIntValue(data.skipProtocol),
-            arc.app.db.websql._getIntValue(data.skipServer),
-            arc.app.db.websql._getIntValue(data.skipParams),
-            arc.app.db.websql._getIntValue(data.skipHistory),
-            arc.app.db.websql._getIntValue(data.skipMethod),
-            arc.app.db.websql._getIntValue(data.skipPayload),
-            arc.app.db.websql._getIntValue(data.skipHeaders),
-            arc.app.db.websql._getIntValue(data.skipPath),
-            data.time
+            data.project, data.name, data.url, data.method, data.headers, data.payload, data.time
           ];
           tx.executeSql(sql, values,
             function(tx, result) {
@@ -996,19 +977,10 @@ arc.app.db.websql.updateRequestObject = function(data) {
           data.time = data.time || Date.now();
           data.project = data.project || 0;
           let sql = 'UPDATE request_data SET project=?,name=?,' +
-            'url=?,method=?,headers=?,payload=?,skipProtocol=?,skipServer=?,skipParams=?, ' +
-            'skipHistory=?,skipMethod=?,skipPayload=?,skipHeaders=?,skipPath=?,time=? ' +
+            'url=?,method=?,headers=?,payload=?,time=? ' +
             'WHERE ID=?';
           let values = [
             data.project, data.name, data.url, data.method, data.headers, data.payload,
-            arc.app.db.websql._getIntValue(data.skipProtocol),
-            arc.app.db.websql._getIntValue(data.skipServer),
-            arc.app.db.websql._getIntValue(data.skipParams),
-            arc.app.db.websql._getIntValue(data.skipHistory),
-            arc.app.db.websql._getIntValue(data.skipMethod),
-            arc.app.db.websql._getIntValue(data.skipPayload),
-            arc.app.db.websql._getIntValue(data.skipHeaders),
-            arc.app.db.websql._getIntValue(data.skipPath),
             data.time, data.id
           ];
           tx.executeSql(sql, values,
@@ -1141,12 +1113,9 @@ arc.app.db.websql.importRequests = function(requestsArray) {
             let data = requestsArray[i];
             data.time = data.time || Date.now();
             let sql = 'INSERT INTO request_data (project, name, url, method, headers,' +
-              'payload, skipProtocol, skipServer, skipParams, skipHistory, skipMethod, ' +
-              'skipPayload, skipHeaders, skipPath, time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+              'payload, time) VALUES (?,?,?,?,?,?,?)';
             let values = [
-              data.project, data.name, data.url, data.method, data.headers, data.payload,
-              data.skipProtocol, data.skipServer, data.skipParams, data.skipHistory,
-              data.skipMethod, data.skipPayload, data.skipHeaders, data.skipPath, data.time
+              data.project, data.name, data.url, data.method, data.headers, data.payload, data.time
             ];
             tx.executeSql(sql, values, success, error);
           }
@@ -1367,13 +1336,13 @@ arc.app.db.websql.initDev();
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BaseObject.html">BaseObject</a></li><li><a href="DriveObject.html">DriveObject</a></li><li><a href="HistoryRequestObject.html">HistoryRequestObject</a></li><li><a href="HistorySocketObject.html">HistorySocketObject</a></li><li><a href="HistoryUrlObject.html">HistoryUrlObject</a></li><li><a href="HttpHeaderObject.html">HttpHeaderObject</a></li><li><a href="HttpStatusObject.html">HttpStatusObject</a></li><li><a href="LegacyObject.html">LegacyObject</a></li><li><a href="OrderedList.html">OrderedList</a></li><li><a href="ProjectObject.html">ProjectObject</a></li><li><a href="RequestObject.html">RequestObject</a></li><li><a href="SavedRequestObject.html">SavedRequestObject</a></li><li><a href="ServerExportedObject.html">ServerExportedObject</a></li><li><a href="UrlObject.html">UrlObject</a></li></ul><h3>Namespaces</h3><ul><li><a href="arc.html">arc</a></li><li><a href="arc.app.html">app</a></li><li><a href="arc.app.analytics.html">analytics</a></li><li><a href="arc.app.arc.html">arc</a></li><li><a href="arc.app.db.html">db</a></li><li><a href="arc.app.db.idb.html">idb</a></li><li><a href="arc.app.db.websql.html">websql</a></li><li><a href="arc.app.headers.html">headers</a></li><li><a href="arc.app.server.html">server</a></li><li><a href="arc.app.server.request.html">request</a></li><li><a href="arc.app.settings.html">settings</a></li><li><a href="arc.app.utils.html">utils</a></li><li><a href="arc.app.xhr.html">xhr</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BaseObject.html">BaseObject</a></li><li><a href="DriveObject.html">DriveObject</a></li><li><a href="HistoryRequestObject.html">HistoryRequestObject</a></li><li><a href="HistorySocketObject.html">HistorySocketObject</a></li><li><a href="HistoryUrlObject.html">HistoryUrlObject</a></li><li><a href="HttpHeaderObject.html">HttpHeaderObject</a></li><li><a href="HttpStatusObject.html">HttpStatusObject</a></li><li><a href="LegacyObject.html">LegacyObject</a></li><li><a href="OrderedList.html">OrderedList</a></li><li><a href="ProjectObject.html">ProjectObject</a></li><li><a href="RequestObject.html">RequestObject</a></li><li><a href="SavedRequestObject.html">SavedRequestObject</a></li><li><a href="ServerExportedObject.html">ServerExportedObject</a></li><li><a href="UrlObject.html">UrlObject</a></li></ul><h3>Namespaces</h3><ul><li><a href="arc.html">arc</a></li><li><a href="arc.app.html">app</a></li><li><a href="arc.app.analytics.html">analytics</a></li><li><a href="arc.app.arc.html">arc</a></li><li><a href="arc.app.db.html">db</a></li><li><a href="arc.app.db.exported.html">exported</a></li><li><a href="arc.app.db.headers.html">headers</a></li><li><a href="arc.app.db.idb.html">idb</a></li><li><a href="arc.app.db.projects.html">projects</a></li><li><a href="arc.app.db.requests.html">requests</a></li><li><a href="arc.app.db.statuses.html">statuses</a></li><li><a href="arc.app.db.urls.html">urls</a></li><li><a href="arc.app.db.websockets.html">websockets</a></li><li><a href="arc.app.db.websql.html">websql</a></li><li><a href="arc.app.headers.html">headers</a></li><li><a href="arc.app.server.html">server</a></li><li><a href="arc.app.server.request.html">request</a></li><li><a href="arc.app.settings.html">settings</a></li><li><a href="arc.app.utils.html">utils</a></li><li><a href="arc.app.xhr.html">xhr</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Jan 27 2016 08:59:07 GMT+0000 (GMT (czas standardowy))
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Fri Jan 29 2016 08:10:37 GMT+0000 (GMT (czas standardowy))
 </footer>
 
 <script> prettyPrint(); </script>

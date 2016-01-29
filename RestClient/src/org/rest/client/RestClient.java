@@ -35,8 +35,7 @@ import org.rest.client.request.FilesObject;
 import org.rest.client.request.HttpMethodOptions;
 import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.storage.StoreKeys;
-import org.rest.client.storage.store.ProjectIdb;
-import org.rest.client.storage.store.ProjectStoreWebSql;
+import org.rest.client.storage.store.ProjectsStore;
 import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.task.CreateMenuTask;
 import org.rest.client.task.InitializeAppHandlersTask;
@@ -55,6 +54,7 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.place.shared.Place;
@@ -414,38 +414,64 @@ public class RestClient implements EntryPoint {
 	 * Save to Store Request form data. This method is used when creating new
 	 * project.
 	 * 
-	 * @param obj
+	 * @param request
 	 *            Object data to save
 	 * @param newProjectName
 	 *            Project name to save
 	 * @param callback
 	 */
-	public static void saveRequestDataWithProject(final RequestObject obj, final String newProjectName,
+	public static void saveRequestDataWithProject(final RequestObject request, final String newProjectName,
 			final Callback<RequestObject, Throwable> callback) {
-		final ProjectStoreWebSql store = clientFactory.getProjectsStore();
 		ProjectObject project = ProjectObject.create();
 		project.setName(newProjectName);
-		
-		store.add(project, new ProjectStoreWebSql.StoreInsertCallback() {
-
-			@Override
-			public void onSuccess(int result) {
-				obj.setProject(result);
-				clientFactory.getEventBus().fireEvent(new NewProjectAvailableEvent(result));
-				ProjectObject po = ProjectObject.create();
-				po.setId(result);
-				po.setName(newProjectName);
-				saveRequestData(obj, po, callback);
-			}
-
-			@Override
-			public void onError(Throwable e) {
-				if (RestClient.isDebug()) {
-					Log.error("Unable to save project data. Can't save project to store.", e);
+		if (SyncAdapter.useIdb) {
+			ProjectsStore.add(project, request, new ProjectsStore.StoreResultCallback() {
+				@Override
+				public void onSuccess(ProjectObject result) {
+					clientFactory.getEventBus().fireEvent(new NewProjectAvailableEvent(result.getId()));
+					RequestDataStoreWebSql.getForProject(result.getId(), new RequestDataStoreWebSql.StoreResultsCallback() {
+						@Override
+						public void onSuccess(JsArray<RequestObject> result) {
+							for (int i = 0; i < result.length(); i++) {
+								clientFactory.getEventBus().fireEvent(new SavedRequestEvent(result.get(i)));
+							}
+						}
+						
+						@Override
+						public void onError(Throwable e) {
+							if (RestClient.isDebug()) {
+								Log.error("Project has been updated. However UI may need to be refreshed to see changes.", e);
+							}
+						}
+					});
 				}
-				callback.onFailure(e);
-			}
-		});
+				
+				@Override
+				public void onError(Throwable e) {
+					if (RestClient.isDebug()) {
+						Log.error("Unable to save project data to store.", e);
+					}
+					callback.onFailure(e);
+				}
+			});
+		} else {
+			ProjectsStore.addLegacy(project, new ProjectsStore.StoreResultCallback() {
+				@Override
+				public void onSuccess(ProjectObject project) {
+					request.setProject(project.getId());
+					clientFactory.getEventBus().fireEvent(new NewProjectAvailableEvent(project.getId()));
+					saveRequestData(request, project, callback);
+				}
+				@Override
+				public void onError(Throwable e) {
+					if (RestClient.isDebug()) {
+						Log.error("Unable to save project data to store.", e);
+					}
+					callback.onFailure(e);
+				}
+			});
+		}
+		
 	}
 
 	/**
@@ -462,12 +488,6 @@ public class RestClient implements EntryPoint {
 				public void onSuccess() {
 					clientFactory.getEventBus().fireEvent(new SavedRequestEvent(obj));
 					callback.onSuccess(obj);
-					// new system test
-					if(createdProject == null) {
-						//TODO: insert request in new system.
-					} else {
-						ProjectIdb.addWithRequest(createdProject, obj);
-					}
 				}
 
 				@Override
@@ -485,12 +505,6 @@ public class RestClient implements EntryPoint {
 					obj.setId(inserId);
 					clientFactory.getEventBus().fireEvent(new SavedRequestEvent(obj));
 					callback.onSuccess(obj);
-					// new system test
-					if(createdProject == null) {
-						//TODO: insert request in new system.
-					} else {
-						ProjectIdb.addWithRequest(createdProject, obj);
-					}
 				}
 				
 				@Override

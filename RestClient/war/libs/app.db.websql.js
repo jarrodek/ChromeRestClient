@@ -34,13 +34,6 @@ arc.app = arc.app || {};
  */
 arc.app.db = arc.app.db || {};
 /**
- * An adapter that the app should use to work with the database.
- * This will be switched to `indexeddb` after successful upgrade.
- *
- * @type {String}
- */
-arc.app.db._adapter = arc.app.db._adapter || 'websql';
-/**
  * A namespace for WebSQL store
  *
  * @namespace
@@ -141,14 +134,8 @@ arc.app.db.websql._dbUpgrade = function(db) {
         'project INTEGER DEFAULT 0, name TEXT NOT NULL, ' +
         'url TEXT NOT NULL, method TEXT NOT NULL, ' +
         'encoding TEXT NULL, headers TEXT NULL, ' +
-        'payload TEXT NULL, skipProtocol INTEGER DEFAULT 0, ' +
-        'skipServer INTEGER DEFAULT 0, ' +
-        'skipParams INTEGER DEFAULT 0, ' +
-        'skipHistory INTEGER DEFAULT 0, ' +
-        'skipMethod INTEGER DEFAULT 0, ' +
-        'skipPayload INTEGER DEFAULT 0, ' +
-        'skipHeaders INTEGER DEFAULT 0, ' +
-        'skipPath INTEGER DEFAULT 0, time INTEGER)';
+        'payload TEXT NULL, ' +
+        'time INTEGER)';
       tx.executeSql(sql, []);
 
       // Status codes definitions
@@ -354,13 +341,13 @@ arc.app.db.websql.addUrlHistory = function(url, time) {
 /**
  * Update a value in a `urls` table.
  */
-arc.app.db.websql.updateUrlHistory = function(id, time) {
+arc.app.db.websql.updateUrlHistory = function(url, time) {
   return new Promise(function(resolve, reject) {
     arc.app.db.websql.open()
       .then(function(db) {
         db.transaction(function(tx) {
-          let sql = 'UPDATE urls SET time = ? WHERE ID = ?';
-          tx.executeSql(sql, [time, id], function() {
+          let sql = 'UPDATE urls SET time = ? WHERE url LIKE ?';
+          tx.executeSql(sql, [time, url], function() {
             resolve();
           }, function(tx, e) {
             arc.app.db.websql.onerror(e);
@@ -531,7 +518,9 @@ arc.app.db.websql.listProjects = function() {
             if (result.rows.length === 0) {
               resolve([]);
             } else {
-              resolve(Array.from(result.rows));
+              let list = Array.from(result.rows);
+              list.forEach((item) => item.created = new Date(item.time));
+              resolve(list);
             }
           }, function(tx, e) {
             arc.app.db.websql.onerror(e);
@@ -559,7 +548,9 @@ arc.app.db.websql.getProject = function(id) {
             if (result.rows.length === 0) {
               resolve([]);
             } else {
-              resolve(Array.from(result.rows)[0]);
+              let item = Array.from(result.rows)[0];
+              item.created = new Date(item.time);
+              resolve(item);
             }
           }, function(tx, e) {
             arc.app.db.websql.onerror(e);
@@ -914,19 +905,9 @@ arc.app.db.websql.insertRequestObject = function(data) {
         db.transaction(function(tx) {
           data.project = data.project || 0;
           let sql = 'INSERT INTO request_data (project, name, url, method, headers,' +
-            'payload, skipProtocol, skipServer, skipParams, skipHistory, skipMethod, ' +
-            'skipPayload, skipHeaders, skipPath, time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+            'payload, time) VALUES (?,?,?,?,?,?,?)';
           let values = [
-            data.project, data.name, data.url, data.method, data.headers, data.payload,
-            arc.app.db.websql._getIntValue(data.skipProtocol),
-            arc.app.db.websql._getIntValue(data.skipServer),
-            arc.app.db.websql._getIntValue(data.skipParams),
-            arc.app.db.websql._getIntValue(data.skipHistory),
-            arc.app.db.websql._getIntValue(data.skipMethod),
-            arc.app.db.websql._getIntValue(data.skipPayload),
-            arc.app.db.websql._getIntValue(data.skipHeaders),
-            arc.app.db.websql._getIntValue(data.skipPath),
-            data.time
+            data.project, data.name, data.url, data.method, data.headers, data.payload, data.time
           ];
           tx.executeSql(sql, values,
             function(tx, result) {
@@ -968,19 +949,10 @@ arc.app.db.websql.updateRequestObject = function(data) {
           data.time = data.time || Date.now();
           data.project = data.project || 0;
           let sql = 'UPDATE request_data SET project=?,name=?,' +
-            'url=?,method=?,headers=?,payload=?,skipProtocol=?,skipServer=?,skipParams=?, ' +
-            'skipHistory=?,skipMethod=?,skipPayload=?,skipHeaders=?,skipPath=?,time=? ' +
+            'url=?,method=?,headers=?,payload=?,time=? ' +
             'WHERE ID=?';
           let values = [
             data.project, data.name, data.url, data.method, data.headers, data.payload,
-            arc.app.db.websql._getIntValue(data.skipProtocol),
-            arc.app.db.websql._getIntValue(data.skipServer),
-            arc.app.db.websql._getIntValue(data.skipParams),
-            arc.app.db.websql._getIntValue(data.skipHistory),
-            arc.app.db.websql._getIntValue(data.skipMethod),
-            arc.app.db.websql._getIntValue(data.skipPayload),
-            arc.app.db.websql._getIntValue(data.skipHeaders),
-            arc.app.db.websql._getIntValue(data.skipPath),
             data.time, data.id
           ];
           tx.executeSql(sql, values,
@@ -1113,12 +1085,9 @@ arc.app.db.websql.importRequests = function(requestsArray) {
             let data = requestsArray[i];
             data.time = data.time || Date.now();
             let sql = 'INSERT INTO request_data (project, name, url, method, headers,' +
-              'payload, skipProtocol, skipServer, skipParams, skipHistory, skipMethod, ' +
-              'skipPayload, skipHeaders, skipPath, time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+              'payload, time) VALUES (?,?,?,?,?,?,?)';
             let values = [
-              data.project, data.name, data.url, data.method, data.headers, data.payload,
-              data.skipProtocol, data.skipServer, data.skipParams, data.skipHistory,
-              data.skipMethod, data.skipPayload, data.skipHeaders, data.skipPath, data.time
+              data.project, data.name, data.url, data.method, data.headers, data.payload, data.time
             ];
             tx.executeSql(sql, values, success, error);
           }

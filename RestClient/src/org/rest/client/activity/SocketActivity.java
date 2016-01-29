@@ -25,8 +25,7 @@ import org.rest.client.jso.WebSocketObject;
 import org.rest.client.log.Log;
 import org.rest.client.place.SocketPlace;
 import org.rest.client.storage.StoreKeys;
-import org.rest.client.storage.store.WebSocketDataStoreWebSql;
-import org.rest.client.suggestion.SocketSuggestOracle;
+import org.rest.client.storage.store.WebSocketHistoryStore;
 import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.SocketView;
 
@@ -242,8 +241,7 @@ public class SocketActivity extends AppActivity implements
 	
 	private void saveHistory(){
 		final WebSocketObject data = WebSocketObject.create(socketUrl);
-		final WebSocketDataStoreWebSql store = clientFactory.getWebSocketsStore();
-		store.query(socketUrl, new WebSocketDataStoreWebSql.StoreResultsCallback() {
+		WebSocketHistoryStore.query(socketUrl, new WebSocketHistoryStore.StoreResultsCallback() {
 			@Override
 			public void onError(Throwable error) {}
 			
@@ -252,7 +250,7 @@ public class SocketActivity extends AppActivity implements
 				if(result != null && result.length() == 1){
 					return;
 				}
-				store.add(data, new WebSocketDataStoreWebSql.StoreInsertCallback() {
+				WebSocketHistoryStore.add(data, new WebSocketHistoryStore.StoreInsertCallback() {
 					@Override
 					public void onSuccess(int inserId) {}
 					@Override
@@ -307,12 +305,6 @@ public class SocketActivity extends AppActivity implements
 		view.setConnectionStatus(WebSocket.CLOSING);
 		socket.close();
 		socket = null;
-	}
-
-	@Override
-	public SocketSuggestOracle getUrlsSuggestOracle() {
-		WebSocketDataStoreWebSql store = clientFactory.getWebSocketsStore();
-		return new SocketSuggestOracle(store);
 	}
 
 	@Override
