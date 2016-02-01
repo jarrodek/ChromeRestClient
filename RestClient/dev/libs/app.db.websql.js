@@ -724,7 +724,7 @@ arc.app.db.websql.queryHistoryTable = function(opts) {
   var sql = 'SELECT * FROM history WHERE ';
   if (opts.query) {
     sql += 'url LIKE ?';
-    sqlArgs.push(opts.query);
+    sqlArgs.push('%' + opts.query + '%');
   } else {
     sql += '1';
   }
@@ -753,62 +753,62 @@ arc.app.db.websql.queryHistoryTable = function(opts) {
       });
   });
 };
-/**
- * Get history items by it's URL and HTTP method values.
- *
- * @param {String} url And URL to query for
- * @param {String} method A HTTP method to query for.
- */
-arc.app.db.websql.getHistoryItems = function(url, method) {
-  return new Promise(function(resolve, reject) {
-    arc.app.db.websql.open()
-      .then(function(db) {
-        db.transaction(function(tx) {
-          let sql = 'SELECT * FROM history WHERE url=? AND method=? ORDER BY time DESC';
-          tx.executeSql(sql, [url, method], function(tx, result) {
-            if (result.rows.length === 0) {
-              resolve([]);
-            } else {
-              resolve(Array.from(result.rows));
-            }
-          }, function(tx, e) {
-            arc.app.db.websql.onerror(e);
-            reject(e);
-          });
-        });
-      })
-      .catch(function(e) {
-        arc.app.db.websql.onerror(e);
-        reject(e);
-      });
-  });
-};
-/**
- * Update a time of the history item.
- *
- * @param {Number} id A record database ID
- * @param {Number} time A time as the same as {Date#getTime()}
- */
-arc.app.db.websql.updateHistoryTime = function(id, time) {
-  return new Promise(function(resolve, reject) {
-    arc.app.db.websql.open()
-      .then(function(db) {
-        db.transaction(function(tx) {
-          let sql = 'UPDATE history SET time = ? WHERE ID = ?';
-          tx.executeSql(sql, [time, id], function() {
-            resolve();
-          }, function(tx, e) {
-            arc.app.db.websql.onerror(e);
-            reject(e);
-          });
-        });
-      })
-      .catch(function(e) {
-        arc.app.db.websql.onerror(e);
-        reject(e);
-      });
-  });
-};
+// /**
+//  * Get history items by it's URL and HTTP method values.
+//  *
+//  * @param {String} url And URL to query for
+//  * @param {String} method A HTTP method to query for.
+//  */
+// arc.app.db.websql.getHistoryItems = function(url, method) {
+//   return new Promise(function(resolve, reject) {
+//     arc.app.db.websql.open()
+//       .then(function(db) {
+//         db.transaction(function(tx) {
+//           let sql = 'SELECT * FROM history WHERE url=? AND method=? ORDER BY time DESC';
+//           tx.executeSql(sql, [url, method], function(tx, result) {
+//             if (result.rows.length === 0) {
+//               resolve([]);
+//             } else {
+//               resolve(Array.from(result.rows));
+//             }
+//           }, function(tx, e) {
+//             arc.app.db.websql.onerror(e);
+//             reject(e);
+//           });
+//         });
+//       })
+//       .catch(function(e) {
+//         arc.app.db.websql.onerror(e);
+//         reject(e);
+//       });
+//   });
+// };
+// /**
+//  * Update a time of the history item.
+//  *
+//  * @param {Number} id A record database ID
+//  * @param {Number} time A time as the same as {Date#getTime()}
+//  */
+// arc.app.db.websql.updateHistoryTime = function(id, time) {
+//   return new Promise(function(resolve, reject) {
+//     arc.app.db.websql.open()
+//       .then(function(db) {
+//         db.transaction(function(tx) {
+//           let sql = 'UPDATE history SET time = ? WHERE ID = ?';
+//           tx.executeSql(sql, [time, id], function() {
+//             resolve();
+//           }, function(tx, e) {
+//             arc.app.db.websql.onerror(e);
+//             reject(e);
+//           });
+//         });
+//       })
+//       .catch(function(e) {
+//         arc.app.db.websql.onerror(e);
+//         reject(e);
+//       });
+//   });
+// };
 arc.app.db.websql.insertWebsocketData = function(url, time) {
   return new Promise(function(resolve, reject) {
     arc.app.db.websql.open()
@@ -971,29 +971,7 @@ arc.app.db.websql.updateRequestObject = function(data) {
       });
   });
 };
-/**
- * Delete requests that are not related to a project.
- */
-arc.app.db.websql.deleteNonProjectRequests = function() {
-  return new Promise(function(resolve, reject) {
-    arc.app.db.websql.open()
-      .then(function(db) {
-        db.transaction(function(tx) {
-          let sql = 'DELETE FROM request_data WHERE project=0';
-          tx.executeSql(sql, [], function() {
-            resolve();
-          }, function(tx, e) {
-            arc.app.db.websql.onerror(e);
-            reject(e);
-          });
-        });
-      })
-      .catch(function(e) {
-        arc.app.db.websql.onerror(e);
-        reject(e);
-      });
-  });
-};
+
 arc.app.db.websql.updateRequestName = function(id, name) {
   return new Promise(function(resolve, reject) {
     arc.app.db.websql.open()
@@ -1028,8 +1006,9 @@ arc.app.db.websql.queryRequestsTable = function(opts) {
   var sql = 'SELECT * FROM request_data WHERE ';
   if (opts.query) {
     sql += 'name LIKE ? OR url LIKE ? AND ';
-    sqlArgs.push(opts.query);
-    sqlArgs.push(opts.query);
+    let q = '%' + opts.query + '%';
+    sqlArgs.push(q);
+    sqlArgs.push(q);
   }
   sql += 'project = 0 ';
   sql += 'ORDER BY id DESC LIMIT ?, ?';
@@ -1126,30 +1105,6 @@ arc.app.db.websql.getRequest = function(id) {
       });
   });
 };
-arc.app.db.websql.getProjectDefaultRequest = function(projectId) {
-  return new Promise(function(resolve, reject) {
-    arc.app.db.websql.open()
-      .then(function(db) {
-        db.transaction(function(tx) {
-          let sql = 'SELECT * FROM request_data WHERE project=? ORDER BY time ASC LIMIT 1';
-          tx.executeSql(sql, [projectId], function(tx, result) {
-            if (result.rows.length === 0) {
-              resolve(null);
-            } else {
-              resolve(Array.from(result.rows)[0]);
-            }
-          }, function(tx, e) {
-            arc.app.db.websql.onerror(e);
-            reject(e);
-          });
-        });
-      })
-      .catch(function(e) {
-        arc.app.db.websql.onerror(e);
-        reject(e);
-      });
-  });
-};
 arc.app.db.websql.getProjectRequests = function(projectId) {
   return new Promise(function(resolve, reject) {
     arc.app.db.websql.open()
@@ -1181,6 +1136,27 @@ arc.app.db.websql.deleteRequestByProject = function(projectId) {
         db.transaction(function(tx) {
           let sql = 'DELETE FROM request_data WHERE project=?';
           tx.executeSql(sql, [projectId], function() {
+            resolve();
+          }, function(tx, e) {
+            arc.app.db.websql.onerror(e);
+            reject(e);
+          });
+        });
+      })
+      .catch(function(e) {
+        arc.app.db.websql.onerror(e);
+        reject(e);
+      });
+  });
+};
+arc.app.db.websql.getProjectByRequest = function(requestId) {
+  return new Promise(function(resolve, reject) {
+    arc.app.db.websql.open()
+      .then(function(db) {
+        db.transaction(function(tx) {
+          let sql = 'SELECT p.* FROM projects as p JOIN request_data as r ON p.id=r.project ' +
+            'WHERE r.id=?';
+          tx.executeSql(sql, [requestId], function() {
             resolve();
           }, function(tx, e) {
             arc.app.db.websql.onerror(e);

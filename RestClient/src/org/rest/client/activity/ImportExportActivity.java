@@ -22,11 +22,12 @@ import org.rest.client.request.ImportDataCallback;
 import org.rest.client.request.RequestImportListObject;
 import org.rest.client.storage.store.ExportedStore;
 import org.rest.client.storage.store.ProjectsStore;
-import org.rest.client.storage.store.RequestDataStoreWebSql;
+import org.rest.client.storage.store.RequestDataStore;
 import org.rest.client.ui.ImportExportView;
 import org.rest.client.ui.ImportExportView.StringCallback;
 
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.JsArrayInteger;
 import com.google.gwt.file.client.File;
@@ -93,9 +94,9 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 		//
 		// Get all request data
 		//
-		clientFactory.getRequestDataStore().all(new RequestDataStoreWebSql.StoreResultsCallback() {
+		RequestDataStore.all(new RequestDataStore.StoreResultsCallback() {
 			@Override
-			public void onSuccess(final JsArray<RequestObject> requestDataResult) {
+			public void onSuccess(final JsArray<JavaScriptObject> requestDataResult) {
 				//
 				// Get project data
 				//
@@ -107,7 +108,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 						JSONArray projectsArray = new JSONArray();
 						
 						for (int i = 0; i < requestDataResult.length(); i++) {
-							RequestObject ro = requestDataResult.get(i);
+							RequestObject ro = requestDataResult.get(i).cast();
 							requestsArray.set(requestsArray.size(), ro.toJSONObject());
 						}
 						
@@ -309,7 +310,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 			arr.set(arr.length(), importData.get(i));
 		}
 		
-		clientFactory.getRequestDataStore().importRequests(arr, new RequestDataStoreWebSql.StoreInsertListCallback() {
+		RequestDataStore.importRequests(arr, new RequestDataStore.StoreInsertListCallback() {
 			@Override
 			public void onError(Throwable error) {
 				StatusNotification.notify("Unable to save data to local database :(",
@@ -485,7 +486,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 			return;
 		}
 		
-		clientFactory.getRequestDataStore().importRequests(requests, new RequestDataStoreWebSql.StoreInsertListCallback() {
+		RequestDataStore.importRequests(requests, new RequestDataStore.StoreInsertListCallback() {
 
 			@Override
 			public void onError(Throwable error) {

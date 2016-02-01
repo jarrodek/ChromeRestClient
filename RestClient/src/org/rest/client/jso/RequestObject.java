@@ -61,7 +61,6 @@ public class RequestObject extends JavaScriptObject {
 			headers : null,
 			payload : null,
 			time: Date.now(),
-			//additional, non DB fields
 			driveId: null
 		}
 	}-*/;
@@ -108,6 +107,9 @@ public class RequestObject extends JavaScriptObject {
 	
 	public final native void setId(int id) /*-{
 		this.id = id;
+	}-*/;
+	public final native void resetId() /*-{
+		delete this.id;
 	}-*/;
 	
 	

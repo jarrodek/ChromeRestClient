@@ -61,6 +61,18 @@ public class SavedListItemViewImpl extends Composite {
 			}
 		}, ClickEvent.getType());
 		
+		
+	}
+	
+	@Override
+	protected void onAttach() {
+		super.onAttach();
+		
+		setViewValues();
+	}
+	
+	private void setViewValues() {
+		
 		long time = (long) requestObject.getTime();
 		Date date = new Date(time);
 		String data = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(date);

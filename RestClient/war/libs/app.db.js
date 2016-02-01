@@ -84,11 +84,11 @@ arc.app.db.urls = {};
  * Init db adapter.
  * It setups which driver should be used to handle database connection.
  */
-arc.app.db.init = function(){
+arc.app.db.init = function() {
   arc.app.settings.getConfig()
-  .then((cfg) => {
-    arc.app.db.useIdb = cfg.useIdb;
-  });
+    .then((cfg) => {
+      arc.app.db.useIdb = cfg.useIdb;
+    });
 };
 /**
  * Get status code definition by it's code.
@@ -189,7 +189,7 @@ arc.app.db.exported.insert = function(refArray) {
         'serverId': item.gaeKey
       };
       if (item.id) {
-          obj.oldId = item.id;
+        obj.oldId = item.id;
       }
       inserts.push(obj);
     });
@@ -225,32 +225,32 @@ arc.app.db.exported.query = function(requestsArray) {
 
 arc.app.db.websockets.insert = function(url, time) {
   if (arc.app.db.useIdb) {
-    return arc.app.db.idb.putHistorySocket(url, time);
+    return arc.app.db.idb.websockets.insert(url, time);
   }
   return arc.app.db.websql.insertWebsocketData(url, time);
 };
 arc.app.db.websockets.query = function(query) {
   if (arc.app.db.useIdb) {
-    return arc.app.db.idb.queryHistorySockets(query);
+    return arc.app.db.idb.websockets.query(query);
   }
   return arc.app.db.websql.queryWebsocketData('%' + query + '%');
 };
 
 arc.app.db.projects.add = function() {
   if (arc.app.db.useIdb) {
-    return arc.app.db.idb.addProjectWithRequests.apply(arc.app.db.idb, arguments)
-    .then(function(insertId){
-      return arc.app.db.idb.getProject(insertId);
-    });
+    return arc.app.db.idb.projects.addWithRequests.apply(arc.app.db.idb, arguments)
+      .then(function(insertId) {
+        return arc.app.db.idb.getProject(insertId);
+      });
   }
   return arc.app.db.websql.addProject.apply(arc.app.db.websql, arguments)
-  .then(function(insertId){
+    .then(function(insertId) {
       return arc.app.db.websql.getProject(insertId);
     });
 };
 arc.app.db.projects.update = function(project) {
   if (arc.app.db.useIdb) {
-    return arc.app.db.idb.updateProject(project);
+    return arc.app.db.idb.projects.update(project);
   }
   if (!project.created) {
     project.created = new Date();
@@ -260,19 +260,25 @@ arc.app.db.projects.update = function(project) {
 /** List all projects */
 arc.app.db.projects.list = function() {
   if (arc.app.db.useIdb) {
-    return arc.app.db.idb.listProjects();
+    return arc.app.db.idb.projects.list();
   }
   return arc.app.db.websql.listProjects();
 };
 arc.app.db.projects.getProject = function(id) {
   if (arc.app.db.useIdb) {
-    return arc.app.db.idb.getProject(id);
+    return arc.app.db.idb.projects.getProject(id);
   }
   return arc.app.db.websql.getProject(id);
 };
+arc.app.db.projects.getForRequest = function(requestId) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.projects.getForRequest(requestId);
+  }
+  return arc.app.db.websql.getProjectByRequest(requestId);
+};
 arc.app.db.projects.remove = function(id) {
   if (arc.app.db.useIdb) {
-    return arc.app.db.idb.deleteProject(id);
+    return arc.app.db.idb.projects.deleteRecursive(id);
   }
   return arc.app.db.websql.deleteProject(id);
 };
@@ -284,7 +290,122 @@ arc.app.db.projects.remove = function(id) {
  */
 arc.app.db.requests.getProjectRequests = function(projectId) {
   if (arc.app.db.useIdb) {
-    return arc.app.db.idb.getProjectRequests(projectId);
+    return arc.app.db.idb.projects.getProjectRequests(projectId)
+      .then(function(list) {
+        let result = [];
+        list.forEach((item) => {
+          result.push(arc.app.db.idb._converIdbSql(item));
+        });
+        return result;
+      });
   }
   return arc.app.db.websql.getProjectRequests(projectId);
+};
+
+arc.app.db.requests.insert = function(legacyRequestObject, type) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.requests.insert(legacyRequestObject, type);
+  }
+  return arc.app.db.websql.insertHistoryObject(legacyRequestObject);
+};
+arc.app.db.requests.importList = function(legacyRequestList) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.requests.import(legacyRequestList);
+  }
+  return arc.app.db.websql.importRequests(legacyRequestList);
+};
+arc.app.db.requests.getRequest = function(id, type) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.requests.getRequest(id)
+      .then(arc.app.db.idb._converIdbSql);
+  }
+  if (type === 'history') {
+    return arc.app.db.websql.getHistoryObject(id);
+  } else {
+    return arc.app.db.websql.getRequest(id);
+  }
+};
+arc.app.db.requests.list = function(type) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.requests.list(type)
+      .then(function(list) {
+        let result = [];
+        list.forEach((item) => {
+          result.push(arc.app.db.idb._converIdbSql(item));
+        });
+        return result;
+      });
+  }
+  return arc.app.db.websql.getAllHistoryObjects();
+};
+/** Remove single entry */
+arc.app.db.requests.remove = function(id) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.requests.delete(id);
+  }
+  return arc.app.db.websql.removeHistoryObject(id);
+};
+/** Remove all entries for given type */
+arc.app.db.requests.removeAll = function(type) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.requests.deleteType(type);
+  }
+  if (type === 'history') {
+    return arc.app.db.websql.truncateHistoryTable();
+  }
+  throw new Error('Unsupported API call'); // no remove all saved action in the UI.
+};
+arc.app.db.requests.deleteByProject = function(projectId) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.requests.deleteByProject(projectId);
+  }
+  return arc.app.db.websql.deleteRequestByProject(projectId);
+};
+arc.app.db.requests.update = function(obj) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.requests.update(obj);
+  }
+  return arc.app.db.websql.updateRequestObject(obj);
+};
+arc.app.db.requests.updateName = function(id, name) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.requests.updateRequestName(id, name);
+  }
+  return arc.app.db.websql.updateRequestName(id, name);
+};
+/**
+ * Query the request objects.
+ * @param {String} type Type of request object. Either `saved` or `history`
+ * @param {Object} queryOpts Query options:
+ * - limit {Number} Number of results
+ * - offset {Number} Starting point
+ * - query {String} Optional, a url to query for
+ * - exclude {Array<Number>} Optional. A list of requests that should be excluded from the query.
+ * @return {Promise} Fulfilled promise will result with legacy request objects structure.
+ */
+arc.app.db.requests.query = function(type, queryOpts) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.projects.list()
+      .then(function(projects) {
+        var requestsIds = [];
+        projects.forEach((item) => {
+          requestsIds = requestsIds.concat(item.requestIds);
+        });
+        if (requestsIds.length > 0) {
+          queryOpts.exclude = requestsIds;
+        }
+      })
+      .then(() => arc.app.db.idb.requests.query(type, queryOpts))
+      .then(function(list) {
+        let result = [];
+        list.forEach((item) => {
+          result.push(arc.app.db.idb._converIdbSql(item));
+        });
+        return result;
+      });
+  }
+  if (type === 'history') {
+    return arc.app.db.websql.queryHistoryTable(queryOpts);
+  }
+  return arc.app.db.websql.queryRequestsTable(queryOpts);
 };

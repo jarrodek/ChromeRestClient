@@ -11,11 +11,12 @@ import org.rest.client.jso.RequestObject;
 import org.rest.client.log.Log;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.storage.store.ProjectsStore;
-import org.rest.client.storage.store.RequestDataStoreWebSql;
+import org.rest.client.storage.store.RequestDataStore;
 import org.rest.client.ui.SaveRequestDialogView;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -64,7 +65,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	Button overwrite;
 	@UiField
 	Button gdrive;
-	String requestOrygURL = "";
+	
 	int overwriteId = -1;
 	boolean forceOverwrite = false;
 
@@ -106,15 +107,16 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		if (RestClient.RESTORED_REQUEST != null) {
 			if (RestClient.RESTORED_REQUEST > 0) {
 				overwriteId = RestClient.RESTORED_REQUEST;
-				RestClient.getClientFactory().getRequestDataStore().getByKey(RestClient.RESTORED_REQUEST,
-						new RequestDataStoreWebSql.StoreResultCallback() {
+				RequestDataStore.getByKey(RestClient.RESTORED_REQUEST,
+						new RequestDataStore.StoreResultCallback() {
 							@Override
-							public void onSuccess(RequestObject result) {
+							public void onSuccess(JavaScriptObject result) {
 								if (result == null) {
 									overwriteId = -1;
 									return;
 								}
-								name.setValue(result.getName());
+								RequestObject item = result.cast();
+								name.setValue(item.getName());
 								overwrite.setVisible(true);
 								save.setText("Save as new");
 							}
@@ -196,8 +198,6 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				@Override
 				public void onSuccess(RequestObject result) {
 					callback.onSuccess(result.getURL());
-					// Log.debug("setPreviewURL::Success::1::" +
-					// result.toJSON());
 				}
 
 				@Override
@@ -211,8 +211,6 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				@Override
 				public void onSuccess(RequestObject result) {
 					callback.onSuccess(result.getURL());
-					// Log.debug("setPreviewURL::Success::2::" +
-					// result.toJSON());
 				}
 
 				@Override
@@ -261,8 +259,8 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 
 			@Override
 			public void onSuccess(String result) {
-				requestOrygURL = result;
-				if (requestOrygURL == null || requestOrygURL.isEmpty()) {
+				
+				if (result == null || result.isEmpty()) {
 					StatusNotification.notify("Enter an URL of the request.", StatusNotification.TIME_MEDIUM);
 					dialog.hide();
 					dialog.removeFromParent();
@@ -299,7 +297,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	void onSave(ClickEvent event) {
 		save.setEnabled(false);
 		forceOverwrite = false;
-		doSaveRequest();
+		doSaveRequest(true);
 	}
 
 	@UiHandler("overwrite")
@@ -313,7 +311,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 			return;
 		}
 
-		doSaveRequest();
+		doSaveRequest(false);
 	}
 
 	@Override
@@ -420,7 +418,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		});
 	}
 
-	private void doSaveRequest() {
+	private void doSaveRequest(final boolean isSave) {
 		if (name.getValue().isEmpty()) {
 			StatusNotification.notify("Name can't be empty.", StatusNotification.TIME_SHORT);
 			save.setEnabled(true);
@@ -443,6 +441,9 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				String _projectName = projectList.getValue(projectList.getSelectedIndex());
 				if (_projectName.equals("__new__")) {
 					String newProjectName = projectName.getValue();
+					if (isSave) {
+						result.resetId();
+					}
 					// add new project
 					RestClient.saveRequestDataWithProject(result, newProjectName, new Callback<RequestObject, Throwable>() {
 						@Override
@@ -478,6 +479,9 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 						return;
 					}
 					result.setProject(projectId);
+				}
+				if (isSave) {
+					result.resetId();
 				}
 				RestClient.saveRequestData(result, null, new Callback<RequestObject, Throwable>() {
 					@Override

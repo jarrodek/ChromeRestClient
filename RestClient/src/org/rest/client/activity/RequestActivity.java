@@ -50,9 +50,9 @@ import org.rest.client.log.Log;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.request.RedirectData;
 import org.rest.client.storage.StoreKeys;
-import org.rest.client.storage.store.HistoryRequestStoreWebSql;
+import org.rest.client.storage.store.HistoryRequestStore;
 import org.rest.client.storage.store.ProjectsStore;
-import org.rest.client.storage.store.RequestDataStoreWebSql;
+import org.rest.client.storage.store.RequestDataStore;
 import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.EditProjectView;
 import org.rest.client.ui.RequestView;
@@ -392,41 +392,34 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 				}
 			});
 		} else {
-			clientFactory.getRequestDataStore().getByKey(endpointId, new RequestDataStoreWebSql.StoreResultCallback() {
+			RequestDataStore.getByKey(endpointId, new RequestDataStore.StoreResultCallback() {
 				@Override
-				public void onSuccess(final RequestObject result) {
+				public void onSuccess(JavaScriptObject result) {
 					if(result == null) {
 						StatusNotification.notify("Unable read project's endpoint data");
 						return;
 					}
-					if (result.getProject() > 0) {
-						RestClient.currentlyOpenedProject = result.getProject();
-						ProjectsStore.getByKey(result.getProject(), new ProjectsStore.StoreResultCallback() {
-
-							@Override
-							public void onSuccess(ProjectObject project) {
-								if (project == null) {
-									StatusNotification.notify("Project does not contain selected endpoint or database resulted with empty record.");
-									return;
-								}
-								restoreProjectEndpoint(project, result);
+					
+					final RequestObject ro = result.cast();
+					
+					ProjectsStore.getForRequest(ro.getId(), new ProjectsStore.StoreResultCallback() {
+						@Override
+						public void onSuccess(ProjectObject project) {
+							if (project == null) {
+								StatusNotification.notify("Project does not contain selected endpoint or database resulted with empty record.");
+								return;
 							}
-
-							@Override
-							public void onError(Throwable e) {
-								if (RestClient.isDebug()) {
-									Log.error("Unable read project data.", e);
-								}
-								StatusNotification.notify("Unable read project data");
-							}
-						});
-						
-					} else {
-						if (RestClient.isDebug()) {
-							Log.error("Project does not contain selected endpoint.");
+							RestClient.currentlyOpenedProject = project.getId();
+							restoreProjectEndpoint(project, ro);
 						}
-						StatusNotification.notify("Project does not contain selected endpoint.");
-					}
+						@Override
+						public void onError(Throwable e) {
+							if (RestClient.isDebug()) {
+								Log.error("Unable read project data.", e);
+							}
+							StatusNotification.notify("Unable read project data");
+						}
+					});
 				}
 
 				@Override
@@ -449,8 +442,8 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 			return;
 		}
 		
-		clientFactory.getRequestDataStore().getDefaultForProject(project.getId(),
-				new RequestDataStoreWebSql.StoreResultCallback() {
+		RequestDataStore.getForProject(project.getId(),
+				new RequestDataStore.StoreResultsCallback() {
 
 					@Override
 					public void onError(Throwable e) {
@@ -461,7 +454,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 					}
 
 					@Override
-					public void onSuccess(RequestObject result) {
+					public void onSuccess(JsArray<JavaScriptObject> result) {
 						if (result == null) {
 							if (RestClient.isDebug()) {
 								Log.error("Can't find default endpoint for this project.");
@@ -469,14 +462,15 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 							StatusNotification.notify("Can't find default endpoint for this project.");
 							return;
 						}
-						restoreProjectEndpoint(project, result);
+						RequestObject obj = result.get(0).cast();
+						restoreProjectEndpoint(project, obj);
 					}
 				});
 	}
 
 	@SuppressWarnings("deprecation")
 	private void restoreProjectEndpoint(final ProjectObject project, final RequestObject request) {
-		showProjectRelatedData(project.getId(), project);
+		showProjectRelatedData(project);
 
 		// if can overwrite current params first restore latest request
 		// and then set parameters.
@@ -528,9 +522,13 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 		RestClient.RESTORED_REQUEST = request.getId();
 	}
 
-	private void showProjectRelatedData(final int projectId, final ProjectObject project) {
-		RequestDataStoreWebSql.getForProject(projectId,
-				new RequestDataStoreWebSql.StoreResultsCallback() {
+	private void showProjectRelatedData(final ProjectObject project) {
+		if(project == null) {
+			Log.info("Project is not attached to this request.");
+			return;
+		}
+		RequestDataStore.getForProject(project.getId(),
+				new RequestDataStore.StoreResultsCallback() {
 
 					@Override
 					public void onError(Throwable e) {
@@ -540,37 +538,19 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 					}
 
 					@Override
-					public void onSuccess(final JsArray<RequestObject> requests) {
+					public void onSuccess(JsArray<JavaScriptObject> requests) {
 						if (requests == null || requests.length() == 0) {
 							return;
 						}
-						int _endpointId = -1;
+						final JsArray<RequestObject> list = requests.cast();
+						int endpointId = -1;
 						if (place.isProjectsEndpoint()) {
 							try {
-								_endpointId = Integer.parseInt(place.getEntryId());
+								endpointId = Integer.parseInt(place.getEntryId());
 							} catch (Exception e) {
 							}
 						}
-						final int endpointId = _endpointId;
-
-						if (project == null) {
-							ProjectsStore.getByKey(projectId, new ProjectsStore.StoreResultCallback() {
-								@Override
-								public void onSuccess(ProjectObject project) {
-									requestView.setProjectData(project, requests, endpointId);
-								}
-
-								@Override
-								public void onError(Throwable e) {
-									if (RestClient.isDebug()) {
-										Log.error("Unable read project data.", e);
-									}
-									StatusNotification.notify("Unable read project related data");
-								}
-							});
-						} else {
-							requestView.setProjectData(project, requests, endpointId);
-						}
+						requestView.setProjectData(project, list, endpointId);
 					}
 				});
 	}
@@ -657,6 +637,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 					public void onSuccess(ProjectObject result) {
 						ProjectChangeEvent ev = new ProjectChangeEvent(project);
 						eventBus.fireEvent(ev);
+						Log.info("Updating project metadata? " + RestClient.currentlyOpenedProject + " | " + project.getId());
 						if (RestClient.currentlyOpenedProject == project.getId()) {
 							requestView.updateProjectMetadata(project);
 						}
@@ -681,8 +662,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 
 					@Override
 					public void onSuccess() {
-						RequestDataStoreWebSql requestsStore = clientFactory.getRequestDataStore();
-						requestsStore.removeByProject(projectId, new RequestDataStoreWebSql.StoreSimpleCallback() {
+						RequestDataStore.removeByProject(projectId, new RequestDataStore.StoreSimpleCallback() {
 
 							@Override
 							public void onError(Throwable e) {
@@ -796,20 +776,21 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 	 * @param requestView
 	 */
 	private void restoreRequestFromHistory(int historyId) {
-		RestClient.getClientFactory().getHistoryRequestStore().getByKey(historyId,
-				new HistoryRequestStoreWebSql.StoreResultCallback() {
+		HistoryRequestStore.getByKey(historyId, new HistoryRequestStore.StoreResultCallback() {
 
 					@Override
-					public void onSuccess(HistoryObject result) {
+					public void onSuccess(JavaScriptObject result) {
 						if(result == null){
 							return;
 						}
-						requestView.setUrl(result.getURL());
-						requestView.setMethod(result.getMethod());
-						requestView.setHeaders(result.getHeaders());
-						requestView.setPayload(result.getPayload());
+						HistoryObject ho = result.cast();
+						
+						requestView.setUrl(ho.getURL());
+						requestView.setMethod(ho.getMethod());
+						requestView.setHeaders(ho.getHeaders());
+						requestView.setPayload(ho.getPayload());
 
-						Date date = new Date((long) result.getTime());
+						Date date = new Date((long) ho.getTime());
 						String lastUseDate = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_FULL).format(date);
 						requestView.setRequestName("Last used: " + lastUseDate);
 						RestClient.fixChromeLayout();
@@ -879,12 +860,13 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 	}
 
 	private void restoreFormSavedRequest(final int savedId) {
-		clientFactory.getRequestDataStore().getByKey(savedId, new RequestDataStoreWebSql.StoreResultCallback() {
+		RequestDataStore.getByKey(savedId, new RequestDataStore.StoreResultCallback() {
 
 			@Override
-			public void onSuccess(RequestObject result) {
+			public void onSuccess(JavaScriptObject result) {
 				RestClient.RESTORED_REQUEST = savedId;
-				setViewParameters(result);
+				RequestObject ro = result.cast();
+				setViewParameters(ro);
 			}
 
 			@Override
@@ -1088,7 +1070,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 		final int entryId = Integer.parseInt(_entryId);
 		if (place.isProjectsEndpoint()) {
 			try {
-				clientFactory.getRequestDataStore().remove(entryId, new RequestDataStoreWebSql.StoreSimpleCallback() {
+				RequestDataStore.remove(entryId, new RequestDataStore.StoreSimpleCallback() {
 
 					@Override
 					public void onSuccess() {
@@ -1111,8 +1093,8 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 				StatusNotification.notify("Unable read project data", StatusNotification.TIME_SHORT);
 			}
 		} else if (place.isProject()) {
-			clientFactory.getRequestDataStore().getDefaultForProject(entryId,
-					new RequestDataStoreWebSql.StoreResultCallback() {
+			RequestDataStore.getForProject(entryId,
+					new RequestDataStore.StoreResultsCallback() {
 
 						@Override
 						public void onError(Throwable e) {
@@ -1123,17 +1105,17 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 						}
 
 						@Override
-						public void onSuccess(RequestObject result) {
-							if (result == null) {
+						public void onSuccess(JsArray<JavaScriptObject> result) {
+							if (result == null || result.length() == 0) {
 								if (RestClient.isDebug()) {
 									Log.error("Can't find selected endpoint. No database entries.");
 								}
 								StatusNotification.notify("Can't find selected endpoint. No database entries.");
 								return;
 							}
-
-							clientFactory.getRequestDataStore().remove(result.getId(),
-									new RequestDataStoreWebSql.StoreSimpleCallback() {
+							RequestObject ro = result.get(0).cast();
+							RequestDataStore.remove(ro.getId(),
+									new RequestDataStore.StoreSimpleCallback() {
 
 								@Override
 								public void onSuccess() {
@@ -1159,7 +1141,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 		return clientFactory.getEditProjectView();
 	}
 
-	private void setViewParameters(RequestObject result) {
+	private void setViewParameters(final RequestObject result) {
 		if (result == null) {
 			requestView.setUrl(null);
 			requestView.setMethod(null);
@@ -1180,31 +1162,41 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 		if (result.getId() > 0) {
 			RestClient.RESTORED_REQUEST = result.getId();
 		}
-
-		if (result.getProject() > 0) {
-			showProjectRelatedData(result.getProject(), null);
-			RestClient.currentlyOpenedProject = result.getProject();
-		} else {
-			// if name is available, set name
-			requestView.setRequestName(result.getName());
-			if (result.getId() > 0) {
-				clientFactory.getRequestDataStore().getByKey(result.getId(), new RequestDataStoreWebSql.StoreResultCallback() {
-
-					@Override
-					public void onSuccess(RequestObject result) {
-						if (result == null) {
-							return;
-						}
-						requestView.setRequestName(result.getName());
+		
+		ProjectsStore.getForRequest(result.getId(), new ProjectsStore.StoreResultCallback() {
+			
+			@Override
+			public void onSuccess(ProjectObject project) {
+				if(project == null) {
+					requestView.setRequestName(result.getName());
+					// if name is available, set name
+					if (result.getId() > 0) {
+						RequestDataStore.getByKey(result.getId(), new RequestDataStore.StoreResultCallback() {
+							@Override
+							public void onSuccess(JavaScriptObject result) {
+								if (result == null) {
+									return;
+								}
+								RequestObject item = result.cast();
+								requestView.setRequestName(item.getName());
+							}
+							@Override
+							public void onError(Throwable e) {}
+						});
 					}
-
-					@Override
-					public void onError(Throwable e) {
-					}
-				});
+				} else {
+					RestClient.currentlyOpenedProject = project.getId();
+					showProjectRelatedData(project);
+				}
+				
 			}
-		}
-
+			
+			@Override
+			public void onError(Throwable e) {
+				
+			}
+		});
+		
 		requestView.setUrl(result.getURL());
 		requestView.setMethod(result.getMethod());
 		requestView.setHeaders(result.getHeaders());
@@ -1231,8 +1223,8 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 			return;
 		}
 		if (RestClient.RESTORED_REQUEST != null) {
-			clientFactory.getRequestDataStore().updateName(name, RestClient.RESTORED_REQUEST,
-					new RequestDataStoreWebSql.StoreSimpleCallback() {
+			RequestDataStore.updateName(name, RestClient.RESTORED_REQUEST,
+					new RequestDataStore.StoreSimpleCallback() {
 						@Override
 						public void onError(Throwable e) {
 							if (RestClient.isDebug()) {

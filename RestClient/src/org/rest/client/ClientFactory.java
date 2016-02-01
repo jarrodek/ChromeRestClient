@@ -15,9 +15,7 @@
  ******************************************************************************/
 package org.rest.client;
 
-import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.storage.store.ProjectsStore;
-import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.store.WebSocketHistoryStore;
 import org.rest.client.ui.AboutView;
 import org.rest.client.ui.EditProjectView;
@@ -41,8 +39,6 @@ public interface ClientFactory {
 	EventBus getEventBus();
 	PlaceController getPlaceController();
 
-	RequestDataStoreWebSql getRequestDataStore();
-	HistoryRequestStoreWebSql getHistoryRequestStore();
 	ProjectsStore getProjectsStore();
 	WebSocketHistoryStore getWebSocketsStore();
 	

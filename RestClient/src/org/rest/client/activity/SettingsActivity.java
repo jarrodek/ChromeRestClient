@@ -24,8 +24,7 @@ import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.NotificationsStateChangeEvent;
 import org.rest.client.place.SettingsPlace;
 import org.rest.client.storage.StoreKeys;
-import org.rest.client.storage.store.HistoryRequestStoreWebSql;
-import org.rest.client.storage.store.RequestIdb;
+import org.rest.client.storage.store.HistoryRequestStore;
 import org.rest.client.ui.SettingsView;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -60,12 +59,11 @@ public class SettingsActivity extends AppActivity implements SettingsView.Presen
 
 	@Override
 	public void clearHistory() {
-		clientFactory.getHistoryRequestStore().deleteHistory(new HistoryRequestStoreWebSql.StoreSimpleCallback() {
+		HistoryRequestStore.deleteHistory(new HistoryRequestStore.StoreDeleteCallback() {
 			
 			@Override
-			public void onSuccess() {
+			public void onSuccess(int deleted) {
 				StatusNotification.notify("History cleared.", StatusNotification.TIME_SHORT);
-				RequestIdb.deleteHistory();
 			}
 			
 			@Override

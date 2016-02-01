@@ -416,7 +416,7 @@ class ProjectObject extends OrderedList {
     if (!opts.requestIds) {
       opts.requestIds = [];
     }
-    if (!(opts.requestIds instanceof Array)) {
+    if (typeof opts.requestIds.length === 'undefined') {
       throw new Error('`requestIds` property must be an array of ids of request objects');
     }
     /**

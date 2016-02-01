@@ -46,20 +46,33 @@ public class ProjectsStore {
 	public final static native void add(ProjectObject project, RequestObject request, StoreResultCallback callback) /*-{
 		$wnd.arc.app.db.projects.add(project, [request])
 		.then(function(result){
-			console.info('Indexed db saved project and request.');
+			callback.@org.rest.client.storage.store.ProjectsStore.StoreResultCallback::onSuccess(Lorg/rest/client/jso/ProjectObject;)(result);
 		}, function(cause){
+			callback.@org.rest.client.storage.store.ProjectsStore.StoreResultCallback::onError(Ljava/lang/Throwable;)(cause);
 			console.error('Indexed db did not saved project and request.', cause);
 			$wnd.arc.app.analytics.sendException('ProjectIdb::addWithRequest' + JSON.stringify(cause));
 		});
 	}-*/;
+	
+	public final static native void getForRequest(int requestId, StoreResultCallback callback) /*-{
+		$wnd.arc.app.db.projects.getForRequest(requestId)
+		.then(function(result){
+			callback.@org.rest.client.storage.store.ProjectsStore.StoreResultCallback::onSuccess(Lorg/rest/client/jso/ProjectObject;)(result);
+		}, function(cause){
+			callback.@org.rest.client.storage.store.ProjectsStore.StoreResultCallback::onError(Ljava/lang/Throwable;)(cause);
+			console.error('Indexed db did not saved project and request.', cause);
+			$wnd.arc.app.analytics.sendException('ProjectIdb::addWithRequest' + JSON.stringify(cause));
+		});
+	}-*/;
+	//arc.app.db.projects.getForRequest
 	/**
 	 * Update
 	 * @param obj
 	 * @param callback
 	 */
 	public final static native void update(ProjectObject obj, final StoreResultCallback callback) /*-{
-		$wnd.arc.app.db.projects.update(obj.name, obj.time, obj.id)
-		.then(function(){
+		$wnd.arc.app.db.projects.update(obj)
+		.then(function(obj){
 			callback.@org.rest.client.storage.store.ProjectsStore.StoreResultCallback::onSuccess(Lorg/rest/client/jso/ProjectObject;)(obj);
 		}, function(cause){
 			callback.@org.rest.client.storage.store.ProjectsStore.StoreResultCallback::onError(Ljava/lang/Throwable;)(cause);

@@ -15,8 +15,6 @@
  ******************************************************************************/
 package org.rest.client.activity;
 
-import java.util.ArrayList;
-
 import org.rest.client.ClientFactory;
 import org.rest.client.NotificationAction;
 import org.rest.client.RestClient;
@@ -27,9 +25,10 @@ import org.rest.client.jso.RequestObject;
 import org.rest.client.log.Log;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SavedPlace;
-import org.rest.client.storage.store.RequestDataStoreWebSql;
+import org.rest.client.storage.store.RequestDataStore;
 import org.rest.client.ui.SavedView;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
@@ -61,7 +60,7 @@ public class SavedActivity extends ListActivity implements SavedView.Presenter {
 
 	@Override
 	public void removeFromSaved(final RequestObject request) {
-		clientFactory.getRequestDataStore().remove(request.getId(), new RequestDataStoreWebSql.StoreSimpleCallback() {
+		RequestDataStore.remove(request.getId(), new RequestDataStore.StoreSimpleCallback() {
 
 			@Override
 			public void onSuccess() {
@@ -85,13 +84,11 @@ public class SavedActivity extends ListActivity implements SavedView.Presenter {
 		action.callback = new StatusNotification.NotificationCallback() {
 			@Override
 			public void onActionPerformed() {
-				final RequestObject save = RequestObject.copyNew(request);
-				clientFactory.getRequestDataStore().insert(save, new RequestDataStoreWebSql.StoreInsertCallback() {
+				RequestDataStore.insert(request, new RequestDataStore.StoreInsertCallback() {
 					@Override
 					public void onSuccess(int result) {
-						save.setId(result);
-						ArrayList<RequestObject> list = new ArrayList<RequestObject>();
-						list.add(save);
+						JsArray<RequestObject> list = JsArray.createArray().cast();
+						list.set(0, request);
 						view.appendResults(list);
 					}
 					@Override
@@ -108,23 +105,8 @@ public class SavedActivity extends ListActivity implements SavedView.Presenter {
 	}
 
 	@Override
-	public void onClearSaved() {
-		clientFactory.getRequestDataStore().removeNonProject(new RequestDataStoreWebSql.StoreSimpleCallback() {
-			@Override
-			public void onError(Throwable e) {
-
-			}
-
-			@Override
-			public void onSuccess() {
-
-			}
-		});
-	}
-
-	@Override
 	public void changeSavedName(String newName, int savedId) {
-		clientFactory.getRequestDataStore().updateName(newName, savedId, new RequestDataStoreWebSql.StoreSimpleCallback() {
+		RequestDataStore.updateName(newName, savedId, new RequestDataStore.StoreSimpleCallback() {
 
 			@Override
 			public void onError(Throwable e) {
@@ -149,7 +131,7 @@ public class SavedActivity extends ListActivity implements SavedView.Presenter {
 
 	@Override
 	public void serach(String query) {
-		recentQuery = "%" + query + "%";
+		recentQuery = query;
 		current_page = 0;
 		view.clearResultList();
 		performQuery();
@@ -164,21 +146,21 @@ public class SavedActivity extends ListActivity implements SavedView.Presenter {
 
 		final String q = (recentQuery != null && recentQuery.length() > 2) ? recentQuery : null;
 		int offset = current_page * PAGE_SIZE;
-		clientFactory.getRequestDataStore().query(q, PAGE_SIZE, offset,
-				new RequestDataStoreWebSql.StoreResultsCallback() {
+		RequestDataStore.query(q, PAGE_SIZE, offset,
+				new RequestDataStore.StoreResultsCallback() {
 
 					@Override
-					public void onSuccess(final JsArray<RequestObject> result) {
+					public void onSuccess(final JsArray<JavaScriptObject> result) {
 						fetchingNextPage = false;
+						if(result == null) {
+							return;
+						}
 						int size = result.length();
 						if (size == 0) {
 							view.setNoMoreItems();
 							return;
 						}
-						ArrayList<RequestObject> list = new ArrayList<RequestObject>();
-						for (int i = 0; i < size; i++) {
-							list.add(result.get(i));
-						}
+						JsArray<RequestObject> list = result.cast();
 						view.appendResults(list);
 					}
 

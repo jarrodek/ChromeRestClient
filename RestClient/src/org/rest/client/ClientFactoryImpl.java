@@ -15,9 +15,7 @@
  ******************************************************************************/
 package org.rest.client;
 
-import org.rest.client.storage.store.HistoryRequestStoreWebSql;
 import org.rest.client.storage.store.ProjectsStore;
-import org.rest.client.storage.store.RequestDataStoreWebSql;
 import org.rest.client.storage.store.WebSocketHistoryStore;
 import org.rest.client.ui.AboutView;
 import org.rest.client.ui.EditProjectView;
@@ -57,8 +55,6 @@ public class ClientFactoryImpl implements ClientFactory {
 	private static final PlaceController placeController = new PlaceController(
 			eventBus);
 	private static RequestView requestView = null;
-	private static RequestDataStoreWebSql requestDataStore = null;
-	private static HistoryRequestStoreWebSql historyRequestStore = null;
 	private static ProjectsStore projectsStore = null;
 	private static WebSocketHistoryStore webSocketSqlStore = null;
 	/**
@@ -91,22 +87,6 @@ public class ClientFactoryImpl implements ClientFactory {
 		// }
 		// return responseView;
 		return GWT.create(ResponseViewImpl.class);
-	}
-
-	@Override
-	public RequestDataStoreWebSql getRequestDataStore() {
-		if (requestDataStore == null) {
-			requestDataStore = GWT.create(RequestDataStoreWebSql.class);
-		}
-		return requestDataStore;
-	}
-
-	@Override
-	public HistoryRequestStoreWebSql getHistoryRequestStore() {
-		if (historyRequestStore == null) {
-			historyRequestStore = GWT.create(HistoryRequestStoreWebSql.class);
-		}
-		return historyRequestStore;
 	}
 
 	@Override

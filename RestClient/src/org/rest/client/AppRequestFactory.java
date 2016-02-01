@@ -19,8 +19,7 @@ import org.rest.client.request.HttpMethodOptions;
 import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.request.RequestPayloadParser;
 import org.rest.client.storage.StoreKeys;
-import org.rest.client.storage.store.HistoryRequestStoreWebSql;
-import org.rest.client.storage.store.RequestIdb;
+import org.rest.client.storage.store.HistoryRequestStore;
 import org.rest.client.storage.store.UrlHistoryStore;
 import org.rest.client.ui.ErrorDialogView;
 
@@ -29,14 +28,13 @@ import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.file.client.File;
 import com.google.gwt.file.client.FileList;
-import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.xhr2.client.AbortHandler;
 import com.google.gwt.xhr2.client.ErrorHandler;
@@ -439,55 +437,52 @@ public class AppRequestFactory {
 	 */
 	private static void saveHistory(RequestObject _data){
 		final HistoryObject data = HistoryObject.copyRequestObject(_data);
-		Log.info(data.toJSONObject().toString());
 		
 		if(!RestClient.isHistoryEabled()){
 			return;
 		}
-		if(RestClient.isDebug()){
-			Log.debug("Try to save new item in history.");
-		}
-		final HistoryRequestStoreWebSql store = RestClient.getClientFactory().getHistoryRequestStore();
-		store.getHistoryItems(data.getURL(), data.getMethod(), new HistoryRequestStoreWebSql.StoreResultsCallback() {
+		final String queryUrl = data.getURL();
+		final String queryMethod = data.getMethod();
+		final String queryHeaders = data.getHeaders();
+		final String queryPayload = data.getPayload();
+		HistoryRequestStore.queryHistory(queryUrl, -1, -1, new HistoryRequestStore.StoreResultsCallback() {
 			@Override
-			public void onSuccess(JsArray<HistoryObject> result) {
+			public void onSuccess(JsArray<JavaScriptObject> result) {
 				boolean found = false;
-				HistoryObject old = null;
 				for (int i = 0; i < result.length(); i++) {
-					HistoryObject item = result.get(i);
+					HistoryObject item = result.get(i).cast();
 					
-					String itemHeaders = item.getHeaders();
-					if(itemHeaders != null && !itemHeaders.equals(data.getHeaders())){
+					if(!item.getURL().equals(queryUrl)) {
 						continue;
-					} else if (itemHeaders == null && data.getHeaders() != null) {
+					}
+					if(!item.getMethod().equals(queryMethod)) {
+						continue;
+					}
+					String itemHeaders = item.getHeaders();
+					if(itemHeaders != null && !itemHeaders.equals(queryHeaders)){
+						continue;
+					} else if (itemHeaders == null && queryHeaders != null) {
 						continue;
 					}
 					String itemPayload = item.getPayload();
-					if(itemPayload != null && !itemPayload.equals(data.getPayload())){
+					if(itemPayload != null && !itemPayload.equals("") && !itemPayload.equals(queryPayload)){
 						continue;
-					} else if(itemPayload == null && data.getPayload() != null){
+					} else if(itemPayload != null && queryPayload != null && itemPayload.equals("") && queryPayload.equals("")) {
+						
+					} else if(itemPayload == null && queryPayload != null) {
 						continue;
 					}
 					found = true;
-					old = item;
 					break;
 				}
 				if(!found){
-					store.put(data, new HistoryRequestStoreWebSql.StoreInsertCallback() {
+					data.reSetId();
+					HistoryRequestStore.insert(data, new HistoryRequestStore.StoreInsertCallback() {
 						@Override
 						public void onSuccess(int result) {
 							if(RestClient.isDebug()){
 								Log.debug("Saved new item in history.");
 							}
-							data.setId(result);
-							JSONObject obj = data.toJSONObject();
-							obj.put("type", new JSONString("save"));
-							RequestIdb.put((HistoryObject) obj.getJavaScriptObject(), new RequestIdb.StoreInsertCallback() {
-								@Override
-								public void onSuccess(int inserId) {}
-								@Override
-								public void onError(Throwable e) {}
-							});
 						}
 						@Override
 						public void onError(Throwable e) {
@@ -500,47 +495,6 @@ public class AppRequestFactory {
 					if(RestClient.isDebug()){
 						Log.debug("Item already exists in history");
 					}
-					final int oldId = old.getId();
-					store.updateHistoryItemTime(oldId, new Date().getTime(), new HistoryRequestStoreWebSql.StoreSimpleCallback () {
-						@Override
-						public void onSuccess() {
-							if(RestClient.isDebug()){
-								Log.debug("History item updated.");
-							}
-						}
-						
-						@Override
-						public void onError(Throwable e) {
-							if(RestClient.isDebug()){
-								Log.error("An error occured when updating history item time.", e);
-							}
-						}
-					});
-					RequestIdb.getByLegacyId(oldId, "history", new RequestIdb.StoreResultCallback() {
-						
-						@Override
-						public void onSuccess(HistoryObject result) {
-							JSONObject obj;
-							if(result == null){
-								obj = data.toJSONObject();
-							} else {
-								obj = result.toJSONObject();
-							}
-							obj.put("type", new JSONString("save"));
-							obj.put("oldId", new JSONNumber(oldId));
-							RequestIdb.put((HistoryObject) obj.getJavaScriptObject(), new RequestIdb.StoreInsertCallback() {
-								@Override
-								public void onSuccess(int inserId) {}
-								@Override
-								public void onError(Throwable e) {}
-							});
-						}
-						
-						@Override
-						public void onError(Throwable e) {
-							
-						}
-					});
 				}
 			}
 			@Override
