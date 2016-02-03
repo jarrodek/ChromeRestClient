@@ -82,10 +82,10 @@ arc.app.db.idb.open = function() {
         statuses: '&key',
         historyUrls: '&url',
         historySockets: '&url',
-        requestObject: '++id,url,method,[url+method],type,oldId',
+        requestObject: '++id,url,method,[url+method],type,_name',
         driveObjects: '[driveId+requestId],driveId,requestId',
-        serverExportObjects: '[serverId+requestId],serverId,requestId,oldId',
-        projectObjects: '++id,*requestIds,oldId'
+        serverExportObjects: '[serverId+requestId],serverId,requestId',
+        projectObjects: '++id,*requestIds'
       });
     db.projectObjects.mapToClass(ProjectObject);
     db.serverExportObjects.mapToClass(ServerExportedObject);
@@ -163,7 +163,6 @@ arc.app.db.idb.open = function() {
             return;
           }
           console.info('Database has been upgraded from WebSQL to IndexedDB.');
-          arc.app.db._adapter = 'indexeddb';
           let upgrade = {
             upgraded: {
               indexeddb: true
@@ -177,6 +176,12 @@ arc.app.db.idb.open = function() {
           } else {
             console.info('Upgrade finished.');
           }
+          arc.app.analytics.sendEvent('Upgrade', 'IndexedDB', 'Upgrade from WebSQL');
+        })
+        .catch(function(error) {
+          arc.app.db.idb.deleteDatabase();
+          arc.app.db.useIdb = false;
+          arc.app.analytics.sendException('IDB create error::' + JSON.stringify(error));
         });
     });
 
@@ -185,6 +190,9 @@ arc.app.db.idb.open = function() {
         resolve(db);
       })
       .catch(function(error) {
+        arc.app.db.idb.deleteDatabase();
+        arc.app.db.useIdb = false;
+        arc.app.analytics.sendException('IDB create error::' + JSON.stringify(error));
         reject(error);
       });
   });
@@ -325,7 +333,6 @@ arc.app.db.idb._converSqlIdb = function(data) {
     data.requestData.forEach((item) => {
       let obj = arc.app.db.idb._createHARfromSql.call(this, item);
       obj.type = 'saved';
-      obj.oldId = item.id;
       //just for upgrade, to be removed before save. 
       if (item.project) {
         obj.project = item.project;
@@ -343,7 +350,6 @@ arc.app.db.idb._converSqlIdb = function(data) {
     });
     data.history.forEach((item) => {
       let obj = arc.app.db.idb._createHARfromSql.call(this, item);
-      obj.oldId = item.id;
       requests.push(obj);
     });
     data.urls.forEach((item) => {
@@ -380,7 +386,7 @@ arc.app.db.idb._converIdbSql = function(data) {
 
   return {
     id: data.id,
-    name: page.title || null,
+    name: data.name || null,
     project: 0,
     url: data.url,
     method: data.method,
@@ -430,8 +436,7 @@ arc.app.db.idb._storeUpgrade = function(data) {
                   let project = new ProjectObject({
                     time: _projects[0].time,
                     name: _projects[0].name,
-                    requestIds: [requestId],
-                    oldId: _projects[0].id
+                    requestIds: [requestId]
                   });
                   projects[referencedProjectId] = project;
                 } else if (_projects.length > 1) {
@@ -446,8 +451,7 @@ arc.app.db.idb._storeUpgrade = function(data) {
               let exportData = data.websql.exported[referencedExported];
               let exportObject = new ServerExportedObject({
                 serverId: exportData.gaeKey,
-                requestId: requestId,
-                oldId: exportData.id
+                requestId: requestId
               });
               exported.push(exportObject);
             }
@@ -540,6 +544,7 @@ arc.app.db.idb._createHARfromSql = function(item) {
     'har': log,
     'url': item.url,
     'method': item.method,
+    'name': item.name,
     'type': 'history'
   });
   return obj;
@@ -739,8 +744,6 @@ arc.app.db.idb.websockets.query = function(query) {
  * {@link ProjectObject}.
  */
 arc.app.db.idb.projects.addWithRequests = function(project, requests) {
-  //WebSQL ID.
-  const projectOldId = project.oldId || project.id || null;
   const requestsArray = []; //array of RequestObject
   if (!(project instanceof ProjectObject)) {
     project = new ProjectObject({
@@ -749,17 +752,9 @@ arc.app.db.idb.projects.addWithRequests = function(project, requests) {
       'requestIds': project.requestIds || []
     });
   }
-  if (projectOldId) {
-    project.oldId = projectOldId;
-  }
   requests.forEach((item) => {
     let r = arc.app.db.idb._createHARfromSql.call(this, item);
     r.type = 'saved';
-    if (item.oldId) {
-      r.oldId = item.oldId;
-    } else if (!item.type && item.id) {
-      r.oldId = item.id;
-    }
     requestsArray.push(r);
   });
   // first insert request to obtain their ids and then insert project
@@ -1043,10 +1038,11 @@ arc.app.db.idb.requests.deleteType = function(type) {
 arc.app.db.idb.requests.query = function(type, opts) {
   return arc.app.db.idb.open()
     .then(function(db) {
-      var builder = db.requestObject;
+      var builder = db.requestObject;//.orderBy('_name');
 
       if (opts.query) {
         builder = builder.where('url').startsWithIgnoreCase(opts.query)
+        .or('_name').startsWithIgnoreCase(opts.query)
           /*.and((item) => opts.query.indexOf(item.har.pages[0].title) !== -1)*/
         ;
         //TODO: Use OR or other filter function to query for name.
@@ -1076,7 +1072,6 @@ arc.app.db.idb.requests.query = function(type, opts) {
           db.close();
         });
     });
-  //db.friends.orderBy('lastName').reverse().offset(10).limit(5);
 };
 arc.app.db.idb.requests.deleteByProject = function(projectId) {
   var requests;
@@ -1114,7 +1109,7 @@ arc.app.db.idb.requests.updateRequestName = function(id, name) {
     .then(arc.app.db.idb.open)
     .then((db) => {
       return db.transaction('rw', db.requestObject, function(requestObject) {
-          request.har.pages[0].title = name;
+          request.name = name;
           return requestObject.put(request);
         })
         .finally(function() {

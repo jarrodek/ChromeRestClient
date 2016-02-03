@@ -5,9 +5,11 @@
     :host {
       display: block;
     }
+    
     h1 {
       @apply(--page-title-text);
     }
+    
     .help-icon {
       height: 36px;
       width: 36px;
@@ -99,6 +101,14 @@
         </paper-item-body>
       </paper-item>
     </section>
+    <section class="settings-section">
+      <paper-item on-tap="resetApp">
+        <paper-item-body two-line>
+          <div>Factory reset</div>
+          <div secondary>Reset the app to default settings</div>
+        </paper-item-body>
+      </paper-item>
+    </section>
     <paper-dialog id="historyClearDialog" on-iron-overlay-closed="onClearDialogResult">
       <h2>Clear history</h2>
       <paper-dialog-scrollable>
@@ -123,6 +133,16 @@
       </paper-dialog-scrollable>
       <div class="buttons">
         <paper-button dialog-confirm>Close</paper-button>
+      </div>
+    </paper-dialog>
+    <paper-dialog id="resetDialog" on-iron-overlay-closed="onResetDialogResult">
+      <h2>Reset app</h2>
+      <paper-dialog-scrollable>
+        <p>This will remove all your data from the storage.</p>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm>Reset</paper-button>
       </div>
     </paper-dialog>
     <paper-toast text="Database recreated" id="dbRecreate"></paper-toast>
@@ -220,14 +240,45 @@
     },
     importIndexedDB: function() {
       arc.app.db.idb.deleteDatabase()
-      .then(arc.app.db.idb.open)
-      .then(function(db){
-        db.close();
-        this.$.dbRecreate.open();
-      }.bind(this))
-      .catch(function(cause){
-        this.$.dbRecreateError.open();
-        console.error('Upgrade database error', cause);
+        .then(arc.app.db.idb.open)
+        .then(function(db) {
+          db.close();
+          this.$.dbRecreate.open();
+        }.bind(this))
+        .catch(function(cause) {
+          this.$.dbRecreateError.open();
+          console.error('Upgrade database error', cause);
+        }.bind(this));
+    },
+
+    resetApp: function() {
+      this.$.resetDialog.open();
+    },
+
+    onResetDialogResult: function(e) {
+      if (e.detail.canceled || !e.detail.confirmed) {
+        return;
+      }
+      chrome.storage.local.clear(function() {
+        chrome.storage.local.set({
+          'upgraded': {
+            'v4': true,
+            'v4p6': true
+          }
+        }, function() {
+          arc.app.db.websql.resetDatabases()
+            .then(arc.app.db.websql.open)
+            .then(arc.app.db.idb.deleteDatabase)
+            .then(arc.app.db.idb.open)
+            .then(function(db) {
+              db.close();
+              this.$.dbRecreate.open();
+            }.bind(this))
+            .catch(function(cause) {
+              this.$.dbRecreateError.open();
+              console.error('Upgrade database error', cause);
+            }.bind(this));
+        }.bind(this));
       }.bind(this));
     }
   });

@@ -58,6 +58,7 @@ arc.app.utils.uuid = function() {
       lut[d3 & 0xff] + lut[d3 >> 8 & 0xff] + lut[d3 >> 16 & 0xff] + lut[d3 >> 24 & 0xff];
   };
   return fn();
+  
   // jscs:enable
   /* jshint ignore:end */
 };

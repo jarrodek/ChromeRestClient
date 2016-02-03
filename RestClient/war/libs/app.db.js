@@ -282,6 +282,84 @@ arc.app.db.projects.remove = function(id) {
   }
   return arc.app.db.websql.deleteProject(id);
 };
+arc.app.db.projects.importData = function(projects, requests) {
+  if (arc.app.db.useIdb) {
+    let pMap = new Map();
+    for (let i in projects) {
+      let project = projects[i];
+      pMap.set(project.id, {
+        project: project,
+        requests: []
+      });
+    }
+    for (let i = requests.length - 1; i >= 0; i--) {
+      let request = requests[i];
+      let isProject = request.project > 0;
+      if (!isProject) {
+        continue;
+      }
+      if (!pMap.has(request.project)) {
+        continue;
+      }
+      let data = pMap.get(request.project);
+      data.requests.push(request);
+      pMap.set(request.project, data);
+      requests.splice(i, 1);
+    }
+    let promises = [];
+    for (let value of pMap.values()) {
+      if (value.requests.length === 0) {
+        continue;
+      }
+      promises.push(arc.app.db.idb.projects.addWithRequests(
+        value.project, value.requests));
+    }
+    promises.push(arc.app.db.idb.requests.import(requests));
+    return Promise.all(promises);
+  } else {
+    return new Promise(function(resolve, reject) {
+      let insertRequests = function(requests) {
+        if (!requests || requests.length === 0) {
+          console.warn('Request data is empty.');
+          resolve();
+          return;
+        }
+        requests.forEach((item) => {
+          if (!item.project) {
+            item.project = 0;
+          }
+        });
+        arc.app.db.requests.importList(requests)
+          .then(resolve)
+          .catch(reject);
+      };
+
+      if (projects && projects.length > 0) {
+        arc.app.db.websql.importProjects2(projects)
+          .then(function(inserts) {
+            let requestsSize = requests.length;
+            for (let i = 0, len = inserts.length; i < len; i++) {
+              let currentProjectId = inserts[i];
+              let exportedProjectId = projects[i].id;
+              for (let j = 0; j < requestsSize; j++) {
+                let r = requests[j];
+                if (!r.project) {
+                  r.project = 0;
+                }
+                if (r.project === exportedProjectId) {
+                  r.project = currentProjectId;
+                }
+              }
+            }
+            insertRequests(requests);
+          })
+          .catch(reject);
+      } else {
+        insertRequests(requests);
+      }
+    });
+  }
+};
 /**
  * Get request referenced with project represented by projectId.
  *
@@ -336,7 +414,10 @@ arc.app.db.requests.list = function(type) {
         return result;
       });
   }
-  return arc.app.db.websql.getAllHistoryObjects();
+  if (type === 'history') {
+    return arc.app.db.websql.getAllHistoryObjects();
+  }
+  return arc.app.db.websql.listRequestObjects();
 };
 /** Remove single entry */
 arc.app.db.requests.remove = function(id) {

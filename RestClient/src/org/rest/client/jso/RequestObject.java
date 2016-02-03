@@ -202,9 +202,6 @@ public class RequestObject extends JavaScriptObject {
 	 * @return request given name or null if none
 	 */
 	public final native String getName() /*-{
-		if(this.har){
-			return this.har.pages[0].title || null;
-		}
 		return this.name || null;
 	}-*/;
 
@@ -217,7 +214,6 @@ public class RequestObject extends JavaScriptObject {
 	public final native void setName(String name) /*-{
 		if(this.har){
 			this.har.pages[0].title = name;
-			return;
 		}
 		this.name = name;
 	}-*/;

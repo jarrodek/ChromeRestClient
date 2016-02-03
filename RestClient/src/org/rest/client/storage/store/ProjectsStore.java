@@ -118,8 +118,8 @@ public class ProjectsStore {
 		});
 	}-*/;
 	
-	public final native void importData(JsArray<ProjectObject> projects, StoreInsertListCallback callback) /*-{
-		$wnd.arc.app.db.websql.importProjects2(projects)
+	public final native static void importData(JsArray<ProjectObject> projects, JsArray<RequestObject> requests, StoreInsertListCallback callback) /*-{
+		$wnd.arc.app.db.projects.importData(projects, requests)
 		.then(function(result){
 			callback.@org.rest.client.storage.store.ProjectsStore.StoreInsertListCallback::onSuccess(Lcom/google/gwt/core/client/JsArrayInteger;)(result);
 		}, function(cause){

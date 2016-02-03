@@ -440,7 +440,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 			// First, save projects data and update referenced requests
 			//
 			
-			clientFactory.getProjectsStore().importData(projects, new ProjectsStore.StoreInsertListCallback() {
+			ProjectsStore.importData(projects, requests, new ProjectsStore.StoreInsertListCallback() {
 
 				@Override
 				public void onError(Throwable error) {
@@ -454,22 +454,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 
 				@Override
 				public void onSuccess(JsArrayInteger rowIds) {
-
-					for (int i = 0, len = rowIds.length(); i < len; i++) {
-						int currentProjectId = rowIds.get(i);
-						int exportedProjectId = projects.get(i).getId();
-						// now find all request where project ID is
-						// "exportedProjectId" as an old ID and replace
-						// it with new one.
-						int requestsSize = requests.length();
-						for (int j=0; j<requestsSize; j++) {
-							RequestObject r = requests.get(j);
-							if (r.getProject() == exportedProjectId) {
-								r.setProject(currentProjectId);
-							}
-						}
-					}
-					saveImportedFileData(requests, callback);
+					callback.onSuccess(true);
 				}
 			});
 		} else {

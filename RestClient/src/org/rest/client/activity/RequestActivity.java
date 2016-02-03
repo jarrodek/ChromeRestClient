@@ -401,17 +401,18 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 					}
 					
 					final RequestObject ro = result.cast();
-					
-					ProjectsStore.getForRequest(ro.getId(), new ProjectsStore.StoreResultCallback() {
+					ProjectsStore.getByKey(ro.getProject(), new ProjectsStore.StoreResultCallback() {
+
 						@Override
 						public void onSuccess(ProjectObject project) {
 							if (project == null) {
 								StatusNotification.notify("Project does not contain selected endpoint or database resulted with empty record.");
 								return;
 							}
-							RestClient.currentlyOpenedProject = project.getId();
+							RestClient.currentlyOpenedProject = projectId;
 							restoreProjectEndpoint(project, ro);
 						}
+
 						@Override
 						public void onError(Throwable e) {
 							if (RestClient.isDebug()) {
@@ -419,6 +420,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 							}
 							StatusNotification.notify("Unable read project data");
 						}
+						
 					});
 				}
 

@@ -165,6 +165,34 @@ arc.app.db.websql._dbUpgrade = function(db) {
     });
   });
 };
+arc.app.db.websql.resetDatabases = function() {
+  return new Promise(function(resolve, reject) {
+    arc.app.db.websql.open()
+      .then(function(db) {
+        db.transaction(function(tx) {
+          let sql = 'DROP TABLE urls';
+          tx.executeSql(sql, [], (tx) => {
+            sql = 'DROP TABLE websocket_data';
+            tx.executeSql(sql, [], (tx) => {
+              sql = 'DROP TABLE history';
+              tx.executeSql(sql, [], (tx) => {
+                sql = 'DROP TABLE projects';
+                tx.executeSql(sql, [], (tx) => {
+                  sql = 'DROP TABLE request_data';
+                  tx.executeSql(sql, [], (tx) => {
+                    sql = 'DROP TABLE exported';
+                    tx.executeSql(sql, [], () => {
+                      resolve();
+                    }, (tx, error) => reject(error));
+                  }, (tx, error) => reject(error));
+                }, (tx, error) => reject(error));
+              }, (tx, error) => reject(error));
+            }, (tx, error) => reject(error));
+          }, (tx, error) => reject(error));
+        });
+      });
+  });
+};
 /**
  * Insert status codes definitions into database.
  * This function should be called once, in background page, when the app is installed for 
@@ -455,7 +483,7 @@ arc.app.db.websql.importProjects2 = function(projectsArray) {
             resolve(results);
           }
         };
-        let success = function(result) {
+        let success = function(tx, result) {
           left--;
           results.push(result.insertId);
           callOnEnd();
@@ -728,9 +756,13 @@ arc.app.db.websql.queryHistoryTable = function(opts) {
   } else {
     sql += '1';
   }
-  sql += ' ORDER BY time DESC  LIMIT ?, ?';
-  sqlArgs.push(opts.offset);
-  sqlArgs.push(opts.limit);
+  sql += ' ORDER BY time DESC';
+  if (typeof opts.offset !== 'undefined' && typeof opts.limit !== 'undefined' && 
+    opts.offset >= 0 && opts.limit >= 0) {
+    sql += '  LIMIT ?, ?';
+    sqlArgs.push(opts.offset);
+    sqlArgs.push(opts.limit);
+  }
   return new Promise(function(resolve, reject) {
     arc.app.db.websql.open()
       .then(function(db) {
@@ -1049,7 +1081,7 @@ arc.app.db.websql.importRequests = function(requestsArray) {
             resolve(results);
           }
         };
-        let success = function(result) {
+        let success = function(tx, result) {
           left--;
           results.push(result.insertId);
           callOnEnd();
@@ -1189,7 +1221,7 @@ arc.app.db.websql.insertExported = function(exportedArray) {
             resolve(results);
           }
         };
-        let success = function(result) {
+        let success = function(tx, result) {
           left--;
           results.push(result.insertId);
           callOnEnd();
