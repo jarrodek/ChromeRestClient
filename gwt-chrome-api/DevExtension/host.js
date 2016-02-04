@@ -206,6 +206,17 @@ gwt.dev.chrome.registerAPI = function(functionsDef) {
         payload: fnData.root.replace('chrome.', ''),
         params: undefined
       };
+      args.forEach((item) => {
+        for (let key in item) {
+          if (key.indexOf('__') === 0) {
+            delete item[key];
+          } else if (key.indexOf('typeMarker') !== -1) {
+            delete item[key];
+          } else if (key.indexOf('castableTypeMap') !== -1) {
+            delete item[key];
+          }
+        }
+      });
       if (args.length > 1) {
         p.params = args;
         p.multiparam = true;
