@@ -182,6 +182,7 @@ arc.app.db.websql.resetDatabases = function() {
                   tx.executeSql(sql, [], (tx) => {
                     sql = 'DROP TABLE exported';
                     tx.executeSql(sql, [], () => {
+                      arc.app.db.websql._db = null;
                       resolve();
                     }, (tx, error) => reject(error));
                   }, (tx, error) => reject(error));

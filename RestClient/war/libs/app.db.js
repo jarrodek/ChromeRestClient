@@ -307,17 +307,20 @@ arc.app.db.projects.importData = function(projects, requests) {
       requests.splice(i, 1);
     }
     let promises = [];
+    let promisesProjects = [];
     for (let value of pMap.values()) {
       if (value.requests.length === 0) {
         continue;
       }
-      promises.push(arc.app.db.idb.projects.addWithRequests(
+      promisesProjects.push(arc.app.db.idb.projects.addWithRequests(
         value.project, value.requests));
     }
     promises.push(arc.app.db.idb.requests.import(requests));
-    return Promise.all(promises);
+    return Promise.all(promisesProjects, promises);
   } else {
     return new Promise(function(resolve, reject) {
+      let insertProjectIds = [];
+
       let insertRequests = function(requests) {
         if (!requests || requests.length === 0) {
           console.warn('Request data is empty.');
@@ -330,13 +333,16 @@ arc.app.db.projects.importData = function(projects, requests) {
           }
         });
         arc.app.db.requests.importList(requests)
-          .then(resolve)
+          .then(function() {
+            resolve(insertProjectIds);
+          })
           .catch(reject);
       };
 
       if (projects && projects.length > 0) {
         arc.app.db.websql.importProjects2(projects)
           .then(function(inserts) {
+            insertProjectIds = inserts;
             let requestsSize = requests.length;
             for (let i = 0, len = inserts.length; i < len; i++) {
               let currentProjectId = inserts[i];
@@ -381,10 +387,18 @@ arc.app.db.requests.getProjectRequests = function(projectId) {
 };
 
 arc.app.db.requests.insert = function(legacyRequestObject, type) {
+  if (!legacyRequestObject) {
+    throw new Error('legacyRequestObject is undefined');
+  }
   if (arc.app.db.useIdb) {
     return arc.app.db.idb.requests.insert(legacyRequestObject, type);
   }
-  return arc.app.db.websql.insertHistoryObject(legacyRequestObject);
+
+  legacyRequestObject.id = undefined;
+  if (type === 'history') {
+    return arc.app.db.websql.insertHistoryObject(legacyRequestObject);
+  }
+  return arc.app.db.websql.insertRequestObject(legacyRequestObject);
 };
 arc.app.db.requests.importList = function(legacyRequestList) {
   if (arc.app.db.useIdb) {
@@ -420,11 +434,17 @@ arc.app.db.requests.list = function(type) {
   return arc.app.db.websql.listRequestObjects();
 };
 /** Remove single entry */
-arc.app.db.requests.remove = function(id) {
+arc.app.db.requests.remove = function(id, type) {
   if (arc.app.db.useIdb) {
     return arc.app.db.idb.requests.delete(id);
   }
-  return arc.app.db.websql.removeHistoryObject(id);
+  if (!type) {
+    throw new Error('Type is not defined');
+  }
+  if (type === 'history') {
+    return arc.app.db.websql.removeHistoryObject(id);
+  }
+  return arc.app.db.websql.deleteRequestObject(id);
 };
 /** Remove all entries for given type */
 arc.app.db.requests.removeAll = function(type) {

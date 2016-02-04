@@ -22,6 +22,7 @@ import org.rest.client.ClientFactory;
 import org.rest.client.ExternalEventsFactory;
 import org.rest.client.RestClient;
 import org.rest.client.StatusNotification;
+import org.rest.client.SyncAdapter;
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.ClearFormEvent;
@@ -380,6 +381,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 						StatusNotification.notify("Unable read project data. Database resulted with empty record.");
 						return;
 					}
+					RestClient.currentlyOpenedProject = projectId;
 					restoreDefaultRequestFromProject(result, requestView);
 				}
 
@@ -399,29 +401,48 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 						StatusNotification.notify("Unable read project's endpoint data");
 						return;
 					}
-					
 					final RequestObject ro = result.cast();
-					ProjectsStore.getByKey(ro.getProject(), new ProjectsStore.StoreResultCallback() {
-
-						@Override
-						public void onSuccess(ProjectObject project) {
-							if (project == null) {
-								StatusNotification.notify("Project does not contain selected endpoint or database resulted with empty record.");
-								return;
+					if(SyncAdapter.useIdb) {
+						ProjectsStore.getForRequest(ro.getId(), new ProjectsStore.StoreResultCallback() {
+							
+							@Override
+							public void onSuccess(ProjectObject project) {
+								if (project == null) {
+									StatusNotification.notify("Project does not contain selected endpoint or database resulted with empty record.");
+									return;
+								}
+								RestClient.currentlyOpenedProject = projectId;
+								restoreProjectEndpoint(project, ro);
 							}
-							RestClient.currentlyOpenedProject = projectId;
-							restoreProjectEndpoint(project, ro);
-						}
-
-						@Override
-						public void onError(Throwable e) {
-							if (RestClient.isDebug()) {
-								Log.error("Unable read project data.", e);
+							
+							@Override
+							public void onError(Throwable e) {
+								if (RestClient.isDebug()) {
+									Log.error("Unable read project data.", e);
+								}
+								StatusNotification.notify("Unable read project data");
 							}
-							StatusNotification.notify("Unable read project data");
-						}
-						
-					});
+						});
+					} else {
+						ProjectsStore.getByKey(ro.getProject(), new ProjectsStore.StoreResultCallback() {
+							@Override
+							public void onSuccess(ProjectObject project) {
+								if (project == null) {
+									StatusNotification.notify("Project does not contain selected endpoint or database resulted with empty record.");
+									return;
+								}
+								RestClient.currentlyOpenedProject = projectId;
+								restoreProjectEndpoint(project, ro);
+							}
+							@Override
+							public void onError(Throwable e) {
+								if (RestClient.isDebug()) {
+									Log.error("Unable read project data.", e);
+								}
+								StatusNotification.notify("Unable read project data");
+							}
+						});
+					}
 				}
 
 				@Override
@@ -457,7 +478,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 
 					@Override
 					public void onSuccess(JsArray<JavaScriptObject> result) {
-						if (result == null) {
+						if (result == null || result.length() == 0) {
 							if (RestClient.isDebug()) {
 								Log.error("Can't find default endpoint for this project.");
 							}
@@ -473,7 +494,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 	@SuppressWarnings("deprecation")
 	private void restoreProjectEndpoint(final ProjectObject project, final RequestObject request) {
 		showProjectRelatedData(project);
-
+		RestClient.currentlyOpenedProject = project.getId();
 		// if can overwrite current params first restore latest request
 		// and then set parameters.
 		if (RestClient.currentlyOpenedProject == RestClient.previouslyOpenedProject) {
@@ -1072,7 +1093,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 		final int entryId = Integer.parseInt(_entryId);
 		if (place.isProjectsEndpoint()) {
 			try {
-				RequestDataStore.remove(entryId, new RequestDataStore.StoreSimpleCallback() {
+				RequestDataStore.remove(entryId, "saved", new RequestDataStore.StoreSimpleCallback() {
 
 					@Override
 					public void onSuccess() {
@@ -1116,7 +1137,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 								return;
 							}
 							RequestObject ro = result.get(0).cast();
-							RequestDataStore.remove(ro.getId(),
+							RequestDataStore.remove(ro.getId(), "saved",
 									new RequestDataStore.StoreSimpleCallback() {
 
 								@Override

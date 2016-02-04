@@ -122,6 +122,7 @@ public class HistoryActivity extends ListActivity implements HistoryView.Present
 					@Override
 					public void onSuccess(int result) {
 						ArrayList<HistoryObject> list = new ArrayList<HistoryObject>();
+						removedObject.setId(result); //required by SQL.
 						list.add(removedObject);
 						view.appendResults(list);
 					}

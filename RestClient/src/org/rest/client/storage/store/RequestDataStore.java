@@ -87,8 +87,8 @@ public class RequestDataStore {
 	 * @param key
 	 * @param callback
 	 */
-	public final native static void remove(int key, StoreSimpleCallback callback) /*-{
-		$wnd.arc.app.db.requests.remove(key)
+	public final native static void remove(int key, String type, StoreSimpleCallback callback) /*-{
+		$wnd.arc.app.db.requests.remove(key, type)
 		.then(function(){
 			callback.@org.rest.client.storage.store.RequestDataStore.StoreSimpleCallback::onSuccess()();
 		}, function(cause){

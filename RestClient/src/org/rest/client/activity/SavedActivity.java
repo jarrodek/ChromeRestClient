@@ -60,7 +60,7 @@ public class SavedActivity extends ListActivity implements SavedView.Presenter {
 
 	@Override
 	public void removeFromSaved(final RequestObject request) {
-		RequestDataStore.remove(request.getId(), new RequestDataStore.StoreSimpleCallback() {
+		RequestDataStore.remove(request.getId(), "saved", new RequestDataStore.StoreSimpleCallback() {
 
 			@Override
 			public void onSuccess() {
@@ -88,6 +88,7 @@ public class SavedActivity extends ListActivity implements SavedView.Presenter {
 					@Override
 					public void onSuccess(int result) {
 						JsArray<RequestObject> list = JsArray.createArray().cast();
+						request.setId(result); //required by SQL.
 						list.set(0, request);
 						view.appendResults(list);
 					}

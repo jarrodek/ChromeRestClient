@@ -73,7 +73,7 @@ public class HistoryRequestStore {
 	}-*/;
 	
 	public final native static void remove(int key, final StoreSimpleCallback callback) /*-{
-		$wnd.arc.app.db.requests.remove(key)
+		$wnd.arc.app.db.requests.remove(key, 'history')
 		.then(function(){
 			callback.@org.rest.client.storage.store.HistoryRequestStore.StoreSimpleCallback::onSuccess()();
 		}, function(cause){

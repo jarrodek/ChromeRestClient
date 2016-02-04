@@ -28,20 +28,6 @@ public class ProjectsStore {
 		void onSuccess();
 		void onError(Throwable e);
 	}
-	/**
-	 * Create
-	 * @param obj
-	 * @param key
-	 * @param callback
-	 */
-	public final native static void addLegacy(ProjectObject obj, final StoreResultCallback callback) /*-{
-		$wnd.arc.app.db.projects.add(obj.name, obj.created)
-		.then(function(result){
-			callback.@org.rest.client.storage.store.ProjectsStore.StoreResultCallback::onSuccess(Lorg/rest/client/jso/ProjectObject;)(result);
-		}, function(cause){
-			callback.@org.rest.client.storage.store.ProjectsStore.StoreResultCallback::onError(Ljava/lang/Throwable;)(cause);
-		});
-	}-*/;
 	
 	public final static native void add(ProjectObject project, RequestObject request, StoreResultCallback callback) /*-{
 		$wnd.arc.app.db.projects.add(project, [request])

@@ -8,6 +8,7 @@ import org.rest.client.StatusNotification;
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.deprecated.DataExportImpl;
+import org.rest.client.event.NewProjectAvailableEvent;
 import org.rest.client.event.StoreDataEvent;
 import org.rest.client.importparser.ImportParser;
 import org.rest.client.importparser.ImportResult;
@@ -454,6 +455,10 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 
 				@Override
 				public void onSuccess(JsArrayInteger rowIds) {
+					for (int i = 0; i < rowIds.length(); i++) {
+						NewProjectAvailableEvent e = new NewProjectAvailableEvent(rowIds.get(i));
+						clientFactory.getEventBus().fireEvent(e);
+					}
 					callback.onSuccess(true);
 				}
 			});
