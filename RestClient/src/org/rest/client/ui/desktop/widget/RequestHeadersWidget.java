@@ -562,7 +562,7 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 			if(ct.indexOf(";") != -1) {
 				ct = ct.substring(0, ct.indexOf(";"));
 			}
-			if((lastSendContentTypeChangeValue == null) || 
+			if((lastSendContentTypeChangeValue == null || lastSendContentTypeChangeValue.equals("null")) || 
 					(lastSendContentTypeChangeValue != null && !lastSendContentTypeChangeValue.equals(ct))) {
 				lastSendContentTypeChangeValue = ct;
 				if(RestClient.isDebug()) {

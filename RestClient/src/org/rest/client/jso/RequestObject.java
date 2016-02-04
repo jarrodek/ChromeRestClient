@@ -334,6 +334,7 @@ public class RequestObject extends JavaScriptObject {
 		JSONObject requestData = toJSONObject();
 		JSONObject save = new JSONObject();
 		save.put(StoreKeys.LATEST_REQUEST_KEY, requestData);
+		Log.debug("Storing lates object", save.getJavaScriptObject());
 		store.getLocal().set(save.getJavaScriptObject(), new StorageSimpleCallback() {
 			
 			@Override

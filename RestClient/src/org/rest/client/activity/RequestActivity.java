@@ -962,7 +962,9 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 
 		RestClient.previouslyOpenedProject = RestClient.currentlyOpenedProject;
 		RestClient.currentlyOpenedProject = -1;
-
+		RestClient.RESTORED_REQUEST = null;
+		RestClient.CURRENT_GOOGLE_DRIVE_ITEM = null;
+		
 		Storage store = GWT.create(Storage.class);
 		store.getLocal().remove(StoreKeys.LATEST_REQUEST_KEY, new StorageSimpleCallback() {
 
@@ -973,13 +975,11 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 
 			@Override
 			public void onDone() {
+				Log.debug("Storing: Latest request store object has been removed.");
 			}
 		});
-		RestClient.RESTORED_REQUEST = null;
-		RestClient.CURRENT_GOOGLE_DRIVE_ITEM = null;
-
+		
 		eventBus.fireEvent(new ClearFormEvent());
-
 		goTo(new RequestPlace("default"));
 		GoogleAnalytics.sendEvent("Engagement", "Click", "Clear request form");
 	}
