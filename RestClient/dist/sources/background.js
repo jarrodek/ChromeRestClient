@@ -15,18 +15,6 @@
  * the License.
  ******************************************************************************/
 /* global chrome, OAuth2, fetch, console */
-"function" != typeof Object.assign && ! function() {
-  Object.assign = function(n) {
-    "use strict";
-    if (void 0 === n || null === n) throw new TypeError("Cannot convert undefined or null to object");
-    for (var t = Object(n), r = 1; r < arguments.length; r++) {
-      var e = arguments[r];
-      if (void 0 !== e && null !== e)
-        for (var o in e) e.hasOwnProperty(o) && (t[o] = e[o])
-    }
-    return t
-  }
-}();
 /**
  * Background page for Advanced Rest Client.
  *
@@ -49,6 +37,10 @@ function initOauth2Object() {
 }
 window.externalDataHolder = {};
 
+/**
+ *
+ * @constructor
+ */
 function MessageHandling(webRequest) {
   this.webRequest = webRequest;
 }
@@ -193,7 +185,7 @@ MessageHandling.prototype.gdriveAuth = function(request, sendResponse) {
 MessageHandling.prototype.gdrive = function(request, sendResponse) {
   var query = request.params;
   if (typeof query === 'string') {
-    query = JSON.parse(request.params);
+    query = JSON.parse(query);
   }
   var viewTabUrl = null;
   if (query.action === 'create') {
@@ -293,7 +285,9 @@ MessageHandling.prototype.runApplication = function(requestDetails) {
 MessageHandling.prototype.guidGenerator = function() {
   /* jscs: disable */
   var S4 = function() {
-    return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+    return (((1 + Math.random()) * 0x10000) | 0)
+      .toString(16)
+      .substring(1);
   };
   /* jscs: enable */
   return (S4() + S4() + '-' + S4() + '-' + S4() + '-' + S4() + '-' + S4() + S4() + S4());
@@ -351,40 +345,67 @@ arc.app.bg.onInstalled = function(details) {
   switch (details.reason) {
     case 'update':
       arc.app.bg.performStorageUpgrade();
+      arc.app.db.websql.open()
+        .then(function() {
+          console.log('WebSQL database has been initialized');
+        })
+        .catch(function(e) {
+          console.error('Error initializing the database.', e);
+        })
+        .then(arc.app.db.idb.open)
+        .then(function() {
+          console.log('IndexedDB database has been initialized');
+        })
+        .catch(function(e) {
+          console.error('Error initializing the database.', e);
+        });
       break;
     case 'install':
-      arc.app.db.websql.open().then(function() {
-        console.log('Database has been initialized');
-        arc.app.bg.installApp();
-      }).catch(function(e) {
-        console.error('Error initializing the database.', e);
-      });
+      arc.app.db.websql.open()
+        .then(function() {
+          console.log('WebSQL database has been initialized');
+          arc.app.bg.installWebSQLApp();
+        })
+        .catch(function(e) {
+          console.error('Error initializing the database.', e);
+        })
+        .then(arc.app.db.idb.open)
+        .then(function() {
+          console.log('IndexedDB database has been initialized');
+        })
+        .catch(function(e) {
+          console.error('Error initializing the database.', e);
+        });
       //error here potentially will break the app since it is fired only during the install.
       break;
   }
 };
 /**
- * //TODO: Upgrade WebSQL to IndexedDb.
+ * Install old system database.
+ * This is only temporary here until upgrade to packaged apps.
  */
-arc.app.bg.installApp = function() {
-  chrome.storage.local.get({
-    'firstrun': false
-  }, function(result) {
-    if (result.firstrun) {
-      return;
-    }
-    arc.app.bg.downloadDefinitions()
-      .then(arc.app.bg.installDefinitions)
-      .then(function() {
-        console.log('App database has been filled with default values.');
-        chrome.storage.local.set({
-          'firstrun': true
-        });
-      })
-      .catch(function(r) {
-        console.error('There was an error when filling up the database with definitions.', r);
+arc.app.bg.installWebSQLApp = function() {
+  return arc.app.bg.downloadDefinitions()
+    .then(arc.app.bg.installDefinitions)
+    .then(function() {
+      console.log('App database has been filled with default values.');
+      chrome.storage.local.set({
+        'firstrun': true
       });
-  });
+    })
+    .catch(function(r) {
+      console.error('There was an error when filling up the database with definitions.', r);
+    });
+};
+/**
+ * Get ARC's definitions list.
+ * This is only temporary here until upgrade to packaged apps.
+ */
+arc.app.bg.downloadDefinitions = function() {
+  return fetch(chrome.runtime.getURL('assets/definitions.json'))
+    .then(function(response) {
+      return response.json();
+    });
 };
 /**
  * Add definitions to the database.
@@ -408,34 +429,6 @@ arc.app.bg.installDefinitions = function(defs) {
     });
 };
 /**
- * Get ARC's definitions list.
- * This is stored in the extension folder.
- */
-arc.app.bg.downloadDefinitions = function() {
-  return new Promise(function(resolve, reject) {
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', '/assets/definitions.json', true);
-    xhr.addEventListener('load', function(e) {
-      let raw = e.target.response;
-      if (!raw) {
-        reject({
-          'message': 'Response was empty'
-        });
-        return;
-      }
-      let data = JSON.parse(e.target.response);
-      resolve(data);
-    });
-    xhr.addEventListener('error', function(e) {
-      reject(e.target);
-    });
-    xhr.send(null);
-  });
-  /*return fetch('/assets/definitions.json').then(function(response) {
-    return response.json();
-  });*/
-};
-/**
  * Perform upgrade to the newest version
  */
 arc.app.bg.performStorageUpgrade = function() {
@@ -453,11 +446,11 @@ arc.app.bg.performStorageUpgrade = function() {
   }, function(state) {
     if (!state.upgraded.v4) {
       arc.app.bg.storageUpgradeV4(state)
-      .then(function(){
-        if (!state.upgraded.v4p6) {
-          return arc.app.bg.storageUpgradeV4p6(state);
-        }
-      });
+        .then(function() {
+          if (!state.upgraded.v4p6) {
+            return arc.app.bg.storageUpgradeV4p6(state);
+          }
+        });
     } else if (!state.upgraded.v4p6) {
       arc.app.bg.storageUpgradeV4p6(state);
     }

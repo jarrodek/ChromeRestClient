@@ -79,5 +79,3 @@ arc.app.arc.checkCompatybility = function() {
     }, 2000);
   }
 };
-
-arc.app.db.init();

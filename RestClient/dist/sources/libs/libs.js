@@ -34,6 +34,9 @@ arc.app.analytics._loadLibrary = function () {
 };
 
 arc.app.analytics._initTranckers = function () {
+  if (typeof ga !== 'function') {
+    return;
+  }
   arc.app.analytics._trackersConfig.forEach(function (item) {
     ga('create', item);
     if (!item.name) {
@@ -55,6 +58,9 @@ arc.app.analytics._getTrackerNames = function () {
 };
 
 arc.app.analytics._setCustomDimmensions = function () {
+  if (typeof ga !== 'function') {
+    return;
+  }
   var names = arc.app.analytics._getTrackerNames();
   var appVersion = chrome && chrome.runtime && chrome.runtime.getManifest ? chrome.runtime.getManifest().version : 'Unknown';
   var chromeVer = arc.app.utils.getChromeVersion();
@@ -89,6 +95,9 @@ arc.app.analytics._setAppUid = function () {
 
 arc.app.analytics._setChromeChannel = function () {
   if (!window.navigator.onLine) {
+    return;
+  }
+  if (typeof ga !== 'function') {
     return;
   }
   arc.app.analytics._loadCSV().then(function (obj) {
@@ -141,6 +150,9 @@ arc.app.analytics._loadCSV = function () {
 };
 
 arc.app.analytics.sendEvent = function (category, action, label, value) {
+  if (typeof ga !== 'function') {
+    return;
+  }
   var names = arc.app.analytics._getTrackerNames();
   var config = {
     hitType: 'event',
@@ -157,6 +169,9 @@ arc.app.analytics.sendEvent = function (category, action, label, value) {
 };
 
 arc.app.analytics.sendScreen = function (screenName) {
+  if (typeof ga !== 'function') {
+    return;
+  }
   var names = arc.app.analytics._getTrackerNames();
   names.forEach(function (name) {
     ga(name + '.send', 'pageview', screenName);
@@ -164,6 +179,9 @@ arc.app.analytics.sendScreen = function (screenName) {
 };
 
 arc.app.analytics.sendException = function (exception, isFatal) {
+  if (typeof ga !== 'function') {
+    return;
+  }
   var names = arc.app.analytics._getTrackerNames();
   var value = {
     'exDescription': '' + exception
@@ -174,6 +192,1220 @@ arc.app.analytics.sendException = function (exception, isFatal) {
   names.forEach(function (name) {
     ga(name + '.send', 'exception', value);
   });
+};
+'use strict';
+
+var arc = arc || {};
+
+arc.app = arc.app || {};
+
+arc.app.db = arc.app.db || {};
+
+arc.app.db.idb = {};
+
+arc.app.db.idb.requests = {};
+
+arc.app.db.idb.projects = {};
+
+arc.app.db.idb.websockets = {};
+
+arc.app.db.idb.upgraded = false;
+
+arc.app.db.idb.open = function () {
+  return new Dexie.Promise(function (resolve, reject) {
+    var db = new Dexie('arc');
+    db.version(1).stores({
+      headers: '&[key+type],key,type',
+      statuses: '&key',
+      historyUrls: '&url',
+      historySockets: '&url',
+      requestObject: '++id,url,method,[url+method],type,_name',
+      driveObjects: '[driveId+requestId],driveId,requestId',
+      serverExportObjects: '[serverId+requestId],serverId,requestId',
+      projectObjects: '++id,*requestIds'
+    });
+    db.projectObjects.mapToClass(ProjectObject);
+    db.serverExportObjects.mapToClass(ServerExportedObject);
+    db.driveObjects.mapToClass(DriveObject);
+    db.requestObject.mapToClass(RequestObject);
+    db.historySockets.mapToClass(HistorySocketObject);
+    db.historyUrls.mapToClass(HistoryUrlObject);
+    db.statuses.mapToClass(HttpStatusObject);
+    db.headers.mapToClass(HttpHeaderObject);
+
+    db.on('error', function (error) {
+      console.error('IndexedDB global error', error);
+    });
+    db.on('populate', function () {
+      return arc.app.db.idb.downloadDefinitions().catch(function () {
+        console.warn('Definitions wasn\'t there. skipping definitions installation.');
+        return Dexie.Promise.resolve();
+      }).then(function (defs) {
+        if (!defs) {
+          return Dexie.Promise.resolve();
+        }
+        return db.transaction('rw', db.statuses, db.headers, function () {
+          var promises = [];
+
+          var codes = defs.codes;
+          defs.requests.forEach(function (item) {
+            return item.type = 'request';
+          });
+          defs.responses.forEach(function (item) {
+            return item.type = 'response';
+          });
+          var headers = defs.requests.concat(defs.responses);
+          codes.forEach(function (item) {
+            promises.push(db.statuses.add(item));
+          });
+          headers.forEach(function (item) {
+            promises.push(db.headers.add(item));
+          });
+
+          return Dexie.Promise.all(promises);
+        });
+      }).then(function () {
+        console.log('The database has been populated with data.');
+      });
+    });
+    db.on('ready', function () {
+      if (arc.app.db.idb.upgraded) {
+        return;
+      }
+      arc.app.db.idb._db = db;
+      arc.app.db.idb.appVer = chrome.runtime.getManifest ? chrome.runtime.getManifest().version : 'tests case';
+      return new Dexie.Promise(function (resolve) {
+        var upgrade = {
+          upgraded: {
+            indexeddb: false
+          }
+        };
+        if (!chrome.storage) {
+          arc.app.db.idb.upgraded = true;
+          resolve(false);
+          return;
+        }
+        chrome.storage.local.get(upgrade, function (upgrade) {
+          if (upgrade.upgraded.indexeddb) {
+            arc.app.db.idb.upgraded = true;
+          } else {
+            console.info('IndexedDB need to be upgraded.');
+          }
+          resolve(upgrade.upgraded.indexeddb);
+        });
+      }).then(arc.app.db.idb.upgradeFromWebSQL).then(function (result) {
+        if (result === null) {
+          return;
+        }
+        console.info('Database has been upgraded from WebSQL to IndexedDB.');
+        var upgrade = {
+          upgraded: {
+            indexeddb: true
+          }
+        };
+        arc.app.db.idb.upgraded = true;
+        if (chrome.storage) {
+          chrome.storage.local.set(upgrade, function () {
+            console.info('Upgrade finished.');
+          });
+        } else {
+          console.info('Upgrade finished.');
+        }
+        arc.app.analytics.sendEvent('Upgrade', 'IndexedDB', 'Upgrade from WebSQL');
+      }).catch(function (error) {
+        arc.app.db.idb.deleteDatabase();
+        arc.app.db.useIdb = false;
+        arc.app.analytics.sendException('IDB create error::' + JSON.stringify(error));
+      });
+    });
+
+    db.open().then(function () {
+      resolve(db);
+    }).catch(function (error) {
+      arc.app.db.idb.deleteDatabase();
+      arc.app.db.useIdb = false;
+      arc.app.analytics.sendException('IDB create error::' + JSON.stringify(error));
+      reject(error);
+    });
+  });
+};
+
+arc.app.db.idb.deleteDatabase = function () {
+  console.warn('IndexedDB database is going bye bye');
+  return new Dexie.Promise(function (resolve, reject) {
+    var request = indexedDB.deleteDatabase('arc');
+    request.onsuccess = function () {
+      arc.app.db.idb.upgraded = false;
+      arc.app.db._adapter = 'websql';
+      var upgrade = {
+        upgraded: {
+          indexeddb: false
+        }
+      };
+      if (chrome.storage) {
+        chrome.storage.local.set(upgrade, function () {
+          console.info('Delete finished.');
+          resolve();
+        });
+      } else {
+        console.info('Delete finished.');
+        resolve();
+      }
+    };
+    request.onerror = function (event) {
+      console.error('Error deleting IndexedDB', event);
+      reject(event);
+    };
+  });
+};
+
+arc.app.db.idb.upgradeFromWebSQL = function (isUpgraded) {
+  if (isUpgraded) {
+    return null;
+  }
+  console.info('Upgrading WebSQL to IndexedDB');
+  return arc.app.db.idb._getSQLdata().then(arc.app.db.idb._converSqlIdb).then(arc.app.db.idb._storeUpgrade);
+};
+
+arc.app.db.idb.downloadDefinitions = function () {
+  return fetch('/assets/definitions.json').then(function (response) {
+    return response.json();
+  });
+};
+
+arc.app.db.idb._getSQLdata = function (dontUpgrade) {
+  if (dontUpgrade) {
+    return Dexie.Promise.resolve(null);
+  }
+  var data = {};
+  return new Dexie.Promise(function (resolve, reject) {
+    arc.app.db.websql.open().then(function (db) {
+      db.transaction(function (tx) {
+        var sql = 'SELECT * FROM urls WHERE 1';
+        tx.executeSql(sql, [], function (tx, result) {
+          data.urls = Array.from(result.rows);
+          sql = 'SELECT * FROM websocket_data WHERE 1';
+          tx.executeSql(sql, [], function (tx, result) {
+            data.websocketData = Array.from(result.rows);
+            sql = 'SELECT * FROM history WHERE 1';
+            tx.executeSql(sql, [], function (tx, result) {
+              data.history = Array.from(result.rows);
+              sql = 'SELECT * FROM projects WHERE 1';
+              tx.executeSql(sql, [], function (tx, result) {
+                data.projects = Array.from(result.rows);
+                sql = 'SELECT * FROM request_data WHERE 1';
+                tx.executeSql(sql, [], function (tx, result) {
+                  data.requestData = Array.from(result.rows);
+                  sql = 'SELECT * FROM exported WHERE 1';
+                  tx.executeSql(sql, [], function (tx, result) {
+                    data.exported = Array.from(result.rows);
+                    resolve(data);
+                  }, function (tx, error) {
+                    return reject(error);
+                  });
+                }, function (tx, error) {
+                  return reject(error);
+                });
+              }, function (tx, error) {
+                return reject(error);
+              });
+            }, function (tx, error) {
+              return reject(error);
+            });
+          }, function (tx, error) {
+            return reject(error);
+          });
+        }, function (tx, error) {
+          return reject(error);
+        });
+      });
+    });
+  });
+};
+
+arc.app.db.createRequestKey = function (method, url) {
+  var args = Array.from(arguments);
+  if (args.length !== 2) {
+    throw new Error('Number of arguments requires is 2 but ' + args.length + ' has been provided');
+  }
+  return method + ':' + url;
+};
+
+arc.app.db.idb._converSqlIdb = function (data) {
+  if (!data) {
+    return Dexie.Promise.resolve(null);
+  }
+  return new Dexie.Promise(function (resolve) {
+    var _this = this;
+
+    var requests = [];
+    var urlHistory = [];
+    var socketHistory = [];
+    var exportedSize = data.exported.length;
+    data.requestData.forEach(function (item) {
+      var obj = arc.app.db.idb._createHARfromSql.call(_this, item);
+      obj.type = 'saved';
+
+      if (item.project) {
+        obj.project = item.project;
+      }
+      for (var i = 0; i < exportedSize; i++) {
+        if (data.exported[i].reference_id === item.id) {
+          obj.exported = i;
+          break;
+        }
+      }
+      requests.push(obj);
+    });
+    data.history.forEach(function (item) {
+      var obj = arc.app.db.idb._createHARfromSql.call(_this, item);
+      requests.push(obj);
+    });
+    data.urls.forEach(function (item) {
+      var obj = new HistoryUrlObject({
+        url: item.url,
+        time: item.time
+      });
+      urlHistory.push(obj);
+    });
+    data.websocketData.forEach(function (item) {
+      var obj = new HistorySocketObject({
+        url: item.url,
+        time: item.time
+      });
+      socketHistory.push(obj);
+    });
+
+    var result = {
+      indexeddb: {
+        requests: requests,
+        urlHistory: urlHistory,
+        socketHistory: socketHistory
+      },
+      websql: data
+    };
+    resolve(result);
+  });
+};
+
+arc.app.db.idb._converIdbSql = function (data) {
+  var har = data.har;
+  var request = har.entries[0].request;
+  var page = har.pages[0];
+
+  return {
+    id: data.id,
+    name: data.name || null,
+    project: 0,
+    url: data.url,
+    method: data.method,
+    encoding: null,
+    headers: arc.app.headers.toString(request.headers),
+    payload: request.postData.text,
+    time: new Date(page.startedDateTime).getTime(),
+    driveId: null
+  };
+};
+
+arc.app.db.idb._storeUpgrade = function (data) {
+  if (!data) {
+    return null;
+  }
+  var db = arc.app.db.idb._db;
+  return db.transaction('rw', db.historyUrls, db.historySockets, db.requestObject, db.serverExportObjects, db.projectObjects, function () {
+    console.info('Entered transaction. Ready to save data.');
+    console.info('Inserting URL history');
+    data.indexeddb.urlHistory.forEach(function (item) {
+      db.historyUrls.put(item);
+    });
+    console.info('Inserting Socket URL history');
+    data.indexeddb.socketHistory.forEach(function (item) {
+      db.historySockets.put(item);
+    });
+    var projects = {};
+    var exported = [];
+    var promises = [];
+
+    var insertRequest = function insertRequest(db, item) {
+      var referencedProjectId = item.project;
+      var referencedExported = item.exported;
+      delete item.project;
+      delete item.exported;
+      return db.requestObject.add(item).then(function (requestId) {
+        if (referencedProjectId) {
+          if (!(referencedProjectId in projects)) {
+            var _projects = data.websql.projects.filter(function (project) {
+              return project.id === referencedProjectId;
+            });
+            if (_projects.length === 1) {
+              var project = new ProjectObject({
+                time: _projects[0].time,
+                name: _projects[0].name,
+                requestIds: [requestId]
+              });
+              projects[referencedProjectId] = project;
+            } else if (_projects.length > 1) {
+              console.warn('Projects filtered array has more than one element ' + 'and it should not happen.');
+            }
+          } else {
+            projects[referencedProjectId].addRequest(requestId);
+          }
+        }
+        if (referencedExported) {
+          var exportData = data.websql.exported[referencedExported];
+          var exportObject = new ServerExportedObject({
+            serverId: exportData.gaeKey,
+            requestId: requestId
+          });
+          exported.push(exportObject);
+        }
+      });
+    };
+
+    console.info('Inserting requests');
+    data.indexeddb.requests.forEach(function (item) {
+      promises.push(insertRequest(db, item));
+    });
+
+    return Dexie.Promise.all(promises).then(function () {
+      console.info('Exported items to be inserted: %d, projects items to be inserted: %d', exported.length, Object.keys(projects).length);
+      if (Object.keys(projects).length > 0) {
+        console.info('Inserting projects');
+        Object.keys(projects).forEach(function (projectKey) {
+          db.projectObjects.add(projects[projectKey]);
+        });
+      }
+      if (exported.length > 0) {
+        console.info('Inserting exported');
+        exported.forEach(function (item) {
+          db.serverExportObjects.add(item);
+        });
+      }
+    });
+  });
+};
+
+arc.app.db.idb._createHARfromSql = function (item) {
+  var creator = new HAR.Creator({
+    name: 'Advanced REST client',
+    version: arc.app.db.idb.appVer,
+    comment: 'Created during WebSQL update to IndexedDB'
+  });
+  var browser = new HAR.Browser({
+    name: 'Chrome',
+    version: 'unknown'
+  });
+  var log = new HAR.Log({
+    'comment': 'Imported from WebSQL implementation',
+    'version': 1.2,
+    'creator': creator,
+    'browser': browser
+  });
+  var requestHeaders = arc.app.headers.toJSON(item.headers);
+  var request = new HAR.Request({
+    url: item.url,
+    httpVersion: 'HTTP/1.1',
+    method: item.method
+  });
+  if (['GET', 'HEAD'].indexOf(item.method) === -1) {
+    arc.app.headers._oldCombine(requestHeaders, item.encoding);
+    var contentType = arc.app.headers.getContentType(requestHeaders) || 'application/x-www-form-urlencoded';
+    var post = new HAR.PostData({
+      mimeType: contentType,
+      text: item.payload
+    });
+    request.postData = post;
+  }
+  request.headers = requestHeaders;
+  var page = new HAR.Page({
+    id: arc.app.db.createRequestKey(item.method, item.url),
+    title: item.name,
+    startedDateTime: new Date(item.time),
+    pageTimings: {}
+  });
+  var entry = new HAR.Entry({
+    startedDateTime: new Date(item.time),
+    request: request,
+    response: {
+      status: '0',
+      statusText: 'No response'
+    }
+  });
+  entry.setPage(page);
+  log.addPage(page);
+  log.addEntry(entry, page.id);
+
+  var obj = new RequestObject({
+    'har': log,
+    'url': item.url,
+    'method': item.method,
+    'name': item.name,
+    'type': 'history'
+  });
+  return obj;
+};
+
+arc.app.db.idb.getStatusCode = function (code) {
+  return new Promise(function (resolve, reject) {
+    arc.app.db.idb.open().then(function (db) {
+      db.statuses.get(code).then(resolve).catch(reject).finally(function () {
+        db.close();
+      });
+    }).catch(function (e) {
+      return reject(e);
+    });
+  });
+};
+
+arc.app.db.idb.getHeaderByName = function (name, type) {
+  return new Promise(function (resolve, reject) {
+    arc.app.db.idb.open().then(function (db) {
+      var result = null;
+      db.headers.where('[key+type]').equals([name, type]).each(function (header) {
+        result = header;
+      }).catch(reject).finally(function () {
+        db.close();
+        resolve(result);
+      });
+    }).catch(function (e) {
+      return reject(e);
+    });
+  });
+};
+
+arc.app.db.idb.getHeadersByName = function (name, type) {
+  return arc.app.db.idb.open().then(function (db) {
+    return db.headers.where('key').startsWithIgnoreCase(name).and(function (item) {
+      return item.type === type;
+    }).sortBy('key').finally(function () {
+      db.close();
+    });
+  });
+};
+
+arc.app.db.idb.putHistoryUrl = function (url, time) {
+  return arc.app.db.idb.open().then(function (db) {
+    return db.transaction('rw', db.historyUrls, function (historyUrls) {
+      return historyUrls.put({
+        'url': url,
+        'time': time
+      });
+    }).finally(function () {
+      db.close();
+    });
+  });
+};
+
+arc.app.db.idb.getHistoryUrls = function (query) {
+  return arc.app.db.idb.open().then(function (db) {
+    return db.historyUrls.where('url').startsWithIgnoreCase(query).sortBy('url').finally(function () {
+      db.close();
+    });
+  });
+};
+
+arc.app.db.idb.websockets.insert = function (url, time) {
+  return arc.app.db.idb.open().then(function (db) {
+    return db.transaction('rw', db.historySockets, function (historySockets) {
+      return historySockets.put({
+        'url': url,
+        'time': time
+      });
+    }).finally(function () {
+      db.close();
+    });
+  });
+};
+
+arc.app.db.idb.websockets.query = function (query) {
+  return arc.app.db.idb.open().then(function (db) {
+    return db.historySockets.where('url').startsWithIgnoreCase(query).sortBy('url').finally(function () {
+      db.close();
+    });
+  });
+};
+
+arc.app.db.idb.projects.addWithRequests = function (project, requests) {
+  var _this2 = this;
+
+  var requestsArray = [];
+  if (!(project instanceof ProjectObject)) {
+    project = new ProjectObject({
+      'time': project.time,
+      'name': project.name,
+      'requestIds': project.requestIds || []
+    });
+  }
+  requests.forEach(function (item) {
+    var r = arc.app.db.idb._createHARfromSql.call(_this2, item);
+    r.type = 'saved';
+    requestsArray.push(r);
+  });
+
+  return arc.app.db.idb.open().then(function (db) {
+    return db.transaction('rw', db.projectObjects, db.requestObject, function () {
+      var promises = [];
+      var insertRequest = function insertRequest(db, item) {
+        return db.requestObject.add(item).catch(function (e) {
+          console.error('Error saving the request.', e);
+          throw e;
+        }).then(function (requestId) {
+          project.addRequest(requestId);
+        });
+      };
+      requestsArray.forEach(function (item) {
+        promises.push(insertRequest(db, item));
+      });
+      return Dexie.Promise.all(promises).then(function () {
+        return db.projectObjects.put(project);
+      }).finally(function () {
+        db.close();
+      });
+    });
+  });
+};
+
+arc.app.db.idb.projects.getProject = function (id) {
+  return arc.app.db.idb.open().then(function (db) {
+    return db.projectObjects.get(id).finally(function () {
+      db.close();
+    });
+  });
+};
+
+arc.app.db.idb.projects.update = function (project) {
+  return arc.app.db.idb.open().then(function (db) {
+    return db.transaction('rw', db.projectObjects, function () {
+      return db.projectObjects.put(project);
+    }).finally(function () {
+      db.close();
+    });
+  });
+};
+
+arc.app.db.idb.projects.list = function () {
+  return arc.app.db.idb.open().then(function (db) {
+    return db.projectObjects.toArray().finally(function () {
+      db.close();
+    });
+  });
+};
+
+arc.app.db.idb.requests.import = function (legacyRequestsList) {
+  var requestsArray = [];
+  return arc.app.db.idb.open().then(function (db) {
+    var _this3 = this;
+
+    legacyRequestsList.forEach(function (item) {
+      var r = arc.app.db.idb._createHARfromSql.call(_this3, item);
+      r.type = 'saved';
+      requestsArray.push(r);
+    });
+    return db.transaction('rw', db.requestObject, function (requestObject) {
+      var promises = [];
+      requestsArray.forEach(function (item) {
+        promises.push(requestObject.add(item));
+      });
+      return Dexie.Promise.all(promises);
+    }).finally(function () {
+      db.close();
+    });
+  });
+};
+arc.app.db.idb.requests.insert = function (requestAsLegacy, type) {
+  return arc.app.db.idb.open().then(function (db) {
+    return db.transaction('rw', db.requestObject, function (requestObject) {
+      var obj = arc.app.db.idb._createHARfromSql(requestAsLegacy);
+      obj.type = type;
+      if (requestAsLegacy.id) {
+        obj.id = requestAsLegacy.id;
+      }
+      return requestObject.add(obj);
+    });
+  });
+};
+
+arc.app.db.idb.requests.getRequest = function (id) {
+  return arc.app.db.idb.open().then(function (db) {
+    return db.requestObject.get(id).finally(function () {
+      db.close();
+    });
+  });
+};
+
+arc.app.db.idb.projects.getProjectRequests = function (projectId) {
+  return arc.app.db.idb.open().then(function (db) {
+    return db.projectObjects.get(projectId).then(function (project) {
+      if (!project || !project.requestIds || project.requestIds.length === 0) {
+        return [];
+      }
+      return db.requestObject.where(':id').anyOf(project.requestIds).toArray();
+    }).finally(function () {
+      db.close();
+    });
+  });
+};
+
+arc.app.db.idb.projects.deleteRecursive = function (projectId) {
+  return arc.app.db.idb.open().then(function (db) {
+    return db.projectObjects.get(projectId).then(function (project) {
+      var requests = project.requestIds;
+      return db.transaction('rw', db.requestObject, db.projectObjects, function () {
+        var promises = [];
+        promises.push(db.projectObjects.delete(projectId));
+        requests.forEach(function (requestId) {
+          promises.push(db.requestObject.delete(requestId));
+        });
+        return Dexie.Promise.all(promises);
+      });
+    }).finally(function () {
+      db.close();
+    });
+  });
+};
+
+arc.app.db.idb.requests.list = function (type) {
+  return arc.app.db.idb.open().then(function (db) {
+    return db.requestObject.where('type').equals(type).toArray().finally(function () {
+      db.close();
+    });
+  });
+};
+
+arc.app.db.idb.projects.getForRequest = function (requestId) {
+  return arc.app.db.idb.open().then(function (db) {
+    return db.projectObjects.where('requestIds').equals(requestId).toArray().then(function (objs) {
+      return objs && objs.length ? objs[0] : null;
+    }).finally(function () {
+      db.close();
+    });
+  });
+};
+
+arc.app.db.idb.requests.delete = function (id) {
+  return arc.app.db.idb.open().then(function (db) {
+    return db.transaction('rw', db.requestObject, function (requestObject) {
+      return requestObject.delete(id);
+    }).finally(function () {
+      db.close();
+    });
+  });
+};
+
+arc.app.db.idb.requests.deleteType = function (type) {
+  if (['history', 'saved'].indexOf(type) === -1) {
+    throw new Error('Unsupported type.');
+  }
+  return arc.app.db.idb.open().then(function (db) {
+    return db.transaction('rw', db.requestObject, function (requestObject) {
+      return requestObject.where('type').equals(type).delete();
+    }).finally(function () {
+      db.close();
+    });
+  });
+};
+
+arc.app.db.idb.requests.query = function (type, opts) {
+  return arc.app.db.idb.open().then(function (db) {
+    var builder = db.requestObject;
+
+    if (opts.query) {
+      builder = builder.where('url').startsWithIgnoreCase(opts.query).or('_name').startsWithIgnoreCase(opts.query);
+    }
+    if (opts.exclude) {
+      if (builder.and) {
+        builder = builder.and(function (item) {
+          return opts.exclude.indexOf(item.id) === -1;
+        });
+      } else {
+        builder = builder.where(':id').noneOf(opts.exclude);
+      }
+    }
+    if (builder.and) {
+      builder = builder.and(function (item) {
+        return item.type === type;
+      });
+    } else {
+      builder = builder.where('type').equals(type);
+    }
+
+    if (opts.offset) {
+      builder = builder.offset(opts.offset);
+    }
+    if (opts.limit) {
+      builder = builder.limit(opts.limit);
+    }
+
+    return builder.toArray().finally(function () {
+      db.close();
+    });
+  });
+};
+arc.app.db.idb.requests.deleteByProject = function (projectId) {
+  var requests;
+  return arc.app.db.idb.getProjectRequests(projectId).then(function (list) {
+    return requests = list;
+  }).then(arc.app.db.idb.open).then(function (db) {
+    return db.transaction('rw', db.requestObject, function (requestObject) {
+      return requestObject.where(':id').anyOf(requests.map(function (item) {
+        return item.id;
+      })).delete();
+    }).finally(function () {
+      db.close();
+    });
+  });
+};
+
+arc.app.db.idb.requests.update = function (obj) {
+  return arc.app.db.idb.open().then(function (db) {
+    return db.transaction('rw', db.requestObject, function (requestObject) {
+      var data = arc.app.db.idb._createHARfromSql(obj);
+      data.id = obj.id;
+      data.type = 'saved';
+      return requestObject.put(data);
+    }).finally(function () {
+      db.close();
+    });
+  });
+};
+arc.app.db.idb.requests.updateRequestName = function (id, name) {
+  var request;
+  return arc.app.db.idb.requests.getRequest(id).then(function (item) {
+    return request = item;
+  }).then(arc.app.db.idb.open).then(function (db) {
+    return db.transaction('rw', db.requestObject, function (requestObject) {
+      request.name = name;
+      return requestObject.put(request);
+    }).finally(function () {
+      db.close();
+    });
+  });
+};
+
+arc.app.db.idb.insertExported = function (refArray) {
+  return arc.app.db.idb.open().then(function (db) {
+    return db.transaction('rw', db.serverExportObjects, function (serverExportObjects) {
+      var promises = [];
+      refArray.forEach(function (item) {
+        var ref = new ServerExportedObject(item);
+        promises.push(serverExportObjects.put(ref));
+      });
+      return Dexie.Promise.all(promises);
+    }).finally(function () {
+      db.close();
+    });
+  });
+};
+
+arc.app.db.idb.listExported = function (requestsArray) {
+  return arc.app.db.idb.open().then(function (db) {
+    return db.serverExportObjects.where('requestId').anyOf(requestsArray).toArray().finally(function () {
+      db.close();
+    });
+  });
+};
+'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var arc = arc || {};
+
+arc.app = arc.app || {};
+
+arc.app.db = arc.app.db || {};
+
+arc.app.db.useIdb = false;
+
+arc.app.db.statuses = {};
+
+arc.app.db.headers = {};
+
+arc.app.db.exported = {};
+
+arc.app.db.websockets = {};
+
+arc.app.db.projects = {};
+
+arc.app.db.requests = {};
+
+arc.app.db.urls = {};
+
+arc.app.db.init = function () {
+  arc.app.settings.getConfig().then(function (cfg) {
+    arc.app.db.useIdb = cfg.useIdb;
+  });
+};
+
+arc.app.db.statuses.getCode = function (code) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.getStatusCode(code);
+  }
+  return arc.app.db.websql.getStatusCode();
+};
+
+arc.app.db.headers.getHeader = function (name, type) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.getHeaderByName(name, type);
+  }
+  return arc.app.db.websql.getHeaderByName(name, type);
+};
+
+arc.app.db.headers.list = function (name, type) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.getHeadersByName(name, type).then(function (item) {
+      item.name = item.key;
+      return item;
+    });
+  }
+  return arc.app.db.websql.getHeadersByName(name + '%', type);
+};
+
+arc.app.db.urls.insert = function (url, time) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.putHistoryUrl(url, time);
+  }
+  return arc.app.db.websql.addUrlHistory(url, time);
+};
+
+arc.app.db.urls.update = function (url, time) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.putHistoryUrl(url, time);
+  }
+  return arc.app.db.websql.updateUrlHistory(url, time);
+};
+
+arc.app.db.urls.list = function (query) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.getHistoryUrls(query);
+  }
+  return arc.app.db.websql.updateUrlHistory(query + '%');
+};
+
+arc.app.db.exported.insert = function (refArray) {
+  if (arc.app.db.useIdb) {
+    var _ret = function () {
+      var inserts = [];
+      refArray.forEach(function (item) {
+        var obj = {
+          'requestId': item.reference_id,
+
+          'serverId': item.gaeKey
+        };
+        if (item.id) {
+          obj.oldId = item.id;
+        }
+        inserts.push(obj);
+      });
+      return {
+        v: arc.app.db.idb.insertExported(inserts)
+      };
+    }();
+
+    if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+  }
+  return arc.app.db.websql.insertExported(refArray);
+};
+
+arc.app.db.exported.query = function (requestsArray) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.listExported(requestsArray).then(function (dbList) {
+      var legacyList = [];
+      dbList.forEach(function (item) {
+        legacyList.push({
+          'reference_id': item.requestId,
+
+          'gaeKey': item.serverId
+        });
+      });
+      return legacyList;
+    });
+  }
+  return arc.app.db.websql.getExportedByReferenceIds(requestsArray);
+};
+
+arc.app.db.websockets.insert = function (url, time) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.websockets.insert(url, time);
+  }
+  return arc.app.db.websql.insertWebsocketData(url, time);
+};
+arc.app.db.websockets.query = function (query) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.websockets.query(query);
+  }
+  return arc.app.db.websql.queryWebsocketData('%' + query + '%');
+};
+
+arc.app.db.projects.add = function () {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.projects.addWithRequests.apply(arc.app.db.idb, arguments).then(function (insertId) {
+      return arc.app.db.idb.getProject(insertId);
+    });
+  }
+  return arc.app.db.websql.addProject.apply(arc.app.db.websql, arguments).then(function (insertId) {
+    return arc.app.db.websql.getProject(insertId);
+  });
+};
+arc.app.db.projects.update = function (project) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.projects.update(project);
+  }
+  if (!project.created) {
+    project.created = new Date();
+  }
+  return arc.app.db.websql.updateProject(project.name, project.created.getTime(), project.id);
+};
+
+arc.app.db.projects.list = function () {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.projects.list();
+  }
+  return arc.app.db.websql.listProjects();
+};
+arc.app.db.projects.getProject = function (id) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.projects.getProject(id);
+  }
+  return arc.app.db.websql.getProject(id);
+};
+arc.app.db.projects.getForRequest = function (requestId) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.projects.getForRequest(requestId);
+  }
+  return arc.app.db.websql.getProjectByRequest(requestId);
+};
+arc.app.db.projects.remove = function (id) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.projects.deleteRecursive(id);
+  }
+  return arc.app.db.websql.deleteProject(id);
+};
+arc.app.db.projects.importData = function (projects, requests) {
+  if (arc.app.db.useIdb) {
+    var pMap = new Map();
+    for (var i in projects) {
+      var project = projects[i];
+      pMap.set(project.id, {
+        project: project,
+        requests: []
+      });
+    }
+    for (var i = requests.length - 1; i >= 0; i--) {
+      var request = requests[i];
+      var isProject = request.project > 0;
+      if (!isProject) {
+        continue;
+      }
+      if (!pMap.has(request.project)) {
+        continue;
+      }
+      var data = pMap.get(request.project);
+      data.requests.push(request);
+      pMap.set(request.project, data);
+      requests.splice(i, 1);
+    }
+    var promises = [];
+    var promisesProjects = [];
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = pMap.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var value = _step.value;
+
+        if (value.requests.length === 0) {
+          continue;
+        }
+        promisesProjects.push(arc.app.db.idb.projects.addWithRequests(value.project, value.requests));
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+
+    promises.push(arc.app.db.idb.requests.import(requests));
+    return Promise.all(promisesProjects, promises);
+  } else {
+    return new Promise(function (resolve, reject) {
+      var insertProjectIds = [];
+
+      var insertRequests = function insertRequests(requests) {
+        if (!requests || requests.length === 0) {
+          console.warn('Request data is empty.');
+          resolve();
+          return;
+        }
+        requests.forEach(function (item) {
+          if (!item.project) {
+            item.project = 0;
+          }
+        });
+        arc.app.db.requests.importList(requests).then(function () {
+          resolve(insertProjectIds);
+        }).catch(reject);
+      };
+
+      if (projects && projects.length > 0) {
+        arc.app.db.websql.importProjects2(projects).then(function (inserts) {
+          insertProjectIds = inserts;
+          var requestsSize = requests.length;
+          for (var i = 0, len = inserts.length; i < len; i++) {
+            var currentProjectId = inserts[i];
+            var exportedProjectId = projects[i].id;
+            for (var j = 0; j < requestsSize; j++) {
+              var r = requests[j];
+              if (!r.project) {
+                r.project = 0;
+              }
+              if (r.project === exportedProjectId) {
+                r.project = currentProjectId;
+              }
+            }
+          }
+          insertRequests(requests);
+        }).catch(reject);
+      } else {
+        insertRequests(requests);
+      }
+    });
+  }
+};
+
+arc.app.db.requests.getProjectRequests = function (projectId) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.projects.getProjectRequests(projectId).then(function (list) {
+      var result = [];
+      list.forEach(function (item) {
+        result.push(arc.app.db.idb._converIdbSql(item));
+      });
+      return result;
+    });
+  }
+  return arc.app.db.websql.getProjectRequests(projectId);
+};
+
+arc.app.db.requests.insert = function (legacyRequestObject, type) {
+  if (!legacyRequestObject) {
+    throw new Error('legacyRequestObject is undefined');
+  }
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.requests.insert(legacyRequestObject, type);
+  }
+
+  legacyRequestObject.id = undefined;
+  if (type === 'history') {
+    return arc.app.db.websql.insertHistoryObject(legacyRequestObject);
+  }
+  return arc.app.db.websql.insertRequestObject(legacyRequestObject);
+};
+arc.app.db.requests.importList = function (legacyRequestList) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.requests.import(legacyRequestList);
+  }
+  return arc.app.db.websql.importRequests(legacyRequestList);
+};
+arc.app.db.requests.getRequest = function (id, type) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.requests.getRequest(id).then(arc.app.db.idb._converIdbSql);
+  }
+  if (type === 'history') {
+    return arc.app.db.websql.getHistoryObject(id);
+  } else {
+    return arc.app.db.websql.getRequest(id);
+  }
+};
+arc.app.db.requests.list = function (type) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.requests.list(type).then(function (list) {
+      var result = [];
+      list.forEach(function (item) {
+        result.push(arc.app.db.idb._converIdbSql(item));
+      });
+      return result;
+    });
+  }
+  if (type === 'history') {
+    return arc.app.db.websql.getAllHistoryObjects();
+  }
+  return arc.app.db.websql.listRequestObjects();
+};
+
+arc.app.db.requests.remove = function (id, type) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.requests.delete(id);
+  }
+  if (!type) {
+    throw new Error('Type is not defined');
+  }
+  if (type === 'history') {
+    return arc.app.db.websql.removeHistoryObject(id);
+  }
+  return arc.app.db.websql.deleteRequestObject(id);
+};
+
+arc.app.db.requests.removeAll = function (type) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.requests.deleteType(type);
+  }
+  if (type === 'history') {
+    return arc.app.db.websql.truncateHistoryTable();
+  }
+  throw new Error('Unsupported API call');
+};
+arc.app.db.requests.deleteByProject = function (projectId) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.requests.deleteByProject(projectId);
+  }
+  return arc.app.db.websql.deleteRequestByProject(projectId);
+};
+arc.app.db.requests.update = function (obj) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.requests.update(obj);
+  }
+  return arc.app.db.websql.updateRequestObject(obj);
+};
+arc.app.db.requests.updateName = function (id, name) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.requests.updateRequestName(id, name);
+  }
+  return arc.app.db.websql.updateRequestName(id, name);
+};
+
+arc.app.db.requests.query = function (type, queryOpts) {
+  if (arc.app.db.useIdb) {
+    return arc.app.db.idb.projects.list().then(function (projects) {
+      var requestsIds = [];
+      projects.forEach(function (item) {
+        requestsIds = requestsIds.concat(item.requestIds);
+      });
+      if (requestsIds.length > 0) {
+        queryOpts.exclude = requestsIds;
+      }
+    }).then(function () {
+      return arc.app.db.idb.requests.query(type, queryOpts);
+    }).then(function (list) {
+      var result = [];
+      list.forEach(function (item) {
+        result.push(arc.app.db.idb._converIdbSql(item));
+      });
+      return result;
+    });
+  }
+  if (type === 'history') {
+    return arc.app.db.websql.queryHistoryTable(queryOpts);
+  }
+  return arc.app.db.websql.queryRequestsTable(queryOpts);
 };
 'use strict';
 
@@ -230,7 +1462,7 @@ arc.app.db.websql._dbUpgrade = function (db) {
       sql = 'CREATE TABLE IF NOT EXISTS projects (' + 'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, ' + 'name TEXT NOT NULL, ' + 'time INTEGER)';
       tx.executeSql(sql, []);
 
-      sql = 'CREATE TABLE IF NOT EXISTS request_data (' + 'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, ' + 'project INTEGER DEFAULT 0, name TEXT NOT NULL, ' + 'url TEXT NOT NULL, method TEXT NOT NULL, ' + 'encoding TEXT NULL, headers TEXT NULL, ' + 'payload TEXT NULL, skipProtocol INTEGER DEFAULT 0, ' + 'skipServer INTEGER DEFAULT 0, ' + 'skipParams INTEGER DEFAULT 0, ' + 'skipHistory INTEGER DEFAULT 0, ' + 'skipMethod INTEGER DEFAULT 0, ' + 'skipPayload INTEGER DEFAULT 0, ' + 'skipHeaders INTEGER DEFAULT 0, ' + 'skipPath INTEGER DEFAULT 0, time INTEGER)';
+      sql = 'CREATE TABLE IF NOT EXISTS request_data (' + 'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, ' + 'project INTEGER DEFAULT 0, name TEXT NOT NULL, ' + 'url TEXT NOT NULL, method TEXT NOT NULL, ' + 'encoding TEXT NULL, headers TEXT NULL, ' + 'payload TEXT NULL, ' + 'time INTEGER)';
       tx.executeSql(sql, []);
 
       sql = 'CREATE TABLE IF NOT EXISTS statuses (' + 'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, ' + 'code INTEGER NOT NULL, label TEXT, desc TEXT)';
@@ -246,6 +1478,46 @@ arc.app.db.websql._dbUpgrade = function (db) {
       reject(e);
     }, function () {
       resolve();
+    });
+  });
+};
+arc.app.db.websql.resetDatabases = function () {
+  return new Promise(function (resolve, reject) {
+    arc.app.db.websql.open().then(function (db) {
+      db.transaction(function (tx) {
+        var sql = 'DROP TABLE urls';
+        tx.executeSql(sql, [], function (tx) {
+          sql = 'DROP TABLE websocket_data';
+          tx.executeSql(sql, [], function (tx) {
+            sql = 'DROP TABLE history';
+            tx.executeSql(sql, [], function (tx) {
+              sql = 'DROP TABLE projects';
+              tx.executeSql(sql, [], function (tx) {
+                sql = 'DROP TABLE request_data';
+                tx.executeSql(sql, [], function (tx) {
+                  sql = 'DROP TABLE exported';
+                  tx.executeSql(sql, [], function () {
+                    arc.app.db.websql._db = null;
+                    resolve();
+                  }, function (tx, error) {
+                    return reject(error);
+                  });
+                }, function (tx, error) {
+                  return reject(error);
+                });
+              }, function (tx, error) {
+                return reject(error);
+              });
+            }, function (tx, error) {
+              return reject(error);
+            });
+          }, function (tx, error) {
+            return reject(error);
+          });
+        }, function (tx, error) {
+          return reject(error);
+        });
+      });
     });
   });
 };
@@ -380,12 +1652,12 @@ arc.app.db.websql.addUrlHistory = function (url, time) {
   });
 };
 
-arc.app.db.websql.updateUrlHistory = function (id, time) {
+arc.app.db.websql.updateUrlHistory = function (url, time) {
   return new Promise(function (resolve, reject) {
     arc.app.db.websql.open().then(function (db) {
       db.transaction(function (tx) {
-        var sql = 'UPDATE urls SET time = ? WHERE ID = ?';
-        tx.executeSql(sql, [time, id], function () {
+        var sql = 'UPDATE urls SET time = ? WHERE url LIKE ?';
+        tx.executeSql(sql, [time, url], function () {
           resolve();
         }, function (tx, e) {
           arc.app.db.websql.onerror(e);
@@ -473,7 +1745,7 @@ arc.app.db.websql.importProjects2 = function (projectsArray) {
           resolve(results);
         }
       };
-      var success = function success(result) {
+      var success = function success(tx, result) {
         left--;
         results.push(result.insertId);
         callOnEnd();
@@ -527,7 +1799,11 @@ arc.app.db.websql.listProjects = function () {
           if (result.rows.length === 0) {
             resolve([]);
           } else {
-            resolve(Array.from(result.rows));
+            var list = Array.from(result.rows);
+            list.forEach(function (item) {
+              return item.created = new Date(item.time);
+            });
+            resolve(list);
           }
         }, function (tx, e) {
           arc.app.db.websql.onerror(e);
@@ -550,7 +1826,9 @@ arc.app.db.websql.getProject = function (id) {
           if (result.rows.length === 0) {
             resolve([]);
           } else {
-            resolve(Array.from(result.rows)[0]);
+            var item = Array.from(result.rows)[0];
+            item.created = new Date(item.time);
+            resolve(item);
           }
         }, function (tx, e) {
           arc.app.db.websql.onerror(e);
@@ -689,13 +1967,16 @@ arc.app.db.websql.queryHistoryTable = function (opts) {
   var sql = 'SELECT * FROM history WHERE ';
   if (opts.query) {
     sql += 'url LIKE ?';
-    sqlArgs.push(opts.query);
+    sqlArgs.push('%' + opts.query + '%');
   } else {
     sql += '1';
   }
-  sql += ' ORDER BY time DESC  LIMIT ?, ?';
-  sqlArgs.push(opts.offset);
-  sqlArgs.push(opts.limit);
+  sql += ' ORDER BY time DESC';
+  if (typeof opts.offset !== 'undefined' && typeof opts.limit !== 'undefined' && opts.offset >= 0 && opts.limit >= 0) {
+    sql += '  LIMIT ?, ?';
+    sqlArgs.push(opts.offset);
+    sqlArgs.push(opts.limit);
+  }
   return new Promise(function (resolve, reject) {
     arc.app.db.websql.open().then(function (db) {
       db.transaction(function (tx) {
@@ -717,47 +1998,6 @@ arc.app.db.websql.queryHistoryTable = function (opts) {
   });
 };
 
-arc.app.db.websql.getHistoryItems = function (url, method) {
-  return new Promise(function (resolve, reject) {
-    arc.app.db.websql.open().then(function (db) {
-      db.transaction(function (tx) {
-        var sql = 'SELECT * FROM history WHERE url=? AND method=? ORDER BY time DESC';
-        tx.executeSql(sql, [url, method], function (tx, result) {
-          if (result.rows.length === 0) {
-            resolve([]);
-          } else {
-            resolve(Array.from(result.rows));
-          }
-        }, function (tx, e) {
-          arc.app.db.websql.onerror(e);
-          reject(e);
-        });
-      });
-    }).catch(function (e) {
-      arc.app.db.websql.onerror(e);
-      reject(e);
-    });
-  });
-};
-
-arc.app.db.websql.updateHistoryTime = function (id, time) {
-  return new Promise(function (resolve, reject) {
-    arc.app.db.websql.open().then(function (db) {
-      db.transaction(function (tx) {
-        var sql = 'UPDATE history SET time = ? WHERE ID = ?';
-        tx.executeSql(sql, [time, id], function () {
-          resolve();
-        }, function (tx, e) {
-          arc.app.db.websql.onerror(e);
-          reject(e);
-        });
-      });
-    }).catch(function (e) {
-      arc.app.db.websql.onerror(e);
-      reject(e);
-    });
-  });
-};
 arc.app.db.websql.insertWebsocketData = function (url, time) {
   return new Promise(function (resolve, reject) {
     arc.app.db.websql.open().then(function (db) {
@@ -839,8 +2079,8 @@ arc.app.db.websql.insertRequestObject = function (data) {
     arc.app.db.websql.open().then(function (db) {
       db.transaction(function (tx) {
         data.project = data.project || 0;
-        var sql = 'INSERT INTO request_data (project, name, url, method, headers,' + 'payload, skipProtocol, skipServer, skipParams, skipHistory, skipMethod, ' + 'skipPayload, skipHeaders, skipPath, time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
-        var values = [data.project, data.name, data.url, data.method, data.headers, data.payload, arc.app.db.websql._getIntValue(data.skipProtocol), arc.app.db.websql._getIntValue(data.skipServer), arc.app.db.websql._getIntValue(data.skipParams), arc.app.db.websql._getIntValue(data.skipHistory), arc.app.db.websql._getIntValue(data.skipMethod), arc.app.db.websql._getIntValue(data.skipPayload), arc.app.db.websql._getIntValue(data.skipHeaders), arc.app.db.websql._getIntValue(data.skipPath), data.time];
+        var sql = 'INSERT INTO request_data (project, name, url, method, headers,' + 'payload, time) VALUES (?,?,?,?,?,?,?)';
+        var values = [data.project, data.name, data.url, data.method, data.headers, data.payload, data.time];
         tx.executeSql(sql, values, function (tx, result) {
           resolve(result.insertId);
         }, function (tx, e) {
@@ -874,8 +2114,8 @@ arc.app.db.websql.updateRequestObject = function (data) {
       db.transaction(function (tx) {
         data.time = data.time || Date.now();
         data.project = data.project || 0;
-        var sql = 'UPDATE request_data SET project=?,name=?,' + 'url=?,method=?,headers=?,payload=?,skipProtocol=?,skipServer=?,skipParams=?, ' + 'skipHistory=?,skipMethod=?,skipPayload=?,skipHeaders=?,skipPath=?,time=? ' + 'WHERE ID=?';
-        var values = [data.project, data.name, data.url, data.method, data.headers, data.payload, arc.app.db.websql._getIntValue(data.skipProtocol), arc.app.db.websql._getIntValue(data.skipServer), arc.app.db.websql._getIntValue(data.skipParams), arc.app.db.websql._getIntValue(data.skipHistory), arc.app.db.websql._getIntValue(data.skipMethod), arc.app.db.websql._getIntValue(data.skipPayload), arc.app.db.websql._getIntValue(data.skipHeaders), arc.app.db.websql._getIntValue(data.skipPath), data.time, data.id];
+        var sql = 'UPDATE request_data SET project=?,name=?,' + 'url=?,method=?,headers=?,payload=?,time=? ' + 'WHERE ID=?';
+        var values = [data.project, data.name, data.url, data.method, data.headers, data.payload, data.time, data.id];
         tx.executeSql(sql, values, function () {
           resolve();
         }, function (tx, e) {
@@ -890,24 +2130,6 @@ arc.app.db.websql.updateRequestObject = function (data) {
   });
 };
 
-arc.app.db.websql.deleteNonProjectRequests = function () {
-  return new Promise(function (resolve, reject) {
-    arc.app.db.websql.open().then(function (db) {
-      db.transaction(function (tx) {
-        var sql = 'DELETE FROM request_data WHERE project=0';
-        tx.executeSql(sql, [], function () {
-          resolve();
-        }, function (tx, e) {
-          arc.app.db.websql.onerror(e);
-          reject(e);
-        });
-      });
-    }).catch(function (e) {
-      arc.app.db.websql.onerror(e);
-      reject(e);
-    });
-  });
-};
 arc.app.db.websql.updateRequestName = function (id, name) {
   return new Promise(function (resolve, reject) {
     arc.app.db.websql.open().then(function (db) {
@@ -932,8 +2154,9 @@ arc.app.db.websql.queryRequestsTable = function (opts) {
   var sql = 'SELECT * FROM request_data WHERE ';
   if (opts.query) {
     sql += 'name LIKE ? OR url LIKE ? AND ';
-    sqlArgs.push(opts.query);
-    sqlArgs.push(opts.query);
+    var q = '%' + opts.query + '%';
+    sqlArgs.push(q);
+    sqlArgs.push(q);
   }
   sql += 'project = 0 ';
   sql += 'ORDER BY id DESC LIMIT ?, ?';
@@ -971,7 +2194,7 @@ arc.app.db.websql.importRequests = function (requestsArray) {
           resolve(results);
         }
       };
-      var success = function success(result) {
+      var success = function success(tx, result) {
         left--;
         results.push(result.insertId);
         callOnEnd();
@@ -985,8 +2208,8 @@ arc.app.db.websql.importRequests = function (requestsArray) {
         for (var i = 0; i < size; i++) {
           var data = requestsArray[i];
           data.time = data.time || Date.now();
-          var sql = 'INSERT INTO request_data (project, name, url, method, headers,' + 'payload, skipProtocol, skipServer, skipParams, skipHistory, skipMethod, ' + 'skipPayload, skipHeaders, skipPath, time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
-          var values = [data.project, data.name, data.url, data.method, data.headers, data.payload, data.skipProtocol, data.skipServer, data.skipParams, data.skipHistory, data.skipMethod, data.skipPayload, data.skipHeaders, data.skipPath, data.time];
+          var sql = 'INSERT INTO request_data (project, name, url, method, headers,' + 'payload, time) VALUES (?,?,?,?,?,?,?)';
+          var values = [data.project, data.name, data.url, data.method, data.headers, data.payload, data.time];
           tx.executeSql(sql, values, success, error);
         }
       }, function (tx, e) {
@@ -1005,28 +2228,6 @@ arc.app.db.websql.getRequest = function (id) {
       db.transaction(function (tx) {
         var sql = 'SELECT * FROM request_data WHERE ID=?';
         tx.executeSql(sql, [id], function (tx, result) {
-          if (result.rows.length === 0) {
-            resolve(null);
-          } else {
-            resolve(Array.from(result.rows)[0]);
-          }
-        }, function (tx, e) {
-          arc.app.db.websql.onerror(e);
-          reject(e);
-        });
-      });
-    }).catch(function (e) {
-      arc.app.db.websql.onerror(e);
-      reject(e);
-    });
-  });
-};
-arc.app.db.websql.getProjectDefaultRequest = function (projectId) {
-  return new Promise(function (resolve, reject) {
-    arc.app.db.websql.open().then(function (db) {
-      db.transaction(function (tx) {
-        var sql = 'SELECT * FROM request_data WHERE project=? ORDER BY time ASC LIMIT 1';
-        tx.executeSql(sql, [projectId], function (tx, result) {
           if (result.rows.length === 0) {
             resolve(null);
           } else {
@@ -1082,6 +2283,204 @@ arc.app.db.websql.deleteRequestByProject = function (projectId) {
       reject(e);
     });
   });
+};
+arc.app.db.websql.getProjectByRequest = function (requestId) {
+  return new Promise(function (resolve, reject) {
+    arc.app.db.websql.open().then(function (db) {
+      db.transaction(function (tx) {
+        var sql = 'SELECT p.* FROM projects as p JOIN request_data as r ON p.id=r.project ' + 'WHERE r.id=?';
+        tx.executeSql(sql, [requestId], function () {
+          resolve();
+        }, function (tx, e) {
+          arc.app.db.websql.onerror(e);
+          reject(e);
+        });
+      });
+    }).catch(function (e) {
+      arc.app.db.websql.onerror(e);
+      reject(e);
+    });
+  });
+};
+
+arc.app.db.websql.insertExported = function (exportedArray) {
+  return new Promise(function (resolve, reject) {
+    arc.app.db.websql.open().then(function (db) {
+
+      var size = exportedArray.length;
+      var left = exportedArray.length;
+      var results = [];
+      var callOnEnd = function callOnEnd() {
+        if (left <= 0) {
+          resolve(results);
+        }
+      };
+      var success = function success(tx, result) {
+        left--;
+        results.push(result.insertId);
+        callOnEnd();
+      };
+      var error = function error() {
+        left--;
+        callOnEnd();
+      };
+
+      db.transaction(function (tx) {
+        for (var i = 0; i < size; i++) {
+          var data = exportedArray[i];
+          var sql = 'INSERT INTO exported (reference_id, gaeKey, type) VALUES (?,?,?)';
+          var values = [data.reference_id, data.type, data.gaeKey];
+          tx.executeSql(sql, values, success, error);
+        }
+      }, function (tx, e) {
+        arc.app.db.websql.onerror(e);
+        reject(e);
+      });
+    }).catch(function (e) {
+      arc.app.db.websql.onerror(e);
+      reject(e);
+    });
+  });
+};
+
+arc.app.db.websql.getExportedByReferenceIds = function (list) {
+  return new Promise(function (resolve, reject) {
+    arc.app.db.websql.open().then(function (db) {
+      db.transaction(function (tx) {
+        var sql = 'SELECT * FROM exported WHERE reference_id IN (?) AND type=\'form\'';
+        var param = list.join(',');
+        tx.executeSql(sql, [param], function (tx, result) {
+          if (result.rows.length === 0) {
+            resolve([]);
+          } else {
+            resolve(Array.from(result.rows));
+          }
+        }, function (tx, e) {
+          arc.app.db.websql.onerror(e);
+          reject(e);
+        });
+      });
+    }).catch(function (e) {
+      arc.app.db.websql.onerror(e);
+      reject(e);
+    });
+  });
+};
+'use strict';
+
+var arc = arc || {};
+
+arc.app = arc.app || {};
+
+arc.app.headers = {};
+
+arc.app.headers.filter = function (headers) {
+  var _tmp = {};
+  headers.forEach(function (header) {
+    if (header.name in _tmp) {
+      if (header.value && header.value.trim() !== '') {
+        _tmp[header.name] += ', ' + header.value;
+      }
+    } else {
+      _tmp[header.name] = header.value;
+    }
+  });
+  var result = [];
+  for (var _key in _tmp) {
+    result[result.length] = {
+      'name': _key,
+      'value': _tmp[_key]
+    };
+  }
+  return result;
+};
+
+arc.app.headers.toString = function (headersArray) {
+  if (!(headersArray instanceof Array)) {
+    throw new Error('Headers must be an instance of Array');
+  }
+  if (headersArray.length === 0) {
+    return '';
+  }
+  headersArray = arc.app.headers.filter(headersArray);
+  var result = '';
+  headersArray.forEach(function (header) {
+    if (result !== '') {
+      result += '\n';
+    }
+    var key = header.name;
+    var value = header.value;
+    if (key && key.trim() !== '') {
+      result += key + ': ';
+      if (value && value.trim() !== '') {
+        result += value;
+      }
+    }
+  });
+  return result;
+};
+
+arc.app.headers.toJSON = function (headersString) {
+  if (headersString === null || headersString.trim() === '') {
+    return [];
+  }
+  if (typeof headersString !== 'string') {
+    throw new Error('Headers must be an instance of String.');
+  }
+  var result = [];
+  var headers = headersString.split(/[\r\n]/gim);
+
+  for (var i = 0, len = headers.length; i < len; i++) {
+    var line = headers[i].trim();
+    if (line === '') {
+      continue;
+    }
+    var _tmp = line.split(/[:\r\n]/i);
+    if (_tmp.length > 0) {
+      var obj = {
+        name: _tmp[0],
+        value: ''
+      };
+      if (_tmp.length > 1) {
+        _tmp.shift();
+        _tmp = _tmp.filter(function (element) {
+          return element.trim() !== '';
+        });
+        obj.value = _tmp.join(', ').trim();
+      }
+      result[result.length] = obj;
+    }
+  }
+  return result;
+};
+
+arc.app.headers._oldCombine = function (headers, encoding) {
+  if (!(headers instanceof Array)) {
+    throw new Error('Headers must be an array');
+  }
+  encoding = String(encoding);
+  var ct = headers.filter(function (item) {
+    return item.name.toLowerCase() === 'content-type';
+  });
+  if (ct.length === 0) {
+    headers.push({
+      'name': 'Content-Type',
+      'value': encoding.trim()
+    });
+    return true;
+  }
+  return false;
+};
+
+arc.app.headers.getContentType = function (headers) {
+  if (typeof headers === 'string') {
+    headers = arc.app.headers.toJSON(headers);
+  }
+  headers = arc.app.headers.filter(headers);
+  var ct = headers.filter(function (item) {
+    return item.name.toLowerCase() === 'content-type';
+  });
+  return ct.length === 0 ? null : ct[0].value;
 };
 'use strict';
 
@@ -1192,6 +2591,24 @@ if (!Array.from) {
     };
   }();
 }
+'function' !== typeof Object.assign && !function () {
+  Object.assign = function (n) {
+    'use strict';
+
+    if (void 0 === n || null === n) {
+      throw new TypeError('Cannot convert undefined or null to object');
+    }
+    for (var t = Object(n), r = 1; r < arguments.length; r++) {
+      var e = arguments[r];
+      if (void 0 !== e && null !== e) {
+        for (var o in e) {
+          e.hasOwnProperty(o) && (t[o] = e[o]);
+        }
+      }
+    }
+    return t;
+  };
+}();
 'use strict';
 
 var arc = arc || {};
@@ -1388,7 +2805,8 @@ arc.app.settings.getConfig = function () {
       'HISTORY_ENABLED': true,
       'MAGICVARS_ENABLED': true,
       'CMH_ENABLED': true,
-      'CMP_ENABLED': true
+      'CMP_ENABLED': true,
+      'useIdb': false
     };
     try {
       chrome.storage.sync.get(values, function (result) {
@@ -1400,6 +2818,7 @@ arc.app.settings.getConfig = function () {
     }
   });
 };
+
 arc.app.settings.saveConfig = function (key, value) {
   return new Promise(function (resolve) {
     var o = {};
@@ -1414,6 +2833,386 @@ arc.app.settings.observe = function (callback) {
 };
 'use strict';
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var BaseObject = function () {
+  function BaseObject() {
+    _classCallCheck(this, BaseObject);
+  }
+
+  _createClass(BaseObject, [{
+    key: 'assertRequiredKeys',
+    value: function assertRequiredKeys(required, passed) {
+      var errors = [];
+      required.forEach(function (name) {
+        if (!(name in passed)) {
+          errors.push(name);
+        }
+      });
+      if (errors.length > 0) {
+        throw new Error('Missing parameters: ' + errors.join(', ') + '.');
+      }
+    }
+  }, {
+    key: 'toJSON',
+    value: function toJSON() {
+      var copy = Object.assign({}, this);
+      var keys = Object.keys(copy);
+      var under = keys.filter(function (key) {
+        return key.indexOf('_') === 0;
+      });
+      under.forEach(function (key) {
+        var realKey = key.substr(1);
+        copy[realKey] = copy[key];
+        delete copy[key];
+      });
+      return copy;
+    }
+  }]);
+
+  return BaseObject;
+}();
+
+var OrderedList = function (_BaseObject) {
+  _inherits(OrderedList, _BaseObject);
+
+  function OrderedList(opts) {
+    _classCallCheck(this, OrderedList);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(OrderedList).call(this, opts));
+
+    _this.order = opts.order || 0;
+    return _this;
+  }
+
+  _createClass(OrderedList, [{
+    key: 'changeOrder',
+    value: function changeOrder(dir, change, moved, movedOrder) {
+      if (dir === 'up') {
+        if (this.order === 0) {
+          throw new Error('Can\'t move list element below 0 in this direction.');
+        }
+        this.moveUp(change, moved, movedOrder);
+      } else {
+        this.moveDown(change, moved, movedOrder);
+      }
+    }
+  }, {
+    key: 'moveUp',
+    value: function moveUp(change, moved, movedOrder) {
+      if (this.order < change) {
+        return;
+      }
+      if (this.order > movedOrder) {
+        return;
+      }
+      if (this === moved) {
+        this.order = change;
+        return;
+      }
+      --this.order;
+    }
+  }, {
+    key: 'moveDown',
+    value: function moveDown(change, moved, movedOrder) {
+      if (this.order > change) {
+        return;
+      }
+      if (this.order < movedOrder) {
+        return;
+      }
+      if (this === moved) {
+        this.order = change;
+        return;
+      }
+      ++this.order;
+    }
+  }, {
+    key: 'toJSON',
+    value: function toJSON() {
+      return _get(Object.getPrototypeOf(OrderedList.prototype), 'toJSON', this).call(this);
+    }
+  }]);
+
+  return OrderedList;
+}(BaseObject);
+
+var RequestObject = function (_OrderedList) {
+  _inherits(RequestObject, _OrderedList);
+
+  function RequestObject(opts) {
+    _classCallCheck(this, RequestObject);
+
+    var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(RequestObject).call(this, opts));
+
+    _get(Object.getPrototypeOf(RequestObject.prototype), 'assertRequiredKeys', _this2).call(_this2, ['url', 'method', 'type'], opts);
+
+    _this2._har = opts._har ? opts._har instanceof HAR.Log ? opts._har : new HAR.Log(opts._har) : null;
+
+    _this2._name = null;
+
+    _this2.url = opts.url;
+
+    _this2.method = opts.method;
+
+    _this2.type = opts.type;
+
+    if (opts.har) {
+      _this2.har = opts.har;
+    }
+
+    if (opts.name) {
+      _this2.name = opts.name;
+    }
+    return _this2;
+  }
+
+  _createClass(RequestObject, [{
+    key: 'toJSON',
+    value: function toJSON() {
+      return _get(Object.getPrototypeOf(RequestObject.prototype), 'toJSON', this).call(this);
+    }
+  }, {
+    key: 'har',
+    set: function set(har) {
+      if (har instanceof HAR.Log) {
+        this._har = har;
+      } else {
+        this._har = new HAR.Log(har);
+      }
+    },
+    get: function get() {
+      return this._har;
+    }
+  }, {
+    key: 'name',
+    set: function set(name) {
+      this._name = String(name);
+      if (this._har) {
+        this._har.pages[0].title = this._name;
+      }
+    },
+    get: function get() {
+      return this._name;
+    }
+  }]);
+
+  return RequestObject;
+}(OrderedList);
+
+var SavedRequestObject = function (_RequestObject) {
+  _inherits(SavedRequestObject, _RequestObject);
+
+  function SavedRequestObject(opts) {
+    _classCallCheck(this, SavedRequestObject);
+
+    opts.type = 'saved';
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(SavedRequestObject).call(this, opts));
+  }
+
+  _createClass(SavedRequestObject, [{
+    key: 'toJSON',
+    value: function toJSON() {
+      return _get(Object.getPrototypeOf(SavedRequestObject.prototype), 'toJSON', this).call(this);
+    }
+  }]);
+
+  return SavedRequestObject;
+}(RequestObject);
+
+var HistoryRequestObject = function (_RequestObject2) {
+  _inherits(HistoryRequestObject, _RequestObject2);
+
+  function HistoryRequestObject(opts) {
+    _classCallCheck(this, HistoryRequestObject);
+
+    opts.type = 'history';
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(HistoryRequestObject).call(this, opts));
+  }
+
+  _createClass(HistoryRequestObject, [{
+    key: 'toJSON',
+    value: function toJSON() {
+      return _get(Object.getPrototypeOf(HistoryRequestObject.prototype), 'toJSON', this).call(this);
+    }
+  }]);
+
+  return HistoryRequestObject;
+}(RequestObject);
+
+var DriveObject = function (_BaseObject2) {
+  _inherits(DriveObject, _BaseObject2);
+
+  function DriveObject(opts) {
+    _classCallCheck(this, DriveObject);
+
+    var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(DriveObject).call(this));
+
+    _get(Object.getPrototypeOf(DriveObject.prototype), 'assertRequiredKeys', _this5).call(_this5, ['driveId', 'requestId'], opts);
+
+    _this5.driveId = opts.driveId;
+
+    _this5.requestId = opts.requestId;
+    return _this5;
+  }
+
+  return DriveObject;
+}(BaseObject);
+
+var ServerExportedObject = function (_BaseObject3) {
+  _inherits(ServerExportedObject, _BaseObject3);
+
+  function ServerExportedObject(opts) {
+    _classCallCheck(this, ServerExportedObject);
+
+    var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(ServerExportedObject).call(this, opts));
+
+    _get(Object.getPrototypeOf(ServerExportedObject.prototype), 'assertRequiredKeys', _this6).call(_this6, ['serverId', 'requestId'], opts);
+
+    _this6.serverId = opts.serverId;
+
+    _this6.requestId = opts.requestId;
+    return _this6;
+  }
+
+  return ServerExportedObject;
+}(BaseObject);
+
+var UrlObject = function (_BaseObject4) {
+  _inherits(UrlObject, _BaseObject4);
+
+  function UrlObject(opts) {
+    _classCallCheck(this, UrlObject);
+
+    var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(UrlObject).call(this));
+
+    _get(Object.getPrototypeOf(UrlObject.prototype), 'assertRequiredKeys', _this7).call(_this7, ['url'], opts);
+
+    _this7.url = opts.url;
+
+    _this7.time = opts.time;
+    return _this7;
+  }
+
+  return UrlObject;
+}(BaseObject);
+
+var HistoryUrlObject = function (_UrlObject) {
+  _inherits(HistoryUrlObject, _UrlObject);
+
+  function HistoryUrlObject(opts) {
+    _classCallCheck(this, HistoryUrlObject);
+
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(HistoryUrlObject).call(this, opts));
+  }
+
+  return HistoryUrlObject;
+}(UrlObject);
+
+var HistorySocketObject = function (_UrlObject2) {
+  _inherits(HistorySocketObject, _UrlObject2);
+
+  function HistorySocketObject(opts) {
+    _classCallCheck(this, HistorySocketObject);
+
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(HistorySocketObject).call(this, opts));
+  }
+
+  return HistorySocketObject;
+}(UrlObject);
+
+var ProjectObject = function (_OrderedList2) {
+  _inherits(ProjectObject, _OrderedList2);
+
+  function ProjectObject(opts) {
+    _classCallCheck(this, ProjectObject);
+
+    var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(ProjectObject).call(this, opts));
+
+    if (!opts.requestIds) {
+      opts.requestIds = [];
+    }
+    if (typeof opts.requestIds.length === 'undefined') {
+      throw new Error('`requestIds` property must be an array of ids of request objects');
+    }
+    if (opts.id) {
+      _this10.id = opts.id;
+    }
+
+    _this10.requestIds = opts.requestIds;
+
+    _this10.name = opts.name;
+
+    _this10.created = opts.time ? new Date(opts.time) : opts.created ? opts.created : undefined;
+    return _this10;
+  }
+
+  _createClass(ProjectObject, [{
+    key: 'addRequest',
+    value: function addRequest(requestIds) {
+      if (!requestIds) {
+        throw new Error('Request ID must be set.');
+      }
+      this.requestIds.push(requestIds);
+    }
+  }]);
+
+  return ProjectObject;
+}(OrderedList);
+
+var HttpStatusObject = function (_BaseObject5) {
+  _inherits(HttpStatusObject, _BaseObject5);
+
+  function HttpStatusObject(opts) {
+    _classCallCheck(this, HttpStatusObject);
+
+    var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(HttpStatusObject).call(this));
+
+    _get(Object.getPrototypeOf(HttpStatusObject.prototype), 'assertRequiredKeys', _this11).call(_this11, ['key', 'label'], opts);
+
+    _this11.key = opts.key;
+
+    _this11.label = opts.label;
+
+    _this11.desc = opts.desc ? opts.desc : undefined;
+    return _this11;
+  }
+
+  return HttpStatusObject;
+}(BaseObject);
+
+var HttpHeaderObject = function (_BaseObject6) {
+  _inherits(HttpHeaderObject, _BaseObject6);
+
+  function HttpHeaderObject(opts) {
+    _classCallCheck(this, HttpHeaderObject);
+
+    var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(HttpHeaderObject).call(this));
+
+    _get(Object.getPrototypeOf(HttpHeaderObject.prototype), 'assertRequiredKeys', _this12).call(_this12, ['key', 'type'], opts);
+
+    _this12.key = opts.key;
+
+    _this12.type = opts.type;
+
+    _this12.example = opts.example ? opts.example : undefined;
+
+    _this12.desc = opts.desc ? opts.desc : undefined;
+    return _this12;
+  }
+
+  return HttpHeaderObject;
+}(BaseObject);
+'use strict';
+
 var arc = arc || {};
 
 arc.app = arc.app || {};
@@ -1421,10 +3220,18 @@ arc.app = arc.app || {};
 arc.app.utils = {};
 
 arc.app.utils.uuid = function () {
-  function s4() {
-    return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+  var lut = [];
+  for (var i = 0; i < 256; i++) {
+    lut[i] = (i < 16 ? '0' : '') + i.toString(16);
   }
-  return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+  var fn = function fn() {
+    var d0 = Math.random() * 0xffffffff | 0;
+    var d1 = Math.random() * 0xffffffff | 0;
+    var d2 = Math.random() * 0xffffffff | 0;
+    var d3 = Math.random() * 0xffffffff | 0;
+    return lut[d0 & 0xff] + lut[d0 >> 8 & 0xff] + lut[d0 >> 16 & 0xff] + lut[d0 >> 24 & 0xff] + '-' + lut[d1 & 0xff] + lut[d1 >> 8 & 0xff] + '-' + lut[d1 >> 16 & 0x0f | 0x40] + lut[d1 >> 24 & 0xff] + '-' + lut[d2 & 0x3f | 0x80] + lut[d2 >> 8 & 0xff] + '-' + lut[d2 >> 16 & 0xff] + lut[d2 >> 24 & 0xff] + lut[d3 & 0xff] + lut[d3 >> 8 & 0xff] + lut[d3 >> 16 & 0xff] + lut[d3 >> 24 & 0xff];
+  };
+  return fn();
 };
 
 arc.app.utils.isProdMode = function () {
@@ -1663,3 +3470,9 @@ arc.app.xhr.byteLength = function (str) {
   }
   return s;
 };
+"use strict";
+
+arc.app.db.init();
+"use strict";
+
+arc.app.db.init();

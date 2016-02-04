@@ -80,6 +80,9 @@ arc.app.analytics._loadLibrary = function() {
  * Initialize trackers.
  */
 arc.app.analytics._initTranckers = function() {
+  if (typeof ga !== 'function') {
+    return;
+  }
   arc.app.analytics._trackersConfig.forEach(function(item) {
     ga('create', item);
     if (!item.name) {
@@ -110,6 +113,9 @@ arc.app.analytics._getTrackerNames = function() {
  * Initialize and set up custom dimmenstion that are used by the app.
  */
 arc.app.analytics._setCustomDimmensions = function() {
+  if (typeof ga !== 'function') {
+    return;
+  }
   var names = arc.app.analytics._getTrackerNames();
   var appVersion = (chrome && chrome.runtime && chrome.runtime.getManifest) ?
     chrome.runtime.getManifest().version : 'Unknown';
@@ -157,6 +163,9 @@ arc.app.analytics._setAppUid = function() {
  */
 arc.app.analytics._setChromeChannel = function() {
   if (!window.navigator.onLine) {
+    return;
+  }
+  if (typeof ga !== 'function') {
     return;
   }
   arc.app.analytics._loadCSV()
@@ -230,6 +239,9 @@ arc.app.analytics._loadCSV = function() {
  * @param {!Number} value An optional value of the event. 
  */
 arc.app.analytics.sendEvent = function(category, action, label, value) {
+  if (typeof ga !== 'function') {
+    return;
+  }
   var names = arc.app.analytics._getTrackerNames();
   var config = {
     hitType: 'event',
@@ -250,6 +262,9 @@ arc.app.analytics.sendEvent = function(category, action, label, value) {
  * @param {String} screenName A screen name to be send.
  */
 arc.app.analytics.sendScreen = function(screenName) {
+  if (typeof ga !== 'function') {
+    return;
+  }
   var names = arc.app.analytics._getTrackerNames();
   names.forEach(function(name) {
     ga(name + '.send', 'pageview', screenName);
@@ -262,6 +277,9 @@ arc.app.analytics.sendScreen = function(screenName) {
  * @param {Boolean} isFatal True if the exception is fatal.
  */
 arc.app.analytics.sendException = function(exception, isFatal) {
+  if (typeof ga !== 'function') {
+    return;
+  }
   var names = arc.app.analytics._getTrackerNames();
   var value = {
     'exDescription': '' + exception
