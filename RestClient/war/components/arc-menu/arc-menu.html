@@ -16,7 +16,7 @@
             <paper-submenu>
                 <paper-item class="menu-trigger">Projects</paper-item>
                 <paper-menu class="menu-content sublist" selected="{{hash}}" attr-for-selected="data-place" on-tap="_itemTap">
-                    <template is="dom-if" if="{{!projects}}">
+                    <template is="dom-if" if="{{!hasProjects}}">
                         <paper-item>No projects here</paper-item>
                     </template>
                     <template is="dom-repeat" items="{{projects}}" sort="{{computeSort(projects)}}">
@@ -53,6 +53,11 @@
             noHistory: {
                 type: Boolean,
                 value: false
+            },
+            hasProjects: {
+                type: Boolean,
+                value: false,
+                computed: '_computeHasProjects(projects.*)'
             }
         },
         ready: function() {
@@ -237,6 +242,13 @@
                     this.noHistory = false;
                 }
             }
+        },
+
+        _computeHasProjects: function() {
+            if (this.projects && this.projects.length) {
+                return true;
+            }
+            return false;
         }
     });
     </script>
