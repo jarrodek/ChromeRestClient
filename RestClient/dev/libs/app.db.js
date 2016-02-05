@@ -338,7 +338,12 @@ arc.app.db.projects.importData = function(projects, requests) {
           })
           .catch(reject);
       };
-
+      // rewrite request's project id to not overrride
+      // important information 
+      requests.forEach((item) => {
+        item.odlProjectId = item.project;
+        item.project = 0;
+      });
       if (projects && projects.length > 0) {
         arc.app.db.websql.importProjects2(projects)
           .then(function(inserts) {
@@ -349,10 +354,7 @@ arc.app.db.projects.importData = function(projects, requests) {
               let exportedProjectId = projects[i].id;
               for (let j = 0; j < requestsSize; j++) {
                 let r = requests[j];
-                if (!r.project) {
-                  r.project = 0;
-                }
-                if (r.project === exportedProjectId) {
+                if (r.odlProjectId === exportedProjectId) {
                   r.project = currentProjectId;
                 }
               }
