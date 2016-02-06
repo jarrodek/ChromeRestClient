@@ -2,10 +2,7 @@
 **/gwt-unitCache/*
 **/extras/*
 **/war/WEB-INF/classes
-<<<<<<< HEAD
 node_modules
 bower_components
-=======
 **/build/classes
 RestClient/war/WEB-INF/appengine-generated/datastore-indexes-auto.xml
->>>>>>> hotfix-db

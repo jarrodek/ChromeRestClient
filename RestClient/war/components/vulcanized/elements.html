@@ -322,13 +322,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   }
 
 </style>
-<style>
 
-  /*******************************
-            Flex Layout
-  *******************************/
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> origin/develop
 <style is="custom-style">
 
   :root {
@@ -380,6 +379,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
      */
     --text-primary-color: var(--dark-theme-text-color);
     --default-primary-color: var(--primary-color);
+<<<<<<< HEAD
 =======
   html /deep/ .layout.horizontal,
   html /deep/ .layout.horizontal-reverse,
@@ -401,49 +401,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     -webkit-flex-direction: row;
     flex-direction: row;
   }
+=======
+>>>>>>> origin/develop
 
-  html /deep/ .layout.horizontal-reverse {
-    -ms-flex-direction: row-reverse;
-    -webkit-flex-direction: row-reverse;
-    flex-direction: row-reverse;
   }
 
-  html /deep/ .layout.vertical {
-    -ms-flex-direction: column;
-    -webkit-flex-direction: column;
-    flex-direction: column;
-  }
+</style>
+<style is="custom-style">
 
-  html /deep/ .layout.vertical-reverse {
-    -ms-flex-direction: column-reverse;
-    -webkit-flex-direction: column-reverse;
-    flex-direction: column-reverse;
-  }
+  :root {
 
-  html /deep/ .layout.wrap {
-    -ms-flex-wrap: wrap;
-    -webkit-flex-wrap: wrap;
-    flex-wrap: wrap;
-  }
+    --shadow-transition: {
+      transition: box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    };
 
-  html /deep/ .layout.wrap-reverse {
-    -ms-flex-wrap: wrap-reverse;
-    -webkit-flex-wrap: wrap-reverse;
-    flex-wrap: wrap-reverse;
-  }
+    --shadow-none: {
+      box-shadow: none;
+    };
 
-  html /deep/ .flex-auto {
-    -ms-flex: 1 1 auto;
-    -webkit-flex: 1 1 auto;
-    flex: 1 1 auto;
-  }
+    /* from http://codepen.io/shyndman/pen/c5394ddf2e8b2a5c9185904b57421cdb */
 
-  html /deep/ .flex-none {
-    -ms-flex: none;
-    -webkit-flex: none;
-    flex: none;
-  }
+    --shadow-elevation-2dp: {
+      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+                  0 1px 5px 0 rgba(0, 0, 0, 0.12),
+                  0 3px 1px -2px rgba(0, 0, 0, 0.2);
+    };
 
+<<<<<<< HEAD
   html /deep/ .flex,
   html /deep/ .flex-1 {
     -ms-flex: 1;
@@ -457,155 +441,186 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     -webkit-flex: 2;
     flex: 2;
   }
+=======
+    --shadow-elevation-3dp: {
+      box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.14),
+                  0 1px 8px 0 rgba(0, 0, 0, 0.12),
+                  0 3px 3px -2px rgba(0, 0, 0, 0.4);
+    };
 
-  html /deep/ .flex-3 {
-    -ms-flex: 3;
-    -webkit-flex: 3;
-    flex: 3;
+    --shadow-elevation-4dp: {
+      box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14),
+                  0 1px 10px 0 rgba(0, 0, 0, 0.12),
+                  0 2px 4px -1px rgba(0, 0, 0, 0.4);
+    };
+>>>>>>> origin/develop
+
+    --shadow-elevation-6dp: {
+      box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.14),
+                  0 1px 18px 0 rgba(0, 0, 0, 0.12),
+                  0 3px 5px -1px rgba(0, 0, 0, 0.4);
+    };
+
+    --shadow-elevation-8dp: {
+      box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14),
+                  0 3px 14px 2px rgba(0, 0, 0, 0.12),
+                  0 5px 5px -3px rgba(0, 0, 0, 0.4);
+    };
+
+    --shadow-elevation-16dp: {
+      box-shadow: 0 16px 24px 2px rgba(0, 0, 0, 0.14),
+                  0  6px 30px 5px rgba(0, 0, 0, 0.12),
+                  0  8px 10px -5px rgba(0, 0, 0, 0.4);
+    };
+
   }
 
-  html /deep/ .flex-4 {
-    -ms-flex: 4;
-    -webkit-flex: 4;
-    flex: 4;
-  }
+</style>
 
-  html /deep/ .flex-5 {
-    -ms-flex: 5;
-    -webkit-flex: 5;
-    flex: 5;
-  }
 
-  html /deep/ .flex-6 {
-    -ms-flex: 6;
-    -webkit-flex: 6;
-    flex: 6;
-  }
 
-  html /deep/ .flex-7 {
-    -ms-flex: 7;
-    -webkit-flex: 7;
-    flex: 7;
-  }
 
-  html /deep/ .flex-8 {
-    -ms-flex: 8;
-    -webkit-flex: 8;
-    flex: 8;
-  }
 
-  html /deep/ .flex-9 {
-    -ms-flex: 9;
-    -webkit-flex: 9;
-    flex: 9;
-  }
 
-  html /deep/ .flex-10 {
-    -ms-flex: 10;
-    -webkit-flex: 10;
-    flex: 10;
-  }
+<style is="custom-style">
 
-  html /deep/ .flex-11 {
-    -ms-flex: 11;
-    -webkit-flex: 11;
-    flex: 11;
-  }
+  :root {
 
-  html /deep/ .flex-12 {
-    -ms-flex: 12;
-    -webkit-flex: 12;
-    flex: 12;
-  }
+    /* Material Design color palette for Google products */
 
-  /* alignment in cross axis */
+    --google-red-100: #f4c7c3;
+    --google-red-300: #e67c73;
+    --google-red-500: #db4437;
+    --google-red-700: #c53929;
 
-  html /deep/ .layout.start {
-    -ms-flex-align: start;
-    -webkit-align-items: flex-start;
-    align-items: flex-start;
-  }
+    --google-blue-100: #c6dafc;
+    --google-blue-300: #7baaf7;
+    --google-blue-500: #4285f4;
+    --google-blue-700: #3367d6;
 
-  html /deep/ .layout.center,
-  html /deep/ .layout.center-center {
-    -ms-flex-align: center;
-    -webkit-align-items: center;
-    align-items: center;
-  }
+    --google-green-100: #b7e1cd;
+    --google-green-300: #57bb8a;
+    --google-green-500: #0f9d58;
+    --google-green-700: #0b8043;
 
-  html /deep/ .layout.end {
-    -ms-flex-align: end;
-    -webkit-align-items: flex-end;
-    align-items: flex-end;
-  }
+    --google-yellow-100: #fce8b2;
+    --google-yellow-300: #f7cb4d;
+    --google-yellow-500: #f4b400;
+    --google-yellow-700: #f09300;
 
-  /* alignment in main axis */
+    --google-grey-100: #f5f5f5;
+    --google-grey-300: #e0e0e0;
+    --google-grey-500: #9e9e9e;
+    --google-grey-700: #616161;
 
-  html /deep/ .layout.start-justified {
-    -ms-flex-pack: start;
-    -webkit-justify-content: flex-start;
-    justify-content: flex-start;
-  }
+    /* Material Design color palette from online spec document */
 
-  html /deep/ .layout.center-justified,
-  html /deep/ .layout.center-center {
-    -ms-flex-pack: center;
-    -webkit-justify-content: center;
-    justify-content: center;
-  }
+    --paper-red-50: #ffebee;
+    --paper-red-100: #ffcdd2;
+    --paper-red-200: #ef9a9a;
+    --paper-red-300: #e57373;
+    --paper-red-400: #ef5350;
+    --paper-red-500: #f44336;
+    --paper-red-600: #e53935;
+    --paper-red-700: #d32f2f;
+    --paper-red-800: #c62828;
+    --paper-red-900: #b71c1c;
+    --paper-red-a100: #ff8a80;
+    --paper-red-a200: #ff5252;
+    --paper-red-a400: #ff1744;
+    --paper-red-a700: #d50000;
 
-  html /deep/ .layout.end-justified {
-    -ms-flex-pack: end;
-    -webkit-justify-content: flex-end;
-    justify-content: flex-end;
-  }
+    --paper-pink-50: #fce4ec;
+    --paper-pink-100: #f8bbd0;
+    --paper-pink-200: #f48fb1;
+    --paper-pink-300: #f06292;
+    --paper-pink-400: #ec407a;
+    --paper-pink-500: #e91e63;
+    --paper-pink-600: #d81b60;
+    --paper-pink-700: #c2185b;
+    --paper-pink-800: #ad1457;
+    --paper-pink-900: #880e4f;
+    --paper-pink-a100: #ff80ab;
+    --paper-pink-a200: #ff4081;
+    --paper-pink-a400: #f50057;
+    --paper-pink-a700: #c51162;
 
-  html /deep/ .layout.around-justified {
-    -ms-flex-pack: around;
-    -webkit-justify-content: space-around;
-    justify-content: space-around;
-  }
+    --paper-purple-50: #f3e5f5;
+    --paper-purple-100: #e1bee7;
+    --paper-purple-200: #ce93d8;
+    --paper-purple-300: #ba68c8;
+    --paper-purple-400: #ab47bc;
+    --paper-purple-500: #9c27b0;
+    --paper-purple-600: #8e24aa;
+    --paper-purple-700: #7b1fa2;
+    --paper-purple-800: #6a1b9a;
+    --paper-purple-900: #4a148c;
+    --paper-purple-a100: #ea80fc;
+    --paper-purple-a200: #e040fb;
+    --paper-purple-a400: #d500f9;
+    --paper-purple-a700: #aa00ff;
 
-  html /deep/ .layout.justified {
-    -ms-flex-pack: justify;
-    -webkit-justify-content: space-between;
-    justify-content: space-between;
-  }
+    --paper-deep-purple-50: #ede7f6;
+    --paper-deep-purple-100: #d1c4e9;
+    --paper-deep-purple-200: #b39ddb;
+    --paper-deep-purple-300: #9575cd;
+    --paper-deep-purple-400: #7e57c2;
+    --paper-deep-purple-500: #673ab7;
+    --paper-deep-purple-600: #5e35b1;
+    --paper-deep-purple-700: #512da8;
+    --paper-deep-purple-800: #4527a0;
+    --paper-deep-purple-900: #311b92;
+    --paper-deep-purple-a100: #b388ff;
+    --paper-deep-purple-a200: #7c4dff;
+    --paper-deep-purple-a400: #651fff;
+    --paper-deep-purple-a700: #6200ea;
 
-  /* self alignment */
+    --paper-indigo-50: #e8eaf6;
+    --paper-indigo-100: #c5cae9;
+    --paper-indigo-200: #9fa8da;
+    --paper-indigo-300: #7986cb;
+    --paper-indigo-400: #5c6bc0;
+    --paper-indigo-500: #3f51b5;
+    --paper-indigo-600: #3949ab;
+    --paper-indigo-700: #303f9f;
+    --paper-indigo-800: #283593;
+    --paper-indigo-900: #1a237e;
+    --paper-indigo-a100: #8c9eff;
+    --paper-indigo-a200: #536dfe;
+    --paper-indigo-a400: #3d5afe;
+    --paper-indigo-a700: #304ffe;
 
-  html /deep/ .self-start {
-    -ms-align-self: flex-start;
-    -webkit-align-self: flex-start;
-    align-self: flex-start;
-  }
+    --paper-blue-50: #e3f2fd;
+    --paper-blue-100: #bbdefb;
+    --paper-blue-200: #90caf9;
+    --paper-blue-300: #64b5f6;
+    --paper-blue-400: #42a5f5;
+    --paper-blue-500: #2196f3;
+    --paper-blue-600: #1e88e5;
+    --paper-blue-700: #1976d2;
+    --paper-blue-800: #1565c0;
+    --paper-blue-900: #0d47a1;
+    --paper-blue-a100: #82b1ff;
+    --paper-blue-a200: #448aff;
+    --paper-blue-a400: #2979ff;
+    --paper-blue-a700: #2962ff;
 
-  html /deep/ .self-center {
-    -ms-align-self: center;
-    -webkit-align-self: center;
-    align-self: center;
-  }
+    --paper-light-blue-50: #e1f5fe;
+    --paper-light-blue-100: #b3e5fc;
+    --paper-light-blue-200: #81d4fa;
+    --paper-light-blue-300: #4fc3f7;
+    --paper-light-blue-400: #29b6f6;
+    --paper-light-blue-500: #03a9f4;
+    --paper-light-blue-600: #039be5;
+    --paper-light-blue-700: #0288d1;
+    --paper-light-blue-800: #0277bd;
+    --paper-light-blue-900: #01579b;
+    --paper-light-blue-a100: #80d8ff;
+    --paper-light-blue-a200: #40c4ff;
+    --paper-light-blue-a400: #00b0ff;
+    --paper-light-blue-a700: #0091ea;
 
-  html /deep/ .self-end {
-    -ms-align-self: flex-end;
-    -webkit-align-self: flex-end;
-    align-self: flex-end;
-  }
-
-  html /deep/ .self-stretch {
-    -ms-align-self: stretch;
-    -webkit-align-self: stretch;
-    align-self: stretch;
-  }
-
-  /*******************************
-            Other Layout
-  *******************************/
-
-  html /deep/ .block {
-    display: block;
-  }
-
+<<<<<<< HEAD
   /* IE 10 support for HTML5 hidden attr */
   html /deep/ [hidden] {
     display: none !important;
@@ -618,15 +633,339 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   html /deep/ .relative {
     position: relative;
   }
+=======
+    --paper-cyan-50: #e0f7fa;
+    --paper-cyan-100: #b2ebf2;
+    --paper-cyan-200: #80deea;
+    --paper-cyan-300: #4dd0e1;
+    --paper-cyan-400: #26c6da;
+    --paper-cyan-500: #00bcd4;
+    --paper-cyan-600: #00acc1;
+    --paper-cyan-700: #0097a7;
+    --paper-cyan-800: #00838f;
+    --paper-cyan-900: #006064;
+    --paper-cyan-a100: #84ffff;
+    --paper-cyan-a200: #18ffff;
+    --paper-cyan-a400: #00e5ff;
+    --paper-cyan-a700: #00b8d4;
 
-  html /deep/ .fit {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+    --paper-teal-50: #e0f2f1;
+    --paper-teal-100: #b2dfdb;
+    --paper-teal-200: #80cbc4;
+    --paper-teal-300: #4db6ac;
+    --paper-teal-400: #26a69a;
+    --paper-teal-500: #009688;
+    --paper-teal-600: #00897b;
+    --paper-teal-700: #00796b;
+    --paper-teal-800: #00695c;
+    --paper-teal-900: #004d40;
+    --paper-teal-a100: #a7ffeb;
+    --paper-teal-a200: #64ffda;
+    --paper-teal-a400: #1de9b6;
+    --paper-teal-a700: #00bfa5;
+
+    --paper-green-50: #e8f5e9;
+    --paper-green-100: #c8e6c9;
+    --paper-green-200: #a5d6a7;
+    --paper-green-300: #81c784;
+    --paper-green-400: #66bb6a;
+    --paper-green-500: #4caf50;
+    --paper-green-600: #43a047;
+    --paper-green-700: #388e3c;
+    --paper-green-800: #2e7d32;
+    --paper-green-900: #1b5e20;
+    --paper-green-a100: #b9f6ca;
+    --paper-green-a200: #69f0ae;
+    --paper-green-a400: #00e676;
+    --paper-green-a700: #00c853;
+
+    --paper-light-green-50: #f1f8e9;
+    --paper-light-green-100: #dcedc8;
+    --paper-light-green-200: #c5e1a5;
+    --paper-light-green-300: #aed581;
+    --paper-light-green-400: #9ccc65;
+    --paper-light-green-500: #8bc34a;
+    --paper-light-green-600: #7cb342;
+    --paper-light-green-700: #689f38;
+    --paper-light-green-800: #558b2f;
+    --paper-light-green-900: #33691e;
+    --paper-light-green-a100: #ccff90;
+    --paper-light-green-a200: #b2ff59;
+    --paper-light-green-a400: #76ff03;
+    --paper-light-green-a700: #64dd17;
+
+    --paper-lime-50: #f9fbe7;
+    --paper-lime-100: #f0f4c3;
+    --paper-lime-200: #e6ee9c;
+    --paper-lime-300: #dce775;
+    --paper-lime-400: #d4e157;
+    --paper-lime-500: #cddc39;
+    --paper-lime-600: #c0ca33;
+    --paper-lime-700: #afb42b;
+    --paper-lime-800: #9e9d24;
+    --paper-lime-900: #827717;
+    --paper-lime-a100: #f4ff81;
+    --paper-lime-a200: #eeff41;
+    --paper-lime-a400: #c6ff00;
+    --paper-lime-a700: #aeea00;
+
+    --paper-yellow-50: #fffde7;
+    --paper-yellow-100: #fff9c4;
+    --paper-yellow-200: #fff59d;
+    --paper-yellow-300: #fff176;
+    --paper-yellow-400: #ffee58;
+    --paper-yellow-500: #ffeb3b;
+    --paper-yellow-600: #fdd835;
+    --paper-yellow-700: #fbc02d;
+    --paper-yellow-800: #f9a825;
+    --paper-yellow-900: #f57f17;
+    --paper-yellow-a100: #ffff8d;
+    --paper-yellow-a200: #ffff00;
+    --paper-yellow-a400: #ffea00;
+    --paper-yellow-a700: #ffd600;
+
+    --paper-amber-50: #fff8e1;
+    --paper-amber-100: #ffecb3;
+    --paper-amber-200: #ffe082;
+    --paper-amber-300: #ffd54f;
+    --paper-amber-400: #ffca28;
+    --paper-amber-500: #ffc107;
+    --paper-amber-600: #ffb300;
+    --paper-amber-700: #ffa000;
+    --paper-amber-800: #ff8f00;
+    --paper-amber-900: #ff6f00;
+    --paper-amber-a100: #ffe57f;
+    --paper-amber-a200: #ffd740;
+    --paper-amber-a400: #ffc400;
+    --paper-amber-a700: #ffab00;
+
+    --paper-orange-50: #fff3e0;
+    --paper-orange-100: #ffe0b2;
+    --paper-orange-200: #ffcc80;
+    --paper-orange-300: #ffb74d;
+    --paper-orange-400: #ffa726;
+    --paper-orange-500: #ff9800;
+    --paper-orange-600: #fb8c00;
+    --paper-orange-700: #f57c00;
+    --paper-orange-800: #ef6c00;
+    --paper-orange-900: #e65100;
+    --paper-orange-a100: #ffd180;
+    --paper-orange-a200: #ffab40;
+    --paper-orange-a400: #ff9100;
+    --paper-orange-a700: #ff6500;
+
+    --paper-deep-orange-50: #fbe9e7;
+    --paper-deep-orange-100: #ffccbc;
+    --paper-deep-orange-200: #ffab91;
+    --paper-deep-orange-300: #ff8a65;
+    --paper-deep-orange-400: #ff7043;
+    --paper-deep-orange-500: #ff5722;
+    --paper-deep-orange-600: #f4511e;
+    --paper-deep-orange-700: #e64a19;
+    --paper-deep-orange-800: #d84315;
+    --paper-deep-orange-900: #bf360c;
+    --paper-deep-orange-a100: #ff9e80;
+    --paper-deep-orange-a200: #ff6e40;
+    --paper-deep-orange-a400: #ff3d00;
+    --paper-deep-orange-a700: #dd2c00;
+
+    --paper-brown-50: #efebe9;
+    --paper-brown-100: #d7ccc8;
+    --paper-brown-200: #bcaaa4;
+    --paper-brown-300: #a1887f;
+    --paper-brown-400: #8d6e63;
+    --paper-brown-500: #795548;
+    --paper-brown-600: #6d4c41;
+    --paper-brown-700: #5d4037;
+    --paper-brown-800: #4e342e;
+    --paper-brown-900: #3e2723;
+
+    --paper-grey-50: #fafafa;
+    --paper-grey-100: #f5f5f5;
+    --paper-grey-200: #eeeeee;
+    --paper-grey-300: #e0e0e0;
+    --paper-grey-400: #bdbdbd;
+    --paper-grey-500: #9e9e9e;
+    --paper-grey-600: #757575;
+    --paper-grey-700: #616161;
+    --paper-grey-800: #424242;
+    --paper-grey-900: #212121;
+
+    --paper-blue-grey-50: #eceff1;
+    --paper-blue-grey-100: #cfd8dc;
+    --paper-blue-grey-200: #b0bec5;
+    --paper-blue-grey-300: #90a4ae;
+    --paper-blue-grey-400: #78909c;
+    --paper-blue-grey-500: #607d8b;
+    --paper-blue-grey-600: #546e7a;
+    --paper-blue-grey-700: #455a64;
+    --paper-blue-grey-800: #37474f;
+    --paper-blue-grey-900: #263238;
+
+    /* opacity for dark text on a light background */
+    --dark-divider-opacity: 0.12;
+    --dark-disabled-opacity: 0.38; /* or hint text or icon */
+    --dark-secondary-opacity: 0.54;
+    --dark-primary-opacity: 0.87;
+
+    /* opacity for light text on a dark background */
+    --light-divider-opacity: 0.12;
+    --light-disabled-opacity: 0.3; /* or hint text or icon */
+    --light-secondary-opacity: 0.7;
+    --light-primary-opacity: 1.0;
+
   }
 
+</style>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic,500,500italic,700,700italic">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,700">
+<style is="custom-style">
+
+  :root {
+
+    /* Shared Styles */
+    --paper-font-common-base: {
+      font-family: 'Roboto', 'Noto', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    };
+
+    --paper-font-common-code: {
+      font-family: 'Roboto Mono', 'Consolas', 'Menlo', monospace;
+      -webkit-font-smoothing: antialiased;
+    };
+
+    --paper-font-common-expensive-kerning: {
+      text-rendering: optimizeLegibility;
+    };
+
+    --paper-font-common-nowrap: {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    };
+
+    /* Material Font Styles */
+
+    --paper-font-display4: {
+      @apply(--paper-font-common-base);
+      @apply(--paper-font-common-nowrap);
+
+      font-size: 112px;
+      font-weight: 300;
+      letter-spacing: -.044em;
+      line-height: 120px;
+    };
+
+    --paper-font-display3: {
+      @apply(--paper-font-common-base);
+      @apply(--paper-font-common-nowrap);
+
+      font-size: 56px;
+      font-weight: 400;
+      letter-spacing: -.026em;
+      line-height: 60px;
+    };
+
+    --paper-font-display2: {
+      @apply(--paper-font-common-base);
+
+      font-size: 45px;
+      font-weight: 400;
+      letter-spacing: -.018em;
+      line-height: 48px;
+    };
+
+    --paper-font-display1: {
+      @apply(--paper-font-common-base);
+
+      font-size: 34px;
+      font-weight: 400;
+      letter-spacing: -.01em;
+      line-height: 40px;
+    };
+
+    --paper-font-headline: {
+      @apply(--paper-font-common-base);
+
+      font-size: 24px;
+      font-weight: 400;
+      letter-spacing: -.012em;
+      line-height: 32px;
+    };
+
+    --paper-font-title: {
+      @apply(--paper-font-common-base);
+      @apply(--paper-font-common-nowrap);
+
+      font-size: 20px;
+      font-weight: 500;
+      line-height: 28px;
+    };
+
+    --paper-font-subhead: {
+      @apply(--paper-font-common-base);
+
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 24px;
+    };
+
+    --paper-font-body2: {
+      @apply(--paper-font-common-base);
+
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 24px;
+    };
+
+    --paper-font-body1: {
+      @apply(--paper-font-common-base);
+
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 20px;
+    };
+
+    --paper-font-caption: {
+      @apply(--paper-font-common-base);
+      @apply(--paper-font-common-nowrap);
+
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.011em;
+      line-height: 20px;
+    };
+
+    --paper-font-menu: {
+      @apply(--paper-font-common-base);
+      @apply(--paper-font-common-nowrap);
+
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 24px;
+    };
+
+    --paper-font-button: {
+      @apply(--paper-font-common-base);
+      @apply(--paper-font-common-nowrap);
+>>>>>>> origin/develop
+
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.018em;
+      line-height: 24px;
+      text-transform: uppercase;
+    };
+
+<<<<<<< HEAD
 <<<<<<< HEAD
 
 
@@ -643,12 +982,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     height: 100vh;
   }
 >>>>>>> hotfix-db
+=======
+    --paper-font-code2: {
+      @apply(--paper-font-common-code);
+>>>>>>> origin/develop
 
-  html /deep/ .scroll {
-    -webkit-overflow-scrolling: touch;
-    overflow: auto;
-  }
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 20px;
+    };
 
+<<<<<<< HEAD
 <<<<<<< HEAD
     /* Shared Styles */
     --paper-font-common-base: {
@@ -669,26 +1013,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     right: 0;
   }
 >>>>>>> hotfix-db
+=======
+    --paper-font-code1: {
+      @apply(--paper-font-common-code);
 
-  html /deep/ .fixed-right {
-    top: 0;
-    right: 0;
-    bottom: 0;
-  }
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 20px;
+    };
+>>>>>>> origin/develop
 
-  html /deep/ .fixed-bottom {
-    right: 0;
-    bottom: 0;
-    left: 0;
-  }
-
-  html /deep/ .fixed-left {
-    top: 0;
-    bottom: 0;
-    left: 0;
   }
 
 </style>
+
+
 <style>
 
 <<<<<<< HEAD
@@ -700,116 +1039,133 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             Flex Layout
   *******************************/
 
-  .layout.horizontal,
-  .layout.horizontal-reverse,
-  .layout.vertical,
-  .layout.vertical-reverse {
+  html /deep/ .layout.horizontal,
+  html /deep/ .layout.horizontal-reverse,
+  html /deep/ .layout.vertical,
+  html /deep/ .layout.vertical-reverse {
     display: -ms-flexbox;
     display: -webkit-flex;
     display: flex;
   }
 >>>>>>> hotfix-db
 
-  .layout.inline {
+  html /deep/ .layout.inline {
     display: -ms-inline-flexbox;
     display: -webkit-inline-flex;
     display: inline-flex;
   }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     --paper-font-display3: {
       @apply(--paper-font-common-base);
       @apply(--paper-font-common-nowrap);
 =======
   .layout.horizontal {
+=======
+  html /deep/ .layout.horizontal {
+>>>>>>> origin/develop
     -ms-flex-direction: row;
     -webkit-flex-direction: row;
     flex-direction: row;
   }
 
-  .layout.horizontal-reverse {
+  html /deep/ .layout.horizontal-reverse {
     -ms-flex-direction: row-reverse;
     -webkit-flex-direction: row-reverse;
     flex-direction: row-reverse;
   }
 >>>>>>> hotfix-db
 
-  .layout.vertical {
+  html /deep/ .layout.vertical {
     -ms-flex-direction: column;
     -webkit-flex-direction: column;
     flex-direction: column;
   }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     --paper-font-display2: {
       @apply(--paper-font-common-base);
 =======
   .layout.vertical-reverse {
+=======
+  html /deep/ .layout.vertical-reverse {
+>>>>>>> origin/develop
     -ms-flex-direction: column-reverse;
     -webkit-flex-direction: column-reverse;
     flex-direction: column-reverse;
   }
 
-  .layout.wrap {
+  html /deep/ .layout.wrap {
     -ms-flex-wrap: wrap;
     -webkit-flex-wrap: wrap;
     flex-wrap: wrap;
   }
 >>>>>>> hotfix-db
 
-  .layout.wrap-reverse {
+  html /deep/ .layout.wrap-reverse {
     -ms-flex-wrap: wrap-reverse;
     -webkit-flex-wrap: wrap-reverse;
     flex-wrap: wrap-reverse;
   }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     --paper-font-display1: {
       @apply(--paper-font-common-base);
 =======
   .flex-auto {
+=======
+  html /deep/ .flex-auto {
+>>>>>>> origin/develop
     -ms-flex: 1 1 auto;
     -webkit-flex: 1 1 auto;
     flex: 1 1 auto;
   }
 
-  .flex-none {
+  html /deep/ .flex-none {
     -ms-flex: none;
     -webkit-flex: none;
     flex: none;
   }
 >>>>>>> hotfix-db
 
-  .flex,
-  .flex-1 {
+  html /deep/ .flex,
+  html /deep/ .flex-1 {
     -ms-flex: 1;
     -webkit-flex: 1;
     flex: 1;
   }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     --paper-font-headline: {
       @apply(--paper-font-common-base);
 =======
   .flex-2 {
+=======
+  html /deep/ .flex-2 {
+>>>>>>> origin/develop
     -ms-flex: 2;
     -webkit-flex: 2;
     flex: 2;
   }
 
-  .flex-3 {
+  html /deep/ .flex-3 {
     -ms-flex: 3;
     -webkit-flex: 3;
     flex: 3;
   }
 >>>>>>> hotfix-db
 
-  .flex-4 {
+  html /deep/ .flex-4 {
     -ms-flex: 4;
     -webkit-flex: 4;
     flex: 4;
   }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
     --paper-font-title: {
       @apply(--paper-font-common-base);
@@ -1039,6 +1395,807 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   }
 
   .flex-12 {
+=======
+  html /deep/ .flex-5 {
+    -ms-flex: 5;
+    -webkit-flex: 5;
+    flex: 5;
+  }
+
+  html /deep/ .flex-6 {
+    -ms-flex: 6;
+    -webkit-flex: 6;
+    flex: 6;
+  }
+
+  html /deep/ .flex-7 {
+    -ms-flex: 7;
+    -webkit-flex: 7;
+    flex: 7;
+  }
+
+  html /deep/ .flex-8 {
+    -ms-flex: 8;
+    -webkit-flex: 8;
+    flex: 8;
+  }
+
+  html /deep/ .flex-9 {
+    -ms-flex: 9;
+    -webkit-flex: 9;
+    flex: 9;
+  }
+
+  html /deep/ .flex-10 {
+    -ms-flex: 10;
+    -webkit-flex: 10;
+    flex: 10;
+  }
+
+  html /deep/ .flex-11 {
+    -ms-flex: 11;
+    -webkit-flex: 11;
+    flex: 11;
+  }
+
+  html /deep/ .flex-12 {
+>>>>>>> origin/develop
+    -ms-flex: 12;
+    -webkit-flex: 12;
+    flex: 12;
+  }
+
+  /* alignment in cross axis */
+
+  html /deep/ .layout.start {
+    -ms-flex-align: start;
+    -webkit-align-items: flex-start;
+    align-items: flex-start;
+  }
+
+  html /deep/ .layout.center,
+  html /deep/ .layout.center-center {
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+  }
+
+  html /deep/ .layout.end {
+    -ms-flex-align: end;
+    -webkit-align-items: flex-end;
+    align-items: flex-end;
+  }
+
+  /* alignment in main axis */
+
+  html /deep/ .layout.start-justified {
+    -ms-flex-pack: start;
+    -webkit-justify-content: flex-start;
+    justify-content: flex-start;
+  }
+
+  html /deep/ .layout.center-justified,
+  html /deep/ .layout.center-center {
+    -ms-flex-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+  }
+
+  html /deep/ .layout.end-justified {
+    -ms-flex-pack: end;
+    -webkit-justify-content: flex-end;
+    justify-content: flex-end;
+  }
+
+  html /deep/ .layout.around-justified {
+    -ms-flex-pack: around;
+    -webkit-justify-content: space-around;
+    justify-content: space-around;
+  }
+
+  html /deep/ .layout.justified {
+    -ms-flex-pack: justify;
+    -webkit-justify-content: space-between;
+    justify-content: space-between;
+  }
+
+  /* self alignment */
+
+  html /deep/ .self-start {
+    -ms-align-self: flex-start;
+    -webkit-align-self: flex-start;
+    align-self: flex-start;
+  }
+
+  html /deep/ .self-center {
+    -ms-align-self: center;
+    -webkit-align-self: center;
+    align-self: center;
+  }
+
+  html /deep/ .self-end {
+    -ms-align-self: flex-end;
+    -webkit-align-self: flex-end;
+    align-self: flex-end;
+  }
+
+  html /deep/ .self-stretch {
+    -ms-align-self: stretch;
+    -webkit-align-self: stretch;
+    align-self: stretch;
+  }
+
+  /*******************************
+            Other Layout
+  *******************************/
+
+  html /deep/ .block {
+    display: block;
+  }
+
+  /* IE 10 support for HTML5 hidden attr */
+  html /deep/ [hidden] {
+    display: none !important;
+  }
+
+  html /deep/ .invisible {
+    visibility: hidden !important;
+  }
+
+  html /deep/ .relative {
+    position: relative;
+  }
+
+  html /deep/ .fit {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  body.fullbleed {
+    margin: 0;
+    height: 100vh;
+  }
+
+<<<<<<< HEAD
+  .scroll {
+=======
+  html /deep/ .scroll {
+>>>>>>> origin/develop
+    -webkit-overflow-scrolling: touch;
+    overflow: auto;
+  }
+
+<<<<<<< HEAD
+  /* fixed position */
+
+  .fixed-bottom,
+  .fixed-left,
+  .fixed-right,
+  .fixed-top {
+    position: fixed;
+  }
+
+  .fixed-top {
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .fixed-right {
+    top: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .fixed-bottom {
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  .fixed-left {
+    top: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+</style>
+
+
+<dom-module id="iron-icon" assetpath="iron-icon/">
+
+  <style>
+    :host {
+      @apply(--layout-inline);
+      @apply(--layout-center-center);
+      position: relative;
+
+      vertical-align: middle;
+
+      fill: var(--iron-icon-fill-color, currentcolor);
+      stroke: var(--iron-icon-stroke-color, none);
+
+      width: var(--iron-icon-width, 24px);
+      height: var(--iron-icon-height, 24px);
+    }
+  </style>
+
+<<<<<<< HEAD
+  /*******************************
+            Other Layout
+  *******************************/
+
+  .block {
+    display: block;
+  }
+
+  /* IE 10 support for HTML5 hidden attr */
+  [hidden] {
+    display: none !important;
+  }
+
+  .invisible {
+    visibility: hidden !important;
+  }
+
+  .relative {
+    position: relative;
+  }
+
+  .fit {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  body.fullbleed {
+    margin: 0;
+    height: 100vh;
+  }
+
+  .scroll {
+    -webkit-overflow-scrolling: touch;
+    overflow: auto;
+  }
+
+  /* fixed position */
+
+=======
+>>>>>>> origin/develop
+  .fixed-bottom,
+  .fixed-left,
+  .fixed-right,
+  .fixed-top {
+    position: fixed;
+  }
+
+<<<<<<< HEAD
+  .fixed-top {
+=======
+  html /deep/ .fixed-top {
+>>>>>>> origin/develop
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+<<<<<<< HEAD
+  .fixed-right {
+=======
+  html /deep/ .fixed-right {
+>>>>>>> origin/develop
+    top: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+<<<<<<< HEAD
+  .fixed-bottom {
+=======
+  html /deep/ .fixed-bottom {
+>>>>>>> origin/develop
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+<<<<<<< HEAD
+  .fixed-left {
+=======
+  html /deep/ .fixed-left {
+>>>>>>> origin/develop
+    top: 0;
+    bottom: 0;
+    left: 0;
+  }
+<<<<<<< HEAD
+
+</style>
+
+<style>
+
+.paper-font-display4,
+.paper-font-display3,
+.paper-font-display2,
+.paper-font-display1,
+.paper-font-headline,
+.paper-font-title,
+.paper-font-subhead,
+.paper-font-body2,
+.paper-font-body1,
+.paper-font-caption,
+.paper-font-menu,
+.paper-font-button {
+  font-family: 'Roboto', 'Noto', sans-serif;
+  -webkit-font-smoothing: antialiased;  /* OS X subpixel AA bleed bug */
+}
+
+.paper-font-code2,
+.paper-font-code1 {
+  font-family: 'Roboto Mono', 'Consolas', 'Menlo', monospace;
+  -webkit-font-smoothing: antialiased;  /* OS X subpixel AA bleed bug */
+}
+
+/* Opt for better kerning for headers & other short labels. */
+.paper-font-display4,
+.paper-font-display3,
+.paper-font-display2,
+.paper-font-display1,
+.paper-font-headline,
+.paper-font-title,
+.paper-font-subhead,
+.paper-font-menu,
+.paper-font-button {
+  text-rendering: optimizeLegibility;
+}
+
+/*
+"Line wrapping only applies to Body, Subhead, Headline, and the smaller Display
+styles. All other styles should exist as single lines."
+*/
+.paper-font-display4,
+.paper-font-display3,
+.paper-font-title,
+.paper-font-caption,
+.paper-font-menu,
+.paper-font-button {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.paper-font-display4 {
+  font-size: 112px;
+  font-weight: 300;
+  letter-spacing: -.044em;
+  line-height: 120px;
+}
+
+.paper-font-display3 {
+  font-size: 56px;
+  font-weight: 400;
+  letter-spacing: -.026em;
+  line-height: 60px;
+}
+
+.paper-font-display2 {
+  font-size: 45px;
+  font-weight: 400;
+  letter-spacing: -.018em;
+  line-height: 48px;
+}
+
+.paper-font-display1 {
+  font-size: 34px;
+  font-weight: 400;
+  letter-spacing: -.01em;
+  line-height: 40px;
+}
+
+.paper-font-headline {
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -.012em;
+  line-height: 32px;
+}
+
+.paper-font-title {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 28px;
+}
+
+.paper-font-subhead {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+.paper-font-body2 {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.paper-font-body1 {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.paper-font-caption {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.011em;
+  line-height: 20px;
+}
+
+.paper-font-menu {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.paper-font-button {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.018em;
+  line-height: 24px;
+  text-transform: uppercase;
+}
+
+.paper-font-code2 {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+}
+
+.paper-font-code1 {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+</style>
+<style>
+.shadow-transition {
+  transition: box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shadow-elevation-2dp {
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+              0 1px 5px 0 rgba(0, 0, 0, 0.12),
+              0 3px 1px -2px rgba(0, 0, 0, 0.2);
+}
+
+.shadow-elevation-3dp {
+  box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.14),
+              0 1px 8px 0 rgba(0, 0, 0, 0.12),
+              0 3px 3px -2px rgba(0, 0, 0, 0.4);
+}
+
+.shadow-elevation-4dp {
+  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14),
+              0 1px 10px 0 rgba(0, 0, 0, 0.12),
+              0 2px 4px -1px rgba(0, 0, 0, 0.4);
+}
+
+.shadow-elevation-6dp {
+  box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.14),
+              0 1px 18px 0 rgba(0, 0, 0, 0.12),
+              0 3px 5px -1px rgba(0, 0, 0, 0.4);
+}
+
+.shadow-elevation-8dp {
+  box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14),
+              0 3px 14px 2px rgba(0, 0, 0, 0.12),
+              0 5px 5px -3px rgba(0, 0, 0, 0.4);
+}
+
+.shadow-elevation-16dp {
+  box-shadow: 0 16px 24px 2px rgba(0, 0, 0, 0.14),
+              0  6px 30px 5px rgba(0, 0, 0, 0.12),
+              0  8px 10px -5px rgba(0, 0, 0, 0.4);
+}
+
+</style>
+
+<style>
+/*
+Note that there is a lot of style duplication here. The hope is that the Polymer
+0.8 styling solution will allow for inheritance of properties so that we can
+eventually avoid it.
+*/
+
+/* Mixins */
+
+/* [paper-font] */
+body {
+  font-family: 'Roboto', 'Noto', sans-serif;
+  -webkit-font-smoothing: antialiased;  /* OS X subpixel AA bleed bug */
+}
+
+/* [paper-font=display2] */
+h1 {
+  font-size: 45px;
+  font-weight: 400;
+  letter-spacing: -.018em;
+  line-height: 48px;
+}
+
+/* [paper-font=display1] */
+h2 {
+  font-size: 34px;
+  font-weight: 400;
+  letter-spacing: -.01em;
+  line-height: 40px;
+}
+
+/* [paper-font=headline] */
+h3 {
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -.012em;
+  line-height: 32px;
+}
+
+/* [paper-font=subhead] */
+h4 {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+/* [paper-font=body2] */
+h5, h6 {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+/* [paper-font=button] */
+a {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.018em;
+  line-height: 24px;
+  text-transform: uppercase;
+}
+
+/* Overrides */
+
+body, a {
+  color: #212121;
+}
+
+h1, h2, h3, h4, h5, h6, p {
+  margin: 0 0 20px 0;
+}
+
+h1, h2, h3, h4, h5, h6, a {
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  text-decoration: none;
+}
+
+</style>
+<style is="custom-style">
+:root {
+  --dark-primary-color: var(--paper-blue-700);
+  --default-primary-color: var(--paper-blue-500);
+  --light-primary-color: var(--paper-blue-50);
+  --text-primary-color: rgba(0, 0, 0, 0.87);
+  /*text/icons*/
+  --accent-color: #FF4081;
+  --primary-background-color: #ffffff;
+  --primary-text-color: #212121;
+  --secondary-text-color: #727272;
+  --disabled-text-color: #bdbdbd;
+  --divider-color: #B6B6B6;
+  --paper-menu-background-color: #fff;
+  --paper-toggle-button-checked-button-color: var(--paper-blue-500);
+  --paper-tabs-selection-bar-color: var(--default-primary-color);
+  --paper-tab-ink: var(--light-primary-color);
+  --page-title-text: {
+    @apply(--paper-font-headline);
+    padding: 0 16px;
+  };
+  --page-section-container: {
+    border-bottom: 1px var(--paper-grey-100) solid;
+    padding-bottom: 20px;
+  };
+  --page-section-title: {
+    @apply(--paper-font-title);
+    padding: 0 16px;
+  };
+  --page-section-item: {
+    @apply(--layout-horizontal);
+    @apply(--layout-center);
+    @apply(--paper-font-body1);
+    padding: 0 16px;
+    min-height: 36px;
+  };
+  --page-section-item-simple: {
+    @apply(--paper-font-body1);
+    padding: 0 16px;
+    min-height: 36px;
+  };
+}
+
+html,
+body.rest-client {
+  font-family: 'Roboto', 'Noto', sans-serif;
+  font-size: 15px;
+  height: 100%;
+}
+</style>
+</head><body><div hidden="" by-vulcanize=""><dom-module id="iron-icon" assetpath="iron-icon/">
+
+  <style>
+    :host {
+      @apply(--layout-inline);
+      @apply(--layout-center-center);
+      position: relative;
+
+      vertical-align: middle;
+
+      fill: var(--iron-icon-fill-color, currentcolor);
+      stroke: var(--iron-icon-stroke-color, none);
+
+      width: var(--iron-icon-width, 24px);
+      height: var(--iron-icon-height, 24px);
+    }
+  </style>
+
+=======
+>>>>>>> hotfix-db
+=======
+
+</style>
+<style>
+
+  /*******************************
+            Flex Layout
+  *******************************/
+
+  .layout.horizontal,
+  .layout.horizontal-reverse,
+  .layout.vertical,
+  .layout.vertical-reverse {
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+  }
+
+  .layout.inline {
+    display: -ms-inline-flexbox;
+    display: -webkit-inline-flex;
+    display: inline-flex;
+  }
+
+  .layout.horizontal {
+    -ms-flex-direction: row;
+    -webkit-flex-direction: row;
+    flex-direction: row;
+  }
+
+  .layout.horizontal-reverse {
+    -ms-flex-direction: row-reverse;
+    -webkit-flex-direction: row-reverse;
+    flex-direction: row-reverse;
+  }
+
+  .layout.vertical {
+    -ms-flex-direction: column;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+  }
+
+  .layout.vertical-reverse {
+    -ms-flex-direction: column-reverse;
+    -webkit-flex-direction: column-reverse;
+    flex-direction: column-reverse;
+  }
+
+  .layout.wrap {
+    -ms-flex-wrap: wrap;
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
+  }
+
+  .layout.wrap-reverse {
+    -ms-flex-wrap: wrap-reverse;
+    -webkit-flex-wrap: wrap-reverse;
+    flex-wrap: wrap-reverse;
+  }
+
+  .flex-auto {
+    -ms-flex: 1 1 auto;
+    -webkit-flex: 1 1 auto;
+    flex: 1 1 auto;
+  }
+
+  .flex-none {
+    -ms-flex: none;
+    -webkit-flex: none;
+    flex: none;
+  }
+
+  .flex,
+  .flex-1 {
+    -ms-flex: 1;
+    -webkit-flex: 1;
+    flex: 1;
+  }
+
+  .flex-2 {
+    -ms-flex: 2;
+    -webkit-flex: 2;
+    flex: 2;
+  }
+
+  .flex-3 {
+    -ms-flex: 3;
+    -webkit-flex: 3;
+    flex: 3;
+  }
+
+  .flex-4 {
+    -ms-flex: 4;
+    -webkit-flex: 4;
+    flex: 4;
+  }
+
+  .flex-5 {
+    -ms-flex: 5;
+    -webkit-flex: 5;
+    flex: 5;
+  }
+
+  .flex-6 {
+    -ms-flex: 6;
+    -webkit-flex: 6;
+    flex: 6;
+  }
+
+  .flex-7 {
+    -ms-flex: 7;
+    -webkit-flex: 7;
+    flex: 7;
+  }
+
+  .flex-8 {
+    -ms-flex: 8;
+    -webkit-flex: 8;
+    flex: 8;
+  }
+
+  .flex-9 {
+    -ms-flex: 9;
+    -webkit-flex: 9;
+    flex: 9;
+  }
+
+  .flex-10 {
+    -ms-flex: 10;
+    -webkit-flex: 10;
+    flex: 10;
+  }
+
+  .flex-11 {
+    -ms-flex: 11;
+    -webkit-flex: 11;
+    flex: 11;
+  }
+
+  .flex-12 {
     -ms-flex: 12;
     -webkit-flex: 12;
     flex: 12;
@@ -1124,100 +2281,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     align-self: stretch;
   }
 
-  /*******************************
-            Other Layout
-  *******************************/
-
-  .block {
-    display: block;
-  }
-
-  /* IE 10 support for HTML5 hidden attr */
-  [hidden] {
-    display: none !important;
-  }
-
-  .invisible {
-    visibility: hidden !important;
-  }
-
-  .relative {
-    position: relative;
-  }
-
-  .fit {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-  }
-
-  body.fullbleed {
-    margin: 0;
-    height: 100vh;
-  }
-
-  .scroll {
-    -webkit-overflow-scrolling: touch;
-    overflow: auto;
-  }
-
-  /* fixed position */
-
-  .fixed-bottom,
-  .fixed-left,
-  .fixed-right,
-  .fixed-top {
-    position: fixed;
-  }
-
-  .fixed-top {
-    top: 0;
-    left: 0;
-    right: 0;
-  }
-
-  .fixed-right {
-    top: 0;
-    right: 0;
-    bottom: 0;
-  }
-
-  .fixed-bottom {
-    right: 0;
-    bottom: 0;
-    left: 0;
-  }
-
-  .fixed-left {
-    top: 0;
-    bottom: 0;
-    left: 0;
-  }
-
-</style>
-
-
-<dom-module id="iron-icon" assetpath="iron-icon/">
-
-  <style>
-    :host {
-      @apply(--layout-inline);
-      @apply(--layout-center-center);
-      position: relative;
-
-      vertical-align: middle;
-
-      fill: var(--iron-icon-fill-color, currentcolor);
-      stroke: var(--iron-icon-stroke-color, none);
-
-      width: var(--iron-icon-width, 24px);
-      height: var(--iron-icon-height, 24px);
-    }
-  </style>
-
-<<<<<<< HEAD
   /*******************************
             Other Layout
   *******************************/
@@ -1629,8 +2692,7 @@ body.rest-client {
     }
   </style>
 
-=======
->>>>>>> hotfix-db
+>>>>>>> origin/develop
   <template>
   </template>
 
@@ -3018,6 +4080,10 @@ body.rest-client {
       font-family: 'Roboto', 'Noto', sans-serif;
       -webkit-font-smoothing: antialiased;
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/develop
 
       font-size: 16px;
       font-weight: 400;
@@ -3079,10 +4145,36 @@ body.rest-client {
       font-family: 'Roboto', 'Noto', sans-serif;
       -webkit-font-smoothing: antialiased;
 
+<<<<<<< HEAD
       /* @apply(--paper-font-common-nowrap); */
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+=======
+    <div id="background"></div>
+    <div id="waves"></div>
+  </template>
+</dom-module>
+<dom-module id="paper-icon-button" assetpath="paper-icon-button/">
+  <template strip-whitespace="">
+    <style>
+      :host {
+        display: inline-block;
+        position: relative;
+        padding: 8px;
+        outline: none;
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        cursor: pointer;
+        z-index: 0;
+        line-height: 1;
+
+        width: 40px;
+        height: 40px;
+>>>>>>> origin/develop
 
       font-size: 14px;
       font-weight: 500;
@@ -3103,8 +4195,8 @@ body.rest-client {
         cursor: auto;
         @apply(--paper-icon-button-disabled);
       }
-      
-      :host(:hover) { 
+
+      :host(:hover) {
         @apply(--paper-icon-button-hover);
       }
 =======
@@ -5265,7 +6357,7 @@ a {
       width: 36px;
       color: var(--paper-grey-500);
     }
-    
+
     .settings-section {
       border-bottom: 1px var(--paper-grey-100) solid;
     }
@@ -5445,7 +6537,7 @@ a {
         height: 100%;
     }
     .table{
-        
+
     }
     .table-header {
         height: 64px;
@@ -5543,6 +6635,7 @@ a {
     </template>
     </dom-module>
 <dom-module id="app-response-status" assetpath="app-response-status/">
+<<<<<<< HEAD
   <template>
     <style include="paper-material">
     :host {
@@ -5652,6 +6745,127 @@ a {
                 </div>
                 <app-headers-display headers="{{item.responseHeaders}}"></app-headers-display>
               </div>
+=======
+    <template>
+        <style include="paper-material">
+        :host {
+            @apply(--layout-vertical);
+        }
+
+        .status-row {
+            @apply(--layout-horizontal);
+            @apply(--paper-font-subhead);
+            @apply(--layout-center);
+            padding: 0 24px;
+            border-bottom: 1px rgba(0, 0, 0, 0.12) solid;
+            min-height: 48px;
+        }
+
+        .status-label {
+            width: 80px;
+            margin-top: 8px;
+            @apply(--paper-font-subhead);
+        }
+
+        .status-value {
+            @apply(--layout-flex);
+            @apply(--layout-horizontal);
+            @apply(--layout-center);
+        }
+
+        .response-status-help {
+            color: rgba(0, 0, 0, 0.24);
+            transition: color 300ms ease-in-out;
+        }
+
+        .response-status-help:hover {
+            color: rgba(33, 150, 243, 1);
+        }
+
+        .status-value.status {
+            padding: 0 16px;
+        }
+
+        .redirect-value {
+            margin-top: 12px;
+            @apply(--layout-flex);
+        }
+
+        .status-color {
+            color: var(--paper-green-700);
+        }
+
+        .status-color.warning {
+            color: var(--paper-orange-700);
+        }
+
+        .status-color.error {
+            color: var(--paper-red-700);
+        }
+
+        .no-redirects-container {
+            @apply(--layout-vertical);
+            @apply(--layout-center);
+        }
+
+        .no-redirects-info {
+            @apply(--paper-font-body2);
+        }
+
+        app-headers-display {
+            margin-top: 12px;
+        }
+        </style>
+        <div class="status-row">
+            <div class="status-label">Status:</div>
+            <div class="status-value status">
+                <span class$="{{computeStatusClass(statusCode)}}"><span>{{statusCode}}</span>: <span>{{statusMessage}}</span></span>
+                <paper-icon-button on-tap="showStatusInfo" icon="help" class="response-status-help"></paper-icon-button>
+                <span>Loading time: </span><span>{{loadingTime}}</span><span>ms</span>
+            </div>
+        </div>
+        <paper-tabs selected="{{selectedTab}}">
+            <paper-tab>Response headers (<span>{{responseHeaders.length}}</span>)</paper-tab>
+            <paper-tab>Request headers (<span>{{requestHeaders.length}}</span>)</paper-tab>
+            <paper-tab>Redirects (<span>{{redirectData.length}}</span>)</paper-tab>
+        </paper-tabs>
+        <iron-pages selected="{{selectedTab}}">
+            <section>
+                <app-headers-display on-tap="_handleLink" headers="{{responseHeaders}}"></app-headers-display>
+            </section>
+            <section>
+                <app-headers-display on-tap="_handleLink" headers="{{requestHeaders}}"></app-headers-display>
+            </section>
+            <section>
+                <template is="dom-if" if="{{!redirectData.length}}">
+                    <div class="no-redirects-container">
+                        <p class="no-redirects-info">There were no redirects during this request</p>
+                    </div>
+                </template>
+                <template is="dom-if" if="{{redirectData.length}}">
+                    <template is="dom-repeat" items="{{redirectData}}">
+                        <div class="status-row">
+                            <div class="status-label">#<span>{{computeIndexName(index)}}</span></div>
+                            <div class="redirect-value" on-tap="_handleLink">
+                                <div class="status-value status">
+                                    <span>To: <span><a href="{{item.redirectUrl}}" class="auto-link">{{item.redirectUrl}}</a></span> with status <span>{{item.statusLine}}</span></span>
+                                    <template is="dom-if" if="{{item.fromCache}}">
+                                        <span>Cached data has been used with this response</span>
+                                    </template>
+                                </div>
+                                <app-headers-display headers="{{item.responseHeaders}}"></app-headers-display>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+            </section>
+        </iron-pages>
+        <paper-dialog id="statusCodeInfo">
+            <h2>{{_scdTitle}}</h2>
+            <paper-dialog-scrollable>{{_scdBody}}</paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button dialog-confirm="" autofocus="">Close</paper-button>
+>>>>>>> origin/develop
             </div>
           </template>
         </template>
@@ -5667,39 +6881,39 @@ a {
   </template>
   </dom-module>
 <dom-module id="app-headers-display" assetpath="app-response-status/">
-  <template>
-    <style>
-    :host {
-      display: block;
-    }
-    
-    .dialog-header-example {
-      @apply(--paper-font-body1);
-      margin-top: 16px;
-    }
-    
-    .dialog-header-desc {
-      @apply(--paper-font-body2);
-    }
-    </style>
-    <template is="dom-repeat" items="{{headers}}">
-      <arc-header-line-display on-dblclick="_displayHeaderInfo" header-name="[[item.name]]" header-value="[[item.value]]"></arc-header-line-display>
+    <template>
+        <style>
+        :host {
+            display: block;
+        }
+
+        .dialog-header-example {
+            @apply(--paper-font-body1);
+            margin-top: 16px;
+        }
+
+        .dialog-header-desc {
+            @apply(--paper-font-body2);
+        }
+        </style>
+        <template is="dom-repeat" items="{{headers}}">
+            <arc-header-line-display on-dblclick="_displayHeaderInfo" header-name="[[item.name]]" header-value="[[item.value]]"></arc-header-line-display>
+        </template>
+        <paper-dialog id="headerInfo">
+            <h2>{{_hdTitle}}</h2>
+            <paper-dialog-scrollable>
+                <section class="dialog-header-desc">{{_hdBody}}</section>
+                <section class="dialog-header-example">
+                    <span>Example: </span>
+                    <span>{{_hdExample}}</span>
+                </section>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button dialog-confirm="" autofocus="">Close</paper-button>
+            </div>
+        </paper-dialog>
     </template>
-    <paper-dialog id="headerInfo">
-      <h2>{{_hdTitle}}</h2>
-      <paper-dialog-scrollable>
-        <section class="dialog-header-desc">{{_hdBody}}</section>
-        <section class="dialog-header-example">
-          <span>Example: </span>
-          <span>{{_hdExample}}</span>
-        </section>
-      </paper-dialog-scrollable>
-      <div class="buttons">
-        <paper-button dialog-confirm="" autofocus="">Close</paper-button>
-      </div>
-    </paper-dialog>
-  </template>
-  </dom-module>
+    </dom-module>
 <dom-module id="arc-header-line-display" assetpath="app-response-status/">
     <template>
         <style>
@@ -5709,23 +6923,23 @@ a {
             padding: 0px 16px;
             display: block;
         }
-        
+
         :host(.iron-selected) {
             font-weight: var(--paper-item-selected-weight, bold);
             @apply(--paper-item-selected);
         }
-        
+
         :host([disabled]) {
             color: var(--paper-item-disabled-color, --disabled-text-color);
             @apply(--paper-item-disabled);
         }
-        
+
         :host(:focus) {
             position: relative;
             outline: 0;
             @apply(--paper-item-focused);
         }
-        
+
         :host(:focus):before {
             @apply(--layout-fit);
             content: '';
@@ -5734,12 +6948,12 @@ a {
             pointer-events: none;
             @apply(--paper-item-focused-before);
         }
-        
+
         .header-name {
             padding-right: 8px;
             @apply(--paper-font-body2);
         }
-        
+
         .header-value {
             @apply(--paper-font-body1);
             @apply(--layout-flex);
@@ -5754,7 +6968,7 @@ a {
 	<template>
 		<style>
 			:host {
-				
+
 			}
 		</style>
 		<span id="display"></span>
@@ -5960,7 +7174,7 @@ a {
         :host {
             display: block;
         }
-        
+
         .sublist {
             padding-left: 20px;
             padding-right: 20px;
@@ -5995,35 +7209,35 @@ a {
     :host {
       display: block;
     }
-    
+
     .licenseText {
       white-space: pre-line;
     }
-    
+
     h1 {
       @apply(--page-title-text);
     }
-    
+
     .about-section {
       @apply(--page-section-container);
     }
-    
+
     .about-row {
       @apply(--page-section-item);
     }
-    
+
     a {
       margin-left: 8px;
     }
-    
+
     h2 {
       @apply(--page-section-title);
     }
-    
+
     .changelog {
       @apply(--page-section-item-simple);
     }
-    
+
     .versionField {
       margin-right: 8px;
     }
@@ -6078,6 +7292,7 @@ a {
     <section class="about-section">
       <h2>Changelog</h2>
       <div class="changelog">
+<<<<<<< HEAD
         <p class="paper-font-title">2/5/2016</p>
         <ul class="paper-font-body1">
           <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/375" target="_blank">#375</a> and <a href="https://github.com/jarrodek/ChromeRestClient/issues/372" target="_blank">#372</a>: Import seems to work, but nothing saved</li>
@@ -6092,6 +7307,8 @@ a {
           <li>Moved whole WebSQL logic to JavaScript</li>
           <li>Several bug fixes</li>
         </ul>
+=======
+>>>>>>> origin/develop
         <p class="paper-font-title">1/12/2016</p>
         <ul class="paper-font-body1">
           <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/347" target="_blank">#347</a>: Headers copy and paste with one line</li>
@@ -6598,6 +7815,7 @@ a {
     </paper-dialog>
   </template>
   </dom-module>
+<<<<<<< HEAD
 <style is="custom-style">
 :root {
   --dark-primary-color: var(--paper-blue-700);
@@ -6649,3 +7867,6 @@ body.rest-client {
 }
 </style>
 </div><script src="elements.js"></script></body></html>
+=======
+</div><script src="elements.js"></script></body></html>
+>>>>>>> origin/develop
