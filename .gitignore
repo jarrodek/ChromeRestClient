@@ -2,5 +2,5 @@
 **/gwt-unitCache/*
 **/extras/*
 **/war/WEB-INF/classes
-node_modules
-bower_components
+**/node_modules
+**/bower_components
