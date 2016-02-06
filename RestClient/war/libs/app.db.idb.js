@@ -1156,18 +1156,3 @@ arc.app.db.idb.listExported = function(requestsArray) {
         });
     });
 };
-/**
- * In dev mode there is no direct connection to the database initialized in the background page.
- * This function must be called in Development environment to initialize IndexedDb.
- */
-arc.app.db.idb.initDev = function() {
-  if (location.hostname !== '127.0.0.1' || location.port !== '8888') {
-    return;
-  }
-  arc.app.db.idb.open()
-    .then(function() {
-      console.log('%cDEVMODE::IndexedDB has been initialized', 'color: #33691E');
-    })
-    .catch((e) => console.error('DEVMODE::Error initializing the IDB database', e));
-};
-arc.app.db.idb.initDev();

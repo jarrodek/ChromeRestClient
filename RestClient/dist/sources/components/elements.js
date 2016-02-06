@@ -16170,7 +16170,7 @@ Polymer({
      */
     _onStorageChanged: function(changes, area) {
       var keys = Object.keys(changes);
-      var accepted = ['DEBUG_ENABLED', 'HISTORY_ENABLED', 'MAGICVARS_ENABLED', 'CMH_ENABLED', 'CMP_ENABLED'];
+      var accepted = ['DEBUG_ENABLED', 'HISTORY_ENABLED', 'MAGICVARS_ENABLED', 'CMH_ENABLED', 'CMP_ENABLED', 'useIdb'];
       keys.forEach(function(key) {
         if (accepted.indexOf(key) !== -1 && this.values[key] !== changes[key].newValue) {
           this.set('values.' + key, changes[key].newValue);

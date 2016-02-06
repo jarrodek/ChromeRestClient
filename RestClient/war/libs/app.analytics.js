@@ -193,7 +193,6 @@ arc.app.analytics._setChromeChannel = function() {
       }
     })
     .catch(function(cause) {
-      console.info('Unable to download Chrome channels list', cause);
     });
 };
 /**

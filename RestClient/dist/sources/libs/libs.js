@@ -2807,7 +2807,7 @@ arc.app.settings.getConfig = function () {
       'MAGICVARS_ENABLED': true,
       'CMH_ENABLED': true,
       'CMP_ENABLED': true,
-      'useIdb': false
+      'useIdb': true
     };
     try {
       chrome.storage.sync.get(values, function (result) {
