@@ -43,46 +43,27 @@ class BaseObject {
       throw new Error('Missing parameters: ' + errors.join(', ') + '.');
     }
   }
-}
-/**
- * An object extending this class will contain additional property
- * to point that this object was available in old database structure
- * and can have old database ID.
- *
- * Object of this class are used only temporarily to sync changes 
- * between IndexedDB and WebSQL. In packaged apps WebSQL is not available 
- * so this object won't be necessary. 
- *
- * Note that datastore used to store this object should have index created
- * for `oldId`
- *
- * @example
- * // expose `oldId` as a reference to WebSQL id
- * if (obect.oldId) {
- *  //has old database id
- * }
- *
- * @extends BaseObject
- */
-class LegacyObject extends BaseObject {
 
-  constructor(opts) {
-    super();
-    /**
-     * An old database ID reference.
-     * It is temporary field to sync changes between IDB and WebSQL
-     *
-     * @type {?Number}
-     */
-    this.oldId = opts.oldId || undefined;
+  /**
+   * Override toJSON behaviour so it will eliminate
+   * all _* properies and replace it with a proper ones.
+   */
+  toJSON() {
+    var copy = Object.assign({}, this);
+    var keys = Object.keys(copy);
+    var under = keys.filter((key) => key.indexOf('_') === 0);
+    under.forEach((key) => {
+      let realKey = key.substr(1);
+      copy[realKey] = copy[key];
+      delete copy[key];
+    });
+    return copy;
   }
 }
 /**
  * OrderedList object represents an object that can be ordered in a list. This
  * objects have additional properties and methods to manage their position on
  * the list.
- *
- * This object extends LegacyObject only temporarily. It should extends BaseObject.
  *
  * @example <caption>Reordering elements on list</caption>  
  * // Initial list
@@ -94,9 +75,9 @@ class LegacyObject extends BaseObject {
  * }); 
  * // [OrderedList1, OrderedList2, OrderedList7, OrderedList3, OrderedList4, OrderedList5, 
  * OrderedList6] 
- * @extends LegacyObject
+ * @extends BaseObject
  */
-class OrderedList extends LegacyObject {
+class OrderedList extends BaseObject {
 
   constructor(opts) {
     super(opts);
@@ -205,6 +186,9 @@ class OrderedList extends LegacyObject {
     }
     ++this.order;
   }
+  toJSON() {
+    return super.toJSON();
+  }
 }
 /** 
  * A base class for request object.
@@ -226,7 +210,15 @@ class RequestObject extends OrderedList {
      *
      * @type {HAR}
      */
-    this._har = null;
+    this._har = opts._har ? (opts._har instanceof HAR.Log) ? opts._har :
+      new HAR.Log(opts._har) : null;
+    /**
+     * A name of the request.
+     * It is repeated in the HAR object - according to HAR spec in the pages array of the 
+     * log object. It must be in the non-array path to index the value in the IDB engine.
+     * @type {!String}
+     */
+    this._name = null;
     /**
      * Request URL. It's an index and part of keyPath in the database. Therefore it's required.
      *
@@ -245,11 +237,16 @@ class RequestObject extends OrderedList {
      * Used to distinguish what kind of request is this (saved, history)
      *
      * @type {!String}
-     * @default null
      */
-    this.type = opts.type ? opts.type : null;
+    this.type = opts.type;
     // set a har object
-    this.har = opts.har ? opts.har : null;
+    if (opts.har) {
+      this.har = opts.har;
+    }
+    // Set a name value.
+    if (opts.name) {
+      this.name = opts.name;
+    }
   }
 
   set har(har) {
@@ -262,6 +259,21 @@ class RequestObject extends OrderedList {
 
   get har() {
     return this._har;
+  }
+
+  set name(name) {
+    this._name = String(name);
+    if (this._har) {
+      this._har.pages[0].title = this._name;
+    }
+  }
+
+  get name() {
+    return this._name;
+  }
+
+  toJSON() {
+    return super.toJSON();
   }
 }
 /** 
@@ -280,6 +292,9 @@ class SavedRequestObject extends RequestObject {
     opts.type = 'saved';
     super(opts);
   }
+  toJSON() {
+    return super.toJSON();
+  }
 }
 /** 
  * A class of history requests objects.
@@ -296,6 +311,9 @@ class HistoryRequestObject extends RequestObject {
   constructor(opts) {
     opts.type = 'history';
     super(opts);
+  }
+  toJSON() {
+    return super.toJSON();
   }
 }
 /**
@@ -334,7 +352,7 @@ class DriveObject extends BaseObject {
  * @throws {Error} If `serverId` or `requestId` is not available to the constructor.
  */
 // jshint unused:false
-class ServerExportedObject extends LegacyObject {
+class ServerExportedObject extends BaseObject {
 
   constructor(opts) {
     super(opts);
@@ -416,8 +434,15 @@ class ProjectObject extends OrderedList {
     if (!opts.requestIds) {
       opts.requestIds = [];
     }
-    if (!(opts.requestIds instanceof Array)) {
+    if (typeof opts.requestIds.length === 'undefined') {
       throw new Error('`requestIds` property must be an array of ids of request objects');
+    }
+    if (opts.id) {
+      /**
+       * A database ID.
+       * It can be null / undefined if the object wasn't saved yet.
+       */
+      this.id = opts.id;
     }
     /**
      * A list of all endpoints (RequestObjects) referenced to this project.

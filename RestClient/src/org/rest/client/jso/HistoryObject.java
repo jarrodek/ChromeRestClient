@@ -53,6 +53,9 @@ public class HistoryObject extends JavaScriptObject {
 	public final native void setId(int id) /*-{
 		this.id = id;
 	}-*/;
+	public final native void reSetId() /*-{
+		delete this.id;
+	}-*/;
 	
 	public final native void setTime(double time) /*-{
 		this.time = time;

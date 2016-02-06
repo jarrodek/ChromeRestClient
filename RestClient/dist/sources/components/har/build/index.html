@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>HAR JS</title>
+</head>
+<body class="rest-client">
+
+  <script type="text/javascript" src="./har.js"></script>
+  <script type="text/javascript" charset="utf-8" async defer>
+    var cacheEntry = new HAR.CacheEntry({'comment': 'Cache entry comment'});
+    var log = new HAR.Log({'comment': 'Test HAR', 'version': 1.2, 'creator': {'name': 'HAR JS',  'version': 1.0}});
+    var content = new HAR.Content({compression: 20, mimeType: 'multipart/form-content', text: 'foo=bar', encoding: 'base64',comment: 'hello world'});
+    var cookie = new HAR.Cookie({name: 'foo', value: 'bar',path: '/', domain: 'www.ahmadnassri.com', expires: new Date(), httpOnly: true, secure: true, comment: 'foo'});
+    var creatoer = new HAR.Creator({name: 'Node HAR',version: '1.0'});
+    var browser = new HAR.Browser({name: 'My Browser',version: '5.0'});
+    var header = new HAR.Header({name: 'foo', value: 'bar', comment: 'foo'});
+    var page = new HAR.Page({ id: 'foo', title: 'hello world', startedDateTime: new Date(), pageTimings: {onLoad: 0, onContentLoad: 0}, comment: 'foo'});
+    var pageParam = new HAR.Param({comment: 'hello', contentType: 'text/plain', fileName: 'foo.bar', name: 'foo', value: 'bar'});
+    var post = new HAR.PostData({comment: 'hello world', mimeType: 'multipart/form-data', text: 'foo=bar'});
+    post.addParam(pageParam);
+    var request = new HAR.Request({url: 'https://ahmadnassri.github.io/har-resources/?param1=value1&param2=object2', headers: [header], postData: post});
+    request.addCookie(cookie);
+    request.addHeader(header);
+    var response = new HAR.Response({ status: 200, statusText: 'OK', headers: [new HAR.Header('foo', 'bar')], content: new HAR.PostData({text: 'This is the response.'}) });
+    response.addCookie(cookie);
+    response.addHeader(header);
+    var entry = new HAR.Entry({startedDateTime: new Date(), request: request, response: response});
+    entry.setPage(page);
+    log.addPage(page);
+    log.addEntry(entry);
+    console.log(log);
+    console.log(JSON.stringify(log));
+  </script>
+</body>
+</html>

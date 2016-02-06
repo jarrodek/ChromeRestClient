@@ -17,7 +17,7 @@ var bump = require('gulp-bump');
 var zip = require('gulp-zip');
 var babel = require('gulp-babel');
 var concat = require('gulp-concat');
-var run = require('gulp-run');
+//var run = require('gulp-run');
 
 /**
  * Tasks that build different version should use this switched to 
@@ -228,7 +228,7 @@ var copySourceFile = function(obj) {
     }));
 };
 var updateDevDocs = function() {
-  run('jsdoc dev/libs -r -d docs/dev/libs').exec();
+  //run('jsdoc dev/libs -r -d docs/dev/libs').exec();
   //run('jsdoc dev -r -d docs/dev -c dev/jsdoc.json').exec();
 };
 /**

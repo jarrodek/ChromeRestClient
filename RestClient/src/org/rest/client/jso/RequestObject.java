@@ -29,7 +29,6 @@ import com.google.gwt.chrome.storage.StorageResult;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -61,17 +60,7 @@ public class RequestObject extends JavaScriptObject {
 			encoding : null,
 			headers : null,
 			payload : null,
-			skipProtocol : false,
-			skipServer : false,
-			skipParams : false,
-			skipHistory : false,
-			skipMethod: false,
-			skipPayload: false,
-			skipHeaders: false,
-			skipPath: false,
 			time: Date.now(),
-			
-			//additional, non DB fields
 			driveId: null
 		}
 	}-*/;
@@ -102,14 +91,6 @@ public class RequestObject extends JavaScriptObject {
 			encoding : null,
 			headers : headers,
 			payload : obj.post,
-			skipProtocol : false,
-			skipServer : false,
-			skipParams : false,
-			skipHistory : false,
-			skipMethod: false,
-			skipPayload: false,
-			skipHeaders: false,
-			skipPath: false,
 			time: Date.now(),
 			//additional, non DB fields
 			driveId: null
@@ -126,6 +107,9 @@ public class RequestObject extends JavaScriptObject {
 	
 	public final native void setId(int id) /*-{
 		this.id = id;
+	}-*/;
+	public final native void resetId() /*-{
+		delete this.id;
 	}-*/;
 	
 	
@@ -228,6 +212,9 @@ public class RequestObject extends JavaScriptObject {
 	 *            Name to set
 	 */
 	public final native void setName(String name) /*-{
+		if(this.har){
+			this.har.pages[0].title = name;
+		}
 		this.name = name;
 	}-*/;
 
@@ -249,188 +236,12 @@ public class RequestObject extends JavaScriptObject {
 	 *            ID from projects IDB
 	 */
 	public final native void setProject(int project) /*-{
+		if(this.har){
+			return;
+		}
 		this.project = project;
 	}-*/;
 
-	/**
-	 * If skipProtocol flag is set to true when restoring this requests data
-	 * protocol value will be removed and current form value will be inserted.
-	 * 
-	 * @param skipProtocol
-	 *            True to drop protocol value when restoring
-	 */
-	public final native void setSkipProtocol(boolean skipProtocol) /*-{
-		this.skipProtocol = skipProtocol;
-	}-*/;
-
-	/**
-	 * @return If skipProtocol is set to TRUE when protocol value will be
-	 *         dropped when restoring this request (use current form value
-	 *         instead)
-	 */
-	public final native boolean isSkipProtocol() /*-{
-		if(typeof this.skipProtocol === 'string'){
-			return this.skipProtocol === 'true' ? true : false;
-		}
-		return !!(this.skipProtocol);
-	}-*/;
-	
-	public final native int getSkipProtocol() /*-{
-		var res = 0;
-		if(!!this.skipProtocol){
-			res = 1;
-		}
-		return res;
-	}-*/;
-	
-	/**
-	 * If skipServer flag is set to true then when restoring this requests data
-	 * server addr value will be removed and current form value will be
-	 * inserted.
-	 * 
-	 * @param skipSetver
-	 *            True to drop server addr value when restoring
-	 */
-	public final native void setSkipServer(boolean skipServer) /*-{
-		this.skipServer = skipServer;
-	}-*/;
-
-	/**
-	 * 
-	 * @return If skipServer is set to TRUE then server addr value will be
-	 *         dropped when restoring this request (use current form value
-	 *         instead)
-	 */
-	public final native boolean isSkipServer() /*-{
-		if(typeof this.skipServer === 'string'){
-			return this.skipServer === 'true' ? true : false;
-		}
-		return !!(this.skipServer);
-	}-*/;
-	public final native int getSkipServer() /*-{
-		var res = 0;
-		if(!!this.skipServer){
-			res = 1;
-		}
-		return res;
-	}-*/;
-	/**
-	 * Set this flag to true to drop any URL parameters saved with this request
-	 * 
-	 * @param skipParams
-	 *            True to drop params value
-	 */
-	public final native void setSkipParams(boolean skipParams) /*-{
-		this.skipParams = skipParams;
-	}-*/;
-
-	/**
-	 * @return if true all URL parameters saved with this request will not be
-	 *         restored (use current form value instead)
-	 */
-	public final native boolean isSkipParams() /*-{
-		if(typeof this.skipParams === 'string'){
-			return this.skipParams === 'true' ? true : false;
-		}
-		return !!(this.skipParams);
-	}-*/;
-	public final native int getSkipParams() /*-{
-		var res = 0;
-		if(!!this.skipParams){
-			res = 1;
-		}
-		return res;
-	}-*/;
-
-	public final native void setSkipHistory(boolean skipHistory) /*-{
-		this.skipHistory = skipHistory;
-	}-*/;
-
-	public final native boolean isSkipHistory() /*-{
-		if(typeof this.skipHistory === 'string'){
-			return this.skipHistory === 'true' ? true : false;
-		}
-		return !!(this.skipHistory);
-	}-*/;
-	public final native int getSkipHistory() /*-{
-		var res = 0;
-		if(!!this.skipHistory){
-			res = 1;
-		}
-		return res;
-	}-*/;
-
-	public final native void setSkipMethod(boolean skipMethod) /*-{
-		this.skipMethod = skipMethod;
-	}-*/;
-
-	public final native boolean isSkipMethod() /*-{
-		if(typeof this.skipMethod === 'string'){
-			return this.skipMethod === 'true' ? true : false;
-		}
-		return !!(this.skipMethod);
-	}-*/;
-	public final native int getSkipMethod() /*-{
-		var res = 0;
-		if(!!(this.skipMethod)){
-			res = 1;
-		}
-		return res;
-	}-*/;
-
-	public final native void setSkipPayload(boolean skipPayload) /*-{
-		this.skipPayload = skipPayload;
-	}-*/;
-
-	public final native boolean isSkipPayload() /*-{
-		if(typeof this.skipPayload === 'string'){
-			return this.skipPayload === 'true' ? true : false;
-		}
-		return !!(this.skipPayload);
-	}-*/;
-	public final native int getSkipPayload() /*-{
-		var res = 0;
-		if(!!(this.skipPayload)){
-			res = 1;
-		}
-		return res;
-	}-*/;
-	
-	public final native void setSkipHeaders(boolean skipHeaders) /*-{
-		this.skipHeaders = skipHeaders;
-	}-*/;
-	
-	public final native boolean isSkipHeaders() /*-{
-		if(typeof this.skipHeaders === 'string'){
-			return this.skipHeaders === 'true' ? true : false;
-		}
-		return !!(this.skipHeaders);
-	}-*/;
-	public final native int getSkipHeaders() /*-{
-		var res = 0;
-		if(!!(this.skipHeaders)){
-			res = 1;
-		}
-		return res;
-	}-*/;
-	
-	public final native void setSkipPath(boolean skipPath) /*-{
-		this.skipPath = skipPath;
-	}-*/;
-	
-	public final native boolean isSkipPath() /*-{
-		if(typeof this.skipPath === 'string'){
-			return this.skipPath === 'true' ? true : false;
-		}
-		return !!(this.skipPath);
-	}-*/;
-	public final native int getSkipPath() /*-{
-		var res = 0;
-		if(!!(this.skipPath)){
-			res = 1;
-		}
-		return res;
-	}-*/;
 	/**
 	 * @return {@link RequestObject} as a {@link JSONObject}
 	 */
@@ -443,14 +254,6 @@ public class RequestObject extends JavaScriptObject {
 		obj.put("name", new JSONString(getName() == null ? "" : getName()));
 		obj.put("payload", new JSONString(getPayload() == null ? "" : getPayload()));
 		obj.put("project", new JSONNumber(getProject()));
-		obj.put("skipHeaders", JSONBoolean.getInstance(getSkipHeaders() == 1 ? true : false));
-		obj.put("skipHistory", JSONBoolean.getInstance(getSkipHistory() == 1 ? true : false));
-		obj.put("skipMethod", JSONBoolean.getInstance(getSkipMethod() == 1 ? true : false));
-		obj.put("skipParams", JSONBoolean.getInstance(getSkipParams() == 1 ? true : false));
-		obj.put("skipPath", JSONBoolean.getInstance(getSkipPath() == 1 ? true : false));
-		obj.put("skipPayload", JSONBoolean.getInstance(getSkipPayload() == 1 ? true : false));
-		obj.put("skipProtocol", JSONBoolean.getInstance(getSkipProtocol() == 1 ? true : false));
-		obj.put("skipServer", JSONBoolean.getInstance(getSkipServer() == 1 ? true : false));
 		obj.put("time", new JSONNumber(getTime()));
 		obj.put("url", new JSONString(getURL() == null ? "" : getURL()));
 		obj.put("driveId", new JSONString(getGDriveId() == null ? "" : getGDriveId()));
@@ -481,14 +284,6 @@ public class RequestObject extends JavaScriptObject {
 		to.setName(from.getName());
 		to.setPayload(from.getPayload());
 		to.setProject(from.getProject());
-		to.setSkipHeaders(from.getSkipHeaders() == 1 ? true : false);
-		to.setSkipHistory(from.getSkipHistory() == 1 ? true : false);
-		to.setSkipMethod(from.getSkipMethod() == 1 ? true : false);
-		to.setSkipParams(from.getSkipParams() == 1 ? true : false);
-		to.setSkipPath(from.getSkipPath() == 1 ? true : false);
-		to.setSkipPayload(from.getSkipPayload() == 1 ? true : false);
-		to.setSkipProtocol(from.getSkipPayload() == 1 ? true : false);
-		to.setSkipServer(from.getSkipServer() == 1 ? true : false);
 		to.setTime(from.getTime());
 		to.setURL(from.getURL());
 		to.setGDriveId(from.getGDriveId());
@@ -539,6 +334,7 @@ public class RequestObject extends JavaScriptObject {
 		JSONObject requestData = toJSONObject();
 		JSONObject save = new JSONObject();
 		save.put(StoreKeys.LATEST_REQUEST_KEY, requestData);
+		Log.debug("Storing lates object", save.getJavaScriptObject());
 		store.getLocal().set(save.getJavaScriptObject(), new StorageSimpleCallback() {
 			
 			@Override

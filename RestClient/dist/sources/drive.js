@@ -29,20 +29,19 @@
 /* global chrome, gapi, google */
 
 /**
- * App's client ID.
- */
-//const CLIENT_ID = '10525470235.apps.googleusercontent.com';
-/**
  * App ID. Required by Drive Picker.
+ * 
  * @type {String}
+ * @const
  */
 const APP_ID = '10525470235';
 /**
  * API key for Google Picker
+ * 
  * @type {string}
+ * @const
  */
 const API_KEY_PICKER = 'AIzaSyACzi_VRqOHzLj_Lf7IdJgQAO3jaw5SMNU';
-
 /**
  * Authorization scopes.
  */
@@ -51,6 +50,9 @@ const API_KEY_PICKER = 'AIzaSyACzi_VRqOHzLj_Lf7IdJgQAO3jaw5SMNU';
   'https://www.googleapis.com/auth/drive.readonly.metadata';*/
 /**
  * XHR boundary for POST calls.
+ *
+ * @type {String}
+ * @const
  */
 const boundary = 'ARCFormBoundary49nr1hyovoq1tt9';
 const delimiter = '\r\n--' + boundary + '\r\n';
@@ -59,52 +61,80 @@ const closeDelim = '\r\n--' + boundary + '--';
  * Drive's registered content type.
  * It will be used to determine app's files in the Drive. 
  * Drive's handlers will recognize the app and will run it from Drive UI. 
+ *
+ * @type {String}
+ * @const
  */
 const appMimeType = 'application/restclient+data';
 /**
  * Extension name for files stored in Google Drive. 
+ *
+ * @type {String}
+ * @const
  */
 const appFileExtension = 'arc';
 /**
  * Advanced Rest Client namespace
+ *
+ * @namespace
  */
 var arc = arc || {};
 /**
  * ARC app's namespace
+ *
+ * @namespace
  */
 arc.app = arc.app || {};
 /**
  * A namespace for Google Drive integration.
+ *
+ * @namespace
  */
 arc.app.drive = {};
 /**
  * True if code is running in extension's environment.
+ *
+ * @type {Boolean}
  */
 arc.app.drive.isExtension = !!chrome.runtime.getBackgroundPage;
 /**
  * API load is on demand and asynchronous. 
  * This array will contain all callback function which
  * has been requested with API load. 
+ *
+ * @type {Set}
  */
 arc.app.drive._callbacks = new Set();
 /**
  * A callback function that should be run after authorization.
+ *
+ * @type {Set}
  */
 arc.app.drive._authCallbacks = new Set();
 /**
  * A flag to determine if API has been initialized.
+ *
+ * @type {Boolean}
+ * @default false
  */
 arc.app.drive._initialized = false;
 /**
  * A namespace for Google Drive file picker.
+ * 
+ * @namespace
  */
 arc.app.drive.picker = {};
 /**
  * A flag to determine if file picker is shown.
+ *
+ * @type {Boolean}
+ * @default false
  */
 arc.app.drive.picker.initialized = false;
 /**
  * Callback to be run after file picker has been initialized. 
+ *
+ * @type {Set}
  */
 arc.app.drive.picker._callbacks = new Set();
 
@@ -152,6 +182,8 @@ arc.app.drive.removeLoader = function() {
  * The call is asynchronous so the function in the window namespace must be exposed that will 
  * handle a callback.
  * This function can't use futures since it will wait until different function will be called.
+ *
+ * @param {Function} Callback A callback function to be called.
  */
 arc.app.drive.loadApi = function(callback) {
   if (arc.app.drive._initialized) {

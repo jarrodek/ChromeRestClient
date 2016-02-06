@@ -19,10 +19,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.rest.client.RestClient;
 import org.rest.client.request.URLParser;
 import org.rest.client.request.URLParser.QueryParam;
-import org.rest.client.storage.store.UrlHistoryStoreWebSql;
 import org.rest.client.suggestion.UrlsSuggestOracle;
 import org.rest.client.ui.RequestView.Presenter;
 
@@ -90,10 +88,8 @@ public class RequestUrlWidget extends Composite implements HasText {
 	
 	public RequestUrlWidget() {
 		
-		UrlHistoryStoreWebSql historyStore = RestClient.getClientFactory().getUrlHistoryStore();
-		
 		//create URL simple field (suggestion box)
-		suggestOracle = new UrlsSuggestOracle(historyStore);
+		suggestOracle = new UrlsSuggestOracle();
 		suggestionsDisplay = new UrlsSuggestionDisplay();
 		suggestionsDisplay.setAnimationEnabled(false);
 		urlField = new SuggestBox(suggestOracle, new TextBox(), suggestionsDisplay);

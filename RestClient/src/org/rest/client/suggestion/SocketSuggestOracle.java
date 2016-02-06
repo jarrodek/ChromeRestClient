@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.rest.client.jso.WebSocketObject;
 import org.rest.client.log.Log;
-import org.rest.client.storage.store.WebSocketDataStoreWebSql;
+import org.rest.client.storage.store.WebSocketHistoryStore;
 
 import com.google.gwt.chrome.history.History;
 import com.google.gwt.chrome.history.HistoryItem;
@@ -19,7 +19,6 @@ public class SocketSuggestOracle extends DatabaseSuggestOracle {
 	 * Allow to perform query
 	 */
 	private boolean allowQuery = true;
-	final private WebSocketDataStoreWebSql store;
 	private boolean databaseQueryEnd = true;
 	private boolean chromeQueryEnd = true;
 	ArrayList<UrlSuggestion> _suggestions = new ArrayList<UrlSuggestion>();
@@ -47,8 +46,7 @@ public class SocketSuggestOracle extends DatabaseSuggestOracle {
 		return allowQuery;
 	}
 
-	public SocketSuggestOracle(WebSocketDataStoreWebSql store) {
-		this.store = store;
+	public SocketSuggestOracle() {
 	}
 
 	/**
@@ -75,7 +73,7 @@ public class SocketSuggestOracle extends DatabaseSuggestOracle {
 
 		final String query = request.getQuery();
 		
-		store.query("%" + query + "%", new WebSocketDataStoreWebSql.StoreResultsCallback () {
+		WebSocketHistoryStore.query(query, new WebSocketHistoryStore.StoreResultsCallback () {
 			
 			@Override
 			public void onSuccess(JsArray<WebSocketObject> result) {

@@ -5,9 +5,11 @@
     :host {
       display: block;
     }
+    
     h1 {
       @apply(--page-title-text);
     }
+    
     .help-icon {
       height: 36px;
       width: 36px;
@@ -82,6 +84,31 @@
         <paper-toggle-button checked="{{values.CMP_ENABLED}}"></paper-toggle-button>
       </paper-item>
     </section>
+    <h1 class="page-title">Experiments</h1>
+    <section class="settings-section">
+      <paper-item>
+        <paper-item-body two-line>
+          <div>Use IndexedDB</div>
+          <div secondary>Disable WebSQL and use IndexedDB</div>
+        </paper-item-body>
+        <paper-toggle-button checked="{{values.useIdb}}"></paper-toggle-button>
+      </paper-item>
+    </section>
+    <section class="settings-section">
+      <paper-item on-tap="importIndexedDB">
+        <paper-item-body>
+          <div>Clear IndexedDB and import data from WebSQL</div>
+        </paper-item-body>
+      </paper-item>
+    </section>
+    <section class="settings-section">
+      <paper-item on-tap="resetApp">
+        <paper-item-body two-line>
+          <div>Factory reset</div>
+          <div secondary>Reset the app to default settings</div>
+        </paper-item-body>
+      </paper-item>
+    </section>
     <paper-dialog id="historyClearDialog" on-iron-overlay-closed="onClearDialogResult">
       <h2>Clear history</h2>
       <paper-dialog-scrollable>
@@ -108,6 +135,18 @@
         <paper-button dialog-confirm>Close</paper-button>
       </div>
     </paper-dialog>
+    <paper-dialog id="resetDialog" on-iron-overlay-closed="onResetDialogResult">
+      <h2>Reset app</h2>
+      <paper-dialog-scrollable>
+        <p>This will remove all your data from the storage.</p>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm>Reset</paper-button>
+      </div>
+    </paper-dialog>
+    <paper-toast text="Database recreated" id="dbRecreate"></paper-toast>
+    <paper-toast text="There was an error recreating the database" id="dbRecreateError"></paper-toast>
   </template>
   <script>
   Polymer({
@@ -151,7 +190,7 @@
      */
     _onStorageChanged: function(changes, area) {
       var keys = Object.keys(changes);
-      var accepted = ['DEBUG_ENABLED', 'HISTORY_ENABLED', 'MAGICVARS_ENABLED', 'CMH_ENABLED', 'CMP_ENABLED'];
+      var accepted = ['DEBUG_ENABLED', 'HISTORY_ENABLED', 'MAGICVARS_ENABLED', 'CMH_ENABLED', 'CMP_ENABLED', 'useIdb'];
       keys.forEach(function(key) {
         if (accepted.indexOf(key) !== -1 && this.values[key] !== changes[key].newValue) {
           this.set('values.' + key, changes[key].newValue);
@@ -198,6 +237,49 @@
       this.fire('settings-action', {
         action: 'clear-history'
       });
+    },
+    importIndexedDB: function() {
+      arc.app.db.idb.deleteDatabase()
+        .then(arc.app.db.idb.open)
+        .then(function(db) {
+          db.close();
+          this.$.dbRecreate.open();
+        }.bind(this))
+        .catch(function(cause) {
+          this.$.dbRecreateError.open();
+          console.error('Upgrade database error', cause);
+        }.bind(this));
+    },
+
+    resetApp: function() {
+      this.$.resetDialog.open();
+    },
+
+    onResetDialogResult: function(e) {
+      if (e.detail.canceled || !e.detail.confirmed) {
+        return;
+      }
+      chrome.storage.local.clear(function() {
+        chrome.storage.local.set({
+          'upgraded': {
+            'v4': true,
+            'v4p6': true
+          }
+        }, function() {
+          arc.app.db.websql.resetDatabases()
+            .then(arc.app.db.websql.open)
+            .then(arc.app.db.idb.deleteDatabase)
+            .then(arc.app.db.idb.open)
+            .then(function(db) {
+              db.close();
+              this.$.dbRecreate.open();
+            }.bind(this))
+            .catch(function(cause) {
+              this.$.dbRecreateError.open();
+              console.error('Upgrade database error', cause);
+            }.bind(this));
+        }.bind(this));
+      }.bind(this));
     }
   });
   </script>

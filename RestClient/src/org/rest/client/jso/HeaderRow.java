@@ -3,7 +3,7 @@ package org.rest.client.jso;
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
- * Class representing database header table row.
+ * IDB value of the HTTP header.
  * 
  * @author jarrod
  * 
@@ -18,8 +18,8 @@ public class HeaderRow extends JavaScriptObject {
 	/**
 	 * @return header name
 	 */
-	public final native String getName()/*-{
-		return this.name;
+	public final native String getKey()/*-{
+		return this.key;
 	}-*/;
 
 	/**

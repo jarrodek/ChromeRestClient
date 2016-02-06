@@ -3,3 +3,4 @@
 **/extras/*
 **/war/WEB-INF/classes
 **/build/classes
+RestClient/war/WEB-INF/appengine-generated/datastore-indexes-auto.xml

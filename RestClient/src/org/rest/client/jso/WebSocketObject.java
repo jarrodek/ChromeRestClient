@@ -38,20 +38,6 @@ public class WebSocketObject extends JavaScriptObject {
 		}
 	}-*/;
 	
-	/**
-	 * @return IDB ID.
-	 */
-	public final native int getId() /*-{
-		return this.id;
-	}-*/;
-	
-	/**
-	 * @param id ID to set (on update only)
-	 */
-	public final native void setId(int id) /*-{
-		this.id = id;
-	}-*/;
-	
 	public final native void setTime(double time) /*-{
 		this.time = time;
 	}-*/;

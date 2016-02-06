@@ -1,18 +1,17 @@
 package org.rest.client.ui.desktop;
 
-import java.util.List;
-
 import org.rest.client.jso.RequestObject;
 import org.rest.client.ui.SavedView;
 import org.rest.client.ui.html5.SearchBox;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.ScrollEvent;
 import com.google.gwt.user.client.Window.ScrollHandler;
@@ -29,8 +28,6 @@ public class SavedViewImpl extends Composite implements SavedView {
 
 	interface SavedViewImplUiBinder extends UiBinder<Widget, SavedViewImpl> {
 	}
-	
-	
 	
 	private Presenter listener = null;
 	private boolean loadingNext = false;
@@ -142,7 +139,7 @@ public class SavedViewImpl extends Composite implements SavedView {
 	}
 
 	@Override
-	public void appendResults(List<RequestObject> data) {
+	public void appendResults(JsArray<RequestObject> data) {
 		
 		if(infoLabel != null){
 			infoLabel.removeFromParent();
@@ -154,19 +151,18 @@ public class SavedViewImpl extends Composite implements SavedView {
 		if(loaderInfo.hasParentElement()){
 			loaderInfo.removeFromParent();
 		}
-		if((data == null || data.isEmpty()) && list.getWidgetCount() == 0){
+		if((data == null || data.length() == 0) && list.getWidgetCount() == 0){
 			emptyInfo();
-			
 			return;
 		}
 		//disable repainting
 		list.setVisible(false);
-		for(RequestObject item : data){
+		for (int i = 0; i < data.length(); i++) {
+			RequestObject item = data.get(i);
 			SavedListItemViewImpl widget = new SavedListItemViewImpl(listener, item);
 			list.add(widget);
 		}
 		list.setVisible(true);
-		
 		ensureScrollItems();
 	}
 	

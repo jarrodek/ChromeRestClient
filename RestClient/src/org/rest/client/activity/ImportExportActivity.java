@@ -8,6 +8,7 @@ import org.rest.client.StatusNotification;
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.deprecated.DataExportImpl;
+import org.rest.client.event.NewProjectAvailableEvent;
 import org.rest.client.event.StoreDataEvent;
 import org.rest.client.importparser.ImportParser;
 import org.rest.client.importparser.ImportResult;
@@ -20,13 +21,14 @@ import org.rest.client.place.ImportExportPlace;
 import org.rest.client.request.ApplicationSession;
 import org.rest.client.request.ImportDataCallback;
 import org.rest.client.request.RequestImportListObject;
-import org.rest.client.storage.store.ExportedWebSql;
-import org.rest.client.storage.store.ProjectStoreWebSql;
-import org.rest.client.storage.store.RequestDataStoreWebSql;
+import org.rest.client.storage.store.ExportedStore;
+import org.rest.client.storage.store.ProjectsStore;
+import org.rest.client.storage.store.RequestDataStore;
 import org.rest.client.ui.ImportExportView;
 import org.rest.client.ui.ImportExportView.StringCallback;
 
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.JsArrayInteger;
 import com.google.gwt.file.client.File;
@@ -93,13 +95,13 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 		//
 		// Get all request data
 		//
-		clientFactory.getRequestDataStore().all(new RequestDataStoreWebSql.StoreResultsCallback() {
+		RequestDataStore.all(new RequestDataStore.StoreResultsCallback() {
 			@Override
-			public void onSuccess(final JsArray<RequestObject> requestDataResult) {
+			public void onSuccess(final JsArray<JavaScriptObject> requestDataResult) {
 				//
 				// Get project data
 				//
-				clientFactory.getProjectsStore().all(new ProjectStoreWebSql.StoreResultsCallback() {
+				ProjectsStore.all(new ProjectsStore.StoreResultsCallback() {
 					@Override
 					public void onSuccess(final JsArray<ProjectObject> projectDataResult) {
 
@@ -107,7 +109,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 						JSONArray projectsArray = new JSONArray();
 						
 						for (int i = 0; i < requestDataResult.length(); i++) {
-							RequestObject ro = requestDataResult.get(i);
+							RequestObject ro = requestDataResult.get(i).cast();
 							requestsArray.set(requestsArray.size(), ro.toJSONObject());
 						}
 						
@@ -309,7 +311,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 			arr.set(arr.length(), importData.get(i));
 		}
 		
-		clientFactory.getRequestDataStore().importRequests(arr, new RequestDataStoreWebSql.StoreInsertListCallback() {
+		RequestDataStore.importRequests(arr, new RequestDataStore.StoreInsertListCallback() {
 			@Override
 			public void onError(Throwable error) {
 				StatusNotification.notify("Unable to save data to local database :(",
@@ -342,7 +344,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 	 * @param exported
 	 */
 	private void saveImportedReferences(JsArray<ExportedDataItem> exported){
-		clientFactory.getExportedStore().insertExported(exported, new ExportedWebSql.StoreInsertListCallback() {
+		ExportedStore.insertExported(exported, new ExportedStore.StoreInsertListCallback() {
 			@Override
 			public void onError(Throwable e) {
 				if (RestClient.isDebug()) {
@@ -439,7 +441,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 			// First, save projects data and update referenced requests
 			//
 			
-			clientFactory.getProjectsStore().importData(projects, new ProjectStoreWebSql.StoreInsertListCallback() {
+			ProjectsStore.importData(projects, requests, new ProjectsStore.StoreInsertListCallback() {
 
 				@Override
 				public void onError(Throwable error) {
@@ -453,22 +455,11 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 
 				@Override
 				public void onSuccess(JsArrayInteger rowIds) {
-
-					for (int i = 0, len = rowIds.length(); i < len; i++) {
-						int currentProjectId = rowIds.get(i);
-						int exportedProjectId = projects.get(i).getId();
-						// now find all request where project ID is
-						// "exportedProjectId" as an old ID and replace
-						// it with new one.
-						int requestsSize = requests.length();
-						for (int j=0; j<requestsSize; j++) {
-							RequestObject r = requests.get(j);
-							if (r.getProject() == exportedProjectId) {
-								r.setProject(currentProjectId);
-							}
-						}
+					for (int i = 0; i < rowIds.length(); i++) {
+						NewProjectAvailableEvent e = new NewProjectAvailableEvent(rowIds.get(i));
+						clientFactory.getEventBus().fireEvent(e);
 					}
-					saveImportedFileData(requests, callback);
+					callback.onSuccess(true);
 				}
 			});
 		} else {
@@ -485,7 +476,7 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 			return;
 		}
 		
-		clientFactory.getRequestDataStore().importRequests(requests, new RequestDataStoreWebSql.StoreInsertListCallback() {
+		RequestDataStore.importRequests(requests, new RequestDataStore.StoreInsertListCallback() {
 
 			@Override
 			public void onError(Throwable error) {

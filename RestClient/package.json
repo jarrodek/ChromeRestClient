@@ -45,7 +45,8 @@
     "gulp-concat": "^2.6.0",
     "mocha": "^2.4.1",
     "should": "^8.2.0",
-    "gulp-run": "^1.6.12"
+    "gulp-run": "^1.6.12",
+    "gulp-connect": "^2.3.1"
   },
   "scripts": {
     "test": "mocha test",

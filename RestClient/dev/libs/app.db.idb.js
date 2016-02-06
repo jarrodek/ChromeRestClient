@@ -16,7 +16,7 @@
  ******************************************************************************/
 
 /* global Dexie, chrome, HAR, HistoryUrlObject, HistorySocketObject, ProjectObject, 
-ServerExportedObject, RequestObject */
+ServerExportedObject, RequestObject, indexedDB */
 
 /**
  * Advanced Rest Client namespace
@@ -44,6 +44,31 @@ arc.app.db = arc.app.db || {};
  */
 arc.app.db.idb = {};
 /**
+ * A namespace for request objects queries..
+ *
+ * @namespace
+ */
+arc.app.db.idb.requests = {};
+/**
+ * A namespace for projects queries
+ *
+ * @namespace
+ */
+arc.app.db.idb.projects = {};
+/**
+ * A namespace for websocket history urls queries
+ *
+ * @namespace
+ */
+arc.app.db.idb.websockets = {};
+/**
+ * A flag to be set to true if the datastore has been upgraded from WebSQL successfully.
+ * This flag will be used to speed up database open operation.
+ * 
+ * @type {Boolean}
+ */
+arc.app.db.idb.upgraded = false;
+/**
  * Open the database.
  *
  * @returns {Dexie.Promise} The promise when ready.
@@ -57,10 +82,10 @@ arc.app.db.idb.open = function() {
         statuses: '&key',
         historyUrls: '&url',
         historySockets: '&url',
-        requestObject: '++id,url,method,[url+method],oldId',
+        requestObject: '++id,url,method,[url+method],type,_name',
         driveObjects: '[driveId+requestId],driveId,requestId',
-        serverExportObjects: '[serverId+requestId],serverId,requestId,oldId',
-        projectObjects: '++id,*requestIds,oldId'
+        serverExportObjects: '[serverId+requestId],serverId,requestId',
+        projectObjects: '++id,*requestIds'
       });
     db.projectObjects.mapToClass(ProjectObject);
     db.serverExportObjects.mapToClass(ServerExportedObject);
@@ -70,73 +95,80 @@ arc.app.db.idb.open = function() {
     db.historyUrls.mapToClass(HistoryUrlObject);
     db.statuses.mapToClass(HttpStatusObject);
     db.headers.mapToClass(HttpHeaderObject);
+
     db.on('error', function(error) {
       console.error('IndexedDB global error', error);
     });
     db.on('populate', function() {
-      return new Dexie.Promise(function(resolve, reject) {
-          return arc.app.db.idb.downloadDefinitions()
-            .catch(function() {
-              console.warn('Definitions wasn\'t there. skipping definitions installation.');
-            })
-            .then(function(defs) {
-              if (!defs) {
-                return Dexie.Promise.resolve();
-              }
-              return db.transaction('rw', db.statuses, db.headers, function() {
-                let codes = defs.codes;
-                defs.requests.forEach((item) => item.type = 'request');
-                defs.responses.forEach((item) => item.type = 'response');
-                let headers = defs.requests.concat(defs.responses);
-                codes.forEach(function(item) {
-                  db.statuses.add(item);
-                });
-                headers.forEach(function(item) {
-                  db.headers.add(item);
-                });
-              });
+      return arc.app.db.idb.downloadDefinitions()
+        .catch(function() {
+          console.warn('Definitions wasn\'t there. skipping definitions installation.');
+          return Dexie.Promise.resolve();
+        })
+        .then(function(defs) {
+          if (!defs) {
+            return Dexie.Promise.resolve();
+          }
+          return db.transaction('rw', db.statuses, db.headers, function() {
+            let promises = [];
+
+            let codes = defs.codes;
+            defs.requests.forEach((item) => item.type = 'request');
+            defs.responses.forEach((item) => item.type = 'response');
+            let headers = defs.requests.concat(defs.responses);
+            codes.forEach(function(item) {
+              promises.push(db.statuses.add(item));
             });
+            headers.forEach(function(item) {
+              promises.push(db.headers.add(item));
+            });
+
+            return Dexie.Promise.all(promises);
+          });
         })
         .then(function() {
           console.log('The database has been populated with data.');
         });
     });
     db.on('ready', function() {
+      if (arc.app.db.idb.upgraded) {
+        return;
+      }
       arc.app.db.idb._db = db;
       arc.app.db.idb.appVer = chrome.runtime.getManifest ? chrome.runtime.getManifest()
         .version : 'tests case';
       return new Dexie.Promise(function(resolve) {
-          console.info('Checking if upgrade is needed.');
           let upgrade = {
             upgraded: {
               indexeddb: false
             }
           };
           if (!chrome.storage) { //tests
+            arc.app.db.idb.upgraded = true;
             resolve(false);
             return;
           }
           chrome.storage.local.get(upgrade, (upgrade) => {
             if (upgrade.upgraded.indexeddb) {
-              arc.app.db._adapter = 'indexeddb';
+              arc.app.db.idb.upgraded = true;
+            } else {
+              console.info('IndexedDB need to be upgraded.');
             }
             resolve(upgrade.upgraded.indexeddb);
           });
         })
-        .then(arc.app.db.idb._getSQLdata)
-        .then(arc.app.db.idb._converSqlIdb)
-        .then(arc.app.db.idb._storeUpgrade)
+        .then(arc.app.db.idb.upgradeFromWebSQL)
         .then(function(result) {
           if (result === null) {
             return;
           }
           console.info('Database has been upgraded from WebSQL to IndexedDB.');
-          arc.app.db._adapter = 'indexeddb';
           let upgrade = {
             upgraded: {
               indexeddb: true
             }
           };
+          arc.app.db.idb.upgraded = true;
           if (chrome.storage) { //tests
             chrome.storage.local.set(upgrade, () => {
               console.info('Upgrade finished.');
@@ -144,6 +176,12 @@ arc.app.db.idb.open = function() {
           } else {
             console.info('Upgrade finished.');
           }
+          arc.app.analytics.sendEvent('Upgrade', 'IndexedDB', 'Upgrade from WebSQL');
+        })
+        .catch(function(error) {
+          arc.app.db.idb.deleteDatabase();
+          arc.app.db.useIdb = false;
+          arc.app.analytics.sendException('IDB create error::' + JSON.stringify(error));
         });
     });
 
@@ -152,34 +190,73 @@ arc.app.db.idb.open = function() {
         resolve(db);
       })
       .catch(function(error) {
+        arc.app.db.idb.deleteDatabase();
+        arc.app.db.useIdb = false;
+        arc.app.analytics.sendException('IDB create error::' + JSON.stringify(error));
         reject(error);
       });
   });
 };
+/**
+ * Delete and re-create database.
+ *
+ * @return {Dexie.Promise} Fulfilled promise if success.
+ */
+arc.app.db.idb.deleteDatabase = function() {
+  console.warn('IndexedDB database is going bye bye');
+  return new Dexie.Promise(function(resolve, reject) {
+    var request = indexedDB.deleteDatabase('arc');
+    request.onsuccess = function() {
+      arc.app.db.idb.upgraded = false;
+      arc.app.db._adapter = 'websql';
+      let upgrade = {
+        upgraded: {
+          indexeddb: false
+        }
+      };
+      if (chrome.storage) { //tests
+        chrome.storage.local.set(upgrade, () => {
+          console.info('Delete finished.');
+          resolve();
+        });
+      } else {
+        console.info('Delete finished.');
+        resolve();
+      }
+    };
+    request.onerror = function(event) {
+      console.error('Error deleting IndexedDB', event);
+      reject(event);
+    };
+  });
+};
+/**
+ * Perform upgrade from WebSQL to IndexedDB. This function will take all data
+ * from old WebSQL storage and insert data to IndexedDB suing new structure.
+ *
+ * @param {Boolean} isUpgraded True if the storage has been already upgraded.
+ * @return {Dexie.Promise} Fulfilled promise means that the import is
+ * finished.
+ */
+arc.app.db.idb.upgradeFromWebSQL = function(isUpgraded) {
+  if (isUpgraded) {
+    return null;
+  }
+  console.info('Upgrading WebSQL to IndexedDB');
+  return arc.app.db.idb._getSQLdata()
+    .then(arc.app.db.idb._converSqlIdb)
+    .then(arc.app.db.idb._storeUpgrade);
+};
+/**
+ * Download database definitions from the app directory.
+ *
+ * @return {Promise} Fulfilled promise returns JSON with definitions.
+ */
 arc.app.db.idb.downloadDefinitions = function() {
   return fetch('/assets/definitions.json')
     .then(function(response) {
       return response.json();
     });
-};
-/**
- * This function is responsible for upgrading app's storage
- * from WebSQL to IndewxedDB.
- */
-arc.app.db.idb._upgradeWebSQL = function() {
-  return new Dexie.Promise(function(resolve, reject) {
-    if (!arc.app.db.websql) {
-      resolve();
-      reject();
-      return;
-    }
-
-    return Dexie.Promise.all([
-      arc.app.db.idb._upgradeWebSLurlHistory(),
-      arc.app.db.idb._upgradeWebSLSocketUrlHistory()
-    ]);
-
-  });
 };
 /**
  * Get all WebSQL data.
@@ -189,7 +266,7 @@ arc.app.db.idb._upgradeWebSQL = function() {
  */
 arc.app.db.idb._getSQLdata = function(dontUpgrade) {
   if (dontUpgrade) {
-    return null;
+    return Dexie.Promise.resolve(null);
   }
   const data = {};
   return new Dexie.Promise(function(resolve, reject) {
@@ -246,58 +323,78 @@ arc.app.db.createRequestKey = function(method, url) {
  */
 arc.app.db.idb._converSqlIdb = function(data) {
   if (!data) {
-    return null;
+    return Dexie.Promise.resolve(null);
   }
-  const requests = [];
-  const urlHistory = [];
-  const socketHistory = [];
-  const exportedSize = data.exported.length;
-  data.requestData.forEach((item) => {
-    let obj = arc.app.db.idb._createHARfromSql.call(this, item);
-    obj.type = 'saved';
-    obj.oldId = item.id;
-    //just for upgrade, to be removed before save. 
-    if (item.project) {
-      obj.project = item.project;
-    }
-    for (let i = 0; i < exportedSize; i++) {
-      /* jscs: disable */
-      if (data.exported[i].reference_id === item.id) {
-        /* jscs: enable */
-        //just for upgrade, to be removed before save. 
-        obj.exported = i;
-        break;
+  return new Dexie.Promise(function(resolve) {
+    const requests = [];
+    const urlHistory = [];
+    const socketHistory = [];
+    const exportedSize = data.exported.length;
+    data.requestData.forEach((item) => {
+      let obj = arc.app.db.idb._createHARfromSql.call(this, item);
+      obj.type = 'saved';
+      //just for upgrade, to be removed before save. 
+      if (item.project) {
+        obj.project = item.project;
       }
-    }
-    requests.push(obj);
-  });
-  data.history.forEach((item) => {
-    let obj = arc.app.db.idb._createHARfromSql.call(this, item);
-    obj.oldId = item.id;
-    requests.push(obj);
-  });
-  data.urls.forEach((item) => {
-    let obj = new HistoryUrlObject({
-      url: item.url,
-      time: item.time,
+      for (let i = 0; i < exportedSize; i++) {
+        /* jscs: disable */
+        if (data.exported[i].reference_id === item.id) {
+          /* jscs: enable */
+          //just for upgrade, to be removed before save. 
+          obj.exported = i;
+          break;
+        }
+      }
+      requests.push(obj);
     });
-    urlHistory.push(obj);
-  });
-  data.websocketData.forEach((item) => {
-    let obj = new HistorySocketObject({
-      url: item.url,
-      time: item.time,
+    data.history.forEach((item) => {
+      let obj = arc.app.db.idb._createHARfromSql.call(this, item);
+      requests.push(obj);
     });
-    socketHistory.push(obj);
+    data.urls.forEach((item) => {
+      let obj = new HistoryUrlObject({
+        url: item.url,
+        time: item.time,
+      });
+      urlHistory.push(obj);
+    });
+    data.websocketData.forEach((item) => {
+      let obj = new HistorySocketObject({
+        url: item.url,
+        time: item.time,
+      });
+      socketHistory.push(obj);
+    });
+
+    var result = {
+      indexeddb: {
+        requests: requests,
+        urlHistory: urlHistory,
+        socketHistory: socketHistory
+      },
+      websql: data
+    };
+    resolve(result);
   });
+};
+/** IDB object to legacy SQL */
+arc.app.db.idb._converIdbSql = function(data) {
+  var har = data.har;
+  var request = har.entries[0].request;
+  var page = har.pages[0];
 
   return {
-    indexeddb: {
-      requests: requests,
-      urlHistory: urlHistory,
-      socketHistory: socketHistory
-    },
-    websql: data
+    id: data.id,
+    name: data.name || null,
+    project: 0,
+    url: data.url,
+    method: data.method,
+    encoding: null,
+    headers: arc.app.headers.toString(request.headers),
+    payload: request.postData.text,
+    time: new Date(page.startedDateTime).getTime(),
+    driveId: null
   };
 };
 /**
@@ -308,7 +405,6 @@ arc.app.db.idb._storeUpgrade = function(data) {
     return null;
   }
   let db = arc.app.db.idb._db;
-  console.info('Upgrading webSQL to IndexedDb');
   return db.transaction('rw', db.historyUrls, db.historySockets, db.requestObject,
     db.serverExportObjects, db.projectObjects,
     function() {
@@ -340,8 +436,7 @@ arc.app.db.idb._storeUpgrade = function(data) {
                   let project = new ProjectObject({
                     time: _projects[0].time,
                     name: _projects[0].name,
-                    requestIds: [requestId],
-                    oldId: _projects[0].id
+                    requestIds: [requestId]
                   });
                   projects[referencedProjectId] = project;
                 } else if (_projects.length > 1) {
@@ -356,8 +451,7 @@ arc.app.db.idb._storeUpgrade = function(data) {
               let exportData = data.websql.exported[referencedExported];
               let exportObject = new ServerExportedObject({
                 serverId: exportData.gaeKey,
-                requestId: requestId,
-                oldId: exportData.id
+                requestId: requestId
               });
               exported.push(exportObject);
             }
@@ -450,83 +544,10 @@ arc.app.db.idb._createHARfromSql = function(item) {
     'har': log,
     'url': item.url,
     'method': item.method,
+    'name': item.name,
     'type': 'history'
   });
   return obj;
-};
-/**
- * Updgrade URL's history.
- */
-arc.app.db.idb._upgradeWebSLurlHistory = function() {
-  return new Dexie.Promise(function(resolve, reject) {
-    arc.app.db.websql.open()
-      .then(function(db) {
-        db.transaction(function(tx) {
-          let sql = 'SELECT * FROM urls WHERE 1';
-          tx.executeSql(sql, [], (tx, result) => {
-            if (result.rows.length === 0) {
-              resolve();
-              return;
-            }
-            let data = Array.from(result.rows);
-            arc.app.db.idb.open()
-              .then(function(db) {
-                db.transaction('rw', db.historyUrls, function(historyUrls) {
-                    data.forEach(function(item) {
-                      historyUrls.add(item);
-                    });
-                  })
-                  .catch(reject)
-                  .finally(function() {
-                    db.close();
-                    resolve();
-                  });
-              })
-              .catch((e) => reject(e));
-          }, function(tx, error) {
-            reject(error);
-          });
-        });
-      })
-      .catch((e) => reject(e));
-  });
-};
-/**
- * Updgrade socket URL's history.
- */
-arc.app.db.idb._upgradeWebSLSocketUrlHistory = function() {
-  return new Dexie.Promise(function(resolve, reject) {
-    arc.app.db.websql.open()
-      .then(function(db) {
-        db.transaction(function(tx) {
-          let sql = 'SELECT * FROM websocket_data WHERE 1';
-          tx.executeSql(sql, [], (tx, result) => {
-            if (result.rows.length === 0) {
-              resolve();
-              return;
-            }
-            let data = Array.from(result.rows);
-            arc.app.db.idb.open()
-              .then(function(db) {
-                db.transaction('rw', db.historySockets, function(historySockets) {
-                    data.forEach(function(item) {
-                      historySockets.add(item);
-                    });
-                  })
-                  .catch(reject)
-                  .finally(function() {
-                    db.close();
-                    resolve();
-                  });
-              })
-              .catch((e) => reject(e));
-          }, function(tx, error) {
-            reject(error);
-          });
-        });
-      })
-      .catch((e) => reject(e));
-  });
 };
 /**
  * Get status code definition by it's code.
@@ -600,11 +621,11 @@ arc.app.db.idb.getHeadersByName = function(name, type) {
  * Add new / update URL history value.
  *
  * @param {String} url The user to add
- * @param {Date|Number} time Time of creation.
+ * @param {Number} time Time of creation.
  * @return {Promise} Fulfilled promise will result with id of created {@link
  * HistoryUrlObject}
  */
-arc.app.db.idb.putUrlHistory = function(url, time) {
+arc.app.db.idb.putHistoryUrl = function(url, time) {
   return arc.app.db.idb.open()
     .then(function(db) {
       return db.transaction('rw', db.historyUrls, function(historyUrls) {
@@ -638,31 +659,73 @@ arc.app.db.idb.getHistoryUrls = function(query) {
     });
 };
 /**
- * Add new project data to the `projects` table with existing RequestObject.
+ * Insert {@link HistorySocketObject} into the store.
  *
- * @param {String} name
- * @param {String} time
- * @param {Number} requestId Optional. Request id which the project has been
- * created with.
+ * @param {String} url The user to add
+ * @param {Number} time Time of creation.
+ *
  * @return {Promise} Fulfilled promise will result with id of created {@link
- * ProjectObject}
+ * HistorySocketObject}
  */
-arc.app.db.idb.addProject = function(name, time, requestId) {
+arc.app.db.idb.websockets.insert = function(url, time) {
   return arc.app.db.idb.open()
     .then(function(db) {
-      let project = new ProjectObject({
-        'time': time,
-        'name': name,
-        'requestIds': requestId ? [requestId] : []
-      });
-      return db.transaction('rw', db.projectObjects, function(projectObjects) {
-          return projectObjects.put(project);
+      return db.transaction('rw', db.historySockets, function(historySockets) {
+          return historySockets.put({
+            'url': url,
+            'time': time
+          });
         })
         .finally(function() {
           db.close();
         });
     });
 };
+/**
+ * Get {@link HistorySocketObject} matching `query`. This function will
+ * return all entries that starts with `query`
+ *
+ * @param {String} query A search string to look for.
+ * @return {Promise} Fulfilled promise will result with list of {@link
+ * HistorySocketObject}
+ */
+arc.app.db.idb.websockets.query = function(query) {
+  return arc.app.db.idb.open()
+    .then(function(db) {
+      return db.historySockets.where('url')
+        .startsWithIgnoreCase(query)
+        .sortBy('url')
+        .finally(function() {
+          db.close();
+        });
+    });
+};
+// /**
+//  * Add new project data to the `projects` table with existing RequestObject.
+//  *
+//  * @param {String} name
+//  * @param {String} time
+//  * @param {Number} requestId Optional. Request id which the project has been
+//  * created with.
+//  * @return {Promise} Fulfilled promise will result with id of created {@link
+//  * ProjectObject}
+//  */
+// arc.app.db.idb.addProject = function(name, time, requestId) {
+//   return arc.app.db.idb.open()
+//     .then(function(db) {
+//       let project = new ProjectObject({
+//         'time': time,
+//         'name': name,
+//         'requestIds': requestId ? [requestId] : []
+//       });
+//       return db.transaction('rw', db.projectObjects, function(projectObjects) {
+//           return projectObjects.put(project);
+//         })
+//         .finally(function() {
+//           db.close();
+//         });
+//     });
+// };
 /**
  * Perform an import (from file / server) with requests and related projects.
  * All requests passed as an argument will be inserted to the store and
@@ -680,9 +743,7 @@ arc.app.db.idb.addProject = function(name, time, requestId) {
  * @return {Promise} Fulfilled promise will result with ID of newly created
  * {@link ProjectObject}.
  */
-arc.app.db.idb.importProjectWithRequests = function(project, requests) {
-  //WebSQL ID.
-  const projectOldId = project.oldId || project.id || null;
+arc.app.db.idb.projects.addWithRequests = function(project, requests) {
   const requestsArray = []; //array of RequestObject
   if (!(project instanceof ProjectObject)) {
     project = new ProjectObject({
@@ -691,17 +752,9 @@ arc.app.db.idb.importProjectWithRequests = function(project, requests) {
       'requestIds': project.requestIds || []
     });
   }
-  if (projectOldId) {
-    project.oldId = projectOldId;
-  }
   requests.forEach((item) => {
     let r = arc.app.db.idb._createHARfromSql.call(this, item);
     r.type = 'saved';
-    if (item.oldId) {
-      r.oldId = item.oldId;
-    } else if (!item.type && item.id) {
-      r.oldId = item.id;
-    }
     requestsArray.push(r);
   });
   // first insert request to obtain their ids and then insert project
@@ -733,19 +786,17 @@ arc.app.db.idb.importProjectWithRequests = function(project, requests) {
     });
 };
 /**
- * Get project data from the store.
- * This function will result null if entry for given [id] is not found.
+ * Get project by the key.
  *
- * @param {Number} id An ID of the project
- * @return {Promise} Fulfilled will result with {@link ProjectObject}.
+ * @param {!Number} id ID of the project
+ *
+ * @return {Promise} Fulfilled promise result with {@link ProjectObject} or
+ * null if not found
  */
-arc.app.db.idb.getProjectLegacy = function(id) {
+arc.app.db.idb.projects.getProject = function(id) {
   return arc.app.db.idb.open()
     .then(function(db) {
-      return db.projectObjects.where('oldId').equals(id).toArray()
-        .then(function(objs) {
-          return (objs && objs.length) ? objs[0] : null;
-        })
+      return db.projectObjects.get(id)
         .finally(function() {
           db.close();
         });
@@ -753,30 +804,17 @@ arc.app.db.idb.getProjectLegacy = function(id) {
 };
 /**
  * Update project data in `projects` table.
- * This function will change and will be operating on ProjectObject only.
  *
  * Fulfilled promise wil result with database ID.
  *
- * @param {Number} id the ID of the project
- * @param {String} name Name to be updated
- * @param {Number} time Optional. Change time. Current time will be used if empty.
- *
+ * @param {ProjectObject} project A project object to be updated
  * @return {Promise} Fulfilled when {@link ProjectObject} has been updated.
  */
-arc.app.db.idb.updateProjectLegacy = function(id, name, time) {
+arc.app.db.idb.projects.update = function(project) {
   return arc.app.db.idb.open()
     .then(function(db) {
-      return db.projectObjects.where('oldId').equals(id).toArray()
-        .then(function(objs) {
-          let obj = (objs && objs.length) ? objs[0] : null;
-          if (!obj) {
-            throw new Error('No project found.');
-          }
-          obj.name = name;
-          obj.time = time || Date.now();
-          return db.transaction('rw', db.projectObjects, function() {
-            return db.projectObjects.put(obj);
-          });
+      return db.transaction('rw', db.projectObjects, function() {
+          return db.projectObjects.put(project);
         })
         .finally(function() {
           db.close();
@@ -789,7 +827,7 @@ arc.app.db.idb.updateProjectLegacy = function(id, name, time) {
  *
  * @return {Promise} Fulfilled promise will result with list of {@link ProjectObject}s
  */
-arc.app.db.idb.listProjects = function() {
+arc.app.db.idb.projects.list = function() {
   return arc.app.db.idb.open()
     .then(function(db) {
       return db.projectObjects.toArray()
@@ -798,42 +836,33 @@ arc.app.db.idb.listProjects = function() {
         });
     });
 };
-/**
- * Get project data from the store.
- * This function will result null if entry for given [id] is not found.
- *
- * @param {Number} legacyId An ID of the project
- */
-arc.app.db.idb.deleteProjectLegacy = function(legacyId) {
-  var _projectId;
-  return arc.app.db.idb.getProjectLegacy(legacyId)
-    .then(function(project) {
-      if (!project) {
-        throw new Error("Project not found in legacy list");
-      }
-      _projectId = project.id;
-    })
-    .then(arc.app.db.idb.open)
-    .then(function(db) {
-      return db.transaction('rw', db.projectObjects, function() {
-          return db.projectObjects.delete(_projectId);
-        })
-        .finally(function() {
-          db.close();
-        });
-    });
-};
+// /**
+//  * Delete project
+//  *
+//  * @param {Number} id An ID of the project
+//  */
+// arc.app.db.idb.deleteProject = function(id) {
+//   return arc.app.db.idb.open()
+//     .then(function(db) {
+//       return db.transaction('rw', db.projectObjects, function() {
+//           return db.projectObjects.delete(id);
+//         })
+//         .finally(function() {
+//           db.close();
+//         });
+//     });
+// };
 /**
  * Insert array of request in one operation.
  *
- * @param {Array<RequestObject>} requests A list of request to be inserted.
+ * @param {Array<RequestObject>} legacyRequestsList A list of request to be inserted.
  * @return {Promise} Fulfilled promise will result with IDs of inserted {@link RequestObject}s
  */
-arc.app.db.idb.importRequests = function(requests) {
+arc.app.db.idb.requests.import = function(legacyRequestsList) {
   const requestsArray = []; //array of RequestObject
   return arc.app.db.idb.open()
     .then(function(db) {
-      requests.forEach((item) => {
+      legacyRequestsList.forEach((item) => {
         let r = arc.app.db.idb._createHARfromSql.call(this, item);
         r.type = 'saved';
         requestsArray.push(r);
@@ -850,17 +879,29 @@ arc.app.db.idb.importRequests = function(requests) {
         });
     });
 };
+arc.app.db.idb.requests.insert = function(requestAsLegacy, type) {
+  return arc.app.db.idb.open()
+    .then(function(db) {
+      return db.transaction('rw', db.requestObject, function(requestObject) {
+        let obj = arc.app.db.idb._createHARfromSql(requestAsLegacy);
+        obj.type = type;
+        if (requestAsLegacy.id) {
+          obj.id = requestAsLegacy.id;
+        }
+        return requestObject.add(obj);
+      });
+    });
+};
 /**
  * Read the request from the datastore.
  *
  * @param {Number} id Request ID.
  * @return {Promise} Fulfilled promise will result a {@link RequestObject}
  */
-arc.app.db.idb.getRequest = function(id) {
+arc.app.db.idb.requests.getRequest = function(id) {
   return arc.app.db.idb.open()
     .then(function(db) {
       return db.requestObject.get(id)
-        //.then((request) => request ? new RequestObject(request) : null)
         .finally(function() {
           db.close();
         });
@@ -872,7 +913,7 @@ arc.app.db.idb.getRequest = function(id) {
  * @param {Number} projectId ID of the project.
  * @return {Promise} Fulfilled promise will result with list of {@link RequestObject}
  */
-arc.app.db.idb.getProjectRequests = function(projectId) {
+arc.app.db.idb.projects.getProjectRequests = function(projectId) {
   return arc.app.db.idb.open()
     .then(function(db) {
       return db.projectObjects.get(projectId)
@@ -884,13 +925,6 @@ arc.app.db.idb.getProjectRequests = function(projectId) {
             .anyOf(project.requestIds)
             .toArray();
         })
-        .then(function(requests) {
-          let result = [];
-          requests.forEach((item) => {
-            result.push(new RequestObject(item));
-          });
-          return result;
-        })
         .finally(function() {
           db.close();
         });
@@ -901,7 +935,7 @@ arc.app.db.idb.getProjectRequests = function(projectId) {
  *
  * @param {Number} projectId A project ID to be removed.
  */
-arc.app.db.idb.deleteProjectRecursive = function(projectId) {
+arc.app.db.idb.projects.deleteRecursive = function(projectId) {
   return arc.app.db.idb.open()
     .then(function(db) {
       return db.projectObjects.get(projectId)
@@ -921,26 +955,202 @@ arc.app.db.idb.deleteProjectRecursive = function(projectId) {
         });
     });
 };
-arc.app.db.idb.deleteProjectRecursiveLegacy = function(legacyProjectId) {
-  var _project;
-  return arc.app.db.idb.getProjectLegacy(legacyProjectId)
-    .then(function(project) {
-      if (!project) {
-        throw new Error("No project found.");
-      }
-      _project = project;
-    })
-    .then(arc.app.db.idb.open)
+/** List request by type */
+arc.app.db.idb.requests.list = function(type) {
+  return arc.app.db.idb.open()
     .then(function(db) {
-      let requests = _project.requestIds;
-      return db.transaction('rw', db.requestObject, db.projectObjects, function() {
+      return db.requestObject
+        .where('type')
+        .equals(type)
+        .toArray()
+        .finally(function() {
+          db.close();
+        });
+    });
+};
+/**
+ * Get a project associated with a request identified by requestId
+ *
+ * @param  {Number} requestId A request id (New system in indexed DB)
+ * @return {Dexie.Promise} Promise fulfilled with a {@link ProjectObject} or null if not found.
+ */
+arc.app.db.idb.projects.getForRequest = function(requestId) {
+  return arc.app.db.idb.open()
+    .then(function(db) {
+      return db.projectObjects
+        .where('requestIds').equals(requestId).toArray()
+        .then(function(objs) {
+          return (objs && objs.length) ? objs[0] : null;
+        })
+        .finally(function() {
+          db.close();
+        });
+    });
+};
+/**
+ * Delete a {@link RequestObject} by database ID.
+ * @param {String} id Entry ID.
+ * @return {Promise} Fulfilled promise when the entry has been removed from the datastore.
+ * Note: If callback `then()` function throw an error the transaction will be rolled back.
+ */
+arc.app.db.idb.requests.delete = function(id) {
+  return arc.app.db.idb.open()
+    .then(function(db) {
+      return db.transaction('rw', db.requestObject, function(requestObject) {
+          return requestObject.delete(id);
+        })
+        .finally(function() {
+          db.close();
+        });
+    });
+};
+/**
+ * Delete objects by the type.
+ *
+ * @param {String} type Type of object to delete. Either `saved` or `history`
+ * @return {Dexie.Promise} Fulfilled promise will result with number of deleted entries.
+ * If error occur during the transaction - even in then() block - the transaction will be aborted 
+ * and rolled back.
+ */
+arc.app.db.idb.requests.deleteType = function(type) {
+  if (['history', 'saved'].indexOf(type) === -1) {
+    throw new Error('Unsupported type.');
+  }
+  return arc.app.db.idb.open()
+    .then(function(db) {
+      return db.transaction('rw', db.requestObject, function(requestObject) {
+          return requestObject.where('type').equals(type).delete();
+        })
+        .finally(function() {
+          db.close();
+        });
+    });
+};
+/**
+ * Make a query to the history table.
+ * In this function it is possible to query for url data.
+ *
+ * @param {Object} opts
+ *  limit {Number} Number of results
+ *  offset {Number} Starting point
+ *  query {String} Optional, a url to query for
+ */
+arc.app.db.idb.requests.query = function(type, opts) {
+  return arc.app.db.idb.open()
+    .then(function(db) {
+      var builder = db.requestObject;//.orderBy('_name');
+
+      if (opts.query) {
+        builder = builder.where('url').startsWithIgnoreCase(opts.query)
+        .or('_name').startsWithIgnoreCase(opts.query)
+          /*.and((item) => opts.query.indexOf(item.har.pages[0].title) !== -1)*/
+        ;
+        //TODO: Use OR or other filter function to query for name.
+      }
+      if (opts.exclude) {
+        if (builder.and) {
+          builder = builder.and((item) => opts.exclude.indexOf(item.id) === -1);
+        } else {
+          builder = builder.where(':id').noneOf(opts.exclude);
+        }
+      }
+      if (builder.and) {
+        builder = builder.and((item) => item.type === type);
+      } else {
+        builder = builder.where('type').equals(type);
+      }
+
+      if (opts.offset) {
+        builder = builder.offset(opts.offset);
+      }
+      if (opts.limit) {
+        builder = builder.limit(opts.limit);
+      }
+
+      return builder.toArray()
+        .finally(function() {
+          db.close();
+        });
+    });
+};
+arc.app.db.idb.requests.deleteByProject = function(projectId) {
+  var requests;
+  return arc.app.db.idb.getProjectRequests(projectId)
+    .then((list) => requests = list)
+    .then(arc.app.db.idb.open)
+    .then((db) => {
+      return db.transaction('rw', db.requestObject, function(requestObject) {
+          return requestObject.where(':id').anyOf(requests.map((item) => item.id)).delete();
+        })
+        .finally(function() {
+          db.close();
+        });
+    });
+};
+/** Update legacy request object */
+arc.app.db.idb.requests.update = function(obj) {
+  return arc.app.db.idb.open()
+    .then(function(db) {
+      return db.transaction('rw', db.requestObject, function(requestObject) {
+          let data = arc.app.db.idb._createHARfromSql(obj);
+          data.id = obj.id;
+          data.type = 'saved';
+          return requestObject.put(data);
+        })
+        .finally(function() {
+          db.close();
+        });
+    });
+};
+arc.app.db.idb.requests.updateRequestName = function(id, name) {
+  var request;
+  return arc.app.db.idb.requests.getRequest(id)
+    .then((item) => request = item)
+    .then(arc.app.db.idb.open)
+    .then((db) => {
+      return db.transaction('rw', db.requestObject, function(requestObject) {
+          request.name = name;
+          return requestObject.put(request);
+        })
+        .finally(function() {
+          db.close();
+        });
+    });
+};
+/**
+ * Insert list of exported to the app sever objects.
+ *
+ * @param  {Array} refArray A list of {@link ServerExportedObject} to insert.
+ * @return {Dexie.Promise} Fulfilled promise result with list of ids of inserts.
+ */
+arc.app.db.idb.insertExported = function(refArray) {
+  return arc.app.db.idb.open()
+    .then(function(db) {
+      return db.transaction('rw', db.serverExportObjects, function(serverExportObjects) {
           let promises = [];
-          promises.push(db.projectObjects.delete(_project.id));
-          requests.forEach((requestId) => {
-            promises.push(db.requestObject.delete(requestId));
+          refArray.forEach((item) => {
+            let ref = new ServerExportedObject(item);
+            promises.push(serverExportObjects.put(ref));
           });
           return Dexie.Promise.all(promises);
         })
+        .finally(function() {
+          db.close();
+        });
+    });
+};
+/**
+ * Query for exported item by a request ID (reference id)
+ *
+ * @param  {Array<Number>} requestsArray A list of IDs of the referenced requests.
+ */
+arc.app.db.idb.listExported = function(requestsArray) {
+  return arc.app.db.idb.open()
+    .then(function(db) {
+      return db.serverExportObjects
+        .where('requestId')
+        .anyOf(requestsArray)
+        .toArray()
         .finally(function() {
           db.close();
         });

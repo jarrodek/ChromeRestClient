@@ -606,15 +606,28 @@ public class RequestBodyWidget extends Composite implements IsHideable, HasText 
 		bodyCodeMirror = CodeMirror.fromTextArea(payloadRawInput.getElement(), opt, new CodeMirrorChangeHandler() {
 			@Override
 			public void onChage() {
-				payloadData = bodyCodeMirror.getValue();
-				payloadRawInput.setValue(payloadData);
-				if(RestClient.isDebug()) {
-					Log.info("Payload changed via raw tab with CodeMirror");
-				}
+				
 			}
 		});
+		setEditorCallback(bodyCodeMirror.getInstance());
 		bodyCodeMirror.refresh();
-		RestClient.fixChromeLayout();
+		//RestClient.fixChromeLayout();
+	}
+	
+	private final native void setEditorCallback(CodeMirrorImpl instance) /*-{
+		var context = this;
+		instance.on("change", function(cm, changeObj) {
+			context.@org.rest.client.ui.desktop.widget.RequestBodyWidget::rawEditorChanged(Ljava/lang/String;)(cm.getValue());
+		});
+		
+	}-*/;
+	
+	void rawEditorChanged(String value) {
+		payloadData = value;
+		payloadRawInput.setValue(value);
+		if(RestClient.isDebug()) {
+			Log.info("Payload changed via raw tab with CodeMirror");
+		}
 	}
 	
 	private void setEditorCurrentMode(){

@@ -15,13 +15,8 @@
  ******************************************************************************/
 package org.rest.client;
 
-import org.rest.client.storage.store.ExportedWebSql;
-import org.rest.client.storage.store.HeadersStoreWebSql;
-import org.rest.client.storage.store.HistoryRequestStoreWebSql;
-import org.rest.client.storage.store.ProjectStoreWebSql;
-import org.rest.client.storage.store.RequestDataStoreWebSql;
-import org.rest.client.storage.store.UrlHistoryStoreWebSql;
-import org.rest.client.storage.store.WebSocketDataStoreWebSql;
+import org.rest.client.storage.store.ProjectsStore;
+import org.rest.client.storage.store.WebSocketHistoryStore;
 import org.rest.client.ui.AboutView;
 import org.rest.client.ui.EditProjectView;
 import org.rest.client.ui.ErrorDialogView;
@@ -44,13 +39,8 @@ public interface ClientFactory {
 	EventBus getEventBus();
 	PlaceController getPlaceController();
 
-	RequestDataStoreWebSql getRequestDataStore();
-	HistoryRequestStoreWebSql getHistoryRequestStore();
-	UrlHistoryStoreWebSql getUrlHistoryStore();
-	HeadersStoreWebSql getHeadersStore();
-	ProjectStoreWebSql getProjectsStore();
-	WebSocketDataStoreWebSql getWebSocketsStore();
-	ExportedWebSql getExportedStore();
+	ProjectsStore getProjectsStore();
+	WebSocketHistoryStore getWebSocketsStore();
 	
 	
 	//VIEWS

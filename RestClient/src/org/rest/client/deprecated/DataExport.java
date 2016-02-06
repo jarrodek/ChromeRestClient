@@ -9,10 +9,11 @@ import org.rest.client.jso.ExportedDataItem;
 import org.rest.client.jso.RequestObject;
 import org.rest.client.log.Log;
 import org.rest.client.request.RequestHeadersParser;
-import org.rest.client.storage.store.ExportedWebSql;
-import org.rest.client.storage.store.RequestDataStoreWebSql;
+import org.rest.client.storage.store.ExportedStore;
+import org.rest.client.storage.store.RequestDataStore;
 
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.JsArrayInteger;
 import com.google.gwt.json.client.JSONArray;
@@ -70,26 +71,35 @@ abstract class DataExport {
 	 * Collect data from database and remove items already exported.
 	 */
 	protected void prepareExportData(final PrepareDataHanler handler) {
-		RestClient.getClientFactory().getRequestDataStore().all(new RequestDataStoreWebSql.StoreResultsCallback() {
+		RequestDataStore.all(new RequestDataStore.StoreResultsCallback() {
 			@Override
 			public void onError(Throwable e) {
 				if (RestClient.isDebug()) {
 					Log.error("Failure to prepare Form data from DB service", e);
 				}
 				StatusNotification.notify("Failure to prepare Form data from local database");
+				handler.onEmptyData();
 			}
 
 			@Override
-			public void onSuccess(final JsArray<RequestObject> result) {
+			public void onSuccess(final JsArray<JavaScriptObject> result) {
+				if(result == null){
+					if (RestClient.isDebug()) {
+						Log.error("Failure to prepare Form data from DB service");
+					}
+					StatusNotification.notify("Failure to prepare Form data from local database");
+					handler.onEmptyData();
+					return;
+				}
 				JsArrayInteger formIdsList = (JsArrayInteger) JsArrayInteger.createArray();
-				for (int i = 0; i < result.length(); i++) {
-					RequestObject item = result.get(i);
+				JsArray<RequestObject> list = result.cast();
+				for (int i = 0; i < list.length(); i++) {
+					RequestObject item = list.get(i);
 					formIdsList.set(i, item.getId());
 				}
 				
-				allDataList = result;
-				RestClient.getClientFactory().getExportedStore()
-						.getExportedByReferenceIds(formIdsList, new ExportedWebSql.StoreResultsCallback() {
+				allDataList = list;
+				ExportedStore.getExportedByReferenceIds(formIdsList, new ExportedStore.StoreResultsCallback() {
 					@Override
 					public void onError(Throwable e) {
 						synchPrepareData(handler);

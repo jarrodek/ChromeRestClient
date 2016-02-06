@@ -46,7 +46,7 @@ arc.app.utils.uuid = function() {
     lut[i] = (i < 16 ? '0' : '') + (i)
       .toString(16);
   }
-  return function() {
+  var fn = function() {
     var d0 = Math.random() * 0xffffffff | 0;
     var d1 = Math.random() * 0xffffffff | 0;
     var d2 = Math.random() * 0xffffffff | 0;
@@ -57,6 +57,8 @@ arc.app.utils.uuid = function() {
       lut[d2 >> 8 & 0xff] + '-' + lut[d2 >> 16 & 0xff] + lut[d2 >> 24 & 0xff] +
       lut[d3 & 0xff] + lut[d3 >> 8 & 0xff] + lut[d3 >> 16 & 0xff] + lut[d3 >> 24 & 0xff];
   };
+  return fn();
+  
   // jscs:enable
   /* jshint ignore:end */
 };

@@ -3,16 +3,13 @@ package org.rest.client.suggestion;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.rest.client.jso.HeaderIdb;
 import org.rest.client.jso.HeaderRow;
 import org.rest.client.log.Log;
-import org.rest.client.storage.store.HeadersIdb;
-import org.rest.client.storage.store.HeadersStoreWebSql;
+import org.rest.client.storage.store.HeadersStore;
 
 import com.google.gwt.core.client.JsArray;
 
 public class HeadersSuggestOracle extends DatabaseSuggestOracle {
-	private final HeadersStoreWebSql store;
 	private final String headerType;
 
 	/**
@@ -22,8 +19,7 @@ public class HeadersSuggestOracle extends DatabaseSuggestOracle {
 	 * @param headerType
 	 *            Either "request" or "response"
 	 */
-	public HeadersSuggestOracle(HeadersStoreWebSql store, String headerType) {
-		this.store = store;
+	public HeadersSuggestOracle(String headerType) {
 		this.headerType = headerType;
 	}
 
@@ -58,17 +54,15 @@ public class HeadersSuggestOracle extends DatabaseSuggestOracle {
 	}
 
 	private void getHeadersIdb(final String query, final com.google.gwt.core.client.Callback<List<HeaderSuggestion>, Throwable> callbackFn) {
-		Log.debug("getHeadersIdb for ", query);
-		HeadersIdb.getHeaders(query, headerType, new HeadersIdb.StoreResultsCallback() {
+		HeadersStore.query(query, headerType, new HeadersStore.StoreResultsCallback() {
+
 			@Override
-			public void onSuccess(JsArray<HeaderIdb> result) {
-				Log.debug("getHeadersIdb has ", result, query);
-				
+			public void onSuccess(JsArray<HeaderRow> result) {
 				String lowerQuery = query.toLowerCase();
 				List<HeaderSuggestion> suggestions = new ArrayList<HeaderSuggestion>();
 				if (result != null) {
 					for (int i = 0; i < result.length(); i++) {
-						HeaderIdb row = result.get(i);
+						HeaderRow row = result.get(i);
 						String headerName = row.getKey();
 						if (headerName == null) {
 							continue;
@@ -80,41 +74,13 @@ public class HeadersSuggestOracle extends DatabaseSuggestOracle {
 						suggestions.add(s);
 					}
 				}
-				Log.debug("getHeadersIdb resulted with ", result);
 				callbackFn.onSuccess(suggestions);
 			}
 
 			@Override
 			public void onError(Throwable e) {
-				store.getHeaders(query + "%", headerType, new HeadersStoreWebSql.StoreResultsCallback() {
-
-					@Override
-					public void onSuccess(JsArray<HeaderRow> result) {
-						String lowerQuery = query.toLowerCase();
-						List<HeaderSuggestion> suggestions = new ArrayList<HeaderSuggestion>();
-						if (result != null) {
-							for (int i = 0; i < result.length(); i++) {
-								HeaderRow row = result.get(i);
-								String headerName = row.getName();
-								if (headerName == null) {
-									continue;
-								}
-								if (!headerName.toLowerCase().startsWith(lowerQuery)) {
-									continue;
-								}
-								HeaderSuggestion s = new HeaderSuggestion(headerName);
-								suggestions.add(s);
-							}
-						}
-						callbackFn.onSuccess(suggestions);
-					}
-
-					@Override
-					public void onError(Throwable e) {
-						Log.error("HeadersSuggestOracle - databaseService query error:", e);
-						callbackFn.onFailure(e);
-					}
-				});
+				Log.error("HeadersSuggestOracle - databaseService query error:", e);
+				callbackFn.onFailure(e);
 			}
 		});
 	}

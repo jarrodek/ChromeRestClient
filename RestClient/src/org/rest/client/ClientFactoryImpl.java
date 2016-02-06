@@ -15,13 +15,8 @@
  ******************************************************************************/
 package org.rest.client;
 
-import org.rest.client.storage.store.ExportedWebSql;
-import org.rest.client.storage.store.HeadersStoreWebSql;
-import org.rest.client.storage.store.HistoryRequestStoreWebSql;
-import org.rest.client.storage.store.ProjectStoreWebSql;
-import org.rest.client.storage.store.RequestDataStoreWebSql;
-import org.rest.client.storage.store.UrlHistoryStoreWebSql;
-import org.rest.client.storage.store.WebSocketDataStoreWebSql;
+import org.rest.client.storage.store.ProjectsStore;
+import org.rest.client.storage.store.WebSocketHistoryStore;
 import org.rest.client.ui.AboutView;
 import org.rest.client.ui.EditProjectView;
 import org.rest.client.ui.ErrorDialogView;
@@ -60,13 +55,8 @@ public class ClientFactoryImpl implements ClientFactory {
 	private static final PlaceController placeController = new PlaceController(
 			eventBus);
 	private static RequestView requestView = null;
-	private static RequestDataStoreWebSql requestDataStore = null;
-	private static HistoryRequestStoreWebSql historyRequestStore = null;
-	private static UrlHistoryStoreWebSql urlHistoryStore = null;
-	private static HeadersStoreWebSql headersStore = null;
-	private static ProjectStoreWebSql projectsStore = null;
-	private static WebSocketDataStoreWebSql webSocketSqlStore = null;
-	private static ExportedWebSql exportedDataService = null;
+	private static ProjectsStore projectsStore = null;
+	private static WebSocketHistoryStore webSocketSqlStore = null;
 	/**
 	 * It must be cached and created only once!
 	 */
@@ -100,43 +90,11 @@ public class ClientFactoryImpl implements ClientFactory {
 	}
 
 	@Override
-	public RequestDataStoreWebSql getRequestDataStore() {
-		if (requestDataStore == null) {
-			requestDataStore = GWT.create(RequestDataStoreWebSql.class);
-		}
-		return requestDataStore;
-	}
-
-	@Override
-	public HistoryRequestStoreWebSql getHistoryRequestStore() {
-		if (historyRequestStore == null) {
-			historyRequestStore = GWT.create(HistoryRequestStoreWebSql.class);
-		}
-		return historyRequestStore;
-	}
-
-	@Override
-	public ProjectStoreWebSql getProjectsStore() {
+	public ProjectsStore getProjectsStore() {
 		if (projectsStore == null) {
-			projectsStore = GWT.create(ProjectStoreWebSql.class);
+			projectsStore = GWT.create(ProjectsStore.class);
 		}
 		return projectsStore;
-	}
-
-	@Override
-	public UrlHistoryStoreWebSql getUrlHistoryStore() {
-		if (urlHistoryStore == null) {
-			urlHistoryStore = GWT.create(UrlHistoryStoreWebSql.class);
-		}
-		return urlHistoryStore;
-	}
-
-	@Override
-	public HeadersStoreWebSql getHeadersStore() {
-		if (headersStore == null) {
-			headersStore = GWT.create(HeadersStoreWebSql.class);
-		}
-		return headersStore;
 	}
 
 	@Override
@@ -198,23 +156,14 @@ public class ClientFactoryImpl implements ClientFactory {
 	}
 
 	@Override
-	public ExportedWebSql getExportedStore() {
-		if(exportedDataService == null){
-			exportedDataService = GWT
-					.create(ExportedWebSql.class);
-		}
-		return exportedDataService;
-	}
-
-	@Override
 	public SocketView getSocketView() {
 		return GWT.create(SocketViewImpl.class);
 	}
 
 	@Override
-	public WebSocketDataStoreWebSql getWebSocketsStore() {
+	public WebSocketHistoryStore getWebSocketsStore() {
 		if(webSocketSqlStore == null){
-			webSocketSqlStore = GWT.create(WebSocketDataStoreWebSql.class);
+			webSocketSqlStore = GWT.create(WebSocketHistoryStore.class);
 		}
 		return webSocketSqlStore;
 	}
