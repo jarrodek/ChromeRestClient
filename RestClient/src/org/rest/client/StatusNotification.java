@@ -34,14 +34,11 @@ public class StatusNotification {
 	/**
 	 * Notification display time: 8sec.
 	 */
-	public static final int TIME_LONG = 12000;
-	/**
-	 * Notification display time: Infinity (value 0)
-	 */
-	public static final int TIME_INFINITY = 0;
+	static final int TIME_LONG = 12000;
+	
 
 	public interface NotificationCallback {
-		void onActionPerformed();
+		void onActionPerformed(); // NO_UCD (unused code)
 	}
 	
 	/**

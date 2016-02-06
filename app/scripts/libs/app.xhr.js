@@ -22,18 +22,26 @@
 
 /**
  * Advanced Rest Client namespace
+ *
+ * @namespace
  */
 var arc = arc || {};
 /**
  * ARC app's namespace
+ *
+ * @namespace
  */
 arc.app = arc.app || {};
 /**
  * A namespace for the XHR object
+ *
+ * @namespace
  */
 arc.app.xhr = arc.app.xhr || {};
 /**
  * Holder for current requests data.
+ *
+ * @type {Map}
  */
 arc.app.xhr.requests = new Map();
 /**

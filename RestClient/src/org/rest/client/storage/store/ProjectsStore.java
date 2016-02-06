@@ -1,59 +1,116 @@
-/*******************************************************************************
- * Copyright 2012 Paweł Psztyć
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
 package org.rest.client.storage.store;
 
-import org.rest.client.storage.IndexedDbAdapter;
-import org.rest.client.storage.indexeddb.IDBDatabase;
-import org.rest.client.storage.indexeddb.IDBDatabaseException;
-import org.rest.client.storage.indexeddb.IDBIndexParameters;
-import org.rest.client.storage.indexeddb.IDBObjectStore;
-import org.rest.client.storage.indexeddb.IDBObjectStoreParameters;
-import org.rest.client.storage.store.objects.ProjectObject;
+import org.rest.client.jso.ProjectObject;
+import org.rest.client.jso.RequestObject;
 
-import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.JsArrayInteger;
 
-public class ProjectsStore extends IndexedDbAdapter<Long, ProjectObject> {
+public class ProjectsStore {
 	
-	public final static String NAME_INDEX = "name";
-	public static final String STORE_NAME = "projects";
+	public interface StoreResultCallback {
+		void onSuccess(ProjectObject result);
+		void onError(Throwable e);
+	}
 	
-	public ProjectsStore() {
-		super("rest_client", STORE_NAME);
+	
+	public interface StoreInsertListCallback {
+		void onSuccess(JsArrayInteger inserId);
+		void onError(Throwable e);
 	}
+	
+	public interface StoreResultsCallback {
+		void onSuccess(JsArray<ProjectObject> result);
+		void onError(Throwable e);
+	}
+	
+	public interface StoreSimpleCallback {
+		void onSuccess();
+		void onError(Throwable e);
+	}
+	
+	public final static native void add(ProjectObject project, RequestObject request, StoreResultCallback callback) /*-{
+		$wnd.arc.app.db.projects.add(project, [request])
+		.then(function(result){
+			callback.@org.rest.client.storage.store.ProjectsStore.StoreResultCallback::onSuccess(Lorg/rest/client/jso/ProjectObject;)(result);
+		}, function(cause){
+			callback.@org.rest.client.storage.store.ProjectsStore.StoreResultCallback::onError(Ljava/lang/Throwable;)(cause);
+			console.error('Indexed db did not saved project and request.', cause);
+			$wnd.arc.app.analytics.sendException('ProjectIdb::addWithRequest' + JSON.stringify(cause));
+		});
+	}-*/;
+	
+	public final static native void getForRequest(int requestId, StoreResultCallback callback) /*-{
+		$wnd.arc.app.db.projects.getForRequest(requestId)
+		.then(function(result){
+			callback.@org.rest.client.storage.store.ProjectsStore.StoreResultCallback::onSuccess(Lorg/rest/client/jso/ProjectObject;)(result);
+		}, function(cause){
+			callback.@org.rest.client.storage.store.ProjectsStore.StoreResultCallback::onError(Ljava/lang/Throwable;)(cause);
+			console.error('Indexed db did not saved project and request.', cause);
+			$wnd.arc.app.analytics.sendException('ProjectIdb::addWithRequest' + JSON.stringify(cause));
+		});
+	}-*/;
+	//arc.app.db.projects.getForRequest
+	/**
+	 * Update
+	 * @param obj
+	 * @param callback
+	 */
+	public final static native void update(ProjectObject obj, final StoreResultCallback callback) /*-{
+		$wnd.arc.app.db.projects.update(obj)
+		.then(function(obj){
+			callback.@org.rest.client.storage.store.ProjectsStore.StoreResultCallback::onSuccess(Lorg/rest/client/jso/ProjectObject;)(obj);
+		}, function(cause){
+			callback.@org.rest.client.storage.store.ProjectsStore.StoreResultCallback::onError(Ljava/lang/Throwable;)(cause);
+		});
+	}-*/;
 
-	@SuppressWarnings("unchecked")
-	public static void setVestion(IDBDatabase db) throws IDBDatabaseException {
-		
-		Log.debug("Set store ("+STORE_NAME+") new version: " + databaseVersion);
-		Log.warn("This will remove all previous data.");
-		
-		if(db.getObjectStoreNames().contains(STORE_NAME)){
-			Log.debug("Remove previous selected store: " + STORE_NAME);
-			db.deleteObjectStore(STORE_NAME);
-		}
-		
-		IDBObjectStoreParameters parameters = IDBObjectStoreParameters.create();
-		parameters.setKeyPath("id");
-		parameters.setAutoIncrement(true);
-		Log.debug("Create new store: Store name: " + STORE_NAME);
-		IDBObjectStore<Long> newStore = (IDBObjectStore<Long>) db.createObjectStore(STORE_NAME, parameters);
-		
-		IDBIndexParameters headersIndexParameters = IDBIndexParameters.create();
-		headersIndexParameters.setUnique(false);
-		newStore.createIndex(NAME_INDEX, NAME_INDEX, headersIndexParameters);
-		Log.debug("Create new store index (name): Store name: " + STORE_NAME);
-	}
+	/**
+	 * Read
+	 * @param key
+	 * @param callback
+	 */
+	public final native static void getByKey(int key, final StoreResultCallback callback) /*-{
+		$wnd.arc.app.db.projects.getProject(key)
+		.then(function(obj){
+			callback.@org.rest.client.storage.store.ProjectsStore.StoreResultCallback::onSuccess(Lorg/rest/client/jso/ProjectObject;)(obj);
+		}, function(cause){
+			callback.@org.rest.client.storage.store.ProjectsStore.StoreResultCallback::onError(Ljava/lang/Throwable;)(cause);
+		});
+	}-*/;
+	/**
+	 * List
+	 * @param callback
+	 */
+	public final native static void all(final StoreResultsCallback callback) /*-{
+		$wnd.arc.app.db.projects.list()
+		.then(function(result){
+			callback.@org.rest.client.storage.store.ProjectsStore.StoreResultsCallback::onSuccess(Lcom/google/gwt/core/client/JsArray;)(result);
+		}, function(cause){
+			callback.@org.rest.client.storage.store.ProjectsStore.StoreResultsCallback::onError(Ljava/lang/Throwable;)(cause);
+		});
+	}-*/;
+	/**
+	 * Delete
+	 * @param key
+	 * @param callback
+	 */
+	public final native static void remove(int key, StoreSimpleCallback callback) /*-{
+		$wnd.arc.app.db.projects.remove(key)
+		.then(function(){
+			callback.@org.rest.client.storage.store.ProjectsStore.StoreSimpleCallback::onSuccess()();
+		}, function(cause){
+			callback.@org.rest.client.storage.store.ProjectsStore.StoreSimpleCallback::onError(Ljava/lang/Throwable;)(cause);
+		});
+	}-*/;
+	
+	public final native static void importData(JsArray<ProjectObject> projects, JsArray<RequestObject> requests, StoreInsertListCallback callback) /*-{
+		$wnd.arc.app.db.projects.importData(projects, requests)
+		.then(function(result){
+			callback.@org.rest.client.storage.store.ProjectsStore.StoreInsertListCallback::onSuccess(Lcom/google/gwt/core/client/JsArrayInteger;)(result);
+		}, function(cause){
+			callback.@org.rest.client.storage.store.ProjectsStore.StoreInsertListCallback::onError(Ljava/lang/Throwable;)(cause);
+		});
+	}-*/;
+	
 }

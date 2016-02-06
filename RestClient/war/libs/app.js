@@ -17,20 +17,28 @@
 /* global chrome */
 /**
  * Advanced Rest Client namespace
+ *
+ * @namespace
  */
 var arc = arc || {};
 /**
  * ARC app's namespace
+ *
+ * @namespace
  */
 arc.app = arc.app || {};
 /**
  * A namespace for the utilis functions
+ *
+ * @namespace
  */
 arc.app.arc = {};
 /**
  * Minimum supported version of Chrome.
  * The script will use manifest.minimum_chrome_version to determine minimum version.
  * It will use higher number to determine if Chrome is compatible.
+ *
+ * @type {Number}
  */
 arc.app.arc.minSupportedVersion = 45;
 /**

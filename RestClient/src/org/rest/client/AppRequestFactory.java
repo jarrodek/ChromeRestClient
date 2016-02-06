@@ -2,7 +2,6 @@ package org.rest.client;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -11,27 +10,25 @@ import java.util.logging.Logger;
 import org.rest.client.event.RequestChangeEvent;
 import org.rest.client.event.RequestEndEvent;
 import org.rest.client.event.RequestStartActionEvent;
-import org.rest.client.jso.UrlRow;
+import org.rest.client.jso.HistoryObject;
+import org.rest.client.jso.RequestObject;
+import org.rest.client.log.Log;
 import org.rest.client.request.FilesObject;
 import org.rest.client.request.FormPayloadData;
 import org.rest.client.request.HttpMethodOptions;
 import org.rest.client.request.RequestHeadersParser;
 import org.rest.client.request.RequestPayloadParser;
-import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.HistoryRequestStoreWebSql;
-import org.rest.client.storage.store.StoreKeys;
-import org.rest.client.storage.store.UrlHistoryStoreWebSql;
-import org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultsCallback;
-import org.rest.client.storage.store.objects.HistoryObject;
-import org.rest.client.storage.store.objects.RequestObject;
+import org.rest.client.storage.StoreKeys;
+import org.rest.client.storage.store.HistoryRequestStore;
+import org.rest.client.storage.store.UrlHistoryStore;
 import org.rest.client.ui.ErrorDialogView;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.def.BackgroundJsCallback;
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -59,12 +56,6 @@ public class AppRequestFactory {
 	private static EventBus eventBus;
 	private static boolean requestInProgress = false;
 	
-	/**
-	 * @return true if some request is already in progress.
-	 */
-	public static boolean isRequestInProgress(){
-		return requestInProgress;
-	}
 	/**
 	 * Initialize class.
 	 * @param ev
@@ -283,7 +274,7 @@ public class AppRequestFactory {
 		}
 	}
 	
-	protected static void onSuccesRequest(final Response response) {
+	private static void onSuccesRequest(final Response response) {
 		if(RestClient.isDebug()){
 			Log.debug("Request sent successfully. Building response view.");
 		}
@@ -398,7 +389,7 @@ public class AppRequestFactory {
 		});
 	}
 	
-	protected static void onFailureRequest(final Response response) {
+	private static void onFailureRequest(final Response response) {
 		requestInProgress = false;
 		ScheduledCommand sc = new ScheduledCommand() {
 			@Override
@@ -450,36 +441,45 @@ public class AppRequestFactory {
 		if(!RestClient.isHistoryEabled()){
 			return;
 		}
-		if(RestClient.isDebug()){
-			Log.debug("Try to save new item in history.");
-		}
-		final HistoryRequestStoreWebSql store = RestClient.getClientFactory().getHistoryRequestStore();
-		store.getHistoryItem(data.getURL(), data.getMethod(), new StoreResultCallback<List<HistoryObject>>() {
+		final String queryUrl = data.getURL();
+		final String queryMethod = data.getMethod();
+		final String queryHeaders = data.getHeaders();
+		final String queryPayload = data.getPayload();
+		HistoryRequestStore.queryHistory(queryUrl, -1, -1, new HistoryRequestStore.StoreResultsCallback() {
 			@Override
-			public void onSuccess(List<HistoryObject> result) {
+			public void onSuccess(JsArray<JavaScriptObject> result) {
 				boolean found = false;
-				HistoryObject old = null;
-				for(HistoryObject item : result){
-					String enc = item.getEncoding();
-					if(enc != null && !enc.equals(data.getEncoding())){
+				for (int i = 0; i < result.length(); i++) {
+					HistoryObject item = result.get(i).cast();
+					
+					if(!item.getURL().equals(queryUrl)) {
+						continue;
+					}
+					if(!item.getMethod().equals(queryMethod)) {
 						continue;
 					}
 					String itemHeaders = item.getHeaders();
-					if(itemHeaders != null && !itemHeaders.equals(data.getHeaders())){
+					if(itemHeaders != null && !itemHeaders.equals(queryHeaders)){
+						continue;
+					} else if (itemHeaders == null && queryHeaders != null) {
 						continue;
 					}
 					String itemPayload = item.getPayload();
-					if(itemPayload != null && !itemPayload.equals(data.getPayload())){
+					if(itemPayload != null && !itemPayload.equals("") && !itemPayload.equals(queryPayload)){
+						continue;
+					} else if(itemPayload != null && queryPayload != null && itemPayload.equals("") && queryPayload.equals("")) {
+						
+					} else if(itemPayload == null && queryPayload != null) {
 						continue;
 					}
 					found = true;
-					old = item;
 					break;
 				}
 				if(!found){
-					store.put(data, null, new StoreResultCallback<Integer>() {
+					data.reSetId();
+					HistoryRequestStore.insert(data, new HistoryRequestStore.StoreInsertCallback() {
 						@Override
-						public void onSuccess(Integer result) {
+						public void onSuccess(int result) {
 							if(RestClient.isDebug()){
 								Log.debug("Saved new item in history.");
 							}
@@ -495,21 +495,6 @@ public class AppRequestFactory {
 					if(RestClient.isDebug()){
 						Log.debug("Item already exists in history");
 					}
-					store.updateHistoryItemTime(old.getId(), new Date(), new StoreResultCallback<Boolean>() {
-						@Override
-						public void onSuccess(Boolean result) {
-							if(RestClient.isDebug()){
-								Log.debug("History item saved.");
-							}
-						}
-						
-						@Override
-						public void onError(Throwable e) {
-							if(RestClient.isDebug()){
-								Log.error("An error occured when updating history item time.", e);
-							}
-						}
-					});
 				}
 			}
 			@Override
@@ -533,59 +518,18 @@ public class AppRequestFactory {
 		if(RestClient.isDebug()){
 			Log.debug("Save URL value into suggestions table.");
 		}
-		final UrlHistoryStoreWebSql store = RestClient.getClientFactory().getUrlHistoryStore();
-		store.getByUrl(url, new StoreResultsCallback() {
+		UrlHistoryStore.put(url, (double) new Date().getTime(), new UrlHistoryStore.StoreCallback() {
 			
 			@Override
-			public void onSuccess(JsArray<UrlRow> result) {
-				if(result != null && result.length() > 0) {
-					if(RestClient.isDebug()){
-						Log.debug("Updating Suggestions table with new time.");
-					}
-					store.updateUrlUseTime(result.get(0).getId(), (double) new Date().getTime(), new org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultCallback() {
-						
-						@Override
-						public void onSuccess(UrlRow result) {
-							if(RestClient.isDebug()){
-								Log.debug("Suggestions table updated with new time.");
-							}
-						}
-						
-						@Override
-						public void onError(Throwable e) {
-							if(RestClient.isDebug()){
-								Log.error("Can't update suggestion time.", e);
-							}
-						}
-					});
-					return;
+			public void onSuccess() {
+				if(RestClient.isDebug()){
+					Log.debug("Suggestions table updated with new time.");
 				}
-				UrlRow row = UrlRow.create();
-				row.setUrl(url);
-				row.setTime(new Date().getTime());
-				store.put(row, new org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultCallback() {
-					
-					@Override
-					public void onError(Throwable e) {
-						if(RestClient.isDebug()){
-							Log.error("There was a problem inserting URL value (used in request).", e);
-						}
-					}
-
-					@Override
-					public void onSuccess(UrlRow result) {
-						if(RestClient.isDebug()){
-							Log.debug("New value has been added to the Suggestions table.");
-						}
-					}
-				});
 			}
 			
 			@Override
 			public void onError(Throwable e) {
-				if(RestClient.isDebug()){
-					Log.error("There was a problem inserting URL value (used in request). Unable to read previous URL's data.", e);
-				}
+				Log.warn("IDB url add error", e);
 			}
 		});
 	}

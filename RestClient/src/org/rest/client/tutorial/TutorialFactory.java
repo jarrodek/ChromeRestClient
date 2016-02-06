@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import org.rest.client.RestClient;
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
-import org.rest.client.storage.store.StoreKeys;
+import org.rest.client.log.Log;
+import org.rest.client.storage.StoreKeys;
 import org.rest.client.ui.TutorialDialog;
 import org.rest.client.ui.TutorialDialog.Controls;
 import org.rest.client.ui.desktop.TutorialDialogImpl;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;

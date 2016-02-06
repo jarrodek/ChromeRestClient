@@ -1,3 +1,6 @@
+// jscs:disable
+/* jshint ignore:start */
+
 // Production steps of ECMA-262, Edition 6, 22.1.2.1
 // Reference: https://people.mozilla.org/~jorendorff/es6-draft.html#sec-array.from
 if (!Array.from) {
@@ -81,3 +84,20 @@ if (!Array.from) {
     };
   }());
 }
+'function' !== typeof Object.assign && !function() {
+  Object.assign = function(n) {
+    'use strict';
+    if (void 0 === n || null === n) {
+      throw new TypeError('Cannot convert undefined or null to object');
+    }
+    for (var t = Object(n), r = 1; r < arguments.length; r++) {
+      var e = arguments[r];
+      if (void 0 !== e && null !== e) {
+        for (var o in e) {
+          e.hasOwnProperty(o) && (t[o] = e[o]);
+        }
+      }
+    }
+    return t;
+  };
+}();

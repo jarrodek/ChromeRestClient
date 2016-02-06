@@ -15,25 +15,21 @@
  ******************************************************************************/
 package org.rest.client.activity;
 
-import java.util.ArrayList;
-import java.util.List;
-//import java.util.logging.Logger;
-
 import org.rest.client.ClientFactory;
 import org.rest.client.NotificationAction;
 import org.rest.client.RestClient;
 import org.rest.client.StatusNotification;
-import org.rest.client.gdrive.DriveAuth;
 import org.rest.client.gdrive.DriveApi;
+import org.rest.client.gdrive.DriveAuth;
+import org.rest.client.jso.RequestObject;
+import org.rest.client.log.Log;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SavedPlace;
-import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.objects.RequestObject;
+import org.rest.client.storage.store.RequestDataStore;
 import org.rest.client.ui.SavedView;
 
-import com.allen_sauer.gwt.log.client.Log;
-import com.google.code.gwt.database.client.service.DataServiceException;
-import com.google.code.gwt.database.client.service.VoidCallback;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 /**
@@ -64,15 +60,11 @@ public class SavedActivity extends ListActivity implements SavedView.Presenter {
 
 	@Override
 	public void removeFromSaved(final RequestObject request) {
-		clientFactory.getRequestDataStore().remove(request.getId(), new StoreResultCallback<Boolean>() {
+		RequestDataStore.remove(request.getId(), "saved", new RequestDataStore.StoreSimpleCallback() {
 
 			@Override
-			public void onSuccess(Boolean result) {
-				if (result != null && result.booleanValue()) {
-					notifyRemoveAndRestore(request);
-				} else {
-					StatusNotification.notify("Unknown error occured :(", StatusNotification.TIME_SHORT);
-				}
+			public void onSuccess() {
+				notifyRemoveAndRestore(request);
 			}
 
 			@Override
@@ -92,19 +84,14 @@ public class SavedActivity extends ListActivity implements SavedView.Presenter {
 		action.callback = new StatusNotification.NotificationCallback() {
 			@Override
 			public void onActionPerformed() {
-				final RequestObject save = RequestObject.copyNew(request);
-				clientFactory.getRequestDataStore().put(save, null, new StoreResultCallback<Integer>() {
-
+				RequestDataStore.insert(request, new RequestDataStore.StoreInsertCallback() {
 					@Override
-					public void onSuccess(Integer result) {
-
-						save.setId(result.intValue());
-						ArrayList<RequestObject> list = new ArrayList<RequestObject>();
-						list.add(save);
-
+					public void onSuccess(int result) {
+						JsArray<RequestObject> list = JsArray.createArray().cast();
+						request.setId(result); //required by SQL.
+						list.set(0, request);
 						view.appendResults(list);
 					}
-
 					@Override
 					public void onError(Throwable e) {
 						if (RestClient.isDebug()) {
@@ -119,28 +106,13 @@ public class SavedActivity extends ListActivity implements SavedView.Presenter {
 	}
 
 	@Override
-	public void onClearSaved() {
-		clientFactory.getRequestDataStore().getService().deleteSaved(new VoidCallback() {
-			@Override
-			public void onFailure(DataServiceException error) {
-
-			}
-
-			@Override
-			public void onSuccess() {
-
-			}
-		});
-	}
-
-	@Override
 	public void changeSavedName(String newName, int savedId) {
-		clientFactory.getRequestDataStore().getService().updateName(newName, savedId, new VoidCallback() {
+		RequestDataStore.updateName(newName, savedId, new RequestDataStore.StoreSimpleCallback() {
 
 			@Override
-			public void onFailure(DataServiceException error) {
+			public void onError(Throwable e) {
 				if (RestClient.isDebug()) {
-					Log.error("Unable to change name :(", error);
+					Log.error("Unable to change name :(", e);
 				}
 				StatusNotification.notify("Unable to change name :(", StatusNotification.TIME_SHORT);
 			}
@@ -160,7 +132,7 @@ public class SavedActivity extends ListActivity implements SavedView.Presenter {
 
 	@Override
 	public void serach(String query) {
-		recentQuery = "%" + query + "%";
+		recentQuery = query;
 		current_page = 0;
 		view.clearResultList();
 		performQuery();
@@ -175,17 +147,22 @@ public class SavedActivity extends ListActivity implements SavedView.Presenter {
 
 		final String q = (recentQuery != null && recentQuery.length() > 2) ? recentQuery : null;
 		int offset = current_page * PAGE_SIZE;
-		clientFactory.getRequestDataStore().queryWithLimit(q, PAGE_SIZE, offset,
-				new StoreResultCallback<List<RequestObject>>() {
+		RequestDataStore.query(q, PAGE_SIZE, offset,
+				new RequestDataStore.StoreResultsCallback() {
 
 					@Override
-					public void onSuccess(final List<RequestObject> result) {
+					public void onSuccess(final JsArray<JavaScriptObject> result) {
 						fetchingNextPage = false;
-						if (result.size() == 0) {
+						if(result == null) {
+							return;
+						}
+						int size = result.length();
+						if (size == 0) {
 							view.setNoMoreItems();
 							return;
 						}
-						view.appendResults(result);
+						JsArray<RequestObject> list = result.cast();
+						view.appendResults(list);
 					}
 
 					@Override

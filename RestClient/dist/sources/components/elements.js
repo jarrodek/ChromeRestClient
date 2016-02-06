@@ -7537,6 +7537,92 @@ this.fire('dom-change');
     });
 
   })();
+Polymer({
+
+      is: 'iron-icon',
+
+      properties: {
+
+        /**
+         * The name of the icon to use. The name should be of the form:
+         * `iconset_name:icon_name`.
+         */
+        icon: {
+          type: String,
+          observer: '_iconChanged'
+        },
+
+        /**
+         * The name of the theme to used, if one is specified by the
+         * iconset.
+         */
+        theme: {
+          type: String,
+          observer: '_updateIcon'
+        },
+
+        /**
+         * If using iron-icon without an iconset, you can set the src to be
+         * the URL of an individual icon image file. Note that this will take
+         * precedence over a given icon attribute.
+         */
+        src: {
+          type: String,
+          observer: '_srcChanged'
+        },
+
+        /**
+         * @type {!Polymer.IronMeta}
+         */
+        _meta: {
+          value: Polymer.Base.create('iron-meta', {type: 'iconset'})
+        }
+
+      },
+
+      _DEFAULT_ICONSET: 'icons',
+
+      _iconChanged: function(icon) {
+        var parts = (icon || '').split(':');
+        this._iconName = parts.pop();
+        this._iconsetName = parts.pop() || this._DEFAULT_ICONSET;
+        this._updateIcon();
+      },
+
+      _srcChanged: function(src) {
+        this._updateIcon();
+      },
+
+      _usesIconset: function() {
+        return this.icon || !this.src;
+      },
+
+      /** @suppress {visibility} */
+      _updateIcon: function() {
+        if (this._usesIconset()) {
+          if (this._iconsetName) {
+            this._iconset = /** @type {?Polymer.Iconset} */ (
+              this._meta.byKey(this._iconsetName));
+            if (this._iconset) {
+              this._iconset.applyIcon(this, this._iconName, this.theme);
+              this.unlisten(window, 'iron-iconset-added', '_updateIcon');
+            } else {
+              this.listen(window, 'iron-iconset-added', '_updateIcon');
+            }
+          }
+        } else {
+          if (!this._img) {
+            this._img = document.createElement('img');
+            this._img.style.width = '100%';
+            this._img.style.height = '100%';
+            this._img.draggable = false;
+          }
+          this._img.src = this.src;
+          Polymer.dom(this.root).appendChild(this._img);
+        }
+      }
+
+    });
 /**
    * The `iron-iconset-svg` element allows users to define their own icon sets
    * that contain svg icons. The svg icon elements should be children of the
@@ -8759,6 +8845,74 @@ Polymer.IronOverlayManager = {
     }
 
   };
+(function() {
+
+  Polymer({
+
+    is: 'iron-overlay-backdrop',
+
+    properties: {
+
+      /**
+       * Returns true if the backdrop is opened.
+       */
+      opened: {
+        readOnly: true,
+        reflectToAttribute: true,
+        type: Boolean,
+        value: false
+      },
+
+      _manager: {
+        type: Object,
+        value: Polymer.IronOverlayManager
+      }
+
+    },
+
+    /**
+     * Appends the backdrop to document body and sets its `z-index` to be below the latest overlay.
+     */
+    prepare: function() {
+      if (!this.parentNode) {
+        Polymer.dom(document.body).appendChild(this);
+        this.style.zIndex = this._manager.currentOverlayZ() - 1;
+      }
+    },
+
+    /**
+     * Shows the backdrop if needed.
+     */
+    open: function() {
+      // only need to make the backdrop visible if this is called by the first overlay with a backdrop
+      if (this._manager.getBackdrops().length < 2) {
+        this._setOpened(true);
+      }
+    },
+
+    /**
+     * Hides the backdrop if needed.
+     */
+    close: function() {
+      // only need to make the backdrop invisible if this is called by the last overlay with a backdrop
+      if (this._manager.getBackdrops().length < 2) {
+        this._setOpened(false);
+      }
+    },
+
+    /**
+     * Removes the backdrop from document body if needed.
+     */
+    complete: function() {
+      // only remove the backdrop if there are no more overlays with backdrops
+      if (this._manager.getBackdrops().length === 0 && this.parentNode) {
+        Polymer.dom(this.parentNode).removeChild(this);
+      }
+    }
+
+  });
+
+})();
 /**
 Use `Polymer.IronOverlayBehavior` to implement an element that can be hidden or shown, and displays
 on top of other content. It includes an optional backdrop, and can be used to implement a variety
@@ -9748,6 +9902,392 @@ Polymer({
       }
     };
   })();
+(function() {
+      'use strict';
+
+      Polymer({
+        is: 'iron-dropdown',
+
+        behaviors: [
+          Polymer.IronControlState,
+          Polymer.IronA11yKeysBehavior,
+          Polymer.IronOverlayBehavior,
+          Polymer.NeonAnimationRunnerBehavior
+        ],
+
+        properties: {
+          /**
+           * The orientation against which to align the dropdown content
+           * horizontally relative to the dropdown trigger.
+           */
+          horizontalAlign: {
+            type: String,
+            value: 'left',
+            reflectToAttribute: true
+          },
+
+          /**
+           * The orientation against which to align the dropdown content
+           * vertically relative to the dropdown trigger.
+           */
+          verticalAlign: {
+            type: String,
+            value: 'top',
+            reflectToAttribute: true
+          },
+
+          /**
+           * A pixel value that will be added to the position calculated for the
+           * given `horizontalAlign`. Use a negative value to offset to the
+           * left, or a positive value to offset to the right.
+           */
+          horizontalOffset: {
+            type: Number,
+            value: 0,
+            notify: true
+          },
+
+          /**
+           * A pixel value that will be added to the position calculated for the
+           * given `verticalAlign`. Use a negative value to offset towards the
+           * top, or a positive value to offset towards the bottom.
+           */
+          verticalOffset: {
+            type: Number,
+            value: 0,
+            notify: true
+          },
+
+          /**
+           * The element that should be used to position the dropdown when
+           * it is opened.
+           */
+          positionTarget: {
+            type: Object,
+            observer: '_positionTargetChanged'
+          },
+
+          /**
+           * An animation config. If provided, this will be used to animate the
+           * opening of the dropdown.
+           */
+          openAnimationConfig: {
+            type: Object
+          },
+
+          /**
+           * An animation config. If provided, this will be used to animate the
+           * closing of the dropdown.
+           */
+          closeAnimationConfig: {
+            type: Object
+          },
+
+          /**
+           * If provided, this will be the element that will be focused when
+           * the dropdown opens.
+           */
+          focusTarget: {
+            type: Object
+          },
+
+          /**
+           * Set to true to disable animations when opening and closing the
+           * dropdown.
+           */
+          noAnimations: {
+            type: Boolean,
+            value: false
+          },
+
+          /**
+           * By default, the dropdown will constrain scrolling on the page
+           * to itself when opened.
+           * Set to true in order to prevent scroll from being constrained
+           * to the dropdown when it opens.
+           */
+          allowOutsideScroll: {
+            type: Boolean,
+            value: false
+          },
+
+          /**
+           * We memoize the positionTarget bounding rectangle so that we can
+           * limit the number of times it is queried per resize / relayout.
+           * @type {?Object}
+           */
+          _positionRectMemo: {
+            type: Object
+          }
+        },
+
+        listeners: {
+          'neon-animation-finish': '_onNeonAnimationFinish'
+        },
+
+        observers: [
+          '_updateOverlayPosition(verticalAlign, horizontalAlign, verticalOffset, horizontalOffset)'
+        ],
+
+        attached: function() {
+          if (this.positionTarget === undefined) {
+            this.positionTarget = this._defaultPositionTarget;
+          }
+        },
+
+        /**
+         * The element that is contained by the dropdown, if any.
+         */
+        get containedElement() {
+          return Polymer.dom(this.$.content).getDistributedNodes()[0];
+        },
+
+        /**
+         * The element that should be focused when the dropdown opens.
+         */
+        get _focusTarget() {
+          return this.focusTarget || this.containedElement;
+        },
+
+        /**
+         * The element that should be used to position the dropdown when
+         * it opens, if no position target is configured.
+         */
+        get _defaultPositionTarget() {
+          var parent = Polymer.dom(this).parentNode;
+
+          if (parent.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+            parent = parent.host;
+          }
+
+          return parent;
+        },
+
+        /**
+         * The bounding rect of the position target.
+         */
+        get _positionRect() {
+          if (!this._positionRectMemo && this.positionTarget) {
+            this._positionRectMemo = this.positionTarget.getBoundingClientRect();
+          }
+
+          return this._positionRectMemo;
+        },
+
+        /**
+         * The horizontal offset value used to position the dropdown.
+         */
+        get _horizontalAlignTargetValue() {
+          var target;
+
+          if (this.horizontalAlign === 'right') {
+            target = document.documentElement.clientWidth - this._positionRect.right;
+          } else {
+            target = this._positionRect.left;
+          }
+
+          target += this.horizontalOffset;
+
+          return Math.max(target, 0);
+        },
+
+        /**
+         * The vertical offset value used to position the dropdown.
+         */
+        get _verticalAlignTargetValue() {
+          var target;
+
+          if (this.verticalAlign === 'bottom') {
+            target = document.documentElement.clientHeight - this._positionRect.bottom;
+          } else {
+            target = this._positionRect.top;
+          }
+
+          target += this.verticalOffset;
+
+          return Math.max(target, 0);
+        },
+
+        /**
+         * Called when the value of `opened` changes.
+         *
+         * @param {boolean} opened True if the dropdown is opened.
+         */
+        _openedChanged: function(opened) {
+          if (opened && this.disabled) {
+            this.cancel();
+          } else {
+            this.cancelAnimation();
+            this._prepareDropdown();
+            Polymer.IronOverlayBehaviorImpl._openedChanged.apply(this, arguments);
+          }
+
+          if (this.opened) {
+            this._focusContent();
+          }
+        },
+
+        /**
+         * Overridden from `IronOverlayBehavior`.
+         */
+        _renderOpened: function() {
+          if (!this.allowOutsideScroll) {
+            Polymer.IronDropdownScrollManager.pushScrollLock(this);
+          }
+
+          if (!this.noAnimations && this.animationConfig && this.animationConfig.open) {
+            this.$.contentWrapper.classList.add('animating');
+            this.playAnimation('open');
+          } else {
+            Polymer.IronOverlayBehaviorImpl._renderOpened.apply(this, arguments);
+          }
+        },
+
+        /**
+         * Overridden from `IronOverlayBehavior`.
+         */
+        _renderClosed: function() {
+          Polymer.IronDropdownScrollManager.removeScrollLock(this);
+          if (!this.noAnimations && this.animationConfig && this.animationConfig.close) {
+            this.$.contentWrapper.classList.add('animating');
+            this.playAnimation('close');
+          } else {
+            Polymer.IronOverlayBehaviorImpl._renderClosed.apply(this, arguments);
+          }
+        },
+
+        /**
+         * Called when animation finishes on the dropdown (when opening or
+         * closing). Responsible for "completing" the process of opening or
+         * closing the dropdown by positioning it or setting its display to
+         * none.
+         */
+        _onNeonAnimationFinish: function() {
+          this.$.contentWrapper.classList.remove('animating');
+          if (this.opened) {
+            Polymer.IronOverlayBehaviorImpl._renderOpened.apply(this);
+          } else {
+            Polymer.IronOverlayBehaviorImpl._renderClosed.apply(this);
+          }
+        },
+
+        /**
+         * Called when an `iron-resize` event fires.
+         */
+        _onIronResize: function() {
+          var containedElement = this.containedElement;
+          var scrollTop;
+          var scrollLeft;
+
+          if (containedElement) {
+            scrollTop = containedElement.scrollTop;
+            scrollLeft = containedElement.scrollLeft;
+          }
+
+          if (this.opened) {
+            this._updateOverlayPosition();
+          }
+
+          Polymer.IronOverlayBehaviorImpl._onIronResize.apply(this, arguments);
+
+          if (containedElement) {
+            containedElement.scrollTop = scrollTop;
+            containedElement.scrollLeft = scrollLeft;
+          }
+        },
+
+        /**
+         * Called when the `positionTarget` property changes.
+         */
+        _positionTargetChanged: function() {
+          this._updateOverlayPosition();
+        },
+
+        /**
+         * Constructs the final animation config from different properties used
+         * to configure specific parts of the opening and closing animations.
+         */
+        _updateAnimationConfig: function() {
+          var animationConfig = {};
+          var animations = [];
+
+          if (this.openAnimationConfig) {
+            // NOTE(cdata): When making `display:none` elements visible in Safari,
+            // the element will paint once in a fully visible state, causing the
+            // dropdown to flash before it fades in. We prepend an
+            // `opaque-animation` to fix this problem:
+            animationConfig.open = [{
+              name: 'opaque-animation',
+            }].concat(this.openAnimationConfig);
+            animations = animations.concat(animationConfig.open);
+          }
+
+          if (this.closeAnimationConfig) {
+            animationConfig.close = this.closeAnimationConfig;
+            animations = animations.concat(animationConfig.close);
+          }
+
+          animations.forEach(function(animation) {
+            animation.node = this.containedElement;
+          }, this);
+
+          this.animationConfig = animationConfig;
+        },
+
+        /**
+         * Prepares the dropdown for opening by updating measured layout
+         * values.
+         */
+        _prepareDropdown: function() {
+          this.sizingTarget = this.containedElement || this.sizingTarget;
+          this._updateAnimationConfig();
+          this._updateOverlayPosition();
+        },
+
+        /**
+         * Updates the overlay position based on configured horizontal
+         * and vertical alignment, and re-memoizes these values for the sake
+         * of behavior in `IronFitBehavior`.
+         */
+        _updateOverlayPosition: function() {
+          this._positionRectMemo = null;
+
+          if (!this.positionTarget) {
+            return;
+          }
+
+          this.style[this.horizontalAlign] =
+            this._horizontalAlignTargetValue + 'px';
+
+          this.style[this.verticalAlign] =
+            this._verticalAlignTargetValue + 'px';
+
+          // NOTE(cdata): We re-memoize inline styles here, otherwise
+          // calling `refit` from `IronFitBehavior` will reset inline styles
+          // to whatever they were when the dropdown first opened.
+          if (this._fitInfo) {
+            this._fitInfo.inlineStyle[this.horizontalAlign] =
+              this.style[this.horizontalAlign];
+
+            this._fitInfo.inlineStyle[this.verticalAlign] =
+              this.style[this.verticalAlign];
+          }
+        },
+
+        /**
+         * Focuses the configured focus target.
+         */
+        _focusContent: function() {
+          // NOTE(cdata): This is async so that it can attempt the focus after
+          // `display: none` is removed from the element.
+          this.async(function() {
+            if (this._focusTarget) {
+              this._focusTarget.focus();
+            }
+          });
+        }
+      });
+    })();
 /**
    * @param {!Function} selectCallback
    * @constructor
@@ -10035,9 +10575,16 @@ Polymer({
       this.selected = this._indexToValue(index);
     },
 
+<<<<<<< HEAD
+      // Ignore the event if this is coming from a focused light child, since that
+      // element will deal with it.
+      if (this.isLightDescendant(/** @type {Node} */(target)))
+        return;
+=======
     get _shouldUpdateSelection() {
       return this.selected != null;
     },
+>>>>>>> hotfix-db
 
     _addListener: function(eventName) {
       this.listen(this, eventName, '_activateHandler');
@@ -10047,10 +10594,17 @@ Polymer({
       this.unlisten(this, eventName, '_activateHandler');
     },
 
+<<<<<<< HEAD
+      // Ignore the event if this is coming from a focused light child, since that
+      // element will deal with it.
+      if (this.isLightDescendant(/** @type {Node} */(target)))
+        return;
+=======
     _activateEventChanged: function(eventName, old) {
       this._removeListener(old);
       this._addListener(eventName);
     },
+>>>>>>> hotfix-db
 
     _updateItems: function() {
       var nodes = Polymer.dom(this).queryDistributedElements(this.selectable || '*');
@@ -10156,6 +10710,36 @@ Polymer({
     }
 
   };
+Polymer({
+
+    is: 'iron-pages',
+
+    behaviors: [
+      Polymer.IronResizableBehavior,
+      Polymer.IronSelectableBehavior
+    ],
+
+    properties: {
+
+      // as the selected page is the only one visible, activateEvent
+      // is both non-sensical and problematic; e.g. in cases where a user
+      // handler attempts to change the page and the activateEvent
+      // handler immediately changes it back
+      activateEvent: {
+        type: String,
+        value: null
+      }
+
+    },
+
+    observers: [
+      '_selectedPageChanged(selected)'
+    ],
+
+    _selectedPageChanged: function(selected, old) {
+      this.async(this.notifyResize);
+    }
+  });
 /**
    * @demo demo/index.html
    * @polymerBehavior Polymer.IronButtonState
@@ -10287,7 +10871,7 @@ Polymer({
 
       // Ignore the event if this is coming from a focused light child, since that
       // element will deal with it.
-      if (this.isLightDescendant(/** @type {Node} */(target)))
+      if (this.isLightDescendant(target))
         return;
 
       keyboardEvent.preventDefault();
@@ -10304,7 +10888,7 @@ Polymer({
 
       // Ignore the event if this is coming from a focused light child, since that
       // element will deal with it.
-      if (this.isLightDescendant(/** @type {Node} */(target)))
+      if (this.isLightDescendant(target))
         return;
 
       if (this.pressed) {
@@ -10366,3017 +10950,6 @@ Polymer({
     Polymer.IronA11yKeysBehavior,
     Polymer.IronButtonStateImpl
   ];
-/**
-   * `Polymer.PaperRippleBehavior` dynamically implements a ripple
-   * when the element has focus via pointer or keyboard.
-   *
-   * NOTE: This behavior is intended to be used in conjunction with and after
-   * `Polymer.IronButtonState` and `Polymer.IronControlState`.
-   *
-   * @polymerBehavior Polymer.PaperRippleBehavior
-   */
-  Polymer.PaperRippleBehavior = {
-
-    properties: {
-      /**
-       * If true, the element will not produce a ripple effect when interacted
-       * with via the pointer.
-       */
-      noink: {
-        type: Boolean,
-        observer: '_noinkChanged'
-      },
-
-      /**
-       * @type {Element|undefined}
-       */
-      _rippleContainer: {
-        type: Object,
-      }
-    },
-
-    /**
-     * Ensures a `<paper-ripple>` element is available when the element is
-     * focused.
-     */
-    _buttonStateChanged: function() {
-      if (this.focused) {
-        this.ensureRipple();
-      }
-    },
-
-    /**
-     * In addition to the functionality provided in `IronButtonState`, ensures
-     * a ripple effect is created when the element is in a `pressed` state.
-     */
-    _downHandler: function(event) {
-      Polymer.IronButtonStateImpl._downHandler.call(this, event);
-      if (this.pressed) {
-        this.ensureRipple(event);
-      }
-    },
-
-    /**
-     * Ensures this element contains a ripple effect. For startup efficiency
-     * the ripple effect is dynamically on demand when needed.
-     * @param {!Event=} optTriggeringEvent (optional) event that triggered the
-     * ripple.
-     */
-    ensureRipple: function(optTriggeringEvent) {
-      if (!this.hasRipple()) {
-        this._ripple = this._createRipple();
-        this._ripple.noink = this.noink;
-        var rippleContainer = this._rippleContainer || this.root;
-        if (rippleContainer) {
-          Polymer.dom(rippleContainer).appendChild(this._ripple);
-        }
-        if (optTriggeringEvent) {
-          // Check if the event happened inside of the ripple container
-          // Fall back to host instead of the root because distributed text
-          // nodes are not valid event targets
-          var domContainer = Polymer.dom(this._rippleContainer || this);
-          var target = Polymer.dom(optTriggeringEvent).rootTarget;
-          if (domContainer.deepContains( /** @type {Node} */(target))) {
-            this._ripple.uiDownAction(optTriggeringEvent);
-          }
-        }
-      }
-    },
-
-    /**
-     * Returns the `<paper-ripple>` element used by this element to create
-     * ripple effects. The element's ripple is created on demand, when
-     * necessary, and calling this method will force the
-     * ripple to be created.
-     */
-    getRipple: function() {
-      this.ensureRipple();
-      return this._ripple;
-    },
-
-    /**
-     * Returns true if this element currently contains a ripple effect.
-     * @return {boolean}
-     */
-    hasRipple: function() {
-      return Boolean(this._ripple);
-    },
-
-    /**
-     * Create the element's ripple effect via creating a `<paper-ripple>`.
-     * Override this method to customize the ripple element.
-     * @return {!PaperRippleElement} Returns a `<paper-ripple>` element.
-     */
-    _createRipple: function() {
-      return /** @type {!PaperRippleElement} */ (
-          document.createElement('paper-ripple'));
-    },
-
-    _noinkChanged: function(noink) {
-      if (this.hasRipple()) {
-        this._ripple.noink = noink;
-      }
-    }
-
-  };
-/** @polymerBehavior Polymer.PaperButtonBehavior */
-  Polymer.PaperButtonBehaviorImpl = {
-
-    properties: {
-
-      /**
-       * The z-depth of this element, from 0-5. Setting to 0 will remove the
-       * shadow, and each increasing number greater than 0 will be "deeper"
-       * than the last.
-       *
-       * @attribute elevation
-       * @type number
-       * @default 1
-       */
-      elevation: {
-        type: Number,
-        reflectToAttribute: true,
-        readOnly: true
-      }
-
-    },
-
-    observers: [
-      '_calculateElevation(focused, disabled, active, pressed, receivedFocusFromKeyboard)',
-      '_computeKeyboardClass(receivedFocusFromKeyboard)'
-    ],
-
-    hostAttributes: {
-      role: 'button',
-      tabindex: '0',
-      animated: true
-    },
-
-    _calculateElevation: function() {
-      var e = 1;
-      if (this.disabled) {
-        e = 0;
-      } else if (this.active || this.pressed) {
-        e = 4;
-      } else if (this.receivedFocusFromKeyboard) {
-        e = 3;
-      }
-      this._setElevation(e);
-    },
-
-    _computeKeyboardClass: function(receivedFocusFromKeyboard) {
-      this.classList.toggle('keyboard-focus', receivedFocusFromKeyboard);
-    },
-
-    /**
-     * In addition to `IronButtonState` behavior, when space key goes down,
-     * create a ripple down effect.
-     *
-     * @param {!KeyboardEvent} event .
-     */
-    _spaceKeyDownHandler: function(event) {
-      Polymer.IronButtonStateImpl._spaceKeyDownHandler.call(this, event);
-      if (this.hasRipple()) {
-        this._ripple.uiDownAction();
-      }
-    },
-
-    /**
-     * In addition to `IronButtonState` behavior, when space key goes up,
-     * create a ripple up effect.
-     *
-     * @param {!KeyboardEvent} event .
-     */
-    _spaceKeyUpHandler: function(event) {
-      Polymer.IronButtonStateImpl._spaceKeyUpHandler.call(this, event);
-      if (this.hasRipple()) {
-        this._ripple.uiUpAction();
-      }
-    }
-
-  };
-
-  /** @polymerBehavior */
-  Polymer.PaperButtonBehavior = [
-    Polymer.IronButtonState,
-    Polymer.IronControlState,
-    Polymer.PaperRippleBehavior,
-    Polymer.PaperButtonBehaviorImpl
-  ];
-/**
-   * `Polymer.PaperInkyFocusBehavior` implements a ripple when the element has keyboard focus.
-   *
-   * @polymerBehavior Polymer.PaperInkyFocusBehavior
-   */
-  Polymer.PaperInkyFocusBehaviorImpl = {
-
-    observers: [
-      '_focusedChanged(receivedFocusFromKeyboard)'
-    ],
-
-    _focusedChanged: function(receivedFocusFromKeyboard) {
-      if (receivedFocusFromKeyboard) {
-        this.ensureRipple();
-      }
-      if (this.hasRipple()) {
-        this._ripple.holdDown = receivedFocusFromKeyboard;
-      }
-    },
-
-    _createRipple: function() {
-      var ripple = Polymer.PaperRippleBehavior._createRipple();
-      ripple.id = 'ink';
-      ripple.setAttribute('center', '');
-      ripple.classList.add('circle');
-      return ripple;
-    }
-
-  };
-
-  /** @polymerBehavior Polymer.PaperInkyFocusBehavior */
-  Polymer.PaperInkyFocusBehavior = [
-    Polymer.IronButtonState,
-    Polymer.IronControlState,
-    Polymer.PaperRippleBehavior,
-    Polymer.PaperInkyFocusBehaviorImpl
-  ];
-Polymer({
-
-    is: 'fade-in-animation',
-
-    behaviors: [
-      Polymer.NeonAnimationBehavior
-    ],
-
-    configure: function(config) {
-      var node = config.node;
-      this._effect = new KeyframeEffect(node, [
-        {'opacity': '0'},
-        {'opacity': '1'}
-      ], this.timingFromConfig(config));
-      return this._effect;
-    }
-
-  });
-Polymer({
-
-    is: 'fade-out-animation',
-
-    behaviors: [
-      Polymer.NeonAnimationBehavior
-    ],
-
-    configure: function(config) {
-      var node = config.node;
-      this._effect = new KeyframeEffect(node, [
-        {'opacity': '1'},
-        {'opacity': '0'}
-      ], this.timingFromConfig(config));
-      return this._effect;
-    }
-
-  });
-Polymer({
-    is: 'paper-menu-grow-height-animation',
-
-    behaviors: [
-      Polymer.NeonAnimationBehavior
-    ],
-
-    configure: function(config) {
-      var node = config.node;
-      var rect = node.getBoundingClientRect();
-      var height = rect.height;
-
-      this._effect = new KeyframeEffect(node, [{
-        height: (height / 2) + 'px'
-      }, {
-        height: height + 'px'
-      }], this.timingFromConfig(config));
-
-      return this._effect;
-    }
-  });
-
-  Polymer({
-    is: 'paper-menu-grow-width-animation',
-
-    behaviors: [
-      Polymer.NeonAnimationBehavior
-    ],
-
-    configure: function(config) {
-      var node = config.node;
-      var rect = node.getBoundingClientRect();
-      var width = rect.width;
-
-      this._effect = new KeyframeEffect(node, [{
-        width: (width / 2) + 'px'
-      }, {
-        width: width + 'px'
-      }], this.timingFromConfig(config));
-
-      return this._effect;
-    }
-  });
-
-  Polymer({
-    is: 'paper-menu-shrink-width-animation',
-
-    behaviors: [
-      Polymer.NeonAnimationBehavior
-    ],
-
-    configure: function(config) {
-      var node = config.node;
-      var rect = node.getBoundingClientRect();
-      var width = rect.width;
-
-      this._effect = new KeyframeEffect(node, [{
-        width: width + 'px'
-      }, {
-        width: width - (width / 20) + 'px'
-      }], this.timingFromConfig(config));
-
-      return this._effect;
-    }
-  });
-
-  Polymer({
-    is: 'paper-menu-shrink-height-animation',
-
-    behaviors: [
-      Polymer.NeonAnimationBehavior
-    ],
-
-    configure: function(config) {
-      var node = config.node;
-      var rect = node.getBoundingClientRect();
-      var height = rect.height;
-      var top = rect.top;
-
-      this.setPrefixedProperty(node, 'transformOrigin', '0 0');
-
-      this._effect = new KeyframeEffect(node, [{
-        height: height + 'px',
-        transform: 'translateY(0)'
-      }, {
-        height: height / 2 + 'px',
-        transform: 'translateY(-20px)'
-      }], this.timingFromConfig(config));
-
-      return this._effect;
-    }
-  });
-/** @polymerBehavior Polymer.IronMultiSelectableBehavior */
-  Polymer.IronMultiSelectableBehaviorImpl = {
-    properties: {
-
-      /**
-       * If true, multiple selections are allowed.
-       */
-      multi: {
-        type: Boolean,
-        value: false,
-        observer: 'multiChanged'
-      },
-
-      /**
-       * Gets or sets the selected elements. This is used instead of `selected` when `multi`
-       * is true.
-       */
-      selectedValues: {
-        type: Array,
-        notify: true
-      },
-
-      /**
-       * Returns an array of currently selected items.
-       */
-      selectedItems: {
-        type: Array,
-        readOnly: true,
-        notify: true
-      },
-
-    },
-
-    observers: [
-      '_updateSelected(attrForSelected, selectedValues)'
-    ],
-
-    /**
-     * Selects the given value. If the `multi` property is true, then the selected state of the
-     * `value` will be toggled; otherwise the `value` will be selected.
-     *
-     * @method select
-     * @param {string} value the value to select.
-     */
-    select: function(value) {
-      if (this.multi) {
-        if (this.selectedValues) {
-          this._toggleSelected(value);
-        } else {
-          this.selectedValues = [value];
-        }
-      } else {
-        this.selected = value;
-      }
-    },
-
-    multiChanged: function(multi) {
-      this._selection.multi = multi;
-    },
-
-    get _shouldUpdateSelection() {
-      return this.selected != null ||
-        (this.selectedValues != null && this.selectedValues.length);
-    },
-
-    _updateSelected: function() {
-      if (this.multi) {
-        this._selectMulti(this.selectedValues);
-      } else {
-        this._selectSelected(this.selected);
-      }
-    },
-
-    _selectMulti: function(values) {
-      this._selection.clear();
-      if (values) {
-        for (var i = 0; i < values.length; i++) {
-          this._selection.setItemSelected(this._valueToItem(values[i]), true);
-        }
-      }
-    },
-
-    _selectionChange: function() {
-      var s = this._selection.get();
-      if (this.multi) {
-        this._setSelectedItems(s);
-      } else {
-        this._setSelectedItems([s]);
-        this._setSelectedItem(s);
-      }
-    },
-
-    _toggleSelected: function(value) {
-      var i = this.selectedValues.indexOf(value);
-      var unselected = i < 0;
-      if (unselected) {
-        this.push('selectedValues',value);
-      } else {
-        this.splice('selectedValues',i,1);
-      }
-      this._selection.setItemSelected(this._valueToItem(value), unselected);
-    }
-  };
-
-  /** @polymerBehavior */
-  Polymer.IronMultiSelectableBehavior = [
-    Polymer.IronSelectableBehavior,
-    Polymer.IronMultiSelectableBehaviorImpl
-  ];
-/**
-   * `Polymer.IronMenuBehavior` implements accessible menu behavior.
-   *
-   * @demo demo/index.html
-   * @polymerBehavior Polymer.IronMenuBehavior
-   */
-  Polymer.IronMenuBehaviorImpl = {
-
-    properties: {
-
-      /**
-       * Returns the currently focused item.
-       * @type {?Object}
-       */
-      focusedItem: {
-        observer: '_focusedItemChanged',
-        readOnly: true,
-        type: Object
-      },
-
-      /**
-       * The attribute to use on menu items to look up the item title. Typing the first
-       * letter of an item when the menu is open focuses that item. If unset, `textContent`
-       * will be used.
-       */
-      attrForItemTitle: {
-        type: String
-      }
-    },
-
-    hostAttributes: {
-      'role': 'menu',
-      'tabindex': '0'
-    },
-
-    observers: [
-      '_updateMultiselectable(multi)'
-    ],
-
-    listeners: {
-      'focus': '_onFocus',
-      'keydown': '_onKeydown',
-      'iron-items-changed': '_onIronItemsChanged'
-    },
-
-    keyBindings: {
-      'up': '_onUpKey',
-      'down': '_onDownKey',
-      'esc': '_onEscKey',
-      'shift+tab:keydown': '_onShiftTabDown'
-    },
-
-    attached: function() {
-      this._resetTabindices();
-    },
-
-    /**
-     * Selects the given value. If the `multi` property is true, then the selected state of the
-     * `value` will be toggled; otherwise the `value` will be selected.
-     *
-     * @param {string} value the value to select.
-     */
-    select: function(value) {
-      if (this._defaultFocusAsync) {
-        this.cancelAsync(this._defaultFocusAsync);
-        this._defaultFocusAsync = null;
-      }
-      var item = this._valueToItem(value);
-      if (item && item.hasAttribute('disabled')) return;
-      this._setFocusedItem(item);
-      Polymer.IronMultiSelectableBehaviorImpl.select.apply(this, arguments);
-    },
-
-    /**
-     * Resets all tabindex attributes to the appropriate value based on the
-     * current selection state. The appropriate value is `0` (focusable) for
-     * the default selected item, and `-1` (not keyboard focusable) for all
-     * other items.
-     */
-    _resetTabindices: function() {
-      var selectedItem = this.multi ? (this.selectedItems && this.selectedItems[0]) : this.selectedItem;
-
-      this.items.forEach(function(item) {
-        item.setAttribute('tabindex', item === selectedItem ? '0' : '-1');
-      }, this);
-    },
-
-    /**
-     * Sets appropriate ARIA based on whether or not the menu is meant to be
-     * multi-selectable.
-     *
-     * @param {boolean} multi True if the menu should be multi-selectable.
-     */
-    _updateMultiselectable: function(multi) {
-      if (multi) {
-        this.setAttribute('aria-multiselectable', 'true');
-      } else {
-        this.removeAttribute('aria-multiselectable');
-      }
-    },
-
-    /**
-     * Given a KeyboardEvent, this method will focus the appropriate item in the
-     * menu (if there is a relevant item, and it is possible to focus it).
-     *
-     * @param {KeyboardEvent} event A KeyboardEvent.
-     */
-    _focusWithKeyboardEvent: function(event) {
-      for (var i = 0, item; item = this.items[i]; i++) {
-        var attr = this.attrForItemTitle || 'textContent';
-        var title = item[attr] || item.getAttribute(attr);
-
-        if (title && title.trim().charAt(0).toLowerCase() === String.fromCharCode(event.keyCode).toLowerCase()) {
-          this._setFocusedItem(item);
-          break;
-        }
-      }
-    },
-
-    /**
-     * Focuses the previous item (relative to the currently focused item) in the
-     * menu.
-     */
-    _focusPrevious: function() {
-      var length = this.items.length;
-      var index = (Number(this.indexOf(this.focusedItem)) - 1 + length) % length;
-      this._setFocusedItem(this.items[index]);
-    },
-
-    /**
-     * Focuses the next item (relative to the currently focused item) in the
-     * menu.
-     */
-    _focusNext: function() {
-      var index = (Number(this.indexOf(this.focusedItem)) + 1) % this.items.length;
-      this._setFocusedItem(this.items[index]);
-    },
-
-    /**
-     * Mutates items in the menu based on provided selection details, so that
-     * all items correctly reflect selection state.
-     *
-     * @param {Element} item An item in the menu.
-     * @param {boolean} isSelected True if the item should be shown in a
-     * selected state, otherwise false.
-     */
-    _applySelection: function(item, isSelected) {
-      if (isSelected) {
-        item.setAttribute('aria-selected', 'true');
-      } else {
-        item.removeAttribute('aria-selected');
-      }
-      Polymer.IronSelectableBehavior._applySelection.apply(this, arguments);
-    },
-
-    /**
-     * Discretely updates tabindex values among menu items as the focused item
-     * changes.
-     *
-     * @param {Element} focusedItem The element that is currently focused.
-     * @param {?Element} old The last element that was considered focused, if
-     * applicable.
-     */
-    _focusedItemChanged: function(focusedItem, old) {
-      old && old.setAttribute('tabindex', '-1');
-      if (focusedItem) {
-        focusedItem.setAttribute('tabindex', '0');
-        focusedItem.focus();
-      }
-    },
-
-    /**
-     * A handler that responds to mutation changes related to the list of items
-     * in the menu.
-     *
-     * @param {CustomEvent} event An event containing mutation records as its
-     * detail.
-     */
-    _onIronItemsChanged: function(event) {
-      var mutations = event.detail;
-      var mutation;
-      var index;
-
-      for (index = 0; index < mutations.length; ++index) {
-        mutation = mutations[index];
-
-        if (mutation.addedNodes.length) {
-          this._resetTabindices();
-          break;
-        }
-      }
-    },
-
-    /**
-     * Handler that is called when a shift+tab keypress is detected by the menu.
-     *
-     * @param {CustomEvent} event A key combination event.
-     */
-    _onShiftTabDown: function(event) {
-      var oldTabIndex = this.getAttribute('tabindex');
-
-      Polymer.IronMenuBehaviorImpl._shiftTabPressed = true;
-
-      this._setFocusedItem(null);
-
-      this.setAttribute('tabindex', '-1');
-
-      this.async(function() {
-        this.setAttribute('tabindex', oldTabIndex);
-        Polymer.IronMenuBehaviorImpl._shiftTabPressed = false;
-        // NOTE(cdata): polymer/polymer#1305
-      }, 1);
-    },
-
-    /**
-     * Handler that is called when the menu receives focus.
-     *
-     * @param {FocusEvent} event A focus event.
-     */
-    _onFocus: function(event) {
-      if (Polymer.IronMenuBehaviorImpl._shiftTabPressed) {
-        // do not focus the menu itself
-        return;
-      }
-
-      this.blur();
-
-      // clear the cached focus item
-      this._defaultFocusAsync = this.async(function() {
-        // focus the selected item when the menu receives focus, or the first item
-        // if no item is selected
-        var selectedItem = this.multi ? (this.selectedItems && this.selectedItems[0]) : this.selectedItem;
-
-        this._setFocusedItem(null);
-
-        if (selectedItem) {
-          this._setFocusedItem(selectedItem);
-        } else {
-          this._setFocusedItem(this.items[0]);
-        }
-      // async 1ms to wait for `select` to get called from `_itemActivate`
-      }, 1);
-    },
-
-    /**
-     * Handler that is called when the up key is pressed.
-     *
-     * @param {CustomEvent} event A key combination event.
-     */
-    _onUpKey: function(event) {
-      // up and down arrows moves the focus
-      this._focusPrevious();
-    },
-
-    /**
-     * Handler that is called when the down key is pressed.
-     *
-     * @param {CustomEvent} event A key combination event.
-     */
-    _onDownKey: function(event) {
-      this._focusNext();
-    },
-
-    /**
-     * Handler that is called when the esc key is pressed.
-     *
-     * @param {CustomEvent} event A key combination event.
-     */
-    _onEscKey: function(event) {
-      // esc blurs the control
-      this.focusedItem.blur();
-    },
-
-    /**
-     * Handler that is called when a keydown event is detected.
-     *
-     * @param {KeyboardEvent} event A keyboard event.
-     */
-    _onKeydown: function(event) {
-      if (!this.keyboardEventMatchesKeys(event, 'up down esc')) {
-        // all other keys focus the menu item starting with that character
-        this._focusWithKeyboardEvent(event);
-      }
-      event.stopPropagation();
-    },
-
-    // override _activateHandler
-    _activateHandler: function(event) {
-      Polymer.IronSelectableBehavior._activateHandler.call(this, event);
-      event.stopPropagation();
-    }
-  };
-
-  Polymer.IronMenuBehaviorImpl._shiftTabPressed = false;
-
-  /** @polymerBehavior Polymer.IronMenuBehavior */
-  Polymer.IronMenuBehavior = [
-    Polymer.IronMultiSelectableBehavior,
-    Polymer.IronA11yKeysBehavior,
-    Polymer.IronMenuBehaviorImpl
-  ];
-/** @polymerBehavior Polymer.PaperItemBehavior */
-  Polymer.PaperItemBehaviorImpl = {
-    hostAttributes: {
-      role: 'option',
-      tabindex: '0'
-    }
-  };
-
-  /** @polymerBehavior */
-  Polymer.PaperItemBehavior = [
-    Polymer.IronButtonState,
-    Polymer.IronControlState,
-    Polymer.PaperItemBehaviorImpl
-  ];
-/**
-Use `Polymer.PaperDialogBehavior` and `paper-dialog-shared-styles.html` to implement a Material Design
-dialog.
-
-For example, if `<paper-dialog-impl>` implements this behavior:
-
-    <paper-dialog-impl>
-        <h2>Header</h2>
-        <div>Dialog body</div>
-        <div class="buttons">
-            <paper-button dialog-dismiss>Cancel</paper-button>
-            <paper-button dialog-confirm>Accept</paper-button>
-        </div>
-    </paper-dialog-impl>
-
-`paper-dialog-shared-styles.html` provide styles for a header, content area, and an action area for buttons.
-Use the `<h2>` tag for the header and the `buttons` class for the action area. You can use the
-`paper-dialog-scrollable` element (in its own repository) if you need a scrolling content area.
-
-Use the `dialog-dismiss` and `dialog-confirm` attributes on interactive controls to close the
-dialog. If the user dismisses the dialog with `dialog-confirm`, the `closingReason` will update
-to include `confirmed: true`.
-
-### Styling
-
-The following custom properties and mixins are available for styling.
-
-Custom property | Description | Default
-----------------|-------------|----------
-`--paper-dialog-background-color` | Dialog background color                     | `--primary-background-color`
-`--paper-dialog-color`            | Dialog foreground color                     | `--primary-text-color`
-`--paper-dialog`                  | Mixin applied to the dialog                 | `{}`
-`--paper-dialog-title`            | Mixin applied to the title (`<h2>`) element | `{}`
-`--paper-dialog-button-color`     | Button area foreground color                | `--default-primary-color`
-
-### Accessibility
-
-This element has `role="dialog"` by default. Depending on the context, it may be more appropriate
-to override this attribute with `role="alertdialog"`.
-
-If `modal` is set, the element will set `aria-modal` and prevent the focus from exiting the element.
-It will also ensure that focus remains in the dialog.
-
-The `aria-labelledby` attribute will be set to the header element, if one exists.
-
-@hero hero.svg
-@demo demo/index.html
-@polymerBehavior Polymer.PaperDialogBehavior
-*/
-
-  Polymer.PaperDialogBehaviorImpl = {
-
-    hostAttributes: {
-      'role': 'dialog',
-      'tabindex': '-1'
-    },
-
-    properties: {
-
-      /**
-       * If `modal` is true, this implies `no-cancel-on-outside-click` and `with-backdrop`.
-       */
-      modal: {
-        observer: '_modalChanged',
-        type: Boolean,
-        value: false
-      },
-
-      /** @type {?Node} */
-      _lastFocusedElement: {
-        type: Object
-      },
-
-      _boundOnFocus: {
-        type: Function,
-        value: function() {
-          return this._onFocus.bind(this);
-        }
-      },
-
-      _boundOnBackdropClick: {
-        type: Function,
-        value: function() {
-          return this._onBackdropClick.bind(this);
-        }
-      }
-
-    },
-
-    listeners: {
-      'tap': '_onDialogClick',
-      'iron-overlay-opened': '_onIronOverlayOpened',
-      'iron-overlay-closed': '_onIronOverlayClosed'
-    },
-
-    attached: function() {
-      this._observer = this._observe(this);
-      this._updateAriaLabelledBy();
-    },
-
-    detached: function() {
-      if (this._observer) {
-        this._observer.disconnect();
-      }
-    },
-
-    _observe: function(node) {
-      var observer = new MutationObserver(function() {
-        this._updateAriaLabelledBy();
-      }.bind(this));
-      observer.observe(node, {
-        childList: true,
-        subtree: true
-      });
-      return observer;
-    },
-
-    _modalChanged: function() {
-      if (this.modal) {
-        this.setAttribute('aria-modal', 'true');
-      } else {
-        this.setAttribute('aria-modal', 'false');
-      }
-      // modal implies noCancelOnOutsideClick and withBackdrop if true, don't overwrite
-      // those properties otherwise.
-      if (this.modal) {
-        this.noCancelOnOutsideClick = true;
-        this.withBackdrop = true;
-      }
-    },
-
-    _updateAriaLabelledBy: function() {
-      var header = Polymer.dom(this).querySelector('h2');
-      if (!header) {
-        this.removeAttribute('aria-labelledby');
-        return;
-      }
-      var headerId = header.getAttribute('id');
-      if (headerId && this.getAttribute('aria-labelledby') === headerId) {
-        return;
-      }
-      // set aria-describedBy to the header element
-      var labelledById;
-      if (headerId) {
-        labelledById = headerId;
-      } else {
-        labelledById = 'paper-dialog-header-' + new Date().getUTCMilliseconds();
-        header.setAttribute('id', labelledById);
-      }
-      this.setAttribute('aria-labelledby', labelledById);
-    },
-
-    _updateClosingReasonConfirmed: function(confirmed) {
-      this.closingReason = this.closingReason || {};
-      this.closingReason.confirmed = confirmed;
-    },
-
-    _onDialogClick: function(event) {
-      var target = event.target;
-      while (target && target !== this) {
-        if (target.hasAttribute) {
-          if (target.hasAttribute('dialog-dismiss')) {
-            this._updateClosingReasonConfirmed(false);
-            this.close();
-            break;
-          } else if (target.hasAttribute('dialog-confirm')) {
-            this._updateClosingReasonConfirmed(true);
-            this.close();
-            break;
-          }
-        }
-        target = target.parentNode;
-      }
-    },
-
-    _onIronOverlayOpened: function() {
-      if (this.modal) {
-        document.body.addEventListener('focus', this._boundOnFocus, true);
-        this.backdropElement.addEventListener('click', this._boundOnBackdropClick);
-      }
-    },
-
-    _onIronOverlayClosed: function() {
-      document.body.removeEventListener('focus', this._boundOnFocus, true);
-      this.backdropElement.removeEventListener('click', this._boundOnBackdropClick);
-    },
-
-    _onFocus: function(event) {
-      if (this.modal) {
-        var target = event.target;
-        while (target && target !== this && target !== document.body) {
-          target = target.parentNode;
-        }
-        if (target) {
-          if (target === document.body) {
-            if (this._lastFocusedElement) {
-              this._lastFocusedElement.focus();
-            } else {
-              this._focusNode.focus();
-            }
-          } else {
-            this._lastFocusedElement = event.target;
-          }
-        }
-      }
-    },
-
-    _onBackdropClick: function() {
-      if (this.modal) {
-        if (this._lastFocusedElement) {
-          this._lastFocusedElement.focus();
-        } else {
-          this._focusNode.focus();
-        }
-      }
-    }
-
-  };
-
-  /** @polymerBehavior */
-  Polymer.PaperDialogBehavior = [Polymer.IronOverlayBehavior, Polymer.PaperDialogBehaviorImpl];
-/** @polymerBehavior */
-  Polymer.PaperSpinnerBehavior = {
-
-    listeners: {
-      'animationend': '__reset',
-      'webkitAnimationEnd': '__reset'
-    },
-
-    properties: {
-      /**
-       * Displays the spinner.
-       */
-      active: {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true,
-        observer: '__activeChanged'
-      },
-
-      /**
-       * Alternative text content for accessibility support.
-       * If alt is present, it will add an aria-label whose content matches alt when active.
-       * If alt is not present, it will default to 'loading' as the alt value.
-       */
-      alt: {
-        type: String,
-        value: 'loading',
-        observer: '__altChanged'
-      },
-
-      __coolingDown: {
-        type: Boolean,
-        value: false
-      }
-    },
-
-    __computeContainerClasses: function(active, coolingDown) {
-      return [
-        active || coolingDown ? 'active' : '',
-        coolingDown ? 'cooldown' : ''
-      ].join(' ');
-    },
-
-    __activeChanged: function(active, old) {
-      this.__setAriaHidden(!active);
-      this.__coolingDown = !active && old;
-    },
-
-    __altChanged: function(alt) {
-      // user-provided `aria-label` takes precedence over prototype default
-      if (alt === this.getPropertyInfo('alt').value) {
-        this.alt = this.getAttribute('aria-label') || alt;
-      } else {
-        this.__setAriaHidden(alt==='');
-        this.setAttribute('aria-label', alt);
-      }
-    },
-
-    __setAriaHidden: function(hidden) {
-      var attr = 'aria-hidden';
-      if (hidden) {
-        this.setAttribute(attr, 'true');
-      } else {
-        this.removeAttribute(attr);
-      }
-    },
-
-    __reset: function() {
-      this.active = false;
-      this.__coolingDown = false;
-    }
-  };
-/**
- * `iron-range-behavior` provides the behavior for something with a minimum to maximum range.
- *
- * @demo demo/index.html
- * @polymerBehavior
- */
- Polymer.IronRangeBehavior = {
-
-  properties: {
-
-    /**
-     * The number that represents the current value.
-     */
-    value: {
-      type: Number,
-      value: 0,
-      notify: true,
-      reflectToAttribute: true
-    },
-
-    /**
-     * The number that indicates the minimum value of the range.
-     */
-    min: {
-      type: Number,
-      value: 0,
-      notify: true
-    },
-
-    /**
-     * The number that indicates the maximum value of the range.
-     */
-    max: {
-      type: Number,
-      value: 100,
-      notify: true
-    },
-
-    /**
-     * Specifies the value granularity of the range's value.
-     */
-    step: {
-      type: Number,
-      value: 1,
-      notify: true
-    },
-
-    /**
-     * Returns the ratio of the value.
-     */
-    ratio: {
-      type: Number,
-      value: 0,
-      readOnly: true,
-      notify: true
-    },
-  },
-
-  observers: [
-    '_update(value, min, max, step)'
-  ],
-
-  _calcRatio: function(value) {
-    return (this._clampValue(value) - this.min) / (this.max - this.min);
-  },
-
-  _clampValue: function(value) {
-    return Math.min(this.max, Math.max(this.min, this._calcStep(value)));
-  },
-
-  _calcStep: function(value) {
-   /**
-    * if we calculate the step using
-    * `Math.round(value / step) * step` we may hit a precision point issue
-    * eg. 0.1 * 0.2 =  0.020000000000000004
-    * http://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html
-    *
-    * as a work around we can divide by the reciprocal of `step`
-    */
-    // polymer/issues/2493
-    value = parseFloat(value);
-    return this.step ? (Math.round((value + this.min) / this.step) -
-        (this.min / this.step)) / (1 / this.step) : value;
-  },
-
-  _validateValue: function() {
-    var v = this._clampValue(this.value);
-    this.value = this.oldValue = isNaN(v) ? this.oldValue : v;
-    return this.value !== v;
-  },
-
-  _update: function() {
-    this._validateValue();
-    this._setRatio(this._calcRatio(this.value) * 100);
-  }
-
-};
-/**
-   * `Use Polymer.IronValidatableBehavior` to implement an element that validates user input.
-   * Use the related `Polymer.IronValidatorBehavior` to add custom validation logic to an iron-input.
-   *
-   * By default, an `<iron-form>` element validates its fields when the user presses the submit button.
-   * To validate a form imperatively, call the form's `validate()` method, which in turn will
-   * call `validate()` on all its children. By using `Polymer.IronValidatableBehavior`, your
-   * custom element will get a public `validate()`, which
-   * will return the validity of the element, and a corresponding `invalid` attribute,
-   * which can be used for styling.
-   *
-   * To implement the custom validation logic of your element, you must override
-   * the protected `_getValidity()` method of this behaviour, rather than `validate()`.
-   * See [this](https://github.com/PolymerElements/iron-form/blob/master/demo/simple-element.html)
-   * for an example.
-   *
-   * ### Accessibility
-   *
-   * Changing the `invalid` property, either manually or by calling `validate()` will update the
-   * `aria-invalid` attribute.
-   *
-   * @demo demo/index.html
-   * @polymerBehavior
-   */
-  Polymer.IronValidatableBehavior = {
-
-    properties: {
-
-      /**
-       * Namespace for this validator.
-       */
-      validatorType: {
-        type: String,
-        value: 'validator'
-      },
-
-      /**
-       * Name of the validator to use.
-       */
-      validator: {
-        type: String
-      },
-
-      /**
-       * True if the last call to `validate` is invalid.
-       */
-      invalid: {
-        notify: true,
-        reflectToAttribute: true,
-        type: Boolean,
-        value: false
-      },
-
-      _validatorMeta: {
-        type: Object
-      }
-
-    },
-
-    observers: [
-      '_invalidChanged(invalid)'
-    ],
-
-    get _validator() {
-      return this._validatorMeta && this._validatorMeta.byKey(this.validator);
-    },
-
-    ready: function() {
-      this._validatorMeta = new Polymer.IronMeta({type: this.validatorType});
-    },
-
-    _invalidChanged: function() {
-      if (this.invalid) {
-        this.setAttribute('aria-invalid', 'true');
-      } else {
-        this.removeAttribute('aria-invalid');
-      }
-    },
-
-    /**
-     * @return {boolean} True if the validator `validator` exists.
-     */
-    hasValidator: function() {
-      return this._validator != null;
-    },
-
-    /**
-     * Returns true if the `value` is valid, and updates `invalid`. If you want
-     * your element to have custom validation logic, do not override this method;
-     * override `_getValidity(value)` instead.
-
-     * @param {Object} value The value to be validated. By default, it is passed
-     * to the validator's `validate()` function, if a validator is set.
-     * @return {boolean} True if `value` is valid.
-     */
-    validate: function(value) {
-      this.invalid = !this._getValidity(value);
-      return !this.invalid;
-    },
-
-    /**
-     * Returns true if `value` is valid.  By default, it is passed
-     * to the validator's `validate()` function, if a validator is set. You
-     * should override this method if you want to implement custom validity
-     * logic for your element.
-     *
-     * @param {Object} value The value to be validated.
-     * @return {boolean} True if `value` is valid.
-     */
-
-    _getValidity: function(value) {
-      if (this.hasValidator()) {
-        return this._validator.validate(value);
-      }
-      return true;
-    }
-  };
-/**
-  Polymer.IronFormElementBehavior enables a custom element to be included
-  in an `iron-form`.
-
-  @demo demo/index.html
-  @polymerBehavior
-  */
-  Polymer.IronFormElementBehavior = {
-
-    properties: {
-      /**
-       * Fired when the element is added to an `iron-form`.
-       *
-       * @event iron-form-element-register
-       */
-
-      /**
-       * Fired when the element is removed from an `iron-form`.
-       *
-       * @event iron-form-element-unregister
-       */
-
-      /**
-       * The name of this element.
-       */
-      name: {
-        type: String
-      },
-
-      /**
-       * The value for this element.
-       */
-      value: {
-        notify: true,
-        type: String
-      },
-
-      /**
-       * Set to true to mark the input as required. If used in a form, a
-       * custom element that uses this behavior should also use
-       * Polymer.IronValidatableBehavior and define a custom validation method.
-       * Otherwise, a `required` element will always be considered valid.
-       * It's also strongly recommended to provide a visual style for the element
-       * when its value is invalid.
-       */
-      required: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * The form that the element is registered to.
-       */
-      _parentForm: {
-        type: Object
-      }
-    },
-
-    attached: function() {
-      // Note: the iron-form that this element belongs to will set this
-      // element's _parentForm property when handling this event.
-      this.fire('iron-form-element-register');
-    },
-
-    detached: function() {
-      if (this._parentForm) {
-        this._parentForm.fire('iron-form-element-unregister', {target: this});
-      }
-    }
-
-  };
-/**
-   * Use `Polymer.IronCheckedElementBehavior` to implement a custom element
-   * that has a `checked` property, which can be used for validation if the
-   * element is also `required`. Element instances implementing this behavior
-   * will also be registered for use in an `iron-form` element.
-   *
-   * @demo demo/index.html
-   * @polymerBehavior Polymer.IronCheckedElementBehavior
-   */
-  Polymer.IronCheckedElementBehaviorImpl = {
-
-    properties: {
-      /**
-       * Fired when the checked state changes.
-       *
-       * @event iron-change
-       */
-
-      /**
-       * Gets or sets the state, `true` is checked and `false` is unchecked.
-       */
-      checked: {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true,
-        notify: true,
-        observer: '_checkedChanged'
-      },
-
-      /**
-       * If true, the button toggles the active state with each tap or press
-       * of the spacebar.
-       */
-      toggles: {
-        type: Boolean,
-        value: true,
-        reflectToAttribute: true
-      },
-
-      /* Overriden from Polymer.IronFormElementBehavior */
-      value: {
-        type: String,
-        value: 'on',
-        observer: '_valueChanged'
-      }
-    },
-
-    observers: [
-      '_requiredChanged(required)'
-    ],
-
-    created: function() {
-      // Used by `iron-form` to handle the case that an element with this behavior
-      // doesn't have a role of 'checkbox' or 'radio', but should still only be
-      // included when the form is serialized if `this.checked === true`.
-      this._hasIronCheckedElementBehavior = true;
-    },
-
-    /**
-     * Returns false if the element is required and not checked, and true otherwise.
-     * @param {*=} _value Ignored.
-     * @return {boolean} true if `required` is false, or if `required` and `checked` are both true.
-     */
-    _getValidity: function(_value) {
-      return this.disabled || !this.required || (this.required && this.checked);
-    },
-
-    /**
-     * Update the aria-required label when `required` is changed.
-     */
-    _requiredChanged: function() {
-      if (this.required) {
-        this.setAttribute('aria-required', 'true');
-      } else {
-        this.removeAttribute('aria-required');
-      }
-    },
-
-    /**
-     * Fire `iron-changed` when the checked state changes.
-     */
-    _checkedChanged: function() {
-      this.active = this.checked;
-      this.fire('iron-change');
-    },
-
-    /**
-     * Reset value to 'on' if it is set to `undefined`.
-     */
-    _valueChanged: function() {
-      if (this.value === undefined || this.value === null) {
-        this.value = 'on';
-      }
-    }
-  };
-
-  /** @polymerBehavior Polymer.IronCheckedElementBehavior */
-  Polymer.IronCheckedElementBehavior = [
-    Polymer.IronFormElementBehavior,
-    Polymer.IronValidatableBehavior,
-    Polymer.IronCheckedElementBehaviorImpl
-  ];
-/**
-   * Use `Polymer.PaperCheckedElementBehavior` to implement a custom element
-   * that has a `checked` property similar to `Polymer.IronCheckedElementBehavior`
-   * and is compatible with having a ripple effect.
-   * @polymerBehavior Polymer.PaperCheckedElementBehavior
-   */
-  Polymer.PaperCheckedElementBehaviorImpl = {
-
-    /**
-     * Synchronizes the element's checked state with its ripple effect.
-     */
-    _checkedChanged: function() {
-      Polymer.IronCheckedElementBehaviorImpl._checkedChanged.call(this);
-      if (this.hasRipple()) {
-        if (this.checked) {
-          this._ripple.setAttribute('checked', '');
-        } else {
-          this._ripple.removeAttribute('checked');
-        }
-      }
-    },
-
-    /**
-     * Synchronizes the element's `active` and `checked` state.
-     */
-    _buttonStateChanged: function() {
-      Polymer.PaperRippleBehavior._buttonStateChanged.call(this);
-      if (this.disabled) {
-        return;
-      }
-      if (this.isAttached) {
-        this.checked = this.active;
-      }
-    }
-
-  };
-
-  /** @polymerBehavior Polymer.PaperCheckedElementBehavior */
-  Polymer.PaperCheckedElementBehavior = [
-    Polymer.PaperInkyFocusBehavior,
-    Polymer.IronCheckedElementBehavior,
-    Polymer.PaperCheckedElementBehaviorImpl
-  ];
-/*
-`<iron-input>` adds two-way binding and custom validators using `Polymer.IronValidatorBehavior`
-to `<input>`.
-
-### Two-way binding
-
-By default you can only get notified of changes to an `input`'s `value` due to user input:
-
-    <input value="{{myValue::input}}">
-
-`iron-input` adds the `bind-value` property that mirrors the `value` property, and can be used
-for two-way data binding. `bind-value` will notify if it is changed either by user input or by script.
-
-    <input is="iron-input" bind-value="{{myValue}}">
-
-### Custom validators
-
-You can use custom validators that implement `Polymer.IronValidatorBehavior` with `<iron-input>`.
-
-    <input is="iron-input" validator="my-custom-validator">
-
-### Stopping invalid input
-
-It may be desirable to only allow users to enter certain characters. You can use the
-`prevent-invalid-input` and `allowed-pattern` attributes together to accomplish this. This feature
-is separate from validation, and `allowed-pattern` does not affect how the input is validated.
-
-    <!-- only allow characters that match [0-9] -->
-    <input is="iron-input" prevent-invalid-input allowed-pattern="[0-9]">
-
-@hero hero.svg
-@demo demo/index.html
-*/
-
-  Polymer({
-
-    is: 'iron-input',
-
-    extends: 'input',
-
-    behaviors: [
-      Polymer.IronValidatableBehavior
-    ],
-
-    properties: {
-
-      /**
-       * Use this property instead of `value` for two-way data binding.
-       */
-      bindValue: {
-        observer: '_bindValueChanged',
-        type: String
-      },
-
-      /**
-       * Set to true to prevent the user from entering invalid input. The new input characters are
-       * matched with `allowedPattern` if it is set, otherwise it will use the `type` attribute (only
-       * supported for `type=number`).
-       */
-      preventInvalidInput: {
-        type: Boolean
-      },
-
-      /**
-       * Regular expression expressing a set of characters to enforce the validity of input characters.
-       * The recommended value should follow this format: `[a-ZA-Z0-9.+-!;:]` that list the characters 
-       * allowed as input.
-       */
-      allowedPattern: {
-        type: String,
-        observer: "_allowedPatternChanged"
-      },
-
-      _previousValidInput: {
-        type: String,
-        value: ''
-      },
-
-      _patternAlreadyChecked: {
-        type: Boolean,
-        value: false
-      }
-
-    },
-
-    listeners: {
-      'input': '_onInput',
-      'keypress': '_onKeypress'
-    },
-
-    get _patternRegExp() {
-      var pattern;
-      if (this.allowedPattern) {
-        pattern = new RegExp(this.allowedPattern);
-      } else {
-        switch (this.type) {
-          case 'number':
-            pattern = /[0-9.,e-]/;
-            break;
-        }
-      }
-      return pattern;
-    },
-
-    ready: function() {
-      this.bindValue = this.value;
-    },
-
-    /**
-     * @suppress {checkTypes}
-     */
-    _bindValueChanged: function() {
-      if (this.value !== this.bindValue) {
-        this.value = !(this.bindValue || this.bindValue === 0 || this.bindValue === false) ? '' : this.bindValue;
-      }
-      // manually notify because we don't want to notify until after setting value
-      this.fire('bind-value-changed', {value: this.bindValue});
-    },
-
-    _allowedPatternChanged: function() {
-      // Force to prevent invalid input when an `allowed-pattern` is set
-      this.preventInvalidInput = this.allowedPattern ? true : false;
-    },
-
-    _onInput: function() {
-      // Need to validate each of the characters pasted if they haven't
-      // been validated inside `_onKeypress` already.
-      if (this.preventInvalidInput && !this._patternAlreadyChecked) {
-        var valid = this._checkPatternValidity();
-        if (!valid) {
-          this.value = this._previousValidInput;
-        }
-      }
-
-      this.bindValue = this.value;
-      this._previousValidInput = this.value;
-      this._patternAlreadyChecked = false;
-    },
-
-    _isPrintable: function(event) {
-      // What a control/printable character is varies wildly based on the browser.
-      // - most control characters (arrows, backspace) do not send a `keypress` event
-      //   in Chrome, but the *do* on Firefox
-      // - in Firefox, when they do send a `keypress` event, control chars have
-      //   a charCode = 0, keyCode = xx (for ex. 40 for down arrow)
-      // - printable characters always send a keypress event.
-      // - in Firefox, printable chars always have a keyCode = 0. In Chrome, the keyCode
-      //   always matches the charCode.
-      // None of this makes any sense.
-
-      // For these keys, ASCII code == browser keycode.
-      var anyNonPrintable =
-        (event.keyCode == 8)   ||  // backspace
-        (event.keyCode == 9)   ||  // tab
-        (event.keyCode == 13)  ||  // enter
-        (event.keyCode == 27);     // escape
-
-      // For these keys, make sure it's a browser keycode and not an ASCII code.
-      var mozNonPrintable =
-        (event.keyCode == 19)  ||  // pause
-        (event.keyCode == 20)  ||  // caps lock
-        (event.keyCode == 45)  ||  // insert
-        (event.keyCode == 46)  ||  // delete
-        (event.keyCode == 144) ||  // num lock
-        (event.keyCode == 145) ||  // scroll lock
-        (event.keyCode > 32 && event.keyCode < 41)   || // page up/down, end, home, arrows
-        (event.keyCode > 111 && event.keyCode < 124); // fn keys
-
-      return !anyNonPrintable && !(event.charCode == 0 && mozNonPrintable);
-    },
-
-    _onKeypress: function(event) {
-      if (!this.preventInvalidInput && this.type !== 'number') {
-        return;
-      }
-      var regexp = this._patternRegExp;
-      if (!regexp) {
-        return;
-      }
-
-      // Handle special keys and backspace
-      if (event.metaKey || event.ctrlKey || event.altKey)
-        return;
-
-      // Check the pattern either here or in `_onInput`, but not in both.
-      this._patternAlreadyChecked = true;
-
-      var thisChar = String.fromCharCode(event.charCode);
-      if (this._isPrintable(event) && !regexp.test(thisChar)) {
-        event.preventDefault();
-      }
-    },
-
-    _checkPatternValidity: function() {
-      var regexp = this._patternRegExp;
-      if (!regexp) {
-        return true;
-      }
-      for (var i = 0; i < this.value.length; i++) {
-        if (!regexp.test(this.value[i])) {
-          return false;
-        }
-      }
-      return true;
-    },
-
-    /**
-     * Returns true if `value` is valid. The validator provided in `validator` will be used first,
-     * then any constraints.
-     * @return {boolean} True if the value is valid.
-     */
-    validate: function() {
-      // Empty, non-required input is valid.
-      if (!this.required && this.value == '') {
-        this.invalid = false;
-        return true;
-      }
-
-      var valid;
-      if (this.hasValidator()) {
-        valid = Polymer.IronValidatableBehavior.validate.call(this, this.value);
-      } else {
-        valid = this.checkValidity();
-        this.invalid = !valid;
-      }
-      this.fire('iron-input-validate');
-      return valid;
-    }
-
-  });
-
-  /*
-  The `iron-input-validate` event is fired whenever `validate()` is called.
-  @event iron-input-validate
-  */
-/**
-   * Use `Polymer.PaperInputBehavior` to implement inputs with `<paper-input-container>`. This
-   * behavior is implemented by `<paper-input>`. It exposes a number of properties from
-   * `<paper-input-container>` and `<input is="iron-input">` and they should be bound in your
-   * template.
-   *
-   * The input element can be accessed by the `inputElement` property if you need to access
-   * properties or methods that are not exposed.
-   * @polymerBehavior Polymer.PaperInputBehavior
-   */
-  Polymer.PaperInputBehaviorImpl = {
-    properties: {
-      /**
-       * Fired when the input changes due to user interaction.
-       *
-       * @event change
-       */
-
-      /**
-       * The label for this input. Bind this to `<label>`'s content and `hidden` property, e.g.
-       * `<label hidden$="[[!label]]">[[label]]</label>` in your `template`
-       */
-      label: {
-        type: String
-      },
-
-      /**
-       * The value for this input. Bind this to the `<input is="iron-input">`'s `bindValue`
-       * property, or the value property of your input that is `notify:true`.
-       */
-      value: {
-        notify: true,
-        type: String
-      },
-
-      /**
-       * Set to true to disable this input. Bind this to both the `<paper-input-container>`'s
-       * and the input's `disabled` property.
-       */
-      disabled: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * Returns true if the value is invalid. Bind this to both the `<paper-input-container>`'s
-       * and the input's `invalid` property.
-       * 
-       * If `autoValidate` is true, the `invalid` attribute is managed automatically,
-       * which can clobber attempts to manage it manually.
-       */
-      invalid: {
-        type: Boolean,
-        value: false,
-        notify: true
-      },
-
-      /**
-       * Set to true to prevent the user from entering invalid input. Bind this to the
-       * `<input is="iron-input">`'s `preventInvalidInput` property.
-       */
-      preventInvalidInput: {
-        type: Boolean
-      },
-
-      /**
-       * Set this to specify the pattern allowed by `preventInvalidInput`. Bind this to the
-       * `<input is="iron-input">`'s `allowedPattern` property.
-       */
-      allowedPattern: {
-        type: String
-      },
-
-      /**
-       * The type of the input. The supported types are `text`, `number` and `password`. Bind this
-       * to the `<input is="iron-input">`'s `type` property.
-       */
-      type: {
-        type: String
-      },
-
-      /**
-       * The datalist of the input (if any). This should match the id of an existing `<datalist>`. Bind this
-       * to the `<input is="iron-input">`'s `list` property.
-       */
-      list: {
-        type: String
-      },
-
-      /**
-       * A pattern to validate the `input` with. Bind this to the `<input is="iron-input">`'s
-       * `pattern` property.
-       */
-      pattern: {
-        type: String
-      },
-
-      /**
-       * Set to true to mark the input as required. Bind this to the `<input is="iron-input">`'s
-       * `required` property.
-       */
-      required: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * The error message to display when the input is invalid. Bind this to the
-       * `<paper-input-error>`'s content, if using.
-       */
-      errorMessage: {
-        type: String
-      },
-
-      /**
-       * Set to true to show a character counter.
-       */
-      charCounter: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * Set to true to disable the floating label. Bind this to the `<paper-input-container>`'s
-       * `noLabelFloat` property.
-       */
-      noLabelFloat: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * Set to true to always float the label. Bind this to the `<paper-input-container>`'s
-       * `alwaysFloatLabel` property.
-       */
-      alwaysFloatLabel: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * Set to true to auto-validate the input value. Bind this to the `<paper-input-container>`'s
-       * `autoValidate` property.
-       */
-      autoValidate: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * Name of the validator to use. Bind this to the `<input is="iron-input">`'s `validator`
-       * property.
-       */
-      validator: {
-        type: String
-      },
-
-      // HTMLInputElement attributes for binding if needed
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `autocomplete` property.
-       */
-      autocomplete: {
-        type: String,
-        value: 'off'
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `autofocus` property.
-       */
-      autofocus: {
-        type: Boolean
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `inputmode` property.
-       */
-      inputmode: {
-        type: String
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `minlength` property.
-       */
-      minlength: {
-        type: Number
-      },
-
-      /**
-       * The maximum length of the input value. Bind this to the `<input is="iron-input">`'s
-       * `maxlength` property.
-       */
-      maxlength: {
-        type: Number
-      },
-
-      /**
-       * The minimum (numeric or date-time) input value.
-       * Bind this to the `<input is="iron-input">`'s `min` property.
-       */
-      min: {
-        type: String
-      },
-
-      /**
-       * The maximum (numeric or date-time) input value.
-       * Can be a String (e.g. `"2000-1-1"`) or a Number (e.g. `2`).
-       * Bind this to the `<input is="iron-input">`'s `max` property.
-       */
-      max: {
-        type: String
-      },
-
-      /**
-       * Limits the numeric or date-time increments.
-       * Bind this to the `<input is="iron-input">`'s `step` property.
-       */
-      step: {
-        type: String
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `name` property.
-       */
-      name: {
-        type: String
-      },
-
-      /**
-       * A placeholder string in addition to the label. If this is set, the label will always float.
-       */
-      placeholder: {
-        type: String,
-        // need to set a default so _computeAlwaysFloatLabel is run
-        value: ''
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `readonly` property.
-       */
-      readonly: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `size` property.
-       */
-      size: {
-        type: Number
-      },
-
-      // Nonstandard attributes for binding if needed
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `autocapitalize` property.
-       */
-      autocapitalize: {
-        type: String,
-        value: 'none'
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `autocorrect` property.
-       */
-      autocorrect: {
-        type: String,
-        value: 'off'
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `autosave` property, used with type=search.
-       */
-      autosave: {
-        type: String
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `results` property, used with type=search.
-       */
-      results: {
-        type: Number
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `accept` property, used with type=file.
-       */
-      accept: {
-        type: String
-      },
-
-      /**
-       * Bind this to the `<input is="iron-input">`'s `multiple` property, used with type=file.
-       */
-      multiple: {
-        type: Boolean
-      },
-
-      _ariaDescribedBy: {
-        type: String,
-        value: ''
-      },
-
-      _ariaLabelledBy: {
-        type: String,
-        value: ''
-      }
-
-    },
-
-    listeners: {
-      'addon-attached': '_onAddonAttached',
-      'focus': '_onFocus'
-    },
-
-    observers: [
-      '_focusedControlStateChanged(focused)'
-    ],
-
-    keyBindings: {
-      'shift+tab:keydown': '_onShiftTabDown'
-    },
-
-    hostAttributes: {
-      tabindex: 0
-    },
-
-    /**
-     * Returns a reference to the input element.
-     */
-    get inputElement() {
-      return this.$.input;
-    },
-
-    /**
-     * Returns a reference to the focusable element.
-     */
-    get _focusableElement() {
-      return this.inputElement;
-    },
-
-    attached: function() {
-      this._updateAriaLabelledBy();
-    },
-
-    _appendStringWithSpace: function(str, more) {
-      if (str) {
-        str = str + ' ' + more;
-      } else {
-        str = more;
-      }
-      return str;
-    },
-
-    _onAddonAttached: function(event) {
-      var target = event.path ? event.path[0] : event.target;
-      if (target.id) {
-        this._ariaDescribedBy = this._appendStringWithSpace(this._ariaDescribedBy, target.id);
-      } else {
-        var id = 'paper-input-add-on-' + Math.floor((Math.random() * 100000));
-        target.id = id;
-        this._ariaDescribedBy = this._appendStringWithSpace(this._ariaDescribedBy, id);
-      }
-    },
-
-    /**
-     * Validates the input element and sets an error style if needed.
-     *
-     * @return {boolean}
-     */
-    validate: function() {
-      return this.inputElement.validate();
-    },
-
-    /**
-     * Forward focus to inputElement
-     */
-    _onFocus: function() {
-      if (!this._shiftTabPressed) {
-        this._focusableElement.focus();
-      }
-    },
-
-    /**
-     * Handler that is called when a shift+tab keypress is detected by the menu.
-     *
-     * @param {CustomEvent} event A key combination event.
-     */
-    _onShiftTabDown: function(event) {
-      var oldTabIndex = this.getAttribute('tabindex');
-      this._shiftTabPressed = true;
-      this.setAttribute('tabindex', '-1');
-      this.async(function() {
-        this.setAttribute('tabindex', oldTabIndex);
-        this._shiftTabPressed = false;
-      }, 1);
-    },
-
-    /**
-     * If `autoValidate` is true, then validates the element.
-     */
-    _handleAutoValidate: function() {
-      if (this.autoValidate)
-        this.validate();
-    },
-
-    /**
-     * Restores the cursor to its original position after updating the value.
-     * @param {string} newValue The value that should be saved.
-     */
-    updateValueAndPreserveCaret: function(newValue) {
-      // Not all elements might have selection, and even if they have the
-      // right properties, accessing them might throw an exception (like for
-      // <input type=number>)
-      try {
-        var start = this.inputElement.selectionStart;
-        this.value = newValue;
-
-        // The cursor automatically jumps to the end after re-setting the value,
-        // so restore it to its original position.
-        this.inputElement.selectionStart = start;
-        this.inputElement.selectionEnd = start;
-      } catch (e) {
-        // Just set the value and give up on the caret.
-        this.value = newValue;
-      }
-    },
-
-    _computeAlwaysFloatLabel: function(alwaysFloatLabel, placeholder) {
-      return placeholder || alwaysFloatLabel;
-    },
-
-    _focusedControlStateChanged: function(focused) {
-      // IronControlState stops the focus and blur events in order to redispatch them on the host
-      // element, but paper-input-container listens to those events. Since there are more
-      // pending work on focus/blur in IronControlState, I'm putting in this hack to get the
-      // input focus state working for now.
-      if (!this.$.container) {
-        this.$.container = Polymer.dom(this.root).querySelector('paper-input-container');
-        if (!this.$.container) {
-          return;
-        }
-      }
-      if (focused) {
-        this.$.container._onFocus();
-      } else {
-        this.$.container._onBlur();
-      }
-    },
-
-    _updateAriaLabelledBy: function() {
-      var label = Polymer.dom(this.root).querySelector('label');
-      if (!label) {
-        this._ariaLabelledBy = '';
-        return;
-      }
-      var labelledBy;
-      if (label.id) {
-        labelledBy = label.id;
-      } else {
-        labelledBy = 'paper-input-label-' + new Date().getUTCMilliseconds();
-        label.id = labelledBy;
-      }
-      this._ariaLabelledBy = labelledBy;
-    },
-
-    _onChange:function(event) {
-      // In the Shadow DOM, the `change` event is not leaked into the
-      // ancestor tree, so we must do this manually.
-      // See https://w3c.github.io/webcomponents/spec/shadow/#events-that-are-not-leaked-into-ancestor-trees.
-      if (this.shadowRoot) {
-        this.fire(event.type, {sourceEvent: event}, {
-          node: this,
-          bubbles: event.bubbles,
-          cancelable: event.cancelable
-        });
-      }
-    }
-  };
-
-  /** @polymerBehavior */
-  Polymer.PaperInputBehavior = [
-    Polymer.IronControlState,
-    Polymer.IronA11yKeysBehavior,
-    Polymer.PaperInputBehaviorImpl
-  ];
-/**
-   * Use `Polymer.PaperInputAddonBehavior` to implement an add-on for `<paper-input-container>`. A
-   * add-on appears below the input, and may display information based on the input value and
-   * validity such as a character counter or an error message.
-   * @polymerBehavior
-   */
-  Polymer.PaperInputAddonBehavior = {
-
-    hostAttributes: {
-      'add-on': ''
-    },
-
-    attached: function() {
-      this.fire('addon-attached');
-    },
-
-    /**
-     * The function called by `<paper-input-container>` when the input value or validity changes.
-     * @param {{
-     *   inputElement: (Node|undefined),
-     *   value: (string|undefined),
-     *   invalid: (boolean|undefined)
-     * }} state All properties are optional -
-     *     inputElement: The input element.
-     *     value: The input value.
-     *     invalid: True if the input value is invalid.
-     */
-    update: function(state) {
-    }
-
-  };
-/**
-   * `Polymer.IronMenubarBehavior` implements accessible menubar behavior.
-   *
-   * @polymerBehavior Polymer.IronMenubarBehavior
-   */
-  Polymer.IronMenubarBehaviorImpl = {
-
-    hostAttributes: {
-      'role': 'menubar'
-    },
-
-    keyBindings: {
-      'left': '_onLeftKey',
-      'right': '_onRightKey'
-    },
-
-    _onUpKey: function(event) {
-      this.focusedItem.click();
-      event.detail.keyboardEvent.preventDefault();
-    },
-
-    _onDownKey: function(event) {
-      this.focusedItem.click();
-      event.detail.keyboardEvent.preventDefault();
-    },
-
-    _onLeftKey: function() {
-      this._focusPrevious();
-    },
-
-    _onRightKey: function() {
-      this._focusNext();
-    },
-
-    _onKeydown: function(event) {
-      if (this.keyboardEventMatchesKeys(event, 'up down left right esc')) {
-        return;
-      }
-
-      // all other keys focus the menu item starting with that character
-      this._focusWithKeyboardEvent(event);
-    }
-
-  };
-
-  /** @polymerBehavior Polymer.IronMenubarBehavior */
-  Polymer.IronMenubarBehavior = [
-    Polymer.IronMenuBehavior,
-    Polymer.IronMenubarBehaviorImpl
-  ];
-(function() { 'use strict';var h,aa=aa||{},k=this,m=function(a){return void 0!==a},ba=function(){},ca=function(a){var b=typeof a;if("object"==b)if(a){if(a instanceof Array)return"array";if(a instanceof Object)return b;var c=Object.prototype.toString.call(a);if("[object Window]"==c)return"object";if("[object Array]"==c||"number"==typeof a.length&&"undefined"!=typeof a.splice&&"undefined"!=typeof a.propertyIsEnumerable&&!a.propertyIsEnumerable("splice"))return"array";if("[object Function]"==c||"undefined"!=typeof a.call&&
-"undefined"!=typeof a.propertyIsEnumerable&&!a.propertyIsEnumerable("call"))return"function"}else return"null";else if("function"==b&&"undefined"==typeof a.call)return"object";return b},n=function(a){return"array"==ca(a)},da=function(a){var b=ca(a);return"array"==b||"object"==b&&"number"==typeof a.length},p=function(a){return"string"==typeof a},ea=function(a){return"number"==typeof a},q=function(a){return"function"==ca(a)},r=function(a){var b=typeof a;return"object"==b&&null!=a||"function"==b},fa=
-function(a,b,c){return a.call.apply(a.bind,arguments)},ga=function(a,b,c){if(!a)throw Error();if(2<arguments.length){var d=Array.prototype.slice.call(arguments,2);return function(){var c=Array.prototype.slice.call(arguments);Array.prototype.unshift.apply(c,d);return a.apply(b,c)}}return function(){return a.apply(b,arguments)}},t=function(a,b,c){t=Function.prototype.bind&&-1!=Function.prototype.bind.toString().indexOf("native code")?fa:ga;return t.apply(null,arguments)},ha=function(a,b){var c=Array.prototype.slice.call(arguments,
-1);return function(){var b=c.slice();b.push.apply(b,arguments);return a.apply(this,b)}},u=Date.now||function(){return+new Date},v=function(a,b){var c=a.split("."),d=k;c[0]in d||!d.execScript||d.execScript("var "+c[0]);for(var e;c.length&&(e=c.shift());)!c.length&&m(b)?d[e]=b:d=d[e]?d[e]:d[e]={}},w=function(a,b){function c(){}c.prototype=b.prototype;a.P=b.prototype;a.prototype=new c;a.ie=function(a,c,f){for(var g=Array(arguments.length-2),l=2;l<arguments.length;l++)g[l-2]=arguments[l];return b.prototype[c].apply(a,
-g)}};Function.prototype.bind=Function.prototype.bind||function(a,b){if(1<arguments.length){var c=Array.prototype.slice.call(arguments,1);c.unshift(this,a);return t.apply(null,c)}return t(this,a)};var x=function(a){if(Error.captureStackTrace)Error.captureStackTrace(this,x);else{var b=Error().stack;b&&(this.stack=b)}a&&(this.message=String(a))};w(x,Error);x.prototype.name="CustomError";var ia=String.prototype.trim?function(a){return a.trim()}:function(a){return a.replace(/^[\s\xa0]+|[\s\xa0]+$/g,"")},ja=function(a,b){return a<b?-1:a>b?1:0};var y=Array.prototype,ka=y.indexOf?function(a,b,c){return y.indexOf.call(a,b,c)}:function(a,b,c){c=null==c?0:0>c?Math.max(0,a.length+c):c;if(p(a))return p(b)&&1==b.length?a.indexOf(b,c):-1;for(;c<a.length;c++)if(c in a&&a[c]===b)return c;return-1},la=y.forEach?function(a,b,c){y.forEach.call(a,b,c)}:function(a,b,c){for(var d=a.length,e=p(a)?a.split(""):a,f=0;f<d;f++)f in e&&b.call(c,e[f],f,a)},ma=y.some?function(a,b,c){return y.some.call(a,b,c)}:function(a,b,c){for(var d=a.length,e=p(a)?a.split(""):
-a,f=0;f<d;f++)if(f in e&&b.call(c,e[f],f,a))return!0;return!1},na=y.every?function(a,b,c){return y.every.call(a,b,c)}:function(a,b,c){for(var d=a.length,e=p(a)?a.split(""):a,f=0;f<d;f++)if(f in e&&!b.call(c,e[f],f,a))return!1;return!0},pa=function(a){var b;a:{b=oa;for(var c=a.length,d=p(a)?a.split(""):a,e=0;e<c;e++)if(e in d&&b.call(void 0,d[e],e,a)){b=e;break a}b=-1}return 0>b?null:p(a)?a.charAt(b):a[b]},qa=function(a,b){var c=ka(a,b),d;(d=0<=c)&&y.splice.call(a,c,1);return d},ra=function(a){return y.concat.apply(y,
-arguments)},sa=function(a,b,c){return 2>=arguments.length?y.slice.call(a,b):y.slice.call(a,b,c)};var ta="StopIteration"in k?k.StopIteration:Error("StopIteration"),ua=function(){};ua.prototype.next=function(){throw ta;};ua.prototype.Sb=function(){return this};var va=function(a,b,c){for(var d in a)b.call(c,a[d],d,a)},wa=function(a){var b=[],c=0,d;for(d in a)b[c++]=a[d];return b},xa=function(a){var b=[],c=0,d;for(d in a)b[c++]=d;return b},ya=function(a,b){var c;a:{for(c in a)if(b.call(void 0,a[c],c,a))break a;c=void 0}return c&&a[c]},za="constructor hasOwnProperty isPrototypeOf propertyIsEnumerable toLocaleString toString valueOf".split(" "),Aa=function(a,b){for(var c,d,e=1;e<arguments.length;e++){d=arguments[e];for(c in d)a[c]=d[c];for(var f=0;f<za.length;f++)c=
-za[f],Object.prototype.hasOwnProperty.call(d,c)&&(a[c]=d[c])}},Ba=function(a){var b=arguments.length;if(1==b&&n(arguments[0]))return Ba.apply(null,arguments[0]);for(var c={},d=0;d<b;d++)c[arguments[d]]=!0;return c};var z=function(a,b){this.p={};this.b=[];this.Ja=this.j=0;var c=arguments.length;if(1<c){if(c%2)throw Error("Uneven number of arguments");for(var d=0;d<c;d+=2)this.set(arguments[d],arguments[d+1])}else a&&this.ha(a)};z.prototype.t=function(){Ca(this);for(var a=[],b=0;b<this.b.length;b++)a.push(this.p[this.b[b]]);return a};z.prototype.H=function(){Ca(this);return this.b.concat()};z.prototype.T=function(a){return A(this.p,a)};
-z.prototype.remove=function(a){return A(this.p,a)?(delete this.p[a],this.j--,this.Ja++,this.b.length>2*this.j&&Ca(this),!0):!1};var Ca=function(a){if(a.j!=a.b.length){for(var b=0,c=0;b<a.b.length;){var d=a.b[b];A(a.p,d)&&(a.b[c++]=d);b++}a.b.length=c}if(a.j!=a.b.length){for(var e={},c=b=0;b<a.b.length;)d=a.b[b],A(e,d)||(a.b[c++]=d,e[d]=1),b++;a.b.length=c}};h=z.prototype;h.get=function(a,b){return A(this.p,a)?this.p[a]:b};
-h.set=function(a,b){A(this.p,a)||(this.j++,this.b.push(a),this.Ja++);this.p[a]=b};h.ha=function(a){var b;a instanceof z?(b=a.H(),a=a.t()):(b=xa(a),a=wa(a));for(var c=0;c<b.length;c++)this.set(b[c],a[c])};h.forEach=function(a,b){for(var c=this.H(),d=0;d<c.length;d++){var e=c[d],f=this.get(e);a.call(b,f,e,this)}};h.clone=function(){return new z(this)};h.Nb=function(){Ca(this);for(var a={},b=0;b<this.b.length;b++){var c=this.b[b];a[c]=this.p[c]}return a};
-h.Sb=function(a){Ca(this);var b=0,c=this.b,d=this.p,e=this.Ja,f=this,g=new ua;g.next=function(){for(;;){if(e!=f.Ja)throw Error("The map has changed since the iterator was created");if(b>=c.length)throw ta;var g=c[b++];return a?g:d[g]}};return g};var A=function(a,b){return Object.prototype.hasOwnProperty.call(a,b)};var Da,Ea,Fa={id:"hitType",name:"t",valueType:"text",maxLength:void 0,defaultValue:void 0},Ga={id:"sessionControl",name:"sc",valueType:"text",maxLength:void 0,defaultValue:void 0},Ha={id:"description",name:"cd",valueType:"text",maxLength:2048,defaultValue:void 0},Ia={id:"eventCategory",name:"ec",valueType:"text",maxLength:150,defaultValue:void 0},Ja={id:"eventAction",name:"ea",valueType:"text",maxLength:500,defaultValue:void 0},Ka={id:"eventLabel",name:"el",valueType:"text",maxLength:500,defaultValue:void 0},
-La={id:"eventValue",name:"ev",valueType:"integer",maxLength:void 0,defaultValue:void 0},Ma={zd:Fa,$c:{id:"anonymizeIp",name:"aip",valueType:"boolean",maxLength:void 0,defaultValue:void 0},Kd:{id:"queueTime",name:"qt",valueType:"integer",maxLength:void 0,defaultValue:void 0},fd:{id:"cacheBuster",name:"z",valueType:"text",maxLength:void 0,defaultValue:void 0},Qd:Ga,Rd:{id:"sessionGroup",name:"sg",valueType:"text",maxLength:void 0,defaultValue:void 0},ge:{id:"userId",name:"uid",valueType:"text",maxLength:void 0,
-defaultValue:void 0},Hd:{id:"nonInteraction",name:"ni",valueType:"boolean",maxLength:void 0,defaultValue:void 0},qd:Ha,$d:{id:"title",name:"dt",valueType:"text",maxLength:1500,defaultValue:void 0},bd:{id:"appId",name:"aid",valueType:"text",maxLength:150,defaultValue:void 0},cd:{id:"appInstallerId",name:"aiid",valueType:"text",maxLength:150,defaultValue:void 0},td:Ia,sd:Ja,ud:Ka,vd:La,Td:{id:"socialNetwork",name:"sn",valueType:"text",maxLength:50,defaultValue:void 0},Sd:{id:"socialAction",name:"sa",
-valueType:"text",maxLength:50,defaultValue:void 0},Ud:{id:"socialTarget",name:"st",valueType:"text",maxLength:2048,defaultValue:void 0},ce:{id:"transactionId",name:"ti",valueType:"text",maxLength:500,defaultValue:void 0},be:{id:"transactionAffiliation",name:"ta",valueType:"text",maxLength:500,defaultValue:void 0},de:{id:"transactionRevenue",name:"tr",valueType:"currency",maxLength:void 0,defaultValue:void 0},ee:{id:"transactionShipping",name:"ts",valueType:"currency",maxLength:void 0,defaultValue:void 0},
-fe:{id:"transactionTax",name:"tt",valueType:"currency",maxLength:void 0,defaultValue:void 0},od:{id:"currencyCode",name:"cu",valueType:"text",maxLength:10,defaultValue:void 0},Dd:{id:"itemPrice",name:"ip",valueType:"currency",maxLength:void 0,defaultValue:void 0},Ed:{id:"itemQuantity",name:"iq",valueType:"integer",maxLength:void 0,defaultValue:void 0},Bd:{id:"itemCode",name:"ic",valueType:"text",maxLength:500,defaultValue:void 0},Cd:{id:"itemName",name:"in",valueType:"text",maxLength:500,defaultValue:void 0},
-Ad:{id:"itemCategory",name:"iv",valueType:"text",maxLength:500,defaultValue:void 0},md:{id:"campaignSource",name:"cs",valueType:"text",maxLength:100,defaultValue:void 0},kd:{id:"campaignMedium",name:"cm",valueType:"text",maxLength:50,defaultValue:void 0},ld:{id:"campaignName",name:"cn",valueType:"text",maxLength:100,defaultValue:void 0},jd:{id:"campaignKeyword",name:"ck",valueType:"text",maxLength:500,defaultValue:void 0},gd:{id:"campaignContent",name:"cc",valueType:"text",maxLength:500,defaultValue:void 0},
-hd:{id:"campaignId",name:"ci",valueType:"text",maxLength:100,defaultValue:void 0},yd:{id:"gclid",name:"gclid",valueType:"text",maxLength:void 0,defaultValue:void 0},pd:{id:"dclid",name:"dclid",valueType:"text",maxLength:void 0,defaultValue:void 0},Jd:{id:"pageLoadTime",name:"plt",valueType:"integer",maxLength:void 0,defaultValue:void 0},rd:{id:"dnsTime",name:"dns",valueType:"integer",maxLength:void 0,defaultValue:void 0},Vd:{id:"tcpConnectTime",name:"tcp",valueType:"integer",maxLength:void 0,defaultValue:void 0},
-Pd:{id:"serverResponseTime",name:"srt",valueType:"integer",maxLength:void 0,defaultValue:void 0},Id:{id:"pageDownloadTime",name:"pdt",valueType:"integer",maxLength:void 0,defaultValue:void 0},Ld:{id:"redirectResponseTime",name:"rrt",valueType:"integer",maxLength:void 0,defaultValue:void 0},Wd:{id:"timingCategory",name:"utc",valueType:"text",maxLength:150,defaultValue:void 0},Zd:{id:"timingVar",name:"utv",valueType:"text",maxLength:500,defaultValue:void 0},Yd:{id:"timingValue",name:"utt",valueType:"integer",
-maxLength:void 0,defaultValue:void 0},Xd:{id:"timingLabel",name:"utl",valueType:"text",maxLength:500,defaultValue:void 0},wd:{id:"exDescription",name:"exd",valueType:"text",maxLength:150,defaultValue:void 0},xd:{id:"exFatal",name:"exf",valueType:"boolean",maxLength:void 0,defaultValue:"1"}},Na=function(a){if(1>a||200<a)throw Error("Expected dimension index range 1-200, but was : "+a);return{id:"dimension"+a,name:"cd"+a,valueType:"text",maxLength:150,defaultValue:void 0}},Oa=function(a){if(1>a||200<
-a)throw Error("Expected metric index range 1-200, but was : "+a);return{id:"metric"+a,name:"cm"+a,valueType:"integer",maxLength:void 0,defaultValue:void 0}};var Pa=function(a){if(1>a)return"0";if(3>a)return"1-2";a=Math.floor(Math.log(a-1)/Math.log(2));return Math.pow(2,a)+1+"-"+Math.pow(2,a+1)},Qa=function(a,b){for(var c=0,d=a.length-1,e=0;c<=d;){var f=Math.floor((c+d)/2),e=a[f];if(b<=e){d=0==f?0:a[f-1];if(b>d)return(d+1).toString()+"-"+e.toString();d=f-1}else if(b>e){if(f>=a.length-1)return(a[a.length-1]+1).toString()+"+";c=f+1}}return"<= 0"};var B=function(){this.gb=[]},Ra=function(){return new B};h=B.prototype;h.when=function(a){this.gb.push(a);return this};h.Rb=function(a){var b=arguments;this.when(function(a){return 0<=ka(b,a.ub())});return this};h.Yc=function(a,b){var c=sa(arguments,1);this.when(function(b){b=b.V().get(a);return 0<=ka(c,b)});return this};h.mb=function(a,b){if(r(this.e))throw Error("Filter has already been set.");this.e=r(b)?t(a,b):a;return this};
-h.ia=function(){if(0==this.gb.length)throw Error("Must specify at least one predicate using #when or a helper method.");if(!r(this.e))throw Error("Must specify a delegate filter using #applyFilter.");return t(function(a){na(this.gb,function(b){return b(a)})&&this.e(a)},this)};var C=function(){this.lb=!1;this.zb="";this.Kb=!1;this.ya=null};C.prototype.Wb=function(a){this.lb=!0;this.zb=a||" - ";return this};C.prototype.Sc=function(){this.Kb=!0;return this};C.prototype.Dc=function(){return Sa(this,Pa)};C.prototype.Ec=function(a){return Sa(this,ha(Qa,a))};
-var Sa=function(a,b){if(null!=a.ya)throw Error("LabelerBuilder: Only one labeling strategy may be used.");a.ya=t(function(a){var d=a.V().get(La),e=a.V().get(Ka);ea(d)&&(d=b(d),null!=e&&this.lb&&(d=e+this.zb+d),a.V().set(Ka,d))},a);return a};C.prototype.ia=function(){if(null==this.ya)throw Error("LabelerBuilder: a labeling strategy must be specified prior to calling build().");return Ra().Rb("event").mb(t(function(a){this.ya(a);this.Kb&&a.V().remove(La)},this)).ia()};var Ua=function(a,b){var c=Array.prototype.slice.call(arguments),d=c.shift();if("undefined"==typeof d)throw Error("[goog.string.format] Template required");return d.replace(/%([0\-\ \+]*)(\d+)?(\.(\d+))?([%sfdiu])/g,function(a,b,d,l,D,N,Y,Z){if("%"==N)return"%";var Nb=c.shift();if("undefined"==typeof Nb)throw Error("[goog.string.format] Not enough arguments");arguments[0]=Nb;return Ta[N].apply(null,arguments)})},Ta={s:function(a,b,c){return isNaN(c)||""==c||a.length>=c?a:a=-1<b.indexOf("-",0)?a+Array(c-
-a.length+1).join(" "):Array(c-a.length+1).join(" ")+a},f:function(a,b,c,d,e){d=a.toString();isNaN(e)||""==e||(d=parseFloat(a).toFixed(e));var f;f=0>a?"-":0<=b.indexOf("+")?"+":0<=b.indexOf(" ")?" ":"";0<=a&&(d=f+d);if(isNaN(c)||d.length>=c)return d;d=isNaN(e)?Math.abs(a).toString():Math.abs(a).toFixed(e);a=c-d.length-f.length;return d=0<=b.indexOf("-",0)?f+d+Array(a+1).join(" "):f+Array(a+1).join(0<=b.indexOf("0",0)?"0":" ")+d},d:function(a,b,c,d,e,f,g,l){return Ta.f(parseInt(a,10),b,c,d,0,f,g,l)}};
-Ta.i=Ta.d;Ta.u=Ta.d;var Va=function(a){if("function"==typeof a.t)return a.t();if(p(a))return a.split("");if(da(a)){for(var b=[],c=a.length,d=0;d<c;d++)b.push(a[d]);return b}return wa(a)},Wa=function(a,b){if("function"==typeof a.forEach)a.forEach(b,void 0);else if(da(a)||p(a))la(a,b,void 0);else{var c;if("function"==typeof a.H)c=a.H();else if("function"!=typeof a.t)if(da(a)||p(a)){c=[];for(var d=a.length,e=0;e<d;e++)c.push(e)}else c=xa(a);else c=void 0;for(var d=Va(a),e=d.length,f=0;f<e;f++)b.call(void 0,d[f],c&&c[f],
-a)}};var E=function(a){this.w=new z;if(0<arguments.length%2)throw Error("Uneven number of arguments to ParameterMap constructor.");for(var b=arguments,c=0;c<b.length;c+=2)this.set(b[c],b[c+1])};E.prototype.set=function(a,b){if(null==b)throw Error("undefined-or-null value for key: "+a.name);this.w.set(a.name,{key:a,value:b})};E.prototype.remove=function(a){this.w.remove(a.name)};E.prototype.get=function(a){a=this.w.get(a.name,null);return null===a?null:a.value};E.prototype.ha=function(a){this.w.ha(a.w)};
-var Xa=function(a,b){la(a.w.t(),function(a){b(a.key,a.value)})};E.prototype.Nb=function(){var a={};Xa(this,function(b,c){a[b.id]=c});return a};E.prototype.clone=function(){var a=new E;a.w=this.w.clone();return a};E.prototype.toString=function(){var a={};Xa(this,function(b,c){a[b.id]=c});return JSON.stringify(a)};var F=function(a){this.e=a};h=F.prototype;h.Yb=function(a){var b=new F(t(this.M,this));b.I=Ia;b.Q=a;return b};h.action=function(a){var b=new F(t(this.M,this));b.I=Ja;b.Q=a;return b};h.label=function(a){var b=new F(t(this.M,this));b.I=Ka;b.Q=a;return b};h.value=function(a){var b=new F(t(this.M,this));b.I=La;b.Q=a;return b};h.fc=function(a){var b=new F(t(this.M,this));b.I=Na(a.index);b.Q=a.value;return b};h.vc=function(a){var b=new F(t(this.M,this));b.I=Oa(a.index);b.Q=a.value;return b};
-h.send=function(a){var b=new E;this.M(b);return a.send("event",b)};h.M=function(a){null!=this.I&&null!=this.Q&&!a.w.T(this.I.name)&&a.set(this.I,this.Q);r(this.e)&&this.e(a)};var Ya=new F(ba);var G=function(){this.aa=this.aa;this.Ca=this.Ca};G.prototype.aa=!1;G.prototype.ma=function(){this.aa||(this.aa=!0,this.o())};G.prototype.o=function(){if(this.Ca)for(;this.Ca.length;)this.Ca.shift()()};var Za=function(a,b){this.type=a;this.currentTarget=this.target=b;this.defaultPrevented=this.X=!1;this.Hb=!0};Za.prototype.preventDefault=function(){this.defaultPrevented=!0;this.Hb=!1};var $a=function(a){$a[" "](a);return a};$a[" "]=ba;var H;a:{var ab=k.navigator;if(ab){var bb=ab.userAgent;if(bb){H=bb;break a}}H=""};var cb=function(){return-1!=H.indexOf("Edge")||-1!=H.indexOf("Trident")||-1!=H.indexOf("MSIE")};var I=function(){return-1!=H.indexOf("Edge")};var db=-1!=H.indexOf("Opera")||-1!=H.indexOf("OPR"),J=cb(),eb=-1!=H.indexOf("Gecko")&&!(-1!=H.toLowerCase().indexOf("webkit")&&!I())&&!(-1!=H.indexOf("Trident")||-1!=H.indexOf("MSIE"))&&!I(),fb=-1!=H.toLowerCase().indexOf("webkit")&&!I(),gb=function(){var a=H;if(eb)return/rv\:([^\);]+)(\)|;)/.exec(a);if(J&&I())return/Edge\/([\d\.]+)/.exec(a);if(J)return/\b(?:MSIE|rv)[: ]([^\);]+)(\)|;)/.exec(a);if(fb)return/WebKit\/(\S+)/.exec(a)},hb=function(){var a=k.document;return a?a.documentMode:void 0},ib=
-function(){if(db&&k.opera){var a=k.opera.version;return q(a)?a():a}var a="",b=gb();b&&(a=b?b[1]:"");return J&&!I()&&(b=hb(),b>parseFloat(a))?String(b):a}(),jb={},K=function(a){var b;if(!(b=jb[a])){b=0;for(var c=ia(String(ib)).split("."),d=ia(String(a)).split("."),e=Math.max(c.length,d.length),f=0;0==b&&f<e;f++){var g=c[f]||"",l=d[f]||"",D=/(\d*)(\D*)/g,N=/(\d*)(\D*)/g;do{var Y=D.exec(g)||["","",""],Z=N.exec(l)||["","",""];if(0==Y[0].length&&0==Z[0].length)break;b=ja(0==Y[1].length?0:parseInt(Y[1],
-10),0==Z[1].length?0:parseInt(Z[1],10))||ja(0==Y[2].length,0==Z[2].length)||ja(Y[2],Z[2])}while(0==b)}b=jb[a]=0<=b}return b},kb=k.document,lb=hb(),mb=!kb||!J||!lb&&I()?void 0:lb||("CSS1Compat"==kb.compatMode?parseInt(ib,10):5);var nb=!J||J&&(I()||9<=mb),ob=J&&!K("9"),pb=!fb||K("528"),qb=eb&&K("1.9b")||J&&K("8")||db&&K("9.5")||fb&&K("528"),rb=eb&&!K("8")||J&&!K("9");var sb=function(a,b){Za.call(this,a?a.type:"");this.relatedTarget=this.currentTarget=this.target=null;this.charCode=this.keyCode=this.button=this.screenY=this.screenX=this.clientY=this.clientX=this.offsetY=this.offsetX=0;this.metaKey=this.shiftKey=this.altKey=this.ctrlKey=!1;this.sb=this.state=null;if(a){var c=this.type=a.type;this.target=a.target||a.srcElement;this.currentTarget=b;var d=a.relatedTarget;if(d){if(eb){var e;a:{try{$a(d.nodeName);e=!0;break a}catch(f){}e=!1}e||(d=null)}}else"mouseover"==
-c?d=a.fromElement:"mouseout"==c&&(d=a.toElement);this.relatedTarget=d;this.offsetX=fb||void 0!==a.offsetX?a.offsetX:a.layerX;this.offsetY=fb||void 0!==a.offsetY?a.offsetY:a.layerY;this.clientX=void 0!==a.clientX?a.clientX:a.pageX;this.clientY=void 0!==a.clientY?a.clientY:a.pageY;this.screenX=a.screenX||0;this.screenY=a.screenY||0;this.button=a.button;this.keyCode=a.keyCode||0;this.charCode=a.charCode||("keypress"==c?a.keyCode:0);this.ctrlKey=a.ctrlKey;this.altKey=a.altKey;this.shiftKey=a.shiftKey;
-this.metaKey=a.metaKey;this.state=a.state;this.sb=a;a.defaultPrevented&&this.preventDefault()}};w(sb,Za);sb.prototype.preventDefault=function(){sb.P.preventDefault.call(this);var a=this.sb;if(a.preventDefault)a.preventDefault();else if(a.returnValue=!1,ob)try{if(a.ctrlKey||112<=a.keyCode&&123>=a.keyCode)a.keyCode=-1}catch(b){}};var tb="closure_listenable_"+(1E6*Math.random()|0),ub=function(a){return!(!a||!a[tb])},vb=0;var wb=function(a,b,c,d,e){this.O=a;this.proxy=null;this.src=b;this.type=c;this.ka=!!d;this.sa=e;this.key=++vb;this.removed=this.ja=!1},xb=function(a){a.removed=!0;a.O=null;a.proxy=null;a.src=null;a.sa=null};var L=function(a){this.src=a;this.k={};this.fa=0};L.prototype.add=function(a,b,c,d,e){var f=a.toString();a=this.k[f];a||(a=this.k[f]=[],this.fa++);var g=yb(a,b,d,e);-1<g?(b=a[g],c||(b.ja=!1)):(b=new wb(b,this.src,f,!!d,e),b.ja=c,a.push(b));return b};L.prototype.remove=function(a,b,c,d){a=a.toString();if(!(a in this.k))return!1;var e=this.k[a];b=yb(e,b,c,d);return-1<b?(xb(e[b]),y.splice.call(e,b,1),0==e.length&&(delete this.k[a],this.fa--),!0):!1};
-var zb=function(a,b){var c=b.type;if(!(c in a.k))return!1;var d=qa(a.k[c],b);d&&(xb(b),0==a.k[c].length&&(delete a.k[c],a.fa--));return d};L.prototype.removeAll=function(a){a=a&&a.toString();var b=0,c;for(c in this.k)if(!a||c==a){for(var d=this.k[c],e=0;e<d.length;e++)++b,xb(d[e]);delete this.k[c];this.fa--}return b};L.prototype.ba=function(a,b,c,d){a=this.k[a.toString()];var e=-1;a&&(e=yb(a,b,c,d));return-1<e?a[e]:null};
-var yb=function(a,b,c,d){for(var e=0;e<a.length;++e){var f=a[e];if(!f.removed&&f.O==b&&f.ka==!!c&&f.sa==d)return e}return-1};var Ab="closure_lm_"+(1E6*Math.random()|0),Bb={},Cb=0,Db=function(a,b,c,d,e){if(n(b)){for(var f=0;f<b.length;f++)Db(a,b[f],c,d,e);return null}c=Eb(c);return ub(a)?a.listen(b,c,d,e):Fb(a,b,c,!1,d,e)},Fb=function(a,b,c,d,e,f){if(!b)throw Error("Invalid event type");var g=!!e,l=Gb(a);l||(a[Ab]=l=new L(a));c=l.add(b,c,d,e,f);if(c.proxy)return c;d=Hb();c.proxy=d;d.src=a;d.O=c;a.addEventListener?a.addEventListener(b.toString(),d,g):a.attachEvent(Ib(b.toString()),d);Cb++;return c},Hb=function(){var a=Jb,
-b=nb?function(c){return a.call(b.src,b.O,c)}:function(c){c=a.call(b.src,b.O,c);if(!c)return c};return b},Kb=function(a,b,c,d,e){if(n(b)){for(var f=0;f<b.length;f++)Kb(a,b[f],c,d,e);return null}c=Eb(c);return ub(a)?a.cb(b,c,d,e):Fb(a,b,c,!0,d,e)},Lb=function(a,b,c,d,e){if(n(b))for(var f=0;f<b.length;f++)Lb(a,b[f],c,d,e);else c=Eb(c),ub(a)?a.jb(b,c,d,e):a&&(a=Gb(a))&&(b=a.ba(b,c,!!d,e))&&Mb(b)},Mb=function(a){if(ea(a)||!a||a.removed)return!1;var b=a.src;if(ub(b))return zb(b.B,a);var c=a.type,d=a.proxy;
-b.removeEventListener?b.removeEventListener(c,d,a.ka):b.detachEvent&&b.detachEvent(Ib(c),d);Cb--;(c=Gb(b))?(zb(c,a),0==c.fa&&(c.src=null,b[Ab]=null)):xb(a);return!0},Ib=function(a){return a in Bb?Bb[a]:Bb[a]="on"+a},Pb=function(a,b,c,d){var e=!0;if(a=Gb(a))if(b=a.k[b.toString()])for(b=b.concat(),a=0;a<b.length;a++){var f=b[a];f&&f.ka==c&&!f.removed&&(f=Ob(f,d),e=e&&!1!==f)}return e},Ob=function(a,b){var c=a.O,d=a.sa||a.src;a.ja&&Mb(a);return c.call(d,b)},Jb=function(a,b){if(a.removed)return!0;if(!nb){var c;
-if(!(c=b))a:{c=["window","event"];for(var d=k,e;e=c.shift();)if(null!=d[e])d=d[e];else{c=null;break a}c=d}e=c;c=new sb(e,this);d=!0;if(!(0>e.keyCode||void 0!=e.returnValue)){a:{var f=!1;if(0==e.keyCode)try{e.keyCode=-1;break a}catch(g){f=!0}if(f||void 0==e.returnValue)e.returnValue=!0}e=[];for(f=c.currentTarget;f;f=f.parentNode)e.push(f);for(var f=a.type,l=e.length-1;!c.X&&0<=l;l--){c.currentTarget=e[l];var D=Pb(e[l],f,!0,c),d=d&&D}for(l=0;!c.X&&l<e.length;l++)c.currentTarget=e[l],D=Pb(e[l],f,!1,
-c),d=d&&D}return d}return Ob(a,new sb(b,this))},Gb=function(a){a=a[Ab];return a instanceof L?a:null},Qb="__closure_events_fn_"+(1E9*Math.random()>>>0),Eb=function(a){if(q(a))return a;a[Qb]||(a[Qb]=function(b){return a.handleEvent(b)});return a[Qb]};var M=function(){G.call(this);this.B=new L(this);this.Tb=this;this.fb=null};w(M,G);M.prototype[tb]=!0;h=M.prototype;h.addEventListener=function(a,b,c,d){Db(this,a,b,c,d)};h.removeEventListener=function(a,b,c,d){Lb(this,a,b,c,d)};
-h.dispatchEvent=function(a){var b,c=this.fb;if(c){b=[];for(var d=1;c;c=c.fb)b.push(c),++d}c=this.Tb;d=a.type||a;if(p(a))a=new Za(a,c);else if(a instanceof Za)a.target=a.target||c;else{var e=a;a=new Za(d,c);Aa(a,e)}var e=!0,f;if(b)for(var g=b.length-1;!a.X&&0<=g;g--)f=a.currentTarget=b[g],e=Rb(f,d,!0,a)&&e;a.X||(f=a.currentTarget=c,e=Rb(f,d,!0,a)&&e,a.X||(e=Rb(f,d,!1,a)&&e));if(b)for(g=0;!a.X&&g<b.length;g++)f=a.currentTarget=b[g],e=Rb(f,d,!1,a)&&e;return e};
-h.o=function(){M.P.o.call(this);this.B&&this.B.removeAll(void 0);this.fb=null};h.listen=function(a,b,c,d){return this.B.add(String(a),b,!1,c,d)};h.cb=function(a,b,c,d){return this.B.add(String(a),b,!0,c,d)};h.jb=function(a,b,c,d){return this.B.remove(String(a),b,c,d)};var Rb=function(a,b,c,d){b=a.B.k[String(b)];if(!b)return!0;b=b.concat();for(var e=!0,f=0;f<b.length;++f){var g=b[f];if(g&&!g.removed&&g.ka==c){var l=g.O,D=g.sa||g.src;g.ja&&zb(a.B,g);e=!1!==l.call(D,d)&&e}}return e&&0!=d.Hb};
-M.prototype.ba=function(a,b,c,d){return this.B.ba(String(a),b,c,d)};var Sb=function(a,b,c){this.tc=c;this.dc=a;this.Gc=b;this.Ba=0;this.ta=null};Sb.prototype.get=function(){var a;0<this.Ba?(this.Ba--,a=this.ta,this.ta=a.next,a.next=null):a=this.dc();return a};Sb.prototype.put=function(a){this.Gc(a);this.Ba<this.tc&&(this.Ba++,a.next=this.ta,this.ta=a)};var Tb=function(a){k.setTimeout(function(){throw a;},0)},Ub,Vb=function(){var a=k.MessageChannel;"undefined"===typeof a&&"undefined"!==typeof window&&window.postMessage&&window.addEventListener&&-1==H.indexOf("Presto")&&(a=function(){var a=document.createElement("IFRAME");a.style.display="none";a.src="";document.documentElement.appendChild(a);var b=a.contentWindow,a=b.document;a.open();a.write("");a.close();var c="callImmediate"+Math.random(),d="file:"==b.location.protocol?"*":b.location.protocol+
-"//"+b.location.host,a=t(function(a){if(("*"==d||a.origin==d)&&a.data==c)this.port1.onmessage()},this);b.addEventListener("message",a,!1);this.port1={};this.port2={postMessage:function(){b.postMessage(c,d)}}});if("undefined"!==typeof a&&!cb()){var b=new a,c={},d=c;b.port1.onmessage=function(){if(m(c.next)){c=c.next;var a=c.ob;c.ob=null;a()}};return function(a){d.next={ob:a};d=d.next;b.port2.postMessage(0)}}return"undefined"!==typeof document&&"onreadystatechange"in document.createElement("SCRIPT")?
-function(a){var b=document.createElement("SCRIPT");b.onreadystatechange=function(){b.onreadystatechange=null;b.parentNode.removeChild(b);b=null;a();a=null};document.documentElement.appendChild(b)}:function(a){k.setTimeout(a,0)}};var Wb=function(){this.Ka=this.Z=null},Yb=new Sb(function(){return new Xb},function(a){a.reset()},100);Wb.prototype.add=function(a,b){var c=Yb.get();c.set(a,b);this.Ka?this.Ka.next=c:this.Z=c;this.Ka=c};Wb.prototype.remove=function(){var a=null;this.Z&&(a=this.Z,this.Z=this.Z.next,this.Z||(this.Ka=null),a.next=null);return a};var Xb=function(){this.next=this.scope=this.Wa=null};Xb.prototype.set=function(a,b){this.Wa=a;this.scope=b;this.next=null};
-Xb.prototype.reset=function(){this.next=this.scope=this.Wa=null};var cc=function(a,b){Zb||$b();ac||(Zb(),ac=!0);bc.add(a,b)},Zb,$b=function(){if(k.Promise&&k.Promise.resolve){var a=k.Promise.resolve();Zb=function(){a.then(dc)}}else Zb=function(){var a=dc;!q(k.setImmediate)||k.Window&&k.Window.prototype&&k.Window.prototype.setImmediate==k.setImmediate?(Ub||(Ub=Vb()),Ub(a)):k.setImmediate(a)}},ac=!1,bc=new Wb,dc=function(){for(var a=null;a=bc.remove();){try{a.Wa.call(a.scope)}catch(b){Tb(b)}Yb.put(a)}ac=!1};var ec=function(a){a.prototype.then=a.prototype.then;a.prototype.$goog_Thenable=!0},fc=function(a){if(!a)return!1;try{return!!a.$goog_Thenable}catch(b){return!1}};var P=function(a,b){this.m=0;this.D=void 0;this.S=this.G=this.l=null;this.ra=this.Va=!1;if(a==gc)O(this,2,b);else try{var c=this;a.call(b,function(a){O(c,2,a)},function(a){O(c,3,a)})}catch(d){O(this,3,d)}},hc=function(){this.next=this.context=this.da=this.Da=this.L=null;this.Na=!1};hc.prototype.reset=function(){this.context=this.da=this.Da=this.L=null;this.Na=!1};
-var ic=new Sb(function(){return new hc},function(a){a.reset()},100),jc=function(a,b,c){var d=ic.get();d.Da=a;d.da=b;d.context=c;return d},gc=function(){};P.prototype.then=function(a,b,c){return kc(this,q(a)?a:null,q(b)?b:null,c)};ec(P);P.prototype.cancel=function(a){0==this.m&&cc(function(){var b=new lc(a);mc(this,b)},this)};
-var mc=function(a,b){if(0==a.m)if(a.l){var c=a.l;if(c.G){for(var d=0,e=null,f=null,g=c.G;g&&(g.Na||(d++,g.L==a&&(e=g),!(e&&1<d)));g=g.next)e||(f=g);e&&(0==c.m&&1==d?mc(c,b):(f?(d=f,d.next==c.S&&(c.S=d),d.next=d.next.next):nc(c),oc(c,e,3,b)))}a.l=null}else O(a,3,b)},qc=function(a,b){a.G||2!=a.m&&3!=a.m||pc(a);a.S?a.S.next=b:a.G=b;a.S=b},kc=function(a,b,c,d){var e=jc(null,null,null);e.L=new P(function(a,g){e.Da=b?function(c){try{var e=b.call(d,c);a(e)}catch(N){g(N)}}:a;e.da=c?function(b){try{var e=
-c.call(d,b);!m(e)&&b instanceof lc?g(b):a(e)}catch(N){g(N)}}:g});e.L.l=a;qc(a,e);return e.L};P.prototype.Pb=function(a){this.m=0;O(this,2,a)};P.prototype.Qb=function(a){this.m=0;O(this,3,a)};
-var O=function(a,b,c){if(0==a.m){if(a==c)b=3,c=new TypeError("Promise cannot resolve to itself");else{if(fc(c)){a.m=1;b=c;c=a.Pb;var d=a.Qb;b instanceof P?qc(b,jc(c||ba,d||null,a)):b.then(c,d,a);return}if(r(c))try{if(d=c.then,q(d)){rc(a,c,d);return}}catch(e){b=3,c=e}}a.D=c;a.m=b;a.l=null;pc(a);3!=b||c instanceof lc||sc(a,c)}},rc=function(a,b,c){a.m=1;var d=!1,e=function(b){d||(d=!0,a.Pb(b))},f=function(b){d||(d=!0,a.Qb(b))};try{c.call(b,e,f)}catch(g){f(g)}},pc=function(a){a.Va||(a.Va=!0,cc(a.gc,a))},
-nc=function(a){var b=null;a.G&&(b=a.G,a.G=b.next,b.next=null);a.G||(a.S=null);return b};P.prototype.gc=function(){for(var a=null;a=nc(this);)oc(this,a,this.m,this.D);this.Va=!1};var oc=function(a,b,c,d){b.L&&(b.L.l=null);if(2==c)b.Da.call(b.context,d);else if(null!=b.da){if(!b.Na)for(;a&&a.ra;a=a.l)a.ra=!1;b.da.call(b.context,d)}ic.put(b)},sc=function(a,b){a.ra=!0;cc(function(){a.ra&&tc.call(null,b)})},tc=Tb,lc=function(a){x.call(this,a)};w(lc,x);lc.prototype.name="cancel";/*
- Portions of this code are from MochiKit, received by
- The Closure Authors under the MIT license. All other code is Copyright
- 2005-2009 The Closure Authors. All Rights Reserved.
-*/
-var Q=function(a,b){this.Fa=[];this.Cb=a;this.rb=b||null;this.ca=this.C=!1;this.D=void 0;this.hb=this.Xb=this.Oa=!1;this.Ia=0;this.l=null;this.Qa=0};Q.prototype.cancel=function(a){if(this.C)this.D instanceof Q&&this.D.cancel();else{if(this.l){var b=this.l;delete this.l;a?b.cancel(a):(b.Qa--,0>=b.Qa&&b.cancel())}this.Cb?this.Cb.call(this.rb,this):this.hb=!0;this.C||this.A(new uc)}};Q.prototype.qb=function(a,b){this.Oa=!1;vc(this,a,b)};
-var vc=function(a,b,c){a.C=!0;a.D=c;a.ca=!b;wc(a)},yc=function(a){if(a.C){if(!a.hb)throw new xc;a.hb=!1}};Q.prototype.v=function(a){yc(this);vc(this,!0,a)};Q.prototype.A=function(a){yc(this);vc(this,!1,a)};Q.prototype.n=function(a,b){return zc(this,a,null,b)};var zc=function(a,b,c,d){a.Fa.push([b,c,d]);a.C&&wc(a);return a};Q.prototype.then=function(a,b,c){var d,e,f=new P(function(a,b){d=a;e=b});zc(this,d,function(a){a instanceof uc?f.cancel():e(a)});return f.then(a,b,c)};ec(Q);
-var Ac=function(a){var b=new Q;zc(a,b.v,b.A,b);return b},Bc=function(a){return ma(a.Fa,function(a){return q(a[1])})},wc=function(a){if(a.Ia&&a.C&&Bc(a)){var b=a.Ia,c=Cc[b];c&&(k.clearTimeout(c.ua),delete Cc[b]);a.Ia=0}a.l&&(a.l.Qa--,delete a.l);for(var b=a.D,d=c=!1;a.Fa.length&&!a.Oa;){var e=a.Fa.shift(),f=e[0],g=e[1],e=e[2];if(f=a.ca?g:f)try{var l=f.call(e||a.rb,b);m(l)&&(a.ca=a.ca&&(l==b||l instanceof Error),a.D=b=l);fc(b)&&(d=!0,a.Oa=!0)}catch(D){b=D,a.ca=!0,Bc(a)||(c=!0)}}a.D=b;d&&(l=t(a.qb,a,
-!0),d=t(a.qb,a,!1),b instanceof Q?(zc(b,l,d),b.Xb=!0):b.then(l,d));c&&(b=new Dc(b),Cc[b.ua]=b,a.Ia=b.ua)},Ec=function(a){var b=new Q;b.v(a);return b},Gc=function(){var a=Fc,b=new Q;b.A(a);return b},xc=function(){x.call(this)};w(xc,x);xc.prototype.message="Deferred has already fired";xc.prototype.name="AlreadyCalledError";var uc=function(){x.call(this)};w(uc,x);uc.prototype.message="Deferred was canceled";uc.prototype.name="CanceledError";
-var Dc=function(a){this.ua=k.setTimeout(t(this.Tc,this),0);this.na=a};Dc.prototype.Tc=function(){delete Cc[this.ua];throw this.na;};var Cc={};var Hc=function(a){this.qa=[];this.e=a};Hc.prototype.R=function(a){if(!q(a))throw Error("Invalid filter. Must be a function.");this.qa.push(a)};Hc.prototype.send=function(a,b){if(0==this.qa.length)return this.e.send(a,b);var c=new R(a,b);return Ic(this,0,c).n(function(){if(!c.Sa)return this.e.send(a,b)},this)};var Ic=function(a,b,c){return Ec().n(function(){return this.qa[b](c)},a).n(function(){if(++b<this.qa.length&&!c.Sa)return Ic(this,b,c)},a)},R=function(a,b){this.Wc=a;this.Cc=b;this.Sa=!1};
-R.prototype.ub=function(){return this.Wc};R.prototype.V=function(){return this.Cc};R.prototype.cancel=function(){this.Sa=!0};Ba("area base br col command embed hr img input keygen link meta param source track wbr".split(" "));var Jc=function(a,b){this.width=a;this.height=b};Jc.prototype.clone=function(){return new Jc(this.width,this.height)};Jc.prototype.floor=function(){this.width=Math.floor(this.width);this.height=Math.floor(this.height);return this};!eb&&!J||J&&J&&(I()||9<=mb)||eb&&K("1.9.1");J&&K("9");var Kc={id:"apiVersion",name:"v",valueType:"text",maxLength:void 0,defaultValue:void 0},Lc={id:"appName",name:"an",valueType:"text",maxLength:100,defaultValue:void 0},Mc={id:"appVersion",name:"av",valueType:"text",maxLength:100,defaultValue:void 0},Nc={id:"clientId",name:"cid",valueType:"text",maxLength:void 0,defaultValue:void 0},Oc={id:"language",name:"ul",valueType:"text",maxLength:20,defaultValue:void 0},Pc={id:"libVersion",name:"_v",valueType:"text",maxLength:void 0,defaultValue:void 0},Qc={id:"sampleRateOverride",
-name:"usro",valueType:"integer",maxLength:void 0,defaultValue:void 0},Rc={id:"screenColors",name:"sd",valueType:"text",maxLength:20,defaultValue:void 0},Sc={id:"screenResolution",name:"sr",valueType:"text",maxLength:20,defaultValue:void 0},Tc={id:"trackingId",name:"tid",valueType:"text",maxLength:void 0,defaultValue:void 0},Uc={id:"viewportSize",name:"vp",valueType:"text",maxLength:20,defaultValue:void 0},Vc={ad:Kc,dd:Lc,ed:Mc,nd:Nc,Fd:Oc,Gd:Pc,Md:Qc,Nd:Rc,Od:Sc,ae:Tc,he:Uc},Xc=function(a){if(!p(a))return a;
-var b=Wc(a,Ma);if(r(b))return b;b=Wc(a,Vc);if(r(b))return b;b=/^dimension(\d+)$/.exec(a);if(null!==b)return Na(parseInt(b[1],10));b=/^metric(\d+)$/.exec(a);if(null!==b)return Oa(parseInt(b[1],10));throw Error(a+" is not a valid parameter name.");},Wc=function(a,b){var c=ya(b,function(b){return b.id==a&&"metric"!=a&&"dimension"!=a});return r(c)?c:null};var S=function(a,b){this.ac=b;this.q=b.Xa();this.Fb=new E;this.ib=!1};h=S.prototype;h.set=function(a,b){if(null==b)throw Error("Value must be defined and not null. Parameter="+a.id);var c=Xc(a);this.Fb.set(c,b)};h.R=function(a){this.ac.R(a)};h.send=function(a,b){if(a instanceof F)return a.send(this);var c=this.Fb.clone();b instanceof E?c.ha(b):r(b)&&va(b,function(a,b){null!=a&&c.set(Xc(b),a)},this);this.ib&&(this.ib=!1,c.set(Ga,"start"));return this.q.send(a,c)};
-h.Hc=function(a){var b={description:a};this.set(Ha,a);return this.send("appview",b)};h.Ic=function(a,b,c,d){return this.send("event",{eventCategory:a,eventAction:b,eventLabel:c,eventValue:d})};h.Kc=function(a,b,c){return this.send("social",{socialNetwork:a,socialAction:b,socialTarget:c})};h.Jc=function(a,b){return this.send("exception",{exDescription:a,exFatal:b})};h.Ib=function(a,b,c,d,e){return this.send("timing",{timingCategory:a,timingVar:b,timingLabel:d,timingValue:c,sampleRateOverride:e})};
-h.jc=function(){this.ib=!0};h.Rc=function(a,b,c,d){return new Yc(this,a,b,c,d)};var Yc=function(a,b,c,d,e){this.Ob=a;this.Zb=b;this.Xc=c;this.rc=d;this.Ea=e;this.Qc=u()};Yc.prototype.send=function(){var a=this.Ob.Ib(this.Zb,this.Xc,u()-this.Qc,this.rc,this.Ea);this.Ob=null;return a};var Zc=function(a,b,c,d,e){this.sc=a;this.Ub=b;this.Vb=c;this.g=d;this.$b=e};
-Zc.prototype.mc=function(a){var b=new S(0,this.$b.create());b.set(Pc,this.sc);b.set(Kc,1);b.set(Lc,this.Ub);b.set(Mc,this.Vb);b.set(Tc,a);(a=navigator.language||navigator.browserLanguage)&&b.set(Oc,a);(a=screen.colorDepth+"-bit")&&b.set(Rc,a);(a=[screen.width,screen.height].join("x"))&&b.set(Sc,a);a=window.document;a="CSS1Compat"==a.compatMode?a.documentElement:a.body;a=new Jc(a.clientWidth,a.clientHeight);(a=[a.width,a.height].join("x"))&&b.set(Uc,a);return b};Zc.prototype.kc=function(){return Ac(this.g.ea)};var $c=function(a,b,c,d,e,f){Q.call(this,e,f);this.bb=a;this.Ta=[];this.tb=!!b;this.ic=!!c;this.cc=!!d;for(b=this.Bb=0;b<a.length;b++)zc(a[b],t(this.vb,this,b,!0),t(this.vb,this,b,!1));0!=a.length||this.tb||this.v(this.Ta)};w($c,Q);$c.prototype.vb=function(a,b,c){this.Bb++;this.Ta[a]=[b,c];this.C||(this.tb&&b?this.v([a,c]):this.ic&&!b?this.A(c):this.Bb==this.bb.length&&this.v(this.Ta));this.cc&&!b&&(c=null);return c};$c.prototype.A=function(a){$c.P.A.call(this,a);for(a=0;a<this.bb.length;a++)this.bb[a].cancel()};
-var ad=function(a){return(new $c(a,!1,!0)).n(function(a){for(var c=[],d=0;d<a.length;d++)c[d]=a[d][1];return c})};var bd=function(){for(var a="xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".split(""),b=0,c=a.length;b<c;b++)switch(a[b]){case "x":a[b]=Math.floor(16*Math.random()).toString(16);break;case "y":a[b]=(Math.floor(4*Math.random())+8).toString(16)}return a.join("")};var T=function(a){this.J=a;this.Ea=100;this.pb=[];this.W=this.ga=null;this.ea=cd(this);this.ea.n(function(){this.Jb=Db(this.J,"a",t(this.nc,this))},this)},cd=function(a){return dd(a).n(function(){return this},a)},dd=function(a){return ad([ed(a),fd(a)])};T.prototype.nc=function(){U(this);var a=gd(this),b=this.xa();dd(this).n(function(){a!=gd(this)&&hd(this,"analytics.user-id");b!=this.xa()&&hd(this,"analytics.tracking-permitted")},this)};var id=function(a,b){U(a);a.pb.push(b)};
-T.prototype.Oc=function(a){U(this);var b=this.W!=a;this.W=a;this.J.set("analytics.tracking-permitted",a.toString());b&&hd(this,"analytics.tracking-permitted")};T.prototype.xa=function(){U(this);var a;if(a=this.W)a=k._gaUserPrefs,a=!(a&&a.ioo&&a.ioo());return a};
-var ed=function(a){return a.J.get("analytics.tracking-permitted").n(function(a){this.W=!0;if(m(a))switch(a){case "true":this.W=!0;break;case "false":this.W=!1}},a)},gd=function(a){U(a);if(!p(a.ga))throw Error("Invalid state. UserID is not a string.");return a.ga},fd=function(a){return a.J.get("analytics.user-id").n(function(a){m(a)?this.ga=a:jd(this)},a)},jd=function(a){a.ga=bd();return a.J.set("analytics.user-id",a.ga).n(function(){hd(this,"analytics.user-id")},a)};
-T.prototype.Nc=function(a){U(this);this.Ea=a};var kd=function(a){U(a);return a.Ea};T.prototype.Fc=function(){return jd(this)};var hd=function(a,b){la(a.pb,function(a){a(b)})};T.prototype.ma=function(){null!=this.Jb&&Mb(this.Jb)};var U=function(a){if(!Ac(a.ea).C)throw Error("Settings object accessed prior to entering ready state.");};var ld=function(){M.call(this);this.eb="google-analytics";this.J=chrome.storage.local;chrome.storage.onChanged.addListener(t(this.Ac,this))};w(ld,M);ld.prototype.Ac=function(a){md(this,a)&&this.dispatchEvent("a")};var md=function(a,b){return ma(xa(b),function(a){return 0==a.lastIndexOf(this.eb,0)},a)};ld.prototype.get=function(a){var b=new Q,c=this.eb+"."+a;this.J.get(c,function(a){chrome.runtime.lastError?b.A(chrome.runtime.lastError):(a=a[c],b.v(null!=a?a.toString():void 0))});return b};
-ld.prototype.set=function(a,b){var c=new Q,d={};d[this.eb+"."+a]=b;this.J.set(d,function(){chrome.runtime.lastError?c.A(chrome.runtime.lastError):c.v()});return c};var V=function(){};V.lc=function(){return V.yb?V.yb:V.yb=new V};V.prototype.send=function(){return Ec()};var nd=function(a){this.ec=a};nd.prototype.send=function(a,b){this.ec.push({pc:a,Bc:b});return Ec()};var od=function(a,b,c){this.g=a;this.U=[];this.K={enabled:new nd(this.U),disabled:c};this.q=this.K.enabled;zc(Ac(this.g.ea),ha(this.zc,b),this.yc,this)};od.prototype.zc=function(a){if(null===this.U)throw Error("Channel setup already completed.");this.K.enabled=a();pd(this);la(this.U,function(a){this.send(a.pc,a.Bc)},this);this.U=null;id(this.g,t(this.xc,this))};
-od.prototype.yc=function(){if(null===this.U)throw Error("Channel setup already completed.");this.q=this.K.enabled=this.K.disabled;this.U=null};od.prototype.send=function(a,b){return this.q.send(a,b)};var pd=function(a){a.q=a.g.xa()?a.K.enabled:a.K.disabled};od.prototype.xc=function(a){switch(a){case "analytics.tracking-permitted":pd(this)}};var qd=function(a,b){this.Ra=[];var c=t(function(){this.pa=new Hc(b.Xa());la(this.Ra,function(a){this.pa.R(a)},this);this.Ra=null;return this.pa},this);this.q=new od(a,c,V.lc())};qd.prototype.Xa=function(){return this.q};qd.prototype.R=function(a){this.pa?this.pa.R(a):this.Ra.push(a)};var rd=function(a,b){this.g=a;this.Pc=b};rd.prototype.create=function(){return new qd(this.g,this.Pc)};var sd=function(a,b){M.call(this);this.wa=a||1;this.Y=b||k;this.Pa=t(this.Uc,this);this.ab=u()};w(sd,M);h=sd.prototype;h.enabled=!1;h.h=null;h.Uc=function(){if(this.enabled){var a=u()-this.ab;0<a&&a<.8*this.wa?this.h=this.Y.setTimeout(this.Pa,this.wa-a):(this.h&&(this.Y.clearTimeout(this.h),this.h=null),this.dispatchEvent("tick"),this.enabled&&(this.h=this.Y.setTimeout(this.Pa,this.wa),this.ab=u()))}};h.start=function(){this.enabled=!0;this.h||(this.h=this.Y.setTimeout(this.Pa,this.wa),this.ab=u())};
-h.stop=function(){this.enabled=!1;this.h&&(this.Y.clearTimeout(this.h),this.h=null)};h.o=function(){sd.P.o.call(this);this.stop();delete this.Y};var td=function(a,b,c){if(q(a))c&&(a=t(a,c));else if(a&&"function"==typeof a.handleEvent)a=t(a.handleEvent,a);else throw Error("Invalid listener argument");return 2147483647<b?-1:k.setTimeout(a,b||0)};var W=function(a){G.call(this);this.Ya=a;this.b={}};w(W,G);var ud=[];W.prototype.listen=function(a,b,c,d){n(b)||(b&&(ud[0]=b.toString()),b=ud);for(var e=0;e<b.length;e++){var f=Db(a,b[e],c||this.handleEvent,d||!1,this.Ya||this);if(!f)break;this.b[f.key]=f}return this};W.prototype.cb=function(a,b,c,d){return vd(this,a,b,c,d)};var vd=function(a,b,c,d,e,f){if(n(c))for(var g=0;g<c.length;g++)vd(a,b,c[g],d,e,f);else{b=Kb(b,c,d||a.handleEvent,e,f||a.Ya||a);if(!b)return a;a.b[b.key]=b}return a};
-W.prototype.jb=function(a,b,c,d,e){if(n(b))for(var f=0;f<b.length;f++)this.jb(a,b[f],c,d,e);else c=c||this.handleEvent,e=e||this.Ya||this,c=Eb(c),d=!!d,b=ub(a)?a.ba(b,c,d,e):a?(a=Gb(a))?a.ba(b,c,d,e):null:null,b&&(Mb(b),delete this.b[b.key]);return this};W.prototype.removeAll=function(){va(this.b,Mb);this.b={}};W.prototype.o=function(){W.P.o.call(this);this.removeAll()};W.prototype.handleEvent=function(){throw Error("EventHandler.handleEvent not implemented");};var wd=function(){M.call(this);this.oa=new W(this);pb&&(qb?this.oa.listen(rb?document.body:window,["online","offline"],this.wb):(this.Eb=pb?navigator.onLine:!0,this.h=new sd(250),this.oa.listen(this.h,"tick",this.oc),this.h.start()))};w(wd,M);wd.prototype.oc=function(){var a=pb?navigator.onLine:!0;a!=this.Eb&&(this.Eb=a,this.wb())};wd.prototype.wb=function(){this.dispatchEvent((pb?navigator.onLine:1)?"online":"offline")};
-wd.prototype.o=function(){wd.P.o.call(this);this.oa.ma();this.oa=null;this.h&&(this.h.ma(),this.h=null)};var xd=function(a,b){this.g=a;this.e=b};xd.prototype.send=function(a,b){b.set(Nc,gd(this.g));return this.e.send(a,b)};var yd=function(a){this.e=a};yd.prototype.send=function(a,b){zd(b);Ad(b);return this.e.send(a,b)};var zd=function(a){Xa(a,function(b,c){m(b.maxLength)&&"text"==b.valueType&&0<b.maxLength&&c.length>b.maxLength&&a.set(b,c.substring(0,b.maxLength))})},Ad=function(a){Xa(a,function(b,c){m(b.defaultValue)&&c==b.defaultValue&&a.remove(b)})};var Fc={status:"device-offline",la:void 0},Bd={status:"rate-limited",la:void 0},Cd={status:"sampled-out",la:void 0},Dd={status:"sent",la:void 0};var Ed=function(a,b){this.Vc=a;this.e=b};Ed.prototype.send=function(a,b){var c;c=this.Vc;var d=c.Lb(),e=Math.floor((d-c.Ab)*c.hc);0<e&&(c.$=Math.min(c.$+e,c.uc),c.Ab=d);1>c.$?c=!1:(--c.$,c=!0);return c||"item"==a||"transaction"==a?this.e.send(a,b):Ec(Bd)};var Fd=function(){this.$=60;this.uc=500;this.hc=5E-4;this.Lb=function(){return(new Date).getTime()};this.Ab=this.Lb()};var Gd=function(a,b){this.g=a;this.e=b};Gd.prototype.send=function(a,b){var c=b.get(Nc),c=parseInt(c.split("-")[1],16),d;"timing"!=a?d=kd(this.g):((d=b.get(Qc))&&b.remove(Qc),d=d||kd(this.g));return c<655.36*d?this.e.send(a,b):Ec(Cd)};var Hd=/^(?:([^:/?#.]+):)?(?:\/\/(?:([^/?#]*)@)?([^/#?]*?)(?::([0-9]+))?(?=[/#?]|$))?([^?#]+)?(?:\?([^#]*))?(?:#(.*))?$/,Jd=function(a){if(Id){Id=!1;var b=k.location;if(b){var c=b.href;if(c&&(c=(c=Jd(c)[3]||null)?decodeURI(c):c)&&c!=b.hostname)throw Id=!0,Error();}}return a.match(Hd)},Id=fb,Kd=function(a,b){for(var c=a.split("&"),d=0;d<c.length;d++){var e=c[d].indexOf("="),f=null,g=null;0<=e?(f=c[d].substring(0,e),g=c[d].substring(e+1)):f=c[d];b(f,g?decodeURIComponent(g.replace(/\+/g," ")):"")}};var Ld=function(){};Ld.prototype.nb=null;var Nd=function(a){var b;(b=a.nb)||(b={},Md(a)&&(b[0]=!0,b[1]=!0),b=a.nb=b);return b};var Od,Pd=function(){};w(Pd,Ld);var Qd=function(a){return(a=Md(a))?new ActiveXObject(a):new XMLHttpRequest},Md=function(a){if(!a.xb&&"undefined"==typeof XMLHttpRequest&&"undefined"!=typeof ActiveXObject){for(var b=["MSXML2.XMLHTTP.6.0","MSXML2.XMLHTTP.3.0","MSXML2.XMLHTTP","Microsoft.XMLHTTP"],c=0;c<b.length;c++){var d=b[c];try{return new ActiveXObject(d),a.xb=d}catch(e){}}throw Error("Could not create ActiveXObject. ActiveX might be disabled, or MSXML might not be installed");}return a.xb};Od=new Pd;var X=function(a){M.call(this);this.headers=new z;this.Ma=a||null;this.F=!1;this.La=this.a=null;this.za=this.$a="";this.N=this.Za=this.va=this.Ua=!1;this.Ha=0;this.Ga=null;this.Gb="";this.kb=this.Zc=!1};w(X,M);var Rd=/^https?$/i,Sd=["POST","PUT"],Td=[],Ud=function(a,b,c){var d=new X;Td.push(d);b&&d.listen("complete",b);d.cb("ready",d.bc);d.send(a,"POST",c,void 0)};X.prototype.bc=function(){this.ma();qa(Td,this)};
-X.prototype.send=function(a,b,c,d){if(this.a)throw Error("[goog.net.XhrIo] Object is active with another request="+this.$a+"; newUri="+a);b=b?b.toUpperCase():"GET";this.$a=a;this.za="";this.Ua=!1;this.F=!0;this.a=this.Ma?Qd(this.Ma):Qd(Od);this.La=this.Ma?Nd(this.Ma):Nd(Od);this.a.onreadystatechange=t(this.Db,this);try{this.Za=!0,this.a.open(b,String(a),!0),this.Za=!1}catch(e){this.na(5,e);return}a=c||"";var f=this.headers.clone();d&&Wa(d,function(a,b){f.set(b,a)});d=pa(f.H());c=k.FormData&&a instanceof
-k.FormData;!(0<=ka(Sd,b))||d||c||f.set("Content-Type","application/x-www-form-urlencoded;charset=utf-8");f.forEach(function(a,b){this.a.setRequestHeader(b,a)},this);this.Gb&&(this.a.responseType=this.Gb);"withCredentials"in this.a&&(this.a.withCredentials=this.Zc);try{Vd(this),0<this.Ha&&((this.kb=Wd(this.a))?(this.a.timeout=this.Ha,this.a.ontimeout=t(this.Mb,this)):this.Ga=td(this.Mb,this.Ha,this)),this.va=!0,this.a.send(a),this.va=!1}catch(g){this.na(5,g)}};
-var Wd=function(a){return J&&K(9)&&ea(a.timeout)&&m(a.ontimeout)},oa=function(a){return"content-type"==a.toLowerCase()};X.prototype.Mb=function(){"undefined"!=typeof aa&&this.a&&(this.za="Timed out after "+this.Ha+"ms, aborting",this.dispatchEvent("timeout"),this.abort(8))};X.prototype.na=function(a,b){this.F=!1;this.a&&(this.N=!0,this.a.abort(),this.N=!1);this.za=b;Xd(this);Yd(this)};var Xd=function(a){a.Ua||(a.Ua=!0,a.dispatchEvent("complete"),a.dispatchEvent("error"))};
-X.prototype.abort=function(){this.a&&this.F&&(this.F=!1,this.N=!0,this.a.abort(),this.N=!1,this.dispatchEvent("complete"),this.dispatchEvent("abort"),Yd(this))};X.prototype.o=function(){this.a&&(this.F&&(this.F=!1,this.N=!0,this.a.abort(),this.N=!1),Yd(this,!0));X.P.o.call(this)};X.prototype.Db=function(){this.aa||(this.Za||this.va||this.N?Zd(this):this.wc())};X.prototype.wc=function(){Zd(this)};
-var Zd=function(a){if(a.F&&"undefined"!=typeof aa&&(!a.La[1]||4!=$d(a)||2!=ae(a)))if(a.va&&4==$d(a))td(a.Db,0,a);else if(a.dispatchEvent("readystatechange"),4==$d(a)){a.F=!1;try{var b=ae(a),c;a:switch(b){case 200:case 201:case 202:case 204:case 206:case 304:case 1223:c=!0;break a;default:c=!1}var d;if(!(d=c)){var e;if(e=0===b){var f=Jd(String(a.$a))[1]||null;if(!f&&self.location)var g=self.location.protocol,f=g.substr(0,g.length-1);e=!Rd.test(f?f.toLowerCase():"")}d=e}if(d)a.dispatchEvent("complete"),
-a.dispatchEvent("success");else{var l;try{l=2<$d(a)?a.a.statusText:""}catch(D){l=""}a.za=l+" ["+ae(a)+"]";Xd(a)}}finally{Yd(a)}}},Yd=function(a,b){if(a.a){Vd(a);var c=a.a,d=a.La[0]?ba:null;a.a=null;a.La=null;b||a.dispatchEvent("ready");try{c.onreadystatechange=d}catch(e){}}},Vd=function(a){a.a&&a.kb&&(a.a.ontimeout=null);ea(a.Ga)&&(k.clearTimeout(a.Ga),a.Ga=null)},$d=function(a){return a.a?a.a.readyState:0},ae=function(a){try{return 2<$d(a)?a.a.status:-1}catch(b){return-1}};var be=function(a,b,c){this.r=a||null;this.qc=!!c},ce=function(a){a.c||(a.c=new z,a.j=0,a.r&&Kd(a.r,function(b,c){a.add(decodeURIComponent(b.replace(/\+/g," ")),c)}))};h=be.prototype;h.c=null;h.j=null;h.add=function(a,b){ce(this);this.r=null;a=de(this,a);var c=this.c.get(a);c||this.c.set(a,c=[]);c.push(b);this.j++;return this};h.remove=function(a){ce(this);a=de(this,a);return this.c.T(a)?(this.r=null,this.j-=this.c.get(a).length,this.c.remove(a)):!1};h.T=function(a){ce(this);a=de(this,a);return this.c.T(a)};
-h.H=function(){ce(this);for(var a=this.c.t(),b=this.c.H(),c=[],d=0;d<b.length;d++)for(var e=a[d],f=0;f<e.length;f++)c.push(b[d]);return c};h.t=function(a){ce(this);var b=[];if(p(a))this.T(a)&&(b=ra(b,this.c.get(de(this,a))));else{a=this.c.t();for(var c=0;c<a.length;c++)b=ra(b,a[c])}return b};h.set=function(a,b){ce(this);this.r=null;a=de(this,a);this.T(a)&&(this.j-=this.c.get(a).length);this.c.set(a,[b]);this.j++;return this};
-h.get=function(a,b){var c=a?this.t(a):[];return 0<c.length?String(c[0]):b};h.toString=function(){if(this.r)return this.r;if(!this.c)return"";for(var a=[],b=this.c.H(),c=0;c<b.length;c++)for(var d=b[c],e=encodeURIComponent(String(d)),d=this.t(d),f=0;f<d.length;f++){var g=e;""!==d[f]&&(g+="="+encodeURIComponent(String(d[f])));a.push(g)}return this.r=a.join("&")};h.clone=function(){var a=new be;a.r=this.r;this.c&&(a.c=this.c.clone(),a.j=this.j);return a};
-var de=function(a,b){var c=String(b);a.qc&&(c=c.toLowerCase());return c};var ee=function(a,b){this.Mc=a;this.Aa=b};ee.prototype.send=function(a,b){if(pb&&!navigator.onLine)return Gc();var c=new Q,d=fe(a,b);d.length>this.Aa?c.A({status:"payload-too-big",la:Ua("Encoded hit length == %s, but should be <= %s.",d.length,this.Aa)}):Ud(this.Mc,function(){c.v(Dd)},d);return c};var fe=function(a,b){var c=new be;c.add(Fa.name,a);Xa(b,function(a,b){c.add(a.name,b.toString())});return c.toString()};var ge=function(a,b,c){this.g=a;this.Lc=b;this.Aa=c};ge.prototype.Xa=function(){if(!this.q){if(!Ac(this.g.ea).C)throw Error("Cannot construct shared channel prior to settings being ready.");new wd;var a=new yd(new ee(this.Lc,this.Aa)),b=new Fd;this.q=new xd(this.g,new Gd(this.g,new Ed(b,a)))}return this.q};var he=new z,ie=function(){Da||(Da=new T(new ld));return Da};v("goog.async.Deferred",Q);v("goog.async.Deferred.prototype.addCallback",Q.prototype.n);v("goog.async.Deferred.prototype.callback",Q.prototype.v);v("goog.async.Deferred.prototype.then",Q.prototype.then);v("goog.events.EventTarget",M);v("goog.events.EventTarget.prototype.listen",M.prototype.listen);
-v("analytics.getService",function(a,b){var c=he.get(a,null),d=b||chrome.runtime.getManifest().version;if(null===c){c=ie();if(!Ea){var e=ie();Ea=new rd(e,new ge(e,"https://www.google-analytics.com/collect",8192))}c=new Zc("ca1.6.0",a,d,c,Ea);he.set(a,c)}return c});v("analytics.internal.GoogleAnalyticsService",Zc);v("analytics.internal.GoogleAnalyticsService.prototype.getTracker",Zc.prototype.mc);v("analytics.internal.GoogleAnalyticsService.prototype.getConfig",Zc.prototype.kc);
-v("analytics.internal.ServiceSettings",T);v("analytics.internal.ServiceSettings.prototype.setTrackingPermitted",T.prototype.Oc);v("analytics.internal.ServiceSettings.prototype.isTrackingPermitted",T.prototype.xa);v("analytics.internal.ServiceSettings.prototype.setSampleRate",T.prototype.Nc);v("analytics.internal.ServiceSettings.prototype.resetUserId",T.prototype.Fc);v("analytics.internal.ServiceTracker",S);v("analytics.internal.ServiceTracker.prototype.send",S.prototype.send);
-v("analytics.internal.ServiceTracker.prototype.sendAppView",S.prototype.Hc);v("analytics.internal.ServiceTracker.prototype.sendEvent",S.prototype.Ic);v("analytics.internal.ServiceTracker.prototype.sendSocial",S.prototype.Kc);v("analytics.internal.ServiceTracker.prototype.sendException",S.prototype.Jc);v("analytics.internal.ServiceTracker.prototype.sendTiming",S.prototype.Ib);v("analytics.internal.ServiceTracker.prototype.startTiming",S.prototype.Rc);v("analytics.internal.ServiceTracker.Timing",Yc);
-v("analytics.internal.ServiceTracker.Timing.prototype.send",Yc.prototype.send);v("analytics.internal.ServiceTracker.prototype.forceSessionStart",S.prototype.jc);v("analytics.internal.ServiceTracker.prototype.addFilter",S.prototype.R);v("analytics.internal.FilterChannel.Hit",R);v("analytics.internal.FilterChannel.Hit.prototype.getHitType",R.prototype.ub);v("analytics.internal.FilterChannel.Hit.prototype.getParameters",R.prototype.V);v("analytics.internal.FilterChannel.Hit.prototype.cancel",R.prototype.cancel);
-v("analytics.ParameterMap",E);v("analytics.ParameterMap.Entry",E.Entry);v("analytics.ParameterMap.prototype.set",E.prototype.set);v("analytics.ParameterMap.prototype.get",E.prototype.get);v("analytics.ParameterMap.prototype.remove",E.prototype.remove);v("analytics.ParameterMap.prototype.toObject",E.prototype.Nb);v("analytics.HitTypes.APPVIEW","appview");v("analytics.HitTypes.EVENT","event");v("analytics.HitTypes.SOCIAL","social");v("analytics.HitTypes.TRANSACTION","transaction");
-v("analytics.HitTypes.ITEM","item");v("analytics.HitTypes.TIMING","timing");v("analytics.HitTypes.EXCEPTION","exception");va(Ma,function(a){var b=a.id.replace(/[A-Z]/,"_$&").toUpperCase();v("analytics.Parameters."+b,a)});v("analytics.filters.EventLabelerBuilder",C);v("analytics.filters.EventLabelerBuilder.prototype.appendToExistingLabel",C.prototype.Wb);v("analytics.filters.EventLabelerBuilder.prototype.stripValue",C.prototype.Sc);v("analytics.filters.EventLabelerBuilder.prototype.powersOfTwo",C.prototype.Dc);
-v("analytics.filters.EventLabelerBuilder.prototype.rangeBounds",C.prototype.Ec);v("analytics.filters.EventLabelerBuilder.prototype.build",C.prototype.ia);v("analytics.filters.FilterBuilder",B);v("analytics.filters.FilterBuilder.builder",Ra);v("analytics.filters.FilterBuilder.prototype.when",B.prototype.when);v("analytics.filters.FilterBuilder.prototype.whenHitType",B.prototype.Rb);v("analytics.filters.FilterBuilder.prototype.whenValue",B.prototype.Yc);
-v("analytics.filters.FilterBuilder.prototype.applyFilter",B.prototype.mb);v("analytics.filters.FilterBuilder.prototype.build",B.prototype.ia);v("analytics.EventBuilder",F);v("analytics.EventBuilder.builder",function(){return Ya});v("analytics.EventBuilder.prototype.category",F.prototype.Yb);v("analytics.EventBuilder.prototype.action",F.prototype.action);v("analytics.EventBuilder.prototype.label",F.prototype.label);v("analytics.EventBuilder.prototype.value",F.prototype.value);
-v("analytics.EventBuilder.prototype.dimension",F.prototype.fc);v("analytics.EventBuilder.prototype.metric",F.prototype.vc);v("analytics.EventBuilder.prototype.send",F.prototype.send); }).call(this);
-Polymer({
-
-      is: 'iron-icon',
-
-      properties: {
-
-        /**
-         * The name of the icon to use. The name should be of the form:
-         * `iconset_name:icon_name`.
-         */
-        icon: {
-          type: String,
-          observer: '_iconChanged'
-        },
-
-        /**
-         * The name of the theme to used, if one is specified by the
-         * iconset.
-         */
-        theme: {
-          type: String,
-          observer: '_updateIcon'
-        },
-
-        /**
-         * If using iron-icon without an iconset, you can set the src to be
-         * the URL of an individual icon image file. Note that this will take
-         * precedence over a given icon attribute.
-         */
-        src: {
-          type: String,
-          observer: '_srcChanged'
-        },
-
-        /**
-         * @type {!Polymer.IronMeta}
-         */
-        _meta: {
-          value: Polymer.Base.create('iron-meta', {type: 'iconset'})
-        }
-
-      },
-
-      _DEFAULT_ICONSET: 'icons',
-
-      _iconChanged: function(icon) {
-        var parts = (icon || '').split(':');
-        this._iconName = parts.pop();
-        this._iconsetName = parts.pop() || this._DEFAULT_ICONSET;
-        this._updateIcon();
-      },
-
-      _srcChanged: function(src) {
-        this._updateIcon();
-      },
-
-      _usesIconset: function() {
-        return this.icon || !this.src;
-      },
-
-      /** @suppress {visibility} */
-      _updateIcon: function() {
-        if (this._usesIconset()) {
-          if (this._iconsetName) {
-            this._iconset = /** @type {?Polymer.Iconset} */ (
-              this._meta.byKey(this._iconsetName));
-            if (this._iconset) {
-              this._iconset.applyIcon(this, this._iconName, this.theme);
-              this.unlisten(window, 'iron-iconset-added', '_updateIcon');
-            } else {
-              this.listen(window, 'iron-iconset-added', '_updateIcon');
-            }
-          }
-        } else {
-          if (!this._img) {
-            this._img = document.createElement('img');
-            this._img.style.width = '100%';
-            this._img.style.height = '100%';
-            this._img.draggable = false;
-          }
-          this._img.src = this.src;
-          Polymer.dom(this.root).appendChild(this._img);
-        }
-      }
-
-    });
-(function() {
-
-  Polymer({
-
-    is: 'iron-overlay-backdrop',
-
-    properties: {
-
-      /**
-       * Returns true if the backdrop is opened.
-       */
-      opened: {
-        readOnly: true,
-        reflectToAttribute: true,
-        type: Boolean,
-        value: false
-      },
-
-      _manager: {
-        type: Object,
-        value: Polymer.IronOverlayManager
-      }
-
-    },
-
-    /**
-     * Appends the backdrop to document body and sets its `z-index` to be below the latest overlay.
-     */
-    prepare: function() {
-      if (!this.parentNode) {
-        Polymer.dom(document.body).appendChild(this);
-        this.style.zIndex = this._manager.currentOverlayZ() - 1;
-      }
-    },
-
-    /**
-     * Shows the backdrop if needed.
-     */
-    open: function() {
-      // only need to make the backdrop visible if this is called by the first overlay with a backdrop
-      if (this._manager.getBackdrops().length < 2) {
-        this._setOpened(true);
-      }
-    },
-
-    /**
-     * Hides the backdrop if needed.
-     */
-    close: function() {
-      // only need to make the backdrop invisible if this is called by the last overlay with a backdrop
-      if (this._manager.getBackdrops().length < 2) {
-        this._setOpened(false);
-      }
-    },
-
-    /**
-     * Removes the backdrop from document body if needed.
-     */
-    complete: function() {
-      // only remove the backdrop if there are no more overlays with backdrops
-      if (this._manager.getBackdrops().length === 0 && this.parentNode) {
-        Polymer.dom(this.parentNode).removeChild(this);
-      }
-    }
-
-  });
-
-})();
-(function() {
-      'use strict';
-
-      Polymer({
-        is: 'iron-dropdown',
-
-        behaviors: [
-          Polymer.IronControlState,
-          Polymer.IronA11yKeysBehavior,
-          Polymer.IronOverlayBehavior,
-          Polymer.NeonAnimationRunnerBehavior
-        ],
-
-        properties: {
-          /**
-           * The orientation against which to align the dropdown content
-           * horizontally relative to the dropdown trigger.
-           */
-          horizontalAlign: {
-            type: String,
-            value: 'left',
-            reflectToAttribute: true
-          },
-
-          /**
-           * The orientation against which to align the dropdown content
-           * vertically relative to the dropdown trigger.
-           */
-          verticalAlign: {
-            type: String,
-            value: 'top',
-            reflectToAttribute: true
-          },
-
-          /**
-           * A pixel value that will be added to the position calculated for the
-           * given `horizontalAlign`, in the direction of alignment. You can think
-           * of it as increasing or decreasing the distance to the side of the
-           * screen given by `horizontalAlign`.
-           *
-           * If `horizontalAlign` is "left", this offset will increase or decrease
-           * the distance to the left side of the screen: a negative offset will
-           * move the dropdown to the left; a positive one, to the right.
-           *
-           * Conversely if `horizontalAlign` is "right", this offset will increase
-           * or decrease the distance to the right side of the screen: a negative
-           * offset will move the dropdown to the right; a positive one, to the left.
-           */
-          horizontalOffset: {
-            type: Number,
-            value: 0,
-            notify: true
-          },
-
-          /**
-           * A pixel value that will be added to the position calculated for the
-           * given `verticalAlign`, in the direction of alignment. You can think
-           * of it as increasing or decreasing the distance to the side of the
-           * screen given by `verticalAlign`.
-           *
-           * If `verticalAlign` is "top", this offset will increase or decrease
-           * the distance to the top side of the screen: a negative offset will
-           * move the dropdown upwards; a positive one, downwards.
-           *
-           * Conversely if `verticalAlign` is "bottom", this offset will increase
-           * or decrease the distance to the bottom side of the screen: a negative
-           * offset will move the dropdown downwards; a positive one, upwards.
-           */
-          verticalOffset: {
-            type: Number,
-            value: 0,
-            notify: true
-          },
-
-          /**
-           * The element that should be used to position the dropdown when
-           * it is opened.
-           */
-          positionTarget: {
-            type: Object,
-            observer: '_positionTargetChanged'
-          },
-
-          /**
-           * An animation config. If provided, this will be used to animate the
-           * opening of the dropdown.
-           */
-          openAnimationConfig: {
-            type: Object
-          },
-
-          /**
-           * An animation config. If provided, this will be used to animate the
-           * closing of the dropdown.
-           */
-          closeAnimationConfig: {
-            type: Object
-          },
-
-          /**
-           * If provided, this will be the element that will be focused when
-           * the dropdown opens.
-           */
-          focusTarget: {
-            type: Object
-          },
-
-          /**
-           * Set to true to disable animations when opening and closing the
-           * dropdown.
-           */
-          noAnimations: {
-            type: Boolean,
-            value: false
-          },
-
-          /**
-           * By default, the dropdown will constrain scrolling on the page
-           * to itself when opened.
-           * Set to true in order to prevent scroll from being constrained
-           * to the dropdown when it opens.
-           */
-          allowOutsideScroll: {
-            type: Boolean,
-            value: false
-          },
-
-          /**
-           * We memoize the positionTarget bounding rectangle so that we can
-           * limit the number of times it is queried per resize / relayout.
-           * @type {?Object}
-           */
-          _positionRectMemo: {
-            type: Object
-          }
-        },
-
-        listeners: {
-          'neon-animation-finish': '_onNeonAnimationFinish'
-        },
-
-        observers: [
-          '_updateOverlayPosition(verticalAlign, horizontalAlign, verticalOffset, horizontalOffset)'
-        ],
-
-        attached: function() {
-          if (this.positionTarget === undefined) {
-            this.positionTarget = this._defaultPositionTarget;
-          }
-        },
-
-        /**
-         * The element that is contained by the dropdown, if any.
-         */
-        get containedElement() {
-          return Polymer.dom(this.$.content).getDistributedNodes()[0];
-        },
-
-        /**
-         * The element that should be focused when the dropdown opens.
-         */
-        get _focusTarget() {
-          return this.focusTarget || this.containedElement;
-        },
-
-        /**
-         * Whether the text direction is RTL
-         */
-        _isRTL: function() {
-          return window.getComputedStyle(this).direction == 'rtl';
-        },
-
-        /**
-         * The element that should be used to position the dropdown when
-         * it opens, if no position target is configured.
-         */
-        get _defaultPositionTarget() {
-          var parent = Polymer.dom(this).parentNode;
-
-          if (parent.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
-            parent = parent.host;
-          }
-
-          return parent;
-        },
-
-        /**
-         * The bounding rect of the position target.
-         */
-        get _positionRect() {
-          if (!this._positionRectMemo && this.positionTarget) {
-            this._positionRectMemo = this.positionTarget.getBoundingClientRect();
-          }
-
-          return this._positionRectMemo;
-        },
-
-        /**
-         * The horizontal offset value used to position the dropdown.
-         */
-        get _horizontalAlignTargetValue() {
-          var target;
-
-          // In RTL, the direction flips, so what is "right" in LTR becomes "left".
-          var isRTL = this._isRTL();
-          if ((!isRTL && this.horizontalAlign === 'right') ||
-              (isRTL && this.horizontalAlign === 'left')) {
-            target = document.documentElement.clientWidth - this._positionRect.right;
-          } else {
-            target = this._positionRect.left;
-          }
-
-          target += this.horizontalOffset;
-
-          return Math.max(target, 0);
-        },
-
-        /**
-         * The vertical offset value used to position the dropdown.
-         */
-        get _verticalAlignTargetValue() {
-          var target;
-
-          if (this.verticalAlign === 'bottom') {
-            target = document.documentElement.clientHeight - this._positionRect.bottom;
-          } else {
-            target = this._positionRect.top;
-          }
-
-          target += this.verticalOffset;
-
-          return Math.max(target, 0);
-        },
-
-        /**
-         * The horizontal align value, accounting for the RTL/LTR text direction.
-         */
-        get _localeHorizontalAlign() {
-          // In RTL, "left" becomes "right".
-          if (this._isRTL()) {
-            return this.horizontalAlign === 'right' ? 'left' : 'right';
-          } else {
-            return this.horizontalAlign;
-          }
-        },
-
-        /**
-         * Called when the value of `opened` changes.
-         *
-         * @param {boolean} opened True if the dropdown is opened.
-         */
-        _openedChanged: function(opened) {
-          if (opened && this.disabled) {
-            this.cancel();
-          } else {
-            this.cancelAnimation();
-            this._prepareDropdown();
-            Polymer.IronOverlayBehaviorImpl._openedChanged.apply(this, arguments);
-          }
-
-          if (this.opened) {
-            this._focusContent();
-          }
-        },
-
-        /**
-         * Overridden from `IronOverlayBehavior`.
-         */
-        _renderOpened: function() {
-          if (!this.allowOutsideScroll) {
-            Polymer.IronDropdownScrollManager.pushScrollLock(this);
-          }
-
-          if (!this.noAnimations && this.animationConfig && this.animationConfig.open) {
-            this.$.contentWrapper.classList.add('animating');
-            this.playAnimation('open');
-          } else {
-            Polymer.IronOverlayBehaviorImpl._renderOpened.apply(this, arguments);
-          }
-        },
-
-        /**
-         * Overridden from `IronOverlayBehavior`.
-         */
-        _renderClosed: function() {
-          Polymer.IronDropdownScrollManager.removeScrollLock(this);
-          if (!this.noAnimations && this.animationConfig && this.animationConfig.close) {
-            this.$.contentWrapper.classList.add('animating');
-            this.playAnimation('close');
-          } else {
-            Polymer.IronOverlayBehaviorImpl._renderClosed.apply(this, arguments);
-          }
-        },
-
-        /**
-         * Called when animation finishes on the dropdown (when opening or
-         * closing). Responsible for "completing" the process of opening or
-         * closing the dropdown by positioning it or setting its display to
-         * none.
-         */
-        _onNeonAnimationFinish: function() {
-          this.$.contentWrapper.classList.remove('animating');
-          if (this.opened) {
-            Polymer.IronOverlayBehaviorImpl._renderOpened.apply(this);
-          } else {
-            Polymer.IronOverlayBehaviorImpl._renderClosed.apply(this);
-          }
-        },
-
-        /**
-         * Called when an `iron-resize` event fires.
-         */
-        _onIronResize: function() {
-          var containedElement = this.containedElement;
-          var scrollTop;
-          var scrollLeft;
-
-          if (containedElement) {
-            scrollTop = containedElement.scrollTop;
-            scrollLeft = containedElement.scrollLeft;
-          }
-
-          if (this.opened) {
-            this._updateOverlayPosition();
-          }
-
-          Polymer.IronOverlayBehaviorImpl._onIronResize.apply(this, arguments);
-
-          if (containedElement) {
-            containedElement.scrollTop = scrollTop;
-            containedElement.scrollLeft = scrollLeft;
-          }
-        },
-
-        /**
-         * Called when the `positionTarget` property changes.
-         */
-        _positionTargetChanged: function() {
-          this._updateOverlayPosition();
-        },
-
-        /**
-         * Constructs the final animation config from different properties used
-         * to configure specific parts of the opening and closing animations.
-         */
-        _updateAnimationConfig: function() {
-          var animationConfig = {};
-          var animations = [];
-
-          if (this.openAnimationConfig) {
-            // NOTE(cdata): When making `display:none` elements visible in Safari,
-            // the element will paint once in a fully visible state, causing the
-            // dropdown to flash before it fades in. We prepend an
-            // `opaque-animation` to fix this problem:
-            animationConfig.open = [{
-              name: 'opaque-animation',
-            }].concat(this.openAnimationConfig);
-            animations = animations.concat(animationConfig.open);
-          }
-
-          if (this.closeAnimationConfig) {
-            animationConfig.close = this.closeAnimationConfig;
-            animations = animations.concat(animationConfig.close);
-          }
-
-          animations.forEach(function(animation) {
-            animation.node = this.containedElement;
-          }, this);
-
-          this.animationConfig = animationConfig;
-        },
-
-        /**
-         * Prepares the dropdown for opening by updating measured layout
-         * values.
-         */
-        _prepareDropdown: function() {
-          this.sizingTarget = this.containedElement || this.sizingTarget;
-          this._updateAnimationConfig();
-          this._updateOverlayPosition();
-        },
-
-        /**
-         * Updates the overlay position based on configured horizontal
-         * and vertical alignment, and re-memoizes these values for the sake
-         * of behavior in `IronFitBehavior`.
-         */
-        _updateOverlayPosition: function() {
-          this._positionRectMemo = null;
-
-          if (!this.positionTarget) {
-            return;
-          }
-
-          this.style[this._localeHorizontalAlign] =
-            this._horizontalAlignTargetValue + 'px';
-
-          this.style[this.verticalAlign] =
-            this._verticalAlignTargetValue + 'px';
-
-          // NOTE(cdata): We re-memoize inline styles here, otherwise
-          // calling `refit` from `IronFitBehavior` will reset inline styles
-          // to whatever they were when the dropdown first opened.
-          if (this._fitInfo) {
-            this._fitInfo.inlineStyle[this.horizontalAlign] =
-              this.style[this.horizontalAlign];
-
-            this._fitInfo.inlineStyle[this.verticalAlign] =
-              this.style[this.verticalAlign];
-          }
-        },
-
-        /**
-         * Focuses the configured focus target.
-         */
-        _focusContent: function() {
-          // NOTE(cdata): This is async so that it can attempt the focus after
-          // `display: none` is removed from the element.
-          this.async(function() {
-            if (this._focusTarget) {
-              this._focusTarget.focus();
-            }
-          });
-        }
-      });
-    })();
-Polymer({
-
-    is: 'iron-pages',
-
-    behaviors: [
-      Polymer.IronResizableBehavior,
-      Polymer.IronSelectableBehavior
-    ],
-
-    properties: {
-
-      // as the selected page is the only one visible, activateEvent
-      // is both non-sensical and problematic; e.g. in cases where a user
-      // handler attempts to change the page and the activateEvent
-      // handler immediately changes it back
-      activateEvent: {
-        type: String,
-        value: null
-      }
-
-    },
-
-    observers: [
-      '_selectedPageChanged(selected)'
-    ],
-
-    _selectedPageChanged: function(selected, old) {
-      this.async(this.notifyResize);
-    }
-  });
 (function() {
     var Utility = {
       distance: function(x1, y1, x2, y2) {
@@ -13797,6 +11370,17 @@ Polymer({
         'space:keyup': '_onSpaceKeyup'
       },
 
+<<<<<<< HEAD
+  /** @polymerBehavior */
+  Polymer.PaperItemBehavior = [
+    Polymer.IronButtonState,
+    Polymer.IronControlState,
+    Polymer.PaperItemBehaviorImpl
+  ];
+/**
+Use `Polymer.PaperDialogBehavior` and `paper-dialog-shared-styles.html` to implement a Material Design
+dialog.
+=======
       attached: function() {
         // Set up a11yKeysBehavior to listen to key events on the target,
         // so that space and enter activate the ripple even if the target doesn't
@@ -13805,6 +11389,7 @@ Polymer({
         this.listen(this.target, 'up', 'uiUpAction');
         this.listen(this.target, 'down', 'uiDownAction');
       },
+>>>>>>> hotfix-db
 
       detached: function() {
         this.unlisten(this.target, 'up', 'uiUpAction');
@@ -13974,6 +11559,240 @@ Polymer({
       }
     });
   })();
+/**
+   * `Polymer.PaperRippleBehavior` dynamically implements a ripple
+   * when the element has focus via pointer or keyboard.
+   *
+   * NOTE: This behavior is intended to be used in conjunction with and after
+   * `Polymer.IronButtonState` and `Polymer.IronControlState`.
+   *
+   * @polymerBehavior Polymer.PaperRippleBehavior
+   */
+  Polymer.PaperRippleBehavior = {
+
+    properties: {
+      /**
+       * If true, the element will not produce a ripple effect when interacted
+       * with via the pointer.
+       */
+      noink: {
+        type: Boolean,
+        observer: '_noinkChanged'
+      },
+
+      /**
+       * @type {Element|undefined}
+       */
+      _rippleContainer: {
+        type: Object,
+      }
+    },
+
+    /**
+     * Ensures a `<paper-ripple>` element is available when the element is
+     * focused.
+     */
+    _buttonStateChanged: function() {
+      if (this.focused) {
+        this.ensureRipple();
+      }
+    },
+
+    /**
+     * In addition to the functionality provided in `IronButtonState`, ensures
+     * a ripple effect is created when the element is in a `pressed` state.
+     */
+    _downHandler: function(event) {
+      Polymer.IronButtonStateImpl._downHandler.call(this, event);
+      if (this.pressed) {
+        this.ensureRipple(event);
+      }
+    },
+
+    /**
+     * Ensures this element contains a ripple effect. For startup efficiency
+     * the ripple effect is dynamically on demand when needed.
+     * @param {!Event=} optTriggeringEvent (optional) event that triggered the
+     * ripple.
+     */
+    ensureRipple: function(optTriggeringEvent) {
+      if (!this.hasRipple()) {
+        this._ripple = this._createRipple();
+        this._ripple.noink = this.noink;
+        var rippleContainer = this._rippleContainer || this.root;
+        if (rippleContainer) {
+          Polymer.dom(rippleContainer).appendChild(this._ripple);
+        }
+        if (optTriggeringEvent) {
+          // Check if the event happened inside of the ripple container
+          // Fall back to host instead of the root because distributed text
+          // nodes are not valid event targets
+          var domContainer = Polymer.dom(this._rippleContainer || this);
+          var target = Polymer.dom(optTriggeringEvent).rootTarget;
+          if (domContainer.deepContains( /** @type {Node} */(target))) {
+            this._ripple.uiDownAction(optTriggeringEvent);
+          }
+        }
+      }
+    },
+
+    /**
+     * Returns the `<paper-ripple>` element used by this element to create
+     * ripple effects. The element's ripple is created on demand, when
+     * necessary, and calling this method will force the
+     * ripple to be created.
+     */
+    getRipple: function() {
+      this.ensureRipple();
+      return this._ripple;
+    },
+
+    /**
+     * Returns true if this element currently contains a ripple effect.
+     * @return {boolean}
+     */
+    hasRipple: function() {
+      return Boolean(this._ripple);
+    },
+
+    /**
+     * Create the element's ripple effect via creating a `<paper-ripple>`.
+     * Override this method to customize the ripple element.
+     * @return {!PaperRippleElement} Returns a `<paper-ripple>` element.
+     */
+    _createRipple: function() {
+      return /** @type {!PaperRippleElement} */ (
+          document.createElement('paper-ripple'));
+    },
+
+    _noinkChanged: function(noink) {
+      if (this.hasRipple()) {
+        this._ripple.noink = noink;
+      }
+    }
+
+  };
+/** @polymerBehavior Polymer.PaperButtonBehavior */
+  Polymer.PaperButtonBehaviorImpl = {
+
+    properties: {
+
+      /**
+       * The z-depth of this element, from 0-5. Setting to 0 will remove the
+       * shadow, and each increasing number greater than 0 will be "deeper"
+       * than the last.
+       *
+       * @attribute elevation
+       * @type number
+       * @default 1
+       */
+      elevation: {
+        type: Number,
+        reflectToAttribute: true,
+        readOnly: true
+      }
+
+    },
+
+    observers: [
+      '_calculateElevation(focused, disabled, active, pressed, receivedFocusFromKeyboard)',
+      '_computeKeyboardClass(receivedFocusFromKeyboard)'
+    ],
+
+    hostAttributes: {
+      role: 'button',
+      tabindex: '0',
+      animated: true
+    },
+
+    _calculateElevation: function() {
+      var e = 1;
+      if (this.disabled) {
+        e = 0;
+      } else if (this.active || this.pressed) {
+        e = 4;
+      } else if (this.receivedFocusFromKeyboard) {
+        e = 3;
+      }
+      this._setElevation(e);
+    },
+
+    _computeKeyboardClass: function(receivedFocusFromKeyboard) {
+      this.classList.toggle('keyboard-focus', receivedFocusFromKeyboard);
+    },
+
+    /**
+     * In addition to `IronButtonState` behavior, when space key goes down,
+     * create a ripple down effect.
+     *
+     * @param {!KeyboardEvent} event .
+     */
+    _spaceKeyDownHandler: function(event) {
+      Polymer.IronButtonStateImpl._spaceKeyDownHandler.call(this, event);
+      if (this.hasRipple()) {
+        this._ripple.uiDownAction();
+      }
+    },
+
+    /**
+     * In addition to `IronButtonState` behavior, when space key goes up,
+     * create a ripple up effect.
+     *
+     * @param {!KeyboardEvent} event .
+     */
+    _spaceKeyUpHandler: function(event) {
+      Polymer.IronButtonStateImpl._spaceKeyUpHandler.call(this, event);
+      if (this.hasRipple()) {
+        this._ripple.uiUpAction();
+      }
+    }
+
+  };
+
+  /** @polymerBehavior */
+  Polymer.PaperButtonBehavior = [
+    Polymer.IronButtonState,
+    Polymer.IronControlState,
+    Polymer.PaperRippleBehavior,
+    Polymer.PaperButtonBehaviorImpl
+  ];
+/**
+   * `Polymer.PaperInkyFocusBehavior` implements a ripple when the element has keyboard focus.
+   *
+   * @polymerBehavior Polymer.PaperInkyFocusBehavior
+   */
+  Polymer.PaperInkyFocusBehaviorImpl = {
+
+    observers: [
+      '_focusedChanged(receivedFocusFromKeyboard)'
+    ],
+
+    _focusedChanged: function(receivedFocusFromKeyboard) {
+      if (receivedFocusFromKeyboard) {
+        this.ensureRipple();
+      }
+      if (this.hasRipple()) {
+        this._ripple.holdDown = receivedFocusFromKeyboard;
+      }
+    },
+
+    _createRipple: function() {
+      var ripple = Polymer.PaperRippleBehavior._createRipple();
+      ripple.id = 'ink';
+      ripple.setAttribute('center', '');
+      ripple.classList.add('circle');
+      return ripple;
+    }
+
+  };
+
+  /** @polymerBehavior Polymer.PaperInkyFocusBehavior */
+  Polymer.PaperInkyFocusBehavior = [
+    Polymer.IronButtonState,
+    Polymer.IronControlState,
+    Polymer.PaperRippleBehavior,
+    Polymer.PaperInkyFocusBehaviorImpl
+  ];
 Polymer({
       is: 'paper-icon-button',
 
@@ -14075,9 +11894,38 @@ Polymer({
       }
     },
 
+<<<<<<< HEAD
+    observers: [
+      '_requiredChanged(required)'
+    ],
+
+    created: function() {
+      // Used by `iron-form` to handle the case that an element with this behavior
+      // doesn't have a role of 'checkbox' or 'radio', but should still only be
+      // included when the form is serialized if `this.checked === true`.
+      this._hasIronCheckedElementBehavior = true;
+    },
+
+    /**
+     * Returns false if the element is required and not checked, and true otherwise.
+     * @param {*=} _value Ignored.
+     * @return {boolean} true if `required` is false, or if `required` and `checked` are both true.
+     */
+    _getValidity: function(_value) {
+      return this.disabled || !this.required || (this.required && this.checked);
+    },
+
+    /**
+     * Update the aria-required label when `required` is changed.
+     */
+    _requiredChanged: function() {
+      if (this.required) {
+        this.setAttribute('aria-required', 'true');
+=======
     _calculateElevation: function() {
       if (!this.raised) {
-        this._setElevation(0);
+        this.elevation = 0;
+>>>>>>> hotfix-db
       } else {
         Polymer.PaperButtonBehaviorImpl._calculateElevation.apply(this);
       }
@@ -14092,11 +11940,387 @@ Polymer({
     @param {{node: Object}} detail Contains the animated node.
     */
   });
+Polymer({
+
+    is: 'fade-in-animation',
+
+    behaviors: [
+      Polymer.NeonAnimationBehavior
+    ],
+
+    configure: function(config) {
+      var node = config.node;
+      this._effect = new KeyframeEffect(node, [
+        {'opacity': '0'},
+        {'opacity': '1'}
+      ], this.timingFromConfig(config));
+      return this._effect;
+    }
+
+  });
+Polymer({
+
+    is: 'fade-out-animation',
+
+    behaviors: [
+      Polymer.NeonAnimationBehavior
+    ],
+
+    configure: function(config) {
+      var node = config.node;
+      this._effect = new KeyframeEffect(node, [
+        {'opacity': '1'},
+        {'opacity': '0'}
+      ], this.timingFromConfig(config));
+      return this._effect;
+    }
+
+  });
+Polymer({
+    is: 'paper-menu-grow-height-animation',
+
+    behaviors: [
+      Polymer.NeonAnimationBehavior
+    ],
+
+    configure: function(config) {
+      var node = config.node;
+      var rect = node.getBoundingClientRect();
+      var height = rect.height;
+
+      this._effect = new KeyframeEffect(node, [{
+        height: (height / 2) + 'px'
+      }, {
+        height: height + 'px'
+      }], this.timingFromConfig(config));
+
+      return this._effect;
+    }
+  });
+
+  Polymer({
+    is: 'paper-menu-grow-width-animation',
+
+    behaviors: [
+      Polymer.NeonAnimationBehavior
+    ],
+
+    configure: function(config) {
+      var node = config.node;
+      var rect = node.getBoundingClientRect();
+      var width = rect.width;
+
+      this._effect = new KeyframeEffect(node, [{
+        width: (width / 2) + 'px'
+      }, {
+        width: width + 'px'
+      }], this.timingFromConfig(config));
+
+      return this._effect;
+    }
+  });
+
+  Polymer({
+    is: 'paper-menu-shrink-width-animation',
+
+    behaviors: [
+      Polymer.NeonAnimationBehavior
+    ],
+
+    configure: function(config) {
+      var node = config.node;
+      var rect = node.getBoundingClientRect();
+      var width = rect.width;
+
+<<<<<<< HEAD
+      /**
+       * Set to true to prevent the user from entering invalid input. The new input characters are
+       * matched with `allowedPattern` if it is set, otherwise it will use the `type` attribute (only
+       * supported for `type=number`).
+       */
+      preventInvalidInput: {
+        type: Boolean
+      },
+
+      /**
+       * Regular expression expressing a set of characters to enforce the validity of input characters.
+       * The recommended value should follow this format: `[a-ZA-Z0-9.+-!;:]` that list the characters 
+       * allowed as input.
+       */
+      allowedPattern: {
+        type: String,
+        observer: "_allowedPatternChanged"
+      },
+=======
+      this._effect = new KeyframeEffect(node, [{
+        width: width + 'px'
+      }, {
+        width: width - (width / 20) + 'px'
+      }], this.timingFromConfig(config));
+
+      return this._effect;
+    }
+  });
+>>>>>>> hotfix-db
+
+  Polymer({
+    is: 'paper-menu-shrink-height-animation',
+
+    behaviors: [
+      Polymer.NeonAnimationBehavior
+    ],
+
+<<<<<<< HEAD
+    },
+
+    listeners: {
+      'input': '_onInput',
+      'keypress': '_onKeypress'
+    },
+
+    get _patternRegExp() {
+      var pattern;
+      if (this.allowedPattern) {
+        pattern = new RegExp(this.allowedPattern);
+      } else {
+        switch (this.type) {
+          case 'number':
+            pattern = /[0-9.,e-]/;
+            break;
+        }
+      }
+      return pattern;
+    },
+
+    ready: function() {
+      this.bindValue = this.value;
+    },
+
+    /**
+     * @suppress {checkTypes}
+     */
+    _bindValueChanged: function() {
+      if (this.value !== this.bindValue) {
+        this.value = !(this.bindValue || this.bindValue === 0 || this.bindValue === false) ? '' : this.bindValue;
+      }
+      // manually notify because we don't want to notify until after setting value
+      this.fire('bind-value-changed', {value: this.bindValue});
+    },
+
+    _allowedPatternChanged: function() {
+      // Force to prevent invalid input when an `allowed-pattern` is set
+      this.preventInvalidInput = this.allowedPattern ? true : false;
+    },
+
+    _onInput: function() {
+      // Need to validate each of the characters pasted if they haven't
+      // been validated inside `_onKeypress` already.
+      if (this.preventInvalidInput && !this._patternAlreadyChecked) {
+        var valid = this._checkPatternValidity();
+        if (!valid) {
+          this.value = this._previousValidInput;
+        }
+      }
+
+      this.bindValue = this.value;
+      this._previousValidInput = this.value;
+      this._patternAlreadyChecked = false;
+    },
+
+    _isPrintable: function(event) {
+      // What a control/printable character is varies wildly based on the browser.
+      // - most control characters (arrows, backspace) do not send a `keypress` event
+      //   in Chrome, but the *do* on Firefox
+      // - in Firefox, when they do send a `keypress` event, control chars have
+      //   a charCode = 0, keyCode = xx (for ex. 40 for down arrow)
+      // - printable characters always send a keypress event.
+      // - in Firefox, printable chars always have a keyCode = 0. In Chrome, the keyCode
+      //   always matches the charCode.
+      // None of this makes any sense.
+
+      // For these keys, ASCII code == browser keycode.
+      var anyNonPrintable =
+        (event.keyCode == 8)   ||  // backspace
+        (event.keyCode == 9)   ||  // tab
+        (event.keyCode == 13)  ||  // enter
+        (event.keyCode == 27);     // escape
+
+      // For these keys, make sure it's a browser keycode and not an ASCII code.
+      var mozNonPrintable =
+        (event.keyCode == 19)  ||  // pause
+        (event.keyCode == 20)  ||  // caps lock
+        (event.keyCode == 45)  ||  // insert
+        (event.keyCode == 46)  ||  // delete
+        (event.keyCode == 144) ||  // num lock
+        (event.keyCode == 145) ||  // scroll lock
+        (event.keyCode > 32 && event.keyCode < 41)   || // page up/down, end, home, arrows
+        (event.keyCode > 111 && event.keyCode < 124); // fn keys
+
+      return !anyNonPrintable && !(event.charCode == 0 && mozNonPrintable);
+    },
+
+    _onKeypress: function(event) {
+      if (!this.preventInvalidInput && this.type !== 'number') {
+        return;
+      }
+      var regexp = this._patternRegExp;
+      if (!regexp) {
+        return;
+      }
+
+      // Handle special keys and backspace
+      if (event.metaKey || event.ctrlKey || event.altKey)
+        return;
+
+      // Check the pattern either here or in `_onInput`, but not in both.
+      this._patternAlreadyChecked = true;
+
+      var thisChar = String.fromCharCode(event.charCode);
+      if (this._isPrintable(event) && !regexp.test(thisChar)) {
+        event.preventDefault();
+      }
+    },
+=======
+    configure: function(config) {
+      var node = config.node;
+      var rect = node.getBoundingClientRect();
+      var height = rect.height;
+      var top = rect.top;
+>>>>>>> hotfix-db
+
+      this.setPrefixedProperty(node, 'transformOrigin', '0 0');
+
+      this._effect = new KeyframeEffect(node, [{
+        height: height + 'px',
+        transform: 'translateY(0)'
+      }, {
+        height: height / 2 + 'px',
+        transform: 'translateY(-20px)'
+      }], this.timingFromConfig(config));
+
+<<<<<<< HEAD
+      var valid;
+      if (this.hasValidator()) {
+        valid = Polymer.IronValidatableBehavior.validate.call(this, this.value);
+      } else {
+        valid = this.checkValidity();
+        this.invalid = !valid;
+      }
+      this.fire('iron-input-validate');
+      return valid;
+=======
+      return this._effect;
+>>>>>>> hotfix-db
+    }
+  });
 (function() {
     'use strict';
 
+<<<<<<< HEAD
+  /*
+  The `iron-input-validate` event is fired whenever `validate()` is called.
+  @event iron-input-validate
+  */
+/**
+   * Use `Polymer.PaperInputBehavior` to implement inputs with `<paper-input-container>`. This
+   * behavior is implemented by `<paper-input>`. It exposes a number of properties from
+   * `<paper-input-container>` and `<input is="iron-input">` and they should be bound in your
+   * template.
+   *
+   * The input element can be accessed by the `inputElement` property if you need to access
+   * properties or methods that are not exposed.
+   * @polymerBehavior Polymer.PaperInputBehavior
+   */
+  Polymer.PaperInputBehaviorImpl = {
+    properties: {
+      /**
+       * Fired when the input changes due to user interaction.
+       *
+       * @event change
+       */
+
+      /**
+       * The label for this input. Bind this to `<label>`'s content and `hidden` property, e.g.
+       * `<label hidden$="[[!label]]">[[label]]</label>` in your `template`
+       */
+      label: {
+        type: String
+      },
+
+      /**
+       * The value for this input. Bind this to the `<input is="iron-input">`'s `bindValue`
+       * property, or the value property of your input that is `notify:true`.
+       */
+      value: {
+        notify: true,
+        type: String
+      },
+
+      /**
+       * Set to true to disable this input. Bind this to both the `<paper-input-container>`'s
+       * and the input's `disabled` property.
+       */
+      disabled: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * Returns true if the value is invalid. Bind this to both the `<paper-input-container>`'s
+       * and the input's `invalid` property.
+       * 
+       * If `autoValidate` is true, the `invalid` attribute is managed automatically,
+       * which can clobber attempts to manage it manually.
+       */
+      invalid: {
+        type: Boolean,
+        value: false,
+        notify: true
+      },
+
+      /**
+       * Set to true to prevent the user from entering invalid input. Bind this to the
+       * `<input is="iron-input">`'s `preventInvalidInput` property.
+       */
+      preventInvalidInput: {
+        type: Boolean
+      },
+
+      /**
+       * Set this to specify the pattern allowed by `preventInvalidInput`. Bind this to the
+       * `<input is="iron-input">`'s `allowedPattern` property.
+       */
+      allowedPattern: {
+        type: String
+      },
+
+      /**
+       * The type of the input. The supported types are `text`, `number` and `password`. Bind this
+       * to the `<input is="iron-input">`'s `type` property.
+       */
+      type: {
+        type: String
+      },
+
+      /**
+       * The datalist of the input (if any). This should match the id of an existing `<datalist>`. Bind this
+       * to the `<input is="iron-input">`'s `list` property.
+       */
+      list: {
+        type: String
+      },
+
+      /**
+       * A pattern to validate the `input` with. Bind this to the `<input is="iron-input">`'s
+       * `pattern` property.
+       */
+      pattern: {
+        type: String
+      },
+=======
     var PaperMenuButton = Polymer({
       is: 'paper-menu-button',
+>>>>>>> hotfix-db
 
       /**
        * Fired when the dropdown opens.
@@ -14344,10 +12568,461 @@ Polymer({
 
     Polymer.PaperMenuButton = PaperMenuButton;
   })();
+/** @polymerBehavior Polymer.IronMultiSelectableBehavior */
+  Polymer.IronMultiSelectableBehaviorImpl = {
+    properties: {
+
+      /**
+       * If true, multiple selections are allowed.
+       */
+      multi: {
+        type: Boolean,
+        value: false,
+        observer: 'multiChanged'
+      },
+
+      /**
+       * Gets or sets the selected elements. This is used instead of `selected` when `multi`
+       * is true.
+       */
+      selectedValues: {
+        type: Array,
+        notify: true
+      },
+
+      /**
+       * Returns an array of currently selected items.
+       */
+      selectedItems: {
+        type: Array,
+        readOnly: true,
+        notify: true
+      },
+
+    },
+
+    observers: [
+      '_updateSelected(attrForSelected, selectedValues)'
+    ],
+
+    /**
+     * Selects the given value. If the `multi` property is true, then the selected state of the
+     * `value` will be toggled; otherwise the `value` will be selected.
+     *
+     * @method select
+     * @param {string} value the value to select.
+     */
+    select: function(value) {
+      if (this.multi) {
+        if (this.selectedValues) {
+          this._toggleSelected(value);
+        } else {
+          this.selectedValues = [value];
+        }
+      } else {
+        this.selected = value;
+      }
+    },
+
+    multiChanged: function(multi) {
+      this._selection.multi = multi;
+    },
+
+    get _shouldUpdateSelection() {
+      return this.selected != null ||
+        (this.selectedValues != null && this.selectedValues.length);
+    },
+
+    _updateSelected: function() {
+      if (this.multi) {
+        this._selectMulti(this.selectedValues);
+      } else {
+        this._selectSelected(this.selected);
+      }
+    },
+
+    _selectMulti: function(values) {
+      this._selection.clear();
+      if (values) {
+        for (var i = 0; i < values.length; i++) {
+          this._selection.setItemSelected(this._valueToItem(values[i]), true);
+        }
+      }
+    },
+
+    _selectionChange: function() {
+      var s = this._selection.get();
+      if (this.multi) {
+        this._setSelectedItems(s);
+      } else {
+        this._setSelectedItems([s]);
+        this._setSelectedItem(s);
+      }
+    },
+
+    _toggleSelected: function(value) {
+      var i = this.selectedValues.indexOf(value);
+      var unselected = i < 0;
+      if (unselected) {
+        this.push('selectedValues',value);
+      } else {
+        this.splice('selectedValues',i,1);
+      }
+      this._selection.setItemSelected(this._valueToItem(value), unselected);
+    }
+  };
+
+  /** @polymerBehavior */
+  Polymer.IronMultiSelectableBehavior = [
+    Polymer.IronSelectableBehavior,
+    Polymer.IronMultiSelectableBehaviorImpl
+  ];
+/**
+   * `Polymer.IronMenuBehavior` implements accessible menu behavior.
+   *
+   * @demo demo/index.html
+   * @polymerBehavior Polymer.IronMenuBehavior
+   */
+  Polymer.IronMenuBehaviorImpl = {
+
+    properties: {
+
+      /**
+       * Returns the currently focused item.
+       * @type {?Object}
+       */
+      focusedItem: {
+        observer: '_focusedItemChanged',
+        readOnly: true,
+        type: Object
+      },
+
+      /**
+       * The attribute to use on menu items to look up the item title. Typing the first
+       * letter of an item when the menu is open focuses that item. If unset, `textContent`
+       * will be used.
+       */
+      attrForItemTitle: {
+        type: String
+      }
+    },
+
+    hostAttributes: {
+      'role': 'menu',
+      'tabindex': '0'
+    },
+
+    observers: [
+      '_updateMultiselectable(multi)'
+    ],
+
+    listeners: {
+      'focus': '_onFocus',
+      'keydown': '_onKeydown',
+      'iron-items-changed': '_onIronItemsChanged'
+    },
+
+    keyBindings: {
+      'up': '_onUpKey',
+      'down': '_onDownKey',
+      'esc': '_onEscKey',
+      'shift+tab:keydown': '_onShiftTabDown'
+    },
+
+    attached: function() {
+      this._resetTabindices();
+    },
+
+    /**
+     * Selects the given value. If the `multi` property is true, then the selected state of the
+     * `value` will be toggled; otherwise the `value` will be selected.
+     *
+     * @param {string} value the value to select.
+     */
+    select: function(value) {
+      if (this._defaultFocusAsync) {
+        this.cancelAsync(this._defaultFocusAsync);
+        this._defaultFocusAsync = null;
+      }
+      var item = this._valueToItem(value);
+      if (item && item.hasAttribute('disabled')) return;
+      this._setFocusedItem(item);
+      Polymer.IronMultiSelectableBehaviorImpl.select.apply(this, arguments);
+    },
+
+    /**
+     * Resets all tabindex attributes to the appropriate value based on the
+     * current selection state. The appropriate value is `0` (focusable) for
+     * the default selected item, and `-1` (not keyboard focusable) for all
+     * other items.
+     */
+    _resetTabindices: function() {
+      var selectedItem = this.multi ? (this.selectedItems && this.selectedItems[0]) : this.selectedItem;
+
+      this.items.forEach(function(item) {
+        item.setAttribute('tabindex', item === selectedItem ? '0' : '-1');
+      }, this);
+    },
+
+    /**
+     * Sets appropriate ARIA based on whether or not the menu is meant to be
+     * multi-selectable.
+     *
+     * @param {boolean} multi True if the menu should be multi-selectable.
+     */
+    _updateMultiselectable: function(multi) {
+      if (multi) {
+        this.setAttribute('aria-multiselectable', 'true');
+      } else {
+        this.removeAttribute('aria-multiselectable');
+      }
+    },
+
+    /**
+     * Given a KeyboardEvent, this method will focus the appropriate item in the
+     * menu (if there is a relevant item, and it is possible to focus it).
+     *
+     * @param {KeyboardEvent} event A KeyboardEvent.
+     */
+    _focusWithKeyboardEvent: function(event) {
+      for (var i = 0, item; item = this.items[i]; i++) {
+        var attr = this.attrForItemTitle || 'textContent';
+        var title = item[attr] || item.getAttribute(attr);
+
+        if (title && title.trim().charAt(0).toLowerCase() === String.fromCharCode(event.keyCode).toLowerCase()) {
+          this._setFocusedItem(item);
+          break;
+        }
+      }
+    },
+
+    /**
+     * Focuses the previous item (relative to the currently focused item) in the
+     * menu.
+     */
+    _focusPrevious: function() {
+      var length = this.items.length;
+      var index = (Number(this.indexOf(this.focusedItem)) - 1 + length) % length;
+      this._setFocusedItem(this.items[index]);
+    },
+
+    /**
+     * Focuses the next item (relative to the currently focused item) in the
+     * menu.
+     */
+    _focusNext: function() {
+      var index = (Number(this.indexOf(this.focusedItem)) + 1) % this.items.length;
+      this._setFocusedItem(this.items[index]);
+    },
+
+    /**
+     * Mutates items in the menu based on provided selection details, so that
+     * all items correctly reflect selection state.
+     *
+     * @param {Element} item An item in the menu.
+     * @param {boolean} isSelected True if the item should be shown in a
+     * selected state, otherwise false.
+     */
+    _applySelection: function(item, isSelected) {
+      if (isSelected) {
+        item.setAttribute('aria-selected', 'true');
+      } else {
+        item.removeAttribute('aria-selected');
+      }
+      Polymer.IronSelectableBehavior._applySelection.apply(this, arguments);
+    },
+
+    /**
+     * Discretely updates tabindex values among menu items as the focused item
+     * changes.
+     *
+     * @param {Element} focusedItem The element that is currently focused.
+     * @param {?Element} old The last element that was considered focused, if
+     * applicable.
+     */
+    _focusedItemChanged: function(focusedItem, old) {
+      old && old.setAttribute('tabindex', '-1');
+      if (focusedItem) {
+        focusedItem.setAttribute('tabindex', '0');
+        focusedItem.focus();
+      }
+    },
+
+    /**
+     * A handler that responds to mutation changes related to the list of items
+     * in the menu.
+     *
+     * @param {CustomEvent} event An event containing mutation records as its
+     * detail.
+     */
+    _onIronItemsChanged: function(event) {
+      var mutations = event.detail;
+      var mutation;
+      var index;
+
+      for (index = 0; index < mutations.length; ++index) {
+        mutation = mutations[index];
+
+        if (mutation.addedNodes.length) {
+          this._resetTabindices();
+          break;
+        }
+      }
+    },
+
+    /**
+     * Handler that is called when a shift+tab keypress is detected by the menu.
+     *
+     * @param {CustomEvent} event A key combination event.
+     */
+    _onShiftTabDown: function(event) {
+      var oldTabIndex = this.getAttribute('tabindex');
+
+      Polymer.IronMenuBehaviorImpl._shiftTabPressed = true;
+
+      this._setFocusedItem(null);
+
+      this.setAttribute('tabindex', '-1');
+
+      this.async(function() {
+        this.setAttribute('tabindex', oldTabIndex);
+        Polymer.IronMenuBehaviorImpl._shiftTabPressed = false;
+        // NOTE(cdata): polymer/polymer#1305
+      }, 1);
+    },
+
+    /**
+     * Handler that is called when the menu receives focus.
+     *
+     * @param {FocusEvent} event A focus event.
+     */
+    _onFocus: function(event) {
+      if (Polymer.IronMenuBehaviorImpl._shiftTabPressed) {
+        // do not focus the menu itself
+        return;
+      }
+
+      this.blur();
+
+      // clear the cached focus item
+      this._defaultFocusAsync = this.async(function() {
+        // focus the selected item when the menu receives focus, or the first item
+        // if no item is selected
+        var selectedItem = this.multi ? (this.selectedItems && this.selectedItems[0]) : this.selectedItem;
+
+        this._setFocusedItem(null);
+
+        if (selectedItem) {
+          this._setFocusedItem(selectedItem);
+        } else {
+          this._setFocusedItem(this.items[0]);
+        }
+      // async 1ms to wait for `select` to get called from `_itemActivate`
+      }, 1);
+    },
+
+    /**
+     * Handler that is called when the up key is pressed.
+     *
+     * @param {CustomEvent} event A key combination event.
+     */
+    _onUpKey: function(event) {
+      // up and down arrows moves the focus
+      this._focusPrevious();
+    },
+
+    /**
+     * Handler that is called when the down key is pressed.
+     *
+     * @param {CustomEvent} event A key combination event.
+     */
+    _onDownKey: function(event) {
+      this._focusNext();
+    },
+
+    /**
+     * Handler that is called when the esc key is pressed.
+     *
+     * @param {CustomEvent} event A key combination event.
+     */
+    _onEscKey: function(event) {
+      // esc blurs the control
+      this.focusedItem.blur();
+    },
+
+    /**
+     * Handler that is called when a keydown event is detected.
+     *
+     * @param {KeyboardEvent} event A keyboard event.
+     */
+    _onKeydown: function(event) {
+      if (!this.keyboardEventMatchesKeys(event, 'up down esc')) {
+        // all other keys focus the menu item starting with that character
+        this._focusWithKeyboardEvent(event);
+      }
+      event.stopPropagation();
+    },
+
+    // override _activateHandler
+    _activateHandler: function(event) {
+      Polymer.IronSelectableBehavior._activateHandler.call(this, event);
+      event.stopPropagation();
+    }
+  };
+
+  Polymer.IronMenuBehaviorImpl._shiftTabPressed = false;
+
+  /** @polymerBehavior Polymer.IronMenuBehavior */
+  Polymer.IronMenuBehavior = [
+    Polymer.IronMultiSelectableBehavior,
+    Polymer.IronA11yKeysBehavior,
+    Polymer.IronMenuBehaviorImpl
+  ];
 (function() {
       Polymer({
         is: 'paper-menu',
 
+<<<<<<< HEAD
+          /**
+           * A pixel value that will be added to the position calculated for the
+           * given `horizontalAlign`, in the direction of alignment. You can think
+           * of it as increasing or decreasing the distance to the side of the
+           * screen given by `horizontalAlign`.
+           *
+           * If `horizontalAlign` is "left", this offset will increase or decrease
+           * the distance to the left side of the screen: a negative offset will
+           * move the dropdown to the left; a positive one, to the right.
+           *
+           * Conversely if `horizontalAlign` is "right", this offset will increase
+           * or decrease the distance to the right side of the screen: a negative
+           * offset will move the dropdown to the right; a positive one, to the left.
+           */
+          horizontalOffset: {
+            type: Number,
+            value: 0,
+            notify: true
+          },
+
+          /**
+           * A pixel value that will be added to the position calculated for the
+           * given `verticalAlign`, in the direction of alignment. You can think
+           * of it as increasing or decreasing the distance to the side of the
+           * screen given by `verticalAlign`.
+           *
+           * If `verticalAlign` is "top", this offset will increase or decrease
+           * the distance to the top side of the screen: a negative offset will
+           * move the dropdown upwards; a positive one, downwards.
+           *
+           * Conversely if `verticalAlign` is "bottom", this offset will increase
+           * or decrease the distance to the bottom side of the screen: a negative
+           * offset will move the dropdown downwards; a positive one, upwards.
+           */
+          verticalOffset: {
+            type: Number,
+            value: 0,
+            notify: true
+          },
+=======
         behaviors: [
           Polymer.IronMenuBehavior
         ]
@@ -14356,6 +13031,7 @@ Polymer({
 Polymer({
 
     is: 'iron-collapse',
+>>>>>>> hotfix-db
 
     properties: {
 
@@ -14380,22 +13056,12 @@ Polymer({
         value: false,
         notify: true,
         observer: '_openedChanged'
-      },
-
-      /**
-       * Set noAnimation to true to disable animations
-       *
-       * @attribute noAnimation
-       */
-      noAnimation: {
-        type: Boolean
-      },
+      }
 
     },
 
     hostAttributes: {
       role: 'group',
-      'aria-hidden': 'true',
       'aria-expanded': 'false'
     },
 
@@ -14403,9 +13069,10 @@ Polymer({
       transitionend: '_transitionEnd'
     },
 
-    attached: function() {
-      // It will take care of setting correct classes and styles.
-      this._transitionEnd();
+    ready: function() {
+      // Avoid transition at the beginning e.g. page loads and enable
+      // transitions only after the element is rendered and ready.
+      this._enableTransition = true;
     },
 
     /**
@@ -14418,252 +13085,280 @@ Polymer({
     },
 
     show: function() {
-      this.opened = true;
+      this.opened = true;    
     },
 
     hide: function() {
-      this.opened = false;
+      this.opened = false;    
     },
 
     updateSize: function(size, animated) {
-      // No change!
-      if (this.style[this.dimension] === size) {
-        return;
+      this.enableTransition(animated);
+      var s = this.style;
+      var nochange = s[this.dimension] === size;
+      s[this.dimension] = size;
+      if (animated && nochange) {
+        this._transitionEnd();
       }
-
-      this._updateTransition(false);
-      // If we can animate, must do some prep work.
-      if (animated && !this.noAnimation) {
-        // Animation will start at the current size.
-        var startSize = this._calcSize();
-        // For `auto` we must calculate what is the final size for the animation.
-        // After the transition is done, _transitionEnd will set the size back to `auto`.
-        if (size === 'auto') {
-          this.style[this.dimension] = size;
-          size = this._calcSize();
-        }
-        // Go to startSize without animation.
-        this.style[this.dimension] = startSize;
-        // Force layout to ensure transition will go. Set offsetHeight to itself
-        // so that compilers won't remove it.
-        this.offsetHeight = this.offsetHeight;
-        // Enable animation.
-        this._updateTransition(true);
-      }
-      // Set the final size.
-      this.style[this.dimension] = size;
     },
 
-    /**
-     * enableTransition() is deprecated, but left over so it doesn't break existing code.
-     * Please use `noAnimation` property instead.
-     *
-     * @method enableTransition
-     * @deprecated since version 1.0.4
-     */
     enableTransition: function(enabled) {
-      console.warn('`enableTransition()` is deprecated, use `noAnimation` instead.');
-      this.noAnimation = !enabled;
+      this.style.transitionDuration = (enabled && this._enableTransition) ? '' : '0s';
     },
 
-    _updateTransition: function(enabled) {
-      this.style.transitionDuration = (enabled && !this.noAnimation) ? '' : '0s';
-    },
+<<<<<<< HEAD
+        /**
+         * Whether the text direction is RTL
+         */
+        _isRTL: function() {
+          return window.getComputedStyle(this).direction == 'rtl';
+        },
 
+        /**
+         * The element that should be used to position the dropdown when
+         * it opens, if no position target is configured.
+         */
+        get _defaultPositionTarget() {
+          var parent = Polymer.dom(this).parentNode;
+=======
     _horizontalChanged: function() {
       this.dimension = this.horizontal ? 'width' : 'height';
       this.style.transitionProperty = this.dimension;
     },
+>>>>>>> hotfix-db
 
     _openedChanged: function() {
-      this.setAttribute('aria-expanded', this.opened);
-      this.setAttribute('aria-hidden', !this.opened);
-
-      this.toggleClass('iron-collapse-closed', false);
-      this.toggleClass('iron-collapse-opened', false);
-      this.updateSize(this.opened ? 'auto' : '0px', true);
-
-      // Focus the current collapse.
       if (this.opened) {
+        this.setAttribute('aria-expanded', 'true');
+        this.setAttribute('aria-hidden', 'false');
+
+        this.toggleClass('iron-collapse-closed', false);
+        this.updateSize('auto', false);
+        var s = this._calcSize();
+        this.updateSize('0px', false);
+        // force layout to ensure transition will go
+        /** @suppress {suspiciousCode} */ this.offsetHeight;
+        this.updateSize(s, true);
+        // focus the current collapse
         this.focus();
-      }
-      if (this.noAnimation) {
-        this._transitionEnd();
+      } else {
+        this.setAttribute('aria-expanded', 'false');
+        this.setAttribute('aria-hidden', 'true');
+
+        this.toggleClass('iron-collapse-opened', false);
+        this.updateSize(this._calcSize(), false);
+        // force layout to ensure transition will go
+        /** @suppress {suspiciousCode} */ this.offsetHeight;
+        this.updateSize('0px', true);
       }
     },
 
     _transitionEnd: function() {
       if (this.opened) {
-        this.style[this.dimension] = 'auto';
+        this.updateSize('auto', false);
       }
       this.toggleClass('iron-collapse-closed', !this.opened);
       this.toggleClass('iron-collapse-opened', this.opened);
-      this._updateTransition(false);
+      this.enableTransition(false);
     },
 
     _calcSize: function() {
       return this.getBoundingClientRect()[this.dimension] + 'px';
-    }
+    },
+
+<<<<<<< HEAD
+          // In RTL, the direction flips, so what is "right" in LTR becomes "left".
+          var isRTL = this._isRTL();
+          if ((!isRTL && this.horizontalAlign === 'right') ||
+              (isRTL && this.horizontalAlign === 'left')) {
+            target = document.documentElement.clientWidth - this._positionRect.right;
+          } else {
+            target = this._positionRect.left;
+          }
+=======
+>>>>>>> hotfix-db
 
   });
 (function() {
+      Polymer({
+        is: 'paper-submenu',
 
-    Polymer({
+        properties: {
+          /**
+           * Fired when the submenu is opened.
+           *
+           * @event paper-submenu-open
+           */
 
-      is: 'paper-submenu',
+          /**
+           * Fired when the submenu is closed.
+           *
+           * @event paper-submenu-close
+           */
 
-      properties: {
+          /**
+           * Set opened to true to show the collapse element and to false to hide it.
+           *
+           * @attribute opened
+           */
+          opened: {
+            type: Boolean,
+            value: false,
+            notify: true,
+            observer: '_openedChanged'
+          }
+        },
+
+        behaviors: [
+          Polymer.IronControlState
+        ],
+
+        get __parent() {
+          return Polymer.dom(this).parentNode;
+        },
+
+<<<<<<< HEAD
         /**
-         * Fired when the submenu is opened.
-         *
-         * @event paper-submenu-open
+         * The horizontal align value, accounting for the RTL/LTR text direction.
          */
+        get _localeHorizontalAlign() {
+          // In RTL, "left" becomes "right".
+          if (this._isRTL()) {
+            return this.horizontalAlign === 'right' ? 'left' : 'right';
+          } else {
+            return this.horizontalAlign;
+          }
+        },
 
         /**
-         * Fired when the submenu is closed.
+         * Called when the value of `opened` changes.
          *
-         * @event paper-submenu-close
+         * @param {boolean} opened True if the dropdown is opened.
          */
+        _openedChanged: function(opened) {
+          if (opened && this.disabled) {
+            this.cancel();
+          } else {
+            this.cancelAnimation();
+            this._prepareDropdown();
+            Polymer.IronOverlayBehaviorImpl._openedChanged.apply(this, arguments);
+          }
+
+          if (this.opened) {
+            this._focusContent();
+          }
+=======
+        get __trigger() {
+          return Polymer.dom(this.$.trigger).getDistributedNodes()[0];
+>>>>>>> hotfix-db
+        },
+
+        attached: function() {
+          this.listen(this.__parent, 'iron-activate', '_onParentIronActivate');
+        },
+
+        dettached: function() {
+          this.unlisten(this.__parent, 'iron-activate', '_onParentIronActivate');
+        },
 
         /**
-         * Set opened to true to show the collapse element and to false to hide it.
-         *
-         * @attribute opened
+         * Expand the submenu content.
          */
-        opened: {
-          type: Boolean,
-          value: false,
-          notify: true,
-          observer: '_openedChanged'
-        }
-      },
-
-      behaviors: [
-        Polymer.IronControlState
-      ],
-
-      listeners: {
-        'focus': '_onFocus'
-      },
-
-      get __parent() {
-        return Polymer.dom(this).parentNode;
-      },
-
-      get __trigger() {
-        return Polymer.dom(this.$.trigger).getDistributedNodes()[0];
-      },
-
-      get __content() {
-        return Polymer.dom(this.$.content).getDistributedNodes()[0];
-      },
-
-      attached: function() {
-        this.listen(this.__parent, 'iron-activate', '_onParentIronActivate');
-      },
-
-      dettached: function() {
-        this.unlisten(this.__parent, 'iron-activate', '_onParentIronActivate');
-      },
-
-      /**
-       * Expand the submenu content.
-       */
-      open: function() {
-        if (!this.disabled && !this._active) {
+        open: function() {
+          if (this.disabled)
+            return;
           this.$.collapse.show();
           this._active = true;
-          this.__trigger && this.__trigger.classList.add('iron-selected');
-          this.__content && this.__content.focus();
-        }
-      },
+          this.__trigger.classList.add('iron-selected');
+        },
 
-      /**
-       * Collapse the submenu content.
-       */
-      close: function() {
-        if (this._active) {
+        /**
+         * Collapse the submenu content.
+         */
+        close: function() {
           this.$.collapse.hide();
           this._active = false;
-          this.__trigger && this.__trigger.classList.remove('iron-selected');
-        }
-      },
+          this.__trigger.classList.remove('iron-selected');
+        },
 
-      /**
-       * Toggle the submenu.
-       */
-      toggle: function() {
-        if (this._active) {
-          this.close();
-        } else {
-          this.open();
-        }
-      },
+        /**
+         * A handler that is called when the trigger is tapped.
+         */
+        _onTap: function() {
+          if (this.disabled)
+            return;
+          this.$.collapse.toggle();
+        },
 
-      /**
-       * A handler that is called when the trigger is tapped.
-       */
-      _onTap: function(e) {
-        if (!this.disabled) {
-          this.toggle();
-        }
-      },
+        /**
+         * Toggles the submenu content when the trigger is tapped.
+         */
+        _openedChanged: function(opened, oldOpened) {
+          if (opened) {
+            this.fire('paper-submenu-open');
+          } else if (oldOpened != null) {
+            this.fire('paper-submenu-close');
+          }
+        },
 
-      /**
-       * Toggles the submenu content when the trigger is tapped.
-       */
-      _openedChanged: function(opened, oldOpened) {
-        if (opened) {
-          this.fire('paper-submenu-open');
-        } else if (oldOpened != null) {
-          this.fire('paper-submenu-close');
-        }
-      },
+        /**
+         * A handler that is called when `iron-activate` is fired.
+         *
+         * @param {CustomEvent} event An `iron-activate` event.
+         */
+        _onParentIronActivate: function(event) {
+          if (Polymer.Gestures.findOriginalTarget(event) !== this.__parent) {
+            return;
+          }
 
-      /**
-       * A handler that is called when `iron-activate` is fired.
-       *
-       * @param {CustomEvent} event An `iron-activate` event.
-       */
-      _onParentIronActivate: function(event) {
-        var parent = this.__parent;
-        if (Polymer.dom(event).localTarget === parent) {
           // The activated item can either be this submenu, in which case it
           // should be expanded, or any of the other sibling submenus, in which
           // case this submenu should be collapsed.
-          if (event.detail.item !== this && !parent.multi) {
+          if (event.detail.item == this) {
+            if (this._active)
+              return;
+            this.open();
+          } else {
             this.close();
           }
+        },
+
+        /**
+         * If the dropdown is open when disabled becomes true, close the
+         * dropdown.
+         *
+         * @param {boolean} disabled True if disabled, otherwise false.
+         */
+        _disabledChanged: function(disabled) {
+          Polymer.IronControlState._disabledChanged.apply(this, arguments);
+          if (disabled && this._active) {
+            this.close();
+
+          }
         }
-      },
+      });
+    })();
+/** @polymerBehavior Polymer.PaperItemBehavior */
+  Polymer.PaperItemBehaviorImpl = {
+    hostAttributes: {
+      role: 'option',
+      tabindex: '0'
+    }
+  };
 
-      /**
-       * If the dropdown is open when disabled becomes true, close the
-       * dropdown.
-       *
-       * @param {boolean} disabled True if disabled, otherwise false.
-       */
-      _disabledChanged: function(disabled) {
-        Polymer.IronControlState._disabledChanged.apply(this, arguments);
-        if (disabled && this._active) {
-          this.close();
-        }
-      },
-
-      /**
-       * Handler that is called when the menu receives focus.
-       *
-       * @param {FocusEvent} event A focus event.
-       */
-      _onFocus: function(event) {
-        this.__trigger && this.__trigger.focus();
-      }
-
-    });
-
-  })();
+<<<<<<< HEAD
+          this.style[this._localeHorizontalAlign] =
+            this._horizontalAlignTargetValue + 'px';
+=======
+  /** @polymerBehavior */
+  Polymer.PaperItemBehavior = [
+    Polymer.IronControlState,
+    Polymer.IronButtonState,
+    Polymer.PaperItemBehaviorImpl
+  ];
 Polymer({
       is: 'paper-item',
+>>>>>>> hotfix-db
 
       behaviors: [
         Polymer.PaperItemBehavior
@@ -14672,6 +13367,227 @@ Polymer({
 Polymer({
       is: 'paper-item-body'
     });
+/**
+Use `Polymer.PaperDialogBehavior` and `paper-dialog-shared-styles.html` to implement a Material Design
+dialog.
+
+For example, if `<paper-dialog-impl>` implements this behavior:
+
+    <paper-dialog-impl>
+        <h2>Header</h2>
+        <div>Dialog body</div>
+        <div class="buttons">
+            <paper-button dialog-dismiss>Cancel</paper-button>
+            <paper-button dialog-confirm>Accept</paper-button>
+        </div>
+    </paper-dialog-impl>
+
+`paper-dialog-shared-styles.html` provide styles for a header, content area, and an action area for buttons.
+Use the `<h2>` tag for the header and the `buttons` class for the action area. You can use the
+`paper-dialog-scrollable` element (in its own repository) if you need a scrolling content area.
+
+Use the `dialog-dismiss` and `dialog-confirm` attributes on interactive controls to close the
+dialog. If the user dismisses the dialog with `dialog-confirm`, the `closingReason` will update
+to include `confirmed: true`.
+
+### Styling
+
+The following custom properties and mixins are available for styling.
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--paper-dialog-background-color` | Dialog background color                     | `--primary-background-color`
+`--paper-dialog-color`            | Dialog foreground color                     | `--primary-text-color`
+`--paper-dialog`                  | Mixin applied to the dialog                 | `{}`
+`--paper-dialog-title`            | Mixin applied to the title (`<h2>`) element | `{}`
+`--paper-dialog-button-color`     | Button area foreground color                | `--default-primary-color`
+
+### Accessibility
+
+This element has `role="dialog"` by default. Depending on the context, it may be more appropriate
+to override this attribute with `role="alertdialog"`.
+
+If `modal` is set, the element will set `aria-modal` and prevent the focus from exiting the element.
+It will also ensure that focus remains in the dialog.
+
+The `aria-labelledby` attribute will be set to the header element, if one exists.
+
+@hero hero.svg
+@demo demo/index.html
+@polymerBehavior Polymer.PaperDialogBehavior
+*/
+
+  Polymer.PaperDialogBehaviorImpl = {
+
+    hostAttributes: {
+      'role': 'dialog',
+      'tabindex': '-1'
+    },
+
+    properties: {
+
+      /**
+       * If `modal` is true, this implies `no-cancel-on-outside-click` and `with-backdrop`.
+       */
+      modal: {
+        observer: '_modalChanged',
+        type: Boolean,
+        value: false
+      },
+
+      /** @type {?Node} */
+      _lastFocusedElement: {
+        type: Object
+      },
+
+      _boundOnFocus: {
+        type: Function,
+        value: function() {
+          return this._onFocus.bind(this);
+        }
+      },
+
+      _boundOnBackdropClick: {
+        type: Function,
+        value: function() {
+          return this._onBackdropClick.bind(this);
+        }
+      }
+
+    },
+
+    listeners: {
+      'tap': '_onDialogClick',
+      'iron-overlay-opened': '_onIronOverlayOpened',
+      'iron-overlay-closed': '_onIronOverlayClosed'
+    },
+
+    attached: function() {
+      this._observer = this._observe(this);
+      this._updateAriaLabelledBy();
+    },
+
+    detached: function() {
+      if (this._observer) {
+        this._observer.disconnect();
+      }
+    },
+
+    _observe: function(node) {
+      var observer = new MutationObserver(function() {
+        this._updateAriaLabelledBy();
+      }.bind(this));
+      observer.observe(node, {
+        childList: true,
+        subtree: true
+      });
+      return observer;
+    },
+
+    _modalChanged: function() {
+      if (this.modal) {
+        this.setAttribute('aria-modal', 'true');
+      } else {
+        this.setAttribute('aria-modal', 'false');
+      }
+      // modal implies noCancelOnOutsideClick and withBackdrop if true, don't overwrite
+      // those properties otherwise.
+      if (this.modal) {
+        this.noCancelOnOutsideClick = true;
+        this.withBackdrop = true;
+      }
+    },
+
+    _updateAriaLabelledBy: function() {
+      var header = Polymer.dom(this).querySelector('h2');
+      if (!header) {
+        this.removeAttribute('aria-labelledby');
+        return;
+      }
+      var headerId = header.getAttribute('id');
+      if (headerId && this.getAttribute('aria-labelledby') === headerId) {
+        return;
+      }
+      // set aria-describedBy to the header element
+      var labelledById;
+      if (headerId) {
+        labelledById = headerId;
+      } else {
+        labelledById = 'paper-dialog-header-' + new Date().getUTCMilliseconds();
+        header.setAttribute('id', labelledById);
+      }
+      this.setAttribute('aria-labelledby', labelledById);
+    },
+
+    _updateClosingReasonConfirmed: function(confirmed) {
+      this.closingReason = this.closingReason || {};
+      this.closingReason.confirmed = confirmed;
+    },
+
+    _onDialogClick: function(event) {
+      var target = event.target;
+      while (target && target !== this) {
+        if (target.hasAttribute) {
+          if (target.hasAttribute('dialog-dismiss')) {
+            this._updateClosingReasonConfirmed(false);
+            this.close();
+            break;
+          } else if (target.hasAttribute('dialog-confirm')) {
+            this._updateClosingReasonConfirmed(true);
+            this.close();
+            break;
+          }
+        }
+        target = target.parentNode;
+      }
+    },
+
+    _onIronOverlayOpened: function() {
+      if (this.modal) {
+        document.body.addEventListener('focus', this._boundOnFocus, true);
+        this.backdropElement.addEventListener('click', this._boundOnBackdropClick);
+      }
+    },
+
+    _onIronOverlayClosed: function() {
+      document.body.removeEventListener('focus', this._boundOnFocus, true);
+      this.backdropElement.removeEventListener('click', this._boundOnBackdropClick);
+    },
+
+    _onFocus: function(event) {
+      if (this.modal) {
+        var target = event.target;
+        while (target && target !== this && target !== document.body) {
+          target = target.parentNode;
+        }
+        if (target) {
+          if (target === document.body) {
+            if (this._lastFocusedElement) {
+              this._lastFocusedElement.focus();
+            } else {
+              this._focusNode.focus();
+            }
+          } else {
+            this._lastFocusedElement = event.target;
+          }
+        }
+      }
+    },
+
+    _onBackdropClick: function() {
+      if (this.modal) {
+        if (this._lastFocusedElement) {
+          this._lastFocusedElement.focus();
+        } else {
+          this._focusNode.focus();
+        }
+      }
+    }
+
+  };
+
+  /** @polymerBehavior */
+  Polymer.PaperDialogBehavior = [Polymer.IronOverlayBehavior, Polymer.PaperDialogBehaviorImpl];
 (function() {
 
   Polymer({
@@ -14968,6 +13884,78 @@ Polymer({
          */
       });
     })();
+/** @polymerBehavior */
+  Polymer.PaperSpinnerBehavior = {
+
+    listeners: {
+      'animationend': '__reset',
+      'webkitAnimationEnd': '__reset'
+    },
+
+    properties: {
+      /**
+       * Displays the spinner.
+       */
+      active: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true,
+        observer: '__activeChanged'
+      },
+
+      /**
+       * Alternative text content for accessibility support.
+       * If alt is present, it will add an aria-label whose content matches alt when active.
+       * If alt is not present, it will default to 'loading' as the alt value.
+       */
+      alt: {
+        type: String,
+        value: 'loading',
+        observer: '__altChanged'
+      },
+
+      __coolingDown: {
+        type: Boolean,
+        value: false
+      }
+    },
+
+    __computeContainerClasses: function(active, coolingDown) {
+      return [
+        active || coolingDown ? 'active' : '',
+        coolingDown ? 'cooldown' : ''
+      ].join(' ');
+    },
+
+    __activeChanged: function(active, old) {
+      this.__setAriaHidden(!active);
+      this.__coolingDown = !active && old;
+    },
+
+    __altChanged: function(alt) {
+      // user-provided `aria-label` takes precedence over prototype default
+      if (alt === this.getPropertyInfo('alt').value) {
+        this.alt = this.getAttribute('aria-label') || alt;
+      } else {
+        this.__setAriaHidden(alt==='');
+        this.setAttribute('aria-label', alt);
+      }
+    },
+
+    __setAriaHidden: function(hidden) {
+      var attr = 'aria-hidden';
+      if (hidden) {
+        this.setAttribute(attr, 'true');
+      } else {
+        this.removeAttribute(attr);
+      }
+    },
+
+    __reset: function() {
+      this.active = false;
+      this.__coolingDown = false;
+    }
+  };
 Polymer({
       is: 'paper-spinner',
 
@@ -14975,7 +13963,105 @@ Polymer({
         Polymer.PaperSpinnerBehavior
       ]
     });
+/**
+ * `iron-range-behavior` provides the behavior for something with a minimum to maximum range.
+ *
+ * @demo demo/index.html
+ * @polymerBehavior
+ */
+ Polymer.IronRangeBehavior = {
+
+  properties: {
+
+    /**
+     * The number that represents the current value.
+     */
+    value: {
+      type: Number,
+      value: 0,
+      notify: true,
+      reflectToAttribute: true
+    },
+
+    /**
+     * The number that indicates the minimum value of the range.
+     */
+    min: {
+      type: Number,
+      value: 0,
+      notify: true
+    },
+
+    /**
+     * The number that indicates the maximum value of the range.
+     */
+    max: {
+      type: Number,
+      value: 100,
+      notify: true
+    },
+
+    /**
+     * Specifies the value granularity of the range's value.
+     */
+    step: {
+      type: Number,
+      value: 1,
+      notify: true
+    },
+
+    /**
+     * Returns the ratio of the value.
+     */
+    ratio: {
+      type: Number,
+      value: 0,
+      readOnly: true,
+      notify: true
+    },
+  },
+
+  observers: [
+    '_update(value, min, max, step)'
+  ],
+
+  _calcRatio: function(value) {
+    return (this._clampValue(value) - this.min) / (this.max - this.min);
+  },
+
+  _clampValue: function(value) {
+    return Math.min(this.max, Math.max(this.min, this._calcStep(value)));
+  },
+
+  _calcStep: function(value) {
+   /**
+    * if we calculate the step using
+    * `Math.round(value / step) * step` we may hit a precision point issue
+    * eg. 0.1 * 0.2 =  0.020000000000000004
+    * http://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html
+    *
+    * as a work around we can divide by the reciprocal of `step`
+    */
+    // polymer/issues/2493
+    value = parseFloat(value);
+    return this.step ? (Math.round((value + this.min) / this.step) -
+        (this.min / this.step)) / (1 / this.step) : value;
+  },
+
+  _validateValue: function() {
+    var v = this._clampValue(this.value);
+    this.value = this.oldValue = isNaN(v) ? this.oldValue : v;
+    return this.value !== v;
+  },
+
+  _update: function() {
+    this._validateValue();
+    this._setRatio(this._calcRatio(this.value) * 100);
+  }
+
+};
 Polymer({
+
     is: 'paper-progress',
 
     behaviors: [
@@ -14983,6 +14069,7 @@ Polymer({
     ],
 
     properties: {
+
       /**
        * The number that represents the current secondary progress.
        */
@@ -15020,9 +14107,20 @@ Polymer({
       }
     },
 
+<<<<<<< HEAD
+    _calculateElevation: function() {
+      if (!this.raised) {
+        this._setElevation(0);
+      } else {
+        Polymer.PaperButtonBehaviorImpl._calculateElevation.apply(this);
+      }
+    }
+    /**
+=======
     observers: [
       '_progressChanged(secondaryProgress, value, min, max)'
     ],
+>>>>>>> hotfix-db
 
     hostAttributes: {
       role: 'progressbar'
@@ -15068,6 +14166,7 @@ Polymer({
     _hideSecondaryProgress: function(secondaryRatio) {
       return secondaryRatio === 0;
     }
+
   });
 Polymer({
       is: 'paper-tooltip',
@@ -15326,6 +14425,629 @@ Polymer({
         }
       },
     });
+/**
+   * `Use Polymer.IronValidatableBehavior` to implement an element that validates user input.
+   * Use the related `Polymer.IronValidatorBehavior` to add custom validation logic to an iron-input.
+   *
+   * By default, an `<iron-form>` element validates its fields when the user presses the submit button.
+   * To validate a form imperatively, call the form's `validate()` method, which in turn will
+   * call `validate()` on all its children. By using `Polymer.IronValidatableBehavior`, your
+   * custom element will get a public `validate()`, which
+   * will return the validity of the element, and a corresponding `invalid` attribute,
+   * which can be used for styling.
+   *
+   * To implement the custom validation logic of your element, you must override
+   * the protected `_getValidity()` method of this behaviour, rather than `validate()`.
+   * See [this](https://github.com/PolymerElements/iron-form/blob/master/demo/simple-element.html)
+   * for an example.
+   *
+   * ### Accessibility
+   *
+   * Changing the `invalid` property, either manually or by calling `validate()` will update the
+   * `aria-invalid` attribute.
+   *
+   * @demo demo/index.html
+   * @polymerBehavior
+   */
+  Polymer.IronValidatableBehavior = {
+
+    properties: {
+
+      /**
+       * Namespace for this validator.
+       */
+      validatorType: {
+        type: String,
+        value: 'validator'
+      },
+
+      /**
+       * Name of the validator to use.
+       */
+      validator: {
+        type: String
+      },
+
+      /**
+       * True if the last call to `validate` is invalid.
+       */
+      invalid: {
+        notify: true,
+        reflectToAttribute: true,
+        type: Boolean,
+        value: false
+      },
+
+      _validatorMeta: {
+        type: Object
+      }
+
+    },
+
+    observers: [
+      '_invalidChanged(invalid)'
+    ],
+
+    get _validator() {
+      return this._validatorMeta && this._validatorMeta.byKey(this.validator);
+    },
+
+    ready: function() {
+      this._validatorMeta = new Polymer.IronMeta({type: this.validatorType});
+    },
+
+    _invalidChanged: function() {
+      if (this.invalid) {
+        this.setAttribute('aria-invalid', 'true');
+      } else {
+        this.removeAttribute('aria-invalid');
+      }
+    },
+
+    /**
+     * @return {boolean} True if the validator `validator` exists.
+     */
+    hasValidator: function() {
+      return this._validator != null;
+    },
+
+    /**
+     * Returns true if the `value` is valid, and updates `invalid`. If you want
+     * your element to have custom validation logic, do not override this method;
+     * override `_getValidity(value)` instead.
+
+     * @param {Object} value The value to be validated. By default, it is passed
+     * to the validator's `validate()` function, if a validator is set.
+     * @return {boolean} True if `value` is valid.
+     */
+    validate: function(value) {
+      this.invalid = !this._getValidity(value);
+      return !this.invalid;
+    },
+
+    /**
+     * Returns true if `value` is valid.  By default, it is passed
+     * to the validator's `validate()` function, if a validator is set. You
+     * should override this method if you want to implement custom validity
+     * logic for your element.
+     *
+     * @param {Object} value The value to be validated.
+     * @return {boolean} True if `value` is valid.
+     */
+
+    _getValidity: function(value) {
+      if (this.hasValidator()) {
+        return this._validator.validate(value);
+      }
+      return true;
+    }
+  };
+/**
+  Polymer.IronFormElementBehavior enables a custom element to be included
+  in an `iron-form`.
+
+  @demo demo/index.html
+  @polymerBehavior
+  */
+  Polymer.IronFormElementBehavior = {
+
+    properties: {
+      /**
+       * Fired when the element is added to an `iron-form`.
+       *
+       * @event iron-form-element-register
+       */
+
+      /**
+       * Fired when the element is removed from an `iron-form`.
+       *
+       * @event iron-form-element-unregister
+       */
+
+      /**
+       * The name of this element.
+       */
+      name: {
+        type: String
+      },
+
+      /**
+       * The value for this element.
+       */
+      value: {
+        notify: true,
+        type: String
+      },
+
+      /**
+       * Set to true to mark the input as required. If used in a form, a
+       * custom element that uses this behavior should also use
+       * Polymer.IronValidatableBehavior and define a custom validation method.
+       * Otherwise, a `required` element will always be considered valid.
+       * It's also strongly recommended to provide a visual style for the element
+       * when its value is invalid.
+       */
+      required: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * The form that the element is registered to.
+       */
+      _parentForm: {
+        type: Object
+      }
+    },
+
+    attached: function() {
+      // Note: the iron-form that this element belongs to will set this
+      // element's _parentForm property when handling this event.
+      this.fire('iron-form-element-register');
+    },
+
+    detached: function() {
+      if (this._parentForm) {
+        this._parentForm.fire('iron-form-element-unregister', {target: this});
+      }
+    }
+
+  };
+/**
+   * Use `Polymer.IronCheckedElementBehavior` to implement a custom element
+   * that has a `checked` property, which can be used for validation if the
+   * element is also `required`. Element instances implementing this behavior
+   * will also be registered for use in an `iron-form` element.
+   *
+   * @demo demo/index.html
+   * @polymerBehavior Polymer.IronCheckedElementBehavior
+   */
+  Polymer.IronCheckedElementBehaviorImpl = {
+
+    properties: {
+      /**
+       * Fired when the checked state changes.
+       *
+       * @event iron-change
+       */
+
+      /**
+       * Gets or sets the state, `true` is checked and `false` is unchecked.
+       */
+      checked: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true,
+        notify: true,
+<<<<<<< HEAD
+        observer: '_openedChanged'
+      },
+
+      /**
+       * Set noAnimation to true to disable animations
+       *
+       * @attribute noAnimation
+       */
+      noAnimation: {
+        type: Boolean
+=======
+        observer: '_checkedChanged'
+>>>>>>> hotfix-db
+      },
+
+      /**
+       * If true, the button toggles the active state with each tap or press
+       * of the spacebar.
+       */
+      toggles: {
+        type: Boolean,
+        value: true,
+        reflectToAttribute: true
+      },
+
+<<<<<<< HEAD
+    hostAttributes: {
+      role: 'group',
+      'aria-hidden': 'true',
+      'aria-expanded': 'false'
+=======
+      /* Overriden from Polymer.IronFormElementBehavior */
+      value: {
+        type: String,
+        value: 'on',
+        observer: '_valueChanged'
+      }
+>>>>>>> hotfix-db
+    },
+
+    observers: [
+      '_requiredChanged(required)'
+    ],
+
+<<<<<<< HEAD
+    attached: function() {
+      // It will take care of setting correct classes and styles.
+      this._transitionEnd();
+=======
+    created: function() {
+      // Used by `iron-form` to handle the case that an element with this behavior
+      // doesn't have a role of 'checkbox' or 'radio', but should still only be
+      // included when the form is serialized if `this.checked === true`.
+      this._hasIronCheckedElementBehavior = true;
+>>>>>>> hotfix-db
+    },
+
+    /**
+     * Returns false if the element is required and not checked, and true otherwise.
+     * @return {boolean} true if `required` is false, or if `required` and `checked` are both true.
+     */
+<<<<<<< HEAD
+    toggle: function() {
+      this.opened = !this.opened;
+    },
+
+    show: function() {
+      this.opened = true;
+    },
+
+    hide: function() {
+      this.opened = false;
+    },
+
+    updateSize: function(size, animated) {
+      // No change!
+      if (this.style[this.dimension] === size) {
+        return;
+      }
+
+      this._updateTransition(false);
+      // If we can animate, must do some prep work.
+      if (animated && !this.noAnimation) {
+        // Animation will start at the current size.
+        var startSize = this._calcSize();
+        // For `auto` we must calculate what is the final size for the animation.
+        // After the transition is done, _transitionEnd will set the size back to `auto`.
+        if (size === 'auto') {
+          this.style[this.dimension] = size;
+          size = this._calcSize();
+        }
+        // Go to startSize without animation.
+        this.style[this.dimension] = startSize;
+        // Force layout to ensure transition will go. Set offsetHeight to itself
+        // so that compilers won't remove it.
+        this.offsetHeight = this.offsetHeight;
+        // Enable animation.
+        this._updateTransition(true);
+=======
+    _getValidity: function(_value) {
+      return this.disabled || !this.required || (this.required && this.checked);
+    },
+
+    /**
+     * Update the aria-required label when `required` is changed.
+     */
+    _requiredChanged: function() {
+      if (this.required) {
+        this.setAttribute('aria-required', 'true');
+      } else {
+        this.removeAttribute('aria-required');
+>>>>>>> hotfix-db
+      }
+      // Set the final size.
+      this.style[this.dimension] = size;
+    },
+
+    /**
+<<<<<<< HEAD
+     * enableTransition() is deprecated, but left over so it doesn't break existing code.
+     * Please use `noAnimation` property instead.
+     *
+     * @method enableTransition
+     * @deprecated since version 1.0.4
+     */
+    enableTransition: function(enabled) {
+      console.warn('`enableTransition()` is deprecated, use `noAnimation` instead.');
+      this.noAnimation = !enabled;
+    },
+
+    _updateTransition: function(enabled) {
+      this.style.transitionDuration = (enabled && !this.noAnimation) ? '' : '0s';
+    },
+
+    _horizontalChanged: function() {
+      this.dimension = this.horizontal ? 'width' : 'height';
+      this.style.transitionProperty = this.dimension;
+    },
+
+    _openedChanged: function() {
+      this.setAttribute('aria-expanded', this.opened);
+      this.setAttribute('aria-hidden', !this.opened);
+
+      this.toggleClass('iron-collapse-closed', false);
+      this.toggleClass('iron-collapse-opened', false);
+      this.updateSize(this.opened ? 'auto' : '0px', true);
+
+      // Focus the current collapse.
+      if (this.opened) {
+        this.focus();
+      }
+      if (this.noAnimation) {
+        this._transitionEnd();
+      }
+    },
+
+    _transitionEnd: function() {
+      if (this.opened) {
+        this.style[this.dimension] = 'auto';
+      }
+      this.toggleClass('iron-collapse-closed', !this.opened);
+      this.toggleClass('iron-collapse-opened', this.opened);
+      this._updateTransition(false);
+    },
+
+    _calcSize: function() {
+      return this.getBoundingClientRect()[this.dimension] + 'px';
+    }
+
+  });
+(function() {
+
+    Polymer({
+
+      is: 'paper-submenu',
+
+      properties: {
+        /**
+         * Fired when the submenu is opened.
+         *
+         * @event paper-submenu-open
+         */
+
+        /**
+         * Fired when the submenu is closed.
+         *
+         * @event paper-submenu-close
+         */
+
+        /**
+         * Set opened to true to show the collapse element and to false to hide it.
+         *
+         * @attribute opened
+         */
+        opened: {
+          type: Boolean,
+          value: false,
+          notify: true,
+          observer: '_openedChanged'
+        }
+      },
+
+      behaviors: [
+        Polymer.IronControlState
+      ],
+
+      listeners: {
+        'focus': '_onFocus'
+      },
+
+      get __parent() {
+        return Polymer.dom(this).parentNode;
+      },
+
+      get __trigger() {
+        return Polymer.dom(this.$.trigger).getDistributedNodes()[0];
+      },
+
+      get __content() {
+        return Polymer.dom(this.$.content).getDistributedNodes()[0];
+      },
+
+      attached: function() {
+        this.listen(this.__parent, 'iron-activate', '_onParentIronActivate');
+      },
+
+      dettached: function() {
+        this.unlisten(this.__parent, 'iron-activate', '_onParentIronActivate');
+      },
+
+      /**
+       * Expand the submenu content.
+       */
+      open: function() {
+        if (!this.disabled && !this._active) {
+          this.$.collapse.show();
+          this._active = true;
+          this.__trigger && this.__trigger.classList.add('iron-selected');
+          this.__content && this.__content.focus();
+        }
+      },
+
+      /**
+       * Collapse the submenu content.
+       */
+      close: function() {
+        if (this._active) {
+          this.$.collapse.hide();
+          this._active = false;
+          this.__trigger && this.__trigger.classList.remove('iron-selected');
+        }
+      },
+
+      /**
+       * Toggle the submenu.
+       */
+      toggle: function() {
+        if (this._active) {
+          this.close();
+        } else {
+          this.open();
+        }
+      },
+
+      /**
+       * A handler that is called when the trigger is tapped.
+       */
+      _onTap: function(e) {
+        if (!this.disabled) {
+          this.toggle();
+        }
+      },
+
+      /**
+       * Toggles the submenu content when the trigger is tapped.
+       */
+      _openedChanged: function(opened, oldOpened) {
+        if (opened) {
+          this.fire('paper-submenu-open');
+        } else if (oldOpened != null) {
+          this.fire('paper-submenu-close');
+        }
+      },
+
+      /**
+       * A handler that is called when `iron-activate` is fired.
+       *
+       * @param {CustomEvent} event An `iron-activate` event.
+       */
+      _onParentIronActivate: function(event) {
+        var parent = this.__parent;
+        if (Polymer.dom(event).localTarget === parent) {
+          // The activated item can either be this submenu, in which case it
+          // should be expanded, or any of the other sibling submenus, in which
+          // case this submenu should be collapsed.
+          if (event.detail.item !== this && !parent.multi) {
+            this.close();
+          }
+        }
+      },
+
+      /**
+       * If the dropdown is open when disabled becomes true, close the
+       * dropdown.
+       *
+       * @param {boolean} disabled True if disabled, otherwise false.
+       */
+      _disabledChanged: function(disabled) {
+        Polymer.IronControlState._disabledChanged.apply(this, arguments);
+        if (disabled && this._active) {
+          this.close();
+        }
+      },
+
+      /**
+       * Handler that is called when the menu receives focus.
+       *
+       * @param {FocusEvent} event A focus event.
+       */
+      _onFocus: function(event) {
+        this.__trigger && this.__trigger.focus();
+      }
+
+    });
+
+  })();
+Polymer({
+      is: 'paper-item',
+
+      behaviors: [
+        Polymer.PaperItemBehavior
+      ]
+    });
+Polymer({
+      is: 'paper-item-body'
+    });
+(function() {
+
+  Polymer({
+
+    is: 'paper-dialog',
+=======
+     * Fire `iron-changed` when the checked state changes.
+     */
+    _checkedChanged: function() {
+      this.active = this.checked;
+      this.fire('iron-change');
+    },
+
+    /**
+     * Reset value to 'on' if it is set to `undefined`.
+     */
+    _valueChanged: function() {
+      if (this.value === undefined || this.value === null) {
+        this.value = 'on';
+      }
+    }
+  };
+
+  /** @polymerBehavior Polymer.IronCheckedElementBehavior */
+  Polymer.IronCheckedElementBehavior = [
+    Polymer.IronFormElementBehavior,
+    Polymer.IronValidatableBehavior,
+    Polymer.IronCheckedElementBehaviorImpl
+  ];
+/**
+   * Use `Polymer.PaperCheckedElementBehavior` to implement a custom element
+   * that has a `checked` property similar to `Polymer.IronCheckedElementBehavior`
+   * and is compatible with having a ripple effect.
+   * @polymerBehavior Polymer.PaperCheckedElementBehavior
+   */
+  Polymer.PaperCheckedElementBehaviorImpl = {
+
+    /**
+     * Synchronizes the element's checked state with its ripple effect.
+     */
+    _checkedChanged: function() {
+      Polymer.IronCheckedElementBehaviorImpl._checkedChanged.call(this);
+      if (this.hasRipple()) {
+        if (this.checked) {
+          this._ripple.setAttribute('checked', '');
+        } else {
+          this._ripple.removeAttribute('checked');
+        }
+      }
+    },
+
+    /**
+     * Synchronizes the element's `active` and `checked` state.
+     */
+    _buttonStateChanged: function() {
+      Polymer.PaperRippleBehavior._buttonStateChanged.call(this);
+      if (this.disabled) {
+        return;
+      }
+      if (this.isAttached) {
+        this.checked = this.active;
+      }
+    }
+
+  };
+
+  /** @polymerBehavior Polymer.PaperCheckedElementBehavior */
+  Polymer.PaperCheckedElementBehavior = [
+    Polymer.PaperInkyFocusBehavior,
+    Polymer.IronCheckedElementBehavior,
+    Polymer.PaperCheckedElementBehaviorImpl
+  ];
 Polymer({
       is: 'paper-checkbox',
 
@@ -15356,6 +15078,7 @@ Polymer({
           value: 'aria-checked'
         }
       },
+>>>>>>> hotfix-db
 
       _computeCheckboxClass: function(checked, invalid) {
         var className = '';
@@ -15379,6 +15102,788 @@ Polymer({
       }
 
     });
+/*
+`<iron-input>` adds two-way binding and custom validators using `Polymer.IronValidatorBehavior`
+to `<input>`.
+
+### Two-way binding
+
+By default you can only get notified of changes to an `input`'s `value` due to user input:
+
+    <input value="{{myValue::input}}">
+
+`iron-input` adds the `bind-value` property that mirrors the `value` property, and can be used
+for two-way data binding. `bind-value` will notify if it is changed either by user input or by script.
+
+    <input is="iron-input" bind-value="{{myValue}}">
+
+### Custom validators
+
+You can use custom validators that implement `Polymer.IronValidatorBehavior` with `<iron-input>`.
+
+    <input is="iron-input" validator="my-custom-validator">
+
+### Stopping invalid input
+
+It may be desirable to only allow users to enter certain characters. You can use the
+`prevent-invalid-input` and `allowed-pattern` attributes together to accomplish this. This feature
+is separate from validation, and `allowed-pattern` does not affect how the input is validated.
+
+    <!-- only allow characters that match [0-9] -->
+    <input is="iron-input" prevent-invalid-input allowed-pattern="[0-9]">
+
+@hero hero.svg
+@demo demo/index.html
+*/
+
+  Polymer({
+
+    is: 'iron-input',
+
+    extends: 'input',
+
+    behaviors: [
+      Polymer.IronValidatableBehavior
+    ],
+
+    properties: {
+
+      /**
+       * Use this property instead of `value` for two-way data binding.
+       */
+      bindValue: {
+        observer: '_bindValueChanged',
+        type: String
+      },
+
+      /**
+       * Set to true to prevent the user from entering invalid input. The new input characters are
+       * matched with `allowedPattern` if it is set, otherwise it will use the `pattern` attribute if
+       * set, or the `type` attribute (only supported for `type=number`).
+       */
+      preventInvalidInput: {
+        type: Boolean
+      },
+
+      /**
+       * Regular expression to match valid input characters.
+       */
+      allowedPattern: {
+        type: String,
+        observer: "_allowedPatternChanged"
+      },
+
+      _previousValidInput: {
+        type: String,
+        value: ''
+      },
+
+      _patternAlreadyChecked: {
+        type: Boolean,
+        value: false
+      }
+
+    },
+
+    listeners: {
+      'input': '_onInput',
+      'keypress': '_onKeypress'
+    },
+
+    get _patternRegExp() {
+      var pattern;
+      if (this.allowedPattern) {
+        pattern = new RegExp(this.allowedPattern);
+      } else if (this.pattern) {
+        pattern = new RegExp(this.pattern);
+      } else {
+        switch (this.type) {
+          case 'number':
+            pattern = /[0-9.,e-]/;
+            break;
+        }
+      }
+      return pattern;
+    },
+
+    ready: function() {
+      this.bindValue = this.value;
+    },
+
+    /**
+     * @suppress {checkTypes}
+     */
+    _bindValueChanged: function() {
+      if (this.value !== this.bindValue) {
+        this.value = !(this.bindValue || this.bindValue === 0) ? '' : this.bindValue;
+      }
+      // manually notify because we don't want to notify until after setting value
+      this.fire('bind-value-changed', {value: this.bindValue});
+    },
+
+    _allowedPatternChanged: function() {
+      // Force to prevent invalid input when an `allowed-pattern` is set
+      this.preventInvalidInput = this.allowedPattern ? true : false;
+    },
+
+    _onInput: function() {
+      // Need to validate each of the characters pasted if they haven't
+      // been validated inside `_onKeypress` already.
+      if (this.preventInvalidInput && !this._patternAlreadyChecked) {
+        var valid = this._checkPatternValidity();
+        if (!valid) {
+          this.value = this._previousValidInput;
+        }
+      }
+
+      this.bindValue = this.value;
+      this._previousValidInput = this.value;
+      this._patternAlreadyChecked = false;
+    },
+
+    _isPrintable: function(event) {
+      // What a control/printable character is varies wildly based on the browser.
+      // - most control characters (arrows, backspace) do not send a `keypress` event
+      //   in Chrome, but the *do* on Firefox
+      // - in Firefox, when they do send a `keypress` event, control chars have
+      //   a charCode = 0, keyCode = xx (for ex. 40 for down arrow)
+      // - printable characters always send a keypress event.
+      // - in Firefox, printable chars always have a keyCode = 0. In Chrome, the keyCode
+      //   always matches the charCode.
+      // None of this makes any sense.
+
+      // For these keys, ASCII code == browser keycode.
+      var anyNonPrintable =
+        (event.keyCode == 8)   ||  // backspace
+        (event.keyCode == 9)   ||  // tab
+        (event.keyCode == 13)  ||  // enter
+        (event.keyCode == 27);     // escape
+
+      // For these keys, make sure it's a browser keycode and not an ASCII code.
+      var mozNonPrintable =
+        (event.keyCode == 19)  ||  // pause
+        (event.keyCode == 20)  ||  // caps lock
+        (event.keyCode == 45)  ||  // insert
+        (event.keyCode == 46)  ||  // delete
+        (event.keyCode == 144) ||  // num lock
+        (event.keyCode == 145) ||  // scroll lock
+        (event.keyCode > 32 && event.keyCode < 41)   || // page up/down, end, home, arrows
+        (event.keyCode > 111 && event.keyCode < 124); // fn keys
+
+      return !anyNonPrintable && !(event.charCode == 0 && mozNonPrintable);
+    },
+
+    _onKeypress: function(event) {
+      if (!this.preventInvalidInput && this.type !== 'number') {
+        return;
+      }
+      var regexp = this._patternRegExp;
+      if (!regexp) {
+        return;
+      }
+
+      // Handle special keys and backspace
+      if (event.metaKey || event.ctrlKey || event.altKey)
+        return;
+
+      // Check the pattern either here or in `_onInput`, but not in both.
+      this._patternAlreadyChecked = true;
+
+      var thisChar = String.fromCharCode(event.charCode);
+      if (this._isPrintable(event) && !regexp.test(thisChar)) {
+        event.preventDefault();
+      }
+    },
+
+    _checkPatternValidity: function() {
+      var regexp = this._patternRegExp;
+      if (!regexp) {
+        return true;
+      }
+      for (var i = 0; i < this.value.length; i++) {
+        if (!regexp.test(this.value[i])) {
+          return false;
+        }
+      }
+      return true;
+    },
+
+<<<<<<< HEAD
+        /**
+         * Fired when `paper-toast` is opened.
+         *
+         * @event 'iron-announce'
+         * @param {Object} detail
+         * @param {String} detail.text The text that will be announced.
+         */
+      });
+    })();
+Polymer({
+      is: 'paper-spinner',
+
+      behaviors: [
+        Polymer.PaperSpinnerBehavior
+      ]
+    });
+Polymer({
+    is: 'paper-progress',
+=======
+    /**
+     * Returns true if `value` is valid. The validator provided in `validator` will be used first,
+     * then any constraints.
+     * @return {boolean} True if the value is valid.
+     */
+    validate: function() {
+      // Empty, non-required input is valid.
+      if (!this.required && this.value == '') {
+        this.invalid = false;
+        return true;
+      }
+
+      var valid;
+      if (this.hasValidator()) {
+        valid = Polymer.IronValidatableBehavior.validate.call(this, this.value);
+      } else {
+        this.invalid = !this.validity.valid;
+        valid = this.validity.valid;
+      }
+      this.fire('iron-input-validate');
+      return valid;
+    }
+>>>>>>> hotfix-db
+
+  });
+
+  /*
+  The `iron-input-validate` event is fired whenever `validate()` is called.
+  @event iron-input-validate
+  */
+/**
+   * Use `Polymer.PaperInputBehavior` to implement inputs with `<paper-input-container>`. This
+   * behavior is implemented by `<paper-input>`. It exposes a number of properties from
+   * `<paper-input-container>` and `<input is="iron-input">` and they should be bound in your
+   * template.
+   *
+   * The input element can be accessed by the `inputElement` property if you need to access
+   * properties or methods that are not exposed.
+   * @polymerBehavior Polymer.PaperInputBehavior
+   */
+  Polymer.PaperInputBehaviorImpl = {
+    properties: {
+<<<<<<< HEAD
+=======
+      /**
+       * Fired when the input changes due to user interaction.
+       *
+       * @event change
+       */
+
+>>>>>>> hotfix-db
+      /**
+       * The label for this input. Bind this to `<label>`'s content and `hidden` property, e.g.
+       * `<label hidden$="[[!label]]">[[label]]</label>` in your `template`
+       */
+      label: {
+        type: String
+      },
+
+      /**
+       * The value for this input. Bind this to the `<input is="iron-input">`'s `bindValue`
+       * property, or the value property of your input that is `notify:true`.
+       */
+      value: {
+        notify: true,
+        type: String
+      },
+
+      /**
+       * Set to true to disable this input. Bind this to both the `<paper-input-container>`'s
+       * and the input's `disabled` property.
+       */
+      disabled: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * Returns true if the value is invalid. Bind this to both the `<paper-input-container>`'s
+       * and the input's `invalid` property.
+       */
+      invalid: {
+        type: Boolean,
+        value: false,
+        notify: true
+      },
+
+      /**
+       * Set to true to prevent the user from entering invalid input. Bind this to the
+       * `<input is="iron-input">`'s `preventInvalidInput` property.
+       */
+      preventInvalidInput: {
+        type: Boolean
+      },
+
+      /**
+       * Set this to specify the pattern allowed by `preventInvalidInput`. Bind this to the
+       * `<input is="iron-input">`'s `allowedPattern` property.
+       */
+      allowedPattern: {
+        type: String
+      },
+
+      /**
+       * The type of the input. The supported types are `text`, `number` and `password`. Bind this
+       * to the `<input is="iron-input">`'s `type` property.
+       */
+      type: {
+        type: String
+      },
+
+      /**
+       * The datalist of the input (if any). This should match the id of an existing `<datalist>`. Bind this
+       * to the `<input is="iron-input">`'s `list` property.
+       */
+      list: {
+        type: String
+      },
+
+<<<<<<< HEAD
+    _hideSecondaryProgress: function(secondaryRatio) {
+      return secondaryRatio === 0;
+    }
+  });
+Polymer({
+      is: 'paper-tooltip',
+=======
+      /**
+       * A pattern to validate the `input` with. Bind this to the `<input is="iron-input">`'s
+       * `pattern` property.
+       */
+      pattern: {
+        type: String
+      },
+
+      /**
+       * Set to true to mark the input as required. Bind this to the `<input is="iron-input">`'s
+       * `required` property.
+       */
+      required: {
+        type: Boolean,
+        value: false
+      },
+>>>>>>> hotfix-db
+
+      /**
+       * The error message to display when the input is invalid. Bind this to the
+       * `<paper-input-error>`'s content, if using.
+       */
+      errorMessage: {
+        type: String
+      },
+
+      /**
+       * Set to true to show a character counter.
+       */
+      charCounter: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * Set to true to disable the floating label. Bind this to the `<paper-input-container>`'s
+       * `noLabelFloat` property.
+       */
+      noLabelFloat: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * Set to true to always float the label. Bind this to the `<paper-input-container>`'s
+       * `alwaysFloatLabel` property.
+       */
+      alwaysFloatLabel: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * Set to true to auto-validate the input value. Bind this to the `<paper-input-container>`'s
+       * `autoValidate` property.
+       */
+      autoValidate: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * Name of the validator to use. Bind this to the `<input is="iron-input">`'s `validator`
+       * property.
+       */
+      validator: {
+        type: String
+      },
+
+      // HTMLInputElement attributes for binding if needed
+
+      /**
+       * Bind this to the `<input is="iron-input">`'s `autocomplete` property.
+       */
+      autocomplete: {
+        type: String,
+        value: 'off'
+      },
+
+      /**
+       * Bind this to the `<input is="iron-input">`'s `autofocus` property.
+       */
+      autofocus: {
+        type: Boolean
+      },
+
+      /**
+       * Bind this to the `<input is="iron-input">`'s `inputmode` property.
+       */
+      inputmode: {
+        type: String
+      },
+
+      /**
+       * Bind this to the `<input is="iron-input">`'s `minlength` property.
+       */
+      minlength: {
+        type: Number
+      },
+
+      /**
+       * The maximum length of the input value. Bind this to the `<input is="iron-input">`'s
+       * `maxlength` property.
+       */
+      maxlength: {
+        type: Number
+      },
+
+      /**
+       * The minimum (numeric or date-time) input value.
+       * Bind this to the `<input is="iron-input">`'s `min` property.
+       */
+      min: {
+        type: String
+      },
+
+      /**
+       * The maximum (numeric or date-time) input value.
+       * Can be a String (e.g. `"2000-1-1"`) or a Number (e.g. `2`).
+       * Bind this to the `<input is="iron-input">`'s `max` property.
+       */
+      max: {
+        type: String
+      },
+
+      /**
+       * Limits the numeric or date-time increments.
+       * Bind this to the `<input is="iron-input">`'s `step` property.
+       */
+      step: {
+        type: String
+      },
+
+      /**
+       * Bind this to the `<input is="iron-input">`'s `name` property.
+       */
+      name: {
+        type: String
+      },
+
+      /**
+       * A placeholder string in addition to the label. If this is set, the label will always float.
+       */
+      placeholder: {
+        type: String,
+        // need to set a default so _computeAlwaysFloatLabel is run
+        value: ''
+      },
+
+      /**
+       * Bind this to the `<input is="iron-input">`'s `readonly` property.
+       */
+      readonly: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * Bind this to the `<input is="iron-input">`'s `size` property.
+       */
+      size: {
+        type: Number
+      },
+
+      // Nonstandard attributes for binding if needed
+
+      /**
+       * Bind this to the `<input is="iron-input">`'s `autocapitalize` property.
+       */
+      autocapitalize: {
+        type: String,
+        value: 'none'
+      },
+
+      /**
+       * Bind this to the `<input is="iron-input">`'s `autocorrect` property.
+       */
+      autocorrect: {
+        type: String,
+        value: 'off'
+      },
+
+      /**
+       * Bind this to the `<input is="iron-input">`'s `autosave` property, used with type=search.
+       */
+      autosave: {
+        type: String
+      },
+
+      /**
+       * Bind this to the `<input is="iron-input">`'s `results` property, used with type=search.
+       */
+      results: {
+        type: Number
+      },
+
+      /**
+       * Bind this to the `<input is="iron-input">`'s `accept` property, used with type=file.
+       */
+      accept: {
+        type: String
+      },
+
+      /**
+       * Bind this to the `<input is="iron-input">`'s `multiple` property, used with type=file.
+       */
+      multiple: {
+        type: Boolean
+      },
+
+      _ariaDescribedBy: {
+        type: String,
+        value: ''
+      },
+
+      _ariaLabelledBy: {
+        type: String,
+        value: ''
+      }
+
+    },
+
+    listeners: {
+      'addon-attached': '_onAddonAttached',
+      'focus': '_onFocus'
+    },
+
+    observers: [
+      '_focusedControlStateChanged(focused)'
+    ],
+
+    keyBindings: {
+      'shift+tab:keydown': '_onShiftTabDown'
+    },
+
+    hostAttributes: {
+      tabindex: 0
+    },
+
+    /**
+     * Returns a reference to the input element.
+     */
+    get inputElement() {
+      return this.$.input;
+    },
+
+    /**
+     * Returns a reference to the focusable element.
+     */
+    get _focusableElement() {
+      return this.inputElement;
+    },
+
+    attached: function() {
+      this._updateAriaLabelledBy();
+    },
+
+    _appendStringWithSpace: function(str, more) {
+      if (str) {
+        str = str + ' ' + more;
+      } else {
+        str = more;
+      }
+      return str;
+    },
+
+    _onAddonAttached: function(event) {
+      var target = event.path ? event.path[0] : event.target;
+      if (target.id) {
+        this._ariaDescribedBy = this._appendStringWithSpace(this._ariaDescribedBy, target.id);
+      } else {
+        var id = 'paper-input-add-on-' + Math.floor((Math.random() * 100000));
+        target.id = id;
+        this._ariaDescribedBy = this._appendStringWithSpace(this._ariaDescribedBy, id);
+      }
+    },
+
+    /**
+     * Validates the input element and sets an error style if needed.
+     *
+     * @return {boolean}
+     */
+    validate: function() {
+      return this.inputElement.validate();
+    },
+
+    /**
+     * Forward focus to inputElement
+     */
+    _onFocus: function() {
+      if (!this._shiftTabPressed) {
+        this._focusableElement.focus();
+      }
+    },
+
+    /**
+     * Handler that is called when a shift+tab keypress is detected by the menu.
+     *
+     * @param {CustomEvent} event A key combination event.
+     */
+    _onShiftTabDown: function(event) {
+      var oldTabIndex = this.getAttribute('tabindex');
+      this._shiftTabPressed = true;
+      this.setAttribute('tabindex', '-1');
+      this.async(function() {
+        this.setAttribute('tabindex', oldTabIndex);
+        this._shiftTabPressed = false;
+      }, 1);
+    },
+
+    /**
+     * If `autoValidate` is true, then validates the element.
+     */
+    _handleAutoValidate: function() {
+      if (this.autoValidate)
+        this.validate();
+    },
+
+    /**
+     * Restores the cursor to its original position after updating the value.
+     * @param {string} newValue The value that should be saved.
+     */
+    updateValueAndPreserveCaret: function(newValue) {
+      // Not all elements might have selection, and even if they have the
+      // right properties, accessing them might throw an exception (like for
+      // <input type=number>)
+      try {
+        var start = this.inputElement.selectionStart;
+        this.value = newValue;
+
+        // The cursor automatically jumps to the end after re-setting the value,
+        // so restore it to its original position.
+        this.inputElement.selectionStart = start;
+        this.inputElement.selectionEnd = start;
+      } catch (e) {
+        // Just set the value and give up on the caret.
+        this.value = newValue;
+      }
+    },
+
+    _computeAlwaysFloatLabel: function(alwaysFloatLabel, placeholder) {
+      return placeholder || alwaysFloatLabel;
+    },
+
+    _focusedControlStateChanged: function(focused) {
+      // IronControlState stops the focus and blur events in order to redispatch them on the host
+      // element, but paper-input-container listens to those events. Since there are more
+      // pending work on focus/blur in IronControlState, I'm putting in this hack to get the
+      // input focus state working for now.
+      if (!this.$.container) {
+        this.$.container = Polymer.dom(this.root).querySelector('paper-input-container');
+        if (!this.$.container) {
+          return;
+        }
+      }
+      if (focused) {
+        this.$.container._onFocus();
+      } else {
+        this.$.container._onBlur();
+      }
+    },
+
+    _updateAriaLabelledBy: function() {
+      var label = Polymer.dom(this.root).querySelector('label');
+      if (!label) {
+        this._ariaLabelledBy = '';
+        return;
+      }
+      var labelledBy;
+      if (label.id) {
+        labelledBy = label.id;
+      } else {
+        labelledBy = 'paper-input-label-' + new Date().getUTCMilliseconds();
+        label.id = labelledBy;
+      }
+      this._ariaLabelledBy = labelledBy;
+    },
+
+    _onChange:function(event) {
+      // In the Shadow DOM, the `change` event is not leaked into the
+      // ancestor tree, so we must do this manually.
+      // See https://w3c.github.io/webcomponents/spec/shadow/#events-that-are-not-leaked-into-ancestor-trees.
+      if (this.shadowRoot) {
+        this.fire(event.type, {sourceEvent: event}, {
+          node: this,
+          bubbles: event.bubbles,
+          cancelable: event.cancelable
+        });
+      }
+    }
+  };
+
+  /** @polymerBehavior */
+  Polymer.PaperInputBehavior = [
+    Polymer.IronControlState,
+    Polymer.IronA11yKeysBehavior,
+    Polymer.PaperInputBehaviorImpl
+  ];
+/**
+   * Use `Polymer.PaperInputAddonBehavior` to implement an add-on for `<paper-input-container>`. A
+   * add-on appears below the input, and may display information based on the input value and
+   * validity such as a character counter or an error message.
+   * @polymerBehavior
+   */
+  Polymer.PaperInputAddonBehavior = {
+
+    hostAttributes: {
+      'add-on': ''
+    },
+
+    attached: function() {
+      this.fire('addon-attached');
+    },
+
+    /**
+     * The function called by `<paper-input-container>` when the input value or validity changes.
+     * @param {{
+     *   inputElement: (Node|undefined),
+     *   value: (string|undefined),
+     *   invalid: (boolean|undefined)
+     * }} state All properties are optional -
+     *     inputElement: The input element.
+     *     value: The input value.
+     *     invalid: True if the input value is invalid.
+     */
+    update: function(state) {
+    }
+
+  };
 Polymer({
     is: 'paper-input-char-counter',
 
@@ -15792,6 +16297,56 @@ Polymer({
       }
 
     });
+/**
+   * `Polymer.IronMenubarBehavior` implements accessible menubar behavior.
+   *
+   * @polymerBehavior Polymer.IronMenubarBehavior
+   */
+  Polymer.IronMenubarBehaviorImpl = {
+
+    hostAttributes: {
+      'role': 'menubar'
+    },
+
+    keyBindings: {
+      'left': '_onLeftKey',
+      'right': '_onRightKey'
+    },
+
+    _onUpKey: function(event) {
+      this.focusedItem.click();
+      event.detail.keyboardEvent.preventDefault();
+    },
+
+    _onDownKey: function(event) {
+      this.focusedItem.click();
+      event.detail.keyboardEvent.preventDefault();
+    },
+
+    _onLeftKey: function() {
+      this._focusPrevious();
+    },
+
+    _onRightKey: function() {
+      this._focusNext();
+    },
+
+    _onKeydown: function(event) {
+      if (this.keyboardEventMatchesKeys(event, 'up down left right esc')) {
+        return;
+      }
+
+      // all other keys focus the menu item starting with that character
+      this._focusWithKeyboardEvent(event);
+    }
+
+  };
+
+  /** @polymerBehavior Polymer.IronMenubarBehavior */
+  Polymer.IronMenubarBehavior = [
+    Polymer.IronMenuBehavior,
+    Polymer.IronMenubarBehaviorImpl
+  ];
 Polymer({
       is: 'paper-tab',
 
@@ -16379,7 +16934,7 @@ Polymer({
      */
     _onStorageChanged: function(changes, area) {
       var keys = Object.keys(changes);
-      var accepted = ['DEBUG_ENABLED', 'HISTORY_ENABLED', 'MAGICVARS_ENABLED', 'CMH_ENABLED', 'CMP_ENABLED'];
+      var accepted = ['DEBUG_ENABLED', 'HISTORY_ENABLED', 'MAGICVARS_ENABLED', 'CMH_ENABLED', 'CMP_ENABLED', 'useIdb'];
       keys.forEach(function(key) {
         if (accepted.indexOf(key) !== -1 && this.values[key] !== changes[key].newValue) {
           this.set('values.' + key, changes[key].newValue);
@@ -16426,6 +16981,49 @@ Polymer({
       this.fire('settings-action', {
         action: 'clear-history'
       });
+    },
+    importIndexedDB: function() {
+      arc.app.db.idb.deleteDatabase()
+        .then(arc.app.db.idb.open)
+        .then(function(db) {
+          db.close();
+          this.$.dbRecreate.open();
+        }.bind(this))
+        .catch(function(cause) {
+          this.$.dbRecreateError.open();
+          console.error('Upgrade database error', cause);
+        }.bind(this));
+    },
+
+    resetApp: function() {
+      this.$.resetDialog.open();
+    },
+
+    onResetDialogResult: function(e) {
+      if (e.detail.canceled || !e.detail.confirmed) {
+        return;
+      }
+      chrome.storage.local.clear(function() {
+        chrome.storage.local.set({
+          'upgraded': {
+            'v4': true,
+            'v4p6': true
+          }
+        }, function() {
+          arc.app.db.websql.resetDatabases()
+            .then(arc.app.db.websql.open)
+            .then(arc.app.db.idb.deleteDatabase)
+            .then(arc.app.db.idb.open)
+            .then(function(db) {
+              db.close();
+              this.$.dbRecreate.open();
+            }.bind(this))
+            .catch(function(cause) {
+              this.$.dbRecreateError.open();
+              console.error('Upgrade database error', cause);
+            }.bind(this));
+        }.bind(this));
+      }.bind(this));
     }
   });
 Polymer({
@@ -16591,122 +17189,121 @@ Polymer({
         }
     });
 'use strict';
-    /* global arc */
-    Polymer({
-        is: 'app-response-status',
-        properties: {
-            statusCode: {
-                type: Number,
-                observer: '_statusCodeChanged'
-            },
-            statusMessage: String,
-            loadingTime: Number,
-            requestHeaders: {
-                type: Array,
-                observer: '_requestHeadersChanged'
-            },
-            responseHeaders: {
-                type: Array,
-                observer: '_responseHeadersChanged'
-            },
-            redirectData: {
-                type: Array,
-                value: []
-            },
-            _scdTitle: String,
-            _scdBody: String,
-            selectedTab: {
-                type: Number,
-                value: 0
-            }
-        },
-        computeStatusClass: function(code) {
-            var cls = 'status-color';
-            if (code >= 500 || code === 0) {
-                cls += ' error';
-            }
-            if (code >= 400 && code < 500) {
-                cls += ' warning';
-            }
-            return cls;
-        },
-        _statusCodeChanged: function() {
-            if (this.statusCode === 0) {
-                this._scdTitle = 'No response';
-                this._scdBody = 'The response was empty';
-                return;
-            }
-            arc.app.db.websql.getStatusCode(this.statusCode)
-                .then(function(result) {
-                    if (result && result.label) {
-                        this._scdTitle = this.statusCode + ': ' + result.label;
-                    } else {
-                        this._scdTitle = 'Status code: ' + this.statusCode;
-                    }
-                    if (result && result.desc) {
-                        this._scdBody = result.desc;
-                    } else {
-                        this._scdBody = 'There is no definition for this status code in the application :(';
-                    }
-                }.bind(this), function() {
-                    this._scdTitle = 'Status code: ' + this.statusCode;
-                    this._scdBody = 'There is no definition for this status code in the application :(';
-                }.bind(this));
-        },
+  /* global arc */
+  Polymer({
+    is: 'app-response-status',
+    properties: {
+      statusCode: {
+        type: Number,
+        observer: '_statusCodeChanged'
+      },
+      statusMessage: String,
+      loadingTime: Number,
+      requestHeaders: {
+        type: Array,
+        observer: '_requestHeadersChanged'
+      },
+      responseHeaders: {
+        type: Array,
+        observer: '_responseHeadersChanged'
+      },
+      redirectData: {
+        type: Array,
+        value: []
+      },
+      _scdTitle: String,
+      _scdBody: String,
+      selectedTab: {
+        type: Number,
+        value: 0
+      }
+    },
+    computeStatusClass: function(code) {
+      var cls = 'status-color';
+      if (code >= 500 || code === 0) {
+        cls += ' error';
+      }
+      if (code >= 400 && code < 500) {
+        cls += ' warning';
+      }
+      return cls;
+    },
+    _statusCodeChanged: function() {
+      if (this.statusCode === 0) {
+        this._scdTitle = 'No response';
+        this._scdBody = 'The response was empty';
+        return;
+      }
+      arc.app.db.statuses.getCode(this.statusCode)
+        .then(function(result) {
+          if (result && result.label) {
+            this._scdTitle = this.statusCode + ': ' + result.label;
+          } else {
+            this._scdTitle = 'Status code: ' + this.statusCode;
+          }
+          if (result && result.desc) {
+            this._scdBody = result.desc;
+          } else {
+            this._scdBody = 'There is no definition for this status code in the application :(';
+          }
+        }.bind(this), function() {
+          this._scdTitle = 'Status code: ' + this.statusCode;
+          this._scdBody = 'There is no definition for this status code in the application :(';
+        }.bind(this));
+    },
 
-        showStatusInfo: function() {
-            this.$.statusCodeInfo.open();
-        },
+    showStatusInfo: function() {
+      this.$.statusCodeInfo.open();
+    },
 
-        _requestHeadersChanged: function() {
-            this.requestHeaders.forEach(function(item) {
-                item.type = 'request'
-            });
-        },
+    _requestHeadersChanged: function() {
+      this.requestHeaders.forEach(function(item) {
+        item.type = 'request';
+      });
+    },
 
-        _responseHeadersChanged: function() {
-            this.responseHeaders.forEach(function(item) {
-                item.type = 'response'
-            });
-        },
-        computeIndexName: function(index) {
-            return index + 1;
-        },
-        _handleLink: function(e) {
-            var e2 = Polymer.dom(e);
-            e.preventDefault();
-            if (e2.rootTarget.nodeName === "A") {
-                this.fire('action-link', {
-                    link: e2.rootTarget.href
-                });
-            }
-        }
-    });
+    _responseHeadersChanged: function() {
+      this.responseHeaders.forEach(function(item) {
+        item.type = 'response';
+      });
+    },
+    computeIndexName: function(index) {
+      return index + 1;
+    },
+    _handleLink: function(e) {
+      var e2 = Polymer.dom(e);
+      e.preventDefault();
+      if (e2.rootTarget.nodeName === 'A') {
+        this.fire('action-link', {
+          link: e2.rootTarget.href
+        });
+      }
+    }
+  });
 'use strict';
-    /* global arc */
-    Polymer({
-        is: 'app-headers-display',
-        properties: {
-            headers: Array,
-            _hdTitle: String,
-            _hdBody: String,
-            _hdExample: String,
-        },
-        _displayHeaderInfo: function(e) {
-            var item = e.model.get('item');
-            arc.app.db.websql.getHeaderByName(item.name, item.type)
-                .then(function(result) {
-                    if (result === null) {
-                        return;
-                    }
-                    result = result[0];
-                    this._hdTitle = result.name;
-                    this._hdBody = result.desc;
-                    this._hdExample = result.example;
-                    this.$.headerInfo.open();
-                }.bind(this));
-        }
-    });
+  /* global arc */
+  Polymer({
+    is: 'app-headers-display',
+    properties: {
+      headers: Array,
+      _hdTitle: String,
+      _hdBody: String,
+      _hdExample: String,
+    },
+    _displayHeaderInfo: function(e) {
+      var item = e.model.get('item');
+      arc.app.db.headers.getHeader(item.name, item.type)
+        .then(function(result) {
+          if (result === null) {
+            return;
+          }
+          this._hdTitle = result.name;
+          this._hdBody = result.desc;
+          this._hdExample = result.example;
+          this.$.headerInfo.open();
+        }.bind(this));
+    }
+  });
 Polymer({
         is: 'arc-header-line-display',
         properties: {
@@ -16881,6 +17478,11 @@ Polymer({
             noHistory: {
                 type: Boolean,
                 value: false
+            },
+            hasProjects: {
+                type: Boolean,
+                value: false,
+                computed: '_computeHasProjects(projects.*)'
             }
         },
         ready: function() {
@@ -16943,7 +17545,7 @@ Polymer({
         },
         _restoreProjects: function() {
             try {
-                arc.app.db.websql.listProjects()
+                arc.app.db.projects.list()
                     .then(function(list) {
                         this.projects = list;
                     }.bind(this));
@@ -16968,6 +17570,9 @@ Polymer({
         },
         computeSort: function(projects) {
             return function(a, b) {
+                if (!a || !b) {
+                    return 1;
+                }
                 if (a.name > b.name) {
                     return 1;
                 }
@@ -17007,13 +17612,13 @@ Polymer({
          * @param {Number} projectId Database id for the project
          */
         appendProject: function(projectId) {
-            arc.app.db.websql.getProject(projectId)
+            arc.app.db.projects.getProject(projectId)
                 .then(function(project) {
                     if (project === null) {
                         console.warn('No project found for given ID ', projectId);
                         return;
                     }
-                    this.push('projects', project[0]);
+                    this.push('projects', project);
                 }.bind(this));
         },
         /**
@@ -17062,6 +17667,13 @@ Polymer({
                     this.noHistory = false;
                 }
             }
+        },
+
+        _computeHasProjects: function() {
+            if (this.projects && this.projects.length) {
+                return true;
+            }
+            return false;
         }
     });
 Polymer({
@@ -17079,3 +17691,93 @@ Polymer({
       this.$.donateDialog.open();
     }
   });
+(function() { 'use strict';var h,aa=aa||{},k=this,m=function(a){return void 0!==a},ba=function(){},ca=function(a){var b=typeof a;if("object"==b)if(a){if(a instanceof Array)return"array";if(a instanceof Object)return b;var c=Object.prototype.toString.call(a);if("[object Window]"==c)return"object";if("[object Array]"==c||"number"==typeof a.length&&"undefined"!=typeof a.splice&&"undefined"!=typeof a.propertyIsEnumerable&&!a.propertyIsEnumerable("splice"))return"array";if("[object Function]"==c||"undefined"!=typeof a.call&&
+"undefined"!=typeof a.propertyIsEnumerable&&!a.propertyIsEnumerable("call"))return"function"}else return"null";else if("function"==b&&"undefined"==typeof a.call)return"object";return b},n=function(a){return"array"==ca(a)},da=function(a){var b=ca(a);return"array"==b||"object"==b&&"number"==typeof a.length},p=function(a){return"string"==typeof a},ea=function(a){return"number"==typeof a},q=function(a){return"function"==ca(a)},r=function(a){var b=typeof a;return"object"==b&&null!=a||"function"==b},fa=
+function(a,b,c){return a.call.apply(a.bind,arguments)},ga=function(a,b,c){if(!a)throw Error();if(2<arguments.length){var d=Array.prototype.slice.call(arguments,2);return function(){var c=Array.prototype.slice.call(arguments);Array.prototype.unshift.apply(c,d);return a.apply(b,c)}}return function(){return a.apply(b,arguments)}},t=function(a,b,c){t=Function.prototype.bind&&-1!=Function.prototype.bind.toString().indexOf("native code")?fa:ga;return t.apply(null,arguments)},ha=function(a,b){var c=Array.prototype.slice.call(arguments,
+1);return function(){var b=c.slice();b.push.apply(b,arguments);return a.apply(this,b)}},u=Date.now||function(){return+new Date},v=function(a,b){var c=a.split("."),d=k;c[0]in d||!d.execScript||d.execScript("var "+c[0]);for(var e;c.length&&(e=c.shift());)!c.length&&m(b)?d[e]=b:d=d[e]?d[e]:d[e]={}},w=function(a,b){function c(){}c.prototype=b.prototype;a.P=b.prototype;a.prototype=new c;a.ie=function(a,c,f){for(var g=Array(arguments.length-2),l=2;l<arguments.length;l++)g[l-2]=arguments[l];return b.prototype[c].apply(a,
+g)}};Function.prototype.bind=Function.prototype.bind||function(a,b){if(1<arguments.length){var c=Array.prototype.slice.call(arguments,1);c.unshift(this,a);return t.apply(null,c)}return t(this,a)};var x=function(a){if(Error.captureStackTrace)Error.captureStackTrace(this,x);else{var b=Error().stack;b&&(this.stack=b)}a&&(this.message=String(a))};w(x,Error);x.prototype.name="CustomError";var ia=String.prototype.trim?function(a){return a.trim()}:function(a){return a.replace(/^[\s\xa0]+|[\s\xa0]+$/g,"")},ja=function(a,b){return a<b?-1:a>b?1:0};var y=Array.prototype,ka=y.indexOf?function(a,b,c){return y.indexOf.call(a,b,c)}:function(a,b,c){c=null==c?0:0>c?Math.max(0,a.length+c):c;if(p(a))return p(b)&&1==b.length?a.indexOf(b,c):-1;for(;c<a.length;c++)if(c in a&&a[c]===b)return c;return-1},la=y.forEach?function(a,b,c){y.forEach.call(a,b,c)}:function(a,b,c){for(var d=a.length,e=p(a)?a.split(""):a,f=0;f<d;f++)f in e&&b.call(c,e[f],f,a)},ma=y.some?function(a,b,c){return y.some.call(a,b,c)}:function(a,b,c){for(var d=a.length,e=p(a)?a.split(""):
+a,f=0;f<d;f++)if(f in e&&b.call(c,e[f],f,a))return!0;return!1},na=y.every?function(a,b,c){return y.every.call(a,b,c)}:function(a,b,c){for(var d=a.length,e=p(a)?a.split(""):a,f=0;f<d;f++)if(f in e&&!b.call(c,e[f],f,a))return!1;return!0},pa=function(a){var b;a:{b=oa;for(var c=a.length,d=p(a)?a.split(""):a,e=0;e<c;e++)if(e in d&&b.call(void 0,d[e],e,a)){b=e;break a}b=-1}return 0>b?null:p(a)?a.charAt(b):a[b]},qa=function(a,b){var c=ka(a,b),d;(d=0<=c)&&y.splice.call(a,c,1);return d},ra=function(a){return y.concat.apply(y,
+arguments)},sa=function(a,b,c){return 2>=arguments.length?y.slice.call(a,b):y.slice.call(a,b,c)};var ta="StopIteration"in k?k.StopIteration:Error("StopIteration"),ua=function(){};ua.prototype.next=function(){throw ta;};ua.prototype.Sb=function(){return this};var va=function(a,b,c){for(var d in a)b.call(c,a[d],d,a)},wa=function(a){var b=[],c=0,d;for(d in a)b[c++]=a[d];return b},xa=function(a){var b=[],c=0,d;for(d in a)b[c++]=d;return b},ya=function(a,b){var c;a:{for(c in a)if(b.call(void 0,a[c],c,a))break a;c=void 0}return c&&a[c]},za="constructor hasOwnProperty isPrototypeOf propertyIsEnumerable toLocaleString toString valueOf".split(" "),Aa=function(a,b){for(var c,d,e=1;e<arguments.length;e++){d=arguments[e];for(c in d)a[c]=d[c];for(var f=0;f<za.length;f++)c=
+za[f],Object.prototype.hasOwnProperty.call(d,c)&&(a[c]=d[c])}},Ba=function(a){var b=arguments.length;if(1==b&&n(arguments[0]))return Ba.apply(null,arguments[0]);for(var c={},d=0;d<b;d++)c[arguments[d]]=!0;return c};var z=function(a,b){this.p={};this.b=[];this.Ja=this.j=0;var c=arguments.length;if(1<c){if(c%2)throw Error("Uneven number of arguments");for(var d=0;d<c;d+=2)this.set(arguments[d],arguments[d+1])}else a&&this.ha(a)};z.prototype.t=function(){Ca(this);for(var a=[],b=0;b<this.b.length;b++)a.push(this.p[this.b[b]]);return a};z.prototype.H=function(){Ca(this);return this.b.concat()};z.prototype.T=function(a){return A(this.p,a)};
+z.prototype.remove=function(a){return A(this.p,a)?(delete this.p[a],this.j--,this.Ja++,this.b.length>2*this.j&&Ca(this),!0):!1};var Ca=function(a){if(a.j!=a.b.length){for(var b=0,c=0;b<a.b.length;){var d=a.b[b];A(a.p,d)&&(a.b[c++]=d);b++}a.b.length=c}if(a.j!=a.b.length){for(var e={},c=b=0;b<a.b.length;)d=a.b[b],A(e,d)||(a.b[c++]=d,e[d]=1),b++;a.b.length=c}};h=z.prototype;h.get=function(a,b){return A(this.p,a)?this.p[a]:b};
+h.set=function(a,b){A(this.p,a)||(this.j++,this.b.push(a),this.Ja++);this.p[a]=b};h.ha=function(a){var b;a instanceof z?(b=a.H(),a=a.t()):(b=xa(a),a=wa(a));for(var c=0;c<b.length;c++)this.set(b[c],a[c])};h.forEach=function(a,b){for(var c=this.H(),d=0;d<c.length;d++){var e=c[d],f=this.get(e);a.call(b,f,e,this)}};h.clone=function(){return new z(this)};h.Nb=function(){Ca(this);for(var a={},b=0;b<this.b.length;b++){var c=this.b[b];a[c]=this.p[c]}return a};
+h.Sb=function(a){Ca(this);var b=0,c=this.b,d=this.p,e=this.Ja,f=this,g=new ua;g.next=function(){for(;;){if(e!=f.Ja)throw Error("The map has changed since the iterator was created");if(b>=c.length)throw ta;var g=c[b++];return a?g:d[g]}};return g};var A=function(a,b){return Object.prototype.hasOwnProperty.call(a,b)};var Da,Ea,Fa={id:"hitType",name:"t",valueType:"text",maxLength:void 0,defaultValue:void 0},Ga={id:"sessionControl",name:"sc",valueType:"text",maxLength:void 0,defaultValue:void 0},Ha={id:"description",name:"cd",valueType:"text",maxLength:2048,defaultValue:void 0},Ia={id:"eventCategory",name:"ec",valueType:"text",maxLength:150,defaultValue:void 0},Ja={id:"eventAction",name:"ea",valueType:"text",maxLength:500,defaultValue:void 0},Ka={id:"eventLabel",name:"el",valueType:"text",maxLength:500,defaultValue:void 0},
+La={id:"eventValue",name:"ev",valueType:"integer",maxLength:void 0,defaultValue:void 0},Ma={zd:Fa,$c:{id:"anonymizeIp",name:"aip",valueType:"boolean",maxLength:void 0,defaultValue:void 0},Kd:{id:"queueTime",name:"qt",valueType:"integer",maxLength:void 0,defaultValue:void 0},fd:{id:"cacheBuster",name:"z",valueType:"text",maxLength:void 0,defaultValue:void 0},Qd:Ga,Rd:{id:"sessionGroup",name:"sg",valueType:"text",maxLength:void 0,defaultValue:void 0},ge:{id:"userId",name:"uid",valueType:"text",maxLength:void 0,
+defaultValue:void 0},Hd:{id:"nonInteraction",name:"ni",valueType:"boolean",maxLength:void 0,defaultValue:void 0},qd:Ha,$d:{id:"title",name:"dt",valueType:"text",maxLength:1500,defaultValue:void 0},bd:{id:"appId",name:"aid",valueType:"text",maxLength:150,defaultValue:void 0},cd:{id:"appInstallerId",name:"aiid",valueType:"text",maxLength:150,defaultValue:void 0},td:Ia,sd:Ja,ud:Ka,vd:La,Td:{id:"socialNetwork",name:"sn",valueType:"text",maxLength:50,defaultValue:void 0},Sd:{id:"socialAction",name:"sa",
+valueType:"text",maxLength:50,defaultValue:void 0},Ud:{id:"socialTarget",name:"st",valueType:"text",maxLength:2048,defaultValue:void 0},ce:{id:"transactionId",name:"ti",valueType:"text",maxLength:500,defaultValue:void 0},be:{id:"transactionAffiliation",name:"ta",valueType:"text",maxLength:500,defaultValue:void 0},de:{id:"transactionRevenue",name:"tr",valueType:"currency",maxLength:void 0,defaultValue:void 0},ee:{id:"transactionShipping",name:"ts",valueType:"currency",maxLength:void 0,defaultValue:void 0},
+fe:{id:"transactionTax",name:"tt",valueType:"currency",maxLength:void 0,defaultValue:void 0},od:{id:"currencyCode",name:"cu",valueType:"text",maxLength:10,defaultValue:void 0},Dd:{id:"itemPrice",name:"ip",valueType:"currency",maxLength:void 0,defaultValue:void 0},Ed:{id:"itemQuantity",name:"iq",valueType:"integer",maxLength:void 0,defaultValue:void 0},Bd:{id:"itemCode",name:"ic",valueType:"text",maxLength:500,defaultValue:void 0},Cd:{id:"itemName",name:"in",valueType:"text",maxLength:500,defaultValue:void 0},
+Ad:{id:"itemCategory",name:"iv",valueType:"text",maxLength:500,defaultValue:void 0},md:{id:"campaignSource",name:"cs",valueType:"text",maxLength:100,defaultValue:void 0},kd:{id:"campaignMedium",name:"cm",valueType:"text",maxLength:50,defaultValue:void 0},ld:{id:"campaignName",name:"cn",valueType:"text",maxLength:100,defaultValue:void 0},jd:{id:"campaignKeyword",name:"ck",valueType:"text",maxLength:500,defaultValue:void 0},gd:{id:"campaignContent",name:"cc",valueType:"text",maxLength:500,defaultValue:void 0},
+hd:{id:"campaignId",name:"ci",valueType:"text",maxLength:100,defaultValue:void 0},yd:{id:"gclid",name:"gclid",valueType:"text",maxLength:void 0,defaultValue:void 0},pd:{id:"dclid",name:"dclid",valueType:"text",maxLength:void 0,defaultValue:void 0},Jd:{id:"pageLoadTime",name:"plt",valueType:"integer",maxLength:void 0,defaultValue:void 0},rd:{id:"dnsTime",name:"dns",valueType:"integer",maxLength:void 0,defaultValue:void 0},Vd:{id:"tcpConnectTime",name:"tcp",valueType:"integer",maxLength:void 0,defaultValue:void 0},
+Pd:{id:"serverResponseTime",name:"srt",valueType:"integer",maxLength:void 0,defaultValue:void 0},Id:{id:"pageDownloadTime",name:"pdt",valueType:"integer",maxLength:void 0,defaultValue:void 0},Ld:{id:"redirectResponseTime",name:"rrt",valueType:"integer",maxLength:void 0,defaultValue:void 0},Wd:{id:"timingCategory",name:"utc",valueType:"text",maxLength:150,defaultValue:void 0},Zd:{id:"timingVar",name:"utv",valueType:"text",maxLength:500,defaultValue:void 0},Yd:{id:"timingValue",name:"utt",valueType:"integer",
+maxLength:void 0,defaultValue:void 0},Xd:{id:"timingLabel",name:"utl",valueType:"text",maxLength:500,defaultValue:void 0},wd:{id:"exDescription",name:"exd",valueType:"text",maxLength:150,defaultValue:void 0},xd:{id:"exFatal",name:"exf",valueType:"boolean",maxLength:void 0,defaultValue:"1"}},Na=function(a){if(1>a||200<a)throw Error("Expected dimension index range 1-200, but was : "+a);return{id:"dimension"+a,name:"cd"+a,valueType:"text",maxLength:150,defaultValue:void 0}},Oa=function(a){if(1>a||200<
+a)throw Error("Expected metric index range 1-200, but was : "+a);return{id:"metric"+a,name:"cm"+a,valueType:"integer",maxLength:void 0,defaultValue:void 0}};var Pa=function(a){if(1>a)return"0";if(3>a)return"1-2";a=Math.floor(Math.log(a-1)/Math.log(2));return Math.pow(2,a)+1+"-"+Math.pow(2,a+1)},Qa=function(a,b){for(var c=0,d=a.length-1,e=0;c<=d;){var f=Math.floor((c+d)/2),e=a[f];if(b<=e){d=0==f?0:a[f-1];if(b>d)return(d+1).toString()+"-"+e.toString();d=f-1}else if(b>e){if(f>=a.length-1)return(a[a.length-1]+1).toString()+"+";c=f+1}}return"<= 0"};var B=function(){this.gb=[]},Ra=function(){return new B};h=B.prototype;h.when=function(a){this.gb.push(a);return this};h.Rb=function(a){var b=arguments;this.when(function(a){return 0<=ka(b,a.ub())});return this};h.Yc=function(a,b){var c=sa(arguments,1);this.when(function(b){b=b.V().get(a);return 0<=ka(c,b)});return this};h.mb=function(a,b){if(r(this.e))throw Error("Filter has already been set.");this.e=r(b)?t(a,b):a;return this};
+h.ia=function(){if(0==this.gb.length)throw Error("Must specify at least one predicate using #when or a helper method.");if(!r(this.e))throw Error("Must specify a delegate filter using #applyFilter.");return t(function(a){na(this.gb,function(b){return b(a)})&&this.e(a)},this)};var C=function(){this.lb=!1;this.zb="";this.Kb=!1;this.ya=null};C.prototype.Wb=function(a){this.lb=!0;this.zb=a||" - ";return this};C.prototype.Sc=function(){this.Kb=!0;return this};C.prototype.Dc=function(){return Sa(this,Pa)};C.prototype.Ec=function(a){return Sa(this,ha(Qa,a))};
+var Sa=function(a,b){if(null!=a.ya)throw Error("LabelerBuilder: Only one labeling strategy may be used.");a.ya=t(function(a){var d=a.V().get(La),e=a.V().get(Ka);ea(d)&&(d=b(d),null!=e&&this.lb&&(d=e+this.zb+d),a.V().set(Ka,d))},a);return a};C.prototype.ia=function(){if(null==this.ya)throw Error("LabelerBuilder: a labeling strategy must be specified prior to calling build().");return Ra().Rb("event").mb(t(function(a){this.ya(a);this.Kb&&a.V().remove(La)},this)).ia()};var Ua=function(a,b){var c=Array.prototype.slice.call(arguments),d=c.shift();if("undefined"==typeof d)throw Error("[goog.string.format] Template required");return d.replace(/%([0\-\ \+]*)(\d+)?(\.(\d+))?([%sfdiu])/g,function(a,b,d,l,D,N,Y,Z){if("%"==N)return"%";var Nb=c.shift();if("undefined"==typeof Nb)throw Error("[goog.string.format] Not enough arguments");arguments[0]=Nb;return Ta[N].apply(null,arguments)})},Ta={s:function(a,b,c){return isNaN(c)||""==c||a.length>=c?a:a=-1<b.indexOf("-",0)?a+Array(c-
+a.length+1).join(" "):Array(c-a.length+1).join(" ")+a},f:function(a,b,c,d,e){d=a.toString();isNaN(e)||""==e||(d=parseFloat(a).toFixed(e));var f;f=0>a?"-":0<=b.indexOf("+")?"+":0<=b.indexOf(" ")?" ":"";0<=a&&(d=f+d);if(isNaN(c)||d.length>=c)return d;d=isNaN(e)?Math.abs(a).toString():Math.abs(a).toFixed(e);a=c-d.length-f.length;return d=0<=b.indexOf("-",0)?f+d+Array(a+1).join(" "):f+Array(a+1).join(0<=b.indexOf("0",0)?"0":" ")+d},d:function(a,b,c,d,e,f,g,l){return Ta.f(parseInt(a,10),b,c,d,0,f,g,l)}};
+Ta.i=Ta.d;Ta.u=Ta.d;var Va=function(a){if("function"==typeof a.t)return a.t();if(p(a))return a.split("");if(da(a)){for(var b=[],c=a.length,d=0;d<c;d++)b.push(a[d]);return b}return wa(a)},Wa=function(a,b){if("function"==typeof a.forEach)a.forEach(b,void 0);else if(da(a)||p(a))la(a,b,void 0);else{var c;if("function"==typeof a.H)c=a.H();else if("function"!=typeof a.t)if(da(a)||p(a)){c=[];for(var d=a.length,e=0;e<d;e++)c.push(e)}else c=xa(a);else c=void 0;for(var d=Va(a),e=d.length,f=0;f<e;f++)b.call(void 0,d[f],c&&c[f],
+a)}};var E=function(a){this.w=new z;if(0<arguments.length%2)throw Error("Uneven number of arguments to ParameterMap constructor.");for(var b=arguments,c=0;c<b.length;c+=2)this.set(b[c],b[c+1])};E.prototype.set=function(a,b){if(null==b)throw Error("undefined-or-null value for key: "+a.name);this.w.set(a.name,{key:a,value:b})};E.prototype.remove=function(a){this.w.remove(a.name)};E.prototype.get=function(a){a=this.w.get(a.name,null);return null===a?null:a.value};E.prototype.ha=function(a){this.w.ha(a.w)};
+var Xa=function(a,b){la(a.w.t(),function(a){b(a.key,a.value)})};E.prototype.Nb=function(){var a={};Xa(this,function(b,c){a[b.id]=c});return a};E.prototype.clone=function(){var a=new E;a.w=this.w.clone();return a};E.prototype.toString=function(){var a={};Xa(this,function(b,c){a[b.id]=c});return JSON.stringify(a)};var F=function(a){this.e=a};h=F.prototype;h.Yb=function(a){var b=new F(t(this.M,this));b.I=Ia;b.Q=a;return b};h.action=function(a){var b=new F(t(this.M,this));b.I=Ja;b.Q=a;return b};h.label=function(a){var b=new F(t(this.M,this));b.I=Ka;b.Q=a;return b};h.value=function(a){var b=new F(t(this.M,this));b.I=La;b.Q=a;return b};h.fc=function(a){var b=new F(t(this.M,this));b.I=Na(a.index);b.Q=a.value;return b};h.vc=function(a){var b=new F(t(this.M,this));b.I=Oa(a.index);b.Q=a.value;return b};
+h.send=function(a){var b=new E;this.M(b);return a.send("event",b)};h.M=function(a){null!=this.I&&null!=this.Q&&!a.w.T(this.I.name)&&a.set(this.I,this.Q);r(this.e)&&this.e(a)};var Ya=new F(ba);var G=function(){this.aa=this.aa;this.Ca=this.Ca};G.prototype.aa=!1;G.prototype.ma=function(){this.aa||(this.aa=!0,this.o())};G.prototype.o=function(){if(this.Ca)for(;this.Ca.length;)this.Ca.shift()()};var Za=function(a,b){this.type=a;this.currentTarget=this.target=b;this.defaultPrevented=this.X=!1;this.Hb=!0};Za.prototype.preventDefault=function(){this.defaultPrevented=!0;this.Hb=!1};var $a=function(a){$a[" "](a);return a};$a[" "]=ba;var H;a:{var ab=k.navigator;if(ab){var bb=ab.userAgent;if(bb){H=bb;break a}}H=""};var cb=function(){return-1!=H.indexOf("Edge")||-1!=H.indexOf("Trident")||-1!=H.indexOf("MSIE")};var I=function(){return-1!=H.indexOf("Edge")};var db=-1!=H.indexOf("Opera")||-1!=H.indexOf("OPR"),J=cb(),eb=-1!=H.indexOf("Gecko")&&!(-1!=H.toLowerCase().indexOf("webkit")&&!I())&&!(-1!=H.indexOf("Trident")||-1!=H.indexOf("MSIE"))&&!I(),fb=-1!=H.toLowerCase().indexOf("webkit")&&!I(),gb=function(){var a=H;if(eb)return/rv\:([^\);]+)(\)|;)/.exec(a);if(J&&I())return/Edge\/([\d\.]+)/.exec(a);if(J)return/\b(?:MSIE|rv)[: ]([^\);]+)(\)|;)/.exec(a);if(fb)return/WebKit\/(\S+)/.exec(a)},hb=function(){var a=k.document;return a?a.documentMode:void 0},ib=
+function(){if(db&&k.opera){var a=k.opera.version;return q(a)?a():a}var a="",b=gb();b&&(a=b?b[1]:"");return J&&!I()&&(b=hb(),b>parseFloat(a))?String(b):a}(),jb={},K=function(a){var b;if(!(b=jb[a])){b=0;for(var c=ia(String(ib)).split("."),d=ia(String(a)).split("."),e=Math.max(c.length,d.length),f=0;0==b&&f<e;f++){var g=c[f]||"",l=d[f]||"",D=/(\d*)(\D*)/g,N=/(\d*)(\D*)/g;do{var Y=D.exec(g)||["","",""],Z=N.exec(l)||["","",""];if(0==Y[0].length&&0==Z[0].length)break;b=ja(0==Y[1].length?0:parseInt(Y[1],
+10),0==Z[1].length?0:parseInt(Z[1],10))||ja(0==Y[2].length,0==Z[2].length)||ja(Y[2],Z[2])}while(0==b)}b=jb[a]=0<=b}return b},kb=k.document,lb=hb(),mb=!kb||!J||!lb&&I()?void 0:lb||("CSS1Compat"==kb.compatMode?parseInt(ib,10):5);var nb=!J||J&&(I()||9<=mb),ob=J&&!K("9"),pb=!fb||K("528"),qb=eb&&K("1.9b")||J&&K("8")||db&&K("9.5")||fb&&K("528"),rb=eb&&!K("8")||J&&!K("9");var sb=function(a,b){Za.call(this,a?a.type:"");this.relatedTarget=this.currentTarget=this.target=null;this.charCode=this.keyCode=this.button=this.screenY=this.screenX=this.clientY=this.clientX=this.offsetY=this.offsetX=0;this.metaKey=this.shiftKey=this.altKey=this.ctrlKey=!1;this.sb=this.state=null;if(a){var c=this.type=a.type;this.target=a.target||a.srcElement;this.currentTarget=b;var d=a.relatedTarget;if(d){if(eb){var e;a:{try{$a(d.nodeName);e=!0;break a}catch(f){}e=!1}e||(d=null)}}else"mouseover"==
+c?d=a.fromElement:"mouseout"==c&&(d=a.toElement);this.relatedTarget=d;this.offsetX=fb||void 0!==a.offsetX?a.offsetX:a.layerX;this.offsetY=fb||void 0!==a.offsetY?a.offsetY:a.layerY;this.clientX=void 0!==a.clientX?a.clientX:a.pageX;this.clientY=void 0!==a.clientY?a.clientY:a.pageY;this.screenX=a.screenX||0;this.screenY=a.screenY||0;this.button=a.button;this.keyCode=a.keyCode||0;this.charCode=a.charCode||("keypress"==c?a.keyCode:0);this.ctrlKey=a.ctrlKey;this.altKey=a.altKey;this.shiftKey=a.shiftKey;
+this.metaKey=a.metaKey;this.state=a.state;this.sb=a;a.defaultPrevented&&this.preventDefault()}};w(sb,Za);sb.prototype.preventDefault=function(){sb.P.preventDefault.call(this);var a=this.sb;if(a.preventDefault)a.preventDefault();else if(a.returnValue=!1,ob)try{if(a.ctrlKey||112<=a.keyCode&&123>=a.keyCode)a.keyCode=-1}catch(b){}};var tb="closure_listenable_"+(1E6*Math.random()|0),ub=function(a){return!(!a||!a[tb])},vb=0;var wb=function(a,b,c,d,e){this.O=a;this.proxy=null;this.src=b;this.type=c;this.ka=!!d;this.sa=e;this.key=++vb;this.removed=this.ja=!1},xb=function(a){a.removed=!0;a.O=null;a.proxy=null;a.src=null;a.sa=null};var L=function(a){this.src=a;this.k={};this.fa=0};L.prototype.add=function(a,b,c,d,e){var f=a.toString();a=this.k[f];a||(a=this.k[f]=[],this.fa++);var g=yb(a,b,d,e);-1<g?(b=a[g],c||(b.ja=!1)):(b=new wb(b,this.src,f,!!d,e),b.ja=c,a.push(b));return b};L.prototype.remove=function(a,b,c,d){a=a.toString();if(!(a in this.k))return!1;var e=this.k[a];b=yb(e,b,c,d);return-1<b?(xb(e[b]),y.splice.call(e,b,1),0==e.length&&(delete this.k[a],this.fa--),!0):!1};
+var zb=function(a,b){var c=b.type;if(!(c in a.k))return!1;var d=qa(a.k[c],b);d&&(xb(b),0==a.k[c].length&&(delete a.k[c],a.fa--));return d};L.prototype.removeAll=function(a){a=a&&a.toString();var b=0,c;for(c in this.k)if(!a||c==a){for(var d=this.k[c],e=0;e<d.length;e++)++b,xb(d[e]);delete this.k[c];this.fa--}return b};L.prototype.ba=function(a,b,c,d){a=this.k[a.toString()];var e=-1;a&&(e=yb(a,b,c,d));return-1<e?a[e]:null};
+var yb=function(a,b,c,d){for(var e=0;e<a.length;++e){var f=a[e];if(!f.removed&&f.O==b&&f.ka==!!c&&f.sa==d)return e}return-1};var Ab="closure_lm_"+(1E6*Math.random()|0),Bb={},Cb=0,Db=function(a,b,c,d,e){if(n(b)){for(var f=0;f<b.length;f++)Db(a,b[f],c,d,e);return null}c=Eb(c);return ub(a)?a.listen(b,c,d,e):Fb(a,b,c,!1,d,e)},Fb=function(a,b,c,d,e,f){if(!b)throw Error("Invalid event type");var g=!!e,l=Gb(a);l||(a[Ab]=l=new L(a));c=l.add(b,c,d,e,f);if(c.proxy)return c;d=Hb();c.proxy=d;d.src=a;d.O=c;a.addEventListener?a.addEventListener(b.toString(),d,g):a.attachEvent(Ib(b.toString()),d);Cb++;return c},Hb=function(){var a=Jb,
+b=nb?function(c){return a.call(b.src,b.O,c)}:function(c){c=a.call(b.src,b.O,c);if(!c)return c};return b},Kb=function(a,b,c,d,e){if(n(b)){for(var f=0;f<b.length;f++)Kb(a,b[f],c,d,e);return null}c=Eb(c);return ub(a)?a.cb(b,c,d,e):Fb(a,b,c,!0,d,e)},Lb=function(a,b,c,d,e){if(n(b))for(var f=0;f<b.length;f++)Lb(a,b[f],c,d,e);else c=Eb(c),ub(a)?a.jb(b,c,d,e):a&&(a=Gb(a))&&(b=a.ba(b,c,!!d,e))&&Mb(b)},Mb=function(a){if(ea(a)||!a||a.removed)return!1;var b=a.src;if(ub(b))return zb(b.B,a);var c=a.type,d=a.proxy;
+b.removeEventListener?b.removeEventListener(c,d,a.ka):b.detachEvent&&b.detachEvent(Ib(c),d);Cb--;(c=Gb(b))?(zb(c,a),0==c.fa&&(c.src=null,b[Ab]=null)):xb(a);return!0},Ib=function(a){return a in Bb?Bb[a]:Bb[a]="on"+a},Pb=function(a,b,c,d){var e=!0;if(a=Gb(a))if(b=a.k[b.toString()])for(b=b.concat(),a=0;a<b.length;a++){var f=b[a];f&&f.ka==c&&!f.removed&&(f=Ob(f,d),e=e&&!1!==f)}return e},Ob=function(a,b){var c=a.O,d=a.sa||a.src;a.ja&&Mb(a);return c.call(d,b)},Jb=function(a,b){if(a.removed)return!0;if(!nb){var c;
+if(!(c=b))a:{c=["window","event"];for(var d=k,e;e=c.shift();)if(null!=d[e])d=d[e];else{c=null;break a}c=d}e=c;c=new sb(e,this);d=!0;if(!(0>e.keyCode||void 0!=e.returnValue)){a:{var f=!1;if(0==e.keyCode)try{e.keyCode=-1;break a}catch(g){f=!0}if(f||void 0==e.returnValue)e.returnValue=!0}e=[];for(f=c.currentTarget;f;f=f.parentNode)e.push(f);for(var f=a.type,l=e.length-1;!c.X&&0<=l;l--){c.currentTarget=e[l];var D=Pb(e[l],f,!0,c),d=d&&D}for(l=0;!c.X&&l<e.length;l++)c.currentTarget=e[l],D=Pb(e[l],f,!1,
+c),d=d&&D}return d}return Ob(a,new sb(b,this))},Gb=function(a){a=a[Ab];return a instanceof L?a:null},Qb="__closure_events_fn_"+(1E9*Math.random()>>>0),Eb=function(a){if(q(a))return a;a[Qb]||(a[Qb]=function(b){return a.handleEvent(b)});return a[Qb]};var M=function(){G.call(this);this.B=new L(this);this.Tb=this;this.fb=null};w(M,G);M.prototype[tb]=!0;h=M.prototype;h.addEventListener=function(a,b,c,d){Db(this,a,b,c,d)};h.removeEventListener=function(a,b,c,d){Lb(this,a,b,c,d)};
+h.dispatchEvent=function(a){var b,c=this.fb;if(c){b=[];for(var d=1;c;c=c.fb)b.push(c),++d}c=this.Tb;d=a.type||a;if(p(a))a=new Za(a,c);else if(a instanceof Za)a.target=a.target||c;else{var e=a;a=new Za(d,c);Aa(a,e)}var e=!0,f;if(b)for(var g=b.length-1;!a.X&&0<=g;g--)f=a.currentTarget=b[g],e=Rb(f,d,!0,a)&&e;a.X||(f=a.currentTarget=c,e=Rb(f,d,!0,a)&&e,a.X||(e=Rb(f,d,!1,a)&&e));if(b)for(g=0;!a.X&&g<b.length;g++)f=a.currentTarget=b[g],e=Rb(f,d,!1,a)&&e;return e};
+h.o=function(){M.P.o.call(this);this.B&&this.B.removeAll(void 0);this.fb=null};h.listen=function(a,b,c,d){return this.B.add(String(a),b,!1,c,d)};h.cb=function(a,b,c,d){return this.B.add(String(a),b,!0,c,d)};h.jb=function(a,b,c,d){return this.B.remove(String(a),b,c,d)};var Rb=function(a,b,c,d){b=a.B.k[String(b)];if(!b)return!0;b=b.concat();for(var e=!0,f=0;f<b.length;++f){var g=b[f];if(g&&!g.removed&&g.ka==c){var l=g.O,D=g.sa||g.src;g.ja&&zb(a.B,g);e=!1!==l.call(D,d)&&e}}return e&&0!=d.Hb};
+M.prototype.ba=function(a,b,c,d){return this.B.ba(String(a),b,c,d)};var Sb=function(a,b,c){this.tc=c;this.dc=a;this.Gc=b;this.Ba=0;this.ta=null};Sb.prototype.get=function(){var a;0<this.Ba?(this.Ba--,a=this.ta,this.ta=a.next,a.next=null):a=this.dc();return a};Sb.prototype.put=function(a){this.Gc(a);this.Ba<this.tc&&(this.Ba++,a.next=this.ta,this.ta=a)};var Tb=function(a){k.setTimeout(function(){throw a;},0)},Ub,Vb=function(){var a=k.MessageChannel;"undefined"===typeof a&&"undefined"!==typeof window&&window.postMessage&&window.addEventListener&&-1==H.indexOf("Presto")&&(a=function(){var a=document.createElement("IFRAME");a.style.display="none";a.src="";document.documentElement.appendChild(a);var b=a.contentWindow,a=b.document;a.open();a.write("");a.close();var c="callImmediate"+Math.random(),d="file:"==b.location.protocol?"*":b.location.protocol+
+"//"+b.location.host,a=t(function(a){if(("*"==d||a.origin==d)&&a.data==c)this.port1.onmessage()},this);b.addEventListener("message",a,!1);this.port1={};this.port2={postMessage:function(){b.postMessage(c,d)}}});if("undefined"!==typeof a&&!cb()){var b=new a,c={},d=c;b.port1.onmessage=function(){if(m(c.next)){c=c.next;var a=c.ob;c.ob=null;a()}};return function(a){d.next={ob:a};d=d.next;b.port2.postMessage(0)}}return"undefined"!==typeof document&&"onreadystatechange"in document.createElement("SCRIPT")?
+function(a){var b=document.createElement("SCRIPT");b.onreadystatechange=function(){b.onreadystatechange=null;b.parentNode.removeChild(b);b=null;a();a=null};document.documentElement.appendChild(b)}:function(a){k.setTimeout(a,0)}};var Wb=function(){this.Ka=this.Z=null},Yb=new Sb(function(){return new Xb},function(a){a.reset()},100);Wb.prototype.add=function(a,b){var c=Yb.get();c.set(a,b);this.Ka?this.Ka.next=c:this.Z=c;this.Ka=c};Wb.prototype.remove=function(){var a=null;this.Z&&(a=this.Z,this.Z=this.Z.next,this.Z||(this.Ka=null),a.next=null);return a};var Xb=function(){this.next=this.scope=this.Wa=null};Xb.prototype.set=function(a,b){this.Wa=a;this.scope=b;this.next=null};
+Xb.prototype.reset=function(){this.next=this.scope=this.Wa=null};var cc=function(a,b){Zb||$b();ac||(Zb(),ac=!0);bc.add(a,b)},Zb,$b=function(){if(k.Promise&&k.Promise.resolve){var a=k.Promise.resolve();Zb=function(){a.then(dc)}}else Zb=function(){var a=dc;!q(k.setImmediate)||k.Window&&k.Window.prototype&&k.Window.prototype.setImmediate==k.setImmediate?(Ub||(Ub=Vb()),Ub(a)):k.setImmediate(a)}},ac=!1,bc=new Wb,dc=function(){for(var a=null;a=bc.remove();){try{a.Wa.call(a.scope)}catch(b){Tb(b)}Yb.put(a)}ac=!1};var ec=function(a){a.prototype.then=a.prototype.then;a.prototype.$goog_Thenable=!0},fc=function(a){if(!a)return!1;try{return!!a.$goog_Thenable}catch(b){return!1}};var P=function(a,b){this.m=0;this.D=void 0;this.S=this.G=this.l=null;this.ra=this.Va=!1;if(a==gc)O(this,2,b);else try{var c=this;a.call(b,function(a){O(c,2,a)},function(a){O(c,3,a)})}catch(d){O(this,3,d)}},hc=function(){this.next=this.context=this.da=this.Da=this.L=null;this.Na=!1};hc.prototype.reset=function(){this.context=this.da=this.Da=this.L=null;this.Na=!1};
+var ic=new Sb(function(){return new hc},function(a){a.reset()},100),jc=function(a,b,c){var d=ic.get();d.Da=a;d.da=b;d.context=c;return d},gc=function(){};P.prototype.then=function(a,b,c){return kc(this,q(a)?a:null,q(b)?b:null,c)};ec(P);P.prototype.cancel=function(a){0==this.m&&cc(function(){var b=new lc(a);mc(this,b)},this)};
+var mc=function(a,b){if(0==a.m)if(a.l){var c=a.l;if(c.G){for(var d=0,e=null,f=null,g=c.G;g&&(g.Na||(d++,g.L==a&&(e=g),!(e&&1<d)));g=g.next)e||(f=g);e&&(0==c.m&&1==d?mc(c,b):(f?(d=f,d.next==c.S&&(c.S=d),d.next=d.next.next):nc(c),oc(c,e,3,b)))}a.l=null}else O(a,3,b)},qc=function(a,b){a.G||2!=a.m&&3!=a.m||pc(a);a.S?a.S.next=b:a.G=b;a.S=b},kc=function(a,b,c,d){var e=jc(null,null,null);e.L=new P(function(a,g){e.Da=b?function(c){try{var e=b.call(d,c);a(e)}catch(N){g(N)}}:a;e.da=c?function(b){try{var e=
+c.call(d,b);!m(e)&&b instanceof lc?g(b):a(e)}catch(N){g(N)}}:g});e.L.l=a;qc(a,e);return e.L};P.prototype.Pb=function(a){this.m=0;O(this,2,a)};P.prototype.Qb=function(a){this.m=0;O(this,3,a)};
+var O=function(a,b,c){if(0==a.m){if(a==c)b=3,c=new TypeError("Promise cannot resolve to itself");else{if(fc(c)){a.m=1;b=c;c=a.Pb;var d=a.Qb;b instanceof P?qc(b,jc(c||ba,d||null,a)):b.then(c,d,a);return}if(r(c))try{if(d=c.then,q(d)){rc(a,c,d);return}}catch(e){b=3,c=e}}a.D=c;a.m=b;a.l=null;pc(a);3!=b||c instanceof lc||sc(a,c)}},rc=function(a,b,c){a.m=1;var d=!1,e=function(b){d||(d=!0,a.Pb(b))},f=function(b){d||(d=!0,a.Qb(b))};try{c.call(b,e,f)}catch(g){f(g)}},pc=function(a){a.Va||(a.Va=!0,cc(a.gc,a))},
+nc=function(a){var b=null;a.G&&(b=a.G,a.G=b.next,b.next=null);a.G||(a.S=null);return b};P.prototype.gc=function(){for(var a=null;a=nc(this);)oc(this,a,this.m,this.D);this.Va=!1};var oc=function(a,b,c,d){b.L&&(b.L.l=null);if(2==c)b.Da.call(b.context,d);else if(null!=b.da){if(!b.Na)for(;a&&a.ra;a=a.l)a.ra=!1;b.da.call(b.context,d)}ic.put(b)},sc=function(a,b){a.ra=!0;cc(function(){a.ra&&tc.call(null,b)})},tc=Tb,lc=function(a){x.call(this,a)};w(lc,x);lc.prototype.name="cancel";/*
+ Portions of this code are from MochiKit, received by
+ The Closure Authors under the MIT license. All other code is Copyright
+ 2005-2009 The Closure Authors. All Rights Reserved.
+*/
+var Q=function(a,b){this.Fa=[];this.Cb=a;this.rb=b||null;this.ca=this.C=!1;this.D=void 0;this.hb=this.Xb=this.Oa=!1;this.Ia=0;this.l=null;this.Qa=0};Q.prototype.cancel=function(a){if(this.C)this.D instanceof Q&&this.D.cancel();else{if(this.l){var b=this.l;delete this.l;a?b.cancel(a):(b.Qa--,0>=b.Qa&&b.cancel())}this.Cb?this.Cb.call(this.rb,this):this.hb=!0;this.C||this.A(new uc)}};Q.prototype.qb=function(a,b){this.Oa=!1;vc(this,a,b)};
+var vc=function(a,b,c){a.C=!0;a.D=c;a.ca=!b;wc(a)},yc=function(a){if(a.C){if(!a.hb)throw new xc;a.hb=!1}};Q.prototype.v=function(a){yc(this);vc(this,!0,a)};Q.prototype.A=function(a){yc(this);vc(this,!1,a)};Q.prototype.n=function(a,b){return zc(this,a,null,b)};var zc=function(a,b,c,d){a.Fa.push([b,c,d]);a.C&&wc(a);return a};Q.prototype.then=function(a,b,c){var d,e,f=new P(function(a,b){d=a;e=b});zc(this,d,function(a){a instanceof uc?f.cancel():e(a)});return f.then(a,b,c)};ec(Q);
+var Ac=function(a){var b=new Q;zc(a,b.v,b.A,b);return b},Bc=function(a){return ma(a.Fa,function(a){return q(a[1])})},wc=function(a){if(a.Ia&&a.C&&Bc(a)){var b=a.Ia,c=Cc[b];c&&(k.clearTimeout(c.ua),delete Cc[b]);a.Ia=0}a.l&&(a.l.Qa--,delete a.l);for(var b=a.D,d=c=!1;a.Fa.length&&!a.Oa;){var e=a.Fa.shift(),f=e[0],g=e[1],e=e[2];if(f=a.ca?g:f)try{var l=f.call(e||a.rb,b);m(l)&&(a.ca=a.ca&&(l==b||l instanceof Error),a.D=b=l);fc(b)&&(d=!0,a.Oa=!0)}catch(D){b=D,a.ca=!0,Bc(a)||(c=!0)}}a.D=b;d&&(l=t(a.qb,a,
+!0),d=t(a.qb,a,!1),b instanceof Q?(zc(b,l,d),b.Xb=!0):b.then(l,d));c&&(b=new Dc(b),Cc[b.ua]=b,a.Ia=b.ua)},Ec=function(a){var b=new Q;b.v(a);return b},Gc=function(){var a=Fc,b=new Q;b.A(a);return b},xc=function(){x.call(this)};w(xc,x);xc.prototype.message="Deferred has already fired";xc.prototype.name="AlreadyCalledError";var uc=function(){x.call(this)};w(uc,x);uc.prototype.message="Deferred was canceled";uc.prototype.name="CanceledError";
+var Dc=function(a){this.ua=k.setTimeout(t(this.Tc,this),0);this.na=a};Dc.prototype.Tc=function(){delete Cc[this.ua];throw this.na;};var Cc={};var Hc=function(a){this.qa=[];this.e=a};Hc.prototype.R=function(a){if(!q(a))throw Error("Invalid filter. Must be a function.");this.qa.push(a)};Hc.prototype.send=function(a,b){if(0==this.qa.length)return this.e.send(a,b);var c=new R(a,b);return Ic(this,0,c).n(function(){if(!c.Sa)return this.e.send(a,b)},this)};var Ic=function(a,b,c){return Ec().n(function(){return this.qa[b](c)},a).n(function(){if(++b<this.qa.length&&!c.Sa)return Ic(this,b,c)},a)},R=function(a,b){this.Wc=a;this.Cc=b;this.Sa=!1};
+R.prototype.ub=function(){return this.Wc};R.prototype.V=function(){return this.Cc};R.prototype.cancel=function(){this.Sa=!0};Ba("area base br col command embed hr img input keygen link meta param source track wbr".split(" "));var Jc=function(a,b){this.width=a;this.height=b};Jc.prototype.clone=function(){return new Jc(this.width,this.height)};Jc.prototype.floor=function(){this.width=Math.floor(this.width);this.height=Math.floor(this.height);return this};!eb&&!J||J&&J&&(I()||9<=mb)||eb&&K("1.9.1");J&&K("9");var Kc={id:"apiVersion",name:"v",valueType:"text",maxLength:void 0,defaultValue:void 0},Lc={id:"appName",name:"an",valueType:"text",maxLength:100,defaultValue:void 0},Mc={id:"appVersion",name:"av",valueType:"text",maxLength:100,defaultValue:void 0},Nc={id:"clientId",name:"cid",valueType:"text",maxLength:void 0,defaultValue:void 0},Oc={id:"language",name:"ul",valueType:"text",maxLength:20,defaultValue:void 0},Pc={id:"libVersion",name:"_v",valueType:"text",maxLength:void 0,defaultValue:void 0},Qc={id:"sampleRateOverride",
+name:"usro",valueType:"integer",maxLength:void 0,defaultValue:void 0},Rc={id:"screenColors",name:"sd",valueType:"text",maxLength:20,defaultValue:void 0},Sc={id:"screenResolution",name:"sr",valueType:"text",maxLength:20,defaultValue:void 0},Tc={id:"trackingId",name:"tid",valueType:"text",maxLength:void 0,defaultValue:void 0},Uc={id:"viewportSize",name:"vp",valueType:"text",maxLength:20,defaultValue:void 0},Vc={ad:Kc,dd:Lc,ed:Mc,nd:Nc,Fd:Oc,Gd:Pc,Md:Qc,Nd:Rc,Od:Sc,ae:Tc,he:Uc},Xc=function(a){if(!p(a))return a;
+var b=Wc(a,Ma);if(r(b))return b;b=Wc(a,Vc);if(r(b))return b;b=/^dimension(\d+)$/.exec(a);if(null!==b)return Na(parseInt(b[1],10));b=/^metric(\d+)$/.exec(a);if(null!==b)return Oa(parseInt(b[1],10));throw Error(a+" is not a valid parameter name.");},Wc=function(a,b){var c=ya(b,function(b){return b.id==a&&"metric"!=a&&"dimension"!=a});return r(c)?c:null};var S=function(a,b){this.ac=b;this.q=b.Xa();this.Fb=new E;this.ib=!1};h=S.prototype;h.set=function(a,b){if(null==b)throw Error("Value must be defined and not null. Parameter="+a.id);var c=Xc(a);this.Fb.set(c,b)};h.R=function(a){this.ac.R(a)};h.send=function(a,b){if(a instanceof F)return a.send(this);var c=this.Fb.clone();b instanceof E?c.ha(b):r(b)&&va(b,function(a,b){null!=a&&c.set(Xc(b),a)},this);this.ib&&(this.ib=!1,c.set(Ga,"start"));return this.q.send(a,c)};
+h.Hc=function(a){var b={description:a};this.set(Ha,a);return this.send("appview",b)};h.Ic=function(a,b,c,d){return this.send("event",{eventCategory:a,eventAction:b,eventLabel:c,eventValue:d})};h.Kc=function(a,b,c){return this.send("social",{socialNetwork:a,socialAction:b,socialTarget:c})};h.Jc=function(a,b){return this.send("exception",{exDescription:a,exFatal:b})};h.Ib=function(a,b,c,d,e){return this.send("timing",{timingCategory:a,timingVar:b,timingLabel:d,timingValue:c,sampleRateOverride:e})};
+h.jc=function(){this.ib=!0};h.Rc=function(a,b,c,d){return new Yc(this,a,b,c,d)};var Yc=function(a,b,c,d,e){this.Ob=a;this.Zb=b;this.Xc=c;this.rc=d;this.Ea=e;this.Qc=u()};Yc.prototype.send=function(){var a=this.Ob.Ib(this.Zb,this.Xc,u()-this.Qc,this.rc,this.Ea);this.Ob=null;return a};var Zc=function(a,b,c,d,e){this.sc=a;this.Ub=b;this.Vb=c;this.g=d;this.$b=e};
+Zc.prototype.mc=function(a){var b=new S(0,this.$b.create());b.set(Pc,this.sc);b.set(Kc,1);b.set(Lc,this.Ub);b.set(Mc,this.Vb);b.set(Tc,a);(a=navigator.language||navigator.browserLanguage)&&b.set(Oc,a);(a=screen.colorDepth+"-bit")&&b.set(Rc,a);(a=[screen.width,screen.height].join("x"))&&b.set(Sc,a);a=window.document;a="CSS1Compat"==a.compatMode?a.documentElement:a.body;a=new Jc(a.clientWidth,a.clientHeight);(a=[a.width,a.height].join("x"))&&b.set(Uc,a);return b};Zc.prototype.kc=function(){return Ac(this.g.ea)};var $c=function(a,b,c,d,e,f){Q.call(this,e,f);this.bb=a;this.Ta=[];this.tb=!!b;this.ic=!!c;this.cc=!!d;for(b=this.Bb=0;b<a.length;b++)zc(a[b],t(this.vb,this,b,!0),t(this.vb,this,b,!1));0!=a.length||this.tb||this.v(this.Ta)};w($c,Q);$c.prototype.vb=function(a,b,c){this.Bb++;this.Ta[a]=[b,c];this.C||(this.tb&&b?this.v([a,c]):this.ic&&!b?this.A(c):this.Bb==this.bb.length&&this.v(this.Ta));this.cc&&!b&&(c=null);return c};$c.prototype.A=function(a){$c.P.A.call(this,a);for(a=0;a<this.bb.length;a++)this.bb[a].cancel()};
+var ad=function(a){return(new $c(a,!1,!0)).n(function(a){for(var c=[],d=0;d<a.length;d++)c[d]=a[d][1];return c})};var bd=function(){for(var a="xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".split(""),b=0,c=a.length;b<c;b++)switch(a[b]){case "x":a[b]=Math.floor(16*Math.random()).toString(16);break;case "y":a[b]=(Math.floor(4*Math.random())+8).toString(16)}return a.join("")};var T=function(a){this.J=a;this.Ea=100;this.pb=[];this.W=this.ga=null;this.ea=cd(this);this.ea.n(function(){this.Jb=Db(this.J,"a",t(this.nc,this))},this)},cd=function(a){return dd(a).n(function(){return this},a)},dd=function(a){return ad([ed(a),fd(a)])};T.prototype.nc=function(){U(this);var a=gd(this),b=this.xa();dd(this).n(function(){a!=gd(this)&&hd(this,"analytics.user-id");b!=this.xa()&&hd(this,"analytics.tracking-permitted")},this)};var id=function(a,b){U(a);a.pb.push(b)};
+T.prototype.Oc=function(a){U(this);var b=this.W!=a;this.W=a;this.J.set("analytics.tracking-permitted",a.toString());b&&hd(this,"analytics.tracking-permitted")};T.prototype.xa=function(){U(this);var a;if(a=this.W)a=k._gaUserPrefs,a=!(a&&a.ioo&&a.ioo());return a};
+var ed=function(a){return a.J.get("analytics.tracking-permitted").n(function(a){this.W=!0;if(m(a))switch(a){case "true":this.W=!0;break;case "false":this.W=!1}},a)},gd=function(a){U(a);if(!p(a.ga))throw Error("Invalid state. UserID is not a string.");return a.ga},fd=function(a){return a.J.get("analytics.user-id").n(function(a){m(a)?this.ga=a:jd(this)},a)},jd=function(a){a.ga=bd();return a.J.set("analytics.user-id",a.ga).n(function(){hd(this,"analytics.user-id")},a)};
+T.prototype.Nc=function(a){U(this);this.Ea=a};var kd=function(a){U(a);return a.Ea};T.prototype.Fc=function(){return jd(this)};var hd=function(a,b){la(a.pb,function(a){a(b)})};T.prototype.ma=function(){null!=this.Jb&&Mb(this.Jb)};var U=function(a){if(!Ac(a.ea).C)throw Error("Settings object accessed prior to entering ready state.");};var ld=function(){M.call(this);this.eb="google-analytics";this.J=chrome.storage.local;chrome.storage.onChanged.addListener(t(this.Ac,this))};w(ld,M);ld.prototype.Ac=function(a){md(this,a)&&this.dispatchEvent("a")};var md=function(a,b){return ma(xa(b),function(a){return 0==a.lastIndexOf(this.eb,0)},a)};ld.prototype.get=function(a){var b=new Q,c=this.eb+"."+a;this.J.get(c,function(a){chrome.runtime.lastError?b.A(chrome.runtime.lastError):(a=a[c],b.v(null!=a?a.toString():void 0))});return b};
+ld.prototype.set=function(a,b){var c=new Q,d={};d[this.eb+"."+a]=b;this.J.set(d,function(){chrome.runtime.lastError?c.A(chrome.runtime.lastError):c.v()});return c};var V=function(){};V.lc=function(){return V.yb?V.yb:V.yb=new V};V.prototype.send=function(){return Ec()};var nd=function(a){this.ec=a};nd.prototype.send=function(a,b){this.ec.push({pc:a,Bc:b});return Ec()};var od=function(a,b,c){this.g=a;this.U=[];this.K={enabled:new nd(this.U),disabled:c};this.q=this.K.enabled;zc(Ac(this.g.ea),ha(this.zc,b),this.yc,this)};od.prototype.zc=function(a){if(null===this.U)throw Error("Channel setup already completed.");this.K.enabled=a();pd(this);la(this.U,function(a){this.send(a.pc,a.Bc)},this);this.U=null;id(this.g,t(this.xc,this))};
+od.prototype.yc=function(){if(null===this.U)throw Error("Channel setup already completed.");this.q=this.K.enabled=this.K.disabled;this.U=null};od.prototype.send=function(a,b){return this.q.send(a,b)};var pd=function(a){a.q=a.g.xa()?a.K.enabled:a.K.disabled};od.prototype.xc=function(a){switch(a){case "analytics.tracking-permitted":pd(this)}};var qd=function(a,b){this.Ra=[];var c=t(function(){this.pa=new Hc(b.Xa());la(this.Ra,function(a){this.pa.R(a)},this);this.Ra=null;return this.pa},this);this.q=new od(a,c,V.lc())};qd.prototype.Xa=function(){return this.q};qd.prototype.R=function(a){this.pa?this.pa.R(a):this.Ra.push(a)};var rd=function(a,b){this.g=a;this.Pc=b};rd.prototype.create=function(){return new qd(this.g,this.Pc)};var sd=function(a,b){M.call(this);this.wa=a||1;this.Y=b||k;this.Pa=t(this.Uc,this);this.ab=u()};w(sd,M);h=sd.prototype;h.enabled=!1;h.h=null;h.Uc=function(){if(this.enabled){var a=u()-this.ab;0<a&&a<.8*this.wa?this.h=this.Y.setTimeout(this.Pa,this.wa-a):(this.h&&(this.Y.clearTimeout(this.h),this.h=null),this.dispatchEvent("tick"),this.enabled&&(this.h=this.Y.setTimeout(this.Pa,this.wa),this.ab=u()))}};h.start=function(){this.enabled=!0;this.h||(this.h=this.Y.setTimeout(this.Pa,this.wa),this.ab=u())};
+h.stop=function(){this.enabled=!1;this.h&&(this.Y.clearTimeout(this.h),this.h=null)};h.o=function(){sd.P.o.call(this);this.stop();delete this.Y};var td=function(a,b,c){if(q(a))c&&(a=t(a,c));else if(a&&"function"==typeof a.handleEvent)a=t(a.handleEvent,a);else throw Error("Invalid listener argument");return 2147483647<b?-1:k.setTimeout(a,b||0)};var W=function(a){G.call(this);this.Ya=a;this.b={}};w(W,G);var ud=[];W.prototype.listen=function(a,b,c,d){n(b)||(b&&(ud[0]=b.toString()),b=ud);for(var e=0;e<b.length;e++){var f=Db(a,b[e],c||this.handleEvent,d||!1,this.Ya||this);if(!f)break;this.b[f.key]=f}return this};W.prototype.cb=function(a,b,c,d){return vd(this,a,b,c,d)};var vd=function(a,b,c,d,e,f){if(n(c))for(var g=0;g<c.length;g++)vd(a,b,c[g],d,e,f);else{b=Kb(b,c,d||a.handleEvent,e,f||a.Ya||a);if(!b)return a;a.b[b.key]=b}return a};
+W.prototype.jb=function(a,b,c,d,e){if(n(b))for(var f=0;f<b.length;f++)this.jb(a,b[f],c,d,e);else c=c||this.handleEvent,e=e||this.Ya||this,c=Eb(c),d=!!d,b=ub(a)?a.ba(b,c,d,e):a?(a=Gb(a))?a.ba(b,c,d,e):null:null,b&&(Mb(b),delete this.b[b.key]);return this};W.prototype.removeAll=function(){va(this.b,Mb);this.b={}};W.prototype.o=function(){W.P.o.call(this);this.removeAll()};W.prototype.handleEvent=function(){throw Error("EventHandler.handleEvent not implemented");};var wd=function(){M.call(this);this.oa=new W(this);pb&&(qb?this.oa.listen(rb?document.body:window,["online","offline"],this.wb):(this.Eb=pb?navigator.onLine:!0,this.h=new sd(250),this.oa.listen(this.h,"tick",this.oc),this.h.start()))};w(wd,M);wd.prototype.oc=function(){var a=pb?navigator.onLine:!0;a!=this.Eb&&(this.Eb=a,this.wb())};wd.prototype.wb=function(){this.dispatchEvent((pb?navigator.onLine:1)?"online":"offline")};
+wd.prototype.o=function(){wd.P.o.call(this);this.oa.ma();this.oa=null;this.h&&(this.h.ma(),this.h=null)};var xd=function(a,b){this.g=a;this.e=b};xd.prototype.send=function(a,b){b.set(Nc,gd(this.g));return this.e.send(a,b)};var yd=function(a){this.e=a};yd.prototype.send=function(a,b){zd(b);Ad(b);return this.e.send(a,b)};var zd=function(a){Xa(a,function(b,c){m(b.maxLength)&&"text"==b.valueType&&0<b.maxLength&&c.length>b.maxLength&&a.set(b,c.substring(0,b.maxLength))})},Ad=function(a){Xa(a,function(b,c){m(b.defaultValue)&&c==b.defaultValue&&a.remove(b)})};var Fc={status:"device-offline",la:void 0},Bd={status:"rate-limited",la:void 0},Cd={status:"sampled-out",la:void 0},Dd={status:"sent",la:void 0};var Ed=function(a,b){this.Vc=a;this.e=b};Ed.prototype.send=function(a,b){var c;c=this.Vc;var d=c.Lb(),e=Math.floor((d-c.Ab)*c.hc);0<e&&(c.$=Math.min(c.$+e,c.uc),c.Ab=d);1>c.$?c=!1:(--c.$,c=!0);return c||"item"==a||"transaction"==a?this.e.send(a,b):Ec(Bd)};var Fd=function(){this.$=60;this.uc=500;this.hc=5E-4;this.Lb=function(){return(new Date).getTime()};this.Ab=this.Lb()};var Gd=function(a,b){this.g=a;this.e=b};Gd.prototype.send=function(a,b){var c=b.get(Nc),c=parseInt(c.split("-")[1],16),d;"timing"!=a?d=kd(this.g):((d=b.get(Qc))&&b.remove(Qc),d=d||kd(this.g));return c<655.36*d?this.e.send(a,b):Ec(Cd)};var Hd=/^(?:([^:/?#.]+):)?(?:\/\/(?:([^/?#]*)@)?([^/#?]*?)(?::([0-9]+))?(?=[/#?]|$))?([^?#]+)?(?:\?([^#]*))?(?:#(.*))?$/,Jd=function(a){if(Id){Id=!1;var b=k.location;if(b){var c=b.href;if(c&&(c=(c=Jd(c)[3]||null)?decodeURI(c):c)&&c!=b.hostname)throw Id=!0,Error();}}return a.match(Hd)},Id=fb,Kd=function(a,b){for(var c=a.split("&"),d=0;d<c.length;d++){var e=c[d].indexOf("="),f=null,g=null;0<=e?(f=c[d].substring(0,e),g=c[d].substring(e+1)):f=c[d];b(f,g?decodeURIComponent(g.replace(/\+/g," ")):"")}};var Ld=function(){};Ld.prototype.nb=null;var Nd=function(a){var b;(b=a.nb)||(b={},Md(a)&&(b[0]=!0,b[1]=!0),b=a.nb=b);return b};var Od,Pd=function(){};w(Pd,Ld);var Qd=function(a){return(a=Md(a))?new ActiveXObject(a):new XMLHttpRequest},Md=function(a){if(!a.xb&&"undefined"==typeof XMLHttpRequest&&"undefined"!=typeof ActiveXObject){for(var b=["MSXML2.XMLHTTP.6.0","MSXML2.XMLHTTP.3.0","MSXML2.XMLHTTP","Microsoft.XMLHTTP"],c=0;c<b.length;c++){var d=b[c];try{return new ActiveXObject(d),a.xb=d}catch(e){}}throw Error("Could not create ActiveXObject. ActiveX might be disabled, or MSXML might not be installed");}return a.xb};Od=new Pd;var X=function(a){M.call(this);this.headers=new z;this.Ma=a||null;this.F=!1;this.La=this.a=null;this.za=this.$a="";this.N=this.Za=this.va=this.Ua=!1;this.Ha=0;this.Ga=null;this.Gb="";this.kb=this.Zc=!1};w(X,M);var Rd=/^https?$/i,Sd=["POST","PUT"],Td=[],Ud=function(a,b,c){var d=new X;Td.push(d);b&&d.listen("complete",b);d.cb("ready",d.bc);d.send(a,"POST",c,void 0)};X.prototype.bc=function(){this.ma();qa(Td,this)};
+X.prototype.send=function(a,b,c,d){if(this.a)throw Error("[goog.net.XhrIo] Object is active with another request="+this.$a+"; newUri="+a);b=b?b.toUpperCase():"GET";this.$a=a;this.za="";this.Ua=!1;this.F=!0;this.a=this.Ma?Qd(this.Ma):Qd(Od);this.La=this.Ma?Nd(this.Ma):Nd(Od);this.a.onreadystatechange=t(this.Db,this);try{this.Za=!0,this.a.open(b,String(a),!0),this.Za=!1}catch(e){this.na(5,e);return}a=c||"";var f=this.headers.clone();d&&Wa(d,function(a,b){f.set(b,a)});d=pa(f.H());c=k.FormData&&a instanceof
+k.FormData;!(0<=ka(Sd,b))||d||c||f.set("Content-Type","application/x-www-form-urlencoded;charset=utf-8");f.forEach(function(a,b){this.a.setRequestHeader(b,a)},this);this.Gb&&(this.a.responseType=this.Gb);"withCredentials"in this.a&&(this.a.withCredentials=this.Zc);try{Vd(this),0<this.Ha&&((this.kb=Wd(this.a))?(this.a.timeout=this.Ha,this.a.ontimeout=t(this.Mb,this)):this.Ga=td(this.Mb,this.Ha,this)),this.va=!0,this.a.send(a),this.va=!1}catch(g){this.na(5,g)}};
+var Wd=function(a){return J&&K(9)&&ea(a.timeout)&&m(a.ontimeout)},oa=function(a){return"content-type"==a.toLowerCase()};X.prototype.Mb=function(){"undefined"!=typeof aa&&this.a&&(this.za="Timed out after "+this.Ha+"ms, aborting",this.dispatchEvent("timeout"),this.abort(8))};X.prototype.na=function(a,b){this.F=!1;this.a&&(this.N=!0,this.a.abort(),this.N=!1);this.za=b;Xd(this);Yd(this)};var Xd=function(a){a.Ua||(a.Ua=!0,a.dispatchEvent("complete"),a.dispatchEvent("error"))};
+X.prototype.abort=function(){this.a&&this.F&&(this.F=!1,this.N=!0,this.a.abort(),this.N=!1,this.dispatchEvent("complete"),this.dispatchEvent("abort"),Yd(this))};X.prototype.o=function(){this.a&&(this.F&&(this.F=!1,this.N=!0,this.a.abort(),this.N=!1),Yd(this,!0));X.P.o.call(this)};X.prototype.Db=function(){this.aa||(this.Za||this.va||this.N?Zd(this):this.wc())};X.prototype.wc=function(){Zd(this)};
+var Zd=function(a){if(a.F&&"undefined"!=typeof aa&&(!a.La[1]||4!=$d(a)||2!=ae(a)))if(a.va&&4==$d(a))td(a.Db,0,a);else if(a.dispatchEvent("readystatechange"),4==$d(a)){a.F=!1;try{var b=ae(a),c;a:switch(b){case 200:case 201:case 202:case 204:case 206:case 304:case 1223:c=!0;break a;default:c=!1}var d;if(!(d=c)){var e;if(e=0===b){var f=Jd(String(a.$a))[1]||null;if(!f&&self.location)var g=self.location.protocol,f=g.substr(0,g.length-1);e=!Rd.test(f?f.toLowerCase():"")}d=e}if(d)a.dispatchEvent("complete"),
+a.dispatchEvent("success");else{var l;try{l=2<$d(a)?a.a.statusText:""}catch(D){l=""}a.za=l+" ["+ae(a)+"]";Xd(a)}}finally{Yd(a)}}},Yd=function(a,b){if(a.a){Vd(a);var c=a.a,d=a.La[0]?ba:null;a.a=null;a.La=null;b||a.dispatchEvent("ready");try{c.onreadystatechange=d}catch(e){}}},Vd=function(a){a.a&&a.kb&&(a.a.ontimeout=null);ea(a.Ga)&&(k.clearTimeout(a.Ga),a.Ga=null)},$d=function(a){return a.a?a.a.readyState:0},ae=function(a){try{return 2<$d(a)?a.a.status:-1}catch(b){return-1}};var be=function(a,b,c){this.r=a||null;this.qc=!!c},ce=function(a){a.c||(a.c=new z,a.j=0,a.r&&Kd(a.r,function(b,c){a.add(decodeURIComponent(b.replace(/\+/g," ")),c)}))};h=be.prototype;h.c=null;h.j=null;h.add=function(a,b){ce(this);this.r=null;a=de(this,a);var c=this.c.get(a);c||this.c.set(a,c=[]);c.push(b);this.j++;return this};h.remove=function(a){ce(this);a=de(this,a);return this.c.T(a)?(this.r=null,this.j-=this.c.get(a).length,this.c.remove(a)):!1};h.T=function(a){ce(this);a=de(this,a);return this.c.T(a)};
+h.H=function(){ce(this);for(var a=this.c.t(),b=this.c.H(),c=[],d=0;d<b.length;d++)for(var e=a[d],f=0;f<e.length;f++)c.push(b[d]);return c};h.t=function(a){ce(this);var b=[];if(p(a))this.T(a)&&(b=ra(b,this.c.get(de(this,a))));else{a=this.c.t();for(var c=0;c<a.length;c++)b=ra(b,a[c])}return b};h.set=function(a,b){ce(this);this.r=null;a=de(this,a);this.T(a)&&(this.j-=this.c.get(a).length);this.c.set(a,[b]);this.j++;return this};
+h.get=function(a,b){var c=a?this.t(a):[];return 0<c.length?String(c[0]):b};h.toString=function(){if(this.r)return this.r;if(!this.c)return"";for(var a=[],b=this.c.H(),c=0;c<b.length;c++)for(var d=b[c],e=encodeURIComponent(String(d)),d=this.t(d),f=0;f<d.length;f++){var g=e;""!==d[f]&&(g+="="+encodeURIComponent(String(d[f])));a.push(g)}return this.r=a.join("&")};h.clone=function(){var a=new be;a.r=this.r;this.c&&(a.c=this.c.clone(),a.j=this.j);return a};
+var de=function(a,b){var c=String(b);a.qc&&(c=c.toLowerCase());return c};var ee=function(a,b){this.Mc=a;this.Aa=b};ee.prototype.send=function(a,b){if(pb&&!navigator.onLine)return Gc();var c=new Q,d=fe(a,b);d.length>this.Aa?c.A({status:"payload-too-big",la:Ua("Encoded hit length == %s, but should be <= %s.",d.length,this.Aa)}):Ud(this.Mc,function(){c.v(Dd)},d);return c};var fe=function(a,b){var c=new be;c.add(Fa.name,a);Xa(b,function(a,b){c.add(a.name,b.toString())});return c.toString()};var ge=function(a,b,c){this.g=a;this.Lc=b;this.Aa=c};ge.prototype.Xa=function(){if(!this.q){if(!Ac(this.g.ea).C)throw Error("Cannot construct shared channel prior to settings being ready.");new wd;var a=new yd(new ee(this.Lc,this.Aa)),b=new Fd;this.q=new xd(this.g,new Gd(this.g,new Ed(b,a)))}return this.q};var he=new z,ie=function(){Da||(Da=new T(new ld));return Da};v("goog.async.Deferred",Q);v("goog.async.Deferred.prototype.addCallback",Q.prototype.n);v("goog.async.Deferred.prototype.callback",Q.prototype.v);v("goog.async.Deferred.prototype.then",Q.prototype.then);v("goog.events.EventTarget",M);v("goog.events.EventTarget.prototype.listen",M.prototype.listen);
+v("analytics.getService",function(a,b){var c=he.get(a,null),d=b||chrome.runtime.getManifest().version;if(null===c){c=ie();if(!Ea){var e=ie();Ea=new rd(e,new ge(e,"https://www.google-analytics.com/collect",8192))}c=new Zc("ca1.6.0",a,d,c,Ea);he.set(a,c)}return c});v("analytics.internal.GoogleAnalyticsService",Zc);v("analytics.internal.GoogleAnalyticsService.prototype.getTracker",Zc.prototype.mc);v("analytics.internal.GoogleAnalyticsService.prototype.getConfig",Zc.prototype.kc);
+v("analytics.internal.ServiceSettings",T);v("analytics.internal.ServiceSettings.prototype.setTrackingPermitted",T.prototype.Oc);v("analytics.internal.ServiceSettings.prototype.isTrackingPermitted",T.prototype.xa);v("analytics.internal.ServiceSettings.prototype.setSampleRate",T.prototype.Nc);v("analytics.internal.ServiceSettings.prototype.resetUserId",T.prototype.Fc);v("analytics.internal.ServiceTracker",S);v("analytics.internal.ServiceTracker.prototype.send",S.prototype.send);
+v("analytics.internal.ServiceTracker.prototype.sendAppView",S.prototype.Hc);v("analytics.internal.ServiceTracker.prototype.sendEvent",S.prototype.Ic);v("analytics.internal.ServiceTracker.prototype.sendSocial",S.prototype.Kc);v("analytics.internal.ServiceTracker.prototype.sendException",S.prototype.Jc);v("analytics.internal.ServiceTracker.prototype.sendTiming",S.prototype.Ib);v("analytics.internal.ServiceTracker.prototype.startTiming",S.prototype.Rc);v("analytics.internal.ServiceTracker.Timing",Yc);
+v("analytics.internal.ServiceTracker.Timing.prototype.send",Yc.prototype.send);v("analytics.internal.ServiceTracker.prototype.forceSessionStart",S.prototype.jc);v("analytics.internal.ServiceTracker.prototype.addFilter",S.prototype.R);v("analytics.internal.FilterChannel.Hit",R);v("analytics.internal.FilterChannel.Hit.prototype.getHitType",R.prototype.ub);v("analytics.internal.FilterChannel.Hit.prototype.getParameters",R.prototype.V);v("analytics.internal.FilterChannel.Hit.prototype.cancel",R.prototype.cancel);
+v("analytics.ParameterMap",E);v("analytics.ParameterMap.Entry",E.Entry);v("analytics.ParameterMap.prototype.set",E.prototype.set);v("analytics.ParameterMap.prototype.get",E.prototype.get);v("analytics.ParameterMap.prototype.remove",E.prototype.remove);v("analytics.ParameterMap.prototype.toObject",E.prototype.Nb);v("analytics.HitTypes.APPVIEW","appview");v("analytics.HitTypes.EVENT","event");v("analytics.HitTypes.SOCIAL","social");v("analytics.HitTypes.TRANSACTION","transaction");
+v("analytics.HitTypes.ITEM","item");v("analytics.HitTypes.TIMING","timing");v("analytics.HitTypes.EXCEPTION","exception");va(Ma,function(a){var b=a.id.replace(/[A-Z]/,"_$&").toUpperCase();v("analytics.Parameters."+b,a)});v("analytics.filters.EventLabelerBuilder",C);v("analytics.filters.EventLabelerBuilder.prototype.appendToExistingLabel",C.prototype.Wb);v("analytics.filters.EventLabelerBuilder.prototype.stripValue",C.prototype.Sc);v("analytics.filters.EventLabelerBuilder.prototype.powersOfTwo",C.prototype.Dc);
+v("analytics.filters.EventLabelerBuilder.prototype.rangeBounds",C.prototype.Ec);v("analytics.filters.EventLabelerBuilder.prototype.build",C.prototype.ia);v("analytics.filters.FilterBuilder",B);v("analytics.filters.FilterBuilder.builder",Ra);v("analytics.filters.FilterBuilder.prototype.when",B.prototype.when);v("analytics.filters.FilterBuilder.prototype.whenHitType",B.prototype.Rb);v("analytics.filters.FilterBuilder.prototype.whenValue",B.prototype.Yc);
+v("analytics.filters.FilterBuilder.prototype.applyFilter",B.prototype.mb);v("analytics.filters.FilterBuilder.prototype.build",B.prototype.ia);v("analytics.EventBuilder",F);v("analytics.EventBuilder.builder",function(){return Ya});v("analytics.EventBuilder.prototype.category",F.prototype.Yb);v("analytics.EventBuilder.prototype.action",F.prototype.action);v("analytics.EventBuilder.prototype.label",F.prototype.label);v("analytics.EventBuilder.prototype.value",F.prototype.value);
+v("analytics.EventBuilder.prototype.dimension",F.prototype.fc);v("analytics.EventBuilder.prototype.metric",F.prototype.vc);v("analytics.EventBuilder.prototype.send",F.prototype.send); }).call(this);

@@ -15,7 +15,7 @@
  ******************************************************************************/
 package org.rest.client.event;
 
-import org.rest.client.storage.store.objects.RequestObject;
+import org.rest.client.jso.RequestObject;
 
 import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;
@@ -28,7 +28,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * @author Paweł Psztyć
  */
 public class SavedRequestEvent extends Event<SavedRequestEvent.Handler> {
-	public static final Type<Handler> TYPE = new Type<Handler>();
+	private static final Type<Handler> TYPE = new Type<Handler>();
 
 	/**
 	 * Register an handler for this event.
@@ -51,7 +51,7 @@ public class SavedRequestEvent extends Event<SavedRequestEvent.Handler> {
 		 */
 		void onSaved(RequestObject obj);
 	}
-	final RequestObject obj;
+	private final RequestObject obj;
 	
 	public SavedRequestEvent(RequestObject obj) {
 		this.obj = obj;

@@ -8,9 +8,9 @@ import org.rest.client.headerssupport.AuthorizeDialog;
 import org.rest.client.headerssupport.Base64Coder;
 import org.rest.client.headerssupport.HeaderSupport;
 import org.rest.client.headerssupport.OAuth.OauthParam;
+import org.rest.client.log.Log;
 import org.rest.client.ui.RequestView;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
@@ -21,11 +21,11 @@ import com.google.gwt.user.client.ui.PopupPanel;
 @SuppressWarnings("deprecation")
 public class HeaderSupportAuthorizationImpl implements HeaderSupport {
 	
-	AuthorizeDialog dialog = new AuthorizeDialog();
+	private AuthorizeDialog dialog = new AuthorizeDialog();
 	private Callback<String, String> callback;
-	String value = null;
-	String[] baseParams = null;
-	List<OauthParam> oauthParams = null;
+	private String value = null;
+	private String[] baseParams = null;
+	private List<OauthParam> oauthParams = null;
 	
 	public HeaderSupportAuthorizationImpl(){
 		this.value = null;

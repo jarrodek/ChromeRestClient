@@ -14,11 +14,11 @@ public class SyncAdapter {
 	/**
 	 * Is debug setting enabled.
 	 */
-	public static boolean debug = true;
+	static boolean debug = true;
 	/**
 	 * Id history setting enabled.
 	 */
-	public static boolean history = true;
+	static boolean history = true;
 	/**
 	 * Are magic variables setting enabled.
 	 */
@@ -32,12 +32,16 @@ public class SyncAdapter {
 	 */
 	public static boolean codeMirrorPayload = true;
 	/**
+	 * Use IndexedDB instead of WebSQL.
+	 */
+	public static boolean useIdb = false;
+	/**
 	 * True if this adapter already set storage event handlers.
 	 */
-	static boolean observing = false;
+	static boolean observing = false; // NO_UCD (unused code)
 	
-	interface SyncResult {
-		void onSync();
+	private interface SyncResult {
+		void onSync(); // NO_UCD (unused code)
 	}
 	
 	
@@ -61,6 +65,7 @@ public class SyncAdapter {
 			@org.rest.client.SyncAdapter::magicVars = data.MAGICVARS_ENABLED;
 			@org.rest.client.SyncAdapter::codeMirrorHeaders = data.CMH_ENABLED;
 			@org.rest.client.SyncAdapter::codeMirrorPayload = data.CMP_ENABLED;
+			@org.rest.client.SyncAdapter::useIdb = data.useIdb
 			fn.@org.rest.client.SyncAdapter.SyncResult::onSync()();
 		});
 	}-*/;
@@ -69,7 +74,7 @@ public class SyncAdapter {
 	/**
 	 * Observe changes to the storage.
 	 */
-	public static final native void observe() /*-{
+	private static final native void observe() /*-{
 		if(@org.rest.client.SyncAdapter::observing === true){
 			return;
 		}
@@ -85,6 +90,7 @@ public class SyncAdapter {
                     	case 'MAGICVARS_ENABLED': @org.rest.client.SyncAdapter::magicVars = changes[key].newValue; break;
                     	case 'CMH_ENABLED': @org.rest.client.SyncAdapter::codeMirrorHeaders = changes[key].newValue; break;
                     	case 'CMP_ENABLED': @org.rest.client.SyncAdapter::codeMirrorPayload = changes[key].newValue; break;
+                    	case 'useIdb': @org.rest.client.SyncAdapter::useIdb = changes[key].newValue; break;
                     	default: return;
                     }
                 }

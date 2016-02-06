@@ -39,7 +39,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * @author Paweł Psztyć
  */
 public class ProjectDeleteEvent extends Event<ProjectDeleteEvent.Handler> {
-	public static final Type<Handler> TYPE = new Type<Handler>();
+	private static final Type<Handler> TYPE = new Type<Handler>();
 
 	/**
 	 * Register an handler for this event.

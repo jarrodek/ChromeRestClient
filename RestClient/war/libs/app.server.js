@@ -17,22 +17,32 @@
 /* global chrome */
 /**
  * Advanced Rest Client namespace
+ *
+ * @namespace
  */
 var arc = arc || {};
 /**
  * ARC app's namespace
+ *
+ * @namespace
  */
 arc.app = arc.app || {};
 /**
  * A namespace for the app server API
+ *
+ * @namespace
  */
 arc.app.server = arc.app.server || {};
 /**
  * Currently logged in user ID.
+ * 
+ * @type {String}
  */
 arc.app.server.applicationUserId = null;
 /**
  * Check if the user has session set on the server.
+ *
+ * @param {Function} callback A callback function to be called when ready.
  */
 arc.app.server.hasSession = function(callback) {
   arc.app.server.request.pingRequest()
@@ -59,6 +69,8 @@ arc.app.server.hasSession = function(callback) {
 };
 /**
  * Opened auth tab id.
+ *
+ * @param {Number} _authTab Id of the tab that has been opened.
  */
 arc.app.server._authTab = null;
 /**

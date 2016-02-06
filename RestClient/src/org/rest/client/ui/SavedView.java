@@ -16,10 +16,9 @@
 package org.rest.client.ui;
 
 
-import java.util.List;
+import org.rest.client.jso.RequestObject;
 
-import org.rest.client.storage.store.objects.RequestObject;
-
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.IsWidget;
 /**
@@ -48,10 +47,6 @@ public interface SavedView extends IsWidget {
 		 * @param savedId
 		 */
 		void removeFromSaved(RequestObject request);
-		/**
-		 * Called when user wants to clear all saved request (but not in projects).
-		 */
-		void onClearSaved();
 		
 		void changeSavedName(String newName, int savedId);
 		
@@ -69,7 +64,7 @@ public interface SavedView extends IsWidget {
 	 */
 	void setNoMoreItems();
 	void clearResultList();
-	void appendResults(List<RequestObject> result);
+	void appendResults(JsArray<RequestObject> result);
 	
 	void setDriveButtonEnabled(boolean enabled);
 }

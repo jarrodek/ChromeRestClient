@@ -28,13 +28,13 @@ import org.rest.client.event.RequestChangeEvent;
 import org.rest.client.event.RequestStartActionEvent;
 import org.rest.client.event.SaveRequestEvent;
 import org.rest.client.event.SavedRequestEvent;
+import org.rest.client.jso.ProjectObject;
+import org.rest.client.jso.RequestObject;
 import org.rest.client.place.RequestPlace;
 import org.rest.client.place.SavedPlace;
 import org.rest.client.request.FilesObject;
 import org.rest.client.request.HttpMethodOptions;
 import org.rest.client.request.RequestHeadersParser;
-import org.rest.client.storage.store.objects.ProjectObject;
-import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.EditProjectView;
 import org.rest.client.ui.IsHideable;
@@ -49,6 +49,7 @@ import org.rest.client.ui.html5.HTML5Progress;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -104,7 +105,10 @@ public class RequestViewImpl extends Composite implements RequestView {
 	@UiField InlineLabel projectName;
 	@UiField HTMLPanel endpointsContainer;
 	@UiField TextBox requestNameField;
-
+	/**
+	 * To restore previously selected content type header when the user switching between tabs.
+	 */
+	String lastSetContentType = null;
 	private List<IsHideable> hidableList = new ArrayList<IsHideable>();
 	private String currentSelectedMethod = "GET";
 
@@ -176,6 +180,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 		RestClient.getClientFactory().getEventBus()
 				.fireEvent(new HttpMethodChangeEvent(currentSelectedMethod));
 	}
+	
 	/**
 	 * Add or remove default content type header when the user switch to / from request that contains a body.
 	 * @param show true to add default content type header and false if it should be removed
@@ -191,7 +196,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 					//no change
 					return;
 				} else {
-					latestSelectedContentType = header.getValue();
+					lastSetContentType = latestSelectedContentType = header.getValue();
 					list.remove(header);
 				}
 			}
@@ -199,8 +204,8 @@ public class RequestViewImpl extends Composite implements RequestView {
 		if(latestSelectedContentType == null) {
 			//there were no CT header.
 			if(show) {
-				list.add(new RequestHeader("Content-Type", "application/x-www-form-urlencoded"));
-				latestSelectedContentType = "application/x-www-form-urlencoded";
+				latestSelectedContentType = lastSetContentType == null ? "application/x-www-form-urlencoded" : lastSetContentType;
+				list.add(new RequestHeader("Content-Type", latestSelectedContentType));
 			}
 		}
 		
@@ -217,6 +222,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 	
 	@Override
 	public void reset() {
+		lastSetContentType = null;
 		projectPanel.addClassName("hidden");
 		sendButton.setEnabled(false);
 		progressIndicator.setStyleName("hidden");
@@ -229,6 +235,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 		requestHeaders.clear();
 		requestBody.clear();
 		radioGet.setEnabled(true);
+		radioGet.setValue(true);
 		
 		openedProject = null;
 		refreshDriveButton.setEnabled(true);
@@ -420,7 +427,7 @@ public class RequestViewImpl extends Composite implements RequestView {
 
 	@Override
 	public void setProjectData(ProjectObject project,
-			List<RequestObject> requests, int currentEndpoint) {
+			JsArray<RequestObject> requests, int currentEndpoint) {
 		this.openedProject = project;
 		projectPanel.removeClassName("hidden");
 		requestNamePanel.addClassName("hidden");
@@ -428,15 +435,15 @@ public class RequestViewImpl extends Composite implements RequestView {
 		
 		final ListBox lb = new ListBox();
 		lb.setStyleName("selectControl");
-		int i = 0;
 		int endpointPosition = 0;
-		for (final RequestObject r : requests) {
+		for (int j = 0; j < requests.length(); j++) {
+			RequestObject r = requests.get(j);
 			lb.addItem(r.getName(), r.getId()+"");
 			if(r.getId() == currentEndpoint){
-				endpointPosition = i;
+				endpointPosition = j;
 			}
-			i++;
 		}
+		
 		lb.setSelectedIndex(endpointPosition);
 		endpointsContainer.add(lb);
 		lb.addChangeHandler(new ChangeHandler() {

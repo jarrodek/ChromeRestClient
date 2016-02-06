@@ -7,7 +7,7 @@ import com.google.gwt.core.client.JavaScriptObject;
  * @author Pawel Psztyc
  *
  */
-public class DOMError extends JavaScriptObject {
+class DOMError extends JavaScriptObject {
 	protected DOMError(){}
 	
 	/**

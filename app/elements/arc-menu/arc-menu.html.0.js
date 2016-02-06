@@ -1,4 +1,42 @@
+<<<<<<< HEAD:app/elements/arc-menu/arc-menu.html.0.js
 
+=======
+<dom-module id="arc-menu">
+    <template>
+        <style>
+        :host {
+            display: block;
+        }
+        
+        .sublist {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        </style>
+        <paper-menu selected="{{hash}}" attr-for-selected="data-place" on-tap="_itemTap">
+            <paper-item data-place="#RequestPlace:default">Request</paper-item>
+            <paper-item data-place="#SocketPlace:default">Socket</paper-item>
+            <paper-submenu>
+                <paper-item class="menu-trigger">Projects</paper-item>
+                <paper-menu class="menu-content sublist" selected="{{hash}}" attr-for-selected="data-place" on-tap="_itemTap">
+                    <template is="dom-if" if="{{!hasProjects}}">
+                        <paper-item>No projects here</paper-item>
+                    </template>
+                    <template is="dom-repeat" items="{{projects}}" sort="{{computeSort(projects)}}">
+                        <paper-item data-place$="{{_computeEnpointParameter(item.id)}}">{{item.name}}</paper-item>
+                    </template>
+                </paper-menu>
+            </paper-submenu>
+            <paper-item data-place="#SavedPlace:default">Saved</paper-item>
+            <template is="dom-if" if="{{!noHistory}}">
+                <paper-item data-place="#HistoryPlace:default">History</paper-item>
+            </template>
+            <paper-item data-place="#SettingsPlace:view">Settings</paper-item>
+            <paper-item data-place="#AboutPlace:view">About</paper-item>
+        </paper-menu>
+    </template>
+    <script>
+>>>>>>> hotfix-db:RestClient/dev/components/arc-menu/arc-menu.html
     Polymer({
         is: 'arc-menu',
         properties: {
@@ -14,6 +52,11 @@
             noHistory: {
                 type: Boolean,
                 value: false
+            },
+            hasProjects: {
+                type: Boolean,
+                value: false,
+                computed: '_computeHasProjects(projects.*)'
             }
         },
         ready: function() {
@@ -41,7 +84,7 @@
         },
         _restoreProjects: function() {
             try {
-                arc.app.db.websql.listProjects()
+                arc.app.db.projects.list()
                     .then(function(list) {
                         this.projects = list;
                     }.bind(this));
@@ -66,6 +109,9 @@
         },
         computeSort: function(projects) {
             return function(a, b) {
+                if (!a || !b) {
+                    return 1;
+                }
                 if (a.name > b.name) {
                     return 1;
                 }
@@ -105,13 +151,13 @@
          * @param {Number} projectId Database id for the project
          */
         appendProject: function(projectId) {
-            arc.app.db.websql.getProject(projectId)
+            arc.app.db.projects.getProject(projectId)
                 .then(function(project) {
                     if (project === null) {
                         console.warn('No project found for given ID ', projectId);
                         return;
                     }
-                    this.push('projects', project[0]);
+                    this.push('projects', project);
                 }.bind(this));
         },
         /**
@@ -160,6 +206,13 @@
                     this.noHistory = false;
                 }
             }
+        },
+
+        _computeHasProjects: function() {
+            if (this.projects && this.projects.length) {
+                return true;
+            }
+            return false;
         }
     });
     

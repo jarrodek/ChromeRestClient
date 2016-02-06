@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>app-about-basic</title>
+
+  <script src="../war/components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../war/components/web-component-tester/browser.js"></script>
+
+  <!-- Import the element to test -->
+  <link rel="import" href="../war/components/app-about/app-about.html">
+
+</head>
+<body>
+
+  <test-fixture id="basic">
+    <template>
+      <app-about></app-about>
+    </template>
+  </test-fixture>
+
+  <script>
+    suite('app-about tests', function() {
+      var about, version, licensing;
+      setup(function() {
+        about = fixture('basic');
+      });
+
+      test('Version is unknown', function() {
+        version = about.querySelector('#appVersion');
+        assert.equal(version.textContent, 'Unknown');
+      });
+
+      test('showLicensing() will update `licensingDialog.opened`', function() {
+        about.showLicensing();
+        assert.isTrue(about.$.licensingDialog.opened, '`opened` is true');
+      });
+
+      test('showDonate() will update `donateDialog.opened`', function() {
+        about.showDonate();
+        assert.isTrue(about.$.donateDialog.opened, '`opened` is true');
+      });
+    });
+  </script>
+
+</body>
+</html>

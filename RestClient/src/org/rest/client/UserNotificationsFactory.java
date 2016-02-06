@@ -5,11 +5,11 @@ import java.util.Date;
 
 import org.rest.client.StatusNotification.NotificationCallback;
 import org.rest.client.event.NotificationsStateChangeEvent;
+import org.rest.client.log.Log;
 import org.rest.client.request.MessageObject;
 import org.rest.client.request.MessagesRequest;
-import org.rest.client.storage.store.StoreKeys;
+import org.rest.client.storage.StoreKeys;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea;
 import com.google.gwt.chrome.storage.StorageResult;

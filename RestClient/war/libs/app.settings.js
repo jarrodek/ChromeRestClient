@@ -17,17 +17,27 @@
 /* global chrome */
 /**
  * Advanced Rest Client namespace
+ *
+ * @namespace
  */
 var arc = arc || {};
 /**
  * ARC app's namespace
+ *
+ * @namespace
  */
 arc.app = arc.app || {};
 /**
  * A namespace for app settings
+ *
+ * @namespace
  */
 arc.app.settings = arc.app.settings || {};
-
+/**
+ * Get current user configuration stored in sync storage.
+ * 
+ * @return {Promise}
+ */
 arc.app.settings.getConfig = function() {
   return new Promise(function(resolve) {
     var values = {
@@ -35,7 +45,8 @@ arc.app.settings.getConfig = function() {
       'HISTORY_ENABLED': true,
       'MAGICVARS_ENABLED': true,
       'CMH_ENABLED': true,
-      'CMP_ENABLED': true
+      'CMP_ENABLED': true,
+      'useIdb': true
     };
     try {
       chrome.storage.sync.get(values, function(result) {
@@ -47,6 +58,14 @@ arc.app.settings.getConfig = function() {
     }
   });
 };
+/**
+ * Save user configuration to sync storage.
+ * 
+ * @param  {String} key A configuration key to be saved
+ * @param  {Boolean} value A value to be saved
+ *
+ * @return {Promise}
+ */
 arc.app.settings.saveConfig = function(key, value) {
   return new Promise(function(resolve) {
     var o = {};

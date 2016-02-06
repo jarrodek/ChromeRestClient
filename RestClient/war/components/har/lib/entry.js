@@ -75,8 +75,17 @@ export function Entry(opts = {}) {
     enumerable: true,
     writable: true,
     value: {
+<<<<<<< HEAD
       beforeRequest: opts.cache.beforeRequest ? new CacheEntry(opts.cache.beforeRequest) : null,
       afterRequest: opts.cache.afterRequest ? new CacheEntry(opts.cache.afterRequest) : null,
+=======
+      beforeRequest: opts.cache.beforeRequest ?
+        (opts.cache.beforeRequest instanceof CacheEntry) ? opts.cache.beforeRequest :
+        new CacheEntry(opts.cache.beforeRequest) : null,
+      afterRequest: opts.cache.afterRequest ?
+        (opts.cache.afterRequest instanceof CacheEntry) ? opts.cache.afterRequest :
+        new CacheEntry(opts.cache.afterRequest) : null,
+>>>>>>> hotfix-db
       comment: opts.cache.comment
     }
   });
@@ -89,7 +98,12 @@ export function Entry(opts = {}) {
     },
 
     set: function(value) {
+<<<<<<< HEAD
       this._request = (value instanceof Request) ? value : new Request(value);
+=======
+      value = (value instanceof Request) ? value : new Request(value);
+      this._request = value;
+>>>>>>> hotfix-db
     }
   });
 
@@ -101,12 +115,29 @@ export function Entry(opts = {}) {
     },
 
     set: function(value) {
+<<<<<<< HEAD
       this._response = (value instanceof Response) ? value : new Response(value);
     }
   });
 
   this.request = opts.request;
   this.response = opts.response;
+=======
+      value = (value instanceof Response) ? value : new Response(value);
+      this._response = value;
+    }
+  });
+  if (opts.request) {
+    this.request = opts.request;
+  } else if (opts._request) {
+    this.request = opts._request;
+  }
+  if (opts.response) {
+    this.response = opts.response;
+  } else if (opts._response) {
+    this.response = opts._response;
+  }
+>>>>>>> hotfix-db
 }
 /**
  * Associate existing page with this Entry object.
@@ -117,3 +148,21 @@ Entry.prototype.setPage = function(page) {
   }
   this.pageref = page.id;
 };
+<<<<<<< HEAD
+=======
+/**
+ * Override toJSON behaviour so it will eliminate
+ * all _* properies and replace it with a proper ones.
+ */
+Entry.prototype.toJSON = function() {
+  var copy = Object.assign({}, this);
+  var keys = Object.keys(copy);
+  var under = keys.filter((key) => key.indexOf('_') === 0);
+  under.forEach((key) => {
+    let realKey = key.substr(1);
+    copy[realKey] = copy[key];
+    delete copy[key];
+  });
+  return copy;
+};
+>>>>>>> hotfix-db

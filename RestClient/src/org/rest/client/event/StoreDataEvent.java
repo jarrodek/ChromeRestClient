@@ -10,7 +10,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
  * 
  */
 public class StoreDataEvent extends GwtEvent<StoreDataEvent.Handler> {
-	public static final Type<Handler> TYPE = new Type<Handler>();
+	private static final Type<Handler> TYPE = new Type<Handler>();
 	
 	/**
 	 * Register an handler for this event.

@@ -3,10 +3,10 @@ package org.rest.client.suggestion;
 import java.util.ArrayList;
 
 import org.rest.client.jso.UrlRow;
-import org.rest.client.storage.store.UrlHistoryStoreWebSql;
-import org.rest.client.storage.store.UrlHistoryStoreWebSql.StoreResultsCallback;
+import org.rest.client.log.Log;
+import org.rest.client.storage.store.UrlHistoryStore;
+import org.rest.client.storage.store.UrlHistoryStore.StoreResultsCallback;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.history.History;
 import com.google.gwt.chrome.history.HistoryItem;
 import com.google.gwt.chrome.history.HistorySearchCallback;
@@ -20,7 +20,6 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 	 * Allow to perform query
 	 */
 	private boolean allowQuery = true;
-	final private UrlHistoryStoreWebSql store;
 	private boolean databaseQueryEnd = true;
 	private boolean chromeQueryEnd = true;
 	ArrayList<UrlSuggestion> _suggestions = new ArrayList<UrlSuggestion>();
@@ -48,8 +47,8 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 		return allowQuery;
 	}
 
-	public UrlsSuggestOracle(UrlHistoryStoreWebSql store) {
-		this.store = store;
+	public UrlsSuggestOracle() {
+		
 	}
 
 	/**
@@ -75,8 +74,7 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 		_suggestions = new ArrayList<UrlSuggestion>();
 
 		final String query = request.getQuery();
-		store.getByUrl(query, new StoreResultsCallback() {
-			
+		UrlHistoryStore.query(query, new StoreResultsCallback() {
 			@Override
 			public void onSuccess(JsArray<UrlRow> result) {
 				requestInProgress = false;
@@ -84,7 +82,6 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 				if(result != null){
 					String lowerQuery = query.toLowerCase();
 					int size = result.length();
-					
 					for(int i=0; i<size; i++){
 						UrlRow row = result.get(i);
 						String url = row.getUrl();
@@ -99,13 +96,11 @@ public class UrlsSuggestOracle extends DatabaseSuggestOracle {
 					}
 				}
 				if(chromeQueryEnd){
-					Log.debug("chromeQueryEnd");
 					recentDatabaseResult = new DatabaseRequestResponse<UrlSuggestion>(request,
 							numberOfDatabaseSuggestions, _suggestions);
 					UrlsSuggestOracle.this.returnSuggestions(callback);
 				}
 			}
-			
 			@Override
 			public void onError(Throwable e) {
 				requestInProgress = false;

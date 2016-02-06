@@ -6,12 +6,12 @@ import org.rest.client.StatusNotification;
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.importparser.ImportResult;
+import org.rest.client.jso.ProjectObject;
+import org.rest.client.jso.RequestObject;
+import org.rest.client.log.Log;
 import org.rest.client.request.RequestImportListItem;
-import org.rest.client.storage.store.objects.ProjectObject;
-import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.ImportExportView;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.runtime.ChromeRuntime.RuntimeStringHandler;
 import com.google.gwt.chrome.runtime.Runtime;
 import com.google.gwt.core.client.Callback;
@@ -33,111 +33,111 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 
 	private static ImportExportViewImplUiBinder uiBinder = GWT.create(ImportExportViewImplUiBinder.class);
 
-	interface ImportExportViewImplUiBinder extends UiBinder<Widget, ImportExportViewImpl> {
+	interface ImportExportViewImplUiBinder extends UiBinder<Widget, ImportExportViewImpl> { // NO_UCD (use private)
 	}
 
 	private Presenter listener;
 	private ImportResult currentFileImport = null;
 
 	@UiField
-	Element fileDrop;
+	Element fileDrop; // NO_UCD (use private)
 	@UiField
-	DivElement fileImportSpinner;
+	DivElement fileImportSpinner; // NO_UCD (use private)
 	/**
 	 * Custom element to display import data in data table.
 	 */
 	@UiField
-	Element importDataTable;
+	Element importDataTable; // NO_UCD (use private)
 	/**
 	 * Custom element to display import data in data table for server data.
 	 */
 	@UiField
-	Element serverImportDataTable;
+	Element serverImportDataTable; // NO_UCD (use private)
 	/**
 	 * "Prepare data to export" button's container
 	 */
 	@UiField
-	Element dataPrepareContainer;
+	Element dataPrepareContainer; // NO_UCD (use private)
 	/**
 	 * "Prepare data to export" button
 	 */
 	@UiField
-	Element dataPrepareButton;
+	Element dataPrepareButton; // NO_UCD (unused code)
 	/**
 	 * Spinner container in data export
 	 */
 	@UiField
-	Element dataDownloadSpinner;
+	Element dataDownloadSpinner; // NO_UCD (use private)
 	/**
 	 * "Download file" button's container
 	 */
 	@UiField
-	Element dataDownload2;
+	Element dataDownload2; // NO_UCD (use private)
 	/**
 	 * "Download file" button
 	 */
 	@UiField
-	Element dataDownload2Button;
+	Element dataDownload2Button; // NO_UCD (use private)
 	/**
 	 * "Cancel" download button
 	 */
 	@UiField
-	Element dataDownloadCancel;
+	Element dataDownloadCancel; // NO_UCD (unused code)
 	/**
 	 * Block of file import section
 	 */
 	@UiField
-	Element fileImportSection;
+	Element fileImportSection; // NO_UCD (use private)
 	/**
 	 * Block of file export section
 	 */
 	@UiField
-	Element fileExportSection;
+	Element fileExportSection; // NO_UCD (use private)
 	/**
 	 * Block of file server import/export section
 	 */
 	@UiField
-	Element serverSection;
+	Element serverSection; // NO_UCD (use private)
 	/**
 	 * A container that keeps "connect" button.
 	 */
 	@UiField
-	Element connectActionContainer;
+	Element connectActionContainer; // NO_UCD (use private)
 	/**
 	 * Server import / export spinner
 	 */
 	@UiField
-	Element serverSpinner;
+	Element serverSpinner; // NO_UCD (use private)
 	/**
 	 * Panel with server action buttons 
 	 */
 	@UiField
-	DivElement storeDataPanel;
+	DivElement storeDataPanel; // NO_UCD (use private)
 	/**
 	 * The panel with the field with the URL to share data.
 	 */
 	@UiField
-	DivElement shareUrlPanel;
+	DivElement shareUrlPanel; // NO_UCD (use private)
 	/**
 	 * A field with the URL to share data.
 	 */
 	@UiField
-	PreElement shareLink;
+	PreElement shareLink; // NO_UCD (use private)
 	/**
 	 * Button to connect to the server
 	 */
 	@UiField
-	Element connectButton;
+	Element connectButton; // NO_UCD (unused code)
 	/**
 	 * Button to store data on the server
 	 */
 	@UiField
-	Element storeDataButton;
+	Element storeDataButton; // NO_UCD (unused code)
 	/**
 	 * Button to restore data from the server.
 	 */
 	@UiField
-	Element restoreDataButton;
+	Element restoreDataButton; // NO_UCD (unused code)
 
 	public ImportExportViewImpl() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -157,7 +157,7 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 	/**
 	 * Prepare export data to download.
 	 */
-	void prepareFileExport() {
+	void prepareFileExport() { // NO_UCD (unused code)
 		setExportState(1);
 		listener.prepareDataToFile(new StringCallback() {
 			@Override
@@ -417,12 +417,12 @@ public class ImportExportViewImpl extends Composite implements ImportExportView 
 		setServerState(0);
 	}
 
-	void onServerStoreClick() {
+	void onServerStoreClick() { // NO_UCD (unused code)
 		setServerState(3);
 		listener.serverStoreAction();
 	}
 
-	void onServerRestoreClick() {
+	void onServerRestoreClick() { // NO_UCD (unused code)
 		setServerState(3);
 		listener.requestImportSuggestions("me");
 		GoogleAnalytics.sendEvent("Settings usage", "Import data", "Import server dialog");

@@ -33,7 +33,7 @@ public interface AboutView extends IsWidget {
 		 * Change place
 		 * @param place
 		 */
-		void goTo(Place place);
+		void goTo(Place place); // NO_UCD (unused code)
 	}
 	/**
 	 * Sets presenter for this view

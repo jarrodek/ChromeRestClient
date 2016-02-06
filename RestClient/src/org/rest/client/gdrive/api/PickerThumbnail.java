@@ -10,7 +10,7 @@ import com.google.gwt.core.client.JavaScriptObject;
  * @author jarrod
  * 
  */
-public class PickerThumbnail extends JavaScriptObject {
+class PickerThumbnail extends JavaScriptObject {
 	protected PickerThumbnail() {
 	}
 

@@ -1,15 +1,11 @@
 package org.rest.client.suggestion;
 
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
-import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.WebSocketDataStoreWebSql;
-import org.rest.client.storage.store.objects.WebSocketObject;
+import org.rest.client.jso.WebSocketObject;
+import org.rest.client.log.Log;
+import org.rest.client.storage.store.WebSocketHistoryStore;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.history.History;
 import com.google.gwt.chrome.history.HistoryItem;
 import com.google.gwt.chrome.history.HistorySearchCallback;
@@ -23,7 +19,6 @@ public class SocketSuggestOracle extends DatabaseSuggestOracle {
 	 * Allow to perform query
 	 */
 	private boolean allowQuery = true;
-	final private WebSocketDataStoreWebSql store;
 	private boolean databaseQueryEnd = true;
 	private boolean chromeQueryEnd = true;
 	ArrayList<UrlSuggestion> _suggestions = new ArrayList<UrlSuggestion>();
@@ -51,8 +46,7 @@ public class SocketSuggestOracle extends DatabaseSuggestOracle {
 		return allowQuery;
 	}
 
-	public SocketSuggestOracle(WebSocketDataStoreWebSql store) {
-		this.store = store;
+	public SocketSuggestOracle() {
 	}
 
 	/**
@@ -79,25 +73,28 @@ public class SocketSuggestOracle extends DatabaseSuggestOracle {
 
 		final String query = request.getQuery();
 		
-		store.query("%" + query + "%", null, new StoreResultCallback<Map<Integer,WebSocketObject>>() {
+		WebSocketHistoryStore.query(query, new WebSocketHistoryStore.StoreResultsCallback () {
 			
 			@Override
-			public void onSuccess(Map<Integer, WebSocketObject> result) {
+			public void onSuccess(JsArray<WebSocketObject> result) {
 				requestInProgress = false;
 				databaseQueryEnd = true;
 				String lowerQuery = query.toLowerCase();
-				Set<Entry<Integer, WebSocketObject>> set = result.entrySet();
-				for(Entry<Integer, WebSocketObject> row : set){
-					String url = row.getValue().getURL();
-					if(url == null){
-						continue;
+				if(result != null){
+					for (int i = 0; i < result.length(); i++) {
+						WebSocketObject row = result.get(i);
+						String url = row.getURL();
+						if(url == null){
+							continue;
+						}
+						if(!url.toLowerCase().startsWith(lowerQuery)){
+							continue;
+						}
+						UrlSuggestion s = new UrlSuggestion(url, false);
+						_suggestions.add(s);
 					}
-					if(!url.toLowerCase().startsWith(lowerQuery)){
-						continue;
-					}
-					UrlSuggestion s = new UrlSuggestion(url, false);
-					_suggestions.add(s);
 				}
+				
 				if(chromeQueryEnd){
 					recentDatabaseResult = new DatabaseRequestResponse<UrlSuggestion>(request,
 							numberOfDatabaseSuggestions, _suggestions);

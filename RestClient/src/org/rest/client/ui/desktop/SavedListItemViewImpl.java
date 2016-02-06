@@ -2,8 +2,8 @@ package org.rest.client.ui.desktop;
 
 import java.sql.Date;
 
+import org.rest.client.jso.RequestObject;
 import org.rest.client.place.RequestPlace;
-import org.rest.client.storage.store.objects.RequestObject;
 import org.rest.client.ui.SavedView.Presenter;
 
 import com.google.gwt.core.client.GWT;
@@ -42,7 +42,6 @@ public class SavedListItemViewImpl extends Composite {
 	@UiField TextBox nameInput;
 	@UiField DivElement detailedPanel;
 	@UiField HTMLPanel urlLabel;
-	@UiField SpanElement encoding;
 	@UiField SpanElement payload;
 	@UiField SpanElement headers;
 	@UiField HTMLPanel container;
@@ -62,6 +61,18 @@ public class SavedListItemViewImpl extends Composite {
 			}
 		}, ClickEvent.getType());
 		
+		
+	}
+	
+	@Override
+	protected void onAttach() {
+		super.onAttach();
+		
+		setViewValues();
+	}
+	
+	private void setViewValues() {
+		
 		long time = (long) requestObject.getTime();
 		Date date = new Date(time);
 		String data = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(date);
@@ -72,14 +83,17 @@ public class SavedListItemViewImpl extends Composite {
 		this.methodLabel.setText(requestObject.getMethod());
 		this.urlValue.setText(requestObject.getURL());
 		
-		if(requestObject.getPayload() != null){
-			payload.setInnerText(requestObject.getPayload());
+		String payloadValue = requestObject.getPayload();
+		String headersValue = requestObject.getHeaders();
+		if (payloadValue != null && !payloadValue.isEmpty()) {
+			payload.setInnerText(payloadValue);
+		} else {
+			payload.setInnerHTML("<span class=\"empty-info\">No saved payload</span>");
 		}
-		if(requestObject.getHeaders() != null){
-			headers.setInnerText(requestObject.getHeaders());
-		}
-		if(requestObject.getEncoding() != null){
-			encoding.setInnerText(requestObject.getEncoding());
+		if (headersValue != null && !headersValue.isEmpty()) {
+			headers.setInnerText(headersValue);
+		} else {
+			headers.setInnerHTML("<span class=\"empty-info\">No saved headers</span>");
 		}
 		
 		container.getElement().setAttribute("data-request-id", ""+requestObject.getId());

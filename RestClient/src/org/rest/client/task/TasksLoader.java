@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.rest.client.RestClient;
+import org.rest.client.log.Log;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;

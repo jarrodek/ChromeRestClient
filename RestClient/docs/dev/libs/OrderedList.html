@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: OrderedList</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: OrderedList</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>OrderedList</h2>
+        
+            <div class="class-description">OrderedList object represents an object that can be ordered in a list. Thisobjects have additional properties and methods to manage their position onthe list.This object extends LegacyObject only temporarily. It should extends BaseObject.</div>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+    <h2>Constructor</h2>
+    
+
+    <h4 class="name" id="OrderedList"><span class="type-signature"></span>new OrderedList<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="app.types.js.html">app.types.js</a>, <a href="app.types.js.html#line99">line 99</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+        <p class="code-caption">Reordering elements on list</p>
+    
+    <pre class="prettyprint"><code>// Initial listlet list = [OrderedList1, OrderedList2, OrderedList3, OrderedList4, OrderedList5, OrderedList6, OrderedList7];// Last element must be moved from 7-th position to 3-rd (zero-based)list.forEach((item) => {  item.changeOrder('up', 2, list[6], list[6].order); }); // [OrderedList1, OrderedList2, OrderedList7, OrderedList3, OrderedList4, OrderedList5, OrderedList6] </code></pre>
+
+
+
+    
+    </div>
+
+    
+        <h3 class="subsection-title">Extends</h3>
+
+        
+
+
+    <ul>
+        <li><a href="LegacyObject.html">LegacyObject</a></li>
+    </ul>
+
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="oldId"><span class="type-signature">(nullable) </span>oldId<span class="type-signature"> :Number</span></h4>
+
+
+
+
+<div class="description">
+    An old database ID reference.It is temporary field to sync changes between IDB and WebSQL
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LegacyObject.html#oldId">LegacyObject#oldId</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="app.types.js.html">app.types.js</a>, <a href="app.types.js.html#line77">line 77</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="order"><span class="type-signature"></span>order<span class="type-signature"> :Number</span></h4>
+
+
+
+
+<div class="description">
+    Object order on a list
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-default">Default Value:</dt>
+    <dd class="tag-default"><ul class="dummy">
+            <li>0</li>
+        </ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="app.types.js.html">app.types.js</a>, <a href="app.types.js.html#line109">line 109</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="assertRequiredKeys"><span class="type-signature"></span>assertRequiredKeys<span class="signature">(required, passed)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Check if [passed] object contains all required properties declared in [required] array.This method will throw an [Error] when required parameter is missing.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>required</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;String></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">An array of required parameters.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>passed</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">An object on which test properties</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseObject.html#assertRequiredKeys">BaseObject#assertRequiredKeys</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="app.types.js.html">app.types.js</a>, <a href="app.types.js.html#line35">line 35</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="changeOrder"><span class="type-signature"></span>changeOrder<span class="signature">(dir, change, moved, movedOrder)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Change the order of the element. This method will change the order of theelement depending on arguments. Note that this method don't care on whichlist item is. Program should perform this operation only on elements thatare already on the list. Object that is changing position can also bechanged using this method so it's safe to use it on all list elements.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dir</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The direction of the change. Set to `up` if theelement should go up on the list or `down` (default) otherwise.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>change</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A target position of the moved element. If theelement should finally be at position 2 this value should be 2.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>moved</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="OrderedList.html">OrderedList</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A moved OrderedList object as a reference tocompare if current object is moved object.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>movedOrder</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A base position of the moved element. Ifmoved element previously was at position 7 this value should be 7.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="app.types.js.html">app.types.js</a>, <a href="app.types.js.html#line144">line 144</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+        <p class="code-caption">Reordering elements on list</p>
+    
+    <pre class="prettyprint"><code>//For example if you want to move element from position 7 to position 2. //The function should look as follows: // Initial listlet list = [OrderedList1, OrderedList2, OrderedList3, OrderedList4, OrderedList5, OrderedList6, OrderedList7];// Last element must be moved from 7-th position to 3-rd (zero-based)list.forEach((item) => {  item.changeOrder('up', 2, list[6], list[6].order); }); // [OrderedList1, OrderedList2, OrderedList7, OrderedList3, OrderedList4, OrderedList5, OrderedList6]Note: positions (order) are zero-based.</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="moveDown"><span class="type-signature"></span>moveDown<span class="signature">(change, moved, movedOrder)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Increment order value so the element will go down on the list.This method is used internally by <a href="OrderedList.html#changeOrder">OrderedList#changeOrder</a> method.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>change</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A target position of the moved element. If theelement should finally be at position 2 this value should be 2.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>moved</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="OrderedList.html">OrderedList</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A moved OrderedList object as a reference tocompare if current object is moved object.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>movedOrder</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A base position of the moved element. Ifmoved element previously was at position 7 this value should be 7.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="app.types.js.html">app.types.js</a>, <a href="app.types.js.html#line195">line 195</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>Object.moveUp(2, OtherObject, 4);</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="moveUp"><span class="type-signature"></span>moveUp<span class="signature">(change, moved, movedOrder)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Decrement order value so the element will go up on the list.This method is used internally by <a href="OrderedList.html#changeOrder">OrderedList#changeOrder</a> method.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>change</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A target position of the moved element. If theelement should finally be at position 2 this value should be 2.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>moved</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="OrderedList.html">OrderedList</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A moved OrderedList object as a reference tocompare if current object is moved object.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>movedOrder</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A base position of the moved element. Ifmoved element previously was at position 7 this value should be 7.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="app.types.js.html">app.types.js</a>, <a href="app.types.js.html#line168">line 168</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>Object.moveUp(2, OtherObject, 4);</code></pre>
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BaseObject.html">BaseObject</a></li><li><a href="DriveObject.html">DriveObject</a></li><li><a href="HistoryRequestObject.html">HistoryRequestObject</a></li><li><a href="HistorySocketObject.html">HistorySocketObject</a></li><li><a href="HistoryUrlObject.html">HistoryUrlObject</a></li><li><a href="HttpHeaderObject.html">HttpHeaderObject</a></li><li><a href="HttpStatusObject.html">HttpStatusObject</a></li><li><a href="LegacyObject.html">LegacyObject</a></li><li><a href="OrderedList.html">OrderedList</a></li><li><a href="ProjectObject.html">ProjectObject</a></li><li><a href="RequestObject.html">RequestObject</a></li><li><a href="SavedRequestObject.html">SavedRequestObject</a></li><li><a href="ServerExportedObject.html">ServerExportedObject</a></li><li><a href="UrlObject.html">UrlObject</a></li></ul><h3>Namespaces</h3><ul><li><a href="arc.html">arc</a></li><li><a href="arc.app.html">app</a></li><li><a href="arc.app.analytics.html">analytics</a></li><li><a href="arc.app.arc.html">arc</a></li><li><a href="arc.app.db.html">db</a></li><li><a href="arc.app.db.exported.html">exported</a></li><li><a href="arc.app.db.headers.html">headers</a></li><li><a href="arc.app.db.idb.html">idb</a></li><li><a href="arc.app.db.projects.html">projects</a></li><li><a href="arc.app.db.requests.html">requests</a></li><li><a href="arc.app.db.statuses.html">statuses</a></li><li><a href="arc.app.db.urls.html">urls</a></li><li><a href="arc.app.db.websockets.html">websockets</a></li><li><a href="arc.app.db.websql.html">websql</a></li><li><a href="arc.app.headers.html">headers</a></li><li><a href="arc.app.server.html">server</a></li><li><a href="arc.app.server.request.html">request</a></li><li><a href="arc.app.settings.html">settings</a></li><li><a href="arc.app.utils.html">utils</a></li><li><a href="arc.app.xhr.html">xhr</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Fri Jan 29 2016 08:10:37 GMT+0000 (GMT (czas standardowy))
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

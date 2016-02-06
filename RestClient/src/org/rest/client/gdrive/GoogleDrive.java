@@ -2,10 +2,10 @@ package org.rest.client.gdrive;
 
 import org.rest.client.RestClient;
 import org.rest.client.event.SavedRequestEvent;
-import org.rest.client.storage.store.StoreKeys;
-import org.rest.client.storage.store.objects.RequestObject;
+import org.rest.client.jso.RequestObject;
+import org.rest.client.log.Log;
+import org.rest.client.storage.StoreKeys;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
 import com.google.gwt.core.client.Callback;
@@ -24,17 +24,7 @@ import com.google.gwt.json.client.JSONString;
  */
 public class GoogleDrive {
 	
-	/**
-	 * Save the request object in Google Drive.
-	 * If the user did not authorized the app it will call OAuth dialog to perform authorization.
-	 * If user do not authorize the app it will rise an exception.
-	 * 
-	 * @param obj Request object to be saved in drive. If request object contains gDriveId it will overwrite existing file instead of creating new.
-	 * @param callback Callback function to be called after save. 
-	 */
-	public static void saveRequestFile(final RequestObject obj, final Callback<DriveFileItem, Throwable> callback){
-		saveRequestFile(obj, null, callback);
-	}
+	
 	
 	
 	/**
@@ -81,7 +71,7 @@ public class GoogleDrive {
 	 * @param accessToken User's access token.
 	 * @param folderId Parent folder for the file. Folders can be read by Drive API
 	 */
-	public static void saveRequestFile(final RequestObject obj, 
+	private static void saveRequestFile(final RequestObject obj, 
 			final Callback<DriveFileItem, Throwable> callback, String accessToken, 
 			final String folderId){
 		
@@ -151,36 +141,7 @@ public class GoogleDrive {
 		});
 	}
 	
-	/**
-	 * Update existing file in Google Drive.
-	 * 
-	 * This function should be called when Google auth state is unknown.
-	 * 
-	 * @param obj Request object to be updated in Drive.
-	 * @param callback Callback function to be called after save.
-	 */
-	public static void updateRequestFile(final RequestObject obj, final Callback<DriveFileItem, Throwable> callback){
-		DriveApi.hasSession(new DriveApi.SessionHandler() {
-			@Override
-			public void onResult(DriveAuth result) {
-				if(result == null){
-					//auth the user
-					DriveApi.auth(new DriveApi.SessionHandler() {
-						@Override
-						public void onResult(DriveAuth result) {
-							if(result == null){
-								callback.onFailure(new Throwable("Authorization is required to perform this action."));
-							} else {
-								updateRequestFile(obj, result.getAccessToken(), callback);
-							}
-						}
-					}, false);
-				} else {
-					updateRequestFile(obj, result.getAccessToken(), callback);
-				}
-			}
-		});
-	}
+	
 	
 	/**
 	 * Update existing file in Google Drive.
@@ -189,7 +150,7 @@ public class GoogleDrive {
 	 * @param accessToken User's access token to be used with the request.
 	 * @param callback Callback function to be called after save.
 	 */
-	public static void updateRequestFile(final RequestObject obj, String accessToken, final Callback<DriveFileItem, Throwable> callback){
+	private static void updateRequestFile(final RequestObject obj, String accessToken, final Callback<DriveFileItem, Throwable> callback){
 		if(RestClient.isDebug()){
 			Log.debug("Updating Google Drive™ item");
 		}

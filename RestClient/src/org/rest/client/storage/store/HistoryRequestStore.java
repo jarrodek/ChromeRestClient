@@ -1,65 +1,114 @@
-/*******************************************************************************
- * Copyright 2012 Paweł Psztyć
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
 package org.rest.client.storage.store;
 
-import org.rest.client.storage.IndexedDbAdapter;
-import org.rest.client.storage.indexeddb.IDBDatabase;
-import org.rest.client.storage.indexeddb.IDBDatabaseException;
-import org.rest.client.storage.indexeddb.IDBIndexParameters;
-import org.rest.client.storage.indexeddb.IDBObjectStore;
-import org.rest.client.storage.indexeddb.IDBObjectStoreParameters;
-import org.rest.client.storage.store.objects.HistoryObject;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
 
-import com.allen_sauer.gwt.log.client.Log;
-
-public class HistoryRequestStore extends IndexedDbAdapter<Long, HistoryObject> {
+public class HistoryRequestStore {
 	
-	public final static String URL_INDEX = "url";
-	public final static String CREATED_INDEX = "created";
-	public static final String STORE_NAME = "history";
 	
-	public HistoryRequestStore() {
-		super("rest_client", STORE_NAME);
+	public interface StoreResultCallback {
+		void onSuccess(JavaScriptObject result);
+		void onError(Throwable e);
 	}
+	
+	public interface StoreInsertCallback {
+		void onSuccess(int inserId);
+		void onError(Throwable e);
+	}
+	
+	public interface StoreResultsCallback {
+		void onSuccess(JsArray<JavaScriptObject> result);
+		void onError(Throwable e);
+	}
+	
+	public interface StoreSimpleCallback {
+		void onSuccess();
+		void onError(Throwable e);
+	}
+	
+	public interface StoreDeleteCallback {
+		/**
+		 * @param deleted A number of deleted entries.
+		 */
+		void onSuccess(int deleted);
+		void onError(Throwable e);
+	}
+	
+	/**
+	 * Insert Request data into history table.
+	 * 
+	 * @param obj The data to insert
+	 * @param key - <b>NULL</b> (do nothing here)
+	 * @param callback The callback to call after insert.
+	 */
+	public final native static void insert(JavaScriptObject obj, StoreInsertCallback callback) /*-{
+		$wnd.arc.app.db.requests.insert(obj, 'history')
+		.then(function(result){
+			callback.@org.rest.client.storage.store.HistoryRequestStore.StoreInsertCallback::onSuccess(I)(result);
+		}, function(cause){
+			callback.@org.rest.client.storage.store.HistoryRequestStore.StoreInsertCallback::onError(Ljava/lang/Throwable;)(cause);
+		});
+	}-*/;
+	
 
-	@SuppressWarnings("unchecked")
-	public static void setVestion(IDBDatabase db) throws IDBDatabaseException {
-		
-		Log.debug("Set store (history) new version " + databaseVersion);
-		Log.warn("This will remove all previous data.");
-		
-		if(db.getObjectStoreNames().contains(STORE_NAME)){
-			Log.debug("Remove previous selected store: " + STORE_NAME);
-			db.deleteObjectStore(STORE_NAME);
+	public final native static void getByKey(int key, final StoreResultCallback callback) /*-{
+		$wnd.arc.app.db.requests.getRequest(key, 'history')
+		.then(function(result){
+			callback.@org.rest.client.storage.store.HistoryRequestStore.StoreResultCallback::onSuccess(Lcom/google/gwt/core/client/JavaScriptObject;)(result);
+		}, function(cause){
+			callback.@org.rest.client.storage.store.HistoryRequestStore.StoreResultCallback::onError(Ljava/lang/Throwable;)(cause);
+		});
+	}-*/;
+	
+	/**
+	 * This type of query is not available for this table.
+	 */
+	public final native static void all(final StoreResultsCallback callback) /*-{
+		$wnd.arc.app.db.requests.list('history')
+		.then(function(result){
+			callback.@org.rest.client.storage.store.HistoryRequestStore.StoreResultsCallback::onSuccess(Lcom/google/gwt/core/client/JsArray;)(result);
+		}, function(cause){
+			callback.@org.rest.client.storage.store.HistoryRequestStore.StoreResultsCallback::onError(Ljava/lang/Throwable;)(cause);
+		});
+	}-*/;
+	
+	public final native static void remove(int key, final StoreSimpleCallback callback) /*-{
+		$wnd.arc.app.db.requests.remove(key, 'history')
+		.then(function(){
+			callback.@org.rest.client.storage.store.HistoryRequestStore.StoreSimpleCallback::onSuccess()();
+		}, function(cause){
+			callback.@org.rest.client.storage.store.HistoryRequestStore.StoreSimpleCallback::onError(Ljava/lang/Throwable;)(cause);
+		});
+	}-*/;
+	
+	public final native static void deleteHistory(final StoreDeleteCallback callback) /*-{
+		$wnd.arc.app.db.requests.removeAll('history')
+		.then(function(count){
+			callback.@org.rest.client.storage.store.HistoryRequestStore.StoreDeleteCallback::onSuccess(I)(count);
+		}, function(cause){
+			callback.@org.rest.client.storage.store.HistoryRequestStore.StoreDeleteCallback::onError(Ljava/lang/Throwable;)(cause);
+		});
+	}-*/;
+	/**
+	 * Get from database data only for history list. It's include: database ID, URL and method field.
+	 * @param callback
+	 */
+	public final native static void queryHistory(String query, int limit, int offset, final StoreResultsCallback callback) /*-{
+		var opts = {};
+		if (query) {
+			opts.query = query;
 		}
-		
-		IDBObjectStoreParameters parameters = IDBObjectStoreParameters.create();
-		parameters.setKeyPath("id");
-		parameters.setAutoIncrement(true);
-		Log.debug("Create new store: Store name: " + STORE_NAME);
-		IDBObjectStore<Long> newStore = (IDBObjectStore<Long>) db.createObjectStore(STORE_NAME, parameters);
-				
-		IDBIndexParameters indexParameters = IDBIndexParameters.create();
-		indexParameters.setUnique(false);
-		newStore.createIndex(URL_INDEX, URL_INDEX, indexParameters);
-		Log.debug("Create new store index (URL): Store name: " + STORE_NAME);
-		IDBIndexParameters createdIndexParameters = IDBIndexParameters.create();
-		createdIndexParameters.setUnique(false);
-		newStore.createIndex(CREATED_INDEX, CREATED_INDEX, createdIndexParameters);
-		Log.debug("Create new store index (created): Store name: " + STORE_NAME);
-	}
-
+		if (typeof limit !== 'undefined' && limit >= 0) {
+			opts.limit = limit;
+		}
+		if (typeof offset !== 'undefined' && offset >= 0) {
+			opts.offset = offset;
+		}
+		$wnd.arc.app.db.requests.query('history', opts)
+		.then(function(result){
+			callback.@org.rest.client.storage.store.HistoryRequestStore.StoreResultsCallback::onSuccess(Lcom/google/gwt/core/client/JsArray;)(result);
+		}, function(cause){
+			callback.@org.rest.client.storage.store.HistoryRequestStore.StoreResultsCallback::onError(Ljava/lang/Throwable;)(cause);
+		});
+	}-*/;
 }

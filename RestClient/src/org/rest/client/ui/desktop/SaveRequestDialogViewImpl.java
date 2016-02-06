@@ -1,26 +1,23 @@
 package org.rest.client.ui.desktop;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.rest.client.RestClient;
 import org.rest.client.StatusNotification;
 import org.rest.client.analytics.GoogleAnalytics;
 import org.rest.client.analytics.GoogleAnalyticsApp;
-import org.rest.client.gdrive.GoogleDrive;
 import org.rest.client.gdrive.DriveFileItem;
+import org.rest.client.gdrive.GoogleDrive;
+import org.rest.client.jso.ProjectObject;
+import org.rest.client.jso.RequestObject;
+import org.rest.client.log.Log;
 import org.rest.client.place.RequestPlace;
-import org.rest.client.request.URLParser;
-import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.ProjectStoreWebSql;
-import org.rest.client.storage.store.objects.ProjectObject;
-import org.rest.client.storage.store.objects.RequestObject;
+import org.rest.client.storage.store.ProjectsStore;
+import org.rest.client.storage.store.RequestDataStore;
 import org.rest.client.ui.SaveRequestDialogView;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -55,8 +52,6 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	@UiField
 	TextBox name;
 	@UiField
-	TextBox prevUrlTextBox;
-	@UiField
 	TextBox projectName;
 	@UiField
 	CheckBox addToProject;
@@ -65,32 +60,12 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	@UiField
 	DivElement projectNameContainer;
 	@UiField
-	DivElement requestOverwriteContainer;
-	@UiField
 	Button save;
 	@UiField
 	Button overwrite;
 	@UiField
 	Button gdrive;
-
-	@UiField
-	CheckBox protocolStatus;
-	@UiField
-	CheckBox serverStatus;
-	@UiField
-	CheckBox pathStatus;
-	@UiField
-	CheckBox parametersStatus;
-	@UiField
-	CheckBox tokenStatus;
-	@UiField
-	CheckBox methodStatus;
-	@UiField
-	CheckBox payloadStatus;
-	@UiField
-	CheckBox headersStatus;
-
-	String requestOrygURL = "";
+	
 	int overwriteId = -1;
 	boolean forceOverwrite = false;
 
@@ -117,21 +92,6 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				projectListValueChange();
 			}
 		});
-
-		ValueChangeHandler<Boolean> optionStatusChange = new ValueChangeHandler<Boolean>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				updatePreviewURL();
-			}
-		};
-
-		protocolStatus.addValueChangeHandler(optionStatusChange);
-		serverStatus.addValueChangeHandler(optionStatusChange);
-		pathStatus.addValueChangeHandler(optionStatusChange);
-		parametersStatus.addValueChangeHandler(optionStatusChange);
-		tokenStatus.addValueChangeHandler(optionStatusChange);
-		// methodStatus.addValueChangeHandler(optionStatusChange);
-		// payloadStatus.addValueChangeHandler(optionStatusChange);
 	}
 
 	/**
@@ -147,15 +107,16 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		if (RestClient.RESTORED_REQUEST != null) {
 			if (RestClient.RESTORED_REQUEST > 0) {
 				overwriteId = RestClient.RESTORED_REQUEST;
-				RestClient.getClientFactory().getRequestDataStore().getByKey(RestClient.RESTORED_REQUEST,
-						new StoreResultCallback<RequestObject>() {
+				RequestDataStore.getByKey(RestClient.RESTORED_REQUEST,
+						new RequestDataStore.StoreResultCallback() {
 							@Override
-							public void onSuccess(RequestObject result) {
+							public void onSuccess(JavaScriptObject result) {
 								if (result == null) {
 									overwriteId = -1;
 									return;
 								}
-								name.setValue(result.getName());
+								RequestObject item = result.cast();
+								name.setValue(item.getName());
 								overwrite.setVisible(true);
 								save.setText("Save as new");
 							}
@@ -198,15 +159,11 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	}
 
 	private void setProjectsList() {
-		final ProjectStoreWebSql store = RestClient.getClientFactory().getProjectsStore();
-		store.all(new StoreResultCallback<Map<Integer, ProjectObject>>() {
+		ProjectsStore.all(new ProjectsStore.StoreResultsCallback() {
 			@Override
-			public void onSuccess(Map<Integer, ProjectObject> result) {
-
-				Iterator<Entry<Integer, ProjectObject>> it = result.entrySet().iterator();
-				while (it.hasNext()) {
-					Entry<Integer, ProjectObject> set = it.next();
-					ProjectObject project = set.getValue();
+			public void onSuccess(final JsArray<ProjectObject> result) {
+				for (int i = 0; i < result.length(); i++) {
+					ProjectObject project = result.get(i);
 					if (project == null) {
 						continue;
 					}
@@ -227,7 +184,6 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				StatusNotification.notify("Unable to set projects data..", StatusNotification.TIME_MEDIUM);
 			}
 		});
-
 	}
 
 	/**
@@ -242,8 +198,6 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				@Override
 				public void onSuccess(RequestObject result) {
 					callback.onSuccess(result.getURL());
-					// Log.debug("setPreviewURL::Success::1::" +
-					// result.toJSON());
 				}
 
 				@Override
@@ -257,8 +211,6 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				@Override
 				public void onSuccess(RequestObject result) {
 					callback.onSuccess(result.getURL());
-					// Log.debug("setPreviewURL::Success::2::" +
-					// result.toJSON());
 				}
 
 				@Override
@@ -270,69 +222,22 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		}
 	}
 
-	private void updatePreviewURL() {
-		if (requestOrygURL == null || requestOrygURL.isEmpty()) {
-			return;
-		}
-
-		URLParser data = new URLParser().parse(requestOrygURL);
-		String url = "";
-		if (protocolStatus.getValue()) {
-			url += "[FUTURE]";
-		} else {
-			url += data.getProtocol();
-		}
-		url += "://";
-
-		if (serverStatus.getValue()) {
-			url += "[FUTURE]";
-		} else {
-			url += data.getAuthority();
-		}
-
-		if (pathStatus.getValue()) {
-			url += "/[FUTURE]/";
-		} else {
-			if (data.getPath() != null && !data.getPath().isEmpty()) {
-				url += data.getPath();
-			}
-		}
-		if (parametersStatus.getValue()) {
-			url += "?[FUTURE]";
-		} else {
-			if (data.getQuery() != null && !data.getQuery().isEmpty()) {
-				url += "?" + data.getQuery();
-			}
-		}
-		if (tokenStatus.getValue()) {
-			url += "#[FUTURE]";
-		} else {
-			if (data.getAnchor() != null && !data.getAnchor().isEmpty()) {
-				url += "#" + data.getAnchor();
-			}
-		}
-		prevUrlTextBox.setText(url);
-	}
+	
 
 	private void projectListValueChange() {
 		if (!addToProject.getValue()) {
-			requestOverwriteContainer.addClassName("hidden");
 			projectNameContainer.addClassName("hidden");
 			return;
 		}
 
 		String _projectName = projectList.getValue(projectList.getSelectedIndex());
 		if (_projectName.equals("")) {
-			requestOverwriteContainer.addClassName("hidden");
 			projectNameContainer.addClassName("hidden");
 			return;
 		}
 
-		requestOverwriteContainer.removeClassName("hidden");
-
 		if (_projectName.equals("__new__")) {
 			projectNameContainer.removeClassName("hidden");
-			requestOverwriteContainer.addClassName("hidden");
 		} else {
 			int parojectId = -1;
 			projectNameContainer.addClassName("hidden");
@@ -354,8 +259,8 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 
 			@Override
 			public void onSuccess(String result) {
-				requestOrygURL = result;
-				if (requestOrygURL == null || requestOrygURL.isEmpty()) {
+				
+				if (result == null || result.isEmpty()) {
 					StatusNotification.notify("Enter an URL of the request.", StatusNotification.TIME_MEDIUM);
 					dialog.hide();
 					dialog.removeFromParent();
@@ -367,8 +272,6 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				dialog.addCloseHandler(SaveRequestDialogViewImpl.this);
 				name.getElement().setAttribute("placeholder", "name...");
 				projectName.getElement().setAttribute("placeholder", "project name...");
-				prevUrlTextBox.setText(requestOrygURL);
-				updatePreviewURL();
 				setProjectsList();
 				handleRestoredRequests();
 				dialog.show();
@@ -394,7 +297,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	void onSave(ClickEvent event) {
 		save.setEnabled(false);
 		forceOverwrite = false;
-		doSaveRequest();
+		doSaveRequest(true);
 	}
 
 	@UiHandler("overwrite")
@@ -408,7 +311,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 			return;
 		}
 
-		doSaveRequest();
+		doSaveRequest(false);
 	}
 
 	@Override
@@ -464,14 +367,6 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				} else {
 					result.setGDriveId(RestClient.CURRENT_GOOGLE_DRIVE_ITEM);
 				}
-				result.setSkipHeaders(headersStatus.getValue());
-				result.setSkipHistory(tokenStatus.getValue());
-				result.setSkipMethod(methodStatus.getValue());
-				result.setSkipParams(parametersStatus.getValue());
-				result.setSkipPayload(payloadStatus.getValue());
-				result.setSkipProtocol(protocolStatus.getValue());
-				result.setSkipServer(serverStatus.getValue());
-				result.setSkipPath(pathStatus.getValue());
 				if (RestClient.GOOGLE_DRIVE_CREATE_FOLDER_ID != null) {
 					RestClient.GOOGLE_DRIVE_CREATE_FOLDER_ID = null;
 				}
@@ -523,7 +418,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 		});
 	}
 
-	private void doSaveRequest() {
+	private void doSaveRequest(final boolean isSave) {
 		if (name.getValue().isEmpty()) {
 			StatusNotification.notify("Name can't be empty.", StatusNotification.TIME_SHORT);
 			save.setEnabled(true);
@@ -537,14 +432,6 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 			@Override
 			public void onSuccess(final RequestObject result) {
 				result.setName(name.getValue());
-				result.setSkipHeaders(headersStatus.getValue());
-				result.setSkipHistory(tokenStatus.getValue());
-				result.setSkipMethod(methodStatus.getValue());
-				result.setSkipParams(parametersStatus.getValue());
-				result.setSkipPayload(payloadStatus.getValue());
-				result.setSkipProtocol(protocolStatus.getValue());
-				result.setSkipServer(serverStatus.getValue());
-				result.setSkipPath(pathStatus.getValue());
 				if (forceOverwrite && overwriteId > 0) {
 					result.setId(overwriteId);
 				}
@@ -554,14 +441,17 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				String _projectName = projectList.getValue(projectList.getSelectedIndex());
 				if (_projectName.equals("__new__")) {
 					String newProjectName = projectName.getValue();
+					if (isSave) {
+						result.resetId();
+					}
 					// add new project
-					RestClient.saveRequestData(result, newProjectName, new Callback<RequestObject, Throwable>() {
+					RestClient.saveRequestDataWithProject(result, newProjectName, new Callback<RequestObject, Throwable>() {
 						@Override
 						public void onSuccess(RequestObject result) {
 							save.setEnabled(true);
 
 							RestClient.getClientFactory().getPlaceController()
-									.goTo(RequestPlace.Tokenizer.fromSaved(result.getId()));
+									.goTo(RequestPlace.Tokenizer.fromProject(result.getId()));
 							dialog.hide();
 						}
 
@@ -590,7 +480,10 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 					}
 					result.setProject(projectId);
 				}
-				RestClient.saveRequestData(result, new Callback<RequestObject, Throwable>() {
+				if (isSave) {
+					result.resetId();
+				}
+				RestClient.saveRequestData(result, null, new Callback<RequestObject, Throwable>() {
 					@Override
 					public void onSuccess(RequestObject result) {
 						save.setEnabled(true);

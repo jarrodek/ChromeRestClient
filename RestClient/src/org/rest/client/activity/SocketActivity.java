@@ -17,23 +17,18 @@ package org.rest.client.activity;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.rest.client.ClientFactory;
 import org.rest.client.RestClient;
 import org.rest.client.StatusNotification;
+import org.rest.client.jso.WebSocketObject;
+import org.rest.client.log.Log;
 import org.rest.client.place.SocketPlace;
-import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.StoreKeys;
-import org.rest.client.storage.store.WebSocketDataStoreWebSql;
-import org.rest.client.storage.store.objects.WebSocketObject;
-import org.rest.client.suggestion.SocketSuggestOracle;
+import org.rest.client.storage.StoreKeys;
+import org.rest.client.storage.store.WebSocketHistoryStore;
 import org.rest.client.tutorial.TutorialFactory;
 import org.rest.client.ui.SocketView;
 
-import com.allen_sauer.gwt.log.client.Log;
-import com.google.code.gwt.database.client.service.DataServiceException;
-import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.gwt.chrome.storage.Storage;
 import com.google.gwt.chrome.storage.StorageArea;
 import com.google.gwt.chrome.storage.StorageArea.StorageSimpleCallback;
@@ -41,6 +36,7 @@ import com.google.gwt.chrome.storage.StorageResult;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.shared.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.json.client.JSONObject;
@@ -68,8 +64,8 @@ public class SocketActivity extends AppActivity implements
 	
 	final private SocketPlace place;
 	private EventBus eventBus;
-	SocketView view = null;
-	TutorialFactory tutorialFactory = null;
+	private SocketView view = null;
+	private TutorialFactory tutorialFactory = null;
 	private WebSocket socket = null;
 	private String socketUrl = null;
 	private final ArrayList<SocketMessage> messages = new ArrayList<SocketMessage>();
@@ -245,19 +241,18 @@ public class SocketActivity extends AppActivity implements
 	
 	private void saveHistory(){
 		final WebSocketObject data = WebSocketObject.create(socketUrl);
-		final WebSocketDataStoreWebSql store = clientFactory.getWebSocketsStore();
-		store.getService().getByUrl(socketUrl, new ListCallback<WebSocketObject>() {
+		WebSocketHistoryStore.query(socketUrl, new WebSocketHistoryStore.StoreResultsCallback() {
 			@Override
-			public void onFailure(DataServiceException error) {}
+			public void onError(Throwable error) {}
 			
 			@Override
-			public void onSuccess(List<WebSocketObject> result) {
-				if(result != null && result.size() == 1){
+			public void onSuccess(JsArray<WebSocketObject> result) {
+				if(result != null && result.length() == 1){
 					return;
 				}
-				clientFactory.getWebSocketsStore().put(data, null, new StoreResultCallback<Integer>() {
+				WebSocketHistoryStore.add(data, new WebSocketHistoryStore.StoreInsertCallback() {
 					@Override
-					public void onSuccess(Integer result) {}
+					public void onSuccess(int inserId) {}
 					@Override
 					public void onError(Throwable e) {}
 				});
@@ -310,12 +305,6 @@ public class SocketActivity extends AppActivity implements
 		view.setConnectionStatus(WebSocket.CLOSING);
 		socket.close();
 		socket = null;
-	}
-
-	@Override
-	public SocketSuggestOracle getUrlsSuggestOracle() {
-		WebSocketDataStoreWebSql store = clientFactory.getWebSocketsStore();
-		return new SocketSuggestOracle(store);
 	}
 
 	@Override

@@ -1,0 +1,24 @@
+{
+  "name": "GWT TEST environment",
+  "description": "This will help you use Chrome API in GWT dev mode",
+  "version": "1.0",
+  "manifest_version": 2,
+  "minimum_chrome_version": "23",
+  "permissions": [
+  	"webRequest",
+    "<all_urls>",
+    "history",
+    "background",
+    "storage",
+    "clipboardWrite"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [{
+      "matches": ["http://127.0.0.1:8888/*"],
+      "js": ["cs.js"],
+	  "run_at": "document_start"
+    }
+  ]
+}

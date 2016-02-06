@@ -24,7 +24,7 @@ public class OAuth {
 		private String key;
 		private String value;
 		public OauthParam(){}
-		public OauthParam(String key, String value){
+		private OauthParam(String key, String value){
 			setKey(key, true);
 			setValue(value);
 		}
@@ -47,7 +47,7 @@ public class OAuth {
 	
 	
 	
-	public static String getBaseString( String httpMethod, String requestUrl, List<OauthParam> params ){
+	private static String getBaseString( String httpMethod, String requestUrl, List<OauthParam> params ){
 		StringBuilder sb = new StringBuilder();
 		sb.append(httpMethod.toUpperCase());
 		sb.append("&");
@@ -91,7 +91,7 @@ public class OAuth {
 		return sb.toString();
 	}
 	
-	public static List<OauthParam> createParamsList(Map<String, String> oauthParams){
+	static List<OauthParam> createParamsList(Map<String, String> oauthParams){
 		List<OauthParam> params = new ArrayList<OauthParam>();
 		Set<String> keySet = oauthParams.keySet();
 		Iterator<String> it = keySet.iterator();
@@ -105,7 +105,7 @@ public class OAuth {
 	}
 	
 	
-	public static String getKey(List<OauthParam> params){
+	private static String getKey(List<OauthParam> params){
 		String consumerSecret = null;
 		String tokenSecret = null;
 		Iterator<OauthParam> it = params.iterator();
@@ -125,7 +125,7 @@ public class OAuth {
 		return key;
 	}
 	
-	public static String getParamValue(List<OauthParam> params, String key){
+	private static String getParamValue(List<OauthParam> params, String key){
 		
 		String result = null;
 		Iterator<OauthParam> it = params.iterator();
@@ -139,7 +139,7 @@ public class OAuth {
 		return result;
 	}
 	
-	public static String getSignatureValue(String httpMethod, String requestUrl, List<OauthParam> params){
+	static String getSignatureValue(String httpMethod, String requestUrl, List<OauthParam> params){
 		
 		String key = getKey(params);
 		String cryptMethod = getParamValue(params, "oauth_signature_method");
@@ -165,7 +165,7 @@ public class OAuth {
 		return cryptedString;
 	}
 	
-	public static String normalizeParameters(final List<OauthParam> params, final List<String> pass){
+	private static String normalizeParameters(final List<OauthParam> params, final List<String> pass){
 		Collections.sort(params, new Comparator<OauthParam>() {
 			@Override
 			public int compare(OauthParam o1, OauthParam o2) {
@@ -191,7 +191,7 @@ public class OAuth {
 		return percentEncode( normalized.toString() );
 	}
 	
-	public static native String cryptSH1(String key, String baseString)/*-{
+	private static native String cryptSH1(String key, String baseString)/*-{
 		return $wnd.b64_hmac_sha1(key, baseString)+"=";//pad = at end
 	}-*/;
 	
@@ -199,7 +199,7 @@ public class OAuth {
 	 * @see http://code.google.com/p/oauth/source/browse/code/javascript/oauth.js
 	 * @param url
 	 */
-	public static native String normalizeUrl(String url)/*-{
+	private static native String normalizeUrl(String url)/*-{
 		var o = {key: ["source","protocol","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"],
                  parser: {strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@\/]*):?([^:@\/]*))?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/ }};
         var m = o.parser.strict.exec(url);
@@ -256,7 +256,7 @@ public class OAuth {
 	}
 	
 	
-	public static String percentEncode(String param){
+	private static String percentEncode(String param){
 		if( param == null || param.equals("") ){
 			return "";
 		}

@@ -11,9 +11,9 @@ import com.google.gwt.core.client.JavaScriptObject;
  */
 public class GoogleAnalyticsApp {
 
-	static JavaScriptObject service;
-	static JavaScriptObject tracker;
-	public static GoogleAnalyticsConfig config;
+	static JavaScriptObject service; // NO_UCD (unused code)
+	private static JavaScriptObject tracker; // NO_UCD (unused code)
+	private static GoogleAnalyticsConfig config; // NO_UCD (unused code)
 	private final static String UA_ID = "UA-18021184-14";
 
 	/**

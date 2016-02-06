@@ -88,7 +88,7 @@ public class SocketViewImpl extends Composite implements SocketView {
 	}
 	
 	private void setUpSuggestions(){
-		suggestOracle = listener.getUrlsSuggestOracle();
+		suggestOracle = new SocketSuggestOracle();
 		suggestionsDisplay = new UrlsSuggestionDisplay();
 		suggestionsDisplay.setAnimationEnabled(false);
 		urlField = new SuggestBox(suggestOracle, new TextBox(), suggestionsDisplay);

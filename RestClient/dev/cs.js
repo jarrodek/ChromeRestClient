@@ -18,15 +18,21 @@
 /* global chrome */
 /**
  * GWT namespace
+ * 
+ * @namespace
  */
 var gwt = gwt || {};
 /**
  * GWT development namespace
+ *
+ * @namespace
  */
 gwt.dev = gwt.dev || {};
 
 /**
  * Chrome extension namespace
+ *
+ * @namespace
  */
 gwt.dev.chrome = gwt.dev.chrome || {};
 

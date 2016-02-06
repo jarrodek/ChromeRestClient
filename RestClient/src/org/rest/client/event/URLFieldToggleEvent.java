@@ -33,7 +33,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * </p>
  */
 public class URLFieldToggleEvent extends Event<URLFieldToggleEvent.Handler> {
-	public static final Type<Handler> TYPE = new Type<Handler>();
+	private static final Type<Handler> TYPE = new Type<Handler>();
 
 	/**
 	 * Register an handler for this event.
@@ -57,16 +57,16 @@ public class URLFieldToggleEvent extends Event<URLFieldToggleEvent.Handler> {
 		void onClearForm(boolean isNowSimpleView);
 	}
 	
-	public final boolean isNowSimpleView;
+	private final boolean isSimpleView;
 	
 	public URLFieldToggleEvent(boolean isNowSimpleView){
-		this.isNowSimpleView = isNowSimpleView;
+		this.isSimpleView = isNowSimpleView;
 		
 	}
 	
 	@Override
 	protected void dispatch(Handler handler) {
-		handler.onClearForm(isNowSimpleView);
+		handler.onClearForm(isSimpleView);
 	}
 
 	@Override

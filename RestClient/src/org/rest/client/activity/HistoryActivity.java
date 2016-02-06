@@ -16,22 +16,23 @@
 package org.rest.client.activity;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.rest.client.ClientFactory;
 import org.rest.client.NotificationAction;
 import org.rest.client.RestClient;
 import org.rest.client.StatusNotification;
+import org.rest.client.analytics.GoogleAnalytics;
+import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.ClearHistoryEvent;
+import org.rest.client.jso.HistoryObject;
+import org.rest.client.log.Log;
 import org.rest.client.place.HistoryPlace;
-import org.rest.client.storage.StoreResultCallback;
-import org.rest.client.storage.store.objects.HistoryObject;
+import org.rest.client.storage.store.HistoryRequestStore;
 import org.rest.client.ui.HistoryView;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -72,25 +73,23 @@ public class HistoryActivity extends ListActivity implements HistoryView.Present
 		current_page++;
 		performQuery();
 	}
-
+	/**
+	 * 1) Get history object from the store and keep it for a while.
+	 * 2) Display toast with confirmation and undo action. 
+	 */
 	@Override
 	public void removeFromeHistory(final int historyId) {
-		clientFactory.getHistoryRequestStore().getByKey(historyId, new StoreResultCallback<HistoryObject>() {
-
+		HistoryRequestStore.getByKey(historyId, new HistoryRequestStore.StoreResultCallback() {
+			
 			@Override
-			public void onSuccess(final HistoryObject removedObject) {
-
-				clientFactory.getHistoryRequestStore().remove(historyId, new StoreResultCallback<Boolean>() {
-
+			public void onSuccess(JavaScriptObject result) {
+				final HistoryObject ho = result.cast();
+				HistoryRequestStore.remove(historyId, new HistoryRequestStore.StoreSimpleCallback() {
 					@Override
-					public void onSuccess(Boolean result) {
-						if (result != null && result.booleanValue()) {
-							notifyRemoveAndRestore(removedObject);
-						} else {
-							StatusNotification.notify("Unknown error occured :(", StatusNotification.TIME_MEDIUM);
-						}
+					public void onSuccess() {
+						notifyRemoveAndRestore(ho);
 					}
-
+					
 					@Override
 					public void onError(Throwable e) {
 						if (RestClient.isDebug()) {
@@ -99,17 +98,16 @@ public class HistoryActivity extends ListActivity implements HistoryView.Present
 						StatusNotification.notify("Unable to clear history data :(", StatusNotification.TIME_MEDIUM);
 					}
 				});
-
 			}
-
 			@Override
 			public void onError(Throwable e) {
 				if (RestClient.isDebug()) {
-					Log.error("Unable to clear history data.", e);
+					Log.error("HistoryObject doesn't exist n the store.", e);
 				}
 				StatusNotification.notify("Unable to clear history data :(", StatusNotification.TIME_MEDIUM);
 			}
 		});
+		
 	}
 
 	private void notifyRemoveAndRestore(final HistoryObject removedObject) {
@@ -119,15 +117,13 @@ public class HistoryActivity extends ListActivity implements HistoryView.Present
 
 			@Override
 			public void onActionPerformed() {
-				final HistoryObject save = HistoryObject.copyNew(removedObject);
-				clientFactory.getHistoryRequestStore().put(save, null, new StoreResultCallback<Integer>() {
+				HistoryRequestStore.insert(removedObject, new HistoryRequestStore.StoreInsertCallback() {
 
 					@Override
-					public void onSuccess(Integer result) {
-						save.setId(result.intValue());
+					public void onSuccess(int result) {
 						ArrayList<HistoryObject> list = new ArrayList<HistoryObject>();
-						list.add(save);
-
+						removedObject.setId(result); //required by SQL.
+						list.add(removedObject);
 						view.appendResults(list);
 					}
 
@@ -147,11 +143,12 @@ public class HistoryActivity extends ListActivity implements HistoryView.Present
 
 	@Override
 	public void onHistoryItemSelect(int historyId, final Callback<HistoryObject, Throwable> callback) {
-		clientFactory.getHistoryRequestStore().getByKey(historyId, new StoreResultCallback<HistoryObject>() {
+		HistoryRequestStore.getByKey(historyId, new HistoryRequestStore.StoreResultCallback() {
 
 			@Override
-			public void onSuccess(HistoryObject result) {
-				callback.onSuccess(result);
+			public void onSuccess(JavaScriptObject result) {
+				HistoryObject ho = result.cast();
+				callback.onSuccess(ho);
 			}
 
 			@Override
@@ -163,10 +160,10 @@ public class HistoryActivity extends ListActivity implements HistoryView.Present
 
 	@Override
 	public void onClearHistory() {
-		clientFactory.getHistoryRequestStore().deleteHistory(new StoreResultCallback<Boolean>() {
+		HistoryRequestStore.deleteHistory(new HistoryRequestStore.StoreDeleteCallback() {
 
 			@Override
-			public void onSuccess(Boolean result) {
+			public void onSuccess(int deleted) {
 				ClearHistoryEvent ev = new ClearHistoryEvent();
 				eventBus.fireEvent(ev);
 			}
@@ -183,7 +180,7 @@ public class HistoryActivity extends ListActivity implements HistoryView.Present
 
 	@Override
 	public void serach(String query) {
-		recentQuery = "%" + query + "%";
+		recentQuery = query;
 		current_page = 0;
 		view.clearResultList();
 		performQuery();
@@ -198,45 +195,53 @@ public class HistoryActivity extends ListActivity implements HistoryView.Present
 
 		final String q = (recentQuery != null && recentQuery.length() > 2) ? recentQuery : null;
 		int offset = current_page * PAGE_SIZE;
-		clientFactory.getHistoryRequestStore().historyList(q, PAGE_SIZE, offset,
-				new StoreResultCallback<List<HistoryObject>>() {
-
-					@Override
-					public void onSuccess(final List<HistoryObject> result) {
-						fetchingNextPage = false;
-						if (result.size() == 0) {
-							view.setNoMoreItems();
-							return;
-						}
-						view.appendResults(result);
-					}
-
-					@Override
-					public void onError(Throwable e) {
-						fetchingNextPage = false;
-						if (RestClient.isDebug()) {
-							Log.error("Database error. Unable read history data.", e);
-						}
-						StatusNotification.notify("Database error. Unable read history data.",
-								StatusNotification.TIME_MEDIUM);
-					}
-				});
+		
+		HistoryRequestStore.queryHistory(q, PAGE_SIZE, offset, new HistoryRequestStore.StoreResultsCallback() {
+			
+			@Override
+			public void onSuccess(JsArray<JavaScriptObject> result) {
+				fetchingNextPage = false;
+				if (result.length() == 0) {
+					view.setNoMoreItems();
+					return;
+				}
+				ArrayList<HistoryObject> list = new ArrayList<HistoryObject>();
+				for (int i = 0; i < result.length(); i++) {
+					HistoryObject item = result.get(i).cast(); 
+					list.add(item);
+				}
+				view.appendResults(list);
+			}
+			
+			@Override
+			public void onError(Throwable e) {
+				fetchingNextPage = false;
+				if (RestClient.isDebug()) {
+					Log.error("Database error. Unable read history data.", e);
+				}
+				StatusNotification.notify("Database error. Unable read history data.",
+						StatusNotification.TIME_MEDIUM);
+				GoogleAnalytics.sendException("HistoryActivity::performQuery::" + e.getMessage());
+				GoogleAnalyticsApp.sendException("HistoryActivity::performQuery::" + e.getMessage());
+			}
+		});
 	}
 
 	@Override
 	public void prepareExportData(final Callback<String, Exception> callback) {
 
 		try {
-			clientFactory.getHistoryRequestStore().all(new StoreResultCallback<Map<Integer, HistoryObject>>() {
+			HistoryRequestStore.all(new HistoryRequestStore.StoreResultsCallback() {
 
 				@Override
-				public void onSuccess(Map<Integer, HistoryObject> map) {
+				public void onSuccess(JsArray<JavaScriptObject> list) {
 					JSONArray requestsArray = new JSONArray();
 					JSONArray projectsArray = new JSONArray();
-					Set<Integer> keys = map.keySet();
-					for (Integer _k : keys) {
-						HistoryObject history = map.get(_k);
-						requestsArray.set(requestsArray.size(), history.toJSONObject());
+					if (list != null) {
+						for (int i = 0; i < list.length(); i++) {
+							HistoryObject item = list.get(i).cast();
+							requestsArray.set(requestsArray.size(), item.toJSONObject());
+						}
 					}
 					JSONObject result = new JSONObject();
 					result.put("projects", projectsArray);
@@ -256,7 +261,7 @@ public class HistoryActivity extends ListActivity implements HistoryView.Present
 
 	}
 
-	public String createDownloadData(String data) {
+	private String createDownloadData(String data) {
 		if (exportFileObjectUrl != null) {
 			revokeDownloadData();
 		}

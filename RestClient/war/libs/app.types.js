@@ -44,6 +44,7 @@ class BaseObject {
     }
   }
 
+<<<<<<< HEAD
 }
 
 /** 
@@ -56,6 +57,167 @@ class RequestObject extends BaseObject {
     super();
     super.assertRequiredKeys(['url', 'method', 'type'], opts);
 
+=======
+  /**
+   * Override toJSON behaviour so it will eliminate
+   * all _* properies and replace it with a proper ones.
+   */
+  toJSON() {
+    var copy = Object.assign({}, this);
+    var keys = Object.keys(copy);
+    var under = keys.filter((key) => key.indexOf('_') === 0);
+    under.forEach((key) => {
+      let realKey = key.substr(1);
+      copy[realKey] = copy[key];
+      delete copy[key];
+    });
+    return copy;
+  }
+}
+/**
+ * OrderedList object represents an object that can be ordered in a list. This
+ * objects have additional properties and methods to manage their position on
+ * the list.
+ *
+ * @example <caption>Reordering elements on list</caption>  
+ * // Initial list
+ * let list = [OrderedList1, OrderedList2, OrderedList3, OrderedList4, OrderedList5, OrderedList6, 
+ * OrderedList7];
+ * // Last element must be moved from 7-th position to 3-rd (zero-based)
+ * list.forEach((item) => { 
+ *  item.changeOrder('up', 2, list[6], list[6].order); 
+ * }); 
+ * // [OrderedList1, OrderedList2, OrderedList7, OrderedList3, OrderedList4, OrderedList5, 
+ * OrderedList6] 
+ * @extends BaseObject
+ */
+class OrderedList extends BaseObject {
+
+  constructor(opts) {
+    super(opts);
+    /**
+     * Object order on a list
+     *
+     * @type {Number}
+     * @default 0
+     */
+    this.order = opts.order || 0;
+  }
+  /**
+   * Change the order of the element. This method will change the order of the
+   * element depending on arguments. Note that this method don't care on which
+   * list item is. Program should perform this operation only on elements that
+   * are already on the list. Object that is changing position can also be
+   * changed using this method so it's safe to use it on all list elements.
+   * 
+   * 
+   * 
+   * @example <caption>Reordering elements on list</caption>  
+   * //For example if you want to move element from position 7 to position 2. 
+   * //The function should look as follows: 
+   * 
+   * // Initial list
+   * let list = [OrderedList1, OrderedList2, OrderedList3, OrderedList4, OrderedList5, 
+   * OrderedList6, OrderedList7];
+   * // Last element must be moved from 7-th position to 3-rd (zero-based)
+   * list.forEach((item) => { 
+   *  item.changeOrder('up', 2, list[6], list[6].order); 
+   * }); 
+   * // [OrderedList1, OrderedList2, OrderedList7, OrderedList3, OrderedList4, OrderedList5, 
+   * OrderedList6]
+   * Note: positions (order) are zero-based.
+   *
+   * @param {String} dir  The direction of the change. Set to `up` if the
+   * element should go up on the list or `down` (default) otherwise.
+   * @param {Number} change  A target position of the moved element. If the
+   * element should finally be at position 2 this value should be 2.
+   * @param {OrderedList} moved  A moved OrderedList object as a reference to
+   * compare if current object is moved object.
+   * @param {Number} movedOrder  A base position of the moved element. If
+   * moved element previously was at position 7 this value should be 7.
+   */
+  changeOrder(dir, change, moved, movedOrder) {
+    if (dir === 'up') {
+      if (this.order === 0) {
+        throw new Error('Can\'t move list element below 0 in this direction.');
+      }
+      this.moveUp(change, moved, movedOrder);
+    } else {
+      this.moveDown(change, moved, movedOrder);
+    }
+  }
+  /**
+   * Decrement order value so the element will go up on the list.
+   * This method is used internally by {@link OrderedList#changeOrder} method.
+   *
+   * @example
+   * Object.moveUp(2, OtherObject, 4);
+   *
+   * @param {Number} change  A target position of the moved element. If the
+   * element should finally be at position 2 this value should be 2.
+   * @param {OrderedList} moved  A moved OrderedList object as a reference to
+   * compare if current object is moved object.
+   * @param {Number} movedOrder  A base position of the moved element. If
+   * moved element previously was at position 7 this value should be 7.
+   */
+  moveUp(change, moved, movedOrder) {
+    if (this.order < change) {
+      return;
+    }
+    if (this.order > movedOrder) {
+      return;
+    }
+    if (this === moved) {
+      this.order = change;
+      return;
+    }
+    --this.order;
+  }
+  /**
+   * Increment order value so the element will go down on the list.
+   * This method is used internally by {@link OrderedList#changeOrder} method.
+   *
+   * @example
+   * Object.moveUp(2, OtherObject, 4);
+   *
+   * @param {Number} change  A target position of the moved element. If the
+   * element should finally be at position 2 this value should be 2.
+   * @param {OrderedList} moved  A moved OrderedList object as a reference to
+   * compare if current object is moved object.
+   * @param {Number} movedOrder  A base position of the moved element. If
+   * moved element previously was at position 7 this value should be 7.
+   */
+  moveDown(change, moved, movedOrder) {
+    if (this.order > change) {
+      return;
+    }
+    if (this.order < movedOrder) {
+      return;
+    }
+    if (this === moved) {
+      this.order = change;
+      return;
+    }
+    ++this.order;
+  }
+  toJSON() {
+    return super.toJSON();
+  }
+}
+/** 
+ * A base class for request object.
+ * This object will be stored in the database.
+ *
+ * @extends OrderedList
+ * @throws {Error} If `url`, `method` or `type` is not available to the constructor.
+ */
+class RequestObject extends OrderedList {
+
+  constructor(opts) {
+    super(opts);
+    super.assertRequiredKeys(['url', 'method', 'type'], opts);
+    
+>>>>>>> hotfix-db
     /**
      * A HAR object containing request info.
      * To initialize this object use helper class HAR:
@@ -63,29 +225,63 @@ class RequestObject extends BaseObject {
      *
      * @type {HAR}
      */
+<<<<<<< HEAD
     this._har = null;
     /**
      * Request URL. It's an index and part of keyPath in the database. Therefore it's required.
      *
      * @type {String}
+=======
+    this._har = opts._har ? (opts._har instanceof HAR.Log) ? opts._har :
+      new HAR.Log(opts._har) : null;
+    /**
+     * A name of the request.
+     * It is repeated in the HAR object - according to HAR spec in the pages array of the 
+     * log object. It must be in the non-array path to index the value in the IDB engine.
+     * @type {!String}
+     */
+    this._name = null;
+    /**
+     * Request URL. It's an index and part of keyPath in the database. Therefore it's required.
+     *
+     * @type {!String}
+>>>>>>> hotfix-db
      */
     this.url = opts.url;
     /**
      * Request HTTP method. 
      * It's an index and part of keyPath in the database. Therefore it's required.
      *
+<<<<<<< HEAD
      * @type {String}
+=======
+     * @type {!String}
+>>>>>>> hotfix-db
      */
     this.method = opts.method;
     /**
      * A type of the object. Sub classes can set it by default.
      * Used to distinguish what kind of request is this (saved, history)
      *
+<<<<<<< HEAD
      * @type {String}
      */
     this.type = opts.type ? opts.type : null;
 
     this.har = opts.har ? opts.har : null;
+=======
+     * @type {!String}
+     */
+    this.type = opts.type;
+    // set a har object
+    if (opts.har) {
+      this.har = opts.har;
+    }
+    // Set a name value.
+    if (opts.name) {
+      this.name = opts.name;
+    }
+>>>>>>> hotfix-db
   }
 
   set har(har) {
@@ -99,6 +295,7 @@ class RequestObject extends BaseObject {
   get har() {
     return this._har;
   }
+<<<<<<< HEAD
 }
 /** 
  * A class of saved requests objects.
@@ -107,6 +304,33 @@ class RequestObject extends BaseObject {
  *  let ro = new RequestObject(...);
  *  ro.type = 'saved';
  * ```
+=======
+
+  set name(name) {
+    this._name = String(name);
+    if (this._har) {
+      this._har.pages[0].title = this._name;
+    }
+  }
+
+  get name() {
+    return this._name;
+  }
+
+  toJSON() {
+    return super.toJSON();
+  }
+}
+/** 
+ * A class of saved requests objects.
+ * It's just a shorthand class.
+ * 
+ * @example <caption>Creating this class id the same as</caption>
+ * let ro = new RequestObject(...);
+ * ro.type = 'saved';
+ * 
+ * @extends RequestObject
+>>>>>>> hotfix-db
  */
 // jshint unused:false
 class SavedRequestObject extends RequestObject {
@@ -114,14 +338,29 @@ class SavedRequestObject extends RequestObject {
     opts.type = 'saved';
     super(opts);
   }
+<<<<<<< HEAD
+=======
+  toJSON() {
+    return super.toJSON();
+  }
+>>>>>>> hotfix-db
 }
 /** 
  * A class of history requests objects.
  * It's just a shorthand class, enlivenment for:
+<<<<<<< HEAD
  * ```
  *  let ro = new RequestObject(...);
  *  ro.type = 'history';
  * ```
+=======
+ * 
+ * @example <caption>Creating this class id the same as</caption>
+ * let ro = new RequestObject(...);
+ * ro.type = 'history';
+ *
+ * @extends RequestObject
+>>>>>>> hotfix-db
  */
 // jshint unused:false
 class HistoryRequestObject extends RequestObject {
@@ -129,17 +368,33 @@ class HistoryRequestObject extends RequestObject {
     opts.type = 'history';
     super(opts);
   }
+<<<<<<< HEAD
+=======
+  toJSON() {
+    return super.toJSON();
+  }
+>>>>>>> hotfix-db
 }
 /**
  * A class representing an entity in the data store with information about 
  * Google Drive referenced items.
+<<<<<<< HEAD
+=======
+ *
+ * @extends BaseObject
+ * @throws {Error} If `driveId` or `requestId` is not available to the constructor.
+>>>>>>> hotfix-db
  */
 // jshint unused:false
 class DriveObject extends BaseObject {
 
   constructor(opts) {
     super();
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> hotfix-db
     super.assertRequiredKeys(['driveId', 'requestId'], opts);
     /**
      * A Google Drive item id.
@@ -158,12 +413,22 @@ class DriveObject extends BaseObject {
 /**
  * A class representing an entity in the data store with information 
  * about export to app server.
+<<<<<<< HEAD
+=======
+ *
+ * @extends BaseObject
+ * @throws {Error} If `serverId` or `requestId` is not available to the constructor.
+>>>>>>> hotfix-db
  */
 // jshint unused:false
 class ServerExportedObject extends BaseObject {
 
   constructor(opts) {
+<<<<<<< HEAD
     super();
+=======
+    super(opts);
+>>>>>>> hotfix-db
 
     super.assertRequiredKeys(['serverId', 'requestId'], opts);
     /**
@@ -182,6 +447,12 @@ class ServerExportedObject extends BaseObject {
 }
 /**
  * A class representing an URL.
+<<<<<<< HEAD
+=======
+ *
+ * @extends BaseObject
+ * @throws {Error} If `url` is not available to the constructor.
+>>>>>>> hotfix-db
  */
 class UrlObject extends BaseObject {
 
@@ -189,10 +460,16 @@ class UrlObject extends BaseObject {
     super();
     super.assertRequiredKeys(['url'], opts);
     /**
+<<<<<<< HEAD
      * An URL to store.
      * It's a database key path so it must be unique.
      *
      * @type {String}
+=======
+     * An URL to store. It's a database key path so it must be unique.
+     *
+     * @type {!String}
+>>>>>>> hotfix-db
      */
     this.url = opts.url;
     /**
@@ -205,6 +482,11 @@ class UrlObject extends BaseObject {
 }
 /**
  * A class representing an entity in the URL history data store.
+<<<<<<< HEAD
+=======
+ *
+ * @extends UrlObject
+>>>>>>> hotfix-db
  */
 // jshint unused:false
 class HistoryUrlObject extends UrlObject {
@@ -214,6 +496,11 @@ class HistoryUrlObject extends UrlObject {
 }
 /**
  * A class representing an entity in the socket urls history data store.
+<<<<<<< HEAD
+=======
+ * 
+ * @extends UrlObject
+>>>>>>> hotfix-db
  */
 // jshint unused:false
 class HistorySocketObject extends UrlObject {
@@ -221,6 +508,7 @@ class HistorySocketObject extends UrlObject {
     super(opts);
   }
 }
+<<<<<<< HEAD
 
 class OrderedList extends BaseObject {
 
@@ -316,6 +604,13 @@ class OrderedList extends BaseObject {
 
 /**
  * A class representing and entity in the Projects data store.
+=======
+/**
+ * A class representing and entity in the Projects data store.
+ *
+ * @extends OrderedList
+ * @throws {Error} If `requestIds` is not undefined but is not an Array.
+>>>>>>> hotfix-db
  */
 // jshint unused:false
 class ProjectObject extends OrderedList {
@@ -326,9 +621,22 @@ class ProjectObject extends OrderedList {
     if (!opts.requestIds) {
       opts.requestIds = [];
     }
+<<<<<<< HEAD
     if (!(opts.requestIds instanceof Array)) {
       throw new Error('`requestIds` property must be an array of ids of request objects');
     }
+=======
+    if (typeof opts.requestIds.length === 'undefined') {
+      throw new Error('`requestIds` property must be an array of ids of request objects');
+    }
+    if (opts.id) {
+      /**
+       * A database ID.
+       * It can be null / undefined if the object wasn't saved yet.
+       */
+      this.id = opts.id;
+    }
+>>>>>>> hotfix-db
     /**
      * A list of all endpoints (RequestObjects) referenced to this project.
      *
@@ -361,3 +669,76 @@ class ProjectObject extends OrderedList {
     this.requestIds.push(requestIds);
   }
 }
+<<<<<<< HEAD
+=======
+/**
+ * A HTTP status code representation in the storage.
+ *
+ * @extends BaseObject
+ * @throws {Error} If `key` or `label` is not available to the constructor.
+ */
+// jshint unused:false
+class HttpStatusObject extends BaseObject {
+  constructor(opts) {
+    super();
+
+    super.assertRequiredKeys(['key', 'label'], opts);
+    /**
+     * A HTTP status code is represented as `key`
+     *
+     * @type {Number}
+     */
+    this.key = opts.key;
+    /**
+     * A status message associated with this code.
+     *
+     * @type {String}
+     */
+    this.label = opts.label;
+    /**
+     * An optional description for this code.
+     *
+     * @type {String}
+     */
+    this.desc = opts.desc ? opts.desc : undefined;
+  }
+}
+/**
+ * A HTTP header representation in the storage.
+ *
+ * @extends BaseObject
+ * @throws {Error} If `key` or `type` is not available to the constructor.
+ */
+// jshint unused:false
+class HttpHeaderObject extends BaseObject {
+  constructor(opts) {
+    super();
+
+    super.assertRequiredKeys(['key', 'type'], opts);
+    /**
+     * Header name.
+     *
+     * @type {String}
+     */
+    this.key = opts.key;
+    /**
+     * Header type. One of `request` or `response`.
+     *
+     * @type {String}
+     */
+    this.type = opts.type;
+    /**
+     * An optional example for this header.
+     *
+     * @type {String}
+     */
+    this.example = opts.example ? opts.example : undefined;
+    /**
+     * An optional description for this header.
+     *
+     * @type {String}
+     */
+    this.desc = opts.desc ? opts.desc : undefined;
+  }
+}
+>>>>>>> hotfix-db

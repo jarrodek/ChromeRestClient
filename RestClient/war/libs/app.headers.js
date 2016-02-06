@@ -21,10 +21,16 @@
 
 /**
  * Advanced Rest Client namespace
+<<<<<<< HEAD
+=======
+ *
+ * @namespace
+>>>>>>> hotfix-db
  */
 var arc = arc || {};
 /**
  * ARC app's namespace
+<<<<<<< HEAD
  */
 arc.app = arc.app || {};
 /**
@@ -46,6 +52,29 @@ arc.app.db.headers = {};
  * @return {Array} An array of filtered headers.
  */
 arc.app.db.headers.filter = function(headers) {
+=======
+ *
+ * @namespace
+ */
+arc.app = arc.app || {};
+/**
+ * A namespace for headers parser.
+ *
+ * @namespace
+ */
+arc.app.headers = {};
+/** 
+ * Filter array of headers and return not duplicated array of the same
+ * headers. Duplicated headers should be appended to already found one using
+ * coma separator.
+ *
+ * @param {Array} headers  Headers array to filter. All objects in headers
+ * array must have "name" and "value" keys.
+ *
+ * @return {Array} An array of filtered headers.
+ */
+arc.app.headers.filter = function(headers) {
+>>>>>>> hotfix-db
   var _tmp = {};
   headers.forEach((header) => {
     if (header.name in _tmp) {
@@ -68,17 +97,30 @@ arc.app.db.headers.filter = function(headers) {
 /**
  * Parse headers array to Raw HTTP headers string.
  *
+<<<<<<< HEAD
  * @param {Array} headersArray List of objects with "name" and "value" properties.
  * @returns {String} A HTTP representation of the headers.
  */
 arc.app.db.headers.toString = function(headersArray) {
+=======
+ * @param {Array} headersArray List of objects with "name" and "value"
+ * properties.
+ *
+ * @returns {String} A HTTP representation of the headers.
+ */
+arc.app.headers.toString = function(headersArray) {
+>>>>>>> hotfix-db
   if (!(headersArray instanceof Array)) {
     throw new Error('Headers must be an instance of Array');
   }
   if (headersArray.length === 0) {
     return '';
   }
+<<<<<<< HEAD
   headersArray = arc.app.db.headers.filter(headersArray);
+=======
+  headersArray = arc.app.headers.filter(headersArray);
+>>>>>>> hotfix-db
   var result = '';
   headersArray.forEach((header) => {
     if (result !== '') {
@@ -101,7 +143,11 @@ arc.app.db.headers.toString = function(headersArray) {
  * @param {String} headersString Raw HTTP headers input
  * @returns {Array} The array of key:value objects
  */
+<<<<<<< HEAD
 arc.app.db.headers.toJSON = function(headersString) {
+=======
+arc.app.headers.toJSON = function(headersString) {
+>>>>>>> hotfix-db
   if (headersString === null || headersString.trim() === '') {
     return [];
   }
@@ -142,7 +188,11 @@ arc.app.db.headers.toJSON = function(headersString) {
  * @param {String} encoding An encoding string from the old request.
  * @return {Boolean} True if encoding has been added to the array.
  */
+<<<<<<< HEAD
 arc.app.db.headers._oldCombine = function(headers, encoding) {
+=======
+arc.app.headers._oldCombine = function(headers, encoding) {
+>>>>>>> hotfix-db
   if (!(headers instanceof Array)) {
     throw new Error('Headers must be an array');
   }
@@ -163,11 +213,19 @@ arc.app.db.headers._oldCombine = function(headers, encoding) {
  * @param {Array|String} headers Either HTTP headers string or list of headers.
  * @return {String|null} A content-type header value or null if not found
  */
+<<<<<<< HEAD
 arc.app.db.headers.getContentType = function(headers) {
   if (typeof headers === 'string') {
     headers = arc.app.db.headers.toJSON(headers);
   }
   headers = arc.app.db.headers.filter(headers);
+=======
+arc.app.headers.getContentType = function(headers) {
+  if (typeof headers === 'string') {
+    headers = arc.app.headers.toJSON(headers);
+  }
+  headers = arc.app.headers.filter(headers);
+>>>>>>> hotfix-db
   var ct = headers.filter((item) => item.name.toLowerCase() === 'content-type');
   return (ct.length === 0) ? null : ct[0].value;
 };

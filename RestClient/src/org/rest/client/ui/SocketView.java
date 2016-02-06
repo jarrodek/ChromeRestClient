@@ -15,8 +15,8 @@
  ******************************************************************************/
 package org.rest.client.ui;
 
-import org.rest.client.suggestion.SocketSuggestOracle;
 import org.rest.client.tutorial.TutorialFactory;
+
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.websocket.client.SocketMessage;
@@ -55,7 +55,6 @@ public interface SocketView extends IsWidget {
 		 */
 		void disconnect();
 		
-		SocketSuggestOracle getUrlsSuggestOracle();
 		/**
 		 * clear all received and sent data
 		 */

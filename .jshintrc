@@ -18,8 +18,23 @@
     "wrap": true,
     "unwrap": true,
     "Polymer": true,
-    "Platform": true,
     "page": true,
-    "app": true
+    "arc": true,
+    "ArcBehaviors": true,
+    "chrome": true,
+    "KeyframeEffect": true,
+    "StatusNotification": true,
+    "HAR": true,
+    "HistoryUrlObject": true,
+    "HistorySocketObject": true,
+    "ProjectObject": true,
+    "ServerExportedObject": true,
+    "RequestObject": true,
+    "fetch": true,
+    "Dexie": true,
+    "FileExport": true,
+    "HttpHeaderObject": true,
+    "HttpStatusObject": true,
+    "DriveObject": true
   }
 }

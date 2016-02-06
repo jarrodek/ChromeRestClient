@@ -5,15 +5,17 @@ import java.util.List;
 
 import org.rest.client.RestClient;
 import org.rest.client.StatusNotification;
+import org.rest.client.jso.ExportedDataItem;
+import org.rest.client.jso.RequestObject;
+import org.rest.client.log.Log;
 import org.rest.client.request.RequestHeadersParser;
-import org.rest.client.storage.store.objects.RequestObject;
-import org.rest.client.storage.websql.ExportedDataInsertItem;
-import org.rest.client.storage.websql.ExportedDataItem;
+import org.rest.client.storage.store.ExportedStore;
+import org.rest.client.storage.store.RequestDataStore;
 
-import com.allen_sauer.gwt.log.client.Log;
-import com.google.code.gwt.database.client.service.DataServiceException;
-import com.google.code.gwt.database.client.service.ListCallback;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.JsArrayInteger;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
@@ -27,24 +29,24 @@ import com.google.web.bindery.event.shared.EventBus;
  * 
  * @author Paweł Psztyć
  */
-public abstract class DataExport {
+abstract class DataExport {
 
 	EventBus eventBus = null;
 	/**
 	 * All data retrieved from database
 	 */
-	protected List<RequestObject> allDataList = new ArrayList<RequestObject>();
+	private JsArray<RequestObject> allDataList;
 	/**
 	 * All already synch items id's
 	 */
-	protected List<Integer> excludeList = new ArrayList<Integer>();
+	private List<Integer> excludeList = new ArrayList<Integer>();
 	/**
 	 * List of ID's of items that will be saved on server. After successful send
 	 * it should be saved in Database
 	 */
 	protected List<Integer> includeList = new ArrayList<Integer>();
 
-	public static interface PrepareDataHanler {
+	static interface PrepareDataHanler {
 		/**
 		 * Called when user data has been prepared to send.
 		 * 
@@ -59,8 +61,8 @@ public abstract class DataExport {
 		void onEmptyData();
 	}
 
-	public static interface ExportItemCallback {
-		void onSuccess(ExportedDataInsertItem item);
+	static interface ExportItemCallback {
+		void onSuccess(ExportedDataItem item);
 
 		void onFailure(String message);
 	}
@@ -69,37 +71,46 @@ public abstract class DataExport {
 	 * Collect data from database and remove items already exported.
 	 */
 	protected void prepareExportData(final PrepareDataHanler handler) {
-		RestClient.getClientFactory().getRequestDataStore().getService().getAllData(new ListCallback<RequestObject>() {
+		RequestDataStore.all(new RequestDataStore.StoreResultsCallback() {
 			@Override
-			public void onFailure(DataServiceException error) {
+			public void onError(Throwable e) {
 				if (RestClient.isDebug()) {
-					Log.error("Failure to prepare Form data from DB service", error);
+					Log.error("Failure to prepare Form data from DB service", e);
 				}
 				StatusNotification.notify("Failure to prepare Form data from local database");
+				handler.onEmptyData();
 			}
 
 			@Override
-			public void onSuccess(final List<RequestObject> result) {
-				final ArrayList<Integer> formIdsList = new ArrayList<Integer>();
-				for (RequestObject item : result) {
-					formIdsList.add(item.getId());
+			public void onSuccess(final JsArray<JavaScriptObject> result) {
+				if(result == null){
+					if (RestClient.isDebug()) {
+						Log.error("Failure to prepare Form data from DB service");
+					}
+					StatusNotification.notify("Failure to prepare Form data from local database");
+					handler.onEmptyData();
+					return;
 				}
-
-				allDataList = result;
-				RestClient.getClientFactory().getExportedDataReferenceService()
-						.getExportedFormByReferenceId(formIdsList, new ListCallback<ExportedDataItem>() {
+				JsArrayInteger formIdsList = (JsArrayInteger) JsArrayInteger.createArray();
+				JsArray<RequestObject> list = result.cast();
+				for (int i = 0; i < list.length(); i++) {
+					RequestObject item = list.get(i);
+					formIdsList.set(i, item.getId());
+				}
+				
+				allDataList = list;
+				ExportedStore.getExportedByReferenceIds(formIdsList, new ExportedStore.StoreResultsCallback() {
 					@Override
-					public void onFailure(DataServiceException error) {
+					public void onError(Throwable e) {
 						synchPrepareData(handler);
 					}
 
 					@Override
-					public void onSuccess(List<ExportedDataItem> res) {
+					public void onSuccess(JsArray<ExportedDataItem> res) {
 						excludeList = new ArrayList<Integer>();
-						for (ExportedDataItem _item : res) {
-							excludeList.add(_item.getReferenceId());
+						for (int i = 0; i < res.length(); i++) {
+							excludeList.add(res.get(i).getReferenceId());
 						}
-
 						synchPrepareData(handler);
 					}
 				});
@@ -107,10 +118,10 @@ public abstract class DataExport {
 		});
 	}
 
-	protected void synchPrepareData(final PrepareDataHanler handler) {
+	private void synchPrepareData(final PrepareDataHanler handler) {
 		List<RequestObject> readyToSendList = new ArrayList<RequestObject>();
-
-		for (RequestObject item : allDataList) {
+		for (int i = 0; i < allDataList.length(); i++) {
+			RequestObject item = allDataList.get(i);
 			if (excludeList.contains(item.getId()))
 				continue;
 			readyToSendList.add(item);

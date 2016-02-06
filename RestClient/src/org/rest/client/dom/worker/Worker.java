@@ -26,13 +26,9 @@ import com.google.gwt.core.client.JavaScriptObject;
  */
 public class Worker {
 	
-	WorkerImpl worker = null;
+	private WorkerImpl worker = null;
 	public Worker(String script){
 		worker = WorkerImpl.get(script);
-	}
-	
-	public void postMessage(String message){
-		worker.postMessage(message);
 	}
 	
 	public void postMessage(JavaScriptObject message){

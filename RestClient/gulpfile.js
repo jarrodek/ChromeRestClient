@@ -5,6 +5,7 @@ var vulcanize = require('gulp-vulcanize');
 var crisper = require('gulp-crisper');
 var preprocess = require('gulp-preprocess');
 var merge = require('merge-stream');
+var connect = require('gulp-connect');
 var $ = require('gulp-load-plugins')();
 var ensureFiles = require('./tasks/ensure-files.js');
 var path = require('path');
@@ -16,6 +17,7 @@ var bump = require('gulp-bump');
 var zip = require('gulp-zip');
 var babel = require('gulp-babel');
 var concat = require('gulp-concat');
+//var run = require('gulp-run');
 
 /**
  * Tasks that build different version should use this switched to 
@@ -97,7 +99,7 @@ gulp.task('copy:images', function() {
 gulp.task('clean:war-components', function() {
   return gulp.src('war/components/*').pipe(vinylPaths(del));
 });
-gulp.task('copy:war-copy-dev', function() {
+gulp.task('copy:war-copy-dev',  function() {
   return gulp.src([
       'dev/*',
       'dev/**/*',
@@ -176,11 +178,11 @@ gulp.task('copy:dist', function() {
   var ext = gulp.src('war/ext/**/*', {
     dot: true
   }).pipe(gulp.dest('dist/sources/ext'));
-  var libs = gulp.src([
+  /*var libs = gulp.src([
       'war/libs/app.db.websql.js',
       'war/libs/app.db.idb.js'
     ])
-    .pipe(gulp.dest('dist/sources/libs'));
+    .pipe(gulp.dest('dist/sources/libs'));*/
   var dexie = gulp.src([
       'war/components/dexie-js/**/*',
       '!war/components/dexie-js/*.json',
@@ -196,7 +198,7 @@ gulp.task('copy:dist', function() {
   var img = gulp.src('war/img/**/*').pipe(gulp.dest('dist/sources/img'));
 
   return merge(
-      root, components, manifest, assets, ext, libs, dexie,
+      root, components, manifest, assets, ext, /*libs,*/ oauth2, dexie,
       restclient, roboto, workers, img, har, hpa)
     .pipe($.size({
       title: 'copy'
@@ -225,7 +227,10 @@ var copySourceFile = function(obj) {
       title: 'copy ' + mode + ' file '
     }));
 };
-
+var updateDevDocs = function() {
+  //run('jsdoc dev/libs -r -d docs/dev/libs').exec();
+  //run('jsdoc dev -r -d docs/dev -c dev/jsdoc.json').exec();
+};
 /**
  * Prepare development environment.
  * It will include separate js libraries into the index page and put it in the extension 
@@ -242,6 +247,11 @@ gulp.task('dev', function() {
       } else {
         gulp.watch('dev/**/*.html', copySourceFile);
         gulp.watch('dev/**/*.js', copySourceFile);
+        gulp.watch([
+          'dev/libs/**/*.js'/*,
+          '!dev/components',
+          '!dev/workers'*/
+        ], updateDevDocs);
         gulp.watch('dev/**/*.jsp', copySourceFile);
         gulp.watch('dev/**/*.css', copySourceFile);
         gutil.log(gutil.colors.green('The app is ready to develop. Good luck!'));
@@ -403,6 +413,23 @@ gulp.task('build:stable', function(callback) {
     }
   );
 });
+gulp.task('connect', function() {
+  connect.server({
+    root: [__dirname + '/'],
+    livereload: true,
+    directoryListing: true,
+    port: 8080
+  });
+});
+gulp.task('html', function() {
+  gulp.src(['./war/libs/*.js'])
+    .pipe(connect.reload());
+});
+gulp.task('watch', function() {
+  gulp.watch(['./war/libs/*.js'], ['html']);
+});
+gulp.task('webserver', ['connect', 'watch']);
+
 // Load tasks for web-component-tester
 // Adds tasks for `gulp test:local` and `gulp test:remote`
 require('web-component-tester').gulp.init(gulp);
