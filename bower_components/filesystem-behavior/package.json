@@ -1,0 +1,20 @@
+{
+  "private": false,
+  "devDependencies": {
+    "gulp": "^3.8.5",
+    "gulp-connect": "^2.3.1",
+    "gulp-html-extract": "^0.0.3",
+    "gulp-if": "^2.0.0",
+    "gulp-jscs": "^3.0.0",
+    "gulp-jscs-stylish": "^1.1.2",
+    "gulp-jshint": "^1.6.3",
+    "gulp-load-plugins": "^1.1.0",
+    "jshint-stylish": "^2.0.0"
+  },
+  "scripts": {
+    "lint": "gulp lint"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  }
+}
