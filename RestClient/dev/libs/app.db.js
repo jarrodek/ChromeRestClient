@@ -498,7 +498,7 @@ arc.app.db.requests.query = function(type, queryOpts) {
           queryOpts.exclude = requestsIds;
         }
       })
-      .then(() => arc.app.db.idb.requests.query(type, queryOpts))
+      .then(() => arc.app.db.idb.requests.query2(type, queryOpts))
       .then(function(list) {
         let result = [];
         list.forEach((item) => {

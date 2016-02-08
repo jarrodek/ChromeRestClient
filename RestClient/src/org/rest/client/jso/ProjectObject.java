@@ -16,6 +16,7 @@
 package org.rest.client.jso;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArrayInteger;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -72,9 +73,14 @@ public final class ProjectObject extends JavaScriptObject {
 	 */
 	public final native void setName(String name) /*-{
 		this.name = name;
-		$wnd._a = this;
 	}-*/;
-
+	
+	public final native JsArrayInteger getRequestIds() /*-{
+		if(!this.requestIds){
+			this.requestIds = [];
+		}
+		return this.requestIds;
+	}-*/;
 	/**
 	 * @return Saved project name
 	 */

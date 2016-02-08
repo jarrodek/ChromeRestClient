@@ -1232,10 +1232,9 @@ div.gwt-DecoratedPopupPanel.w3cErrorPopup .popupBottomRight .popupBottomRightInn
 
 .url_widget_urlPanel .url_widget_fullWidthRelativeInput {
   border-radius: 2px;
-  height: 20px;
   width: 100%;
   box-sizing: border-box;
-  padding: 16px 6px;
+  padding: 8px 6px;
 }
 
 .url_widget_urlPanel .detailed-panel {

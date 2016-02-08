@@ -110,6 +110,21 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 						
 						for (int i = 0; i < requestDataResult.length(); i++) {
 							RequestObject ro = requestDataResult.get(i).cast();
+							boolean projectSet = false;
+							for (int j = 0; j < projectDataResult.length(); j++) {
+								ProjectObject pd = projectDataResult.get(j);
+								JsArrayInteger ids = pd.getRequestIds();
+								for (int k = 0; k < ids.length(); k++) {
+									if(ids.get(k) == ro.getId()){
+										ro.setProject(pd.getId());
+										projectSet = true;
+										break;
+									}
+								}
+								if(projectSet){
+									break;
+								}
+							}
 							requestsArray.set(requestsArray.size(), ro.toJSONObject());
 						}
 						
@@ -117,6 +132,8 @@ public class ImportExportActivity extends AppActivity implements ImportExportVie
 							ProjectObject pd = projectDataResult.get(i);
 							projectsArray.set(projectsArray.size(), pd.toJSONObject());
 						}
+						
+						requestsArray = RequestDataStore.syncProjectIds(requestsArray, projectsArray);
 						
 						JSONObject result = new JSONObject();
 						result.put("projects", projectsArray);

@@ -910,7 +910,10 @@ arc.app.db.idb.requests.query = function (type, opts) {
     var builder = db.requestObject;
 
     if (opts.query) {
-      builder = builder.where('url').startsWithIgnoreCase(opts.query).or('_name').startsWithIgnoreCase(opts.query);
+      builder = builder.where('url').startsWithIgnoreCase(opts.query);
+      if (type === 'saved') {
+        builder = builder.or('_name').startsWithIgnoreCase(opts.query);
+      }
     }
     if (opts.exclude) {
       if (builder.and) {
@@ -939,6 +942,43 @@ arc.app.db.idb.requests.query = function (type, opts) {
     return builder.toArray().finally(function () {
       db.close();
     });
+  });
+};
+arc.app.db.idb.requests.query2 = function (type, opts) {
+  return arc.app.db.idb.open().then(function (db) {
+    return db.requestObject.where('type').equals(type).toArray();
+  }).then(function (objects) {
+    var list = [];
+
+    objects.forEach(function (item) {
+      if (opts.query) {
+        var lowerQuery = opts.query.toLowerCase();
+        if (item.url.toLowerCase().indexOf(lowerQuery) !== -1) {
+          if (!opts.exclude || opts.exclude && opts.exclude.indexOf(item.id) === -1) {
+            list.push(item);
+          }
+          return;
+        }
+        if (type === 'saved') {
+          if (item.name.toLowerCase().indexOf(lowerQuery) !== -1) {
+            if (!opts.exclude || opts.exclude && opts.exclude.indexOf(item.id) === -1) {
+              list.push(item);
+            }
+            return;
+          }
+        }
+      } else {
+        if (!opts.exclude || opts.exclude && opts.exclude.indexOf(item.id) === -1) {
+          list.push(item);
+        }
+      }
+    });
+
+    if (opts.offset && opts.limit || opts.offset === 0) {
+      list = list.slice(opts.offset, opts.offset + opts.limit);
+    }
+
+    return list;
   });
 };
 arc.app.db.idb.requests.deleteByProject = function (projectId) {
@@ -1394,7 +1434,7 @@ arc.app.db.requests.query = function (type, queryOpts) {
         queryOpts.exclude = requestsIds;
       }
     }).then(function () {
-      return arc.app.db.idb.requests.query(type, queryOpts);
+      return arc.app.db.idb.requests.query2(type, queryOpts);
     }).then(function (list) {
       var result = [];
       list.forEach(function (item) {

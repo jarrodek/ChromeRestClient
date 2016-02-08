@@ -5,6 +5,7 @@ import org.rest.client.jso.RequestObject;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.JsArrayInteger;
+import com.google.gwt.json.client.JSONArray;
 
 public class RequestDataStore {
 
@@ -182,5 +183,17 @@ public class RequestDataStore {
 			$wnd.arc.app.analytics.sendException('RequestDataStore::updateName::' + JSON.stringify(cause));
 		});
 	}-*/;
-
+	
+	public final native static JSONArray syncProjectIds(JSONArray requestsArray, JSONArray projectsArray) /*-{
+		if(!projectsArray || !projectsArray.length) {
+			return requestsArray;
+		}
+		var requestsSize = requestsArray.length;
+		projectsArray.forEach(function(project){
+			var ids = project.requestIds;
+			for(var i=0; i<requestsSize; i++) {
+				
+			}
+		});
+	}-*/;
 }
