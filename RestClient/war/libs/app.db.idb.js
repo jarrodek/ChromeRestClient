@@ -1038,7 +1038,7 @@ arc.app.db.idb.requests.deleteType = function(type) {
 arc.app.db.idb.requests.query = function(type, opts) {
   return arc.app.db.idb.open()
     .then(function(db) {
-      var builder = db.requestObject;//.orderBy('_name');
+      var builder = db.requestObject; //.orderBy('_name');
 
       if (opts.query) {
         builder = builder.where('url').startsWithIgnoreCase(opts.query);
@@ -1077,20 +1077,20 @@ arc.app.db.idb.requests.query2 = function(type, opts) {
     .then(function(db) {
       return db.requestObject.where('type').equals(type).toArray();
     })
-    .then(function(objects){
+    .then(function(objects) {
       let list = [];
 
-      objects.forEach(function (item) {
+      objects.forEach(function(item) {
         if (opts.query) {
           let lowerQuery = opts.query.toLowerCase();
-          if (item.url.toLowerCase().indexOf(opts.query) !== -1) {
+          if (item.url.toLowerCase().indexOf(lowerQuery) !== -1) {
             if (!opts.exclude || (opts.exclude && opts.exclude.indexOf(item.id) === -1)) {
               list.push(item);
             }
             return;
           }
           if (type === 'saved') {
-            if (item.name.toLowerCase().indexOf(opts.query) !== -1) {
+            if (item.name.toLowerCase().indexOf(lowerQuery) !== -1) {
               if (!opts.exclude || (opts.exclude && opts.exclude.indexOf(item.id) === -1)) {
                 list.push(item);
               }
@@ -1194,18 +1194,3 @@ arc.app.db.idb.listExported = function(requestsArray) {
         });
     });
 };
-/**
- * In dev mode there is no direct connection to the database initialized in the background page.
- * This function must be called in Development environment to initialize IndexedDb.
- */
-arc.app.db.idb.initDev = function() {
-  if (location.hostname !== '127.0.0.1' || location.port !== '8888') {
-    return;
-  }
-  arc.app.db.idb.open()
-    .then(function() {
-      console.log('%cDEVMODE::IndexedDB has been initialized', 'color: #33691E');
-    })
-    .catch((e) => console.error('DEVMODE::Error initializing the IDB database', e));
-};
-arc.app.db.idb.initDev();

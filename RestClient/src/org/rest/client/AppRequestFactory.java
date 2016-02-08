@@ -322,8 +322,6 @@ public class AppRequestFactory {
 				if(RestClient.isDebug()){
 					Log.error("XMLHttpRequest2 callback::onError", exception);
 				}
-//				ErrorDialogView dialog = RestClient.getClientFactory().getErrorDialogView();
-//				dialog.getHandler().publish(new LogRecord(dialog.getHandler().getLevel(), exception.getMessage()));
 				onFailureRequest(response);
 			}
 		});
