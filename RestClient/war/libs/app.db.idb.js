@@ -1041,11 +1041,10 @@ arc.app.db.idb.requests.query = function(type, opts) {
       var builder = db.requestObject;//.orderBy('_name');
 
       if (opts.query) {
-        builder = builder.where('url').startsWithIgnoreCase(opts.query)
-        .or('_name').startsWithIgnoreCase(opts.query)
-          /*.and((item) => opts.query.indexOf(item.har.pages[0].title) !== -1)*/
-        ;
-        //TODO: Use OR or other filter function to query for name.
+        builder = builder.where('url').startsWithIgnoreCase(opts.query);
+        if (type === 'saved') {
+          builder = builder.or('_name').startsWithIgnoreCase(opts.query);
+        }
       }
       if (opts.exclude) {
         if (builder.and) {
@@ -1071,6 +1070,45 @@ arc.app.db.idb.requests.query = function(type, opts) {
         .finally(function() {
           db.close();
         });
+    });
+};
+arc.app.db.idb.requests.query2 = function(type, opts) {
+  return arc.app.db.idb.open()
+    .then(function(db) {
+      return db.requestObject.where('type').equals(type).toArray();
+    })
+    .then(function(objects){
+      let list = [];
+
+      objects.forEach(function (item) {
+        if (opts.query) {
+          let lowerQuery = opts.query.toLowerCase();
+          if (item.url.toLowerCase().indexOf(opts.query) !== -1) {
+            if (!opts.exclude || (opts.exclude && opts.exclude.indexOf(item.id) === -1)) {
+              list.push(item);
+            }
+            return;
+          }
+          if (type === 'saved') {
+            if (item.name.toLowerCase().indexOf(opts.query) !== -1) {
+              if (!opts.exclude || (opts.exclude && opts.exclude.indexOf(item.id) === -1)) {
+                list.push(item);
+              }
+              return;
+            }
+          }
+        } else {
+          if (!opts.exclude || (opts.exclude && opts.exclude.indexOf(item.id) === -1)) {
+            list.push(item);
+          }
+        }
+      });
+
+      if (opts.offset && opts.limit || opts.offset === 0) {
+        list = list.slice(opts.offset, opts.offset + opts.limit);
+      }
+
+      return list;
     });
 };
 arc.app.db.idb.requests.deleteByProject = function(projectId) {
@@ -1156,3 +1194,18 @@ arc.app.db.idb.listExported = function(requestsArray) {
         });
     });
 };
+/**
+ * In dev mode there is no direct connection to the database initialized in the background page.
+ * This function must be called in Development environment to initialize IndexedDb.
+ */
+arc.app.db.idb.initDev = function() {
+  if (location.hostname !== '127.0.0.1' || location.port !== '8888') {
+    return;
+  }
+  arc.app.db.idb.open()
+    .then(function() {
+      console.log('%cDEVMODE::IndexedDB has been initialized', 'color: #33691E');
+    })
+    .catch((e) => console.error('DEVMODE::Error initializing the IDB database', e));
+};
+arc.app.db.idb.initDev();

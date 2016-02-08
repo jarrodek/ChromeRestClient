@@ -1288,3 +1288,20 @@ arc.app.db.websql.getExportedByReferenceIds = function(list) {
       });
   });
 };
+/**
+ * In dev mode there is no direct connection to the database initialized in the background page.
+ * This function must be called in Development environment to initialize WebSQL.
+ */
+arc.app.db.websql.initDev = function() {
+  if (location.hostname !== '127.0.0.1' || location.port !== '8888') {
+    return;
+  }
+  arc.app.db.websql.open()
+    .then(function() {
+      console.log('%cDEVMODE::Database has been initialized', 'color: #33691E');
+    })
+    .catch(function(e) {
+      console.error('DEVMODE::Error initializing the database', e);
+    });
+};
+arc.app.db.websql.initDev();
