@@ -34,20 +34,14 @@ arc.app.importer.saveFileData = function(data) {
   const requests = [];
 
   data.requests.forEach((item) => {
-    try {
-      let obj = arc.app.importer._createHARfromSql(item);
-      //just for import, to be removed before save.
-      if (item.project) {
-        obj.project = item.project;
-      }
+    let obj = arc.app.importer.normalizeRequest(item);
+    if (obj) {
       requests.push(obj);
-    } catch (e) {
-      console.error('Unable to import request object', item, e.message);
+      obj.type = 'saved';
     }
   });
   return arc.app.db.idb.open()
     .then(function(db) {
-
       return db.transaction('rw', db.requestObject, db.projectObjects, function() {
           const projects = {};
           let promises = [];
@@ -78,9 +72,11 @@ arc.app.importer.saveFileData = function(data) {
                 }
               });
           };
+
           requests.forEach((item) => {
             promises.push(insertRequest(db, item));
           });
+
           return Dexie.Promise.all(promises)
             .then(() => {
               if (Object.keys(projects)
@@ -101,6 +97,22 @@ arc.app.importer.saveFileData = function(data) {
         });
     });
 };
+arc.app.importer.normalizeRequest = function(item) {
+  if (item.har) {
+    return item;
+  }
+  try {
+    let obj = arc.app.importer._createHARfromSql(item);
+    //just for import, to be removed before save.
+    if (item.project) {
+      obj.project = item.project;
+    }
+    return obj;
+  } catch (e) {
+    console.error('Unable to import request object', item, e.message);
+  }
+  return null;
+};
 /**
  * To be used to transform old system data to new data structure.
  *
@@ -118,12 +130,12 @@ arc.app.importer.saveFileData = function(data) {
 arc.app.importer._createHARfromSql = function(item) {
   var creator = new HAR.Creator({
     name: 'Advanced REST client',
-    version: arc.app.utils.appVer(),
+    version: arc.app.utils.appVer,
     comment: 'Created during file import'
   });
   var browser = new HAR.Browser({
     name: 'Chrome',
-    version: arc.app.utils.getChromeVersion()
+    version: arc.app.utils.chromeVersion
   });
   var log = new HAR.Log({
     'comment': 'Imported from the file.',
@@ -150,7 +162,7 @@ arc.app.importer._createHARfromSql = function(item) {
   }
   request.headers = requestHeaders;
   var page = new HAR.Page({
-    id: arc.app.db.idb.createRequestKey(item.method, item.url),
+    id: arc.app.db.idb.requests.createRequestKey(item.method, item.url),
     title: item.name,
     startedDateTime: new Date(item.time),
     pageTimings: {}
@@ -171,6 +183,7 @@ arc.app.importer._createHARfromSql = function(item) {
     'har': log,
     'url': item.url,
     'method': item.method,
+    'name': item.name,
     'type': 'saved'
   });
   return obj;
@@ -187,20 +200,18 @@ arc.app.importer.prepareExport = function() {
   return arc.app.db.idb.open()
     .then(function(_db) {
       db = _db;
-      return db.requestObject.toArray();
+      return db.requestObject
+        .where('type')
+        .equals('saved')
+        .toArray();
     })
     .then(function(requests) {
-      result.requests = arc.app.importer.translateExportItems({
-        'type': 'request',
-        'items': requests
-      });
-      return db.projectObjects.toArray();
+      result.requests = arequests;
+      return db.projectObjects
+        .toArray();
     })
     .then(function(projects) {
-      result.projects = arc.app.importer.translateExportItems({
-        'type': 'project',
-        'items': projects
-      });
+      result.projects = projects;
     })
     .then(function() {
       return arc.app.importer.createExportObject(result);
@@ -210,32 +221,9 @@ arc.app.importer.prepareExport = function() {
     });
 };
 /**
- * Translate raw object to the proper type.
- * If the object is already its target type it will be overwritten.
- *
- * @param {Object} opts
- *  type - Required, `request` or `project`
- *  items - Required, list of items to translate
- */
-arc.app.importer.translateExportItems = function(opts) {
-  if (!opts.type) {
-    throw new Error('Type is required.');
-  }
-  var result = [];
-  switch (opts.type) {
-    case 'request':
-      opts.items.forEach((item) => result.push(new RequestObject(item)));
-    break;
-    case 'project':
-      opts.items.forEach((item) => result.push(new ProjectObject(item)));
-    break;
-  }
-  return result;
-};
-/**
  * Create a proper export object that have required export definitions.
  *
- * @param {Object} opts 
+ * @param {Object} opts
  *  requests - A list of requests to be exported
  *  projects - A list of projects to be exported
  */

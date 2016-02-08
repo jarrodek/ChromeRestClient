@@ -38,15 +38,7 @@ Polymer({
     }
   },
   _restoreProjects: function() {
-    try {
-      arc.app.db.idb.listProjects()
-        .then(function(list) {
-          this.projects = list;
-        }.bind(this));
-    } catch (e) {
-      console.error('Error setting up storage listener', e);
-      arc.app.analytics.sendException('arc-menu::ready::' + e.message, false);
-    }
+    this.$.model.query();
   },
   _observeHistoryEnabled: function() {
     try {
@@ -97,14 +89,7 @@ Polymer({
    * @param {Number} projectId Database id for the project
    */
   appendProject: function(projectId) {
-    arc.app.db.websql.getProject(projectId)
-      .then(function(project) {
-        if (project === null) {
-          console.warn('No project found for given ID ', projectId);
-          return;
-        }
-        this.push('projects', project[0]);
-      }.bind(this));
+    this.$.model.query();
   },
   /**
    * Remove project from the UI.

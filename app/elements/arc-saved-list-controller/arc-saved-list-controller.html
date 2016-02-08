@@ -11,9 +11,9 @@
     <template is="dom-if" if="{{!hasRequests}}">
       <arc-saved-list-empty></arc-saved-list-empty>
     </template>
-    <arc-request-object-model id="model" data="{{requests}}" on-error="_dbError"></arc-request-object-model>
-    <arc-request-object-model id="saveModel" auto on-save="_requestSaved"></arc-request-object-model>
-    <arc-request-object-model id="deleteModel" on-deleted="_selectedRemoved" on-error="_selectedRemoveError"></arc-request-object-model>
+    <arc-request-object-model id="model" data="{{requests}}" on-error="_dbError" request-type="saved" limit="50" offset="0"></arc-request-object-model>
+    <arc-request-object-model id="saveModel" auto on-save="_requestSaved" request-type="saved"></arc-request-object-model>
+    <arc-request-object-model id="deleteModel" on-deleted="_selectedRemoved" on-error="_selectedRemoveError" request-type="saved"></arc-request-object-model>
   </template>
   <script src="arc-saved-list-controller.js"></script>
 </dom-module>

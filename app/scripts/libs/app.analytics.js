@@ -67,8 +67,8 @@ arc.app.analytics._initTranckers = function() {
  * Initialize and set up custom dimmenstion that are used by the app.
  */
 arc.app.analytics._setCustomDimmensions = function() {
-  var appVersion = chrome.runtime.getManifest().version;
-  var chromeVer = arc.app.utils.getChromeVersion();
+  var appVersion = arc.app.utils.appVer;
+  var chromeVer = arc.app.utils.chromeVersion;
   arc.app.analytics._trackers.forEach(function(tracker) {
     tracker.set('dimension1', chromeVer);
     tracker.set('dimension2', appVersion);

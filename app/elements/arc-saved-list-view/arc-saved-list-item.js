@@ -93,6 +93,7 @@ Polymer({
   },
 
   showDetails: function() {
+    return;
     if (!this.detailsDialog) {
       this._createDetailsDialog();
     }
@@ -116,7 +117,7 @@ Polymer({
       window.setTimeout(function() {
         e = Polymer.dom(e);
         e.rootTarget.sizingTarget.classList.remove('fit');
-        e.rootTarget.fit()
+        e.rootTarget.fit();
       }, 0);
     });
 

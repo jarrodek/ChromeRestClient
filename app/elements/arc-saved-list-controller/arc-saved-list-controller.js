@@ -22,6 +22,9 @@
       }
     },
     onShow: function() {
+      // window.setTimeout(() => {
+      //
+      // }, 250);
       this.$.model.query();
     },
     onHide: function() {

@@ -79,15 +79,15 @@
       }
       ;
     }
-    
+
     h1 {
       @apply(--page-title-text);
     }
 
     .table {
-      @apply(--layout-vertical);
+      /*@apply(--layout-vertical);*/
     }
-    
+
     .table-header {
       @apply(--layout-horizontal);
       @apply(--layout-center);
@@ -104,7 +104,7 @@
       font-weight: 300;
     }
 
-    .table-header-info{
+    .table-header-info {
       @apply(--layout-flex);
       position: relative;
       height: 100%;
@@ -113,9 +113,9 @@
 
     .selected-actions {
       padding-right: 16px;
-      color: rgba(0,0,0,.57);
+      color: rgba(0, 0, 0, .57);
     }
-    
+
     .table-columns {
       @apply(--layout-horizontal);
       @apply(--layout-center);
@@ -125,115 +125,116 @@
       color: rgba(0, 0, 0, 0.54);
       border-bottom: 1px rgba(0, 0, 0, 0.12) solid;
     }
-    
+
     .table-columns:last-child {
       border-bottom: 1px rgba(0, 0, 0, 0) solid;
     }
-    
+
     .table-columns [data-sortoption] {
       color: rgba(0, 0, 0, 0.87);
     }
-    
+
     .table-columns iron-icon {
       opacity: 0;
       width: 16px;
       height: 16px;
       transition: opacity 300ms cubic-bezier(0.65, 0.05, 0.36, 1), transform 400ms cubic-bezier(0.65, 0.05, 0.36, 1);
     }
-    
+
     .table-columns [data-sortoption] iron-icon {
       opacity: 1;
     }
-    
+
     .table-columns [data-sortoption="asc"] iron-icon {
       transform: rotate(0deg);
     }
-    
+
     .table-columns [data-sortoption="desc"] iron-icon {
       transform: rotate(180deg);
     }
-    
+
     .checkbox-column {
       @apply(--table-checkbox-column);
     }
-    
+
     .name-column {
       @apply(--table-name-column);
     }
-    
+
     .method-column {
       @apply(--table-method-column);
     }
-    
+
     .url-column {
       @apply(--table-url-column);
     }
-    
+
     .action-column {
       @apply(--table-action-column);
     }
     </style>
-    <div class="table">
-      <div class$="{{_computeTableHeaderClass(selected.*)}}">
-        <div class="table-header-info">
-          <neon-animated-pages id="tableTitle" selected="[[tableHeaderState]]" entry-animation="slide-from-right-animation" exit-animation="slide-left-animation">
-            <neon-animatable>
-              <h1>Saved requests</h1>
-            </neon-animatable>
-            <neon-animatable>
-              <h1>{{selected.length}} items selected</h1>
-            </neon-animatable>
-          </neon-animated-pages>
-        </div>
-        <template is="dom-if" if="[[hasSelectedItems]]">
-          <div class="selected-actions">
-            <paper-icon-button icon="file-download" id="exportSelected" on-tap="exportSelected"></paper-icon-button>
-            <paper-icon-button icon="delete" id="deleteSelected" on-tap="deleteSelected"></paper-icon-button>
-            <paper-tooltip for="exportSelected">Export selected to file</paper-tooltip>
-            <paper-tooltip for="deleteSelected">Delete selected</paper-tooltip>
+    <paper-drawer-panel drawer-width="300px" id="details" force-narrow="[[narrowDrawer]]" right-drawer>
+      <div drawer> Drawer panel... </div>
+      <div class="table" main>
+        <div class$="{{_computeTableHeaderClass(selected.*)}}">
+          <div class="table-header-info">
+            <neon-animated-pages id="tableTitle" selected="[[tableHeaderState]]" entry-animation="slide-from-right-animation" exit-animation="slide-left-animation">
+              <neon-animatable>
+                <h1>Saved requests</h1>
+              </neon-animatable>
+              <neon-animatable>
+                <h1>{{selected.length}} items selected</h1>
+              </neon-animatable>
+            </neon-animated-pages>
           </div>
+          <template is="dom-if" if="[[hasSelectedItems]]">
+            <div class="selected-actions">
+              <paper-icon-button icon="file-download" id="exportSelected" on-tap="exportSelected"></paper-icon-button>
+              <paper-icon-button icon="delete" id="deleteSelected" on-tap="deleteSelected"></paper-icon-button>
+              <paper-tooltip for="exportSelected">Export selected to file</paper-tooltip>
+              <paper-tooltip for="deleteSelected">Delete selected</paper-tooltip>
+            </div>
+          </template>
+          <template is="dom-if" if="[[!hasSelectedItems]]">
+            <paper-menu-button horizontal-align="right">
+              <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
+              <paper-menu class="dropdown-content">
+                <paper-item on-tap="_confirmClearSaved">Remove all</paper-item>
+              </paper-menu>
+            </paper-menu-button>
+          </template>
+        </div>
+        <div class="table-columns">
+          <div class="checkbox-column" id="projectColumn">
+            <paper-checkbox checked="{{allChecked}}" on-tap="toggleAll"></paper-checkbox>
+          </div>
+          <div class="name-column layout horizontal center" id="nameColumn" on-tap="sortColumn" data-sort="name" data-sortoption$="{{computeSortColumn(sort,dir,'title')}}">
+            <iron-icon icon="arrow-drop-down"></iron-icon>Name
+            <paper-ripple recenters=""></paper-ripple>
+          </div>
+          <div class="method-column layout horizontal center" id="methodColumn" on-tap="sortColumn" data-sort="method" data-sortoption$="{{computeSortColumn(sort,dir,'method')}}">
+            <iron-icon icon="arrow-drop-down"></iron-icon>Method
+            <paper-ripple recenters=""></paper-ripple>
+          </div>
+          <div class="url-column layout horizontal center" id="urlColumn" on-tap="sortColumn" data-sort="url" data-sortoption$="{{computeSortColumn(sort,dir,'url')}}">
+            <iron-icon icon="arrow-drop-down"></iron-icon>URL
+            <paper-ripple recenters=""></paper-ripple>
+          </div>
+          <div class="action-column layout horizontal center" id="actionColumn">Actions</div>
+          <paper-tooltip for="nameColumn">The request name added when saving</paper-tooltip>
+          <paper-tooltip for="methodColumn">The request HTTP method</paper-tooltip>
+          <paper-tooltip for="urlColumn">Full URL saved with the request</paper-tooltip>
+        </div>
+        <template is="dom-repeat" items="{{requests}}" sort="{{computeSort(sort,dir)}}" observe="request.name" id="requestList">
+          <arc-saved-list-item request="{{item}}" selected="{{item.selected}}" on-selected-changed="_onItemToggle"></arc-saved-list-item>
         </template>
-        <template is="dom-if" if="[[!hasSelectedItems]]">
-          <paper-menu-button horizontal-align="right">
-            <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
-            <paper-menu class="dropdown-content">
-              <paper-item on-tap="_confirmClearSaved">Remove all</paper-item>
-            </paper-menu>
-          </paper-menu-button>
-        </template>
+        <div class="table-columns">
+          <div class="flex"></div>
+          <paper-button raised="" class="actionButton" on-tap="importTap">import</paper-button>
+          <paper-button on-tap="cancelTap">cancel</paper-button>
+        </div>
       </div>
-      <div class="table-columns">
-        <div class="checkbox-column" id="projectColumn">
-          <paper-checkbox checked="{{allChecked}}" on-tap="toggleAll"></paper-checkbox>
-        </div>
-        <div class="name-column layout horizontal center" id="nameColumn" on-tap="sortColumn" data-sort="title" data-sortoption$="{{computeSortColumn(sort,dir,'title')}}">
-          <iron-icon icon="arrow-drop-down"></iron-icon>Name
-          <paper-ripple recenters=""></paper-ripple>
-        </div>
-        <div class="method-column layout horizontal center" id="methodColumn" on-tap="sortColumn" data-sort="method" data-sortoption$="{{computeSortColumn(sort,dir,'method')}}">
-          <iron-icon icon="arrow-drop-down"></iron-icon>Method
-          <paper-ripple recenters=""></paper-ripple>
-        </div>
-        <div class="url-column layout horizontal center" id="urlColumn" on-tap="sortColumn" data-sort="url" data-sortoption$="{{computeSortColumn(sort,dir,'url')}}">
-          <iron-icon icon="arrow-drop-down"></iron-icon>URL
-          <paper-ripple recenters=""></paper-ripple>
-        </div>
-        <div class="action-column layout horizontal center" id="actionColumn">Actions</div>
-        <paper-tooltip for="nameColumn">The request name added when saving</paper-tooltip>
-        <paper-tooltip for="methodColumn">The request HTTP method</paper-tooltip>
-        <paper-tooltip for="urlColumn">Full URL saved with the request</paper-tooltip>
-      </div>
-
-      <template is="dom-repeat" items="{{requests}}" sort="{{computeSort(sort,dir)}}" observe="request.har.pages.0.title" id="requestList">
-        <arc-saved-list-item request="{{item}}" selected="{{item.selected}}" on-selected-changed="_onItemToggle"></arc-saved-list-item>
-      </template>
-
-      <div class="table-columns">
-        <div class="flex"></div>
-        <paper-button raised="" class="actionButton" on-tap="importTap">import</paper-button>
-        <paper-button on-tap="cancelTap">cancel</paper-button>
-      </div>
-    </div>
+    </paper-drawer-panel>
     <paper-dialog id="dataClearDialog" on-iron-overlay-closed="onClearDialogResult">
       <h2>Clear saved list</h2>
       <p>This will remove all data from the saved store. Would you like to continue?</p>
@@ -242,9 +243,8 @@
         <paper-button dialog-confirm autofocus>Clear</paper-button>
       </div>
     </paper-dialog>
-    <array-selector id="selector" items="{{requests}}" selected="{{selected}}"  multi></array-selector>
+    <array-selector id="selector" items="{{requests}}" selected="{{selected}}" multi></array-selector>
     <paper-toast text="Select request first." id="noSelectionToast"></paper-toast>
-
   </template>
   <script src="arc-saved-list-view.js"></script>
 </dom-module>

@@ -80,27 +80,42 @@ arc.app.utils._chromeVersion = null;
 /**
  * Get Chrome full version.
  *
- * @return {String} A full version or `(not set)` is can't find.
+ * @type {String} A full version or `(not set)` is can't find.
  */
-arc.app.utils.getChromeVersion = function() {
-  if (arc.app.utils._chromeVersion) {
-    return arc.app.utils._chromeVersion;
-  }
-  var raw = navigator.userAgent.match(/Chrom[e|ium]\/([0-9\.]+)/);
-  arc.app.utils._chromeVersion = raw ? raw[1] : '(not set)';
-  return arc.app.utils._chromeVersion;
-};
+Object.defineProperty(arc.app.utils, 'chromeVersion', {
+  enumerable: true,
 
+  get: function() {
+    if (arc.app.utils._chromeVersion) {
+      return arc.app.utils._chromeVersion;
+    }
+    var raw = navigator.userAgent.match(/Chrom[e|ium]\/([0-9\.]+)/);
+    arc.app.utils._chromeVersion = raw ? raw[1] : '(not set)';
+    return arc.app.utils._chromeVersion;
+  },
+
+  set: function(value) {
+    throw new Error('appVer can\'t be overrited.');
+  }
+});
 arc.app.utils._appVer = null;
 /**
  * Get ARC version from the manifest file.
  *
- * @return {String} An ARC version.
+ * @type {String} An ARC version.
  */
-arc.app.utils.appVer = function() {
-  if (arc.app.utils._appVer) {
+Object.defineProperty(arc.app.utils, 'appVer', {
+  enumerable: true,
+
+  get: function() {
+    if (arc.app.utils._appVer) {
+      return arc.app.utils._appVer;
+    }
+    arc.app.utils._appVer = chrome.runtime.getManifest().version;
     return arc.app.utils._appVer;
+  },
+
+  set: function(value) {
+    throw new Error('appVer can\'t be overrited.');
   }
-  arc.app.utils._appVer = chrome.runtime.getManifest().version;
-  return arc.app.utils._appVer;
-};
+});

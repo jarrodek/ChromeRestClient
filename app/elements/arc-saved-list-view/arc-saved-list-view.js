@@ -64,8 +64,20 @@ Polymer({
           }
         };
       }
+    },
+    /**
+     * If true the details drowe will narrow.
+     */
+    narrowDrawer: {
+      type: Boolean,
+      value: true
     }
   },
+
+  listeners: {
+    'dblclick': '_showRequestDetails'
+  },
+
   /** Toggle all checkboxes in the list */
   toggleAll: function() {
     if (this.allChecked) {
@@ -132,9 +144,8 @@ Polymer({
    */
   computeSort: function(sortOpt, dir) {
     return function(a, b) {
-      let isName = sortOpt === 'title';
-      let aProp = isName ? a.har.pages[0][sortOpt] : a[sortOpt];
-      let bProp = isName ? b.har.pages[0][sortOpt] : b[sortOpt];
+      let aProp = a[sortOpt];
+      let bProp = b[sortOpt];
 
       if (aProp > bProp) {
         return dir === 'asc' ? 1 : -1;
@@ -193,5 +204,12 @@ Polymer({
     this.fire('delete-requested', {
       data: this.selected
     });
+  },
+
+  _showRequestDetails: function(e) {
+    var item = this.$.requestList.itemForElement(e.target);
+    console.log('saved item db click');
+    this.narrowDrawer = false;
+    this.$.details.openDrawer();
   }
 });
