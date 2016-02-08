@@ -1,3 +1,0 @@
-WCT.loadSuites([
-        'basic.html'
-      ]);

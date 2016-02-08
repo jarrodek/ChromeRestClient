@@ -1,3 +1,0 @@
-Polymer({
-      is: 'test-element'
-    });
