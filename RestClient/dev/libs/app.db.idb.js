@@ -98,6 +98,7 @@ arc.app.db.idb.open = function() {
 
     db.on('error', function(error) {
       console.error('IndexedDB global error', error);
+      arc.app.analytics.sendException('IDB error:: ' + JSON.stringify(error));
     });
     db.on('populate', function() {
       return arc.app.db.idb.downloadDefinitions()
