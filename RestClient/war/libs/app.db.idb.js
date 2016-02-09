@@ -98,6 +98,7 @@ arc.app.db.idb.open = function() {
 
     db.on('error', function(error) {
       console.error('IndexedDB global error', error);
+      arc.app.analytics.sendException('IDB error:: ' + JSON.stringify(error));
     });
     db.on('populate', function() {
       return arc.app.db.idb.downloadDefinitions()
@@ -830,7 +831,7 @@ arc.app.db.idb.projects.update = function(project) {
 arc.app.db.idb.projects.list = function() {
   return arc.app.db.idb.open()
     .then(function(db) {
-      return db.projectObjects.toArray()
+      return db.projectObjects.reverse().toArray()
         .finally(function() {
           db.close();
         });
@@ -1075,7 +1076,7 @@ arc.app.db.idb.requests.query = function(type, opts) {
 arc.app.db.idb.requests.query2 = function(type, opts) {
   return arc.app.db.idb.open()
     .then(function(db) {
-      return db.requestObject.where('type').equals(type).toArray();
+      return db.requestObject.where('type').equals(type).reverse().toArray();
     })
     .then(function(objects) {
       let list = [];

@@ -240,7 +240,7 @@ arc.app.db.projects.add = function() {
   if (arc.app.db.useIdb) {
     return arc.app.db.idb.projects.addWithRequests.apply(arc.app.db.idb, arguments)
       .then(function(insertId) {
-        return arc.app.db.idb.getProject(insertId);
+        return arc.app.db.idb.projects.getProject(insertId);
       });
   }
   return arc.app.db.websql.addProject.apply(arc.app.db.websql, arguments)

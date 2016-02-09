@@ -182,7 +182,7 @@ MessageHandling.prototype.gdriveAuth = function(request, sendResponse) {
     });
   });
 };
-MessageHandling.prototype.gdrive = function(request, sendResponse) {
+MessageHandling.prototype.gdrive = function(request, sendResponse, sender) {
   var query = request.params;
   if (typeof query === 'string') {
     query = JSON.parse(query);
@@ -199,9 +199,9 @@ MessageHandling.prototype.gdrive = function(request, sendResponse) {
       viewTabUrl = chrome.extension.getURL('RestClient.html#RequestPlace:gdrive/' + query.ids[0]);
     }
   }
-  if (viewTabUrl !== null) {
-    sendResponse({
-      assignUrl: viewTabUrl
+  if (viewTabUrl !== null && sender.tab.id) {
+    chrome.tabs.update(sender.tab.id, {
+      url: viewTabUrl
     });
   }
 };
