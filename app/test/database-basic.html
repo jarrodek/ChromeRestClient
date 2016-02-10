@@ -1,0 +1,180 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>my-list-basic</title>
+  <script src="../bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../bower_components/web-component-tester/browser.js"></script>
+  <script src="../bower_components/dexie-js/dist/latest/Dexie.min.js"></script>
+  <script src="../bower_components/har/build/har.js"></script>
+  <script src="chance.js"></script>
+  <script src="mock-data.js"></script>
+  <!-- Import the element to test -->
+  <link rel="import" href="../bower_components/polymer/polymer.html">
+  <link rel="import" href="../elements/arc-project-object-model/arc-project-object-model.html">
+  <link rel="import" href="../elements/arc-request-object-model/arc-request-object-model.html">
+  <script src="../scripts/libs/app.db.idb.js"></script>
+  <script src="../scripts/libs/app.analytics.js"></script>
+  <script src="../scripts/libs/app.types.js"></script>
+</head>
+
+<body>
+  <test-fixture id="insertModel">
+    <template>
+      <arc-project-object-model auto></arc-project-object-model>
+    </template>
+  </test-fixture>
+  <test-fixture id="readModel">
+    <template>
+      <arc-project-object-model auto></arc-project-object-model>
+    </template>
+  </test-fixture>
+  <test-fixture id="deleteModel">
+    <template>
+      <arc-project-object-model></arc-project-object-model>
+    </template>
+  </test-fixture>
+  <test-fixture id="requestInsertModel">
+    <template>
+      <arc-request-object-model auto></arc-request-object-model>
+    </template>
+  </test-fixture>
+  <test-fixture id="requestQueryModel">
+    <template>
+      <arc-request-object-model></arc-request-object-model>
+    </template>
+  </test-fixture>
+  <script>
+  suite('`arc-project-object-model` tests', function() {
+    var insertModel, readModel, insertId, deleteModel;
+
+    setup(function() {
+      insertModel = fixture('insertModel');
+      readModel = fixture('readModel');
+      deleteModel = fixture('deleteModel');
+    });
+
+    test('Element should insert new project', function(done) {
+      var project = new ProjectObject({
+        'name': 'test project',
+        'created': new Date()
+      });
+      var saveCallback = function() {
+        insertModel.removeEventListener('save', saveCallback);
+        insertId = insertModel.data.id;
+        expect(insertModel.data.id).to.be.a('number');
+        done();
+      };
+      var errorCallback = function(e) {
+        insertModel.removeEventListener('error', errorCallback);
+        should.not.exist(e);
+        done();
+      };
+      insertModel.addEventListener('save', saveCallback);
+      insertModel.addEventListener('error', errorCallback);
+      insertModel.data = project;
+    });
+
+    test('Element should read inserted', function(done) {
+      var readyCallback = function() {
+        readModel.removeEventListener('data-ready', readyCallback);
+        expect(readModel.data).to.be.an('object');
+        var isInstance = readModel.data instanceof ProjectObject;
+        expect(isInstance, 'Read data should be an instance of ProjectObject').to.equal(true);
+        done();
+      };
+      var errorCallback = function(e) {
+        readModel.removeEventListener('error', errorCallback);
+        should.not.exist(e);
+        done();
+      };
+      readModel.addEventListener('data-ready', readyCallback);
+      readModel.addEventListener('error', errorCallback);
+      readModel.objectId = insertId;
+    });
+
+    test('Element should remove inserted', function(done) {
+      deleteModel.addEventListener('deleted', function() {
+        expect(deleteModel.data).to.equal(null);
+        expect(deleteModel.objectId).to.equal(null);
+        done();
+      });
+      deleteModel.addEventListener('error', function(e) {
+        should.not.exist(e);
+        done();
+      });
+      deleteModel.objectId = insertId;
+      deleteModel.remove();
+    });
+
+    test('Element should insert project and associate requests', function(done) {
+      var project = new ProjectObject({
+        'name': 'test project',
+        'created': new Date()
+      });
+      var requests = getIdbRequestData(3);
+
+      var saveCallback = function() {
+        insertModel.removeEventListener('save', saveCallback);
+        expect(insertModel.data.id).to.be.a('number');
+        insertModel.addRequests(requests)
+        .catch(function(e){
+          console.log('Catch block', e);
+          should.not.exist(e);
+        })
+        .finally(function(){
+          done();
+        });
+      };
+      var errorCallback = function(e) {
+        insertModel.removeEventListener('error', errorCallback);
+        should.not.exist(e);
+        done();
+      };
+      insertModel.addEventListener('save', saveCallback);
+      insertModel.addEventListener('error', errorCallback);
+      insertModel.data = project;
+    });
+  });
+
+  suite('`arc-request-object-model` tests', function() {
+    var insertModel, readModel, insertId, deleteModel;
+    setup(function() {
+      insertModel = fixture('requestInsertModel');
+      // requestQueryModel = fixture('requestQueryModel');
+      // deleteModel = fixture('deleteModel');
+    });
+
+    test('Element should insert new requests', function(done) {
+      var requests = getIdbRequestData(3);
+      var saveCallback = function() {
+        insertModel.removeEventListener('save', saveCallback);
+        insertId = insertModel.objectId;
+        expect(insertId).to.be.an('array');
+        done();
+      };
+      var errorCallback = function(e) {
+        insertModel.removeEventListener('error', errorCallback);
+        should.not.exist(e);
+        done();
+      };
+      insertModel.addEventListener('save', saveCallback);
+      insertModel.addEventListener('error', errorCallback);
+      insertModel.data = requests;
+    });
+
+  });
+  </script>
+</body>
+
+</html>

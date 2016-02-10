@@ -7,6 +7,7 @@ var ensureFiles = require('./tasks/ensure-files.js');
 var path = require('path');
 var vulcanize = require('gulp-vulcanize');
 var crisper = require('gulp-crisper');
+var modRewrite = require('connect-modrewrite');
 //var foreach = require('gulp-foreach');
 //var gutil = require('gulp-util');
 
@@ -70,32 +71,41 @@ gulp.task('vulcanize', function() {
  */
 gulp.task('crisper-elements', function() {
   gulp.src('app/elements/**/*.html')
-  .pipe(crisper({
-    scriptInHead: false,
-    onlySplit: false,
-    alwaysWriteScript: false
-  }))
-  .pipe(gulp.dest('app/elements/'));
+    .pipe(crisper({
+      scriptInHead: false,
+      onlySplit: false,
+      alwaysWriteScript: false
+    }))
+    .pipe(gulp.dest('app/elements/'));
 });
 /**
  * Make all bower_components CSP ready
  */
 gulp.task('crisper-bower', function() {
   gulp.src('bower_components/**/*.html')
-  .pipe(crisper({
-    scriptInHead: false,
-    onlySplit: false,
-    alwaysWriteScript: false
-  }))
-  .pipe(gulp.dest('bower_components/'));
+    .pipe(crisper({
+      scriptInHead: false,
+      onlySplit: false,
+      alwaysWriteScript: false
+    }))
+    .pipe(gulp.dest('bower_components/'));
 });
+
 gulp.task('connect', function() {
   connect.server({
-    root: [__dirname + '/'],
-    livereload: true,
-    port: 8888
+      root: [__dirname + '/'],
+      livereload: true,
+      port: 8888,
+      middleware: function() {
+        return [
+          modRewrite([
+            '^/app/bower_components/(.*)$ /bower_components/$1 [L]',
+          ])
+        ]
+      }
   });
 });
+
 gulp.task('html', function() {
   gulp.src('./app/*.html')
     .pipe(connect.reload());
@@ -104,3 +114,10 @@ gulp.task('watch', function() {
   gulp.watch(['./app/*.html'], ['html']);
 });
 gulp.task('elements-webserver', ['connect', 'watch']);
+// Load tasks for web-component-tester
+// Adds tasks for `gulp test`
+require('web-component-tester').gulp.init(gulp);
+// Load custom tasks from the `tasks` directory
+try {
+  require('require-dir')('tasks');
+} catch (err) {}

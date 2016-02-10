@@ -24,8 +24,7 @@ Polymer({
         let table = db.requestObject;
         let result;
         if (this.objectId instanceof Array) {
-          //db[TABLE-NAME].schema.primKey.keyPath
-          result = table.where('id').anyOf(this.objectId);
+          result = table.where(':id').anyOf(this.objectId);
         } else if (this.objectId) {
           result = table.get(this.objectId);
         } else {
@@ -58,36 +57,13 @@ Polymer({
    * Save current `data` to the database.
    */
   save: function() {
-    arc.app.db.idb.open()
-      .then(function(db) {
-        db.transaction('rw', db.requestObject, function() {
-            if (this.data instanceof Array) {
-              this.data.forEach((item) => {
-                db.requestObject.put(item);
-              });
-            } else {
-              db.requestObject.put(this.data);
-            }
-          }.bind(this))
-          .then(() => {
-            this.fire('save', {
-              data: this.data
-            });
-          })
-          .catch((e) => {
-            this.fire('error', {
-              error: e
-            });
-          })
-          .finally(function() {
-            db.close();
-          });
-      }.bind(this));
+    this.genericSave('requestObject');
   },
   /**
    * Remove current data from the store.
    */
   remove: function() {
-    this.genericRemove(db.requestObject);
+    this.genericRemove('requestObject');
   }
+  
 });

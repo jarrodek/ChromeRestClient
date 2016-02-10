@@ -173,7 +173,7 @@ arc.app.db.idb.requests.createRequestKey = function(method, url) {
   return method + ':' + url;
 };
 arc.app.db.idb.downloadDefinitions = function() {
-  return fetch('/assets/definitions.json')
+  return fetch(chrome.runtime.getURL('/assets/definitions.json'))
     .then(function(response) {
       return response.json();
     });

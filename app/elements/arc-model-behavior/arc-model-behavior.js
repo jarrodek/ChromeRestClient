@@ -79,7 +79,7 @@ ArcBehaviors.ArcModelBehavior = {
   /**
    * Save data if auto is enabled.
    */
-  _dataChanged: function() {
+  _dataChanged: function(newValue, oldValue) {
     if (this.auto) {
       this.save();
     }
@@ -103,23 +103,28 @@ ArcBehaviors.ArcModelBehavior = {
    * Save current `data` to the database.
    *
    * @param {String} table A table name to perform save operation on.
+   * @return {Promise} Fulfiled promise will result with saved id.
    */
   genericSave: function(table) {
-    arc.app.db.idb.open()
+    //console.log(this.data);
+    return arc.app.db.idb.open()
       .then(function(db) {
-        db.transaction('rw', db[table], function(table) {
+        return db.transaction('rw', db[table], function(table) {
             if (this.data instanceof Array) {
+              let promises = [];
               this.data.forEach((item) => {
-                table.put(item);
+                promises.push(table.put(item));
               });
-            } else {
-              table.put(this.data);
+              return Dexie.Promise.all(promises);
             }
+            return table.put(this.data);
           }.bind(this))
-          .then(() => {
+          .then((id) => {
+            this.objectId = id;
             this.fire('save', {
               data: this.data
             });
+            return id;
           })
           .catch((e) => {
             arc.app.analytics.sendException('arc-model::genericSave::' +
@@ -137,9 +142,10 @@ ArcBehaviors.ArcModelBehavior = {
    * Query the table.
    *
    * @param {String} table A table name to perform query operation on.
+   * @return {Promise} Fulfiled promise will result with query results.
    */
   genericQuery: function(table) {
-    arc.app.db.idb.open()
+    return arc.app.db.idb.open()
       .then(function(db) {
         let result;
         table = db[table];
@@ -172,9 +178,11 @@ ArcBehaviors.ArcModelBehavior = {
         this.fire('data-ready', {
           data: data
         });
+        return data;
       }.bind(this))
       .catch(function(cause) {
-        arc.app.analytics.sendException('arc-model::genericQuery::' + JSON.stringify(cause), false);
+        arc.app.analytics.sendException('arc-model::genericQuery::' +
+          JSON.stringify(cause), false);
         this.fire('error', {
           error: cause
         });
@@ -186,11 +194,12 @@ ArcBehaviors.ArcModelBehavior = {
    * If this attribute is empty then it will delete objects from the `data` attribute.
    *
    * @param {String} table A table name to perform delete operation on.
+   * @return {Promise} Fulfiled promise when object is deleted.
    */
   genericRemove: function(table) {
-    arc.app.db.idb.open()
+    return arc.app.db.idb.open()
       .then(function(db) {
-        db.transaction('rw', db[table], function(table) {
+        return db.transaction('rw', db[table], function(table) {
             if (this.objectId) {
               if (this.objectId instanceof Array) {
                 let promises = [];
@@ -215,6 +224,7 @@ ArcBehaviors.ArcModelBehavior = {
           }.bind(this))
           .then(() => {
             this.set('data', null);
+            this.set('objectId', null);
             this.fire('deleted');
           })
           .catch((e) => {
