@@ -32,7 +32,7 @@ arc.app.importer = arc.app.importer || {};
  */
 arc.app.importer.saveFileData = function(data) {
   const requests = [];
-
+  const isLegacy = data.kind === undefined ? true : false;
   data.requests.forEach((item) => {
     let obj = arc.app.importer.normalizeRequest(item);
     if (obj) {
@@ -48,7 +48,9 @@ arc.app.importer.saveFileData = function(data) {
           //TODO: Is here memory leak?
           let insertRequest = (db, item) => {
             let referencedProjectId = item.project;
+            let oldItemId = item.id;
             delete item.project;
+            delete item.id;
             return db.requestObject.add(item)
               .then(function(requestId) {
                 if (referencedProjectId) {
@@ -69,6 +71,18 @@ arc.app.importer.saveFileData = function(data) {
                   } else {
                     projects[referencedProjectId].addRequest(requestId);
                   }
+                } else if (!isLegacy) {
+                  for (var i = 0, length = data.projects.length; i < length; i++) {
+                    if (!data.projects[i].requestIds) {
+                      continue;
+                    }
+                    if (data.projects[i].requestIds.indexOf(oldItemId) !== -1) {
+                      if (!data.projects[i].importRequestIds) {
+                        data.projects[i].importRequestIds = [];
+                      }
+                      data.projects[i].importRequestIds.push(requestId);
+                    }
+                  }
                 }
               });
           };
@@ -79,13 +93,36 @@ arc.app.importer.saveFileData = function(data) {
 
           return Dexie.Promise.all(promises)
             .then(() => {
-              if (Object.keys(projects)
-                .length > 0) {
-                Object.keys(projects)
-                  .forEach((projectKey) => {
-                    db.projectObjects.add(projects[projectKey]);
+              let list = [];
+              if (isLegacy) {
+                let projectKeys = Object.keys(projects);
+                if (projectKeys.length > 0) {
+                  projectKeys.forEach((projectKey) => {
+                    list.push(new ProjectObject(projects[projectKey]));
                   });
+                }
+              } else {
+                if (data.projects && data.projects.length) {
+                  data.projects.forEach((item) => {
+                    if (!item.importRequestIds) {
+                      item.importRequestIds = [];
+                    }
+                    item.requestIds = item.importRequestIds;
+                    delete item.importRequestIds;
+                    list.push(new ProjectObject(item));
+                  });
+                }
               }
+
+              if (!list.length) {
+                return null;
+              }
+              let promises = [];
+              list.forEach((project) => {
+                delete project.id;
+                promises.push(db.projectObjects.add(project));
+              });
+              return Dexie.Promise.all(promises);
             });
         })
         .catch(function(error) {
@@ -98,7 +135,13 @@ arc.app.importer.saveFileData = function(data) {
     });
 };
 arc.app.importer.normalizeRequest = function(item) {
-  if (item.har) {
+  if (item.kind) {
+    let har = item._har ? item._har : item.har;
+    if (har) {
+      item.har = new HAR.Log(har);
+    }
+    delete item._har;
+    item = new RequestObject(item);
     return item;
   }
   try {
@@ -206,7 +249,10 @@ arc.app.importer.prepareExport = function() {
         .toArray();
     })
     .then(function(requests) {
-      result.requests = arequests;
+      if (requests && requests.length) {
+        requests.forEach((item) => item._har = new HAR.Log(item._har))
+      }
+      result.requests = requests;
       return db.projectObjects
         .toArray();
     })

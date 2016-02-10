@@ -118,7 +118,7 @@ arc.app.analytics._setChromeChannel = function() {
       if (!(obj instanceof Array)) {
         return;
       }
-      let version = arc.app.utils.getChromeVersion();
+      let version = arc.app.utils.chromeVersion;
       for (let i = 0, size = obj[1].length; i < size; i++) {
         let item = obj[1][i];
         /*jshint camelcase: false */

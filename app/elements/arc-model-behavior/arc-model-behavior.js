@@ -68,7 +68,14 @@ ArcBehaviors.ArcModelBehavior = {
     /**
      * If true the `data` will be saved automatically right after change.
      */
-    auto: Boolean
+    auto: Boolean,
+    /**
+     * Query direction. `asc` for from lowest primary key or `desc` otherwise.
+     */
+    direction: {
+      type: String,
+      value: 'asc'
+    }
   },
   /**
    * Performs a query when objectId change.
@@ -155,16 +162,14 @@ ArcBehaviors.ArcModelBehavior = {
         } else if (this.objectId) {
           result = table.get(this.objectId);
         } else {
-          result = table.toArray();
+          result = table.toCollection();
         }
-        if (this.offset) {
-          result = result.offset(this.offset);
-        }
-        if (this.limit) {
-          result = result.limit(this.limit);
-        }
+
         if (this.sortBy) {
           result = result.sortBy(this.sortBy);
+        }
+        if (result.toArray) {
+          result = result.toArray();
         }
         return result.finally(function() {
           db.close();
@@ -173,6 +178,20 @@ ArcBehaviors.ArcModelBehavior = {
       .then(function(data) {
         if (data.length === 0) {
           data = null;
+        } else {
+          if (this.direction && this.direction === 'desc') {
+            data.reverse();
+          }
+          if (this.offset || this.limit) {
+            let limit = this.limit, offset = this.offset;
+            if (!Number.isInteger(offset)) {
+              offset = 0;
+            }
+            if (!Number.isInteger(limit)) {
+              limit = data.length;
+            }
+            data = data.slice(offset, offset+limit);
+          }
         }
         this.data = data;
         this.fire('data-ready', {
@@ -181,6 +200,7 @@ ArcBehaviors.ArcModelBehavior = {
         return data;
       }.bind(this))
       .catch(function(cause) {
+        console.error(cause);
         arc.app.analytics.sendException('arc-model::genericQuery::' +
           JSON.stringify(cause), false);
         this.fire('error', {

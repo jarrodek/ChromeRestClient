@@ -22,9 +22,7 @@ Polymer({
      */
     detailsDialog: Object
   },
-  listeners: {
-    'dblclick': 'showDetails'
-  },
+
   behaviors: [
     Polymer.Templatizer
   ],
@@ -40,7 +38,7 @@ Polymer({
     var dialog = document.createElement('paper-dialog');
     dialog.classList.add('nameEditDialog');
     var input = document.createElement('paper-input');
-    input.value = this.request.har.pages[0].title;
+    input.value = this.request.name;
     input.setAttribute('class', 'name-input');
     input.errorMessage = 'Add name for this request';
     input.autoValidate = true;
@@ -65,6 +63,7 @@ Polymer({
       return;
     }
     this.set('request.har.pages.0.title', this.nameInput.value);
+    this.set('request.name', this.nameInput.value);
     this.fire('name-changed', {
       item: this.request
     });
@@ -90,37 +89,6 @@ Polymer({
 
   _navigateItem: function() {
     page('request/saved/' + this.request.id);
-  },
-
-  showDetails: function() {
-    return;
-    if (!this.detailsDialog) {
-      this._createDetailsDialog();
-    }
-    var h2 = Polymer.dom(this.detailsDialog).querySelector('h2');
-    h2.innerText = this.request.har.pages[0].title;
-    /*
-    var content = Polymer.dom(this.detailsDialog).querySelector('arc-request-details-dialog-view');
-    content.request = this.request;
-    */
-    this.detailsDialog.open();
-  },
-
-  _createDetailsDialog: function() {
-    this.templatize(this.$.detailsDialogTemplate);
-    var instance = this.stamp({
-      request: this.request
-    });
-    Polymer.dom(this.root).appendChild(instance.root);
-    this.detailsDialog = Polymer.dom(this.root).querySelector('paper-dialog#details');
-    this.detailsDialog.addEventListener('iron-overlay-opened', function(e) {
-      window.setTimeout(function() {
-        e = Polymer.dom(e);
-        e.rootTarget.sizingTarget.classList.remove('fit');
-        e.rootTarget.fit();
-      }, 0);
-    });
-
   }
-
+  
 });

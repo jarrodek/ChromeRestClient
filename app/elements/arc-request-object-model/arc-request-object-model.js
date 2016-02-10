@@ -28,16 +28,13 @@ Polymer({
         } else if (this.objectId) {
           result = table.get(this.objectId);
         } else {
-          result = table.where('type').equals(this.requestType).toArray();
-        }
-        if (this.offset) {
-          result = result.offset(this.offset);
-        }
-        if (this.limit) {
-          result = result.limit(this.limit);
+          result = table.where('type').equals(this.requestType);
         }
         if (this.sortBy) {
           result = result.sortBy(this.sortBy);
+        }
+        if (result.toArray) {
+          result = result.toArray();
         }
         return result.finally(function() {
           db.close();
@@ -46,17 +43,37 @@ Polymer({
       .then(function(data) {
         if (data.length === 0) {
           data = null;
+        } else {
+          if (this.direction && this.direction === 'desc') {
+            data.reverse();
+          }
+          if (this.offset || this.limit) {
+            let limit = this.limit, offset = this.offset;
+            if (!Number.isInteger(offset)) {
+              offset = 0;
+            }
+            if (!Number.isInteger(limit)) {
+              limit = data.length;
+            }
+            data = data.slice(offset, offset+limit);
+          }
+          data.forEach((item) => item._har = new HAR.Log(item._har))
         }
         this.data = data;
         this.fire('data-ready', {
           data: data
         });
-      }.bind(this));
+      }.bind(this)).catch((err) => {
+        console.error(cause);
+      });
   },
   /**
    * Save current `data` to the database.
    */
   save: function() {
+    if (!this.data) {
+      return Dexie.Promise.reject(new Error('Nothing to save.'));
+    }
     this.genericSave('requestObject');
   },
   /**
@@ -64,6 +81,16 @@ Polymer({
    */
   remove: function() {
     this.genericRemove('requestObject');
+  },
+  /**
+   * Removed unescessary data from the object before save.
+   */
+  _cleanObject: function() {
+    if (typeof this.data.selected !== 'undefined') {
+      delete this.data.selected;
+    }
+    if (typeof this.data.kind !== 'undefined') {
+      delete this.data.kind;
+    }
   }
-  
 });

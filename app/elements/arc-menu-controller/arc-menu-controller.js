@@ -27,7 +27,7 @@ Polymer({
     }
   },
   attached: function() {
-    this._restoreProjects();
+    this.refreshProjects();
     //console.info('arc-menu has been attached');
   },
 
@@ -37,7 +37,8 @@ Polymer({
       page(e.rootTarget.dataset.place);
     }
   },
-  _restoreProjects: function() {
+
+  refreshProjects: function() {
     this.$.model.query();
   },
   _observeHistoryEnabled: function() {

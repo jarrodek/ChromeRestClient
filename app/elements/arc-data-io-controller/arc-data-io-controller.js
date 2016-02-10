@@ -76,6 +76,7 @@ Polymer({
           message: 'Data saved',
           timeout: StatusNotification.TIME_SHORT
         });
+        this.fire('data-imported');
       }.bind(this))
       .catch(function(cause) {
         console.error('Data import error.', cause);

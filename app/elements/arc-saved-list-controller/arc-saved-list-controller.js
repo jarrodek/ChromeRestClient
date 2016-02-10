@@ -5,36 +5,34 @@
     is: 'arc-saved-list-controller',
     behaviors: [
       ArcBehaviors.ArcControllerBehavior,
-      ArcBehaviors.ArcFileExportBehavior
+      ArcBehaviors.ArcFileExportBehavior,
+      ArcBehaviors.ListControllerBehavior
     ],
     properties: {
-      /**
-       * List of requests
-       */
-      requests: Array,
-      /**
-       * If the view has requests
-       */
-      hasRequests: {
+      sortBy: String,
+      sortDirection: String,
+      isShowing: {
         type: Boolean,
-        value: false,
-        computed: '_computeHasRequests(requests)'
+        value: false
       }
     },
     onShow: function() {
-      // window.setTimeout(() => {
-      //
-      // }, 250);
-      this.$.model.query();
+      this.isShowing = true;
+      this.queryPage();
     },
     onHide: function() {
+      this.isShowing = false;
       window.setTimeout(function() {
-        this.requests = undefined;
-      }.bind(this), 100);
+        this.resetQuery();
+      }.bind(this), 250);
     },
-    /** Compute if the view has requests */
-    _computeHasRequests: function(requests) {
-      return !!requests;
+
+    queryPage: function() {
+      this.$.model.query();
+    },
+
+    _dataRead: function(e) {
+      this.appendResults(e.detail.data);
     },
 
     _requestNameChanged: function(e) {
@@ -105,9 +103,9 @@
 
     _selectedRemoved: function() {
       this.removedCopy.forEach((item) => {
-        for (var i = 0; i < this.requests.length; i++) {
-          if (this.requests[i].id === item.id) {
-            this.splice('requests', i, 1);
+        for (var i = 0; i < this.listData.length; i++) {
+          if (this.listData[i].id === item.id) {
+            this.splice('listData', i, 1);
             break;
           }
         };
@@ -131,12 +129,26 @@
       if (this.removedCopy) {
         var view = Polymer.dom(this.root).querySelector('arc-saved-list-view');
         this.removedCopy.forEach((item) => {
-          this.push('requests', item);
+          this.push('listData', item);
           view.$.selector.select(item);
         });
         view.$.requestList.render();
       }
       this.removedCopy = null;
+    },
+
+    _viewScrolling: function(e) {
+      this.computeScroll(e.target.scroller);
+    },
+
+    _sortChanged: function(e) {
+      if (!this.isShowing) {
+        return;
+      }
+      this.sortBy = e.detail.sort;
+      this.sortDirection = e.detail.dir;
+      this.resetQuery();
+      this.queryPage();
     }
 
   });

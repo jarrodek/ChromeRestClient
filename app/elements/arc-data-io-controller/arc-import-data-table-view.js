@@ -26,6 +26,25 @@ Polymer({
    * @return {String} Project name or 'none' if not found.
    */
   _computeProjectName: function(item, projects) {
+    if (!projects.length) {
+      return 'none';
+    }
+
+    if (!item.kind) {
+      return this._computeProjectNameLegacy(item, projects);
+    }
+
+    for (var i = 0, length = projects.length; i < length; i++) {
+      if (projects[i].requestIds.indexOf(item.id) !== -1) {
+        return projects[i].name;
+      }
+    }
+    return 'none';
+  },
+  /**
+   * Do the same as `_computeProjectName` but for legacy project data.
+   */
+  _computeProjectNameLegacy: function(item, projects) {
     if (!item.project || isNaN(item.project)) {
       return 'none';
     }

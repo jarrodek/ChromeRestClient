@@ -1,17 +1,36 @@
-<dom-module id="arc-request-details-dialog-view">
+<dom-module id="arc-request-details-view">
   <template>
     <style>
     :host {
-      @apply(--layout-vertical);
+      /*@apply(--layout-vertical);*/
       display: block;
+      --section-element: {
+        min-height: 48px;
+        padding: 0 16px;
+      }
+    }
+
+    h2 {
+      @apply(--paper-font-menu);
+      @apply(--layout-flex);
+    }
+    paper-toolbar {
+      --paper-toolbar-background: #fafafa;
+    }
+    .request-name {
+      @apply(--paper-font-subhead);
+      @apply(--layout-center);
+      @apply(--layout-horizontal);
+      @apply(--section-element);
     }
 
     .url-group {
-      @apply(--layout-horizontal);
+      @apply(--section-element);
+      @apply(--layout-vertical);
     }
 
     .method {
-      @apply(--paper-font-subhead);
+      font-weight: 500;
       margin-right: 8px;
     }
 
@@ -31,26 +50,35 @@
     }
 
     .headers {
+      @apply(--section-element);
       margin-top: 24px;
     }
 
     .headers,
     .payload {
+      @apply(--section-element);
       margin-bottom: 24px;
     }
 
     pre {
+      @apply(--code-snippet);
       white-space: pre-wrap;
       word-break: break-all;
       -webkit-user-select: text;
       line-height: 16px;
       padding: 8px;
       cursor: text;
-
       background-color: var(--code-snippet-background-color, #FFF8E1);
-      @apply(--code-snippet);
+      font-size: medium;
     }
     </style>
+    <paper-toolbar>
+      <h2>Request details</h2>
+      <paper-icon-button icon="chevron-right" on-click="closeDrawer"></paper-icon-button>
+    </paper-toolbar>
+    <div class="request-name">
+      {{request.name}}
+    </div>
     <div class="url-group">
       <span class="method">{{request.method}}</span>
       <span class="url">{{request.url}}</span>
@@ -66,5 +94,5 @@
       </div>
     </template>
   </template>
-  <script src="arc-request-details-dialog-view.js"></script>
+  <script src="arc-request-details-view.js"></script>
 </dom-module>

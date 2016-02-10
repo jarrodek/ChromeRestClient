@@ -46,6 +46,12 @@ Polymer({
       value: false,
       computed: '_computeHasSelected(selected.length)'
     },
+    /**
+     * A request to show in detailed view.
+     *
+     * @type {RequestObject}
+     */
+    detailedRequest: Object,
 
     headerAnimationConfig: {
       value: function() {
@@ -74,8 +80,19 @@ Polymer({
     }
   },
 
-  listeners: {
-    'dblclick': '_showRequestDetails'
+  observers: [
+    '_sortChanged(sort,dir)'
+  ],
+
+  get scroller() {
+    return this.$.table;
+  },
+
+  _sortChanged: function (sort, dir) {
+    this.fire('sort-option-changed', {
+      'sort': sort,
+      'dir': dir
+    });
   },
 
   /** Toggle all checkboxes in the list */
@@ -208,8 +225,19 @@ Polymer({
 
   _showRequestDetails: function(e) {
     var item = this.$.requestList.itemForElement(e.target);
-    console.log('saved item db click');
+    var index = this.$.requestList.indexForElement(e.target);
+    this.set('detailedRequest', item);
+    this.set('requests.' + index + '.selected', true);
     this.narrowDrawer = false;
     this.$.details.openDrawer();
+  },
+
+  closeDetailsPanel: function() {
+    this.narrowDrawer = true;
+    this.$.details.closeDrawer();
+  },
+
+  _tableScroll: function() {
+    this.fire('scroll');
   }
 });

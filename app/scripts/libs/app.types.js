@@ -202,7 +202,15 @@ class RequestObject extends OrderedList {
   constructor(opts) {
     super(opts);
     super.assertRequiredKeys(['url', 'method', 'type'], opts);
-
+    if (opts.id) {
+      /**
+       * A database ID.
+       * It can be null / undefined if the object wasn't saved yet.
+       *
+       * @type {Number}
+       */
+      this.id = opts.id;
+    }
     /**
      * A HAR object containing request info.
      * To initialize this object use helper class HAR:
@@ -441,6 +449,8 @@ class ProjectObject extends OrderedList {
       /**
        * A database ID.
        * It can be null / undefined if the object wasn't saved yet.
+       *
+       * @type {Number}
        */
       this.id = opts.id;
     }

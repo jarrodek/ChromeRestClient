@@ -1,3 +1,25 @@
+<!--
+@license
+Copyright 2016 Pawel Psztyc, The ARC team
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<!--
+An `arc-saved-list-view` element is a element responsible for displaying a list of saved requests.
+
+@group Views Elements
+@element arc-saved-list-view
+-->
 <dom-module id="arc-saved-list-view">
   <template>
     <style>
@@ -38,7 +60,8 @@
       --table-name-value: {
         @apply(--table-name-column);
         padding-left: 56px;
-        height: auto;
+        height: initial;
+        min-height: 24px;
       }
       ;
       --table-method-column: {
@@ -86,6 +109,7 @@
 
     .table {
       /*@apply(--layout-vertical);*/
+      overflow: auto;
     }
 
     .table-header {
@@ -173,14 +197,18 @@
       @apply(--table-action-column);
     }
     </style>
-    <paper-drawer-panel drawer-width="300px" id="details" force-narrow="[[narrowDrawer]]" right-drawer>
-      <div drawer> Drawer panel... </div>
-      <div class="table" main>
+    <paper-drawer-panel drawer-width="360px" id="details" force-narrow="[[narrowDrawer]]" right-drawer disable-edge-swipe>
+      <arc-request-details-view drawer request="{{detailedRequest}}" on-close="closeDetailsPanel"></arc-request-details-view>
+      <div class="table" id="table" main on-scroll="_tableScroll">
         <div class$="{{_computeTableHeaderClass(selected.*)}}">
           <div class="table-header-info">
             <neon-animated-pages id="tableTitle" selected="[[tableHeaderState]]" entry-animation="slide-from-right-animation" exit-animation="slide-left-animation">
               <neon-animatable>
-                <h1>Saved requests</h1>
+                <h1>
+                  Saved requests
+                  <paper-spinner-lite alt="Loading contacts list" active="{{querying}}"></paper-spinner-lite>
+                  <span>{{_test(querying)}}</span>
+                </h1>
               </neon-animatable>
               <neon-animatable>
                 <h1>{{selected.length}} items selected</h1>
@@ -208,7 +236,7 @@
           <div class="checkbox-column" id="projectColumn">
             <paper-checkbox checked="{{allChecked}}" on-tap="toggleAll"></paper-checkbox>
           </div>
-          <div class="name-column layout horizontal center" id="nameColumn" on-tap="sortColumn" data-sort="name" data-sortoption$="{{computeSortColumn(sort,dir,'title')}}">
+          <div class="name-column layout horizontal center" id="nameColumn" on-tap="sortColumn" data-sort="name" data-sortoption$="{{computeSortColumn(sort,dir,'name')}}">
             <iron-icon icon="arrow-drop-down"></iron-icon>Name
             <paper-ripple recenters=""></paper-ripple>
           </div>
@@ -225,8 +253,9 @@
           <paper-tooltip for="methodColumn">The request HTTP method</paper-tooltip>
           <paper-tooltip for="urlColumn">Full URL saved with the request</paper-tooltip>
         </div>
-        <template is="dom-repeat" items="{{requests}}" sort="{{computeSort(sort,dir)}}" observe="request.name" id="requestList">
-          <arc-saved-list-item request="{{item}}" selected="{{item.selected}}" on-selected-changed="_onItemToggle"></arc-saved-list-item>
+        <!-- sort="{{computeSort(sort,dir)}}"  -->
+        <template is="dom-repeat" items="{{requests}}" observe="request.name" id="requestList">
+          <arc-saved-list-item on-dblclick="_showRequestDetails" request="{{item}}" selected="{{item.selected}}" on-selected-changed="_onItemToggle"></arc-saved-list-item>
         </template>
         <div class="table-columns">
           <div class="flex"></div>

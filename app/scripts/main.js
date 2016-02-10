@@ -28,4 +28,9 @@
     app.$.paperDrawerPanel.closeDrawer();
   };
 
+  // A handler called when data has been imported to the app.
+  app._dataImportedHandler = function() {
+    app.$.appMenu.refreshProjects();
+  };
+
 })(document, window);
