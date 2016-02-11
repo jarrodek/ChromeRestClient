@@ -434,6 +434,8 @@ public class RestClient implements EntryPoint {
 							RequestObject item = result.get(i).cast();
 							clientFactory.getEventBus().fireEvent(new SavedRequestEvent(item));
 						}
+						RequestObject res = result.get(0).cast();
+						callback.onSuccess(res);
 					}
 					
 					@Override
@@ -441,6 +443,7 @@ public class RestClient implements EntryPoint {
 						if (RestClient.isDebug()) {
 							Log.error("Project has been updated. However UI may need to be refreshed to see changes.", e);
 						}
+						callback.onFailure(e);
 					}
 				});
 			}
@@ -462,7 +465,7 @@ public class RestClient implements EntryPoint {
 	 * @param obj
 	 * @param callback
 	 */
-	public static void saveRequestData(final RequestObject obj, final ProjectObject createdProject, final Callback<RequestObject, Throwable> callback) {
+	public static void saveRequestData(final RequestObject obj, final Callback<RequestObject, Throwable> callback) {
 		if (obj.getId() > 0) {
 			RequestDataStore.update(obj, new RequestDataStore.StoreSimpleCallback() {
 				@Override

@@ -1,13 +1,13 @@
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,7 +15,7 @@
  * the License.
  ******************************************************************************/
 
-/* global Dexie, chrome, HAR, HistoryUrlObject, HistorySocketObject, ProjectObject, 
+/* global Dexie, chrome, HAR, HistoryUrlObject, HistorySocketObject, ProjectObject,
 ServerExportedObject, RequestObject, indexedDB */
 
 /**
@@ -64,7 +64,7 @@ arc.app.db.idb.websockets = {};
 /**
  * A flag to be set to true if the datastore has been upgraded from WebSQL successfully.
  * This flag will be used to speed up database open operation.
- * 
+ *
  * @type {Boolean}
  */
 arc.app.db.idb.upgraded = false;
@@ -262,7 +262,7 @@ arc.app.db.idb.downloadDefinitions = function() {
 /**
  * Get all WebSQL data.
  *
- * @param {Boolean} dontUpgrade Used in promise chain. Don't upgrade it IndexedDB has been 
+ * @param {Boolean} dontUpgrade Used in promise chain. Don't upgrade it IndexedDB has been
  * already upgraded
  */
 arc.app.db.idb._getSQLdata = function(dontUpgrade) {
@@ -334,7 +334,7 @@ arc.app.db.idb._converSqlIdb = function(data) {
     data.requestData.forEach((item) => {
       let obj = arc.app.db.idb._createHARfromSql.call(this, item);
       obj.type = 'saved';
-      //just for upgrade, to be removed before save. 
+      //just for upgrade, to be removed before save.
       if (item.project) {
         obj.project = item.project;
       }
@@ -342,7 +342,7 @@ arc.app.db.idb._converSqlIdb = function(data) {
         /* jscs: disable */
         if (data.exported[i].reference_id === item.id) {
           /* jscs: enable */
-          //just for upgrade, to be removed before save. 
+          //just for upgrade, to be removed before save.
           obj.exported = i;
           break;
         }
@@ -573,7 +573,7 @@ arc.app.db.idb.getStatusCode = function(code) {
 };
 /**
  * Get header from the storage by it's name and type
- * 
+ *
  * @param {String} name A header name to look for
  * @param {String} type Either `request` or `response`
  * @return {Promise} Fulfilled promise will result with a {@link
@@ -883,13 +883,28 @@ arc.app.db.idb.requests.import = function(legacyRequestsList) {
 arc.app.db.idb.requests.insert = function(requestAsLegacy, type) {
   return arc.app.db.idb.open()
     .then(function(db) {
-      return db.transaction('rw', db.requestObject, function(requestObject) {
+      return db.transaction('rw', db.requestObject, db.projectObjects, function() {
         let obj = arc.app.db.idb._createHARfromSql(requestAsLegacy);
         obj.type = type;
         if (requestAsLegacy.id) {
           obj.id = requestAsLegacy.id;
         }
-        return requestObject.add(obj);
+        return db.requestObject.add(obj)
+        .then(function(insertResult) {
+          if (requestAsLegacy.project) {
+            return db.projectObjects.get(requestAsLegacy.project)
+            .then(function(project) {
+              if (project) {
+                project.requestIds = project.requestIds || [];
+                project.requestIds.push(insertResult);
+                return db.projectObjects.put(project);
+              }
+              return Dexie.Promise.resolve(null);
+            })
+            .then(() => insertResult);
+          }
+          return insertResult;
+        });
       });
     });
 };
@@ -1010,7 +1025,7 @@ arc.app.db.idb.requests.delete = function(id) {
  *
  * @param {String} type Type of object to delete. Either `saved` or `history`
  * @return {Dexie.Promise} Fulfilled promise will result with number of deleted entries.
- * If error occur during the transaction - even in then() block - the transaction will be aborted 
+ * If error occur during the transaction - even in then() block - the transaction will be aborted
  * and rolled back.
  */
 arc.app.db.idb.requests.deleteType = function(type) {
@@ -1195,3 +1210,18 @@ arc.app.db.idb.listExported = function(requestsArray) {
         });
     });
 };
+/**
+ * In dev mode there is no direct connection to the database initialized in the background page.
+ * This function must be called in Development environment to initialize IndexedDb.
+ */
+arc.app.db.idb.initDev = function() {
+  if (location.hostname !== '127.0.0.1' || location.port !== '8888') {
+    return;
+  }
+  arc.app.db.idb.open()
+    .then(function() {
+      console.log('%cDEVMODE::IndexedDB has been initialized', 'color: #33691E');
+    })
+    .catch((e) => console.error('DEVMODE::Error initializing the IDB database', e));
+};
+arc.app.db.idb.initDev();

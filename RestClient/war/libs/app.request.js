@@ -48,6 +48,9 @@ arc.app.server.request = {};
  */
 arc.app.server.request.init = function() {
   var root = 'https://chromerestclient.appspot.com/';
+  if (!arc.app.utils.isProdMode()) {
+    root = 'http://127.0.0.1:8888/';
+  }
   arc.app.server.request.SERVICE_URL = root + 'ext-channel';
   arc.app.server.request.PING_URL = root + 'ping/session';
   arc.app.server.request.AUTH_URL = root + 'auth';

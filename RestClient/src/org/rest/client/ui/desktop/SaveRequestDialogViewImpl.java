@@ -256,10 +256,8 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 	@Override
 	public void show() {
 		getPreviewURL(new Callback<String, Throwable>() {
-
 			@Override
 			public void onSuccess(String result) {
-				
 				if (result == null || result.isEmpty()) {
 					StatusNotification.notify("Enter an URL of the request.", StatusNotification.TIME_MEDIUM);
 					dialog.hide();
@@ -435,6 +433,7 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				if (forceOverwrite && overwriteId > 0) {
 					result.setId(overwriteId);
 				}
+				
 				//
 				// check project data
 				//
@@ -483,16 +482,19 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				if (isSave) {
 					result.resetId();
 				}
-				RestClient.saveRequestData(result, null, new Callback<RequestObject, Throwable>() {
+				
+				RestClient.saveRequestData(result, new Callback<RequestObject, Throwable>() {
 					@Override
 					public void onSuccess(RequestObject result) {
 						save.setEnabled(true);
 						dialog.hide();
-						// if(RestClient.CURRENT_GOOGLE_DRIVE_ITEM != null &&
-						// !RestClient.CURRENT_GOOGLE_DRIVE_ITEM.isEmpty()){
-						RestClient.getClientFactory().getPlaceController()
-								.goTo(RequestPlace.Tokenizer.fromSaved(result.getId()));
-						// }
+						RequestPlace p;
+						if(result.getProject() > 0) {
+							p = RequestPlace.Tokenizer.fromProject(result.getId());
+						} else {
+							p = RequestPlace.Tokenizer.fromSaved(result.getId());
+						}
+						RestClient.getClientFactory().getPlaceController().goTo(p);
 					}
 
 					@Override

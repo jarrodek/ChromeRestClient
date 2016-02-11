@@ -1271,7 +1271,7 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 			@Override
 			public void onSuccess(final RequestObject result) {
 				result.setName(name);
-				RestClient.saveRequestData(result, null, new Callback<RequestObject, Throwable>() {
+				RestClient.saveRequestData(result, new Callback<RequestObject, Throwable>() {
 					@Override
 					public void onSuccess(RequestObject result) {
 						RestClient.RESTORED_REQUEST = result.getId();
