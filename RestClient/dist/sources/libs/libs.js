@@ -815,13 +815,27 @@ arc.app.db.idb.requests.import = function (legacyRequestsList) {
 };
 arc.app.db.idb.requests.insert = function (requestAsLegacy, type) {
   return arc.app.db.idb.open().then(function (db) {
-    return db.transaction('rw', db.requestObject, function (requestObject) {
+    return db.transaction('rw', db.requestObject, db.projectObjects, function () {
       var obj = arc.app.db.idb._createHARfromSql(requestAsLegacy);
       obj.type = type;
       if (requestAsLegacy.id) {
         obj.id = requestAsLegacy.id;
       }
-      return requestObject.add(obj);
+      return db.requestObject.add(obj).then(function (insertResult) {
+        if (requestAsLegacy.project) {
+          return db.projectObjects.get(requestAsLegacy.project).then(function (project) {
+            if (project) {
+              project.requestIds = project.requestIds || [];
+              project.requestIds.push(insertResult);
+              return db.projectObjects.put(project);
+            }
+            return Dexie.Promise.resolve(null);
+          }).then(function () {
+            return insertResult;
+          });
+        }
+        return insertResult;
+      });
     });
   });
 };
@@ -2477,21 +2491,19 @@ arc.app.headers.toJSON = function (headersString) {
     if (line === '') {
       continue;
     }
-    var _tmp = line.split(/[:\r\n]/i);
-    if (_tmp.length > 0) {
-      var obj = {
-        name: _tmp[0],
-        value: ''
-      };
-      if (_tmp.length > 1) {
-        _tmp.shift();
-        _tmp = _tmp.filter(function (element) {
-          return element.trim() !== '';
-        });
-        obj.value = _tmp.join(', ').trim();
-      }
-      result[result.length] = obj;
+
+    var pos = line.indexOf(':');
+    var obj = {
+      name: '',
+      value: ''
+    };
+    if (pos === -1) {
+      obj.name = line;
+    } else {
+      obj.name = line.substr(0, pos);
+      obj.value = line.substr(pos + 1).trim();
     }
+    result[result.length] = obj;
   }
   return result;
 };

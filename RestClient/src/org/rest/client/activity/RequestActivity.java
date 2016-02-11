@@ -674,19 +674,26 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 						StatusNotification.notify("Unable to update project data", StatusNotification.TIME_SHORT);
 					}
 				});
-				
 			}
 		});
+		
 		ProjectDeleteRequestEvent.register(eventBus, new ProjectDeleteRequestEvent.Handler() {
 
 			@Override
 			public void onProjectDelete(final int projectId) {
+				
+				
 				ProjectsStore.remove(projectId, new ProjectsStore.StoreSimpleCallback() {
 
 					@Override
 					public void onSuccess() {
+						if(SyncAdapter.useIdb) {
+							ProjectDeleteEvent ev = new ProjectDeleteEvent(projectId);
+							eventBus.fireEvent(ev);
+							goTo(new RequestPlace(null));
+							return;
+						}
 						RequestDataStore.removeByProject(projectId, new RequestDataStore.StoreSimpleCallback() {
-
 							@Override
 							public void onError(Throwable e) {
 								if (RestClient.isDebug()) {
@@ -699,9 +706,11 @@ public class RequestActivity extends AppActivity implements RequestView.Presente
 
 							@Override
 							public void onSuccess() {
+								
 								ProjectDeleteEvent ev = new ProjectDeleteEvent(projectId);
 								eventBus.fireEvent(ev);
 								goTo(new RequestPlace(null));
+								
 							}
 						});
 					}
