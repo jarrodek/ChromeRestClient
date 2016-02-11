@@ -70,6 +70,16 @@ arc.app.analytics._setCustomDimmensions = function () {
   });
 };
 
+arc.app.analytics.setDatabaseEngine = function (engine) {
+  if (typeof ga !== 'function') {
+    return;
+  }
+  var names = arc.app.analytics._getTrackerNames();
+  names.forEach(function (name) {
+    ga('set', 'dimension4', engine);
+  });
+};
+
 arc.app.analytics._setAppUid = function () {
   var setUid = function setUid(uuid) {
     var names = arc.app.analytics._getTrackerNames();
@@ -151,7 +161,11 @@ arc.app.analytics._loadCSV = function () {
 
 arc.app.analytics.sendEvent = function (category, action, label, value) {
   if (typeof ga !== 'function') {
-    return;
+    var pendingData = {
+      'type': 'event',
+      'params': arguments
+    };
+    return pendingData;
   }
   var names = arc.app.analytics._getTrackerNames();
   var config = {
@@ -180,7 +194,11 @@ arc.app.analytics.sendScreen = function (screenName) {
 
 arc.app.analytics.sendException = function (exception, isFatal) {
   if (typeof ga !== 'function') {
-    return;
+    var pendingData = {
+      'type': 'exception',
+      'params': [exception, isFatal + '']
+    };
+    return pendingData;
   }
   var names = arc.app.analytics._getTrackerNames();
   var value = {
@@ -193,7 +211,28 @@ arc.app.analytics.sendException = function (exception, isFatal) {
     ga(name + '.send', 'exception', value);
   });
 };
+arc.app.analytics.getPendingAnalytics = function (callback) {
+  if (!chrome.runtime.getBackgroundPage) {
+    callback([]);
+    return;
+  }
+  chrome.runtime.getBackgroundPage(function (bg) {
+    var bgPendings = bg.pendingAnalytics;
+    if (!bgPendings) {
+      bgPendings = [];
+    }
+    if (!window.pendingAnalytics) {
+      window.pendingAnalytics = [];
+    }
+    var data = window.pendingAnalytics.concat(bgPendings);
+    callback(data);
+    window.pendingAnalytics = [];
+    bg.pendingAnalytics = [];
+  });
+};
 'use strict';
+
+window.pendingAnalytics = window.pendingAnalytics || [];
 
 var arc = arc || {};
 
@@ -235,7 +274,10 @@ arc.app.db.idb.open = function () {
 
     db.on('error', function (error) {
       console.error('IndexedDB global error', error);
-      arc.app.analytics.sendException('IDB error:: ' + JSON.stringify(error));
+      var pending = arc.app.analytics.sendException('IDB error:: ' + JSON.stringify(error));
+      if (pending) {
+        window.pendingAnalytics[window.pendingAnalytics.length] = pending;
+      }
     });
     db.on('populate', function () {
       return arc.app.db.idb.downloadDefinitions().catch(function () {
@@ -247,7 +289,6 @@ arc.app.db.idb.open = function () {
         }
         return db.transaction('rw', db.statuses, db.headers, function () {
           var promises = [];
-
           var codes = defs.codes;
           defs.requests.forEach(function (item) {
             return item.type = 'request';
@@ -262,11 +303,16 @@ arc.app.db.idb.open = function () {
           headers.forEach(function (item) {
             promises.push(db.headers.add(item));
           });
-
           return Dexie.Promise.all(promises);
         });
       }).then(function () {
         console.log('The database has been populated with data.');
+      }).catch(function (e) {
+        console.warn('Database population unsuccessfull.', e);
+        var peding = arc.app.analytics.sendException('IDB populate error::' + JSON.stringify(e));
+        if (pending) {
+          window.pendingAnalytics[window.pendingAnalytics.length] = pending;
+        }
       });
     });
     db.on('ready', function () {
@@ -288,6 +334,7 @@ arc.app.db.idb.open = function () {
         }
         chrome.storage.local.get(upgrade, function (upgrade) {
           if (upgrade.upgraded.indexeddb) {
+            console.info('IndexedDB is already upgraded.');
             arc.app.db.idb.upgraded = true;
           } else {
             console.info('IndexedDB need to be upgraded.');
@@ -312,20 +359,33 @@ arc.app.db.idb.open = function () {
         } else {
           console.info('Upgrade finished.');
         }
-        arc.app.analytics.sendEvent('Upgrade', 'IndexedDB', 'Upgrade from WebSQL');
+        var pending = arc.app.analytics.sendEvent('Upgrade', 'IndexedDB', 'Upgrade from WebSQL');
+        if (pending) {
+          window.pendingAnalytics[window.pendingAnalytics.length] = pending;
+        }
       }).catch(function (error) {
+        console.error('IDB upgrade main catch block', error);
         arc.app.db.idb.deleteDatabase();
         arc.app.db.useIdb = false;
-        arc.app.analytics.sendException('IDB create error::' + JSON.stringify(error));
+        var pending = arc.app.analytics.sendException('IDB create error::' + JSON.stringify(error));
+        if (pending) {
+          window.pendingAnalytics[window.pendingAnalytics.length] = pending;
+        }
       });
     });
 
     db.open().then(function () {
+      arc.app.analytics.setDatabaseEngine('idb');
       resolve(db);
     }).catch(function (error) {
+      console.error('IDB open main catch block', error);
       arc.app.db.idb.deleteDatabase();
       arc.app.db.useIdb = false;
-      arc.app.analytics.sendException('IDB create error::' + JSON.stringify(error));
+      arc.app.analytics.setDatabaseEngine('wsql');
+      var pending = arc.app.analytics.sendException('IDB create error::' + JSON.stringify(error));
+      if (pending) {
+        window.pendingAnalytics[window.pendingAnalytics.length] = pending;
+      }
       reject(error);
     });
   });
@@ -369,8 +429,17 @@ arc.app.db.idb.upgradeFromWebSQL = function (isUpgraded) {
 };
 
 arc.app.db.idb.downloadDefinitions = function () {
-  return fetch('/assets/definitions.json').then(function (response) {
-    return response.json();
+  return new Dexie.Promise(function (resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/assets/definitions.json', true);
+    xhr.addEventListener('load', function () {
+      var defs = JSON.parse(this.responseText);
+      resolve(defs);
+    });
+    xhr.addEventListener('error', function (e) {
+      reject(e);
+    });
+    xhr.send();
   });
 };
 
@@ -436,6 +505,7 @@ arc.app.db.idb._converSqlIdb = function (data) {
   if (!data) {
     return Dexie.Promise.resolve(null);
   }
+  console.info('SQL data collected. Converting data to new format.');
   return new Dexie.Promise(function (resolve) {
     var _this = this;
 
@@ -443,6 +513,7 @@ arc.app.db.idb._converSqlIdb = function (data) {
     var urlHistory = [];
     var socketHistory = [];
     var exportedSize = data.exported.length;
+    console.info('Converting request data to RequestObject...');
     data.requestData.forEach(function (item) {
       var obj = arc.app.db.idb._createHARfromSql.call(_this, item);
       obj.type = 'saved';
@@ -458,10 +529,12 @@ arc.app.db.idb._converSqlIdb = function (data) {
       }
       requests.push(obj);
     });
+    console.info('Converting history data to RequestObject...');
     data.history.forEach(function (item) {
       var obj = arc.app.db.idb._createHARfromSql.call(_this, item);
       requests.push(obj);
     });
+    console.info('Converting urls data to HistoryUrlObject...');
     data.urls.forEach(function (item) {
       var obj = new HistoryUrlObject({
         url: item.url,
@@ -469,6 +542,7 @@ arc.app.db.idb._converSqlIdb = function (data) {
       });
       urlHistory.push(obj);
     });
+    console.info('Converting websocket history data to HistorySocketObject...');
     data.websocketData.forEach(function (item) {
       var obj = new HistorySocketObject({
         url: item.url,
@@ -485,6 +559,7 @@ arc.app.db.idb._converSqlIdb = function (data) {
       },
       websql: data
     };
+    console.info('Data conversion completed.');
     resolve(result);
   });
 };
@@ -512,6 +587,7 @@ arc.app.db.idb._storeUpgrade = function (data) {
   if (!data) {
     return null;
   }
+  console.info('Storing data to the IDB.');
   var db = arc.app.db.idb._db;
   return db.transaction('rw', db.historyUrls, db.historySockets, db.requestObject, db.serverExportObjects, db.projectObjects, function () {
     console.info('Entered transaction. Ready to save data.');
@@ -2537,6 +2613,8 @@ arc.app.headers.getContentType = function (headers) {
   return ct.length === 0 ? null : ct[0].value;
 };
 'use strict';
+
+window.pendingAnalytics = window.pendingAnalytics || [];
 
 var arc = arc || {};
 

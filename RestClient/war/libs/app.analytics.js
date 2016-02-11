@@ -1,13 +1,13 @@
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -17,7 +17,7 @@
 /* global ga, chrome, fetch */
 /**
  * Advanced Rest Client namespace
- * 
+ *
  * @namespace
  */
 var arc = arc || {};
@@ -124,6 +124,20 @@ arc.app.analytics._setCustomDimmensions = function() {
     //ga(name + '.set', 'appVersion', appVersion);
     ga(name + '.set', 'dimension2', appVersion);
     ga(name + '.set', 'dimension1', chromeVer);
+  });
+};
+/**
+ * Set dimension4 definition as a database engine used by the app.
+ *
+ * @param {String} either wsql or idb.
+ */
+arc.app.analytics.setDatabaseEngine = function(engine) {
+  if (typeof ga !== 'function') {
+    return;
+  }
+  var names = arc.app.analytics._getTrackerNames();
+  names.forEach(function(name) {
+    ga(name + '.set', 'dimension4', engine);
   });
 };
 /**
@@ -234,11 +248,15 @@ arc.app.analytics._loadCSV = function() {
  * @param {String} category Event's category
  * @param {String} action Event's action
  * @param {String} label Event's label
- * @param {!Number} value An optional value of the event. 
+ * @param {!Number} value An optional value of the event.
  */
 arc.app.analytics.sendEvent = function(category, action, label, value) {
   if (typeof ga !== 'function') {
-    return;
+    var pendingData = {
+      'type': 'event',
+      'params': arguments
+    };
+    return pendingData;
   }
   var names = arc.app.analytics._getTrackerNames();
   var config = {
@@ -276,7 +294,11 @@ arc.app.analytics.sendScreen = function(screenName) {
  */
 arc.app.analytics.sendException = function(exception, isFatal) {
   if (typeof ga !== 'function') {
-    return;
+    var pendingData = {
+      'type': 'exception',
+      'params': [exception, isFatal + '']
+    };
+    return pendingData;
   }
   var names = arc.app.analytics._getTrackerNames();
   var value = {
@@ -287,5 +309,25 @@ arc.app.analytics.sendException = function(exception, isFatal) {
   }
   names.forEach(function(name) {
     ga(name + '.send', 'exception', value);
+  });
+};
+arc.app.analytics.getPendingAnalytics = function(callback) {
+  if (!chrome.runtime.getBackgroundPage) {
+    //dev
+    callback([]);
+    return;
+  }
+  chrome.runtime.getBackgroundPage((bg) => {
+    let bgPendings = bg.pendingAnalytics;
+    if (!bgPendings) {
+      bgPendings = [];
+    }
+    if (!window.pendingAnalytics) {
+      window.pendingAnalytics = [];
+    }
+    let data = window.pendingAnalytics.concat(bgPendings);
+    callback(data);
+    window.pendingAnalytics = [];
+    bg.pendingAnalytics = [];
   });
 };
