@@ -433,6 +433,11 @@ public class SaveRequestDialogViewImpl implements CloseHandler<PopupPanel>, KeyD
 				if (forceOverwrite && overwriteId > 0) {
 					result.setId(overwriteId);
 				}
+				/*boolean a = true;
+				if (a) {
+					Log.dir(result.toJSONObject());
+					return;
+				}*/
 				
 				//
 				// check project data
