@@ -103,44 +103,7 @@ arc.app.db.idb.open = function() {
         window.pendingAnalytics[window.pendingAnalytics.length] = pending;
       }
     });
-    db.on('populate', function() {
-      return arc.app.db.idb.downloadDefinitions()
-        .catch(function() {
-          console.warn('Definitions wasn\'t there. skipping definitions installation.');
-          return Dexie.Promise.resolve();
-        })
-        .then(function(defs) {
-          if (!defs) {
-            return Dexie.Promise.resolve();
-          }
-          defs.requests.forEach((item) => item.type = 'request');
-          defs.responses.forEach((item) => item.type = 'response');
-          let headers = defs.requests.concat(defs.responses);
 
-          return db.transaction('rw', db.statuses, db.headers, function() {
-            console.info('populating database with predefined values');
-            let promises = [];
-            let codes = defs.codes;
-            codes.forEach(function(item) {
-              promises.push(db.statuses.add(item));
-            });
-            headers.forEach(function(item) {
-              promises.push(db.headers.add(item));
-            });
-            return Dexie.Promise.all(promises);
-          });
-        })
-        .then(function() {
-          console.log('The database has been populated with data.');
-        })
-        .catch(function(e) {
-          console.warn('Database population unsuccessfull.', e);
-          let pending = arc.app.analytics.sendException('IDB populate error::' + JSON.stringify(e));
-          if (pending) {
-            window.pendingAnalytics[window.pendingAnalytics.length] = pending;
-          }
-        });
-    });
     db.on('ready', function() {
       if (arc.app.db.idb.upgraded) {
         return;
@@ -148,61 +111,8 @@ arc.app.db.idb.open = function() {
       arc.app.db.idb._db = db;
       arc.app.db.idb.appVer = chrome.runtime.getManifest ? chrome.runtime.getManifest()
         .version : 'tests case';
-      return new Dexie.Promise(function(resolve) {
-          let upgrade = {
-            upgraded: {
-              indexeddb: false
-            }
-          };
-          if (!chrome.storage) { //tests
-            arc.app.db.idb.upgraded = true;
-            resolve(false);
-            return;
-          }
-          chrome.storage.local.get(upgrade, (upgrade) => {
-            if (upgrade.upgraded.indexeddb) {
-              console.info('IndexedDB is already upgraded.');
-              arc.app.db.idb.upgraded = true;
-            } else {
-              console.info('IndexedDB need to be upgraded.');
-            }
-            resolve(upgrade.upgraded.indexeddb);
-          });
-        })
-        .then(arc.app.db.idb.upgradeFromWebSQL)
-        .then(function(result) {
-          if (result === null) {
-            return;
-          }
-          console.info('Database has been upgraded from WebSQL to IndexedDB.');
-          let upgrade = {
-            upgraded: {
-              indexeddb: true
-            }
-          };
-          arc.app.db.idb.upgraded = true;
-          if (chrome.storage) { //tests
-            chrome.storage.local.set(upgrade, () => {
-              console.info('Upgrade finished.');
-            });
-          } else {
-            console.info('Upgrade finished.');
-          }
-          let pending = arc.app.analytics.sendEvent('Upgrade', 'IndexedDB', 'Upgrade from WebSQL');
-          if (pending) {
-            window.pendingAnalytics[window.pendingAnalytics.length] = pending;
-          }
-        })
-        .catch(function(error) {
-          console.error('IDB upgrade main catch block', error);
-          arc.app.db.idb.deleteDatabase();
-          arc.app.db.useIdb = false;
-          let pending = arc.app.analytics.sendException('IDB create error::' +
-            JSON.stringify(error));
-          if (pending) {
-            window.pendingAnalytics[window.pendingAnalytics.length] = pending;
-          }
-        });
+      return arc.app.db.idb.populateDatabase(db)
+        .then(arc.app.db.idb.upgradeWsqlDatabase);
     });
 
     db.open()
@@ -222,6 +132,118 @@ arc.app.db.idb.open = function() {
         reject(error);
       });
   });
+};
+/**
+ * Populate database with initial data
+ *
+ * @return {Promise} Fulfilled promise when data were populated or no population is needed.
+ */
+arc.app.db.idb.populateDatabase = function(db) {
+  //if statuses are set headers must be set as well since they are inserted in single transaction.
+  return db.statuses.count()
+    .then((count) => {
+      if (count > 0) {
+        console.info('Database already populated');
+        return Dexie.Promise.resolve(null);
+      }
+      return arc.app.db.idb.downloadDefinitions()
+        .catch(function() {
+          console.warn('Definitions wasn\'t there. skipping definitions installation.');
+          return Dexie.Promise.reject(new Error('Definitions location error'));
+        });
+    })
+    .then(function(defs) {
+      if (!defs) {
+        return Dexie.Promise.resolve(null);
+      }
+
+      defs.requests.forEach((item) => item.type = 'request');
+      defs.responses.forEach((item) => item.type = 'response');
+      let headers = defs.requests.concat(defs.responses);
+
+      return db.transaction('rw', db.statuses, db.headers, function() {
+        console.info('populating database with predefined values');
+        let promises = [];
+        let codes = defs.codes;
+        codes.forEach(function(item) {
+          promises.push(db.statuses.add(item));
+        });
+        headers.forEach(function(item) {
+          promises.push(db.headers.add(item));
+        });
+        return Dexie.Promise.all(promises);
+      });
+    })
+    .then(function() {
+      console.log('The database has been populated with data.');
+    })
+    .catch(function(e) {
+      console.warn('Database population unsuccessfull.', e);
+      let pending = arc.app.analytics.sendException('IDB populate error::' + JSON.stringify(e));
+      if (pending) {
+        window.pendingAnalytics[window.pendingAnalytics.length] = pending;
+      }
+    });
+};
+/**
+ * Upgrade database from WebSQL if needed.
+ */
+arc.app.db.idb.upgradeWsqlDatabase = function() {
+  return new Dexie.Promise(function(resolve) {
+      let upgrade = {
+        upgraded: {
+          indexeddb: false
+        }
+      };
+      if (!chrome.storage) { //tests
+        arc.app.db.idb.upgraded = true;
+        resolve(false);
+        return;
+      }
+      chrome.storage.local.get(upgrade, (upgrade) => {
+        if (upgrade.upgraded.indexeddb) {
+          console.info('IndexedDB is already upgraded.');
+          arc.app.db.idb.upgraded = true;
+        } else {
+          console.info('IndexedDB need to be upgraded.');
+        }
+        resolve(upgrade.upgraded.indexeddb);
+      });
+    })
+    .then(arc.app.db.idb.upgradeFromWebSQL)
+    .then(function(result) {
+      if (result === null) {
+        return;
+      }
+      console.info('Database has been upgraded from WebSQL to IndexedDB.');
+      let upgrade = {
+        upgraded: {
+          indexeddb: true
+        }
+      };
+      arc.app.db.idb.upgraded = true;
+      if (chrome.storage) { //tests
+        chrome.storage.local.set(upgrade, () => {
+          console.info('Upgrade finished.');
+        });
+      } else {
+        console.info('Upgrade finished.');
+      }
+      let pending = arc.app.analytics.sendEvent('Upgrade', 'IndexedDB', 'Upgrade from WebSQL');
+      if (pending) {
+        window.pendingAnalytics[window.pendingAnalytics.length] = pending;
+      }
+    })
+    .catch(function(error) {
+      console.error('IDB upgrade main catch block', error);
+      arc.app.db.idb.deleteDatabase();
+      arc.app.db.useIdb = false;
+      let pending = arc.app.analytics.sendException('IDB create error::' +
+        JSON.stringify(error));
+      if (pending) {
+        window.pendingAnalytics[window.pendingAnalytics.length] = pending;
+      }
+    });
 };
 /**
  * Delete and re-create database.
@@ -282,7 +304,7 @@ arc.app.db.idb.upgradeFromWebSQL = function(isUpgraded) {
 arc.app.db.idb.downloadDefinitions = function() {
   return new Dexie.Promise(function(resolve, reject) {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET','/assets/definitions.json', true);
+    xhr.open('GET', '/assets/definitions.json', true);
     xhr.addEventListener('load', function() {
       let defs = JSON.parse(this.responseText);
       resolve(defs);
@@ -931,21 +953,21 @@ arc.app.db.idb.requests.insert = function(requestAsLegacy, type) {
           obj.id = requestAsLegacy.id;
         }
         return db.requestObject.add(obj)
-        .then(function(insertResult) {
-          if (requestAsLegacy.project) {
-            return db.projectObjects.get(requestAsLegacy.project)
-            .then(function(project) {
-              if (project) {
-                project.requestIds = project.requestIds || [];
-                project.requestIds.push(insertResult);
-                return db.projectObjects.put(project);
-              }
-              return Dexie.Promise.resolve(null);
-            })
-            .then(() => insertResult);
-          }
-          return insertResult;
-        });
+          .then(function(insertResult) {
+            if (requestAsLegacy.project) {
+              return db.projectObjects.get(requestAsLegacy.project)
+                .then(function(project) {
+                  if (project) {
+                    project.requestIds = project.requestIds || [];
+                    project.requestIds.push(insertResult);
+                    return db.projectObjects.put(project);
+                  }
+                  return Dexie.Promise.resolve(null);
+                })
+                .then(() => insertResult);
+            }
+            return insertResult;
+          });
       });
     });
 };

@@ -27,7 +27,7 @@ const SCOPES = 'https://www.googleapis.com/auth/drive.install ' +
   'https://www.googleapis.com/auth/drive.readonly.metadata';
 
 window.googleAuth = null;
-window.pedingAnalytics = [];
+window.pendingAnalytics = [];
 
 function initOauth2Object() {
   window.googleAuth = new OAuth2('google', {
