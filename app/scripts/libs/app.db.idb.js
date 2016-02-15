@@ -17,7 +17,7 @@
 
 /* global Dexie, chrome, HAR, HistoryUrlObject, HistorySocketObject, ProjectObject,
  ServerExportedObject, RequestObject, indexedDB */
-
+window.pendingAnalytics = window.pendingAnalytics || [];
 /**
  * Advanced Rest Client namespace
  *
@@ -114,47 +114,85 @@ arc.app.db.idb.open = function() {
     db.headers.mapToClass(HttpHeaderObject);
     db.on('error', function(error) {
       console.error('IndexedDB global error', error);
+      let pending = arc.app.analytics.sendException('IDB error:: ' + JSON.stringify(error));
+      if (pending) {
+        window.pendingAnalytics[window.pendingAnalytics.length] = pending;
+      }
     });
-    db.on('populate', function() {
-      return arc.app.db.idb.downloadDefinitions()
-        .catch(function() {
-          console.warn('Definitions wasn\'t there. skipping definitions installation.');
-          return Dexie.Promise.resolve();
-        })
-        .then(function(defs) {
-          if (!defs) {
-            return Dexie.Promise.resolve();
-          }
-          return db.transaction('rw', db.statuses, db.headers, function() {
-            let promises = [];
-
-            let codes = defs.codes;
-            defs.requests.forEach((item) => item.type = 'request');
-            defs.responses.forEach((item) => item.type = 'response');
-            let headers = defs.requests.concat(defs.responses);
-            codes.forEach(function(item) {
-              promises.push(db.statuses.add(item));
-            });
-            headers.forEach(function(item) {
-              promises.push(db.headers.add(item));
-            });
-
-            return Dexie.Promise.all(promises);
-          });
-        })
-        .then(function() {
-          console.log('The database has been populated with data.');
-        });
+    db.on('ready', function() {
+      if (arc.app.db.idb.upgraded) {
+        return;
+      }
+      arc.app.db.idb._db = db;
+      return arc.app.db.idb.populateDatabase(db)
+      .then(() => arc.app.db.idb.upgraded = true)
+      .catch((e) => arc.app.db.idb.upgraded = false);
     });
     db.open()
       .then(function() {
         resolve(db);
       })
       .catch(function(error) {
-        arc.app.analytics.sendException('IDB create error::' + JSON.stringify(error));
+        console.error('IDB open main catch block', error);
+        let pending = arc.app.analytics.sendException('IDB create error::' + JSON.stringify(error));
+        if (pending) {
+          window.pendingAnalytics[window.pendingAnalytics.length] = pending;
+        }
         reject(error);
       });
   });
+};
+/**
+ * Populate database with initial data
+ *
+ * @return {Promise} Fulfilled promise when data were populated or no population is needed.
+ */
+arc.app.db.idb.populateDatabase = function(db) {
+  //if statuses are set headers must be set as well since they are inserted in single transaction.
+  return db.statuses.count()
+    .then((count) => {
+      if (count > 0) {
+        console.info('Database already populated');
+        return Dexie.Promise.resolve(null);
+      }
+      return arc.app.db.idb.downloadDefinitions()
+        .catch(function() {
+          console.warn('Definitions wasn\'t there. skipping definitions installation.');
+          return Dexie.Promise.reject(new Error('Definitions location error'));
+        });
+    })
+    .then(function(defs) {
+      if (!defs) {
+        return Dexie.Promise.resolve(null);
+      }
+
+      defs.requests.forEach((item) => item.type = 'request');
+      defs.responses.forEach((item) => item.type = 'response');
+      let headers = defs.requests.concat(defs.responses);
+
+      return db.transaction('rw', db.statuses, db.headers, function() {
+        console.info('populating database with predefined values');
+        let promises = [];
+        let codes = defs.codes;
+        codes.forEach(function(item) {
+          promises.push(db.statuses.add(item));
+        });
+        headers.forEach(function(item) {
+          promises.push(db.headers.add(item));
+        });
+        return Dexie.Promise.all(promises);
+      });
+    })
+    .then(function() {
+      console.log('The database has been populated with data.');
+    })
+    .catch(function(e) {
+      console.warn('Database population unsuccessfull.', e);
+      let pending = arc.app.analytics.sendException('IDB populate error::' + JSON.stringify(e));
+      if (pending) {
+        window.pendingAnalytics[window.pendingAnalytics.length] = pending;
+      }
+    });
 };
 /**
  * Creates IndexedDB key for a RequestObject.

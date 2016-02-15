@@ -207,7 +207,6 @@ An `arc-saved-list-view` element is a element responsible for displaying a list 
                 <h1>
                   Saved requests
                   <paper-spinner-lite alt="Loading contacts list" active="{{querying}}"></paper-spinner-lite>
-                  <span>{{_test(querying)}}</span>
                 </h1>
               </neon-animatable>
               <neon-animatable>
@@ -253,8 +252,8 @@ An `arc-saved-list-view` element is a element responsible for displaying a list 
           <paper-tooltip for="methodColumn">The request HTTP method</paper-tooltip>
           <paper-tooltip for="urlColumn">Full URL saved with the request</paper-tooltip>
         </div>
-        <!-- sort="{{computeSort(sort,dir)}}"  -->
-        <template is="dom-repeat" items="{{requests}}" observe="request.name" id="requestList">
+        <!-- observe="request.name" sort="{{computeSort(sort,dir)}}"  -->
+        <template is="dom-repeat" items="{{requests}}" id="requestList">
           <arc-saved-list-item on-dblclick="_showRequestDetails" request="{{item}}" selected="{{item.selected}}" on-selected-changed="_onItemToggle"></arc-saved-list-item>
         </template>
         <div class="table-columns">

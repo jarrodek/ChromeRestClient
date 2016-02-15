@@ -1,3 +1,5 @@
+'use strict';
+
 Polymer({
   is: 'arc-project-object-model',
   behaviors: [
@@ -67,51 +69,51 @@ Polymer({
     return arc.app.db.idb.open()
       .then(function(db) {
         return db.transaction('rw', db.requestObject, db.projectObjects, function() {
-          return new Dexie.Promise(function(resolve, reject){
-            if (requests instanceof Array) {
-              let promises = [];
-              requests.forEach((item) => promises.push(db.requestObject.put(item)));
-              Dexie.Promise.all(promises)
-              .then(() => {
-                resolve();
+            return new Dexie.Promise(function(resolve, reject) {
+                if (requests instanceof Array) {
+                  let promises = [];
+                  requests.forEach((item) => promises.push(db.requestObject.put(item)));
+                  Dexie.Promise.all(promises)
+                    .then(() => {
+                      resolve();
+                    })
+                    .catch((e) => {
+                      reject(e);
+                    });
+                } else {
+                  db.requestObject.put(requests)
+                    .then(() => {
+                      resolve();
+                    })
+                    .catch((e) => {
+                      reject(e);
+                    });
+                }
               })
-              .catch((e) => {
-                reject(e);
-              });
-            } else {
-              db.requestObject.put(requests)
-              .then(() => {
-                resolve();
-              })
-              .catch((e) => {
-                reject(e);
-              });
-            }
-          })
-          .then(function() {
-            if (!this.data.requestIds) {
-              this.data.requestIds = [];
-            }
-            if (requests instanceof Array) {
-              let list = [];
-              requests.forEach((item) => list.push(item.id));
-              this.data.requestIds = this.data.requestIds.concat(list);
-            } else {
-              this.data.requestIds.push(request.id);
-            }
-            return db.projectObjects.put(this.data)
               .then(function() {
-                this.auto = autoValue;
-                this.fire('save', {
-                  data: this.data
-                });
-                return requests;
+                if (!this.data.requestIds) {
+                  this.data.requestIds = [];
+                }
+                if (requests instanceof Array) {
+                  let list = [];
+                  requests.forEach((item) => list.push(item.id));
+                  this.data.requestIds = this.data.requestIds.concat(list);
+                } else {
+                  this.data.requestIds.push(request.id);
+                }
+                return db.projectObjects.put(this.data)
+                  .then(function() {
+                    this.auto = autoValue;
+                    this.fire('save', {
+                      data: this.data
+                    });
+                    return requests;
+                  }.bind(this));
               }.bind(this));
-          }.bind(this));
-        }.bind(this))
-        .finally(function(){
-          db.close();
-        });
+          }.bind(this))
+          .finally(function() {
+            db.close();
+          });
       }.bind(this));
   }
 

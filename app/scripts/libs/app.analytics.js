@@ -182,6 +182,12 @@ arc.app.analytics._loadCSV = function() {
  * @param {!Number} value An optional value of the event.
  */
 arc.app.analytics.sendEvent = function(category, action, label, value) {
+  if (arc.app.analytics._trackers.length === 0) {
+    return {
+      'type': 'event',
+      'params': arguments
+    };
+  }
   arc.app.analytics._trackers.forEach(function(tracker) {
     tracker.sendEvent(category, action, label, value);
   });
@@ -203,7 +209,32 @@ arc.app.analytics.sendScreen = function(screenName) {
  * @param {Boolean} isFatal True if the exception is fatal.
  */
 arc.app.analytics.sendException = function(exception, isFatal) {
+  if (arc.app.analytics._trackers.length === 0) {
+    return {
+      'type': 'exception',
+      'params': [exception, isFatal + '']
+    };
+  }
   arc.app.analytics._trackers.forEach(function(tracker) {
     tracker.sendException(exception, isFatal);
+  });
+};
+arc.app.analytics.getPendingAnalytics = function(callback) {
+  if (!chrome.runtime.getBackgroundPage) {
+    callback([]);
+    return;
+  }
+  chrome.runtime.getBackgroundPage((bg) => {
+    let bgPendings = bg.pendingAnalytics;
+    if (!bgPendings) {
+      bgPendings = [];
+    }
+    if (!window.pendingAnalytics) {
+      window.pendingAnalytics = [];
+    }
+    let data = window.pendingAnalytics.concat(bgPendings);
+    callback(data);
+    window.pendingAnalytics = [];
+    bg.pendingAnalytics = [];
   });
 };

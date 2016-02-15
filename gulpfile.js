@@ -93,16 +93,16 @@ gulp.task('crisper-bower', function() {
 
 gulp.task('connect', function() {
   connect.server({
-      root: [__dirname + '/'],
-      livereload: true,
-      port: 8888,
-      middleware: function() {
-        return [
-          modRewrite([
-            '^/app/bower_components/(.*)$ /bower_components/$1 [L]',
-          ])
-        ]
-      }
+    root: [__dirname + '/'],
+    livereload: true,
+    port: 8888,
+    middleware: function() {
+      return [
+        modRewrite([
+          '^/app/bower_components/(.*)$ /bower_components/$1 [L]',
+        ])
+      ];
+    }
   });
 });
 

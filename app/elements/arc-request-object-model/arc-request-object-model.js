@@ -48,16 +48,17 @@ Polymer({
             data.reverse();
           }
           if (this.offset || this.limit) {
-            let limit = this.limit, offset = this.offset;
+            let limit = this.limit;
+            let offset = this.offset;
             if (!Number.isInteger(offset)) {
               offset = 0;
             }
             if (!Number.isInteger(limit)) {
               limit = data.length;
             }
-            data = data.slice(offset, offset+limit);
+            data = data.slice(offset, offset + limit);
           }
-          data.forEach((item) => item._har = new HAR.Log(item._har))
+          data.forEach((item) => item._har = new HAR.Log(item._har));
         }
         this.data = data;
         this.fire('data-ready', {
@@ -74,6 +75,7 @@ Polymer({
     if (!this.data) {
       return Dexie.Promise.reject(new Error('Nothing to save.'));
     }
+    this._cleanObject();
     this.genericSave('requestObject');
   },
   /**
@@ -86,11 +88,7 @@ Polymer({
    * Removed unescessary data from the object before save.
    */
   _cleanObject: function() {
-    if (typeof this.data.selected !== 'undefined') {
-      delete this.data.selected;
-    }
-    if (typeof this.data.kind !== 'undefined') {
-      delete this.data.kind;
-    }
+    delete this.data.selected;
+    delete this.data.kind;
   }
 });

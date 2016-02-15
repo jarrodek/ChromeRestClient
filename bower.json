@@ -20,7 +20,8 @@
     "chrome-platform-analytics": "GoogleChrome/chrome-platform-analytics#ca1.6.0d",
     "font-roboto-local": "PolymerElements/font-roboto-local#latest",
     "file-reader": "jarrodek/file-reader#latest",
-    "chrome-app-filesystem": "jarrodek/chrome-app-filesystem#latest"
+    "chrome-app-filesystem": "jarrodek/chrome-app-filesystem#latest",
+    "web-socket": "../web-socket"
   },
   "devDependencies": {
     "web-component-tester": "*"

@@ -94,6 +94,8 @@ ArcBehaviors.ListControllerBehavior = {
      * True if query is now performed.
      * A `queryPage` implementation should set it to false if not using `appendResults` function
      * and after query function finish. `queryPage` function won't be called again otherwise.
+     *
+     * @type Boolean
      */
     querying: {
       type: Boolean,
@@ -149,7 +151,6 @@ ArcBehaviors.ListControllerBehavior = {
    * @param {Array<Any>} results list of results.
    */
   appendResults: function(results) {
-    this._setQuerying(false);
     this.page++;
     if (!results || !results.length) {
       this.hasMore = false;
@@ -159,6 +160,7 @@ ArcBehaviors.ListControllerBehavior = {
       }
       this.set('listData', this.listData.concat(results));
     }
+    this._setQuerying(false);
   },
   /**
    * Reset data to initial state.

@@ -9,13 +9,34 @@
       ArcBehaviors.ListControllerBehavior
     ],
     properties: {
+      /**
+       * Model's key to sort on.
+       */
       sortBy: String,
+      /**
+       * Selected sort direction.
+       * Can be either `acs` for natural order or `desc` for reversed order.
+       */
       sortDirection: String,
+      /**
+       * True if the component is showning in the UI.
+       *
+       * @type Boolean
+       */
       isShowing: {
         type: Boolean,
         value: false
       }
     },
+
+    // observers: [
+    //   'queryingChanged(querying)'
+    // ],
+    //
+    // queryingChanged: function() {
+    //   console.log('queryingChanged', this.querying);
+    // },
+
     onShow: function() {
       this.isShowing = true;
       this.queryPage();
@@ -28,6 +49,7 @@
     },
 
     queryPage: function() {
+      this._setQuerying(true);
       this.$.model.query();
     },
 

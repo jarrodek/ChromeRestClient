@@ -71,3 +71,35 @@ arc.app.arc.checkCompatybility = function() {
     }, 2000);
   }
 };
+
+/* JavaScript extension */
+
+/**
+ * Ensure that the property will be set as a date object.
+ * If passed `time` argument is not a valid date object or couldn't be parsed as a date, current
+ * date will be used.
+ * Due to the issue: https://github.com/Polymer/polymer/issues/3424 it can't be placed in Object's
+ * prototype.
+ *
+ * @property {Object} obj An object to operate on.
+ * @property {String} property A property to assign a value to. It will be set to `this[property]`.
+ * @property {Date|String|Number} A date object, timestamp or date string.
+ */
+Object.ensureDate = function(obj, property, time) {
+  if (time instanceof Date) {
+    obj[property] = time;
+  } else if (Number.isInteger(time)) {
+    obj[property] = new Date(time);
+  } else {
+    try {
+      let d = new Date(time);
+      if (Number.isNaN(d.getDate())) {
+        obj[property] = new Date();
+      } else {
+        obj[property] = d;
+      }
+    } catch (e) {
+      obj[property] = new Date();
+    }
+  }
+};

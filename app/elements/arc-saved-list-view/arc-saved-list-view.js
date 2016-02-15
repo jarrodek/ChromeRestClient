@@ -53,24 +53,29 @@ Polymer({
      */
     detailedRequest: Object,
 
-    headerAnimationConfig: {
-      value: function() {
-        return {
-          'entry': {
-            name: 'slide-from-right-animation',
-            node: this.$.tableTitle,
-            timing: {
-              delay: 0,
-              duration: 150
-            }
-          },
-          'exit': {
-            name: 'slide-left-animation',
-            node: this.$.tableTitle
-          }
-        };
-      }
+    querying: {
+      type: Boolean,
+      value: true
     },
+
+    // headerAnimationConfig: {
+    //   value: function() {
+    //     return {
+    //       'entry': {
+    //         name: 'slide-from-right-animation',
+    //         node: this.$.tableTitle,
+    //         timing: {
+    //           delay: 0,
+    //           duration: 150
+    //         }
+    //       },
+    //       'exit': {
+    //         name: 'slide-left-animation',
+    //         node: this.$.tableTitle
+    //       }
+    //     };
+    //   }
+    // },
     /**
      * If true the details drowe will narrow.
      */
@@ -80,15 +85,15 @@ Polymer({
     }
   },
 
-  observers: [
-    '_sortChanged(sort,dir)'
-  ],
+  // observers: [
+  //   '_sortChanged(sort,dir)'
+  // ],
 
   get scroller() {
     return this.$.table;
   },
 
-  _sortChanged: function (sort, dir) {
+  _sortChanged: function(sort, dir) {
     this.fire('sort-option-changed', {
       'sort': sort,
       'dir': dir
