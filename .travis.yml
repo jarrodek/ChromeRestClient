@@ -3,7 +3,8 @@ sudo: false
 before_script:
   - npm install -g bower polylint web-component-tester
   - bower install
-  - polylint
+  - wct
+#  - polylint --root ./ --input app/index.html
 node_js: stable
 addons:
   apt:

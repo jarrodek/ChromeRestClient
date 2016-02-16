@@ -82,7 +82,9 @@ Polymer({
     narrowDrawer: {
       type: Boolean,
       value: true
-    }
+    },
+
+    allChecked: Boolean
   },
 
   // observers: [

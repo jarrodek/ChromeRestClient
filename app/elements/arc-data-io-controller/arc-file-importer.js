@@ -31,7 +31,8 @@ Polymer({
       readOnly: true,
       type: Boolean,
       value: false
-    }
+    },
+    importFileReader: Boolean
   },
   /**
    * Handler called when file has been added by the user.

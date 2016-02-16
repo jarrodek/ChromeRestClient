@@ -39,7 +39,8 @@ Polymer({
       type: Boolean,
       value: true,
       computed: '_canShowServerSection(_fileImporting, _fileExporting)'
-    }
+    },
+    authorized: Boolean
   },
   /**
    * Ping server for session state on show.

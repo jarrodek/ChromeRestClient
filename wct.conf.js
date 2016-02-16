@@ -4,6 +4,11 @@ var ret = {
   'suites': ['app/test'],
   'webserver': {
     'pathMappings': []
+  },
+  plugins: {
+    local: {
+      browsers: ['chrome']
+    }
   }
 };
 
