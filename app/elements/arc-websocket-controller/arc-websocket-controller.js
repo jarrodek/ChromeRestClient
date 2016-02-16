@@ -37,25 +37,39 @@ Polymer({
       type: Array,
       value: [],
       notify: true
+    },
+    /**
+     * Last used URL.
+     */
+    lastSocketUrl: {
+      type: String,
+      value: 'ws://echo.websocket.org'
     }
   },
+
+  // onShow: function() {
+  //
+  // },
+  /**
+   * Message received handler.
+   */
   _messageReceived: function(e) {
     var message = new WebSocketMessage({
       message: e.detail.data,
       direction: 'in'
     });
     this.push('messages', message);
-    console.log(message);
+    //console.log(message);
   },
 
   _onDisconnected: function() {
-    console.log('disconnected');
+    // console.log('disconnected');
     this._setConnecting(false);
     this._setConnected(false);
   },
 
   _onConnected: function() {
-    console.log('_onConnected');
+    // console.log('_onConnected');
     this._setConnecting(false);
     this._setConnected(true);
   },
@@ -70,6 +84,7 @@ Polymer({
     this.$.socket.url = url;
     this._setConnecting(true);
     this.$.socket.open();
+    this.lastSocketUrl = this.$.socket.url;
   },
 
   _disconnect: function() {
@@ -82,7 +97,39 @@ Polymer({
       direction: 'out'
     });
     this.push('messages', message);
-    this.$.socket.message = message.message;
+    this.$.socket.message = message.isBinary ? message.binaryData : message.message;
     this.$.socket.send();
+  },
+
+  _downloadBinary: function(e) {
+    var msg = e.detail.message;
+    if (!msg || !msg.isBinary) {
+      return;
+    }
+    this.fileSuggestedName = 'socket-message';
+    this.exportContent = msg.binaryData;
+    this.exportMime = 'application/octet-stream';
+    this.exportData();
+  },
+  /**
+   * Clear messages log output
+   */
+  clearMessages: function() {
+    this.set('messages', []);
+  },
+  /**
+   * Exporrt all messages to a file.
+   */
+  exportMessages: function() {
+    this.fileSuggestedName = 'socket-messages';
+    this.exportContent = this.messages;
+    this.exportMime = 'json';
+    this.exportData();
+  },
+
+  _restoredHandler: function() {
+    if (this.lastSocketUrl) {
+      this.$.view.url = this.lastSocketUrl;
+    }
   }
 });

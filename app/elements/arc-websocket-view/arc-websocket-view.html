@@ -1,106 +1,181 @@
 <dom-module id="arc-websocket-view">
   <template>
     <style>
-      :host {
-        display: block;
-      }
-      .remote-address-line {
-        @apply(--layout-horizontal);
+    :host {
+      display: block;
+    }
 
-      }
-      .url-input {
-        min-width: 320px;
-      }
+    .remote-address-line {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      @apply(--section-padding);
+      padding-right: 24px;
+    }
 
-      .table-columns {
-        height: 56px;
-        font-family: 'Roboto';
-        font-weight: 500;
-        color: rgba(0, 0, 0, 0.54);
-        font-size: 12px;
-      }
-      .table-values {
-        /*height: 48px;*/
-        font-family: 'Roboto';
-        color: rgba(0, 0, 0, 0.87);
-        font-size: 13px;
-        padding: 16px 24px !important;
-      }
+    .connection-info-line{
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      margin-top: 24px;
+    }
 
-      .direction-column,
-      .time-column,
-      .message-column {
-        padding-right: 24px;
-      }
-      .time-column,
-      .message-column {
-        padding-left: 56px;
-      }
-      .table-values,
-      .table-columns {
-        border-bottom: 1px rgba(0, 0, 0, 0.12) solid;
-        padding: 0 24px;
-      }
-      .direction-column {
-        min-width: 56px;
-        padding: 0 24px 0 0;
-      }
-      .time-column {
-        min-width: 70px;
-      }
-      .table-columns:last-child {
-        border-bottom: 1px rgba(0, 0, 0, 0) solid;
-      }
+    .connection-info {
+      margin-right: 8px;
+    }
 
+    .welcome-info {
+      @apply(--layout-vertical);
+      margin-top: 40px;
+      color: rgba(0,0,0,0.58);
+    }
+
+    .info-headline {
+      @apply(--paper-font-headline);
+    }
+
+    .url-input {
+      min-width: 320px;
+    }
+
+    .table {
+      margin-top: 40px;
+    }
+
+    iron-pages > section {
+      margin-top: 20px;
+    }
+
+    .table-columns {
+      height: 56px;
+      font-family: 'Roboto';
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.54);
+      font-size: 12px;
+    }
+
+    .table-values {
+      /*height: 48px;*/
+      font-family: 'Roboto';
+      color: rgba(0, 0, 0, 0.87);
+      font-size: 13px;
+      padding: 16px 24px !important;
+    }
+
+    .direction-column,
+    .time-column,
+    .message-column {
+      padding-right: 24px;
+    }
+
+    .time-column,
+    .message-column {
+      padding-left: 56px;
+    }
+
+    .table-values,
+    .table-columns {
+      border-bottom: 1px rgba(0, 0, 0, 0.12) solid;
+      padding: 0 24px;
+    }
+
+    .direction-column {
+      min-width: 56px;
+      padding: 0 24px 0 0;
+    }
+
+    .time-column {
+      min-width: 70px;
+    }
+
+    .table-columns:last-child {
+      border-bottom: 1px rgba(0, 0, 0, 0) solid;
+    }
+
+    .message-column .message {
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .action-button {
+      @apply(--action-button);
+    }
+
+    .action-button:hover {
+      @apply(--action-button-hover);
+    }
+
+    .action-button[disabled] {
+      @apply(--action-button-disabled);
+    }
+
+    .padding-section {
+      @apply(--section-padding);
+      padding-right: 24px;
+    }
     </style>
     <div class="remote-address-line">
-      <paper-input label="Socket URL" value="{{url}}" class="url-input"></paper-input>
-      <paper-button hidden$="{{connected}}" disabled$="[[connectDisabled]]" on-tap="_connect">connect</paper-button>
-      <paper-button hidden$="{{!connected}}" on-tap="_disconnect">disconnect</paper-button>
+      <div hidden$="{{connected}}" class="connection-info-line">
+        <paper-input label="Socket URL" value="{{url}}" class="url-input"></paper-input>
+        <paper-button class="action-button" disabled$="[[connectDisabled]]" on-tap="_connect">connect</paper-button>
+      </div>
+      <div hidden$="{{!connected}}" class="connection-info-line">
+        <p class="connection-info">Connected to <span>[[url]]</span></p>
+        <paper-button on-tap="_disconnect" raised>disconnect</paper-button>
+      </div>
     </div>
-    <div hidden$="{{!connecting}}">
-      <p>connecting to the remote server</p>
+    <div class="padding-section welcome-info" hidden$="{{!_computeInitialInfoVisible(connected, connecting, retrying)}}">
+      <p class="info-headline">Connect to remote server using web sockets and debug it.</p>
+      <p>Learn more about Web Sockets at <a href="http://www.websocket.org/" target="_blank">websocket.org</a></p>
+    </div>
+    <div class="padding-section" hidden$="{{!connecting}}">
+      <p>Connecting to the remote server...</p>
       <paper-progress indeterminate></paper-progress>
     </div>
-    <div hidden$="{{!retrying}}">
+    <div class="padding-section" hidden$="{{!retrying}}">
       <h3>Connection lost</h3>
-      <p>Will try to reconnect.</p>
+      <p>Trying to reconnect.</p>
     </div>
-    <div hidden$="{{hideMessages}}">
-
-
-      <paper-tabs selected="{{selectedTab}}">
+    <div class="padding-section" hidden$="{{hideMessages}}">
+      <paper-tabs selected="{{selectedTab}}" >
         <paper-tab>Text</paper-tab>
         <paper-tab>File</paper-tab>
       </paper-tabs>
       <iron-pages selected="{{selectedTab}}">
         <section>
-          <paper-textarea label="Your message" value="{{message}}"></paper-textarea>
-          <paper-button on-tap="_sendMessage">send</paper-button>
+          <paper-textarea label="Message to send" value="{{message}}"></paper-textarea>
+          <paper-button class="action-button" on-tap="_sendMessage" disabled$="{{!messageSendEnabled}}">send</paper-button>
         </section>
         <section>
           <file-drop id="fileDrop" on-file-ready="_onFile"></file-drop>
-          <paper-button on-tap="_sendMessage">send</paper-button>
+          <paper-button class="action-button" on-tap="_sendFileMessage" disabled$="{{!fileSendEnabled}}">send</paper-button>
         </section>
       </iron-pages>
 
+
+    </div>
+    <div class="padding-section" hidden$="{{hideLog}}">
       <div class="table">
         <div class="table-columns layout horizontal center">
           <div class="direction-column" id="directionColumn">Direction</div>
           <div class="time-column" id="timeColumn">Time</div>
-          <div class="message-column" id="messageColumn">Message</div>
+          <div class="message-column flex" id="messageColumn">Message</div>
+          <paper-icon-button icon="file-download" id="downloadAllButton" on-tap="_exportMessages"></paper-icon-button>
+          <paper-icon-button icon="clear" id="clearButton" on-tap="_clearMessages"></paper-icon-button>
           <paper-tooltip for="directionColumn">Either 'in' for incoming or 'out' for outgoing messages</paper-tooltip>
           <paper-tooltip for="timeColumn">Event time</paper-tooltip>
           <paper-tooltip for="messageColumn">Message sent to / received from the server</paper-tooltip>
+          <paper-tooltip for="downloadAllButton">Export all messages to file</paper-tooltip>
+          <paper-tooltip for="clearButton">Clear messages log</paper-tooltip>
         </div>
-        <template is="dom-repeat" items="{{messages}}" sort="_sortMessages">
+        <template is="dom-repeat" items="{{messages}}" sort="_sortMessages" id="logList">
           <div class="table-values layout horizontal center">
             <div class="direction-column">{{item.direction}}</div>
             <div class="time-column">{{_computeTime(item.time)}}</div>
-            <div class="message-column">{{item.message}}</div>
+            <div class="message-column">
+              <span class="message">{{item.message}}</span>
+              <paper-icon-button hidden$="{{!item.isBinary}}" icon="file-download" on-tap="_downloadBinnary"></paper-icon-button>
+            </div>
           </div>
         </template>
-
       </div>
     </div>
     <paper-toast text="You must enter remote address. Eg. ws://echo.websocket.org" id="emptyAddress"></paper-toast>

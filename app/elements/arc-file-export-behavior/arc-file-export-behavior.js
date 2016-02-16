@@ -6,7 +6,7 @@ window.ArcBehaviors = window.ArcBehaviors || {};
  * Include `arc-file-export-behavior.html` to your `elements.html` file.
  *
  * To handle a callback events implement the `onFileSaved` and `onFileError` in your component.
- * 
+ *
  *
  * @polymerBehavior
  */
@@ -117,7 +117,8 @@ ArcBehaviors.ArcFileExportBehavior = {
           this.fileWriter.mime = 'text/plain';
         break;
         default:
-          console.warn('Unsupported mime type for file writer.');
+          this.fileWriter.mime = this.exportMime;
+          console.warn('Setting up unsupported mime type for file writer.');
       }
     }
   },

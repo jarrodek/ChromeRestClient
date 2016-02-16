@@ -92,7 +92,7 @@ Polymer({
     this.fire('file-ready', {
       file: file
     });
-    this.playAnimation('entry');
+    // this.playAnimation('entry');
   },
 
   _computeDropSectionClassName: function(dragging) {
@@ -111,12 +111,12 @@ Polymer({
     this.file = null;
     var input = Polymer.dom(this.root).querySelector('#file');
     input.value = null;
-    this.cancelAnimation();
-    var section = Polymer.dom(this.root).querySelector('#dropSection');
-    if (section.classList.contains('with-file')) {
-      section.classList.remove('with-file');
-    }
-    this.playAnimation('exit');
+    // this.cancelAnimation();
+    // var section = Polymer.dom(this.root).querySelector('#dropSection');
+    // if (section.classList.contains('with-file')) {
+    //   section.classList.remove('with-file');
+    // }
+    // this.playAnimation('exit');
   },
 
   _onNeonAnimationFinish: function() {

@@ -33,6 +33,12 @@
     background-image: none;
     color: white;
   };
+  --action-button-disabled: {
+    background: #eaeaea;
+    color: #a8a8a8;
+    cursor: auto;
+    pointer-events: none;
+  }
   --section-padding: {
     padding-left: 24px;
   };
@@ -45,6 +51,8 @@
     @apply(--paper-font-headline);
     padding: 0 16px;
   };
+  --paper-tab-ink: var(--paper-blue-a100);
+  --paper-tabs-selection-bar-color: var(--paper-blue-a100);
 }
 
 

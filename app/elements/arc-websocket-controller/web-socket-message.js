@@ -3,16 +3,25 @@
 class WebSocketMessage {
 
   constructor(opts) {
-    let msg = opts.message;
-    if ((msg instanceof Blob) || (msg instanceof ArrayBuffer)) {
-      msg = '[Binnary data]';
-    }
+    /**
+     * If the message is a binnary data this will be set to true.
+     *
+     * @type {Boolean}
+     */
+    this.isBinary;
+    /**
+     * If `binaryData` is true this must contain raw binary data.
+     *
+     * @type {Blob|ArrayBuffer}
+     */
+    this.binaryData;
     /**
      * A message sent to / received from the server.
      *
      * @type {String|ArrayBuffer|Blob}
      */
-    this.message = msg || 'empty';
+    this._message;
+    this.message = opts.message;
     /**
      * A direction of the message. Either "in" or "out".
      *
@@ -30,11 +39,25 @@ class WebSocketMessage {
     } else {
       this.time = new Date();
     }
+  }
 
+  set message(msg) {
+    if ((msg instanceof Blob) || (msg instanceof ArrayBuffer)) {
+      this.isBinary = true;
+      this.binaryData = msg;
+      msg = '[Binary data]';
+    } else {
+      this.isBinary = false;
+      this.binaryData = null;
+    }
+    this._message = msg || '(empty message)';
+  }
+
+  get message() {
+    return this._message;
   }
 
   set time(time) {
-
     Object.ensureDate(this, '_time', time);
   }
 

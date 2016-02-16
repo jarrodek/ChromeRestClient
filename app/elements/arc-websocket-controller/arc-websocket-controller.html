@@ -11,15 +11,20 @@
       on-connect-requested="_connect"
       on-disconnect-requested="_disconnect"
       on-send-requested="_send"
+      on-message-download="_downloadBinary"
+      on-messages-download="exportMessages"
+      on-clear-messages="clearMessages"
       messages="[[messages]]"
       connecting="[[connecting]]"
       connected="[[connected]]"
-      retrying="[[retrying]]"></arc-websocket-view>
+      retrying="[[retrying]]"
+      id="view"></arc-websocket-view>
     <web-socket id="socket" retrying="{{retrying}}"
       on-message="_messageReceived"
       on-disconnected="_onDisconnected"
       on-connected="_onConnected"
       on-error="_onError"></web-socket>
+    <chrome-storage id="store" type="local" name="lastSocket" value="{{lastSocketUrl}}" on-load="_restoredHandler" on-load-empty="_restoredHandler"></chrome-storage>
   </template>
   <script src="arc-websocket-controller.js"></script>
 </dom-module>

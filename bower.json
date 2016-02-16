@@ -21,7 +21,8 @@
     "font-roboto-local": "PolymerElements/font-roboto-local#latest",
     "file-reader": "jarrodek/file-reader#latest",
     "chrome-app-filesystem": "jarrodek/chrome-app-filesystem#latest",
-    "web-socket": "../web-socket"
+    "web-socket": "jarrodek/web-socket#latest",
+    "chrome-storage":"Scarygami/chrome-storage#latest"
   },
   "devDependencies": {
     "web-component-tester": "*"
