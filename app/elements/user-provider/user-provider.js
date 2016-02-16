@@ -106,6 +106,7 @@ Polymer({
             return;
           }
           this._setTokenData(accessToken);
+          this._setAuthorized(true);
           resolve(accessToken);
         }.bind(this));
       } catch (e) {
@@ -138,7 +139,6 @@ Polymer({
         this._setAuthorized(false);
         return;
       }
-      this.set('accessToken'.accessToken);
       this.$.revokeRequest.generateRequest();
     }.bind(this)).catch(function(e) {
       console.error('user-provider::restore', e);
@@ -150,6 +150,7 @@ Polymer({
   _tokenRevokedHandler: function() {
     this._clearCache().then(function() {
       this._setAuthorized(false);
+      this.set('accessToken', null);
     }.bind(this));
   },
   /**
@@ -162,19 +163,17 @@ Polymer({
    * Clear auth data.
    */
   _clearCache: function() {
-    return this.authorize(false)
-      .then(function(accessToken) {
-        if (!accessToken) {
-          return Promise.resolve(true);
-        }
-        return new Promise(function(resolve) {
-          chrome.identity.removeCachedAuthToken({
-            token: this.accessToken
-          }, function() {
-            resolve();
-          });
-        });
-      }.bind(this));
+    return new Promise((resolve, reject) => {
+      if (!this.accessToken) {
+        resolve(true);
+        return;
+      }
+      chrome.identity.removeCachedAuthToken({
+        token: this.accessToken
+      }, function() {
+        resolve();
+      });
+    });
   },
   /**
    * A success handler for token info request.

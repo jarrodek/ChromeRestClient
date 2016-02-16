@@ -1,0 +1,53 @@
+<dom-module id="arc-menu-view">
+  <template>
+    <style>
+    :host {
+      display: block;
+      height: 100%;
+      @apply(--layout-vertical);
+    }
+
+    .bottom-menu {
+      /*@apply(--layout-self-end);*/
+      /*@apply(--layout-end-justified);*/
+    }
+
+    .icon-buttons {
+      padding-left: 8px;
+    }
+
+    .sublist {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+    </style>
+    <paper-menu selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap" class="flex">
+      <paper-item data-route="request" data-place$="{{baseUrl}}">Request</paper-item>
+      <paper-item data-route="socket" data-place$="{{baseUrl}}socket">Socket</paper-item>
+      <paper-submenu>
+        <paper-item class="menu-trigger">Projects</paper-item>
+        <paper-menu class="menu-content sublist" selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap">
+          <template is="dom-if" if="{{!projects}}">
+            <paper-item>No projects here</paper-item>
+          </template>
+          <template is="dom-repeat" items="{{projects}}" sort="{{computeSort(projects)}}">
+            <paper-item data-route$="request/project/{{item.id}}" data-place$="{{baseUrl}}request/project/{{item.id}}">{{item.name}}</paper-item>
+          </template>
+        </paper-menu>
+      </paper-submenu>
+      <paper-item data-route="saved" data-place$="{{baseUrl}}saved">Saved</paper-item>
+      <template is="dom-if" if="{{!noHistory}}">
+        <paper-item data-route="history" data-place$="{{baseUrl}}history">History</paper-item>
+      </template>
+    </paper-menu>
+    <section class="bottom-menu" on-tap="_itemTap">
+      <div class="icon-buttons">
+        <paper-icon-button icon="settings" data-route="settings" data-place$="{{baseUrl}}settings" title="Settings"></paper-icon-button>
+        <paper-icon-button icon="info" data-route="about" data-place$="{{baseUrl}}about" title="About app"></paper-icon-button>
+      </div>
+      <paper-item on-tap="_onAuth" hidden="{{appAuthorized}}">Sign in</paper-item>
+      <paper-item on-tap="_onSignOut" hidden="{{!appAuthorized}}">Sign out</paper-item>
+    </section>
+  </template>
+  <script src="arc-menu-view.js"></script>
+</dom-module>

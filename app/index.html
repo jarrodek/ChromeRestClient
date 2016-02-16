@@ -18,10 +18,10 @@
         <paper-drawer-panel responsive-width="1000px" id="paperDrawerPanel">
             <paper-scroll-header-panel drawer>
                 <!-- Drawer Toolbar -->
-                <paper-toolbar>
+                <!-- <paper-toolbar>
                     <div class="title">Title</div>
                     <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
-                </paper-toolbar>
+                </paper-toolbar> -->
                 <!-- App Menu -->
                 <arc-menu-controller id="appMenu" route="[[route]]" base-url="[[baseUrl]]"></arc-menu-controller>
             </paper-scroll-header-panel>
@@ -53,7 +53,7 @@
                 </div>
             </paper-scroll-header-panel>
         </paper-drawer-panel>
-        <user-provider id="userProvider" profile-image="{{profileUrl}}"></user-provider>
+        <user-provider id="userProvider" authorized="{{appAuthorized}}" profile-image="{{profileUrl}}"></user-provider>
     </template>
 
     <script src="../bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>

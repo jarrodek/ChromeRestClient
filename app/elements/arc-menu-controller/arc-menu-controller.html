@@ -21,34 +21,19 @@ the License.
       <style>
       :host {
         display: block;
-      }
-
-      .sublist {
-        padding-left: 20px;
-        padding-right: 20px;
+        height: 100%;
       }
       </style>
-      <paper-menu selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap">
-        <paper-item data-route="request" data-place$="{{baseUrl}}">Request</paper-item>
-        <paper-item data-route="socket" data-place$="{{baseUrl}}socket">Socket</paper-item>
-        <paper-submenu>
-          <paper-item class="menu-trigger">Projects</paper-item>
-          <paper-menu class="menu-content sublist" selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap">
-            <template is="dom-if" if="{{!projects}}">
-              <paper-item>No projects here</paper-item>
-            </template>
-            <template is="dom-repeat" items="{{projects}}" sort="{{computeSort(projects)}}">
-              <paper-item data-route$="request/project/{{item.id}}" data-place$="{{baseUrl}}request/project/{{item.id}}">{{item.name}}</paper-item>
-            </template>
-          </paper-menu>
-        </paper-submenu>
-        <paper-item data-route="saved" data-place$="{{baseUrl}}saved">Saved</paper-item>
-        <template is="dom-if" if="{{!noHistory}}">
-          <paper-item data-route="history" data-place$="{{baseUrl}}history">History</paper-item>
-        </template>
-        <paper-item data-route="settings" data-place$="{{baseUrl}}settings">Settings</paper-item>
-        <paper-item data-route="about" data-place$="{{baseUrl}}about">About</paper-item>
-      </paper-menu>
+      <arc-menu-view
+        app-authorized="[[appAuthorized]]"
+        route="[[route]]"
+        base-url="[[baseUrl]]"
+        projects="[[projects]]"
+        no-history="[[noHistory]]"
+        on-navigate="_navigateRequested"
+        on-authorize-requested="_authRequested"
+        on-signout-requested="_signOutRequested"></arc-menu-view>
+      <user-provider id="userProvider" authorized="{{appAuthorized}}" profile-image="{{profileUrl}}"></user-provider>
       <arc-project-object-model id="model" data="{{projects}}"></arc-project-object-model>
     </template>
   </dom-module>

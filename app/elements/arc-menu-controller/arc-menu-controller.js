@@ -28,19 +28,22 @@ Polymer({
   },
   attached: function() {
     this.refreshProjects();
-    //console.info('arc-menu has been attached');
   },
-
-  _itemTap: function(e) {
-    e = Polymer.dom(e);
-    if (e.rootTarget.dataset.place) {
-      page(e.rootTarget.dataset.place);
-    }
+  /**
+   * User clicked on a navigation element.
+   */
+  _navigateRequested: function(e) {
+    page(e.detail.url);
   },
-
+  /**
+   * Refresh projects list and display new list.
+   */
   refreshProjects: function() {
     this.$.model.query();
   },
+  /**
+   * Attach listener to chrome local storage to listen for history settings change.
+   */
   _observeHistoryEnabled: function() {
     try {
       chrome.storage.onChanged.addListener(this._historyObserver);
@@ -48,22 +51,6 @@ Polymer({
       console.error('Error setting up storage listener', e);
       arc.app.analytics.sendException('arc-menu::ready::' + e.message, false);
     }
-  },
-  computeSort: function() {
-    return function(a, b) {
-      if (a.name > b.name) {
-        return 1;
-      }
-      if (a.name < b.name) {
-        return -1;
-      }
-      if (a.name === b.name) {
-        return 0;
-      }
-    };
-  },
-  _computeEnpointParameter: function(id) {
-    return this.baseUrl + 'project/' + id;
   },
   /**
    * Update project name in the UI.
@@ -77,10 +64,9 @@ Polymer({
         'Try insert new project first.');
       return;
     }
-    var context = this;
-    this.projects.forEach(function(project, i) {
+    this.projects.forEach((project, i) => {
       if (project.id === projectId) {
-        context.set('projects.' + i + '.name', projectName);
+        this.set('projects.' + i + '.name', projectName);
       }
     });
   },
@@ -101,10 +87,9 @@ Polymer({
         'Try insert new project first.');
       return;
     }
-    var context = this;
-    this.projects.forEach(function(project, i) {
+    this.projects.forEach((project, i) => {
       if (project.id === projectId) {
-        context.splice('projects', i, 1);
+        this.splice('projects', i, 1);
       }
     });
   },
@@ -135,5 +120,13 @@ Polymer({
         this.noHistory = false;
       }
     }
+  },
+
+  _authRequested: function() {
+    this.$.userProvider.authorize();
+  },
+
+  _signOutRequested: function() {
+    this.$.userProvider.revokeToken();
   }
 });
