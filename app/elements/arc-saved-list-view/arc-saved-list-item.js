@@ -20,7 +20,14 @@ Polymer({
     /**
      * Handler to the request details dialog
      */
-    detailsDialog: Object
+    detailsDialog: Object,
+    /**
+     * True if this view represents history item.
+     */
+    isHistory: {
+      type: Boolean,
+      value: false
+    }
   },
 
   behaviors: [
@@ -32,7 +39,7 @@ Polymer({
     }
   },
   _editName: function() {
-    if (this.dialog) {
+    if (this.dialog || this.isHistory) {
       return;
     }
     var dialog = document.createElement('paper-dialog');
@@ -59,7 +66,7 @@ Polymer({
   },
 
   _acceptName: function(e) {
-    if (e.keyCode !== 13) {
+    if (e.keyCode !== 13 || this.isHistory) {
       return;
     }
     this.set('request.har.pages.0.title', this.nameInput.value);
@@ -71,6 +78,9 @@ Polymer({
   },
 
   _closeDialog: function() {
+    if (this.isHistory) {
+      return;
+    }
     this.nameInput.removeEventListener('keydown', this._keyDownBindFunction);
     this.dialog.removeEventListener('iron-overlay-closed', this._closeDialogBindFuntion);
     this._keyDownBindFunction = null;
@@ -84,11 +94,20 @@ Polymer({
   },
 
   arrayItem: function(change, index, path) {
-    return this.get(path, change.base[index]);
+    var date = Object.ensureDate({}, 'date', this.get(path, change.base[index]));
+    var options = {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric'
+    };
+    return new Intl.DateTimeFormat(undefined, options).format(date.date);
   },
 
   _navigateItem: function() {
     page('request/saved/' + this.request.id);
   }
-  
+
 });

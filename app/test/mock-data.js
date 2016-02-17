@@ -199,14 +199,14 @@ var installDefinitions = function(defs) {
     });
 };
 
-var getIdbRequestData = function(dataSize) {
+var getIdbRequestData = function(dataSize, isHistory) {
   var list = [];
   for (var i = 0; i < dataSize; i++) {
-    list.push(generateSqlRequestData());
+    list.push(generateIdbRequestData(isHistory));
   }
   return list;
 };
-var generateIdbRequestData = function() {
+var generateIdbRequestData = function(isHistory) {
   var isPayload = chance.bool();
   var payloadMethods = ['POST', 'PUT', 'DELETE', 'OPTIONS'];
   var otherMethods = ['GET', 'HEAD'];
@@ -219,9 +219,10 @@ var generateIdbRequestData = function() {
     headers += 'X-' + chance.word() + ': ' + chance.word() + '\n';
   }
   var payload = isPayload ? chance.paragraph() : '';
-  var requestName = chance.sentence({words: 2});
+  var requestName = isHistory ? null : chance.sentence({
+    words: 2
+  });
   var item = {
-    'name': requestName,
     'project': 0,
     'url': chance.url(),
     'method': chance.pick(isPayload ? payloadMethods : otherMethods),
@@ -229,6 +230,9 @@ var generateIdbRequestData = function() {
     'payload': payload,
     'time': chance.hammertime()
   };
+  if (!isHistory) {
+    item.name = requestName;
+  }
   var creator = new HAR.Creator({
     name: 'Advanced REST client',
     version: arc.app.utils.appVer,
@@ -284,8 +288,26 @@ var generateIdbRequestData = function() {
     'har': log,
     'url': item.url,
     'method': item.method,
-    'name': item.name,
-    'type': 'saved'
+    'type': isHistory ? 'history' : 'saved'
   });
+  if (!isHistory) {
+    obj.name = item.name;
+  }
   return obj;
+};
+var fillHistoryIdb = function() {
+  var list = getIdbRequestData(2893, true);
+  return arc.app.db.idb.open()
+    .then(function(db) {
+      return db.transaction('rw', db.requestObject, (table) => {
+          let promises = [];
+          list.forEach((item) => {
+            promises.push(table.put(item));
+          });
+          return Dexie.Promise.all(promises);
+        })
+        .then(() => console.log('OK'))
+        .finally(() => db.close());
+    });
+
 };

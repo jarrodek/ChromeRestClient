@@ -1,8 +1,7 @@
 (function() {
   'use strict';
-
   Polymer({
-    is: 'arc-saved-list-controller',
+    is: 'arc-history-list-controller',
     behaviors: [
       ArcBehaviors.ArcControllerBehavior,
       ArcBehaviors.ArcFileExportBehavior,
@@ -60,10 +59,6 @@
       this.appendResults(e.detail.data);
     },
 
-    _requestNameChanged: function(e) {
-      var item = e.detail.item;
-      this.$.saveModel.data = item;
-    },
     /** User requested to clear all entries. */
     _clearSavedStore: function() {
       this.$.model.remove();
@@ -135,7 +130,7 @@
           }
         };
       });
-      var view = Polymer.dom(this.root).querySelector('arc-saved-list-view');
+      var view = Polymer.dom(this.root).querySelector('arc-history-list-view');
       view.$.selector.clearSelection();
       StatusNotification.notify({
         message: 'Removed selected items.',
@@ -152,7 +147,7 @@
 
     _requestSaved: function() {
       if (this.removedCopy) {
-        var view = Polymer.dom(this.root).querySelector('arc-saved-list-view');
+        var view = Polymer.dom(this.root).querySelector('arc-history-list-view');
         this.removedCopy.forEach((item) => {
           this.push('listData', item);
           view.$.selector.select(item);

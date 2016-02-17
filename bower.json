@@ -22,7 +22,8 @@
     "file-reader": "jarrodek/file-reader#latest",
     "chrome-app-filesystem": "jarrodek/chrome-app-filesystem#latest",
     "web-socket": "jarrodek/web-socket#latest",
-    "chrome-storage":"Scarygami/chrome-storage#latest"
+    "chrome-storage":"Scarygami/chrome-storage#latest",
+    "code-mirror": "jarrodek/code-mirror#^1.0.0"
   },
   "devDependencies": {
     "web-component-tester": "*"

@@ -16,14 +16,14 @@ the License.
 -->
 <link rel="import" href="../arc-request-object-model/arc-request-object-model.html">
 <link rel="import" href="../arc-saved-list-view/arc-saved-list-empty.html">
-<link rel="import" href="../arc-saved-list-view/arc-saved-list-view.html">
+<link rel="import" href="../arc-history-list-view/arc-history-list-view.html">
 <!--
 `arc-saved-list-controller` controlls behavior of the saved requests list.
 
 @group Controller Elements
 @element arc-saved-list-controller
 -->
-<dom-module id="arc-saved-list-controller">
+<dom-module id="arc-history-list-controller">
   <template>
     <style>
     :host {
@@ -31,21 +31,21 @@ the License.
     }
     </style>
     <template is="dom-if" if="{{hasListData}}">
-      <arc-saved-list-view requests="{{listData}}"
-        on-name-changed="_requestNameChanged"
+      <arc-history-list-view
+        requests="{{listData}}"
         on-clear-saved="_clearSavedStore"
         on-export-requested="_onExportRequested"
         on-delete-requested="_onDeleteRequested"
         on-content-scroll="_viewScrolling"
         on-sort-option-changed="_sortChanged"
-        querying="[[querying]]"></arc-saved-list-view>
+        querying="[[querying]]"></arc-history-list-view>
     </template>
     <template is="dom-if" if="{{!hasListData}}">
       <arc-saved-list-empty></arc-saved-list-empty>
     </template>
-    <arc-request-object-model id="model" on-data-ready="_dataRead" on-error="_dbError" request-type="saved" limit="[[limit]]" offset="[[offset]]" sort-by="[[sortBy]]" direction=[[sortDirection]]></arc-request-object-model>
-    <arc-request-object-model id="saveModel" auto on-save="_requestSaved" request-type="saved"></arc-request-object-model>
-    <arc-request-object-model id="deleteModel" on-deleted="_selectedRemoved" on-error="_selectedRemoveError" request-type="saved"></arc-request-object-model>
+    <arc-request-object-model id="model" on-data-ready="_dataRead" on-error="_dbError" request-type="history" limit="[[limit]]" offset="[[offset]]" sort-by="[[sortBy]]" direction=[[sortDirection]]></arc-request-object-model>
+    <arc-request-object-model id="saveModel" auto on-save="_requestSaved" request-type="history"></arc-request-object-model>
+    <arc-request-object-model id="deleteModel" on-deleted="_selectedRemoved" on-error="_selectedRemoveError" request-type="history"></arc-request-object-model>
   </template>
 </dom-module>
-<script src="arc-saved-list-controller.js"></script>
+<script src="arc-history-list-controller.js"></script>

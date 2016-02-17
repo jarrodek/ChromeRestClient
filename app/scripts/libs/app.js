@@ -102,4 +102,5 @@ Object.ensureDate = function(obj, property, time) {
       obj[property] = new Date();
     }
   }
+  return obj;
 };

@@ -30,7 +30,13 @@ Polymer({
         } else {
           result = table.where('type').equals(this.requestType);
         }
-        if (this.sortBy) {
+        let indexes = [];
+        table.schema.indexes.forEach((item) => {
+          if (typeof item.keyPath === 'string') {
+            indexes.push(item.keyPath);
+          }
+        });
+        if (this.sortBy && indexes.indexOf(this.sortBy) !== -1) {
           result = result.sortBy(this.sortBy);
         }
         if (result.toArray) {

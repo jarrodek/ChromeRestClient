@@ -15,12 +15,12 @@ License for the specific language governing permissions and limitations under
 the License.
 -->
 <!--
-An `arc-saved-list-view` element is a element responsible for displaying a list of saved requests.
+An `arc-history-list-view` element is a element responsible for displaying a list of history requests.
 
 @group Views Elements
-@element arc-saved-list-view
+@element arc-history-list-view
 -->
-<dom-module id="arc-saved-list-view">
+<dom-module id="arc-history-list-view">
   <template>
     <style>
     :host {
@@ -240,26 +240,26 @@ An `arc-saved-list-view` element is a element responsible for displaying a list 
           <div class="checkbox-column" id="projectColumn">
             <paper-checkbox checked="{{allChecked}}" on-tap="toggleAll"></paper-checkbox>
           </div>
-          <div class="name-column layout horizontal center" id="nameColumn" on-tap="sortColumn" data-sort="name" data-sortoption$="{{computeSortColumn(sort,dir,'name')}}">
-            <iron-icon icon="arrow-drop-down"></iron-icon>Name
-            <paper-ripple recenters=""></paper-ripple>
+          <div class="name-column layout horizontal center" id="nameColumn" on-tap="sortColumn" data-sort="time" data-sortoption$="{{computeSortColumn(sort,dir,'time')}}">
+            <iron-icon icon="arrow-drop-down"></iron-icon>Time
+            <paper-ripple recenters></paper-ripple>
           </div>
           <div class="method-column layout horizontal center" id="methodColumn" on-tap="sortColumn" data-sort="method" data-sortoption$="{{computeSortColumn(sort,dir,'method')}}">
             <iron-icon icon="arrow-drop-down"></iron-icon>Method
-            <paper-ripple recenters=""></paper-ripple>
+            <paper-ripple recenters></paper-ripple>
           </div>
           <div class="url-column layout horizontal center" id="urlColumn" on-tap="sortColumn" data-sort="url" data-sortoption$="{{computeSortColumn(sort,dir,'url')}}">
             <iron-icon icon="arrow-drop-down"></iron-icon>URL
-            <paper-ripple recenters=""></paper-ripple>
+            <paper-ripple recenters></paper-ripple>
           </div>
           <div class="action-column layout horizontal center" id="actionColumn">Actions</div>
-          <paper-tooltip for="nameColumn">The request name added when saving</paper-tooltip>
+          <paper-tooltip for="nameColumn">The request last used time</paper-tooltip>
           <paper-tooltip for="methodColumn">The request HTTP method</paper-tooltip>
           <paper-tooltip for="urlColumn">Full URL saved with the request</paper-tooltip>
         </div>
         <!-- observe="request.name" sort="{{computeSort(sort,dir)}}"  -->
         <template is="dom-repeat" items="{{requests}}" id="requestList">
-          <arc-saved-list-item on-dblclick="_showRequestDetails" request="{{item}}" selected="{{item.selected}}" on-selected-changed="_onItemToggle"></arc-saved-list-item>
+          <arc-saved-list-item on-dblclick="_showRequestDetails" request="{{item}}" selected="{{item.selected}}" on-selected-changed="_onItemToggle" is-history></arc-saved-list-item>
         </template>
         <div class="table-columns">
           <div class="flex"></div>
@@ -269,8 +269,8 @@ An `arc-saved-list-view` element is a element responsible for displaying a list 
       </div>
     </paper-drawer-panel>
     <paper-dialog id="dataClearDialog" on-iron-overlay-closed="onClearDialogResult">
-      <h2>Clear saved list</h2>
-      <p>This will remove all data from the saved store. Would you like to continue?</p>
+      <h2>Clear history</h2>
+      <p>This will remove all data from the history store. Would you like to continue?</p>
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
         <paper-button dialog-confirm autofocus>Clear</paper-button>
@@ -279,5 +279,5 @@ An `arc-saved-list-view` element is a element responsible for displaying a list 
     <array-selector id="selector" items="{{requests}}" selected="{{selected}}" multi></array-selector>
     <paper-toast text="Select request first." id="noSelectionToast"></paper-toast>
   </template>
-  <script src="arc-saved-list-view.js"></script>
+  <script src="arc-history-list-view.js"></script>
 </dom-module>

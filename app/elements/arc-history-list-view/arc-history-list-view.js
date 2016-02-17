@@ -1,7 +1,7 @@
 'use strict';
 
 Polymer({
-  is: 'arc-saved-list-view',
+  is: 'arc-history-list-view',
 
   behaviors: [
     Polymer.IronScrollTargetBehavior
@@ -25,8 +25,7 @@ Polymer({
      * is deep inside HAR object.
      */
     sort: {
-      type: String,
-      value: 'title'
+      type: String
     },
     /**
      * Table sort direction
@@ -62,25 +61,6 @@ Polymer({
       type: Boolean,
       value: true
     },
-
-    // headerAnimationConfig: {
-    //   value: function() {
-    //     return {
-    //       'entry': {
-    //         name: 'slide-from-right-animation',
-    //         node: this.$.tableTitle,
-    //         timing: {
-    //           delay: 0,
-    //           duration: 150
-    //         }
-    //       },
-    //       'exit': {
-    //         name: 'slide-left-animation',
-    //         node: this.$.tableTitle
-    //       }
-    //     };
-    //   }
-    // },
     /**
      * If true the details drowe will narrow.
      */
@@ -92,10 +72,6 @@ Polymer({
     allChecked: Boolean
   },
 
-  observers: [
-    '_sortChanged(sort,dir)'
-  ],
-
   attached: function() {
     this.scrollTarget = document.querySelector('#headerPanelMain').scroller;
   },
@@ -104,11 +80,35 @@ Polymer({
     return this.scrollTarget;
   },
 
+  observers: [
+    '_sortChanged(sort,dir)',
+    '_requestChanged(requests)'
+  ],
+
   _sortChanged: function(sort, dir) {
     this.fire('sort-option-changed', {
       'sort': sort,
       'dir': dir
     });
+  },
+
+  _requestChanged: function() {
+    if (this.sort && this.sort === 'time') {
+      let dir = this.dir;
+      this.requests.sort((a, b) => {
+        let aProp = Object.ensureDate({}, 'date', a.har.pages[0].startedDateTime).date.getTime();
+        let bProp = Object.ensureDate({}, 'date', b.har.pages[0].startedDateTime).date.getTime();
+        if (aProp > bProp) {
+          return dir === 'asc' ? 1 : -1;
+        }
+        if (aProp < bProp) {
+          return dir === 'asc' ? -1 : 1;
+        }
+        if (aProp === bProp) {
+          return 0;
+        }
+      });
+    }
   },
 
   /** Toggle all checkboxes in the list */

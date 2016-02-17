@@ -156,7 +156,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     });
 
     test('Element should insert new requests', function(done) {
-      var requests = getIdbRequestData(3);
+      var requests = getIdbRequestData(3, false);
       var saveCallback = function() {
         insertModel.removeEventListener('save', saveCallback);
         insertId = insertModel.objectId;
