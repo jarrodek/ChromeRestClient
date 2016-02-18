@@ -6,15 +6,17 @@ Polymer({
     ArcBehaviors.ArcControllerBehavior
   ],
   properties: {
-    version: String
+    version: {
+      type: String,
+      value: function() {
+        return chrome.runtime.getManifest().version;
+      }
+    }
   },
-  attached: function() {
-    this.version = chrome.runtime.getManifest().version;
+  onShow: function() {
+    this._setPageTitle('Advanced Rest Client Application');
   },
-  showLicensing: function() {
-    this.$.licensingDialog.open();
-  },
-  showDonate: function() {
-    this.$.donateDialog.open();
+  onHide: function() {
+    this._setPageTitle('');
   }
 });

@@ -23,7 +23,8 @@
     "chrome-app-filesystem": "jarrodek/chrome-app-filesystem#latest",
     "web-socket": "jarrodek/web-socket#latest",
     "chrome-storage":"Scarygami/chrome-storage#latest",
-    "code-mirror": "jarrodek/code-mirror#^1.0.0"
+    "code-mirror": "jarrodek/code-mirror#^1.0.0",
+    "lodash": "lodash/lodash#^4.5.0"
   },
   "devDependencies": {
     "web-component-tester": "*"

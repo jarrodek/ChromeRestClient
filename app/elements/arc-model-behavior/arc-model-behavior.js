@@ -75,6 +75,13 @@ ArcBehaviors.ArcModelBehavior = {
     direction: {
       type: String,
       value: 'asc'
+    },
+    /**
+     * To clear the whole store before calling `genericRemove()` set this to true.
+     */
+    forceDeleteAll: {
+      type: Boolean,
+      value: false
     }
   },
   /**
@@ -218,8 +225,8 @@ ArcBehaviors.ArcModelBehavior = {
    */
   genericRemove: function(table) {
     return arc.app.db.idb.open()
-      .then(function(db) {
-        return db.transaction('rw', db[table], function(table) {
+      .then((db) => {
+        return db.transaction('rw', db[table], (table) => {
             if (this.objectId) {
               if (this.objectId instanceof Array) {
                 let promises = [];
@@ -241,7 +248,11 @@ ArcBehaviors.ArcModelBehavior = {
               }
               return table.delete(this.data[keyPath]);
             }
-          }.bind(this))
+            if (this.forceDeleteAll) {
+              return table.toCollection().delete();
+            }
+            console.warn('nothing to delete...');
+          })
           .then(() => {
             this.set('data', null);
             this.set('objectId', null);
@@ -257,6 +268,6 @@ ArcBehaviors.ArcModelBehavior = {
           .finally(function() {
             db.close();
           });
-      }.bind(this));
+      });
   }
 };

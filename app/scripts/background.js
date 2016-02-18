@@ -6,7 +6,7 @@
  */
 chrome.app.runtime.onLaunched.addListener(function() {
   chrome.app.window.create(
-    'app/index.html#history', {
+    'app/index.html#about', {
       id: 'arc-window',
       bounds: {
         width: 800,

@@ -111,6 +111,13 @@ ArcBehaviors.ListControllerBehavior = {
       type: Boolean,
       value: false,
       computed: '_computeHasListData(listData)'
+    },
+    /**
+     * A search term from search bar.
+     */
+    searchQuery: {
+      type: String,
+      reflectToAttribute: true
     }
   },
   /**
@@ -121,7 +128,7 @@ ArcBehaviors.ListControllerBehavior = {
   },
   /** Compute if there are elements on the list */
   _computeHasListData: function(data) {
-    return !!data;
+    return !!data && data.length > 0;
   },
   /**
    * Child element should override this function to perform a query.
@@ -170,5 +177,16 @@ ArcBehaviors.ListControllerBehavior = {
     this.page = 0;
     this.hasMore = true;
     this._setQuerying(false);
-  }
+  },
+  /**
+   * Resets current query and perform a new query with new criteria.
+   */
+  onSearch: function() {
+    this.resetQuery();
+    this.queryPage();
+  },
+  /**
+   * Should be implemented by page controllers
+   */
+  onClearAll: function(e) { /* ... */ }
 };

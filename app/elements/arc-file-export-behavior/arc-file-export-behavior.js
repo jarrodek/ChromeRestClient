@@ -2,7 +2,7 @@
 
 window.ArcBehaviors = window.ArcBehaviors || {};
 /**
- * The `ArcBehaviors` contains a method to export data to file.
+ * The `ArcFileExportBehavior` contains a method to export data to file.
  * Include `arc-file-export-behavior.html` to your `elements.html` file.
  *
  * To handle a callback events implement the `onFileSaved` and `onFileError` in your component.

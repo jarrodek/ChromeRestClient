@@ -6,10 +6,58 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   -webkit-touch-callout: none;
 }
 
-html,body{
+html,
+body {
   height: 100%;
+}
+
+/* Search bar states */
+paper-toolbar[mode="search"] .toolbar-hide {
+  display: none;
+}
+
+paper-toolbar[mode="search"] .toolbar-hide[mode~=search] {
+  display: initial;
+}
+
+paper-toolbar[mode="search"] #search-bar {
+  display: flex;
+  flex: 1;
+}
+
+#mainSearchInput {
+  display: none;
+  background-color: transparent;
+  outline: none;
+  border: none;
+  font-size: 24px;
+  font-weight: 300;
+  font-family: Roboto, sans-serif;
+}
+
+paper-toolbar[mode="search"] #mainSearchInput {
+  display: initial;
+}
+/* Requesting features in main toolbar. */
+paper-toolbar > *[feature] {
+  display: none;
+}
+paper-toolbar[search] > *[feature="search"] {
+  display: initial;
+}
+paper-toolbar[open] > *[feature="open"] {
+  display: initial;
+}
+paper-toolbar[save] > *[feature="save"] {
+  display: initial;
+}
+paper-toolbar[export] > *[feature="export"] {
+  display: initial;
+}
+paper-toolbar[clearAll] > *[feature="clearAll"] {
+  display: initial;
 }

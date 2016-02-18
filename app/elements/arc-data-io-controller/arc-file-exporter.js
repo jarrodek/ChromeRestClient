@@ -82,11 +82,14 @@ Polymer({
     });
   },
 
-  onFileError: function() {
+  onFileError: function(e) {
     this.exportContent = null;
     this._setDataReady(true);
     this._setLoading(false);
     this._setExporting(true);
+    if (e.detail.message.indexOf('cancelled') !== -1) {
+      return;
+    }
     StatusNotification.notify({
       message: e.detail.message
     });

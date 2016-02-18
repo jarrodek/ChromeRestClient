@@ -47,9 +47,12 @@ Polymer({
     }
   },
 
-  // onShow: function() {
-  //
-  // },
+  onShow: function() {
+    this._setPageTitle('Socket');
+  },
+  onHide: function() {
+    this._setPageTitle('');
+  },
   /**
    * Message received handler.
    */

@@ -46,7 +46,7 @@ Polymer({
    * Ping server for session state on show.
    */
   onShow: function() {
-
+    this._setPageTitle('Data import / export');
   },
   /**
    * to be removed?

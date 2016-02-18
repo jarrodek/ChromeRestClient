@@ -227,14 +227,14 @@ An `arc-saved-list-view` element is a element responsible for displaying a list 
               <paper-tooltip for="deleteSelected">Delete selected</paper-tooltip>
             </div>
           </template>
-          <template is="dom-if" if="[[!hasSelectedItems]]">
+          <!-- <template is="dom-if" if="[[!hasSelectedItems]]">
             <paper-menu-button horizontal-align="right">
               <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
               <paper-menu class="dropdown-content">
                 <paper-item on-tap="_confirmClearSaved">Remove all</paper-item>
               </paper-menu>
             </paper-menu-button>
-          </template>
+          </template> -->
         </div>
         <div class="table-columns">
           <div class="checkbox-column" id="projectColumn">

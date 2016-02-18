@@ -227,20 +227,20 @@ An `arc-history-list-view` element is a element responsible for displaying a lis
               <paper-tooltip for="deleteSelected">Delete selected</paper-tooltip>
             </div>
           </template>
-          <template is="dom-if" if="[[!hasSelectedItems]]">
+          <!-- <template is="dom-if" if="[[!hasSelectedItems]]">
             <paper-menu-button horizontal-align="right">
               <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
               <paper-menu class="dropdown-content">
                 <paper-item on-tap="_confirmClearSaved">Remove all</paper-item>
               </paper-menu>
             </paper-menu-button>
-          </template>
+          </template> -->
         </div>
         <div class="table-columns">
           <div class="checkbox-column" id="projectColumn">
             <paper-checkbox checked="{{allChecked}}" on-tap="toggleAll"></paper-checkbox>
           </div>
-          <div class="name-column layout horizontal center" id="nameColumn" on-tap="sortColumn" data-sort="time" data-sortoption$="{{computeSortColumn(sort,dir,'time')}}">
+          <div class="name-column layout horizontal center" id="nameColumn" on-tap="sortColumn" data-sort="har.pages.0.startedDateTime" data-sortoption$="{{computeSortColumn(sort,dir,'har.pages.0.startedDateTime')}}">
             <iron-icon icon="arrow-drop-down"></iron-icon>Time
             <paper-ripple recenters></paper-ripple>
           </div>

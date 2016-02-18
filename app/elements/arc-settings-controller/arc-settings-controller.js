@@ -23,6 +23,15 @@ Polymer({
   observers: [
     '_onValueChange(values.*)'
   ],
+
+  onShow: function() {
+    this._setPageTitle('Settings');
+  },
+
+  onHide: function() {
+    this._setPageTitle('');
+  },
+
   ready: function() {
     if (!arc.app.settings || !arc.app.settings.getConfig) {
       throw new Error('The arc.app.settings library not ready');

@@ -32,8 +32,9 @@ the License.
     </style>
     <template is="dom-if" if="{{hasListData}}">
       <arc-history-list-view
+        is-history
         requests="{{listData}}"
-        on-clear-saved="_clearSavedStore"
+        on-clear-data="_clearDataStore"
         on-export-requested="_onExportRequested"
         on-delete-requested="_onDeleteRequested"
         on-content-scroll="_viewScrolling"
@@ -43,7 +44,7 @@ the License.
     <template is="dom-if" if="{{!hasListData}}">
       <arc-saved-list-empty></arc-saved-list-empty>
     </template>
-    <arc-request-object-model id="model" on-data-ready="_dataRead" on-error="_dbError" request-type="history" limit="[[limit]]" offset="[[offset]]" sort-by="[[sortBy]]" direction=[[sortDirection]]></arc-request-object-model>
+    <arc-request-object-model id="model" search-term="[[searchQuery]]" on-data-ready="_dataRead" on-error="_dbError" request-type="history" limit="[[limit]]" offset="[[offset]]" sort-by="[[sortBy]]" direction=[[sortDirection]]></arc-request-object-model>
     <arc-request-object-model id="saveModel" auto on-save="_requestSaved" request-type="history"></arc-request-object-model>
     <arc-request-object-model id="deleteModel" on-deleted="_selectedRemoved" on-error="_selectedRemoveError" request-type="history"></arc-request-object-model>
   </template>
