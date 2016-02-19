@@ -282,16 +282,76 @@ class SocketFetch {
        */
       started: false
     };
-    let port = this._connection.uri.port();
-    if (!port) {
-      let protocol = this._connection.uri.protocol();
-      if (protocol in this.protocol2port) {
-        port = this.protocol2port[protocol];
-      } else {
-        port = 80;
-      }
-      this._connection.uri.port(port);
-    }
+    /**
+     * A boolean property state represents the socket read status. It can be either:
+     * STATUS (0) - expecting the message is contain a status line
+     * HEADERS (1) - expecting the message is containing headers part of the message (headers are
+     * optional)
+     * BODY (2) - expecting to read a message body
+     * DONE (3) - message has been fully read. This status can be set by readSocketError function
+     * when server closes the connection.
+     */
+    this.state = 0;
+
+    /**
+     * A integer representing status code of the response.
+     *
+     * @type {Number}
+     */
+    this.status = undefined;
+    /**
+     * An optional string representing response status message
+     *
+     * @type {String}
+     */
+    this.statusMessage;
+    /**
+     * A read headers string. It may be incomplete if state equals HEADERS or STATUS.
+     *
+     * @type {String}
+     */
+    this.headers = '';
+    /**
+     * A read response body. It may be incomplete if readyState does not equals DONE.
+     *
+     * @type {Uint8Array}
+     */
+    this.body;
+    /**
+     * A shortcut for finding content-type header in a headers list. It can be either a getter
+     * function that is looking for a Content-Type header or a value set after headers are parsed.
+     *
+     * @type {String}
+     */
+    this.contentType;
+    /**
+     * As a shortcut for finding Content-Length header in a headers list. It can be either a
+     * getter function that is looking for a Content-Length header or a value set after headers
+     * are parsed.
+     *
+     * @type {Number}
+     */
+    this.contentLength;
+    /**
+     * A shortcut for finding Content-Length header in a headers list. It can be either a getter
+     * function that is looking for a Content-Length header or a value set after headers are parsed
+     *
+     * @type {Boolean}
+     */
+    this.chunked;
+    /**
+     * A flag determining that the response is chunked Transfer-Encoding. When Transfer-Encoding
+     * header is set to "chunked" then the response will be split in chunks. Every chunk starts
+     * with hex number of length in chunk followed by new line character (\r\n or CR or 13|10).
+     * Because message received by the socket most probably will have different buffer size, the
+     * `readSocketData()` function may contain more than one part of chunk or incomplete part of
+     * chunk.
+     *
+     * @type {Number}
+     */
+    this.chunkSize;
+
+    this._setupUrlData();
   }
   /**
    * Get a Request object.
@@ -315,6 +375,18 @@ class SocketFetch {
       'https': 443,
       'ftp': 21
     };
+  }
+  get STATUS() {
+    return 0;
+  }
+  get HEADERS() {
+    return 1;
+  }
+  get BODY() {
+    return 2;
+  }
+  get DONE() {
+    return 3;
   }
   /**
    * Returns new promise and perform a request.
@@ -506,16 +578,26 @@ class SocketFetch {
   }
 
   readSocketData(readInfo) {
+    console.log('readSocketData');
     if (this._connection.aborted) {
       return;
     }
     if (readInfo) {
-      this.log('has message', readInfo);
+      // it runs asynchroniusly so wait until message read finish.
+      chrome.sockets.tcp.setPaused(this._connection.socketId, true);
+      this._processSocketMessage(readInfo.data)
+        .then(() => {
+          chrome.sockets.tcp.setPaused(this._connection.socketId, false);
+        })
+        .catch((cause) => {
+          chrome.sockets.tcp.setPaused(this._connection.socketId, false);
+        });
     }
     //chrome.socket.read(this.socketId, null, this._readSocketData.bind(this));
   }
 
   readSocketError(info) {
+    console.log('readSocketError');
     if (info.socketId !== this._connection.socketId) {
       return;
     }
@@ -525,6 +607,201 @@ class SocketFetch {
     chrome.sockets.tcp.setPaused(this._connection.socketId, false);
   }
 
+  /**
+   * Process received message.
+   *
+   * @param {ArrayBuffer} data Received message.
+   */
+  _processSocketMessage(data) {
+    data = new Uint8Array(data);
+    this.log('has message', data);
+    return new Promise((resolve, reject) => {
+      if (this.state === this.DONE) {
+        resolve();
+        return;
+      }
+      if (this.state === this.STATUS) {
+        data = this._processStatus(data);
+        if (data === null) {
+          resolve();
+          return;
+        }
+      }
+      if (this.state === this.HEADERS) {
+        data = this._processHeaders(data);
+        if (data === null) {
+          resolve();
+          return;
+        }
+      }
+      if (this.state === this.BODY) {
+        data = this._processBody(data);
+        resolve();
+      }
+      throw new Error('Unknown state');
+    });
+  }
+  /**
+   * Read status line from the response.
+   * This function will set `status` and `statusMessage` fields
+   * and then will set `state` to HEADERS.
+   */
+  _processStatus(data) {
+    var index = this.indexOfSubarray(data, [13,10]);
+    var statusArray = data.subarray(0, index);
+    data = data.subarray(index + 2);
+    var statusLine = this.arrayBufferToString(statusArray);
+    statusLine = statusLine.replace(/HTTP\/\d(\.\d)?\s/, '');
+    status = statusLine.substr(0, statusLine.indexOf(' '));
+    try {
+      this.status = parseInt(status);
+    } catch (e) {
+      this.status = 0;
+    }
+    this.statusMessage = statusLine.substr(statusLine.indexOf(' ') + 1);
+    this.state = this.HEADERS;
+    return data;
+  }
+  _processHeaders(data) {
+    var index = this.indexOfSubarray(data, [13,10,13,10]);
+    if (index === -1) {
+      //end in next chunk
+      this.headers += this.arrayBufferToString(data);
+      return null;
+    }
+    var headersArray = data.subarray(0, index);
+    this.headers += this.arrayBufferToString(headersArray);
+    this._parseHeaders();
+    this.state = this.BODY;
+    data = data.subarray(index + 4);
+    if (data.length === 0) {
+      return null;
+    }
+    return data;
+  }
+  _processBody(data) {
+    if (this.chunked) {
+      console.log('CHUNKED');
+    } else {
+      if (!this.body) {
+        this.body = new Uint8Array(data.length);
+        this.body.set(data);
+      } else {
+        let len = this.body.length;
+        let sumLength = len + data.length;
+        let newArray = new Uint8Array(sumLength);
+        newArray.set(this.body);
+        newArray.set(data, len);
+        this.body = newArray;
+        if (newArray.subarray(sumLength - 4) === [13,10,13,10]) {
+          console.warn('aaaaaaaa');
+          this.onResponseReady();
+        } else if (newArray.length >= this.contentLength) {
+          console.warn('bbbbbbbb');
+          this.onResponseReady();
+        }
+      }
+    }
+  }
+  onResponseReady() {
+    console.log('READY');
+    this.state = this.DONE;
+    this.body = this.arrayBufferToString(this.body);
+    console.log(this.body);
+    //var response = new Response();
+    throw 'implement me :)';
+  }
+  /**
+   * This function assumes that all the headers has been read and it's just before changing
+   * the ststaus to BODY.
+   */
+  _parseHeaders() {
+    var list = this.headersToObject(this.headers);
+    this.log('Received headers list', list);
+    this.headers = new Headers(list);
+    if (this.headers.has('Content-Type')) {
+      this.contentType = this.headers.get('Content-Type');
+    }
+    if (this.headers.has('Content-Length')) {
+      this.contentLength = this.headers.get('Content-Length');
+    }
+    if (this.headers.has('Transfer-Encoding')) {
+      let te = this.headers.get('Transfer-Encoding');
+      if (tr === 'chunked') {
+        this.chunked = true;
+      }
+    }
+  }
+  /**
+   * Parse headers string and receive an object.
+   *
+   * @param {String} headersString A headers string as defined in the spec
+   * @return {Object} And object of key-value pairs where key is a
+   */
+  headersToObject(headersString) {
+    if (headersString === null || headersString.trim() === '') {
+      return [];
+    }
+    if (typeof headersString !== 'string') {
+      throw new Error('Headers must be a String.');
+    }
+    const result = {};
+    const headers = headersString.split(/[\r\n]/gim);
+
+    for (let i = 0, len = headers.length; i < len; i++) {
+      let line = headers[i].trim();
+      if (line === '') {
+        continue;
+      }
+      let _tmp = line.split(/[:\r\n]/i);
+      if (_tmp.length > 0) {
+        let obj = {
+          name: _tmp[0],
+          value: ''
+        };
+        if (_tmp.length > 1) {
+          _tmp.shift();
+          _tmp = _tmp.filter(function(element) {
+            return element.trim() !== '';
+          });
+          obj.value = _tmp.join(', ').trim();
+        }
+        if (obj.name in result) {
+          result[obj.name] += '; ' + obj.value;
+        } else {
+          result[obj.name] = obj.value;
+        }
+      }
+    }
+    return result;
+  }
+  /**
+   * @return Returns an index of first occurance of subArray sequence in inputArray or -1 if not
+   * found.
+   */
+  indexOfSubarray(inputArray, subArray) {
+    var result = -1;
+    var len = inputArray.length;
+    var subLen = subArray.length;
+    for (let i = 0; i < len; ++i) {
+      if (result !== -1) {
+        return result;
+      }
+      if (inputArray[i] !== subArray[0]) {
+        continue;
+      }
+      result = i;
+      for (let j = 1; j < subLen; j++) {
+        if (inputArray[i + j] === subArray[j]) {
+          result = i;
+        } else {
+          result = -1;
+          break;
+        }
+      }
+    }
+    return result;
+  }
   /**
    * Convert ArrayBuffer to readable form
    * @param {ArrayBuffer} buff
@@ -557,6 +834,19 @@ class SocketFetch {
       bufferView[i] = string.charCodeAt(i);
     }
     return buffer;
+  }
+
+  _setupUrlData() {
+    let port = this._connection.uri.port();
+    if (!port) {
+      let protocol = this._connection.uri.protocol();
+      if (protocol in this.protocol2port) {
+        port = this.protocol2port[protocol];
+      } else {
+        port = 80;
+      }
+      this._connection.uri.port(port);
+    }
   }
 
   getCodeMessage(code) {
