@@ -5,7 +5,7 @@
   "description": "The web developers helper program to create and test custom HTTP requests.",
   "version": "5.0.0",
   "version_name": "5.0.0-dev.0",
-  "minimum_chrome_version": "45",
+  "minimum_chrome_version": "47",
   "author": "Pawel Psztyc",
 
   "icons": {
