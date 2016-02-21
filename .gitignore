@@ -4,3 +4,4 @@
 **/war/WEB-INF/classes
 node_modules
 bower_components
+.vscode

@@ -19,8 +19,7 @@
     "unlimitedStorage",
     "identity",
     "syncFileSystem",
-    "clipboardWrite",
-    {
+    "clipboardWrite", {
       "fileSystem": ["write"]
     }
   ],

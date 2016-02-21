@@ -25,7 +25,8 @@
     "chrome-storage":"Scarygami/chrome-storage#latest",
     "code-mirror": "jarrodek/code-mirror#^1.0.0",
     "lodash": "lodash/lodash#^4.5.0",
-    "uri.js": "medialize/URI.js#^1.17.0"
+    "uri.js": "medialize/URI.js#^1.17.0",
+    "zlib": "imaya/zlib.js#^0.2.0"
   },
   "devDependencies": {
     "web-component-tester": "*"
