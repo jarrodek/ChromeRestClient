@@ -51,7 +51,20 @@ Polymer({
     /**
      * Current access token.
      */
-    accessToken: String
+    accessToken: String,
+    /**
+     * True when the user is not signed in to the Chrome.
+     */
+    notSignedIn: {
+      type: Boolean,
+      value: false
+    },
+    _signInChanged: {
+      type: Object,
+      value: function() {
+        return this._onSignInChanged.bind(this);
+      }
+    }
   },
 
   ready: function() {
@@ -59,14 +72,28 @@ Polymer({
     this._restore();
   },
 
+  attached: function() {
+    chrome.identity.onSignInChanged.addListener(this._signInChanged);
+  },
+
+  detached: function() {
+    chrome.identity.onSignInChanged.removeListener(this._signInChanged);
+  },
+
   _restore: function() {
-    this.authorize(false).then(function(accessToken) {
+    if (this.notSignedIn) {
+      return;
+    }
+    this.authorize(false).then((accessToken) => {
       if (!accessToken) {
         this._setAuthorized(false);
         return;
       }
       this._setTokenData(accessToken);
-    }.bind(this)).catch(function(e) {
+    }).catch((e) => {
+      if (this.notSignedIn) {
+        return;
+      }
       console.error('user-provider::restore', e);
     });
   },
@@ -96,24 +123,32 @@ Polymer({
    *    If false dialog will never show and function will result with token == null.
    */
   authorize: function(interactive) {
-    return new Promise(function(resolve, reject) {
+    if (this.notSignedIn) {
+      return Promise.reject({
+        'message': 'The user is not signed in.'
+      });
+    }
+    return new Promise((resolve, reject) => {
       try {
         let options = this._authOptions(interactive);
-        chrome.identity.getAuthToken(options, function(accessToken) {
+        chrome.identity.getAuthToken(options, (accessToken) => {
           if (chrome.runtime.lastError) {
             this._setAuthorized(false);
+            if (chrome.runtime.lastError.message === 'The user is not signed in.') {
+              this.notSignedIn = true;
+            }
             reject(chrome.runtime.lastError);
             return;
           }
           this._setTokenData(accessToken);
           this._setAuthorized(true);
           resolve(accessToken);
-        }.bind(this));
+        });
       } catch (e) {
         console.error(e);
         reject(e.message);
       }
-    }.bind(this));
+    });
   },
   /**
    * Construct an options for chrome.identity.getAuthToken function.
@@ -134,13 +169,14 @@ Polymer({
    * Revoke access token. The token will not work after this operation.
    */
   revokeToken: function() {
-    this.authorize(false).then(function(accessToken) {
+    this.authorize(false).then((accessToken) => {
       if (!accessToken) {
         this._setAuthorized(false);
         return;
       }
       this.$.revokeRequest.generateRequest();
-    }.bind(this)).catch(function(e) {
+    })
+    .catch((e) => {
       console.error('user-provider::restore', e);
     });
   },
@@ -148,10 +184,10 @@ Polymer({
    * A function to be called when the token has been revoked.
    */
   _tokenRevokedHandler: function() {
-    this._clearCache().then(function() {
+    this._clearCache().then(() => {
       this._setAuthorized(false);
       this.set('accessToken', null);
-    }.bind(this));
+    });
   },
   /**
    * Revoke error handler.
@@ -213,5 +249,9 @@ Polymer({
   _userDataError: function(error) {
     //TODO: error handling
     console.error('user-account::userDataError:', error);
+  },
+
+  _onSignInChanged: function(account, signedIn) {
+    this.set('notSignedIn', !signedIn);
   }
 });
