@@ -41,7 +41,7 @@ the License.
         querying="[[querying]]"></arc-saved-list-view>
     </template>
     <template is="dom-if" if="{{!hasListData}}">
-      <arc-saved-list-empty></arc-saved-list-empty>
+      <arc-saved-list-empty on-open-drive="openDrive"></arc-saved-list-empty>
     </template>
     <arc-request-object-model id="model" on-data-ready="_dataRead" search-term="[[searchQuery]]" on-error="_dbError" request-type="saved" limit="[[limit]]" offset="[[offset]]" sort-by="[[sortBy]]" direction=[[sortDirection]]></arc-request-object-model>
     <arc-request-object-model id="saveModel" auto on-save="_requestSaved" request-type="saved"></arc-request-object-model>

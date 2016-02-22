@@ -1,0 +1,64 @@
+<dom-module id="drive-controller">
+  <template>
+    <style>
+    :host {
+      display: block;
+      margin: 24px 40px;
+      -webkit-overflow-scrolling: touch;
+
+      background: var(--paper-dialog-background-color, --primary-background-color);
+      color: var(--paper-dialog-color, --primary-text-color);
+
+      @apply(--paper-font-body1);
+      @apply(--shadow-elevation-16dp);
+      @apply(--paper-dialog);
+
+    }
+    :host > h2 {
+      position: relative;
+      margin: 0;
+      @apply(--paper-font-title);
+
+      @apply(--paper-dialog-title);
+    }
+    :host .buttons {
+      position: relative;
+      padding: 8px 8px 8px 24px;
+      margin: 0;
+
+      color: var(--paper-dialog-button-color, --primary-color);
+
+      @apply(--layout-horizontal);
+      @apply(--layout-end-justified);
+    }
+    #threshold {
+      min-width: 600px;
+      min-height: 400px;
+    }
+    </style>
+    <h2>Select Drive file</h2>
+    <iron-scroll-threshold on-lower-threshold="loadMoreData" id="threshold">
+      <iron-list scroll-target="threshold" items="[[items]]" as="item">
+        <template>
+          <div tabindex$="[[tabIndex]]">
+            Name: [[item.name]]
+          </div>
+        </template>
+      </iron-list>
+    </iron-scroll-threshold>
+    <div class="buttons">
+      <paper-button dialog-dismiss>Cancel</paper-button>
+      <paper-button dialog-confirm>Accept</paper-button>
+    </div>
+    <iron-ajax
+      url="https://www.googleapis.com/drive/v3/files"
+      params="{{queryParams}}"
+      handle-as="json"
+      on-response="handleListResponse"
+      on-error="handleListError"
+      headers="{{authHeaders}}"
+      debounce-duration="300" id="query"></iron-ajax>
+    <user-provider auth-headers="{{authHeaders}}" id="userProvider" authorized="{{appAuthorized}}" access-token="{{accessToken}}" not-signed-in="{{notSignedIn}}"></user-provider>
+  </template>
+  <script src="drive-controller.js"></script>
+</dom-module>

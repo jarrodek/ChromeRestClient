@@ -47,7 +47,10 @@ Polymer({
     /**
      * Authorization headers for Google services.
      */
-    authHeaders: Object,
+    authHeaders: {
+      type: Object,
+      notify: true
+    },
     /**
      * Current access token.
      */
@@ -253,5 +256,6 @@ Polymer({
 
   _onSignInChanged: function(account, signedIn) {
     this.set('notSignedIn', !signedIn);
+    this._restore();
   }
 });
