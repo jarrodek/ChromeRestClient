@@ -37,6 +37,9 @@ window.addEventListener('initializeRouting', function() {
     app.route = 'request';
     app.params = ctx.params;
   });
+  page('/request/current', function(ctx) {
+    app.route = 'request';
+  });
 
   page('/history', function() {
     app.route = 'history';
@@ -53,7 +56,7 @@ window.addEventListener('initializeRouting', function() {
   page('/saved', function() {
     app.route = 'saved';
   });
-  
+
   page('/dataimport', function() {
     app.route = 'dataimport';
   });

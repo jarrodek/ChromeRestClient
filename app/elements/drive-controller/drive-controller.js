@@ -1,7 +1,12 @@
+/**
+ * TODO: View informing that the user is not signed in to Chrome
+ * TODO: Error message handling
+ */
 Polymer({
   is: 'drive-controller',
   behaviors: [
     Polymer.IronOverlayBehavior,
+    Polymer.IronResizableBehavior,
     ArcBehaviors.ListControllerBehavior
   ],
   hostAttributes: {
@@ -26,8 +31,26 @@ Polymer({
       type: Array,
       value: []
     },
-    nextPageToken: String
+    nextPageToken: String,
+    /**
+     * If true it will restore a request when the file data has been received automatically.
+     * If till fire file-ready otherwise
+     */
+    restoreOnFile: {
+      type: Boolean,
+      value: false
+    }
   },
+
+  // ready: function() {
+  //   var i = 500;
+  //   var res = [];
+  //   var result = [];
+  //   while (i--) {
+  //     result.push({name: 'aaaaa ' + i, 'createdTime': i});
+  //   }
+  //   this.set('items', result);
+  // },
 
   selectFile: function() {
     if (!this.appAuthorized) {
@@ -39,20 +62,22 @@ Polymer({
         console.error('Fix me pls.');
       });
     } else {
-      this.withBackdrop = true;
+      //this.withBackdrop = true;
       this.open();
-      this.loadMoreData();
+      if (!this.items || this.items.length === 0) {
+        this.loadMoreData();
+      }
     }
   },
 
   loadMoreData: function() {
-    if (!this.opened) {
+    if (!this.opened || this.loading) {
       return;
     }
-    //mimeType="application/restclient+data" and 
-    var q = `trashed = false`;
+    this.set('loading', true);
+    var q = `mimeType="application/restclient+data" and trashed = false`;
     if (this.query) {
-      q += ` and title contains '${this.query}'`;
+      q += ` and name contains '${this.query}'`;
     }
     var params = {
       'q': q,
@@ -70,13 +95,61 @@ Polymer({
   handleListResponse: function(e) {
     var response = this.$.query.lastResponse;
     if ('files' in response) {
-      this.items = this.items.concat(response.files);
+      this.set('items', this.items.concat(response.files));
+      this.refit();
     }
     if ('nextPageToken' in response) {
       this.nextPageToken = response.nextPageToken;
     }
+    this.set('loading', false);
   },
+
   handleListError: function(e) {
     console.log('handleListError', e);
+    this.set('loading', false);
+  },
+
+  _onSearch: function() {
+    this.debounce('query', function() {
+      this._resetQuery();
+    }, 300);
+  },
+
+  _resetQuery: function() {
+    this.nextPageToken = null;
+    this.items = [];
+    this.loadMoreData();
+  },
+
+  _fileSelected: function(e) {
+    this.set('loading', true);
+    this.set('fileId', e.detail.selected.id);
+    this.$.download.generateRequest();
+  },
+
+  _cancel: function() {
+    this.close();
+  },
+
+  handleDownloadResponse: function() {
+    var response = this.$.download.lastResponse;
+    let obj = arc.app.importer.normalizeRequest(response);
+    obj.type = 'drive';
+    this.set('loading', false);
+    this.close();
+    if (this.restoreOnFile) {
+      this.fire('restore-request', {
+        request: obj
+      });
+    } else {
+      this.fire('file-ready', {
+        file: obj
+      });
+    }
+  },
+
+  handleDownloadError: function() {
+    console.log('handleDownloadError', e);
+    this.set('loading', false);
   }
 });

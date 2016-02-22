@@ -67,6 +67,11 @@
     app.pageTitle = e.detail.title;
   });
 
+  document.body.addEventListener('restore-request', (e) => {
+    app.set('request', e.detail.request);
+    page('/request/current');
+  });
+
   /**
    * Read more about requesting features in ArcHasToolbarBehavior behavior file.
    */
@@ -76,7 +81,7 @@
     var list = e.detail.features;
     var bar = document.querySelector('#mainToolbar');
     list.forEach((feature) => {
-      bar.setAttribute(feature, true)
+      bar.setAttribute(feature, true);
       app.featuresMapping.set(feature, e.target);
     });
   });
