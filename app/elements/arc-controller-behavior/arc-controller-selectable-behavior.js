@@ -26,6 +26,7 @@ ArcBehaviors.ArcControllerSelectableBehaviorImpl = {
      */
     opened: {
       type: Boolean,
+      notify: true,
       observer: '_onOpenedChanged'
     }
   },

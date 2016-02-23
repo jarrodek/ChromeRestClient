@@ -1,0 +1,42 @@
+<dom-module id="url-input-editor">
+  <template>
+    <style>
+    :host {
+      @apply(--layout-vertical);
+      --paper-input-container-underline: {
+        background-color: transparent;
+      }
+    }
+
+    input::-webkit-input-placeholder {
+      color: var(--paper-input-container-color, --secondary-text-color);
+    }
+
+    .simple {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+    }
+
+    .main-input {
+      @apply(--layout-flex);
+      padding: 8px 0;
+    }
+    </style>
+    <div class="simple">
+      <paper-icon-button icon="hardware:keyboard-arrow-right"></paper-icon-button>
+      <paper-input-container class="flex" no-label-float>
+        <input is="iron-input" type="url" value="{{url::input}}" class="main-input" placeholder="Request URL" />
+      </paper-input-container>
+      <paper-menu-button horizontal-align="right" id="urlContextMenuButton">
+        <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
+        <paper-menu class="dropdown-content" id="urlContextMenu" on-iron-select="_contextMenuAction">
+          <paper-item data-action="encParamsAction">Encode parameters</paper-item>
+          <paper-item data-action="decParamsAction">Decode parameters</paper-item>
+          <paper-item data-action="replAmpAction">Replace "&amp;" with ";"</paper-item>
+          <paper-item data-action="replSemiAction">Replace ";" with "&amp;"</paper-item>
+        </paper-menu>
+      </paper-menu-button>
+    </div>
+  </template>
+  <script src="url-input-editor.js"></script>
+</dom-module>

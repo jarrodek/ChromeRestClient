@@ -23,22 +23,33 @@ window.addEventListener('initializeRouting', function() {
   });
 
   page('/', function() {
+    var params = {
+      'type': 'restore'
+    };
     app.route = 'request';
+    app.params = params;
   });
-  page('/request/saved/:savedId', function() {
+  page('/request/saved/:savedId', function(ctx) {
+    ctx.params.type = 'saved';
     app.route = 'request';
     app.params = ctx.params;
   });
-  page('/request/history/:historyId', function() {
+  page('/request/history/:historyId', function(ctx) {
+    ctx.params.type = 'history';
     app.route = 'request';
     app.params = ctx.params;
   });
   page('/request/project/:projectid', function(ctx) {
+    ctx.params.type = 'project';
     app.route = 'request';
     app.params = ctx.params;
   });
-  page('/request/current', function(ctx) {
+  page('/request/current', function() {
+    var params = {
+      'type': 'current'
+    };
     app.route = 'request';
+    app.params = params;
   });
 
   page('/history', function() {

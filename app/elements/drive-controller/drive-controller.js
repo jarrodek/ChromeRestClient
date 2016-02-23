@@ -135,6 +135,7 @@ Polymer({
     var response = this.$.download.lastResponse;
     let obj = arc.app.importer.normalizeRequest(response);
     obj.type = 'drive';
+    obj.id = this.fileId;
     this.set('loading', false);
     this.close();
     if (this.restoreOnFile) {
