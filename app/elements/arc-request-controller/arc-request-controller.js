@@ -10,13 +10,15 @@ Polymer({
     },
     request: {
       type: Object,
-      notify: true
+      notify: true,
+      observer: '_requestChanged'
     },
     response: {
       type: Object
     },
     routeParams: {
-      type: Object
+      type: Object,
+      observer: '_prepareRequest'
     },
 
   },
@@ -33,23 +35,31 @@ Polymer({
   },
 
   _prepareRequest: function() {
-    if (!this.opened) {
+    if (!this.opened || !this.routeParams) {
       return;
     }
-    if (this.request) {
-      return;
+    switch (this.routeParams.type) {
+      default:
+        this._restoreLatest();
+        break;
     }
+  },
 
+  _restoreLatest: function() {
+    this.$.latest.read();
   },
 
   _latestLoaded: function() {
-    // if (this.restoredSet) {
-    //   // infinite loop
-    //   return;
-    // }
-    if (!(this.request instanceof RequestObject)) {
-      this.set('request', new RequestObject(this.request));
-      this.restoredSet = true;
+    if (!this.$.latest.value) {
+      this.set('request', new RequestObject({
+        type: 'history',
+        url: '',
+        method: 'GET'
+      }));
     }
+  },
+
+  _requestChanged: function() {
+    console.log('_requestChanged', this.request);
   }
 });

@@ -1,3 +1,5 @@
+'use strict';
+
 Polymer({
   is: 'arc-request-view',
   properties: {
@@ -27,7 +29,8 @@ Polymer({
     if (!this.opened) {
       return;
     }
-    this.set('masterUrl', this.request.url);
+    var value = this.request ? this.request.url : undefined;
+    this.set('masterUrl', value);
     console.log('_requestChanged');
   },
 
@@ -38,7 +41,9 @@ Polymer({
     if (this.request.url === this.masterUrl) {
       return;
     }
-    this.request.har.entries[0].request.url = this.masterUrl;
+    if (this.request.har) {
+      this.request.har.entries[0].request.url = this.masterUrl;
+    }
     this.set('request.url', this.masterUrl);
     console.log('_masterUrlChanged', this.masterUrl);
   }

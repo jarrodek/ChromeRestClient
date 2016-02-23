@@ -22,7 +22,7 @@ the License.
       }
     </style>
     <content></content>
-    <chrome-storage type="local" name="latestRequest" value="{{request}}" on-load="_latestLoaded"></chrome-storage>
+    <chrome-storage auto id="latest" value-as="RequestObject" type="local" name="latestRequest" value="{{request}}" on-read="_latestLoaded"></chrome-storage>
   </template>
   <script src="arc-request-controller.js"></script>
 </dom-module>

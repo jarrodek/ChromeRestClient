@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * TODO: View informing that the user is not signed in to Chrome
  * TODO: Error message handling

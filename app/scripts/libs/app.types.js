@@ -325,6 +325,26 @@ class HistoryRequestObject extends RequestObject {
   }
 }
 /**
+ * A class of drive requests object.
+ * It's just a shorthand class, enlivenment for:
+ *
+ * @example <caption>Creating this class id the same as</caption>
+ * let ro = new RequestObject(...);
+ * ro.type = 'drive';
+ *
+ * @extends RequestObject
+ */
+// jshint unused:false
+class DriveRequestObject extends RequestObject {
+  constructor(opts) {
+    opts.type = 'drive';
+    super(opts);
+  }
+  toJSON() {
+    return super.toJSON();
+  }
+}
+/**
  * A class representing an entity in the data store with information about
  * Google Drive referenced items.
  *
@@ -584,3 +604,10 @@ class FileExport extends BaseObject {
     this.projects = opts.projects;
   }
 }
+
+window.RequestObject = RequestObject;
+window.SavedRequestObject = SavedRequestObject;
+window.HistoryRequestObject = HistoryRequestObject;
+window.DriveRequestObject = DriveRequestObject;
+window.ProjectObject = ProjectObject;
+window.FileExport = FileExport;
