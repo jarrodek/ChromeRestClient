@@ -351,7 +351,7 @@ class URLParser {
       result += '?' + this._query;
     }
     if (this.anchor && this.anchor.trim() !== '') {
-      result += this.anchor;
+      result += '#' + this.anchor;
     }
     return result;
   }

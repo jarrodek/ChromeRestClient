@@ -50,34 +50,38 @@ Polymer({
       // no schema, adding "http" by default
       url = 'http://' + url;
     }
-    if (url.substr(-1) === '/') { //trim last '/'
-      url = url.substr(0, url.length - 1);
+    if (url.substr(-1) !== '/') {
+      url += '/';
     }
     var path = this.pathValue;
-    if (path && path[0] !== '/') {
-      path = '/' + path;
+    if (path) {
+      if (path[0] === '/') {
+        path = path.substr(1);
+      }
+      url += path;
     }
-    url += path;
-    if (this.paramsList.length > 0) {
-      url += '?';
+    var params = '';
+    if (this.paramsList && this.paramsList.length > 0) {
+      this.paramsList.forEach((item, index) => {
+        if (!item.name) {
+          return;
+        }
+        if (index > 0) {
+          params += '&';
+        }
+        params += item.name;
+        if (item.value) {
+          params += '=' + item.value;
+        }
+      });
     }
-    this.paramsList.forEach((item, index) => {
-      if (!item.name) {
-        return;
-      }
-      if (index > 0) {
-        url += '&';
-      }
-      url += item.name;
-      if (item.value) {
-        url += '=' + item.value;
-      }
-    });
+    if (params) {
+      url += '?' + params;
+    }
 
     if (this.anchorValue) {
       url += '#' + this.anchorValue;
     }
-    // console.log(url);
     this.set('url', url);
   },
 

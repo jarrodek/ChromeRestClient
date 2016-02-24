@@ -1,13 +1,13 @@
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,7 +15,7 @@
  * the License.
  ******************************************************************************/
 
-/** 
+/**
  * A parser for headers.
  */
 
@@ -31,12 +31,12 @@ arc.app = arc.app || {};
  * A namespace for headers parser.
  */
 arc.app.headers = {};
-/** 
- * Filter array of headers and return not duplicated array of the same headers. 
- * Duplicated headers should be appended to already found one using coma separator. 
+/**
+ * Filter array of headers and return not duplicated array of the same headers.
+ * Duplicated headers should be appended to already found one using coma separator.
  *
- * @param {Array} headers 
- *                Headers array to filter. All objects in headers array must have "name" 
+ * @param {Array} headers
+ *                Headers array to filter. All objects in headers array must have "name"
  *                and "value" keys.
  * @return {Array} An array of filtered headers.
  */
@@ -44,7 +44,7 @@ arc.app.headers.filter = function(headers) {
   var _tmp = {};
   headers.forEach((header) => {
     if (header.name in _tmp) {
-      if (header.value && header.value.trim() !== '') {
+      if (!!header.value) {
         _tmp[header.name] += ', ' + header.value;
       }
     } else {
@@ -94,7 +94,8 @@ arc.app.headers.toString = function(headersArray) {
  * Parse HTTP headers input from string to array of a key:value pairs objects.
  *
  * @param {String} headersString Raw HTTP headers input
- * @returns {Array} The array of key:value objects
+ * @returns {Array<Object>} The array of objects where properties are `name` as a header name and
+ * `value` as a header content.
  */
 arc.app.headers.toJSON = function(headersString) {
   if (headersString === null || headersString.trim() === '') {
