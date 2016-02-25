@@ -28,6 +28,10 @@ Polymer({
     queryParams: {
       type: Object
     },
+    /**
+     * File search term entered by the user.
+     */
+    query: String,
     authHeaders: Object,
     items: {
       type: Array,
@@ -41,6 +45,13 @@ Polymer({
     restoreOnFile: {
       type: Boolean,
       value: false
+    },
+    /**
+     * Drive file ID.
+     */
+    fileId: {
+      type: String,
+      notify: true
     }
   },
 

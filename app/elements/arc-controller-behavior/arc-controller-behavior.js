@@ -33,7 +33,7 @@ window.ArcBehaviors = window.ArcBehaviors || {};
  * (https://github.com/PolymerElements/neon-animation/issues/130) it can't be done right now.
  * This function is called synchronously so async tasks will not work here.
  *
- * @polymerBehavior ArcControllerBehavior
+ * @polymerBehavior ArcBehaviors.ArcControllerBehavior
  */
 ArcBehaviors.ArcControllerBehaviorImpl = {
 

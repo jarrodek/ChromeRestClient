@@ -98,35 +98,32 @@ arc.app.headers.toString = function(headersArray) {
  * `value` as a header content.
  */
 arc.app.headers.toJSON = function(headersString) {
-  if (headersString === null || headersString.trim() === '') {
+  if (!headersString || headersString.trim() === '') {
     return [];
   }
   if (typeof headersString !== 'string') {
     throw new Error('Headers must be an instance of String.');
   }
   const result = [];
-  const headers = headersString.split(/[\r\n]/gim);
+  const headers = headersString.split(/\n/gim);
 
   for (let i = 0, len = headers.length; i < len; i++) {
     let line = headers[i].trim();
     if (line === '') {
       continue;
     }
-    let _tmp = line.split(/[:\r\n]/i);
-    if (_tmp.length > 0) {
-      let obj = {
-        name: _tmp[0],
-        value: ''
-      };
-      if (_tmp.length > 1) {
-        _tmp.shift();
-        _tmp = _tmp.filter(function(element) {
-          return element.trim() !== '';
-        });
-        obj.value = _tmp.join(', ').trim();
-      }
-      result[result.length] = obj;
+    let sepPosition = line.indexOf(':');
+    if (sepPosition === -1) {
+      result[line] = '';
+      continue;
     }
+    let name = line.substr(0, sepPosition);
+    let value = line.substr(sepPosition + 1).trim();
+    let obj = {
+      name: name,
+      value: value
+    };
+    result.push(obj);
   }
   return result;
 };

@@ -6,7 +6,8 @@ Polymer({
     requests: Object,
     selected: Object,
     sort: String,
-    dir: String
+    dir: String,
+    allChecked: Boolean
   },
   importTap: function() {
     var selected = this.requests.filter(function(item) {

@@ -3,7 +3,7 @@ window.ArcBehaviors = window.ArcBehaviors || {};
 /**
  * Behavior for common functions between saved and history controllers.
  *
- * @polymerBehavior
+ * @polymerBehavior ArcBehaviors.RequestsListControllerBehavior
  */
 ArcBehaviors.RequestsListControllerBehavior = {
   properties: {

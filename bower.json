@@ -32,5 +32,6 @@
   "devDependencies": {
     "web-component-tester": "*"
   },
-  "ignore": []
+  "ignore": [],
+  "main": "app/index.html"
 }

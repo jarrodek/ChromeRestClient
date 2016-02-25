@@ -111,7 +111,12 @@ Object.defineProperty(arc.app.utils, 'appVer', {
     if (arc.app.utils._appVer) {
       return arc.app.utils._appVer;
     }
-    arc.app.utils._appVer = chrome.runtime.getManifest().version;
+    if (!chrome || !chrome.runetime || !chrome.runtime.getManifest) {
+      //testing
+      arc.app.utils._appVer = '5.0.5-test';
+    } else {
+      arc.app.utils._appVer = chrome.runtime.getManifest().version;
+    }
     return arc.app.utils._appVer;
   },
 

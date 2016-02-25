@@ -4,7 +4,7 @@ window.ArcBehaviors = window.ArcBehaviors || {};
 /**
  * The `RequestsListViewBehavior` contains a method for fiews that contain a list of requests.
  *
- * @polymerBehavior RequestsListViewBehavior
+ * @polymerBehavior ArcBehaviors.RequestsListViewBehavior
  */
 ArcBehaviors.RequestsListViewBehaviorImpl = {
   properties: {
