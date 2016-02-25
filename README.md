@@ -23,20 +23,18 @@ npm install && bower install
 ```
 Take a coffee break. It will take a while...
 
-After you have all dependencies installed the is a very important step: [crisper][2] the bower components directory. Chrome Apps require strict CSP compliance. It means that no JavaScript code can be included into HTML file. `paper-*` and `iron-*` elements, however, have a lot of JavaScript code inside HTML that we need to move to external file.
-
-Run following command
-```shell
-gulp crisper-bower
-```
-
-Well, the app is ready to develop / preview. You can either load the app from [chrome://extensions/][3] page (check "Developer mode" check box) or run command:
+Well, the app is ready to develop / preview. You can either load the app from chrome://extensions/ page (check "Developer mode" check box) or run command:
 ```shell
 npm run arc
 ```
 
 Thanks for testing and don't forget to file an issue report if you find a bug.
 
+If you run into trouble caused by CSP environment you can run following command:
+```shell
+gulp crisper-bower
+```
+This will [crisper][2] the `bower_components` directory and make the app working again.
+
  [1]: https://docs.npmjs.com/getting-started/installing-node "Install Node.js"
  [2]: https://github.com/PolymerLabs/crisper "Crisper for Polymer"
- [3]: chrome://extensions/ "Apps listing"

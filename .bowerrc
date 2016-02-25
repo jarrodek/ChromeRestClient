@@ -1,3 +1,6 @@
 {
-  "analytics": true
+  "analytics": true,
+  "scripts": {
+    "postinstall": "gulp crisper-bower"
+  }
 }
