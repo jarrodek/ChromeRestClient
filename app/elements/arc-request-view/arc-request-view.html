@@ -26,6 +26,7 @@ the License.
     <url-input-editor url="{{masterUrl}}"></url-input-editor>
     <method-selector method="{{request.method}}" is-payload="{{isPayload}}" content-type="{{contentType}}"></method-selector>
     <headers-editor is-payload="{{isPayload}}" content-type="{{contentType}}" headers="{{requestHeaders}}" on-headers-changed="_headersChanged"></headers-editor>
+    <payload-editor hidden$="{{!isPayload}}" content-type="{{contentType}}" value="{{request.payload}}"></payload-editor>
   </template>
   <script src="arc-request-view.js"></script>
 </dom-module>

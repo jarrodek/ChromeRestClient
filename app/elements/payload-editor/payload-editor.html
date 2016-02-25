@@ -1,0 +1,36 @@
+<dom-module id="payload-editor">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 0 12px;
+        position: relative;
+
+        --code-mirror-editor: {
+          font-size: 15px;
+          height: inherit;
+          min-height: 60px;
+          padding: 8px;
+        };
+        --code-mirror-wrapper: {
+          border: 1px #f5f5f5 solid;
+        };
+      }
+    </style>
+    <paper-tabs selected="{{tabSelected}}" id="tabs">
+      <paper-tab>Raw payload</paper-tab>
+      <paper-tab hidden$="[[!withForm]]">Data form</paper-tab>
+      <paper-tab>Files</paper-tab>
+    </paper-tabs>
+    <iron-pages selected="{{tabSelected}}">
+      <section>
+        <code-mirror mode="application/json" on-change="valueChanged" value="{{value}}" id="cm"></code-mirror>
+      </section>
+      <section hidden$="[[!withForm]]">
+        <h3>This form helps you fill payload value as a form of <b>x-www-form-urlencoded</b> content type.</h3>
+        form
+      </section>
+    </iron-pages>
+  </template>
+  <script src="payload-editor.js"></script>
+</dom-module>
