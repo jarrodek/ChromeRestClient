@@ -31,7 +31,7 @@ Polymer({
     this._setPageTitle('');
   },
   onClearAll: function() {
-
+    console.error('Implement me');
   },
 
   _prepareRequest: function() {

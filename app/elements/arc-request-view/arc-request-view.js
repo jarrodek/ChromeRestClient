@@ -33,7 +33,7 @@ Polymer({
      */
     contentType: {
       type: String,
-      value: 'application/json',
+      // value: 'application/json',
       notify: true
     },
 
@@ -54,8 +54,11 @@ Polymer({
     }
     var urlValue = this.request ? this.request.url : undefined;
     this.set('masterUrl', urlValue);
-
-    console.log('_requestChanged deep in path', changes);
+    var headers = this.request ? this.request.headers : '';
+    this.set('requestHeaders', headers);
+    var ct = arc.app.headers.getContentType(headers);
+    this.set('contentType', ct);
+    //console.log('_requestChanged deep in path', changes);
   },
 
   _masterUrlChanged: function() {

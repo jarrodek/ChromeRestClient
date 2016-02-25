@@ -37,7 +37,15 @@ Polymer({
       value: []
     }
   },
-
+  ready: function() {
+    this.$.cm.setOption('extraKeys', {
+      'Ctrl-Space': function(cm) {
+        CodeMirror.showHint(cm, CodeMirror.hint['http-headers'], {
+          container: Polymer.dom(this.root)
+        });
+      }.bind(this)
+    });
+  },
   valueChanged: function(e) {
     this._detectContentType();
   },
