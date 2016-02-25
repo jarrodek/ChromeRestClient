@@ -35,6 +35,6 @@
   "ignore": [],
   "main": "app/index.html",
   "resolutions": {
-    "lodash": "lodash/lodash#^4.5.0"
+    "lodash": "^4.5.0"
   }
 }
