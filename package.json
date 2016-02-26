@@ -6,6 +6,7 @@
     "test": "gulp test",
     "arc": "node bin/install.js"
   },
+  "main": "app/index.html",
   "devDependencies": {
     "babel-preset-es2015": "^6.3.13",
     "connect-modrewrite": "^0.8.5",

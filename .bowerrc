@@ -1,5 +1,6 @@
 {
   "analytics": true,
+  "directory": "app/bower_components/",
   "scripts": {
     "postinstall": "gulp crisper-bower"
   }

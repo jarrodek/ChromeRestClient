@@ -82,13 +82,13 @@ gulp.task('crisper-elements', function() {
  * Make all bower_components CSP ready
  */
 gulp.task('crisper-bower', function() {
-  gulp.src('bower_components/**/*.html')
+  gulp.src('app/bower_components/**/*.html')
     .pipe(crisper({
       scriptInHead: false,
       onlySplit: false,
       alwaysWriteScript: false
     }))
-    .pipe(gulp.dest('bower_components/'));
+    .pipe(gulp.dest('app/bower_components/'));
 });
 
 gulp.task('connect', function() {
@@ -99,7 +99,7 @@ gulp.task('connect', function() {
     middleware: function() {
       return [
         modRewrite([
-          '^/app/bower_components/(.*)$ /bower_components/$1 [L]',
+          //'^/app/bower_components/(.*)$ /bower_components/$1 [L]',
         ])
       ];
     }

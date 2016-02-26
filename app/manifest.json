@@ -76,13 +76,13 @@
   "app": {
     "background": {
       "scripts": [
-        "app/scripts/libs/app.polifils.js",
+        "scripts/libs/app.polifils.js",
         "bower_components/dexie-js/dist/latest/Dexie.min.js",
         "bower_components/har/build/har.js",
-        "app/scripts/libs/app.utils.js",
-        "app/scripts/libs/app.types.js",
-        "app/scripts/libs/app.db.idb.js",
-        "app/scripts/background.js"
+        "scripts/libs/app.utils.js",
+        "scripts/libs/app.types.js",
+        "scripts/libs/app.db.idb.js",
+        "scripts/background.js"
       ]
     }
   }
