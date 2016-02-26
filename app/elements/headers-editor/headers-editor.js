@@ -37,6 +37,9 @@ Polymer({
       value: []
     }
   },
+  observers: [
+    '_headerValuesChanged(headersList.*)'
+  ],
   ready: function() {
     this.$.cm.setOption('extraKeys', {
       'Ctrl-Space': function(cm) {
@@ -48,6 +51,56 @@ Polymer({
   },
   valueChanged: function(e) {
     this._detectContentType();
+  },
+
+  /**
+   * Insert a Content-Type header into a headers list if it is not on the list already.
+   *
+   * This function uses `contentType` value for the header.
+   * If it is not defined then an warning message will be shown.
+   */
+  ensureContentTypeHeader: function() {
+    var arr = arc.app.headers.toJSON(this.headers);
+    var ct = arc.app.headers.getContentType(arr);
+    if (!!ct) {
+      return;
+    }
+    if (!this.contentType) {
+      this.displayWarning('content-type-missing');
+      return;
+    }
+    arr.push({
+      name: 'Content-Type',
+      value: this.contentType
+    });
+    var headers = arc.app.headers.toString(arr);
+    this.set('headers', headers);
+  },
+  /**
+   * Display a dialog with error message.
+   *
+   * @param {String} type A predefined type to display.
+   */
+  displayWarning: function(type) {
+    console.warn('Content type header not present but it should be.');
+  },
+  /**
+   * Update headers array from form values to the HTTP string.
+   */
+  updateHeaders: function() {
+    if (!this.headersList) {
+      return;
+    }
+    var headers = arc.app.headers.toString(this.headersList);
+    this.set('headers', headers);
+  },
+
+  appendEmptyHeader: function() {
+    var item = {
+      name: '',
+      value: ''
+    };
+    this.push('headersList', item);
   },
 
   _detectContentType: function() {
@@ -100,47 +153,17 @@ Polymer({
     var headers = arc.app.headers.toString(arr);
     this.set('headers', headers);
   },
-  /**
-   * Insert a Content-Type header into a headers list if it is not on the list already.
-   *
-   * This function uses `contentType` value for the header.
-   * If it is not defined then an warning message will be shown.
-   */
-  ensureContentTypeHeader: function() {
-    var arr = arc.app.headers.toJSON(this.headers);
-    var ct = arc.app.headers.getContentType(arr);
-    if (!!ct) {
-      return;
-    }
-    if (!this.contentType) {
-      this.displayWarning('content-type-missing');
-      return;
-    }
-    arr.push({
-      name: 'Content-Type',
-      value: this.contentType
-    });
-    var headers = arc.app.headers.toString(arr);
-    this.set('headers', headers);
-  },
-  /**
-   * Display a dialog with error message.
-   *
-   * @param {String} type A predefined type to display.
-   */
-  displayWarning: function(type) {
-    console.warn('Content type header not present but it should be.');
-  },
   /** Called when tab selection changed */
   _selectedTabChanged: function() {
     switch (this.tabSelected) {
-      case 0 :
+      case 0:
         this.updateHeaders();
-      break;
-      case 1 :
+        this.$.cm.editor.refresh();
+        break;
+      case 1:
         var arr = arc.app.headers.toJSON(this.headers);
         this.set('headersList', arr);
-      break;
+        break;
     }
   },
 
@@ -149,23 +172,28 @@ Polymer({
     this.splice('headersList', index, 1);
     this.updateHeaders();
   },
-  /**
-   * Update headers array from form values to the HTTP string.
-   */
-  updateHeaders: function() {
-    if (!this.headersList) {
+
+  _headerValuesChanged: function(record) {
+    // if path == 'headersList' it means the object was initialized.
+    if (!record || !record.path || record.path === 'headersList') {
       return;
     }
-    var headers = arc.app.headers.toString(this.headersList);
-    this.set('headers', headers);
+    this.updateHeaders();
   },
+  /** Called when headers form has renederd. */
+  _onHeadersFormRender: function() {
+    if (!this.root) {
+      return;
+    }
+    var row = Polymer.dom(this.root).querySelectorAll('.headers-list .form-row');
+    if (!row || !row.length) {
+      return;
+    }
+    row = row.pop();
+    try {
+      row.children[0].children[0].focus();
+    } catch (e) {
 
-  appendEmptyHeader: function() {
-    var item = {
-      name: '',
-      value: ''
-    };
-    this.push('headersList', item);
+    }
   }
-
 });

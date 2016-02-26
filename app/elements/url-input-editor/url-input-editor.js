@@ -217,7 +217,7 @@ Polymer({
     var url = data.toString();
     this.set('url', url);
   },
-
+  /** Called when URL params form has renederd. */
   _onParamsRender: function() {
     if (!this.root) {
       return;
@@ -232,6 +232,5 @@ Polymer({
     } catch (e) {
 
     }
-    console.log('_onParamsRender');
   }
 });

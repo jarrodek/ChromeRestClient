@@ -9,6 +9,13 @@
         --code-mirror-wrapper: {
           border: 1px #f5f5f5 solid;
         };
+
+        --paper-input-container-underline: {
+          background-color: var(--google-grey-100);
+        }
+      }
+      input::-webkit-input-placeholder {
+        color: var(--paper-input-container-color, --secondary-text-color);
       }
       .headers-title {
         @apply(--paper-font-caption);
@@ -18,7 +25,9 @@
         @apply(--layout-horizontal);
         @apply(--layout-flex);
       }
-
+      .header-name {
+        margin-right: 12px;
+      }
       .header-value {
         @apply(--layout-flex);
       }
@@ -54,7 +63,7 @@
       </section>
       <section class="headers-list">
         <label class="headers-title">HTTP headers</label>
-        <template is="dom-repeat" id="headersList" items="{{headersList}}">
+        <template is="dom-repeat" id="headersList" items="{{headersList}}" on-dom-change="_onHeadersFormRender">
           <div class="form-row">
             <paper-input-container class="header-name" no-label-float inline>
               <input is="iron-input" type="text" value="{{item.name::input}}" placeholder="Header name"/>
