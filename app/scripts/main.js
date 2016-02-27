@@ -121,6 +121,20 @@
   };
   // called when any component want to change request link.
   document.body.addEventListener('action-link-change', (e) => {
-    app.set('request.url', e.detail.url);
+    var url = e.detail.url;
+    if (app.request.url && url.indexOf('/') === 0) {
+      let p = new URLParser(app.request.url);
+      url = p.protocol + '://' + p.authority + url;
+      app.set('request.url', url);
+    } else {
+      app.set('request.url', url);
+    }
+
   });
+  // called when any component want to write to clipboard.
+  document.body.addEventListener('clipboard-write', (e) => {
+    var data = e.detail.data;
+    arc.app.clipboard.write(data);
+  });
+
 })(document, window);

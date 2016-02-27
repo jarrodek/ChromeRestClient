@@ -41,7 +41,7 @@ Polymer({
     result.statusText = response.statusText;
     result.redirects = Array.from(response.redirects);
     result.stats = response.stats;
-    var ct = arc.app.headers.getContentType(response.headers);
+    var ct = response.headers ? response.headers.get('content-type') : null;
     if (ct && ct.indexOf('image') !== -1) {
       response.blob()
       .then((blob) => {

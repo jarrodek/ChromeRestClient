@@ -22,6 +22,7 @@ the License.
       }
     </style>
     <arc-response-status-view loading-time="[[loadingTime]]" status-code="[[response.status]]" status-message="[[response.statusText]]" response-headers="[[response.headers]]" redirect-data="[[response.redirects]]"></arc-response-status-view>
+    <arc-response-payload-view payload="[[response.body]]" headers="[[response.headers]]"></arc-response-payload-view>
   </template>
   <script src="arc-response-view.js"></script>
 </dom-module>

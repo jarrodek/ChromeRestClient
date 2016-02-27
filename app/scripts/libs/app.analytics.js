@@ -17,14 +17,20 @@
 /* global fetch, analytics */
 /**
  * Advanced Rest Client namespace
+ *
+ * @namespace
  */
 var arc = arc || {};
 /**
  * ARC app's namespace
+ *
+ * @namespace
  */
 arc.app = arc.app || {};
 /**
  * A namespace for the Google Analytics tasks.
+ *
+ * @namespace
  */
 arc.app.analytics = arc.app.analytics || {};
 /**

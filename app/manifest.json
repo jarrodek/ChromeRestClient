@@ -19,13 +19,14 @@
     "unlimitedStorage",
     "identity",
     "syncFileSystem",
-    "clipboardWrite", {
+    {
       "fileSystem": ["write"]
     }
   ],
 
   "optional_permissions": [
-    "notifications"
+    "clipboardWrite",
+    "history"
   ],
 
   "commands": {

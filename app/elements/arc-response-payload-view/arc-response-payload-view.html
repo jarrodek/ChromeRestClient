@@ -1,0 +1,53 @@
+<html>
+  <head></head>
+  <body>
+    <dom-module id="arc-response-payload-view">
+      <template>
+        <style>
+          :host {
+            display: block;
+          }
+          .raw-content {
+            margin: 2px 0px;
+            overflow: auto;
+            font-family: monospace;
+            font-size: 13px;
+            -webkit-user-select: text;
+          }
+          .raw-content.wrap {
+            white-space: pre-wrap;
+          }
+          paper-icon-button[active] {
+            background-color: #BDBDBD;
+          }
+        </style>
+        <paper-tabs selected="{{selectedTab}}">
+          <paper-tab>Raw</paper-tab>
+          <paper-tab>Parsed</paper-tab>
+          <paper-tab>JSON</paper-tab>
+          <paper-tab>XML</paper-tab>
+          <paper-tab>Image</paper-tab>
+        </paper-tabs>
+        <iron-pages selected="{{selectedTab}}">
+          <section>
+            <div class="actions-panel">
+              <paper-icon-button title="Wrap or unwrap text" icon="editor:wrap-text" toggles on-tap="_toggleTextWrap"></paper-icon-button>
+              <paper-icon-button title="Copy content to clipboard" icon="content-copy" on-tap="_clipboardCopy"></paper-icon-button>
+              <paper-icon-button title="Save content to file" icon="save" on-tap="_saveFile"></paper-icon-button>
+            </div>
+            <div id="rawContent" class="raw-content">[[raw]]</div>
+          </section>
+          <section>
+            <code-highlight code="[[raw]]" mode="[[parsedMode]]"></code-highlight>
+          </section>
+          <section>
+            <json-viewer id="jsonViewer"></json-viewer>
+          </section>
+          <section></section>
+          <section></section>
+        </iron-pages>
+      </template>
+    </dom-module>
+    <script src="arc-response-payload-view.js"></script>
+  </body>
+</html>

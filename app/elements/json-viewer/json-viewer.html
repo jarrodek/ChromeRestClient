@@ -1,0 +1,107 @@
+<html>
+  <head></head>
+  <body>
+    <dom-module id="json-viewer">
+      <template>
+        <style>
+          :host {
+            display: block;
+            font-family: monospace;
+            font-size: 10pt;
+            color: black;
+            cursor: text;
+            -webkit-user-select: text;
+          }
+          .prettyPrint {}
+
+          .numeric,
+          .nullValue,
+          .booleanValue,
+          .stringValue,
+          .keyName {}
+
+          .stringValue {
+            white-space: normal;
+          }
+
+          .brace {
+            display: inline-block;
+          }
+
+          .numeric {
+            color: blue;
+          }
+
+          .nullValue {
+            color: #708;
+          }
+
+          .booleanValue {
+            color: #708;
+          }
+
+          .punctuation {
+            color: black;
+          }
+
+          .stringValue {
+            color: #48A;
+          }
+
+          .node {
+            position: relative;
+            white-space: nowrap;
+            margin-bottom: 5px;
+            word-wrap: break-word;
+          }
+
+          .arrayCounter {
+            color: gray;
+            font-size: 11px;
+          }
+          .arrayCounter:before {
+            /* 	content: "size"; */
+          }
+
+          .keyName {
+            color: rgb(206, 123, 0);
+          }
+
+          .rootElementToggleButton {
+            position: absolute;
+            top: 0;
+            left: -9px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: bold;
+          }
+
+          .arrayKeyNumber {
+            color: rgb(119, 119, 119);
+          }
+
+          .infoRow {
+            display: none;
+            margin: 0 7px;
+            text-indent: 0;
+          }
+
+          div[data-expanded="false"] div[collapse-indicator] {
+            display: inline-block !important;
+          }
+
+          div[data-expanded="false"] div[data-element] {
+            display: none !important;
+          }
+
+        </style>
+        <paper-spinner active="[[working]]"></paper-spinner>
+        <div class="error" hidden$="[[!isError]]">
+          <p>There was an error parsing JSON data</p>
+        </div>
+        <output id="output" hidden$="[[!showOutput]]" on-tap="_handleDisplayClick"></output>
+      </template>
+    </dom-module>
+    <script src="json-viewer.js"></script>
+  </body>
+</html>
