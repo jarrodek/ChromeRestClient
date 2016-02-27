@@ -9,10 +9,6 @@ Polymer({
     },
     statusMessage: String,
     loadingTime: Number,
-    requestHeaders: {
-      type: Array,
-      observer: '_requestHeadersChanged'
-    },
     responseHeaders: {
       type: Array,
       observer: '_responseHeadersChanged'
@@ -39,27 +35,33 @@ Polymer({
     return cls;
   },
   _statusCodeChanged: function() {
-    if (this.statusCode === 0) {
+    if (!this.statusCode) {
       this._scdTitle = 'No response';
       this._scdBody = 'The response was empty';
       return;
     }
-    arc.app.db.websql.getStatusCode(this.statusCode)
-      .then(function(result) {
-        if (result && result.label) {
-          this._scdTitle = this.statusCode + ': ' + result.label;
-        } else {
-          this._scdTitle = 'Status code: ' + this.statusCode;
-        }
-        if (result && result.desc) {
-          this._scdBody = result.desc;
-        } else {
-          this._scdBody = 'There is no definition for this status code in the application :(';
-        }
-      }.bind(this), function() {
-        this._scdTitle = 'Status code: ' + this.statusCode;
-        this._scdBody = 'There is no definition for this status code in the application :(';
-      }.bind(this));
+    this.$.statusModel.objectId = this.statusCode;
+    this.$.statusModel.query();
+  },
+
+  _onStatusInfoReady: function(e) {
+    var result = e.detail.data;
+    console.log(result);
+    if (result && result.label) {
+      this._scdTitle = this.statusCode + ': ' + result.label;
+    } else {
+      this._scdTitle = 'Status code: ' + this.statusCode;
+    }
+    if (result && result.desc) {
+      this._scdBody = result.desc;
+    } else {
+      this._scdBody = 'There is no definition for this status code in the application :(';
+    }
+  },
+
+  _onStatusInfoError: function() {
+    this._scdTitle = 'Status code: ' + this.statusCode;
+    this._scdBody = 'There is no definition for this status code in the application :(';
   },
 
   showStatusInfo: function() {
@@ -73,7 +75,7 @@ Polymer({
   },
 
   _responseHeadersChanged: function() {
-    this.responseHeaders.forEach(function(item) {
+    this.responseHeaders.forEach((item) => {
       item.type = 'response';
     });
   },

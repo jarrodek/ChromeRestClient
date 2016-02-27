@@ -10,6 +10,7 @@ Polymer({
   },
   _displayHeaderInfo: function(e) {
     var item = e.model.get('item');
+    debugger;
     arc.app.db.websql.getHeaderByName(item.name, item.type)
       .then(function(result) {
         if (result === null) {

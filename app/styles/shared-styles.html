@@ -7,13 +7,25 @@
     .page-title {
       @apply(--paper-font-display2);
     }
-    
+
     paper-menu a > *,
     paper-menu paper-item > *,
     paper-menu paper-icon-item > * {
       pointer-events: none;
     }
-    
+
+    .padding-section {
+      @apply(--section-padding);
+    }
+
+    .action-button {
+      @apply(--action-button);
+    }
+
+    .action-button:hover {
+      @apply(--action-button-hover);
+    }
+
     @media (max-width: 600px) {
       .page-title {
         font-size: 24px!important;

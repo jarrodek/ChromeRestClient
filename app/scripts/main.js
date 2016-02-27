@@ -100,7 +100,12 @@
     }
     var src = app.featuresMapping.get(feature);
     var name = feature[0].toUpperCase() + feature.substr(1);
-    src['on' + name](event);
+    var fnName = 'on' + name;
+    if (!(fnName in src)) {
+      console.warn(`Function ${fnName} is undefined for ${src.nodeName}`);
+    } else {
+      src[fnName](event);
+    }
   };
   app._onFeatureOpen = (e) => {
     app._featureCalled('open', e);

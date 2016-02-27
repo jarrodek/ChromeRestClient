@@ -41,7 +41,8 @@ Final local copy of the object stored as a `latestRequest` is:
       }
     </style>
     <content></content>
-    <chrome-storage auto debug id="latest" type="local" name="latestRequest" value="{{request}}" on-read="_latestLoaded"></chrome-storage>
+    <chrome-storage auto id="latest" type="local" name="latestRequest" value="{{request}}" on-read="_latestLoaded"></chrome-storage>
+    <arc-socket-request id="socket" on-ready="_responseReady"></arc-socket-request>
   </template>
   <script src="arc-request-controller.js"></script>
 </dom-module>

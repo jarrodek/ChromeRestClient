@@ -41,7 +41,8 @@ Polymer({
      */
     filesList: {
       type: Array,
-      value: []
+      value: [],
+      notify: true
     },
     /**
      * If true form data is visible.
@@ -106,6 +107,9 @@ Polymer({
       name: fileName,
       files: []
     };
+    if (!this.filesList) {
+      this.filesList = [];
+    }
     this.push('filesList', item);
   },
   /** Encode payload button press handler */
@@ -220,6 +224,9 @@ Polymer({
   /** Count number of files choosen by the user */
   _countFiles: function() {
     var result = 0;
+    if (!this.filesList) {
+      return result;
+    }
     this.filesList.forEach((item) => {
       result += item.files.length;
     });

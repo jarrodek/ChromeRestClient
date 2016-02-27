@@ -44,9 +44,11 @@
         <!-- Main Content -->
         <div class="content">
           <neon-animated-pages id="pages" attr-for-selected="data-route" selected-attribute="opened" selected="[[route]]" entry-animation="slide-from-right-animation" exit-animation="slide-left-animation">
-            <arc-request-controller opened="{{requestOpened}}" request="{{request}}" response="{{response}}" route-params="[[params]]" data-route="request">
-              <arc-request-view opened="{{requestOpened}}" request="{{request}}"></arc-request-view>
-              <arc-response-view opened="{{requestOpened}}" response="{{response}}"></arc-response-view>
+            <arc-request-controller request-loading="{{requestLoading}}"  has-response="{{hasResponse}}" opened="{{requestOpened}}" request="{{request}}" response="{{response}}" route-params="[[params]]" data-route="request">
+              <arc-request-view request-loading="[[requestLoading]]" opened="{{requestOpened}}" request="{{request}}"></arc-request-view>
+              <template is="dom-if" if="[[hasResponse]]">
+                <arc-response-view opened="[[requestOpened]]" response="[[response]]"></arc-response-view>
+              </template>
             </arc-request-controller>
             <arc-websocket-controller data-route="socket">Socket</arc-websocket-controller>
             <arc-history-list-controller search-query="[[searchTerm]]" data-route="history">History</arc-history-list-controller>

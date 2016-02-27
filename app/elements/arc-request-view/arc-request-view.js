@@ -41,7 +41,12 @@ Polymer({
       type: String,
       notify: true,
       observer: '_headersChanged'
-    }
+    },
+    /**
+     * Tru if request is loading at the moment.
+     * Will display a progress bar.
+     */
+    requestLoading: Boolean
   },
 
   observers: [
@@ -81,5 +86,13 @@ Polymer({
       return;
     }
     this.set('request.headers', this.requestHeaders);
+  },
+
+  _sendRequest: function() {
+    this.fire('send');
+  },
+
+  _abortRequest: function() {
+    this.fire('abort');
   }
 });
