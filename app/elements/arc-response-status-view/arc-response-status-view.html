@@ -35,7 +35,6 @@ the License.
 
           .status-label {
             width: 80px;
-            margin-top: 8px;
             @apply(--paper-font-subhead);
           }
 
@@ -91,15 +90,14 @@ the License.
         <div class="status-row">
           <div class="status-label">Status:</div>
           <div class="status-value status">
-            <span class$="{{computeStatusClass(statusCode)}}">
+            <span class$="{{_computeStatusClass(statusCode)}}">
               <span>{{statusCode}}</span>:
               <span>{{statusMessage}}</span>
             </span>
             <paper-icon-button on-tap="showStatusInfo" icon="help" class="response-status-help"></paper-icon-button>
-            <span>Loading time:
+            <span>
+              Loading time: {{loadingTime}} ms
             </span>
-            <span>{{loadingTime}}</span>
-            <span>ms</span>
           </div>
         </div>
         <paper-tabs selected="{{selectedTab}}">
@@ -119,22 +117,21 @@ the License.
             <template is="dom-if" if="{{redirectData.length}}">
               <template is="dom-repeat" items="{{redirectData}}">
                 <div class="status-row">
-                  <div class="status-label">#<span>{{computeIndexName(index)}}</span>
+                  <div class="status-label">
+                    #<span>{{_computeIndexName(index)}}</span>
                   </div>
                   <div class="redirect-value" on-tap="_handleLink">
                     <div class="status-value status">
                       <span>To:
                         <span>
-                          <a href="{{item.redirectUrl}}" class="auto-link">{{item.redirectUrl}}</a>
+                          <!-- TODO: Handle links differently and not show link if there is no actually a link -->
+                          <a href="{{_computeRedirectLocation(item.headers)}}" class="auto-link">{{_computeRedirectLocation(item.headers)}}</a>
                         </span>
                         with status
-                        <span>{{item.statusLine}}</span>
+                        <span>{{item.status}} {{item.statusText}}</span>
                       </span>
-                      <template is="dom-if" if="{{item.fromCache}}">
-                        <span>Cached data has been used with this response</span>
-                      </template>
                     </div>
-                    <app-headers-display headers="{{item.responseHeaders}}"></app-headers-display>
+                    <arc-headers-display-view headers="{{_computeRedirectHeaders(item.headers)}}"></arc-headers-display-view>
                   </div>
                 </div>
               </template>

@@ -34,9 +34,11 @@ the License.
           }
 
         </style>
+
         <template is="dom-repeat" items="{{headers}}">
           <arc-header-line-display-view on-dblclick="_displayHeaderInfo" header-name="[[item.name]]" header-value="[[item.value]]"></arc-header-line-display-view>
         </template>
+
         <paper-dialog id="headerInfo">
           <h2>{{_hdTitle}}</h2>
           <paper-dialog-scrollable>
@@ -51,7 +53,7 @@ the License.
             <paper-button dialog-confirm="" autofocus="">Close</paper-button>
           </div>
         </paper-dialog>
-        <arc-header-object-model id="model"></arc-header-object-model>
+        <arc-header-object-model id="model" on-data-ready="_onHeaderData"></arc-header-object-model>
       </template>
     </dom-module>
     <script src="arc-headers-display-view.js"></script>

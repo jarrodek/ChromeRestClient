@@ -88,7 +88,9 @@ ArcBehaviors.ArcModelBehavior = {
    * Performs a query when objectId change.
    */
   _objectIdChanged: function() {
-    this.query();
+    if (this.auto) {
+      this.query();
+    }
   },
   /**
    * Save data if auto is enabled.
@@ -153,6 +155,37 @@ ArcBehaviors.ArcModelBehavior = {
       }.bind(this));
   },
   /**
+   * Get object by it's primary key.
+   *
+   * @param {String} table A table name to perform query operation on.
+   * @return {Promise} Fulfiled promise will result with get results.
+   */
+  genericGetObject: function(table) {
+    return arc.app.db.idb.open()
+      .then((db) => {
+        return db[table]
+          .get(this.objectId)
+          .finally(() => {
+            db.close();
+          });
+      })
+      .then((data) => {
+        this.data = data;
+        this.fire('data-ready', {
+          data: data
+        });
+        return data;
+      })
+      .catch((cause) => {
+        console.error(cause);
+        arc.app.analytics.sendException('arc-model::genericGetObject::' +
+          JSON.stringify(cause), false);
+        this.fire('error', {
+          error: cause
+        });
+      });
+  },
+  /**
    * Query the table.
    *
    * @param {String} table A table name to perform query operation on.
@@ -164,8 +197,11 @@ ArcBehaviors.ArcModelBehavior = {
         let result;
         table = db[table];
         if (this.objectId instanceof Array) {
-          //db[TABLE-NAME].schema.primKey.keyPath
-          result = table.where(':id').anyOf(this.objectId);
+          if (table.schema.primKey.keyPath instanceof Array) {
+            result = table.get(this.objectId);
+          } else {
+            result = table.where(':id').anyOf(this.objectId);
+          }
         } else if (this.objectId) {
           result = table.get(this.objectId);
         } else {
@@ -183,21 +219,24 @@ ArcBehaviors.ArcModelBehavior = {
         });
       }.bind(this))
       .then(function(data) {
-        if (data.length === 0) {
+        if (!data) {
+          data = null;
+        } else if (data.length === 0) {
           data = null;
         } else {
           if (this.direction && this.direction === 'desc') {
             data.reverse();
           }
           if (this.offset || this.limit) {
-            let limit = this.limit, offset = this.offset;
+            let limit = this.limit;
+            let offset = this.offset;
             if (!Number.isInteger(offset)) {
               offset = 0;
             }
             if (!Number.isInteger(limit)) {
               limit = data.length;
             }
-            data = data.slice(offset, offset+limit);
+            data = data.slice(offset, offset + limit);
           }
         }
         this.data = data;

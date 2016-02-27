@@ -119,4 +119,8 @@
   app._onFeatureClearAll = (e) => {
     app._featureCalled('clearAll', e);
   };
+  // called when any component want to change request link.
+  document.body.addEventListener('action-link-change', (e) => {
+    app.set('request.url', e.detail.url);
+  });
 })(document, window);

@@ -3,6 +3,9 @@
 Polymer({
   is: 'arc-header-value-display-view',
   properties: {
+    /**
+     * Header value to display
+     */
     value: {
       type: String,
       observer: '_valueChanged'

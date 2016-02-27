@@ -3,7 +3,8 @@ Polymer({
   behaviors: [
     ArcBehaviors.ArcModelBehavior
   ],
-  query: function() {
-    return this.genericQuery('headers');
+
+  getObject: function() {
+    return this.genericGetObject('headers');
   }
 });

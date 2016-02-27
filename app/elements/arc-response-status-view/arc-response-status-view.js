@@ -9,10 +9,7 @@ Polymer({
     },
     statusMessage: String,
     loadingTime: Number,
-    responseHeaders: {
-      type: Array,
-      observer: '_responseHeadersChanged'
-    },
+    responseHeaders: Array,
     redirectData: {
       type: Array,
       value: []
@@ -24,7 +21,7 @@ Polymer({
       value: 0
     }
   },
-  computeStatusClass: function(code) {
+  _computeStatusClass: function(code) {
     var cls = 'status-color';
     if (code >= 500 || code === 0) {
       cls += ' error';
@@ -67,28 +64,42 @@ Polymer({
   showStatusInfo: function() {
     this.$.statusCodeInfo.open();
   },
-
-  _requestHeadersChanged: function() {
-    this.requestHeaders.forEach(function(item) {
-      item.type = 'request';
-    });
-  },
-
-  _responseHeadersChanged: function() {
-    this.responseHeaders.forEach((item) => {
-      item.type = 'response';
-    });
-  },
-  computeIndexName: function(index) {
+  /** Compute index to 1-based index. */
+  _computeIndexName: function(index) {
     return index + 1;
   },
+  /** Catch headers link click and send proper event to the listeners. */
   _handleLink: function(e) {
     var e2 = Polymer.dom(e);
     e.preventDefault();
     if (e2.rootTarget.nodeName === 'A') {
-      this.fire('action-link', {
-        link: e2.rootTarget.href
+      this.fire('action-link-change', {
+        url: e2.rootTarget.href
       });
     }
+  },
+
+  _computeRedirectLocation: function(headers) {
+    if (!headers) {
+      return 'unknown';
+    }
+    return headers.get('location') || 'unknown';
+  },
+
+  _computeRedirectHeaders: function(headers) {
+    if (!headers) {
+      return [];
+    }
+    var result = [];
+    if (!headers) {
+      return result;
+    }
+    for (let header of headers) {
+      result.push({
+        name: header[0],
+        value: header[1]
+      });
+    }
+    return result;
   }
 });

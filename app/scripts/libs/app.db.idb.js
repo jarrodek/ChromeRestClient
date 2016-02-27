@@ -166,8 +166,14 @@ arc.app.db.idb.populateDatabase = function(db) {
         return Dexie.Promise.resolve(null);
       }
 
-      defs.requests.forEach((item) => item.type = 'request');
-      defs.responses.forEach((item) => item.type = 'response');
+      defs.requests.forEach((item) => {
+        item.type = 'request';
+        item.key = item.key.toLowerCase();
+      });
+      defs.responses.forEach((item) => {
+        item.type = 'response';
+        item.key = item.key.toLowerCase();
+      });
       let headers = defs.requests.concat(defs.responses);
 
       return db.transaction('rw', db.statuses, db.headers, function() {

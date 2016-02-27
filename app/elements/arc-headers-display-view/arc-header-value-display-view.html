@@ -14,13 +14,25 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 -->
+<!--
+An element that will display a value as a link.
+Regular data binding in Polymer is using innerText setter to assign value.
+Thus any HTML tag won't be recognized and displayed as text.
+This element will find links in the header value and display it as a link if necessary.
+Parent elements may catch click on link and handle it properly.
+
+@group View Elements
+@element arc-header-value-display-view
+-->
 <html>
   <head></head>
   <body>
     <dom-module id="arc-header-value-display-view">
       <template>
         <style>
-          :host {}
+          :host {
+            display: inline;
+          }
         </style>
         <span id="display"></span>
       </template>

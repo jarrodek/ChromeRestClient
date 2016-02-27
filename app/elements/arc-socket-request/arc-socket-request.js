@@ -39,7 +39,7 @@ Polymer({
     result.headers = this._translateHeaders(response.headers);
     result.status = response.status;
     result.statusText = response.statusText;
-    result.redirects = response.redirects;
+    result.redirects = Array.from(response.redirects);
     result.stats = response.stats;
     var ct = arc.app.headers.getContentType(response.headers);
     if (ct && ct.indexOf('image') !== -1) {
