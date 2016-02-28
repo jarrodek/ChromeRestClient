@@ -76,7 +76,7 @@ ArcBehaviors.ArcFileExportBehavior = {
 
   detached: function() {
     if (!this.fileWriter) {
-      this.fileWriter.removeEventListener('file-save', this._fileWriteHandler);
+      this.fileWriter.removeEventListener('file-write', this._fileWriteHandler);
       this.fileWriter.removeEventListener('error', this._fileErrorHandler);
       this.fileWriter.parentNode.removeChild(this.fileWriter);
     }
@@ -89,7 +89,7 @@ ArcBehaviors.ArcFileExportBehavior = {
     if (!this.fileWriter) {
       this.fileWriter = document.createElement('chrome-app-filesystem');
     }
-    this.fileWriter.addEventListener('file-save', this._fileWriteHandler);
+    this.fileWriter.addEventListener('file-write', this._fileWriteHandler);
     this.fileWriter.addEventListener('error', this._fileErrorHandler);
     document.body.appendChild(this.fileWriter);
   },
@@ -102,7 +102,7 @@ ArcBehaviors.ArcFileExportBehavior = {
 
   _fileSuggestedChanged: function() {
     if (this.fileWriter && this.fileSuggestedName) {
-      this.fileWriter.fileName = this.fileSuggestedName;
+      this.fileWriter.filename = this.fileSuggestedName;
     }
   },
 
@@ -129,7 +129,11 @@ ArcBehaviors.ArcFileExportBehavior = {
     this.fileWriter.write();
   },
   /** Override this function to handle an event */
-  onFileSaved: function() {},
+  onFileSaved: function() {
+    //empty
+  },
   /** Override this function to handle an event */
-  onFileError: function() {}
+  onFileError: function() {
+    //empty
+  }
 };

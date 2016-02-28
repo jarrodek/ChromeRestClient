@@ -15,7 +15,16 @@ body {
   height: 100%;
 }
 
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Material Icons'), local('MaterialIcons-Regular'), url(/assets/MaterialIcons-Regular.woff2) format('woff2');
+}
+
+
 /* Search bar states */
+
 paper-toolbar[mode="search"] .toolbar-hide {
   display: none;
 }
@@ -42,22 +51,30 @@ paper-toolbar[mode="search"] #search-bar {
 paper-toolbar[mode="search"] #mainSearchInput {
   display: initial;
 }
+
+
 /* Requesting features in main toolbar. */
+
 paper-toolbar > *[feature] {
   display: none;
 }
+
 paper-toolbar[search] > *[feature="search"] {
   display: initial;
 }
+
 paper-toolbar[open] > *[feature="open"] {
   display: initial;
 }
+
 paper-toolbar[save] > *[feature="save"] {
   display: initial;
 }
+
 paper-toolbar[export] > *[feature="export"] {
   display: initial;
 }
+
 paper-toolbar[clearAll] > *[feature="clearAll"] {
   display: initial;
 }

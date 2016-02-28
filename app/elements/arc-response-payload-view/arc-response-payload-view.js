@@ -26,7 +26,70 @@ Polymer({
     parsedMode: {
       type: String,
       readOnly: true
+    },
+    /**
+     * True if "raw" tab is shown.
+     *
+     * @type {Boolean}
+     */
+    isRaw: {
+      type: Boolean,
+      value: false,
+      readOnly: true,
+      observer: '_tabsChanged'
+    },
+    /**
+     * True if "parsed" tab is shown.
+     *
+     * @type {Boolean}
+     */
+    isParsed: {
+      type: Boolean,
+      value: false,
+      readOnly: true,
+      observer: '_tabsChanged'
+    },
+    /**
+     * True if "json" tab is shown.
+     *
+     * @type {Boolean}
+     */
+    isJson: {
+      type: Boolean,
+      value: false,
+      readOnly: true,
+      observer: '_tabsChanged'
+    },
+    /**
+     * True if "xml" tab is shown.
+     *
+     * @type {Boolean}
+     */
+    isXml: {
+      type: Boolean,
+      value: false,
+      readOnly: true,
+      observer: '_tabsChanged'
+    },
+    /**
+     * True if "image" tab is shown.
+     *
+     * @type {Boolean}
+     */
+    isImage: {
+      type: Boolean,
+      value: false,
+      readOnly: true,
+      observer: '_tabsChanged'
     }
+  },
+
+  _resetTabs: function() {
+    this._setIsRaw(false);
+    this._setIsParsed(false);
+    this._setIsJson(false);
+    this._setIsXml(false);
+    this._setIsImage(false);
   },
 
   _payloadChanged: function() {
@@ -42,18 +105,46 @@ Polymer({
   /** Parse response as string */
   _displayString: function(payload) {
     this._setRaw(payload);
+    this._setIsRaw(true);
     var ct = arc.app.headers.getContentType(this.headers);
     if (ct) {
-      this._setParsedMode(ct);
+      if (ct.indexOf('xml') !== -1) {
+        this.$.xmlViewer.xml = payload;
+        this._setIsXml(true);
+        this.selectedTab = 3;
+        this._tabsChanged();
+      } else {
+        this._setParsedMode(ct);
+        this._setIsParsed(false);
+        this.selectedTab = 1;
+        this._tabsChanged();
+      }
     }
   },
   /** Display blob. Most commonly it will be image data */
   _displayBlob: function(payload) {
+    this._setIsImage(true);
+    this.selectedTab = 4;
+    this._tabsChanged();
+    this.$.imageViewer.blob = payload;
 
+    var fr = new FileReader();
+    fr.onloadend = (e) => {
+      this._setRaw(e.target.result);
+      this._setIsRaw(true);
+    };
+    fr.onerror = (e) => {
+      this._setRaw('Unable to read binnary data as string.');
+      this._setIsRaw(true);
+    };
+    fr.readAsText(payload);
   },
   /** Display parsed JSON */
   _displayJSON: function(payload) {
     this._setRaw(JSON.stringify(payload));
+    this._setIsRaw(true);
+    this.selectedTab = 2;
+    this._tabsChanged();
     this.$.jsonViewer.json = payload;
   },
 
@@ -74,11 +165,11 @@ Polymer({
   },
 
   _saveFile: function() {
-    var params = {
-      'data': null,
-      'content-type': null
-    };
-    throw 'implement me';
-    this.fire('save-file', params);
+    // arc-request-controller listen to this event
+    this.fire('save-file');
+  },
+
+  _tabsChanged: function() {
+    this.$.tabs.notifyResize();
   }
 });

@@ -42,7 +42,8 @@ Polymer({
     result.redirects = Array.from(response.redirects);
     result.stats = response.stats;
     var ct = response.headers ? response.headers.get('content-type') : null;
-    if (ct && ct.indexOf('image') !== -1) {
+    if (ct && ct.indexOf('image') !== -1 &&
+      ct.indexOf('xml') === -1) {
       response.blob()
       .then((blob) => {
         result.body = blob;

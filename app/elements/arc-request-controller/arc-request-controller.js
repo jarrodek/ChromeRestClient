@@ -1,6 +1,7 @@
 Polymer({
   is: 'arc-request-controller',
   behaviors: [
+    ArcBehaviors.ArcFileExportBehavior,
     ArcBehaviors.ArcControllerBehavior
   ],
   properties: {
@@ -45,7 +46,8 @@ Polymer({
 
   listeners: {
     'send': 'sendRequest',
-    'abort': 'abortRequest'
+    'abort': 'abortRequest',
+    'save-file': '_saveToFile'
   },
 
   onShow: function() {
@@ -131,5 +133,35 @@ Polymer({
 
   _computeHasResponse: function(response) {
     return !!response;
+  },
+  /**
+   * Save current payload to file.
+   */
+  _saveToFile: function() {
+    if (!this.hasResponse) {
+      return;
+    }
+    var ct = arc.app.headers.getContentType(this.response.headers);
+    this.exportContent = this.response.body;
+    this.exportMime = ct || 'text';
+    var ext = 'log';
+    if (this.exportMime.indexOf('xml') !== -1) {
+      ext = 'xml';
+    } else if (this.exportMime.indexOf('json') !== -1) {
+      ext = 'json';
+    } else if (this.exportMime.indexOf('html') !== -1) {
+      ext = 'html';
+    } else if (this.exportMime.indexOf('javascript') !== -1) {
+      ext = 'js';
+    }
+
+    this.fileSuggestedName = 'response-export.' + ext;
+    this.exportData();
+  },
+
+  onFileSaved: function() {
+    StatusNotification.notify({
+      message: 'File saved'
+    });
   }
 });
