@@ -7,13 +7,15 @@ Polymer({
   properties: {
     toolbarFeatures: {
       type: Array,
-      value: ['clearAll', 'loader','open','save']
+      value: ['clearAll', 'loader', 'save']
     },
+
     request: {
       type: Object,
       notify: true,
       observer: '_requestChanged'
     },
+
     routeParams: {
       type: Object,
       observer: '_prepareRequest'
@@ -41,6 +43,15 @@ Polymer({
       value: false,
       notify: true,
       computed: '_computeHasResponse(response)'
+    },
+    isError: {
+      type: Boolean,
+      value: false,
+      readOnly: true
+    },
+    errorMessage: {
+      type: String,
+      readOnly: true
     }
   },
 
@@ -54,11 +65,23 @@ Polymer({
     this._setPageTitle('Request');
     this._prepareRequest();
   },
+
   onHide: function() {
     this._setPageTitle('');
   },
+
   onClearAll: function() {
-    console.error('Implement me');
+    let base = new RequestLocalObject({
+      url: '',
+      method: 'GET'
+    });
+    this.set('request', base);
+    this._setResponse(null);
+    page('/request/current');
+  },
+
+  onSave: function() {
+
   },
 
   _prepareRequest: function() {
@@ -82,8 +105,6 @@ Polymer({
         url: '',
         method: 'GET'
       });
-      //class above will not work with Polymer's data binding model.
-      //It mus be translated to the Object again.
       this.set('request', base);
     }
   },
@@ -99,6 +120,7 @@ Polymer({
       });
       return;
     }
+    this._setIsError(false);
     this._setResponse(null);
     this._setRequestLoading(true);
     this._saveUrl();
@@ -190,7 +212,6 @@ Polymer({
       request = this.$.requestModel.fromData(this.request, this.response);
       this.$.requestModel.requestType = 'history';
     } else {
-      debugger;
       request = request[0];
       request.har = this.$.requestModel.appendHarResponse(request.har, this.request, this.response);
       this.$.requestModel.requestType = request.type;
@@ -200,6 +221,22 @@ Polymer({
   },
 
   _onHistorySave: function(e) {
-    console.log('Haved history object', e.detail);
+    console.info('Saved history object', e.detail);
+  },
+  /** Called then transport not finished the request because of error. */
+  _onRequestError: function(e) {
+    var msg = e.detail.message;
+    if (typeof message !== 'string') {
+      //it could be an Error object
+      if (msg.message) {
+        msg = msg.message;
+      } else {
+        msg = null;
+      }
+    }
+    this._setIsError(true);
+    this._setErrorMessage(msg);
+    this._setRequestLoading(false);
+    //there will be no history save since there's nothing to save.
   }
 });

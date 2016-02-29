@@ -31,6 +31,9 @@ Polymer({
       }
     }).catch((cause) => {
       console.error('Error during fetch', cause);
+      this.fire('error', {
+        message: cause
+      });
     });
   },
 

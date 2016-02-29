@@ -30,9 +30,12 @@
     "ProjectObject": true,
     "ServerExportedObject": true,
     "RequestObject": true,
+    "RequestLocalObject": true,
     "fetch": true,
     "Dexie": true,
     "FileExport": true,
-    "_": true
+    "_": true,
+    "Headers": true,
+    "SocketFetch": true
   }
 }

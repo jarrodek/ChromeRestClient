@@ -115,7 +115,7 @@ Polymer({
         this._tabsChanged();
       } else {
         this._setParsedMode(ct);
-        this._setIsParsed(false);
+        this._setIsParsed(true);
         this.selectedTab = 1;
         this._tabsChanged();
       }

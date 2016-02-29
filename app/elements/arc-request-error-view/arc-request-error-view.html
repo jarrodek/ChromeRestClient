@@ -1,0 +1,33 @@
+<html>
+  <head></head>
+  <body>
+    <dom-module id="arc-request-error-view">
+      <template>
+        <style>
+          :host {
+            @apply(--layout-horizontal);
+            @apply(--layout-center);
+          }
+          .error-icon {
+            width: 128px;
+            height: 128px;
+            color: rgba(0,0,0,0.56);
+          }
+          .error-desc {
+            @apply(--paper-font-subhead);
+            color: var(--google-red-500);
+          }
+
+        </style>
+        <div>
+          <iron-icon class="error-icon" icon="arc:sentiment-very-dissatisfied"></iron-icon>
+        </div>
+        <div class="error-desc">
+          <p>There was an error during the request</p>
+          <p>[[message]]</p>
+        </div>
+      </template>
+    </dom-module>
+    <script src="arc-request-error-view.js"></script>
+  </body>
+</html>
