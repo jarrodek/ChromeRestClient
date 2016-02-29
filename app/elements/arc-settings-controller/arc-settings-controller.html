@@ -25,7 +25,7 @@ the License.
       :host {
         display: block;
       }
-      
+
       .help-icon {
         height: 36px;
         width: 36px;
@@ -55,15 +55,6 @@ the License.
       <section class="settings-section">
         <paper-item>
           <paper-item-body two-line="">
-            <div>Debug</div>
-            <div secondary="">Enable debug messages in chrome console output</div>
-          </paper-item-body>
-          <paper-toggle-button checked="{{values.DEBUG_ENABLED}}"></paper-toggle-button>
-        </paper-item>
-      </section>
-      <section class="settings-section">
-        <paper-item>
-          <paper-item-body two-line="">
             <div>History</div>
             <div secondary="true">Save list of requests made by the app in local storage</div>
           </paper-item-body>
@@ -79,24 +70,6 @@ the License.
             </div>
           </paper-item-body>
           <paper-toggle-button checked="{{values.MAGICVARS_ENABLED}}"></paper-toggle-button>
-        </paper-item>
-      </section>
-      <section class="settings-section">
-        <paper-item>
-          <paper-item-body two-line="">
-            <div>CodeMirror for headers</div>
-            <div secondary="">Enable CodeMirror editor in headers panel</div>
-          </paper-item-body>
-          <paper-toggle-button checked="{{values.CMH_ENABLED}}"></paper-toggle-button>
-        </paper-item>
-      </section>
-      <section class="settings-section">
-        <paper-item>
-          <paper-item-body two-line="">
-            <div>CodeMirror for payload</div>
-            <div secondary="">Enable CodeMirror editor in payload panel</div>
-          </paper-item-body>
-          <paper-toggle-button checked="{{values.CMP_ENABLED}}"></paper-toggle-button>
         </paper-item>
       </section>
       <paper-dialog id="historyClearDialog" on-iron-overlay-closed="onClearDialogResult">
