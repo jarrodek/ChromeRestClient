@@ -77,7 +77,8 @@
           <paper-button title="Encodes payload to x-www-form-urlencoded data" on-tap="encodePaylod">encode payload</paper-button>
           <paper-button title="Decodes payload to human readable form" on-tap="decodePaylod">decode payload</paper-button>
         </div>
-        <code-mirror mode="application/json" theme="cm-arc" on-change="valueChanged" value="{{value}}" id="cm"></code-mirror>
+        <code-mirror mode="application/json" theme="cm-arc" value="{{value}}" id="cm"></code-mirror>
+        <!-- on-change="valueChanged" -->
       </section>
       <section hidden$="[[!withForm]]" class="params-list">
         <div class="encoder-buttons">

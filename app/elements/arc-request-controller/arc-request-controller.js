@@ -18,7 +18,7 @@ Polymer({
 
     routeParams: {
       type: Object,
-      observer: '_prepareRequest'
+      //observer: '_prepareRequest'
     },
     /**
      * True if request is loading at the moment.
@@ -89,6 +89,9 @@ Polymer({
       return;
     }
     switch (this.routeParams.type) {
+      case 'history':
+        this._restoreHistory(this.routeParams.historyId);
+        break;
       default:
         this._restoreLatest();
         break;
@@ -96,7 +99,22 @@ Polymer({
   },
 
   _restoreLatest: function() {
+    debugger;
     this.$.latest.read();
+  },
+
+  _restoreHistory: function(id) {
+    id = parseInt(id);
+    if (!id || id !== id) {
+      this._restoreLatest();
+      StatusNotification.notify({
+        message: 'Not found'
+      });
+      return;
+    }
+    this.$.requestQueryModel.objectId = id;
+    this.$.requestQueryModel.requestType = 'history';
+    this.$.requestQueryModel.getObject();
   },
 
   _latestLoaded: function() {
@@ -238,5 +256,16 @@ Polymer({
     this._setErrorMessage(msg);
     this._setRequestLoading(false);
     //there will be no history save since there's nothing to save.
+  },
+
+  _requestObjectRestored: function(e) {
+    if (e.detail.data) {
+      let request = this.$.requestQueryModel.toLocalRequest();
+      this.set('request', request);
+    } else {
+      StatusNotification.notify({
+        message: 'Not found'
+      });
+    }
   }
 });

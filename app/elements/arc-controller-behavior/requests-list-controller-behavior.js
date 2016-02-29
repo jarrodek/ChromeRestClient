@@ -134,7 +134,7 @@ ArcBehaviors.RequestsListControllerBehavior = {
           this.splice('listData', i, 1);
           break;
         }
-      };
+      }
     });
     this.view.$.selector.clearSelection();
     StatusNotification.notify({
@@ -159,7 +159,6 @@ ArcBehaviors.RequestsListControllerBehavior = {
     }
     this.removedCopy = null;
   },
-
   _viewScrolling: function(e) {
     if (!this.isShowing) {
       return;

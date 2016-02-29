@@ -85,6 +85,9 @@ Polymer({
     if (!this.valuesList) {
       return;
     }
+    if (!this.contentType || this.contentType.indexOf('x-www-form-urlencoded') === -1) {
+      return;
+    }
     var value = PayloadParser.arrayToString(this.valuesList);
     this.set('value', value);
   },
@@ -157,12 +160,12 @@ Polymer({
   _computeWithForm: function(contentType) {
     return contentType && contentType.indexOf('x-www-form-urlencoded') !== -1;
   },
-  valueChanged: function() {
-    console.log('payload editor:: value changed', this.value);
-    //TODO: if this important?
-  },
+  // valueChanged: function() {
+  //   console.log('payload editor:: value changed', this.value);
+  //   //TODO: if this important?
+  // },
   /** Notify tabs resizer ehrn programatically number of tabs changed. */
-  _updateTabsState: function(withForm) {
+  _updateTabsState: function() {
     this.$.tabs.notifyResize();
   },
   /** Remove element from the params form */

@@ -3,7 +3,7 @@
   arc.app.analytics.init();
 
   let app = document.querySelector('#app');
-  app.baseUrl = '/app/';
+  app.baseUrl = '/';
   app.pageTitle = '';
   app.addEventListener('dom-change', function() {
     console.log('Our app is ready to rock!');

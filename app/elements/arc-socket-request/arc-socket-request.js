@@ -24,11 +24,7 @@ Polymer({
     }
     this.connection = new SocketFetch(this.request.url, init);
     this.connection.fetch().then((response) => {
-      if (response.ok) {
-        this._processResponse(response);
-      } else {
-        this._processErrorResponse(response);
-      }
+      this._processResponse(response);
     }).catch((cause) => {
       console.error('Error during fetch', cause);
       this.fire('error', {
@@ -44,6 +40,7 @@ Polymer({
     result.statusText = response.statusText;
     result.redirects = Array.from(response.redirects);
     result.stats = response.stats;
+    result.ok = response.ok;
     var ct = response.headers ? response.headers.get('content-type') : null;
     if (ct && ct.indexOf('image') !== -1 &&
       ct.indexOf('xml') === -1) {
@@ -71,10 +68,6 @@ Polymer({
         });
       });
     }
-  },
-
-  _processErrorResponse: function(response) {
-    console.log(response);
   },
 
   abort: function() {

@@ -107,7 +107,13 @@ Polymer({
   },
 
   _navigateItem: function() {
-    page('request/saved/' + this.request.id);
+    var url;
+    if (this.isHistory) {
+      url = 'request/history/' + this.request.id;
+    } else {
+      url = 'request/saved/' + this.request.id;
+    }
+    page(url);
   }
 
 });

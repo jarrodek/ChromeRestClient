@@ -36,6 +36,7 @@
     "FileExport": true,
     "_": true,
     "Headers": true,
-    "SocketFetch": true
+    "SocketFetch": true,
+    "PayloadParser": true
   }
 }

@@ -2,10 +2,7 @@
 
 /* global app */
 window.addEventListener('initializeRouting', function() {
-  try {
-    history.redirect('!', '/app/');
-    page.base(app.baseUrl.replace(/\/$/, ''));
-  } catch (e) {}
+
   // Middleware
   function scrollToTop(ctx, next) {
     app.scrollPageToTop();
@@ -18,33 +15,32 @@ window.addEventListener('initializeRouting', function() {
   }
 
   // Routes
-  page('*', scrollToTop, closeDrawer, function(ctx, next) {
-    next();
-  });
+  arc.app.router.middle(scrollToTop, closeDrawer);
 
-  page('/', function() {
+  arc.app.router.register('/', function() {
     var params = {
       'type': 'restore'
     };
-    app.route = 'request';
     app.params = params;
+    app.route = 'request';
   });
-  page('/request/saved/:savedId', function(ctx) {
+
+  arc.app.router.register('/request/saved/:savedId', function(ctx) {
     ctx.params.type = 'saved';
-    app.route = 'request';
     app.params = ctx.params;
+    app.route = 'request';
   });
-  page('/request/history/:historyId', function(ctx) {
+  arc.app.router.register('/request/history/:historyId', function(ctx) {
     ctx.params.type = 'history';
-    app.route = 'request';
     app.params = ctx.params;
+    app.route = 'request';
   });
-  page('/request/project/:projectid', function(ctx) {
+  arc.app.router.register('/request/project/:projectid', function(ctx) {
     ctx.params.type = 'project';
-    app.route = 'request';
     app.params = ctx.params;
+    app.route = 'request';
   });
-  page('/request/current', function() {
+  arc.app.router.register('/request/current', function() {
     var params = {
       'type': 'current'
     };
@@ -52,35 +48,38 @@ window.addEventListener('initializeRouting', function() {
     app.params = params;
   });
 
-  page('/history', function() {
+  arc.app.router.register('/history', function() {
     app.route = 'history';
   });
-  page('/settings', function() {
+  arc.app.router.register('/settings', function() {
     app.route = 'settings';
   });
-  page('/about', function() {
+  arc.app.router.register('/about', function() {
     app.route = 'about';
   });
-  page('/socket', function() {
+  arc.app.router.register('/socket', function() {
     app.route = 'socket';
   });
-  page('/saved', function() {
+  arc.app.router.register('/saved', function() {
     app.route = 'saved';
   });
 
-  page('/dataimport', function() {
+  arc.app.router.register('/dataimport', function() {
     app.route = 'dataimport';
   });
-
-  // 404
-  page('*', function() {
-    page.redirect('/');
-  });
-
-  page({
-    hashbang: true,
-    popstate: false
-  });
+  window.page = arc.app.router.redirect;
+  arc.app.router.start();
+  //
+  // // 404
+  // page('*', function() {
+  //   //console.warn('redirecting unknown page.');
+  //   page.redirect('/');
+  // });
+  //
+  // page({
+  //   hashbang: true,
+  //   popstate: false
+  // });
 
   let event = new Event('ArcInitialized');
   window.dispatchEvent(event);

@@ -59,7 +59,7 @@ class PayloadParser {
     var htmlInputCheck = /^([^\\=]{1,})=(.*)$/m;
     if (!htmlInputCheck.test(input)) {
       //replace chome inspector data.
-      input = a.replace(/^([^\\:]{1,}):(.*)$/gm, '$1=$2&').replace(/\n/gm,'');
+      input = input.replace(/^([^\\:]{1,}):(.*)$/gm, '$1=$2&').replace(/\n/gm,'');
       input = input.substr(0, input.length - 1);
     }
     var parts = input.split('&');

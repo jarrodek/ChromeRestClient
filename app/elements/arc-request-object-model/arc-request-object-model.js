@@ -361,6 +361,29 @@ Polymer({
     });
     return obj;
   },
+  /**
+   * Transform current `data` to RequestLocalObject.
+   */
+  toLocalRequest: function() {
+    var obj = new RequestLocalObject({});
+    if (!this.data) {
+      return obj;
+    }
+    var data = this.data;
+    obj.url = data.url;
+    obj.method = data.method;
+    obj.isSaved = data.requestType === 'saved';
+    obj.isDrive = data.requestType === 'drive';
+    obj.id = data.id;
+    var entries = data.har.entries;
+    var request = entries[entries.length - 1].request; // take the last one.
+    if (!request) {
+      return obj;
+    }
+    obj.headers = arc.app.headers.toString(request.headers);
+    obj.payload = request.postData.text;
+    return obj;
+  },
 
   _createHarRequestObject: function(request, entriesCount) {
     var req = new HAR.Request({
@@ -385,7 +408,7 @@ Polymer({
       }
       var post = new HAR.PostData({
         mimeType: contentType,
-        text: request.body
+        text: request.payload
       });
       req.postData = post;
     }
