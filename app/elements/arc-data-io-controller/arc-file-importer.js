@@ -49,13 +49,34 @@ Polymer({
    * Handler called when the files has been read.
    */
   _importFileReady: function(e) {
+    console.info('File read', e.detail.result);
     if (e.detail.result) {
       try {
         let result = JSON.parse(e.detail.result);
         if (!(result.projects && result.requests)) {
+          if ('headers' in result && 'url' in result && 'method' in result) {
+            //old file.
+            this.importData = {
+              projects: [],
+              requests: [result]
+            };
+            return;
+          }
+          StatusNotification.notify({
+            message: 'This is not an ARC file.'
+          });
           throw new Error('Not an ARC file.');
         }
         this.importData = result;
+        if (!this.isFileImport) {
+          StatusNotification.notify({
+            message: 'File is empty'
+          });
+          this.importData = null;
+          this._resetFileDrop();
+          this._setImporting(false);
+        }
+
       } catch (e) {
         //TODO: add status message
         console.error('arc-data-import::_importFileReady::JSON.parse::error', e);
@@ -84,7 +105,7 @@ Polymer({
   },
   /** Compute is file is being imported. */
   _computeFileImportPreview: function(importData) {
-    return importData && (importData.projects.length || importData.requests.length);
+    return !!(importData && (importData.projects.length || importData.requests.length));
   },
 
   /**
