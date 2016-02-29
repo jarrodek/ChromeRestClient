@@ -22,6 +22,43 @@ Polymer({
       type: String
     }
   },
+
+  getObject: function() {
+    return this.genericGetObject('requestObject');
+  },
+
+  getByMethodUrl: function(url, method) {
+    var db;
+    return arc.app.db.idb.open()
+      .then((_db) => {
+        db = _db;
+        return db.requestObject
+          .where('[url+method]').equals([url, method])
+          .toArray();
+      })
+      .then((data) => {
+        if (!data) {
+          data = null;
+        } else if (data.length === 0) {
+          data = null;
+        }
+        this.data = data;
+        this.fire('data-ready', {
+          data: data
+        });
+        return data;
+      })
+      .catch((cause) => {
+        console.error(cause);
+        this.fire('error', {
+          error: cause
+        });
+      })
+      .finally(function() {
+        db.close();
+      });
+  },
+
   /**
    * Gather arguments and perform a query to the datastore.
    */
@@ -80,17 +117,19 @@ Polymer({
           result = result.toArray();
         }
         return result.catch((cause) => {
-            console.error(cause);
-            this.fire('error', {
-              error: cause
-            });
-          })
-          .finally(function() {
-            db.close();
+          console.error(cause);
+          this.fire('error', {
+            error: cause
           });
+        })
+        .finally(function() {
+          db.close();
+        });
       })
       .then((data) => {
-        if (data.length === 0) {
+        if (!data) {
+          data = null;
+        } else if (data.length === 0) {
           data = null;
         } else {
           let dir = this.direction;
@@ -119,6 +158,7 @@ Polymer({
         this.fire('data-ready', {
           data: data
         });
+        return data;
       }).catch((cause) => {
         console.error(cause);
         this.fire('error', {
@@ -159,32 +199,32 @@ Polymer({
       return arc.app.db.idb.open()
         .then((db) => {
           return db.transaction('rw', db.requestObject, (table) => {
-              return table
-                .where('type')
-                .equals(type)
-                .toCollection()
-                .delete();
-            })
-            .then(() => {
-              this.fire('deleted');
-            })
-            .catch((e) => {
-              arc.app.analytics.sendException('request-model::_deleteAll::' +
-                JSON.stringify(e), false);
-              this.fire('error', {
-                error: e
-              });
-            })
-            .finally(function() {
-              db.close();
+            return table
+              .where('type')
+              .equals(type)
+              .toCollection()
+              .delete();
+          })
+          .then(() => {
+            this.fire('deleted');
+          })
+          .catch((e) => {
+            arc.app.analytics.sendException('request-model::_deleteAll::' +
+              JSON.stringify(e), false);
+            this.fire('error', {
+              error: e
             });
+          })
+          .finally(function() {
+            db.close();
+          });
         });
     } else {
       return arc.app.db.idb.open()
         .then((db) => {
           return this._getProjectRequestsList()
             .then((excluded) => {
-              return db.transaction('rw', db.requestObject, (table) => {
+              return db.transaction('rw', db.requestObject, () => {
                 return db.requestObject
                   .where(':id').noneOf(excluded)
                   .and((item) => {
@@ -281,5 +321,166 @@ Polymer({
       }
     });
     return data;
+  },
+  /**
+   * Create new RequestObject from passed request and response objects.
+   *
+   * @param {ArcRequest} request A request object.
+   * @param {ArcResponse} response Optional response data.
+   * @return {RequestObject} A new RequestObject with passed data.
+   */
+  fromData: function(request, response) {
+    var creator = new HAR.Creator({
+      name: 'Advanced REST client',
+      version: arc.app.utils.appVer,
+      comment: 'ARC for Google Chrome.'
+    });
+    var browser = new HAR.Browser({
+      name: 'Chrome',
+      version: arc.app.utils.chromeVersion
+    });
+    var log = new HAR.Log({
+      'comment': 'Created when making a request as a history object.',
+      'version': 1.2,
+      'creator': creator,
+      'browser': browser
+    });
+
+    var pageParams = this._createHarRequestObject(request, 0);
+    var entry = this._createHarResponseObject(pageParams, response);
+
+    entry.setPage(pageParams.page);
+    log.addPage(pageParams.page);
+    log.addEntry(entry, pageParams.page.id);
+    var obj = new RequestObject({
+      'har': log,
+      'url': request.url,
+      'method': request.method,
+      'name': request.name || '',
+      'type': 'history'
+    });
+    return obj;
+  },
+
+  _createHarRequestObject: function(request, entriesCount) {
+    var req = new HAR.Request({
+      url: request.url,
+      httpVersion: 'HTTP/1.1',
+      method: request.method
+    });
+    var requestHeaders;
+    if (typeof request.headers === 'string') {
+      requestHeaders = arc.app.headers.toJSON(request.headers);
+    } else {
+      requestHeaders = request.headers;
+    }
+    if (['GET', 'HEAD'].indexOf(request.method) === -1) {
+      //Do not pass encoding for non-payload requests
+      let contentType;
+      if (!request.headers) {
+        contentType = 'application/x-www-form-urlencoded';
+      } else {
+        contentType = arc.app.headers.getContentType(requestHeaders) ||
+          'application/x-www-form-urlencoded';
+      }
+      var post = new HAR.PostData({
+        mimeType: contentType,
+        text: request.body
+      });
+      req.postData = post;
+    }
+    req.headers = requestHeaders;
+    var page = new HAR.Page({
+      id: arc.app.db.idb.requests.createRequestKey(request.method, request.url) + '-' +
+        entriesCount,
+      title: request.name,
+      startedDateTime: new Date(request.time || Date.now()),
+      pageTimings: {}
+    });
+    return {
+      request: req,
+      page: page
+    };
+  },
+
+  _createHarResponseObject: function(pageParams, response) {
+    var entryParams = {
+      request: pageParams.request
+    };
+    var responseParams = {
+      status: '0',
+      statusText: 'No response'
+    };
+    if (response) {
+      let contentType = arc.app.headers.getContentType(response.headers);
+      let body;
+      if (contentType) {
+        if (contentType.indexOf('json') !== -1) {
+          body = JSON.stringify(response.body);
+        } else {
+          body = String(response.body);
+        }
+      } else {
+        body = String(response.body);
+      }
+      responseParams = {
+        status: response.status || 0,
+        statusText: response.statusText || 'unknown status',
+        headers: response.headers || [],
+        content: {
+          text: body,
+          mimeType: contentType
+        }
+      };
+      if (response.stats) {
+        entryParams.timings = response.stats;
+
+        let time = 0;
+        if (response.stats.connect && response.stats.connect !== -1) {
+          time += response.stats.connect;
+        }
+        if (response.stats.receive && response.stats.receive !== -1) {
+          time += response.stats.receive;
+        }
+        if (response.stats.send && response.stats.send !== -1) {
+          time += response.stats.send;
+        }
+        if (response.stats.ssl && response.stats.ssl !== -1) {
+          time += response.stats.ssl;
+        }
+        if (response.stats.wait && response.stats.wait !== -1) {
+          time += response.stats.wait;
+        }
+        if (time) {
+          entryParams.time = time;
+        }
+        if (response.stats.startTime) {
+          entryParams.startedDateTime = new Date(response.stats.startTime);
+        }
+      }
+    }
+    if (!('startedDateTime' in entryParams)) {
+      entryParams.startedDateTime = new Date();
+    }
+    entryParams.response = new HAR.Response(responseParams);
+    return new HAR.Entry(entryParams);
+  },
+
+  appendHarResponse: function(har, request, response) {
+    if (!har) {
+      return this.fromData(request, response);
+    }
+
+    var pageParams = this._createHarRequestObject(request, har.entries.length);
+    var entry = this._createHarResponseObject(pageParams, response);
+    if (!(har instanceof HAR.Log)) {
+      har = new HAR.Log(har);
+    }
+
+    entry.setPage(pageParams.page);
+    har.addPage(pageParams.page);
+    har.addEntry(entry, pageParams.page.id);
+
+    return har;
   }
 });

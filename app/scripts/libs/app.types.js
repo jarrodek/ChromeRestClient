@@ -345,6 +345,64 @@ class DriveRequestObject extends RequestObject {
   }
 }
 /**
+ * Creates a new base request object stored in the local store.
+ * It's different than RequestObject to quickly access latest request data
+ * without querying IDB. It also simplifies logic.
+ * Request object is created on demand during save.
+ *
+ * This object ment to be stored in local storage and support request view editors.
+ */
+class RequestLocalObject extends BaseObject {
+  constructor(opts) {
+    super(opts);
+    /**
+     * An url of the request.
+     *
+     * @type {String}
+     */
+    this.url = opts.url || '';
+    /**
+     * A HTTP method
+     *
+     * @type {String}
+     */
+    this.method = opts.method || 'GET';
+    /**
+     * A HTTP message part with the string values.
+     *
+     * @type {String}
+     */
+    this.headers = opts.headers || '';
+    /**
+     * A payload of the request.
+     *
+     * @type {Any}
+     */
+    this.payload = opts.payload || undefined;
+    /**
+     * (Optional) True if original request that created this object originated from saved request,
+     * may be not set. If `isSaved` and `isDrive` is false then the object represents
+     * history object.
+     *
+     * @type {Boolean}
+     */
+    this.isSaved = opts.isSaved || false;
+    /**
+     * (Optional) True if original request that created this object originated from google drive.
+     *
+     * @type {Boolean}
+     */
+    this.isDrive = opts.isDrive || false;
+    /**
+     * (Optional) Type depends on isSaved and isDrive, the ID of the original object.
+     * Database have numeric ID but drive object will have is of string type.
+     *
+     * @type {String|Number}
+     */
+    this.id = opts.id || undefined;
+  }
+}
+/**
  * A class representing an entity in the data store with information about
  * Google Drive referenced items.
  *
@@ -611,3 +669,4 @@ window.HistoryRequestObject = HistoryRequestObject;
 window.DriveRequestObject = DriveRequestObject;
 window.ProjectObject = ProjectObject;
 window.FileExport = FileExport;
+window.RequestLocalObject = RequestLocalObject;

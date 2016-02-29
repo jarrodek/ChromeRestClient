@@ -133,7 +133,7 @@ Polymer({
       this._setRaw(e.target.result);
       this._setIsRaw(true);
     };
-    fr.onerror = (e) => {
+    fr.onerror = () => {
       this._setRaw('Unable to read binnary data as string.');
       this._setIsRaw(true);
     };
@@ -143,6 +143,7 @@ Polymer({
   _displayJSON: function(payload) {
     this._setRaw(JSON.stringify(payload));
     this._setIsRaw(true);
+    this._setIsJson(true);
     this.selectedTab = 2;
     this._tabsChanged();
     this.$.jsonViewer.json = payload;
@@ -156,7 +157,7 @@ Polymer({
     }
   },
   /**
-   *
+   * Save to clipboard.
    */
   _clipboardCopy: function() {
     this.fire('clipboard-write', {

@@ -27,7 +27,7 @@ Final local copy of the object stored as a `latestRequest` is:
   method: 'String', //a HTTP method
   headers: 'String', // A HTTP message part with the string values.
   payload: 'Any', // a payload message,
-  isSaved: 'Boolean', // (Optional) true if original request that created this object originated from saved request, may be not set.
+  isSaved: 'Boolean', // (Optional) true if original request that created this object originated from saved request, may be not set. If isSaved and isDrive is false then the object represents history object
   isDrive: 'Boolean', // (Optional) true if original request that created this object originated from google drive, may be not set.
   id: 'String|Number' // (Optional) type depends on isSaved and isDrive, the ID of the original object, may be not set.
 }
@@ -41,8 +41,10 @@ Final local copy of the object stored as a `latestRequest` is:
       }
     </style>
     <content></content>
-    <chrome-storage auto id="latest" type="local" name="latestRequest" value="{{request}}" on-read="_latestLoaded"></chrome-storage>
+    <chrome-storage auto id="latest" type="local" name="latestRequest" value="{{request}}"  value-as="RequestLocalObject" on-read="_latestLoaded"></chrome-storage>
     <arc-socket-request id="socket" on-ready="_responseReady"></arc-socket-request>
+    <arc-historyurl-model id="historyurlModel" on-save="_historyUrlSaved" on-error="_historyUrlSaveError"></arc-historyurl-model>
+    <arc-request-object-model id="requestModel" on-data-ready="_requestObjectReady" on-save="_onHistorySave"></arc-request-object-model>
   </template>
   <script src="arc-request-controller.js"></script>
 </dom-module>

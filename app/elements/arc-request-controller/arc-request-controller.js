@@ -78,11 +78,13 @@ Polymer({
 
   _latestLoaded: function() {
     if (!this.$.latest.value) {
-      this.set('request', new RequestObject({
-        type: 'history',
+      let base = new RequestLocalObject({
         url: '',
         method: 'GET'
-      }));
+      });
+      //class above will not work with Polymer's data binding model.
+      //It mus be translated to the Object again.
+      this.set('request', base);
     }
   },
 
@@ -111,17 +113,22 @@ Polymer({
    * Saves request and response in the history store.
    */
   _saveHistory: function() {
-
+    this.$.requestModel.getByMethodUrl(this.request.url, this.request.method);
   },
   /**
    * Save an URL in URL's history store for autofill helper.
    */
   _saveUrl: function() {
-
+    var url = this.request.url;
+    this.$.historyurlModel.data = new HistoryUrlObject({
+      url: url,
+      time: Date.now()
+    });
+    this.$.historyurlModel.save();
   },
 
   _callRequest: function() {
-    var request = Object.assign(this.request);
+    var request = Object.assign({}, this.request);
     this.$.socket.request = request;
     this.$.socket.run();
   },
@@ -129,6 +136,7 @@ Polymer({
   _responseReady: function(e) {
     this._setRequestLoading(false);
     this._setResponse(e.detail.response);
+    this._saveHistory();
   },
 
   _computeHasResponse: function(response) {
@@ -163,5 +171,35 @@ Polymer({
     StatusNotification.notify({
       message: 'File saved'
     });
+  },
+
+  _historyUrlSaved: function() {
+    console.info('History URL has been saved.');
+  },
+
+  _historyUrlSaveError: function(e) {
+    console.warn('Error saving into URLs history.', e);
+  },
+  /**
+   * Called when the request object has been read from the datastore.
+   * This function is called only when updating hitory data in object.
+   */
+  _requestObjectReady: function(e) {
+    var request = e.detail.data;
+    if (!request) {
+      request = this.$.requestModel.fromData(this.request, this.response);
+      this.$.requestModel.requestType = 'history';
+    } else {
+      debugger;
+      request = request[0];
+      request.har = this.$.requestModel.appendHarResponse(request.har, this.request, this.response);
+      this.$.requestModel.requestType = request.type;
+    }
+    this.$.requestModel.data = request;
+    this.$.requestModel.save();
+  },
+
+  _onHistorySave: function(e) {
+    console.log('Haved history object', e.detail);
   }
 });

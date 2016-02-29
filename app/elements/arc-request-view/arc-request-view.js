@@ -11,7 +11,8 @@ Polymer({
      * A restored request object.
      */
     request: {
-      type: Object
+      type: Object,
+      notify: true
     },
     /**
      * A value used by the URL editor widget.
@@ -50,7 +51,7 @@ Polymer({
   },
 
   observers: [
-    '_requestChanged(request.*)'
+    '_requestChanged(request, request.*)'
   ],
 
   _requestChanged: function(changes) {
@@ -61,8 +62,12 @@ Polymer({
     this.set('masterUrl', urlValue);
     var headers = this.request ? this.request.headers : '';
     this.set('requestHeaders', headers);
-    var ct = arc.app.headers.getContentType(headers);
-    this.set('contentType', ct);
+    if (headers) {
+      var ct = arc.app.headers.getContentType(headers);
+      this.set('contentType', ct);
+    } else {
+      this.set('contentType', undefined);
+    }
     //console.log('_requestChanged deep in path', changes);
   },
 
@@ -82,7 +87,7 @@ Polymer({
     if (!this.opened) {
       return;
     }
-    if (this.request.headers === this.requestHeaders) {
+    if (this.request && this.request.headers === this.requestHeaders) {
       return;
     }
     this.set('request.headers', this.requestHeaders);

@@ -54,15 +54,31 @@ the License.
             <div id="rawContent" class="raw-content">[[raw]]</div>
           </section>
           <section hidden$="[[!isParsed]]">
+            <div class="actions-panel">
+              <paper-icon-button title="Copy content to clipboard" icon="content-copy" on-tap="_clipboardCopy"></paper-icon-button>
+              <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
+            </div>
             <code-highlight code="[[raw]]" mode="[[parsedMode]]"></code-highlight>
           </section>
           <section hidden$="[[!isJson]]">
+            <div class="actions-panel">
+              <paper-icon-button title="Copy content to clipboard" icon="content-copy" on-tap="_clipboardCopy"></paper-icon-button>
+              <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
+            </div>
             <json-viewer id="jsonViewer"></json-viewer>
           </section>
           <section hidden$="[[!isXml]]">
+            <div class="actions-panel">
+              <paper-icon-button title="Copy content to clipboard" icon="content-copy" on-tap="_clipboardCopy"></paper-icon-button>
+              <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
+            </div>
             <xml-viewer id="xmlViewer"></xml-viewer>
           </section>
           <section hidden$="[[!isImage]]">
+            <div class="actions-panel">
+              <paper-icon-button title="Copy content to clipboard" icon="content-copy" on-tap="_clipboardCopy"></paper-icon-button>
+              <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
+            </div>
             <chrome-image id="imageViewer"></chrome-image>
           </section>
         </iron-pages>
