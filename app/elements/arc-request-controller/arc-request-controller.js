@@ -58,7 +58,8 @@ Polymer({
   listeners: {
     'send': 'sendRequest',
     'abort': 'abortRequest',
-    'save-file': '_saveToFile'
+    'save-file': '_saveToFile',
+    'save-request': '_saveRequest'
   },
 
   onShow: function() {
@@ -81,7 +82,13 @@ Polymer({
   },
 
   onSave: function() {
-
+    var ui = document.body.querySelector('#saveRequestUi');
+    if (!ui) {
+      StatusNotification.notify({
+        message: 'UI element not found'
+      });
+    }
+    ui.open();
   },
 
   _prepareRequest: function() {
@@ -99,7 +106,6 @@ Polymer({
   },
 
   _restoreLatest: function() {
-    debugger;
     this.$.latest.read();
   },
 
@@ -239,6 +245,18 @@ Polymer({
   },
 
   _onHistorySave: function(e) {
+    var id = e.detail.id;
+    this.request.id = id;
+    switch (e.detail.type) {
+      case 'saved':
+        this.request.isSaved = true;
+        break;
+      case 'drive':
+        this.request.isDrive = true;
+        break;
+      default:
+        break;
+    }
     console.info('Saved history object', e.detail);
   },
   /** Called then transport not finished the request because of error. */
@@ -266,6 +284,18 @@ Polymer({
       StatusNotification.notify({
         message: 'Not found'
       });
+    }
+  },
+
+  _saveRequest: function() {
+    var current = this.request;
+    if (current.id) {
+
+    } else {
+      let request = this.$.requestModel.fromData(this.request, this.response);
+      this.$.requestModel.requestType = 'saved';
+      this.$.requestModel.data = request;
+      this.$.requestModel.save(request);
     }
   }
 });

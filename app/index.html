@@ -49,6 +49,7 @@
               <template is="dom-if" if="[[hasResponse]]">
                 <arc-response-view opened="[[requestOpened]]" response="[[response]]"></arc-response-view>
               </template>
+              <arc-save-dialog-view id="saveRequestUi"></arc-save-dialog-view>
             </arc-request-controller>
             <arc-websocket-controller data-route="socket">Socket</arc-websocket-controller>
             <arc-history-list-controller search-query="[[searchTerm]]" data-route="history">History</arc-history-list-controller>

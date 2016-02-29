@@ -68,7 +68,7 @@ Polymer({
   selectFile: function() {
     if (!this.appAuthorized) {
       this.$.userProvider.authorize(true)
-      .then((authToken) => {
+      .then(() => {
         this.selectFile();
       })
       .catch(() => {
@@ -105,7 +105,7 @@ Polymer({
     this.$.query.generateRequest();
   },
 
-  handleListResponse: function(e) {
+  handleListResponse: function() {
     var response = this.$.query.lastResponse;
     if ('files' in response) {
       this.set('items', this.items.concat(response.files));
@@ -162,7 +162,7 @@ Polymer({
     }
   },
 
-  handleDownloadError: function() {
+  handleDownloadError: function(e) {
     console.log('handleDownloadError', e);
     this.set('loading', false);
   }
