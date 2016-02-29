@@ -39,17 +39,40 @@
             @apply(--layout-horizontal);
             @apply(--layout-end-justified);
           }
+          .options-panel{
 
+          }
+          .options-panel paper-checkbox {
+            margin-right: 12px;
+          }
+          .caption {
+            @apply(--paper-font-caption);
+            color: #737373;
+          }
         </style>
         <div class="title-area" id="titleArea">
           <h2 class="flex">Save request</h2>
+          <template is="dom-if" if="[[isDrive]]">
+            <iron-icon alt="Saving to Google Drive" icon="arc:drive-color"></iron-icon>
+          </template>
         </div>
         <section>
+          <div class="options-panel">
+            <div class="caption">Save options</div>
+            <paper-checkbox checked="{{isDrive}}">Save to Google Drive</paper-checkbox>
+            <paper-checkbox checked="{{isProject}}">Save in project</paper-checkbox>
+          </div>
           <paper-input label="Request name" value="{{name}}"></paper-input>
         </section>
         <div class="buttons">
-          <paper-button dialog-dismiss="" on-tap="_cancel">Cancel</paper-button>
-          <paper-button dialog-confirm="" on-tap="_save">Save</paper-button>
+          <paper-button dialog-dismiss on-tap="_cancel">Cancel</paper-button>
+          <template is="dom-if" if="[[isOverride]]">
+            <paper-button dialog-confirm on-tap="_override">Override</paper-button>
+            <paper-button dialog-confirm on-tap="_save">Save as new</paper-button>
+          </template>
+          <template is="dom-if" if="[[!isOverride]]">
+            <paper-button dialog-confirm on-tap="_save">Save</paper-button>
+          </template>
         </div>
       </template>
     </dom-module>

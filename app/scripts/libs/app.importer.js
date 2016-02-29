@@ -250,7 +250,7 @@ arc.app.importer.prepareExport = function() {
     })
     .then(function(requests) {
       if (requests && requests.length) {
-        requests.forEach((item) => item._har = new HAR.Log(item._har))
+        requests.forEach((item) => item._har = new HAR.Log(item._har));
       }
       result.requests = requests;
       return db.projectObjects

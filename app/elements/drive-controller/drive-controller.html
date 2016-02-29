@@ -21,6 +21,14 @@
       on-error="handleDownloadError"
       headers="{{authHeaders}}"
       debounce-duration="300" id="download"></iron-ajax>
+    <iron-ajax
+      id="upload"
+      method="POST"
+      url="https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart"
+      handle-as="json"
+      on-response="_handleInsertResponse"
+      on-error="_handleInsertError"
+      debounce-duration="300"></iron-ajax>
     <user-provider auth-headers="{{authHeaders}}" id="userProvider" authorized="{{appAuthorized}}" not-signed-in="{{notSignedIn}}"></user-provider>
   </template>
   <script src="drive-controller.js"></script>

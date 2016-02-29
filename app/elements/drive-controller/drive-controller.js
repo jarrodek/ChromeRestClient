@@ -146,9 +146,13 @@ Polymer({
 
   handleDownloadResponse: function() {
     var response = this.$.download.lastResponse;
+    if (response.kind && response.requests) {
+      response = response.requests[0];
+    }
     let obj = arc.app.importer.normalizeRequest(response);
     obj.type = 'drive';
-    obj.id = this.fileId;
+    obj.driveId = this.fileId;
+    obj.isDrive = true;
     this.set('loading', false);
     this.close();
     if (this.restoreOnFile) {
@@ -165,5 +169,54 @@ Polymer({
   handleDownloadError: function(e) {
     console.log('handleDownloadError', e);
     this.set('loading', false);
+  },
+
+  exportDrive: function(requestObject, fileName) {
+    if (!this.appAuthorized) {
+      return this.$.userProvider.authorize(true)
+      .then(() => {
+        return this._exportDrive(requestObject, fileName);
+      })
+      .catch(() => {
+        console.error('Fix me pls.');
+      });
+    } else {
+      return this._exportDrive(requestObject, fileName);
+    }
+
+  },
+
+  _exportDrive: function(requestObject, fileName) {
+    var exportObj = arc.app.importer.createExportObject({
+      requests: [requestObject],
+      projects: []
+    });
+    var payload = arc.app.drive.createInsertPayload(exportObj, fileName);
+    var headers = Object.assign(this.authHeaders, {
+      'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+    });
+    this.$.upload.body = payload;
+    this.$.upload.headers = headers;
+    this.$.upload.generateRequest();
+    return new Promise((resolve, reject) => {
+      this._uploadPromise = {
+        resolve: resolve,
+        reject: reject
+      };
+    });
+  },
+
+  _handleInsertResponse: function(e) {
+    if (this._uploadPromise.resolve) {
+      this._uploadPromise.resolve(e.target.lastResponse);
+    }
+    delete this._uploadPromise;
+  },
+
+  _handleInsertError: function(e) {
+    if (this._uploadPromise.reject) {
+      this._uploadPromise.reject(e.target.lastResponse);
+    }
+    delete this._uploadPromise;
   }
 });

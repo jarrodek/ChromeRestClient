@@ -103,6 +103,12 @@ Polymer({
           //result = table.where('type').equals(this.requestType);
           result = table.where(':id').noneOf(excludedRequests)
             .and((item) => {
+              if (!type) {
+                return true;
+              }
+              if (item.type === 'drive') {
+                return true;
+              }
               return item.type === type;
             });
         }
@@ -174,7 +180,7 @@ Polymer({
       return Dexie.Promise.reject(new Error('Nothing to save.'));
     }
     this._cleanObject();
-    this.genericSave('requestObject');
+    return this.genericSave('requestObject');
   },
   /**
    * Remove current data from the store.
@@ -190,7 +196,7 @@ Polymer({
         console.warn('Nothing to delete.');
       }
     }
-    this.genericRemove('requestObject');
+    return this.genericRemove('requestObject');
   },
   /** Custom function to datae all objects by type. */
   _deleteAll: function() {
@@ -372,9 +378,11 @@ Polymer({
     var data = this.data;
     obj.url = data.url;
     obj.method = data.method;
-    obj.isSaved = data.requestType === 'saved';
-    obj.isDrive = data.requestType === 'drive';
+    obj.isSaved = data.type === 'saved';
+    obj.isDrive = data.type === 'drive';
     obj.id = data.id;
+    obj.name = data.name || undefined;
+    obj.driveId = data.driveId || undefined;
     var entries = data.har.entries;
     var request = entries[entries.length - 1].request; // take the last one.
     if (!request) {
@@ -488,7 +496,9 @@ Polymer({
     entryParams.response = new HAR.Response(responseParams);
     return new HAR.Entry(entryParams);
   },
-
+  /**
+   * Appends new response to existing HAR object.
+   */
   appendHarResponse: function(har, request, response) {
     if (!har) {
       return this.fromData(request, response);
@@ -505,5 +515,31 @@ Polymer({
     har.addEntry(entry, pageParams.page.id);
 
     return har;
+  },
+  /**
+   * Helper function when overriding request data.
+   * Replace `restoredRequest` metadata and append current request and response.
+   */
+  replaceData: function(restoredRequest, currentRequest, currentResponse) {
+    var har = restoredRequest.har;
+    if (!har) {
+      let request = this.fromData(currentRequest, currentResponse);
+      request.name = restoredRequest.name;
+      request.type = restoredRequest.type;
+      request.id = restoredRequest.id;
+      return request;
+    }
+    restoredRequest.method = currentRequest.method;
+    restoredRequest.url = currentRequest.url;
+    var pageParams = this._createHarRequestObject(currentRequest, har.entries.length);
+    var entry = this._createHarResponseObject(pageParams, currentResponse);
+    if (!(har instanceof HAR.Log)) {
+      har = new HAR.Log(har);
+    }
+    entry.setPage(pageParams.page);
+    har.addPage(pageParams.page);
+    har.addEntry(entry, pageParams.page.id);
+    restoredRequest.har = har;
+    return restoredRequest;
   }
 });

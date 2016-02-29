@@ -241,6 +241,12 @@ class RequestObject extends OrderedList {
      */
     this.method = opts.method;
     /**
+     * Google Drive ID.
+     *
+     * @type {String}
+     */
+    this.driveId = opts.driveId;
+    /**
      * A type of the object. Sub classes can set it by default.
      * Used to distinguish what kind of request is this (saved, history)
      *
@@ -394,12 +400,17 @@ class RequestLocalObject extends BaseObject {
      */
     this.isDrive = opts.isDrive || false;
     /**
-     * (Optional) Type depends on isSaved and isDrive, the ID of the original object.
-     * Database have numeric ID but drive object will have is of string type.
+     * (Optional) Type depends on isSaved, the ID of the original object.
      *
-     * @type {String|Number}
+     * @type {Number}
      */
     this.id = opts.id || undefined;
+    /**
+     * Drive items are stored like saved request. They have additional attribute `driveId`.
+     *
+     * @type {String}
+     */
+    this.driveId = opts.driveId || undefined;
   }
 }
 /**

@@ -88,6 +88,14 @@ Polymer({
         message: 'UI element not found'
       });
     }
+    ui.reset();
+    ui.isDrive = this.request.isDrive;
+    if (this.request.isSaved || this.request.isDrive) {
+      if (this.request.id) {
+        ui.isOverride = true;
+      }
+      ui.name = this.request.name;
+    }
     ui.open();
   },
 
@@ -95,9 +103,15 @@ Polymer({
     if (!this.opened || !this.routeParams) {
       return;
     }
+    this._setResponse(null);
     switch (this.routeParams.type) {
+      case 'drive':
+        throw new Error('Implement me!');
+      case 'saved':
+        this._restoreSaved(this.routeParams.savedId, 'saved');
+        break;
       case 'history':
-        this._restoreHistory(this.routeParams.historyId);
+        this._restoreSaved(this.routeParams.historyId, 'history');
         break;
       default:
         this._restoreLatest();
@@ -108,8 +122,11 @@ Polymer({
   _restoreLatest: function() {
     this.$.latest.read();
   },
-
-  _restoreHistory: function(id) {
+  /**
+   * Restore saved request from the local storage.
+   * The model will call `_requestObjectRestored` function when ready.
+   */
+  _restoreSaved: function(id, type) {
     id = parseInt(id);
     if (!id || id !== id) {
       this._restoreLatest();
@@ -119,8 +136,24 @@ Polymer({
       return;
     }
     this.$.requestQueryModel.objectId = id;
-    this.$.requestQueryModel.requestType = 'history';
+    this.$.requestQueryModel.requestType = type;
     this.$.requestQueryModel.getObject();
+  },
+  /**
+   * Datastore has read restored request data.
+   */
+  _requestObjectRestored: function(e) {
+    if (e.detail.data) {
+      let request = this.$.requestQueryModel.toLocalRequest();
+      console.info('Restored request', request);
+      //TODO: There is some error here
+      //Sometimes headers are not fully restored. Need to investigate.
+      this.set('request', request);
+    } else {
+      StatusNotification.notify({
+        message: 'Not found'
+      });
+    }
   },
 
   _latestLoaded: function() {
@@ -228,7 +261,7 @@ Polymer({
   },
   /**
    * Called when the request object has been read from the datastore.
-   * This function is called only when updating hitory data in object.
+   * This function is called only when updating history data in object.
    */
   _requestObjectReady: function(e) {
     var request = e.detail.data;
@@ -236,7 +269,9 @@ Polymer({
       request = this.$.requestModel.fromData(this.request, this.response);
       this.$.requestModel.requestType = 'history';
     } else {
-      request = request[0];
+      if (request instanceof Array) {
+        request = request[0];
+      }
       request.har = this.$.requestModel.appendHarResponse(request.har, this.request, this.response);
       this.$.requestModel.requestType = request.type;
     }
@@ -245,14 +280,14 @@ Polymer({
   },
 
   _onHistorySave: function(e) {
-    var id = e.detail.id;
-    this.request.id = id;
-    switch (e.detail.type) {
+    var id = e.detail.data.id;
+    this.set('request.id', id);
+    switch (e.detail.data.type) {
       case 'saved':
-        this.request.isSaved = true;
+        this.set('request.isSaved', true);
         break;
       case 'drive':
-        this.request.isDrive = true;
+        this.set('request.isDrive', true);
         break;
       default:
         break;
@@ -276,26 +311,81 @@ Polymer({
     //there will be no history save since there's nothing to save.
   },
 
-  _requestObjectRestored: function(e) {
-    if (e.detail.data) {
-      let request = this.$.requestQueryModel.toLocalRequest();
-      this.set('request', request);
+  _saveRequest: function(e) {
+    var name = e.detail.name;
+    var override = e.detail.override || false;
+    var toDrive = e.detail.isDrive || this.request.isDrive;
+    //always save to local store, origin is not important.
+    this._saveLocal(toDrive, name, override);
+  },
+  /**
+   * Save request data in local storage.
+   */
+  _saveLocal: function(isDrive, name, override) {
+    var current = this.request;
+    // override existing item
+    if (current.id && override) {
+      this.$.requestModel.objectId = current.id;
+      this.$.requestModel.getObject()
+      .then((result) => {
+        if (!result) {
+          StatusNotification.notify({
+            message: 'Override object not found'
+          });
+          return;
+        }
+        current.name = result.name = name;
+        current.type = result.type = isDrive ? 'drive' : 'saved';
+        this.set('request', current);
+        result = this.$.requestModel.replaceData(result, current, this.response);
+        this.$.requestModel.requestType = current.type;
+        this.$.requestModel.data = result;
+        this.$.requestModel.save()
+        .then(() => {
+          if (result.type === 'drive') {
+            this._saveDrive(result);
+          }
+        });
+      });
     } else {
-      StatusNotification.notify({
-        message: 'Not found'
+      // create new object
+      let request = this.$.requestModel.fromData(current, this.response);
+      request.name = name;
+      request.type = isDrive ? 'drive' : 'saved';
+      // this will be propagated into the store after IDB save.
+      this.set('request.name', name);
+      this.$.requestModel.requestType = request.type;
+      this.$.requestModel.data = request;
+      this.$.requestModel.save()
+      .then(() => {
+        if (request.type === 'drive') {
+          this._saveDrive(request);
+        }
       });
     }
   },
 
-  _saveRequest: function() {
-    var current = this.request;
-    if (current.id) {
-
-    } else {
-      let request = this.$.requestModel.fromData(this.request, this.response);
-      this.$.requestModel.requestType = 'saved';
-      this.$.requestModel.data = request;
-      this.$.requestModel.save(request);
+  _saveDrive: function(request) {
+    var ctrl = document.body.querySelector('drive-controller');
+    if (!ctrl) {
+      console.warn('Drive controller not found!');
+      return;
     }
+    ctrl.exportDrive(request, request.name).then((insertResult) => {
+      console.log(insertResult);
+      var driveId = insertResult.id;
+      this.set('request.driveId', driveId);
+      request.driveId = driveId;
+      this.$.requestModel.data = request;
+      this.$.requestModel.save();
+      StatusNotification.notify({
+        message: 'File saved'
+      });
+    }).catch((error) => {
+      console.error('Unable insert to Drive.', error);
+      StatusNotification.notify({
+        message: 'Unable upload file to Drive'
+      });
+    });
   }
 });

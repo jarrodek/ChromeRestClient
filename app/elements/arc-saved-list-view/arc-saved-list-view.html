@@ -227,6 +227,9 @@ An `arc-saved-list-view` element is a element responsible for displaying a list 
               <paper-tooltip for="deleteSelected">Delete selected</paper-tooltip>
             </div>
           </template>
+          <template is="dom-if" if="[[!hasSelectedItems]]">
+            <paper-button on-tap="openDrive">Open from Google Drive</paper-button>
+          </template>
           <!-- <template is="dom-if" if="[[!hasSelectedItems]]">
             <paper-menu-button horizontal-align="right">
               <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
@@ -262,9 +265,9 @@ An `arc-saved-list-view` element is a element responsible for displaying a list 
           <arc-saved-list-item on-dblclick="_showRequestDetails" request="{{item}}" selected="{{item.selected}}" on-selected-changed="_onItemToggle"></arc-saved-list-item>
         </template>
         <div class="table-columns">
-          <div class="flex"></div>
+          <!-- <div class="flex"></div>
           <paper-button raised="" class="actionButton" on-tap="importTap">import</paper-button>
-          <paper-button on-tap="cancelTap">cancel</paper-button>
+          <paper-button on-tap="cancelTap">cancel</paper-button> -->
         </div>
       </div>
     </paper-drawer-panel>

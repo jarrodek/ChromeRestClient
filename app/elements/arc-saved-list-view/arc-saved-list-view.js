@@ -5,5 +5,9 @@ Polymer({
 
   behaviors: [
     ArcBehaviors.RequestsListViewBehavior
-  ]
+  ],
+
+  openDrive: function() {
+    this.fire('open-drive');
+  }
 });

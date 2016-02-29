@@ -38,7 +38,8 @@ the License.
         on-delete-requested="_onDeleteRequested"
         on-content-scroll="_viewScrolling"
         on-sort-option-changed="_sortChanged"
-        querying="[[querying]]"></arc-saved-list-view>
+        querying="[[querying]]"
+        on-open-drive="openDrive"></arc-saved-list-view>
     </template>
     <template is="dom-if" if="{{!hasListData}}">
       <arc-saved-list-empty on-open-drive="openDrive"></arc-saved-list-empty>

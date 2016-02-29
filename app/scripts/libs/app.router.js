@@ -72,7 +72,8 @@ arc.app.router.onHash = function(e) {
       return;
     }
     copy = copy.substr(1);
-    let paramValue = copy.match(new RegExp(item.pattern))[0];
+    // let paramValue = copy.match(new RegExp(item.pattern))[0];
+    let paramValue = copy.match(/[^\/]+/)[0];
     copy = copy.replace('/' + paramValue, '');
     params.params[item.name] = paramValue;
   });

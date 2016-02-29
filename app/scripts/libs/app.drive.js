@@ -180,6 +180,28 @@ arc.app.drive.insertFile = function(parentId, filename, content, callback) {
     });
   }
 };
+
+arc.app.drive.createInsertPayload = function(content, filename) {
+  if (typeof content !== 'string') {
+    content = JSON.stringify(content);
+  }
+
+  let metadata = {
+    'name': filename + '.' + appFileExtension,
+    'mimeType': appMimeType,
+    'description': 'Advanced REST client exported file.'
+    // 'parents': [{
+    //   'id': parentId
+    // }]
+  };
+  let metaString = JSON.stringify(metadata);
+  let payload = btoa(content);
+  let multipartRequestBody = `${delimiter}Content-Type: application/json; charset=UTF-8\r\n\r\n${metaString}`;
+  multipartRequestBody += `${delimiter}Content-Type: ${appMimeType}\r\n`;
+  multipartRequestBody += `Content-Transfer-Encoding: base64\r\n\r\n${payload}${closeDelim}`;
+  return multipartRequestBody;
+};
+
 /**
  * Update content of the file.
  *
