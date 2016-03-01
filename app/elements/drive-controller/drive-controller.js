@@ -55,16 +55,6 @@ Polymer({
     }
   },
 
-  // ready: function() {
-  //   var i = 500;
-  //   var res = [];
-  //   var result = [];
-  //   while (i--) {
-  //     result.push({name: 'aaaaa ' + i, 'createdTime': i});
-  //   }
-  //   this.set('items', result);
-  // },
-
   selectFile: function() {
     if (!this.appAuthorized) {
       this.$.userProvider.authorize(true)
@@ -172,51 +162,23 @@ Polymer({
   },
 
   exportDrive: function(requestObject, fileName) {
-    if (!this.appAuthorized) {
-      return this.$.userProvider.authorize(true)
-      .then(() => {
-        return this._exportDrive(requestObject, fileName);
-      })
-      .catch(() => {
-        console.error('Fix me pls.');
-      });
-    } else {
-      return this._exportDrive(requestObject, fileName);
-    }
-
-  },
-
-  _exportDrive: function(requestObject, fileName) {
     var exportObj = arc.app.importer.createExportObject({
       requests: [requestObject],
       projects: []
     });
-    var payload = arc.app.drive.createInsertPayload(exportObj, fileName);
-    var headers = Object.assign(this.authHeaders, {
-      'Content-Type': 'multipart/related; boundary="' + boundary + '"'
-    });
-    this.$.upload.body = payload;
-    this.$.upload.headers = headers;
-    this.$.upload.generateRequest();
-    return new Promise((resolve, reject) => {
-      this._uploadPromise = {
-        resolve: resolve,
-        reject: reject
-      };
+    return drive.file.create({
+      resource: {
+        name: fileName + '.arc',
+        description: 'Advanced REST client exported file.'
+      },
+      media: {
+        mimeType: 'application/json',
+        body: exportObj
+      }
     });
   },
 
-  _handleInsertResponse: function(e) {
-    if (this._uploadPromise.resolve) {
-      this._uploadPromise.resolve(e.target.lastResponse);
-    }
-    delete this._uploadPromise;
-  },
+  _createInsertPayload: function() {
 
-  _handleInsertError: function(e) {
-    if (this._uploadPromise.reject) {
-      this._uploadPromise.reject(e.target.lastResponse);
-    }
-    delete this._uploadPromise;
   }
 });

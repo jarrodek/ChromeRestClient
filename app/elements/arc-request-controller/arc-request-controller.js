@@ -1,3 +1,5 @@
+'use strict';
+
 Polymer({
   is: 'arc-request-controller',
   behaviors: [
@@ -146,8 +148,8 @@ Polymer({
     if (e.detail.data) {
       let request = this.$.requestQueryModel.toLocalRequest();
       console.info('Restored request', request);
-      //TODO: There is some error here
-      //Sometimes headers are not fully restored. Need to investigate.
+      /*TODO: There is some error here. Sometimes headers are not fully restored.
+      Need to investigate.*/
       this.set('request', request);
     } else {
       StatusNotification.notify({
@@ -343,7 +345,10 @@ Polymer({
         this.$.requestModel.save()
         .then(() => {
           if (result.type === 'drive') {
-            this._saveDrive(result);
+            // Go outside Dexie promise
+            this.async(() => {
+              this._saveDrive(result);
+            });
           }
         });
       });
@@ -359,7 +364,10 @@ Polymer({
       this.$.requestModel.save()
       .then(() => {
         if (request.type === 'drive') {
-          this._saveDrive(request);
+          // Go outside Dexie promise
+          this.async(() => {
+            this._saveDrive(request);
+          });
         }
       });
     }
@@ -371,7 +379,8 @@ Polymer({
       console.warn('Drive controller not found!');
       return;
     }
-    ctrl.exportDrive(request, request.name).then((insertResult) => {
+    ctrl.exportDrive(request, request.name)
+    .then((insertResult) => {
       console.log(insertResult);
       var driveId = insertResult.id;
       this.set('request.driveId', driveId);

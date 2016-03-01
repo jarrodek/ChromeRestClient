@@ -1,3 +1,5 @@
+'use strict';
+
 Polymer({
   is: 'payload-editor',
   properties: {

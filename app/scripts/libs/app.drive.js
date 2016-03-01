@@ -14,33 +14,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
-
-/**
- * Communicating with background page.
- *
- * While inside Chrome extension environment it need to call
- * `chrome.runtime.getBackgroundPage` to run any function from it.
- *
- * In development mode the app does not have access to Chrome APIs.
- * In this case dev extension will communicate with background page
- * instead of calling the API directly.
- * During the development extension from var/extension folder must be loaded into Chrome.
- * It will inject content script which will pass data to background page.
- *
- * The call require object informing API which function to call in the background page.
- * The object requires two properties to be available:
- * payload - function name to be called in the background page
- * response - type of expected response; can be "object" or "string"
- * source - must contain "gwt:host" so the content script will recognize it as a command from dev
- *    environment to the background page.
- *
- * @example
- * var payload = {
- *  'payload': 'checkDriveAuth',
- *  'source': 'gwt:host'
- * };
- */
-
 /* global chrome, gapi, google */
 
 /**
@@ -48,345 +21,306 @@
  */
 //const CLIENT_ID = '10525470235.apps.googleusercontent.com';
 /**
- * App ID. Required by Drive Picker.
- * @type {String}
+ * Google Drive REST API namespace.
+ *
+ * @namespace
  */
-const APP_ID = '10525470235';
-/**
- * API key for Google Picker
- * @type {string}
- */
-const API_KEY_PICKER = 'AIzaSyACzi_VRqOHzLj_Lf7IdJgQAO3jaw5SMNU';
-
-/**
- * Authorization scopes.
- */
-/*const SCOPES = 'https://www.googleapis.com/auth/drive.install ' +
-  'https://www.googleapis.com/auth/drive.file ' +
-  'https://www.googleapis.com/auth/drive.readonly.metadata';*/
-/**
- * XHR boundary for POST calls.
- */
-const boundary = 'ARCFormBoundary49nr1hyovoq1tt9';
-const delimiter = '\r\n--' + boundary + '\r\n';
-const closeDelim = '\r\n--' + boundary + '--';
-/**
- * Drive's registered content type.
- * It will be used to determine app's files in the Drive.
- * Drive's handlers will recognize the app and will run it from Drive UI.
- */
-const appMimeType = 'application/restclient+data';
-/**
- * Extension name for files stored in Google Drive.
- */
-const appFileExtension = 'arc';
-/**
- * Advanced Rest Client namespace
- */
-var arc = arc || {};
-/**
- * ARC app's namespace
- */
-arc.app = arc.app || {};
-/**
- * A namespace for Google Drive integration.
- */
-arc.app.drive = {};
-/**
- * True if code is running in extension's environment.
- */
-arc.app.drive.isExtension = !!chrome.runtime.getBackgroundPage;
-/**
- * API load is on demand and asynchronous.
- * This array will contain all callback function which
- * has been requested with API load.
- */
-arc.app.drive._callbacks = new Set();
-/**
- * A callback function that should be run after authorization.
- */
-arc.app.drive._authCallbacks = new Set();
-/**
- * A flag to determine if API has been initialized.
- */
-arc.app.drive._initialized = false;
-/**
- * A namespace for Google Drive file picker.
- */
-arc.app.drive.picker = {};
-/**
- * A flag to determine if file picker is shown.
- */
-arc.app.drive.picker.initialized = false;
-/**
- * Callback to be run after file picker has been initialized.
- */
-arc.app.drive.picker._callbacks = new Set();
+var drive = {};
 /**
  * Authorize the app in Google Drive service.
  *
- * Callback function will contain auth result object (if user have authorized application)
- * with token data or null if user resign with authentication.
- *
- * @param {Function} callback Callback function to be called after authorization.
+ * @return {Promise} Fulfilled promise with auth token or reject.
  */
-arc.app.drive.auth = function(callback) {
-  chrome.identity.getAuthToken({'interactive': true}, callback);
-};
-/**
- * Insert new file to Google Drive.
- *
- * Callback function will contain insert result or 'error' if error occured.
- *
- * @param {String} parentId Id of parent folder in Google Drive. Null to keep files in root folder.
- * @param {String} filename File name visible in Drive interface.
- * @param {String|Object} content Content to be saved in the file. Anything else then String will
- *        be passed to JSON.stringify function.
- * @param {Function} callback A callback function to be called after insert.
- */
-arc.app.drive.insertFile = function(parentId, filename, content, callback) {
-  try {
-    if (typeof content !== 'string') {
-      content = JSON.stringify(content);
-    }
-
-    let metadata = {
-      'title': filename + '.' + appFileExtension,
-      'mimeType': appMimeType,
-      'parents': [{
-        'id': parentId
-      }]
-    };
-    let metaString = JSON.stringify(metadata);
-    let payload = btoa(content);
-    let multipartRequestBody = `${delimiter}Content-Type: application/json\r\n\r\n${metaString}`;
-    multipartRequestBody += `${delimiter}Content-Type: ${appMimeType}\r\n`;
-    multipartRequestBody += `Content-Transfer-Encoding: base64\r\n\r\n${payload}${closeDelim}`;
-    let request = gapi.client.request({
-      'path': '/upload/drive/v2/files',
-      'method': 'POST',
-      'params': {
-        'uploadType': 'multipart'
-      },
-      'headers': {
-        'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
-      },
-      'body': multipartRequestBody
+drive.auth = function(callback) {
+  return new Promise((resolve, reject) => {
+    chrome.identity.getAuthToken({'interactive': true}, (authToken) => {
+      if (chrome.runtime.lastError) {
+        return reject(chrome.runtime.lastError.message);
+      }
+      if (!authToken) {
+        return reject('User canceled');
+      }
+      resolve(authToken);
     });
-    request.execute(callback);
-  } catch (e) {
-    callback({
-      'error': e
-    });
-  }
-};
-
-arc.app.drive.createInsertPayload = function(content, filename) {
-  if (typeof content !== 'string') {
-    content = JSON.stringify(content);
-  }
-
-  let metadata = {
-    'name': filename + '.' + appFileExtension,
-    'mimeType': appMimeType,
-    'description': 'Advanced REST client exported file.'
-    // 'parents': [{
-    //   'id': parentId
-    // }]
-  };
-  let metaString = JSON.stringify(metadata);
-  let payload = btoa(content);
-  let multipartRequestBody = `${delimiter}Content-Type: application/json; charset=UTF-8\r\n\r\n${metaString}`;
-  multipartRequestBody += `${delimiter}Content-Type: ${appMimeType}\r\n`;
-  multipartRequestBody += `Content-Transfer-Encoding: base64\r\n\r\n${payload}${closeDelim}`;
-  return multipartRequestBody;
-};
-
-/**
- * Update content of the file.
- *
- * @param {String} fileId Google Drive file id.
- * @param {String|Object} content Content to be saved in the file. Anything else then String
- *            will be passed to JSON.stringify function.
- * @param {Function} callback A callback function to be called after patch.
- */
-arc.app.drive.updateFile = function(fileId, content, callback) {
-  try {
-    if (typeof content !== 'string') {
-      content = JSON.stringify(content);
-    }
-    let metadata = {
-      'mimeType': appMimeType
-    };
-    let metaString = JSON.stringify(metadata);
-    let payload = btoa(content);
-    let multipartRequestBody = `${delimiter}Content-Type: application/json\r\n\r\n${metaString}`;
-    multipartRequestBody += `${delimiter}Content-Type: ${appMimeType}\r\n`;
-    multipartRequestBody += `Content-Transfer-Encoding: base64\r\n\r\n${payload}${closeDelim}`;
-    let request = gapi.client.request({
-      'path': `/upload/drive/v2/files/${fileId}`,
-      'method': 'PUT',
-      'params': {
-        'uploadType': 'multipart'
-      },
-      'headers': {
-        'Content-Type': `multipart/mixed; boundary="${boundary}"`
-      },
-      'body': multipartRequestBody
-    });
-    request.execute(callback);
-  } catch (e) {
-    callback({
-      'error': e
-    });
-  }
-};
-/**
- * Get Google Drive file metadata.
- *
- * @param {String} fileId Google Drive file id.
- * @param {Function} callback A callback function to be called.
- */
-arc.app.drive.getFileMeta = function(fileId, callback) {
-  let request = gapi.client.request({
-    'path': `/drive/v2/files/${fileId}`,
-    'method': 'GET',
-    'params': {
-      'fields': 'downloadUrl,title,etag'
-    }
-  });
-  request.execute(function(resp) {
-    callback(resp);
   });
 };
 /**
- * Get file contents from Google Drive.
+ * Files manipulation API.
  *
- * @param {String} downloadUrl File's download URL (received from the API)
- * @param {Function} callback A callback function to be called.
+ * @namespace
  */
-arc.app.drive.getFile = function(downloadUrl, callback) {
-  let accessToken = gapi.auth.getToken().access_token;
-  if (!accessToken) {
-    console.warn('Access token is not available. Call rejected');
-    callback.call(this, {
-      'error': 'Not authorized'
-    });
-    return;
-  }
-  let xhr = new XMLHttpRequest();
-  xhr.open('GET', downloadUrl);
-  xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
-  xhr.onload = function() {
-    callback.call(arc, xhr.responseText);
-  };
-  xhr.onerror = function(e) {
-    callback.call(arc, e);
-  };
-  xhr.send();
-};
-arc.app.drive.listFiles = function(mimeType, nextPageToken, query, callback) {
-  let accessToken = gapi.auth.getToken().access_token;
-  if (!accessToken) {
-    console.warn('Access token is not available. Call rejected');
-    callback.call(this, {
-      'error': 'Not authorized'
-    });
-    return;
-  }
-  let q = `mimeType="${mimeType}" and trashed = false`;
-  if (query) {
-    q += ` and title contains '${query}'`;
-  }
-  let params = {
-    'q': q,
-    'maxResults': 50,
-    'fields': 'items(createdDate,iconLink,id,title),nextLink,nextPageToken'
-  };
-  if (nextPageToken !== null) {
-    params.pageToken = nextPageToken;
-  }
-  //application/restclient+data
-  //TODO: why do I need it here?
-  if (accessToken) {
-    gapi.auth.setToken({
-      'access_token': accessToken
-    });
-  }
-  try {
-    var request = gapi.client.request({
-      'path': '/drive/v2/files',
-      'method': 'GET',
-      'params': params
-    });
-    request.execute(callback);
-  } catch (e) {
-    callback.call(this, {
-      'error': e
-    });
-  }
-};
+drive.file = {};
 /**
- * Construct new Picker object.
- *
- * @param {String} authToken User's auth token
- * @param {Function} callback A callback function to be called after dialog closes.
- * @param {Array} views Rest parameter for views that should be attached to the picker.
+ * File meta boundary for POST calls.
  */
-arc.app.drive.picker._constructPicker = function(authToken, callback, views) {
-  var pickerBuilder = new google.picker.PickerBuilder()
-    .setDeveloperKey(API_KEY_PICKER)
-    .setOAuthToken(authToken)
-    .setCallback(callback)
-    .setAppId(APP_ID)
-    //.setOrigin('http://127.0.0.1:8888')
-    .disableFeature(google.picker.Feature.MULTISELECT_ENABLED);
-  views.forEach(function(view) {
-    pickerBuilder.addView(view);
-  });
-  return pickerBuilder;
-};
+drive.file.boundary = 'ARCFormBoundary49nr1hyovoq1tt9';
+drive.file.delimiter = '\r\n--' + drive.file.boundary + '\r\n';
+drive.file.closeDelimiter = '\r\n--' + drive.file.boundary + '--';
 /**
- * Open picker to select application file.
- *
- * @param {String} authToken An auth token to be used with the picker.
- * @param {Function} callback A callback function to be called after dialog closes.
+ * Drive's registered content type.
+ * It will be used to search for app's files in the Drive.
+ * Drive's handlers will recognize the app and will run it from Drive UI.
  */
-arc.app.drive.picker.getAppFile = function(authToken, callback) {
-  let filesView = new google.picker.View(google.picker.ViewId.DOCS);
-  filesView.setMimeTypes('application/restclient+data');
-  //proxy callback function to react on cancel or select actions.
-  var fn = function(data) {
-    if (data[google.picker.Response.ACTION] === google.picker.Action.PICKED ||
-      data[google.picker.Response.ACTION] === google.picker.Action.CANCEL) {
-      callback.call(arc, data);
+drive.file.mime = 'application/restclient+data';
+/**
+ * Extension name for files stored in Google Drive.
+ */
+drive.file.extension = 'arc';
+/**
+ * A list of allowed resources (file metadata) in the file create request.
+ * See https://developers.google.com/drive/v3/reference/files/create for full list.
+ */
+drive.file.allowedResource = [
+  'appProperties', 'contentHints', 'createdTime', 'description', 'folderColorRgb', 'id',
+  'mimeType', 'modifiedTime', 'name', 'parents', 'properties', 'starred', 'viewedByMeTime',
+  'viewersCanCopyContent', 'writersCanShare'
+];
+/**
+ * Creates a Google Drive File.
+ *
+ * If config.resource.mimeType is not set and drive.file.mime is set then `drive.file.mime` will
+ * be used as a mime type.
+ *
+ * This script will automatically set file thumbnail if not set
+ * (config.resource.contentHints.thumbnail object value).
+ *
+ * @param {Object} config A file creation configuration consisted with:
+ *  - {Object} resource - A file metadata. See `drive.file.allowedResource` for more information.
+ *  - {Object} media - A file contents definition to save on drive. It must have defined following
+ * keys:
+ *    - {String} mimeType - A media mime type
+ *    - {String|Object} body - A content to save.
+ */
+drive.file.create = function(config) {
+  return new Promise((resolve, reject) => {
+    if (!('resource' in config) ||
+        !('media' in config)) {
+      reject(new Error('Invalid arguments.'));
+      return;
     }
-  };
-  let pickerBuilder = arc.app.drive.picker._constructPicker(authToken, fn, [filesView]);
-  let picker = pickerBuilder.build();
-  picker.setVisible(true);
-};
-/**
- * Open picker to select folder from Google Dive.
- * Folders are user by the app to select app files save location.
- *
- * @param {String} authToken An auth token to be used with the picker.
- * @param {Function} callback A callback function to be called after dialog closes.
- */
-arc.app.drive.picker.getFolder = function(authToken, callback) {
-  var foldersView = new google.picker.DocsView(google.picker.ViewId.FOLDERS);
-  foldersView.setIncludeFolders(true);
-  foldersView.setSelectFolderEnabled(true);
+    let names = Object.getOwnPropertyNames(config.resource);
+    let error = false;
+    let invalidArguments = [];
+    names.forEach((key) => {
+      if (drive.file.allowedResource.indexOf(key) === -1) {
+        error = true;
+        invalidArguments.push(key);
+      }
+    });
+    if (error) {
+      reject(new Error('Unknown argument for resource: ' + invalidArguments.join(', ')));
+      return;
+    }
 
-  //proxy callback function to react on cancel or select actions.
-  var fn = function(data) {
-    if (data[google.picker.Response.ACTION] === google.picker.Action.PICKED ||
-      data[google.picker.Response.ACTION] === google.picker.Action.CANCEL) {
-      callback.call(arc, data);
+    if (!config.resource.mimeType && drive.file.mime) {
+      config.resource.mimeType = drive.file.mime;
     }
-  };
-  var pickerBuilder = arc.app.drive.picker._constructPicker(authToken, fn, [foldersView]);
-  pickerBuilder.setTitle('Select a folder');
-  var picker = pickerBuilder.build();
-  picker.setVisible(true);
+
+    if (!config.resource.contentHints || !config.resource.contentHints.thumbnail ||
+      !config.resource.contentHints.image) {
+      let at;
+      drive.auth()
+      .then((_at) => at = _at)
+      .then(drive.file._appSafeIcon)
+      .then((file) => {
+        if (!config.resource.contentHints) {
+          config.resource.contentHints = {};
+        }
+        config.resource.contentHints.thumbnail = {
+          image: file,
+          mimeType: 'image/png'
+        };
+        return drive.file._uploadFile(at, config);
+      })
+      .then(resolve)
+      .catch(reject);
+    } else {
+      let at;
+      drive.auth()
+      .then((_at) => at = _at)
+      .then(drive.file._uploadFile(at, config))
+      .then(resolve)
+      .catch(reject);
+    }
+  });
 };
+/**
+ * Perform upload action.
+ */
+drive.file._uploadFile = function(accessToken, options) {
+  let headers = new Headers();
+  headers.set('Authorization', 'Bearer ' + accessToken);
+  headers.set('Content-Type', 'multipart/related; boundary="' + drive.file.boundary + '"');
+  let init = {
+    method: 'POST',
+    body: drive.file._getPayload(options),
+    headers: headers,
+  };
+  return fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', init)
+  .then(function(response) {
+    return response.json();
+  });
+};
+
+drive.file._appSafeIcon = () => {
+  return new Promise((resolve) => {
+    fetch(chrome.runtime.getURL('/assets/arc_icon_128.png'))
+    .then((response) => {
+      return response.blob();
+    })
+    .then((blob) => {
+      let reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = function(e) {
+        let data = e.target.result;
+        data = btoa(data)
+        .replace(/\+/g, '-') // Convert '+' to '-'
+        .replace(/\//g, '_') // Convert '/' to '_'
+        .replace(/=+$/, '');
+        resolve(data);
+      };
+    });
+  });
+};
+drive.file._getPayload = function(config) {
+  var content;
+  if (typeof config.media.body !== 'string') {
+    content = JSON.stringify(config.media.body);
+  } else {
+    content = config.media.body;
+  }
+  var d = drive.file.delimiter;
+  var cd = drive.file.closeDelimiter;
+  let meta = JSON.stringify(config.resource);
+
+  let body = `${d}Content-Type: application/json; charset=UTF-8\r\n\r\n${meta}`;
+  body += `${d}Content-Type: ${config.media.mimeType}\r\n\r\n`;
+  body += `${content}${cd}`;
+  return body;
+};
+//
+// /**
+//  * Update content of the file.
+//  *
+//  * @param {String} fileId Google Drive file id.
+//  * @param {String|Object} content Content to be saved in the file. Anything else then String
+//  *            will be passed to JSON.stringify function.
+//  * @param {Function} callback A callback function to be called after patch.
+//  */
+// arc.app.drive.updateFile = function(fileId, content, callback) {
+//   try {
+//     if (typeof content !== 'string') {
+//       content = JSON.stringify(content);
+//     }
+//     let metadata = {
+//       'mimeType': appMimeType
+//     };
+//     let metaString = JSON.stringify(metadata);
+//     let payload = btoa(unescape(encodeURIComponent(content)));
+//     let multipartRequestBody = `${delimiter}Content-Type: application/json\r\n\r\n${metaString}`;
+//     multipartRequestBody += `${delimiter}Content-Type: ${appMimeType}\r\n`;
+//     multipartRequestBody += `Content-Transfer-Encoding: base64\r\n\r\n${payload}${closeDelim}`;
+//
+//     let request = gapi.client.request({
+//       'path': `/upload/drive/v2/files/${fileId}`,
+//       'method': 'PUT',
+//       'params': {
+//         'uploadType': 'multipart'
+//       },
+//       'headers': {
+//         'Content-Type': `multipart/mixed; boundary="${boundary}"`
+//       },
+//       'body': multipartRequestBody
+//     });
+//     request.execute(callback);
+//   } catch (e) {
+//     callback({
+//       'error': e
+//     });
+//   }
+// };
+// /**
+//  * Get Google Drive file metadata.
+//  *
+//  * @param {String} fileId Google Drive file id.
+//  * @param {Function} callback A callback function to be called.
+//  */
+// arc.app.drive.getFileMeta = function(fileId, callback) {
+//   let request = gapi.client.request({
+//     'path': `/drive/v2/files/${fileId}`,
+//     'method': 'GET',
+//     'params': {
+//       'fields': 'downloadUrl,title,etag'
+//     }
+//   });
+//   request.execute(function(resp) {
+//     callback(resp);
+//   });
+// };
+// /**
+//  * Get file contents from Google Drive.
+//  *
+//  * @param {String} downloadUrl File's download URL (received from the API)
+//  * @param {Function} callback A callback function to be called.
+//  */
+// arc.app.drive.getFile = function(downloadUrl, callback) {
+//   let accessToken = gapi.auth.getToken().access_token;
+//   if (!accessToken) {
+//     console.warn('Access token is not available. Call rejected');
+//     callback.call(this, {
+//       'error': 'Not authorized'
+//     });
+//     return;
+//   }
+//   let xhr = new XMLHttpRequest();
+//   xhr.open('GET', downloadUrl);
+//   xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+//   xhr.onload = function() {
+//     callback.call(arc, xhr.responseText);
+//   };
+//   xhr.onerror = function(e) {
+//     callback.call(arc, e);
+//   };
+//   xhr.send();
+// };
+// arc.app.drive.listFiles = function(mimeType, nextPageToken, query, callback) {
+//   let accessToken = gapi.auth.getToken().access_token;
+//   if (!accessToken) {
+//     console.warn('Access token is not available. Call rejected');
+//     callback.call(this, {
+//       'error': 'Not authorized'
+//     });
+//     return;
+//   }
+//   let q = `mimeType="${mimeType}" and trashed = false`;
+//   if (query) {
+//     q += ` and title contains '${query}'`;
+//   }
+//   let params = {
+//     'q': q,
+//     'maxResults': 50,
+//     'fields': 'items(createdDate,iconLink,id,title),nextLink,nextPageToken'
+//   };
+//   if (nextPageToken !== null) {
+//     params.pageToken = nextPageToken;
+//   }
+//   //application/restclient+data
+//   //TODO: why do I need it here?
+//   if (accessToken) {
+//     gapi.auth.setToken({
+//       'access_token': accessToken
+//     });
+//   }
+//   try {
+//     var request = gapi.client.request({
+//       'path': '/drive/v2/files',
+//       'method': 'GET',
+//       'params': params
+//     });
+//     request.execute(callback);
+//   } catch (e) {
+//     callback.call(this, {
+//       'error': e
+//     });
+//   }
+// };

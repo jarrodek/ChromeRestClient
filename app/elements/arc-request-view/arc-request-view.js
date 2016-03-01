@@ -75,7 +75,7 @@ Polymer({
     if (!this.opened) {
       return;
     }
-    if (this.request.url === this.masterUrl) {
+    if (!this.request || this.request.url === this.masterUrl) {
       return;
     }
     this.set('request.url', this.masterUrl);
