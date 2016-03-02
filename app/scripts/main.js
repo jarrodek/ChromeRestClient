@@ -160,4 +160,13 @@
     app.$.appMenu.refreshProjects();
   });
 
+  app.onSave = () => {
+    var ctrl = document.querySelector('arc-request-controller');
+    ctrl.onSave();
+  };
+
+  app.onOpen = () => {
+    page('/saved');
+  };
+
 })(document, window);

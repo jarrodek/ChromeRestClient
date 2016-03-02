@@ -171,6 +171,7 @@ Polymer({
     if (!this.url) {
       return;
     }
+    /* global URI, URLParser */
     URI.escapeQuerySpace = false;
     var data = new URLParser(this.url);
     var isEncode = type === 'encode';
@@ -232,5 +233,9 @@ Polymer({
     } catch (e) {
 
     }
+  },
+
+  onEnter: function() {
+    this.fire('send');
   }
 });

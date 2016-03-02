@@ -54,7 +54,7 @@ Polymer({
     '_requestChanged(request, request.*)'
   ],
 
-  _requestChanged: function(changes) {
+  _requestChanged: function() {
     if (!this.opened) {
       return;
     }

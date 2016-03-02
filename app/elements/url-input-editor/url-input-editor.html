@@ -81,7 +81,7 @@
     <div class="simple" opened$="{{detailed}}">
       <paper-icon-button id="toggleButton" icon="hardware:keyboard-arrow-right" on-tap="toggle"></paper-icon-button>
       <paper-input-container class="main-input" no-label-float>
-        <input is="iron-input" type="url" value="{{url::input}}" placeholder="Request URL" />
+        <input is="iron-input" type="url" value="{{url::input}}" placeholder="Request URL" id="masterUrl"/>
       </paper-input-container>
       <paper-input label="Host" value="{{hostValue}}" class="host-input" on-input="updateUrl"></paper-input>
       <paper-menu-button horizontal-align="right" id="urlContextMenuButton">
@@ -113,6 +113,7 @@
       </div>
       <paper-input label="Hash" value="{{anchorValue}}" class="anchor-input"></paper-input>
     </div>
+    <iron-a11y-keys id="a11y" target="{{this.$.masterUrl}}" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
   </template>
   <script src="url-input-editor.js"></script>
 </dom-module>
