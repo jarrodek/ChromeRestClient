@@ -198,7 +198,14 @@ class OrderedList extends BaseObject {
  * @throws {Error} If `url`, `method` or `type` is not available to the constructor.
  */
 class RequestObject extends OrderedList {
-
+  /**
+   * To construct RequestObject client need an URL, method and type defined.
+   * A type can be one of 'saved', 'history' or 'drive'.
+   * If a type is 'drive' then driveId property must be set.
+   *
+   * RequestObjects may not have id property when it's newly created object or
+   * when object was restored from Drive and not yet saved locally.
+   */
   constructor(opts) {
     super(opts);
     super.assertRequiredKeys(['url', 'method', 'type'], opts);
@@ -240,12 +247,6 @@ class RequestObject extends OrderedList {
      * @type {!String}
      */
     this.method = opts.method;
-    /**
-     * Google Drive ID.
-     *
-     * @type {String}
-     */
-    this.driveId = opts.driveId;
     /**
      * A type of the object. Sub classes can set it by default.
      * Used to distinguish what kind of request is this (saved, history)
@@ -345,6 +346,12 @@ class DriveRequestObject extends RequestObject {
   constructor(opts) {
     opts.type = 'drive';
     super(opts);
+    /**
+     * Google Drive ID.
+     *
+     * @type {String}
+     */
+    this.driveId = opts.driveId;
   }
   toJSON() {
     return super.toJSON();
@@ -560,7 +567,7 @@ class ProjectObject extends OrderedList {
      *
      * @type {Date}
      */
-    this.created = opts.time ? new Date(opts.time) : opts.created ? opts.created : undefined;
+    this.created = opts.time ? new Date(opts.time) : opts.created ? opts.created : new Date();
   }
 
   /**

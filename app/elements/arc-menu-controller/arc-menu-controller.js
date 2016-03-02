@@ -17,6 +17,7 @@ Polymer({
       value: false
     }
   },
+  
   ready: function() {
     try {
       this._observeHistoryEnabled();
@@ -76,6 +77,7 @@ Polymer({
    * @param {Number} projectId Database id for the project
    */
   appendProject: function(projectId) {
+    console.info('append project ', projectId);
     this.$.model.query();
   },
   /**

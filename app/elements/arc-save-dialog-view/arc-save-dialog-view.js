@@ -30,7 +30,26 @@ Polymer({
     isProject: {
       type: Boolean,
       value: false
-    }
+    },
+    /**
+     * New project name
+     */
+    newProjectName: {
+      type: String
+    },
+    /**
+     * Existing project ID.
+     */
+    projectId: {
+      type: Number
+    },
+    /**
+     * List of available projects
+     */
+    projects: Array
+  },
+  listeners: {
+    'iron-overlay-opened': '_updateProjects'
   },
   /**
    * Resets the UI.
@@ -46,29 +65,51 @@ Polymer({
   },
 
   _save: function() {
+    this._fireSave(false);
+  },
+
+  _override: function() {
+    this._fireSave(true);
+  },
+
+  _fireSave: function(override) {
     if (!this.name) {
       StatusNotification.notify({
         message: 'Enter name'
       });
       return;
     }
-    this._saveRequested({
-      name: this.name,
-      isDrive: this.isDrive,
-      isProject: this.isProject
-    });
-  },
+    if (this.isProject && (!this.newProjectName && !this.projectId)) {
+      StatusNotification.notify({
+        message: 'Enter project name or select it from projects list'
+      });
+      return;
+    }
 
-  _override: function() {
     this._saveRequested({
       name: this.name,
-      override: true,
-      isDrive: this.isDrive
+      override: override,
+      isDrive: this.isDrive,
+      isProject: this.isProject,
+      projectName: this.newProjectName,
+      projectId: this.newProjectName ? null : this.projectId
     });
   },
 
   _saveRequested: function(details) {
     this.fire('save-request', details);
     this.close();
+  },
+
+  _updateProjects: function() {
+    this.$.projects.query();
+  },
+
+  _projectsRead: function(e) {
+    this.set('projects', e.detail.data);
+  },
+
+  _computeShowProjectSelector: function(projects, newProjectName) {
+    return !(!projects.length || newProjectName);
   }
 });

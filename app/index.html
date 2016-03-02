@@ -31,6 +31,17 @@
         <paper-toolbar id="mainToolbar">
           <paper-icon-button class="toolbar-hide" icon="menu" paper-drawer-toggle></paper-icon-button>
           <div class="flex title toolbar-hide">[[pageTitle]]</div>
+          <div feature="projectEndpoints" class="flex">
+            <template is="dom-if" if="[[projectEndpoints.length]]">
+              <paper-dropdown-menu label="Project endpoints">
+                <paper-menu selected="[[selectedRequest]]" attr-for-selected="data-id" class="dropdown-content" on-iron-select="_onFeatureProjectEndpoints">
+                  <template is="dom-repeat" items="{{projectEndpoints}}">
+                    <paper-item data-id$="[[item.id]]">[[item.name]]</paper-item>
+                  </template>
+                </paper-menu>
+              </paper-dropdown-menu>
+            </template>
+          </div>
           <paper-icon-button feature="open" on-tap="_onFeatureOpen" class="toolbar-hide" icon="folder-open" title="Open"></paper-icon-button>
           <paper-icon-button feature="save" on-tap="_onFeatureSave" class="toolbar-hide" icon="save" title="Save"></paper-icon-button>
           <paper-icon-button feature="export" on-tap="_onFeatureExport" class="toolbar-hide" icon="communication:import-export" title="Export list"></paper-icon-button>

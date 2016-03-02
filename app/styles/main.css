@@ -52,29 +52,17 @@ paper-toolbar[mode="search"] #mainSearchInput {
   display: initial;
 }
 
-
 /* Requesting features in main toolbar. */
 
 paper-toolbar > *[feature] {
   display: none;
 }
 
-paper-toolbar[search] > *[feature="search"] {
-  display: initial;
-}
-
-paper-toolbar[open] > *[feature="open"] {
-  display: initial;
-}
-
-paper-toolbar[save] > *[feature="save"] {
-  display: initial;
-}
-
-paper-toolbar[export] > *[feature="export"] {
-  display: initial;
-}
-
-paper-toolbar[clearAll] > *[feature="clearAll"] {
+paper-toolbar[search] > *[feature="search"],
+paper-toolbar[open] > *[feature="open"],
+paper-toolbar[save] > *[feature="save"],
+paper-toolbar[export] > *[feature="export"],
+paper-toolbar[clearAll] > *[feature="clearAll"],
+paper-toolbar[projectEndpoints] > *[feature="projectEndpoints"] {
   display: initial;
 }

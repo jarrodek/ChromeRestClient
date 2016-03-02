@@ -95,7 +95,7 @@ ArcBehaviors.ArcModelBehavior = {
   /**
    * Save data if auto is enabled.
    */
-  _dataChanged: function(newValue, oldValue) {
+  _dataChanged: function() {
     if (this.auto) {
       this.save();
     }
@@ -183,6 +183,7 @@ ArcBehaviors.ArcModelBehavior = {
         this.fire('error', {
           error: cause
         });
+        throw cause;
       });
   },
   /**
@@ -266,47 +267,47 @@ ArcBehaviors.ArcModelBehavior = {
     return arc.app.db.idb.open()
       .then((db) => {
         return db.transaction('rw', db[table], (table) => {
-            if (this.objectId) {
-              if (this.objectId instanceof Array) {
-                let promises = [];
-                this.objectId.forEach((id) => {
-                  promises.push(table.delete(id));
-                });
-                return Dexie.Promise.all(promises);
-              }
-              return table.delete(this.objectId);
+          if (this.objectId) {
+            if (this.objectId instanceof Array) {
+              let promises = [];
+              this.objectId.forEach((id) => {
+                promises.push(table.delete(id));
+              });
+              return Dexie.Promise.all(promises);
             }
-            if (this.data) {
-              let keyPath = table.schema.primKey.keyPath;
-              if (this.data instanceof Array) {
-                let promises = [];
-                this.data.forEach((item) => {
-                  promises.push(table.delete(item[keyPath]));
-                });
-                return Dexie.Promise.all(promises);
-              }
-              return table.delete(this.data[keyPath]);
+            return table.delete(this.objectId);
+          }
+          if (this.data) {
+            let keyPath = table.schema.primKey.keyPath;
+            if (this.data instanceof Array) {
+              let promises = [];
+              this.data.forEach((item) => {
+                promises.push(table.delete(item[keyPath]));
+              });
+              return Dexie.Promise.all(promises);
             }
-            if (this.forceDeleteAll) {
-              return table.toCollection().delete();
-            }
-            console.warn('nothing to delete...');
-          })
-          .then(() => {
-            this.set('data', null);
-            this.set('objectId', null);
-            this.fire('deleted');
-          })
-          .catch((e) => {
-            arc.app.analytics.sendException('arc-model::genericRemove::' +
-              JSON.stringify(e), false);
-            this.fire('error', {
-              error: e
-            });
-          })
-          .finally(function() {
-            db.close();
+            return table.delete(this.data[keyPath]);
+          }
+          if (this.forceDeleteAll) {
+            return table.toCollection().delete();
+          }
+          console.warn('nothing to delete...');
+        })
+        .then(() => {
+          this.set('data', null);
+          this.set('objectId', null);
+          this.fire('deleted');
+        })
+        .catch((e) => {
+          arc.app.analytics.sendException('arc-model::genericRemove::' +
+            JSON.stringify(e), false);
+          this.fire('error', {
+            error: e
           });
+        })
+        .finally(function() {
+          db.close();
+        });
       });
   }
 };

@@ -187,6 +187,8 @@ Polymer({
   },
   /**
    * Ajax call success handler for file download
+   *
+   * TODO: Add an UI to choose request if more than one.
    */
   _handleDownloadResponse: function() {
     var response = this.$.download.lastResponse;

@@ -5,6 +5,19 @@
   let app = document.querySelector('#app');
   app.baseUrl = '/';
   app.pageTitle = '';
+  /**
+   * Because controllers do not have direct access to the toolbar it must keep relevant data in
+   * the main object if it must to be accessible to the toolbar.
+   * This is an array of requests related to the currently opened project.
+   *
+   * TODO: In future releases controllers should not keep their data in the toolbar. New design
+   * should keep all releted to the controller data in the main workspace window.
+   */
+  app.projectEndpoints = [];
+  /**
+   * The same as above.
+   */
+  app.selectedRequest = null;
   app.addEventListener('dom-change', function() {
     console.log('Our app is ready to rock!');
   });
@@ -75,6 +88,7 @@
 
   /**
    * Read more about requesting features in ArcHasToolbarBehavior behavior file.
+   * Also change main.css in features section.
    */
   app.featuresMapping = new Map();
   document.body.addEventListener('request-toolbar-features', (e) => {
@@ -93,6 +107,7 @@
       bar.removeAttribute(feature);
     }
     app.featuresMapping.clear();
+    app.projectEndpoints = [];
   });
   app._featureCalled = (feature, event) => {
     if (!app.featuresMapping.has(feature)) {
@@ -120,10 +135,14 @@
   app._onFeatureClearAll = (e) => {
     app._featureCalled('clearAll', e);
   };
+  app._onFeatureProjectEndpoints = (e) => {
+    app._featureCalled('projectEndpoints', e.detail.item.dataset.id);
+  };
   // called when any component want to change request link.
   document.body.addEventListener('action-link-change', (e) => {
     var url = e.detail.url;
     if (app.request.url && url.indexOf('/') === 0) {
+      /* global URLParser */
       let p = new URLParser(app.request.url);
       url = p.protocol + '://' + p.authority + url;
       app.set('request.url', url);
@@ -136,6 +155,9 @@
   document.body.addEventListener('clipboard-write', (e) => {
     var data = e.detail.data;
     arc.app.clipboard.write(data);
+  });
+  document.body.addEventListener('project-saved', () => {
+    app.$.appMenu.refreshProjects();
   });
 
 })(document, window);

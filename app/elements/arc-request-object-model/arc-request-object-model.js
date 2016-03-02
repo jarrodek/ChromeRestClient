@@ -358,18 +358,24 @@ Polymer({
     entry.setPage(pageParams.page);
     log.addPage(pageParams.page);
     log.addEntry(entry, pageParams.page.id);
-    var obj = new RequestObject({
+
+    var params = {
       'har': log,
       'url': request.url,
       'method': request.method,
-      'name': request.name || '',
-      'type': request.type || 'history',
-      'driveId': request.driveId
-    });
-    return obj;
+      'name': request.name || ''
+    };
+    if ('driveId' in request) {
+      params.driveId = request.driveId;
+      return new DriveRequestObject(params);
+    } else if (request.type === 'saved') {
+      return new SavedRequestObject(params);
+    } else {
+      return new HistoryRequestObject(params);
+    }
   },
   /**
-   * Transform current `data` to RequestLocalObject.
+   * Transform current `data` to `RequestLocalObject`.
    */
   toLocalRequest: function() {
     var obj = new RequestLocalObject({});
@@ -379,17 +385,23 @@ Polymer({
     var data = this.data;
     obj.url = data.url;
     obj.method = data.method;
+
+    if ('driveId' in data) {
+      if (data.driveId) {
+        obj.isDrive = true;
+        obj.driveId = data.driveId;
+      } else {
+        obj.isDrive = false;
+      }
+    } else {
+      obj.isDrive = false;
+    }
     if ('isSaved' in data) {
       obj.isSaved = data.isSaved;
     } else {
       obj.isSaved = data.type === 'saved';
     }
-    if ('isDrive' in data) {
-      obj.isDrive = data.isDrive;
-      obj.driveId = data.driveId;
-    } else {
-      obj.isDrive = data.type === 'drive';
-    }
+
     obj.id = data.id;
     obj.name = data.name || undefined;
     if (data.har) {
@@ -410,7 +422,9 @@ Polymer({
     }
     return obj;
   },
-
+  /**
+   * Create a HAR's request object from given request
+   */
   _createHarRequestObject: function(request, entriesCount) {
     var req = new HAR.Request({
       url: request.url,

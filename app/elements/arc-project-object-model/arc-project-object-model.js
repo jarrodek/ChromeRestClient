@@ -13,11 +13,21 @@ Polymer({
   },
 
   save: function() {
-    return this.genericSave('projectObjects');
+    return this.genericSave('projectObjects')
+    .then(() => {
+      this.fire('project-saved');
+    });
   },
 
   remove: function() {
-    return this.genericRemove('projectObjects');
+    return this.genericRemove('projectObjects')
+    .then(() => {
+      this.fire('project-removed');
+    });
+  },
+
+  getObject: function() {
+    return this.genericGetObject('projectObjects');
   },
   /**
    * Get a list requests associated with the project.
@@ -99,7 +109,7 @@ Polymer({
                   requests.forEach((item) => list.push(item.id));
                   this.data.requestIds = this.data.requestIds.concat(list);
                 } else {
-                  this.data.requestIds.push(request.id);
+                  this.data.requestIds.push(requests.id);
                 }
                 return db.projectObjects.put(this.data)
                   .then(function() {
@@ -107,6 +117,7 @@ Polymer({
                     this.fire('save', {
                       data: this.data
                     });
+                    this.fire('project-appended');
                     return requests;
                   }.bind(this));
               }.bind(this));

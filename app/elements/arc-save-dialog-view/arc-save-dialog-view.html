@@ -63,6 +63,18 @@
             <paper-checkbox checked="{{isProject}}">Save in project</paper-checkbox>
           </div>
           <paper-input label="Request name" value="{{name}}"></paper-input>
+          <template is="dom-if" if="[[isProject]]">
+            <paper-input label="Project name" value="{{newProjectName}}"></paper-input>
+            <template is="dom-if" if="[[_computeShowProjectSelector(projects, newProjectName)]]">
+              <paper-dropdown-menu label="Projects">
+                <paper-menu selected="[[projectId]]" attr-for-selected="data-id" class="dropdown-content">
+                  <template is="dom-repeat" items="{{projects}}">
+                    <paper-item data-id$="[[item.id]]">[[item.name]]</paper-item>
+                  </template>
+                </paper-menu>
+              </paper-dropdown-menu>
+            </template>
+          </template>
         </section>
         <div class="buttons">
           <paper-button dialog-dismiss on-tap="_cancel">Cancel</paper-button>
@@ -74,6 +86,7 @@
             <paper-button dialog-confirm on-tap="_save">Save</paper-button>
           </template>
         </div>
+        <arc-project-object-model id="projects" on-data-ready="_projectsRead"></arc-project-object-model>
       </template>
     </dom-module>
     <script src="arc-save-dialog-view.js"></script>

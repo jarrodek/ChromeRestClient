@@ -37,6 +37,9 @@
     "_": true,
     "Headers": true,
     "SocketFetch": true,
-    "PayloadParser": true
+    "PayloadParser": true,
+    "DriveRequestObject": true,
+    "SavedRequestObject": true,
+    "HistoryRequestObject": true
   }
 }

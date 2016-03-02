@@ -162,5 +162,12 @@ arc.app.headers.getContentType = function(headers) {
   }
   headers = arc.app.headers.filter(headers);
   var ct = headers.filter((item) => item.name.toLowerCase() === 'content-type');
-  return (ct.length === 0) ? null : ct[0].value;
+  ct = (ct.length === 0) ? null : ct[0].value;
+  if (ct) {
+    let index = ct.indexOf('; ');
+    if (index > 0) {
+      ct = ct.substr(0, index);
+    }
+  }
+  return ct;
 };

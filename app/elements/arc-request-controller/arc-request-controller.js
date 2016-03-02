@@ -9,7 +9,7 @@ Polymer({
   properties: {
     toolbarFeatures: {
       type: Array,
-      value: ['clearAll', 'loader', 'save']
+      value: ['clearAll', 'loader', 'save', 'projectEndpoints']
     },
 
     request: {
@@ -20,7 +20,7 @@ Polymer({
 
     routeParams: {
       type: Object,
-      //observer: '_prepareRequest'
+      observer: '_prepareRequest'
     },
     /**
      * True if request is loading at the moment.
@@ -54,6 +54,13 @@ Polymer({
     errorMessage: {
       type: String,
       readOnly: true
+    },
+    /**
+     * If set, current request has asssociated project data.
+     */
+    project: {
+      type: Object,
+      readOnly: true
     }
   },
 
@@ -80,6 +87,7 @@ Polymer({
     });
     this.set('request', base);
     this._setResponse(null);
+    this._setProject(undefined);
     page('/request/current');
   },
 
@@ -98,26 +106,43 @@ Polymer({
       }
       ui.name = this.request.name;
     }
+    if (this.project) {
+      ui.isProject = true;
+      ui.projectId = this.project.id;
+    }
     ui.open();
+  },
+
+  onProjectEndpoints: function(enpointId) {
+    this._restoreSaved(enpointId);
   },
 
   _prepareRequest: function() {
     if (!this.opened || !this.routeParams) {
       return;
     }
+    console.log('PREPARE REQUEST');
     this._setResponse(null);
+    this._setProject(undefined);
     switch (this.routeParams.type) {
-      case 'drive':
-        throw new Error('Implement me!');
       case 'saved':
-        this._restoreSaved(this.routeParams.savedId, 'saved');
+        this._restoreSaved(this.routeParams.savedId);
         break;
       case 'history':
-        this._restoreSaved(this.routeParams.historyId, 'history');
+        this._restoreSaved(this.routeParams.historyId);
+        break;
+      case 'project':
+        this._restoreProject(this.routeParams.projectid);
         break;
       case 'current':
         this.$.requestQueryModel.data = this.request;
         let request = this.$.requestQueryModel.toLocalRequest();
+        if ('driveId' in request) {
+          if (request.driveId && !request.id) {
+            this.$.requestModel.data = this.request;
+            this.$.requestModel.save();
+          }
+        }
         this.set('request', request);
         break;
       default:
@@ -133,17 +158,15 @@ Polymer({
    * Restore saved request from the local storage.
    * The model will call `_requestObjectRestored` function when ready.
    */
-  _restoreSaved: function(id, type) {
+  _restoreSaved: function(id) {
     id = parseInt(id);
     if (!id || id !== id) {
-      this._restoreLatest();
       StatusNotification.notify({
-        message: 'Not found'
+        message: 'Not found. Id is undefined.'
       });
       return;
     }
     this.$.requestQueryModel.objectId = id;
-    this.$.requestQueryModel.requestType = type;
     this.$.requestQueryModel.getObject();
   },
   /**
@@ -156,11 +179,57 @@ Polymer({
       /*TODO: There is some error here. Sometimes headers are not fully restored.
       Need to investigate.*/
       this.set('request', request);
+      if (request.name) {
+        this._setPageTitle(request.name);
+      }
     } else {
       StatusNotification.notify({
-        message: 'Not found'
+        message: 'Request data not found in a storage.'
       });
     }
+  },
+
+  _restoreProject: function(id) {
+    id = parseInt(id);
+    if (!id || id !== id) {
+      StatusNotification.notify({
+        message: 'Project not found. Id is undefined.'
+      });
+      return;
+    }
+    this.$.projects.objectId = id;
+    this.$.projects.getObject()
+    .then((project) => {
+      this._setProject(project);
+      this._restoreSaved(project.requestIds[0]);
+      this.async(() => {
+        this._propagateProjectData();
+      });
+    })
+    .catch((cause) => {
+      console.error('_restoreProject', cause);
+      StatusNotification.notify({
+        message: 'Project data not found in the datastore.'
+      });
+      return;
+    });
+  },
+  /**
+   * Setup endpoinds in the UI.
+   */
+  _propagateProjectData: function() {
+    this.$.projectQueryModel.objectId = this.project.requestIds;
+    this.$.projectQueryModel.query();
+  },
+
+  /**
+   * TODO: this should not work this way.
+   * Controllers should keep their data on their own and do not use global scope.
+   */
+  _projectEndpointsRestored: function(e) {
+    /* global app */
+    app.projectEndpoints = e.detail.data;
+    app.selectedRequest = this.request.id;
   },
 
   _latestLoaded: function() {
@@ -243,6 +312,7 @@ Polymer({
       ext = 'xml';
     } else if (this.exportMime.indexOf('json') !== -1) {
       ext = 'json';
+      this.exportContent = JSON.stringify(this.exportContent);
     } else if (this.exportMime.indexOf('html') !== -1) {
       ext = 'html';
     } else if (this.exportMime.indexOf('javascript') !== -1) {
@@ -327,8 +397,51 @@ Polymer({
       this.request.isDrive = true;
     }
     //always save to local store, origin is not important.
-    this._saveLocal(toDrive, name, override);
+    this._saveLocal(toDrive, name, override)
+    .then((insertId) => {
+      if (e.detail.isProject) {
+        this.async(() => {
+          this._saveProject(e.detail.projectName, insertId, e.detail.projectId);
+        });
+      }
+    });
   },
+  /**
+   * Save/update project with the request.
+   * TODO: fire event to update projects list in the menu.
+   *
+   * @param {String} name A name of the request. It's only relevant when creating new project.
+   * @param {Number} requestId A request ID to be associated with the project.
+   * @param {Number} projectId A project ID to update. It's only relevan when the project already
+   * exists and should just insert new requestId to existing object.
+   */
+  _saveProject: function(name, requestId, projectId) {
+    // update or create?
+    if (projectId) {
+      this.$.projects.objectId = projectId;
+      this.$.projects.query()
+      .then((project) => {
+        if (!project.requestIds) {
+          project.requestIds = [];
+        }
+        project.requestIds.push(requestId);
+        this.$.projects.save();
+      })
+      .catch(() => {
+        StatusNotification.notify({
+          message: 'Request was saved but not added to the project'
+        });
+      });
+    } else {
+      let project = new ProjectObject({
+        name: name,
+        requestIds: [requestId]
+      });
+      this.$.projects.data = project;
+      this.$.projects.save();
+    }
+  },
+
   /**
    * Save request data in local storage.
    */
@@ -337,48 +450,49 @@ Polymer({
     // override existing item
     if (current.id && override) {
       this.$.requestModel.objectId = current.id;
-      this.$.requestModel.getObject()
+      return this.$.requestModel.getObject()
       .then((result) => {
         if (!result) {
           StatusNotification.notify({
             message: 'Override object not found'
           });
-          return;
+          return Promise.reject('Object not found');
         }
         current.name = result.name = name;
         this.set('request', current);
         result = this.$.requestModel.replaceData(result, current, this.response);
         this.$.requestModel.requestType = current.type;
         this.$.requestModel.data = result;
-        this.$.requestModel.save()
-        .then(() => {
+        return this.$.requestModel.save()
+        .then((insertId) => {
           if (result.type === 'drive') {
             // Go outside Dexie promise
             this.async(() => {
               this._saveDrive(result);
             });
           }
+          return insertId;
         });
       });
-    } else {
-      // create new object
-      let request = this.$.requestModel.fromData(current, this.response);
-      request.name = name;
-      request.type = isDrive ? 'drive' : 'saved';
-      // this will be propagated into the store after IDB save.
-      this.set('request.name', name);
-      this.$.requestModel.requestType = request.type;
-      this.$.requestModel.data = request;
-      this.$.requestModel.save()
-      .then(() => {
-        if (request.type === 'drive') {
-          // Go outside Dexie promise
-          this.async(() => {
-            this._saveDrive(request);
-          });
-        }
-      });
     }
+    // create new object
+    let request = this.$.requestModel.fromData(current, this.response);
+    request.name = name;
+    request.type = isDrive ? 'drive' : 'saved';
+    // this will be propagated into the store after IDB save.
+    this.set('request.name', name);
+    this.$.requestModel.requestType = request.type;
+    this.$.requestModel.data = request;
+    return this.$.requestModel.save()
+    .then((insertId) => {
+      if (request.type === 'drive') {
+        // Go outside Dexie promise
+        this.async(() => {
+          this._saveDrive(request);
+        });
+      }
+      return insertId;
+    });
   },
 
   _saveDrive: function(request) {
@@ -402,6 +516,12 @@ Polymer({
       StatusNotification.notify({
         message: 'Unable upload file to Drive'
       });
+    });
+  },
+
+  _projectSaveError: function() {
+    StatusNotification.notify({
+      message: 'Request was saved but not added to the project'
     });
   }
 });
