@@ -41,14 +41,6 @@
     bar.setAttribute('show', true);
     bar.parentNode.setAttribute('mode', 'search');
     var input = document.querySelector('#mainSearchInput');
-    var blurFn = function(e) {
-      let input = document.querySelector('#mainSearchInput');
-      input.removeEventListener('blur', blurFn);
-      input.removeEventListener('search', searchFn);
-      let bar = e.target.parentNode;
-      bar.removeAttribute('show', true);
-      bar.parentNode.removeAttribute('mode', 'search');
-    };
     var searchFn = function(e) {
       //inform controller about search action
       app._featureCalled('search', e);
@@ -58,6 +50,15 @@
       //   }
       // });
     };
+    var blurFn = function(e) {
+      let input = document.querySelector('#mainSearchInput');
+      input.removeEventListener('blur', blurFn);
+      input.removeEventListener('search', searchFn);
+      let bar = e.target.parentNode;
+      bar.removeAttribute('show', true);
+      bar.parentNode.removeAttribute('mode', 'search');
+    };
+
     input.addEventListener('search', searchFn);
     input.addEventListener('blur', blurFn);
     input.focus();
@@ -85,7 +86,7 @@
       app.featuresMapping.set(feature, e.target);
     });
   });
-  document.body.addEventListener('release-toolbar-features', (e) => {
+  document.body.addEventListener('release-toolbar-features', () => {
     var bar = document.querySelector('#mainToolbar');
     var keys = app.featuresMapping.keys();
     for (let feature of keys) {

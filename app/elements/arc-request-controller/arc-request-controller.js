@@ -115,6 +115,11 @@ Polymer({
       case 'history':
         this._restoreSaved(this.routeParams.historyId, 'history');
         break;
+      case 'current':
+        this.$.requestQueryModel.data = this.request;
+        let request = this.$.requestQueryModel.toLocalRequest();
+        this.set('request', request);
+        break;
       default:
         this._restoreLatest();
         break;
@@ -374,7 +379,7 @@ Polymer({
   },
 
   _saveDrive: function(request) {
-    var ctrl = document.body.querySelector('drive-controller');
+    var ctrl = document.body.querySelector('arc-drive-controller');
     if (!ctrl) {
       console.warn('Drive controller not found!');
       return;

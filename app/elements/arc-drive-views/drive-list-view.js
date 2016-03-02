@@ -1,3 +1,5 @@
+'use strict';
+
 Polymer({
   is: 'drive-list-view',
 
@@ -38,7 +40,7 @@ Polymer({
     return !!selectedItem;
   },
 
-  openSearch: function(e) {
+  openSearch: function() {
     if (this.$.searchIcon.icon === 'close') {
       this.$.titleArea.removeAttribute('mode', 'search');
       this.$.searchIcon.icon = 'search';

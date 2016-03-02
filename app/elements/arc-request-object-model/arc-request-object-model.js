@@ -363,7 +363,8 @@ Polymer({
       'url': request.url,
       'method': request.method,
       'name': request.name || '',
-      'type': 'history'
+      'type': request.type || 'history',
+      'driveId': request.driveId
     });
     return obj;
   },
@@ -378,18 +379,35 @@ Polymer({
     var data = this.data;
     obj.url = data.url;
     obj.method = data.method;
-    obj.isSaved = data.type === 'saved';
-    obj.isDrive = data.type === 'drive';
+    if ('isSaved' in data) {
+      obj.isSaved = data.isSaved;
+    } else {
+      obj.isSaved = data.type === 'saved';
+    }
+    if ('isDrive' in data) {
+      obj.isDrive = data.isDrive;
+      obj.driveId = data.driveId;
+    } else {
+      obj.isDrive = data.type === 'drive';
+    }
     obj.id = data.id;
     obj.name = data.name || undefined;
-    obj.driveId = data.driveId || undefined;
-    var entries = data.har.entries;
-    var request = entries[entries.length - 1].request; // take the last one.
-    if (!request) {
-      return obj;
+    if (data.har) {
+      var entries = data.har.entries;
+      var request = entries[entries.length - 1].request; // take the last one.
+      if (!request) {
+        return obj;
+      }
+      obj.headers = arc.app.headers.toString(request.headers);
+      obj.payload = request.postData.text;
+    } else {
+      if (data.headers) {
+        obj.headers = data.headers;
+      }
+      if (data.payload) {
+        obj.payload = data.payload;
+      }
     }
-    obj.headers = arc.app.headers.toString(request.headers);
-    obj.payload = request.postData.text;
     return obj;
   },
 

@@ -44,8 +44,8 @@ window.addEventListener('initializeRouting', function() {
     var params = {
       'type': 'current'
     };
-    app.route = 'request';
     app.params = params;
+    app.route = 'request';
   });
 
   arc.app.router.register('/history', function() {

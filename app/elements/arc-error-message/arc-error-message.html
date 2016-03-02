@@ -1,0 +1,55 @@
+<!--
+## `arc-error-message`
+The `<arc-error-message>` element displays an eror message with the icon and styled text.
+It can be used as a default error element in the app.
+
+### Use
+Typical use for the element
+```
+<body>
+  <arc-error-message hidden$="[[!isError]]">
+    <p>There was a general error</p>
+  </arc-error-message>
+
+### Styling
+`<arc-error-message>` provides the following custom properties and mixins for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--error-message-icon` | Mixin applied to the icon | `{}`
+`--error-message-text` | Mixin applied to the text | `{}`
+
+-->
+<dom-module id="arc-error-message">
+  <template>
+    <style>
+      :host {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      .error-icon {
+        width: 128px;
+        height: 128px;
+        color: rgba(0,0,0,0.56);
+        @apply(--error-message-icon);
+      }
+
+      .error-desc ::content > * {
+        @apply(--paper-font-subhead);
+        color: var(--google-red-500);
+        @apply(--error-message-text);
+      }
+
+    </style>
+
+    <div>
+      <iron-icon class="error-icon" icon="arc:sentiment-very-dissatisfied"></iron-icon>
+    </div>
+    <div class="error-desc">
+      <content></content>
+    </div>
+
+  </template>
+  <script src="arc-error-message.js"></script>
+</dom-module>

@@ -65,30 +65,32 @@
       display: flex;
       flex: 1;
     }
-    .avatar {
-      display: inline-block;
-      box-sizing: border-box;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--paper-amber-500);
+    .icon {
+      width: 16px;
+      height: 16px;
+    }
+    .shared-icon {
+      color: rgba(0,0,0,0.54);
+      margin-right: 12px;
     }
     </style>
     <div class="title-area" id="titleArea">
       <h2 class="flex">Select Drive file <paper-spinner-lite active="[[loading]]"></paper-spinner-lite></h2>
       <div id="search-bar">
         <paper-icon-button icon="search" id="searchIcon" title="Search" on-tap="openSearch"></paper-icon-button>
-        <input is="iron-input" type="search" value="{{query::input}}" class="flex" id="driveSearchInput" on-search="_searchAction"></input>
+        <input is="iron-input" type="search" value="{{query::input}}" class="flex" id="driveSearchInput" on-search="_searchAction">
       </div>
     </div>
     <iron-scroll-threshold on-lower-threshold="loadMoreData" id="threshold">
-      <iron-list scroll-target="threshold" items="[[items]]" selected-item="{{selectedItem}}" id="list" as="item" selected-as="selected" index-as="index" selection-enabled>
+      <iron-list scroll-target="threshold" items="[[items]]" selected-item="{{selectedItem}}" id="list" as="item" selected-as="selected" index-as="index" selection-enabled="">
         <template>
-          <paper-icon-item  tabindex$="[[index]]" class$="[[computeSelectedClass(selected)]]">
-            <div class="avatar" item-icon></div>
+          <paper-item tabindex$="[[index]]" class$="[[computeSelectedClass(selected)]]">
             <div class="flex">[[item.name]]</div>
-            <date-time>[[item.createdTime]]</date-time>
-          </paper-icon-item>
+            <template is="dom-if" if="[[item.shared]]">
+              <iron-icon icon="folder-shared" class="shared-icon" title="Shared with you"></iron-icon>
+            </template>
+            <date-time date="[[item.createdTime]]" second="" month="short"></date-time>
+          </paper-item>
         </template>
       </iron-list>
     </iron-scroll-threshold>

@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
-/* global chrome, gapi, google */
+/* global chrome */
 
 /**
  * App's client ID.
@@ -31,7 +31,7 @@ var drive = {};
  *
  * @return {Promise} Fulfilled promise with auth token or reject.
  */
-drive.auth = function(callback) {
+drive.auth = function() {
   return new Promise((resolve, reject) => {
     chrome.identity.getAuthToken({'interactive': true}, (authToken) => {
       if (chrome.runtime.lastError) {
@@ -93,29 +93,12 @@ drive.file.allowedResource = [
  */
 drive.file.create = function(config) {
   return new Promise((resolve, reject) => {
-    if (!('resource' in config) ||
-        !('media' in config)) {
-      reject(new Error('Invalid arguments.'));
+    try {
+      config = drive.file.ensureDriveFileConfig(config);
+    } catch (e) {
+      reject(e);
       return;
     }
-    let names = Object.getOwnPropertyNames(config.resource);
-    let error = false;
-    let invalidArguments = [];
-    names.forEach((key) => {
-      if (drive.file.allowedResource.indexOf(key) === -1) {
-        error = true;
-        invalidArguments.push(key);
-      }
-    });
-    if (error) {
-      reject(new Error('Unknown argument for resource: ' + invalidArguments.join(', ')));
-      return;
-    }
-
-    if (!config.resource.mimeType && drive.file.mime) {
-      config.resource.mimeType = drive.file.mime;
-    }
-
     if (!config.resource.contentHints || !config.resource.contentHints.thumbnail ||
       !config.resource.contentHints.image) {
       let at;
@@ -138,30 +121,75 @@ drive.file.create = function(config) {
       let at;
       drive.auth()
       .then((_at) => at = _at)
-      .then(drive.file._uploadFile(at, config))
+      .then(() => drive.file._uploadFile(at, config))
       .then(resolve)
       .catch(reject);
     }
   });
 };
 /**
+ * Update the file on Google Drive.
+ *
+ * @param {String} fileId A Google Drive file ID.
+ * @param {Object} config The same as for `create` function.
+ * @return {Promise} Fulfilled promise with file properties (the response).
+ */
+drive.file.update = function(fileId, config) {
+  return new Promise((resolve, reject) => {
+    try {
+      config = drive.file.ensureDriveFileConfig(config);
+    } catch (e) {
+      reject(e);
+      return;
+    }
+    let at;
+    drive.auth()
+    .then((_at) => at = _at)
+    .then(() => drive.file._uploadUpdate(fileId, at, config))
+    .then(resolve)
+    .catch(reject);
+  });
+};
+/**
+ * Ensure that the file has correct configuration and throw an error if not.
+ * Also it will add a mime type of the file if not present.
+ */
+drive.file.ensureDriveFileConfig = function(config) {
+  if (!('resource' in config) ||
+      !('media' in config)) {
+    throw new Error('Invalid arguments.');
+  }
+  let names = Object.getOwnPropertyNames(config.resource);
+  let error = false;
+  let invalidArguments = [];
+  names.forEach((key) => {
+    if (drive.file.allowedResource.indexOf(key) === -1) {
+      error = true;
+      invalidArguments.push(key);
+    }
+  });
+  if (error) {
+    throw new Error('Unknown argument for resource: ' + invalidArguments.join(', '));
+  }
+  if (!config.resource.mimeType && drive.file.mime) {
+    config.resource.mimeType = drive.file.mime;
+  }
+  return config;
+};
+/**
  * Perform upload action.
  */
 drive.file._uploadFile = function(accessToken, options) {
-  let headers = new Headers();
-  headers.set('Authorization', 'Bearer ' + accessToken);
-  headers.set('Content-Type', 'multipart/related; boundary="' + drive.file.boundary + '"');
-  let init = {
+  var init = {
     method: 'POST',
     body: drive.file._getPayload(options),
-    headers: headers,
+    headers: drive.file._getUploadHeaders(accessToken),
   };
   return fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', init)
   .then(function(response) {
     return response.json();
   });
 };
-
 drive.file._appSafeIcon = () => {
   return new Promise((resolve) => {
     fetch(chrome.runtime.getURL('/assets/arc_icon_128.png'))
@@ -174,13 +202,33 @@ drive.file._appSafeIcon = () => {
       reader.onloadend = function(e) {
         let data = e.target.result;
         data = btoa(data)
-        .replace(/\+/g, '-') // Convert '+' to '-'
-        .replace(/\//g, '_') // Convert '/' to '_'
-        .replace(/=+$/, '');
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_');
         resolve(data);
       };
     });
   });
+};
+drive.file._uploadUpdate = function(fileId, accessToken, options) {
+  var init = {
+    method: 'PATCH',
+    body: drive.file._getPayload(options),
+    headers: drive.file._getUploadHeaders(accessToken),
+  };
+  return fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`,
+    init)
+  .then(function(response) {
+    return response.json();
+  })
+  .catch((e) => {
+    throw e;
+  });
+};
+drive.file._getUploadHeaders = function(accessToken) {
+  var headers = new Headers();
+  headers.set('Authorization', 'Bearer ' + accessToken);
+  headers.set('Content-Type', 'multipart/related; boundary="' + drive.file.boundary + '"');
+  return headers;
 };
 drive.file._getPayload = function(config) {
   var content;
