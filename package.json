@@ -4,7 +4,8 @@
   "scripts": {
     "lint": "gulp lint",
     "test": "gulp test",
-    "arc": "node bin/install.js"
+    "arc": "node bin/install.js",
+    "echo-server": "node echo-server 5000"
   },
   "main": "app/index.html",
   "devDependencies": {

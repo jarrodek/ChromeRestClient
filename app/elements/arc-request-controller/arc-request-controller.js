@@ -88,6 +88,9 @@ Polymer({
     this.set('request', base);
     this._setResponse(null);
     this._setProject(undefined);
+    app.projectEndpoints = [];
+    app.selectedRequest = null;
+    this._setPageTitle('Request');
     page('/request/current');
   },
 
@@ -114,6 +117,9 @@ Polymer({
   },
 
   onProjectEndpoints: function(enpointId) {
+    if (this.request && String(this.request.id) === String(enpointId)) {
+      return;
+    }
     this._restoreSaved(enpointId);
   },
 

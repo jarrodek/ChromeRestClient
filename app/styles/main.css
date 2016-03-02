@@ -26,15 +26,11 @@ body {
 /* Search bar states */
 
 paper-toolbar[mode="search"] .toolbar-hide {
-  display: none;
+  display: none !important;
 }
 
 paper-toolbar[mode="search"] .toolbar-hide[mode~=search] {
-  display: initial;
-}
-
-paper-toolbar[mode="search"] #search-bar {
-  display: flex;
+  display: flex !important;
   flex: 1;
 }
 
