@@ -322,6 +322,10 @@ Polymer({
     var name = e.detail.name;
     var override = e.detail.override || false;
     var toDrive = e.detail.isDrive || this.request.isDrive;
+    if (toDrive) {
+      this.request.type = 'save';
+      this.request.isDrive = true;
+    }
     //always save to local store, origin is not important.
     this._saveLocal(toDrive, name, override);
   },
@@ -342,7 +346,6 @@ Polymer({
           return;
         }
         current.name = result.name = name;
-        current.type = result.type = isDrive ? 'drive' : 'saved';
         this.set('request', current);
         result = this.$.requestModel.replaceData(result, current, this.response);
         this.$.requestModel.requestType = current.type;
@@ -386,7 +389,6 @@ Polymer({
     }
     ctrl.exportDrive(request, request.name)
     .then((insertResult) => {
-      console.log(insertResult);
       var driveId = insertResult.id;
       this.set('request.driveId', driveId);
       request.driveId = driveId;

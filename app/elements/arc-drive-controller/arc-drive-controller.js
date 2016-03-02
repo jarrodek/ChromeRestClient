@@ -284,7 +284,9 @@ Polymer({
     });
     if (driveId) {
       return drive.file.update(driveId, {
-        resource: {},
+        resource: {
+          name: fileName + '.arc',
+        },
         media: {
           mimeType: 'application/json',
           body: exportObj
