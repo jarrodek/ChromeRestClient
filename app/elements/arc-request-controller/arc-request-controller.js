@@ -141,7 +141,7 @@ Polymer({
         break;
       case 'current':
         this.$.requestQueryModel.data = this.request;
-        let request = this.$.requestQueryModel.toLocalRequest();
+        let request = this.$.requestQueryModel.toLocalRequest(true);
         if ('driveId' in request) {
           if (request.driveId && !request.id) {
             this.$.requestModel.data = this.request;
@@ -182,7 +182,7 @@ Polymer({
   _requestObjectRestored: function(e) {
     if (e.detail.data) {
       this.debounce('restore.request', function() {
-        let request = this.$.requestQueryModel.toLocalRequest();
+        let request = this.$.requestQueryModel.toLocalRequest(this.routeParams.type === 'history');
         console.info('Restored request', request);
         /*TODO: There is some error here. Sometimes headers are not fully restored.
         Need to investigate.*/
@@ -282,9 +282,15 @@ Polymer({
   },
   /**
    * Saves request and response in the history store.
+   * Model will call `_requestObjectReady`
    */
   _saveHistory: function() {
-    this.$.requestModel.getByMethodUrl(this.request.url, this.request.method);
+    if (this.request.id) {
+      this.$.requestModel.objectId = this.request.id;
+      this.$.requestModel.getObject();
+    } else {
+      this.$.requestModel.getByMethodUrl(this.request.url, this.request.method);
+    }
   },
   /**
    * Save an URL in URL's history store for autofill helper.

@@ -376,8 +376,14 @@ Polymer({
   },
   /**
    * Transform current `data` to `RequestLocalObject`.
+   *
+   * @param {Boolean} isHistory True if the request is restored from history storage. For history
+   * objects it will restore latest request in HAR object. For `saved` and `drive` objects
+   * it will restore first (saved) request. This is default to false.
+   * @return {RequestObject} Subclass of a RequestObject
    */
-  toLocalRequest: function() {
+  toLocalRequest: function(isHistory) {
+    isHistory = isHistory || false;
     var obj = new RequestLocalObject({});
     if (!this.data) {
       return obj;
@@ -406,7 +412,17 @@ Polymer({
     obj.name = data.name || undefined;
     if (data.har) {
       var entries = data.har.entries;
-      var request = entries[entries.length - 1].request; // take the last one.
+      //for saved and drive requests take first one
+      //for history late last one.
+      var request;
+      if (!isHistory) {
+        //TODO: it will not cover a situation when object was overriten.
+        //This will requires an additional information (some pointer) to the request that is
+        //the request.
+        request = entries[0].request; // take the first one.
+      } else {
+        request = entries[entries.length - 1].request; // take the last one.
+      }
       if (!request) {
         return obj;
       }
