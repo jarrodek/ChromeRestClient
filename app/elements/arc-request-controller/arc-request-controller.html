@@ -42,14 +42,14 @@ Final local copy of the object stored as a `latestRequest` is:
     </style>
     <content></content>
     <arc-request-error-view hidden$=[[!isError]] message="[[errorMessage]]"></arc-request-error-view>
-    <chrome-storage debug auto id="latest" type="local" name="latestRequest" value="{{request}}"  value-as="RequestLocalObject" on-read="_latestLoaded"></chrome-storage>
+    <chrome-storage auto id="latest" type="local" name="latestRequest" value="{{request}}"  value-as="RequestLocalObject" on-read="_latestLoaded"></chrome-storage>
     <arc-socket-request id="socket" on-ready="_responseReady" on-error="_onRequestError"></arc-socket-request>
     <arc-historyurl-model id="historyurlModel" on-save="_historyUrlSaved" on-error="_historyUrlSaveError"></arc-historyurl-model>
     <arc-request-object-model id="requestModel" on-data-ready="_requestObjectReady" on-save="_onHistorySave"></arc-request-object-model>
     <arc-request-object-model id="requestQueryModel" on-data-ready="_requestObjectRestored"></arc-request-object-model>
     <arc-request-object-model id="projectQueryModel" on-data-ready="_projectEndpointsRestored"></arc-request-object-model>
     <arc-project-object-model id="projects" on-error="_projectSaveError"></arc-project-object-model>
-    
+
   </template>
   <script src="arc-request-controller.js"></script>
 </dom-module>

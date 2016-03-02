@@ -30,6 +30,24 @@ Polymer({
     return this.genericGetObject('projectObjects');
   },
   /**
+   * Retreives information about project that is associated with given requestId
+   *
+   * @param {Number} requestId A request id to look for.
+   */
+  getForRequest: function(requestId) {
+    return arc.app.db.idb.open()
+      .then((db) => {
+        return db.projectObjects
+          .where('requestIds')
+          .equals(requestId)
+          .first()
+          .finally(() => {
+            db.close();
+          });
+      });
+  },
+
+  /**
    * Get a list requests associated with the project.
    * The promise will always result with array.
    *

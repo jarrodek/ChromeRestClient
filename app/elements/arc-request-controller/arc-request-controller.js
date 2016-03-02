@@ -121,7 +121,6 @@ Polymer({
     if (!this.opened || !this.routeParams) {
       return;
     }
-    console.log('PREPARE REQUEST');
     this._setResponse(null);
     this._setProject(undefined);
     switch (this.routeParams.type) {
@@ -150,7 +149,9 @@ Polymer({
         break;
     }
   },
-
+  /**
+   * A `_latestLoaded` function will be called when ready.
+   */
   _restoreLatest: function() {
     this.$.latest.read();
   },
@@ -174,14 +175,19 @@ Polymer({
    */
   _requestObjectRestored: function(e) {
     if (e.detail.data) {
-      let request = this.$.requestQueryModel.toLocalRequest();
-      console.info('Restored request', request);
-      /*TODO: There is some error here. Sometimes headers are not fully restored.
-      Need to investigate.*/
-      this.set('request', request);
-      if (request.name) {
-        this._setPageTitle(request.name);
-      }
+      this.debounce('restore.request', function() {
+        let request = this.$.requestQueryModel.toLocalRequest();
+        console.info('Restored request', request);
+        /*TODO: There is some error here. Sometimes headers are not fully restored.
+        Need to investigate.*/
+        this.set('request', request);
+        if (request.name) {
+          this._setPageTitle(request.name);
+        }
+        if (this.routeParams && this.routeParams.type !== 'project') {
+          this.associateProject();
+        }
+      }, 200);
     } else {
       StatusNotification.notify({
         message: 'Request data not found in a storage.'
@@ -239,6 +245,10 @@ Polymer({
         method: 'GET'
       });
       this.set('request', base);
+    } else {
+      if (this.routeParams && this.routeParams.type !== 'project') {
+        this.associateProject();
+      }
     }
   },
 
@@ -522,6 +532,27 @@ Polymer({
   _projectSaveError: function() {
     StatusNotification.notify({
       message: 'Request was saved but not added to the project'
+    });
+  },
+  /**
+   * Associate project with current request.
+   * If the request has been added to the project, this function will restore project information
+   * and update the UI.
+   */
+  associateProject: function() {
+    var requestId = this.request.id;
+    if (!requestId) {
+      return;
+    }
+    this.$.projects.getForRequest(requestId)
+    .then((project) => {
+      if (!project) {
+        return;
+      }
+      this._setProject(project);
+      this.async(() => {
+        this._propagateProjectData();
+      });
     });
   }
 });
