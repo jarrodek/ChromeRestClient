@@ -421,34 +421,6 @@ class RequestLocalObject extends BaseObject {
   }
 }
 /**
- * A class representing an entity in the data store with information about
- * Google Drive referenced items.
- *
- * @extends BaseObject
- * @throws {Error} If `driveId` or `requestId` is not available to the constructor.
- */
-// jshint unused:false
-class DriveObject extends BaseObject {
-
-  constructor(opts) {
-    super();
-
-    super.assertRequiredKeys(['driveId', 'requestId'], opts);
-    /**
-     * A Google Drive item id.
-     *
-     * @type {String}
-     */
-    this.driveId = opts.driveId;
-    /**
-     * RequestObject data store id.
-     *
-     * @type {Number}
-     */
-    this.requestId = opts.requestId;
-  }
-}
-/**
  * A class representing an entity in the data store with information
  * about export to app server.
  *
@@ -678,6 +650,19 @@ class FileExport extends BaseObject {
 
     this.requests = opts.requests;
     this.projects = opts.projects;
+  }
+}
+/**
+ * A class representing a magic variable stored in the database.
+ */
+class MagicVariableObject extends BaseObject {
+  constructor(opts) {
+    super();
+    this.id = undefined;
+    this.variable = opts.variable || undefined;
+    this.value = opts.value || undefined;
+    this.type = opts.type || 'global';
+    this.project = opts.project || undefined;
   }
 }
 

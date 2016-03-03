@@ -1,0 +1,109 @@
+<!--
+@license
+Copyright 2016 Pawel Psztyc, The ARC team
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<!--
+# arc-magic-variables
+The `<arc-magic-variables>` element is an element that supports "magic variables" in ARC.
+Magic variables are special strings that are passed to the any string field in the request
+and it will be replaced with other string that is defined for this variable.
+
+## Example
+Let's say you want to generate a random number in the request. You can put a magic variable into
+any request field that is containing string value:
+
+```http://www.domain.com/?time=${now}```
+can produce something like:
+```http://www.domain.com/?time=12312312312```
+
+## Build-in magic variables.
+| Variable | Description | Example |
+| --- | --- | --- |
+| `${random}` | Will generate random number in range from 0 to Number.MAX_SAFE_INTEGER | 9007199254740991 |
+| `${random:NUMBER}` | A variation of `${random}` where result will be remembered and can be used on other field. If the same `NUMBER` occurs again then previously generated value will be used. | 7199254740 |
+| `${now}` | Inserts current epoch time | 12312312312 |
+
+## Defined locally magic variables.
+An app instance can create its own magic variables. There are two types of magic variables:
+* global - Applied to every request
+* scoped - Applied to a request enclosed in a project.
+
+User-defined variables are kept in IndexedDB and can be retreived or changed on demand.
+
+### Global variables
+They are like build-in variables but the users can define their own wariables.
+Variables this type will be applied to every outgoing request.
+
+### Scoped variables.
+Scoped variables are associated with a project and will be applied to those request that are added to the same project.
+
+## Database structure
+| Property | Type | Is key | Description |
+| --- | --- | --- | --- |
+| id | Number | Yes, key path | An autoincremental key for the rule |
+| variable | String | Yes | A variable name. It must be consisted with [0-9A-Za-z${}_-] |
+| value | String | No | Replacement value. Replacement value may include other magic variables |
+| type | String | Yes | Either `global` or `scoped` (for now) |
+| project | Number | Yes | Relevan if `type` is set to `scoped`. The rule will be applied to the requests that are associated with this project. If not set if will be omnited. |
+
+## Usage
+The element expose one field `value` that will be parsed during the work. It may be either String or Object.
+While String is obvious, the Object will be treated differently. It will parse only a values of each key that is associated with the key and if it is a string.
+This means that no deep objects will be taken into consideration.
+
+Before start applying new magic variables the program should call `clear()` function to clear the groups defined by previous use.
+It will keep this data so you can use the element many times on different strngs resulting with the same group values.
+
+```
+<arc-magic-variables
+  id="mv"
+  values="[[headersList]]"
+  on-parsed="_onParsed">
+</arc-magic-variables>
+// in code:
+
+...
+this.$.mv.clear();
+this.set('headersList', headers);
+this.$.mv.parse();
+...
+_onParsed = (e) => {
+  var headers = e.detail.result;
+};
+...
+```
+The parse method returns a Promise which will be fulfilled when it finish parsing data:
+```
+...
+this.set('headersList', headers);
+this.$.mv.parse()
+.then((result) => {
+  // parsed data
+});
+...
+```
+-->
+<dom-module id="arc-magic-variables">
+  <template>
+    <style>
+      :host {
+        display: none;
+      }
+    </style>
+    <arc-project-object-model id="projectModel"></arc-project-object-model>
+    <arc-variable-object-model id="variableModel"></arc-variable-object-model>
+  </template>
+  <script src="arc-magic-variables.js"></script>
+</dom-module>
