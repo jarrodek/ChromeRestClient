@@ -25,14 +25,16 @@ ArcBehaviors.RequestsListViewBehaviorImpl = {
      * is deep inside HAR object.
      */
     sort: {
-      type: String
+      type: String,
+      notify: true
     },
     /**
      * Table sort direction
      */
     dir: {
       type: String,
-      value: 'asc'
+      value: 'asc',
+      notify: true
     },
     /**
      * Determined which header state to show.
@@ -77,10 +79,6 @@ ArcBehaviors.RequestsListViewBehaviorImpl = {
     }
   },
 
-  observers: [
-    '_sortChanged(sort,dir)'
-  ],
-
   attached: function() {
     this.scrollTarget = document.querySelector('#headerPanelMain').scroller;
   },
@@ -92,16 +90,7 @@ ArcBehaviors.RequestsListViewBehaviorImpl = {
   get scroller() {
     return this.scrollTarget;
   },
-  /**
-   * Called when sort direction or column changed.
-   * This function will fire `sort-option-changed` event.
-   */
-  _sortChanged: function(sort, dir) {
-    this.fire('sort-option-changed', {
-      'sort': sort,
-      'dir': dir
-    });
-  },
+  
   /** Toggle all checkboxes in the list */
   toggleAll: function() {
     if (this.allChecked) {

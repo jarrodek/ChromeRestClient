@@ -33,12 +33,13 @@ the License.
     <template is="dom-if" if="{{hasListData}}">
       <arc-history-list-view
         is-history
+        sort="{{sortBy}}"
+        dir="{{sortDirection}}"
         requests="{{listData}}"
         on-clear-data="_clearDataStore"
         on-export-requested="_onExportRequested"
         on-delete-requested="_onDeleteRequested"
         on-content-scroll="_viewScrolling"
-        on-sort-option-changed="_sortChanged"
         querying="[[querying]]"></arc-history-list-view>
     </template>
     <template is="dom-if" if="{{!hasListData}}">

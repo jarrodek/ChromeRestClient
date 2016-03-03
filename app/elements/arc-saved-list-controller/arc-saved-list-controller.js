@@ -5,7 +5,6 @@ Polymer({
   behaviors: [
     ArcBehaviors.ArcControllerBehavior,
     ArcBehaviors.ArcFileExportBehavior,
-    ArcBehaviors.ListControllerBehavior,
     ArcBehaviors.RequestsListControllerBehavior
   ],
   get view() {

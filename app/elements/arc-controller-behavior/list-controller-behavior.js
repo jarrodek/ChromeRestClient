@@ -188,5 +188,5 @@ ArcBehaviors.ListControllerBehavior = {
   /**
    * Should be implemented by page controllers
    */
-  onClearAll: function(e) { /* ... */ }
+  onClearAll: function() { /* ... */ }
 };

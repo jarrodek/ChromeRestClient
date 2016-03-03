@@ -2,10 +2,23 @@
 
 Polymer({
   is: 'arc-history-list-controller',
+
+  properties: {
+    sortBy: {
+      type: String,
+      value: 'har.pages.-1.startedDateTime',
+      notify: true
+    },
+    sortDirection: {
+      type: String,
+      value: 'desc',
+      notify: true
+    }
+  },
+
   behaviors: [
     ArcBehaviors.ArcControllerBehavior,
     ArcBehaviors.ArcFileExportBehavior,
-    ArcBehaviors.ListControllerBehavior,
     ArcBehaviors.RequestsListControllerBehavior
   ],
   get view() {

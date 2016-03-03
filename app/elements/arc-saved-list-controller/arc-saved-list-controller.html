@@ -32,12 +32,13 @@ the License.
     </style>
     <template is="dom-if" if="{{hasListData}}">
       <arc-saved-list-view requests="{{listData}}"
+        sort="{{sortBy}}"
+        dir="{{sortDirection}}"
         on-name-changed="_requestNameChanged"
         on-clear-data="_clearDataStore"
         on-export-requested="_onExportRequested"
         on-delete-requested="_onDeleteRequested"
         on-content-scroll="_viewScrolling"
-        on-sort-option-changed="_sortChanged"
         querying="[[querying]]"
         on-open-drive="openDrive"></arc-saved-list-view>
     </template>

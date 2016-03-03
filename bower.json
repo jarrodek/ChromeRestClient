@@ -26,7 +26,7 @@
     "chrome-storage":"jarrodek/chrome-storage#latest",
     "chrome-image": "jarrodek/chrome-image#1.0.0",
     "code-mirror": "jarrodek/code-mirror#latest",
-    "lodash": "lodash/lodash#^4.5.0",
+    "lodash": "jarrodek/lodash#^4.6.2",
     "uri.js": "medialize/URI.js#^1.17.0",
     "zlib": "imaya/zlib.js#^0.2.0"
   },
@@ -36,6 +36,6 @@
   "ignore": [],
   "main": "app/index.html",
   "resolutions": {
-    "lodash": "^4.5.0"
+    "lodash": "^4.6.2"
   }
 }

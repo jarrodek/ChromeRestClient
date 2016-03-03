@@ -3,19 +3,29 @@ window.ArcBehaviors = window.ArcBehaviors || {};
 /**
  * Behavior for common functions between saved and history controllers.
  *
+ * ## Sorting a list
+ * To set a sort option for page query set `sortBy` and `sortDirections` i nthe element that
+ * use this behavior.
+ *
  * @polymerBehavior ArcBehaviors.RequestsListControllerBehavior
  */
-ArcBehaviors.RequestsListControllerBehavior = {
+ArcBehaviors.RequestsListControllerBehaviorImpl = {
   properties: {
     /**
      * Model's key to sort on.
      */
-    sortBy: String,
+    sortBy: {
+      type: String,
+      notify: true
+    },
     /**
      * Selected sort direction.
      * Can be either `acs` for natural order or `desc` for reversed order.
      */
-    sortDirection: String,
+    sortDirection: {
+      type: String,
+      notify: true
+    },
     /**
      * True if the component is showning in the UI.
      *
@@ -31,6 +41,9 @@ ArcBehaviors.RequestsListControllerBehavior = {
       value: ['search', 'clearAll']
     }
   },
+  observers: [
+    '_sortChanged(sortBy, sortDirection)'
+  ],
   onShow: function() {
     this._setTitle();
     this.searchQuery = '';
@@ -49,6 +62,7 @@ ArcBehaviors.RequestsListControllerBehavior = {
     if (!this.isShowing) {
       return;
     }
+    // console.log('Querying page for results');
     this._setQuerying(true);
     this.$.model.query();
   },
@@ -166,12 +180,10 @@ ArcBehaviors.RequestsListControllerBehavior = {
     this.computeScroll(e.target.scroller);
   },
 
-  _sortChanged: function(e) {
+  _sortChanged: function() {
     if (!this.isShowing) {
       return;
     }
-    this.sortBy = e.detail.sort;
-    this.sortDirection = e.detail.dir;
     this.resetQuery();
     this.queryPage();
   },
@@ -182,3 +194,8 @@ ArcBehaviors.RequestsListControllerBehavior = {
     }
   }
 };
+ArcBehaviors.RequestsListControllerBehavior = [
+  ArcBehaviors.ListControllerBehavior,
+  ArcBehaviors.RequestsListControllerBehaviorImpl
+
+];

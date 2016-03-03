@@ -240,7 +240,7 @@ An `arc-history-list-view` element is a element responsible for displaying a lis
           <div class="checkbox-column" id="projectColumn">
             <paper-checkbox checked="{{allChecked}}" on-tap="toggleAll"></paper-checkbox>
           </div>
-          <div class="name-column layout horizontal center" id="nameColumn" on-tap="sortColumn" data-sort="har.pages.0.startedDateTime" data-sortoption$="{{computeSortColumn(sort,dir,'har.pages.0.startedDateTime')}}">
+          <div class="name-column layout horizontal center" id="nameColumn" on-tap="sortColumn" data-sort="har.pages.-1.startedDateTime" data-sortoption$="{{computeSortColumn(sort,dir,'har.pages.-1.startedDateTime')}}">
             <iron-icon icon="arrow-drop-down"></iron-icon>Time
             <paper-ripple recenters></paper-ripple>
           </div>
