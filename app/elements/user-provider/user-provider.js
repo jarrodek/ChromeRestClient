@@ -93,11 +93,11 @@ Polymer({
         return;
       }
       this._setTokenData(accessToken);
-    }).catch((e) => {
+    }).catch(() => {
       if (this.notSignedIn) {
         return;
       }
-      console.error('user-provider::restore', e);
+      //console.error('user-provider::restore', e);
     });
   },
 
@@ -180,7 +180,8 @@ Polymer({
       this.$.revokeRequest.generateRequest();
     })
     .catch((e) => {
-      console.error('user-provider::restore', e);
+      this.fire('error', e);
+      console.error('user-provider::revokeToken', e);
     });
   },
   /**

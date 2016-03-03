@@ -8,18 +8,13 @@
   --secondary-text-color: #737373;
   --disabled-text-color: #9b9b9b;
   --divider-color: #dbdbdb;
-  --primary-color: #3f51b5;
+  --primary-color: var(--paper-blue-a100);
   --light-primary-color: #c5cae9;
-  --dark-primary-color: #303f9f;
+  --dark-primary-color: var(--paper-blue-700);
   --accent-color: #ff4081;
   --light-accent-color: #ff80ab;
   --dark-accent-color: #f50057;
-  /* Components */
-  /* paper-drawer-panel */
-  /*--drawer-menu-color: #ffffff;*/
-  /*--drawer-border-color: 1px solid #ccc;*/
-  /*--drawer-toolbar-border-color: 1px solid rgba(0, 0, 0, 0.22);*/
-  /* paper-menu */
+
   --paper-menu-background-color: #fff;
   --menu-link-color: #111111;
   --paper-toolbar-color: #737373;
@@ -52,8 +47,22 @@
     @apply(--paper-font-headline);
     padding: 0 16px;
   };
-  --paper-tab-ink: var(--paper-blue-a100);
-  --paper-tabs-selection-bar-color: var(--paper-blue-a100);
+  --paper-tab-ink: var(--primary-color);
+  --paper-tabs-selection-bar-color: var(--primary-color);
+
+  --paper-input-container-underline: {
+    background-color: var(--google-grey-100);
+  };
+  --paper-icon-button: {
+    transition: color cubic-bezier(0.4, 0, 1, 1) 100ms;
+    color: var(--secondary-text-color);
+  };
+  --paper-icon-button-hover: {
+    color: var(--dark-primary-color);
+  };
+  input::-webkit-input-placeholder {
+    color: var(--paper-input-container-color, --secondary-text-color);
+  }
 }
 
 
@@ -71,7 +80,7 @@ body {
 .main-toolbar .title {
   @apply(--layout-horizontal);
   @apply(--layout-center);
-  pointer-events: bounding-box;
+  pointer-events: bounding-box !important;
 }
 .project-endpoints {
   margin-left: 20px;
