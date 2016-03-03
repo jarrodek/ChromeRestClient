@@ -112,10 +112,10 @@ ArcBehaviors.ArcFileExportBehavior = {
       switch (this.exportMime) {
         case 'json':
           this.fileWriter.mime = 'application/json';
-        break;
+          break;
         case 'text':
           this.fileWriter.mime = 'text/plain';
-        break;
+          break;
         default:
           this.fileWriter.mime = this.exportMime;
           console.warn('Setting up unsupported mime type for file writer.');

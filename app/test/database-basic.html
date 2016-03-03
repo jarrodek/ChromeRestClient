@@ -15,19 +15,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <title>my-list-basic</title>
   <script src="../bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
   <script src="../bower_components/web-component-tester/browser.js"></script>
-  <script src="../bower_components/dexie-js/dist/latest/Dexie.min.js"></script>
-  <script src="../bower_components/har/build/har.js"></script>
-  <script src="chance.js"></script>
-  <script src="mock-data.js"></script>
   <!-- Import the element to test -->
   <link rel="import" href="../bower_components/polymer/polymer.html">
-  <link rel="import" href="../elements/arc-project-object-model/arc-project-object-model.html">
-  <link rel="import" href="../elements/arc-request-object-model/arc-request-object-model.html">
-  <script src="../scripts/libs/app.db.idb.js"></script>
-  <script src="../scripts/libs/app.analytics.js"></script>
-  <script src="../scripts/libs/app.utils.js"></script>
-  <script src="../scripts/libs/app.headers.js"></script>
-  <script src="../scripts/libs/app.types.js"></script>
+  <link rel="import" href="database-import.html">
 </head>
 
 <body>
@@ -79,8 +69,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       };
       var errorCallback = function(e) {
         insertModel.removeEventListener('error', errorCallback);
-        should.not.exist(e);
-        done();
+        window.setTimeout(() => {
+          expect(e).to.not.exist;
+          done();
+        }, 0);
       };
       insertModel.addEventListener('save', saveCallback);
       insertModel.addEventListener('error', errorCallback);
@@ -97,12 +89,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       };
       var errorCallback = function(e) {
         readModel.removeEventListener('error', errorCallback);
-        should.not.exist(e);
-        done();
+        window.setTimeout(() => {
+          expect(e).to.not.exist;
+          done();
+        }, 0);
       };
       readModel.addEventListener('data-ready', readyCallback);
       readModel.addEventListener('error', errorCallback);
       readModel.objectId = insertId;
+    });
+
+    test('Element should read inserted with Promise', function(done) {
+      readModel.query()
+      .catch((e) => {
+        window.setTimeout(() => {
+          console.info(e);
+          expect(e).to.not.exist;
+          done();
+        }, 0);
+      })
+      .then((data) => {
+        // exit promise to report an error
+        window.setTimeout(() => {
+          expect(readModel.data, 'Returned value is not an array').to.be.an('array');
+          var isInstance = readModel.data[0] instanceof ProjectObject;
+          expect(isInstance, 'Read data should be an instance of ProjectObject').to.equal(true);
+          done();
+        }, 0);
+      });
+
     });
 
     test('Element should remove inserted', function(done) {
@@ -112,8 +127,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         done();
       });
       deleteModel.addEventListener('error', function(e) {
-        should.not.exist(e);
-        done();
+        window.setTimeout(() => {
+          expect(e).to.not.exist;
+          done();
+        }, 0);
       });
       deleteModel.objectId = insertId;
       deleteModel.remove();
@@ -130,18 +147,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         insertModel.removeEventListener('save', saveCallback);
         expect(insertModel.data.id).to.be.a('number');
         insertModel.addRequests(requests)
-        .catch(function(e){
-          console.log('Catch block', e);
-          should.not.exist(e);
+        .catch(function(e) {
+          window.setTimeout(() => {
+            expect(e).to.not.exist;
+
+          }, 0);
         })
-        .finally(function(){
+        .finally(function() {
           done();
         });
       };
       var errorCallback = function(e) {
         insertModel.removeEventListener('error', errorCallback);
-        should.not.exist(e);
-        done();
+        window.setTimeout(() => {
+          expect(e).to.not.exist;
+          done();
+        }, 0);
       };
       insertModel.addEventListener('save', saveCallback);
       insertModel.addEventListener('error', errorCallback);
@@ -167,8 +188,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       };
       var errorCallback = function(e) {
         insertModel.removeEventListener('error', errorCallback);
-        should.not.exist(e);
-        done();
+        window.setTimeout(() => {
+          expect(e).to.not.exist;
+          done();
+        }, 0);
       };
       insertModel.addEventListener('save', saveCallback);
       insertModel.addEventListener('error', errorCallback);

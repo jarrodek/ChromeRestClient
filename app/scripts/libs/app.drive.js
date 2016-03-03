@@ -192,7 +192,9 @@ drive.file._uploadFile = function(accessToken, options) {
 };
 drive.file._appSafeIcon = () => {
   return new Promise((resolve) => {
-    fetch(chrome.runtime.getURL('/assets/arc_icon_128.png'))
+    let url = chrome.runtime.getURL ? chrome.runtime.getURL('/assets/arc_icon_128.png') :
+      '/app/assets/arc_icon_128.png'; // for test cases
+    fetch(url)
     .then((response) => {
       return response.blob();
     })

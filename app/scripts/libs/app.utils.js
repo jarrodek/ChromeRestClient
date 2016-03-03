@@ -94,7 +94,7 @@ Object.defineProperty(arc.app.utils, 'chromeVersion', {
     return arc.app.utils._chromeVersion;
   },
 
-  set: function(value) {
+  set: function() {
     throw new Error('appVer can\'t be overrited.');
   }
 });
@@ -120,7 +120,7 @@ Object.defineProperty(arc.app.utils, 'appVer', {
     return arc.app.utils._appVer;
   },
 
-  set: function(value) {
+  set: function() {
     throw new Error('appVer can\'t be overrited.');
   }
 });

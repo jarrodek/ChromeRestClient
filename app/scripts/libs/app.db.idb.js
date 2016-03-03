@@ -112,7 +112,7 @@ arc.app.db.idb.open = function() {
         requestObject: '++id,url,method,[url+method],type,_name',
         serverExportObjects: '[serverId+requestId],serverId,requestId',
         projectObjects: '++id,*requestIds',
-        variables: '++id,variable,type,project'
+        variables: '++id,variable,type'
       });
     db.projectObjects.mapToClass(ProjectObject);
     db.serverExportObjects.mapToClass(ServerExportedObject);
@@ -227,7 +227,9 @@ arc.app.db.idb.requests.createRequestKey = function(method, url) {
   return method + ':' + url;
 };
 arc.app.db.idb.downloadDefinitions = function() {
-  return fetch(chrome.runtime.getURL('/assets/definitions.json'))
+  var url = chrome.runtime.getURL ? chrome.runtime.getURL('/assets/definitions.json') :
+    '/app/assets/definitions.json'; // for test cases
+  return fetch(url)
     .then(function(response) {
       return response.json();
     });

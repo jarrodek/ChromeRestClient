@@ -1,5 +1,5 @@
 'use strict';
-/* global arc */
+
 Polymer({
   is: 'arc-headers-display-view',
   properties: {

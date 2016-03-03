@@ -1,3 +1,5 @@
+'use strict';
+/* global CodeMirror */
 Polymer({
   is: 'headers-editor',
 
@@ -49,7 +51,8 @@ Polymer({
       }.bind(this)
     });
   },
-  valueChanged: function(e) {
+
+  valueChanged: function() {
     this._detectContentType();
   },
 
@@ -82,7 +85,7 @@ Polymer({
    * @param {String} type A predefined type to display.
    */
   displayWarning: function(type) {
-    console.warn('Content type header not present but it should be.');
+    console.warn('Content type header not present but it should be: ' + type);
   },
   /**
    * Update headers array from form values to the HTTP string.
@@ -139,7 +142,8 @@ Polymer({
         notChanged = true;
         return item;
       }
-      return item.value = this.contentType;
+      item.value = this.contentType;
+      return item;
     }.bind(this));
     if (notChanged) {
       return;

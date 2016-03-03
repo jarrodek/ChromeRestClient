@@ -658,7 +658,7 @@ class FileExport extends BaseObject {
 class MagicVariableObject extends BaseObject {
   constructor(opts) {
     super();
-    this.id = undefined;
+    //this.id = undefined;
     this.variable = opts.variable || undefined;
     this.value = opts.value || undefined;
     this.type = opts.type || 'global';

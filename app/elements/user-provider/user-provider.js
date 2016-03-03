@@ -202,7 +202,7 @@ Polymer({
    * Clear auth data.
    */
   _clearCache: function() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       if (!this.accessToken) {
         resolve(true);
         return;
@@ -235,7 +235,7 @@ Polymer({
     switch (e.detail.xhr.status) {
       case 400:
         //bad request - accessToken not ready.
-      break;
+        break;
       default:
         console.log('tokenInfoError', e);
     }

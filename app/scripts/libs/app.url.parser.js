@@ -47,6 +47,7 @@
  *
  * @see http://blog.stevenlevithan.com/archives/parseuri
  */
+/*jshint unused:false*/
 class URLParser {
   /**
    * Creates an instance of the parser and parse the url
@@ -254,7 +255,7 @@ class URLParser {
   set query(query) {
     if (query) {
       this._query = query;
-      this._paramsList = this._parseParams(_query);
+      this._paramsList = this._parseParams(query);
     } else {
       this._query = null;
       this._paramsList = new Set();

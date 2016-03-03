@@ -59,8 +59,8 @@ Polymer({
 
   detatch: function() {
     if (!this._worker) {
-      worker.removeEventListener('message', this._workerDataHandler);
-      worker.removeEventListener('error', this._workerErrorHandler);
+      this.worker.removeEventListener('message', this._workerDataHandler);
+      this.worker.removeEventListener('error', this._workerErrorHandler);
     }
   },
 
@@ -113,7 +113,7 @@ Polymer({
     }
     target = target.parentNode;
     var expanded = target.dataset.expanded;
-    if (!expanded || expanded == 'true') {
+    if (!expanded || expanded === 'true') {
       target.dataset.expanded = 'false';
     } else {
       target.dataset.expanded = 'true';

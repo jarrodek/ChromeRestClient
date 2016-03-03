@@ -1,5 +1,5 @@
 'use strict';
-
+/*jshint unused:false*/
 class WebSocketMessage {
 
   constructor(opts) {
@@ -8,19 +8,19 @@ class WebSocketMessage {
      *
      * @type {Boolean}
      */
-    this.isBinary;
+    this.isBinary = undefined;
     /**
      * If `binaryData` is true this must contain raw binary data.
      *
      * @type {Blob|ArrayBuffer}
      */
-    this.binaryData;
+    this.binaryData = undefined;
     /**
      * A message sent to / received from the server.
      *
      * @type {String|ArrayBuffer|Blob}
      */
-    this._message;
+    this._message = undefined;
     this.message = opts.message;
     /**
      * A direction of the message. Either "in" or "out".

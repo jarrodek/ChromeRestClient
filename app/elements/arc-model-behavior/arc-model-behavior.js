@@ -193,8 +193,10 @@ ArcBehaviors.ArcModelBehavior = {
    * @return {Promise} Fulfiled promise will result with query results.
    */
   genericQuery: function(table) {
+    var opened;
     return arc.app.db.idb.open()
-      .then(function(db) {
+      .then((db) => {
+        opened = db;
         let result;
         table = db[table];
         if (this.objectId instanceof Array) {
@@ -208,18 +210,15 @@ ArcBehaviors.ArcModelBehavior = {
         } else {
           result = table.toCollection();
         }
-
         if (this.sortBy) {
           result = result.sortBy(this.sortBy);
         }
         if (result.toArray) {
           result = result.toArray();
         }
-        return result.finally(function() {
-          db.close();
-        });
-      }.bind(this))
-      .then(function(data) {
+        return result;
+      })
+      .then((data) => {
         if (!data) {
           data = null;
         } else if (data.length === 0) {
@@ -245,14 +244,20 @@ ArcBehaviors.ArcModelBehavior = {
           data: data
         });
         return data;
-      }.bind(this))
-      .catch(function(cause) {
-        console.error(cause);
+      })
+      .catch((cause) => {
+        console.error('Error in generic query', cause);
         arc.app.analytics.sendException('arc-model::genericQuery::' +
           JSON.stringify(cause), false);
         this.fire('error', {
           error: cause
         });
+        return Promise.reject(cause);
+      })
+      .finally(() => {
+        if (opened) {
+          opened.close();
+        }
       });
   },
   /**

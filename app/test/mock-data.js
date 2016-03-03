@@ -172,7 +172,9 @@ var installWebSQLApp = function() {
  * This is only temporary here until upgrade to packaged apps.
  */
 var downloadDefinitions = function() {
-  return fetch(chrome.runtime.getURL('assets/definitions.json'))
+  var url = chrome.runtime.getURL ? chrome.runtime.getURL('/assets/definitions.json') :
+    '/assets/definitions.json'; // for test cases
+  return fetch(chrome.runtime.getURL(url))
     .then(function(response) {
       return response.json();
     });

@@ -1,4 +1,6 @@
 'use strict';
+
+/* global URLParser */
 /*******************************************************************************
  * Copyright 2016 Pawel Psztyc, The ARC team
  *

@@ -52,8 +52,8 @@ Polymer({
 
   detatch: function() {
     if (!this._worker) {
-      worker.removeEventListener('message', this._workerDataHandler);
-      worker.removeEventListener('error', this._workerErrorHandler);
+      this.worker.removeEventListener('message', this._workerDataHandler);
+      this.worker.removeEventListener('error', this._workerErrorHandler);
     }
   },
 
@@ -85,7 +85,7 @@ Polymer({
     }
   },
 
-  _workerError: function(e) {
+  _workerError: function() {
     this._setIsError(true);
     this._setWorking(false);
   },
@@ -99,7 +99,7 @@ Polymer({
       return;
     }
 
-    if (e.target.nodeName == 'A') {
+    if (e.target.nodeName === 'A') {
       e.preventDefault();
       this.fire('action-link-change', {
         url: e.target.getAttribute('href')
@@ -116,7 +116,7 @@ Polymer({
       return;
     }
     var expanded = parent.dataset.expanded;
-    if (!expanded || expanded == 'true') {
+    if (!expanded || expanded === 'true') {
       parent.dataset.expanded = 'false';
     } else {
       parent.dataset.expanded = 'true';

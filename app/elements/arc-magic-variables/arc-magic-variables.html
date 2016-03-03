@@ -14,6 +14,7 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 -->
+<link rel="import" href="../arc-variable-object-model/arc-variable-object-model.html">
 <!--
 # arc-magic-variables
 The `<arc-magic-variables>` element is an element that supports "magic variables" in ARC.
@@ -69,7 +70,8 @@ It will keep this data so you can use the element many times on different strngs
 ```
 <arc-magic-variables
   id="mv"
-  values="[[headersList]]"
+  value="[[headersList]]"
+  scope="[[projectId]]"
   on-parsed="_onParsed">
 </arc-magic-variables>
 // in code:
@@ -102,7 +104,6 @@ this.$.mv.parse()
         display: none;
       }
     </style>
-    <arc-project-object-model id="projectModel"></arc-project-object-model>
     <arc-variable-object-model id="variableModel"></arc-variable-object-model>
   </template>
   <script src="arc-magic-variables.js"></script>

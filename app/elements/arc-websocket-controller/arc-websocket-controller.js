@@ -1,5 +1,5 @@
 'use strict';
-
+/* global WebSocketMessage */
 Polymer({
   is: 'arc-websocket-controller',
   behaviors: [

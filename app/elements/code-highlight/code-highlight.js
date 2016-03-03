@@ -1,4 +1,5 @@
 'use strict';
+/* global CodeMirror */
 
 Polymer({
   is: 'code-highlight',
@@ -28,13 +29,13 @@ Polymer({
     var mode;
     var spec;
     if (m) {
-      var info = CodeMirror.findModeByExtension(m[1]);
+      let info = CodeMirror.findModeByExtension(m[1]);
       if (info) {
         mode = info.mode;
         spec = info.mime;
       }
     } else if (/\//.test(val)) {
-      var info = CodeMirror.findModeByMIME(val);
+      let info = CodeMirror.findModeByMIME(val);
       if (info) {
         mode = info.mode;
         spec = val;
@@ -70,7 +71,7 @@ Polymer({
     // replace tabs
     for (var pos = 0;;) {
       let idx = text.indexOf('\t', pos);
-      if (idx == -1) {
+      if (idx === -1) {
         content += text.slice(pos);
         col += text.length - pos;
         break;
@@ -81,7 +82,7 @@ Polymer({
         col += size;
         for (var i = 0; i < size; ++i) {
           content += ' ';
-        };
+        }
         pos = idx + 1;
       }
     }
