@@ -63,7 +63,7 @@ arc.app.server.hasSession = function(callback) {
 arc.app.server._authTab = null;
 /**
  * Authorize the user in the app.
- * TODO: This needs new approach:
+ * TODO:80 This needs new approach:
  * - Redirect the user to the server's auth callback
  * - from the page call chrome.runtime.sendExtensionMessage
  * - handle message in the background page and call the app

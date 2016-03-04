@@ -19,9 +19,9 @@ ArcBehaviors.ArcControllerSelectableBehaviorImpl = {
      * All controller pages will have `opened` attribute set by parent `neon-animated-pages`
      * when the controller is selected.
      * The app can't cancel this behavior since it is controlled by different component.
-     * TODO: make it possible to stop from switching the page and make use of
+     * TODO:200 make it possible to stop from switching the page and make use of
      * `mayStop()` function.
-     * TODO: `mayStop()` should be a promise so the component may perform async tasks before
+     * TODO:90 `mayStop()` should be a promise so the component may perform async tasks before
      * it will close.
      */
     opened: {

@@ -78,7 +78,7 @@ arc.app.xhr.run = function(id) {
       })
       .then(arc.app.xhr._readResponse)
       .then(function(responseHar) {
-        //TODO: add redirect info
+        //TODO:100 add redirect info
         let har = arc.app.xhr.requests.get(id);
         arc.app.xhr.requests.delete(id);
         let refId = har.log.pages[har.log.pages.length - 1].id;

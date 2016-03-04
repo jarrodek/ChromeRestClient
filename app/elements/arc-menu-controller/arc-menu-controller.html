@@ -33,8 +33,8 @@ the License.
         on-navigate="_navigateRequested"
         on-authorize-requested="_authRequested"
         on-signout-requested="_signOutRequested"></arc-menu-view>
-      <user-provider id="userProvider" authorized="{{appAuthorized}}"></user-provider>
       <arc-project-object-model id="model" data="{{projects}}"></arc-project-object-model>
+      <chrome-signin-aware id="auth" is-authorized="{{appAuthorized}}"></chrome-signin-aware>
     </template>
   </dom-module>
   <script src="arc-menu-controller.js"></script>

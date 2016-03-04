@@ -45,7 +45,7 @@ arc.app.importer.saveFileData = function(data) {
       return db.transaction('rw', db.requestObject, db.projectObjects, function() {
           const projects = {};
           let promises = [];
-          //TODO: Is here memory leak?
+          //TODO:60 Is here memory leak?
           let insertRequest = (db, item) => {
             let referencedProjectId = item.project;
             let oldItemId = item.id;

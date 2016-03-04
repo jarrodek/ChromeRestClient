@@ -1,8 +1,8 @@
 'use strict';
 /* global drive */
 /**
- * TODO: View informing that the user is not signed in to Chrome
- * TODO: Error message handling
+ * TODO:10 View informing that the user is not signed in to Chrome
+ * TODO:0 Error message handling
  */
 Polymer({
   is: 'arc-drive-controller',
@@ -188,7 +188,7 @@ Polymer({
   /**
    * Ajax call success handler for file download
    *
-   * TODO: Add an UI to choose request if more than one.
+   * TODO:40 Add an UI to choose request if more than one.
    */
   _handleDownloadResponse: function() {
     var response = this.$.download.lastResponse;

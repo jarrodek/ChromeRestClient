@@ -17,7 +17,7 @@ Polymer({
       value: false
     }
   },
-  
+
   ready: function() {
     try {
       this._observeHistoryEnabled();
@@ -125,10 +125,10 @@ Polymer({
   },
 
   _authRequested: function() {
-    this.$.userProvider.authorize();
+    this.$.auth.signIn();
   },
 
   _signOutRequested: function() {
-    this.$.userProvider.revokeToken();
+    this.$.auth.signOut();
   }
 });

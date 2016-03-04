@@ -45,7 +45,7 @@ gulp.task('lint', function() {
 });
 /**
  * Vulcanize all web-components into one file.
- * TODO: do I really need it? There's no long running HTTP request to download this files.
+ * TODO:120 do I really need it? There's no long running HTTP request to download this files.
  * Since they are stored locally is probably dont matter. But to be sure it need to pass
  * performance test.
  */

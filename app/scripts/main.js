@@ -10,7 +10,7 @@
    * the main object if it must to be accessible to the toolbar.
    * This is an array of requests related to the currently opened project.
    *
-   * TODO: In future releases controllers should not keep their data in the toolbar. New design
+   * TODO:50 In future releases controllers should not keep their data in the toolbar. New design
    * should keep all releted to the controller data in the main workspace window.
    */
   app.projectEndpoints = [];

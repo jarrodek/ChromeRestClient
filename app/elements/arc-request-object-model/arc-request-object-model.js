@@ -417,7 +417,7 @@ Polymer({
       //for history late last one.
       var request;
       if (!isHistory) {
-        //TODO: it will not cover a situation when object was overriten.
+        //TODO:190 it will not cover a situation when object was overriten.
         //This will requires an additional information (some pointer) to the request that is
         //the request.
         request = entries[0].request; // take the first one.

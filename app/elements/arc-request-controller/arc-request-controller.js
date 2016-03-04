@@ -184,7 +184,7 @@ Polymer({
       this.debounce('restore.request', function() {
         let request = this.$.requestQueryModel.toLocalRequest(this.routeParams.type === 'history');
         console.info('Restored request', request);
-        /*TODO: There is some error here. Sometimes headers are not fully restored.
+        /*TODO:70 There is some error here. Sometimes headers are not fully restored.
         Need to investigate.*/
         this.set('request', request);
         if (request.name) {
@@ -235,7 +235,7 @@ Polymer({
   },
 
   /**
-   * TODO: this should not work this way.
+   * TODO:210 this should not work this way.
    * Controllers should keep their data on their own and do not use global scope.
    */
   _projectEndpointsRestored: function(e) {
@@ -430,7 +430,7 @@ Polymer({
   },
   /**
    * Save/update project with the request.
-   * TODO: fire event to update projects list in the menu.
+   * TODO:140 fire event to update projects list in the menu.
    *
    * @param {String} name A name of the request. It's only relevant when creating new project.
    * @param {Number} requestId A request ID to be associated with the project.

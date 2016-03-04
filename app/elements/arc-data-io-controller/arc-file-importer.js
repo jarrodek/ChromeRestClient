@@ -1,6 +1,6 @@
 'use strict';
 
-//TODO: add importer for new data structure.
+//TODO:20 add importer for new data structure.
 Polymer({
   is: 'arc-file-importer',
   /**
@@ -78,7 +78,7 @@ Polymer({
         }
 
       } catch (e) {
-        //TODO: add status message
+        //TODO:110 add status message
         console.error('arc-data-import::_importFileReady::JSON.parse::error', e);
         this._resetFileDrop();
         this._setImporting(false);

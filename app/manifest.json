@@ -18,6 +18,7 @@
     "storage",
     "unlimitedStorage",
     "identity",
+    "identity.email",
     "syncFileSystem",
     {
       "fileSystem": ["write"]

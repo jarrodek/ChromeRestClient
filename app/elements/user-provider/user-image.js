@@ -68,7 +68,7 @@ Polymer({
         this.$.fileRequest.generateRequest();
       }.bind(this));
     }.bind(this), function(reason) {
-      //TODO: error handling
+      //TODO:130 error handling
       console.error('webkitRequestFileSystem', reason);
     });
   },
@@ -78,7 +78,7 @@ Polymer({
    * @param {Error} e - error object
    */
   _userPictureError: function(e) {
-    //TODO: error handling
+    //TODO:150 error handling
     console.error('user-image::userPictureError:', e);
   },
   /**
