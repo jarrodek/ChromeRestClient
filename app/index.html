@@ -79,6 +79,7 @@
     <iron-a11y-keys id="a11y" target="{{document.body}}" keys="ctrl+s" on-keys-pressed="onSave"></iron-a11y-keys>
     <iron-a11y-keys id="a11y" target="{{document.body}}" keys="ctrl+o" on-keys-pressed="onOpen"></iron-a11y-keys>
   </template>
+  <!-- build:js scripts/app.js -->
   <script src="bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
   <script src="bower_components/dexie-js/dist/latest/Dexie.min.js"></script>
   <script src="bower_components/har/build/har.js"></script>
@@ -106,6 +107,7 @@
   <script src="scripts/code-mirror/addon/hint/http-headers.js"></script>
   <script src="scripts/code-mirror/addon/hint/show-hint.js"></script>
   <script src="scripts/main.js"></script>
+  <!-- endbuild-->
 </body>
 
 </html>

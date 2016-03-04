@@ -8,7 +8,11 @@ var path = require('path');
 var vulcanize = require('gulp-vulcanize');
 var crisper = require('gulp-crisper');
 var modRewrite = require('connect-modrewrite');
-var htmlmin = require('gulp-htmlmin');
+// var htmlmin = require('gulp-htmlmin');
+var uglify = require('gulp-uglify');
+var runSequence = require('run-sequence');
+var del = require('del');
+var strip = require('gulp-strip-comments');
 //var foreach = require('gulp-foreach');
 //var gutil = require('gulp-util');
 
@@ -16,6 +20,10 @@ var DIST = 'dist';
 var dist = function(subpath) {
   return !subpath ? DIST : path.join(DIST, subpath);
 };
+// Clean output directory
+gulp.task('clean', function() {
+  return del(['.tmp', dist()]);
+});
 // Ensure that we are not missing required files for the project
 // "dot" files are specifically tricky due to them being hidden on
 // some systems.
@@ -44,15 +52,46 @@ gulp.task('lint', function() {
     .pipe($.jshint.reporter('jshint-stylish'))
     .pipe($.jshint.reporter('fail'));
 });
+
+var optimizeHtmlTask = function(src, dest) {
+  var assets = $.useref.assets({
+    searchPath: ['.tmp', 'app']
+  });
+  return gulp.src(src)
+    .pipe(assets)
+    // Concatenate and minify JavaScript
+    .pipe($.if('*.js', $.uglify({
+      preserveComments: 'some'
+    })))
+    // Concatenate and minify styles
+    // In case you are still using useref build blocks
+    .pipe($.if('*.css', $.minifyCss()))
+    .pipe(assets.restore())
+    .pipe($.useref())
+    // Minify any HTML
+    .pipe($.if('*.html', $.minifyHtml({
+      quotes: true,
+      empty: true,
+      spare: true
+    })))
+    // Output files
+    .pipe(gulp.dest(dest))
+    .pipe($.size({
+      title: 'html'
+    }));
+};
+// Scan your HTML for assets & optimize them
+gulp.task('html', function() {
+  return optimizeHtmlTask(
+    ['app/**/*.html', '!app/{elements,test,bower_components}/**/*.html'],
+    dist());
+});
 /**
  * Vulcanize all web-components into one file.
- *
  */
 gulp.task('vulcanize', function() {
   return gulp.src('app/elements/elements.html')
     .pipe(vulcanize({
-      abspath: '',
-      excludes: [],
       stripExcludes: false,
       inlineScripts: true,
       inlineCss: true,
@@ -62,18 +101,41 @@ gulp.task('vulcanize', function() {
       scriptInHead: false,
       onlySplit: false
     }))
-    .pipe(htmlmin({
-      removeComments: true,
-      removeCommentsFromCDATA: true,
-      removeCDATASectionsFromCDATA: true,
-      collapseWhitespace: true,
-      removeTagWhitespace: true,
-      keepClosingSlash: true,
-      minifyJS: true,
-      minifyCSS: true
-    }))
-    .pipe(gulp.dest(dist('elements')));
+    .pipe(gulp.dest(dist('elements')))
+    .pipe($.size({
+      title: 'vulcanize'
+    }));
 });
+gulp.task('minifyHtml', function() {
+  return gulp.src('dist/elements/*.js')
+  // .pipe(htmlmin({
+    //removeComments: true,
+    // removeCommentsFromCDATA: true,
+    // removeCDATASectionsFromCDATA: true,
+    // collapseWhitespace: true,
+    // removeTagWhitespace: true,
+    // keepClosingSlash: true,
+    // minifyJS: true,
+    // minifyCSS: true
+  // }))
+  .pipe(strip())
+  .pipe(uglify())
+
+  .pipe(gulp.dest(dist()))
+  .pipe($.size({
+    title: 'Minify JS'
+  }));
+});
+
+// Build production files, the default task
+gulp.task('default',  function(cb) {
+  runSequence(
+    ['ensureFiles'],
+    ['html'],
+    ['vulcanize','minifyHtml'], // 'cache-config',
+    cb);
+});
+
 /**
  * Make all elements CSP ready
  */
