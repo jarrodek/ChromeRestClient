@@ -31,38 +31,36 @@
     }
     </style>
     <h2>Application server sync</h2>
-    <template is="dom-if" if="{{loading}}">
-      <div id="serverSpinner" class="padding-section">
-        <paper-spinner active="true" alt="Preparing data"></paper-spinner>
-      </div>
-    </template>
+    <div hidden$="[[isAuthorized]]" class="padding-section">
+      <p class="paper-font-caption">Now you can store your data securely in the app server running on Google infrastructure. Your data will be always available with you once you're signed in to Chrome.</p>
+      <p class="paper-font-caption">You must first authorize the app to use server synchronization.</p>
+      <chrome-signin width="wide" is-authorized="{{isAuthorized}}" scope="profile"></chrome-signin>
+    </div>
+
+    <div class="padding-section">
+      <paper-spinner active="[[loading]]" alt="Preparing data"></paper-spinner>
+    </div>
+
     <template is="dom-if" if="{{serverError}}">
       <p class="server-error padding-section">
         It looks that the app's server is down. Please, try in a moment.
       </p>
     </template>
     <template is="dom-if" if="{{show}}">
-      <template is="dom-if" if="{{showConnect}}">
-        <div id="connectActionContainer" class="padding-section">
-          <p>You must be connected to import/export from server.</p>
-          <paper-button raised="true" on-tap="connect">Connect with server</paper-button>
-        </div>
-      </template>
-      <template is="dom-if" if="{{showActions}}">
-        <div id="storeDataPanel" class="padding-section">
-          <p class="paper-font-caption">You can store your date an application server and share it between different machines or people.</p>
-          <p>
-            <paper-button id="storeDataButton" class="action-button">Store your data</paper-button>
-            <paper-button id="restoreDataButton" class="action-button">Restore your data</paper-button>
-          </p>
-        </div>
-        <div id="shareUrlPanel" class="padding-section">
-          <p class="paper-font-caption">You can share all your saved data by giving someone link below:</p>
-          <pre class="Import_Export_shareLink" id="shareLink"></pre>
-        </div>
-      </template>
+      <div id="storeDataPanel" class="padding-section">
+        <p class="paper-font-caption">You can store your date an application server and share it between different machines or people.</p>
+        <p>
+          <paper-button id="storeDataButton" class="action-button">Store your data</paper-button>
+          <paper-button id="restoreDataButton" class="action-button">Restore your data</paper-button>
+        </p>
+      </div>
+      <div id="shareUrlPanel" class="padding-section">
+        <p class="paper-font-caption">You can share all your saved data by giving someone link below:</p>
+        <pre class="Import_Export_shareLink" id="shareLink"></pre>
+      </div>
       <!-- <arc-server-import-table-view></arc-server-import-table-view> -->
     </template>
+
   </template>
 </dom-module>
 <script src="arc-server-exporter.js"></script>

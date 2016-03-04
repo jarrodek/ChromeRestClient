@@ -48,6 +48,9 @@ Polymer({
   onShow: function() {
     this._setPageTitle('Data import / export');
   },
+  onHide: function() {
+    this._setPageTitle('');
+  },
   /**
    * to be removed?
    */

@@ -8,6 +8,7 @@ var path = require('path');
 var vulcanize = require('gulp-vulcanize');
 var crisper = require('gulp-crisper');
 var modRewrite = require('connect-modrewrite');
+var htmlmin = require('gulp-htmlmin');
 //var foreach = require('gulp-foreach');
 //var gutil = require('gulp-util');
 
@@ -45,9 +46,7 @@ gulp.task('lint', function() {
 });
 /**
  * Vulcanize all web-components into one file.
- * TODO:120 do I really need it? There's no long running HTTP request to download this files.
- * Since they are stored locally is probably dont matter. But to be sure it need to pass
- * performance test.
+ *
  */
 gulp.task('vulcanize', function() {
   return gulp.src('app/elements/elements.html')
@@ -63,8 +62,17 @@ gulp.task('vulcanize', function() {
       scriptInHead: false,
       onlySplit: false
     }))
-    .pipe(gulp.dest(dist('elements')))
-    .pipe(gulp.dest('war/components/vulcanized'));
+    .pipe(htmlmin({
+      removeComments: true,
+      removeCommentsFromCDATA: true,
+      removeCDATASectionsFromCDATA: true,
+      collapseWhitespace: true,
+      removeTagWhitespace: true,
+      keepClosingSlash: true,
+      minifyJS: true,
+      minifyCSS: true
+    }))
+    .pipe(gulp.dest(dist('elements')));
 });
 /**
  * Make all elements CSP ready

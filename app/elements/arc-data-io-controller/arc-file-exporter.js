@@ -49,18 +49,18 @@ Polymer({
    */
   _prepareData: function() {
     arc.app.importer.prepareExport()
-      .then(function(data) {
-        this.exportContent = data;
-        this._setLoading(false);
-        this._setDataReady(true);
-      }.bind(this))
-      .catch((cause) => {
-        console.error(cause);
-        StatusNotification.notify({
-          message: cause.message
-        });
-        arc.app.analytics.sendException(cause.message, false);
+    .then(function(data) {
+      this.exportContent = data;
+      this._setLoading(false);
+      this._setDataReady(true);
+    }.bind(this))
+    .catch((cause) => {
+      console.error(cause);
+      StatusNotification.notify({
+        message: cause.message
       });
+      arc.app.analytics.sendException(cause.message, false);
+    });
   },
   _saveData: function() {
     var date = new Date();

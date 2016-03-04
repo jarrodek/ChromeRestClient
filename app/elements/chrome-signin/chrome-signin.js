@@ -127,7 +127,7 @@
        */
       labelSignin: {
         type: String,
-        value: 'Sign in'
+        value: '' //Sign in
       },
 
       _labelSignin: {

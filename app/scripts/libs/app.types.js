@@ -645,8 +645,8 @@ class FileExport extends BaseObject {
       console.warn('The opts.projects is not an array. Overriding');
       opts.projects = [];
     }
-    opts.requests.forEach((item) => item.kind = 'ARC#requestsRequestObject');
-    opts.projects.forEach((item) => item.kind = 'ARC#requestsProject');
+    opts.requests.forEach((item) => item.kind = 'ARC#RequestObject');
+    opts.projects.forEach((item) => item.kind = 'ARC#ProjectObject');
 
     this.requests = opts.requests;
     this.projects = opts.projects;
