@@ -6,7 +6,14 @@
  */
 window.ArcBehaviors = window.ArcBehaviors || {};
 /**
- * Behavior that highlights stuff.
+ * Base behaviors for all models in ARC.
+ * This behaviors contains genering CRUD methods that the models can implement. Models can also
+ * override this methods to implement their own agorithm.
+ *
+ * ARC is using Dexie.js libarary as a wrapper for IDB. Dexie has many convienient methods to manage
+ * database version, structure and keys. Also it simplifies querying the database.
+ * Note however that the Dexie has it's own Promises implementation. It works like standard Promise
+ * function but sometimes results are not as expected to be.
  *
  * @polymerBehavior
  */
@@ -37,7 +44,9 @@ ArcBehaviors.ArcModelBehavior = {
   properties: {
     /**
      * Current data.
-     * Can be RequestObject or array of RequestObjects
+     * It doesn't mean that the data are saved in the datastore. Them may be saved at the moment
+     * or save function have never been called.
+     * It's a genner for read data and setter for new / changed data.
      */
     data: {
       type: Object,
@@ -62,22 +71,28 @@ ArcBehaviors.ArcModelBehavior = {
      */
     offset: Number,
     /**
-     * Execute query and get an array with the results sorted by given property.
+     * `data` will be sorted for given key.
+     * Note that this should be a database key. If not, manual sorting is performed which may
+     * influance performance. If sort is made on exising datastore key, native IDB sort is
+     * performed using IDB cursor.
      */
     sortBy: String,
     /**
-     * If true the `data` will be saved automatically right after change.
+     * If true the `data` are read/saved automatically after key/data change.
      */
     auto: Boolean,
     /**
-     * Query direction. `asc` for from lowest primary key or `desc` otherwise.
+     * Query direction.
+     * Set to `asc` (default) for from lowest primary key or `desc` otherwise.
      */
     direction: {
       type: String,
       value: 'asc'
     },
     /**
-     * To clear the whole store before calling `genericRemove()` set this to true.
+     * To clear the data store, before calling `genericRemove()` this must
+     * be set to `true` or the model do not delete datastore and console.warn will be printed.
+     * It's just additional layer of security to be sure that the operation was intentional.
      */
     forceDeleteAll: {
       type: Boolean,

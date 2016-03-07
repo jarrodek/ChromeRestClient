@@ -35,6 +35,7 @@
     "gulp-useref": "^2.1.0",
     "gulp-util": "^3.0.7",
     "gulp-vulcanize": "*",
+    "hydrolysis": "^1.22.0",
     "jshint-stylish": "^2.0.0",
     "polylint": "^2.9.1",
     "require-dir": "^0.3.0",

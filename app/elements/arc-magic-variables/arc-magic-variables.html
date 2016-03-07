@@ -67,15 +67,16 @@ This means that no deep objects will be taken into consideration.
 Before start applying new magic variables the program should call `clear()` function to clear the groups defined by previous use.
 It will keep this data so you can use the element many times on different strngs resulting with the same group values.
 
-```
+```html
 <arc-magic-variables
   id="mv"
   value="[[headersList]]"
   scope="[[projectId]]"
   on-parsed="_onParsed">
 </arc-magic-variables>
-// in code:
-
+```
+JavaScript code:
+```
 ...
 this.$.mv.clear();
 this.set('headersList', headers);

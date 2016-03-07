@@ -1,3 +1,5 @@
+'use strict';
+
 Polymer({
   is: 'arc-magic-variables',
   /**
@@ -5,6 +7,12 @@ Polymer({
    *
    * @event parsed
    * @param {String|Object} thesame type as `value` property.
+   */
+  /**
+   * Fired when an error ocurred during parse.
+   *
+   * @event error
+   * @param {String} message An error message
    */
   properties: {
     /**
@@ -17,16 +25,21 @@ Polymer({
     },
     /**
      * A value to apply magic variables.
-     * If not String then magic variables will be applied to every string value of this object.
-     * No deep paths are allowed.
+     *
+     * If the value is `String` ten all magic variables will be applied to this string.
+     * Otherwise magic variables will be applied to every string value of this object's most top
+     * properties.
+     * **No deep paths are allowed**.
      */
     value: Object,
     /**
      * Remembered groups and their values.
      * It keeps generated values for groups found in a variables e.g.:
+     * ```
      * {
      *   'variable-name:1': 'generated value'
      * }
+     * ```
      */
     _groups: {
       type: Object,
@@ -44,15 +57,27 @@ Polymer({
   },
   /**
    * This function should be called when groups should be cleared.
+   * The programm keeps the rules definition cached so you can use one element to apply magic
+   * variables accross different strings/objects using group definitions. However it will never know
+   * when to clear groups and get new rules definition from IDB.
+   * After calling this function all cached definitions and groups values will be cleared.
+   *
+   * TODO: Measure inpact of this operation on performance. GC may be called to often
+   * and maybe better approach is to replace definition values in the list than destroying it and
+   * creating new list.
    */
   clear: function() {
     this._groups = {};
+    this._setRules(null);
   },
   /**
    * Get rules from the datastore.
    * When finish rules will be available in the `rules` array.
    */
   _getRules: function() {
+    if (this.rules) {
+      return Promise.resolve(this.rules);
+    }
     return this.$.variableModel.query()
     .then((rules) => {
       this._setRules(rules);
@@ -64,7 +89,7 @@ Polymer({
    * Those that contains a variables in value will be omnited for further parsing.
    */
   _setupGroupRules: function() {
-    if (!this.rules) {
+    if (!this.rules || (this._groups && Object.getOwnPropertyNames(this._groups).length > 0)) {
       return Promise.resolve();
     }
     var reg = /\${(([a-zA-Z0-9-_]+)(:[0-9]+)?)}/gm;
@@ -76,7 +101,15 @@ Polymer({
     });
     return Promise.resolve();
   },
-
+  /**
+   * Apply magic variables to the string / object.
+   *
+   * This function will fire `parsed` event when read and return a Promise with parsing results.
+   * If `value` attribute is not set (or empty) while calling this function it will result success
+   * response immidietly.
+   *
+   * @return {Promise} Fulfilled promise with parsing result.
+   */
   parse: function() {
     if (!this.value) {
       //transparent
@@ -169,6 +202,7 @@ Polymer({
   _apply: function(str, key, value) {
     key = key.replace('${', '');
     key = key.replace('}', '');
+    // console.log('_apply', str, key, value);
     var regGeneral = new RegExp('\\$\\{' + key + '\\}', 'gm');
     var regGroup = new RegExp('\\$\\{(' + key + ':\\d+)\\}', 'gm');
     value = this._parseValue(key, value);
@@ -186,6 +220,7 @@ Polymer({
       str = str.replace(regGeneral, _value);
     }
     if (regGroup.test(str)) {
+      regGroup.lastIndex = 0;
       while (true) {
         let matches = regGroup.exec(str);
         if (!matches) {
@@ -281,6 +316,7 @@ Polymer({
    */
   _randomInt: function() {
     // "|0" forces the value to a 32 bit integer.
-    return (Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)) | 0;
+    //return (Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)) | 0;
+    return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
   }
 });

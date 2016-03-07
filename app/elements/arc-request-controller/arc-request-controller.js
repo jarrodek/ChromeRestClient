@@ -7,17 +7,25 @@ Polymer({
     ArcBehaviors.ArcControllerBehavior
   ],
   properties: {
+    /**
+     * Toolbar features to ask for.
+     */
     toolbarFeatures: {
       type: Array,
       value: ['clearAll', 'loader', 'save', 'projectEndpoints']
     },
-
+    /**
+     * Current request data.
+     * It's a RequestLocalObject type.
+     */
     request: {
       type: Object,
       notify: true,
       observer: '_requestChanged'
     },
-
+    /**
+     * Route params passed from the router.
+     */
     routeParams: {
       type: Object,
       observer: '_prepareRequest'
@@ -40,17 +48,27 @@ Polymer({
       notify: true,
       readOnly: true
     },
+    /**
+     * Set to true if the response is ready.
+     */
     hasResponse: {
       type: Boolean,
       value: false,
       notify: true,
       computed: '_computeHasResponse(response)'
     },
+    /**
+     * There was an error during latest operation if set to true.
+     */
     isError: {
       type: Boolean,
       value: false,
       readOnly: true
     },
+    /**
+     * Relevan if `isError` is set to true.
+     * Last error message to display.
+     */
     errorMessage: {
       type: String,
       readOnly: true
@@ -261,7 +279,9 @@ Polymer({
   _requestChanged: function() {
     console.log('_requestChanged', this.request);
   },
-
+  /**
+   * Sends current request.
+   */
   sendRequest: function() {
     if (!this.request.url) {
       StatusNotification.notify({
@@ -306,8 +326,33 @@ Polymer({
 
   _callRequest: function() {
     var request = Object.assign({}, this.request);
-    this.$.socket.request = request;
-    this.$.socket.run();
+    this.$.magicVariables.clear();
+    this.$.magicVariables.value = request.url;
+    this.$.magicVariables.parse()
+    .then((result) => {
+      request.url = result;
+      this.$.magicVariables.value = request.headers;
+      return this.$.magicVariables.parse();
+    })
+    .then((result) => {
+      request.headers = result;
+      this.$.magicVariables.value = request.payload;
+      return this.$.magicVariables.parse();
+    })
+    .then((result) => {
+      request.payload = result;
+      console.log('Parsed request', request);
+      this.async(() => {
+        this.$.socket.request = request;
+        this.$.socket.run();
+      });
+    })
+    .catch(() => {
+      this.async(() => {
+        this.$.socket.request = request;
+        this.$.socket.run();
+      });
+    });
   },
 
   _responseReady: function(e) {

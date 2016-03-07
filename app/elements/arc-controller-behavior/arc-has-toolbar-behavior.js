@@ -91,7 +91,7 @@ ArcBehaviors.ArcHasToolbarBehavior = {
   },
   /**
    * This function will be automatically called when the element also is
-   * `ArcControllerSelectableBehavior`. It will request features from `toolbarFeatures`
+   * `ArcControllerBehavior`. It will request features from `toolbarFeatures`
    * when the element shows.
    */
   requestFeatures: function() {

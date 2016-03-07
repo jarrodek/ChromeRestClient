@@ -36,10 +36,92 @@ window.ArcBehaviors = window.ArcBehaviors || {};
  * @polymerBehavior ArcBehaviors.ArcControllerBehavior
  */
 ArcBehaviors.ArcControllerBehaviorImpl = {
-
+  /**
+   * Fired when controller page is selected and will be shown.
+   *
+   * @event arc-controller-select
+   */
+  /**
+   * Fired when controller page is deselected and will be hidden.
+   *
+   * @event arc-controller-deselect
+   */
+  properties: {
+    /**
+     * `neon-animated-pages` sets the `opened` attribute when selection has changed. It's set in
+     * `neon-animated-pages` to automate ARC controllers life cycle methods and it can't be changed
+     * from the component.
+     *
+     * When set to true the component page has been shown by the `neon-animated-pages` page and
+     * component's `onShow()` function was called.
+     *
+     * TODO:200 make it possible to stop from switching the page and make use of `mayStop()`
+     * function.
+     * TODO:90 `mayStop()` should be a promise so the component may perform async tasks before
+     * it will close.
+     */
+    opened: {
+      type: Boolean,
+      notify: true,
+      observer: '_onOpenedChanged'
+    },
+    /**
+     * True if the component is visible in the UI.
+     *
+     * It is different from `opened` attribute because it will change status when `onShow()` and
+     `onHide()` function has been called.
+     *
+     * @type Boolean
+     */
+    isShowing: {
+      type: Boolean,
+      notify: true,
+      value: false
+    }
+  },
+  /**
+   * A handler to be called when the controller selection change.
+   * If the controller is deselected, `onHide` function will be called only when
+   * `mayStop` function return true.
+   */
+  _onOpenedChanged: function() {
+    if (this.opened) {
+      this.onShow();
+      this.isShowing = true;
+      if (this.requestFeatures) {
+        this.requestFeatures();
+      }
+    } else {
+      if (this.mayStop()) {
+        this.onHide();
+        this.isShowing = false;
+        if (this.releaseFeatures) {
+          this.releaseFeatures();
+        }
+      }
+    }
+  },
+  /**
+   * Function to be implemented in controller component.
+   * It will be called when the controller will be selected.
+   */
+  onShow: function() { /**/ },
+  /**
+   * Function to be implemented in controller component.
+   * It will be called when the controller will be de-selected.
+   */
+  onHide: function() { /**/ },
+  /**
+   * Function to be implemented in controller component.
+   * Controller will not call onHide function until this function return true.
+   */
+  mayStop: function() {
+    return true;
+  }
 };
 ArcBehaviors.ArcControllerBehavior = [
   ArcBehaviors.ArcControllerBehaviorImpl,
-  ArcBehaviors.ArcControllerSelectableBehavior,
+  Polymer.NeonAnimatableBehavior,
+  Polymer.IronResizableBehavior,
   ArcBehaviors.ArcHasToolbarBehavior
 ];

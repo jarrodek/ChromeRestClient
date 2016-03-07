@@ -197,5 +197,4 @@ ArcBehaviors.RequestsListControllerBehaviorImpl = {
 ArcBehaviors.RequestsListControllerBehavior = [
   ArcBehaviors.ListControllerBehavior,
   ArcBehaviors.RequestsListControllerBehaviorImpl
-
 ];

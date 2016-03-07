@@ -14,24 +14,30 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 -->
-<!--
-A request kept in the local storage is not a type of Request object.
-This is a simple mapping to current request form options.
-Other methods may translate this objecy to the RequestObject depending on the action (eg. save action). But then it still will be copy og this object.
-So the idea is that the editor is working on a different object than it may be used to store data. This will simplify data flow in the app.
 
-Final local copy of the object stored as a `latestRequest` is:
-```
-{
-  url: 'String', // a url of the request,
-  method: 'String', //a HTTP method
-  headers: 'String', // A HTTP message part with the string values.
-  payload: 'Any', // a payload message,
-  isSaved: 'Boolean', // (Optional) true if original request that created this object originated from saved request, may be not set. If isSaved and isDrive is false then the object represents history object
-  isDrive: 'Boolean', // (Optional) true if original request that created this object originated from google drive, may be not set.
-  id: 'String|Number' // (Optional) type depends on isSaved and isDrive, the ID of the original object, may be not set.
-}
-```
+<!--
+A `arc-request-controller` controlls request form, request data, making a request and displays the result.
+It is also responsible for saving data and updating history data.
+
+A request that is stored in the local storage and server by this controller is not a type of RequestObject like regular saved object.
+It is a simple object of properties exposed in a form editor (url, method, headers, payload). Also it contains an information about object's type (saved, drive, history) and Google Drive opbject info (driveId).
+See [RequestLocalObject class definition](../scripts/libs/app.type.js) for more info.
+
+When requested, RequestLocalObject is translated to RequestObject and saved to IndexedDB with full object definition.
+It works both ways. It will translate saved RequestObject to RequestLocalObject.
+
+Having both this things separated it makes it simple to manage objects when changing the request and not saving unwanted data. It also more efficient comparing to RequestObject that stores much more data.
+RequestLocalObject is only one and it lives in local storage.
+
+#### Controller note
+This controller was made differently. All other controllers contains corresponding view in it hidding them from the page enviroment (in shadow dom).
+This one, however, do not include related views and they are inserted in index page.
+
+This approach have some implications.
+** Data exposed to a view from the controller are also available to any script that runs on the page
+** Data in view can be changed programatically by other component (view/controller/main.js) without asking a controller
+  - which simplifies the app
+  - but my cause problems in the future. When changing anything it must be tested accross whole app and not only the controller.
 -->
 <dom-module id="arc-request-controller">
   <template>
@@ -41,6 +47,7 @@ Final local copy of the object stored as a `latestRequest` is:
       }
     </style>
     <content></content>
+
     <arc-request-error-view hidden$=[[!isError]] message="[[errorMessage]]"></arc-request-error-view>
     <chrome-storage auto id="latest" type="local" name="latestRequest" value="{{request}}"  value-as="RequestLocalObject" on-read="_latestLoaded"></chrome-storage>
     <arc-socket-request id="socket" on-ready="_responseReady" on-error="_onRequestError"></arc-socket-request>
@@ -49,6 +56,7 @@ Final local copy of the object stored as a `latestRequest` is:
     <arc-request-object-model id="requestQueryModel" on-data-ready="_requestObjectRestored"></arc-request-object-model>
     <arc-request-object-model id="projectQueryModel" on-data-ready="_projectEndpointsRestored"></arc-request-object-model>
     <arc-project-object-model id="projects" on-error="_projectSaveError"></arc-project-object-model>
+    <arc-magic-variables id="magicVariables" scope="[[project.id]]"></arc-magic-variables>
 
   </template>
   <script src="arc-request-controller.js"></script>
