@@ -1,0 +1,18 @@
+{
+  "name": "advancer-rest-client-pages",
+  "version": "0.0.1",
+  "description": "gh-pages for ARC.",
+  "authors": [
+    "Pawel Psztyc",
+    "Advanced REST client team"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.1.0"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "paper-styles": "PolymerElements/paper-styles#^1.0.4"
+  },
+  "main": "index.html",
+  "ignore": []
+}
