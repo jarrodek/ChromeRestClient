@@ -1,6 +1,8 @@
 #! /usr/bin/env node
 var shell = require('shelljs');
+var path = require('path');
 
+var packageDirectory = path.join(shell.pwd(), 'app');
 var chromeCmd = '';
 var osx = false;
 switch (process.platform) {
@@ -36,14 +38,12 @@ function isInstalled(program) {
 }
 
 function runApp(program) {
-  var currentDirectory = shell.pwd();
-  var cmd = `${chromeCmd} --silent-launch --load-and-launch-app="${currentDirectory}" &`;
+  var cmd = `${chromeCmd} --silent-launch --load-and-launch-app="${packageDirectory}" &`;
   shell.exec(cmd);
 }
 
 function runAppOsx() {
-  var currentDirectory = shell.pwd();
   var cmd = 'open /Applications/Google\\ Chrome.app --args --silent-launch ';
-  cmd += `--load-and-launch-app="${currentDirectory}" &`;
+  cmd += `--load-and-launch-app="${packageDirectory}" &`;
   shell.exec(cmd);
 }
