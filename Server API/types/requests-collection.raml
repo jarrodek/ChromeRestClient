@@ -1,0 +1,37 @@
+description: Collection of available request saved by the user
+get:
+  description: Get a list of all user requests
+  responses:
+    200:
+      body:
+        application/json:
+          example: |
+            {
+              "kind": "kind#RequestItemList",
+              "data": [{
+                "id":"1234567890",
+                "aid":"1",
+                "url": "http://www.google.com",
+                "method": "GET",
+                "headers": [{"Connection": "close"}],
+                "payload": ""
+              }]
+            }
+    401:
+      body:
+        application/json:
+          example: |
+            {
+              "message": "You are unathorized to see this collection"
+            }
+post:
+  description: Add new items to the app storage.
+  responses:
+    200:
+      body:
+        application/json:
+          example: |
+            {
+              "kind": "kind#RequestItemList",
+              "data": [{"id":"1234567890","aid":"1"}]
+            }

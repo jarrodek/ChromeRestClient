@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "https://advancedrestclient.com/schemas/requestObject.schema.json",
+  "id": "https://advancedrestclient.com/schemas/request-object.schema",
   "title": "Request Object",
   "description": "Basic request object.",
   "type": "object",
@@ -8,7 +8,7 @@
     "kind": {
       "type": "String",
       "id": "http://jsonschema.net/kind",
-      "default": "ARC#requestsRequestObject",
+      "default": "ARC#RequestObject",
       "description": "Object namespace"
     },
     "url": {

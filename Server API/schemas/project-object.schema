@@ -8,7 +8,7 @@
     "kind": {
       "type": "String",
       "id": "http://jsonschema.net/kind",
-      "default": "ARC#requestsProject",
+      "default": "ARC#ProjectObject",
       "description": "Project namespace"
     },
     "id": {

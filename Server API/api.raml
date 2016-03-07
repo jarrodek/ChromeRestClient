@@ -1,68 +1,21 @@
 #%RAML 1.0
 title: Advanced Rest Client
-version: v1
-baseUri: https://chromerestclient.appspot.com
-description: A kind of response.
-mediaType:  application/json
+version: v2
+baseUri: https://api.advancedrestclient.com/{version}/
+description: A backend API for Advanced Rest Client APP.
+mediaType: application/json
+protocols: HTTPS
+securitySchemes:
+  - oauth_2_0: !include security-schemes/oauth_2_0.raml
 resourceTypes:
-  - collection:
-      description: Collection of available request saved by the user
-      get:
-        description: Get a list of all user requests
-        responses:
-          200:
-            body:
-              application/json:
-                example: |
-                  {
-                    "kind": "kind#RequestItemList",
-                    "data": [{
-                      "id":"1234567890",
-                      "aid":"1",
-                      "url": "http://www.google.com",
-                      "method": "GET",
-                      "headers": [{"Connection": "close"}],
-                      "payload": ""
-                    }]
-                  }
-          401:
-            body:
-              application/json:
-                example: |
-                  {
-                    "message": "You are unathorized to see this collection"
-                  }
-      post:
-        description: Add new items to the app storage.
-        responses:
-          200:
-            body:
-              application/json:
-                example: |
-                  {
-                    "kind": "kind#RequestItemList",
-                    "data": [{"id":"1234567890","aid":"1"}]
-                  }
-  - collection-item:
-      description: Entity representing a <<resourcePathName|!singularize>>
-      get:
-        description: |
-          Get the <<resourcePathName|!singularize>>
-          with <<resourcePathName|!singularize>>Id =
-          {<<resourcePathName|!singularize>>Id}
-        responses:
-          200:
-            body:
-              application/json:
-          404:
-            body:
-              application/json:
-                example: |
-                  {
-                    "message": "<<resourcePathName|!singularize>> not found."
-                  }
-      put:
-      delete:
+  collection: !include types/requests-collection.raml
+  collection-item: !include types/requests-collection-item.raml
+securedBy: [ oauth_2_0: {scopes: [PROFILE]}]
+schemas:
+ - requestObject: !include schemas/request-object.schema
+ - projectObject: !include schemas/project-object.schema
+traits:
+  paged: !include traits/paged.raml
 types:
   AppResponse:
     type: object
@@ -73,10 +26,6 @@ types:
       kind:
         type: string
         description: A type representation for the response object. Kind values are have kind# prefix and datastore class name.
-      nextPageToken?:
-        type: string
-        description: List response may have this parameter pointing to the next results page.
-
   SessionState:
     type: object
     description: |
@@ -105,7 +54,7 @@ types:
       message?:
         type: string
         description: Optional message explaining the error.
-  RequestItem:
+  RequestObject:
     type: object
     properties:
       id: number
@@ -126,19 +75,6 @@ types:
         description: |
           Application uuid.
           Every apllication has own generated UUID. This value will be used to to associate items with the app.
-  RequestListItem:
-    type: AppResponse
-    description: Short list of RequestItem properties for listing.
-    properties:
-      id:
-        type: string
-        description: In old system it is key to string representation. In new it is numeric value for the database entry. Always presented as string.
-      name:
-        type: string
-        description: User entered request name
-      url:
-        type: string
-        description: URL used in this response.
 /session:
   description: An information about current user session.
   get:
@@ -148,13 +84,17 @@ types:
         body:
           application/json:
             type: SessionState
-/requests:
-  type: collection
-  description: An endpoint used to read, store or delete user data from the server
+/request:
+  description: An endpoint used to read, store or delete user endpoinds data from the server
   get:
-  post:
+    description: Reads a list of all the requests available to the user.
+    is: [paged]
+  put:
+    description: Creates new request object.
   /{requestId}:
-    type: collection-item
-    get:
-    put:
     delete:
+      description: Removes user endpoint.
+    post:
+      description: Updates user endpoint
+    get:
+      description: Retreives single endponit definition.
