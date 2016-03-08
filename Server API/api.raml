@@ -1,8 +1,13 @@
 #%RAML 1.0
 title: Advanced Rest Client
+uses:
+  DataTypes: !include types/data-types.raml
 version: v2
-baseUri: https://api.advancedrestclient.com/{version}/
-description: A backend API for Advanced Rest Client APP.
+baseUri: https://api.advancedrestclient.com/{version}
+description: |
+  A backend API for Advanced Rest Client APP.
+  The API is based on Google Cloud Endpoinds. Therefore OAuth2 authentication using Google account is required.
+  All request are restricted to the authorized user. Valid Bearer token in the Authorization header is required.
 mediaType: application/json
 protocols: HTTPS
 securitySchemes:
@@ -16,85 +21,43 @@ schemas:
  - projectObject: !include schemas/project-object.schema
 traits:
   paged: !include traits/paged.raml
+  projected: !include traits/projected.raml
 types:
-  AppResponse:
-    type: object
-    description: |
-      App response is a base response object from the server.
-      Every other response from the serwer must extend this base object.
-    properties:
-      kind:
-        type: string
-        description: A type representation for the response object. Kind values are have kind# prefix and datastore class name.
-  SessionState:
-    type: object
-    description: |
-      Session state represents an information if the user have session set on server.
-      The response is kind#SessionState
-    properties:
-      uid:
-        type: string
-        description: User database ID
-      hasSession:
-        type: boolean
-        description: A flag indicating if the user have active session.
-  ResponseError:
-    type: AppResponse
-    description: If there was an error during the request there will be error property set to true.
-    properties:
-      error:
-        type: boolean
-        default: true
-        required: true
-        description: A flag set to response indicating that this is error message.
-      code:
-        type: number
-        required: true
-        description: Error code ID.
-      message?:
-        type: string
-        description: Optional message explaining the error.
-  RequestObject:
-    type: object
-    properties:
-      id: number
-      name:
-        type: string
-        description: A name for the request item
-      url:
-        type: string
-        description: An URL for the request item
-      payload:
-        type: string
-        description: A payload value for the request item
-      method:
-        type: string
-        description: HTTP method name
-      aid:
-        type: string
-        description: |
-          Application uuid.
-          Every apllication has own generated UUID. This value will be used to to associate items with the app.
 /session:
   description: An information about current user session.
   get:
-    protocols: HTTPS
     responses:
       200:
         body:
           application/json:
-            type: SessionState
+            type: DataTypes.SessionState
 /request:
   description: An endpoint used to read, store or delete user endpoinds data from the server
   get:
-    description: Reads a list of all the requests available to the user.
-    is: [paged]
+    description: Reads a list of all the requests available to the user. This may include shared with the user requests.
+    is: [paged, projected]
   put:
-    description: Creates new request object.
+    description: Stores a new RequestObject in the datastore.
   /{requestId}:
+    description: |
+      Endpoint represent a data related to the stored request.
+      By default this endpoint will return a RequestObject with all HARs associated with it. Use projection without 'har' property included to retreive only the main definition of the request (body, method, url, payload) without requests history.
+
     delete:
       description: Removes user endpoint.
     post:
       description: Updates user endpoint
     get:
-      description: Retreives single endponit definition.
+      description: Retreives single saved request definition.
+      is: [projected]
+    /har:
+      get:
+        description: Retreives a list of HAR objects related to the request
+        is: [paged, projected]
+      delete:
+        description: Deletes all HAR data for selected endpoint
+      /{harId}:
+        post:
+          description: Updates a HAR data.
+        delete:
+          description: Deletes particular HAR object definition.

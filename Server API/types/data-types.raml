@@ -1,0 +1,49 @@
+#%RAML 1.0 Library
+types:
+  AppResponse:
+    type: object
+    description: |
+      App response is a base response object from the server.
+      Every other response from the server must extend this base object.
+    properties:
+      kind:
+        type: string
+        description: A type representation for the response object. Kind values are have kind# prefix and datastore class name.
+
+  SessionState:
+    type: object
+    description: |
+      Object represents relevant information about the user.
+    properties:
+      consent:
+        type: boolean
+        description: |
+          This will be set to true if the user consent to terms and conditions.
+          It also means that there is a UserObject entity in the datastore which may only be created when the user consent to data storing agreement.
+          There is no actuall `consent` field in the datastore.
+          New API users will have it set to false even if they have stored data in the backed. In old API there were no consent screen. The app must inform the user that the data will be deleted if he won't consent to the terms (when newApi set to false).
+      newApi:
+        type: boolean
+        description: |
+          This will be true if the user is using new API. It is only valid for the first API created for the app. It will be set to false if the user has data stored on the server and the data hasn't been migrated to new API.
+          Google Cloud endpoints has version management included so ony other API upgrade will be performed automatically in the Endpoints API.
+          If set to false it also means that the user will be informaed about data migration and will be transformed to new structure on demand.
+          Use of old data is not possible with the new API thought but this step is required to migrate the data since the user has `appId` parameter stored locally in the browser that will idenify user data.
+          New API uses Google's user id that can't be changed by the user (unlike email) and will unambiguously identify app user.
+  ResponseError:
+    type: AppResponse
+    description: |
+      Representation of the response for errored request.
+    properties:
+      error:
+        type: boolean
+        default: true
+        required: true
+        description: A flag set to response indicating that this is error message.
+      code:
+        type: number
+        required: true
+        description: Error code ID.
+      message?:
+        type: string
+        description: Optional message explaining the error.
