@@ -1,4 +1,6 @@
 {
+  "id": "https://advancedrestclient.com/schemas/har/postData.json",
+  "title": "Detailed info about request/response payload",
   "type": "object",
   "optional": true,
   "required": [

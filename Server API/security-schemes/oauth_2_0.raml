@@ -1,9 +1,11 @@
-#%RAML 1.0
-description: The app supports Google OAuth tokens only.
+#%RAML 1.0 SecurityScheme
+description: |
+  The app supports Google OAuth tokens only.
+  Read more about Google authorization at https://developers.google.com/identity/protocols/OAuth2
 type: OAuth 2.0
 settings:
-  authorizationUri: https://
-  accessTokenUri: https://
+  authorizationUri: https://www.googleapis.com/oauth2/v4/token
+  accessTokenUri: https://www.googleapis.com/oauth2/v4/token
   authorizationGrants: [ authorization_code ]
   scopes: <<scopes>>
 describedBy:

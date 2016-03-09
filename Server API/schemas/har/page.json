@@ -27,7 +27,7 @@
       "description": "Page title."
     },
     "pageTimings": {
-      "$ref": "#pageTimings",
+      "$ref": "pageTimings.json",
       "description": "Detailed timing info about page load."
     },
     "comment": {

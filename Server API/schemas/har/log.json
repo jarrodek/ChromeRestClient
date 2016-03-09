@@ -9,6 +9,16 @@
     "entries"
   ],
   "properties": {
+    "kind": {
+      "type": {
+        "enum": [ "ARC#har" ]
+      },
+      "description": "Object namespace. It identifies the object as a HAR object associated with a request. This is always set to ARC#har"
+    },
+    "key": {
+      "type": "string",
+      "description": "AppEngine datastore ID"
+    },
     "version": {
       "type": "string",
       "description": "Version number of the format. If empty, string \"1.1\" is assumed by default."

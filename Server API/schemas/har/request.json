@@ -30,21 +30,21 @@
     "cookies": {
       "type": "array",
       "items": {
-        "$ref": "#cookie"
+        "$ref": "cookie.json"
       },
       "description": "List of cookie objects."
     },
     "headers": {
       "type": "array",
       "items": {
-        "$ref": "#record"
+        "$ref": "record.json"
       },
       "description": "List of header objects."
     },
     "queryString": {
       "type": "array",
       "items": {
-        "$ref": "#record"
+        "$ref": "record.json"
       },
       "description": "List of query parameter objects."
     },

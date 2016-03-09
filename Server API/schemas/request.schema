@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "https://advancedrestclient.com/schemas/request.schema",
+  "title": "Request Object",
+  "description": "Basic request object.",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": {
+        "enum": [ "ARC#request" ]
+      },
+      "description": "Object namespace. It identifies the object as a request object. This is always set to ARC#request."
+    },
+    "key": {
+      "type": "string",
+      "description": "AppEngine datastore ID"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the request. Not present if this object is a history object."
+    },
+    "type": {
+      "type": "string",
+      "default": "saved",
+      "description": "Type of the request.",
+      "oneOf": [
+        {"type": "string", "value": "saved"},
+        {"type": "string", "value": "history"},
+        {"type": "string", "value": "drive"}
+      ]
+    },
+    "project": {
+      "$ref": "project.scema"
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "$ref": "permission.schema"
+      }
+    },
+    "driveId": {
+      "type": "string",
+      "description": "If present the object has associated Google Drive item at a time of creation."
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time",
+      "description": "A RFC3339 date-time string representing time of creation."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "An URL of the request"
+    },
+    "method": {
+      "id": "http://jsonschema.net/method",
+      "type": "string",
+      "description": "The request HTTP method.",
+      "oneOf": [
+        {"type": "string", "value": "GET"},
+        {"type": "string", "value": "POST"},
+        {"type": "string", "value": "PUT"},
+        {"type": "string", "value": "HEAD"},
+        {"type": "string", "value": "OPTIONS"},
+        {"type": "string", "value": "PATCH"}
+      ]
+    },
+    "headers": {
+      "id": "http://jsonschema.net/headers",
+      "type": "string",
+      "description": "List of HTTP headers as defined in RFC2616 sec. 14. Not set if there were no headers saved with the request."
+    },
+    "payload": {
+      "id": "http://jsonschema.net/payload",
+      "type": "string",
+      "default": "",
+      "description": "A HTTP body as string. Not set with request method of HEAD or GET."
+    },
+    "har": {
+      "type": "array",
+      "items": {
+        "$ref": "har/log.json"
+      }
+    }
+  },
+  "required": [
+    "kind",
+    "type",
+    "url",
+    "method"
+  ]
+}

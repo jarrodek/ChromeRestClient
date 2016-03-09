@@ -5,7 +5,6 @@ queryParameters:
     description: |
       List response may contain this parameter pointing to the next results page. All other query parameteres must be the same as for a previous request or the page token will be revalidated.
       The nextPageToken will honor `limit` parameter but will discard `start` parameter. So use `start` with `nextPageToken` is redundant.
-
     default: none
   limit?:
     type: number

@@ -30,19 +30,19 @@
     "cookies": {
       "type": "array",
       "items": {
-        "$ref": "#cookie"
+        "$ref": "cookie.json"
       },
       "description": "List of cookie objects."
     },
     "headers": {
       "type": "array",
       "items": {
-        "$ref": "#record"
+        "$ref": "record.json"
       },
       "description": "List of header objects."
     },
     "content": {
-      "$ref": "#content",
+      "$ref": "content.json",
       "description": "Details about the response body."
     },
     "redirectURL": {

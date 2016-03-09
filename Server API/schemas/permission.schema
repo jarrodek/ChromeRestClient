@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "https://advancedrestclient.com/schemas/permission",
+  "title": "Permission Object",
+  "description": "An object representing permission granted to another object.",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": {
+        "enum": [ "ARC#Permission" ]
+      }
+    },
+    "key": {
+      "type": "string",
+      "description": "AppEngine datastore ID"
+    },
+    "type": {
+      "type": "string",
+      "default": "owner",
+      "description": "Type of granted permission.",
+      "oneOf": [
+        {"type": "string", "value": "owner"},
+        {"type": "string", "value": "read"},
+        {"type": "string", "value": "write"}
+      ]
+    },
+    "uid": {
+      "type": "string",
+      "description": "User ID. It may be not set if the user is not yet app user. Required if email is not set."
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "An email of the user who the permission is granted to. It's only set if the user is not the app user and the request is pending. Required if uid is not set."
+    }
+  },
+  "required": [
+    "kind"
+  ]
+}

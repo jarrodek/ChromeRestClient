@@ -29,19 +29,19 @@
       "description": "Total elapsed time of the request in milliseconds. This is the sum of all timings available in the timings object (i.e. not including -1 values) ."
     },
     "request": {
-      "$ref": "#request",
+      "$ref": "request.json",
       "description": "Detailed info about the request."
     },
     "response": {
-      "$ref": "#response",
+      "$ref": "response.json",
       "description": "Detailed info about the response."
     },
     "cache": {
-      "$ref": "#cache",
+      "$ref": "cache.json",
       "description": "Info about cache usage."
     },
     "timings": {
-      "$ref": "#timings",
+      "$ref": "timings.json",
       "description": "Detailed timing info about request/response round trip."
     },
     "serverIPAddress": {

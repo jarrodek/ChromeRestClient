@@ -1,4 +1,6 @@
 {
+  "id": "https://advancedrestclient.com/schemas/har/timings.json",
+  "title": "Detailed info about page timings",
   "required": [
     "send",
     "wait",

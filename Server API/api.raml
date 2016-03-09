@@ -1,7 +1,5 @@
 #%RAML 1.0
 title: Advanced Rest Client
-uses:
-  DataTypes: !include types/data-types.raml
 version: v2
 baseUri: https://api.advancedrestclient.com/{version}
 description: |
@@ -10,54 +8,359 @@ description: |
   All request are restricted to the authorized user. Valid Bearer token in the Authorization header is required.
 mediaType: application/json
 protocols: HTTPS
+schemas:
+ - RequestListSchema: !include schemas/requestlist.schema
+ - RequestSchema: !include schemas/request.schema
+ - PermissionSchema: !include schemas/permission.schema
+ - PermissionListSchema: !include schemas/permissionlist.schema
+ - HarSchema: !include schemas/har/log.json
+ - ProjectSchema: !include schemas/project.schema
+ - ProjectListSchema: !include schemas/projectlist.schema
+types:
+  AppResponse:
+   type: object
+   description: |
+     App response is a base response object from the server.
+     Every other response from the server must extend this base object.
+  SessionState:
+   type: object
+   description: |
+     Object represents relevant information about the user.
+   properties:
+     consent:
+       type: boolean
+       description: |
+         This will be set to true if the user consent to terms and conditions.
+         It also means that there is a UserObject entity in the datastore which may only be created when the user consent to data storing agreement.
+         There is no actuall `consent` field in the datastore.
+         New API users will have it set to false even if they have stored data in the backed. In old API there were no consent screen. The app must inform the user that the data will be deleted if he won't consent to the terms (when newApi set to false).
+     newApi:
+       type: boolean
+       description: |
+         This will be true if the user is using new API. It is only valid for the first API created for the app. It will be set to false if the user has data stored on the server and the data hasn't been migrated to new API.
+         Google Cloud endpoints has version management included so ony other API upgrade will be performed automatically in the Endpoints API.
+         If set to false it also means that the user will be informaed about data migration and will be transformed to new structure on demand.
+         Use of old data is not possible with the new API thought but this step is required to migrate the data since the user has `appId` parameter stored locally in the browser that will idenify user data.
+         New API uses Google's user id that can't be changed by the user (unlike email) and will unambiguously identify app user.
+  ResponseError:
+   type: AppResponse
+   description: |
+     Representation of the response for errored request.
+   properties:
+     error:
+       type: boolean
+       default: true
+       required: true
+       description: A flag set to response indicating that this is error message.
+     code:
+       type: number
+       required: true
+       description: Error code ID.
+     message?:
+       type: string
+       description: Optional message explaining the error.
+  RequestListResponse:
+   displayName: OK list response
+   description: The response when the server resulted with the list of requests (or empty list if the user do not have saved responses).
+   schema: RequestListSchema
+  RequestResponse:
+   displayName: OK request data response.
+   description: A response representing single saved request
+   schema: RequestSchema
+  HarResponse:
+   displayName: OK HAR response
+   description: A response with HAR object
+   schema: HarSchema
+  PutResponse:
+   type: AppResponse
+   displayName: OK insert response
+   description: |
+    A response for saved request put request.
+    This is different from any other put resposnes due to minimize network usage and limit number of bytes transfered by the call. Other fields are known to the app anyway.
+    This response will contain any other auto-generated values that were not present to the original request.
+    For example if `created` field wans't available with the request the server create new value at the moment of insertion to the datastore. This value will be returned by the request. It will not if it was previously in the request.
+   properties:
+     kind:
+       type: string
+       required: true
+       default: ARC#request
+     key:
+       type: string
+       required: true
+       description: AppEnding database key
+  PermissionRequestResponse:
+   displayName: OK permission
+   description: A response with granted permission or request with the permission to grant.
+   schema: PermissionSchema
+  PermissionListResponse:
+   displayName: OK response
+   description: OK response for permission list request
+   schema: PermissionListSchema
+  ProjectListResponse:
+   displayName: OK response
+   description: OK response for projects list request
+   schema: ProjectListSchema
+  ProjectRequestResponse:
+   displayName: OK response
+   description: OK response for project data request
+   schema: ProjectSchema
 securitySchemes:
   - oauth_2_0: !include security-schemes/oauth_2_0.raml
-resourceTypes:
-  collection: !include types/requests-collection.raml
-  collection-item: !include types/requests-collection-item.raml
-securedBy: [ oauth_2_0: {scopes: [PROFILE]}]
-schemas:
- - requestObject: !include schemas/request-object.schema
- - projectObject: !include schemas/project-object.schema
+securedBy: [ oauth_2_0: {scopes: [PROFILE, EMAIL]}]
 traits:
   paged: !include traits/paged.raml
   projected: !include traits/projected.raml
-types:
+  secured: !include traits/secured.raml
 /session:
   description: An information about current user session.
+  is: [secured]
   get:
     responses:
       200:
         body:
           application/json:
-            type: DataTypes.SessionState
+            type: SessionState
 /request:
-  description: An endpoint used to read, store or delete user endpoinds data from the server
+  description: |
+    An endpoint manipulate request objects in the datastore.
+    Request object have 0 to 1 related project object and a least 0 HAR objects.
+    It's not however required for the RequestObject to contain a HAR object. HAR are history of responses to one particular endpoint. RequestObject consist with the edpoint definition itself.
   get:
-    description: Reads a list of all the requests available to the user. This may include shared with the user requests.
-    is: [paged, projected]
+    description: |
+      Reads a list of requests available to the user.
+      This may include requests shared with the user by other users. The information about sharing level is available in permission field.
+    is: [paged, projected, secured]
+    responses:
+      200:
+        body:
+          application/json:
+            type: RequestListResponse
   put:
-    description: Stores a new RequestObject in the datastore.
+    description: |
+      Stores a new RequestObject in the datastore.
+      This enpoint do not require to put an HAR object in the same request.
+    body:
+      application/json:
+        schema: RequestSchema
+    responses:
+      200:
+        body:
+          application/json:
+            type: PutResponse
+      401:
+        body:
+          application/json:
+            type: ResponseError
+            description: The user is not authorized
   /{requestId}:
     description: |
       Endpoint represent a data related to the stored request.
       By default this endpoint will return a RequestObject with all HARs associated with it. Use projection without 'har' property included to retreive only the main definition of the request (body, method, url, payload) without requests history.
-
-    delete:
-      description: Removes user endpoint.
-    post:
-      description: Updates user endpoint
     get:
       description: Retreives single saved request definition.
-      is: [projected]
+      is: [projected, secured]
+      responses:
+        200:
+          body:
+            application/json:
+              type: RequestResponse
+        401:
+          body:
+            application/json:
+              type: ResponseError
+              description: The user is not authorized
+    delete:
+      description: Removes user endpoint.
+      responses:
+        204:
+          description: The data has been deleted. No response body required.
+    post:
+      description: Updates user endpoint. The request must contain RequestObject properties. Only those available in the request will be changed.
+      body:
+        application/json:
+          type: RequestSchema
+      responses:
+        200:
+          body:
+            application/json:
+              type: PutResponse
     /har:
+      description: Endpoint for manipulate HAR data associated with the saved request object.
       get:
         description: Retreives a list of HAR objects related to the request
-        is: [paged, projected]
+        is: [paged, projected, secured]
+        responses:
+          200:
+            body:
+              application/json:
+                type: HarResponse
       delete:
         description: Deletes all HAR data for selected endpoint
+        responses:
+          204:
+            description: The data has been deleted. No response body required.
       /{harId}:
         post:
           description: Updates a HAR data.
+          body:
+            application/json:
+              type: HarSchema
+          responses:
+            200:
+              body:
+                application/json:
+                  type: HarResponse
         delete:
+          is: [secured]
           description: Deletes particular HAR object definition.
+          responses:
+            204:
+              description: The data has been deleted. No response body required.
+        get:
+          is: [secured, projected]
+          description: Gets data for HAR object.
+          responses:
+            200:
+              body:
+                application/json:
+                  type: HarResponse
+    /permissions:
+      description: |
+        An endpoint representing permission objects for the request.
+        To change a permission use /permission/{permissionId} endpoint
+      get:
+        description: Get a list of permissions associated with the request.
+        is: [paged, projected, secured]
+        responses:
+          200:
+            body:
+              type: PermissionListResponse
+      put:
+        is: [secured]
+        description: Add new permission to the request.
+        body:
+          application/json:
+            type: PutResponse
+/project:
+  description: And endpoint to manipulate project related data.
+  get:
+    is: [paged, projected, secured]
+    description: Gets a list of projects that are accessible to the user.
+    responses:
+      200:
+        description: |
+          Returns a list of projects available to the user.
+          This method will result with project data only. It will not include permissions and requests filed until projection parameter contain request or permissions values.
+        body:
+          application/json:
+            type: ProjectListResponse
+  put:
+    is: [secured]
+    description: Add new project to the request.
+    body:
+      application/json:
+        type: ProjectRequestResponse
+    responses:
+      200:
+        description: Returns a list of projects available to the user.
+        body:
+          application/json:
+            type: PutResponse
+  /{projectId}:
+    get:
+      is: [secured, projected]
+      responses:
+        200:
+          body:
+            application/json:
+              type: ProjectRequestResponse
+    delete:
+      is: [secured]
+      description: |
+        Removes project frm the datastore.
+      responses:
+        204:
+          description: The data has been deleted. No response body required.
+    post:
+      is: [secured]
+      description: |
+        Change project.
+        Only name is allowed to change.
+      body:
+        application/json:
+          type: ProjectRequestResponse
+      responses:
+        200:
+          body:
+            application/json:
+              type: ProjectRequestResponse
+    /permissions:
+      description: |
+        An endpoint representing permission objects for the project.
+        Permissions granted on a request level override permissions on project level.
+        For example when the user has write access to the project but a request associated with the project has been share with the same user on "read" level finally user will have only "read" permission for the RequestObject.
+        To change a permission use /permission/{permissionId} endpoint
+      get:
+        description: Returns a list of permissions associated with the project.
+        is: [paged, projected, secured]
+        responses:
+          200:
+            body:
+              type: PermissionListResponse
+      put:
+        is: [secured]
+        description: Add new permission to the project.
+        body:
+          application/json:
+            type: PutResponse
+/permission:
+  description: |
+    An endpoint to manipulate permissions.
+    Permissions are attached to an object internally and there's no need to point the connection using this endpoinds.
+    To create a permission use /{object}/permission endpoint for particular object.
+  /{permissionId}:
+    get:
+      description: Returns a permission definition.
+      is: [secured, projected]
+      responses:
+        200:
+          body:
+            application/json:
+              type: PermissionRequestResponse
+    delete:
+      is: [secured]
+      description: |
+        Removes granted permission.
+        It is possible to remove "owner" type permission only if another owner is in the list for particular object. Otherwise error will be returned.
+        Only an owner can change a permission to an object.
+      responses:
+        204:
+          description: The data has been deleted. No response body required.
+        400:
+          displayName: Bad Request
+          body:
+            application/json:
+              type: ResponseError
+              description: |
+                Returned when trying to remove permission of an object thet the user is not an owner or when an owner will try to remove his permission without setting a new owner.
+    post:
+      is: [secured]
+      description: |
+        Change a permission level.
+        Only "type" is allowed to change. It is possible to degrade "owner" to lower level only if other owner is in permission list.
+      body:
+        application/json:
+          type: PermissionSchema
+      responses:
+        200:
+          body:
+            application/json:
+              type: PermissionRequestResponse
+        400:
+          displayName: Bad Request
+          body:
+            application/json:
+              type: ResponseError
+              description: |
+                Returned when a user who is trying to change a permission is not an owner.
+                Also when an owner is trying to reduce his permission without promoting another user to be an owner.

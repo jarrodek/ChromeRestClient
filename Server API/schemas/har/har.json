@@ -1,11 +1,12 @@
 {
+  "id": "https://advancedrestclient.com/schemas/har/har.json",
   "type": "object",
   "required": [
     "log"
   ],
   "properties": {
     "log": {
-      "$ref": "#log"
+      "$ref": "log.json"
     }
   }
 }

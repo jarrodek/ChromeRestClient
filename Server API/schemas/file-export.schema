@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "https://advancedrestclient.com/schemas/fileexport.schema.json",
+  "id": "https://advancedrestclient.com/schemas/fileexport.schema",
   "title": "ARC data export",
   "description": "An object representing exported from the app saved data.",
   "type": "object",
