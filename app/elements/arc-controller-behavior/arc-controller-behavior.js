@@ -92,13 +92,15 @@ ArcBehaviors.ArcControllerBehaviorImpl = {
         this.requestFeatures();
       }
     } else {
-      if (this.mayStop()) {
-        this.onHide();
-        this.isShowing = false;
-        if (this.releaseFeatures) {
-          this.releaseFeatures();
-        }
+      this.onHide();
+      this.isShowing = false;
+      if (this.releaseFeatures) {
+        this.releaseFeatures();
       }
+      // mayStop() logic has been moved to router.
+      // if (this.mayStop()) {
+      //
+      // }
     }
   },
   /**

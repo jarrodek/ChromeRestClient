@@ -3,6 +3,23 @@
 /* global app */
 window.addEventListener('initializeRouting', function() {
 
+  function mayStopController(ctx, next) {
+    var ctrl = document.querySelector('#pages [opened]');
+    if (!ctrl || !ctrl.mayStop) {
+      next();
+      return;
+    }
+    Promise.resolve(ctrl.mayStop())
+    .then((may) => {
+      if (may) {
+        next();
+      }
+    })
+    .catch(() => {
+      next();
+    });
+  }
+
   // Middleware
   function scrollToTop(ctx, next) {
     app.scrollPageToTop();
@@ -15,7 +32,7 @@ window.addEventListener('initializeRouting', function() {
   }
 
   // Routes
-  arc.app.router.middle(scrollToTop, closeDrawer);
+  arc.app.router.middle(mayStopController, scrollToTop, closeDrawer);
 
   arc.app.router.register('/', function() {
     var params = {
