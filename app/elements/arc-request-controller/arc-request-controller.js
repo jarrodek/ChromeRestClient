@@ -305,12 +305,13 @@ Polymer({
    * Model will call `_requestObjectReady`
    */
   _saveHistory: function() {
-    if (this.request.id) {
-      this.$.requestModel.objectId = this.request.id;
-      this.$.requestModel.getObject();
-    } else {
-      this.$.requestModel.getByMethodUrl(this.request.url, this.request.method);
-    }
+    this.$.requestModel.getByMethodUrl(this.request.url, this.request.method);
+    // if (this.request.id) {
+    //   this.$.requestModel.objectId = this.request.id;
+    //   this.$.requestModel.getObject();
+    // } else {
+    //   this.$.requestModel.getByMethodUrl(this.request.url, this.request.method);
+    // }
   },
   /**
    * Save an URL in URL's history store for autofill helper.
