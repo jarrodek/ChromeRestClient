@@ -169,4 +169,10 @@
     page('/saved');
   };
 
+  app._cancelEvent = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+  };
+
 })(document, window);

@@ -411,7 +411,15 @@ Polymer({
   _requestObjectReady: function(e) {
     var request = e.detail.data;
     if (!request) {
-      request = this.$.requestModel.fromData(this.request, this.response);
+      let request2save = Object.assign({}, this.request);
+      if (this.request.id) {
+        delete request2save.id;
+        delete request2save.driveId;
+        request2save.type = 'history';
+        request2save.order = 0;
+        request2save.name = undefined;
+      }
+      request = this.$.requestModel.fromData(request2save, this.response);
       this.$.requestModel.requestType = 'history';
     } else {
       if (request instanceof Array) {

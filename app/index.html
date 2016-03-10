@@ -57,19 +57,19 @@
         <!-- Main Content -->
         <div class="content">
           <neon-animated-pages id="pages" attr-for-selected="data-route" selected-attribute="opened" selected="[[route]]" entry-animation="slide-from-right-animation" exit-animation="slide-left-animation">
-            <arc-request-controller request-loading="{{requestLoading}}" has-response="{{hasResponse}}" opened="{{requestOpened}}" request="{{request}}" response="{{response}}" route-params="[[params]]" data-route="request">
-              <arc-request-view request-loading="[[requestLoading]]" opened="{{requestOpened}}" request="{{request}}"></arc-request-view>
+            <arc-request-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" request-loading="{{requestLoading}}" has-response="{{hasResponse}}" opened="{{requestOpened}}" request="{{request}}" response="{{response}}" route-params="[[params]]" data-route="request">
+              <arc-request-view on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" request-loading="[[requestLoading]]" opened="{{requestOpened}}" request="{{request}}"></arc-request-view>
               <template is="dom-if" if="[[hasResponse]]">
                 <arc-response-view opened="[[requestOpened]]" response="[[response]]"></arc-response-view>
               </template>
-              <arc-save-dialog-view id="saveRequestUi"></arc-save-dialog-view>
+              <arc-save-dialog-view on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" id="saveRequestUi"></arc-save-dialog-view>
             </arc-request-controller>
-            <arc-websocket-controller data-route="socket">Socket</arc-websocket-controller>
-            <arc-history-list-controller search-query="[[searchTerm]]" data-route="history">History</arc-history-list-controller>
-            <arc-saved-list-controller search-query="[[searchTerm]]" data-route="saved"></arc-saved-list-controller>
-            <arc-data-io-controller data-route="dataimport" on-data-imported="_dataImportedHandler"></arc-data-io-controller>
-            <arc-settings-controller data-route="settings"></arc-settings-controller>
-            <arc-about-controller data-route="about"></arc-about-controller>
+            <arc-websocket-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="socket"></arc-websocket-controller>
+            <arc-history-list-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" main on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" search-query="[[searchTerm]]" data-route="history"></arc-history-list-controller>
+            <arc-saved-list-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" search-query="[[searchTerm]]" data-route="saved"></arc-saved-list-controller>
+            <arc-data-io-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="dataimport" on-data-imported="_dataImportedHandler"></arc-data-io-controller>
+            <arc-settings-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="settings"></arc-settings-controller>
+            <arc-about-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="about"></arc-about-controller>
           </neon-animated-pages>
         </div>
       </paper-scroll-header-panel>
@@ -81,7 +81,7 @@
   </template>
   <!-- build:js scripts/app.js -->
   <script src="bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
-  <script src="bower_components/dexie-js/dist/latest/Dexie.min.js"></script>
+  <script src="bower_components/dexie-js/dist/dexie.min.js"></script>
   <script src="bower_components/har/build/har.js"></script>
   <script src="bower_components/lodash/lodash.js"></script>
   <script src="bower_components/uri.js/src/URI.js"></script>

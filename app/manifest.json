@@ -79,7 +79,7 @@
     "background": {
       "scripts": [
         "scripts/libs/app.polifils.js",
-        "bower_components/dexie-js/dist/latest/Dexie.min.js",
+        "bower_components/dexie-js/dist/dexie.min.js",
         "bower_components/har/build/har.js",
         "scripts/libs/app.utils.js",
         "scripts/libs/app.types.js",
