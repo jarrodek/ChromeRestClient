@@ -19,8 +19,6 @@
     }
     .request-name {
       @apply(--paper-font-subhead);
-      @apply(--layout-center);
-      @apply(--layout-horizontal);
       @apply(--section-element);
     }
 
@@ -71,15 +69,21 @@
       background-color: var(--code-snippet-background-color, #FFF8E1);
       font-size: medium;
     }
+    .caption {
+      @apply(--paper-font-caption);
+      color: #737373;
+    }
     </style>
     <paper-toolbar>
       <h2>Request details</h2>
       <paper-icon-button icon="chevron-right" on-click="closeDrawer"></paper-icon-button>
     </paper-toolbar>
-    <div class="request-name">
-      {{request.name}}
+    <div class="request-name" hidden$="[[!request.name]]">
+      <p class="caption">Request name</p>
+      <p>[[request.name]]</p>
     </div>
     <div class="url-group">
+      <p class="caption">Request details</p>
       <span class="method">{{request.method}}</span>
       <span class="url">{{request.url}}</span>
     </div>
