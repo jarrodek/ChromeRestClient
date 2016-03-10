@@ -13,8 +13,25 @@ var uglify = require('gulp-uglify');
 var runSequence = require('run-sequence');
 var del = require('del');
 var strip = require('gulp-strip-comments');
+
+const Builder = require('./tasks/builder.js');
+var minimist = require('minimist');
 //var foreach = require('gulp-foreach');
 //var gutil = require('gulp-util');
+
+var Cli = {
+  getParams: (defaults) => {
+    return minimist(process.argv.slice(2), defaults);
+  },
+  get buildOptions() {
+    return {
+      string: 'build',
+      default: {
+        build: process.env.NODE_ENV || 'canary'
+      }
+    };
+  }
+};
 
 var DIST = 'dist';
 var dist = function(subpath) {
@@ -191,3 +208,16 @@ require('web-component-tester').gulp.init(gulp);
 try {
   require('require-dir')('tasks');
 } catch (err) {}
+
+var build = (done) => {
+  var params = Cli.getParams(Cli.buildOptions);
+  switch (params.build) {
+    case 'canary':
+      Builder.buildCanary(done);
+      break;
+    default:
+      throw new Error(`Unknown target ${params.build}.`);
+  }
+};
+
+gulp.task('build', build);

@@ -3,16 +3,14 @@
   "name": "Advanced REST client",
   "short_name": "ARC",
   "description": "The web developers helper program to create and test custom HTTP requests.",
-  "version": "5.0.0",
-  "version_name": "5.0.0-dev.0",
+  "version": "5.0.0.11",
+  "version_name": "5.0.0.11-canary",
   "minimum_chrome_version": "47",
   "author": "Pawel Psztyc",
-
   "icons": {
     "16": "assets/arc_icon_16.png",
     "128": "assets/arc_icon_128.png"
   },
-
   "permissions": [
     "<all_urls>",
     "storage",
@@ -21,14 +19,14 @@
     "identity.email",
     "syncFileSystem",
     {
-      "fileSystem": ["write"]
+      "fileSystem": [
+        "write"
+      ]
     }
   ],
-
   "optional_permissions": [
     "clipboardWrite"
   ],
-
   "commands": {
     "command-save-data": {
       "suggested_key": {
@@ -57,13 +55,11 @@
       "description": "Restore closed window"
     }
   },
-
   "sockets": {
     "tcp": {
       "connect": "*"
     }
   },
-
   "oauth2": {
     "client_id": "10525470235-vtm8ckt9v43r1gbbjqhp01tnnr0ol41j.apps.googleusercontent.com",
     "scopes": [
@@ -74,7 +70,6 @@
     ]
   },
   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCcwog3RvKBNlbE9nxa06ruwxAKR2kauzTVWYN4e1uFK8g3ScGxqG08gvuzgbOlbIO0TNHXdkJzf6DY0EPH0w8wUYDNlyav4DToaB2pdJAjcHOPsvUwktc0N0Y6ABrnreww23ZvNfqHuF0+u/Zzn3vGEFjHIcG2LGMXgP3R0QgdDQIDAQAB",
-
   "app": {
     "background": {
       "scripts": [

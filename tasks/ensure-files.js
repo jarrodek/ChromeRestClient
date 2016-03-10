@@ -11,7 +11,7 @@ function ensureFiles(files, cb) {
 
     try {
       fileFound = fs.statSync(filePath).isFile();
-    } catch (e) { }
+    } catch (e) {}
 
     if (!fileFound) {
       prev.push(filePath + ' Not Found');
@@ -20,8 +20,9 @@ function ensureFiles(files, cb) {
     return prev;
   }, []);
 
+  var err;
   if (missingFiles.length) {
-    var err = new Error('Missing Required Files\n' + missingFiles.join('\n'));
+    err = new Error('Missing Required Files\n' + missingFiles.join('\n'));
   }
 
   if (cb) {

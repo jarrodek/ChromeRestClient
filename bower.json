@@ -3,7 +3,11 @@
   "description": "The web developers helper program to create and test custom HTTP requests.",
   "homepage": "https://advancedrestclient.com/",
   "keywords": [
-    "chrome", "REST", "client", "HTTP", "test"
+    "chrome",
+    "REST",
+    "client",
+    "HTTP",
+    "test"
   ],
   "author": "",
   "private": true,
@@ -14,15 +18,15 @@
     "platinum-elements": "PolymerElements/platinum-elements#^2.0.0",
     "font-roboto-local": "PolymerElements/font-roboto-local#latest",
     "page": "visionmedia/page.js#~1.6.4",
-    "HTML5-History-API":"devote/HTML5-History-API#latest",
+    "HTML5-History-API": "devote/HTML5-History-API#latest",
     "dexie-js": "dfahlander/Dexie.js#latest",
-    "har":"jarrodek/har#latest",
+    "har": "jarrodek/har#latest",
     "chrome-platform-analytics": "GoogleChrome/chrome-platform-analytics#ca1.6.0d",
     "file-reader": "jarrodek/file-reader#latest",
     "web-socket": "jarrodek/web-socket#latest",
     "socket-fetch": "jarrodek/socket-fetch#latest",
     "chrome-app-filesystem": "jarrodek/chrome-app-filesystem#latest",
-    "chrome-storage":"jarrodek/chrome-storage#latest",
+    "chrome-storage": "jarrodek/chrome-storage#latest",
     "chrome-image": "jarrodek/chrome-image#1.0.0",
     "code-mirror": "jarrodek/code-mirror#latest",
     "lodash": "jarrodek/lodash#^4.6.2",
@@ -36,5 +40,6 @@
   "main": "app/index.html",
   "resolutions": {
     "lodash": "^4.6.2"
-  }
+  },
+  "version": "5.0.0"
 }
