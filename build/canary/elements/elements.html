@@ -198,6 +198,12 @@ the License.
       align-items: flex-end;
     };
 
+    --layout-baseline: {
+      -ms-flex-align: baseline;
+      -webkit-align-items: baseline;
+      align-items: baseline;
+    };
+
     /* alignment in main axis */
 
     --layout-start-justified: {
@@ -259,6 +265,49 @@ the License.
       -ms-align-self: stretch;
       -webkit-align-self: stretch;
       align-self: stretch;
+    };
+
+    --layout-self-baseline: {
+      -ms-align-self: baseline;
+      -webkit-align-self: baseline;
+      align-self: baseline;
+    };
+
+    /* multi-line alignment in main axis */
+
+    --layout-start-aligned: {
+      -ms-flex-line-pack: start;  /* IE10 */
+      -ms-align-content: flex-start;
+      -webkit-align-content: flex-start;
+      align-content: flex-start;
+    };
+
+    --layout-end-aligned: {
+      -ms-flex-line-pack: end;  /* IE10 */
+      -ms-align-content: flex-end;
+      -webkit-align-content: flex-end;
+      align-content: flex-end;
+    };
+
+    --layout-center-aligned: {
+      -ms-flex-line-pack: center;  /* IE10 */
+      -ms-align-content: center;
+      -webkit-align-content: center;
+      align-content: center;
+    };
+
+    --layout-between-aligned: {
+      -ms-flex-line-pack: justify;  /* IE10 */
+      -ms-align-content: space-between;
+      -webkit-align-content: space-between;
+      align-content: space-between;
+    };
+
+    --layout-around-aligned: {
+      -ms-flex-line-pack: distribute;  /* IE10 */
+      -ms-align-content: space-around;
+      -webkit-align-content: space-around;
+      align-content: space-around;
     };
 
     /*******************************
@@ -1353,9 +1402,8 @@ the License.
   }
 
 </style>
-
-
-
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic,500,500italic,700,700italic">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,700">
 <style is="custom-style">
 
   :root {
@@ -1618,6 +1666,8 @@ the License.
       }
 
       .left-drawer.narrow-layout > #drawer:not(.iron-selected) {
+        visibility: hidden;
+
         -webkit-transform: translateX(-100%);
         transform: translateX(-100%);
       }
@@ -1630,8 +1680,10 @@ the License.
         transform: translateX(100%);
       }
 
-      .right-drawer.narrow-layout.dragging > #drawer:not(.iron-selected),
-      .right-drawer.narrow-layout.peeking > #drawer:not(.iron-selected) {
+      .left-drawer.dragging > #drawer:not(.iron-selected),
+      .left-drawer.peeking > #drawer:not(.iron-selected),
+      .right-drawer.dragging > #drawer:not(.iron-selected),
+      .right-drawer.peeking > #drawer:not(.iron-selected) {
         visibility: visible;
       }
 
@@ -1660,7 +1712,7 @@ the License.
         box-sizing: border-box;
       }
 
-      iron-selector:not(.narrow-layout) #main ::content [paper-drawer-toggle] {
+      iron-selector:not(.narrow-layout) ::content [paper-drawer-toggle] {
         display: none;
       }
     </style>
@@ -1670,13 +1722,13 @@ the License.
 
     <iron-selector attr-for-selected="id" class$="[[_computeIronSelectorClass(narrow, _transition, dragging, rightDrawer, peeking)]]" activate-event="" selected="[[selected]]">
 
-      <div id="main" style$="[[_computeMainStyle(narrow, rightDrawer, drawerWidth)]]" on-transitionend="_onMainTransitionEnd">
+      <div id="main" style$="[[_computeMainStyle(narrow, rightDrawer, drawerWidth)]]">
         <content select="[main]"></content>
         <div id="scrim" on-tap="closeDrawer"></div>
       </div>
 
       <div id="drawer" style$="[[_computeDrawerStyle(drawerWidth)]]">
-        <content select="[drawer]"></content>
+        <content id="drawerContent" select="[drawer]"></content>
       </div>
 
     </iron-selector>
@@ -1797,12 +1849,13 @@ the License.
         cursor: pointer;
         z-index: 0;
         line-height: 1;
-        
+
         width: 40px;
         height: 40px;
 
         /* Because of polymer/2558, this style has lower specificity than * */
         box-sizing: border-box !important;
+
         @apply(--paper-icon-button);
       }
 
@@ -1815,10 +1868,11 @@ the License.
         color: var(--paper-icon-button-disabled-text, --disabled-text-color);
         pointer-events: none;
         cursor: auto;
+
         @apply(--paper-icon-button-disabled);
       }
-      
-      :host(:hover) { 
+
+      :host(:hover) {
         @apply(--paper-icon-button-hover);
       }
 
@@ -1827,6 +1881,7 @@ the License.
         --iron-icon-height: 100%;
       }
     </style>
+
     <iron-icon id="icon" src="[[src]]" icon="[[icon]]" alt$="[[alt]]"></iron-icon>
   </template>
 
@@ -3358,6 +3413,7 @@ the License.
       .toggle-button {
         position: absolute;
         top: -3px;
+        left: 0;
         height: 20px;
         width: 20px;
         border-radius: 50%;
@@ -3407,6 +3463,8 @@ the License.
         position: absolute;
         top: -14px;
         left: -14px;
+        right: auto;
+        bottom: auto;
         width: 48px;
         height: 48px;
         opacity: 0.5;
@@ -9928,6 +9986,9 @@ THE SOFTWARE.
     </style>
   </template>
 </dom-module>
+<script src="arc-controller-behavior/arc-controller-selectable-behavior.js"></script>
+
+  
 <dom-module id="arc-drive-controller" assetpath="arc-drive-controller/">
   <template>
     <style>
@@ -10416,6 +10477,7 @@ THE SOFTWARE.
     <style>
     :host {
       display: block;
+      height: 100%;
       --table-list-item: {
         @apply(--paper-font-menu);
         overflow: visible;
@@ -10594,7 +10656,7 @@ THE SOFTWARE.
     }
     </style>
     <paper-drawer-panel drawer-width="360px" id="details" force-narrow="[[narrowDrawer]]" right-drawer="" disable-edge-swipe="">
-      <arc-request-details-view drawer="" request="{{detailedRequest}}" on-close="closeDetailsPanel"></arc-request-details-view>
+      <arc-request-details-view drawer="" is-history="" request="{{detailedRequest}}" on-close="closeDetailsPanel"></arc-request-details-view>
       <div class="table" id="table" main="">
         <div class$="{{_computeTableHeaderClass(selected.*)}}">
           <div class="table-header-info">
@@ -10691,6 +10753,7 @@ THE SOFTWARE.
       }
     </style>
     <content></content>
+
     <arc-request-error-view hidden$="[[!isError]]" message="[[errorMessage]]"></arc-request-error-view>
     <chrome-storage auto="" id="latest" type="local" name="latestRequest" value="{{request}}" value-as="RequestLocalObject" on-read="_latestLoaded"></chrome-storage>
     <arc-socket-request id="socket" on-ready="_responseReady" on-error="_onRequestError"></arc-socket-request>
@@ -10699,6 +10762,7 @@ THE SOFTWARE.
     <arc-request-object-model id="requestQueryModel" on-data-ready="_requestObjectRestored"></arc-request-object-model>
     <arc-request-object-model id="projectQueryModel" on-data-ready="_projectEndpointsRestored"></arc-request-object-model>
     <arc-project-object-model id="projects" on-error="_projectSaveError"></arc-project-object-model>
+    <arc-magic-variables id="magicVariables" scope="[[project.id]]"></arc-magic-variables>
 
   </template>
   </dom-module>
@@ -10934,75 +10998,6 @@ THE SOFTWARE.
   </dom-module>
 
 
-<dom-module id="arc-request-details-dialog-view" assetpath="arc-request-details-dialog-view/">
-  <template>
-    <style>
-    :host {
-      @apply(--layout-vertical);
-      display: block;
-    }
-
-    .url-group {
-      @apply(--layout-horizontal);
-    }
-
-    .method {
-      @apply(--paper-font-subhead);
-      margin-right: 8px;
-    }
-
-    .method::after {
-      content: ':';
-    }
-
-    .url {
-      @apply(--paper-font-subhead);
-      white-space: normal;
-      word-wrap: break-word;
-    }
-
-    .camption {
-      @apply(--paper-font-caption);
-      color: rgba(0, 0, 0, 0.57);
-    }
-
-    .headers {
-      margin-top: 24px;
-    }
-
-    .headers,
-    .payload {
-      margin-bottom: 24px;
-    }
-
-    pre {
-      white-space: pre-wrap;
-      word-break: break-all;
-      -webkit-user-select: text;
-      line-height: 16px;
-      padding: 8px;
-      cursor: text;
-
-      background-color: var(--code-snippet-background-color, #FFF8E1);
-      @apply(--code-snippet);
-    }
-    </style>
-    <div class="url-group">
-      <span class="method">{{request.method}}</span>
-      <span class="url">{{request.url}}</span>
-    </div>
-    <div class="headers">
-      <div class="camption">Headers</div>
-      <pre>[[_computeHeaders(request)]]</pre>
-    </div>
-    <template is="dom-if" if="[[_hasPayload]]">
-      <div class="payload">
-        <div class="camption">Payload</div>
-        <pre>[[request.har.entries.0.request.postData.text]]</pre>
-      </div>
-    </template>
-  </template>
-  </dom-module>
 <dom-module id="arc-file-importer" assetpath="arc-data-io-controller/">
   <template>
     <style>
@@ -11454,8 +11449,6 @@ THE SOFTWARE.
     }
     .request-name {
       @apply(--paper-font-subhead);
-      @apply(--layout-center);
-      @apply(--layout-horizontal);
       @apply(--section-element);
     }
 
@@ -11506,15 +11499,21 @@ THE SOFTWARE.
       background-color: var(--code-snippet-background-color, #FFF8E1);
       font-size: medium;
     }
+    .caption {
+      @apply(--paper-font-caption);
+      color: #737373;
+    }
     </style>
     <paper-toolbar>
       <h2>Request details</h2>
       <paper-icon-button icon="chevron-right" on-click="closeDrawer"></paper-icon-button>
     </paper-toolbar>
-    <div class="request-name">
-      {{request.name}}
+    <div class="request-name" hidden$="[[!request.name]]">
+      <p class="caption">Request name</p>
+      <p>[[request.name]]</p>
     </div>
     <div class="url-group">
+      <p class="caption">Request details</p>
       <span class="method">{{request.method}}</span>
       <span class="url">{{request.url}}</span>
     </div>
@@ -12277,6 +12276,8 @@ THE SOFTWARE.
     </section>
   </template>
   </dom-module>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic,500,500italic,700,700italic">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,700">
 <style is="custom-style">
 
   :root {
@@ -12754,7 +12755,16 @@ THE SOFTWARE.
           paper-icon-button[active] {
             background-color: #BDBDBD;
           }
+          .empty-info {
+            margin-top: 20px;
+            margin-left: 16px;
+          }
         </style>
+        <div class="empty-info" hidden$="[[!isEmpty]]">
+          <arc-error-message icon="arc:sentiment-neutral">
+            <p>The response was empty</p>
+          </arc-error-message>
+        </div>
         <paper-tabs selected="{{selectedTab}}" id="tabs">
           <paper-tab hidden$="[[!isRaw]]">Raw</paper-tab>
           <paper-tab hidden$="[[!isParsed]]">Parsed</paper-tab>
@@ -12765,9 +12775,9 @@ THE SOFTWARE.
         <iron-pages selected="{{selectedTab}}">
           <section hidden$="[[!isRaw]]">
             <div class="actions-panel">
-              <paper-icon-button title="Wrap or unwrap text" icon="editor:wrap-text" toggles="" on-tap="_toggleTextWrap"></paper-icon-button>
               <paper-icon-button title="Copy content to clipboard" icon="content-copy" on-tap="_clipboardCopy"></paper-icon-button>
               <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
+              <paper-icon-button title="Wrap or unwrap text" icon="editor:wrap-text" toggles="" on-tap="_toggleTextWrap"></paper-icon-button>
             </div>
             <div id="rawContent" class="raw-content">[[raw]]</div>
           </section>
@@ -12941,7 +12951,7 @@ THE SOFTWARE.
     </style>
 
     <div>
-      <iron-icon class="error-icon" icon="arc:sentiment-very-dissatisfied"></iron-icon>
+      <iron-icon class="error-icon" icon="[[icon]]"></iron-icon>
     </div>
     <div class="error-desc">
       <content></content>
@@ -13713,29 +13723,13 @@ THE SOFTWARE.
     </div>
   </template>
   </dom-module>
-<iron-iconset-svg name="arc" size="48">
+<iron-iconset-svg name="arc" size="24">
   <svg>
     <defs>
-      <style type="text/css">
-      
-      .drive1 {
-        fill: #11A861
-      }
-
-      .drive2 {
-        fill: #3777E3
-      }
-
-      .drive3 {
-        fill: #FFCF63
-      }
-
-      
-      </style>
-      <g id="drive-color">
-        <polygon class="drive2" points="22194,115341 44385,76894 133156,76894 110963,115341 "></polygon>
-        <polygon class="drive3" points="88772,76894 133156,76894 88772,0 44385,0 "></polygon>
-        <polygon class="drive1" points="0,76894 22194,115341 66578,38447 44385,0 "></polygon>
+      <g id="drive-color" transform="matrix(1.8023972e-4,0,0,1.6517796e-4,0,4.9482084)">
+       <polygon points="133156,76894 110963,115341 22194,115341 44385,76894" style="fill:#3777e3"></polygon>
+       <polygon points="88772,0 44385,0 88772,76894 133156,76894" style="fill:#ffcf63"></polygon>
+       <polygon points="66578,38447 44385,0 0,76894 22194,115341" style="fill:#11a861"></polygon>
       </g>
       <g id="drive">
         <polygon points="22194,115341 44385,76894 133156,76894 110963,115341 "></polygon>
@@ -13746,7 +13740,13 @@ THE SOFTWARE.
         <path d="M17 5H3c-1.1 0-2 .89-2 2v9h2c0 1.65 1.34 3 3 3s3-1.35 3-3h5.5c0 1.65 1.34 3 3 3s3-1.35 3-3H23v-5l-6-6zM3 11V7h4v4H3zm3 6.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm7-6.5H9V7h4v4zm4.5 6.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM15 11V7h1l4 4h-5z"></path>
       </g>
       <g id="sentiment-very-dissatisfied">
-        <path d="M23.99 4C12.94 4 4 12.95 4 24s8.94 20 19.99 20S44 35.05 44 24 35.04 4 23.99 4zM24 40c-8.84 0-16-7.16-16-16S15.16 8 24 8s16 7.16 16 16-7.16 16-16 16zm8.36-24.49l-2.12 2.13-2.12-2.13L26 17.64l2.12 2.12L26 21.88 28.12 24l2.12-2.12L32.36 24l2.13-2.12-2.13-2.12 2.13-2.12zM15.64 24l2.12-2.12L19.88 24 22 21.88l-2.12-2.12L22 17.64l-2.12-2.13-2.12 2.13-2.12-2.13-2.13 2.13 2.13 2.12-2.13 2.12zM24 28c-4.66 0-8.62 2.92-10.22 7h20.44c-1.6-4.08-5.56-7-10.22-7z"></path>
+        <path d="M11.99 2C6.47 2 2 6.47 2 12s4.47 10 9.99 10S22 17.53 22 12 17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm4.18-12.24l-1.06 1.06-1.06-1.06L13 8.82l1.06 1.06L13 10.94 14.06 12l1.06-1.06L16.18 12l1.06-1.06-1.06-1.06 1.06-1.06zM7.82 12l1.06-1.06L9.94 12 11 10.94 9.94 9.88 11 8.82 9.94 7.76 8.88 8.82 7.82 7.76 6.76 8.82l1.06 1.06-1.06 1.06zM12 14c-2.33 0-4.31 1.46-5.11 3.5h10.22c-.8-2.04-2.78-3.5-5.11-3.5z"></path>
+      </g>
+      <g id="sentiment-neutral">
+        <path d="M9 14h6v1.5H9z"></path>
+        <circle cx="15.5" cy="9.5" r="1.5"></circle>
+        <circle cx="8.5" cy="9.5" r="1.5"></circle>
+        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path>
       </g>
     </defs>
   </svg>
@@ -14900,6 +14900,12 @@ THE SOFTWARE.
       align-items: flex-end;
     };
 
+    --layout-baseline: {
+      -ms-flex-align: baseline;
+      -webkit-align-items: baseline;
+      align-items: baseline;
+    };
+
     /* alignment in main axis */
 
     --layout-start-justified: {
@@ -14961,6 +14967,49 @@ THE SOFTWARE.
       -ms-align-self: stretch;
       -webkit-align-self: stretch;
       align-self: stretch;
+    };
+
+    --layout-self-baseline: {
+      -ms-align-self: baseline;
+      -webkit-align-self: baseline;
+      align-self: baseline;
+    };
+
+    /* multi-line alignment in main axis */
+
+    --layout-start-aligned: {
+      -ms-flex-line-pack: start;  /* IE10 */
+      -ms-align-content: flex-start;
+      -webkit-align-content: flex-start;
+      align-content: flex-start;
+    };
+
+    --layout-end-aligned: {
+      -ms-flex-line-pack: end;  /* IE10 */
+      -ms-align-content: flex-end;
+      -webkit-align-content: flex-end;
+      align-content: flex-end;
+    };
+
+    --layout-center-aligned: {
+      -ms-flex-line-pack: center;  /* IE10 */
+      -ms-align-content: center;
+      -webkit-align-content: center;
+      align-content: center;
+    };
+
+    --layout-between-aligned: {
+      -ms-flex-line-pack: justify;  /* IE10 */
+      -ms-align-content: space-between;
+      -webkit-align-content: space-between;
+      align-content: space-between;
+    };
+
+    --layout-around-aligned: {
+      -ms-flex-line-pack: distribute;  /* IE10 */
+      -ms-align-content: space-around;
+      -webkit-align-content: space-around;
+      align-content: space-around;
     };
 
     /*******************************

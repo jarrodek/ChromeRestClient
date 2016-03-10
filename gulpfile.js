@@ -136,7 +136,9 @@ gulp.task('minifyHtml', function() {
     // minifyCSS: true
   // }))
   .pipe(strip())
-  .pipe(uglify())
+  .pipe($.uglify({
+    preserveComments: 'some'
+  }))
 
   .pipe(gulp.dest(dist()))
   .pipe($.size({
@@ -149,7 +151,8 @@ gulp.task('default',  function(cb) {
   runSequence(
     ['ensureFiles'],
     ['html'],
-    ['vulcanize','minifyHtml'], // 'cache-config',
+    ['vulcanize'],
+    ['minifyHtml'], // 'cache-config',
     cb);
 });
 

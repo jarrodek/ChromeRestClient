@@ -1,3 +1,5 @@
+'use strict';
+
 Polymer({
   is: 'arc-request-details-view',
   properties: {
