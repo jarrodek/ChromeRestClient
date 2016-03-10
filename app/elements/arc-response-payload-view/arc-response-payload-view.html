@@ -36,7 +36,16 @@ the License.
           paper-icon-button[active] {
             background-color: #BDBDBD;
           }
+          .empty-info {
+            margin-top: 20px;
+            margin-left: 16px;
+          }
         </style>
+        <div class="empty-info" hidden$="[[!isEmpty]]">
+          <arc-error-message icon="arc:sentiment-neutral">
+            <p>The response was empty</p>
+          </arc-error-message>
+        </div>
         <paper-tabs selected="{{selectedTab}}" id="tabs">
           <paper-tab hidden$="[[!isRaw]]">Raw</paper-tab>
           <paper-tab hidden$="[[!isParsed]]">Parsed</paper-tab>
@@ -47,9 +56,9 @@ the License.
         <iron-pages selected="{{selectedTab}}">
           <section hidden$="[[!isRaw]]">
             <div class="actions-panel">
-              <paper-icon-button title="Wrap or unwrap text" icon="editor:wrap-text" toggles on-tap="_toggleTextWrap"></paper-icon-button>
               <paper-icon-button title="Copy content to clipboard" icon="content-copy" on-tap="_clipboardCopy"></paper-icon-button>
               <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
+              <paper-icon-button title="Wrap or unwrap text" icon="editor:wrap-text" toggles on-tap="_toggleTextWrap"></paper-icon-button>
             </div>
             <div id="rawContent" class="raw-content">[[raw]]</div>
           </section>

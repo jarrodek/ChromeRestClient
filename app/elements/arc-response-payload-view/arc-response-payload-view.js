@@ -81,6 +81,12 @@ Polymer({
       value: false,
       readOnly: true,
       observer: '_tabsChanged'
+    },
+
+    isEmpty: {
+      type: Boolean,
+      value: true,
+      readOnly: true
     }
   },
 
@@ -90,10 +96,16 @@ Polymer({
     this._setIsJson(false);
     this._setIsXml(false);
     this._setIsImage(false);
+    this._setIsEmpty(false);
   },
 
   _payloadChanged: function() {
+    this._resetTabs();
     var payload = this.payload;
+    if (!payload) {
+      this._setIsEmpty(true);
+      return;
+    }
     if (typeof payload === 'string') {
       this._displayString(payload);
     } else if (payload instanceof Blob) {
@@ -104,7 +116,6 @@ Polymer({
   },
   /** Parse response as string */
   _displayString: function(payload) {
-    this._resetTabs();
     this._setRaw(payload);
     this._setIsRaw(true);
 
@@ -125,7 +136,6 @@ Polymer({
   },
   /** Display blob. Most commonly it will be image data */
   _displayBlob: function(payload) {
-    this._resetTabs();
     this._setIsImage(true);
 
     this.selectedTab = 4;
@@ -145,7 +155,9 @@ Polymer({
   },
   /** Display parsed JSON */
   _displayJSON: function(payload) {
-    this._resetTabs();
+    if (!payload) {
+      return;
+    }
     this._setRaw(JSON.stringify(payload));
     this._setIsRaw(true);
     this._setIsJson(true);
