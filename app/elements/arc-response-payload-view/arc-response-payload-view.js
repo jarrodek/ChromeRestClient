@@ -104,8 +104,10 @@ Polymer({
   },
   /** Parse response as string */
   _displayString: function(payload) {
+    this._resetTabs();
     this._setRaw(payload);
     this._setIsRaw(true);
+
     var ct = arc.app.headers.getContentType(this.headers);
     if (ct) {
       if (ct.indexOf('xml') !== -1) {
@@ -123,7 +125,9 @@ Polymer({
   },
   /** Display blob. Most commonly it will be image data */
   _displayBlob: function(payload) {
+    this._resetTabs();
     this._setIsImage(true);
+
     this.selectedTab = 4;
     this._tabsChanged();
     this.$.imageViewer.blob = payload;
@@ -141,9 +145,11 @@ Polymer({
   },
   /** Display parsed JSON */
   _displayJSON: function(payload) {
+    this._resetTabs();
     this._setRaw(JSON.stringify(payload));
     this._setIsRaw(true);
     this._setIsJson(true);
+
     this.selectedTab = 2;
     this._tabsChanged();
     this.$.jsonViewer.json = payload;
