@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="styles/main.css">
   <script src="scripts/head.js"></script>
   <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="bower_components/font-roboto-local/roboto.html">
   <link rel="import" href="elements/elements.html">
   <style is="custom-style" include="shared-styles"></style>
 </head>
@@ -79,14 +80,15 @@
     <iron-a11y-keys id="a11y" target="{{document.body}}" keys="ctrl+s" on-keys-pressed="onSave"></iron-a11y-keys>
     <iron-a11y-keys id="a11y" target="{{document.body}}" keys="ctrl+o" on-keys-pressed="onOpen"></iron-a11y-keys>
   </template>
-  <!-- build:js scripts/app.js -->
+  <!-- build:js scripts/dependencies.js -->
   <script src="bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
   <script src="bower_components/dexie-js/dist/dexie.min.js"></script>
   <script src="bower_components/har/build/har.js"></script>
   <script src="bower_components/lodash/lodash.js"></script>
   <script src="bower_components/uri.js/src/URI.js"></script>
   <script src="bower_components/zlib/bin/zlib_and_gzip.min.js"></script>
-
+  <!-- endbuild-->
+  <!-- build:js scripts/app.js -->
   <script src="scripts/libs/app.router.js"></script>
   <script src="scripts/libs/app.utils.js"></script>
   <script src="scripts/libs/app.types.js"></script>
@@ -103,11 +105,13 @@
   <script src="scripts/libs/app.url.parser.js"></script>
   <script src="scripts/libs/app.payload.parser.js"></script>
   <script src="scripts/libs/app.clipboard.js"></script>
+  <!-- endbuild-->
+  <!-- build:js scripts/code-mirror-custom.js -->
   <script src="scripts/code-mirror/mode/headers/headers.js"></script>
   <script src="scripts/code-mirror/addon/hint/http-headers.js"></script>
   <script src="scripts/code-mirror/addon/hint/show-hint.js"></script>
-  <script src="scripts/main.js"></script>
   <!-- endbuild-->
+  <script src="scripts/main.js"></script>
 </body>
 
 </html>

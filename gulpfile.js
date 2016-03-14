@@ -146,16 +146,6 @@ gulp.task('minifyHtml', function() {
   }));
 });
 
-// Build production files, the default task
-gulp.task('default',  function(cb) {
-  runSequence(
-    ['ensureFiles'],
-    ['html'],
-    ['vulcanize'],
-    ['minifyHtml'], // 'cache-config',
-    cb);
-});
-
 /**
  * Make all elements CSP ready
  */
