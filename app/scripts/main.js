@@ -19,7 +19,7 @@
    */
   app.selectedRequest = null;
   app.addEventListener('dom-change', function() {
-    console.log('Our app is ready to rock!');
+    app.updateBranding();
   });
 
   // event called when the app is initialized and can remove loader.
@@ -175,4 +175,15 @@
     e.stopImmediatePropagation();
   };
 
+
+  app.updateBranding = () => {
+    if (!chrome.runtime.getManifest) {
+      return;
+    }
+    var manifest = chrome.runtime.getManifest();
+    if (manifest.version_name.indexOf('canary') !== -1) {
+      document.body.classList.add('canary');
+      Polymer.updateStyles();
+    }
+  };
 })(document, window);

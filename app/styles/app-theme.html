@@ -8,9 +8,9 @@
   --disabled-text-color: #9b9b9b;
   --divider-color: #dbdbdb;
   --primary-color: var(--paper-blue-a100);
-  --light-primary-color: #c5cae9;
+  --light-primary-color: var(--paper-indygo-100);
   --dark-primary-color: var(--paper-blue-700);
-  --accent-color: #ff4081;
+  --accent-color: var(--paper-red-a200);
   --light-accent-color: #ff80ab;
   --dark-accent-color: #f50057;
 
@@ -18,11 +18,13 @@
   --menu-link-color: #111111;
   --paper-toolbar-color: #737373;
   --paper-toolbar-background: var(--google-grey-300);
+
   --action-button: {
     background-color: #2196F3;
     background-image: none;
     color: white;
   };
+
   --action-button-hover: {
     background-color: #1976D2;
     background-image: none;
@@ -64,6 +66,20 @@
   }
 }
 
+.canary paper-toolbar {
+  --paper-toolbar-color: rgba(0,0,0,0.87);
+  --paper-toolbar-background: var(--paper-orange-500);
+}
+.canary paper-icon-button {
+  --paper-icon-button: {
+    color: rgba(0,0,0,0.87);
+    transition: color cubic-bezier(0.4, 0, 1, 1) 100ms;
+  }
+}
+
+.canary * {
+  --dark-primary-color: red;
+}
 
 /* General styles */
 
