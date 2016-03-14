@@ -14,11 +14,13 @@ const $ = require('gulp-load-plugins')();
 const runSequence = require('run-sequence');
 const merge = require('merge-stream');
 const concat = require('concatenate-files');
+const zipFolder = require('zip-folder');
 
 var Builder = {
   commitMessage: '',
   workingBranch: 'develop',
   target: 'canary',
+  version: '0.0.0.0',
   /**
    * Build a canary release.
    * 1. Bump version
@@ -27,29 +29,31 @@ var Builder = {
    * 4. Upload item to CSW (canary item)
    */
   buildCanary: (done) => {
-    Builder._copyApp()
-      .then(() => done());
-    return;
     Builder.target = 'canary';
     var version = Bump.bump({
       target: 'canary'
     });
+    Builder.version = version.manifest;
     var date = new Date().toGMTString();
     Builder.commitMessage = `Canary build at ${date} to version ${version.manifest}`;
     Builder.workingBranch = 'chrome-app';
-    if (Builder._gitAddAll().code !== 0) {
-      done(new Error('Unable to add all files to commit'));
+    try {
+      Builder._gitCommitAndPush();
+    } catch (e) {
+      console.error('Unable push changes to git repository. Task terminated.');
+      done();
       return;
     }
-    if (Builder._gitCommit().code !== 0) {
-      done(new Error('Unable to commit git repository'));
-      return;
-    }
-    if (Builder._gitPush().code !== 0) {
-      done(new Error('Unable to push changes'));
-      return;
-    }
-    done();
+
+    Builder._buildPackage()
+    .then(() => {
+      console.log(`Finished job.`);
+      done();
+    })
+    .catch((e) => {
+      console.error('Error Building canary', e);
+      done();
+    });
   },
 
   _gitAddAll: () => {
@@ -62,8 +66,30 @@ var Builder = {
     return shell.exec(`git push origin ${Builder.workingBranch}`);
   },
 
+  _gitCommitAndPush: () => {
+    if (Builder._gitAddAll().code !== 0) {
+      throw new Error('Unable to add all files to commit');
+    }
+    if (Builder._gitCommit().code !== 0) {
+      throw new Error('Unable to commit git repository');
+    }
+    if (Builder._gitPush().code !== 0) {
+      throw new Error('Unable to push changes');
+    }
+  },
+
+  _buildPackage: function() {
+    return Builder._copyApp()
+    .then(() => Builder._createPackage())
+    .then(() => console.log('Package builded.'));
+  },
+
   get buildTarget() {
     return path.join('build', Builder.target);
+  },
+
+  get distTarget() {
+    return path.join('dist', Builder.target);
   },
 
   _copyApp: () => {
@@ -77,9 +103,8 @@ var Builder = {
         Builder._processIndexFile();
       })
       .then(() => {
-        console.log('App build completed.');
-      })
-      .catch((e) => console.error('Error during copy app', e));
+        console.log('All files copied.');
+      });
     // ML-PPSZT-OSX-EMEA:ChromeRestClient pawelpsztyc$ ln -s app/bower_components/ bower_components
     // ML-PPSZT-OSX-EMEA:ChromeRestClient pawelpsztyc$ vulcanize --inline-scripts --inline-css
     //--strip-comments app/elements/elements.html > dist/elements.html
@@ -237,7 +262,6 @@ var Builder = {
         var backgroundScript = 'scripts/background.js';
         deps = deps.filter((dep) => dep !== backgroundScript);
         deps = deps.map((dep) => './app/' + dep);
-        console.log(deps);
         let depsFilename = 'background-deps.js';
         let depsLocation = path.join(dest, depsFilename);
         concat(deps, depsLocation, {
@@ -260,6 +284,36 @@ var Builder = {
             resolve();
           });
         });
+      });
+    });
+  },
+  /**
+   * Create a package
+   */
+  _createPackage: () => {
+    return new Promise((resolve, reject) => {
+      let build = Builder.buildTarget;
+      var options = {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric'
+      };
+      var date = new Intl.DateTimeFormat(undefined, options).format(new Date());
+      let fileName = `${Builder.target}-${Builder.version}-${date}.zip`;
+      let dist = path.join(Builder.distTarget, fileName);
+      fsensure.dir.exists(Builder.distTarget, (err) => {
+        if (err) {
+          console.error('Creating package folders structure error', err);
+          reject(err);
+        } else {
+          zipFolder(build, dist, (err) => {
+            if (err) {
+              console.error('Creating package file error', err);
+              reject(err);
+            }
+            resolve();
+          });
+        }
       });
     });
   }
