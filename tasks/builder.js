@@ -299,7 +299,8 @@ var Builder = {
         day: 'numeric'
       };
       var date = new Intl.DateTimeFormat(undefined, options).format(new Date());
-      let fileName = `${Builder.target}-${Builder.version}-${date}.zip`;
+      date = date.replace(/\//g,'-');
+      let fileName = `${Builder.target}-${Builder.version}@${date}.zip`;
       let dist = path.join(Builder.distTarget, fileName);
       fsensure.dir.exists(Builder.distTarget, (err) => {
         if (err) {
