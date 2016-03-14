@@ -126,7 +126,7 @@ var Builder = {
       .then(() => Builder._ensureDirStructure())
       .then(() => Builder._copyFiles())
       .then(() => Builder._vulcanizeElements())
-      .then(() => Builder._manifestDependecies())
+      .then(() => Builder._processManifest())
       .then(() => {
         Builder._processIndexFile();
       })
@@ -276,7 +276,7 @@ var Builder = {
     });
   },
   //combine all manifest dependecies into one file
-  _manifestDependecies: () => {
+  _processManifest: () => {
     return new Promise((resolve, reject) => {
       let dest = Builder.buildTarget;
       let manifestFile = path.join(dest, 'manifest.json');
@@ -302,6 +302,7 @@ var Builder = {
           }
           //write new path to manifest
           data.app.background.scripts = [depsFilename, backgroundScript];
+          delete data.key;
           data = JSON.stringify(data, null, 2);
           fs.writeFile(manifestFile, data, 'utf8', (err) => {
             if (err) {
