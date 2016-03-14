@@ -208,8 +208,40 @@ var build = (done) => {
     case 'canary':
       Builder.buildCanary(done);
       break;
+    case 'dev':
+      Builder.buildDev(done);
+      break;
+    case 'beta-hotfix':
+      Builder.buildBeta(false, done);
+      break;
+    case 'beta-release':
+      Builder.buildBeta(true, done);
+      break;
+    case 'stable':
+      Builder.buildStable(false, done);
+      break;
+    case 'hotfix':
+      Builder.buildStable(true, done);
+      break;
     default:
-      throw new Error(`Unknown target ${params.build}.`);
+      let msg = `Unknown target ${params.build}.
+
+      Usage:
+      gulp build --build <TARGET>
+
+      Targets:
+        canary          Build a canary (weekly) release
+        dev             Build a dev release
+        beta-release    Build a new beta release
+        beta-hotfix     Hotfix existig beta release
+        stable          Build a stable release
+        hotfix          Hotfix stable release.
+
+      Description:
+        The build process is similar for all targets. However versionig system require different
+        approach on each build type.
+      `;
+      console.log(msg);
   }
 };
 

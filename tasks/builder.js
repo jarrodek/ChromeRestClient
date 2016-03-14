@@ -20,6 +20,7 @@ var Builder = {
   commitMessage: '',
   workingBranch: 'develop',
   target: 'canary',
+  targetDir: 'canary',
   version: '0.0.0.0',
   /**
    * Build a canary release.
@@ -30,13 +31,40 @@ var Builder = {
    */
   buildCanary: (done) => {
     Builder.target = 'canary';
+    Builder.targetDir = 'canary';
+    Builder.workingBranch = 'chrome-app';
+    Builder._build(done);
+  },
+
+  buildDev: (done) => {
+    Builder.target = 'dev';
+    Builder.targetDir = 'dev';
+    Builder.workingBranch = 'chrome-app';
+    Builder._build(done);
+  },
+
+  buildBeta: (release, done) => {
+    Builder.target = release ? 'beta-release' : 'beta-hotfix';
+    Builder.targetDir = 'beta';
+    Builder.workingBranch = 'chrome-app';
+    Builder._build(done);
+  },
+
+  buildStable: (hotfix, done) => {
+    Builder.target = hotfix ? 'hotfix' : 'stable';
+    Builder.targetDir = 'stable';
+    Builder.workingBranch = 'chrome-app';
+    Builder._build(done);
+  },
+
+  _build: function(done) {
     var version = Bump.bump({
-      target: 'canary'
+      target: Builder.target
     });
     Builder.version = version;
     var date = new Date().toGMTString();
-    Builder.commitMessage = `Canary build at ${date} to version ${version}`;
-    Builder.workingBranch = 'chrome-app';
+    var buildName = Builder.target[0].toUpperCase() + Builder.target.substr(1);
+    Builder.commitMessage = `${buildName} build at ${date} to version ${version}`;
     try {
       Builder._gitCommitAndPush();
     } catch (e) {
@@ -85,11 +113,11 @@ var Builder = {
   },
 
   get buildTarget() {
-    return path.join('build', Builder.target);
+    return path.join('build', Builder.targetDir);
   },
 
   get distTarget() {
-    return path.join('dist', Builder.target);
+    return path.join('dist', Builder.targetDir);
   },
 
   _copyApp: () => {
