@@ -33,9 +33,9 @@ var Builder = {
     var version = Bump.bump({
       target: 'canary'
     });
-    Builder.version = version.manifest;
+    Builder.version = version;
     var date = new Date().toGMTString();
-    Builder.commitMessage = `Canary build at ${date} to version ${version.manifest}`;
+    Builder.commitMessage = `Canary build at ${date} to version ${version}`;
     Builder.workingBranch = 'chrome-app';
     try {
       Builder._gitCommitAndPush();
