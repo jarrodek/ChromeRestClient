@@ -9,12 +9,12 @@
         items="{{items}}"
         query="{{query}}"
         loading="[[loading]]"
-        on-cancel="_cancel"
         on-file-selected="_fileSelected"
         on-more-data="loadMoreData"
         on-search="_onSearch"></drive-list-view>
       <drive-error-message message="[[errorMessage]]"></drive-error-message>
       <drive-open-from-drive-ui></drive-open-from-drive-ui>
+      <chrome-not-signedin-view></chrome-not-signedin-view>
     </iron-pages>
     <iron-ajax
       id="query"

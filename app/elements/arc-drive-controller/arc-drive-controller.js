@@ -89,7 +89,8 @@ Polymer({
     }
   },
   listeners: {
-    'restore-view': '_restoreDefaulView'
+    'restore-view': '_restoreDefaulView',
+    'cancel': '_cancel'
   },
   /**
    * Opens a Google Drive file picker.
@@ -103,7 +104,8 @@ Polymer({
         this.selectFile();
       })
       .catch(() => {
-        console.error('Fix me pls.');
+        this.viewSelected = 3;
+        this.open();
       });
     } else {
       //this.withBackdrop = true;
@@ -216,7 +218,7 @@ Polymer({
    * Ajax call to Drive API error handler
    */
   _handleDriveApiError: function(e) {
-    console.log('_handleDriveApiError', e);
+    // console.log('_handleDriveApiError', e);
     this.set('loading', false);
     var message = null;
     switch (e.detail.request.status) {
