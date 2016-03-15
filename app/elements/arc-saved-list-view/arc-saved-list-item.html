@@ -49,6 +49,9 @@
       padding: 0 24px;
       margin-top: 12px;
     }
+    .type-column iron-icon {
+      color: rgba(0, 0, 0, 0.57);
+    }
     </style>
     <div class="checkbox-column">
       <paper-checkbox checked="{{selected}}"></paper-checkbox>
@@ -57,6 +60,9 @@
     <div class="name-column" hidden$="[[!isHistory]]">[[arrayItem(request.har.pages.*, 0, 'startedDateTime')]]</div>
     <div class="method-column">{{request.method}}</div>
     <div class="url-column">{{request.url}}</div>
+    <div class="type-column" hidden$="[[!savedIcon]]">
+      <iron-icon icon="save" title="This item is a saved request."></iron-icon>
+    </div>
     <div class="action-column">
       <paper-button on-tap="_navigateItem">open</paper-button>
     </div>

@@ -262,11 +262,11 @@ An `arc-history-list-view` element is a element responsible for displaying a lis
         <template is="dom-repeat" items="{{requests}}" id="requestList">
           <arc-saved-list-item on-dblclick="_showRequestDetails" request="{{item}}" selected="{{item.selected}}" on-selected-changed="_onItemToggle" is-history></arc-saved-list-item>
         </template>
-        <div class="table-columns">
+        <!-- <div class="table-columns">
           <div class="flex"></div>
           <paper-button raised="" class="actionButton" on-tap="importTap">import</paper-button>
           <paper-button on-tap="cancelTap">cancel</paper-button>
-        </div>
+        </div> -->
       </div>
     </paper-drawer-panel>
     <paper-dialog id="dataClearDialog" on-iron-overlay-closed="onClearDialogResult">

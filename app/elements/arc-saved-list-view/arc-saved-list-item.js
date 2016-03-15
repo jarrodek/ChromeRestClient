@@ -6,7 +6,8 @@ Polymer({
      */
     request: {
       type: Object,
-      notify: true
+      notify: true,
+      observer: '_requestChanged'
     },
     /**
      * True if this row element is selected.
@@ -27,12 +28,31 @@ Polymer({
     isHistory: {
       type: Boolean,
       value: false
-    }
+    },
+    savedIcon: {
+      type: Boolean,
+      value: false,
+      readOnly: true
+    },
   },
 
   behaviors: [
     Polymer.Templatizer
   ],
+
+  _requestChanged: function() {
+    if (!this.request || !this.isHistory) {
+      this._setSavedIcon(false);
+      return;
+    }
+    var type = this.request.type;
+    if (type === 'drive' || type === 'saved') {
+      this._setSavedIcon(true);
+    } else {
+      this._setSavedIcon(false);
+    }
+  },
+
   detached: function() {
     if (this.dialog) {
       this.dialog.close();

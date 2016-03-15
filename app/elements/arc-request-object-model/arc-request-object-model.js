@@ -208,7 +208,7 @@ Polymer({
             return table
               .where('type')
               .equals(type)
-              .toCollection()
+              // .toCollection()
               .delete();
           })
           .then(() => {
@@ -300,7 +300,7 @@ Polymer({
     data.sort((a, b) => {
       let aProp = _.get(a, sort);
       let bProp = _.get(b, sort);
-      
+
       if (isNaN(aProp)) {
         let aTime = new Date(aProp).getTime();
         if (!isNaN(aTime)) {
