@@ -127,9 +127,7 @@ var Builder = {
       .then(() => Builder._copyFiles())
       .then(() => Builder._vulcanizeElements())
       .then(() => Builder._processManifest())
-      .then(() => {
-        Builder._processIndexFile();
-      })
+      .then(() => Builder._processIndexFile())
       .then(() => {
         console.log('All files copied.');
       });
@@ -253,17 +251,11 @@ var Builder = {
    * Process the index.html file.
    */
   _processIndexFile: () => {
-    let targetDir = Builder.buildTarget;
-    // var targetHtml = path.join(targetDir, 'index.html');
-    return gulp.src('./app/index.html')
-      .pipe(usemin({
-        css: [],
-        html: [],
-        js: [],
-        inlinejs: [],
-        inlinecss: []
-      }))
-      .pipe(gulp.dest(targetDir));
+    return new Promise((resolve) => {
+      runSequence(['processIndex'], () => {
+        resolve();
+      });
+    });
   },
   /**
    * Copy files that are not copied by vulcanize process.
@@ -400,6 +392,20 @@ gulp.task('copy', () => {
     .pipe($.size({
       title: 'copy'
     }));
+});
+
+gulp.task('processIndex', () => {
+  let targetDir = Builder.buildTarget;
+  // var targetHtml = path.join(targetDir, 'index.html');
+  return gulp.src('./app/index.html')
+    .pipe(usemin({
+      css: [],
+      html: [],
+      js: [],
+      inlinejs: [],
+      inlinecss: []
+    }))
+    .pipe(gulp.dest(targetDir));
 });
 
 module.exports = Builder;
