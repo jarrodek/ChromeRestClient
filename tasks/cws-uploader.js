@@ -51,7 +51,7 @@ var CwsUploader = {
   _authorize: function() {
     return new Promise((resolve, reject) => {
       CwsUploader.authClient.authorize(function(err, tokens) {
-        console.log(err, tokens);
+        // console.log(err, tokens);
         if (err) {
           reject(err);
           return;
@@ -77,7 +77,7 @@ var CwsUploader = {
     return new Promise((resolve, reject) => {
       let options = {
         host: 'www.googleapis.com',
-        path: `/upload/chromewebstore/v1.1/items/${id}?key=${apiKey}`,
+        path: `/upload/chromewebstore/v1.1/items/${id}?key=${CwsUploader.apiKey}`,
         port: '443',
         method: 'PUT',
         headers: {
