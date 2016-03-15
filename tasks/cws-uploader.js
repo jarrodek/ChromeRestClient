@@ -62,6 +62,7 @@ var CwsUploader = {
 
   uploadItem: function(file, target) {
     var config = fs.readFileSync('./tasks/cws-config.json', 'utf-8');
+    config = JSON.parse(config);
     if (target in config) {
       let id = config[target].id;
       let buffer = fs.readFileSync(file);
