@@ -95,14 +95,14 @@ var CwsUploader = {
         });
 
         response.on('end', function() {
-          console.log(str);
+          console.log('CWS response', str);
           resolve(str);
         });
       });
       req.write(buffer);
       req.end();
       req.on('error', (e) => {
-        console.error(e);
+        console.error('CWS request error', e);
         reject(e);
       });
     });
