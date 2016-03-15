@@ -9,10 +9,11 @@ var vulcanize = require('gulp-vulcanize');
 var crisper = require('gulp-crisper');
 var modRewrite = require('connect-modrewrite');
 // var htmlmin = require('gulp-htmlmin');
-var uglify = require('gulp-uglify');
-var runSequence = require('run-sequence');
+// var uglify = require('gulp-uglify');
+// var runSequence = require('run-sequence');
 var del = require('del');
 var strip = require('gulp-strip-comments');
+var uploader = require('./tasks/cws-uploader.js');
 
 const Builder = require('./tasks/builder.js');
 var minimist = require('minimist');
@@ -246,3 +247,15 @@ var build = (done) => {
 };
 
 gulp.task('build', build);
+
+gulp.task('test', function(done) {
+  uploader.auth()
+  .then(() => {
+    console.log('Auth');
+    done();
+  })
+  .catch((e) => {
+    console.error(e);
+    done(e);
+  });
+});

@@ -15,6 +15,7 @@ const runSequence = require('run-sequence');
 const merge = require('merge-stream');
 const concat = require('concatenate-files');
 const zipFolder = require('zip-folder');
+const uploader = require('./cws-uploader.js');
 
 var Builder = {
   commitMessage: '',
@@ -109,7 +110,15 @@ var Builder = {
   _buildPackage: function() {
     return Builder._copyApp()
     .then(() => Builder._createPackage())
+    .then((buildPath) => Builder._uploadPackage(buildPath))
     .then(() => console.log('Package builded.'));
+  },
+  /**
+   * Upload the package to CWS.
+   */
+  _uploadPackage: (buildPath) => {
+    return uploader.auth()
+    .then(() => uploader.uploadItem(buildPath, Builder.targetDir));
   },
 
   get buildTarget() {
@@ -334,7 +343,7 @@ var Builder = {
               console.error('Creating package file error', err);
               reject(err);
             }
-            resolve();
+            resolve(dist);
           });
         }
       });

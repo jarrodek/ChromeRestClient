@@ -1,0 +1,14 @@
+{
+  "canary": {
+    "id": "ffgciingieijajcbpkockcbknajffbel"
+  },
+  "dev" : {
+    "id": "hgmloofddffdnphfgcellkdfbfbjeloo"
+  },
+  "beta" : {
+    "id": "hgmloofddffdnphfgcellkdfbfbjeloo"
+  },
+  "stable" : {
+    "id": "hgmloofddffdnphfgcellkdfbfbjeloo"
+  }
+}
