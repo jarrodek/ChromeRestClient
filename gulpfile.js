@@ -249,32 +249,5 @@ var build = (done) => {
 gulp.task('build', build);
 
 gulp.task('test', function(done) {
-  var client = require('./tasks/auth-client.js');
-  client.execute(['https://www.googleapis.com/auth/chromewebstore'])
-  .then((result) => {
-    console.log(result);
-    done();
-  });
-  // var google = require('googleapis');
-  // var OAuth2Client = google.auth.OAuth2;
-  // google.auth.getApplicationDefault(function(err, authClient) {
-  //   if (err) {
-  //     console.log('Failed to get the default credentials: ' + String(err));
-  //     return;
-  //   }
-  //   if (authClient.createScopedRequired && authClient.createScopedRequired()) {
-  //     // Scopes can be specified either as an array or as a single, space-delimited string.
-  //     authClient = authClient.createScoped(['https://www.googleapis.com/auth/chromewebstore']);
-  //   }
-  //   console.log(authClient);
-  // });
-  // uploader.auth()
-  // .then(() => {
-  //   console.log('Auth');
-  //   done();
-  // })
-  // .catch((e) => {
-  //   console.error(e);
-  //   done(e);
-  // });
+  done();
 });

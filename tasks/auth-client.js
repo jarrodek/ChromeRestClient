@@ -20,7 +20,9 @@ function AuthClient(options) {
     secrets.web.redirectUris[0]);
   this._authenticate = function(scopes, callback) {
     self.authorizeUrl = self.oAuth2Client.generateAuthUrl({
+      //jscs:disable requireCamelCaseOrUpperCaseIdentifiers
       access_type: 'offline',
+      //jscs:enable requireCamelCaseOrUpperCaseIdentifiers
       scope: scopes.join(' ')
     });
     // console.log(self.authorizeUrl);
@@ -38,12 +40,13 @@ function AuthClient(options) {
         } else {
           self.oAuth2Client.setCredentials(tokens);
           self.isAuthenticated = true;
-          response.end('Authentication successful! Please return to the console.');
+          response.end('Authentication successful! Close tab and return to the console.');
         }
         server.close();
         callback();
       });
     }).listen(8080, function() {
+      console.log('Close browser tab after authentication to continue.');
       openBrowser(self.authorizeUrl);
     });
   };

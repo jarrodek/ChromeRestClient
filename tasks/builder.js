@@ -140,9 +140,6 @@ var Builder = {
       .then(() => {
         console.log('All files copied.');
       });
-    // ML-PPSZT-OSX-EMEA:ChromeRestClient pawelpsztyc$ ln -s app/bower_components/ bower_components
-    // ML-PPSZT-OSX-EMEA:ChromeRestClient pawelpsztyc$ vulcanize --inline-scripts --inline-css
-    //--strip-comments app/elements/elements.html > dist/elements.html
   },
   /**
    * Removes target directory.
