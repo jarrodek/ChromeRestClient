@@ -126,7 +126,7 @@ gulp.task('vulcanize', function() {
 });
 gulp.task('minifyHtml', function() {
   return gulp.src('dist/elements/*.js')
-  // .pipe(htmlmin({
+    // .pipe(htmlmin({
     //removeComments: true,
     // removeCommentsFromCDATA: true,
     // removeCDATASectionsFromCDATA: true,
@@ -135,16 +135,16 @@ gulp.task('minifyHtml', function() {
     // keepClosingSlash: true,
     // minifyJS: true,
     // minifyCSS: true
-  // }))
-  .pipe(strip())
-  .pipe($.uglify({
-    preserveComments: 'some'
-  }))
+    // }))
+    .pipe(strip())
+    .pipe($.uglify({
+      preserveComments: 'some'
+    }))
 
   .pipe(gulp.dest(dist()))
-  .pipe($.size({
-    title: 'Minify JS'
-  }));
+    .pipe($.size({
+      title: 'Minify JS'
+    }));
 });
 
 /**
@@ -249,13 +249,32 @@ var build = (done) => {
 gulp.task('build', build);
 
 gulp.task('test', function(done) {
-  uploader.auth()
-  .then(() => {
-    console.log('Auth');
+  var client = require('./tasks/auth-client.js');
+  client.execute(['https://www.googleapis.com/auth/chromewebstore'])
+  .then((result) => {
+    console.log(result);
     done();
-  })
-  .catch((e) => {
-    console.error(e);
-    done(e);
   });
+  // var google = require('googleapis');
+  // var OAuth2Client = google.auth.OAuth2;
+  // google.auth.getApplicationDefault(function(err, authClient) {
+  //   if (err) {
+  //     console.log('Failed to get the default credentials: ' + String(err));
+  //     return;
+  //   }
+  //   if (authClient.createScopedRequired && authClient.createScopedRequired()) {
+  //     // Scopes can be specified either as an array or as a single, space-delimited string.
+  //     authClient = authClient.createScoped(['https://www.googleapis.com/auth/chromewebstore']);
+  //   }
+  //   console.log(authClient);
+  // });
+  // uploader.auth()
+  // .then(() => {
+  //   console.log('Auth');
+  //   done();
+  // })
+  // .catch((e) => {
+  //   console.error(e);
+  //   done(e);
+  // });
 });

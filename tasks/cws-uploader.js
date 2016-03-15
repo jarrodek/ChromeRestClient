@@ -1,18 +1,12 @@
 'use strict';
 
-const google = require('googleapis');
+var authClient = require('./auth-client.js');
 const fs = require('fs');
 const https = require('https');
 
 var CwsUploader = {
-
-  clientConfigFile: '/home/jarrod/Documents/CWS-Builder-ServiceAccount/' +
-    'chromerestclient-5d1a9822cb24.json',
-  _key: null,
-  clientEmail: null,
   scopes: ['https://www.googleapis.com/auth/chromewebstore'],
   token: null,
-
   _getConfig: () => {
     return new Promise((resolve, reject) => {
       fs.readFile(CwsUploader.clientConfigFile, (err, data) => {
@@ -27,38 +21,14 @@ var CwsUploader = {
   },
 
   auth: () => {
-    return CwsUploader._getConfig()
-      .then((config) => CwsUploader._setup(config))
-      .then(() => CwsUploader._authorize())
-      .then((tokens) => {
-        CwsUploader.token = tokens.access_token;
-      });
-  },
-
-  _setup: (config) => {
-    // console.log(config);
-    CwsUploader._key = config.private_key;
-    CwsUploader.clientEmail = config.client_email;
-    CwsUploader.apiKey = config.api_key;
-    CwsUploader.authClient = new google.auth.JWT(
-      CwsUploader.clientEmail,
-      null,
-      CwsUploader._key,
-      CwsUploader.scopes,
-      'jarrodek@gmail.com'); //
-  },
-
-  _authorize: function() {
-    return new Promise((resolve, reject) => {
-      CwsUploader.authClient.authorize(function(err, tokens) {
-        // console.log(err, tokens);
-        if (err) {
-          reject(err);
-          return;
+    return authClient
+      .execute(CwsUploader.scopes)
+      .then((ok) => {
+        if (!ok) {
+          throw new Error('User not authenticated');
         }
-        resolve(tokens);
+        CwsUploader.token = authClient.oAuth2Client.credentials.access_token;
       });
-    });
   },
 
   uploadItem: function(file, target) {
@@ -77,7 +47,7 @@ var CwsUploader = {
     return new Promise((resolve, reject) => {
       let options = {
         host: 'www.googleapis.com',
-        path: `/upload/chromewebstore/v1.1/items/${id}?key=${CwsUploader.apiKey}`,
+        path: `/upload/chromewebstore/v1.1/items/${id}`, //?key=${CwsUploader.apiKey}
         port: '443',
         method: 'PUT',
         headers: {
