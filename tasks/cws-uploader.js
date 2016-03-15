@@ -39,12 +39,13 @@ var CwsUploader = {
     // console.log(config);
     CwsUploader._key = config.private_key;
     CwsUploader.clientEmail = config.client_email;
+    CwsUploader.apiKey = config.api_key;
     CwsUploader.authClient = new google.auth.JWT(
       CwsUploader.clientEmail,
       null,
       CwsUploader._key,
       CwsUploader.scopes,
-      ''); //jarrodek@gmail.com
+      'jarrodek@gmail.com'); //
   },
 
   _authorize: function() {
@@ -76,7 +77,7 @@ var CwsUploader = {
     return new Promise((resolve, reject) => {
       let options = {
         host: 'www.googleapis.com',
-        path: `/upload/chromewebstore/v1.1/items/${id}`,
+        path: `/upload/chromewebstore/v1.1/items/${id}?key=${apiKey}`,
         port: '443',
         method: 'PUT',
         headers: {
