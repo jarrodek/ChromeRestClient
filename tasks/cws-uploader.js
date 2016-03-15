@@ -28,11 +28,11 @@ var CwsUploader = {
 
   auth: () => {
     return CwsUploader._getConfig()
-      .then((config) => CwsUploader._setup(config))
-      .then(() => CwsUploader._authorize())
-      .then((tokens) => {
-        CwsUploader.token = tokens.access_token;
-      });
+      .then((config) => CwsUploader._setup(config));
+      // .then(() => CwsUploader._authorize())
+      // .then((tokens) => {
+      //   CwsUploader.token = tokens.access_token;
+      // });
   },
 
   _setup: (config) => {
@@ -81,7 +81,7 @@ var CwsUploader = {
         port: '443',
         method: 'PUT',
         headers: {
-          'Authorization': 'Bearer ' + CwsUploader.token,
+          // 'Authorization': 'Bearer ' + CwsUploader.token,
           'Content-Type': 'application/zip',
           'Accept': '*/*',
           'Content-Length': buffer.length + '',
