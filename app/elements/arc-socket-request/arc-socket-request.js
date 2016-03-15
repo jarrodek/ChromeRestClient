@@ -19,7 +19,21 @@ Polymer({
       init.headers = obj;
     }
     //TODO:180 include files.
-    if (this.request.payload) {
+
+    if (this.request.files && this.request.files.length > 0) {
+      // create FormData from the form
+      let fd = new FormData();
+      this.request.files.forEach((field) => {
+        field.files.forEach((file) => {
+          fd.append(field.name, file);
+        });
+      });
+      let params = PayloadParser.stringToArray(this.request.payload);
+      params.forEach((pair) => {
+        fd.append(pair.name, pair.value);
+      });
+      init.body = fd;
+    } else if (this.request.payload) {
       init.body = this.request.payload;
     }
     this.connection = new SocketFetch(this.request.url, init);
