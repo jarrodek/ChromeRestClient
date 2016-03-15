@@ -290,6 +290,7 @@ var Builder = {
         var backgroundScript = 'scripts/background.js';
         deps = deps.filter((dep) => dep !== backgroundScript);
         deps = deps.map((dep) => './app/' + dep);
+        //backgroundScript = 'background.js';
         let depsFilename = 'background-deps.js';
         let depsLocation = path.join(dest, depsFilename);
         concat(deps, depsLocation, {
