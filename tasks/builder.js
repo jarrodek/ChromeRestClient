@@ -137,6 +137,7 @@ var Builder = {
       .then(() => Builder._vulcanizeElements())
       .then(() => Builder._processManifest())
       .then(() => Builder._processIndexFile())
+      .then(() => Builder._applyBranding())
       .then(() => {
         console.log('All files copied.');
       });
@@ -345,6 +346,33 @@ var Builder = {
         }
       });
     });
+  },
+  // Apply branding depending on the release.
+  _applyBranding: () => {
+    var srcIcons = [
+      path.join('branding', Builder.targetDir, 'arc_icon_128.png'),
+      path.join('branding', Builder.targetDir, 'arc_icon_32.png'),
+      path.join('branding', Builder.targetDir, 'arc_icon_16.png')
+    ];
+    var destIcons = [
+      path.join(Builder.buildTarget, 'assets', 'arc_icon_128.png'),
+      path.join(Builder.buildTarget, 'assets', 'arc_icon_32.png'),
+      path.join(Builder.buildTarget, 'assets', 'arc_icon_16.png')
+    ];
+    var promises = [];
+    var copy = (file, i) => {
+      return new Promise((resolve, reject) => {
+        try {
+          let buffer = fs.readFileSync(file);
+          fs.writeFileSync(destIcons[i], buffer);
+          resolve();
+        } catch (e) {
+          reject(e);
+        }
+      });
+    };
+    srcIcons.forEach((file, i) => promises.push(copy(file, i)));
+    return Promise.all(promises);
   }
 };
 
