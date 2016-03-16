@@ -177,8 +177,24 @@ Polymer({
    * Handler when user select a file from file picker.
    */
   _fileSelected: function(e) {
+    this.openItemAsRequest(e.detail.selected.id);
+  },
+  /**
+   * Open a Google Drive item as a request item.
+   *
+   * @param {String} id An item ID. This will show an error if the file wasn't created by this app
+   * (e.g. old version of the app).
+   */
+  openItemAsRequest: function(id) {
+    if (!id) {
+      console.warn('Trying to open Drive item without ID');
+      return;
+    }
+    if (!this.opened) {
+      this.open();
+    }
     this.set('loading', true);
-    this.set('fileId', e.detail.selected.id);
+    this.set('fileId', id);
     this.$.download.generateRequest();
   },
   /**

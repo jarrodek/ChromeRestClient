@@ -13,7 +13,7 @@ chrome.app.runtime.onLaunched.addListener(function(lunchData) {
         _url = _url.substr(_url.indexOf('state') + 6);
         var data = JSON.parse(decodeURIComponent(_url));
         var id = data.ids[0];
-        url += '#/request/drive/' + id;
+        url += '#!/request/drive/' + id;
       break;
     }
   }

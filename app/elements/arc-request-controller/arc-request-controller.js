@@ -147,6 +147,7 @@ Polymer({
     }
     this._setResponse(null);
     this._setProject(undefined);
+    
     switch (this.routeParams.type) {
       case 'saved':
         this._restoreSaved(this.routeParams.savedId);
@@ -167,6 +168,18 @@ Polymer({
           }
         }
         this.set('request', request);
+        break;
+      case 'drive':
+        let id = this.routeParams.driveId;
+        let ctrl = document.body.querySelector('arc-drive-controller');
+        if (!ctrl) {
+          StatusNotification.notify({
+            message: 'Drive controller not found.'
+          });
+          return;
+        }
+        console.log('Opening drive', id);
+        ctrl.openItemAsRequest(id);
         break;
       default:
         this._restoreLatest();
