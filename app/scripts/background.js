@@ -1,5 +1,23 @@
 'use strict';
 
+var lunch = (url) => {
+  if (!url) {
+    url = 'index.html';
+  }
+  var all = chrome.app.window.getAll();
+  var length = all.length;
+  var id = 'arc-window-' + length;
+  chrome.app.window.create(
+    url, {
+      id: id,
+      bounds: {
+        width: 800,
+        height: 600
+      }
+    }
+  );
+};
+
 /**
  * Listens for the app launching then creates the window.
  *
@@ -19,23 +37,12 @@ chrome.app.runtime.onLaunched.addListener(function(lunchData) {
       break;
     }
   }
-  var all = chrome.app.window.getAll();
-  var length = all.length;
-  var id = 'arc-window-' + length;
-  chrome.app.window.create(
-    url, {
-      id: id,
-      bounds: {
-        width: 800,
-        height: 600
-      }
-    }
-  );
+  lunch(url);
 });
 
 /**
  * Called when user use one of the commands registered in the manifest file.
  */
-chrome.commands.onCommand.addListener(function(command) {
-  console.log('Command:', command);
-});
+// chrome.commands.onCommand.addListener(function(command) {
+//   console.log('Command:', command);
+// });
