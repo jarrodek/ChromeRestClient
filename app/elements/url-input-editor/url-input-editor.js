@@ -33,7 +33,8 @@ Polymer({
       value: function() {
         return this.$.masterUrl;
       }
-    }
+    },
+    suggesionsOpened: Boolean
   },
 
   toggle: function() {
@@ -243,7 +244,15 @@ Polymer({
   },
 
   onEnter: function() {
+    if (this.suggesionsOpened) {
+      return;
+    }
     this.fire('send');
+  },
+
+  _onSuggestionSelected: function(e) {
+    var value = e.detail.value;
+    this.set('url', value);
   },
 
   _queryUrlHistory: function(e) {

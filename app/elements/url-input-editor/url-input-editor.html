@@ -107,7 +107,7 @@
       <paper-input label="Hash" value="{{anchorValue}}" class="anchor-input"></paper-input>
     </div>
     <iron-a11y-keys id="a11y" target="{{this.$.masterUrl}}" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
-    <paper-autocomplete target="[[masterUrlElement]]" id="autocomplete" loader on-query="_queryUrlHistory"></paper-autocomplete>
+    <paper-autocomplete target="[[masterUrlElement]]" id="autocomplete" loader on-query="_queryUrlHistory" opened="{{suggesionsOpened}}" on-selected="_onSuggestionSelected"></paper-autocomplete>
     <arc-historyurl-model id="model" on-data-ready="_setSuggestions"></arc-historyurl-model>
   </template>
   <script src="url-input-editor.js"></script>
