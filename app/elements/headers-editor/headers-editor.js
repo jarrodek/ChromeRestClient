@@ -51,7 +51,10 @@ Polymer({
       }.bind(this)
     });
   },
-
+  /**
+   * Called by CodeMirror editor.
+   * When something change n the headers list, detect content type header.
+   */
   valueChanged: function() {
     this._detectContentType();
   },
@@ -66,11 +69,14 @@ Polymer({
     var arr = arc.app.headers.toJSON(this.headers);
     var ct = arc.app.headers.getContentType(arr);
     if (!!ct) {
+      this.hideWarningn('content-type-missing');
       return;
     }
     if (!this.contentType) {
       this.displayWarning('content-type-missing');
       return;
+    } else {
+      this.hideWarningn('content-type-missing');
     }
     arr.push({
       name: 'Content-Type',
@@ -86,6 +92,9 @@ Polymer({
    */
   displayWarning: function(type) {
     console.warn('Content type header not present but it should be: ' + type);
+  },
+  hideWarningn: function(type) {
+    console.info('Content type header is present now: ' + type);
   },
   /**
    * Update headers array from form values to the HTTP string.
@@ -112,13 +121,20 @@ Polymer({
       return;
     }
     if (!this.headers) {
+      if (this.isPayload) {
+        this.displayWarning('content-type-missing');
+      }
       return;
     }
     var ct = arc.app.headers.getContentType(this.headers);
     if (!ct) {
+      if (this.isPayload) {
+        this.displayWarning('content-type-missing');
+      }
       return;
     }
     this.set('contentType', ct);
+    this.hideWarningn('content-type-missing');
   },
 
   _isPayloadChanged: function() {
@@ -126,8 +142,9 @@ Polymer({
       this.ensureContentTypeHeader();
     }
   },
+
   _onContentTypeChanged: function() {
-    if (!this.isPayload) {
+    if (!this.isPayload || !this.contentType) {
       return;
     }
     var arr = arc.app.headers.toJSON(this.headers);

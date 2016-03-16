@@ -157,17 +157,32 @@ arc.app.headers._oldCombine = function(headers, encoding) {
  * @return {String|null} A content-type header value or null if not found
  */
 arc.app.headers.getContentType = function(headers) {
-  if (typeof headers === 'string') {
-    headers = arc.app.headers.toJSON(headers);
+  if (typeof headers !== 'string') {
+    headers = arc.app.headers.toString(headers);
   }
-  headers = arc.app.headers.filter(headers);
-  var ct = headers.filter((item) => item.name.toLowerCase() === 'content-type');
-  ct = (ct.length === 0) ? null : ct[0].value;
-  if (ct) {
-    let index = ct.indexOf('; ');
-    if (index > 0) {
-      ct = ct.substr(0, index);
-    }
+  headers = headers.trim();
+  if (headers === '') {
+    return null;
+  }
+  var re = /^content-type:\s?(.*)$/im;
+  var match = headers.match(re);
+  if (!match) {
+    return null;
+  }
+  var ct = match[1].trim();
+  let index = ct.indexOf('; ');
+  if (index > 0) {
+    ct = ct.substr(0, index);
   }
   return ct;
+  // headers = arc.app.headers.filter(headers);
+  // var ct = headers.filter((item) => item.name.toLowerCase() === 'content-type');
+  // ct = (ct.length === 0) ? null : ct[0].value;
+  // if (ct) {
+  //   let index = ct.indexOf('; ');
+  //   if (index > 0) {
+  //     ct = ct.substr(0, index);
+  //   }
+  // }
+  // return ct;
 };

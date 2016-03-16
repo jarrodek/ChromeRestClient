@@ -3,7 +3,7 @@
 Polymer({
   is: 'method-selector',
   properties: {
-    
+
     method: {
       type: String,
       value: 'GET',
@@ -26,7 +26,7 @@ Polymer({
   },
 
   observers: [
-    '_ensureContentType(isPayload)'
+    // '_ensureContentType(isPayload)'
   ],
 
   _computeIsPayload: function(method) {
