@@ -82,5 +82,13 @@
         "scripts/background.js"
       ]
     }
+  },
+  "url_handlers": {
+    "google_drive_open": {
+      "matches": [
+        "https://chromerestclient.appspot.com/GDrive.html*"
+      ],
+      "title": "Open from Google Drive"
+    }
   }
 }

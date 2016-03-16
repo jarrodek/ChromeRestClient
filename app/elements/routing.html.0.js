@@ -64,7 +64,11 @@ window.addEventListener('initializeRouting', function() {
     app.params = params;
     app.route = 'request';
   });
-
+  arc.app.router.register('/request/drive/:driveId', function(ctx) {
+    ctx.params.type = 'drive';
+    app.params = ctx.params;
+    app.route = 'request';
+  });
   arc.app.router.register('/history', function() {
     app.route = 'history';
   });
