@@ -4,6 +4,7 @@ var gulp = require('gulp');
 var $ = require('gulp-load-plugins')();
 var crisper = require('gulp-crisper');
 var minimist = require('minimist');
+require('./tasks/dev-server.js');
 
 var Cli = {
   getParams: (defaults) => {
