@@ -31,7 +31,8 @@
     "code-mirror": "jarrodek/code-mirror#latest",
     "lodash": "jarrodek/lodash#^4.6.2",
     "uri.js": "medialize/URI.js#^1.17.0",
-    "zlib": "imaya/zlib.js#^0.2.0"
+    "zlib": "imaya/zlib.js#^0.2.0",
+    "paper-autocomplete": "jarrodek/paper-autocomplete#^1.0.1"
   },
   "devDependencies": {
     "web-component-tester": "*"

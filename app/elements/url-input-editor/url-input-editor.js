@@ -26,6 +26,13 @@ Polymer({
     paramsList: {
       type: Array,
       value: []
+    },
+    masterUrlElement: {
+      readOnly: true,
+      type: HTMLElement,
+      value: function() {
+        return this.$.masterUrl;
+      }
     }
   },
 
@@ -237,5 +244,25 @@ Polymer({
 
   onEnter: function() {
     this.fire('send');
+  },
+
+  _queryUrlHistory: function(e) {
+    var value = e.detail.value;
+    if (!value) {
+      this.$.autocomplete.source = [];
+      return;
+    }
+    this.$.model.objectId = value;
+    this.$.model.query();
+  },
+
+  _setSuggestions: function(e) {
+    var data = e.detail.data;
+    if (!data) {
+      this.$.autocomplete.source = [];
+      return;
+    }
+    var suggestions = data.map((item) => item.url);
+    this.$.autocomplete.source = suggestions;
   }
 });
