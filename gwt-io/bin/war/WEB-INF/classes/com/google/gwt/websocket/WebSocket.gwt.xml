@@ -1,0 +1,8 @@
+<!--
+
+    WebSocket for XmlHttpRequest
+
+-->
+<module>
+	<source path="client" />
+</module>

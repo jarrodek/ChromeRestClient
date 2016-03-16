@@ -1,0 +1,8 @@
+<!--
+
+    FileReader for XmlHttpRequest
+
+-->
+<module>
+	<source path="client" />
+</module>

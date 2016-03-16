@@ -2,23 +2,8 @@
 
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')();
-var connect = require('gulp-connect');
-var ensureFiles = require('./tasks/ensure-files.js');
-var path = require('path');
-var vulcanize = require('gulp-vulcanize');
 var crisper = require('gulp-crisper');
-var modRewrite = require('connect-modrewrite');
-// var htmlmin = require('gulp-htmlmin');
-// var uglify = require('gulp-uglify');
-// var runSequence = require('run-sequence');
-var del = require('del');
-var strip = require('gulp-strip-comments');
-var uploader = require('./tasks/cws-uploader.js');
-
-const Builder = require('./tasks/builder.js');
 var minimist = require('minimist');
-//var foreach = require('gulp-foreach');
-//var gutil = require('gulp-util');
 
 var Cli = {
   getParams: (defaults) => {
@@ -33,24 +18,6 @@ var Cli = {
     };
   }
 };
-
-var DIST = 'dist';
-var dist = function(subpath) {
-  return !subpath ? DIST : path.join(DIST, subpath);
-};
-// Clean output directory
-gulp.task('clean', function() {
-  return del(['.tmp', dist()]);
-});
-// Ensure that we are not missing required files for the project
-// "dot" files are specifically tricky due to them being hidden on
-// some systems.
-gulp.task('ensureFiles', function(cb) {
-  var requiredFiles = ['.jscsrc', '.jshintrc', '.bowerrc'];
-  ensureFiles(requiredFiles.map(function(p) {
-    return path.join(__dirname, p);
-  }), cb);
-});
 // Lint JavaScript files
 gulp.task('lint', function() {
   return gulp.src([
@@ -70,85 +37,8 @@ gulp.task('lint', function() {
     .pipe($.jshint.reporter('jshint-stylish'))
     .pipe($.jshint.reporter('fail'));
 });
-
-var optimizeHtmlTask = function(src, dest) {
-  var assets = $.useref.assets({
-    searchPath: ['.tmp', 'app']
-  });
-  return gulp.src(src)
-    .pipe(assets)
-    // Concatenate and minify JavaScript
-    .pipe($.if('*.js', $.uglify({
-      preserveComments: 'some'
-    })))
-    // Concatenate and minify styles
-    // In case you are still using useref build blocks
-    .pipe($.if('*.css', $.minifyCss()))
-    .pipe(assets.restore())
-    .pipe($.useref())
-    // Minify any HTML
-    .pipe($.if('*.html', $.minifyHtml({
-      quotes: true,
-      empty: true,
-      spare: true
-    })))
-    // Output files
-    .pipe(gulp.dest(dest))
-    .pipe($.size({
-      title: 'html'
-    }));
-};
-// Scan your HTML for assets & optimize them
-gulp.task('html', function() {
-  return optimizeHtmlTask(
-    ['app/**/*.html', '!app/{elements,test,bower_components}/**/*.html'],
-    dist());
-});
 /**
- * Vulcanize all web-components into one file.
- */
-gulp.task('vulcanize', function() {
-  return gulp.src('app/elements/elements.html')
-    .pipe(vulcanize({
-      stripExcludes: false,
-      inlineScripts: true,
-      inlineCss: true,
-      stripComments: true
-    }))
-    .pipe(crisper({
-      scriptInHead: false,
-      onlySplit: false
-    }))
-    .pipe(gulp.dest(dist('elements')))
-    .pipe($.size({
-      title: 'vulcanize'
-    }));
-});
-gulp.task('minifyHtml', function() {
-  return gulp.src('dist/elements/*.js')
-    // .pipe(htmlmin({
-    //removeComments: true,
-    // removeCommentsFromCDATA: true,
-    // removeCDATASectionsFromCDATA: true,
-    // collapseWhitespace: true,
-    // removeTagWhitespace: true,
-    // keepClosingSlash: true,
-    // minifyJS: true,
-    // minifyCSS: true
-    // }))
-    .pipe(strip())
-    .pipe($.uglify({
-      preserveComments: 'some'
-    }))
-
-  .pipe(gulp.dest(dist()))
-    .pipe($.size({
-      title: 'Minify JS'
-    }));
-});
-
-/**
- * Make all elements CSP ready
+ * Make all elements from ./app/elements/ CSP ready
  */
 gulp.task('crisper-elements', function() {
   gulp.src('app/elements/**/*.html')
@@ -171,30 +61,6 @@ gulp.task('crisper-bower', function() {
     }))
     .pipe(gulp.dest('app/bower_components/'));
 });
-
-gulp.task('connect', function() {
-  connect.server({
-    root: [__dirname + '/'],
-    livereload: true,
-    port: 8888,
-    middleware: function() {
-      return [
-        modRewrite([
-          //'^/app/bower_components/(.*)$ /bower_components/$1 [L]',
-        ])
-      ];
-    }
-  });
-});
-
-gulp.task('html', function() {
-  gulp.src('./app/*.html')
-    .pipe(connect.reload());
-});
-gulp.task('watch', function() {
-  gulp.watch(['./app/*.html'], ['html']);
-});
-gulp.task('elements-webserver', ['connect', 'watch']);
 // Load tasks for web-component-tester
 // Adds tasks for `gulp test`
 require('web-component-tester').gulp.init(gulp);
@@ -204,6 +70,7 @@ try {
 } catch (err) {}
 
 var build = (done) => {
+  var Builder = require('./tasks/builder.js');
   var params = Cli.getParams(Cli.buildOptions);
   switch (params.build) {
     case 'canary':
