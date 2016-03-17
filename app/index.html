@@ -79,6 +79,71 @@
     <arc-drive-controller restore-on-file id="driveController"></arc-drive-controller>
     <iron-a11y-keys id="a11y" target="{{document.body}}" keys="ctrl+s" on-keys-pressed="onSave"></iron-a11y-keys>
     <iron-a11y-keys id="a11y" target="{{document.body}}" keys="ctrl+o" on-keys-pressed="onOpen"></iron-a11y-keys>
+    <onboarding-tutorial>
+      <onboarding-page>
+        <div>
+          <p>Welcome to new</p>
+          <p>Advanced REST Client</p>
+          <p>Let's walk throught some recent changes</p>
+        </div>
+      </onboarding-page>
+      <onboarding-page>
+        <h2>The app is now desktop app!</h2>
+        <div class="onboarding-image-page">
+          <div class="image"></div>
+          <div class="description">
+            <ul>
+              <li><b>much faster</b> thanks to Polymer framework</li>
+              <li><b>more secure</b> thanks to Content Security Policy environment</li>
+              <li><b>more reliable</b> because code base has been rewritten</li>
+              <li>and <b>more powerful</b> because the app is using socket instead of XHR</li>
+            </ul>
+            <paper-button raised>Learn more</paper-button>
+          </div>
+        </div>
+      </onboarding-page>
+      <onboarding-page>
+        <h2>You can do more with ARC</h2>
+        <div>
+          <div class="onboarding-image-page">
+            <div class="image"></div>
+            <div class="description">
+              <ul>
+                <li>override User-Agent without using additional extensions</li>
+                <li>set any header with the request</li>
+                <li>read all headers in response</li>
+                <li>get all you can form HTTP spec</li>
+              </ul>
+            </div>
+          </div>
+          <p>
+            Transport is based on sockets so there are no limitations related to XHR or Fetch specification.
+            Now the app will send to the server only the data that you provide in the request form.
+          </p>
+        </div>
+      </onboarding-page>
+      <onboarding-page>
+        <h2>Google Drive integration</h2>
+        <div class="onboarding-image-page">
+          <div class="image"></div>
+          <div class="description">
+            <p>Save and share your data on Google Drive</p>
+            <p>Once you share request data with your team, they can easly use your data on their own machines.</p>
+            <p>* more sharing options comming soon</p>
+          </div>
+        </div>
+      </onboarding-page>
+      <onboarding-page>
+        <h2>ARC beta program</h2>
+        <div class="onboarding-image-page">
+          <div class="image"></div>
+          <div class="description">
+            <p>Introducing ARC beta program. Now you can get new features earlier! Help us test new features and influance app's development givin us feedback.</p>
+            <paper-button raised>sign up for beta program</paper-button>
+          </div>
+        </div>
+      </onboarding-page>
+    </onboarding-tutorial>
   </template>
   <!-- build:js scripts/dependencies.js -->
   <script src="bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>

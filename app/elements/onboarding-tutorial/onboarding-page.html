@@ -1,0 +1,25 @@
+<dom-module id="onboarding-page">
+  <template>
+    <style>
+    :host {
+      display: block;
+    }
+
+    :host >::content h2 {
+      position: relative;
+      margin: 0;
+      @apply(--paper-font-title);
+      @apply(--paper-dialog-title);
+    }
+    :host > ::content > * {
+      margin-top: 20px;
+      padding: 0 24px;
+    }
+    :host > ::content > *:first-child {
+      margin-top: 24px;
+    }
+    </style>
+    <content></content>
+  </template>
+  <script src="onboarding-page.js"></script>
+</dom-module>
