@@ -1,4 +1,5 @@
 'use strict';
+
 /* global CodeMirror */
 Polymer({
   is: 'headers-editor',
@@ -37,12 +38,17 @@ Polymer({
     headersList: {
       type: Array,
       value: []
+    },
+    headersDefaults: {
+      type: String,
+      computed: '_computeHeadersDefaults(isPayload)'
     }
   },
   observers: [
     '_headerValuesChanged(headersList.*)'
   ],
   ready: function() {
+
     this.$.cm.setOption('extraKeys', {
       'Ctrl-Space': function(cm) {
         CodeMirror.showHint(cm, CodeMirror.hint['http-headers'], {
@@ -175,10 +181,12 @@ Polymer({
     this.set('headers', headers);
   },
   /** Called when tab selection changed */
-  _selectedTabChanged: function() {
-    switch (this.tabSelected) {
+  _selectedTabChanged: function(newVal, oldVal) {
+    switch (newVal) {
       case 0:
-        this.updateHeaders();
+        if (oldVal === 1) {
+          this.updateHeaders();
+        }
         this.$.cm.editor.refresh();
         break;
       case 1:
@@ -216,5 +224,28 @@ Polymer({
     } catch (e) {
 
     }
+  },
+  /* Compute default headers string. */
+  _computeHeadersDefaults: function(isPayload) {
+    var txt = `accept: application/json
+accept-encoding: gzip, deflate
+accept-language: en-US,en;q=0.8\n`;
+    if (isPayload) {
+      txt += 'content-type: application/json\n';
+    }
+    txt += `user-agent: ${navigator.userAgent}`;
+    return txt;
+  },
+  // Insert predefined default set into the editor
+  _insertDefaultSet: function() {
+    var headers = this.headers;
+    if (headers && headers[headers.length - 1] !== '\n') {
+      headers += '\n';
+    }
+    headers += this.headersDefaults;
+    this.set('headers', headers);
+    this.tabSelected = 0;
+    // this.$.cm.editor.setValue(headers);
+    // this.headers = headers;
   }
 });

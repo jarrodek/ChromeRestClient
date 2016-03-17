@@ -2,6 +2,7 @@ Polymer({
   is: 'arc-response-view',
   properties: {
     response: Object,
+    request: Object,
     loadingTime: {
       type: Number,
       readOnly: true,

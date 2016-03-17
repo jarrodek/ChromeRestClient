@@ -58,10 +58,10 @@
         <!-- Main Content -->
         <div class="content">
           <neon-animated-pages id="pages" attr-for-selected="data-route" selected-attribute="opened" selected="[[route]]" entry-animation="slide-from-right-animation" exit-animation="slide-left-animation">
-            <arc-request-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" request-loading="{{requestLoading}}" has-response="{{hasResponse}}" opened="{{requestOpened}}" request="{{request}}" response="{{response}}" route-params="[[params]]" data-route="request">
+            <arc-request-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" request-loading="{{requestLoading}}" has-response="{{hasResponse}}" opened="{{requestOpened}}" request="{{request}}" response="{{response}}" active-request="{{activeRequest}}" route-params="[[params]]" data-route="request">
               <arc-request-view on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" request-loading="[[requestLoading]]" opened="{{requestOpened}}" request="{{request}}"></arc-request-view>
               <template is="dom-if" if="[[hasResponse]]">
-                <arc-response-view opened="[[requestOpened]]" response="[[response]]"></arc-response-view>
+                <arc-response-view opened="[[requestOpened]]" response="[[response]]" request="[[activeRequest]]"></arc-response-view>
               </template>
               <arc-save-dialog-view on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" id="saveRequestUi"></arc-save-dialog-view>
             </arc-request-controller>

@@ -91,13 +91,25 @@ arc.app.headers.toString = function(headersArray) {
   return result;
 };
 /**
- * Parse HTTP headers input from string to array of a key:value pairs objects.
+ * Parse HTTP headers input from string to array of objects containing `name` and `value`
+ * properties.
  *
- * @param {String} headersString Raw HTTP headers input
+ * @param {String|Headers} headers Raw HTTP headers input or Headers object
  * @returns {Array<Object>} The array of objects where properties are `name` as a header name and
  * `value` as a header content.
  */
-arc.app.headers.toJSON = function(headersString) {
+arc.app.headers.toJSON = function(headers) {
+  if (typeof headers === 'string') {
+    return arc.app.headers._stringToJSON(headers);
+  } else {
+    return arc.app.headers._hedersToJSON(headers);
+  }
+};
+/**
+ * Parse headers string to array of objects.
+ * See `arc.app.headers.toJSON` for more info.
+ */
+arc.app.headers._stringToJSON = function(headersString) {
   if (!headersString || headersString.trim() === '') {
     return [];
   }
@@ -126,6 +138,21 @@ arc.app.headers.toJSON = function(headersString) {
     result.push(obj);
   }
   return result;
+};
+/**
+ * Parse Headers object to array of objects.
+ * See `arc.app.headers.toJSON` for more info.
+ */
+arc.app.headers._hedersToJSON = function(headers) {
+  if (!headers) {
+    return [];
+  }
+  return Array.from(headers).map((item) => {
+    return {
+      name: item[0],
+      value: item[1]
+    };
+  });
 };
 /**
  * Helper method for old system: combine headers list with encoding value.

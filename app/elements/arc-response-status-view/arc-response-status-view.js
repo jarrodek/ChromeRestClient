@@ -10,6 +10,11 @@ Polymer({
     statusMessage: String,
     loadingTime: Number,
     responseHeaders: Array,
+    requestHeaders: Headers,
+    requestHeadersArray: {
+      type: Array,
+      computed: '_computeRequestHeaders(requestHeaders)'
+    },
     redirectData: {
       type: Array,
       value: []
@@ -101,5 +106,11 @@ Polymer({
       });
     }
     return result;
+  },
+
+  _computeRequestHeaders: function(requestHeaders) {
+    // console.log(requestHeaders);
+    // return [];
+    return arc.app.headers.toJSON(requestHeaders);
   }
 });

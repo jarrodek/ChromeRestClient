@@ -9,6 +9,9 @@
         --code-mirror-wrapper: {
           border: 1px #f5f5f5 solid;
         };
+        --code-mirror-editor: {
+          z-index: 0;
+        }
 
         --paper-input-container-underline: {
           background-color: var(--google-grey-100);
@@ -55,7 +58,7 @@
     <paper-tabs selected="{{tabSelected}}">
       <paper-tab>Raw headers</paper-tab>
       <paper-tab>Headers form</paper-tab>
-      <!-- <paper-tab>Predefinied sets</paper-tab> -->
+      <paper-tab>Predefinied sets</paper-tab>
     </paper-tabs>
     <iron-pages selected="{{tabSelected}}">
       <section>
@@ -77,7 +80,12 @@
         <paper-button raised on-tap="appendEmptyHeader">Add</paper-button>
       </section>
       <section>
-        snippets
+        <h4>Use predefined sets below to insert headers into the editor</h4>
+        <h5>Default Chrome headers</h5>
+        <code>
+          <pre>[[headersDefaults]]</pre>
+        </code>
+        <paper-button raised on-tap="_insertDefaultSet">Use this set</paper-button>
       </section>
     </iron-pages>
   </template>

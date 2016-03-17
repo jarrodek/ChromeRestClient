@@ -18,7 +18,6 @@ Polymer({
       headers.forEach((item) => obj.append(item.name, item.value));
       init.headers = obj;
     }
-    //TODO:180 include files.
 
     if (this.request.files && this.request.files.length > 0) {
       // create FormData from the form
@@ -62,6 +61,7 @@ Polymer({
       .then((blob) => {
         result.body = blob;
         this.fire('ready', {
+          request: this.connection.request,
           response: result
         });
       });
@@ -70,6 +70,7 @@ Polymer({
       .then((json) => {
         result.body = json;
         this.fire('ready', {
+          request: this.connection.request,
           response: result
         });
       });
@@ -78,6 +79,7 @@ Polymer({
       .then((text) => {
         result.body = text;
         this.fire('ready', {
+          request: this.connection.request,
           response: result
         });
       });

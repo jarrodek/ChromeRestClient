@@ -49,7 +49,7 @@ Polymer({
    * Handler called when the files has been read.
    */
   _importFileReady: function(e) {
-    console.info('File read', e.detail.result);
+    // console.info('File read', e.detail.result);
     if (e.detail.result) {
       try {
         let result = JSON.parse(e.detail.result);

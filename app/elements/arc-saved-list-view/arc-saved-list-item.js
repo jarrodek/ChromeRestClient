@@ -34,6 +34,11 @@ Polymer({
       value: false,
       readOnly: true
     },
+    driveIcon: {
+      type: Boolean,
+      value: false,
+      readOnly: true
+    }
   },
 
   behaviors: [
@@ -41,15 +46,23 @@ Polymer({
   ],
 
   _requestChanged: function() {
-    if (!this.request || !this.isHistory) {
-      this._setSavedIcon(false);
-      return;
-    }
     var type = this.request.type;
-    if (type === 'drive' || type === 'saved') {
-      this._setSavedIcon(true);
+    if (type === 'saved') {
+      if (this.isHistory) {
+        this._setSavedIcon(true);
+      } else {
+        this._setSavedIcon(false);
+      }
+    } else if (type === 'drive') {
+      if (this.isHistory) {
+        this._setSavedIcon(true);
+      } else {
+        this._setSavedIcon(false);
+      }
+      this._setDriveIcon(true);
     } else {
       this._setSavedIcon(false);
+      this._setDriveIcon(false);
     }
   },
 

@@ -20,8 +20,16 @@ the License.
       :host {
         display: block;
       }
+      arc-response-status-view {
+        border: 1px #f5f5f5 solid;
+        margin: 0 12px;
+      }
+      arc-response-payload-view {
+        border: 1px #f5f5f5 solid;
+        margin: 12px;
+      }
     </style>
-    <arc-response-status-view loading-time="[[loadingTime]]" status-code="[[response.status]]" status-message="[[response.statusText]]" response-headers="[[response.headers]]" redirect-data="[[response.redirects]]"></arc-response-status-view>
+    <arc-response-status-view loading-time="[[loadingTime]]" status-code="[[response.status]]" status-message="[[response.statusText]]" response-headers="[[response.headers]]" request-headers="[[request.headers]]" redirect-data="[[response.redirects]]"></arc-response-status-view>
     <arc-response-payload-view payload="[[response.body]]" headers="[[response.headers]]"></arc-response-payload-view>
   </template>
   <script src="arc-response-view.js"></script>

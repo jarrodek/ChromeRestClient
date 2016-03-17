@@ -14,7 +14,11 @@
           pre {
             -webkit-user-select: text;
           }
+          paper-progress {
+            width: 100%;
+          }
         </style>
+        <paper-progress hidden$="[[!loading]]" indeterminate></paper-progress>
         <pre id="output" class="parsed-content CodeMirror cm-s-cm-arc"></pre>
       </template>
     </dom-module>

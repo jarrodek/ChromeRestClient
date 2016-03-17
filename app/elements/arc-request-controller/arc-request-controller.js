@@ -1,5 +1,5 @@
 'use strict';
-
+/* global ArcRequest */
 Polymer({
   is: 'arc-request-controller',
   behaviors: [
@@ -45,6 +45,16 @@ Polymer({
      */
     response: {
       type: Object,
+      notify: true,
+      readOnly: true
+    },
+    /**
+     * Active request is an object returned from `socket-fetch` library.
+     * It is a original Request object used to make a request containing all final
+     * request data like headers ans payload.
+     */
+    activeRequest: {
+      type: ArcRequest,
       notify: true,
       readOnly: true
     },
@@ -99,6 +109,7 @@ Polymer({
   },
 
   onClearAll: function() {
+
     let base = new RequestLocalObject({
       url: '',
       method: 'GET'
@@ -147,7 +158,7 @@ Polymer({
     }
     this._setResponse(null);
     this._setProject(undefined);
-    
+
     switch (this.routeParams.type) {
       case 'saved':
         this._restoreSaved(this.routeParams.savedId);
@@ -372,6 +383,7 @@ Polymer({
   _responseReady: function(e) {
     this._setRequestLoading(false);
     this._setResponse(e.detail.response);
+    this._setActiveRequest(e.detail.request);
     this._saveHistory();
   },
 
@@ -446,18 +458,18 @@ Polymer({
   },
 
   _onHistorySave: function(e) {
-    var id = e.detail.data.id;
-    this.set('request.id', id);
-    switch (e.detail.data.type) {
-      case 'saved':
-        this.set('request.isSaved', true);
-        break;
-      case 'drive':
-        this.set('request.isDrive', true);
-        break;
-      default:
-        break;
-    }
+    // var id = e.detail.data.id;
+    // this.set('request.id', id);
+    // switch (e.detail.data.type) {
+    //   case 'saved':
+    //     this.set('request.isSaved', true);
+    //     break;
+    //   case 'drive':
+    //     this.set('request.isDrive', true);
+    //     break;
+    //   default:
+    //     break;
+    // }
     console.info('Saved history object', e.detail);
   },
   /** Called then transport not finished the request because of error. */

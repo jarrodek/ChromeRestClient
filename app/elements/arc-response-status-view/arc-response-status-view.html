@@ -29,8 +29,8 @@ the License.
             @apply(--paper-font-subhead);
             @apply(--layout-center);
             padding: 0 24px;
-            border-bottom: 1px rgba(0, 0, 0, 0.12) solid;
-            min-height: 48px;
+            border-bottom: 1px rgba(0, 0, 0, 0.05) solid;
+            min-height: 56px;
           }
 
           .status-label {
@@ -102,11 +102,15 @@ the License.
         </div>
         <paper-tabs selected="{{selectedTab}}">
           <paper-tab>Response headers (<span>{{responseHeaders.length}}</span>)</paper-tab>
+          <paper-tab>Request headers (<span>{{requestHeadersArray.length}}</span>)</paper-tab>
           <paper-tab>Redirects (<span>{{redirectData.length}}</span>)</paper-tab>
         </paper-tabs>
         <iron-pages selected="{{selectedTab}}">
           <section>
             <arc-headers-display-view on-tap="_handleLink" headers="{{responseHeaders}}"></arc-headers-display-view>
+          </section>
+          <section>
+            <arc-headers-display-view on-tap="_handleLink" headers="{{requestHeadersArray}}"></arc-headers-display-view>
           </section>
           <section>
             <template is="dom-if" if="{{!redirectData.length}}">
