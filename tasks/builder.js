@@ -420,7 +420,7 @@ gulp.task('copy', () => {
   // copy webworkers used in bower_components
   var webWorkers = gulp.src([
     'bower_components/socket-fetch/decompress-worker.js'
-  ]).pipe(gulp.dest(path.join(dest, 'elements')));
+  ]).pipe(gulp.dest(path.join(dest))); // in elements folder they are in the "root" path
 
   return merge(app, bower, webWorkers, assets, scripts, styles, codeMirror)
     .pipe($.size({
