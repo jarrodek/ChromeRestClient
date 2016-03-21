@@ -200,11 +200,11 @@ var Builder = {
     ];
     var promises = [];
     var fn = (path) => {
-      console.log('Creating dir', path);
+      // console.log('Creating dir', path);
       return new Promise((resolve, reject) => {
-        console.log('Calling mkdir');
+        // console.log('Calling mkdir');
         fsensure.dir.exists(path, (err) => {
-          console.log('Path exists', path);
+          // console.log('Path exists', path);
           if (err) {
             console.error(err);
             reject(err);
@@ -421,6 +421,11 @@ gulp.task('copy', () => {
   var webWorkers = gulp.src([
     'bower_components/socket-fetch/decompress-worker.js'
   ]).pipe(gulp.dest(path.join(dest))); // in elements folder they are in the "root" path
+
+  var elements = gulp.src([
+    'app/elements/**/*',
+    '!app/elements/elements.html'
+  ]).pipe(gulp.dest(path.join(dest,'elements')));
 
   return merge(app, bower, webWorkers, assets, scripts, styles/*, codeMirror*/)
     .pipe($.size({
