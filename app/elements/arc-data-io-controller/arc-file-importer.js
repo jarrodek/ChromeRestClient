@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 //TODO:20 add importer for new data structure.
@@ -123,3 +124,4 @@ Polymer({
     this._resetFileDrop();
   }
 });
+})();

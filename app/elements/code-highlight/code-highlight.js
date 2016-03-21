@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 /* global CodeMirror */
 
@@ -129,3 +130,4 @@ Polymer({
     }
   }
 });
+})();

@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 Polymer({
@@ -107,3 +108,4 @@ Polymer({
     return result;
   }
 });
+})();

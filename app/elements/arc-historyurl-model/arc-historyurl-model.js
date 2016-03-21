@@ -1,3 +1,4 @@
+(function() {
 Polymer({
   is: 'arc-historyurl-model',
 
@@ -45,3 +46,4 @@ Polymer({
       });
   }
 });
+})();

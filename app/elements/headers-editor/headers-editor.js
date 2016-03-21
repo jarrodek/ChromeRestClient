@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 /* global CodeMirror */
@@ -249,3 +250,4 @@ accept-language: en-US,en;q=0.8\n`;
     // this.headers = headers;
   }
 });
+})();

@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 /* global ArcRequest */
 Polymer({
@@ -647,3 +648,4 @@ Polymer({
     });
   }
 });
+})();

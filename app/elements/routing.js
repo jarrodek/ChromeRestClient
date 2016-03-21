@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 /* global app */
@@ -105,3 +106,4 @@ window.addEventListener('initializeRouting', function() {
   let event = new Event('ArcInitialized');
   window.dispatchEvent(event);
 });
+})();

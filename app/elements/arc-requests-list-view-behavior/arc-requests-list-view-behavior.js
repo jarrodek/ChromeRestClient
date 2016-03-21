@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 window.ArcBehaviors = window.ArcBehaviors || {};
@@ -6,7 +7,7 @@ window.ArcBehaviors = window.ArcBehaviors || {};
  *
  * @polymerBehavior ArcBehaviors.RequestsListViewBehavior
  */
-ArcBehaviors.RequestsListViewBehaviorImpl = {
+window.ArcBehaviors.RequestsListViewBehaviorImpl = {
   properties: {
     /**
      * A list of requests to display.
@@ -90,7 +91,7 @@ ArcBehaviors.RequestsListViewBehaviorImpl = {
   get scroller() {
     return this.scrollTarget;
   },
-  
+
   /** Toggle all checkboxes in the list */
   toggleAll: function() {
     if (this.allChecked) {
@@ -221,7 +222,8 @@ ArcBehaviors.RequestsListViewBehaviorImpl = {
   }
 };
 
-ArcBehaviors.RequestsListViewBehavior = [
+window.ArcBehaviors.RequestsListViewBehavior = [
   ArcBehaviors.RequestsListViewBehaviorImpl,
   Polymer.IronScrollTargetBehavior
 ];
+})();

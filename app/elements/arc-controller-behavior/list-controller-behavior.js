@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 window.ArcBehaviors = window.ArcBehaviors || {};
@@ -30,7 +31,7 @@ window.ArcBehaviors = window.ArcBehaviors || {};
  *
  * @polymerBehavior
  */
-ArcBehaviors.ListControllerBehavior = {
+window.ArcBehaviors.ListControllerBehavior = {
   properties: {
     /**
      * Data resulted by the query.
@@ -190,3 +191,4 @@ ArcBehaviors.ListControllerBehavior = {
    */
   onClearAll: function() { /* ... */ }
 };
+})();

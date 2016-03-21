@@ -1,3 +1,4 @@
+(function() {
 Polymer({
   is: 'arc-response-view',
   properties: {
@@ -34,3 +35,4 @@ Polymer({
     return Math.round(value);
   }
 });
+})();

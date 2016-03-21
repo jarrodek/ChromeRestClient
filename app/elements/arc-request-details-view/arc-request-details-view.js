@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 Polymer({
@@ -44,3 +45,4 @@ Polymer({
     this.fire('close');
   }
 });
+})();

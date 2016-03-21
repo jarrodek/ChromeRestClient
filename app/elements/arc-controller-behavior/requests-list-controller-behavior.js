@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 window.ArcBehaviors = window.ArcBehaviors || {};
 /**
@@ -9,7 +10,7 @@ window.ArcBehaviors = window.ArcBehaviors || {};
  *
  * @polymerBehavior ArcBehaviors.RequestsListControllerBehavior
  */
-ArcBehaviors.RequestsListControllerBehaviorImpl = {
+window.ArcBehaviors.RequestsListControllerBehaviorImpl = {
   properties: {
     /**
      * Model's key to sort on.
@@ -194,7 +195,8 @@ ArcBehaviors.RequestsListControllerBehaviorImpl = {
     }
   }
 };
-ArcBehaviors.RequestsListControllerBehavior = [
+window.ArcBehaviors.RequestsListControllerBehavior = [
   ArcBehaviors.ListControllerBehavior,
   ArcBehaviors.RequestsListControllerBehaviorImpl
 ];
+})();

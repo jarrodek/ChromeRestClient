@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 /* global drive */
 /**
@@ -335,3 +336,4 @@ Polymer({
     this._setErrorMessage(null);
   }
 });
+})();

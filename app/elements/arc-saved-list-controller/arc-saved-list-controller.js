@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 Polymer({
@@ -37,3 +38,4 @@ Polymer({
     ctrl.selectFile();
   }
 });
+})();

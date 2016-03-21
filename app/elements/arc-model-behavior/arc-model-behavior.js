@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 /**
  * ARC's behaviors namespace.
@@ -17,7 +18,7 @@ window.ArcBehaviors = window.ArcBehaviors || {};
  *
  * @polymerBehavior
  */
-ArcBehaviors.ArcModelBehavior = {
+window.ArcBehaviors.ArcModelBehavior = {
   /**
    * Fired when current data object or data objects has been deleted.
    *
@@ -331,3 +332,4 @@ ArcBehaviors.ArcModelBehavior = {
       });
   }
 };
+})();

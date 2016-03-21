@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 Polymer({
@@ -320,3 +321,4 @@ Polymer({
     return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
   }
 });
+})();

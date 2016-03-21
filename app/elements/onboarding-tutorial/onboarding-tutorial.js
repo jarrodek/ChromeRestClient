@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 Polymer({
@@ -166,3 +167,4 @@ Polymer({
     return lastPage ? false : true;
   }
 });
+})();

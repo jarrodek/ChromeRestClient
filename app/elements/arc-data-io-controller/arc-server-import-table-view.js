@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 Polymer({
@@ -99,3 +100,4 @@ Polymer({
     return dir;
   }
 });
+})();

@@ -1,3 +1,4 @@
+(function() {
 Polymer({
   is: 'arc-menu-view',
 
@@ -68,3 +69,4 @@ Polymer({
     this.fire('signout-requested');
   }
 });
+})();

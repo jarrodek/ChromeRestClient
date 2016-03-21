@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 Polymer({
@@ -121,3 +122,4 @@ Polymer({
     arc.app.analytics.sendEvent('Settings usage', 'Clear history', 'true');
   }
 });
+})();

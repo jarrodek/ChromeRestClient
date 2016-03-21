@@ -1,6 +1,6 @@
-'use strict';
-
 (function() {
+  
+  'use strict';
   var AuthEngine = {
     _grantedScopeArray: [],
     _requestedScopeArray: [],

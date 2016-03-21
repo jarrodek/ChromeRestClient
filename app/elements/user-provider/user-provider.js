@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 Polymer({
@@ -260,3 +261,4 @@ Polymer({
     this._restore();
   }
 });
+})();

@@ -1,4 +1,3 @@
-'use strict';
 
 Polymer({
   is: 'drive-open-from-drive-ui',

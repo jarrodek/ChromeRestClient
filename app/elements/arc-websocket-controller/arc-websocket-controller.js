@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 /* global WebSocketMessage */
 Polymer({
@@ -136,3 +137,4 @@ Polymer({
     }
   }
 });
+})();

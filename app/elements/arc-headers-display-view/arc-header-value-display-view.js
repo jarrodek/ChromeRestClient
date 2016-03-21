@@ -1,4 +1,3 @@
-'use strict';
 
 Polymer({
   is: 'arc-header-value-display-view',

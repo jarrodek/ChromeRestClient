@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 window.ArcBehaviors = window.ArcBehaviors || {};
 
@@ -29,7 +30,7 @@ window.ArcBehaviors = window.ArcBehaviors || {};
  *
  * @polymerBehavior
  */
-ArcBehaviors.ArcHasToolbarBehavior = {
+window.ArcBehaviors.ArcHasToolbarBehavior = {
   /**
    * An event called when the title changed
    *
@@ -113,3 +114,4 @@ ArcBehaviors.ArcHasToolbarBehavior = {
     });
   }
 };
+})();

@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 window.ArcBehaviors = window.ArcBehaviors || {};
@@ -35,7 +36,7 @@ window.ArcBehaviors = window.ArcBehaviors || {};
  *
  * @polymerBehavior ArcBehaviors.ArcControllerBehavior
  */
-ArcBehaviors.ArcControllerBehaviorImpl = {
+window.ArcBehaviors.ArcControllerBehaviorImpl = {
   /**
    * Fired when controller page is selected and will be shown.
    *
@@ -123,9 +124,10 @@ ArcBehaviors.ArcControllerBehaviorImpl = {
     return true;
   }
 };
-ArcBehaviors.ArcControllerBehavior = [
+window.ArcBehaviors.ArcControllerBehavior = [
   ArcBehaviors.ArcControllerBehaviorImpl,
   Polymer.NeonAnimatableBehavior,
   Polymer.IronResizableBehavior,
   ArcBehaviors.ArcHasToolbarBehavior
 ];
+})();

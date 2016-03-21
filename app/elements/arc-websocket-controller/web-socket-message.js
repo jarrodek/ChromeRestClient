@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 /*jshint unused:false*/
 class WebSocketMessage {
@@ -77,5 +78,5 @@ class WebSocketMessage {
     copy.time = copy.time.getTime();
     return copy;
   }
-
 }
+})();

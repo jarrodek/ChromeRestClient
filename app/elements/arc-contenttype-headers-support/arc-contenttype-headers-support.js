@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 Polymer({
@@ -47,3 +48,4 @@ Polymer({
     this.set('selected', this.defaults.indexOf(this.value));
   }
 });
+})();

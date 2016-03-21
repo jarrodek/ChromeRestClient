@@ -1,3 +1,4 @@
+(function() {
 Polymer({
   is: 'arc-response-payload-view',
   properties: {
@@ -192,3 +193,4 @@ Polymer({
     this.$.tabs.notifyResize();
   }
 });
+})();

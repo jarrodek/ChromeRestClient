@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 Polymer({
@@ -114,3 +115,4 @@ Polymer({
     return arc.app.headers.toJSON(requestHeaders);
   }
 });
+})();

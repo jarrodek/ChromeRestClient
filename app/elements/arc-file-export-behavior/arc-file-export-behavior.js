@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 window.ArcBehaviors = window.ArcBehaviors || {};
@@ -10,7 +11,7 @@ window.ArcBehaviors = window.ArcBehaviors || {};
  *
  * @polymerBehavior
  */
-ArcBehaviors.ArcFileExportBehavior = {
+window.ArcBehaviors.ArcFileExportBehavior = {
   properties: {
     /**
      * Suggested file name.
@@ -137,3 +138,4 @@ ArcBehaviors.ArcFileExportBehavior = {
     //empty
   }
 };
+})();

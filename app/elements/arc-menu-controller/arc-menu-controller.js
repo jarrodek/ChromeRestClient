@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 Polymer({
@@ -132,3 +133,4 @@ Polymer({
     this.$.auth.signOut();
   }
 });
+})();

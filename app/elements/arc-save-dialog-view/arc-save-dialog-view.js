@@ -1,3 +1,4 @@
+(function() {
 Polymer({
   is: 'arc-save-dialog-view',
   behaviors: [
@@ -113,3 +114,4 @@ Polymer({
     return !(!projects.length || newProjectName);
   }
 });
+})();

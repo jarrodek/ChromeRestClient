@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 Polymer({
@@ -101,3 +102,4 @@ Polymer({
     this.fire('abort');
   }
 });
+})();

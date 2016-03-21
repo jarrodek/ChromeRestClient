@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 
 Polymer({
@@ -275,3 +276,4 @@ Polymer({
     this.$.autocomplete.source = suggestions;
   }
 });
+})();
