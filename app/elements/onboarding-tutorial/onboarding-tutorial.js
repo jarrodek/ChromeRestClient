@@ -67,13 +67,34 @@ Polymer({
       }
     }
     this.pages = effectiveChildren;
-    this.open();
+    if (this.delay) {
+      this.async(() => {
+        this.openTutorial();
+      }, this.delay);
+    } else {
+      this.openTutorial();
+    }
   },
+
+  openTutorial: function() {
+    this._getTutorialState()
+    .then((state) => {
+      if (state) {
+        return;
+      }
+      this.open();
+    });
+  },
+
   _comnputeShowPrevious: function(selectedPage) {
     return selectedPage > 0;
   },
 
   next: function() {
+    if (this.lastPage) {
+      this.completeTutorial();
+      return;
+    }
     this.$.pages.entryAnimation = 'slide-from-right-animation';
     this.$.pages.exitAnimation = 'slide-left-animation';
     this.$.pages.selectNext();
@@ -82,6 +103,55 @@ Polymer({
     this.$.pages.entryAnimation = 'slide-from-left-animation';
     this.$.pages.exitAnimation = 'slide-right-animation';
     this.$.pages.selectPrevious();
+  },
+
+  completeTutorial: function() {
+    if (!this.id) {
+      this.close();
+      return;
+    }
+    this._saveTutorialPassed();
+    this.close();
+  },
+
+  skip: function() {
+    this.completeTutorial();
+  },
+
+  _getTutorialState: function() {
+    return new Promise((resolve) => {
+      chrome.storage.sync.get('tutorials', (data) => {
+        if (!('tutorials' in data)) {
+          resolve(false);
+          return;
+        }
+        var t = data.tutorials;
+        if (!(t instanceof Array)) {
+          resolve(false);
+          return;
+        }
+        resolve(t.indexOf(this.id) !== -1);
+      });
+    });
+  },
+
+  _saveTutorialPassed: function() {
+    return Promise.resolve();
+    return new Promise((resolve) => {
+      chrome.storage.sync.get('tutorials', (data) => {
+        if (!('tutorials' in data)) {
+          data.tutorials = [];
+        }
+        var t = data.tutorials;
+        if (!(t instanceof Array)) {
+          t = [];
+        }
+        t[t.length] = this.id;
+        chrome.storage.sync.set({tutorials: t}, () => {
+          resolve();
+        });
+      });
+    });
   },
 
   _comnputeNextLabel: function(lastPage) {

@@ -2,21 +2,63 @@
   <template>
     <style>
     :host {
-      display: block;
+      /*display: block;
+      height: 100%;
+      box-sizing: border-box;
+      padding-bottom: 72px;*/
+      @apply(--layout-vertical);
+      @apply(--layout-flex);
+      --tutorial-content-font: {
+        font-size: 19px;
+      }
     }
 
     :host >::content h2 {
       position: relative;
       margin: 0;
-      @apply(--paper-font-title);
+      @apply(--paper-font-display1);
       @apply(--paper-dialog-title);
     }
     :host > ::content > * {
       margin-top: 20px;
       padding: 0 24px;
+      @apply(--tutorial-font);
+      @apply(--tutorial-content-font);
     }
     :host > ::content > *:first-child {
       margin-top: 24px;
+    }
+    :host > ::content .onboarding-image-page {
+      @apply(--layout-horizontal);
+      @apply(--layout-flex);
+    }
+    :host > ::content .onboarding-image-page .image {
+      @apply(--layout-vertical);
+      @apply(--layout-center-center);
+      @apply(--layout-flex);
+    }
+    :host > ::content .onboarding-image-page iron-icon {
+      color: rgba(0, 0, 0, 0.57);
+      width: 140px;
+      height: 140px;
+      margin-bottom: 40px;
+    }
+    :host > ::content .onboarding-image-page iron-icon:last-child {
+      margin-bottom: 0;
+    }
+    :host > ::content .onboarding-image-page .description {
+      @apply(--layout-vertical);
+      @apply(--layout-flex);
+    }
+    :host > ::content li {
+      margin: 12px 0;
+    }
+    :host > ::content .info-button {
+      align-self: flex-end;
+    }
+    :host > ::content .tutorial-additional-info{
+      margin-top: 40px;
+      font-size: 16px;
     }
     </style>
     <content></content>

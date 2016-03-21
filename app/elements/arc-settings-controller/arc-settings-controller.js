@@ -86,12 +86,18 @@ Polymer({
     this.$.magicVatDialog.open();
   },
 
-  manageClick: function() {
-    page('/dataimport');
+  showTutorial: function() {
+    var tutorial = document.querySelector('#onboarding');
+    if (!tutorial) {
+      return;
+    }
+    tutorial.open();
   },
+
   historyClearClick: function() {
     this.$.historyClearDialog.open();
   },
+
   onClearDialogResult: function(e) {
     if (e.detail.canceled || !e.detail.confirmed) {
       return;

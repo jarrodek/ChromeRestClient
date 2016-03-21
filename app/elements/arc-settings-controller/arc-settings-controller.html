@@ -37,12 +37,12 @@ the License.
       }
       </style>
       <section class="settings-section">
-        <paper-item on-tap="manageClick">
+        <paper-item>
           <paper-item-body two-line="">
-            <div>Import / export
-            </div>
-            <div secondary="">Import or export data you saved in the app</div>
+            <div>History</div>
+            <div secondary="true">Save list of requests made by the app in local storage</div>
           </paper-item-body>
+          <paper-toggle-button checked="{{values.HISTORY_ENABLED}}"></paper-toggle-button>
         </paper-item>
       </section>
       <section class="settings-section">
@@ -54,15 +54,6 @@ the License.
       </section>
       <section class="settings-section">
         <paper-item>
-          <paper-item-body two-line="">
-            <div>History</div>
-            <div secondary="true">Save list of requests made by the app in local storage</div>
-          </paper-item-body>
-          <paper-toggle-button checked="{{values.HISTORY_ENABLED}}"></paper-toggle-button>
-        </paper-item>
-      </section>
-      <section class="settings-section">
-        <paper-item>
           <paper-item-body>
             <div>
               Magic variables
@@ -70,6 +61,13 @@ the License.
             </div>
           </paper-item-body>
           <paper-toggle-button checked="{{values.MAGICVARS_ENABLED}}"></paper-toggle-button>
+        </paper-item>
+      </section>
+      <section class="settings-section">
+        <paper-item on-tap="showTutorial">
+          <paper-item-body>
+            <div>Show tutorial</div>
+          </paper-item-body>
         </paper-item>
       </section>
       <paper-dialog id="historyClearDialog" on-iron-overlay-closed="onClearDialogResult">
