@@ -422,10 +422,10 @@ gulp.task('copy', () => {
     'bower_components/socket-fetch/decompress-worker.js'
   ]).pipe(gulp.dest(path.join(dest))); // in elements folder they are in the "root" path
 
-  var elements = gulp.src([
-    'app/elements/**/*',
-    '!app/elements/elements.html'
-  ]).pipe(gulp.dest(path.join(dest,'elements')));
+  // var elements = gulp.src([
+  //   'app/elements/**/*',
+  //   '!app/elements/elements.html'
+  // ]).pipe(gulp.dest(path.join(dest,'elements')));
 
   return merge(app, bower, webWorkers, assets, scripts, styles/*, codeMirror*/)
     .pipe($.size({
