@@ -12,9 +12,9 @@ var Cli = {
   },
   get buildOptions() {
     return {
-      string: 'build',
+      string: 'target',
       default: {
-        build: process.env.NODE_ENV || 'canary'
+        target: process.env.NODE_ENV
       }
     };
   }
@@ -73,7 +73,7 @@ try {
 var build = (done) => {
   var Builder = require('./tasks/builder.js');
   var params = Cli.getParams(Cli.buildOptions);
-  switch (params.build) {
+  switch (params.target) {
     case 'canary':
       Builder.buildCanary(done);
       break;
@@ -93,10 +93,10 @@ var build = (done) => {
       Builder.buildStable(true, done);
       break;
     default:
-      let msg = `Unknown target ${params.build}.
+      let msg = `Unknown target ${params.target}.
 
       Usage:
-      gulp build --build <TARGET>
+      gulp build --target <TARGET>
 
       Targets:
         canary          Build a canary (weekly) release
