@@ -5,8 +5,16 @@
       display: block;
       height: 100%;
       @apply(--layout-vertical);
+      --paper-item-selected: {
+        background-color: var(--paper-grey-200);
+      }
+      --paper-item-focused: {
+        background-color: var(--paper-grey-100);
+      }
     }
-
+    paper-item:hover {
+      background-color: var(--paper-grey-100);
+    }
     .bottom-menu {
       /*@apply(--layout-self-end);*/
       /*@apply(--layout-end-justified);*/

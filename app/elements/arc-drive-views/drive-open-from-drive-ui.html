@@ -36,9 +36,10 @@
 
     <h2>Opening shared file</h2>
     <div>
-      <p>The app is not able to open the file because this file wasn't created by the app.</p>
-      <p>However, when you open the file by <b>selecting the file on Google Drive website and choosing "Open with" and next "Advanced Rest Client"</b>. Then you open the file in the app and explicitly give permission to open the file by the app in the future.</p>
+      <p>The app can't open files not created by you.</p>
+      <p>Please go to Drive webapp, <b>select file and choose "Open with" and next "Advanced Rest Client"</b>
       <p>This must to be done once per file.</p>
+      <paper-button raised on-tap="_openDrive">Open Drive</paper-button>
     </div>
     <div class="buttons">
       <paper-button dialog-dismiss="" on-tap="_back">Back</paper-button>
