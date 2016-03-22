@@ -88,6 +88,7 @@ Polymer({
   },
 
   _comnputeShowPrevious: function(selectedPage) {
+    selectedPage = Number(selectedPage);
     return selectedPage > 0;
   },
 
@@ -160,6 +161,7 @@ Polymer({
   },
 
   _comnputeLastPage: function(selectedPage, pages) {
+    selectedPage = Number(selectedPage);
     return selectedPage === pages.length - 1 ? true : false;
   },
 
