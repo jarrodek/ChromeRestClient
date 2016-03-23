@@ -418,10 +418,12 @@ Polymer({
       //for history late last one.
       var request;
       if (!isHistory) {
-        //TODO:190 it will not cover a situation when object was overriten.
-        //This will requires an additional information (some pointer) to the request that is
-        //the request.
-        request = entries[0].request; // take the first one.
+        //TODO:190 it will not cover a situation when object was overriten. Fixed at 23 march 2016.
+        if (data.referenceEntry || data.referenceEntry === 0) {
+          request = entries[data.referenceEntry].request;
+        } else {
+          request = entries[0].request; // take the first one.
+        }
       } else {
         request = entries[entries.length - 1].request; // take the last one.
       }
@@ -590,6 +592,7 @@ Polymer({
     har.addPage(pageParams.page);
     har.addEntry(entry, pageParams.page.id);
     restoredRequest.har = har;
+    restoredRequest.referenceEntry = har.entries.length - 1;
     return restoredRequest;
   }
 });

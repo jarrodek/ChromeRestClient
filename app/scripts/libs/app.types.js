@@ -262,6 +262,17 @@ class RequestObject extends OrderedList {
     if (opts.name) {
       this.name = opts.name;
     }
+    /**
+     * The `referenceEntry` property references to the HAR entry object that contains request data.
+     * It can be not set which means that the client should take first array item (for saved) or
+     * last array item (for history).
+     * This should be set every time the request is ovveriten.
+     *
+     * It is an index of entries array in HAR object.
+     *
+     * @type {Number}
+     */
+    this.referenceEntry = opts.referenceEntry || undefined;
   }
 
   set har(har) {
