@@ -1,5 +1,0 @@
-{
-  "exclude": ["dev/components", "dev/workers"],
-  "recurse": true,
-  "destination": "docs/dev"
-}
