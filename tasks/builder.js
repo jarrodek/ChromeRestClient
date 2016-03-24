@@ -314,8 +314,6 @@ var Builder = {
             data.name += ' - beta';
             data.short_name += ' - beta';
           }
-          console.log(data.name, data.short_name, dest);
-          throw new Error('ssss');
           //jscs:enable requireCamelCaseOrUpperCaseIdentifiers
           delete data.key;
           data = JSON.stringify(data, null, 2);
