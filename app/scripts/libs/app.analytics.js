@@ -1,23 +1,23 @@
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
-/* global ga, chrome, fetch */
+/* global fetch, analytics */
 /**
  * Advanced Rest Client namespace
- * 
+ *
  * @namespace
  */
 var arc = arc || {};
@@ -63,13 +63,7 @@ arc.app.analytics.init = function() {
  * Initialize trackers.
  */
 arc.app.analytics._initTranckers = function() {
-<<<<<<< HEAD:app/scripts/libs/app.analytics.js
   var service = analytics.getService('ARC');
-=======
-  if (typeof ga !== 'function') {
-    return;
-  }
->>>>>>> hotfix-db:RestClient/dev/libs/app.analytics.js
   arc.app.analytics._trackersConfig.forEach(function(item) {
     let tracker = service.getTracker(item.trackingId);
     arc.app.analytics._trackers.push(tracker);
@@ -79,17 +73,8 @@ arc.app.analytics._initTranckers = function() {
  * Initialize and set up custom dimmenstion that are used by the app.
  */
 arc.app.analytics._setCustomDimmensions = function() {
-<<<<<<< HEAD:app/scripts/libs/app.analytics.js
-  var appVersion = chrome.runtime.getManifest().version;
-=======
-  if (typeof ga !== 'function') {
-    return;
-  }
-  var names = arc.app.analytics._getTrackerNames();
-  var appVersion = (chrome && chrome.runtime && chrome.runtime.getManifest) ?
-    chrome.runtime.getManifest().version : 'Unknown';
->>>>>>> hotfix-db:RestClient/dev/libs/app.analytics.js
-  var chromeVer = arc.app.utils.getChromeVersion();
+  var appVersion = arc.app.utils.appVer;
+  var chromeVer = arc.app.utils.chromeVersion;
   arc.app.analytics._trackers.forEach(function(tracker) {
     tracker.set('dimension1', chromeVer);
     tracker.set('dimension2', appVersion);
@@ -134,15 +119,12 @@ arc.app.analytics._setChromeChannel = function() {
   if (!window.navigator.onLine) {
     return;
   }
-  if (typeof ga !== 'function') {
-    return;
-  }
   arc.app.analytics._loadCSV()
     .then(function(obj) {
       if (!(obj instanceof Array)) {
         return;
       }
-      let version = arc.app.utils.getChromeVersion();
+      let version = arc.app.utils.chromeVersion;
       for (let i = 0, size = obj[1].length; i < size; i++) {
         let item = obj[1][i];
         /*jshint camelcase: false */
@@ -152,9 +134,9 @@ arc.app.analytics._setChromeChannel = function() {
           // jscs:enable requireCamelCaseOrUpperCaseIdentifiers
           /*jshint camelcase: true */
           let channel = item.channel;
-          arc.app.analytics._trackers.forEach(function(tracker) {
-            tracker.set('dimension3', channel);
-          });
+          for (let j = 0, len = arc.app.analytics._trackers.length; j < len; j++) {
+            arc.app.analytics._trackers[i].set('dimension3', channel);
+          }
           return;
         }
       }
@@ -203,29 +185,17 @@ arc.app.analytics._loadCSV = function() {
  * @param {String} category Event's category
  * @param {String} action Event's action
  * @param {String} label Event's label
- * @param {!Number} value An optional value of the event. 
+ * @param {!Number} value An optional value of the event.
  */
 arc.app.analytics.sendEvent = function(category, action, label, value) {
-<<<<<<< HEAD:app/scripts/libs/app.analytics.js
+  if (arc.app.analytics._trackers.length === 0) {
+    return {
+      'type': 'event',
+      'params': arguments
+    };
+  }
   arc.app.analytics._trackers.forEach(function(tracker) {
     tracker.sendEvent(category, action, label, value);
-=======
-  if (typeof ga !== 'function') {
-    return;
-  }
-  var names = arc.app.analytics._getTrackerNames();
-  var config = {
-    hitType: 'event',
-    eventCategory: category,
-    eventAction: action,
-    eventLabel: label
-  };
-  if (typeof value !== 'undefined') {
-    config.eventValue = value;
-  }
-  names.forEach(function(name) {
-    ga(name + '.send', config);
->>>>>>> hotfix-db:RestClient/dev/libs/app.analytics.js
   });
 };
 /**
@@ -234,17 +204,8 @@ arc.app.analytics.sendEvent = function(category, action, label, value) {
  * @param {String} screenName A screen name to be send.
  */
 arc.app.analytics.sendScreen = function(screenName) {
-<<<<<<< HEAD:app/scripts/libs/app.analytics.js
   arc.app.analytics._trackers.forEach(function(tracker) {
     tracker.sendAppView(screenName);
-=======
-  if (typeof ga !== 'function') {
-    return;
-  }
-  var names = arc.app.analytics._getTrackerNames();
-  names.forEach(function(name) {
-    ga(name + '.send', 'pageview', screenName);
->>>>>>> hotfix-db:RestClient/dev/libs/app.analytics.js
   });
 };
 /**
@@ -254,22 +215,32 @@ arc.app.analytics.sendScreen = function(screenName) {
  * @param {Boolean} isFatal True if the exception is fatal.
  */
 arc.app.analytics.sendException = function(exception, isFatal) {
-<<<<<<< HEAD:app/scripts/libs/app.analytics.js
+  if (arc.app.analytics._trackers.length === 0) {
+    return {
+      'type': 'exception',
+      'params': [exception, isFatal + '']
+    };
+  }
   arc.app.analytics._trackers.forEach(function(tracker) {
     tracker.sendException(exception, isFatal);
-=======
-  if (typeof ga !== 'function') {
+  });
+};
+arc.app.analytics.getPendingAnalytics = function(callback) {
+  if (!chrome.runtime.getBackgroundPage) {
+    callback([]);
     return;
   }
-  var names = arc.app.analytics._getTrackerNames();
-  var value = {
-    'exDescription': '' + exception
-  };
-  if (typeof isFatal !== 'undefined') {
-    value.exFatal = isFatal;
-  }
-  names.forEach(function(name) {
-    ga(name + '.send', 'exception', value);
->>>>>>> hotfix-db:RestClient/dev/libs/app.analytics.js
+  chrome.runtime.getBackgroundPage((bg) => {
+    let bgPendings = bg.pendingAnalytics;
+    if (!bgPendings) {
+      bgPendings = [];
+    }
+    if (!window.pendingAnalytics) {
+      window.pendingAnalytics = [];
+    }
+    let data = window.pendingAnalytics.concat(bgPendings);
+    callback(data);
+    window.pendingAnalytics = [];
+    bg.pendingAnalytics = [];
   });
 };

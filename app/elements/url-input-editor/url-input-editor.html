@@ -1,0 +1,114 @@
+<dom-module id="url-input-editor">
+  <template>
+    <style>
+    :host {
+      @apply(--layout-vertical);
+    }
+
+    .simple {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+    }
+
+    .main-input {
+      @apply(--layout-flex);
+    }
+
+    .host-input {
+      @apply(--layout-flex);
+      display: none;
+    }
+
+    .path-input {
+      @apply(--layout-flex);
+    }
+
+    .anchor-input {
+      @apply(--layout-flex);
+    }
+
+    .simple[opened] .host-input {
+      display: initial;
+    }
+
+    .simple[opened] .main-input {
+      display: none;
+    }
+
+    #toggleButton {
+      transition: transform 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
+      transform: rotateZ(0deg);
+    }
+
+    .simple[opened] #toggleButton {
+      transform: rotateZ(90deg);
+    }
+
+    .detailed {
+      display: none;
+      padding: 0 40px;
+    }
+
+    .detailed[opened] {
+      display: initial;
+    }
+
+    .form-row {
+      @apply(--layout-horizontal);
+      @apply(--layout-flex);
+    }
+    .param-name {
+      margin-right: 12px;
+    }
+    .param-value {
+      @apply(--layout-flex);
+    }
+    .params-list {
+      margin: 12px 0;
+    }
+    .query-title {
+      @apply(--paper-font-caption);
+      color: #737373;
+    }
+    </style>
+    <div class="simple" opened$="{{detailed}}">
+      <paper-icon-button id="toggleButton" icon="hardware:keyboard-arrow-right" on-tap="toggle"></paper-icon-button>
+      <paper-input-container class="main-input" no-label-float>
+        <input is="iron-input" type="url" value="{{url::input}}" placeholder="Request URL" id="masterUrl"/>
+      </paper-input-container>
+      <paper-input label="Host" value="{{hostValue}}" class="host-input" on-input="updateUrl"></paper-input>
+      <paper-menu-button horizontal-align="right" id="urlContextMenuButton">
+        <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
+        <paper-menu class="dropdown-content" id="urlContextMenu" on-iron-select="_contextMenuAction">
+          <paper-item data-action="encParamsAction">Encode parameters</paper-item>
+          <paper-item data-action="decParamsAction">Decode parameters</paper-item>
+          <paper-item data-action="replAmpAction">Replace "&amp;" with ";"</paper-item>
+          <paper-item data-action="replSemiAction">Replace ";" with "&amp;"</paper-item>
+        </paper-menu>
+      </paper-menu-button>
+    </div>
+    <div class="detailed" opened$="{{detailed}}" on-input="updateUrl">
+      <paper-input label="Path" value="{{pathValue}}" class="path-input"></paper-input>
+      <div class="params-list">
+        <label class="query-title">Query parameters</label>
+        <template is="dom-repeat" id="paramsList" items="{{paramsList}}" on-dom-change="_onParamsRender">
+          <div class="form-row">
+            <paper-input-container class="param-name" no-label-float inline>
+              <input is="iron-input" type="text" value="{{item.name::input}}" placeholder="Param name"/>
+            </paper-input-container>
+            <paper-input-container class="param-value" no-label-float inline>
+              <input is="iron-input" type="text" value="{{item.value::input}}" placeholder="Param value" />
+            </paper-input-container>
+            <paper-icon-button icon="close" title="Remove parameter" on-tap="_removeParam"></paper-icon-button>
+          </div>
+        </template>
+        <paper-button raised on-tap="appendEmptyQueryParam">Add</paper-button>
+      </div>
+      <paper-input label="Hash" value="{{anchorValue}}" class="anchor-input"></paper-input>
+    </div>
+    <iron-a11y-keys id="a11y" target="{{this.$.masterUrl}}" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
+    <paper-autocomplete target="[[masterUrlElement]]" id="autocomplete" loader on-query="_queryUrlHistory" opened="{{suggesionsOpened}}" on-selected="_onSuggestionSelected"></paper-autocomplete>
+    <arc-historyurl-model id="model" on-data-ready="_setSuggestions"></arc-historyurl-model>
+  </template>
+  <script src="url-input-editor.js"></script>
+</dom-module>

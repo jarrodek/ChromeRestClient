@@ -2,7 +2,7 @@
   "esnext": true,
   "node": true,
   "browser": true,
-  "bitwise": true,
+  "bitwise": false,
   "camelcase": false,
   "curly": true,
   "eqeqeq": true,
@@ -30,11 +30,16 @@
     "ProjectObject": true,
     "ServerExportedObject": true,
     "RequestObject": true,
+    "RequestLocalObject": true,
     "fetch": true,
     "Dexie": true,
     "FileExport": true,
-    "HttpHeaderObject": true,
-    "HttpStatusObject": true,
-    "DriveObject": true
+    "_": true,
+    "Headers": true,
+    "SocketFetch": true,
+    "PayloadParser": true,
+    "DriveRequestObject": true,
+    "SavedRequestObject": true,
+    "HistoryRequestObject": true
   }
 }

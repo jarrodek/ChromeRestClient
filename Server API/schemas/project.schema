@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "https://advancedrestclient.com/schemas/project.schema",
+  "title": "ARC project object",
+  "description": "An object representing project information.",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": {
+        "enum": [ "ARC#project" ]
+      },
+      "description": "Object namespace. It identifies the object as a project object. This is always set to ARC#project"
+    },
+    "key": {
+      "type": "string",
+      "description": "AppEngine datastore ID"
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time",
+      "description": "A RFC3339 date-time string representing time of creation."
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the project"
+    },
+    "order": {
+      "type": "number",
+      "default": 0,
+      "title": "An order number on the list of projects. It's only rewlevant for owner since shared user may have different order."
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "$ref": "permission.schema"
+      },
+      "description": "A list of permissions to the project."
+    },
+    "requests": {
+      "type": "array",
+      "title": "A list of requests associated with the project.",
+      "items": {
+        "$ref": "request.schema"
+      }
+    }
+  },
+  "required": [
+    "kind",
+    "name"
+  ]
+}

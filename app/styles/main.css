@@ -1,15 +1,64 @@
 body {
-  font-family: RobotoDraft, sans-serif;
+  font-family: Roboto, sans-serif;
   color: #333;
   margin: 0;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   -webkit-touch-callout: none;
 }
 
-html,body{
+html,
+body {
   height: 100%;
+}
+
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Material Icons'), local('MaterialIcons-Regular'), url(/assets/MaterialIcons-Regular.woff2) format('woff2');
+}
+
+
+/* Search bar states */
+
+paper-toolbar[mode="search"] .toolbar-hide {
+  display: none !important;
+}
+
+paper-toolbar[mode="search"] .toolbar-hide[mode~=search] {
+  display: flex !important;
+  flex: 1;
+}
+
+#mainSearchInput {
+  display: none;
+  background-color: transparent;
+  outline: none;
+  border: none;
+  font-size: 24px;
+  font-weight: 300;
+  font-family: Roboto, sans-serif;
+}
+
+paper-toolbar[mode="search"] #mainSearchInput {
+  display: initial;
+}
+
+/* Requesting features in main toolbar. */
+
+paper-toolbar > *[feature] {
+  display: none;
+}
+
+paper-toolbar[search] > *[feature="search"],
+paper-toolbar[open] > *[feature="open"],
+paper-toolbar[save] > *[feature="save"],
+paper-toolbar[export] > *[feature="export"],
+paper-toolbar[clearAll] > *[feature="clearAll"],
+paper-toolbar[projectEndpoints] > *[feature="projectEndpoints"] {
+  display: initial;
 }

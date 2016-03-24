@@ -1,0 +1,13 @@
+#%RAML 1.0 Trait
+headers:
+  Authorization:
+    description: |
+      A valid Authorization header is required with Bearer token.
+      Only a person recognized by the user ID and access granted to the object will have access to the object.
+responses:
+  401:
+    displayName: Unauthorized
+    description: Either user is not authorized to perform given operation or the auth token is invalid or revoked.
+  403:
+    displayName: Forbidden
+    description: The user is not authorized to access the resource.

@@ -1,0 +1,157 @@
+<!--
+@license
+Copyright 2016 Pawel Psztyc, The ARC team
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<html>
+  <head></head>
+  <body>
+    <dom-module id="arc-response-status-view">
+      <template>
+        <style include="paper-material">
+          :host {
+            @apply(--layout-vertical);
+          }
+
+          .status-row {
+            @apply(--layout-horizontal);
+            @apply(--paper-font-subhead);
+            @apply(--layout-center);
+            padding: 0 24px;
+            border-bottom: 1px rgba(0, 0, 0, 0.05) solid;
+            min-height: 56px;
+          }
+
+          .status-label {
+            width: 80px;
+            @apply(--paper-font-subhead);
+          }
+
+          .status-value {
+            @apply(--layout-flex);
+            @apply(--layout-horizontal);
+            @apply(--layout-center);
+          }
+
+          .response-status-help {
+            color: rgba(0, 0, 0, 0.24);
+            transition: color 300ms ease-in-out;
+          }
+          .response-status-help:hover {
+            color: rgba(33, 150, 243, 1);
+          }
+
+          .status-value.status {
+            padding: 0 16px;
+          }
+
+          .redirect-value {
+            margin-top: 12px;
+            @apply(--layout-flex);
+          }
+
+          .status-color {
+            color: var(--paper-green-700);
+          }
+
+          .status-color.warning {
+            color: var(--paper-orange-700);
+          }
+
+          .status-color.error {
+            color: var(--paper-red-700);
+          }
+
+          .no-redirects-container {
+            @apply(--layout-vertical);
+            @apply(--layout-center);
+          }
+
+          .no-redirects-info {
+            @apply(--paper-font-body2);
+          }
+
+          app-headers-display {
+            margin-top: 12px;
+          }
+
+        </style>
+        <div class="status-row">
+          <div class="status-label">Status:</div>
+          <div class="status-value status">
+            <span class$="{{_computeStatusClass(statusCode)}}">
+              <span>{{statusCode}}</span>:
+              <span>{{statusMessage}}</span>
+            </span>
+            <paper-icon-button on-tap="showStatusInfo" icon="help" class="response-status-help"></paper-icon-button>
+            <span>
+              Loading time: {{loadingTime}} ms
+            </span>
+          </div>
+        </div>
+        <paper-tabs selected="{{selectedTab}}">
+          <paper-tab>Response headers (<span>{{responseHeaders.length}}</span>)</paper-tab>
+          <paper-tab>Request headers (<span>{{requestHeadersArray.length}}</span>)</paper-tab>
+          <paper-tab>Redirects (<span>{{redirectData.length}}</span>)</paper-tab>
+        </paper-tabs>
+        <iron-pages selected="{{selectedTab}}">
+          <section>
+            <arc-headers-display-view on-tap="_handleLink" headers="{{responseHeaders}}"></arc-headers-display-view>
+          </section>
+          <section>
+            <arc-headers-display-view on-tap="_handleLink" headers="{{requestHeadersArray}}"></arc-headers-display-view>
+          </section>
+          <section>
+            <template is="dom-if" if="{{!redirectData.length}}">
+              <div class="no-redirects-container">
+                <p class="no-redirects-info">There were no redirects during this request</p>
+              </div>
+            </template>
+            <template is="dom-if" if="{{redirectData.length}}">
+              <template is="dom-repeat" items="{{redirectData}}">
+                <div class="status-row">
+                  <div class="status-label">
+                    #<span>{{_computeIndexName(index)}}</span>
+                  </div>
+                  <div class="redirect-value" on-tap="_handleLink">
+                    <div class="status-value status">
+                      <span>To:
+                        <span>
+                          <!-- TODO: Handle links differently and not show link if there is no actually a link -->
+                          <a href="{{_computeRedirectLocation(item.headers)}}" class="auto-link">{{_computeRedirectLocation(item.headers)}}</a>
+                        </span>
+                        with status
+                        <span>{{item.status}} {{item.statusText}}</span>
+                      </span>
+                    </div>
+                    <arc-headers-display-view headers="{{_computeRedirectHeaders(item.headers)}}"></arc-headers-display-view>
+                  </div>
+                </div>
+              </template>
+            </template>
+          </section>
+        </iron-pages>
+        <paper-dialog id="statusCodeInfo">
+          <h2>{{_scdTitle}}</h2>
+          <paper-dialog-scrollable>{{_scdBody}}</paper-dialog-scrollable>
+          <div class="buttons">
+            <paper-button dialog-confirm autofocus>Close</paper-button>
+          </div>
+        </paper-dialog>
+        <arc-status-object-model id="statusModel" on-data-ready="_onStatusInfoReady" on-error="_onStatusInfoError"></arc-status-object-model>
+      </template>
+    </dom-module>
+    <script src="arc-response-status-view.js"></script>
+  </body>
+</html>

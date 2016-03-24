@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "https://advancedrestclient.com/schemas/projectlist.schema",
+  "title": "Projects list",
+  "description": "A list of projects available to the user.",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": {
+        "enum": [ "ARC#projectslist" ]
+      },
+      "description": "Object namespace. It identifies the object as a list of projects."
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "project.schema"
+      }
+    },
+    "nextPageToken": {
+      "type": "string",
+      "description": "A next page token used with pagination. May be not set if projection is used."
+    }
+  },
+  "required": [
+    "kind",
+    "items"
+  ]
+}

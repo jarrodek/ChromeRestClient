@@ -1,0 +1,56 @@
+<dom-module id="onboarding-tutorial">
+  <template strip-whitespace>
+    <style>
+      :host {
+        display: block;
+        margin: 24px 40px;
+        -webkit-overflow-scrolling: touch;
+
+        background: var(--paper-dialog-background-color, --primary-background-color);
+        color: var(--paper-dialog-color, --primary-text-color);
+
+        @apply(--paper-font-body1);
+        @apply(--shadow-elevation-16dp);
+        @apply(--paper-dialog);
+        width: 800px;
+        height: 600px;
+        overflow: hidden;
+      }
+      .actions {
+        position: relative;
+        padding: 8px 8px 8px 24px;
+        margin: 0;
+
+        color: var(--paper-dialog-button-color, --primary-color);
+
+        @apply(--layout-horizontal);
+        /*@apply(--layout-end-justified);*/
+      }
+      neon-animated-pages {
+        width: 800px;
+        height: calc(100% - 60px);
+      }
+      .pages {
+        @apply(--layout-flex);
+      }
+    </style>
+    <neon-animated-pages id="pages" selected="{{selectedPage}}" entry-animation="slide-from-right-animation" exit-animation="slide-left-animation">
+      <content></content>
+    </neon-animated-pages>
+    <div class="actions">
+      <div class="pages">
+        <paper-radio-group selected="{{selectedPage}}">
+        <template is="dom-repeat" items="[[pages]]">
+          <paper-radio-button name$="[[index]]"></paper-radio-button>
+        </template>
+        </paper-radio-group>
+      </div>
+      <div class="buttons">
+        <paper-button hidden$="[[!showSkip]]" on-tap="skip">skip</paper-button>
+        <paper-button on-tap="prev" raised disabled$="[[!previousEnabled]]">previous</paper-button>
+        <paper-button on-tap="next" raised>[[nextLabel]]</paper-button>
+      </div>
+    </div>
+  </template>
+  <script src="onboarding-tutorial.js"></script>
+</dom-module>

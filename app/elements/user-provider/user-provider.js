@@ -1,3 +1,6 @@
+(function() {
+'use strict';
+
 Polymer({
   is: 'user-provider',
 
@@ -19,10 +22,6 @@ Polymer({
      * User profile image. The information will be retreived from the Google API
      * after successfoul authorization.
      * It can be use by different element to display user image.
-     *
-     * @attribute profileImage
-     * @type String
-     * @default null
      */
     profileImage: {
       type: String,
@@ -49,11 +48,27 @@ Polymer({
     /**
      * Authorization headers for Google services.
      */
-    authHeaders: Object,
+    authHeaders: {
+      type: Object,
+      notify: true
+    },
     /**
      * Current access token.
      */
-    accessToken: String
+    accessToken: String,
+    /**
+     * True when the user is not signed in to the Chrome.
+     */
+    notSignedIn: {
+      type: Boolean,
+      value: false
+    },
+    _signInChanged: {
+      type: Object,
+      value: function() {
+        return this._onSignInChanged.bind(this);
+      }
+    }
   },
 
   ready: function() {
@@ -61,19 +76,29 @@ Polymer({
     this._restore();
   },
 
+  attached: function() {
+    chrome.identity.onSignInChanged.addListener(this._signInChanged);
+  },
+
+  detached: function() {
+    chrome.identity.onSignInChanged.removeListener(this._signInChanged);
+  },
+
   _restore: function() {
-    this.authorize(false).then(function(accessToken) {
+    if (this.notSignedIn) {
+      return;
+    }
+    this.authorize(false).then((accessToken) => {
       if (!accessToken) {
         this._setAuthorized(false);
         return;
       }
-      this.authHeaders = {
-        'Authorization': 'Bearer ' + accessToken
-      };
-      this.accessToken = accessToken;
-      this._setAuthorized(true);
-    }.bind(this)).catch(function(e) {
-      console.error('user-provider::restore', e);
+      this._setTokenData(accessToken);
+    }).catch(() => {
+      if (this.notSignedIn) {
+        return;
+      }
+      //console.error('user-provider::restore', e);
     });
   },
 
@@ -86,25 +111,48 @@ Polymer({
     }
   },
 
+  _setTokenData: function(accessToken) {
+    this.authHeaders = {
+      'Authorization': 'Bearer ' + accessToken
+    };
+    this.accessToken = accessToken;
+    this._setAuthorized(true);
+  },
+
   /**
    * Authorize the user using Chrome Identity API for Google Accounts.
    *
-   * @param {Bool} interactive 
-   *    if true user will see confirmation dialog if the user is not logged in. 
+   * @param {Bool} interactive
+   *    if true user will see confirmation dialog if the user is not logged in.
    *    If false dialog will never show and function will result with token == null.
    */
   authorize: function(interactive) {
-    return new Promise(function(resolve, reject) {
+    if (this.notSignedIn) {
+      return Promise.reject({
+        'message': 'The user is not signed in.'
+      });
+    }
+    return new Promise((resolve, reject) => {
       try {
         let options = this._authOptions(interactive);
-        chrome.identity.getAuthToken(options, function(token) {
-          resolve(token);
-        }.bind(this));
+        chrome.identity.getAuthToken(options, (accessToken) => {
+          if (chrome.runtime.lastError) {
+            this._setAuthorized(false);
+            if (chrome.runtime.lastError.message === 'The user is not signed in.') {
+              this.notSignedIn = true;
+            }
+            reject(chrome.runtime.lastError);
+            return;
+          }
+          this._setTokenData(accessToken);
+          this._setAuthorized(true);
+          resolve(accessToken);
+        });
       } catch (e) {
         console.error(e);
         reject(e.message);
       }
-    }.bind(this));
+    });
   },
   /**
    * Construct an options for chrome.identity.getAuthToken function.
@@ -125,56 +173,60 @@ Polymer({
    * Revoke access token. The token will not work after this operation.
    */
   revokeToken: function() {
-    this.authorize(false).then(function(accessToken) {
+    this.authorize(false).then((accessToken) => {
       if (!accessToken) {
         this._setAuthorized(false);
         return;
       }
-      this.set('accessToken'.accessToken);
       this.$.revokeRequest.generateRequest();
-    }.bind(this)).catch(function(e) {
-      console.error('user-provider::restore', e);
+    })
+    .catch((e) => {
+      this.fire('error', e);
+      console.error('user-provider::revokeToken', e);
     });
   },
   /**
    * A function to be called when the token has been revoked.
    */
-  _tokenRevokedHandler: function(e) {
-    this._clearCache().then(function() {
+  _tokenRevokedHandler: function() {
+    this._clearCache().then(() => {
       this._setAuthorized(false);
-    }.bind(this));
+      this.set('accessToken', null);
+    });
   },
   /**
    * Revoke error handler.
    */
-  _tokenRevokeError: function(e) {
+  _tokenRevokeError: function() {
     console.warn('Token revoke failed.');
   },
   /**
    * Clear auth data.
    */
   _clearCache: function() {
-    return this.authorize(false)
-      .then(function(accessToken) {
-        if (!accessToken) {
-          return Promise.resolve(true);
-        }
-        return new Promise(function(resolve) {
-          chrome.identity.removeCachedAuthToken({
-            token: this.accessToken
-          }, function() {
-            resolve();
-          });
-        });
-      }.bind(this));
+    return new Promise((resolve) => {
+      if (!this.accessToken) {
+        resolve(true);
+        return;
+      }
+      chrome.identity.removeCachedAuthToken({
+        token: this.accessToken
+      }, function() {
+        resolve();
+      });
+    });
   },
   /**
    * A success handler for token info request.
    */
   _tokenInfoHandler: function(e) {
     var tokenInfo = e.detail.response;
-    if (!tokenInfo) return;
+    if (!tokenInfo) {
+      return;
+    }
+    //jscs: disable
     if (tokenInfo.expires_in <= 0) {
+      //jscs: enable
       this._setAuthorized(false);
     }
   },
@@ -198,9 +250,15 @@ Polymer({
       this.profileImage = resp.response.picture;
     }
   },
-  
+
   _userDataError: function(error) {
-    //TODO: error handling
+    //TODO:160 error handling
     console.error('user-account::userDataError:', error);
+  },
+
+  _onSignInChanged: function(account, signedIn) {
+    this.set('notSignedIn', !signedIn);
+    this._restore();
   }
 });
+})();

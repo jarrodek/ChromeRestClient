@@ -1,0 +1,40 @@
+<dom-module id="method-selector">
+  <template>
+    <style>
+    :host {
+      display: block;
+    }
+    </style>
+    <paper-radio-group selected="{{method}}">
+      <paper-radio-button name="GET">GET</paper-radio-button>
+      <paper-radio-button name="POST">POST</paper-radio-button>
+      <paper-radio-button name="PUT">PUT</paper-radio-button>
+      <paper-radio-button name="DELETE">DELETE</paper-radio-button>
+    </paper-radio-group>
+    <paper-dropdown-menu label="Other methods">
+      <paper-listbox class="dropdown-content" selected="{{method}}" attr-for-selected="data-method">
+        <paper-item data-method="PATCH">PATCH</paper-item>
+        <paper-item data-method="HEAD">HEAD</paper-item>
+        <paper-item data-method="OPTIONS">OPTIONS</paper-item>
+      </paper-listbox>
+    </paper-dropdown-menu>
+    <paper-dropdown-menu label="Custom content type" hidden$="{{!isPayload}}" no-label-float>
+      <paper-listbox class="dropdown-content" selected="{{contentType}}" attr-for-selected="data-type">
+        <paper-item data-type="application/json">application/json</paper-item>
+        <paper-item data-type="application/xml">application/xml</paper-item>
+        <paper-item data-type="application/atom+xml">application/atom+xml</paper-item>
+        <paper-item data-type="multipart/form-data">multipart/form-data</paper-item>
+        <paper-item data-type="multipart/alternative">multipart/alternative</paper-item>
+        <paper-item data-type="multipart/mixed">multipart/mixed</paper-item>
+        <paper-item data-type="application/x-www-form-urlencoded">application/x-www-form-urlencoded</paper-item>
+        <paper-item data-type="application/base64">application/base64</paper-item>
+        <paper-item data-type="application/octet-stream">application/octet-stream</paper-item>
+        <paper-item data-type="text/plain">text/plain</paper-item>
+        <paper-item data-type="text/css">text/css</paper-item>
+        <paper-item data-type="text/html">text/html</paper-item>
+        <paper-item data-type="application/javascript">application/javascript</paper-item>
+      </paper-listbox>
+    </paper-dropdown-menu>
+  </template>
+  <script src="method-selector.js"></script>
+</dom-module>

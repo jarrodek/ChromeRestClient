@@ -1,0 +1,55 @@
+<dom-module id="authorization-support">
+  <template>
+    <style>
+    :host {
+      display: block;
+      margin: 24px 40px;
+      -webkit-overflow-scrolling: touch;
+      background: var(--paper-dialog-background-color, --primary-background-color);
+      color: var(--paper-dialog-color, --primary-text-color);
+      @apply(--paper-font-body1);
+      @apply(--shadow-elevation-16dp);
+      @apply(--paper-dialog);
+    }
+
+    :host > * {
+      padding: 0 24px;
+    }
+
+    h2 {
+      position: relative;
+      margin: 0;
+      @apply(--paper-font-title);
+      @apply(--paper-dialog-title);
+    }
+
+    .title-area {
+      padding-top: 24px;
+      padding-bottom: 24px;
+      @apply(--layout-horizontal);
+    }
+
+    .buttons {
+      position: relative;
+      padding: 8px 8px 8px 24px;
+      margin: 0;
+      margin-bottom: 24px;
+      color: var(--paper-dialog-button-color, --primary-color);
+      @apply(--layout-horizontal);
+      @apply(--layout-end-justified);
+    }
+    </style>
+    <div class="title-area" id="titleArea">
+      <h2 class="flex">Basic authorization</h2>
+    </div>
+    <div class="form">
+      <paper-input label="User name" value="{{login}}"></paper-input>
+      <paper-input label="Password (visible)" value="{{password}}"></paper-input>
+    </div>
+    <div class="buttons">
+      <paper-button dialog-dismiss on-tap="_cancel">Cancel</paper-button>
+      <paper-button dialog-confirm on-tap="_select">Select</paper-button>
+    </div>
+  </template>
+  <script src="authorization-support.js"></script>
+</dom-module>

@@ -1,0 +1,53 @@
+<!--
+@license
+Copyright 2016 Pawel Psztyc, The ARC team
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<link rel="import" href="../arc-request-object-model/arc-request-object-model.html">
+<link rel="import" href="../arc-saved-list-view/arc-saved-list-empty.html">
+<link rel="import" href="../arc-saved-list-view/arc-saved-list-view.html">
+<!--
+`arc-saved-list-controller` controlls behavior of the saved requests list.
+
+@group Controller Elements
+@element arc-saved-list-controller
+-->
+<dom-module id="arc-saved-list-controller">
+  <template>
+    <style>
+    :host {
+      display: block;
+    }
+    </style>
+    <template is="dom-if" if="{{hasListData}}">
+      <arc-saved-list-view requests="{{listData}}"
+        sort="{{sortBy}}"
+        dir="{{sortDirection}}"
+        on-name-changed="_requestNameChanged"
+        on-clear-data="_clearDataStore"
+        on-export-requested="_onExportRequested"
+        on-delete-requested="_onDeleteRequested"
+        on-content-scroll="_viewScrolling"
+        querying="[[querying]]"
+        on-open-drive="openDrive"></arc-saved-list-view>
+    </template>
+    <template is="dom-if" if="{{!hasListData}}">
+      <arc-saved-list-empty on-open-drive="openDrive"></arc-saved-list-empty>
+    </template>
+    <arc-request-object-model id="model" on-data-ready="_dataRead" search-term="[[searchQuery]]" on-error="_dbError" request-type="saved" limit="[[limit]]" offset="[[offset]]" sort-by="[[sortBy]]" direction=[[sortDirection]]></arc-request-object-model>
+    <arc-request-object-model id="saveModel" auto on-save="_requestSaved" request-type="saved"></arc-request-object-model>
+    <arc-request-object-model id="deleteModel" on-deleted="_selectedRemoved" on-error="_selectedRemoveError" request-type="saved"></arc-request-object-model>
+  </template>
+</dom-module>
+<script src="arc-saved-list-controller.js"></script>

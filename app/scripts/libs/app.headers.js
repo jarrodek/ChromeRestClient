@@ -1,13 +1,13 @@
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,7 +15,7 @@
  * the License.
  ******************************************************************************/
 
-/** 
+/**
  * A parser for headers.
  */
 
@@ -31,12 +31,12 @@ arc.app = arc.app || {};
  * A namespace for headers parser.
  */
 arc.app.headers = {};
-/** 
- * Filter array of headers and return not duplicated array of the same headers. 
- * Duplicated headers should be appended to already found one using coma separator. 
+/**
+ * Filter array of headers and return not duplicated array of the same headers.
+ * Duplicated headers should be appended to already found one using coma separator.
  *
- * @param {Array} headers 
- *                Headers array to filter. All objects in headers array must have "name" 
+ * @param {Array} headers
+ *                Headers array to filter. All objects in headers array must have "name"
  *                and "value" keys.
  * @return {Array} An array of filtered headers.
  */
@@ -44,7 +44,7 @@ arc.app.headers.filter = function(headers) {
   var _tmp = {};
   headers.forEach((header) => {
     if (header.name in _tmp) {
-      if (header.value && header.value.trim() !== '') {
+      if (!!header.value) {
         _tmp[header.name] += ', ' + header.value;
       }
     } else {
@@ -91,43 +91,68 @@ arc.app.headers.toString = function(headersArray) {
   return result;
 };
 /**
- * Parse HTTP headers input from string to array of a key:value pairs objects.
+ * Parse HTTP headers input from string to array of objects containing `name` and `value`
+ * properties.
  *
- * @param {String} headersString Raw HTTP headers input
- * @returns {Array} The array of key:value objects
+ * @param {String|Headers} headers Raw HTTP headers input or Headers object
+ * @returns {Array<Object>} The array of objects where properties are `name` as a header name and
+ * `value` as a header content.
  */
-arc.app.headers.toJSON = function(headersString) {
-  if (headersString === null || headersString.trim() === '') {
+arc.app.headers.toJSON = function(headers) {
+  if (typeof headers === 'string') {
+    return arc.app.headers._stringToJSON(headers);
+  } else {
+    return arc.app.headers._hedersToJSON(headers);
+  }
+};
+/**
+ * Parse headers string to array of objects.
+ * See `arc.app.headers.toJSON` for more info.
+ */
+arc.app.headers._stringToJSON = function(headersString) {
+  if (!headersString || headersString.trim() === '') {
     return [];
   }
   if (typeof headersString !== 'string') {
     throw new Error('Headers must be an instance of String.');
   }
   const result = [];
-  const headers = headersString.split(/[\r\n]/gim);
+  const headers = headersString.split(/\n/gim);
 
   for (let i = 0, len = headers.length; i < len; i++) {
     let line = headers[i].trim();
     if (line === '') {
       continue;
     }
-    let _tmp = line.split(/[:\r\n]/i);
-    if (_tmp.length > 0) {
-      let obj = {
-        name: _tmp[0],
-        value: ''
-      };
-      if (_tmp.length > 1) {
-        _tmp.shift();
-        _tmp = _tmp.filter(function(element) {
-          return element.trim() !== '';
-        });
-        obj.value = _tmp.join(', ').trim();
-      }
-      result[result.length] = obj;
+    let sepPosition = line.indexOf(':');
+    if (sepPosition === -1) {
+      result[line] = '';
+      continue;
     }
+    let name = line.substr(0, sepPosition);
+    let value = line.substr(sepPosition + 1).trim();
+    let obj = {
+      name: name,
+      value: value
+    };
+    result.push(obj);
   }
   return result;
+};
+/**
+ * Parse Headers object to array of objects.
+ * See `arc.app.headers.toJSON` for more info.
+ */
+arc.app.headers._hedersToJSON = function(headers) {
+  if (!headers) {
+    return [];
+  }
+  return Array.from(headers).map((item) => {
+    return {
+      name: item[0],
+      value: item[1]
+    };
+  });
 };
 /**
  * Helper method for old system: combine headers list with encoding value.
@@ -159,10 +184,32 @@ arc.app.headers._oldCombine = function(headers, encoding) {
  * @return {String|null} A content-type header value or null if not found
  */
 arc.app.headers.getContentType = function(headers) {
-  if (typeof headers === 'string') {
-    headers = arc.app.headers.toJSON(headers);
+  if (typeof headers !== 'string') {
+    headers = arc.app.headers.toString(headers);
   }
-  headers = arc.app.headers.filter(headers);
-  var ct = headers.filter((item) => item.name.toLowerCase() === 'content-type');
-  return (ct.length === 0) ? null : ct[0].value;
+  headers = headers.trim();
+  if (headers === '') {
+    return null;
+  }
+  var re = /^content-type:\s?(.*)$/im;
+  var match = headers.match(re);
+  if (!match) {
+    return null;
+  }
+  var ct = match[1].trim();
+  let index = ct.indexOf('; ');
+  if (index > 0) {
+    ct = ct.substr(0, index);
+  }
+  return ct;
+  // headers = arc.app.headers.filter(headers);
+  // var ct = headers.filter((item) => item.name.toLowerCase() === 'content-type');
+  // ct = (ct.length === 0) ? null : ct[0].value;
+  // if (ct) {
+  //   let index = ct.indexOf('; ');
+  //   if (index > 0) {
+  //     ct = ct.substr(0, index);
+  //   }
+  // }
+  // return ct;
 };

@@ -1,8 +1,6 @@
 /.project
-**/gwt-unitCache/*
-**/extras/*
-**/war/WEB-INF/classes
 node_modules
 bower_components
-**/build/classes
-RestClient/war/WEB-INF/appengine-generated/datastore-indexes-auto.xml
+build
+dist
+.vscode

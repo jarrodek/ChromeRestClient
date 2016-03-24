@@ -1,0 +1,27 @@
+language: node_js
+sudo: false
+addons:
+  apt:
+    sources:
+      - google-chrome
+      - ubuntu-toolchain-r-test
+    packages:
+      - google-chrome-stable
+      - g++-4.8
+  sauce_connect: true
+before_script:
+#  - npm install -g bower polylint web-component-tester
+#  - bower install
+  - 'export DISPLAY=:99.0'
+  - sh -e /etc/init.d/xvfb start
+  - sleep 3
+  - npm i -g bower polylint web-component-tester
+  - bower i
+script:
+  - wct
+#  - polylint --root ./ --input app/index.html
+node_js:
+  - stable
+env:
+  global:
+    - "CXX='g++-4.8'"

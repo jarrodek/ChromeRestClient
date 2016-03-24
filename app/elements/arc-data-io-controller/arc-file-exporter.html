@@ -1,0 +1,77 @@
+<!--
+@license
+Copyright 2016 Pawel Psztyc, The ARC team
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+--><!--
+The `arc-file-exporter` element is a helper element for `arc-data-import-controller`
+that is responsible for file export.
+
+Example:
+
+<arc-file-exporter></arc-file-exporter>
+
+@group Controller Elements
+@element arc-file-exporter
+--><html><head></head><body><dom-module id="arc-file-exporter">
+  <template>
+    <style>
+    :host {
+      @apply(--layout-vertical);
+    }
+
+    h2 {
+      @apply(--section-title);
+    }
+
+    .padding-section {
+      @apply(--section-padding);
+    }
+
+    .action-button {
+      @apply(--action-button);
+    }
+
+    .action-button:hover {
+      @apply(--action-button-hover);
+    }
+
+    p {
+      @apply(--paper-font-caption);
+    }
+    </style>
+    <h2 class="section-title">Export to file</h2>
+    <template is="dom-if" if="{{loading}}">
+      <div class="padding-section">
+        <paper-spinner active="true" alt="Preparing data"></paper-spinner>
+      </div>
+    </template>
+    <template is="dom-if" if="{{!loading}}">
+      <template is="dom-if" if="{{!dataReady}}">
+        <div class="padding-section">
+          <p>Prepare data to export first and wait until ready.</p>
+          <paper-button class="action-button" on-transitionend="_prepareDataClick">Prepare data to export</paper-button>
+        </div>
+      </template>
+      <template is="dom-if" if="{{dataReady}}">
+        <div class="padding-section" id="dataDownload2">
+          <p>Click on a button below to download your data.</p>
+          <paper-button raised="true" class="action-button" on-tap="_saveData">Download file</paper-button>
+          <paper-button on-tap="_cancelExport">Cancel</paper-button>
+        </div>
+      </template>
+    </template>
+  </template>
+</dom-module>
+<script src="arc-file-exporter.js"></script>
+</body></html>

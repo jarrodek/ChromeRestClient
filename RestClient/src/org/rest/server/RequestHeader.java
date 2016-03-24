@@ -9,24 +9,23 @@ import javax.jdo.annotations.PrimaryKey;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 @PersistenceCapable
-public class RequestHeader { 
-
+public class RequestHeader {
 	@PrimaryKey
     @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
     private Key key;
-	
+
 	@Persistent
     private String name;
 	@Persistent
     private String value;
-	
+
 	RequestHeader(){}
-	
+
 	RequestHeader(String name, String value){
 		this.name = name;
 		this.value = value;
 	}
-	
+
 	/**
 	 * @return the key
 	 */
@@ -68,7 +67,7 @@ public class RequestHeader {
 	public final void setValue(String value) {
 		this.value = value;
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

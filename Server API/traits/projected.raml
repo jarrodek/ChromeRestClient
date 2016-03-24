@@ -1,0 +1,11 @@
+#%RAML 1.0 Trait
+queryParameters:
+  projection?:
+    type: string
+    description: |
+      A projected values to return to the client.
+      Data from this field will be used to produce projected data in the response. By default all entity data will be included into a request. If the value of this property has been set this fields will be used in the response instead.
+      The endpoint will result with error if the fields definition do not match table definition.
+      A special token "nextPageToken" is available to the request. If not present in the projection it will not be available in the response.
+
+    example: name,url,har(pages,entries),nextPageToken

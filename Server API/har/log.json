@@ -1,0 +1,43 @@
+{
+  "id": "https://advancedrestclient.com/schemas/har/log.json",
+  "title": "The log entry",
+  "description": "This object represents the root of exported data.",
+  "type": "object",
+  "required": [
+    "version",
+    "creator",
+    "entries"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Version number of the format. If empty, string \"1.1\" is assumed by default."
+    },
+    "creator": {
+      "$ref": "creator.json",
+      "description": "Name and version info of the log creator application."
+    },
+    "browser": {
+      "$ref": "creator.json",
+      "description": "Name and version info of used browser."
+    },
+    "pages": {
+      "type": "array",
+      "description": "List of all exported (tracked) pages. Leave out this field if the application does not support grouping by pages.",
+      "items": {
+        "$ref": "page.json"
+      }
+    },
+    "entries": {
+      "type": "array",
+      "description": "This object represents an array with all exported HTTP requests. Sorting entries by startedDateTime (starting from the oldest) is preferred way how to export data since it can make importing faster. However the reader application should always make sure the array is sorted (if required for the import).",
+      "items": {
+        "$ref": "entry.json"
+      }
+    },
+    "comment": {
+      "type": "string",
+      "description": "A comment provided by the user or the application."
+    }
+  }
+}
