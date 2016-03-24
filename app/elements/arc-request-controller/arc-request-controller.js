@@ -226,9 +226,7 @@ Polymer({
     if (e.detail.data) {
       this.debounce('restore.request', function() {
         let request = this.$.requestQueryModel.toLocalRequest(this.routeParams.type === 'history');
-        console.info('Restored request', request);
-        /*TODO:70 There is some error here. Sometimes headers are not fully restored.
-        Need to investigate.*/
+        // console.info('Restored request', request);
         this.set('request', request);
         if (request.name) {
           this._setPageTitle(request.name);

@@ -418,7 +418,6 @@ Polymer({
       //for history late last one.
       var request;
       if (!isHistory) {
-        //TODO:190 it will not cover a situation when object was overriten. Fixed at 23 march 2016.
         if (data.referenceEntry || data.referenceEntry === 0) {
           request = entries[data.referenceEntry].request;
         } else {

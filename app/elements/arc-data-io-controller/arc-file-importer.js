@@ -79,8 +79,10 @@ Polymer({
         }
 
       } catch (e) {
-        //TODO:110 add status message
         console.error('arc-data-import::_importFileReady::JSON.parse::error', e);
+        StatusNotification.notify({
+          message: 'Unable to parse the file.'
+        });
         this._resetFileDrop();
         this._setImporting(false);
       }

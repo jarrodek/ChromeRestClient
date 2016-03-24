@@ -2,7 +2,6 @@
 'use strict';
 /* global drive */
 /**
- * TODO:10 View informing that the user is not signed in to Chrome
  * TODO:0 Error message handling
  */
 Polymer({
