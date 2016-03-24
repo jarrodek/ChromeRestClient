@@ -126,11 +126,16 @@ var CwsUploader = {
           str += chunk;
         });
         response.on('end', function() {
-          console.log(str);
           str = JSON.parse(str);
           if (str.error) {
-            console.log(str);
-            let message = str.error.errors[0].message;
+            let message;
+            if (str.error.code) {
+              message = 'Server error: ' + str.error.code + ' - ' + str.error.message;
+            } else if (str.error.errors) {
+              message = str.error.errors[0].message;
+            } else {
+              message = 'Unknown error ocurred.';
+            }
             console.error(message);
             reject(message);
             return;
