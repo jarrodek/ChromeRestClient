@@ -18,26 +18,26 @@
    * The same as above.
    */
   app.selectedRequest = null;
+  // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
     app.updateBranding();
   });
 
-  // event called when the app is initialized and can remove loader.
+  // event fired when the app is initialized and can remove loader.
   window.addEventListener('ArcInitialized', function() {
     document.querySelector('arc-loader-screen').close();
   });
-
   window.addEventListener('WebComponentsReady', function() {
-    console.log('Components are ready');
+    // console.log('Components are ready');
     //event will be handled in elements/routing.html
     let event = new Event('initializeRouting');
     window.dispatchEvent(event);
   });
-
+  //When changin route this will scroll page top. This is called from router.
   app.scrollPageToTop = function() {
     app.$.headerPanelMain.scrollToTop(true);
   };
-
+  //called by the router to close a drawer (in mobile view) when changing route.
   app.closeDrawer = function() {
     app.$.paperDrawerPanel.closeDrawer();
   };
@@ -174,16 +174,44 @@
     e.stopPropagation();
     e.stopImmediatePropagation();
   };
-
-
+  /**
+   * Updates body class depending on a channel release.
+   * TODO: update dev and beta branding.
+   */
   app.updateBranding = () => {
     if (!chrome.runtime.getManifest) {
+      //tests
       return;
     }
     var manifest = chrome.runtime.getManifest();
-    if (manifest.version_name.indexOf('canary') !== -1) {
-      document.body.classList.add('canary');
+    // jscs:disable
+    var manifestName = manifest.version_name;
+    // jscs:enable
+    var cls = null;
+    if (manifestName.indexOf('canary') !== -1) {
+      cls = 'canary';
+    } else if (manifestName.indexOf('dev') !== -1) {
+      cls = 'dev';
+    } else if (manifestName.indexOf('beta') !== -1) {
+      cls = 'beta';
+    }
+    if (cls) {
+      document.body.classList.add(cls);
       Polymer.updateStyles();
+      if (cls === 'canary') {
+        app.$.canaryInfo.open();
+      }
+    }
+  };
+  /**
+   * Used by elements to open a browser window/tab.
+   * Element must have data-href attribute set with value of the URL to open.
+   *
+   * @param {ClickEvent} e A click event.
+   */
+  app.followLink = (e) => {
+    if (e.target.dataset.href) {
+      window.open(e.target.dataset.href);
     }
   };
 })(document, window);

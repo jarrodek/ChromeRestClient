@@ -102,7 +102,7 @@
               <li>and <b>more powerful</b> because the app is using sockets instead of XHR</li>
             </ul>
             <div class="info-button">
-              <paper-button raised>Learn more</paper-button>
+              <paper-button on-tap="followLink" data-href="http://restforchrome.blogspot.com/2016/03/new-advanced-rest-client-chrome-app.html" raised>Learn more</paper-button>
             </div>
           </div>
         </div>
@@ -123,7 +123,7 @@
                 <li>get all you can form the HTTP spec</li>
               </ul>
               <div class="info-button">
-                <paper-button raised>Learn more</paper-button>
+                <paper-button on-tap="followLink" data-href="http://restforchrome.blogspot.com/2016/03/arc-version-5-release.html" raised>Learn more</paper-button>
               </div>
               <p class="tutorial-additional-info">
                 Transport is now based on sockets so there are no limitations related to XHR or Fetch specification.
@@ -152,14 +152,28 @@
       <onboarding-page>
         <h2>ARC beta program</h2>
         <div class="onboarding-image-page">
-          <div class="image"></div>
+          <div class="image">
+            <iron-image src="assets/beta-icon.png"></iron-image>
+          </div>
           <div class="description">
-            <p class="beta-info">Introducing ARC beta program. Now you can get new features earlier! <br/>Help us test new features and influance app's development givin us feedback.</p>
-            <paper-button raised>sign up for beta program</paper-button>
+            <p class="beta-info">
+              Introducing ARC beta program. Now you can get new features earlier! <br/>
+              Help us test new features and influance app's development by giving us early feedback.</p>
+            <paper-button on-tap="followLink" data-href="http://restforchrome.blogspot.com/2016/03/join-advanced-rest-client-beta-program.html" raised>sign up for beta program</paper-button>
           </div>
         </div>
       </onboarding-page>
     </onboarding-tutorial>
+    <paper-dialog id="canaryInfo">
+      <h2>You are using the cannary channel</h2>
+      <paper-dialog-scrollable>
+        This version is not for production and it's daily build of the app.<br/>
+        Probably it is not working and you shouldn't use it unless you know what you are doing.
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Close</paper-button>
+      </div>
+    </paper-dialog>
   </template>
   <!-- build:js scripts/dependencies.js -->
   <script src="bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
