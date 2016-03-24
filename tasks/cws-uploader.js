@@ -49,6 +49,7 @@ var CwsUploader = {
       .then((result) => {
         result = JSON.parse(result);
         if (result.uploadState === 'SUCCESS') {
+          console.log('The item has been uploaded.');
           if (target === 'canary') {
             // publish right away
             return CwsUploader.publishItem(id);
@@ -106,6 +107,7 @@ var CwsUploader = {
    */
   publishItem: (id, audience) => {
     audience = audience || 'default';
+    console.log('Publishing an item: %s for audience: %s', id, audience);
     return new Promise((resolve, reject) => {
       let options = {
         host: 'www.googleapis.com',
@@ -124,7 +126,7 @@ var CwsUploader = {
           str += chunk;
         });
         response.on('end', function() {
-          // console.log('CWS response', str);
+          console.log('Publish response.', str);
           resolve(str);
         });
       });

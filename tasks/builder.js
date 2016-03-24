@@ -300,8 +300,20 @@ var Builder = {
             reject(err);
             return;
           }
+          //jscs:disable requireCamelCaseOrUpperCaseIdentifiers
           //write new path to manifest
           data.app.background.scripts = [depsFilename, backgroundScript];
+          if (dest === 'canary') {
+            data.name += ' - canary';
+            data.short_name += ' - canary';
+          } else if (dest === 'dev') {
+            data.name += ' - dev';
+            data.short_name += ' - dev';
+          } else if (dest === 'beta') {
+            data.name += ' - beta';
+            data.short_name += ' - beta';
+          }
+          //jscs:enable requireCamelCaseOrUpperCaseIdentifiers
           delete data.key;
           data = JSON.stringify(data, null, 2);
           fs.writeFile(manifestFile, data, 'utf8', (err) => {
