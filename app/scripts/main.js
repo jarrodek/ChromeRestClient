@@ -189,11 +189,11 @@
     // jscs:enable
     var cls = null;
     if (manifestName.indexOf('canary') !== -1) {
-      cls = 'canary';
+      cls = 'canary-channel';
     } else if (manifestName.indexOf('dev') !== -1) {
       cls = 'dev-channel';
     } else if (manifestName.indexOf('beta') !== -1) {
-      cls = 'beta';
+      cls = 'beta-channel';
     }
     if (cls) {
       document.body.classList.add(cls);

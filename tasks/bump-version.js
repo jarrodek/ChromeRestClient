@@ -44,7 +44,7 @@ var Bump = {
    * 'hotfix'
    * For `canary` release (daily build) the PATCH number will increase.
    * For `dev` release (weekly build) the BUILD number will increase.
-   * For `beta-release` release the MAJOR number will increase and MINOR will be set to 0.
+   * For `beta-release` release  will increase the MAJOR and MINOR will be set to 0.
    * for `beta-hotfix` release (where hotfix is applied to the beta) MINOR version will increase
    * For `stable` release the MINOR number will be set to 0.
    * For `hotfix` release the MINOR number will increase.
