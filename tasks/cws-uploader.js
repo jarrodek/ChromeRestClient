@@ -126,6 +126,13 @@ var CwsUploader = {
           str += chunk;
         });
         response.on('end', function() {
+          str = JSON.parse(str);
+          if (str.error) {
+            let message = str.error.errors[0].message;
+            console.error(message);
+            reject(message);
+            return;
+          }
           console.log('Publish response.', str);
           resolve(str);
         });
