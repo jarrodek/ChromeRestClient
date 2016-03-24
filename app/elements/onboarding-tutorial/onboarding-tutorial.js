@@ -138,7 +138,6 @@ Polymer({
   },
 
   _saveTutorialPassed: function() {
-    return Promise.resolve();
     return new Promise((resolve) => {
       chrome.storage.sync.get('tutorials', (data) => {
         if (!('tutorials' in data)) {
