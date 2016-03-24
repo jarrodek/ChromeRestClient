@@ -140,7 +140,7 @@ var CwsUploader = {
             reject(message);
             return;
           }
-          console.log('Publish response.', str);
+          console.log('The item is now published.');
           resolve(str);
         });
       });
