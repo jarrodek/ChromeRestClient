@@ -300,16 +300,17 @@ var Builder = {
             reject(err);
             return;
           }
+          let targetName = Builder.targetDir;
           //jscs:disable requireCamelCaseOrUpperCaseIdentifiers
           //write new path to manifest
           data.app.background.scripts = [depsFilename, backgroundScript];
-          if (dest === 'canary') {
+          if (targetName === 'canary') {
             data.name += ' - canary';
             data.short_name += ' - canary';
-          } else if (dest === 'dev') {
+          } else if (targetName === 'dev') {
             data.name += ' - dev';
             data.short_name += ' - dev';
-          } else if (dest === 'beta') {
+          } else if (targetName === 'beta') {
             data.name += ' - beta';
             data.short_name += ' - beta';
           }
