@@ -82,9 +82,15 @@
     transition: color cubic-bezier(0.4, 0, 1, 1) 100ms;
   }
 }
-
-.canary * {
-  --dark-primary-color: red;
+.dev-channel paper-toolbar {
+  --paper-toolbar-color: rgba(255,255,255,0.87);
+  --paper-toolbar-background: var(--paper-deep-purple-500);
+}
+.dev-channel paper-icon-button {
+  --paper-icon-button: {
+    color: rgba(0,0,0,0.87);
+    transition: color cubic-bezier(0.4, 0, 1, 1) 100ms;
+  }
 }
 
 /* General styles */

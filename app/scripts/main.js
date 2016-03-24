@@ -191,7 +191,7 @@
     if (manifestName.indexOf('canary') !== -1) {
       cls = 'canary';
     } else if (manifestName.indexOf('dev') !== -1) {
-      cls = 'dev';
+      cls = 'dev-channel';
     } else if (manifestName.indexOf('beta') !== -1) {
       cls = 'beta';
     }
