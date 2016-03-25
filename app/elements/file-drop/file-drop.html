@@ -13,18 +13,35 @@ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
---><html><head></head><body><dom-module id="file-drop">
+-->
+
+<!--
+The `file-drop` element is an file input element that uses drag and drop
+and (hidden) input type file to accept files.
+
+It accepts one file as an input and fire `file-ready` event when the file has been
+selected by the user.
+
+### Styling
+Custom property | Description | Default
+----------------|-------------|----------
+`--file-drop` | Mixin applied to the element | `{}`
+
+-->
+<dom-module id="file-drop">
   <style>
   :host {
     display: block;
-    min-height: 200px;
-    height: 100%;
+    /*min-height: 200px;*/
+    /*height: 100%;*/
+    margin: 0 24px;
+    @apply(--file-drop);
   }
   .drop-zone {
-    max-width: 700px;
+    /*max-width: 700px;
     min-width: 320px;
-    width: 100%;
-    padding: 40px 120px;
+    width: 100%;*/
+    padding: 40px 0px;
     border: 2px dashed var(--paper-lime-300);
   }
   .drop-zone.active {
@@ -52,4 +69,3 @@ the License.
   </template>
   <script src="file-drop.js"></script>
 </dom-module>
-</body></html>
