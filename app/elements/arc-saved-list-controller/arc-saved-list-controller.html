@@ -29,7 +29,11 @@ the License.
     :host {
       display: block;
     }
+    paper-progress {
+      width: 100%;
+    }
     </style>
+    <paper-progress indeterminate hidden$="[[!querying]]"></paper-progress>
     <template is="dom-if" if="{{hasListData}}">
       <arc-saved-list-view requests="{{listData}}"
         sort="{{sortBy}}"
@@ -42,7 +46,7 @@ the License.
         querying="[[querying]]"
         on-open-drive="openDrive"></arc-saved-list-view>
     </template>
-    <template is="dom-if" if="{{!hasListData}}">
+    <template is="dom-if" if="{{isEmpty}}">
       <arc-saved-list-empty on-open-drive="openDrive"></arc-saved-list-empty>
     </template>
     <arc-request-object-model id="model" on-data-ready="_dataRead" search-term="[[searchQuery]]" on-error="_dbError" request-type="saved" limit="[[limit]]" offset="[[offset]]" sort-by="[[sortBy]]" direction=[[sortDirection]]></arc-request-object-model>

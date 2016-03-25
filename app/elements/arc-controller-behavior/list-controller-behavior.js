@@ -119,8 +119,19 @@ window.ArcBehaviors.ListControllerBehavior = {
     searchQuery: {
       type: String,
       reflectToAttribute: true
+    },
+
+    isEmpty: {
+      type: Boolean,
+      value: true,
+      readOnly: true
     }
   },
+
+  observers: [
+    '_updateIsEmpty(querying,listData)'
+  ],
+
   /**
    * Compute query offset based on current page.
    */
@@ -130,6 +141,10 @@ window.ArcBehaviors.ListControllerBehavior = {
   /** Compute if there are elements on the list */
   _computeHasListData: function(data) {
     return !!data && data.length > 0;
+  },
+
+  _updateIsEmpty: function(querying, listData) {
+    this._setIsEmpty(!querying && (!listData || listData.length === 0));
   },
   /**
    * Child element should override this function to perform a query.
