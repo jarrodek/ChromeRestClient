@@ -34,6 +34,11 @@ arc.app = arc.app || {};
  */
 arc.app.analytics = arc.app.analytics || {};
 /**
+ * Print debug messages to the console.
+ * @type {Boolean}
+ */
+arc.app.analytics.debug = true;
+/**
  * A list of created trackers.
  */
 arc.app.analytics._trackers = [];
@@ -87,9 +92,24 @@ arc.app.analytics.initAnalyticsConfig = function(config) {
 arc.app.analytics._setCustomDimmensions = function() {
   var appVersion = arc.app.utils.appVer;
   var chromeVer = arc.app.utils.chromeVersion;
+  var manifest = chrome.runtime.getManifest();
+  // jscs:disable
+  var manifestName = manifest.version_name;
+  // jscs:enable
+  var channel = null;
+  if (manifestName.indexOf('canary') !== -1) {
+    channel = 'canary';
+  } else if (manifestName.indexOf('dev') !== -1) {
+    channel = 'dev';
+  } else if (manifestName.indexOf('beta') !== -1) {
+    channel = 'beta';
+  } else {
+    channel = 'stable';
+  }
   arc.app.analytics._trackers.forEach(function(tracker) {
     tracker.set('dimension1', chromeVer);
     tracker.set('dimension2', appVersion);
+    tracker.set('dimension5', channel);
     //tracker.set('appVersion', appVersion);
   });
   console.log('Setting up custom dimension #%d: %s', 1, chromeVer);
@@ -218,6 +238,9 @@ arc.app.analytics._addDebugListeners = function(tracker) {
  * Print event debug info in console.
  */
 arc.app.analytics._debugEvent = function(hit) {
+  if (!arc.app.analytics.debug) {
+    return;
+  }
   var params = hit.getParameters();
   var cat = params.get(analytics.Parameters.EVENT_CATEGORY);
   var act = params.get(analytics.Parameters.EVENT_ACTION);
@@ -232,6 +255,9 @@ arc.app.analytics._debugEvent = function(hit) {
  * Print event debug info in console.
  */
 arc.app.analytics._debugAppView = function(hit) {
+  if (!arc.app.analytics.debug) {
+    return;
+  }
   var params = hit.getParameters();
   var sn = params.get(analytics.Parameters.DESCRIPTION);
   console.groupCollapsed(
@@ -241,6 +267,9 @@ arc.app.analytics._debugAppView = function(hit) {
   console.groupEnd();
 };
 arc.app.analytics._debugHit = function(hit) {
+  if (!arc.app.analytics.debug) {
+    return;
+  }
   var params = hit.getParameters();
   console.groupCollapsed(
     '[Google Analytics] Running command: ga("send", "%s")',
@@ -252,6 +281,9 @@ arc.app.analytics._debugHit = function(hit) {
  * Print a hit params in the table.
  */
 arc.app.analytics._printHitData = function(params) {
+  if (!arc.app.analytics.debug) {
+    return;
+  }
   var map = params.toObject();
   var list = Object.assign({}, analytics.Parameters, arc.app.analytics.internal.Parameters);
   var properties = Object.getOwnPropertyNames(list);

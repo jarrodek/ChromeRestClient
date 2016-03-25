@@ -107,7 +107,7 @@ Polymer({
         timeout: StatusNotification.TIME_SHORT
       });
       arc.app.analytics.sendException('arc-data-import-controller::connectAppServer' +
-        err, false);
+        err.message, false);
     });
   }
 });
