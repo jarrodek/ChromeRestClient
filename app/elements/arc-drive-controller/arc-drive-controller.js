@@ -114,6 +114,7 @@ Polymer({
         this.loadMoreData();
       }
     }
+    arc.app.analytics.sendEvent('Drive integration', 'Open', 'Open drive picker');
   },
   /**
    * Query the Drive API to download files list.
@@ -167,6 +168,7 @@ Polymer({
     this.debounce('query', function() {
       this._resetQuery();
     }, 300);
+    arc.app.analytics.sendEvent('Drive integration', 'Search', 'Search for file');
   },
   /**
    * Reset current query data.
@@ -181,6 +183,7 @@ Polymer({
    */
   _fileSelected: function(e) {
     this.openItemAsRequest(e.detail.selected.id);
+    arc.app.analytics.sendEvent('Drive integration', 'Open', 'Open file');
   },
   /**
    * Open a Google Drive item as a request item.

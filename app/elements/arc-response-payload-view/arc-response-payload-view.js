@@ -91,6 +91,34 @@ Polymer({
     }
   },
 
+  observers: [
+    '_selectedTabChanged(selectedTab)'
+  ],
+
+  _selectedTabChanged: function(selectedTab) {
+    var tabName;
+    switch (selectedTab) {
+      case 0:
+        tabName = 'Raw tab';
+        break;
+      case 1:
+        tabName = 'Parsed tab';
+        break;
+      case 2:
+        tabName = 'JSON tab';
+        break;
+      case 3:
+        tabName = 'XML tab';
+        break;
+      case 4:
+        tabName = 'Image tab';
+        break;
+    }
+    if (this.isAttached) {
+      arc.app.analytics.sendEvent('Response payload', 'Tab switched', tabName);
+    }
+  },
+
   _resetTabs: function() {
     this._setIsRaw(false);
     this._setIsParsed(false);
@@ -171,8 +199,10 @@ Polymer({
   _toggleTextWrap: function(e) {
     if (e.target.active) {
       this.$.rawContent.classList.add('wrap');
+      arc.app.analytics.sendEvent('Response payload', 'Content action', 'Wrap text');
     } else {
       this.$.rawContent.classList.remove('wrap');
+      arc.app.analytics.sendEvent('Response payload', 'Content action', 'Unwrap text');
     }
   },
   /**
@@ -182,11 +212,13 @@ Polymer({
     this.fire('clipboard-write', {
       data: this.raw
     });
+    arc.app.analytics.sendEvent('Response payload', 'Content action', 'Copy to clipboard');
   },
 
   _saveFile: function() {
     // arc-request-controller listen to this event
     this.fire('save-file');
+    arc.app.analytics.sendEvent('Response payload', 'Content action', 'Save as file');
   },
 
   _tabsChanged: function() {

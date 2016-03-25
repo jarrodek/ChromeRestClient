@@ -163,10 +163,12 @@
   app.onSave = () => {
     var ctrl = document.querySelector('arc-request-controller');
     ctrl.onSave();
+    arc.app.analytics.sendEvent('Shortcats usage', 'Called', 'Save');
   };
 
   app.onOpen = () => {
     page('/saved');
+    arc.app.analytics.sendEvent('Shortcats usage', 'Called', 'Open');
   };
 
   app._cancelEvent = (e) => {

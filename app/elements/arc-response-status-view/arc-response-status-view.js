@@ -27,6 +27,29 @@ Polymer({
       value: 0
     }
   },
+
+  observers: [
+    '_selectedTabChanged(selectedTab)'
+  ],
+
+  _selectedTabChanged: function(selectedTab) {
+    var tabName;
+    switch (selectedTab) {
+      case 0:
+        tabName = 'Response headers';
+        break;
+      case 1:
+        tabName = 'Request headers';
+        break;
+      case 2:
+        tabName = 'Redirects';
+        break;
+    }
+    if (this.isAttached) {
+      arc.app.analytics.sendEvent('Response status', 'Tab switched', tabName);
+    }
+  },
+
   _computeStatusClass: function(code) {
     var cls = 'status-color';
     if (code >= 500 || code === 0) {
@@ -69,6 +92,7 @@ Polymer({
 
   showStatusInfo: function() {
     this.$.statusCodeInfo.open();
+    arc.app.analytics.sendEvent('Response status', 'Display status info', this.statusCode);
   },
   /** Compute index to 1-based index. */
   _computeIndexName: function(index) {
@@ -82,6 +106,7 @@ Polymer({
       this.fire('action-link-change', {
         url: e2.rootTarget.href
       });
+      arc.app.analytics.sendEvent('Response status', 'Link change', 'From response headers');
     }
   },
 

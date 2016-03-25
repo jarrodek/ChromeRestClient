@@ -110,7 +110,6 @@ Polymer({
   },
 
   onClearAll: function() {
-
     let base = new RequestLocalObject({
       url: '',
       method: 'GET'
@@ -122,8 +121,12 @@ Polymer({
     app.selectedRequest = null;
     this._setPageTitle('Request');
     page('/request/current');
+    arc.app.analytics.sendEvent('Engagement', 'Click', 'Clear all');
   },
-
+  /**
+   * Handler for save request click / shortcut.
+   * Save UI will call `_saveRequest()` function.
+   */
   onSave: function() {
     var ui = document.body.querySelector('#saveRequestUi');
     if (!ui) {
@@ -144,12 +147,15 @@ Polymer({
       ui.projectId = this.project.id;
     }
     ui.open();
+    arc.app.analytics.sendEvent('Engagement', 'Click', 'Save action initialization');
   },
 
   onProjectEndpoints: function(enpointId) {
     if (this.request && String(this.request.id) === String(enpointId)) {
       return;
     }
+    // this one is not going throught the router.
+    arc.app.analytics.sendScreen('Request - project endpoint');
     this._restoreSaved(enpointId);
   },
 
@@ -317,11 +323,15 @@ Polymer({
     this._setRequestLoading(true);
     this._saveUrl();
     this._callRequest();
+    arc.app.analytics.sendEvent('Engagement', 'Click', 'Request start');
+    // Will help arrange methods bar according to importance of elements.
+    arc.app.analytics.sendEvent('Request', 'Method', this.request.method);
   },
 
   abortRequest: function() {
     this._setRequestLoading(false);
     this.$.socket.abort();
+    arc.app.analytics.sendEvent('Engagement', 'Click', 'Request abort');
   },
   /**
    * Saves request and response in the history store.
@@ -505,6 +515,19 @@ Polymer({
         });
       }
     });
+    var saveType = [];
+    if (override) {
+      saveType.push('override');
+    }
+    if (toDrive) {
+      saveType.push('drive');
+    }
+    if (e.detail.isProject) {
+      saveType.push('project');
+    }
+    arc.app.analytics.sendEvent('Engagement', 'Click', 'Save request');
+    // weill help arrange UI according to importance of elements.
+    arc.app.analytics.sendEvent('Request', 'Save type', saveType.join(','));
   },
   /**
    * Save/update project with the request.
@@ -616,7 +639,9 @@ Polymer({
       StatusNotification.notify({
         message: 'Unable upload file to Drive'
       });
+      arc.app.analytics.sendException(JSON.stringify(error), false);
     });
+    arc.app.analytics.sendEvent('Engagement', 'Click', 'Save request to Drive');
   },
 
   _projectSaveError: function() {

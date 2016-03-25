@@ -40,6 +40,7 @@ Polymer({
 
   toggle: function() {
     this.detailed = !this.detailed;
+    var stateName = this.detailed ? 'Details form' : 'Single line';
     if (this.detailed) {
       this.async(() => {
         this.updateForm();
@@ -49,6 +50,7 @@ Polymer({
         this.updateUrl();
       }, 0);
     }
+    arc.app.analytics.sendEvent('Request view', 'URL widget toggle', stateName);
   },
   /**
    * Update url from form values.
@@ -154,11 +156,7 @@ Polymer({
         console.warn('Unknown action: %s', action);
     }
     if (gaLabel) {
-      //category: 'Request view'
-      this.fire('ga-event', {
-        'action': 'URL widget context menu action',
-        'label': gaLabel
-      });
+      arc.app.analytics.sendEvent('Request view', 'URL widget context menu action', gaLabel);
     }
   },
   /**
@@ -274,6 +272,10 @@ Polymer({
     }
     var suggestions = data.map((item) => item.url);
     this.$.autocomplete.source = suggestions;
+  },
+
+  _menuOpened: function() {
+    arc.app.analytics.sendEvent('Request view', 'URL widget toggle', 'Open menu');
   }
 });
 })();

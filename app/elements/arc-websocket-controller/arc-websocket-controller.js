@@ -89,6 +89,7 @@ Polymer({
     this._setConnecting(true);
     this.$.socket.open();
     this.lastSocketUrl = this.$.socket.url;
+    arc.app.analytics.sendEvent('Engagement', 'Click', 'Connect to socket');
   },
 
   _disconnect: function() {
@@ -103,6 +104,7 @@ Polymer({
     this.push('messages', message);
     this.$.socket.message = message.isBinary ? message.binaryData : message.message;
     this.$.socket.send();
+    arc.app.analytics.sendEvent('Engagement', 'Click', 'Send message to socket');
   },
 
   _downloadBinary: function(e) {

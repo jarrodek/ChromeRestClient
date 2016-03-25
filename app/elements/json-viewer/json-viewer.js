@@ -105,7 +105,8 @@ Polymer({
       this.fire('action-link-change', {
         url: e.target.getAttribute('href')
       });
-      window.scrollTo(0, 0);
+      app.scrollPageToTop();
+      arc.app.analytics.sendEvent('Response status', 'Link change', 'From JSON viewer');
       return;
     }
     var toggleId = e.target.dataset.toggle;

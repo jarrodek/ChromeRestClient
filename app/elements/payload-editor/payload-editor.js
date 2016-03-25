@@ -148,15 +148,24 @@ Polymer({
   },
   /** Set value if has form */
   _selectedTabChanged: function() {
+    var tabName;
     switch (this.tabSelected) {
       case 0:
         this.updateValue();
         this.$.cm.editor.refresh();
+        tabName = 'Raw tab';
         break;
       case 1:
         let arr = PayloadParser.stringToArray(this.value);
         this.set('valuesList', arr);
+        tabName = 'Form tab';
         break;
+      case 2:
+        tabName = 'Files tab';
+        break;
+    }
+    if (this.isAttached) {
+      arc.app.analytics.sendEvent('Payload editor', 'Tab switched', tabName);
     }
   },
   /** Compute if form tab should be shown. */

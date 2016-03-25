@@ -102,6 +102,7 @@ window.ArcBehaviors.RequestsListControllerBehaviorImpl = {
     this.fileSuggestedName = 'arc-export-' + day + '-' + month + '-' + year + '-export.json';
     this.exportMime = 'json';
     this.exportData();
+    arc.app.analytics.sendEvent('Engagement', 'Click', 'Export saved as file');
   },
 
   onFileSaved: function() {
@@ -123,6 +124,7 @@ window.ArcBehaviors.RequestsListControllerBehaviorImpl = {
     this.removedCopy = Array.from(items);
     this.$.deleteModel.data = items;
     this.$.deleteModel.remove();
+    arc.app.analytics.sendEvent('Engagement', 'Click', 'Delete saved list');
   },
 
   _selectedRemoveError: function(e) {
@@ -162,6 +164,7 @@ window.ArcBehaviors.RequestsListControllerBehaviorImpl = {
   },
   _revertDeleted: function() {
     this.$.saveModel.data = this.removedCopy;
+    arc.app.analytics.sendEvent('Engagement', 'Click', 'Removed reverted');
   },
   _requestSaved: function() {
     if (this.removedCopy) {
@@ -187,11 +190,13 @@ window.ArcBehaviors.RequestsListControllerBehaviorImpl = {
     }
     this.resetQuery();
     this.queryPage();
+    arc.app.analytics.sendEvent('Engagement', 'Sort change', 'Request list');
   },
 
   onClearAll: function() {
     if (this.view) {
       this.view.warnClearAll();
+      arc.app.analytics.sendEvent('Engagement', 'Click', 'Clear all requested');
     }
   },
   openDrive: function() {

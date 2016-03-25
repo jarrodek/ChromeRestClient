@@ -60,7 +60,6 @@ arc.app.router.onHash = function(e) {
     arc.app.router.redirect('/');
     return;
   }
-
   var params = {
     params: {}
   };
@@ -73,11 +72,16 @@ arc.app.router.onHash = function(e) {
     }
     copy = copy.substr(1);
     // let paramValue = copy.match(new RegExp(item.pattern))[0];
-    let paramValue = copy.match(/[^\/]+/)[0];
-    copy = copy.replace('/' + paramValue, '');
-    params.params[item.name] = paramValue;
+    let match = copy.match(/[^\/]+/);
+    if (match) {
+      let paramValue = copy.match(/[^\/]+/)[0];
+      copy = copy.replace('/' + paramValue, '');
+      params.params[item.name] = paramValue;
+    } else {
+      params.params[item.name] = copy;
+    }
   });
-
+  params.path = parts[0].substr(1);
   var clb = arc.app.router._routes.get(call);
   var fns = Array.from(arc.app.router._middle);
   fns.push(clb);

@@ -32,9 +32,28 @@ window.addEventListener('initializeRouting', function() {
     next();
   }
 
+  function sendScreen(ctx, next) {
+    var path = ctx.path;
+    var screenName = '[unknown]';
+    switch (ctx.path) {
+      case '': screenName = 'Request - empty'; break;
+      case 'request/project': screenName = 'Request - project'; break;
+      case 'request/saved': screenName = 'Request - saved'; break;
+      case 'request/history': screenName = 'Request - history'; break;
+      case 'request/current': screenName = 'Request - current'; break;
+      case 'request/drive': screenName = 'Request - drive'; break;
+      case 'history': screenName = 'History'; break;
+      case 'settings': screenName = 'Settings'; break;
+      case 'about': screenName = 'About'; break;
+      case 'socket': screenName = 'Socket'; break;
+      case 'saved': screenName = 'Saved'; break;
+      case 'dataimport': screenName = 'Data import / export'; break;
+    }
+    arc.app.analytics.sendScreen(screenName);
+    next();
+  }
   // Routes
-  arc.app.router.middle(mayStopController, scrollToTop, closeDrawer);
-
+  arc.app.router.middle(mayStopController, scrollToTop, closeDrawer, sendScreen);
   arc.app.router.register('/', function() {
     var params = {
       'type': 'restore'
@@ -42,7 +61,6 @@ window.addEventListener('initializeRouting', function() {
     app.params = params;
     app.route = 'request';
   });
-
   arc.app.router.register('/request/saved/:savedId', function(ctx) {
     ctx.params.type = 'saved';
     app.params = ctx.params;

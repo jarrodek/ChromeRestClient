@@ -94,17 +94,21 @@ Polymer({
 
   next: function() {
     if (this.lastPage) {
+      arc.app.analytics.sendEvent('Onboarding', 'Passed', 'passed');
       this.completeTutorial();
       return;
     }
     this.$.pages.entryAnimation = 'slide-from-right-animation';
     this.$.pages.exitAnimation = 'slide-left-animation';
     this.$.pages.selectNext();
+    arc.app.analytics.sendEvent('Onboarding', 'Page', 'Next');
   },
+  
   prev: function() {
     this.$.pages.entryAnimation = 'slide-from-left-animation';
     this.$.pages.exitAnimation = 'slide-right-animation';
     this.$.pages.selectPrevious();
+    arc.app.analytics.sendEvent('Onboarding', 'Page', 'Prev');
   },
 
   completeTutorial: function() {
@@ -118,6 +122,7 @@ Polymer({
 
   skip: function() {
     this.completeTutorial();
+    arc.app.analytics.sendEvent('Onboarding', 'Skipped', 'skip');
   },
 
   _getTutorialState: function() {

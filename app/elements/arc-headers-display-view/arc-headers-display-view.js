@@ -44,8 +44,10 @@ Polymer({
    */
   _displayHeaderInfo: function(e) {
     var item = e.model.get('item');
-    this.$.model.objectId = [item.name.toLowerCase(), this.type];
+    var header = item.name.toLowerCase();
+    this.$.model.objectId = [header, this.type];
     this.$.model.getObject();
+    arc.app.analytics.sendEvent('Response status', 'Display header info', header);
   },
   /** Called when model returned data */
   _onHeaderData: function(e) {

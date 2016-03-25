@@ -78,7 +78,7 @@
       </paper-input-container>
       <paper-input label="Host" value="{{hostValue}}" class="host-input" on-input="updateUrl"></paper-input>
       <paper-menu-button horizontal-align="right" id="urlContextMenuButton">
-        <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
+        <paper-icon-button icon="more-vert" class="dropdown-trigger" on-tap="_menuOpened"></paper-icon-button>
         <paper-menu class="dropdown-content" id="urlContextMenu" on-iron-select="_contextMenuAction">
           <paper-item data-action="encParamsAction">Encode parameters</paper-item>
           <paper-item data-action="decParamsAction">Decode parameters</paper-item>

@@ -16,11 +16,12 @@ Polymer({
   },
   /**
    * Request name has changed by the user in a view.
-   * After setting upp new data the model will store data automatically.
+   * After setting up new data the model will store data automatically.
    */
   _requestNameChanged: function(e) {
     var item = e.detail.item;
     this.$.saveModel.data = item;
+    arc.app.analytics.sendEvent('Saved view', 'Update', 'Request name');
   },
   /**
    * Generic function to be called on database error.

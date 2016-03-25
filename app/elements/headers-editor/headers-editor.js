@@ -67,7 +67,6 @@ Polymer({
     '_headerValuesChanged(headersList.*)'
   ],
   ready: function() {
-
     this.$.cm.setOption('extraKeys', {
       'Ctrl-Space': function(cm) {
         CodeMirror.showHint(cm, CodeMirror.hint['http-headers'], {
@@ -75,6 +74,11 @@ Polymer({
         });
       }.bind(this)
     });
+    // this data will help prioritize code-mirror support for headers.
+    this.$.cm.editor.on('header-value-selected', (e) =>
+      arc.app.analytics.sendEvent('Headers editor', 'CM value picked', e));
+    this.$.cm.editor.on('header-key-selected', (e) =>
+      arc.app.analytics.sendEvent('Headers editor', 'CM name picked', e));
   },
   /**
    * Called by CodeMirror editor.
@@ -83,7 +87,6 @@ Polymer({
   valueChanged: function() {
     this._detectContentType();
   },
-
   /**
    * Insert a Content-Type header into a headers list if it is not on the list already.
    *
@@ -202,17 +205,26 @@ Polymer({
   },
   /** Called when tab selection changed */
   _selectedTabChanged: function(newVal, oldVal) {
+    var tabName;
     switch (newVal) {
       case 0:
         if (oldVal === 1) {
           this.updateHeaders();
         }
         this.$.cm.editor.refresh();
+        tabName = 'Raw tab';
         break;
       case 1:
         var arr = arc.app.headers.toJSON(this.headers);
         this.set('headersList', arr);
+        tabName = 'Form tab';
         break;
+      case 2:
+        tabName = 'Predefined tab';
+        break;
+    }
+    if (this.isAttached) {
+      arc.app.analytics.sendEvent('Headers editor', 'Tab switched', tabName);
     }
   },
 
@@ -334,6 +346,7 @@ accept-language: en-US,en;q=0.8\n`;
     if (index || index === 0) {
       this.set(['headersList', index, 'name'], value);
     }
+    arc.app.analytics.sendEvent('Headers editor', 'Fill support', 'Name selected');
   },
   /**
    * Called when the headers list has changed.

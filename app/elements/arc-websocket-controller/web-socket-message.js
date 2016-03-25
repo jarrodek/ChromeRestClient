@@ -79,4 +79,5 @@ class WebSocketMessage {
     return copy;
   }
 }
+window.WebSocketMessage = WebSocketMessage;
 })();
