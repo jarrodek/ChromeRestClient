@@ -150,12 +150,15 @@ Polymer({
     var response = this.$.query.lastResponse;
     if ('files' in response) {
       this.set('items', this.items.concat(response.files));
-      this.refit();
+      //this.refit();
     }
     if ('nextPageToken' in response) {
       this.nextPageToken = response.nextPageToken;
     }
     this.set('loading', false);
+    this.async(function() {
+      this.notifyResize();
+    }, 1);
   },
   /**
    * Called when user accept search query.
