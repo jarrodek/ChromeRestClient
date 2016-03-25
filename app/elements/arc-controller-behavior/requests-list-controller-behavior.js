@@ -193,6 +193,13 @@ window.ArcBehaviors.RequestsListControllerBehaviorImpl = {
     if (this.view) {
       this.view.warnClearAll();
     }
+  },
+  openDrive: function() {
+    var ctrl = document.querySelector('#driveController');
+    if (!ctrl) {
+      return;
+    }
+    ctrl.selectFile();
   }
 };
 window.ArcBehaviors.RequestsListControllerBehavior = [

@@ -28,14 +28,6 @@ Polymer({
   _dbError: function(e) {
     console.error('_dbError', e);
     arc.app.analytics.sendException('Saved-ctrl::' + JSON.stringify(e));
-  },
-
-  openDrive: function() {
-    var ctrl = document.querySelector('#driveController');
-    if (!ctrl) {
-      return;
-    }
-    ctrl.selectFile();
   }
 });
 })();
