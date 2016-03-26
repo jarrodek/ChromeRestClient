@@ -117,5 +117,6 @@ var build = (done) => {
 gulp.task('build', build);
 
 gulp.task('test', function(done) {
-  done();
+  var Builder = require('./tasks/builder.js');
+  Builder._vulcanizeElements().then(() => done());
 });

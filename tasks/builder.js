@@ -232,7 +232,11 @@ var Builder = {
         inlineScripts: true,
         inlineCss: true,
         implicitStrip: true,
-        stripComments: true
+        stripComments: true,
+        excludes: [
+          path.join('app', 'bower_components', 'font-roboto', 'roboto.html'),
+          path.join('bower_components', 'font-roboto', 'roboto.html')
+        ]
       });
       console.log('Processing elements.html');
       vulcan.process(source, function(err, inlinedHtml) {
