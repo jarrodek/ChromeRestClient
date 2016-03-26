@@ -117,6 +117,9 @@ var build = (done) => {
 gulp.task('build', build);
 
 gulp.task('test', function(done) {
-  var Builder = require('./tasks/builder.js');
-  Builder._vulcanizeElements().then(() => done());
+  var analyzer = require('./tasks/tree-analyzer.js');
+  analyzer.copyDependencies().then(() => done()).catch((e) => {
+    console.error(e);
+    done();
+  });
 });

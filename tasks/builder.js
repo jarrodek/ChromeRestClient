@@ -221,7 +221,7 @@ var Builder = {
     });
   },
   /**
-   *
+   * 
    */
   _vulcanizeElements: () => {
     console.log('Vulcanizing');
