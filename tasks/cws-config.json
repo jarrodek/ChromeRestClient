@@ -1,14 +1,18 @@
 {
   "canary": {
-    "id": "ffgciingieijajcbpkockcbknajffbel"
+    "id": "ffgciingieijajcbpkockcbknajffbel",
+    "publishTo": "trustedTesters"
   },
   "dev" : {
-    "id": "okeafnfmgoafdfbcjkanpgmjanccpell"
+    "id": "okeafnfmgoafdfbcjkanpgmjanccpell",
+    "publishTo": "trustedTesters"
   },
   "beta" : {
-    "id": "epgngalmiadbjnoompchcohonhidjanm"
+    "id": "epgngalmiadbjnoompchcohonhidjanm",
+    "publishTo": "trustedTesters"
   },
   "stable" : {
-    "id": "hgmloofddffdnphfgcellkdfbfbjeloo"
+    "id": "hgmloofddffdnphfgcellkdfbfbjeloo",
+    "publishTo": "default"
   }
 }

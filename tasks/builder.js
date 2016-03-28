@@ -33,28 +33,28 @@ var Builder = {
   buildCanary: (done) => {
     Builder.target = 'canary';
     Builder.targetDir = 'canary';
-    Builder.workingBranch = 'chrome-app';
+    Builder.workingBranch = 'develop';
     Builder._build(done);
   },
 
   buildDev: (done) => {
     Builder.target = 'dev';
     Builder.targetDir = 'dev';
-    Builder.workingBranch = 'chrome-app';
+    Builder.workingBranch = 'develop';
     Builder._build(done);
   },
 
   buildBeta: (release, done) => {
     Builder.target = release ? 'beta-release' : 'beta-hotfix';
     Builder.targetDir = 'beta';
-    Builder.workingBranch = 'chrome-app';
+    Builder.workingBranch = 'develop';
     Builder._build(done);
   },
 
   buildStable: (hotfix, done) => {
     Builder.target = hotfix ? 'hotfix' : 'stable';
     Builder.targetDir = 'stable';
-    Builder.workingBranch = 'chrome-app';
+    Builder.workingBranch = 'develop';
     Builder._build(done);
   },
 
@@ -221,7 +221,7 @@ var Builder = {
     });
   },
   /**
-   * 
+   *
    */
   _vulcanizeElements: () => {
     console.log('Vulcanizing');

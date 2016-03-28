@@ -44,6 +44,7 @@ var CwsUploader = {
     config = JSON.parse(config);
     if (target in config) {
       let id = config[target].id;
+      let publishTo = config[target].publishTo;
       let buffer = fs.readFileSync(file);
       return CwsUploader._uploadItem(buffer, id)
       .then((result) => {
@@ -52,7 +53,7 @@ var CwsUploader = {
           console.log('The item has been uploaded.');
           if (target === 'canary') {
             // publish right away
-            return CwsUploader.publishItem(id);
+            return CwsUploader.publishItem(id, publishTo);
           }
         } else {
           throw new Error('Error uploading item to Chrome Web Store. ' + JSON.stringify(result));
@@ -106,7 +107,7 @@ var CwsUploader = {
    * or 'trustedTesters'. Default to 'default'.
    */
   publishItem: (id, audience) => {
-    audience = audience || 'default';
+    audience = audience || 'trustedTesters';
     console.log('Publishing an item: %s for audience: %s', id, audience);
     return new Promise((resolve, reject) => {
       let options = {
