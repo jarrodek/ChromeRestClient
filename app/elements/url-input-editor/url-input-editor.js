@@ -6,7 +6,8 @@ Polymer({
   properties: {
     url: {
       type: String,
-      notify: true
+      notify: true,
+      observer: '_urlChanged'
     },
     detailed: {
       type: Boolean,
@@ -36,6 +37,13 @@ Polymer({
       }
     },
     suggesionsOpened: Boolean
+  },
+
+  _urlChanged: function(newVal, oldVal) {
+    if (this.detailed && (!newVal || newVal.length === 0)) {
+      // clear the form
+      this.updateForm();
+    }
   },
 
   toggle: function() {
@@ -107,7 +115,9 @@ Polymer({
     } else {
       hostField = data.protocol + '://';
     }
-    hostField += data.authority;
+    if (data.authority) {
+      hostField += data.authority;
+    }
     this.set('hostValue', hostField);
     this.set('pathValue', data.path);
     this.set('anchorValue', data.anchor);
