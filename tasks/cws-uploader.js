@@ -6,18 +6,13 @@ const https = require('https');
 
 var CwsUploader = {
   scopes: ['https://www.googleapis.com/auth/chromewebstore'],
+  _config: null,
   token: null,
-  _getConfig: () => {
-    return new Promise((resolve, reject) => {
-      fs.readFile(CwsUploader.clientConfigFile, (err, data) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        data = JSON.parse(data);
-        resolve(data);
-      });
-    });
+  get config() {
+    if (!CwsUploader._config) {
+      CwsUploader._config = JSON.parse(fs.readFileSync('./tasks/cws-config.json', 'utf-8'));
+    }
+    return CwsUploader._config;
   },
 
   auth: () => {
@@ -40,8 +35,7 @@ var CwsUploader = {
    * @param {String} target Build target (canary, dev, beta, stable)
    */
   uploadItem: function(file, target) {
-    var config = fs.readFileSync('./tasks/cws-config.json', 'utf-8');
-    config = JSON.parse(config);
+    var config = CwsUploader.config;
     if (target in config) {
       let id = config[target].id;
       let publishTo = config[target].publishTo;
@@ -53,7 +47,7 @@ var CwsUploader = {
           console.log('The item has been uploaded.');
           if (target === 'canary') {
             // publish right away
-            return CwsUploader.publishItem(id, publishTo);
+            return CwsUploader._publishItem(id, publishTo);
           }
         } else {
           throw new Error('Error uploading item to Chrome Web Store. ' + JSON.stringify(result));
@@ -99,6 +93,30 @@ var CwsUploader = {
     });
   },
   /**
+   * Publish a not published item in the CWS.
+   */
+  publishTarget: (target, audience) => {
+    var config = CwsUploader.config;
+    if (target in config) {
+      let id = config[target].id;
+      let publishTo;
+      if (audience) {
+        switch (audience) {
+          case 'all': publishTo = 'default'; break;
+          case 'testers': publishTo = 'publish_to_trusted_testers'; break;
+        }
+      } else {
+        publishTo = config[target].publishTo;
+      }
+      if (!publishTo) {
+        return Promise.reject(new Error(`Audience "${publishTo}" is invalid.`));
+      }
+      return CwsUploader.publishItem(id, publishTo);
+    } else {
+      return Promise.reject(new Error(`${target} is invalid target.`));
+    }
+  },
+  /**
    * Publish an item in Chrome Web Store.
    * Call `CwsUploader.auth()` before calling this function.
    *
@@ -106,7 +124,7 @@ var CwsUploader = {
    * @param {String?} audience Target audience to publish to. Possible values are 'default'
    * or 'trustedTesters'. Default to 'default'.
    */
-  publishItem: (id, audience) => {
+  _publishItem: (id, audience) => {
     audience = audience || 'trustedTesters';
     console.log('Publishing an item: %s for audience: %s', id, audience);
     return new Promise((resolve, reject) => {

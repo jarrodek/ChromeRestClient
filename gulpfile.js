@@ -17,6 +17,22 @@ var Cli = {
         target: process.env.NODE_ENV
       }
     };
+  },
+  get publishTarget() {
+    return {
+      string: 'target',
+      default: {
+        target: process.env.NODE_ENV
+      }
+    };
+  },
+  get publishAudience() {
+    return {
+      string: 'audience',
+      default: {
+        target: process.env.NODE_ENV
+      }
+    };
   }
 };
 // Lint JavaScript files
@@ -111,10 +127,56 @@ var build = (done) => {
         approach on each build type.
       `;
       console.log(msg);
+      done();
   }
 };
 
+var publish = (done) => {
+  var params = Cli.getParams(Cli.publishTarget);
+  switch (params.target) {
+    case 'canary':
+    case 'dev':
+    case 'beta':
+    case 'stable':
+      let Publisher = require('./tasks/cws-uploader.js');
+      Publisher.publishTarget(params.target, params.audience)
+      .then(() => {
+        console.log('The item has been published.');
+        done();
+      })
+      .catch((err) => {
+        done(err);
+      });
+      break;
+    default:
+      let msg = `Unknown target ${params.target}.
+
+      Usage:
+      gulp publish --target <TARGET> [--audience <AUDIENCE>]
+
+      Targets:
+        canary          Publish a canary channel app in the store.
+        dev             Publish a dev channel app in the store.
+        beta            Publish a beta channel app in the store.
+        stable          Publish the app in the store.
+
+      Audience:
+        all             The app will be publicly available
+        testers         The app will be published for testers.
+
+      Description:
+        The command will publish the app for given channel. If --audience parameter is not present
+        the one from cws-config.json file will be used.
+        The app must have testers group assigned in order to publish to testers.
+      `;
+      console.log(msg);
+      done();
+  }
+
+};
+
 gulp.task('build', build);
+gulp.task('publish', publish);
 
 gulp.task('test', function(done) {
   var analyzer = require('./tasks/tree-analyzer.js');
