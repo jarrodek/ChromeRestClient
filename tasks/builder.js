@@ -160,15 +160,16 @@ var Builder = {
     });
   },
   /**
-   * Vulcanizer nned to have bower_components in root path.
+   * Vulcanizer need to have bower_components in root path.
    */
   _ensureBowerComponents: () => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       try {
         fs.lstat('./bower_components', (err, stats) => {
           if (err) {
-            console.error('Ensure bower files symlink', err);
-            reject(err);
+            fs.symlink('./app/bower_components/', './bower_components', 'dir', () => {
+              resolve();
+            });
             return;
           }
           if (!stats.isSymbolicLink()) {
