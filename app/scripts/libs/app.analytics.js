@@ -43,6 +43,16 @@ arc.app.analytics.debug = true;
  */
 arc.app.analytics._trackers = [];
 /**
+ * Handler to the service object.
+ * @type {Object}
+ */
+arc.app.analytics._service = null;
+/**
+ * State of the library. True when GA tracking is permitted.
+ * @type {Boolean}
+ */
+arc.app.analytics.enabled = true;
+/**
  * A configuration for trackers.
  * The array should contain as many configuration objects as needed.
  * Functions will use this configurations later to call trackers.
@@ -74,6 +84,7 @@ arc.app.analytics.init = function() {
  */
 arc.app.analytics._initTranckers = function() {
   var service = analytics.getService('ARC');
+  arc.app.analytics._service = service;
   console.log('Service has been initialized.');
   service.getConfig().addCallback(arc.app.analytics.initAnalyticsConfig);
   arc.app.analytics._trackersConfig.forEach(function(item) {
@@ -84,8 +95,30 @@ arc.app.analytics._initTranckers = function() {
 };
 arc.app.analytics.initAnalyticsConfig = function(config) {
   var permitted = config.isTrackingPermitted();
+  arc.app.analytics.enabled = permitted;
   console.info('[Google Analytics] Tracking is ' + (permitted ? '' : 'not ') + 'permitted');
 },
+/**
+ * Enable or disable Google Analytics tracking.
+ *
+ * @param {Boolean} permitted True if the analytics is permitted to send data to the GA.
+ * @return {Promise} Fulfilled promise when state has been set.
+ */
+arc.app.analytics.setAnalyticsPermitted = function(permitted) {
+  if (!arc.app.analytics._service) {
+    return Promise.reject(new Error('Google Analytics not ready.'));
+  }
+  var msg = '[Google Analytics] Setting tracking state to ' + (permitted ? 'enabled' : 'disabled');
+  console.info(msg);
+  arc.app.analytics.enabled = permitted;
+  return new Promise((result) => {
+    arc.app.analytics._service.getConfig().addCallback((config) => {
+      config.setTrackingPermitted(permitted, () => {
+        result();
+      });
+    });
+  });
+};
 /**
  * Initialize and set up custom dimmenstion that are used by the app.
  */
@@ -388,6 +421,9 @@ arc.app.analytics.sendEvent = function(category, action, label, value) {
       'params': arguments
     };
   }
+  if (!arc.app.analytics.enabled) {
+    return;
+  }
   arc.app.analytics._trackers.forEach(function(tracker) {
     tracker.sendEvent(category, action, label, value);
   });
@@ -398,6 +434,9 @@ arc.app.analytics.sendEvent = function(category, action, label, value) {
  * @param {String} screenName A screen name to be send.
  */
 arc.app.analytics.sendScreen = function(screenName) {
+  if (!arc.app.analytics.enabled) {
+    return;
+  }
   arc.app.analytics._trackers.forEach(function(tracker) {
     tracker.sendAppView(screenName);
   });
@@ -414,6 +453,9 @@ arc.app.analytics.sendException = function(exception, isFatal) {
       'type': 'exception',
       'params': [exception, isFatal + '']
     };
+  }
+  if (!arc.app.analytics.enabled) {
+    return;
   }
   arc.app.analytics._trackers.forEach(function(tracker) {
     tracker.sendException(exception, isFatal);

@@ -7,18 +7,43 @@ Polymer({
     ArcBehaviors.ArcControllerBehavior
   ],
   properties: {
+    /**
+     * System settings object.
+     * This keeps values saved in sync storage.
+     *
+     * @type {Object.<string, boolean>}
+     */
     values: {
       type: Object
     },
+    /**
+     * A handler for a storage change event.
+     *
+     * @type {Function}
+     */
     _storageObserver: {
       type: Function,
       value: function() {
         return this._onStorageChanged.bind(this);
       }
     },
+    /**
+     * True when the settings object has been initialized.
+     */
     initialized: {
       type: Boolean,
       value: false
+    },
+    /**
+     * State of the GA tracking.
+     * It's outside the regular app's settings system since it's controled by the library.
+     * Therefore it must be set in the UI as a different object.
+     *
+     * @type {Boolean}
+     */
+    gaEnabled: {
+      type: Boolean,
+      value: true
     }
   },
   observers: [
@@ -27,6 +52,7 @@ Polymer({
 
   onShow: function() {
     this._setPageTitle('Settings');
+    this.set('gaEnabled', arc.app.analytics.enabled);
   },
 
   onHide: function() {
@@ -120,6 +146,10 @@ Polymer({
     });
 
     arc.app.analytics.sendEvent('Settings usage', 'Clear history', 'true');
+  },
+
+  _gaSettingTapped: function() {
+    arc.app.analytics.setAnalyticsPermitted(this.gaEnabled);
   }
 });
 })();

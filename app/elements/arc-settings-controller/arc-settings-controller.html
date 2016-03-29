@@ -70,6 +70,17 @@ the License.
           </paper-item-body>
         </paper-item>
       </section>
+      <section class="settings-section">
+        <paper-item>
+          <paper-item-body two-line="">
+            <div>
+              Send anonymous usage data
+            </div>
+            <div secondary="true">None of your data are sent to the server. It helps making an ARC better when you provide usage statistics. Please, leave it enabled if you can.</div>
+          </paper-item-body>
+          <paper-toggle-button on-tap="_gaSettingTapped" checked="{{gaEnabled}}"></paper-toggle-button>
+        </paper-item>
+      </section>
       <paper-dialog id="historyClearDialog" on-iron-overlay-closed="onClearDialogResult">
         <h2>Clear history</h2>
         <paper-dialog-scrollable>
