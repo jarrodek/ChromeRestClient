@@ -103,7 +103,7 @@ var CwsUploader = {
       if (audience) {
         switch (audience) {
           case 'all': publishTo = 'default'; break;
-          case 'testers': publishTo = 'publish_to_trusted_testers'; break;
+          case 'testers': publishTo = 'trustedTesters'; break;
         }
       } else {
         publishTo = config[target].publishTo;
@@ -111,7 +111,7 @@ var CwsUploader = {
       if (!publishTo) {
         return Promise.reject(new Error(`Audience "${publishTo}" is invalid.`));
       }
-      return CwsUploader.publishItem(id, publishTo);
+      return CwsUploader.auth().then(() => CwsUploader._publishItem(id, publishTo));
     } else {
       return Promise.reject(new Error(`${target} is invalid target.`));
     }
@@ -125,12 +125,17 @@ var CwsUploader = {
    * or 'trustedTesters'. Default to 'default'.
    */
   _publishItem: (id, audience) => {
-    audience = audience || 'trustedTesters';
+    if (!audience) {
+      return Promise.reject(new Error('The audience parameter is required.'));
+    }
+    if (['default', 'trustedTesters'].indexOf(audience) === -1) {
+      return Promise.reject(new Error(`The "${audience}" is not valid value for the audience.`));
+    }
     console.log('Publishing an item: %s for audience: %s', id, audience);
     return new Promise((resolve, reject) => {
       let options = {
         host: 'www.googleapis.com',
-        path: `/chromewebstore/v1.1/items/${id}/publish?target=${audience}`,
+        path: `/chromewebstore/v1.1/items/${id}/publish?publishTarget=${audience}`,
         port: '443',
         method: 'POST',
         headers: {
