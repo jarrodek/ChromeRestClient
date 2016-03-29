@@ -1,15 +1,15 @@
 {
   "canary": {
     "id": "ffgciingieijajcbpkockcbknajffbel",
-    "publishTo": "trustedTesters"
+    "publishTo": "publish_to_trusted_testers"
   },
   "dev" : {
     "id": "okeafnfmgoafdfbcjkanpgmjanccpell",
-    "publishTo": "trustedTesters"
+    "publishTo": "publish_to_trusted_testers"
   },
   "beta" : {
     "id": "epgngalmiadbjnoompchcohonhidjanm",
-    "publishTo": "trustedTesters"
+    "publishTo": "publish_to_trusted_testers"
   },
   "stable" : {
     "id": "hgmloofddffdnphfgcellkdfbfbjeloo",
