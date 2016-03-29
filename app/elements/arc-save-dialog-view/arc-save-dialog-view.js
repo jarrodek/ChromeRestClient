@@ -111,7 +111,7 @@ Polymer({
   },
 
   _computeShowProjectSelector: function(projects, newProjectName) {
-    return !(!projects.length || newProjectName);
+    return !(!(projects && projects.length) || newProjectName);
   }
 });
 })();
