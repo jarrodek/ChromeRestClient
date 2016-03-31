@@ -105,6 +105,8 @@ Options:
 
   --publish       If set the script will publish the app. You'll be asked to log in to your
                   Google account during the process. By detault the app is not published.
+                  Note that the app will be uploaded to the store but not published even if
+                  --publish is not set.
 
 Description:
   Build the app, update git repository and publish the app in the store.
@@ -133,6 +135,7 @@ var build = (done) => {
   if (options.buildOnly && options.publish) {
     options.publish = false;
   }
+
   switch (params.target) {
     case 'canary':
       Builder.buildCanary(options, done);
