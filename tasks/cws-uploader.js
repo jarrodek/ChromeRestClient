@@ -16,6 +16,9 @@ var CwsUploader = {
   },
 
   auth: () => {
+    if (CwsUploader.token) {
+      return Promise.resolve(CwsUploader.token);
+    }
     return authClient
       .execute(CwsUploader.scopes)
       .then((ok) => {
