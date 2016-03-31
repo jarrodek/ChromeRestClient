@@ -30,35 +30,35 @@ var Builder = {
    * 3. Build app (canary channel)
    * 4. Upload item to CSW (canary item)
    */
-  buildCanary: (done) => {
+  buildCanary: (opts, done) => {
     Builder.target = 'canary';
     Builder.targetDir = 'canary';
     Builder.workingBranch = 'develop';
-    Builder._build(done);
+    Builder._build(opts, done);
   },
 
-  buildDev: (done) => {
+  buildDev: (opts, done) => {
     Builder.target = 'dev';
     Builder.targetDir = 'dev';
     Builder.workingBranch = 'develop';
-    Builder._build(done);
+    Builder._build(opts, done);
   },
 
-  buildBeta: (release, done) => {
-    Builder.target = release ? 'beta-release' : 'beta-hotfix';
+  buildBeta: (opts, done) => {
+    Builder.target = opts.isHotfix ? 'beta-hotfix' : 'beta-release';
     Builder.targetDir = 'beta';
     Builder.workingBranch = 'develop';
-    Builder._build(done);
+    Builder._build(opts, done);
   },
 
-  buildStable: (hotfix, done) => {
-    Builder.target = hotfix ? 'hotfix' : 'stable';
+  buildStable: (opts, done) => {
+    Builder.target = opts.isHotfix ? 'stable-hotfix' : 'stable-release';
     Builder.targetDir = 'stable';
     Builder.workingBranch = 'develop';
-    Builder._build(done);
+    Builder._build(opts, done);
   },
 
-  _build: function(done) {
+  _build: function(opts, done) {
     var version = Bump.bump({
       target: Builder.target
     });
@@ -66,15 +66,30 @@ var Builder = {
     var date = new Date().toGMTString();
     var buildName = Builder.target[0].toUpperCase() + Builder.target.substr(1);
     Builder.commitMessage = `${buildName} build at ${date} to version ${version}`;
-    try {
-      Builder._gitCommitAndPush();
-    } catch (e) {
-      console.error('Unable push changes to git repository. Task terminated.');
-      done();
-      return;
+
+    if (!opts.buildOnly) {
+      try {
+        Builder._gitCommitAndPush();
+      } catch (e) {
+        console.error('Unable push changes to git repository. Task terminated.');
+        done();
+        return;
+      }
     }
 
     Builder._buildPackage()
+    .then((buildPath) => {
+      if (opts.buildOnly) {
+        return Promise.resolve();
+      }
+      return Builder._uploadPackage(buildPath);
+    })
+    .then(() => {
+      if (opts.buildOnly || !opts.publish) {
+        return Promise.resolve();
+      }
+      return Builder._publishPackage();
+    })
     .then(() => {
       console.log(`Finished job.`);
       done();
@@ -109,9 +124,7 @@ var Builder = {
 
   _buildPackage: function() {
     return Builder._copyApp()
-    .then(() => Builder._createPackage())
-    .then((buildPath) => Builder._uploadPackage(buildPath))
-    .then(() => console.log('Package builded.'));
+    .then(() => Builder._createPackage());
   },
   /**
    * Upload the package to CWS.
@@ -119,6 +132,13 @@ var Builder = {
   _uploadPackage: (buildPath) => {
     return uploader.auth()
     .then(() => uploader.uploadItem(buildPath, Builder.targetDir));
+  },
+  /**
+   * Publish package after it has been uploaded. If it is done in the same run it does not require
+   * another auth.
+   */
+  _publishPackage: () => {
+    return uploader.publishTarget(Builder.targetDir);
   },
 
   get buildTarget() {
@@ -428,7 +448,7 @@ gulp.task('copy', () => {
   // Copy over only the bower_components we need
   // These are things which cannot be vulcanized
   var bower = gulp.src([
-    'app/bower_components/{webcomponentsjs,font-roboto-local,codemirror}/**/*'
+    'app/bower_components/{webcomponentsjs,font-roboto-local,codemirror,prism/components}/**/*'
   ]).pipe(gulp.dest(path.join(dest,'bower_components')));
 
   // var codeMirror = gulp.src([

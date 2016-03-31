@@ -82,10 +82,10 @@ var Bump = {
         version = Bump._bumpBetaHotfix(version);
         versionName = 'beta';
         break;
-      case 'stable':
+      case 'stable-release':
         version = Bump._bumpStable(version);
         break;
-      case 'hotfix':
+      case 'stable-hotfix':
         version = Bump._bumpHotfix(version);
         break;
       default:
