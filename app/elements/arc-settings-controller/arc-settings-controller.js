@@ -44,6 +44,17 @@ Polymer({
     gaEnabled: {
       type: Boolean,
       value: true
+    },
+
+    showNotifications: {
+      type: Boolean,
+      value: false,
+      readOnly: true
+    },
+
+    notificationsEnabled: {
+      type: Boolean,
+      value: false
     }
   },
   observers: [
@@ -71,9 +82,22 @@ Polymer({
           this.initialized = true;
         }.bind(this), 0);
       }.bind(this));
-
     chrome.storage.onChanged.addListener(this._storageObserver);
+    var channel = arc.app.utils.releaseChannel;
+    if (channel !== 'stable') {
+      this._setShowNotifications(true);
+      this._checkNotificationsPermissions();
+    }
   },
+  /**
+   * Check if user allowed desktop notifications.
+   */
+  _checkNotificationsPermissions: function() {
+    chrome.permissions.contains({permissions: ['notifications']}, (granted) => {
+      this.set('notificationsEnabled', granted);
+    });
+  },
+
   /**
    * A callback called when the value of any storage change.
    * This view should handle external changes to the store.
@@ -150,6 +174,19 @@ Polymer({
 
   _gaSettingTapped: function() {
     arc.app.analytics.setAnalyticsPermitted(this.gaEnabled);
+  },
+
+  _notificationsTapped: function() {
+    if (this.notificationsEnabled) {
+      chrome.permissions.request({permissions: ['notifications']}, (granted) => {
+        if (!granted) {
+          this.set('notificationsEnabled', false);
+        }
+      });
+    } else {
+      console.info('Removing notifications permission');
+      chrome.permissions.remove({permissions: ['notifications']});
+    }
   }
 });
 })();

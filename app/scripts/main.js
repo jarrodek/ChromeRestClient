@@ -185,16 +185,13 @@
       //tests
       return;
     }
-    var manifest = chrome.runtime.getManifest();
-    // jscs:disable
-    var manifestName = manifest.version_name;
-    // jscs:enable
+    var channel = arc.app.utils.releaseChannel;
     var cls = null;
-    if (manifestName.indexOf('canary') !== -1) {
+    if (channel === 'canary') {
       cls = 'canary-channel';
-    } else if (manifestName.indexOf('dev') !== -1) {
+    } else if (channel === 'dev') {
       cls = 'dev-channel';
-    } else if (manifestName.indexOf('beta') !== -1) {
+    } else if (channel === 'beta') {
       cls = 'beta-channel';
     }
     if (cls) {
@@ -203,6 +200,10 @@
       if (cls === 'canary') {
         app.$.canaryInfo.open();
       }
+    }
+    if (channel === 'stable') {
+      var elm = app.$.onboardingNotifications;
+      elm.parentNode.removeChild(elm);
     }
   };
   /**
@@ -215,5 +216,24 @@
     if (e.target.dataset.href) {
       window.open(e.target.dataset.href);
     }
+  };
+  /**
+   * Enable desktop notifications permission for the app.
+   * This function can't use promise since a notification request must be made as a result
+   * of user gesture (like click).
+   *
+   * @param {Function} callback A callback function with the result.
+   */
+  app.enableNotifications = (callback) => {
+    chrome.permissions.request({permissions: ['notifications']}, (granted) => {
+      if (callback && typeof callback === 'function') {
+        callback(granted);
+      } else {
+        // from tutorial.
+        if (granted) {
+          app.$.enableNotify.setAttribute('hidden', true);
+        }
+      }
+    });
   };
 })(document, window);

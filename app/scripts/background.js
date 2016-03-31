@@ -1,6 +1,22 @@
 'use strict';
 
-var lunch = (url) => {
+/**
+ * Advanced Rest Client namespace.
+ *
+ * @namespace
+ */
+var arc = arc || {};
+/**
+ * ARC background page namespace.
+ *
+ * @namespace
+ */
+arc.bg = arc.bg || {};
+/**
+ * Open new window of the app.
+ * Every call will open new window even if another window is already created.
+ */
+arc.bg.openWindow = (url) => {
   if (!url) {
     url = 'index.html';
   }
@@ -11,20 +27,17 @@ var lunch = (url) => {
     url, {
       id: id,
       bounds: {
-        width: 800,
-        height: 600
+        width: 1000,
+        height: 800
       }
     }
   );
 };
-
 /**
- * Listens for the app launching then creates the window.
- *
- * @see http://developer.chrome.com/apps/app.runtime.html
- * @see http://developer.chrome.com/apps/app.window.html
+ * Handler for `onLaunched` event.
+ * Depending on launch data it will open window in default view or requested view.
  */
-chrome.app.runtime.onLaunched.addListener(function(lunchData) {
+arc.bg.onLaunched = (lunchData) => {
   var url = 'index.html';
   if (lunchData && lunchData.id) {
     switch (lunchData.id) {
@@ -34,12 +47,135 @@ chrome.app.runtime.onLaunched.addListener(function(lunchData) {
         let data = JSON.parse(decodeURIComponent(_url));
         let id = data.ids[0];
         url += '#!/request/drive/' + id;
-      break;
+        break;
     }
   }
-  lunch(url);
-});
+  arc.bg.openWindow(url);
+};
+arc.bg.release = null;
+arc.bg.setReleaseInfo = () => {
+  var manifest = chrome.runtime.getManifest();
+  // jscs:disable
+  var manifestName = manifest.version_name;
+  // jscs:enable
+  var release = null;
+  if (manifestName.indexOf('beta') === -1) {
+    release = 'beta';
+  } else if (manifestName.indexOf('dev') === -1) {
+    release = 'dev';
+  } else if (manifestName.indexOf('canary') === -1) {
+    release = 'canary';
+  } else {
+    release = 'stable';
+  }
+  arc.bg.release = release;
+};
+/**
+ * Handler called when the app is installed or updated.
+ */
+arc.bg.onInstalled = (details) => {
+  switch (details.reason) {
+    case 'update':
+      arc.bg.notifyBetaUpdate();
+      break;
+  }
+};
+/**
+ * If the beta channel, notify user about new version.
+ */
+arc.bg.notifyBetaUpdate = () => {
+  if (!arc.bg.release || arc.bg.release === 'stable') {
+    return;
+  }
+  arc.bg.notifications.canNotify()
+  .then((granted) => {
+    if (granted) {
+      arc.bg.notifications.displayUpdate(arc.bg.release);
+    }
+  });
+};
 
+/**
+ * Notifications support.
+ *
+ * @namespace
+ */
+arc.bg.notifications = {};
+/**
+ * Checks if the app have permissions to show notifications.
+ *
+ * @return {!Promise} Fulfilled promise when state is determined.
+ */
+arc.bg.notifications.canNotify = () => {
+  return new Promise((resolve) => {
+    chrome.permissions.contains({permissions: ['notifications']}, (granted) => {
+      resolve(granted);
+    });
+  });
+};
+/**
+ * Listen for notifications events.
+ */
+arc.bg.notifications.listen = () => {
+  arc.bg.notifications.canNotify()
+  .then((granted) => {
+    if (granted) {
+      chrome.notifications.onClicked.addListener(arc.bg.notifications.onClicked);
+      chrome.notifications.onButtonClicked.addListener(arc.bg.notifications.onButtonClicked);
+    }
+  });
+};
+arc.bg.notifications.onClicked = (notificationId) => {
+  switch (notificationId) {
+    case 'beta-update':
+    case 'dev-update':
+    case 'canary-update':
+      arc.bg.openWindow();
+      break;
+  }
+  chrome.notifications.clear(notificationId);
+};
+arc.bg.notifications.onButtonClicked = (notificationId, buttonIndex) => {
+  switch (notificationId) {
+    case 'beta-update':
+    case 'dev-update':
+    case 'canary-update':
+      if (buttonIndex === 0) {
+        arc.bg.openWindow();
+      }
+      break;
+  }
+  chrome.notifications.clear(notificationId);
+};
+arc.bg.notifications.displayUpdate = (channel) => {
+  var msg = `Test ${channel} channel now and give feedback before stable release.`;
+  var opts = {
+    type: 'basic',
+    iconUrl: 'assets/arc_icon_128.png',
+    title: 'Advanced REST Client updated',
+    message: msg,
+    buttons: [
+      {
+        title: 'Open app'
+      },
+      {
+        title: 'Close'
+      }
+    ],
+    isClickable: true
+  };
+  chrome.notifications.create(`${channel}-update`, opts);
+};
+arc.bg.setReleaseInfo();
+/**
+ * Listens for the app launching then creates the window.
+ *
+ * @see http://developer.chrome.com/apps/app.runtime.html
+ * @see http://developer.chrome.com/apps/app.window.html
+ */
+chrome.app.runtime.onLaunched.addListener(arc.bg.onLaunched);
+chrome.runtime.onInstalled.addListener(arc.bg.onInstalled);
+arc.bg.notifications.listen();
 /**
  * Called when user use one of the commands registered in the manifest file.
  */

@@ -263,3 +263,35 @@ Object.defineProperty(arc.app.utils, 'osInfo', {
     throw new Error('osInfo can\'t be overrited.');
   }
 });
+arc.app.utils._releaseChannel = null;
+/**
+ * Get release channel name.
+ *
+ * @type {String} Stable, beta, dev or canary.
+ */
+Object.defineProperty(arc.app.utils, 'releaseChannel', {
+  enumerable: true,
+  get: function() {
+    if (arc.app.utils._releaseChannel) {
+      return arc.app.utils._releaseChannel;
+    }
+    var manifest = chrome.runtime.getManifest();
+    // jscs:disable
+    var manifestName = manifest.version_name;
+    // jscs:enable
+    var release = null;
+    if (manifestName.indexOf('beta') === -1) {
+      release = 'beta';
+    } else if (manifestName.indexOf('dev') === -1) {
+      release = 'dev';
+    } else if (manifestName.indexOf('canary') === -1) {
+      release = 'canary';
+    } else {
+      release = 'stable';
+    }
+    arc.app.utils._releaseChannel = release;
+  },
+  set: function() {
+    throw new Error('releaseChannel can\'t be set.');
+  }
+});

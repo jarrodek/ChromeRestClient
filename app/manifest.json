@@ -25,7 +25,8 @@
     }
   ],
   "optional_permissions": [
-    "clipboardWrite"
+    "clipboardWrite",
+    "notifications"
   ],
   "commands": {
     "command-save-data": {

@@ -32,55 +32,54 @@ the License.
         color: var(--paper-grey-500);
       }
 
-      .settings-section {
+      paper-item {
         border-bottom: 1px var(--paper-grey-100) solid;
       }
       </style>
-      <section class="settings-section">
-        <paper-item>
-          <paper-item-body two-line="">
-            <div>History</div>
-            <div secondary="true">Save list of requests made by the app in local storage</div>
-          </paper-item-body>
-          <paper-toggle-button checked="{{values.HISTORY_ENABLED}}"></paper-toggle-button>
-        </paper-item>
-      </section>
-      <section class="settings-section">
-        <paper-item on-tap="historyClearClick">
-          <paper-item-body>
-            <div>Clear history</div>
-          </paper-item-body>
-        </paper-item>
-      </section>
-      <section class="settings-section">
-        <paper-item>
-          <paper-item-body>
-            <div>
-              Magic variables
-              <paper-icon-button icon="help" class="help-icon" on-tap="openMagicVariablesDialog"></paper-icon-button>
-            </div>
-          </paper-item-body>
-          <paper-toggle-button checked="{{values.MAGICVARS_ENABLED}}"></paper-toggle-button>
-        </paper-item>
-      </section>
-      <section class="settings-section">
-        <paper-item on-tap="showTutorial">
-          <paper-item-body>
-            <div>Show tutorial</div>
-          </paper-item-body>
-        </paper-item>
-      </section>
-      <section class="settings-section">
-        <paper-item>
-          <paper-item-body two-line="">
-            <div>
-              Send anonymous usage data
-            </div>
-            <div secondary="true">None of your data are sent to the server. It helps making an ARC better when you provide usage statistics. Please, leave it enabled if you can.</div>
-          </paper-item-body>
-          <paper-toggle-button on-tap="_gaSettingTapped" checked="{{gaEnabled}}"></paper-toggle-button>
-        </paper-item>
-      </section>
+      <paper-item>
+        <paper-item-body two-line="">
+          <div>History</div>
+          <div secondary="true">Save list of requests made by the app in local storage</div>
+        </paper-item-body>
+        <paper-toggle-button checked="{{values.HISTORY_ENABLED}}"></paper-toggle-button>
+      </paper-item>
+      <paper-item on-tap="historyClearClick">
+        <paper-item-body>
+          <div>Clear history</div>
+        </paper-item-body>
+      </paper-item>
+      <paper-item>
+        <paper-item-body>
+          <div>
+            Magic variables
+            <paper-icon-button icon="help" class="help-icon" on-tap="openMagicVariablesDialog"></paper-icon-button>
+          </div>
+        </paper-item-body>
+        <paper-toggle-button checked="{{values.MAGICVARS_ENABLED}}"></paper-toggle-button>
+      </paper-item>
+      <paper-item on-tap="showTutorial">
+        <paper-item-body>
+          <div>Show tutorial</div>
+        </paper-item-body>
+      </paper-item>
+      <paper-item>
+        <paper-item-body two-line="">
+          <div>
+            Send anonymous usage data
+          </div>
+          <div secondary="true">None of your data are sent to the server. It helps making an ARC better when you provide usage statistics. Please, leave it enabled if you can.</div>
+        </paper-item-body>
+        <paper-toggle-button on-tap="_gaSettingTapped" checked="{{gaEnabled}}"></paper-toggle-button>
+      </paper-item>
+      <paper-item>
+        <paper-item-body two-line="">
+          <div>
+            Allow desktop notifications
+          </div>
+          <div secondary="true">The notifications will be displayed when beta, dev or canary channel is updated.</div>
+        </paper-item-body>
+        <paper-toggle-button on-tap="_notificationsTapped" checked="{{notificationsEnabled}}"></paper-toggle-button>
+      </paper-item>
       <paper-dialog id="historyClearDialog" on-iron-overlay-closed="onClearDialogResult">
         <h2>Clear history</h2>
         <paper-dialog-scrollable>

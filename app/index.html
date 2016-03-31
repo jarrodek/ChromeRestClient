@@ -163,6 +163,21 @@
           </div>
         </div>
       </onboarding-page>
+      <onboarding-page id="onboardingNotifications">
+        <h2>Be notified about update</h2>
+        <div class="onboarding-image-page">
+          <div class="image">
+            <iron-icon icon="arc:notifications-active"></iron-icon>
+          </div>
+          <div class="description">
+            <p class="beta-info">
+              Beta, Dev and Canary channel users can be notified when new versions is released.
+              You'll receive a notification on your desktop when the app udpate itseld so you can test the changes right away.
+            </p>
+            <paper-button on-tap="enableNotifications" id="enableNotify" raised>Enable notifications</paper-button>
+          </div>
+        </div>
+      </onboarding-page>
     </onboarding-tutorial>
     <paper-dialog id="canaryInfo">
       <h2>You are using the cannary channel</h2>
