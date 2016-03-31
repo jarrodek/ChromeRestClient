@@ -148,18 +148,28 @@ class PrismHighlight {
       return Promise.resolve(Prism.languages.html);
     }
     {
-      //text/html; charset=ISO-8859-2
+      // text/html; charset=ISO-8859-2
+      // application/vnd.dart;charset=utf-8
+      // text/x-java-source;charset=utf-8
       let i = mime.indexOf('/');
       if (i !== -1) {
         mime = mime.substr(i + 1);
         i = mime.indexOf(';');
         if (i !== -1) {
-          mime = mime.substr(i + 1).trim();
+          mime = mime.substr(0, i).trim();
         }
       }
     }
+    // remove "vnd." prefix
+    if (mime.indexOf('vnd.') === 0) {
+      mime = mime.substr(4);
+    }
     if (mime.toLowerCase().indexOf('x-') === 0) {
       mime = mime.substr(2);
+    }
+    var srcI = mime.toLowerCase().indexOf('-source');
+    if (srcI > 0) {
+      mime = mime.substr(0, srcI);
     }
     if (Prism.plugins.mods.langs.indexOf(mime) === -1) {
       // console.log('No lang found for mime: ', mime);
