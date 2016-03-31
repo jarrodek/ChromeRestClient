@@ -1,0 +1,31 @@
+<script src="../../bower_components/prism/prism.js" data-manual=""></script>
+<script src="../../bower_components/prism/plugins/autolinker/prism-autolinker.js" data-manual=""></script>
+<script src="prism-modes.js"></script>
+<link rel="import" href="prism-styles.html">
+<!--
+Syntax highlighting via [Prism](http://prismjs.com/).
+
+-->
+<dom-module id="prism-highlight">
+  <template>
+    <style include="prism-styles">
+    :host {
+      display: block;
+    }
+
+    pre {
+      -webkit-user-select: text;
+    }
+
+    paper-progress {
+      width: 100%;
+    }
+    </style>
+    <pre class="parsed-content"><code id="output" class="language-" on-tap="_handleLinks"></code></pre>
+    <div hidden$="[[!hasMore]]">
+      <paper-button raised on-tap="_loadNext">Show next [[maxRead]] lines</paper-button>
+      <paper-button raised on-tap="_loadAll">Display all</paper-button>
+    </div>
+  </template>
+  <script src="prism-highlight.js"></script>
+</dom-module>

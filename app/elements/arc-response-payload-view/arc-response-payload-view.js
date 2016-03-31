@@ -126,6 +126,7 @@ Polymer({
     this._setIsXml(false);
     this._setIsImage(false);
     this._setIsEmpty(false);
+    this._setParsedMode(undefined);
   },
 
   _payloadChanged: function() {
@@ -156,6 +157,7 @@ Polymer({
         this.selectedTab = 3;
         this._tabsChanged();
       } else {
+        // console.log('SETTING UP PARSE MODE', ct);
         this._setParsedMode(ct);
         this._setIsParsed(true);
         this.selectedTab = 1;

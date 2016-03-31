@@ -149,7 +149,7 @@
     } else {
       app.set('request.url', url);
     }
-
+    app.scrollPageToTop();
   });
   // called when any component want to write to clipboard.
   document.body.addEventListener('clipboard-write', (e) => {

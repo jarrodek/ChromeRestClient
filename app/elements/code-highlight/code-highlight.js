@@ -57,7 +57,7 @@ Polymer({
       mode = spec = val;
     }
     if (this._loaded.indexOf(mode) !== -1) {
-      CodeMirror.runMode(this.code, mode, this._appendParsed.bind(this));
+      this._runParser(mode);
     } else {
       this._loadMode(mode);
     }
@@ -68,9 +68,15 @@ Polymer({
   _loadMode: function(mode) {
     CodeMirror.modeURL = '/bower_components/codemirror/mode/%N/%N.js';
     CodeMirror.requireMode(mode, () => {
-      CodeMirror.runMode(this.code, mode, this._appendParsed.bind(this));
+      this._runParser(mode);
       this._loaded.push(mode);
     });
+  },
+
+  _runParser: function(mode) {
+    console.time('CodeMirror highlight');
+    CodeMirror.runMode(this.code, mode, this._appendParsed.bind(this));
+    console.timeEnd('CodeMirror highlight');
   },
 
   _callLoadedEnd: function() {
