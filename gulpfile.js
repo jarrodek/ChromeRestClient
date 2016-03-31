@@ -86,9 +86,45 @@ try {
   require('require-dir')('tasks');
 } catch (err) {}
 
+var buildHelpMessage = `Usage:
+gulp build --target <TARGET> [--hotfix] [--build-only] [--publish]
+
+Targets:
+  canary          Build a canary (daily) release
+  dev             Build a dev (feature) release
+  beta            Build a beta (RC) release
+  stable          Build a stable release
+
+Options:
+  --hotfix        Treat the release as a hotfix release. It matters only for versioning
+                  system (during version bump) See tasks/bump-version.js for more info.
+                  Bu default it's full release.
+
+  --build-only    Don't push changes to git and don't publish the app in the store. It
+                  overrides --publish and prevent script from publishing the app.
+
+  --publish       If set the script will publish the app. You'll be asked to log in to your
+                  Google account during the process. By detault the app is not published.
+
+Description:
+  Build the app, update git repository and publish the app in the store.
+
+Examples:
+  gulp build --target canary --publish
+  This will build canary release, push changes to the git repository and publish the app.
+
+  gulp build --target beta --hotfix --build-only
+  This will only build beta release as a hotfix (only minor number will increase).
+`;
+
 var build = (done) => {
-  var Builder = require('./tasks/builder.js');
   var params = Cli.getParams(Cli.buildOptions);
+  if (params.help) {
+    console.log(buildHelpMessage);
+    done();
+    return;
+  }
+  var Builder = require('./tasks/builder.js');
   var options = {
     isHotfix: params.hotfix || false,
     buildOnly: params['build-only'] || false,
@@ -113,35 +149,7 @@ var build = (done) => {
     default:
       let msg = `Unknown target ${params.target}.
 
-      Usage:
-      gulp build --target <TARGET> [--hotfix] [--build-only] [--publish]
-
-      Targets:
-        canary          Build a canary (daily) release
-        dev             Build a dev (feature) release
-        beta            Build a beta (RC) release
-        stable          Build a stable release
-
-      Options:
-      --hotfix          Treat the release as a hotfix release. It matters only for versioning
-                        system (during version bump) See tasks/bump-version.js for more info.
-                        Bu default it's full release.
-
-      --build-only      Don't push changes to git and don't publish the app in the store. It
-                        overrides --publish and prevent script from publishing the app.
-
-      --publish         If set the script will publish the app. You'll be asked to log in to your
-                        Google account during the process. By detault the app is not published.
-
-      Description:
-        Build the app, update git repository and publish the app in the store.
-
-      Examples:
-      gulp build --target canary --publish
-      This will build canary release, push changes to the git repository and publish the app.
-
-      gulp build --target beta --hotfix --build-only
-      This will only build beta release as a hotfix (only minor number will increase).
+      ${buildHelpMessage}
       `;
       console.log(msg);
       done();
