@@ -187,6 +187,14 @@ Polymer({
       console.info('Removing notifications permission');
       chrome.permissions.remove({permissions: ['notifications']});
     }
+  },
+
+  _showAddToDesktopTutotial: function() {
+    this.$.addShortcutsToDesktop.open();
+  },
+
+  _openApps: function() {
+    window.open('chrome://apps');
   }
 });
 })();

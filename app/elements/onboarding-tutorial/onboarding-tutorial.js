@@ -14,14 +14,19 @@ Polymer({
     name: String,
     /**
      * Delay tutorial show after attaching this element to the DOM.
-     *
+     * Use with combination with `auto`. It will do nothing if auto is not set.
      * @type {Number}
      */
     delay: {
       type: Number,
       value: 2000
     },
-
+    /**
+     * If true the tutorial will open itself automatically.
+     * Use with combination with `delay`
+     * @type {Boolean}
+     */
+    auto: Boolean,
     pages: {
       type: Array,
       value: []
@@ -49,7 +54,16 @@ Polymer({
     showSkip: {
       type: Boolean,
       computed: '_comnputeShowSkip(lastPage)'
-    }
+    },
+    /**
+     * True when hide the pagination for tutorial pages.
+     * @type {Boolean}
+     */
+    noPagination: Boolean,
+    /**
+     * Hide "previous" button
+     */
+    hidePrev: Boolean
   },
   behaviors: [
     Polymer.IronOverlayBehavior,
@@ -68,6 +82,14 @@ Polymer({
       }
     }
     this.pages = effectiveChildren;
+    if (this.pages.length === 1) {
+      //hide controls
+      this.noPagination = true;
+      this.hidePrev = true;
+    }
+    if (!this.auto) {
+      return;
+    }
     if (this.delay) {
       this.async(() => {
         this.openTutorial();
@@ -103,7 +125,7 @@ Polymer({
     this.$.pages.selectNext();
     arc.app.analytics.sendEvent('Onboarding', 'Page', 'Next');
   },
-  
+
   prev: function() {
     this.$.pages.entryAnimation = 'slide-from-left-animation';
     this.$.pages.exitAnimation = 'slide-right-animation';
@@ -126,6 +148,9 @@ Polymer({
   },
 
   _getTutorialState: function() {
+    if (!this.id) {
+      return Promise.resolve(false);
+    }
     return new Promise((resolve) => {
       chrome.storage.sync.get('tutorials', (data) => {
         if (!('tutorials' in data)) {
@@ -143,6 +168,9 @@ Polymer({
   },
 
   _saveTutorialPassed: function() {
+    if (!this.id) {
+      return Promise.resolve();
+    }
     return new Promise((resolve) => {
       chrome.storage.sync.get('tutorials', (data) => {
         if (!('tutorials' in data)) {
@@ -152,7 +180,13 @@ Polymer({
         if (!(t instanceof Array)) {
           t = [];
         }
-        t[t.length] = this.id;
+        if (t.indexOf(this.id) === -1) {
+          t[t.length] = this.id;
+        } else {
+          t = t.filter((value, index, self) => {
+            return self.indexOf(value) === index;
+          });
+        }
         chrome.storage.sync.set({tutorials: t}, () => {
           resolve();
         });

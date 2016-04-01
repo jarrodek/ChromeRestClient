@@ -24,6 +24,7 @@ the License.
       <style>
       :host {
         display: block;
+        --iron-image-width: 400px;
       }
 
       .help-icon {
@@ -34,6 +35,16 @@ the License.
 
       paper-item {
         border-bottom: 1px var(--paper-grey-100) solid;
+      }
+
+      mark {
+        -webkit-user-select: text;
+      }
+      #addShortcutsToDesktop .onboarding-image-page {
+        @apply(--layout-vertical);
+      }
+      #addShortcutsToDesktop .onboarding-image-page .description {
+        @apply(--layout-center);
       }
       </style>
       <paper-item>
@@ -57,11 +68,6 @@ the License.
         </paper-item-body>
         <paper-toggle-button checked="{{values.MAGICVARS_ENABLED}}"></paper-toggle-button>
       </paper-item>
-      <paper-item on-tap="showTutorial">
-        <paper-item-body>
-          <div>Show tutorial</div>
-        </paper-item-body>
-      </paper-item>
       <paper-item>
         <paper-item-body two-line="">
           <div>
@@ -79,6 +85,18 @@ the License.
           <div secondary="true">The notifications will be displayed when beta, dev or canary channel is updated.</div>
         </paper-item-body>
         <paper-toggle-button on-tap="_notificationsTapped" checked="{{notificationsEnabled}}"></paper-toggle-button>
+      </paper-item>
+      <paper-item on-tap="_showAddToDesktopTutotial">
+        <paper-item-body>
+          <div>
+            Add shortcut to desktop
+          </div>
+        </paper-item-body>
+      </paper-item>
+      <paper-item on-tap="showTutorial">
+        <paper-item-body>
+          <div>Show tutorial</div>
+        </paper-item-body>
       </paper-item>
       <paper-dialog id="historyClearDialog" on-iron-overlay-closed="onClearDialogResult">
         <h2>Clear history</h2>
@@ -106,6 +124,23 @@ the License.
           <paper-button dialog-confirm="">Close</paper-button>
         </div>
       </paper-dialog>
+      <onboarding-tutorial id="addShortcutsToDesktop">
+        <onboarding-page>
+          <h2>Adding app's shortcuts</h2>
+          <div class="onboarding-image-page">
+            <div class="image">
+              <iron-image src="/assets/create-shortcut.gif"></iron-image>
+            </div>
+            <div class="description">
+              <ul>
+                <li>Got to <mark>chrome://apps</mark></li>
+                <li>Right click on ARC (this app)</li>
+                <li>Select "Create shortcut..."</li>
+              </ul>
+            </div>
+          </div>
+        </onboarding-page>
+      </onboarding-tutorial>
     </template>
     <script src="arc-settings-controller.js"></script>
   </dom-module>
