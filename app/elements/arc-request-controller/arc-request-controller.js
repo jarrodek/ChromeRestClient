@@ -128,12 +128,21 @@ Polymer({
    * Save UI will call `_saveRequest()` function.
    */
   onSave: function() {
+    if (!this.request.url || !this.request.url.trim()) {
+      StatusNotification.notify({
+        message: 'Enter URL first.'
+      });
+      return;
+    }
+
     var ui = document.body.querySelector('#saveRequestUi');
     if (!ui) {
       StatusNotification.notify({
         message: 'UI element not found'
       });
+      return;
     }
+
     ui.reset();
     ui.isDrive = this.request.isDrive;
     if (this.request.isSaved || this.request.isDrive) {
@@ -501,10 +510,18 @@ Polymer({
   _saveRequest: function(e) {
     var name = e.detail.name;
     var override = e.detail.override || false;
-    var toDrive = e.detail.isDrive || this.request.isDrive;
+    var toDrive = e.detail.isDrive || false;
     if (toDrive) {
       this.request.type = 'save';
       this.request.isDrive = true;
+    } else {
+      this.request.type = 'save';
+      this.request.isDrive = false;
+      this.request.isSave = true;
+      this.request.driveId = undefined;
+    }
+    if (!override) {
+      this.request.id = undefined;
     }
     //always save to local store, origin is not important.
     this._saveLocal(toDrive, name, override)
