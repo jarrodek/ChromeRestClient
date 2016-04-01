@@ -44,48 +44,6 @@ arc.app.db = arc.app.db || {};
  */
 arc.app.db.idb = {};
 /**
- * A namespace for request objects queries..
- *
- * @namespace
- */
-arc.app.db.idb.requests = {};
-/**
- * A namespace for projects queries
- *
- * @namespace
- */
-arc.app.db.idb.projects = {};
-/**
- * A namespace for websocket history urls queries
- *
- * @namespace
- */
-arc.app.db.idb.websockets = {};
-/**
- * A namespace for status codes definitions queries
- *
- * @namespace
- */
-arc.app.db.idb.statuses = {};
-/**
- * A namespace for headers definitions queries
- *
- * @namespace
- */
-arc.app.db.idb.headers = {};
-/**
- * A namespace for exported to app server data queries
- *
- * @namespace
- */
-arc.app.db.idb.exported = {};
-/**
- * A namespace for url history queries
- *
- * @namespace
- */
-arc.app.db.idb.urls = {};
-/**
  * Open the database.
  *
  * @returns {Promise} The promise when ready.
@@ -138,6 +96,7 @@ arc.app.db.idb.open = function() {
       .then(() => arc.app.db.idb.upgraded = true)
       .catch(() => arc.app.db.idb.upgraded = false);
     });
+    arc.app.db.idb.addHooks(db);
     db.open()
       .then(function() {
         resolve(db);
@@ -151,6 +110,24 @@ arc.app.db.idb.open = function() {
         reject(error);
       });
   });
+};
+arc.app.db.idb.addHooks = function(db) {
+  var createUpdateTime = (primKey, obj) => {
+    obj.updateTime = Date.now();
+  };
+  var updateUpdateTime = (modifications, primKey, obj) => {
+    return {
+      updateTime: Date.now()
+    };
+  };
+  db.projectObjects.hook('creating', createUpdateTime);
+  db.projectObjects.hook('updating', updateUpdateTime);
+
+  db.requestObject.hook('creating', createUpdateTime);
+  db.requestObject.hook('updating', updateUpdateTime);
+
+  db.variables.hook('creating', createUpdateTime);
+  db.variables.hook('updating', updateUpdateTime);
 };
 /**
  * Populate database with initial data
@@ -218,7 +195,7 @@ arc.app.db.idb.populateDatabase = function(db) {
  * @param {String} url An URL of the request.
  * @return {String} a key for the Request object
  */
-arc.app.db.idb.requests.createRequestKey = function(method, url) {
+arc.app.db.idb.createRequestKey = function(method, url) {
   var args = Array.from(arguments);
   if (args.length !== 2) {
     throw new Error('Number of arguments requires is 2 but ' + args.length +
@@ -233,38 +210,4 @@ arc.app.db.idb.downloadDefinitions = function() {
     .then(function(response) {
       return response.json();
     });
-};
-/**
- * Get status code definition by it's code
- */
-arc.app.db.idb.statuses.getStatusCode = function(code) {
-  return arc.app.db.idb.open()
-    .then(function(db) {
-      return db.statuses.get(code)
-        .finally(function() {
-          db.close();
-        });
-    });
-};
-/**
- * Get header from the storage by it's name and type
- */
-arc.app.db.idb.headers.getHeaderByName = function(name, type) {
-  return new Promise(function(resolve, reject) {
-    arc.app.db.idb.open()
-      .then(function(db) {
-        let result = null;
-        db.headers.where('[key+type]')
-          .equals([name, type])
-          .each(function(header) {
-            result = header;
-          })
-          .catch(reject)
-          .finally(function() {
-            db.close();
-            resolve(result);
-          });
-      })
-      .catch((e) => reject(e));
-  });
 };

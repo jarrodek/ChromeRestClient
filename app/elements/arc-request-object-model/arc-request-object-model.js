@@ -473,7 +473,7 @@ Polymer({
     }
     req.headers = requestHeaders;
     var page = new HAR.Page({
-      id: arc.app.db.idb.requests.createRequestKey(request.method, request.url) + '-' +
+      id: arc.app.db.idb.createRequestKey(request.method, request.url) + '-' +
         entriesCount,
       title: request.name,
       startedDateTime: new Date(request.time || Date.now()),

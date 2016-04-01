@@ -269,7 +269,7 @@ var generateIdbRequestData = function(isHistory) {
   }
   request.headers = requestHeaders;
   var page = new HAR.Page({
-    id: arc.app.db.idb.requests.createRequestKey(item.method, item.url),
+    id: arc.app.db.idb.createRequestKey(item.method, item.url),
     title: item.name,
     startedDateTime: new Date(item.time),
     pageTimings: {}
