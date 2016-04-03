@@ -59,6 +59,9 @@ Polymer({
     this.isOverride = false;
     this.isDrive = false;
     this.name = '';
+    this.isProject = false;
+    this.projectId = undefined;
+    this.newProjectName = undefined;
   },
 
   _cancel: function() {
@@ -111,7 +114,13 @@ Polymer({
   },
 
   _computeShowProjectSelector: function(projects, newProjectName) {
-    return !(!(projects && projects.length) || newProjectName);
+    if (newProjectName) {
+      return false;
+    }
+    if (projects && projects.length) {
+      return true;
+    }
+    return false;
   }
 });
 })();

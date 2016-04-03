@@ -100,6 +100,10 @@ Polymer({
     'save-request': '_saveRequest'
   },
 
+  observers: [
+    '_requestNameChanged(request.name)'
+  ],
+
   onShow: function() {
     this._setPageTitle('Request');
     this._prepareRequest();
@@ -116,9 +120,7 @@ Polymer({
     });
     this.set('request', base);
     this._setResponse(null);
-    this._setProject(undefined);
-    app.projectEndpoints = [];
-    app.selectedRequest = null;
+    this._setUpProject(undefined);
     this._setPageTitle('Request');
     page('/request/current');
     arc.app.analytics.sendEvent('Engagement', 'Click', 'Clear all');
@@ -174,6 +176,8 @@ Polymer({
     }
     this._setResponse(null);
     this._setProject(undefined);
+    app.projectEndpoints = [];
+    app.selectedRequest = null;
 
     switch (this.routeParams.type) {
       case 'saved':
@@ -268,11 +272,8 @@ Polymer({
     this.$.projects.objectId = id;
     this.$.projects.getObject()
     .then((project) => {
-      this._setProject(project);
       this._restoreSaved(project.requestIds[0]);
-      this.async(() => {
-        this._propagateProjectData();
-      });
+      this._setUpProject(project);
     })
     .catch((cause) => {
       console.error('_restoreProject', cause);
@@ -283,9 +284,25 @@ Polymer({
     });
   },
   /**
+   * Set ups project data and propagate changes
+   */
+  _setUpProject: function(project) {
+    this.async(() => {
+      this._setProject(project);
+      this._propagateProjectData();
+    });
+  },
+
+  /**
    * Setup endpoinds in the UI.
    */
   _propagateProjectData: function() {
+    var project = this.project;
+    if (!project) {
+      app.projectEndpoints = [];
+      app.selectedRequest = null;
+      return;
+    }
     this.$.projectQueryModel.objectId = this.project.requestIds;
     this.$.projectQueryModel.query();
   },
@@ -316,6 +333,13 @@ Polymer({
 
   _requestChanged: function() {
     console.log('_requestChanged', this.request);
+    //this.request.name
+  },
+
+  _requestNameChanged: function(name) {
+    if (name) {
+      this._setPageTitle(name);
+    }
   },
   /**
    * Sends current request.
@@ -511,25 +535,27 @@ Polymer({
     var name = e.detail.name;
     var override = e.detail.override || false;
     var toDrive = e.detail.isDrive || false;
+    this.set('request.type', 'save');
     if (toDrive) {
-      this.request.type = 'save';
-      this.request.isDrive = true;
+      this.set('request.isDrive', true);
     } else {
-      this.request.type = 'save';
-      this.request.isDrive = false;
-      this.request.isSave = true;
-      this.request.driveId = undefined;
+      this.set('request.isDrive', false);
+      this.set('request.isSaved', true);
+      this.set('request.driveId', undefined);
     }
     if (!override) {
-      this.request.id = undefined;
+      this.set('request.id', undefined);
     }
+    this.set('request.name', name);
     //always save to local store, origin is not important.
-    this._saveLocal(toDrive, name, override)
+    this._saveLocal()
     .then((insertId) => {
       if (e.detail.isProject) {
         this.async(() => {
           this._saveProject(e.detail.projectName, insertId, e.detail.projectId);
         });
+      } else {
+        this._setUpProject(undefined);
       }
     });
     var saveType = [];
@@ -558,7 +584,7 @@ Polymer({
   _saveProject: function(name, requestId, projectId) {
     // update or create?
     if (projectId) {
-      this.$.projects.objectId = projectId;
+      this.$.projects.objectId = Number(projectId);
       this.$.projects.query()
       .then((project) => {
         if (!project.requestIds) {
@@ -581,14 +607,22 @@ Polymer({
       this.$.projects.save();
     }
   },
+  /**
+   * A handler for project data save event.
+   */
+  _projectSavedHandler: function(e) {
+    var project = e.detail.data;
+    debugger;
+    this._setUpProject(project);
+  },
 
   /**
    * Save request data in local storage.
    */
-  _saveLocal: function(isDrive, name, override) {
+  _saveLocal: function() {
     var current = this.request;
     // override existing item
-    if (current.id && override) {
+    if (current.id) {
       this.$.requestModel.objectId = current.id;
       return this.$.requestModel.getObject()
       .then((result) => {
@@ -598,13 +632,14 @@ Polymer({
           });
           return Promise.reject('Object not found');
         }
-        current.name = result.name = name;
-        this.set('request', current);
+        result.name = current.name;
+        // this.set('request', current);
         result = this.$.requestModel.replaceData(result, current, this.response);
         this.$.requestModel.requestType = current.type;
         this.$.requestModel.data = result;
         return this.$.requestModel.save()
         .then((insertId) => {
+
           if (result.type === 'drive') {
             // Go outside Dexie promise
             this.async(() => {
@@ -617,14 +652,17 @@ Polymer({
     }
     // create new object
     let request = this.$.requestModel.fromData(current, this.response);
-    request.name = name;
-    request.type = isDrive ? 'drive' : 'saved';
+    // request.name = current.name;
+    request.type = current.isDrive ? 'drive' : 'saved';
     // this will be propagated into the store after IDB save.
-    this.set('request.name', name);
+    // this.set('request.name', current.name);
     this.$.requestModel.requestType = request.type;
     this.$.requestModel.data = request;
     return this.$.requestModel.save()
     .then((insertId) => {
+      if (insertId) {
+        this.set('request.id', insertId);
+      }
       if (request.type === 'drive') {
         // Go outside Dexie promise
         this.async(() => {
@@ -681,10 +719,7 @@ Polymer({
       if (!project) {
         return;
       }
-      this._setProject(project);
-      this.async(() => {
-        this._propagateProjectData();
-      });
+      this._setUpProject(project);
     });
   }
 });

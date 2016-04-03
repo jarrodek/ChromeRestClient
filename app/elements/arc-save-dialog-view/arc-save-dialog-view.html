@@ -64,10 +64,10 @@
           </div>
           <paper-input label="Request name" value="{{name}}"></paper-input>
           <template is="dom-if" if="[[isProject]]">
-            <paper-input label="Project name" value="{{newProjectName}}"></paper-input>
+            <paper-input label="New project name" value="{{newProjectName}}"></paper-input>
             <template is="dom-if" if="[[_computeShowProjectSelector(projects, newProjectName)]]">
-              <paper-dropdown-menu label="Projects">
-                <paper-menu selected="[[projectId]]" attr-for-selected="data-id" class="dropdown-content">
+              <paper-dropdown-menu label="Or select existing project">
+                <paper-menu selected="{{projectId}}" attr-for-selected="data-id" class="dropdown-content">
                   <template is="dom-repeat" items="{{projects}}">
                     <paper-item data-id$="[[item.id]]">[[item.name]]</paper-item>
                   </template>

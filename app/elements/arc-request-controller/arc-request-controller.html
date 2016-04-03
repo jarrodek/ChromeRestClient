@@ -55,7 +55,7 @@ This approach have some implications.
     <arc-request-object-model id="requestModel" on-data-ready="_requestObjectReady" on-save="_onHistorySave"></arc-request-object-model>
     <arc-request-object-model id="requestQueryModel" on-data-ready="_requestObjectRestored"></arc-request-object-model>
     <arc-request-object-model id="projectQueryModel" on-data-ready="_projectEndpointsRestored"></arc-request-object-model>
-    <arc-project-object-model id="projects" on-error="_projectSaveError"></arc-project-object-model>
+    <arc-project-object-model id="projects" on-error="_projectSaveError" on-save="_projectSavedHandler"></arc-project-object-model>
     <arc-magic-variables id="magicVariables" scope="[[project.id]]"></arc-magic-variables>
 
   </template>
