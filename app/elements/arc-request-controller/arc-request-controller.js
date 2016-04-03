@@ -101,7 +101,8 @@ Polymer({
   },
 
   observers: [
-    '_requestNameChanged(request.name)'
+    '_requestNameChanged(request.name)',
+    '_requestIdChanged(request.id)'
   ],
 
   onShow: function() {
@@ -314,7 +315,14 @@ Polymer({
   _projectEndpointsRestored: function(e) {
     /* global app */
     app.projectEndpoints = e.detail.data;
-    app.selectedRequest = this.request.id;
+    app.set('selectedRequest', this.request.id);
+  },
+
+  _requestIdChanged: function(id) {
+    if (!id || !this.project) {
+      return;
+    }
+    app.set('selectedRequest', id);
   },
 
   _latestLoaded: function() {
