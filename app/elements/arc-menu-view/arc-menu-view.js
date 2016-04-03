@@ -127,6 +127,29 @@
       message += '## Steps to reproduce\n1. \n2. \n3. ';
       message = encodeURIComponent(message);
       window.open('https://github.com/jarrodek/ChromeRestClient/issues/new?body=' + message);
+    },
+
+    _actionsMenuOpened: function() {
+      this.$.actionsMenu.selected = -1;
+    },
+
+    _contextMenuAction: function(e) {
+      var action = e.target.selectedItem.dataset.action;
+      if (!action) {
+        return;
+      }
+      switch (action) {
+        case 'rate-review':
+          var url = 'https://chrome.google.com/webstore/detail/hgmloofddffdnphfgcellkdfbfbjeloo/' +
+            'reviews?utm_source=ARC';
+          window.open(url);
+          break;
+        case 'new-app-window':
+          chrome.runtime.getBackgroundPage(function(bg) {
+            bg.arc.bg.openWindow();
+          });
+          break;
+      }
     }
   });
 })();

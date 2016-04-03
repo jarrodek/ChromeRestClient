@@ -37,7 +37,7 @@ arc.app.importer.saveFileData = function(data) {
     let obj = arc.app.importer.normalizeRequest(item);
     if (obj) {
       requests.push(obj);
-      obj.type = 'saved';
+      obj.type = obj.type || 'saved';
     }
   });
   return arc.app.db.idb.open()

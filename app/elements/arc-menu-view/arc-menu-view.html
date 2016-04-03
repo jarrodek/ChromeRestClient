@@ -31,6 +31,11 @@
 
     .icon-buttons {
       padding-left: 8px;
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+    }
+    .visible-icons {
+      @apply(--layout-flex);
     }
 
     .sublist {
@@ -60,9 +65,24 @@
     </paper-menu>
     <section class="bottom-menu" id="bottomMenu" on-tap="_itemTap">
       <div class="icon-buttons">
-        <paper-icon-button icon="settings" data-route="settings" data-place$="{{baseUrl}}settings" title="Settings"></paper-icon-button>
-        <paper-icon-button icon="info" data-route="about" data-place$="{{baseUrl}}about" title="About app"></paper-icon-button>
-        <paper-icon-button icon="bug-report" title="File a bug report" on-tap="newIssueReport"></paper-icon-button>
+        <div class="visible-icons">
+          <paper-icon-button icon="settings" data-route="settings" data-place$="{{baseUrl}}settings" title="Settings"></paper-icon-button>
+          <paper-icon-button icon="info" data-route="about" data-place$="{{baseUrl}}about" title="About app"></paper-icon-button>
+          <paper-icon-button icon="bug-report" title="File a bug report" on-tap="newIssueReport"></paper-icon-button>
+        </div>
+        <paper-menu-button vertical-align="bottom" horizontal-align="left">
+          <paper-icon-button icon="more-vert" class="dropdown-trigger" on-tap="_actionsMenuOpened"></paper-icon-button>
+          <paper-menu class="dropdown-content" id="actionsMenu" on-iron-select="_contextMenuAction">
+            <paper-icon-item data-action="new-app-window">
+              <iron-icon icon="open-in-new" item-icon title="Open new window"></iron-icon>
+              Open new window
+            </paper-icon-item>
+            <paper-icon-item data-action="rate-review">
+              <iron-icon icon="arc:rate-review" item-icon title="Rate &amp; review the app"></iron-icon>
+              Rate and review
+            </paper-icon-item>
+          </paper-menu>
+        </paper-menu-button>
       </div>
       <!--
       <paper-item on-tap="_onAuth" hidden$="{{appAuthorized}}" disabled="[[requestingAuth]]">Sign in</paper-item>
