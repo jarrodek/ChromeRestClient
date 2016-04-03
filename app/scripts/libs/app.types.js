@@ -545,12 +545,21 @@ class ProjectObject extends OrderedList {
      * @type {String}
      */
     this.name = opts.name;
+    // need only timestamp.
+    if (opts.created && opts.created instanceof Date) {
+      opts.created = opts.created.getTime();
+    } else if (opts.created && isNaN(opts.created)) {
+      try {
+        let d = new Date(opts.created);
+        opts.created = d.getTime();
+      } catch (e) {}
+    }
     /**
      * Project creation time.
      *
      * @type {Date}
      */
-    this.created = opts.time ? new Date(opts.time) : opts.created ? opts.created : new Date();
+    this.created = opts.created ? opts.created : Date.now();
   }
 
   /**

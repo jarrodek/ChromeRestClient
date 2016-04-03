@@ -210,7 +210,7 @@ Polymer({
           });
           return;
         }
-        console.log('Opening drive', id);
+        // console.log('Opening drive', id);
         ctrl.openItemAsRequest(id);
         break;
       default:
@@ -506,22 +506,6 @@ Polymer({
     this.$.requestModel.data = request;
     this.$.requestModel.save();
   },
-
-  _onHistorySave: function(e) {
-    // var id = e.detail.data.id;
-    // this.set('request.id', id);
-    // switch (e.detail.data.type) {
-    //   case 'saved':
-    //     this.set('request.isSaved', true);
-    //     break;
-    //   case 'drive':
-    //     this.set('request.isDrive', true);
-    //     break;
-    //   default:
-    //     break;
-    // }
-    console.info('Saved history object', e.detail);
-  },
   /** Called then transport not finished the request because of error. */
   _onRequestError: function(e) {
     var msg = e.detail.message;
@@ -620,7 +604,6 @@ Polymer({
    */
   _projectSavedHandler: function(e) {
     var project = e.detail.data;
-    debugger;
     this._setUpProject(project);
   },
 

@@ -59,7 +59,7 @@ arc.app.importer.saveFileData = function(data) {
                       (project) => project.id === referencedProjectId);
                     if (_projects.length === 1) {
                       let project = new ProjectObject({
-                        time: _projects[0].time,
+                        created: _projects[0].time,
                         name: _projects[0].name,
                         requestIds: [requestId]
                       });
