@@ -235,7 +235,7 @@ Polymer({
                 return db.requestObject
                   .where(':id').noneOf(excluded)
                   .and((item) => {
-                    return item.type === type;
+                    return item.type === 'saved' || item.type === 'drive';
                   })
                   .delete();
               })
