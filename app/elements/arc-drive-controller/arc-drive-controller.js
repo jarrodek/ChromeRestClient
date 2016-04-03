@@ -243,7 +243,12 @@ Polymer({
     // console.log('_handleDriveApiError', e);
     this.set('loading', false);
     var message = null;
+    var isBackMessage = true;
     switch (e.detail.request.status) {
+      case 0:
+        message = 'You are offline.';
+        isBackMessage = false;
+        break;
       case 400:
         /*
         User error. This can mean that a required field or parameter has not been provided,
@@ -292,6 +297,11 @@ Polymer({
         break;
     }
     this._setErrorMessage(message);
+    if (isBackMessage) {
+      this.$.diveError.isClose = false;
+    } else {
+      this.$.diveError.isClose = true;
+    }
     this.viewSelected = 1;
   },
 

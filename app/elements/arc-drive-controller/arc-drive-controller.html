@@ -7,7 +7,7 @@
     </style>
     <iron-pages selected="{{viewSelected}}">
       <drive-list-view id="listView" items="{{items}}" query="{{query}}" loading="[[loading]]" on-file-selected="_fileSelected" on-more-data="loadMoreData" on-search="_onSearch"></drive-list-view>
-      <drive-error-message message="[[errorMessage]]"></drive-error-message>
+      <drive-error-message id="diveError" message="[[errorMessage]]"></drive-error-message>
       <drive-open-from-drive-ui></drive-open-from-drive-ui>
       <chrome-not-signedin-view></chrome-not-signedin-view>
     </iron-pages>

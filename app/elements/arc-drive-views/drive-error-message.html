@@ -32,15 +32,13 @@
         @apply(--layout-horizontal);
         @apply(--layout-end-justified);
       }
-
     </style>
-
     <h2 class="flex">An error occurred</h2>
     <arc-error-message>
       <p>[[message]]</p>
     </arc-error-message>
     <div class="buttons">
-      <paper-button dialog-dismiss="" on-tap="_back">Back</paper-button>
+      <paper-button dialog-dismiss="" on-tap="_back">[[_buttonLabel]]</paper-button>
     </div>
   </template>
   <script src="drive-error-message.js"></script>
