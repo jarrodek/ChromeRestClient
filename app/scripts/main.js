@@ -236,4 +236,23 @@
       }
     });
   };
+  /**
+   * Handler called to network state change event.
+   * This will display toase then the device is offline and close the message when it
+   * comes back online.
+   */
+  app._networkStateChanged = (e) => {
+    var online = e.detail.online;
+    if (online) {
+      app.$.offlineToast.close();
+    } else {
+      app.$.offlineToast.open();
+    }
+  };
+  /**
+   * Force close offline message.
+   */
+  app.closeOfflineMessage = () => {
+    app.$.offlineToast.close();
+  };
 })(document, window);

@@ -12,12 +12,21 @@
         background-color: var(--paper-grey-100);
       }
     }
+    :host(arc-menu-view[with-toast]) .bottom-menu {
+      bottom: 72px;
+    }
+    paper-menu {
+      @apply(--layout-flex);
+    }
     paper-item:hover {
       background-color: var(--paper-grey-100);
     }
     .bottom-menu {
       /*@apply(--layout-self-end);*/
       /*@apply(--layout-end-justified);*/
+      position: relative;
+      bottom: 0;
+      transition: bottom 200ms ease-in-out;
     }
 
     .icon-buttons {
@@ -29,7 +38,7 @@
       /*padding-right: 20px;*/
     }
     </style>
-    <paper-menu selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap" class="flex">
+    <paper-menu selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap">
       <paper-item data-route="request" data-place$="{{baseUrl}}">Request</paper-item>
       <paper-item data-route="socket" data-place$="{{baseUrl}}socket">Socket</paper-item>
       <paper-submenu>
@@ -48,9 +57,8 @@
         <paper-item data-route="history" data-place$="{{baseUrl}}history">History</paper-item>
       </template>
       <paper-item data-route="dataimport" data-place$="{{baseUrl}}dataimport">Import / export</paper-item>
-
     </paper-menu>
-    <section class="bottom-menu" on-tap="_itemTap">
+    <section class="bottom-menu" id="bottomMenu" on-tap="_itemTap">
       <div class="icon-buttons">
         <paper-icon-button icon="settings" data-route="settings" data-place$="{{baseUrl}}settings" title="Settings"></paper-icon-button>
         <paper-icon-button icon="info" data-route="about" data-place$="{{baseUrl}}about" title="About app"></paper-icon-button>
