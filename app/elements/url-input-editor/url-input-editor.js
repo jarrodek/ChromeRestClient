@@ -39,7 +39,7 @@ Polymer({
     suggesionsOpened: Boolean
   },
 
-  _urlChanged: function(newVal, oldVal) {
+  _urlChanged: function(newVal) {
     if (this.detailed && (!newVal || newVal.length === 0)) {
       // clear the form
       this.updateForm();
@@ -255,6 +255,11 @@ Polymer({
   onEnter: function() {
     if (this.suggesionsOpened) {
       return;
+    }
+    var url = this.url;
+    if (url && url.indexOf('://') === -1) {
+      url = 'https://' + url;
+      this.set('url', url);
     }
     this.fire('send');
   },
