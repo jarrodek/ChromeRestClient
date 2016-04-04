@@ -1,7 +1,7 @@
 /* global Prism */
 
 Prism.plugins.mods = {
-  path: 'bower_components/prism/components/',
+  path: '/bower_components/prism/components/',
   dependencies: {
     'javascript': 'clike',
     'actionscript': 'javascript',

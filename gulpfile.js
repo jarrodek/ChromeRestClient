@@ -168,13 +168,13 @@ var publish = (done) => {
     case 'stable':
       let Publisher = require('./tasks/cws-uploader.js');
       Publisher.publishTarget(params.target, params.audience)
-      .then(() => {
-        console.log('The item has been published.');
-        done();
-      })
-      .catch((err) => {
-        done(err);
-      });
+        .then(() => {
+          console.log('The item has been published.');
+          done();
+        })
+        .catch((err) => {
+          done(err);
+        });
       break;
     default:
       let msg = `Unknown target ${params.target}.

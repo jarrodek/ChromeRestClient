@@ -37,7 +37,7 @@ arc.app.analytics = arc.app.analytics || {};
  * Print debug messages to the console.
  * @type {Boolean}
  */
-arc.app.analytics.debug = true;
+arc.app.analytics.debug = false;
 /**
  * A list of created trackers.
  */
@@ -71,13 +71,17 @@ arc.app.analytics._trackersConfig = [{
  * Initialize Google Analytics code (init tracker).
  */
 arc.app.analytics.init = function() {
-  console.group('Initiaize Google Analytics');
+  if (arc.app.analytics.debug) {
+    console.group('Initiaize Google Analytics');
+  }
   arc.app.analytics._initTranckers();
   arc.app.analytics._setupAnalyticsListener();
   arc.app.analytics._setCustomDimmensions();
   arc.app.analytics._setAppUid();
   arc.app.analytics._setChromeChannel();
-  console.groupEnd();
+  if (arc.app.analytics.debug) {
+    console.groupEnd();
+  }
 };
 /**
  * Initialize trackers.
@@ -85,18 +89,24 @@ arc.app.analytics.init = function() {
 arc.app.analytics._initTranckers = function() {
   var service = analytics.getService('ARC');
   arc.app.analytics._service = service;
-  console.log('Service has been initialized.');
+  if (arc.app.analytics.debug) {
+    console.log('Service has been initialized.');
+  }
   service.getConfig().addCallback(arc.app.analytics.initAnalyticsConfig);
   arc.app.analytics._trackersConfig.forEach(function(item) {
     let tracker = service.getTracker(item.trackingId);
-    console.log('Setup tracker for ' + item.trackingId);
+    if (arc.app.analytics.debug) {
+      console.log('Setup tracker for ' + item.trackingId);
+    }
     arc.app.analytics._trackers.push(tracker);
   });
 };
 arc.app.analytics.initAnalyticsConfig = function(config) {
   var permitted = config.isTrackingPermitted();
   arc.app.analytics.enabled = permitted;
-  console.info('[Google Analytics] Tracking is ' + (permitted ? '' : 'not ') + 'permitted');
+  if (arc.app.analytics.debug) {
+    console.info('[Google Analytics] Tracking is ' + (permitted ? '' : 'not ') + 'permitted');
+  }
 },
 /**
  * Enable or disable Google Analytics tracking.
@@ -108,8 +118,10 @@ arc.app.analytics.setAnalyticsPermitted = function(permitted) {
   if (!arc.app.analytics._service) {
     return Promise.reject(new Error('Google Analytics not ready.'));
   }
-  var msg = '[Google Analytics] Setting tracking state to ' + (permitted ? 'enabled' : 'disabled');
-  console.info(msg);
+  if (arc.app.analytics.debug) {
+    var msg = '[Google Analytics] Tracking state is' + (permitted ? 'enabled' : 'disabled');
+    console.info(msg);
+  }
   arc.app.analytics.enabled = permitted;
   return new Promise((result) => {
     arc.app.analytics._service.getConfig().addCallback((config) => {
@@ -145,8 +157,10 @@ arc.app.analytics._setCustomDimmensions = function() {
     tracker.set('dimension5', channel);
     //tracker.set('appVersion', appVersion);
   });
-  console.log('Setting up custom dimension #%d: %s', 1, chromeVer);
-  console.log('Setting up custom dimension #%d: %s', 2, appVersion);
+  if (arc.app.analytics.debug) {
+    console.log('Setting up custom dimension #%d: %s', 1, chromeVer);
+    console.log('Setting up custom dimension #%d: %s', 2, appVersion);
+  }
 };
 /**
  * The app is creating a anonymous UUID and is keeping it into
@@ -162,7 +176,9 @@ arc.app.analytics._setAppUid = function() {
     arc.app.analytics._trackers.forEach(function(tracker) {
       tracker.set('userId', uuid);
     });
-    console.log('[Google Analytics] Setting up user ID: %s', uuid);
+    if (arc.app.analytics.debug) {
+      console.log('[Google Analytics] Setting up user ID: %s', uuid);
+    }
   };
   if (chrome && chrome.storage && chrome.storage.sync) {
     chrome.storage.sync.get({
@@ -187,7 +203,9 @@ arc.app.analytics._setChromeChannel = function() {
   if (!window.navigator.onLine) {
     return;
   }
-  console.log('Setting up chrome channel');
+  if (arc.app.analytics.debug) {
+    console.log('Setting up chrome channel');
+  }
   arc.app.analytics._loadCSV()
     .then(function(obj) {
       if (!(obj instanceof Array)) {
@@ -208,16 +226,18 @@ arc.app.analytics._setChromeChannel = function() {
             for (let j = 0, len = arc.app.analytics._trackers.length; j < len; j++) {
               arc.app.analytics._trackers[j].set('dimension3', channel);
             }
-            console.info('[Google Analytics] Setting up custom dimension #%d: %s', 3, channel);
+            if (arc.app.analytics.debug) {
+              console.info('[Google Analytics] Setting up custom dimension #%d: %s', 3, channel);
+            }
             return;
           }
         }
       }
     })
     .catch(function(cause) {
-      // @if NODE_ENV='debug'
-      console.info('Unable to download Chrome channels list', cause);
-      // @endif
+      if (arc.app.analytics.debug) {
+        console.info('Unable to download Chrome channels list', cause);
+      }
     });
 };
 /**

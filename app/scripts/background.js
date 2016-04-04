@@ -52,24 +52,6 @@ arc.bg.onLaunched = (lunchData) => {
   }
   arc.bg.openWindow(url);
 };
-arc.bg.release = null;
-arc.bg.setReleaseInfo = () => {
-  var manifest = chrome.runtime.getManifest();
-  // jscs:disable
-  var manifestName = manifest.version_name;
-  // jscs:enable
-  var release = null;
-  if (manifestName.indexOf('beta') === -1) {
-    release = 'beta';
-  } else if (manifestName.indexOf('dev') === -1) {
-    release = 'dev';
-  } else if (manifestName.indexOf('canary') === -1) {
-    release = 'canary';
-  } else {
-    release = 'stable';
-  }
-  arc.bg.release = release;
-};
 /**
  * Handler called when the app is installed or updated.
  */
@@ -84,13 +66,13 @@ arc.bg.onInstalled = (details) => {
  * If the beta channel, notify user about new version.
  */
 arc.bg.notifyBetaUpdate = () => {
-  if (!arc.bg.release || arc.bg.release === 'stable') {
+  if (!arc.app.utils.releaseChannel || arc.app.utils.releaseChannel === 'stable') {
     return;
   }
   arc.bg.notifications.canNotify()
   .then((granted) => {
     if (granted) {
-      arc.bg.notifications.displayUpdate(arc.bg.release);
+      arc.bg.notifications.displayUpdate(arc.app.utils.releaseChannel);
     }
   });
 };
@@ -166,7 +148,6 @@ arc.bg.notifications.displayUpdate = (channel) => {
   };
   chrome.notifications.create(`${channel}-update`, opts);
 };
-arc.bg.setReleaseInfo();
 /**
  * Listens for the app launching then creates the window.
  *

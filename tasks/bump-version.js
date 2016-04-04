@@ -91,7 +91,6 @@ var Bump = {
       default:
         throw new Error(`Unknown target ${options.target}`);
     }
-
     var bower = Bump.getBower();
     var packageFile = Bump.getPackage();
     manifest.version = version.manifest;

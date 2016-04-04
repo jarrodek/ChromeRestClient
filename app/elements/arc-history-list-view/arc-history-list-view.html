@@ -202,6 +202,9 @@ An `arc-history-list-view` element is a element responsible for displaying a lis
       height: 100%;
       overflow: visible;
     }
+    paper-progress {
+      width: 100%;
+    }
     </style>
     <paper-drawer-panel drawer-width="360px" id="details" force-narrow="[[narrowDrawer]]" right-drawer disable-edge-swipe>
       <arc-request-details-view drawer is-history request="{{detailedRequest}}" on-close="closeDetailsPanel"></arc-request-details-view>
@@ -262,11 +265,12 @@ An `arc-history-list-view` element is a element responsible for displaying a lis
         <template is="dom-repeat" items="{{requests}}" id="requestList">
           <arc-saved-list-item on-dblclick="_showRequestDetails" request="{{item}}" selected="{{item.selected}}" on-selected-changed="_onItemToggle" is-history></arc-saved-list-item>
         </template>
-        <!-- <div class="table-columns">
-          <div class="flex"></div>
+        <div class="table-columns">
+          <paper-progress indeterminate hidden$="[[!querying]]"></paper-progress>
+          <!-- <div class="flex"></div>
           <paper-button raised="" class="actionButton" on-tap="importTap">import</paper-button>
-          <paper-button on-tap="cancelTap">cancel</paper-button>
-        </div> -->
+          <paper-button on-tap="cancelTap">cancel</paper-button> -->
+        </div>
       </div>
     </paper-drawer-panel>
     <paper-dialog id="dataClearDialog" on-iron-overlay-closed="onClearDialogResult">

@@ -36,6 +36,7 @@ the License.
     <paper-progress indeterminate hidden$="[[!querying]]"></paper-progress>
     <template is="dom-if" if="{{hasListData}}">
       <arc-saved-list-view requests="{{listData}}"
+        querying="[[querying]]"
         sort="{{sortBy}}"
         dir="{{sortDirection}}"
         on-name-changed="_requestNameChanged"

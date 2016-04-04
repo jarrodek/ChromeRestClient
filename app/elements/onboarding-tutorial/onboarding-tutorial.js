@@ -73,20 +73,11 @@ Polymer({
     'role': 'dialog',
     'tabindex': '-1'
   },
+
   attached: function() {
-    var effectiveChildren = Polymer.dom(this).getEffectiveChildNodes();
-    for (let i = effectiveChildren.length - 1; i >= 0; i--) {
-      let node = effectiveChildren[i];
-      if (node.nodeType === 3) {
-        effectiveChildren.splice(i, 1);
-      }
-    }
-    this.pages = effectiveChildren;
-    if (this.pages.length === 1) {
-      //hide controls
-      this.noPagination = true;
-      this.hidePrev = true;
-    }
+    var boundHandler = this._childNodesChanged.bind(this);
+    this._observer = Polymer.dom(this.$.content).observeNodes(boundHandler);
+
     if (!this.auto) {
       return;
     }
@@ -96,6 +87,21 @@ Polymer({
       }, this.delay);
     } else {
       this.openTutorial();
+    }
+  },
+
+  detached: function() {
+    Polymer.dom(this.$.content).unobserveNodes(this._observer);
+  },
+
+  _childNodesChanged: function(info) {
+    var children = Polymer.dom(this).getEffectiveChildNodes();
+    children = children.filter((node) => node.nodeType === Node.ELEMENT_NODE);
+    this.set('pages', children);
+    if (this.pages.length === 1) {
+      //hide controls
+      this.noPagination = true;
+      this.hidePrev = true;
     }
   },
 
@@ -200,7 +206,7 @@ Polymer({
 
   _comnputeLastPage: function(selectedPage, pages) {
     selectedPage = Number(selectedPage);
-    return selectedPage === pages.length - 1 ? true : false;
+    return selectedPage === pages.length - 1;
   },
 
   _comnputeShowSkip: function(lastPage) {

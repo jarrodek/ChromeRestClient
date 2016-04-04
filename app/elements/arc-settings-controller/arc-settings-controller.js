@@ -83,7 +83,7 @@ Polymer({
         }.bind(this), 0);
       }.bind(this));
     chrome.storage.onChanged.addListener(this._storageObserver);
-    var channel = arc.app.utils.releaseChannel;
+    var channel  = arc.app.utils.releaseChannel;
     if (channel !== 'stable') {
       this._setShowNotifications(true);
       this._checkNotificationsPermissions();

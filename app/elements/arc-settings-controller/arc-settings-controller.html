@@ -77,7 +77,7 @@ the License.
         </paper-item-body>
         <paper-toggle-button on-tap="_gaSettingTapped" checked="{{gaEnabled}}"></paper-toggle-button>
       </paper-item>
-      <paper-item>
+      <paper-item hidden$="[[!showNotifications]]">
         <paper-item-body two-line="">
           <div>
             Allow desktop notifications
