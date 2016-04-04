@@ -1,6 +1,10 @@
 package org.rest.client.analytics;
 
+import org.rest.client.jso.PendingAnalytics;
+
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.JsArrayString;
 
 /**
  * Google Analytics App tracking. See
@@ -162,4 +166,19 @@ public class GoogleAnalyticsApp {
 		}
 		tracker.sendException(message);
 	}-*/;
+	
+	public static void sendPendingData(JsArray<PendingAnalytics> result) {
+		for (int i = 0; i < result.length(); i++) {
+			PendingAnalytics pa = result.get(i);
+			String type = pa.getType();
+			JsArrayString params = pa.getParams();
+			if(type.equals("event")){
+				sendEvent(params.get(0), params.get(1), params.get(2));
+			} else if(type.equals("exception")){
+				sendException(params.get(0));
+			}
+		}
+	}
+	
+	
 }

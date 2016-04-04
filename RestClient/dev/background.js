@@ -1,13 +1,13 @@
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -50,7 +50,7 @@ MessageHandling.prototype.setListeners = function() {
    * External extension communication.
    *
    * @param {Object} message Details:
-   *            message - (any data) The message sent by the calling script. It's must be 
+   *            message - (any data) The message sent by the calling script. It's must be
    *                      anjavascript object described in the bottom of this file.
    *            sender - (object): tab - This property will only be present when
    *            the connection was opened from a tab or content script; id - The
@@ -127,9 +127,9 @@ MessageHandling.prototype.gdrive = function(request, sendResponse) {
       viewTabUrl = chrome.extension.getURL('RestClient.html#RequestPlace:gdrive/' + query.ids[0]);
     }
   }
-  if (viewTabUrl !== null) {
-    sendResponse({
-      assignUrl: viewTabUrl
+  if (viewTabUrl !== null && sender.tab.id) {
+    chrome.tabs.update(sender.tab.id, {
+      url: viewTabUrl
     });
   }
 };
@@ -245,7 +245,7 @@ arc.app = arc.app || {};
  */
 arc.app.bg = {};
 /**
- * A handler to be called when the app is upgraded. 
+ * A handler to be called when the app is upgraded.
  * It should perform an update tasks if necessary.
  */
 arc.app.bg.onInstalled = function(details) {
@@ -309,10 +309,18 @@ arc.app.bg.installWebSQLApp = function() {
  * This is only temporary here until upgrade to packaged apps.
  */
 arc.app.bg.downloadDefinitions = function() {
-  return fetch(chrome.runtime.getURL('assets/definitions.json'))
-    .then(function(response) {
-      return response.json();
+  return new Dexie.Promise(function(resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET','/assets/definitions.json', true);
+    xhr.addEventListener('load', function() {
+      let defs = JSON.parse(this.responseText);
+      resolve(defs);
     });
+    xhr.addEventListener('error', function(e) {
+      reject(e);
+    });
+    xhr.send();
+  });
 };
 /**
  * Add definitions to the database.
@@ -335,7 +343,6 @@ arc.app.bg.installDefinitions = function(defs) {
       return arc.app.db.websql.insertHeadersDefinitions(save);
     });
 };
->>>>>>> hotfix-db
 /**
  * Perform upgrade to the newest version
  */
@@ -402,7 +409,7 @@ arc.app.bg.storageUpgradeV4 = function(state) {
   return Promise.all([sync, local, updateState]);
 };
 arc.app.bg.storageUpgradeV4p6 = function(state) {
-  // fix previous upgrade override 
+  // fix previous upgrade override
   return new Promise(function(resolve) {
     let save = {
       'DEBUG_ENABLED': true,
@@ -671,7 +678,7 @@ chrome.runtime.onInstalled.addListener(arc.app.bg.onInstalled);
  * External extension communication.
  *
  * @param details:
- *  message - (any data) The message sent by the calling script. It's must be 
+ *  message - (any data) The message sent by the calling script. It's must be
  *    javascript object described in the bottom of this file.
  *  sender - (object): tab - This property will only be present when
  *    the connection was opened from a tab or content script; id - The
@@ -688,7 +695,7 @@ chrome.runtime.onInstalled.addListener(arc.app.bg.onInstalled);
  */
 /**
  * ======================================== External data structure
- * If you want to run this application either from other extension/application you need to pass 
+ * If you want to run this application either from other extension/application you need to pass
  * a message object:
  * <ul>
  * <li>"payload" (required) - message payload: "create" to open new application window with values;

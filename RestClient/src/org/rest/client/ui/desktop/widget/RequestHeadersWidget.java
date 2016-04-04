@@ -456,9 +456,7 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 			headersCodeMirror = CodeMirror.fromTextArea(headersRawInput.getElement(), opt, new CodeMirrorChangeHandler() {
 				@Override
 				public void onChage() {
-					headersData = headersCodeMirror.getValue();
-					headersRawInput.setValue(headersData);
-					Log.info("Code mirror change fired actually now::" + headersData);
+					
 				}
 			});
 			setHeadersEditorCallback(headersCodeMirror.getInstance());
@@ -490,6 +488,7 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 	private final native void setHeadersEditorCallback(CodeMirrorImpl headersCodeMirror) /*-{
 		var context = this;
 		headersCodeMirror.on("change", function(cm, changeObj) {
+			
 			context.@org.rest.client.ui.desktop.widget.RequestHeadersWidget::rawEditorChanged(Ljava/lang/String;)(cm.getValue());
             if(changeObj.origin === "setValue" || changeObj.origin === undefined || (changeObj.origin === "+input" && changeObj.text[0] === "")){
                 //do not show proposition on ENTER.
@@ -576,6 +575,10 @@ public class RequestHeadersWidget extends Composite implements HasText, HeaderVa
 	
 	
 	void rawEditorChanged(String value) {
+		headersData = value;
+		headersRawInput.setValue(value);
+		Log.info("Code mirror change fired actually now::" + value);
+		
 		ArrayList<RequestHeader> list = RequestHeadersParser.stringToHeaders(value);
 		for(RequestHeader header : list){
 			onHeaderChange(header.getName(), header.getValue());

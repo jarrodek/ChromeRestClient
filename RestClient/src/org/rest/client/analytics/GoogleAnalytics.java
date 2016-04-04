@@ -1,5 +1,10 @@
 package org.rest.client.analytics;
 
+import org.rest.client.jso.PendingAnalytics;
+
+import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.JsArrayString;
+
 /**
  * A legacy tracker for Google Analytics.
  * It is collecting data as a web view - not the app.
@@ -71,4 +76,17 @@ public class GoogleAnalytics {
 	public final static native void sendException(String message) /*-{
 		$wnd.arc.app.analytics.sendException(message);
 	}-*/;
+	
+	public final static void sendPendingData(JsArray<PendingAnalytics> result) {
+		for (int i = 0; i < result.length(); i++) {
+			PendingAnalytics pa = result.get(i);
+			String type = pa.getType();
+			JsArrayString params = pa.getParams();
+			if(type.equals("event")){
+				sendEvent(params.get(0), params.get(1), params.get(2));
+			} else if(type.equals("exception")){
+				sendException(params.get(0));
+			}
+		}
+	}
 }

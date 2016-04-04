@@ -240,7 +240,7 @@ arc.app.db.projects.add = function() {
   if (arc.app.db.useIdb) {
     return arc.app.db.idb.projects.addWithRequests.apply(arc.app.db.idb, arguments)
       .then(function(insertId) {
-        return arc.app.db.idb.getProject(insertId);
+        return arc.app.db.idb.projects.getProject(insertId);
       });
   }
   return arc.app.db.websql.addProject.apply(arc.app.db.websql, arguments)
@@ -498,7 +498,7 @@ arc.app.db.requests.query = function(type, queryOpts) {
           queryOpts.exclude = requestsIds;
         }
       })
-      .then(() => arc.app.db.idb.requests.query(type, queryOpts))
+      .then(() => arc.app.db.idb.requests.query2(type, queryOpts))
       .then(function(list) {
         let result = [];
         list.forEach((item) => {

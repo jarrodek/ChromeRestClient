@@ -48,20 +48,12 @@ window.addEventListener('load', function() {
         chrome.extension.sendMessage({
           'payload': 'gdrive',
           'params': query
-        }, function(response) {
-          if (response.assignUrl) {
-            window.location.assign(response.assignUrl);
-          }
         });
         break;
       case 'open':
         chrome.extension.sendMessage({
           'payload': 'gdrive',
           'params': query
-        }, function(response) {
-          if (response.assignUrl) {
-            window.location.assign(response.assignUrl);
-          }
         });
         break;
     }

@@ -1,13 +1,13 @@
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,9 +15,9 @@
  * the License.
  ******************************************************************************/
 
-/* global Dexie, chrome, HAR, HistoryUrlObject, HistorySocketObject, ProjectObject, 
+/* global Dexie, chrome, HAR, HistoryUrlObject, HistorySocketObject, ProjectObject,
 ServerExportedObject, RequestObject, indexedDB */
-
+window.pendingAnalytics = window.pendingAnalytics || [];
 /**
  * Advanced Rest Client namespace
  *
@@ -64,7 +64,7 @@ arc.app.db.idb.websockets = {};
 /**
  * A flag to be set to true if the datastore has been upgraded from WebSQL successfully.
  * This flag will be used to speed up database open operation.
- * 
+ *
  * @type {Boolean}
  */
 arc.app.db.idb.upgraded = false;
@@ -98,38 +98,12 @@ arc.app.db.idb.open = function() {
 
     db.on('error', function(error) {
       console.error('IndexedDB global error', error);
+      let pending = arc.app.analytics.sendException('IDB error:: ' + JSON.stringify(error));
+      if (pending) {
+        window.pendingAnalytics[window.pendingAnalytics.length] = pending;
+      }
     });
-    db.on('populate', function() {
-      return arc.app.db.idb.downloadDefinitions()
-        .catch(function() {
-          console.warn('Definitions wasn\'t there. skipping definitions installation.');
-          return Dexie.Promise.resolve();
-        })
-        .then(function(defs) {
-          if (!defs) {
-            return Dexie.Promise.resolve();
-          }
-          return db.transaction('rw', db.statuses, db.headers, function() {
-            let promises = [];
 
-            let codes = defs.codes;
-            defs.requests.forEach((item) => item.type = 'request');
-            defs.responses.forEach((item) => item.type = 'response');
-            let headers = defs.requests.concat(defs.responses);
-            codes.forEach(function(item) {
-              promises.push(db.statuses.add(item));
-            });
-            headers.forEach(function(item) {
-              promises.push(db.headers.add(item));
-            });
-
-            return Dexie.Promise.all(promises);
-          });
-        })
-        .then(function() {
-          console.log('The database has been populated with data.');
-        });
-    });
     db.on('ready', function() {
       if (arc.app.db.idb.upgraded) {
         return;
@@ -137,65 +111,139 @@ arc.app.db.idb.open = function() {
       arc.app.db.idb._db = db;
       arc.app.db.idb.appVer = chrome.runtime.getManifest ? chrome.runtime.getManifest()
         .version : 'tests case';
-      return new Dexie.Promise(function(resolve) {
-          let upgrade = {
-            upgraded: {
-              indexeddb: false
-            }
-          };
-          if (!chrome.storage) { //tests
-            arc.app.db.idb.upgraded = true;
-            resolve(false);
-            return;
-          }
-          chrome.storage.local.get(upgrade, (upgrade) => {
-            if (upgrade.upgraded.indexeddb) {
-              arc.app.db.idb.upgraded = true;
-            } else {
-              console.info('IndexedDB need to be upgraded.');
-            }
-            resolve(upgrade.upgraded.indexeddb);
-          });
-        })
-        .then(arc.app.db.idb.upgradeFromWebSQL)
-        .then(function(result) {
-          if (result === null) {
-            return;
-          }
-          console.info('Database has been upgraded from WebSQL to IndexedDB.');
-          let upgrade = {
-            upgraded: {
-              indexeddb: true
-            }
-          };
-          arc.app.db.idb.upgraded = true;
-          if (chrome.storage) { //tests
-            chrome.storage.local.set(upgrade, () => {
-              console.info('Upgrade finished.');
-            });
-          } else {
-            console.info('Upgrade finished.');
-          }
-          arc.app.analytics.sendEvent('Upgrade', 'IndexedDB', 'Upgrade from WebSQL');
-        })
-        .catch(function(error) {
-          arc.app.db.idb.deleteDatabase();
-          arc.app.db.useIdb = false;
-          arc.app.analytics.sendException('IDB create error::' + JSON.stringify(error));
-        });
+      return arc.app.db.idb.populateDatabase(db)
+        .then(arc.app.db.idb.upgradeWsqlDatabase);
     });
 
     db.open()
       .then(function() {
+        arc.app.analytics.setDatabaseEngine('idb');
         resolve(db);
       })
       .catch(function(error) {
+        console.error('IDB open main catch block', error);
         arc.app.db.idb.deleteDatabase();
         arc.app.db.useIdb = false;
-        arc.app.analytics.sendException('IDB create error::' + JSON.stringify(error));
+        arc.app.analytics.setDatabaseEngine('wsql');
+        let pending = arc.app.analytics.sendException('IDB create error::' + JSON.stringify(error));
+        if (pending) {
+          window.pendingAnalytics[window.pendingAnalytics.length] = pending;
+        }
         reject(error);
       });
   });
+};
+/**
+ * Populate database with initial data
+ *
+ * @return {Promise} Fulfilled promise when data were populated or no population is needed.
+ */
+arc.app.db.idb.populateDatabase = function(db) {
+  //if statuses are set headers must be set as well since they are inserted in single transaction.
+  return db.statuses.count()
+    .then((count) => {
+      if (count > 0) {
+        console.info('Database already populated');
+        return Dexie.Promise.resolve(null);
+      }
+      return arc.app.db.idb.downloadDefinitions()
+        .catch(function() {
+          console.warn('Definitions wasn\'t there. skipping definitions installation.');
+          return Dexie.Promise.reject(new Error('Definitions location error'));
+        });
+    })
+    .then(function(defs) {
+      if (!defs) {
+        return Dexie.Promise.resolve(null);
+      }
+
+      defs.requests.forEach((item) => item.type = 'request');
+      defs.responses.forEach((item) => item.type = 'response');
+      let headers = defs.requests.concat(defs.responses);
+
+      return db.transaction('rw', db.statuses, db.headers, function() {
+        console.info('populating database with predefined values');
+        let promises = [];
+        let codes = defs.codes;
+        codes.forEach(function(item) {
+          promises.push(db.statuses.add(item));
+        });
+        headers.forEach(function(item) {
+          promises.push(db.headers.add(item));
+        });
+        return Dexie.Promise.all(promises);
+      });
+    })
+    .then(function() {
+      console.log('The database has been populated with data.');
+    })
+    .catch(function(e) {
+      console.warn('Database population unsuccessfull.', e);
+      let pending = arc.app.analytics.sendException('IDB populate error::' + JSON.stringify(e));
+      if (pending) {
+        window.pendingAnalytics[window.pendingAnalytics.length] = pending;
+      }
+    });
+};
+/**
+ * Upgrade database from WebSQL if needed.
+ */
+arc.app.db.idb.upgradeWsqlDatabase = function() {
+  return new Dexie.Promise(function(resolve) {
+      let upgrade = {
+        upgraded: {
+          indexeddb: false
+        }
+      };
+      if (!chrome.storage) { //tests
+        arc.app.db.idb.upgraded = true;
+        resolve(false);
+        return;
+      }
+      chrome.storage.local.get(upgrade, (upgrade) => {
+        if (upgrade.upgraded.indexeddb) {
+          console.info('IndexedDB is already upgraded.');
+          arc.app.db.idb.upgraded = true;
+        } else {
+          console.info('IndexedDB need to be upgraded.');
+        }
+        resolve(upgrade.upgraded.indexeddb);
+      });
+    })
+    .then(arc.app.db.idb.upgradeFromWebSQL)
+    .then(function(result) {
+      if (result === null) {
+        return;
+      }
+      console.info('Database has been upgraded from WebSQL to IndexedDB.');
+      let upgrade = {
+        upgraded: {
+          indexeddb: true
+        }
+      };
+      arc.app.db.idb.upgraded = true;
+      if (chrome.storage) { //tests
+        chrome.storage.local.set(upgrade, () => {
+          console.info('Upgrade finished.');
+        });
+      } else {
+        console.info('Upgrade finished.');
+      }
+      let pending = arc.app.analytics.sendEvent('Upgrade', 'IndexedDB', 'Upgrade from WebSQL');
+      if (pending) {
+        window.pendingAnalytics[window.pendingAnalytics.length] = pending;
+      }
+    })
+    .catch(function(error) {
+      console.error('IDB upgrade main catch block', error);
+      arc.app.db.idb.deleteDatabase();
+      arc.app.db.useIdb = false;
+      let pending = arc.app.analytics.sendException('IDB create error::' +
+        JSON.stringify(error));
+      if (pending) {
+        window.pendingAnalytics[window.pendingAnalytics.length] = pending;
+      }
+    });
 };
 /**
  * Delete and re-create database.
@@ -205,7 +253,7 @@ arc.app.db.idb.open = function() {
 arc.app.db.idb.deleteDatabase = function() {
   console.warn('IndexedDB database is going bye bye');
   return new Dexie.Promise(function(resolve, reject) {
-    var request = indexedDB.deleteDatabase('arc');
+    let request = indexedDB.deleteDatabase('arc');
     request.onsuccess = function() {
       arc.app.db.idb.upgraded = false;
       arc.app.db._adapter = 'websql';
@@ -249,19 +297,28 @@ arc.app.db.idb.upgradeFromWebSQL = function(isUpgraded) {
 };
 /**
  * Download database definitions from the app directory.
+ * Replaced with XHR because of https://code.google.com/p/chromium/issues/detail?id=466876
  *
  * @return {Promise} Fulfilled promise returns JSON with definitions.
  */
 arc.app.db.idb.downloadDefinitions = function() {
-  return fetch('/assets/definitions.json')
-    .then(function(response) {
-      return response.json();
+  return new Dexie.Promise(function(resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/assets/definitions.json', true);
+    xhr.addEventListener('load', function() {
+      let defs = JSON.parse(this.responseText);
+      resolve(defs);
     });
+    xhr.addEventListener('error', function(e) {
+      reject(e);
+    });
+    xhr.send();
+  });
 };
 /**
  * Get all WebSQL data.
  *
- * @param {Boolean} dontUpgrade Used in promise chain. Don't upgrade it IndexedDB has been 
+ * @param {Boolean} dontUpgrade Used in promise chain. Don't upgrade it IndexedDB has been
  * already upgraded
  */
 arc.app.db.idb._getSQLdata = function(dontUpgrade) {
@@ -325,15 +382,17 @@ arc.app.db.idb._converSqlIdb = function(data) {
   if (!data) {
     return Dexie.Promise.resolve(null);
   }
+  console.info('SQL data collected. Converting data to new format.');
   return new Dexie.Promise(function(resolve) {
     const requests = [];
     const urlHistory = [];
     const socketHistory = [];
     const exportedSize = data.exported.length;
+    console.info('Converting request data to RequestObject...');
     data.requestData.forEach((item) => {
       let obj = arc.app.db.idb._createHARfromSql.call(this, item);
       obj.type = 'saved';
-      //just for upgrade, to be removed before save. 
+      //just for upgrade, to be removed before save.
       if (item.project) {
         obj.project = item.project;
       }
@@ -341,17 +400,19 @@ arc.app.db.idb._converSqlIdb = function(data) {
         /* jscs: disable */
         if (data.exported[i].reference_id === item.id) {
           /* jscs: enable */
-          //just for upgrade, to be removed before save. 
+          //just for upgrade, to be removed before save.
           obj.exported = i;
           break;
         }
       }
       requests.push(obj);
     });
+    console.info('Converting history data to RequestObject...');
     data.history.forEach((item) => {
       let obj = arc.app.db.idb._createHARfromSql.call(this, item);
       requests.push(obj);
     });
+    console.info('Converting urls data to HistoryUrlObject...');
     data.urls.forEach((item) => {
       let obj = new HistoryUrlObject({
         url: item.url,
@@ -359,6 +420,7 @@ arc.app.db.idb._converSqlIdb = function(data) {
       });
       urlHistory.push(obj);
     });
+    console.info('Converting websocket history data to HistorySocketObject...');
     data.websocketData.forEach((item) => {
       let obj = new HistorySocketObject({
         url: item.url,
@@ -375,6 +437,7 @@ arc.app.db.idb._converSqlIdb = function(data) {
       },
       websql: data
     };
+    console.info('Data conversion completed.');
     resolve(result);
   });
 };
@@ -404,6 +467,7 @@ arc.app.db.idb._storeUpgrade = function(data) {
   if (!data) {
     return null;
   }
+  console.info('Storing data to the IDB.');
   let db = arc.app.db.idb._db;
   return db.transaction('rw', db.historyUrls, db.historySockets, db.requestObject,
     db.serverExportObjects, db.projectObjects,
@@ -572,7 +636,7 @@ arc.app.db.idb.getStatusCode = function(code) {
 };
 /**
  * Get header from the storage by it's name and type
- * 
+ *
  * @param {String} name A header name to look for
  * @param {String} type Either `request` or `response`
  * @return {Promise} Fulfilled promise will result with a {@link
@@ -830,7 +894,7 @@ arc.app.db.idb.projects.update = function(project) {
 arc.app.db.idb.projects.list = function() {
   return arc.app.db.idb.open()
     .then(function(db) {
-      return db.projectObjects.toArray()
+      return db.projectObjects.reverse().toArray()
         .finally(function() {
           db.close();
         });
@@ -882,13 +946,28 @@ arc.app.db.idb.requests.import = function(legacyRequestsList) {
 arc.app.db.idb.requests.insert = function(requestAsLegacy, type) {
   return arc.app.db.idb.open()
     .then(function(db) {
-      return db.transaction('rw', db.requestObject, function(requestObject) {
+      return db.transaction('rw', db.requestObject, db.projectObjects, function() {
         let obj = arc.app.db.idb._createHARfromSql(requestAsLegacy);
         obj.type = type;
         if (requestAsLegacy.id) {
           obj.id = requestAsLegacy.id;
         }
-        return requestObject.add(obj);
+        return db.requestObject.add(obj)
+          .then(function(insertResult) {
+            if (requestAsLegacy.project) {
+              return db.projectObjects.get(requestAsLegacy.project)
+                .then(function(project) {
+                  if (project) {
+                    project.requestIds = project.requestIds || [];
+                    project.requestIds.push(insertResult);
+                    return db.projectObjects.put(project);
+                  }
+                  return Dexie.Promise.resolve(null);
+                })
+                .then(() => insertResult);
+            }
+            return insertResult;
+          });
       });
     });
 };
@@ -1009,7 +1088,7 @@ arc.app.db.idb.requests.delete = function(id) {
  *
  * @param {String} type Type of object to delete. Either `saved` or `history`
  * @return {Dexie.Promise} Fulfilled promise will result with number of deleted entries.
- * If error occur during the transaction - even in then() block - the transaction will be aborted 
+ * If error occur during the transaction - even in then() block - the transaction will be aborted
  * and rolled back.
  */
 arc.app.db.idb.requests.deleteType = function(type) {
@@ -1038,14 +1117,13 @@ arc.app.db.idb.requests.deleteType = function(type) {
 arc.app.db.idb.requests.query = function(type, opts) {
   return arc.app.db.idb.open()
     .then(function(db) {
-      var builder = db.requestObject;//.orderBy('_name');
+      var builder = db.requestObject; //.orderBy('_name');
 
       if (opts.query) {
-        builder = builder.where('url').startsWithIgnoreCase(opts.query)
-        .or('_name').startsWithIgnoreCase(opts.query)
-          /*.and((item) => opts.query.indexOf(item.har.pages[0].title) !== -1)*/
-        ;
-        //TODO: Use OR or other filter function to query for name.
+        builder = builder.where('url').startsWithIgnoreCase(opts.query);
+        if (type === 'saved') {
+          builder = builder.or('_name').startsWithIgnoreCase(opts.query);
+        }
       }
       if (opts.exclude) {
         if (builder.and) {
@@ -1071,6 +1149,45 @@ arc.app.db.idb.requests.query = function(type, opts) {
         .finally(function() {
           db.close();
         });
+    });
+};
+arc.app.db.idb.requests.query2 = function(type, opts) {
+  return arc.app.db.idb.open()
+    .then(function(db) {
+      return db.requestObject.where('type').equals(type).reverse().toArray();
+    })
+    .then(function(objects) {
+      let list = [];
+
+      objects.forEach(function(item) {
+        if (opts.query) {
+          let lowerQuery = opts.query.toLowerCase();
+          if (item.url.toLowerCase().indexOf(lowerQuery) !== -1) {
+            if (!opts.exclude || (opts.exclude && opts.exclude.indexOf(item.id) === -1)) {
+              list.push(item);
+            }
+            return;
+          }
+          if (type === 'saved') {
+            if (item.name.toLowerCase().indexOf(lowerQuery) !== -1) {
+              if (!opts.exclude || (opts.exclude && opts.exclude.indexOf(item.id) === -1)) {
+                list.push(item);
+              }
+              return;
+            }
+          }
+        } else {
+          if (!opts.exclude || (opts.exclude && opts.exclude.indexOf(item.id) === -1)) {
+            list.push(item);
+          }
+        }
+      });
+
+      if (opts.offset && opts.limit || opts.offset === 0) {
+        list = list.slice(opts.offset, opts.offset + opts.limit);
+      }
+
+      return list;
     });
 };
 arc.app.db.idb.requests.deleteByProject = function(projectId) {

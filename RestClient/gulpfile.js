@@ -25,6 +25,32 @@ var concat = require('gulp-concat');
  */
 var mode = 'debug';
 
+/**
+ * Get command line arguments.
+ * Command line arguments must be passed as a `--argName arg value` string.
+ *
+ * @example
+ * $ gulp task-name --bolleanOption --file ./file.js --option value
+ * // -> Map { 'bolleanOption' => true, file' => './file.js', 'option' => 'value' }
+ *
+ * @return {Map} Passed arguments map.
+ */
+function getArguments() {
+  var args = process.argv.slice(3);
+  var map = new Map();
+  for (let i = 0, len = args.length; i < len; i++) {
+    let arg = args[i].substr(2);
+    let val = args[i + 1];
+    if (!val || val.indexOf('--') === 0) {
+      val = true;
+    } else {
+      i++;
+    }
+    map.set(arg, val);
+  }
+  return map;
+}
+
 // Ensure that we are not missing required files for the project
 // "dot" files are specifically tricky due to them being hidden on
 // some systems.
@@ -99,7 +125,7 @@ gulp.task('copy:images', function() {
 gulp.task('clean:war-components', function() {
   return gulp.src('war/components/*').pipe(vinylPaths(del));
 });
-gulp.task('copy:war-copy-dev',  function() {
+gulp.task('copy:war-copy-dev', function() {
   return gulp.src([
       'dev/*',
       'dev/**/*',
@@ -248,9 +274,10 @@ gulp.task('dev', function() {
         gulp.watch('dev/**/*.html', copySourceFile);
         gulp.watch('dev/**/*.js', copySourceFile);
         gulp.watch([
-          'dev/libs/**/*.js'/*,
-          '!dev/components',
-          '!dev/workers'*/
+          'dev/libs/**/*.js'
+          /*,
+                    '!dev/components',
+                    '!dev/workers'*/
         ], updateDevDocs);
         gulp.watch('dev/**/*.jsp', copySourceFile);
         gulp.watch('dev/**/*.css', copySourceFile);
@@ -319,19 +346,33 @@ gulp.task('bump-beta-build', function() {
     .pipe(gulp.dest('./'));
 });
 gulp.task('bump-stable-build', function() {
+  var args = getArguments();
+  var bumpMinor = args.has('bump') ? true : false;
   return gulp.src('./manifest.json')
-    .pipe(bump({
+    .pipe($.if(bumpMinor, bump({
       type: 'minor'
-    }))
-    .pipe(bump({
+    })))
+    .pipe($.if(!bumpMinor, bump({
+      type: 'patch'
+    })))
+    .pipe($.if(bumpMinor, bump({
       key: 'version_name',
       type: 'minor'
-    }))
-    .pipe(bump({
+    })))
+    .pipe($.if(!bumpMinor, bump({
+      key: 'version_name',
+      type: 'patch'
+    })))
+    .pipe($.if(bumpMinor, bump({
       key: 'version_name',
       type: 'prerelease',
       'preid': 'stable'
-    }))
+    })))
+    .pipe($.if(!bumpMinor, bump({
+      key: 'version_name',
+      type: 'prerelease',
+      'preid': 'stable'
+    })))
     .pipe(gulp.dest('./'));
 });
 /**
@@ -433,3 +474,8 @@ gulp.task('webserver', ['connect', 'watch']);
 // Load tasks for web-component-tester
 // Adds tasks for `gulp test:local` and `gulp test:remote`
 require('web-component-tester').gulp.init(gulp);
+
+gulp.task('test-task', () => {
+  var args = getArguments();
+  gutil.log(args);
+});

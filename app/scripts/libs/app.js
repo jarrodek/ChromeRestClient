@@ -15,6 +15,7 @@
  * the License.
  ******************************************************************************/
 /* global chrome */
+window.pendingAnalytics = window.pendingAnalytics || [];
 /**
  * Advanced Rest Client namespace
  *

@@ -24,6 +24,7 @@ import org.rest.client.analytics.GoogleAnalyticsApp;
 import org.rest.client.event.ApplicationReadyEvent;
 import org.rest.client.event.NewProjectAvailableEvent;
 import org.rest.client.event.SavedRequestEvent;
+import org.rest.client.jso.PendingAnalytics;
 import org.rest.client.jso.ProjectObject;
 import org.rest.client.jso.RequestObject;
 import org.rest.client.log.Log;
@@ -55,6 +56,8 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.place.shared.Place;
@@ -240,9 +243,23 @@ public class RestClient implements EntryPoint {
 				} else {
 					historyHandler.handleCurrentHistory();
 				}
-				fixChromeLayout();
+				//fixChromeLayout();
 				clientFactory.getEventBus().fireEvent(new ApplicationReadyEvent());
 				initializing = false;
+				Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+					@Override
+					public void execute() {
+						RestClient.getPendingAnalytics(new PendingAnalyticsCallback() {
+							
+							@Override
+							public void onData(JsArray<PendingAnalytics> result) {
+								if(result == null || result.length() == 0) return;
+								GoogleAnalyticsApp.sendPendingData(result);
+								GoogleAnalytics.sendPendingData(result);
+							}
+						});
+					}
+				});
 			}
 		});
 	}
@@ -434,6 +451,8 @@ public class RestClient implements EntryPoint {
 							RequestObject item = result.get(i).cast();
 							clientFactory.getEventBus().fireEvent(new SavedRequestEvent(item));
 						}
+						RequestObject res = result.get(0).cast();
+						callback.onSuccess(res);
 					}
 					
 					@Override
@@ -441,6 +460,7 @@ public class RestClient implements EntryPoint {
 						if (RestClient.isDebug()) {
 							Log.error("Project has been updated. However UI may need to be refreshed to see changes.", e);
 						}
+						callback.onFailure(e);
 					}
 				});
 			}
@@ -462,7 +482,7 @@ public class RestClient implements EntryPoint {
 	 * @param obj
 	 * @param callback
 	 */
-	public static void saveRequestData(final RequestObject obj, final ProjectObject createdProject, final Callback<RequestObject, Throwable> callback) {
+	public static void saveRequestData(final RequestObject obj, final Callback<RequestObject, Throwable> callback) {
 		if (obj.getId() > 0) {
 			RequestDataStore.update(obj, new RequestDataStore.StoreSimpleCallback() {
 				@Override
@@ -561,4 +581,14 @@ public class RestClient implements EntryPoint {
 														$doc.body.style.removeProperty('display');
 														}, 15);
 														}-*/;
+	
+	public static interface PendingAnalyticsCallback {
+		void onData(JsArray<PendingAnalytics> result);
+	}
+	
+	public final native static void getPendingAnalytics(PendingAnalyticsCallback callback) /*-{
+		$wnd.arc.app.analytics.getPendingAnalytics($entry(function(result){
+			callback.@org.rest.client.RestClient.PendingAnalyticsCallback::onData(Lcom/google/gwt/core/client/JsArray;)(result);
+		}));
+	}-*/;
 }

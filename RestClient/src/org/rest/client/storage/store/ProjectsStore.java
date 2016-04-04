@@ -98,6 +98,7 @@ public class ProjectsStore {
 	public final native static void remove(int key, StoreSimpleCallback callback) /*-{
 		$wnd.arc.app.db.projects.remove(key)
 		.then(function(){
+			console.log('Remove project callback jsni');
 			callback.@org.rest.client.storage.store.ProjectsStore.StoreSimpleCallback::onSuccess()();
 		}, function(cause){
 			callback.@org.rest.client.storage.store.ProjectsStore.StoreSimpleCallback::onError(Ljava/lang/Throwable;)(cause);
