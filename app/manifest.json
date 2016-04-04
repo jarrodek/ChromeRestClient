@@ -9,7 +9,9 @@
   "author": "Pawel Psztyc",
   "icons": {
     "16": "assets/arc_icon_16.png",
-    "128": "assets/arc_icon_128.png"
+    "32": "assets/arc_icon_32.png",
+    "48": "assets/arc_icon_48.png",
+    "128": "assets/arc_icon_128.png",
   },
   "permissions": [
     "<all_urls>",
