@@ -207,11 +207,11 @@ gulp.task('build', build);
 gulp.task('publish', publish);
 
 gulp.task('test', function(done) {
-  var params = Cli.getParams({});
-  console.log(params);
-  // var analyzer = require('./tasks/tree-analyzer.js');
-  // analyzer.copyDependencies().then(() => done()).catch((e) => {
-  //   console.error(e);
-  //   done();
-  // });
+  var analyzer = require('./tasks/tree-analyzer.js');
+  analyzer.analyseDependencies().then(() => done()).catch((e) => {
+    console.error('An error occured', Object.getOwnPropertyNames(e));
+    console.error(e.message);
+    console.error(e.stack);
+    done();
+  });
 });
