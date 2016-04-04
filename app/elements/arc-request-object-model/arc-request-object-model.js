@@ -367,7 +367,7 @@ Polymer({
       'method': request.method,
       'name': request.name || ''
     };
-    if ('driveId' in request) {
+    if (request.driveId) {
       params.driveId = request.driveId;
       return new DriveRequestObject(params);
     } else if (request.type === 'saved') {
