@@ -280,16 +280,17 @@ Object.defineProperty(arc.app.utils, 'releaseChannel', {
     var manifestName = manifest.version_name;
     // jscs:enable
     var release = null;
-    if (manifestName.indexOf('beta') === -1) {
+    if (manifestName.indexOf('beta') !== -1) {
       release = 'beta';
-    } else if (manifestName.indexOf('dev') === -1) {
+    } else if (manifestName.indexOf('dev') !== -1) {
       release = 'dev';
-    } else if (manifestName.indexOf('canary') === -1) {
+    } else if (manifestName.indexOf('canary') !== -1) {
       release = 'canary';
     } else {
       release = 'stable';
     }
     arc.app.utils._releaseChannel = release;
+    return release;
   },
   set: function() {
     throw new Error('releaseChannel can\'t be set.');

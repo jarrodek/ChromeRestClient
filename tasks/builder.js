@@ -448,8 +448,21 @@ gulp.task('copy', () => {
   // Copy over only the bower_components we need
   // These are things which cannot be vulcanized
   var bower = gulp.src([
-    'app/bower_components/{webcomponentsjs,font-roboto-local,codemirror,prism/components}/**/*'
+    'app/bower_components/{webcomponentsjs,font-roboto-local,codemirror,prism/components}/**/*',
+
+    '!app/bower_components/codemirror/lib/**',
+    '!app/bower_components/codemirror/theme/**',
+    '!app/bower_components/codemirror/keymap/**',
+    '!app/bower_components/codemirror/*'
+    
   ]).pipe(gulp.dest(path.join(dest,'bower_components')));
+
+  var prismAutolinker = gulp.src(
+    'app/bower_components/prism/plugins/autolinker/prism-autolinker.min.js'
+  ).pipe(gulp.dest(path.join(dest,'bower_components', 'prism', 'plugins', 'autolinker')));
+  var prism = gulp.src(
+    'app/bower_components/prism/prism.js'
+  ).pipe(gulp.dest(path.join(dest,'bower_components', 'prism')));
 
   // var codeMirror = gulp.src([
   //   'app/bower_components/codemirror/**/*'
@@ -465,7 +478,10 @@ gulp.task('copy', () => {
   //   '!app/elements/elements.html'
   // ]).pipe(gulp.dest(path.join(dest,'elements')));
 
-  return merge(app, bower, webWorkers, assets, scripts, styles/*, codeMirror*/)
+  return merge(
+      app, bower, webWorkers, assets, scripts, styles,
+      prismAutolinker, prism /*, codeMirror*/
+    )
     .pipe($.size({
       title: 'copy'
     }));
