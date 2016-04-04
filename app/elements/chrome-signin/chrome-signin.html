@@ -267,9 +267,9 @@ TODO: if exporting this element don't forget to set dependencies.
       is-authorized="{{isAuthorized}}"
       need-additional-auth="{{needAdditionalAuth}}"></chrome-signin-aware>
     <template is="dom-if" if="{{raised}}">
-      <paper-material hidden="[[!signedIn]]" id="shadow" class="fit" elevation="2" animated></paper-material>
+      <paper-material hidden$="[[!signedIn]]" id="shadow" class="fit" elevation="2" animated></paper-material>
     </template>
-    <div id="button" hidden="[[!signedIn]]" class$="[[_computeButtonClass(height, width, theme, isAuthorized, _brand, needAdditionalAuth)]]">
+    <div id="button" hidden$="[[!signedIn]]" class$="[[_computeButtonClass(height, width, theme, isAuthorized, _brand, needAdditionalAuth)]]">
       <paper-ripple id="ripple" class="fit"></paper-ripple>
       <!-- this div is needed to position the ripple behind text content -->
       <div class="button-container">
