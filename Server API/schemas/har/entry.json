@@ -1,0 +1,61 @@
+{
+  "id": "https://advancedrestclient.com/schemas/har/entry.json",
+  "title": "Exported HTTP request info object",
+  "type": "object",
+  "optional": true,
+  "description": "This object represents an array item of all exported HTTP requests.",
+  "required": [
+    "startedDateTime",
+    "time",
+    "request",
+    "response",
+    "cache",
+    "timings"
+  ],
+  "properties": {
+    "pageref": {
+      "type": "string",
+      "description": "Reference to the parent page. Leave out this field if the application does not support grouping by pages."
+    },
+    "startedDateTime": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(\\d{4})(-)?(\\d\\d)(-)?(\\d\\d)(T)?(\\d\\d)(:)?(\\d\\d)(:)?(\\d\\d)(\\.\\d+)?(Z|([+-])(\\d\\d)(:)?(\\d\\d))",
+      "description": "Date and time stamp of the request start (ISO 8601 - YYYY-MM-DDThh:mm:ss.sTZD)."
+    },
+    "time": {
+      "type": "number",
+      "min": 0,
+      "description": "Total elapsed time of the request in milliseconds. This is the sum of all timings available in the timings object (i.e. not including -1 values) ."
+    },
+    "request": {
+      "$ref": "request.json",
+      "description": "Detailed info about the request."
+    },
+    "response": {
+      "$ref": "response.json",
+      "description": "Detailed info about the response."
+    },
+    "cache": {
+      "$ref": "cache.json",
+      "description": "Info about cache usage."
+    },
+    "timings": {
+      "$ref": "timings.json",
+      "description": "Detailed timing info about request/response round trip."
+    },
+    "serverIPAddress": {
+      "type": "string",
+      "format": "ipv4",
+      "description": "IP address of the server that was connected (result of DNS resolution)."
+    },
+    "connection": {
+      "type": "string",
+      "description": "Unique ID of the parent TCP/IP connection, can be the client or server port number. Note that a port number doesn't have to be unique identifier in cases where the port is shared for more connections. If the port isn't available for the application, any other unique connection ID can be used instead (e.g. connection index). Leave out this field if the application doesn't support this info."
+    },
+    "comment": {
+      "type": "string",
+      "description": "A comment provided by the user or the application."
+    }
+  }
+}

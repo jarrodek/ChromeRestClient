@@ -14,7 +14,7 @@
 	<replace-with class="org.rest.client.ClientFactoryImpl">
 		<when-type-is class="org.rest.client.ClientFactory" />
 	</replace-with>
-	
+
 	<!-- This Linker will produce a monolithic JavaScript file. It may be used only when there is a single distinct compilation result. -->
 	<!-- SSO linker must be enabled and xsiframe disabled when biulding an extension. -->
  	<!-- <add-linker name="sso" /> -->
@@ -26,12 +26,12 @@
 	<!-- (only use if you’re not using enums as String values) -->
 	<!-- <set-configuration-property name="compiler.enum.obfuscate.names" value="true"/> -->
 	<set-configuration-property name="CssResource.obfuscationPrefix" value="empty"/>
-	
+
 	<set-property name="compiler.useSourceMaps" value="true"></set-property>
-	
+
 	<entry-point class='org.rest.client.RestClient' />
 
 	<source path='client' />
 	<source path='shared' />
-	
+
 </module>

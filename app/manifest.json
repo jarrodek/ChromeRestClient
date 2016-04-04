@@ -1,0 +1,97 @@
+{
+  "manifest_version": 2,
+  "name": "Advanced REST client",
+  "short_name": "ARC",
+  "description": "The web developers helper program to create and test custom HTTP requests.",
+  "version": "6.0.10.93",
+  "version_name": "6.0.10.93-stable",
+  "minimum_chrome_version": "47",
+  "author": "Pawel Psztyc",
+  "icons": {
+    "16": "assets/arc_icon_16.png",
+    "32": "assets/arc_icon_32.png",
+    "48": "assets/arc_icon_48.png",
+    "128": "assets/arc_icon_128.png"
+  },
+  "permissions": [
+    "<all_urls>",
+    "storage",
+    "unlimitedStorage",
+    "identity",
+    "identity.email",
+    "syncFileSystem",
+    {
+      "fileSystem": [
+        "write"
+      ]
+    }
+  ],
+  "optional_permissions": [
+    "clipboardWrite",
+    "notifications"
+  ],
+  "commands": {
+    "command-save-data": {
+      "suggested_key": {
+        "default": "Ctrl+S",
+        "mac": "Command+S"
+      },
+      "description": "Save current state"
+    },
+    "command-open-request": {
+      "suggested_key": {
+        "default": "Ctrl+O",
+        "mac": "Command+O"
+      },
+      "description": "Open request"
+    },
+    "command-open-window": {
+      "suggested_key": {
+        "default": "Ctrl+N"
+      },
+      "description": "Open new window"
+    },
+    "command-restore-window": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+N"
+      },
+      "description": "Restore closed window"
+    }
+  },
+  "sockets": {
+    "tcp": {
+      "connect": "*"
+    }
+  },
+  "oauth2": {
+    "client_id": "10525470235-vtm8ckt9v43r1gbbjqhp01tnnr0ol41j.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/drive.file",
+      "https://www.googleapis.com/auth/drive.install",
+      "https://www.googleapis.com/auth/drive.metadata.readonly",
+      "profile"
+    ]
+  },
+  "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCcwog3RvKBNlbE9nxa06ruwxAKR2kauzTVWYN4e1uFK8g3ScGxqG08gvuzgbOlbIO0TNHXdkJzf6DY0EPH0w8wUYDNlyav4DToaB2pdJAjcHOPsvUwktc0N0Y6ABrnreww23ZvNfqHuF0+u/Zzn3vGEFjHIcG2LGMXgP3R0QgdDQIDAQAB",
+  "app": {
+    "background": {
+      "scripts": [
+        "scripts/libs/app.polifils.js",
+        "bower_components/dexie-js/dist/dexie.min.js",
+        "bower_components/har/build/har.js",
+        "scripts/libs/app.utils.js",
+        "scripts/libs/app.types.js",
+        "scripts/libs/app.db.idb.js",
+        "scripts/background.js"
+      ]
+    }
+  },
+  "url_handlers": {
+    "google_drive_open": {
+      "matches": [
+        "https://chromerestclient.appspot.com/GDrive.html*"
+      ],
+      "title": "Open from Google Drive"
+    }
+  }
+}

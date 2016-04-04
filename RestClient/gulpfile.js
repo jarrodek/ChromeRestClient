@@ -215,7 +215,6 @@ gulp.task('copy:dist', function() {
       '!war/components/dexie-js/*.md'
     ])
     .pipe(gulp.dest('dist/sources/components/dexie-js/'));
-  var oauth2 = gulp.src('war/oauth2/**/*').pipe(gulp.dest('dist/sources/oauth2'));
   var restclient = gulp.src('war/restclient/**/*', {
       dot: true
     })
@@ -223,6 +222,7 @@ gulp.task('copy:dist', function() {
   var roboto = gulp.src('war/roboto/**/*').pipe(gulp.dest('dist/sources/roboto'));
   var workers = gulp.src('war/workers/**/*').pipe(gulp.dest('dist/sources/workers'));
   var img = gulp.src('war/img/**/*').pipe(gulp.dest('dist/sources/img'));
+
   return merge(
       root, components, manifest, assets, ext, /*libs,*/ oauth2, dexie,
       restclient, roboto, workers, img, har, hpa)

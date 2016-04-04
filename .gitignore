@@ -1,6 +1,7 @@
-/.project
-**/gwt-unitCache/*
-**/extras/*
-**/war/WEB-INF/classes
-**/node_modules
-**/bower_components
+.project
+.vscode
+.imdone
+node_modules
+bower_components
+build
+dist

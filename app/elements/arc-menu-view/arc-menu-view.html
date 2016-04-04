@@ -1,0 +1,94 @@
+<dom-module id="arc-menu-view">
+  <template>
+    <style>
+    :host {
+      display: block;
+      height: 100%;
+      @apply(--layout-vertical);
+      --paper-item-selected: {
+        background-color: var(--paper-grey-200);
+      }
+      --paper-item-focused: {
+        background-color: var(--paper-grey-100);
+      }
+    }
+    :host(arc-menu-view[with-toast]) .bottom-menu {
+      bottom: 72px;
+    }
+    paper-menu {
+      @apply(--layout-flex);
+    }
+    paper-item:hover {
+      background-color: var(--paper-grey-100);
+    }
+    .bottom-menu {
+      /*@apply(--layout-self-end);*/
+      /*@apply(--layout-end-justified);*/
+      position: relative;
+      bottom: 0;
+      transition: bottom 200ms ease-in-out;
+    }
+
+    .icon-buttons {
+      padding-left: 8px;
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+    }
+    .visible-icons {
+      @apply(--layout-flex);
+    }
+
+    .sublist {
+      padding-left: 20px;
+      /*padding-right: 20px;*/
+    }
+    </style>
+    <paper-menu selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap">
+      <paper-item data-route="request" data-place$="{{baseUrl}}">Request</paper-item>
+      <paper-item data-route="socket" data-place$="{{baseUrl}}socket">Socket</paper-item>
+      <paper-submenu>
+        <paper-item class="menu-trigger">Projects</paper-item>
+        <paper-menu class="menu-content sublist" selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap">
+          <template is="dom-if" if="{{!projects}}">
+            <paper-item>No projects here</paper-item>
+          </template>
+          <template is="dom-repeat" items="{{projects}}" sort="{{computeSort(projects)}}">
+            <paper-item data-route$="request/project/{{item.id}}" data-place$="{{baseUrl}}request/project/{{item.id}}">{{item.name}}</paper-item>
+          </template>
+        </paper-menu>
+      </paper-submenu>
+      <paper-item data-route="saved" data-place$="{{baseUrl}}saved">Saved</paper-item>
+      <template is="dom-if" if="{{!noHistory}}">
+        <paper-item data-route="history" data-place$="{{baseUrl}}history">History</paper-item>
+      </template>
+      <paper-item data-route="dataimport" data-place$="{{baseUrl}}dataimport">Import / export</paper-item>
+    </paper-menu>
+    <section class="bottom-menu" id="bottomMenu" on-tap="_itemTap">
+      <div class="icon-buttons">
+        <div class="visible-icons">
+          <paper-icon-button icon="settings" data-route="settings" data-place$="{{baseUrl}}settings" title="Settings"></paper-icon-button>
+          <paper-icon-button icon="info" data-route="about" data-place$="{{baseUrl}}about" title="About app"></paper-icon-button>
+          <paper-icon-button icon="bug-report" title="File a bug report" on-tap="newIssueReport"></paper-icon-button>
+        </div>
+        <paper-menu-button vertical-align="bottom" horizontal-align="left">
+          <paper-icon-button icon="more-vert" class="dropdown-trigger" on-tap="_actionsMenuOpened"></paper-icon-button>
+          <paper-menu class="dropdown-content" id="actionsMenu" on-iron-select="_contextMenuAction">
+            <paper-icon-item data-action="new-app-window">
+              <iron-icon icon="open-in-new" item-icon title="Open new window"></iron-icon>
+              Open new window
+            </paper-icon-item>
+            <paper-icon-item data-action="rate-review">
+              <iron-icon icon="arc:rate-review" item-icon title="Rate &amp; review the app"></iron-icon>
+              Rate and review
+            </paper-icon-item>
+          </paper-menu>
+        </paper-menu-button>
+      </div>
+      <!--
+      <paper-item on-tap="_onAuth" hidden$="{{appAuthorized}}" disabled="[[requestingAuth]]">Sign in</paper-item>
+      <paper-item on-tap="_onSignOut" hidden$="{{!appAuthorized}}">Sign out</paper-item>
+      -->
+    </section>
+  </template>
+  <script src="arc-menu-view.js"></script>
+</dom-module>

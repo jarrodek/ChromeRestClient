@@ -1,5 +1,0 @@
-Import lib in your module:
-
-<inherits name="com.google.gwt.file.FileApi" />
-
-enjoj :)

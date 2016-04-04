@@ -1,0 +1,102 @@
+<dom-module id="arc-request-details-view">
+  <template>
+    <style>
+    :host {
+      /*@apply(--layout-vertical);*/
+      display: block;
+      --section-element: {
+        min-height: 48px;
+        padding: 0 16px;
+      }
+    }
+
+    h2 {
+      @apply(--paper-font-menu);
+      @apply(--layout-flex);
+    }
+    paper-toolbar {
+      --paper-toolbar-background: #fafafa;
+    }
+    .request-name {
+      @apply(--paper-font-subhead);
+      @apply(--section-element);
+    }
+
+    .url-group {
+      @apply(--section-element);
+      @apply(--layout-vertical);
+    }
+
+    .method {
+      font-weight: 500;
+      margin-right: 8px;
+    }
+
+    .method::after {
+      content: ':';
+    }
+
+    .url {
+      @apply(--paper-font-subhead);
+      white-space: normal;
+      word-wrap: break-word;
+    }
+
+    .camption {
+      @apply(--paper-font-caption);
+      color: rgba(0, 0, 0, 0.57);
+    }
+
+    .headers {
+      @apply(--section-element);
+      margin-top: 24px;
+    }
+
+    .headers,
+    .payload {
+      @apply(--section-element);
+      margin-bottom: 24px;
+    }
+
+    pre {
+      @apply(--code-snippet);
+      white-space: pre-wrap;
+      word-break: break-all;
+      -webkit-user-select: text;
+      line-height: 16px;
+      padding: 8px;
+      cursor: text;
+      background-color: var(--code-snippet-background-color, #FFF8E1);
+      font-size: medium;
+    }
+    .caption {
+      @apply(--paper-font-caption);
+      color: #737373;
+    }
+    </style>
+    <paper-toolbar>
+      <h2>Request details</h2>
+      <paper-icon-button icon="chevron-right" on-click="closeDrawer"></paper-icon-button>
+    </paper-toolbar>
+    <div class="request-name" hidden$="[[!request.name]]">
+      <p class="caption">Request name</p>
+      <p>[[request.name]]</p>
+    </div>
+    <div class="url-group">
+      <p class="caption">Request details</p>
+      <span class="method">{{request.method}}</span>
+      <span class="url">{{request.url}}</span>
+    </div>
+    <div class="headers">
+      <div class="camption">Headers</div>
+      <pre>[[_computeHeaders(request)]]</pre>
+    </div>
+    <template is="dom-if" if="[[_hasPayload]]">
+      <div class="payload">
+        <div class="camption">Payload</div>
+        <pre>[[request.har.entries.0.request.postData.text]]</pre>
+      </div>
+    </template>
+  </template>
+  <script src="arc-request-details-view.js"></script>
+</dom-module>

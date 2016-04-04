@@ -1,0 +1,24 @@
+{
+  "id": "https://advancedrestclient.com/schemas/har/creator.json",
+  "title": "The creator entry",
+  "type": "object",
+  "description": "Creator and browser objects share the same structure.",
+  "required": [
+    "name",
+    "version"
+  ],
+  "properties": {
+    "name": {
+      "description": "Name of the application/browser used to export the log.",
+      "type": "string"
+    },
+    "version": {
+      "description": "Version of the application/browser used to export the log.",
+      "type": "string"
+    },
+    "comment": {
+      "description": "A comment provided by the user or the application.",
+      "type": "string"
+    }
+  }
+}

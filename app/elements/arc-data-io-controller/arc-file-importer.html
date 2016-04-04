@@ -1,0 +1,59 @@
+<!--
+@license
+Copyright 2016 Pawel Psztyc
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+--><!--
+The `arc-file-importer` element is a helper element for `arc-data-import-controller`
+that is responsible for file import.
+
+Example:
+
+<arc-file-importer></arc-file-importer>
+
+@group Controller Elements
+@element arc-file-importer
+--><html><head></head><body><dom-module id="arc-file-importer">
+  <template>
+    <style>
+    :host {
+      @apply(--layout-vertical);
+    }
+
+    h2 {
+      @apply(--section-title);
+    }
+
+    #fileDrop {
+      margin-left: 24px;
+    }
+    </style>
+    <template is="dom-if" if="{{!isFileImport}}">
+      <section id="fileImportSection">
+        <h2 class="section-title">Import from file</h2>
+        <file-drop id="fileDrop" on-file-ready="_onImportFile"></file-drop>
+      </section>
+    </template>
+    
+    <div id="fileImportSpinner">
+      <paper-spinner active="[[importFileReader]]" alt="Preparing data"></paper-spinner>
+    </div>
+
+    <template is="dom-if" if="{{isFileImport}}">
+      <arc-import-data-table-view projects="[[importData.projects]]" requests="[[importData.requests]]" on-import-action="_importTableAction"></arc-import-data-table-view>
+    </template>
+    <file-reader id="fileReader" loading="{{importFileReader}}" readas="text" on-file-read="_importFileReady" on-file-error="_importFileError" auto=""></file-reader>
+  </template>
+  <script src="arc-file-importer.js"></script>
+</dom-module>
+</body></html>

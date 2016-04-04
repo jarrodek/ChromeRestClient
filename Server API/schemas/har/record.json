@@ -1,0 +1,20 @@
+{
+  "id": "https://advancedrestclient.com/schemas/har/record.json",
+  "title": "Pair with name and value keys.",
+  "type": "object",
+  "required": [
+    "name",
+    "value"
+  ],
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "value": {
+      "type": "string"
+    },
+    "comment": {
+      "type": "string"
+    }
+  }
+}

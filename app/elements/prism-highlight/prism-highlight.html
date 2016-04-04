@@ -1,0 +1,32 @@
+<link rel="import" href="prism-styles.html">
+<!--
+Syntax highlighting via [Prism](http://prismjs.com/).
+
+Be sure that the following files are in the path:
+- /scripts/workers/prism-modes.js
+- /scripts/workers/prism-worker.js
+- /bower_components/prism/* (the prism library)
+-->
+<dom-module id="prism-highlight">
+  <template>
+    <style include="prism-styles">
+    :host {
+      display: block;
+    }
+    pre {
+      -webkit-user-select: text;
+      margin: 8px;
+    }
+    paper-progress {
+      width: 100%;
+    }
+    </style>
+    <pre class="parsed-content"><code id="output" class="language-" on-tap="_handleLinks"></code></pre>
+    <div hidden$="[[!hasMore]]">
+      <paper-button raised on-tap="_loadNext">Show next [[maxRead]] lines</paper-button>
+      <paper-button raised on-tap="_loadAll">Display all</paper-button>
+    </div>
+    <paper-progress indeterminate hidden$="[[!working]]"></paper-progress>
+  </template>
+  <script src="prism-highlight.js"></script>
+</dom-module>

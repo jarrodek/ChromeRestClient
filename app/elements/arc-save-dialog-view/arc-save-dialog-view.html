@@ -1,0 +1,94 @@
+<html>
+  <head></head>
+  <body>
+    <dom-module id="arc-save-dialog-view">
+      <template>
+        <style>
+          :host {
+            display: block;
+            margin: 24px 40px;
+            -webkit-overflow-scrolling: touch;
+            background: var(--paper-dialog-background-color, --primary-background-color);
+            color: var(--paper-dialog-color, --primary-text-color);
+            @apply(--paper-font-body1);
+            @apply(--shadow-elevation-16dp);
+            @apply(--paper-dialog);
+          }
+           :host > * {
+            padding: 0 24px;
+          }
+
+          h2 {
+            position: relative;
+            margin: 0;
+            @apply(--paper-font-title);
+            @apply(--paper-dialog-title);
+          }
+
+          .title-area {
+            padding-top: 24px;
+            padding-bottom: 24px;
+            @apply(--layout-horizontal);
+          }
+
+          .buttons {
+            position: relative;
+            padding: 8px 8px 8px 24px;
+            margin: 0 0 24px;
+            color: var(--paper-dialog-button-color, --primary-color);
+            @apply(--layout-horizontal);
+            @apply(--layout-end-justified);
+          }
+          .options-panel{
+
+          }
+          .options-panel paper-checkbox {
+            margin-right: 12px;
+          }
+          .caption {
+            @apply(--paper-font-caption);
+            color: #737373;
+          }
+        </style>
+        <div class="title-area" id="titleArea">
+          <h2 class="flex">Save request</h2>
+          <template is="dom-if" if="[[isDrive]]">
+            <iron-icon alt="Saving to Google Drive" icon="arc:drive-color"></iron-icon>
+          </template>
+        </div>
+        <section>
+          <div class="options-panel">
+            <div class="caption">Save options</div>
+            <paper-checkbox checked="{{isDrive}}">Save to Google Drive</paper-checkbox>
+            <paper-checkbox checked="{{isProject}}">Save in project</paper-checkbox>
+          </div>
+          <paper-input label="Request name" value="{{name}}"></paper-input>
+          <template is="dom-if" if="[[isProject]]">
+            <paper-input label="New project name" value="{{newProjectName}}"></paper-input>
+            <template is="dom-if" if="[[_computeShowProjectSelector(projects, newProjectName)]]">
+              <paper-dropdown-menu label="Or select existing project">
+                <paper-menu selected="{{projectId}}" attr-for-selected="data-id" class="dropdown-content">
+                  <template is="dom-repeat" items="{{projects}}">
+                    <paper-item data-id$="[[item.id]]">[[item.name]]</paper-item>
+                  </template>
+                </paper-menu>
+              </paper-dropdown-menu>
+            </template>
+          </template>
+        </section>
+        <div class="buttons">
+          <paper-button dialog-dismiss on-tap="_cancel">Cancel</paper-button>
+          <template is="dom-if" if="[[isOverride]]">
+            <paper-button dialog-confirm on-tap="_override">Override</paper-button>
+            <paper-button dialog-confirm on-tap="_save">Save as new</paper-button>
+          </template>
+          <template is="dom-if" if="[[!isOverride]]">
+            <paper-button dialog-confirm on-tap="_save">Save</paper-button>
+          </template>
+        </div>
+        <arc-project-object-model id="projects" on-data-ready="_projectsRead"></arc-project-object-model>
+      </template>
+    </dom-module>
+    <script src="arc-save-dialog-view.js"></script>
+  </body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "canary": {
+    "id": "ffgciingieijajcbpkockcbknajffbel",
+    "publishTo": "trustedTesters"
+  },
+  "dev" : {
+    "id": "okeafnfmgoafdfbcjkanpgmjanccpell",
+    "publishTo": "trustedTesters"
+  },
+  "beta" : {
+    "id": "epgngalmiadbjnoompchcohonhidjanm",
+    "publishTo": "trustedTesters"
+  },
+  "stable" : {
+    "id": "hgmloofddffdnphfgcellkdfbfbjeloo",
+    "publishTo": "default"
+  }
+}

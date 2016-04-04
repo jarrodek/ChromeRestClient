@@ -1,0 +1,23 @@
+{
+  "id": "https://advancedrestclient.com/schemas/har/pageTimings.json",
+  "title": "Detailed timing info about page load",
+  "type": "object",
+  "description": "This object describes timings for various events (states) fired during the page load. All times are specified in milliseconds. If a time info is not available appropriate field is set to -1. Depeding on the browser, onContentLoad property represents DOMContentLoad event or document.readyState == interactive.",
+  "optional": true,
+  "properties": {
+    "onContentLoad": {
+      "type": "number",
+      "min": -1,
+      "description": "Content of the page loaded. Number of milliseconds since page load started (page.startedDateTime). Use -1 if the timing does not apply to the current request."
+    },
+    "onLoad": {
+      "type": "number",
+      "min": -1,
+      "description": "Page is loaded (onLoad event fired). Number of milliseconds since page load started (page.startedDateTime). Use -1 if the timing does not apply to the current request."
+    },
+    "comment": {
+      "type": "string",
+      "description": "A comment provided by the user or the application."
+    }
+  }
+}

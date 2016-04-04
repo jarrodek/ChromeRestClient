@@ -1,0 +1,16 @@
+{
+  "id": "https://advancedrestclient.com/schemas/har/cache.json",
+  "title": "HAR cache properties",
+  "type": "object",
+  "properties": {
+    "beforeRequest": {
+      "$ref": "cacheEntry.json"
+    },
+    "afterRequest": {
+      "$ref": "cacheEntry.json"
+    },
+    "comment": {
+      "type": "string"
+    }
+  }
+}

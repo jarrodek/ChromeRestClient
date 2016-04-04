@@ -1,0 +1,149 @@
+<!--
+@license
+Copyright 2016 Pawel Psztyc, The ARC team
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<html>
+
+<head></head>
+
+<body>
+  <dom-module id="arc-settings-controller">
+    <template>
+      <style>
+      :host {
+        display: block;
+        --iron-image-width: 400px;
+      }
+
+      .help-icon {
+        height: 36px;
+        width: 36px;
+        color: var(--paper-grey-500);
+      }
+
+      paper-item {
+        border-bottom: 1px var(--paper-grey-100) solid;
+      }
+
+      mark {
+        -webkit-user-select: text;
+      }
+      #addShortcutsToDesktop .onboarding-image-page {
+        @apply(--layout-vertical);
+      }
+      #addShortcutsToDesktop .onboarding-image-page .description {
+        @apply(--layout-center);
+      }
+      </style>
+      <paper-item>
+        <paper-item-body two-line="">
+          <div>History</div>
+          <div secondary="true">Save list of requests made by the app in local storage</div>
+        </paper-item-body>
+        <paper-toggle-button checked="{{values.HISTORY_ENABLED}}"></paper-toggle-button>
+      </paper-item>
+      <paper-item on-tap="historyClearClick">
+        <paper-item-body>
+          <div>Clear history</div>
+        </paper-item-body>
+      </paper-item>
+      <paper-item>
+        <paper-item-body>
+          <div>
+            Magic variables
+            <paper-icon-button icon="help" class="help-icon" on-tap="openMagicVariablesDialog"></paper-icon-button>
+          </div>
+        </paper-item-body>
+        <paper-toggle-button checked="{{values.MAGICVARS_ENABLED}}"></paper-toggle-button>
+      </paper-item>
+      <paper-item>
+        <paper-item-body two-line="">
+          <div>
+            Send anonymous usage data
+          </div>
+          <div secondary="true">None of your data are sent to the server. It helps making an ARC better when you provide usage statistics. Please, leave it enabled if you can.</div>
+        </paper-item-body>
+        <paper-toggle-button on-tap="_gaSettingTapped" checked="{{gaEnabled}}"></paper-toggle-button>
+      </paper-item>
+      <paper-item hidden$="[[!showNotifications]]">
+        <paper-item-body two-line="">
+          <div>
+            Allow desktop notifications
+          </div>
+          <div secondary="true">The notifications will be displayed when beta, dev or canary channel is updated.</div>
+        </paper-item-body>
+        <paper-toggle-button on-tap="_notificationsTapped" checked="{{notificationsEnabled}}"></paper-toggle-button>
+      </paper-item>
+      <paper-item on-tap="_showAddToDesktopTutotial">
+        <paper-item-body>
+          <div>
+            Add shortcut to desktop
+          </div>
+        </paper-item-body>
+      </paper-item>
+      <paper-item on-tap="showTutorial">
+        <paper-item-body>
+          <div>Show tutorial</div>
+        </paper-item-body>
+      </paper-item>
+      <paper-dialog id="historyClearDialog" on-iron-overlay-closed="onClearDialogResult">
+        <h2>Clear history</h2>
+        <paper-dialog-scrollable>
+          <p>This will remove all data from the history store. Would you like to continue?</p>
+        </paper-dialog-scrollable>
+        <div class="buttons">
+          <paper-button dialog-dismiss="">Cancel</paper-button>
+          <paper-button dialog-confirm="" autofocus="">Clear</paper-button>
+        </div>
+      </paper-dialog>
+      <paper-dialog id="magicVatDialog">
+        <h2>Magic variables</h2>
+        <paper-dialog-scrollable>
+          <p>Now you use the Magic Variables. Currently it is two special strings that will be replaced just before sending a request:</p>
+          <p>${random} - generate random number from 0 to Number.MAX_VALUE</p>
+          <p>${now} - insert current time (in ms)</p>
+          <p>You can place it in the URL, in headers list or in payload.</p>
+          <p>Furthermore, if you'd like to group generated numbers and use them more than once using the same generated value:</p>
+          <p>${random:[group_number]} where [group_number] is a number of the group.</p>
+          <p>For example you can use ${random:1} more than once and the same value will be placed anywhere when you put this string.</p>
+          <p>Learn more on blog post: <a href="http://restforchrome.blogspot.co.uk/2012/11/introduce-magic-variables.html" target="_blank">Introduce: Magic Variables</a></p>
+        </paper-dialog-scrollable>
+        <div class="buttons">
+          <paper-button dialog-confirm="">Close</paper-button>
+        </div>
+      </paper-dialog>
+      <onboarding-tutorial id="addShortcutsToDesktop">
+        <onboarding-page>
+          <h2>Adding app's shortcuts</h2>
+          <div class="onboarding-image-page">
+            <div class="image">
+              <iron-image src="/assets/create-shortcut.gif"></iron-image>
+            </div>
+            <div class="description">
+              <ul>
+                <li>Got to <mark>chrome://apps</mark></li>
+                <li>Right click on ARC (this app)</li>
+                <li>Select "Create shortcut..."</li>
+              </ul>
+            </div>
+          </div>
+        </onboarding-page>
+      </onboarding-tutorial>
+    </template>
+    <script src="arc-settings-controller.js"></script>
+  </dom-module>
+</body>
+
+</html>

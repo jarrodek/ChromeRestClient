@@ -1,0 +1,28 @@
+{
+  "id": "https://advancedrestclient.com/schemas/har/cacheEntry.json",
+  "title": "HAR cacheEntry property",
+  "type": "object",
+  "optional": true,
+  "required": [
+    "lastAccess",
+    "eTag",
+    "hitCount"
+  ],
+  "properties": {
+    "expires": {
+      "type": "string"
+    },
+    "lastAccess": {
+      "type": "string"
+    },
+    "eTag": {
+      "type": "string"
+    },
+    "hitCount": {
+      "type": "integer"
+    },
+    "comment": {
+      "type": "string"
+    }
+  }
+}

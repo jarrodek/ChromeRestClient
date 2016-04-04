@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -19,6 +18,12 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.rest.server.models.ResponseFormItem;
+import org.rest.server.models.ResponseListingItem;
+import org.rest.server.models.SaveResponseItem;
+import org.rest.server.responses.IdentityDebugResponse;
+import org.rest.server.responses.ResponseError;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
@@ -72,7 +77,13 @@ public class ExtensionServlet extends HttpServlet {
 			return;
 		}
 		resp.setStatus(200);
-		
+		if (path.startsWith("/_debug/identity")) {
+			User user = getUser();
+			String data = gson.toJson(new IdentityDebugResponse(user));
+			resp.setStatus(200);
+			resp.getWriter().print(data);
+			return;
+		} else 
 		if(path.startsWith("/list")){
 			String userId = null;
 			if(path.equals("/list")){
@@ -97,17 +108,18 @@ public class ExtensionServlet extends HttpServlet {
 							gson.toJson(new ResponseError("Not logged in", 401)));
 					return;
 				}
+				System.out.println("Me is " + user.getUserId());
 				userId = user.getUserId();
 			}
 			AppUser appUser = AppUser.getUserById(userId);
 			if(appUser == null){
 				resp.setStatus(404);
 				resp.getWriter().print(
-						gson.toJson(new ResponseError("Not found", 404)));
+						gson.toJson(new ResponseError("Owner user not found: " + userId, 404)));
 				return;
 			}
 			
-			List<ResponseListingItem> res = new ArrayList<ExtensionServlet.ResponseListingItem>();
+			List<ResponseListingItem> res = new ArrayList<ResponseListingItem>();
 			List<RequestItem> items = appUser.getItemsSet();
 			for(RequestItem item : items){
 				ResponseListingItem _responseItem = new ResponseListingItem();
@@ -308,7 +320,7 @@ public class ExtensionServlet extends HttpServlet {
 		}
 		
 		if (toSave.size() > 0) {
-			List<SaveResponseItem> response = new ArrayList<ExtensionServlet.SaveResponseItem>();
+			List<SaveResponseItem> response = new ArrayList<SaveResponseItem>();
 			
 			appUser.getItemsSet().addAll(toSave);
 			PersistenceManager pm = PMF.get().getPersistenceManager();
@@ -334,69 +346,6 @@ public class ExtensionServlet extends HttpServlet {
 		}
 
 		return gson.toJson(new ResponseError("Data parse error. Can't parse data on server."));
-	}
-	
-	static class SaveResponseItem {
-		String key;
-		Integer id;
-	}
-	
-	
-	/**
-	 * Response for list of requests available to get
-	 * @author Paweł Psztyć
-	 *
-	 */
-	static class ResponseListingItem {
-		String key;
-		String name;
-		String url;
-		Long updated;
-	}
-	
-	static class ResponseFormItem {
-		static class ResponseItemHeader{
-			String key;
-			String value;
-		}
-		String key;
-		String name;
-		String url;
-		String post;
-		String method;
-		String encoding;
-		List<ResponseItemHeader> headers;
-	}
-	
-	
-	
-	@SuppressWarnings("unused")
-	private static class ResponseError {
-		final boolean error = true;
-		/**
-		 * Code error
-		 */
-		final int code;
-		/**
-		 * Error message
-		 */
-		final String message;
-		/**
-		 * Time of request
-		 */
-		final long time;
-
-		ResponseError(String message) {
-			this.message = message;
-			this.time = new Date().getTime();
-			this.code = 400;
-		}
-
-		ResponseError(String message, int code) {
-			this.message = message;
-			this.time = new Date().getTime();
-			this.code = code;
-		}
 	}
 
 	public static String readInputStreamAsString(InputStream in)

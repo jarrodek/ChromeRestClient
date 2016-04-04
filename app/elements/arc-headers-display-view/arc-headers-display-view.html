@@ -1,0 +1,61 @@
+<!--
+@license
+Copyright 2016 Pawel Psztyc, The ARC team
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<html>
+  <head></head>
+  <body>
+    <dom-module id="arc-headers-display-view">
+      <template>
+        <style>
+          :host {
+            display: block;
+          }
+
+          .dialog-header-example {
+            @apply(--paper-font-body1);
+            margin-top: 16px;
+          }
+
+          .dialog-header-desc {
+            @apply(--paper-font-body2);
+          }
+
+        </style>
+
+        <template is="dom-repeat" items="{{headers}}">
+          <arc-header-line-display-view on-dblclick="_displayHeaderInfo" header-name="[[item.name]]" header-value="[[item.value]]"></arc-header-line-display-view>
+        </template>
+
+        <paper-dialog id="headerInfo">
+          <h2>{{_hdTitle}}</h2>
+          <paper-dialog-scrollable>
+            <section class="dialog-header-desc">{{_hdBody}}</section>
+            <section class="dialog-header-example">
+              <span>Example:
+              </span>
+              <span>{{_hdExample}}</span>
+            </section>
+          </paper-dialog-scrollable>
+          <div class="buttons">
+            <paper-button dialog-confirm="" autofocus="">Close</paper-button>
+          </div>
+        </paper-dialog>
+        <arc-header-object-model id="model" on-data-ready="_onHeaderData"></arc-header-object-model>
+      </template>
+    </dom-module>
+    <script src="arc-headers-display-view.js"></script>
+  </body>
+</html>

@@ -1,41 +1,49 @@
-Advanced Rest Client Application for Google Chrome
+Advanced Rest Client Application - the Chrome App
 =================
 
-The web developers helper program to create and test custom HTTP requests.
+This branch is to update the app to the Chrome packaged apps.
+It's in active development **and it's not working yet**.
 
-This is a source code for the application. 
+## Developer preview
+I assume you have [Node.js][1] already installed on your machine.
 
-##Installation
-Go to [Chrome Web Store][cws_url] and install the app from there.
+Start with getting the code
+```shell
+git clone https://github.com/jarrodek/ChromeRestClient.git
+```
 
-[![Available on Chrome Web Store][cws_logo]][cws_url]
+When ready go to the directory and switch to a `chrome-app` branch
+```shell
+cd ChromeRestClient
+git checkout chrome-app
+```
 
+Next install dependencies:
+```shell
+npm install && bower install
+```
+Take a coffee break. It will take a while... You can also install [gifi][gifi], a wrapper for `npm install` that will display a random gif while waiting for npm:
 
-##Project philosophy
-
-###Free for all
-The app is and will be free to use for everyone. It's open source project and you can involve in its development.
-
-###Easy to use
-As a UX designer and developer I promise to develop easiest to use tool from them all. Every part of the UI and app's functionality is based on real users requirements. All you can find there is what you really need to work with REST services.
-
-###Quality and stability
-The app should work as desired. I take it serious if it comes to release and I've prepared complex testing and releasing process so the final release should be free of bugs.
-If you however find a bug in the released version, please, [file a bug report][issue_tracker] on project's Github page. 
-
-##Contact
-You can contact me using my [Google+ account][gp_profile]. 
-Also, follow ARC's [profile on Google Plus][gp_appprofile] or read application [blog][app_blog].
-
-##License
-This project is licensed under Apache License 2.0.
-See the LICENSE file for more details. 
+![](https://raw.githubusercontent.com/vdemedes/gifi/master/media/demo.gif)
 
 
 
-[cws_url]: https://chrome.google.com/webstore/detail/advanced-rest-client/hgmloofddffdnphfgcellkdfbfbjeloo?utm_source=gitgub&utp_campaign=app&utm_medium=installation
-[cws_logo]: https://developer.chrome.com/webstore/images/ChromeWebStore_BadgeWBorder_v2_340x96.png "Get from Chrome Web Store"
-[issue_tracker]: https://github.com/jarrodek/ChromeRestClient/issues
-[gp_profile]: https://plus.google.com/+PawelPsztyc
-[gp_appprofile]: https://plus.google.com/b/117577071661965941720/117577071661965941720
-[app_blog]: restforchrome.blogspot.com
+
+Well, the app is ready to develop / preview. You can either load the app from chrome://extensions/ page (check "Developer mode" check box) or run command:
+```shell
+npm run arc
+```
+
+Thanks for testing and don't forget to file an issue report if you find a bug.
+
+## CSP troubles
+If you run into trouble caused by CSP environment you can run following command:
+```shell
+gulp crisper-bower
+```
+
+This will [crisper][2] the `bower_components` directory and make the app works again.
+
+ [1]: https://docs.npmjs.com/getting-started/installing-node "Install Node.js"
+ [2]: https://github.com/PolymerLabs/crisper "Crisper for Polymer"
+ [gifi]: https://github.com/vdemedes/gifi "watch GIFs while running npm install"

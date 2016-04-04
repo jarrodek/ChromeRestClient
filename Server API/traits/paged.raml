@@ -1,0 +1,19 @@
+#%RAML 1.0 Trait
+queryParameters:
+  nextPageToken?:
+    type: string
+    description: |
+      List response may contain this parameter pointing to the next results page. All other query parameteres must be the same as for a previous request or the page token will be revalidated.
+      The nextPageToken will honor `limit` parameter but will discard `start` parameter. So use `start` with `nextPageToken` is redundant.
+    default: none
+  limit?:
+    type: number
+    default: 50
+    description: |
+      Limit the number of items in the response.
+  start?:
+    type: number
+    default: 0
+    description: |
+      Omnit N first results from the list and return rest of the results respecting `limit` value.
+      Use of this property with `nextPageToken` is redundant.

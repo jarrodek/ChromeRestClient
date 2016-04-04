@@ -1,0 +1,115 @@
+<dom-module id="headers-editor">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 0 12px;
+        position: relative;
+
+        --code-mirror-wrapper: {
+          border: 1px var(--main-section-border-color) solid;
+        };
+        --code-mirror-editor: {
+          z-index: 0;
+        }
+
+        --paper-input-container-underline: {
+          background-color: var(--main-section-border-color);
+        }
+
+        --paper-autocomplete: {
+          top: 32px;
+        }
+      }
+      input::-webkit-input-placeholder {
+        color: var(--paper-input-container-color, --secondary-text-color);
+      }
+      .headers-title {
+        @apply(--paper-font-caption);
+        color: #737373;
+      }
+      .form-row {
+        @apply(--layout-horizontal);
+        @apply(--layout-flex);
+        @apply(--layout-relative);
+      }
+      .header-name {
+        margin-right: 12px;
+      }
+      .header-value {
+        @apply(--layout-flex);
+      }
+
+      .headers-list {
+        margin: 12px 0;
+        position: relative;
+      }
+
+      .CodeMirror-hints {
+        position: absolute;
+        z-index: 10;
+        background: white;
+        overflow: hidden;
+        overflow-y: auto;
+        max-height: 20em;
+        margin-top: 60px;
+        margin-left: 20px;
+      }
+
+      .CodeMirror-hint.iron-selected {
+        /*background: #08f;
+        color: white;*/
+      }
+
+      .form-row .edit-header {
+        display: none;
+      }
+      .form-row.has-support .edit-header {
+        display: initial;
+      }
+    </style>
+    <paper-tabs selected="{{tabSelected}}">
+      <paper-tab>Raw headers</paper-tab>
+      <paper-tab>Headers form</paper-tab>
+      <paper-tab>Predefined sets</paper-tab>
+    </paper-tabs>
+    <iron-pages selected="{{tabSelected}}">
+      <section>
+        <code-mirror mode="http-headers" theme="cm-arc" on-change="valueChanged" value="{{headers}}" id="cm"></code-mirror>
+      </section>
+      <section class="headers-list">
+        <label class="headers-title">HTTP headers</label>
+        <div class="headers-form">
+          <template is="dom-repeat" id="headersList" items="{{headersList}}" on-dom-change="_onHeadersFormRender">
+            <div class="form-row">
+              <paper-input-container class="header-name" no-label-float inline>
+                <input is="iron-input" on-focus="_headerNameFocus" type="text" value="{{item.name::input}}" placeholder="Header name"/>
+              </paper-input-container>
+              <paper-input-container class="header-value" no-label-float inline>
+                <input is="iron-input" name="headerValue" type="text" value="{{item.value::input}}" placeholder="Header value" />
+              </paper-input-container>
+              <div class="edit-header">
+                <paper-icon-button icon="image:edit" title="Edit header value" on-tap="_openHeaderSupport"></paper-icon-button>
+              </div>
+              <paper-icon-button icon="close" title="Remove header" on-tap="_removeHeader"></paper-icon-button>
+              <paper-autocomplete loader on-query="_queryHeaderName" on-selected="_onHeaderNameSelected"></paper-autocomplete>
+            </div>
+          </template>
+        </div>
+        <paper-button raised on-tap="appendEmptyHeader">Add</paper-button>
+      </section>
+      <section>
+        <h4>Use predefined sets below to insert headers into the editor</h4>
+        <h5>Default Chrome headers</h5>
+        <code>
+          <pre>[[headersDefaults]]</pre>
+        </code>
+        <paper-button raised on-tap="_insertDefaultSet">Use this set</paper-button>
+      </section>
+    </iron-pages>
+    <arc-header-object-model id="headerModel" on-data-ready="_setNameSuggestions"></arc-header-object-model>
+    <content-type-support></content-type-support>
+    <authorization-support></authorization-support>
+  </template>
+  <script src="headers-editor.js"></script>
+</dom-module>

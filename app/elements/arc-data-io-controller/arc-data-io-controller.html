@@ -1,0 +1,64 @@
+<!--
+@license
+Copyright 2016 Pawel Psztyc
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+--><!--
+The `arc-data-io-controller` is a controller for data import and export.
+It is responsible for all data import / export operations in the app.
+
+Example:
+
+<arc-data-io-controller></arc-data-io-controller>
+
+@group Controller Elements
+@element arc-data-import-controller
+--><html><head></head><body><dom-module id="arc-data-io-controller">
+  <template>
+    <style>
+    :host {
+      @apply(--layout-vertical);
+      padding: 20px 0;
+    }
+
+    .import-file-section {
+      margin-bottom: 40px;
+    }
+
+    .padding-section {
+      padding-left: 24px;
+    }
+    </style>
+    <template is="dom-if" if="{{loading}}">
+      <div class="padding-section">
+        <paper-spinner active="true" alt="Preparing data"></paper-spinner>
+      </div>
+    </template>
+    <template is="dom-if" if="{{!loading}}">
+      <template is="dom-if" if="{{_showFileImport}}">
+        <arc-file-importer class="import-file-section" importing="{{_fileImporting}}" on-import="_importFileData"></arc-file-importer>
+      </template>
+      <template is="dom-if" if="{{_showFileExport}}">
+        <arc-file-exporter class="import-file-section" exporting="{{_fileExporting}}"></arc-file-exporter>
+      </template>
+      <!--
+      <template is="dom-if" if="{{_showServerOptions}}">
+        <arc-server-exporter on-connect="_connectAppServer" authorized="[[authorized]]"></arc-server-exporter>
+      </template>
+      -->
+    </template>
+    <user-provider id="userProvider" authorized="{{authorized}}"></user-provider>
+  </template>
+</dom-module>
+<script src="arc-data-io-controller.js"></script>
+</body></html>

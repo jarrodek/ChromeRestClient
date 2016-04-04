@@ -1,0 +1,30 @@
+<dom-module id="arc-saved-list-empty">
+  <template>
+    <style>
+    :host {
+      display: block;
+    }
+
+    h1.empty {
+      @apply(--paper-font-display1);
+      @apply(--section-padding);
+    }
+
+    .info {
+      @apply(--paper-font-subhead);
+      @apply(--section-padding);
+    }
+
+    .code {
+      background-color: #f7f7f7;
+      font-family: monospace;
+      white-space: pre;
+    }
+    </style>
+    <h1 class="empty">You do not have any saved requests.</h1>
+    <p class="info">You can save request using key combination: <span class="code">ctrl+s</span> on the request screen.</p>
+    <p class="info">You can also open file from <paper-button raised on-tap="openDrive">Google Drive</paper-button></p>
+
+  </template>
+  <script src="arc-saved-list-empty.js"></script>
+</dom-module>

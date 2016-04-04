@@ -1,0 +1,54 @@
+<!--
+@license
+Copyright 2016 Pawel Psztyc, The ARC team
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+--><html><head></head><body><dom-module id="arc-loader-screen">
+  <template>
+    <style>
+      :host {
+        @apply(--layout-fit);
+        @apply(--layout-vertical);
+        @apply(--layout-center-center);
+        background-color: rgb(0, 30, 70);
+        color: white;
+        font-family: roboto;
+        z-index: 10;
+        --paper-spinner-color: var(--google-blue-500);
+      }
+      paper-spinner-lite {
+        margin-top: 20px;
+        width: 16px;
+        height: 16px;
+      }
+      #container{
+        @apply(--layout-vertical);
+        @apply(--layout-center-center);
+      }
+      .splash-status-message {
+        @apply(--paper-font-headline);
+      }
+    </style>
+    <div id="container">
+      <div class="splash-image">
+        <img src="/assets/arc_icon_128.png" alt="Loading" width="128" height="128">
+      </div>
+      <div class="splash-status">
+        <span class="splash-status-message">Advanced REST client</span>
+      </div>
+      <paper-spinner-lite active$="{{opened}}"></paper-spinner-lite>
+    </div>
+  </template>
+  <script src="arc-loader-screen.html.0.js"></script>
+</dom-module>
+</body></html>
