@@ -201,6 +201,9 @@ An `arc-saved-list-view` element is a element responsible for displaying a list 
       height: 100%;
       overflow: visible;
     }
+    paper-progress {
+      width: 100%;
+    }
     </style>
     <paper-drawer-panel drawer-width="360px" id="details" force-narrow="[[narrowDrawer]]" right-drawer disable-edge-swipe>
       <arc-request-details-view drawer request="{{detailedRequest}}" on-close="closeDetailsPanel"></arc-request-details-view>
@@ -265,6 +268,7 @@ An `arc-saved-list-view` element is a element responsible for displaying a list 
           <arc-saved-list-item on-dblclick="_showRequestDetails" request="{{item}}" selected="{{item.selected}}" on-selected-changed="_onItemToggle"></arc-saved-list-item>
         </template>
         <div class="table-columns">
+          <paper-progress indeterminate hidden$="[[!querying]]"></paper-progress>
           <!-- <div class="flex"></div>
           <paper-button raised="" class="actionButton" on-tap="importTap">import</paper-button>
           <paper-button on-tap="cancelTap">cancel</paper-button> -->

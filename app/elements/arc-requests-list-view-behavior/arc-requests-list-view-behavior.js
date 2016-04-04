@@ -61,8 +61,7 @@ window.ArcBehaviors.RequestsListViewBehaviorImpl = {
     detailedRequest: Object,
 
     querying: {
-      type: Boolean,
-      value: true
+      type: Boolean
     },
     /**
      * If true the details drowe will narrow.
@@ -82,6 +81,7 @@ window.ArcBehaviors.RequestsListViewBehaviorImpl = {
 
   attached: function() {
     this.scrollTarget = document.querySelector('#headerPanelMain').scroller;
+    this.listen(this.scrollTarget, 'scroll', '_scrollHandler');
   },
   /**
    * Get scroll target element.
@@ -223,7 +223,7 @@ window.ArcBehaviors.RequestsListViewBehaviorImpl = {
 };
 
 window.ArcBehaviors.RequestsListViewBehavior = [
-  ArcBehaviors.RequestsListViewBehaviorImpl,
-  Polymer.IronScrollTargetBehavior
+  Polymer.IronScrollTargetBehavior,
+  ArcBehaviors.RequestsListViewBehaviorImpl
 ];
 })();
