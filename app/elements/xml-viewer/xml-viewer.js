@@ -5,14 +5,14 @@ Polymer({
   is: 'xml-viewer',
   properties: {
     /**
-     * XML data to parse an display
+     * XML data to parse and display
      */
     xml: {
       type: Object,
       observer: '_changed'
     },
     /**
-     * True if error ocurred during parse method
+     * True if error ocurred when parsing data
      */
     isError: {
       type: Boolean,

@@ -254,18 +254,14 @@ TODO: if exporting this element don't forget to set dependencies.
     :host([noink]) .brand-google-plus.theme-light:focus {
       border: 1px solid #c0c0c0;
     }
+
     .button-container {
       @apply(--layout-relative);
       @apply(--layout-horizontal);
       @apply(--layout-center-center);
     }
     </style>
-    <chrome-signin-aware id="aware"
-      access-token="{{accessToken}}"
-      scopes="{{scopes}}"
-      signed-in="{{signedIn}}"
-      is-authorized="{{isAuthorized}}"
-      need-additional-auth="{{needAdditionalAuth}}"></chrome-signin-aware>
+    <chrome-signin-aware id="aware" access-token="{{accessToken}}" scopes="{{scopes}}" signed-in="{{signedIn}}" is-authorized="{{isAuthorized}}" need-additional-auth="{{needAdditionalAuth}}"></chrome-signin-aware>
     <template is="dom-if" if="{{raised}}">
       <paper-material hidden$="[[!signedIn]]" id="shadow" class="fit" elevation="2" animated></paper-material>
     </template>

@@ -3,32 +3,52 @@
 
 Polymer({
   is: 'url-input-editor',
+  /**
+   * Event called when the user press enter in any field in the editor.
+   * The event will not be called if the suggestion box is opened.
+   * 
+   * @event send
+   */
   properties: {
+    /**
+     * The URL value to be displayed in the editor.
+     */
     url: {
       type: String,
       notify: true,
       observer: '_urlChanged'
     },
+    // True when detailed view is enabled.
     detailed: {
       type: Boolean,
       value: false
     },
+    // value for host. Eg: https://google.com
     hostValue: {
       type: String,
       value: ''
     },
+    // URL's path value
     pathValue: {
       type: String,
       value: ''
     },
+    // URL's history hash.
     anchorValue: {
       type: String,
       value: ''
     },
+    /**
+     * A list of parameters used in detailed view form of parameters.
+     */
     paramsList: {
       type: Array,
       value: []
     },
+    /**
+     * An input filed for the URL value.
+     * It is used by `paper-autocomplete` element as an input target.
+     */
     masterUrlElement: {
       readOnly: true,
       type: HTMLElement,
@@ -36,16 +56,25 @@ Polymer({
         return this.$.masterUrl;
       }
     },
+    // True when a suggestion box for the URL is opened.
     suggesionsOpened: Boolean
   },
-
+  /**
+   * Called when the URL value change.
+   *
+   * @param {String} newVal New value of the URL.
+   */
   _urlChanged: function(newVal) {
     if (this.detailed && (!newVal || newVal.length === 0)) {
       // clear the form
       this.updateForm();
     }
   },
-
+  /**
+   * Toggle the view.
+   * TODO: This should change only the `detailed` property value and change observer should
+   * make a change.
+   */
   toggle: function() {
     this.detailed = !this.detailed;
     var stateName = this.detailed ? 'Details form' : 'Single line';
@@ -61,7 +90,7 @@ Polymer({
     arc.app.analytics.sendEvent('Request view', 'URL widget toggle', stateName);
   },
   /**
-   * Update url from form values.
+   * Update the URL from detailed form values.
    */
   updateUrl: function() {
     var url = this.hostValue;
@@ -103,9 +132,8 @@ Polymer({
     }
     this.set('url', url);
   },
-
   /**
-   * Crerate / update form data from master URL.
+   * Crerate / update form data from the URL.
    */
   updateForm: function() {
     var data = new URLParser(this.url);
@@ -123,7 +151,9 @@ Polymer({
     this.set('anchorValue', data.anchor);
     this.set('paramsList', Array.from(data.paramsList));
   },
-
+  /**
+   * Adds empty line of URL params to the detailed form of URL parameters.
+   */
   appendEmptyQueryParam: function() {
     var item = {
       name: '',
@@ -131,13 +161,19 @@ Polymer({
     };
     this.push('paramsList', item);
   },
-
+  /**
+   * Handler for click event when removing parameter line from the form.
+   *
+   * @param {ClickEvent} e A click event.
+   */
   _removeParam: function(e) {
     var index = this.$.paramsList.indexForElement(e.target);
     this.splice('paramsList', index, 1);
     this.updateUrl();
   },
-
+  /**
+   * Handler for click action of any of context menu items.
+   */
   _contextMenuAction: function(e) {
     var action = e.target.selectedItem.dataset.action;
     this.$.urlContextMenu.selected = -1;
@@ -235,7 +271,7 @@ Polymer({
     var url = data.toString();
     this.set('url', url);
   },
-  /** Called when URL params form has renederd. */
+  /** Called when URL params form has been renederd. */
   _onParamsRender: function() {
     if (!this.root) {
       return;
@@ -251,7 +287,10 @@ Polymer({
 
     }
   },
-
+  /**
+   * A handler called when the user press "enter" in any of the form fields.
+   * This will send a `send` event.
+   */
   onEnter: function() {
     if (this.suggesionsOpened) {
       return;
@@ -263,12 +302,12 @@ Polymer({
     }
     this.fire('send');
   },
-
+  // Hanlder for suggestion selected event.
   _onSuggestionSelected: function(e) {
     var value = e.detail.value;
     this.set('url', value);
   },
-
+  // Handler called when the `paper-autocomplete` request a suggestions.
   _queryUrlHistory: function(e) {
     var value = e.detail.value;
     if (!value) {
@@ -278,7 +317,10 @@ Polymer({
     this.$.model.objectId = value;
     this.$.model.query();
   },
-
+  /**
+   * Handler called when the suggestions data are ready and should be passed to the
+   * `paper-autocomplete`
+   */
   _setSuggestions: function(e) {
     var data = e.detail.data;
     if (!data) {
@@ -288,7 +330,7 @@ Polymer({
     var suggestions = data.map((item) => item.url);
     this.$.autocomplete.source = suggestions;
   },
-
+  // Handler called when the context menu has been opened.
   _menuOpened: function() {
     arc.app.analytics.sendEvent('Request view', 'URL widget toggle', 'Open menu');
   }

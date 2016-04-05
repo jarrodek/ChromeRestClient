@@ -13,33 +13,57 @@ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
---><html><head></head><body><dom-module id="user-image">
+-->
+
+<!--
+The `<user-image>` element is responsible for downloading, storing and displaying user profile image.
+It fit's Chrome apps environment because downloaded image will be stored in local filesystem and from there will be served.
+
+### Usage
+    <user-image profile-image="[[userProfileImage]]">
+
+### Styling
+Custom property | Description | Default
+----------------|-------------|----------
+`--user-profile` | Mixin applied to the element | `{}`
+`--user-profile-image` | Mixin applied to the image element | `{}`
+-->
+<html>
+
+<head></head>
+
+<body>
+  <dom-module id="user-image">
     <template>
-        <style>
-        :host {
-            position: relative;
-            display: inline-block;
-            --iron-image-width: 40px;
-            --iron-image-height: 40px;
-        }
+      <style>
+      :host {
+        position: relative;
+        display: inline-block;
+        --iron-image-width: 40px;
+        --iron-image-height: 40px;
+        @apply(--user-profile);
+      }
 
-        iron-image {
-            border-radius: 50%;
-        }
+      iron-image {
+        border-radius: 50%;
+        @apply(--user-profile-image);
+      }
 
-        paper-ripple {
-            color: #EDEDED;
-        }
-        </style>
-        <template is="dom-if" if="{{hasImage}}">
-            <iron-image src="{{_pictureObjectUrl}}"></iron-image>
-            <paper-ripple class="circle" fit=""></paper-ripple>
-        </template>
-        <template is="dom-if" if="{{!hasImage}}">
-          <paper-icon-button icon="account-circle" alt="Profile"></paper-icon-button>
-        </template>
-        <iron-ajax id="fileRequest" handle-as="blob" method="GET" on-error="_userPictureError" on-response="_userPictureResponse" url="{{profileImage}}"></iron-ajax>
+      paper-ripple {
+        color: #EDEDED;
+      }
+      </style>
+      <template is="dom-if" if="{{hasImage}}">
+        <iron-image src="{{_pictureObjectUrl}}"></iron-image>
+        <paper-ripple class="circle" fit=""></paper-ripple>
+      </template>
+      <template is="dom-if" if="{{!hasImage}}">
+        <paper-icon-button icon="account-circle" alt="Profile"></paper-icon-button>
+      </template>
+      <iron-ajax id="fileRequest" handle-as="blob" method="GET" on-error="_userPictureError" on-response="_userPictureResponse" url="{{profileImage}}"></iron-ajax>
     </template>
     <script src="user-image.js"></script>
-</dom-module>
-</body></html>
+  </dom-module>
+</body>
+
+</html>

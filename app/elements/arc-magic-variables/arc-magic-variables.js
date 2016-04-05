@@ -7,7 +7,7 @@ Polymer({
    * Fired when all rules has been applied.
    *
    * @event parsed
-   * @param {String|Object} thesame type as `value` property.
+   * @param {String|Object} Type depends on initial `value` property. Parsed String / Object.
    */
   /**
    * Fired when an error ocurred during parse.
@@ -49,8 +49,7 @@ Polymer({
     /**
      * A value for scoped rules.
      * If not set scoped rules will not be applied.
-     * Rules where `type` property is equal scope will be used.
-     * It is a number of project.
+     * Only scoped rules where `project` property is equal this value will be used.
      */
     scope: {
       type: Number
@@ -58,7 +57,7 @@ Polymer({
   },
   /**
    * This function should be called when groups should be cleared.
-   * The programm keeps the rules definition cached so you can use one element to apply magic
+   * The program keeps the rules definition cached so you can use one element to apply magic
    * variables accross different strings/objects using group definitions. However it will never know
    * when to clear groups and get new rules definition from IDB.
    * After calling this function all cached definitions and groups values will be cleared.
@@ -105,7 +104,7 @@ Polymer({
   /**
    * Apply magic variables to the string / object.
    *
-   * This function will fire `parsed` event when read and return a Promise with parsing results.
+   * This function will fire `parsed` event when finish and return a Promise with parsing results.
    * If `value` attribute is not set (or empty) while calling this function it will result success
    * response immidietly.
    *
@@ -161,13 +160,13 @@ Polymer({
     });
   },
   /**
-   * Apply build in random function.
+   * Apply build-in random function.
    */
   _applyRandom: function(str) {
     return this._apply(str, 'random');
   },
   /**
-   * Apply build in time function.
+   * Apply build-in time function.
    */
   _applyNow: function(str) {
     return this._apply(str, 'now');
