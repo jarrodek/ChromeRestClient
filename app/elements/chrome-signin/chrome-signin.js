@@ -35,7 +35,9 @@
     WIDE: 'wide'
   };
   /**
-    `&lt;chrome-signin&gt;` is used to authenticate with Google, allowing you to interact
+   This is a Chrome apps version of `<google-signin>`.
+
+    `<chrome-signin>` is used to authenticate with Google, allowing you to interact
     with other Google APIs such as Drive and Google+.
     If you do not need to show the button, use companion `<chrome-signin-aware>` element to
     declare scopes, check authentication state.
@@ -43,12 +45,15 @@
     If you don't declare scope in the element, the ones from manifest file will be used.
 
     #### Examples
-    ```<google-signin></google-signin>
+
+    ```
+    <google-signin></google-signin>
     <google-signin label-signin="Sign-in" scopes="https://www.googleapis.com/auth/drive">
     </google-signin>
     <google-signin theme="dark" width="iconOnly" scopes="https://www.googleapis.com/auth/drive">
     </google-signin>
     ```
+    
     See https://elements.polymer-project.org/elements/google-signin for more information
   */
   Polymer({

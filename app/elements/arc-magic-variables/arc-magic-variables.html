@@ -16,39 +16,44 @@ the License.
 -->
 <link rel="import" href="../arc-variable-object-model/arc-variable-object-model.html">
 <!--
-# arc-magic-variables
-The `<arc-magic-variables>` element is an element that supports "magic variables" in ARC.
-Magic variables are special strings that are passed to the any string field in the request
+# `arc-magic-variables`
+The `<arc-magic-variables>` element adds "magic variables" supports in the ARC.
+
+Magic variables are special strings that are passed to any string property in the request
 and it will be replaced with other string that is defined for this variable.
 
 ## Example
-Let's say you want to generate a random number in the request. You can put a magic variable into
-any request field that is containing string value:
+Let's say you want to generate a random number in the request. So the property value like:
 
-```http://www.domain.com/?time=${now}```
-can produce something like:
-```http://www.domain.com/?time=12312312312```
+```
+http://www.domain.com/?time=${now}
+```
+can produce:
+```
+http://www.domain.com/?time=12312312312
+```
 
 ## Build-in magic variables.
 | Variable | Description | Example |
 | --- | --- | --- |
 | `${random}` | Will generate random number in range from 0 to Number.MAX_SAFE_INTEGER | 9007199254740991 |
-| `${random:NUMBER}` | A variation of `${random}` where result will be remembered and can be used on other field. If the same `NUMBER` occurs again then previously generated value will be used. | 7199254740 |
+| `${random:NUMBER}` | A variation of `${random}` where the result will be remembered and can be used in other property. If the same `NUMBER` occurs again then previously generated value will be used. | 7199254740 |
 | `${now}` | Inserts current epoch time | 12312312312 |
 
-## Defined locally magic variables.
-An app instance can create its own magic variables. There are two types of magic variables:
-* global - Applied to every request
-* scoped - Applied to a request enclosed in a project.
+## Magic variables scopes
+There are two types of magic variables:
 
-User-defined variables are kept in IndexedDB and can be retreived or changed on demand.
+* **global** - Applied to every request,
+* **scoped** - Applied to a request enclosed in a project.
 
 ### Global variables
-They are like build-in variables but the users can define their own wariables.
-Variables this type will be applied to every outgoing request.
+Variables of this type will be applied to every outgoing request.
 
 ### Scoped variables.
-Scoped variables are associated with a project and will be applied to those request that are added to the same project.
+Scoped variables are associated with a project and are applied to those request that are added to corresponding project.
+
+## User magic variables
+This element supports user defined variables. Variables defined by the user are kept in IndexedDB locally and retreived by the element on run time. Users can decide either the variable is global or scoped.
 
 ## Database structure
 | Property | Type | Is key | Description |
@@ -57,15 +62,15 @@ Scoped variables are associated with a project and will be applied to those requ
 | variable | String | Yes | A variable name. It must be consisted with [0-9A-Za-z${}_-] |
 | value | String | No | Replacement value. Replacement value may include other magic variables |
 | type | String | Yes | Either `global` or `scoped` (for now) |
-| project | Number | Yes | Relevan if `type` is set to `scoped`. The rule will be applied to the requests that are associated with this project. If not set if will be omnited. |
+| project | Number | Yes | Relevant if the `type` is set to `scoped`. The rule will be applied to the requests that are associated with this project. If not set if will be omnited. |
 
 ## Usage
-The element expose one field `value` that will be parsed during the work. It may be either String or Object.
-While String is obvious, the Object will be treated differently. It will parse only a values of each key that is associated with the key and if it is a string.
+The element's `value` property contains a value that will be parsed during the work. It may be either String or Object.
+While String is obvious, the Object will be treated differently. It will parse only string values of each first level key.
 This means that no deep objects will be taken into consideration.
 
 Before start applying new magic variables the program should call `clear()` function to clear the groups defined by previous use.
-It will keep this data so you can use the element many times on different strngs resulting with the same group values.
+The element will keep groups generated data so it can be uses many times on different strings resulting with the same group values.
 
 ```html
 <arc-magic-variables
