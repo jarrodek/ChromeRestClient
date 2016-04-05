@@ -1,4 +1,5 @@
 'use strict';
+/* global self, Prism, importScripts */
 
 self.document = {
   'currentScript': null,
@@ -51,26 +52,26 @@ Prism.plugins.mods.langs.forEach(function(lang) {
  * Guess proper language parser for given code and mime type (lang).
  *
  * @param {string} code The source being highlighted.
- * @param {string=} lang A mime type.
+ * @param {string=} mime A mime type.
  * @return {!prism.Lang}
  */
-function detectLang(code, lang) {
+function detectLang(code, mime) {
   // console.log('Detecting lang for: ', lang);
-  if (!lang) {
+  if (!mime) {
     // console.log('Lang detected: html');
     return Prism.languages.html;
   }
-  if (lang.indexOf('html') !== -1) {
+  if (mime.indexOf('html') !== -1) {
     // console.log('Lang detected: html');
     return Prism.languages.html;
   }
-  if (lang.indexOf('js') !== -1 || lang.indexOf('es') === 0) {
+  if (mime.indexOf('js') !== -1 || mime.indexOf('es') === 0) {
     // console.log('Lang detected: javascript');
     return Prism.languages.javascript;
-  } else if (lang.indexOf('css') !== -1) {
+  } else if (mime.indexOf('css') !== -1) {
     // console.log('Lang detected: css');
     return Prism.languages.css;
-  } else if (lang === 'c') {
+  } else if (mime === 'c') {
     // console.log('Lang detected: clike');
     return Prism.languages.clike;
   }
