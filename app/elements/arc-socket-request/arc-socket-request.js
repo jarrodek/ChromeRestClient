@@ -49,13 +49,14 @@ Polymer({
 
   _processResponse: function(response) {
     var result = {};
-    result.headers = this._translateHeaders(response.headers);
+    result.headers = arc.app.headers.toJSON(response.headers);
     result.status = response.status;
     result.statusText = response.statusText;
     result.redirects = Array.from(response.redirects);
     result.stats = response.stats;
     result.ok = response.ok;
-    var ct = response.headers ? response.headers.get('content-type') : null;
+    var ct = (response.headers && response.headers.get) ?
+      response.headers.get('content-type') : null;
     if (ct && ct.indexOf('image') !== -1 &&
       ct.indexOf('xml') === -1) {
       response.blob()
@@ -92,20 +93,6 @@ Polymer({
       return;
     }
     this.connection.abort();
-  },
-
-  _translateHeaders: function(headers) {
-    var result = [];
-    if (!headers) {
-      return result;
-    }
-    for (let header of headers) {
-      result.push({
-        name: header[0],
-        value: header[1]
-      });
-    }
-    return result;
   }
 });
 })();

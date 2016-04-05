@@ -10,7 +10,9 @@ class TestServer {
       key: fs.readFileSync('./tests/certs/server.key', 'utf8'),
       cert: fs.readFileSync('./tests/certs/server.crt', 'utf8')
     };
-
+    app.disable('x-powered-by');
+    app.disable('trust proxy');
+    app.disable('etag');
     this.setHandlers();
     this.createServer();
   }
@@ -32,7 +34,12 @@ class TestServer {
 
   _setMain() {
     app.get('/', (req, res) => {
-      res.send('Hello World!');
+      res.removeHeader('Date');
+      res.removeHeader('Connection');
+      res.removeHeader('Content-Length');
+      res.removeHeader('Transfer-Encoding');
+      res.end();
+      //res.send('Hello World!');
     });
   }
 }
