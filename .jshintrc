@@ -40,6 +40,7 @@
     "PayloadParser": true,
     "DriveRequestObject": true,
     "SavedRequestObject": true,
-    "HistoryRequestObject": true
+    "HistoryRequestObject": true,
+    "BasicAuth": true
   }
 }

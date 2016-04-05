@@ -62,30 +62,42 @@ Polymer({
       response.blob()
       .then((blob) => {
         result.body = blob;
-        this.fire('ready', {
-          request: this.connection.request,
-          response: result
-        });
+        return this._finishRequest(this.connection.request, result);
       });
     } else if (ct && ct.indexOf('json') !== -1) {
       response.json()
       .then((json) => {
         result.body = json;
-        this.fire('ready', {
-          request: this.connection.request,
-          response: result
-        });
+        return this._finishRequest(this.connection.request, result);
       });
     } else {
       response.text()
       .then((text) => {
         result.body = text;
-        this.fire('ready', {
-          request: this.connection.request,
-          response: result
-        });
+        return this._finishRequest(this.connection.request, result);
       });
     }
+  },
+
+  _finishRequest: function(request, response) {
+    var isBasicAuth = false;
+    if (response.headers && response.headers.length) {
+      response.headers.forEach((header) => {
+        if (header.name.toLowerCase() === 'www-authenticate') {
+          if (header.value.toLowerCase().indexOf('basic ') === 0) {
+            isBasicAuth = true;
+          }
+        }
+      });
+    }
+    var detail = {
+      request: request,
+      response: response
+    };
+    if (isBasicAuth) {
+      detail.basicAuth = true;
+    }
+    this.fire('ready', detail);
   },
 
   abort: function() {

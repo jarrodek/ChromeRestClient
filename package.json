@@ -10,6 +10,7 @@
   "main": "app/index.html",
   "devDependencies": {
     "babel-preset-es2015": "^6.3.13",
+    "basic-auth": "^1.0.3",
     "bower": "*",
     "concatenate-files": "^0.1.1",
     "connect-modrewrite": "^0.8.5",
