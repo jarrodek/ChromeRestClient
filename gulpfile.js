@@ -200,11 +200,17 @@ var publish = (done) => {
       console.log(msg);
       done();
   }
-
 };
 
 gulp.task('build', build);
 gulp.task('publish', publish);
+
+var testServer = (done) => {
+  let srv = require('./tasks/ssl.js');
+  srv.create();
+};
+
+gulp.task('test-server', testServer);
 
 gulp.task('test', function(done) {
   var analyzer = require('./tasks/tree-analyzer.js');
