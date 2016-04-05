@@ -1,0 +1,12 @@
+<dom-module id="arc-project-controller">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <arc-request-object-model id="requestModel" on-data-ready="_requestReady"></arc-request-object-model>
+    <arc-project-object-model auto id="project" on-data-ready="_projectReady" on-error="_projectError" on-save="_projectSaved"></arc-project-object-model>
+  </template>
+  <script src="arc-project-controller.js"></script>
+</dom-module>

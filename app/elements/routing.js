@@ -33,7 +33,7 @@ window.addEventListener('initializeRouting', function() {
   }
 
   function sendScreen(ctx, next) {
-    var path = ctx.path;
+    // var path = ctx.path;
     var screenName = '[unknown]';
     switch (ctx.path) {
       case '': screenName = 'Request - empty'; break;
@@ -48,6 +48,11 @@ window.addEventListener('initializeRouting', function() {
       case 'socket': screenName = 'Socket'; break;
       case 'saved': screenName = 'Saved'; break;
       case 'dataimport': screenName = 'Data import / export'; break;
+      case 'project':
+        if (ctx.params.action === 'edit') {
+          screenName = 'Edit project';
+        }
+        break;
     }
     arc.app.analytics.sendScreen(screenName);
     next();
@@ -103,9 +108,13 @@ window.addEventListener('initializeRouting', function() {
   arc.app.router.register('/saved', function() {
     app.route = 'saved';
   });
-
   arc.app.router.register('/dataimport', function() {
     app.route = 'dataimport';
+  });
+  arc.app.router.register('/project/:projectId/edit', function(ctx) {
+    ctx.params.action = 'edit';
+    app.params = ctx.params;
+    app.route = 'project';
   });
   window.page = arc.app.router.redirect;
   arc.app.router.start();
