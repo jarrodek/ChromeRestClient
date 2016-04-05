@@ -15,6 +15,7 @@
     "connect-modrewrite": "^0.8.5",
     "crisper": "^2.0.1",
     "del": "^2.0.2",
+    "express": "^4.13.4",
     "fsensure": "^1.1.2",
     "glob-all": "^3.0.1",
     "googleapis": "^2.1.7",

@@ -3,16 +3,21 @@
 
 Polymer({
   is: 'json-viewer',
+  /**
+   * Event called when the user click on the anchor in display area.
+   * 
+   * @event action-link-change
+   */
   properties: {
     /**
-     * JSON data to parse an display
+     * JSON data to parse and display
      */
     json: {
-      type: Object,
+      type: String,
       observer: '_changed'
     },
     /**
-     * True if error ocurred during parse method
+     * True if error ocurred when parsing `json` data
      */
     isError: {
       type: Boolean,
@@ -20,7 +25,7 @@ Polymer({
       value: false
     },
     /**
-     * True when JSON is parsed
+     * True when JSON is beeing parsed
      */
     working: {
       type: Boolean,
@@ -36,13 +41,16 @@ Polymer({
       value: false,
       computed: '_computeShowOutput(working, isError, json)'
     },
+    // A reference to the worker object.
     _worker: Object,
+    // function to be called when worker data are received
     _workerDataHandler: {
       type: Function,
       value: function() {
         return this._workerData.bind(this);
       }
     },
+    // function to be called when worker error data are received
     _workerErrorHandler: {
       type: Function,
       value: function() {
@@ -57,7 +65,7 @@ Polymer({
       this.worker.removeEventListener('error', this._workerErrorHandler);
     }
   },
-
+  // Called when `json` property changed. It starts parsing the data.
   _changed: function() {
     if (!this.json) {
       return;
@@ -74,7 +82,7 @@ Polymer({
     }
     this._worker.postMessage(this.json);
   },
-
+  // Called when worker data received.
   _workerData: function(e) {
     var data = e.data;
     this._setWorking(false);
@@ -85,16 +93,16 @@ Polymer({
       this.$.output.innerHTML = data.message;
     }
   },
-
+  // Called when workr error received.
   _workerError: function() {
     this._setIsError(true);
     this._setWorking(false);
   },
-
+  // Compute if output should be shown.
   _computeShowOutput: function(working, isError, json) {
     return !working && !isError && !!json;
   },
-
+  // Called when the user click on the display area. It will handle view toggle and links clicks.
   _handleDisplayClick: function(e) {
     if (!e.target) {
       return;
@@ -105,6 +113,8 @@ Polymer({
       this.fire('action-link-change', {
         url: e.target.getAttribute('href')
       });
+      /* global app */
+      //TODO: this should be done by events, not direct use of global function.
       app.scrollPageToTop();
       arc.app.analytics.sendEvent('Response status', 'Link change', 'From JSON viewer');
       return;

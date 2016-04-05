@@ -1,20 +1,31 @@
 'use strict';
+/* global self */
 
-self.onmessage = function(e) {
-  var parser = new JSONViewer(e.data);
-  if (parser.latestError !== null) {
-    self.postMessage({
-      message: parser.latestError,
-      error: true
-    });
-    return;
+var SafeHtmlUtils = {
+  AMP_RE: new RegExp(/&/g),
+  GT_RE: new RegExp(/>/g),
+  LT_RE: new RegExp(/</g),
+  SQUOT_RE: new RegExp(/'/g),
+  QUOT_RE: new RegExp(/"/g),
+
+  htmlEscape: function(s) {
+    if (s.indexOf('&') !== -1) {
+      s = s.replace(SafeHtmlUtils.AMP_RE, '&amp;');
+    }
+    if (s.indexOf('<') !== -1) {
+      s = s.replace(SafeHtmlUtils.LT_RE, '&lt;');
+    }
+    if (s.indexOf('>') !== -1) {
+      s = s.replace(SafeHtmlUtils.GT_RE, '&gt;');
+    }
+    if (s.indexOf('"') !== -1) {
+      s = s.replace(SafeHtmlUtils.QUOT_RE, '&quot;');
+    }
+    if (s.indexOf('\'') !== -1) {
+      s = s.replace(SafeHtmlUtils.SQUOT_RE, '&#39;');
+    }
+    return s;
   }
-  var result = parser.getHTML();
-  parser = null;
-  self.postMessage({
-    message: result,
-    error: false
-  });
 };
 
 class JSONViewer {
@@ -76,13 +87,13 @@ class JSONViewer {
    */
   parse(data) {
     var result = '';
-    if (data == null) {
+    if (data === null) {
       result += this.parseNullValue();
-    } else if (typeof data == 'number') {
+    } else if (typeof data === 'number') {
       result += this.parseNumericValue(data);
-    } else if (typeof data == 'boolean') {
+    } else if (typeof data === 'boolean') {
       result += this.parseBooleanValue(data);
-    } else if (typeof data == 'string') {
+    } else if (typeof data === 'string') {
       result += this.parseStringValue(data);
     } else if (data instanceof Array) {
       result += this.parseArray(data);
@@ -215,29 +226,19 @@ class JSONViewer {
   }
 }
 
-var SafeHtmlUtils = {
-  AMP_RE: new RegExp(/&/g),
-  GT_RE: new RegExp(/>/g),
-  LT_RE: new RegExp(/</g),
-  SQUOT_RE: new RegExp(/'/g),
-  QUOT_RE: new RegExp(/"/g),
-
-  htmlEscape: function(s) {
-    if (s.indexOf('&') != -1) {
-      s = s.replace(SafeHtmlUtils.AMP_RE, '&amp;');
-    }
-    if (s.indexOf('<') != -1) {
-      s = s.replace(SafeHtmlUtils.LT_RE, '&lt;');
-    }
-    if (s.indexOf('>') != -1) {
-      s = s.replace(SafeHtmlUtils.GT_RE, '&gt;');
-    }
-    if (s.indexOf('"') != -1) {
-      s = s.replace(SafeHtmlUtils.QUOT_RE, '&quot;');
-    }
-    if (s.indexOf('\'') != -1) {
-      s = s.replace(SafeHtmlUtils.SQUOT_RE, '&#39;');
-    }
-    return s;
+self.onmessage = function(e) {
+  var parser = new JSONViewer(e.data);
+  if (parser.latestError !== null) {
+    self.postMessage({
+      message: parser.latestError,
+      error: true
+    });
+    return;
   }
+  var result = parser.getHTML();
+  parser = null;
+  self.postMessage({
+    message: result,
+    error: false
+  });
 };
