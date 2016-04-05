@@ -21,10 +21,16 @@ class TestServer {
     var httpServer = http.createServer(app);
     var httpsServer = https.createServer(this.credentials, app);
     httpServer.listen(80, () => {
-      console.log('HTTP started.');
+      console.log('HTTP started (80).');
     });
-    httpsServer.listen(443, () => {
-      console.log('HTTPS started.');
+    httpServer.listen(8080, () => {
+      console.log('HTTP started (8080).');
+    });
+    // httpsServer.listen(443, () => {
+    //   console.log('HTTPS started (443).');
+    // });
+    httpsServer.listen(3000, () => {
+      console.log('HTTPS started (3000).');
     });
   }
 
@@ -34,12 +40,13 @@ class TestServer {
 
   _setMain() {
     app.get('/', (req, res) => {
-      res.removeHeader('Date');
-      res.removeHeader('Connection');
-      res.removeHeader('Content-Length');
-      res.removeHeader('Transfer-Encoding');
-      res.end();
-      //res.send('Hello World!');
+      // res.removeHeader('Date');
+      // res.removeHeader('Connection');
+      // res.removeHeader('Content-Length');
+      // res.removeHeader('Transfer-Encoding');
+      // res.end();
+      res.set('Content-Type', 'text/html');
+      res.send('<h1>Hello World!</h1>');
     });
   }
 }
