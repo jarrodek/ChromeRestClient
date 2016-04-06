@@ -56,10 +56,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       deleteModel = fixture('deleteModel');
     });
 
+    // test('Generate random DB structure', function(done) {
+    //   generateRandomDB()
+    //   .then(() => done());
+    // });
+
     test('Element should insert new project', function(done) {
       var project = new ProjectObject({
         'name': 'test project',
-        'created': new Date()
+        'created': Date.now()
       });
       var saveCallback = function() {
         insertModel.removeEventListener('save', saveCallback);
@@ -139,9 +144,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     test('Element should insert project and associate requests', function(done) {
       var project = new ProjectObject({
         'name': 'test project',
-        'created': new Date()
+        'created': Date.now()
       });
-      var requests = getIdbRequestData(3);
+      var requests = getRequestData(3);
 
       var saveCallback = function() {
         insertModel.removeEventListener('save', saveCallback);
@@ -179,7 +184,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     });
 
     test('Element should insert new requests', function(done) {
-      var requests = getIdbRequestData(3, false);
+      var requests = getRequestData(3, false);
       var saveCallback = function() {
         insertModel.removeEventListener('save', saveCallback);
         insertId = insertModel.objectId;

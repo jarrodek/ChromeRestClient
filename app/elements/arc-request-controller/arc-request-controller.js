@@ -172,7 +172,7 @@ Polymer({
   },
 
   _prepareRequest: function() {
-    if (!this.opened || !this.routeParams) {
+    if (!this.opened || !this.routeParams || !this.routeParams.type) {
       return;
     }
     this._setResponse(null);

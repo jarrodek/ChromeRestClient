@@ -152,7 +152,10 @@ window.ArcBehaviors.ArcModelBehavior = {
             return table.put(this.data);
           }.bind(this))
           .then((id) => {
+            let auto = this.auto;
+            this.auto = false;
             this.objectId = id;
+            this.auto = auto;
             this.fire('save', {
               data: this.data
             });
@@ -186,7 +189,10 @@ window.ArcBehaviors.ArcModelBehavior = {
           });
       })
       .then((data) => {
+        let auto = this.auto;
+        this.auto = false;
         this.data = data;
+        this.auto = auto;
         this.fire('data-ready', {
           data: data
         });
@@ -255,7 +261,10 @@ window.ArcBehaviors.ArcModelBehavior = {
             data = data.slice(offset, offset + limit);
           }
         }
+        let auto = this.auto;
+        this.auto = false;
         this.data = data;
+        this.auto = auto;
         this.fire('data-ready', {
           data: data
         });

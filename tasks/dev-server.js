@@ -2,11 +2,11 @@
 
 var gulp = require('gulp');
 var connect = require('gulp-connect');
+var path = require('path');
 // var modRewrite = require('connect-modrewrite');
-
 gulp.task('connect', function() {
   connect.server({
-    root: [__dirname + '/'],
+    root: [path.resolve(__dirname, '..')],
     livereload: true,
     port: 8888,
     // middleware: function() {
