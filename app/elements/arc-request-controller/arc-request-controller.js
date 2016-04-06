@@ -1,6 +1,6 @@
 (function() {
 'use strict';
-/* global ArcRequest */
+/* global ArcRequest, URI */
 Polymer({
   is: 'arc-request-controller',
   behaviors: [
@@ -172,7 +172,7 @@ Polymer({
   },
 
   _prepareRequest: function() {
-    if (!this.opened || !this.routeParams) {
+    if (!this.opened || !this.routeParams || !this.routeParams.type) {
       return;
     }
     this._setResponse(null);
@@ -431,6 +431,9 @@ Polymer({
   },
 
   _responseReady: function(e) {
+    if (e.detail.basicAuth) {
+      this._openBasicAuthDialog();
+    }
     this._setRequestLoading(false);
     this._setResponse(e.detail.response);
     this._setActiveRequest(e.detail.request);
@@ -712,6 +715,78 @@ Polymer({
       }
       this._setUpProject(project);
     });
+  },
+
+  _openBasicAuthDialog: function() {
+    this.$.basicAuthDialog.open();
+
+    var uri = this._computeUrlPath(this.request.url);
+
+    this.$.basicAuthModel.query(uri)
+    .then((data) => {
+      if (data && data.length) {
+        let auth = data[0];
+        if (!auth || !auth.encoded) {
+          return;
+        }
+        let authData = atob(auth.encoded).split(':');
+        if (authData[0]) {
+          this.$.authDialogLogin.value = authData[0];
+        }
+        if (authData[1]) {
+          this.$.authDialogPassword.value = authData[1];
+        }
+      }
+    });
+  },
+
+  // Toggle password visibility in basic auth dialog.
+  authTogglePassword: function(e) {
+    var input = this.$.authDialogPassword;
+    var icon = e.target;
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.icon = 'visibility-off';
+    } else {
+      input.type = 'password';
+      icon.icon = 'visibility';
+    }
+  },
+  // A handler for closing basic auth dialog.
+  _basicAuthDialogHandler: function(e) {
+    var detail = e.detail;
+    if (detail.canceled) {
+      return;
+    }
+    if (detail.confirmed) {
+      //append the auth header and send the request again.
+      this._reRunWithBasic();
+    }
+  },
+  // Re-run current request with basic auth value from the auth dialog.
+  _reRunWithBasic: function() {
+    var login = this.$.authDialogLogin.value;
+    var password = this.$.authDialogPassword.value;
+    var enc = `${login}:${password}`;
+    var encoded = btoa(enc);
+    var value = 'Basic ' + encoded;
+    var headers = arc.app.headers.replace(this.request.headers, 'authorization', value);
+    this.set('request.headers', headers);
+    this.sendRequest();
+
+    var uri = this._computeUrlPath(this.request.url);
+    this.$.basicAuthModel.data = {
+      'url': uri,
+      'encoded': encoded
+    };
+    this.$.basicAuthModel.save()
+    .catch((e) => {
+      console.warn('Unable save auth basic data to the store', e);
+    });
+  },
+
+  _computeUrlPath: function(url) {
+    return new URI(url).fragment('').search('').toString();
   }
 });
 })();

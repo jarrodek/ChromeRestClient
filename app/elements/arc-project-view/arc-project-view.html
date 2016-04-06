@@ -1,0 +1,117 @@
+<dom-module id="arc-project-view">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 0 16px;
+
+        --table-list-item: {
+          @apply(--paper-font-menu);
+          overflow: visible;
+          height: 48px;
+          color: rgba(0, 0, 0, 0.87);
+          border-bottom: 1px rgba(0, 0, 0, 0.12) solid;
+        }
+        ;
+        --table-base-cell: {
+          padding-right: 16px;
+          padding-left: 56px;
+          position: relative;
+          height: 100%;
+        }
+        --table-checkbox-column: {
+          padding-left: 16px;
+        }
+        ;
+        --table-checkbox-value: {
+          @apply(--table-checkbox-column);
+        }
+        ;
+        --table-name-column: {
+          @apply(--table-base-cell);
+          min-width: 120px;
+          max-width: 120px;
+          padding-left: 40px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        ;
+        --table-name-value: {
+          @apply(--table-name-column);
+          padding-left: 56px;
+          height: initial;
+          min-height: 24px;
+        }
+        ;
+        --table-method-column: {
+          @apply(--table-base-cell);
+          min-width: 100px;
+          max-width: 100px;
+        }
+        ;
+        --table-method-value: {
+          @apply(--table-method-column);
+          padding-left: 56px;
+          height: auto;
+        }
+        ;
+        --table-url-column: {
+          @apply(--table-base-cell);
+          @apply(--layout-flex);
+          text-overflow: ellipsis;
+          overflow: hidden;
+        }
+        ;
+        --table-url-value: {
+          @apply(--table-url-column);
+          padding-left: 56px;
+          height: auto;
+        }
+        ;
+        --table-action-column: {
+          @apply(--table-base-cell);
+          padding-right: 24px;
+        }
+        ;
+        --table-action-value: {
+          @apply(--table-action-column);
+          padding-left: 56px;
+          padding-right: 16px;
+          height: auto;
+        }
+        ;
+      }
+      .project-info {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+      .requests-info {}
+    </style>
+
+    <section class="project-info">
+      <paper-input noLabelFloat value="{{project.name}}"></paper-input>
+      <paper-icon-button icon="file-download" id="exportProject" on-tap="exportProject"></paper-icon-button>
+      <paper-icon-button icon="delete" id="deleteProject" on-tap="deleteProject"></paper-icon-button>
+      <paper-tooltip for="exportProject">Export project to file</paper-tooltip>
+      <paper-tooltip for="deleteProject">Delete project and associated requests</paper-tooltip>
+    </section>
+
+    <section class="requests-info">
+      <h2>Associated request</h2>
+      <template is="dom-repeat" items="{{requests}}" id="requestList">
+        <arc-saved-list-item no-check can-delete request="{{item}}"></arc-saved-list-item>
+      </template>
+    </section>
+
+    <paper-dialog id="projectDeleteDialog" on-iron-overlay-closed="onDeleteDialogResult">
+      <h2>Delete project</h2>
+      <p>This will remove the project and all request data associated with the project.</p>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus>Delete</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+  <script src="arc-project-view.js"></script>
+</dom-module>

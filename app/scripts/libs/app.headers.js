@@ -63,12 +63,15 @@ arc.app.headers.filter = function(headers) {
 /**
  * Parse headers array to Raw HTTP headers string.
  *
- * @param {Array} headersArray List of objects with "name" and "value" properties.
+ * @param {Array|String|Headers} headersArray List of objects with "name" and "value" properties.
  * @returns {String} A HTTP representation of the headers.
  */
 arc.app.headers.toString = function(headersArray) {
+  if (typeof headersArray === 'string') {
+    return headersArray;
+  }
   if (!(headersArray instanceof Array)) {
-    throw new Error('Headers must be an instance of Array');
+    headersArray = arc.app.headers.toJSON(headersArray);
   }
   if (headersArray.length === 0) {
     return '';
@@ -212,4 +215,48 @@ arc.app.headers.getContentType = function(headers) {
   //   }
   // }
   // return ct;
+};
+/**
+ * Replace value fir given headers in the headers.
+ *
+ * @param {Array|String|Object} headers A headers object. Can be string, array of objects or
+ * Headers object.
+ * @param {String} name Header name to be replaced.
+ * @param {String} value Header value to be repleced.
+ * @return {Array} Updated headers.
+ */
+arc.app.headers.replace = function(headers, name, value) {
+  var origType = 'headers';
+  if (headers instanceof Array) {
+    origType = 'array';
+  } else if (typeof headers === 'string') {
+    origType = 'string';
+  }
+  if (origType !== 'array') {
+    headers = arc.app.headers.toJSON(headers);
+  }
+  var _name = name.toLowerCase();
+  var found = false;
+  headers.forEach((header) => {
+    if (header.name.toLowerCase() === _name) {
+      header.value = value;
+      found = true;
+    }
+  });
+  if (!found) {
+    headers.push({
+      name: name,
+      value: value
+    });
+  }
+  if (origType === 'array') {
+    return headers;
+  } else if (origType === 'string') {
+    return arc.app.headers.toString(headers);
+  }
+  var obj = {};
+  headers.forEach((header) => {
+    obj[header.name] = header.value;
+  });
+  return new Headers(obj);
 };

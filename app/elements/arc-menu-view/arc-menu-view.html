@@ -42,6 +42,15 @@
       padding-left: 20px;
       /*padding-right: 20px;*/
     }
+    .project-name {
+      @apply(--layout-flex);
+    }
+    .edit-project-icon {
+      display: none;
+    }
+    .project-item:hover .edit-project-icon {
+      display: initial;
+    }
     </style>
     <paper-menu selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap">
       <paper-item data-route="request" data-place$="{{baseUrl}}">Request</paper-item>
@@ -53,7 +62,10 @@
             <paper-item>No projects here</paper-item>
           </template>
           <template is="dom-repeat" items="{{projects}}" sort="{{computeSort(projects)}}">
-            <paper-item data-route$="request/project/{{item.id}}" data-place$="{{baseUrl}}request/project/{{item.id}}">{{item.name}}</paper-item>
+            <paper-item data-route$="request/project/{{item.id}}" class="project-item">
+              <div class="project-name" data-place$="{{baseUrl}}request/project/{{item.id}}">{{item.name}}</div>
+              <paper-icon-button class="edit-project-icon" data-place$="{{baseUrl}}project/{{item.id}}/edit" icon="arc:mode-edit" alt="Edit project"></paper-icon-button>
+            </paper-item>
           </template>
         </paper-menu>
       </paper-submenu>

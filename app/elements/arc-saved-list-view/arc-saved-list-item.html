@@ -52,8 +52,20 @@
     .type-column iron-icon {
       color: rgba(0, 0, 0, 0.57);
     }
+    :host([no-check]) .name-column {
+      padding-left: 0px;
+    }
+    :host([no-check]) paper-dialog.nameEditDialog {
+      left: 0;
+      padding: 0;
+      margin: 0;
+      top: 0;
+    }
+    .name-column {
+      cursor: text;
+    }
     </style>
-    <div class="checkbox-column">
+    <div hidden$="[[noCheck]]" class="checkbox-column">
       <paper-checkbox checked="{{selected}}"></paper-checkbox>
     </div>
     <div class="name-column" on-tap="_editName" hidden$="[[isHistory]]">{{request.name}}</div>
@@ -69,6 +81,7 @@
       </template>
     </div>
     <div class="action-column">
+      <paper-button hidden$="[[!canDelete]]" on-tap="_deleteItem">delete</paper-button>
       <paper-button on-tap="_navigateItem">open</paper-button>
     </div>
   </template>

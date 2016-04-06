@@ -83,6 +83,11 @@ window.ArcBehaviors.RequestsListViewBehaviorImpl = {
     this.scrollTarget = document.querySelector('#headerPanelMain').scroller;
     this.listen(this.scrollTarget, 'scroll', '_scrollHandler');
   },
+
+  detached: function() {
+    this.unlisten(this.scrollTarget, 'scroll', '_scrollHandler');
+  },
+
   /**
    * Get scroll target element.
    *
