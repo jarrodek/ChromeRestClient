@@ -454,7 +454,7 @@ gulp.task('copy', () => {
     '!app/bower_components/codemirror/theme/**',
     '!app/bower_components/codemirror/keymap/**',
     '!app/bower_components/codemirror/*'
-    
+
   ]).pipe(gulp.dest(path.join(dest,'bower_components')));
 
   var prismAutolinker = gulp.src(
@@ -471,7 +471,12 @@ gulp.task('copy', () => {
   // copy webworkers used in bower_components
   var webWorkers = gulp.src([
     'bower_components/socket-fetch/decompress-worker.js'
-  ]).pipe(gulp.dest(path.join(dest))); // in elements folder they are in the "root" path
+  ]).pipe(gulp.dest(path.join(dest, 'elements')));
+
+  // zlib library need to placed folder up relativelly to decompress-worker
+  var zlibLibrary = gulp.src([
+    'bower_components/zlib/bin/zlib_and_gzip.min.js'
+  ]).pipe(gulp.dest(path.join(dest, 'zlib', 'bin')));
 
   // var elements = gulp.src([
   //   'app/elements/**/*',
@@ -480,7 +485,8 @@ gulp.task('copy', () => {
 
   return merge(
       app, bower, webWorkers, assets, scripts, styles,
-      prismAutolinker, prism /*, codeMirror*/
+      prismAutolinker, prism, /*, codeMirror*/
+      zlibLibrary
     )
     .pipe($.size({
       title: 'copy'
