@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- Edited by XMLSpy® -->
+<breakfast_menu ver="1" xmlns:h="http://www.w3.org/TR/html4/" xmlns:f="http://www.w3schools.com/furniture">
+	<food orser="0" menu="1">
+		<name href="http://www.google.com">Belgian Waffles</name>
+		<price accepted="true">$5.95</price>
+		<description>
+			<![CDATA[
+	two of our famous Belgian Waffles with plenty of real
+	maple syrup <a href="http://www.google.com">google</a>
+	asdf asdf
+		<a href="https://www.google.pl/webhp?sourceid=chrome-instant&ion=1&ie=UTF-8#hl=en&sclient=psy-ab&q=javascript%20find%20links%20in%20text&oq=&gs_l=&pbx=1&fp=4f8778963b1a64d3&ion=1&bav=on.2,or.r_gc.r_pw.r_cp.r_qf.&biw=1215&bih=938">google2</a>
+	asd fasdf
+			]]></description>
+		<calories>650</calories>
+	</food>
+	<food>
+		<name>
+		Strawberry Belgian Waffles
+
+
+		</name>
+		<price>$7.95</price>
+		<description>light Belgian waffles covered with strawberries and
+			whipped cream</description>
+		<calories>900</calories>
+	</food>
+	<food>
+		<name>Berry-Berry Belgian Waffles</name>
+		<price>$8.95</price>
+		<description>light Belgian waffles covered with an assortment of fresh
+			berries and whipped cream</description>
+		<calories>900</calories>
+		<food>
+			<name>Berry-Berry Belgian Waffles</name>
+			<price>$8.95</price>
+			<description>light Belgian waffles covered with an assortment of fresh
+				berries and whipped cream</description>
+			<calories>900</calories>
+			<food>
+				<name>Berry-Berry Belgian Waffles</name>
+				<price>$8.95</price>
+				<description>light Belgian waffles covered with an assortment of fresh
+					berries and whipped cream</description>
+				<calories>900</calories>
+				<food>
+					<name>Berry-Berry Belgian Waffles</name>
+					<price>$8.95</price>
+					<description>light Belgian waffles covered with an assortment of fresh
+						berries and whipped cream</description>
+					<calories>900</calories>
+					<food>
+						<name>Berry-Berry Belgian Waffles</name>
+						<price>$8.95</price>
+						<description>light Belgian waffles covered with an assortment of fresh
+							berries and whipped cream</description>
+						<calories>900</calories>
+						<food>
+							<name>Berry-Berry Belgian Waffles</name>
+							<price>$8.95</price>
+							<description>light Belgian waffles covered with an assortment of fresh
+								berries and whipped cream</description>
+							<calories>900</calories>
+						</food>
+					</food>
+				</food>
+			</food>
+		</food>
+	</food>
+	<food>
+		<name>French Toast</name>
+		<price>$4.50</price>
+		<description>thick slices made from our homemade sourdough bread
+		</description>
+		<calories>600</calories>
+	</food>
+	<food>
+		<name>Homestyle Breakfast</name>
+		<price>$6.95</price>
+		<description>two eggs, bacon or sausage, toast, and our ever-popular
+			hash browns</description>
+		<calories>950</calories>
+	</food>
+</breakfast_menu>
