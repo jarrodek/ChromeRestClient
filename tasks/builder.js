@@ -389,11 +389,13 @@ var Builder = {
   _applyBranding: () => {
     var srcIcons = [
       path.join('branding', Builder.targetDir, 'arc_icon_128.png'),
+      path.join('branding', Builder.targetDir, 'arc_icon_48.png'),
       path.join('branding', Builder.targetDir, 'arc_icon_32.png'),
       path.join('branding', Builder.targetDir, 'arc_icon_16.png')
     ];
     var destIcons = [
       path.join(Builder.buildTarget, 'assets', 'arc_icon_128.png'),
+      path.join(Builder.buildTarget, 'assets', 'arc_icon_48.png'),
       path.join(Builder.buildTarget, 'assets', 'arc_icon_32.png'),
       path.join(Builder.buildTarget, 'assets', 'arc_icon_16.png')
     ];
