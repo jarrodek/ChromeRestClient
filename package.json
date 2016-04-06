@@ -1,11 +1,10 @@
 {
   "name": "advanced-rest-client",
-  "version": "7.0.12",
+  "version": "6.9.12",
   "scripts": {
     "lint": "gulp lint",
     "test": "gulp test",
-    "arc": "node bin/install.js",
-    "echo-server": "node echo-server 5000"
+    "arc": "node bin/install.js"
   },
   "main": "app/index.html",
   "devDependencies": {
