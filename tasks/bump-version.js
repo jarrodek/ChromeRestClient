@@ -124,11 +124,14 @@ var Bump = {
     return Bump._combineVersion(version);
   },
   _bumpStable: function(version) {
-    version[1] = 0;
+    // version[1] = 0;
+    version[1]++;
+    version[3]++;
     return Bump._combineVersion(version);
   },
   _bumpHotfix: function(version) {
     version[1]++;
+    version[3]++;
     return Bump._combineVersion(version);
   },
   _combineVersion: function(version) {
