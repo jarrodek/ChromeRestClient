@@ -149,6 +149,10 @@ Polymer({
     this.$.historyClearDialog.open();
   },
 
+  passwordsClearClick: function() {
+    this.$.passwordsClearDialog.open();
+  },
+
   onClearDialogResult: function(e) {
     if (e.detail.canceled || !e.detail.confirmed) {
       return;
@@ -160,16 +164,49 @@ Polymer({
     })
     .then((deleteCount) => {
       console.log('Deleted ' + deleteCount + ' objects');
+      StatusNotification.notify({
+        message: 'History has been cleared'
+      });
+    })
+    .then(() => {
+      _db.close();
+    })
+    .catch((e) => {
+      StatusNotification.notify({
+        message: 'Unable to clear history'
+      });
+      console.error('Error clearing the history', e);
+      throw e;
+    });
+
+    arc.app.analytics.sendEvent('Settings usage', 'Clear history', 'true');
+  },
+
+  onClearPasswordsResult: function(e) {
+    if (e.detail.canceled || !e.detail.confirmed) {
+      return;
+    }
+    var _db;
+    arc.app.db.idb.open().then((db) => {
+      _db = db;
+      return db.table('basicAuth').clear();
+    })
+    .then((deleteCount) => {
+      console.log('Deleted ' + deleteCount + ' objects');
+      StatusNotification.notify({
+        message: 'Passwords store cleared'
+      });
     })
     .then(() => {
       _db.close();
     })
     .catch((e) => {
       console.error('Error clearing the history', e);
+      StatusNotification.notify({
+        message: 'Unable to clear passwords store'
+      });
       throw e;
     });
-
-    arc.app.analytics.sendEvent('Settings usage', 'Clear history', 'true');
   },
 
   _gaSettingTapped: function() {

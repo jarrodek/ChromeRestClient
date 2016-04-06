@@ -86,6 +86,12 @@ the License.
         </paper-item-body>
         <paper-toggle-button on-tap="_notificationsTapped" checked="{{notificationsEnabled}}"></paper-toggle-button>
       </paper-item>
+      <paper-item on-tap="passwordsClearClick">
+        <paper-item-body two-line="">
+          <div>Clear password storage</div>
+          <div secondary="true">Removes all saved passwords for basic authorization.</div>
+        </paper-item-body>
+      </paper-item>
       <paper-item on-tap="_showAddToDesktopTutotial">
         <paper-item-body>
           <div>
@@ -122,6 +128,16 @@ the License.
         </paper-dialog-scrollable>
         <div class="buttons">
           <paper-button dialog-confirm="">Close</paper-button>
+        </div>
+      </paper-dialog>
+      <paper-dialog id="passwordsClearDialog" on-iron-overlay-closed="onClearPasswordsResult">
+        <h2>Clear saved passwords</h2>
+        <paper-dialog-scrollable>
+          <p>This will remove all saved passwords for basic authentication.</p>
+        </paper-dialog-scrollable>
+        <div class="buttons">
+          <paper-button dialog-dismiss="">Cancel</paper-button>
+          <paper-button dialog-confirm="" autofocus="">Remove</paper-button>
         </div>
       </paper-dialog>
       <onboarding-tutorial id="addShortcutsToDesktop">

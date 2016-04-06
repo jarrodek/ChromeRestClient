@@ -102,8 +102,9 @@ Polymer({
           result = table.get(this.objectId);
         } else {
           //result = table.where('type').equals(this.requestType);
-          result = table.where(':id').noneOf(excludedRequests)
-            .and((item) => {
+          result = table.where(':id').noneOf(excludedRequests);
+          if (this.requestType !== 'history') {
+            result = result.and((item) => {
               if (!type) {
                 return true;
               }
@@ -112,6 +113,7 @@ Polymer({
               }
               return item.type === type;
             });
+          }
         }
         if (this.sortBy) {
           if (indexes.indexOf(this.sortBy) === -1) {

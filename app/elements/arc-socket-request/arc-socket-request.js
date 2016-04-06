@@ -49,42 +49,55 @@ Polymer({
 
   _processResponse: function(response) {
     var result = {};
-    result.headers = this._translateHeaders(response.headers);
+    result.headers = arc.app.headers.toJSON(response.headers);
     result.status = response.status;
     result.statusText = response.statusText;
     result.redirects = Array.from(response.redirects);
     result.stats = response.stats;
     result.ok = response.ok;
-    var ct = response.headers ? response.headers.get('content-type') : null;
+    var ct = (response.headers && response.headers.get) ?
+      response.headers.get('content-type') : null;
     if (ct && ct.indexOf('image') !== -1 &&
       ct.indexOf('xml') === -1) {
       response.blob()
       .then((blob) => {
         result.body = blob;
-        this.fire('ready', {
-          request: this.connection.request,
-          response: result
-        });
+        return this._finishRequest(this.connection.request, result);
       });
     } else if (ct && ct.indexOf('json') !== -1) {
       response.json()
       .then((json) => {
         result.body = json;
-        this.fire('ready', {
-          request: this.connection.request,
-          response: result
-        });
+        return this._finishRequest(this.connection.request, result);
       });
     } else {
       response.text()
       .then((text) => {
         result.body = text;
-        this.fire('ready', {
-          request: this.connection.request,
-          response: result
-        });
+        return this._finishRequest(this.connection.request, result);
       });
     }
+  },
+
+  _finishRequest: function(request, response) {
+    var isBasicAuth = false;
+    if (response.headers && response.headers.length) {
+      response.headers.forEach((header) => {
+        if (header.name.toLowerCase() === 'www-authenticate') {
+          if (header.value.toLowerCase().indexOf('basic ') === 0) {
+            isBasicAuth = true;
+          }
+        }
+      });
+    }
+    var detail = {
+      request: request,
+      response: response
+    };
+    if (isBasicAuth) {
+      detail.basicAuth = true;
+    }
+    this.fire('ready', detail);
   },
 
   abort: function() {
@@ -92,20 +105,6 @@ Polymer({
       return;
     }
     this.connection.abort();
-  },
-
-  _translateHeaders: function(headers) {
-    var result = [];
-    if (!headers) {
-      return result;
-    }
-    for (let header of headers) {
-      result.push({
-        name: header[0],
-        value: header[1]
-      });
-    }
-    return result;
   }
 });
 })();

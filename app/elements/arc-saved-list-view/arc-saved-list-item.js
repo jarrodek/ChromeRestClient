@@ -38,6 +38,16 @@ Polymer({
       type: Boolean,
       value: false,
       readOnly: true
+    },
+    // True to not show the checkbox
+    noCheck: {
+      type: Boolean,
+      value: false
+    },
+    // If true "delete" button will be displayed. `delete` event will be fired.
+    canDelete: {
+      type: Boolean,
+      value: false
     }
   },
 
@@ -147,6 +157,12 @@ Polymer({
       url = 'request/saved/' + this.request.id;
     }
     page(url);
+  },
+  
+  _deleteItem: function() {
+    this.fire('delete', {
+      request: this.request
+    });
   }
 
 });

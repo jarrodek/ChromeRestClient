@@ -1,5 +1,8 @@
 (function() {
 'use strict';
+
+/* global HeadersBehaviors */
+
 Polymer({
   is: 'authorization-support',
   behaviors: [
@@ -16,6 +19,9 @@ Polymer({
   provideSupport: function() {
     var currentValue = this.target.value;
     if (currentValue) {
+      currentValue = currentValue.replace('Basic ', '');
+      currentValue = currentValue.replace('basic ', '');
+      currentValue = currentValue.trim();
       let enc;
       try {
         enc = atob(currentValue);
@@ -39,7 +45,7 @@ Polymer({
 
   _select: function() {
     var enc = `${this.login}:${this.password}`;
-    var value = btoa(enc);
+    var value = 'Basic ' + btoa(enc);
     this.setValue(value);
   }
 });

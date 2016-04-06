@@ -45,6 +45,9 @@ This approach have some implications.
       :host {
         display: block;
       }
+      #basicAuthDialog {
+        top: 10px;
+      }
     </style>
     <content></content>
 
@@ -57,7 +60,25 @@ This approach have some implications.
     <arc-request-object-model id="projectQueryModel" on-data-ready="_projectEndpointsRestored"></arc-request-object-model>
     <arc-project-object-model id="projects" on-error="_projectSaveError" on-save="_projectSavedHandler"></arc-project-object-model>
     <arc-magic-variables id="magicVariables" scope="[[project.id]]"></arc-magic-variables>
+    <arc-basicauth-model id="basicAuthModel"></arc-basicauth-model>
 
+    <paper-dialog id="basicAuthDialog"
+      entry-animation="slide-from-top-animation"
+      exit-animation="slide-up-animation"
+      on-iron-overlay-closed="_basicAuthDialogHandler">
+      <h2>Authentication required</h2>
+      <paper-dialog-scrollable>
+        <p>The endpoint requires a username and password</p>
+        <paper-input label="login" type="text" id="authDialogLogin"></paper-input>
+        <paper-input label="password" type="password" id="authDialogPassword">
+          <paper-icon-button suffix on-tap="authTogglePassword" icon="visibility" alt="Show password icon" title="Show password"></paper-icon-button>
+        </paper-input>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm>Log in</paper-button>
+      </div>
+    </paper-dialog>
   </template>
   <script src="arc-request-controller.js"></script>
 </dom-module>
