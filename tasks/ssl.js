@@ -40,9 +40,9 @@ class TestServer {
   createServer() {
     var httpServer = http.createServer(app);
     var httpsServer = https.createServer(this.credentials, app);
-    httpServer.listen(80, () => {
-      console.log('HTTP started (80).');
-    });
+    // httpServer.listen(80, () => {
+    //   console.log('HTTP started (80).');
+    // });
     httpServer.listen(8080, () => {
       console.log('HTTP started (8080).');
     });
@@ -57,6 +57,10 @@ class TestServer {
   setHandlers() {
     this._setMain();
     this._setBasicAuth();
+    this._setMeta();
+    this._setJson();
+    this._setXML();
+    this._setCookie();
   }
 
   _setMain() {
@@ -75,6 +79,68 @@ class TestServer {
     app.get('/auth', this.basicAuth.bind(this), (req, res) => {
       res.set('Content-Type', 'text/html');
       res.send('<h1>You are authenticated</h1>');
+    });
+  }
+
+  _setMeta() {
+    app.get('/meta', (req, res) => {
+      // res.status(200).send('OK');
+      res.set('Content-Type', 'text/html');
+      res.set('Link', '</.meta>; rel=meta');
+      res.send('<h1>You should see  </.meta>; rel=meta in the Link header  </h1>');
+    });
+  }
+
+  _setJson() {
+    app.get('/json', (req, res) => {
+      var json = fs.readFileSync('./tasks/test-data/json1.json', 'utf8');
+      // res.status(200).send('OK');
+      res.set('Content-Type', 'application/json');
+      res.send(json);
+    });
+  }
+
+  _setXML() {
+    app.get('/xml', (req, res) => {
+      var json = fs.readFileSync('./tasks/test-data/xml1.xml', 'utf8');
+      // res.status(200).send('OK');
+      res.set('Content-Type', 'application/xml');
+      res.send(json);
+    });
+    app.get('/xml2', (req, res) => {
+      var json = fs.readFileSync('./tasks/test-data/xml2.xml', 'utf8');
+      // res.status(200).send('OK');
+      res.set('Content-Type', 'application/xml');
+      res.send(json);
+    });
+    app.get('/xml3', (req, res) => {
+      var json = fs.readFileSync('./tasks/test-data/xml3.xml', 'utf8');
+      // res.status(200).send('OK');
+      res.set('Content-Type', 'application/xml');
+      res.send(json);
+    });
+  }
+
+  _setCookie() {
+    app.get('/cookie', (req, res) => {
+      var Chance = require('chance');
+      var chance = new Chance();
+      for (var i = 0; i < 10; i++) {
+        var value = chance.string({length: chance.integer({min: 10, max: 100})});
+        var opts = {};
+        if (chance.bool()) {
+          opts.expires = 0;
+        }
+        if (chance.bool()) {
+          opts.httpOnly = true;
+        }
+        if (chance.bool()) {
+          opts.domain = chance.domain();
+        }
+        res.cookie(chance.word(), value, opts);
+      }
+      res.set('Content-Type', 'text/html');
+      res.send('<h1>Cookies are set</h1>');
     });
   }
 }

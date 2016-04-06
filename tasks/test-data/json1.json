@@ -1,0 +1,49 @@
+{
+  "aaa": [null],
+  "count": 5,
+  "fruits": ["apple", "banana", "orange", "lemon", "grapes"],
+  "nullValue": "null",
+  "ok": true,
+  "link": "https://www.google.pl/webhp?sourceid=chrome-instant&ion=1&ie=UTF-8#hl=en&sclient=psy-ab&q=javascript%20find%20links%20in%20text&oq=&gs_l=&pbx=1&fp=4f8778963b1a64d3&ion=1&bav=on.2,or.r_gc.r_pw.r_cp.r_qf.&biw=1215&bih=938&oq=&gs_l=&pbx=1&fp=4f8778963b1a64d3&ion=1&bav=on.2,or.r_gc.r_pw.r_cp.r_qf.&biw=1215&bih=938&oq=&gs_l=&pbx=1&fp=4f8778963b1a64d3&ion=1&bav=on.2,or.r_gc.r_pw.r_cp.r_qf.&biw=1215&bih=938",
+  "link2": "https://www.google.pl/webhp?sourceid",
+  "link3": "file:///file",
+  "1234567": "Numeric key as string",
+  "link4": "ftp://www.google.pl/webhp?sourceid",
+  "link5": "http://www.google.pl/webhp?sourceid",
+  "link6": "/somepoint.php",
+  "long": 18014398509481984419,
+  "long2": 7329270081369171000,
+  "array": ["string1", "string2", "string3 string3 string3 string3 string3 string3"],
+  "deep": [{
+    "aaa": [null],
+    "count": 5,
+    "fruits": ["apple", "banana", "orange", "lemon", "grapes"],
+    "nullValue": "null",
+    "ok": true,
+    "long": 18014398509481984419,
+    "array": ["string1", "string2", "string3 string3 string3 string3 string3 string3"],
+    "deep": [{
+        "aaa": [null],
+        "count": 5,
+        "fruits": ["apple", "banana", "orange", "lemon", "grapes"],
+        "nullValue": "null",
+        "ok": true,
+        "long": 18014398509481984419,
+        "array": ["string1", "string2", "string3 string3 string3 string3 string3 string3"],
+        "deep": []
+      },
+      "test"
+    ]
+  }, {
+    "aaa": [null],
+    "count": 5,
+    "fruits": ["apple", "banana", "orange", "lemon", "grapes"],
+    "nullValue": "null",
+    "ok": true,
+    "long": 18014398509481984419,
+    "array": ["string1", "string2", "string3 string3 string3 string3 string3 string3"],
+    "deep": [
+      "long", 18014398509481984419
+    ]
+  }]
+}
