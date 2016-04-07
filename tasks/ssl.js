@@ -17,6 +17,10 @@ app.use(bodyParser.urlencoded({
 })); // for parsing application/x-www-form-urlencoded
 app.use(busboy());
 app.use(function(req, res, next) {
+  if (!req.is('multipart/*')) {
+    next();
+    return;
+  }
   req.busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
     console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype);
     file.on('data', function(data) {
@@ -126,7 +130,12 @@ class TestServer {
       // res.removeHeader('Transfer-Encoding');
       // res.end();
       res.set('Content-Type', 'text/html');
-      res.send('<h1>Hello World!</h1>');
+      if (req.secure) {
+        res.send('<h1>SSL connection made</h1>');
+      } else {
+        res.send('<h1>Non SSL connection made</h1>');
+      }
+
     });
   }
 
