@@ -6,7 +6,10 @@ Polymer({
    * @param {Object} project Project object to be deleted
    */
   properties: {
-    project: Object,
+    project: {
+      type: Object,
+      notify: true
+    },
     requests: Array
   },
   // Handler to export ptoject click.
@@ -17,7 +20,6 @@ Polymer({
   deleteProject: function() {
     this.$.projectDeleteDialog.open();
   },
-
   /**
    * User confirm removing all data.
    * Send an event to the controller to remove all items.
