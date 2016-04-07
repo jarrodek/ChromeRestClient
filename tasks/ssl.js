@@ -7,7 +7,7 @@ const app = require('express')();
 const bodyParser = require('body-parser');
 const multer = require('multer'); // v1.0.5
 const upload = multer(); // for parsing multipart/form-data
-const coBusboy = require('co-busboy');
+// const coBusboy = require('co-busboy');
 // var Busboy = require('busboy');
 const busboy = require('connect-busboy');
 
@@ -17,12 +17,13 @@ app.use(bodyParser.urlencoded({
 })); // for parsing application/x-www-form-urlencoded
 app.use(busboy());
 app.use(function(req, res, next) {
-  if (!req.is('multipart/*')) {
+  if (!req.is('multipart/*') || !req.busboy) {
     next();
     return;
   }
   req.busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
-    console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype);
+    console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding +
+    ', mimetype: ' + mimetype);
     file.on('data', function(data) {
       console.log('File [' + fieldname + '] got ' + data.length + ' bytes');
     });
@@ -30,7 +31,8 @@ app.use(function(req, res, next) {
       console.log('File [' + fieldname + '] Finished');
     });
   });
-  req.busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
+  req.busboy.on('field', function(fieldname, val
+  /*, fieldnameTruncated, valTruncated, encoding, mimetype*/) {
     console.log('Field [' + fieldname + ']: value: ' + val);
   });
   req.busboy.on('finish', function() {
