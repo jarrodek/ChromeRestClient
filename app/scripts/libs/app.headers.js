@@ -200,9 +200,11 @@ arc.app.headers.getContentType = function(headers) {
     return null;
   }
   var ct = match[1].trim();
-  let index = ct.indexOf('; ');
-  if (index > 0) {
-    ct = ct.substr(0, index);
+  if (ct.indexOf('multipart') === -1) {
+    let index = ct.indexOf('; ');
+    if (index > 0) {
+      ct = ct.substr(0, index);
+    }
   }
   return ct;
   // headers = arc.app.headers.filter(headers);
