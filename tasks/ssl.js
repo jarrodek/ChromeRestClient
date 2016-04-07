@@ -4,6 +4,13 @@ const http = require('http');
 const https = require('https');
 const basicAuth = require('basic-auth');
 const app = require('express')();
+const bodyParser = require('body-parser');
+const multer = require('multer'); // v1.0.5
+const upload = multer(); // for parsing multipart/form-data
+
+app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.urlencoded({extended: true})); // for parsing application/x-www-form-urlencoded
+//app.use(bodyParser.raw());
 
 class TestServer {
   constructor() {
@@ -61,6 +68,9 @@ class TestServer {
     this._setJson();
     this._setXML();
     this._setCookie();
+    this._setPost();
+    this._setPut();
+    this._setDelete();
   }
 
   _setMain() {
@@ -141,6 +151,32 @@ class TestServer {
       }
       res.set('Content-Type', 'text/html');
       res.send('<h1>Cookies are set</h1>');
+    });
+  }
+
+  _setPost() {
+    app.post('/', upload.array(), (req, res) => {
+      var response = Object.assign({}, {
+        'body': req.body,
+        'query': req.query
+      });
+      // console.log(req.body, req.query);
+      // console.log(req.headers);
+      // console.log(req);
+      res.set('Content-Type', 'application/json');
+      res.send(response);
+    });
+  }
+
+  _setPut() {
+    app.put('/', (req, res) => {
+      res.send('PUT request to homepage');
+    });
+  }
+
+  _setDelete() {
+    app.delete('/', (req, res) => {
+      res.send('DELETE request to homepage');
     });
   }
 }
