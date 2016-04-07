@@ -7,10 +7,54 @@ const app = require('express')();
 const bodyParser = require('body-parser');
 const multer = require('multer'); // v1.0.5
 const upload = multer(); // for parsing multipart/form-data
+const coBusboy = require('co-busboy');
+// var Busboy = require('busboy');
+const busboy = require('connect-busboy');
 
 app.use(bodyParser.json()); // for parsing application/json
-app.use(bodyParser.urlencoded({extended: true})); // for parsing application/x-www-form-urlencoded
-//app.use(bodyParser.raw());
+app.use(bodyParser.urlencoded({
+  extended: true
+})); // for parsing application/x-www-form-urlencoded
+app.use(busboy());
+app.use(function(req, res, next) {
+  req.busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
+    console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype);
+    file.on('data', function(data) {
+      console.log('File [' + fieldname + '] got ' + data.length + ' bytes');
+    });
+    file.on('end', function() {
+      console.log('File [' + fieldname + '] Finished');
+    });
+  });
+  req.busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
+    console.log('Field [' + fieldname + ']: value: ' + val);
+  });
+  req.busboy.on('finish', function() {
+    next();
+  });
+  req.pipe(req.busboy);
+});
+// app.use(function* (next) {
+//   console.log('Next function called');
+//   if (!this.request.is('multipart/*')) {
+//     return yield next;
+//   }
+//   console.log('Processing multipart request');
+//   var parts = coBusboy(this);
+//   var part
+//   while (part = yield parts) {
+//     if (part.length) {
+//       // arrays are busboy fields
+//       console.log('key: ' + part[0]);
+//       console.log('value: ' + part[1]);
+//     } else {
+//       // otherwise, it's a stream
+//       console.log('It\'s a stream');
+//       //part.pipe(fs.createWriteStream('some file.txt'))
+//     }
+//   }
+//   console.log('and we are done parsing the form!');
+// });
 
 class TestServer {
   constructor() {
@@ -71,6 +115,7 @@ class TestServer {
     this._setPost();
     this._setPut();
     this._setDelete();
+    this._setMultipard();
   }
 
   _setMain() {
@@ -136,7 +181,12 @@ class TestServer {
       var Chance = require('chance');
       var chance = new Chance();
       for (var i = 0; i < 10; i++) {
-        var value = chance.string({length: chance.integer({min: 10, max: 100})});
+        var value = chance.string({
+          length: chance.integer({
+            min: 10,
+            max: 100
+          })
+        });
         var opts = {};
         if (chance.bool()) {
           opts.expires = 0;
@@ -165,6 +215,45 @@ class TestServer {
       // console.log(req);
       res.set('Content-Type', 'application/json');
       res.send(response);
+    });
+  }
+
+  _setMultipard() {
+    app.post('/post', (req, res) => {
+      console.log('Calling /post');
+      console.log(req.body, req.query);
+      res.set('Connection', 'close');
+      res.set('Content-Type', 'text/html');
+      res.send('Post with success');
+      // var busboy = new Busboy({
+      //   headers: req.headers
+      // });
+      // busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
+      //   console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype);
+      //   file.on('data', function(data) {
+      //     console.log('File [' + fieldname + '] got ' + data.length + ' bytes');
+      //   });
+      //   file.on('end', function() {
+      //     console.log('File [' + fieldname + '] Finished');
+      //   });
+      // });
+      // busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
+      //   console.log('Field [' + fieldname + ']: value: ' + inspect(val));
+      // });
+      // busboy.on('finish', function() {
+      //   console.log('Done parsing form!');
+      //   res.writeHead(303, {
+      //     Connection: 'close',
+      //     Location: '/'
+      //   });
+      //   res.end();
+      // });
+      // req.pipe(busboy);
+
+      // console.log(req.headers);
+      // console.log(req);
+      // res.set('Content-Type', 'application/json');
+      // res.send(response);
     });
   }
 
