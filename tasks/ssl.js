@@ -68,6 +68,7 @@ class TestServer {
       key: fs.readFileSync('./tests/certs/server.key', 'utf8'),
       cert: fs.readFileSync('./tests/certs/server.crt', 'utf8')
     };
+    this.post = 8081;
     app.disable('x-powered-by');
     // app.disable('etag');
     this.setHandlers();
@@ -100,8 +101,8 @@ class TestServer {
     // httpServer.listen(80, () => {
     //   console.log('HTTP started (80).');
     // });
-    httpServer.listen(8080, () => {
-      console.log('HTTP started (8080).');
+    httpServer.listen(this.post, () => {
+      console.log('HTTP started (' + this.post + ').');
     });
     // httpsServer.listen(443, () => {
     //   console.log('HTTPS started (443).');
@@ -122,6 +123,7 @@ class TestServer {
     this._setPut();
     this._setDelete();
     this._setMultipard();
+    this._setRedirect();
   }
 
   _setMain() {
@@ -277,6 +279,19 @@ class TestServer {
   _setDelete() {
     app.delete('/', (req, res) => {
       res.send('DELETE request to homepage');
+    });
+  }
+
+  _setRedirect() {
+    app.get('/redirect', (req, res) => {
+      res.redirect('/redirect/dest');
+    });
+    app.get('/redirect2', (req, res) => {
+      res.redirect('http://localhost:' + this.post + '/redirect/dest');
+    });
+    app.get('/redirect/dest', (req, res) => {
+      res.set('Content-Type', 'text/html');
+      res.send('<h1>You have been redirected</h1>');
     });
   }
 }

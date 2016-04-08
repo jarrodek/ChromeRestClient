@@ -255,8 +255,8 @@ var Builder = {
         implicitStrip: true,
         stripComments: true,
         excludes: [
-          path.join('app', 'bower_components', 'font-roboto', 'roboto.html'),
-          path.join('bower_components', 'font-roboto', 'roboto.html')
+          // path.join('app', 'bower_components', 'font-roboto', 'roboto.html'),
+          // path.join('bower_components', 'font-roboto', 'roboto.html')
         ]
       });
       console.log('Processing elements.html');
@@ -315,7 +315,7 @@ var Builder = {
         deps = deps.filter((dep) => dep !== backgroundScript);
         deps = deps.map((dep) => './app/' + dep);
         //backgroundScript = 'background.js';
-        let depsFilename = path.join('scripts', 'background-deps.js');
+        let depsFilename = 'scripts/background-deps.js';
         let depsLocation = path.join(dest, depsFilename);
         concat(deps, depsLocation, {
           separator: '\n'
