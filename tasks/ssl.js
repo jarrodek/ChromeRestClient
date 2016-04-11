@@ -65,8 +65,8 @@ app.use(function(req, res, next) {
 class TestServer {
   constructor() {
     this.credentials = {
-      key: fs.readFileSync('./tests/certs/server.key', 'utf8'),
-      cert: fs.readFileSync('./tests/certs/server.crt', 'utf8')
+      key: fs.readFileSync('./tests/certs/server1.key', 'utf8'),
+      cert: fs.readFileSync('./tests/certs/server1.crt', 'utf8')
     };
     this.post = 8081;
     app.disable('x-powered-by');
