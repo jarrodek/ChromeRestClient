@@ -166,6 +166,12 @@ class TestServer {
       res.set('Content-Type', 'application/json');
       res.send(json);
     });
+    app.get('/json2', (req, res) => {
+      var json = fs.readFileSync('./tasks/test-data/json2.json', 'utf8');
+      // res.status(200).send('OK');
+      res.set('Content-Type', 'application/json');
+      res.send(json);
+    });
   }
 
   _setXML() {
@@ -212,6 +218,13 @@ class TestServer {
         }
         res.cookie(chance.word(), value, opts);
       }
+      res.cookie('rememberme', '1', {
+        maxAge: 900000,
+        httpOnly: true,
+        domain: 'localhost',
+        path: '/cookie',
+        secure: true
+      });
       res.set('Content-Type', 'text/html');
       res.send('<h1>Cookies are set</h1>');
     });
