@@ -71,7 +71,8 @@
     <paper-tabs selected="{{tabSelected}}">
       <paper-tab>Raw headers</paper-tab>
       <paper-tab>Headers form</paper-tab>
-      <paper-tab>Predefined sets</paper-tab>
+      <paper-tab>Headers sets</paper-tab>
+      <!-- <paper-tab>Authorization</paper-tab> -->
     </paper-tabs>
     <iron-pages selected="{{tabSelected}}">
       <section>
@@ -106,6 +107,12 @@
         </code>
         <paper-button raised on-tap="_insertDefaultSet">Use this set</paper-button>
       </section>
+      <!-- <section>
+        <paper-menu>
+          <paper-item>Basic</paper-item>
+          <paper-item>Cookie</paper-item>
+        </paper-menu>
+      </section> -->
     </iron-pages>
     <arc-header-object-model id="headerModel" on-data-ready="_setNameSuggestions"></arc-header-object-model>
     <content-type-support></content-type-support>
