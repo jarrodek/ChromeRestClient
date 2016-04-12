@@ -32,6 +32,7 @@ The `<arc-request-error-view>` displays an error associated with the request.
         @apply(--layout-vertical);
         @apply(--layout-flex);
         -webkit-user-select: text;
+        margin: 0 16px;
       }
 
       .message-wrapper {
@@ -101,6 +102,12 @@ The `<arc-request-error-view>` displays an error associated with the request.
             <section>
               <h3>Abort / timeout</h3>
               <p>The request has been aborted manually or because of the conection timeout. There were no response from the server but the connection wasn't closed.</p>
+              <p>
+                Try to:
+              </p>
+              <ul>
+                <li>add "Connection: close" header which should be used by the server to close the connection after it finish generating response</li>
+              </ul>
               <p>
                 Please, check if:
               </p>
