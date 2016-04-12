@@ -20,6 +20,7 @@
   app.selectedRequest = null;
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
+    arc.app.logger.initConsole();
     app.updateBranding();
   });
 
@@ -32,6 +33,7 @@
     //event will be handled in elements/routing.html
     let event = new Event('initializeRouting');
     window.dispatchEvent(event);
+    arc.app.logger.initFileLogger();
   });
   //When changin route this will scroll page top. This is called from router.
   app.scrollPageToTop = function() {
@@ -254,5 +256,15 @@
    */
   app.closeOfflineMessage = () => {
     app.$.offlineToast.close();
+  };
+
+  window.addEventListener('error', (e) => {
+    console.log('Window error event,', e);
+  });
+  window.onerror = function(error, url, line) {
+    console.log({
+      acc: 'error',
+      data: 'ERR:' + error + ' URL:' + url + ' L:' + line
+    });
   };
 })(document, window);
