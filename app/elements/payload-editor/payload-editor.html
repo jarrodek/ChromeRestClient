@@ -84,10 +84,15 @@ the License.
       .add-param-button {
         margin-top: 12px;
       }
+      .form-info {
+        @apply(--layout-horizontal);
+        @apply(--layout-flex);
+        @apply(--layout-center-center);
+      }
     </style>
     <paper-tabs selected="{{tabSelected}}" id="tabs">
       <paper-tab>Raw payload</paper-tab>
-      <paper-tab hidden$="[[!withForm]]">Data form</paper-tab>
+      <paper-tab>Data form</paper-tab>
       <paper-tab>Files ([[filesCount]])</paper-tab>
     </paper-tabs>
     <iron-pages selected="{{tabSelected}}">
@@ -99,24 +104,29 @@ the License.
         <code-mirror mode="application/json" theme="cm-arc" value="{{value}}" id="cm"></code-mirror>
         <!-- on-change="valueChanged" -->
       </section>
-      <section hidden$="[[!withForm]]" class="params-list">
-        <div class="encoder-buttons">
-          <paper-button title="Encodes payload to x-www-form-urlencoded data" on-tap="encodePaylod">encode payload</paper-button>
-          <paper-button title="Decodes payload to human readable form" on-tap="decodePaylod">decode payload</paper-button>
-        </div>
-        <label class="params-title">Form data for x-www-form-urlencoded parameters</label>
-        <template is="dom-repeat" id="valuesList" items="{{valuesList}}" on-dom-change="_onParamsRender">
-          <div class="form-row">
-            <paper-input-container class="param-name" no-label-float inline>
-              <input is="iron-input" type="text" value="{{item.name::input}}" placeholder="Param name"/>
-            </paper-input-container>
-            <paper-input-container class="param-value" no-label-float inline>
-              <input is="iron-input" type="text" value="{{item.value::input}}" placeholder="Param value"/>
-            </paper-input-container>
-            <paper-icon-button icon="close" title="Remove param" on-tap="_removeParam"></paper-icon-button>
+      <section class="params-list">
+        <div hidden$="[[!withForm]]">
+          <div class="encoder-buttons">
+            <paper-button title="Encodes payload to x-www-form-urlencoded data" on-tap="encodePaylod">encode payload</paper-button>
+            <paper-button title="Decodes payload to human readable form" on-tap="decodePaylod">decode payload</paper-button>
           </div>
-        </template>
-        <paper-button raised on-tap="appendEmptyParam" class="add-param-button">Add another parameter</paper-button>
+          <label class="params-title">Form data for x-www-form-urlencoded parameters</label>
+          <template is="dom-repeat" id="valuesList" items="{{valuesList}}" on-dom-change="_onParamsRender">
+            <div class="form-row">
+              <paper-input-container class="param-name" no-label-float inline>
+                <input is="iron-input" type="text" value="{{item.name::input}}" placeholder="Param name"/>
+              </paper-input-container>
+              <paper-input-container class="param-value" no-label-float inline>
+                <input is="iron-input" type="text" value="{{item.value::input}}" placeholder="Param value"/>
+              </paper-input-container>
+              <paper-icon-button icon="close" title="Remove param" on-tap="_removeParam"></paper-icon-button>
+            </div>
+          </template>
+          <paper-button raised on-tap="appendEmptyParam" class="add-param-button">Add another parameter</paper-button>
+        </div>
+        <div hidden$="[[withForm]]" class="form-info">
+          <p>This form is only applicable for the 'x-www-form-urlencoded' content type.</p>
+        </div>
       </section>
       <section class="files-list">
         <label class="params-title">Files to append to the form data request</label>
