@@ -451,20 +451,12 @@ gulp.task('copy', () => {
   // These are things which cannot be vulcanized
   var bower = gulp.src([
     'app/bower_components/{webcomponentsjs,font-roboto-local,codemirror,prism/components}/**/*',
-
     '!app/bower_components/codemirror/lib/**',
     '!app/bower_components/codemirror/theme/**',
     '!app/bower_components/codemirror/keymap/**',
-    '!app/bower_components/codemirror/*'
-
+    '!app/bower_components/codemirror/*',
+    '!app/bower_components/font-roboto-local/fonts/robotomono/**'
   ]).pipe(gulp.dest(path.join(dest,'bower_components')));
-
-  var prismAutolinker = gulp.src(
-    'app/bower_components/prism/plugins/autolinker/prism-autolinker.min.js'
-  ).pipe(gulp.dest(path.join(dest,'bower_components', 'prism', 'plugins', 'autolinker')));
-  var prism = gulp.src(
-    'app/bower_components/prism/prism.js'
-  ).pipe(gulp.dest(path.join(dest,'bower_components', 'prism')));
 
   // var codeMirror = gulp.src([
   //   'app/bower_components/codemirror/**/*'
@@ -484,11 +476,23 @@ gulp.task('copy', () => {
   //   'app/elements/**/*',
   //   '!app/elements/elements.html'
   // ]).pipe(gulp.dest(path.join(dest,'elements')));
+  var bowerDeps = [
+    'chrome-platform-analytics/google-analytics-bundle.js',
+    'dexie-js/dist/dexie.min.js',
+    'har/build/har.js',
+    'lodash/lodash.js',
+    'uri.js/src/URI.js',
+    'prism/prism.js',
+    'prism/plugins/autolinker/prism-autolinker.min.js'
+  ];
+  var dependencies = gulp.src([
+    `app/bower_components/{${bowerDeps.join(',')}}`,
+  ]).pipe(gulp.dest(path.join(dest,'bower_components')));
 
   return merge(
       app, bower, webWorkers, assets, scripts, styles,
-      prismAutolinker, prism, /*, codeMirror*/
-      zlibLibrary
+      /*, codeMirror*/
+      zlibLibrary, dependencies
     )
     .pipe($.size({
       title: 'copy'

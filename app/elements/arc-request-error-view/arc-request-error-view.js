@@ -11,6 +11,9 @@ Polymer({
   // handler to the message change event.
   _messageChanged: function(msg) {
     // msg = 'NET::ERR_CERT_COMMON_NAME_INVALID';
+    if (msg) {
+      msg = msg.trim();
+    }
     switch (msg) {
       case 'net::ERR_CERT_AUTHORITY_INVALID':
         this.detailsPage = 1;
@@ -18,7 +21,7 @@ Polymer({
       case 'net::ERR_CONNECTION_REFUSED':
         this.detailsPage = 2;
         break;
-      case 'NET::ERR_CERT_COMMON_NAME_INVALID':
+      case 'net::ERR_CERT_COMMON_NAME_INVALID':
         this.detailsPage = 3;
         break;
       case 'Request aborted':

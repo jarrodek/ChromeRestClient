@@ -123,6 +123,7 @@ Polymer({
     this._setResponse(null);
     this._setUpProject(undefined);
     this._setPageTitle('Request');
+    this._setIsError(false);
     page('/request/current');
     arc.app.analytics.sendEvent('Engagement', 'Click', 'Clear all');
   },
@@ -520,7 +521,7 @@ Polymer({
         msg = null;
       }
     }
-    
+
     this._setIsError(true);
     this._setErrorMessage(msg);
     this._setRequestLoading(false);
