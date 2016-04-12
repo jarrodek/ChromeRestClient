@@ -12,6 +12,7 @@ Polymer({
     loadingTime: Number,
     responseHeaders: Array,
     requestHeaders: Headers,
+    httpMessage: String,
     requestHeadersArray: {
       type: Array,
       computed: '_computeRequestHeaders(requestHeaders)'

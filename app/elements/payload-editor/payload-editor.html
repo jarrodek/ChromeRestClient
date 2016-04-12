@@ -89,6 +89,9 @@ the License.
         @apply(--layout-flex);
         @apply(--layout-center-center);
       }
+      .form-info > div {
+        @apply(--layout-vertical);
+      }
     </style>
     <paper-tabs selected="{{tabSelected}}" id="tabs">
       <paper-tab>Raw payload</paper-tab>
@@ -125,7 +128,10 @@ the License.
           <paper-button raised on-tap="appendEmptyParam" class="add-param-button">Add another parameter</paper-button>
         </div>
         <div hidden$="[[withForm]]" class="form-info">
-          <p>This form is only applicable for the 'x-www-form-urlencoded' content type.</p>
+          <div>
+            <p>This form is only applicable for the 'x-www-form-urlencoded' content type.</p>
+            <paper-button raised on-tap="_updateContentType" data-ct="application/x-www-form-urlencoded">Use x-www-form-urlencoded</paper-button>
+          </div>
         </div>
       </section>
       <section class="files-list">

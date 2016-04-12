@@ -86,6 +86,12 @@ the License.
             margin-top: 12px;
           }
 
+          .source-message {
+            margin: 16px;
+          }
+          .source-message pre {
+            font-size: 15px;
+          }
         </style>
         <div class="status-row">
           <div class="status-label">Status:</div>
@@ -111,6 +117,12 @@ the License.
           </section>
           <section>
             <arc-headers-display-view on-tap="_handleLink" headers="{{requestHeadersArray}}"></arc-headers-display-view>
+            <div class="source-message">
+              <h5>Source message</h5>
+              <pre>
+[[httpMessage]]
+              </pre>
+            </div>
           </section>
           <section>
             <template is="dom-if" if="{{!redirectData.length}}">

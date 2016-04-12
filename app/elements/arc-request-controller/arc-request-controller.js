@@ -520,6 +520,7 @@ Polymer({
         msg = null;
       }
     }
+    
     this._setIsError(true);
     this._setErrorMessage(msg);
     this._setRequestLoading(false);

@@ -36,6 +36,8 @@ Polymer({
     } else if (this.request.payload) {
       init.body = this.request.payload;
     }
+    init.debug = true;
+    init.timeout = 20000;
     this.connection = new SocketFetch(this.request.url, init);
     this.connection.fetch().then((response) => {
       this._processResponse(response);
