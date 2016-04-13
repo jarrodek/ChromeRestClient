@@ -29,10 +29,10 @@
    */
   arc.app.logger = arc.app.logger || {};
   arc.app.logger.logs = [];
-  arc.app.logger._hasFile = false;
+  arc.app.logger._db = null;
   // See http://tobyho.com/2012/07/27/taking-over-console-log/
   arc.app.logger.initConsole = function() {
-    var methods = ['log', 'warn', 'error'];
+    var methods = ['log', 'warn', 'error', 'info'];
     methods.forEach(function(method) {
       arc.app.logger._intercept(method);
     });
@@ -44,7 +44,7 @@
       let arr = Array.from(arguments);
       let callstack = [];
       try {
-        i.dont.exist += 0;
+        o.dont.exist += 0;
       } catch (e) {
         let lines = e.stack.split('\n');
         for (var i = 0, len = lines.length; i < len; i++) {
@@ -61,73 +61,41 @@
     if (args && args[0] && args[0] === '--no-save') {
       return;
     }
-    // return;
-    //var log = [].concat([method, stack, Date.now()], args);
     var log = {
       'type': method,
       'stack': stack,
       'time': Date.now(),
-      'args': args
+      'logs': JSON.stringify(args) //to avoid objects that
     };
-    if (!arc.app.logger._hasFile) {
+    if (!arc.app.logger._db) {
       arc.app.logger.logs.push(log);
-      return;
-    }
-    if (arc.app.logger.logs.length === 0) {
-      arc.app.logger.fileLoggerSave(log);
     } else {
-      arc.app.logger.logs.push(log);
-      arc.app.logger.fileLoggerNext();
+      arc.app.logger.appendLog(log);
     }
   };
 
-  arc.app.logger.initFileLogger = () => {
-    if (arc.app.logger._hasFile) {
+  arc.app.logger.initDbLogger = () => {
+    if (arc.app.logger._db) {
       return;
     }
-    var elm = document.querySelector('#logfile');
-    if (!elm) {
-      return;
-    }
-    arc.app.logger._hasFile = true;
-    arc.app.logger._fileHandler = elm;
-    elm.addEventListener('save', arc.app.logger.fileLoggerSaved);
-    elm.addEventListener('error', arc.app.logger.fileLoggerError);
-    elm.addEventListener('file-read', arc.app.logger.fileLoggerRead);
+    arc.app.db.idb.open().then((db) => {
+      arc.app.logger._db = db;
+      arc.app.logger.nextLog();
+    });
   };
 
-  arc.app.logger.fileLoggerNext = () => {
+  arc.app.logger.nextLog = () => {
     if (arc.app.logger.logs && arc.app.logger.logs.length > 0) {
-      arc.app.logger.fileLoggerSave(arc.app.logger.logs.shift());
+      arc.app.logger.appendLog(arc.app.logger.logs.shift());
     }
   };
 
-  arc.app.logger.fileLoggerSave = (log) => {
-    var str = JSON.stringify(log) + ',';
-    arc.app.logger._fileHandler.content = str;
-    arc.app.logger._fileHandler.append();
-  };
-
-  arc.app.logger.fileLoggerSaved = (e) => {
-    console.log('--no-save','fileLoggerSave', e);
-    arc.app.logger.fileLoggerNext();
-  };
-  arc.app.logger.fileLoggerError = (e) => {
-    console.log('--no-save','fileLoggerError', e);
-    arc.app.logger.fileLoggerNext();
-  };
-  arc.app.logger.fileLoggerRead = (e) => {
-    var content = e.detail.content;
-    if (content.substr(content.length - 1) === ',') {
-      content = content.substr(0, content.length - 1);
-    }
-    content = '[' + content + ']';
-    try {
-      content = JSON.parse(content);
-    } catch (e1) {
-      console.log('--no-save','fileLoggerRead error', e1);
-      return;
-    }
-    console.log('--no-save','fileLoggerRead', content);
+  arc.app.logger.appendLog = (log) => {
+    //console.log('--no-save','fileLoggerSave', e);
+    arc.app.logger._db.logs.add(log)
+    .then(() => arc.app.logger.nextLog())
+    .catch((e) => {
+      console.log('--no-save','fileLoggerSave', e);
+    });
   };
 })();

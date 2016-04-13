@@ -700,6 +700,30 @@ class BasicAuth extends BaseObject {
   }
 }
 
+class LogObject extends BaseObject {
+  constructor(opts) {
+    super();
+    super.assertRequiredKeys(['time'], opts);
+
+    this.time = opts.time;
+    this.type = opts.type || 'log';
+    if (!opts.stack) {
+      opts.stack = [];
+    }
+    if (!(opts.stack instanceof Array)) {
+      opts.stack = [opts.stack];
+    }
+    this.stack = opts.stack;
+    if (!opts.log) {
+      opts.log = '';
+    }
+    // if (!(opts.log instanceof Array)) {
+    //   opts.log = [opts.log];
+    // }
+    this.logs = opts.log;
+  }
+}
+
 window.RequestObject = RequestObject;
 window.SavedRequestObject = SavedRequestObject;
 window.HistoryRequestObject = HistoryRequestObject;
@@ -708,3 +732,4 @@ window.ProjectObject = ProjectObject;
 window.FileExport = FileExport;
 window.RequestLocalObject = RequestLocalObject;
 window.BasicAuth = BasicAuth;
+window.LogObject = LogObject;

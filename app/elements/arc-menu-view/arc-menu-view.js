@@ -149,6 +149,13 @@
             bg.arc.bg.openWindow();
           });
           break;
+        case 'view-logs':
+          var logViewer = document.querySelector('arc-log-viewer');
+          if (!logViewer) {
+            return;
+          }
+          logViewer.open();
+          break;
       }
     }
   });

@@ -84,6 +84,19 @@ arc.app.db.idb.open = function() {
         variables: '++id,variable,type',
         basicAuth: '&url'
       });
+    db.version(4)
+      .stores({
+        headers: '&[key+type],key,type',
+        statuses: '&key',
+        historyUrls: '&url',
+        historySockets: '&url',
+        requestObject: '++id,url,method,[url+method],type,_name',
+        serverExportObjects: '[serverId+requestId],serverId,requestId',
+        projectObjects: '++id,*requestIds',
+        variables: '++id,variable,type',
+        basicAuth: '&url',
+        logs: '&time,type'
+      });
     db.projectObjects.mapToClass(ProjectObject);
     db.serverExportObjects.mapToClass(ServerExportedObject);
     db.requestObject.mapToClass(RequestObject);
@@ -93,6 +106,7 @@ arc.app.db.idb.open = function() {
     db.headers.mapToClass(HttpHeaderObject);
     db.variables.mapToClass(MagicVariableObject);
     db.basicAuth.mapToClass(BasicAuth);
+    db.logs.mapToClass(LogObject);
     db.on('error', function(error) {
       console.error('IndexedDB global error', error);
       let pending = arc.app.analytics.sendException('IDB error:: ' + JSON.stringify(error));
