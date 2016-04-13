@@ -91,7 +91,7 @@ Polymer({
     console.log('_projectSaved');
   },
 
-  _projectNameChanged: function(a,b) {
+  _projectNameChanged: function() {
     this.$.project.save();
     // this.$.project.data = this.project;
     // console.log('_projectNameChanged',a,b);

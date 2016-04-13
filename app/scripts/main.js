@@ -33,7 +33,7 @@
     //event will be handled in elements/routing.html
     let event = new Event('initializeRouting');
     window.dispatchEvent(event);
-    arc.app.logger.initFileLogger();
+    arc.app.logger.initDbLogger();
   });
   //When changin route this will scroll page top. This is called from router.
   app.scrollPageToTop = function() {

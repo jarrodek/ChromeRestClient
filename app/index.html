@@ -199,11 +199,7 @@
     <paper-toast id="offlineToast" class="fit-bottom offline-toast" text="You are now offline. Can't make new requests." duration="-1">
       <paper-button on-tap="closeOfflineMessage">close</paper-button>
     </paper-toast>
-    <chrome-local-filesystem
-      id="logfile"
-      quota="52428800"
-      mime="application/json"
-      filename="app-log.json"></chrome-local-filesystem>
+    <arc-log-viewer></arc-log-viewer>
   </template>
   <script src="bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
   <script src="bower_components/dexie-js/dist/dexie.min.js"></script>

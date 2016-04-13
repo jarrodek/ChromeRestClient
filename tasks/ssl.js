@@ -139,7 +139,10 @@ class TestServer {
       } else {
         res.send('<h1>Non SSL connection made</h1>');
       }
+    });
 
+    app.delete('/', (req, res) => {
+      res.sendStatus(204);
     });
   }
 
