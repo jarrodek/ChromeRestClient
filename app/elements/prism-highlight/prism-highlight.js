@@ -44,14 +44,13 @@ class PrismHighlight {
         value: false,
         readOnly: true
       },
-      /**
-       * Number of occurance for text search.
-       */
-      markedCount: {
-        type: Number,
-        value: 0,
-        readOnly: true,
-        notify: true
+
+      // An element which should be searched for text.
+      _textSearch: {
+        type: HTMLElement,
+        value: function() {
+          return this.$.output;
+        }
       }
     };
   }
@@ -59,6 +58,12 @@ class PrismHighlight {
   get observers() {
     return [
       '_highlight(code, lang)'
+    ];
+  }
+
+  get behaviors() {
+    return [
+      ArcBehaviors.TextSearchBehavior
     ];
   }
 
@@ -185,67 +190,6 @@ class PrismHighlight {
     var url = el.href;
     this.fire('action-link-change', {
       url: url
-    });
-  }
-
-  mark(word) {
-    this.cleanMarked();
-    if (!word) {
-      return;
-    }
-    var walker = document.createTreeWalker(
-      this.$.output,
-      NodeFilter.SHOW_TEXT,
-      null,
-      false
-    );
-    // var wordLength = word.length;
-    var count = 0;
-    var regStr = `(${word})`;
-    var re = new RegExp(regStr, 'gim');
-    var replacement = `<mark class="arc-search-mark">${word}</mark>`;
-    var nodes = [];
-    while (walker.nextNode()) {
-      re.lastIndex = 0;
-      let node = walker.currentNode;
-      let value = node.nodeValue;
-      if (!re.test(value)) {
-        continue;
-      }
-      nodes.push({
-        node: node,
-        value: value
-      });
-    }
-    nodes.forEach((nodeData) => {
-      let markedContainer = document.createElement('span');
-      markedContainer.classList.add('marked');
-      count += nodeData.value.match(re).length;
-      let replaced = nodeData.value.replace(re, replacement);
-      markedContainer.innerHTML = replaced;
-      nodeData.node.parentNode.replaceChild(markedContainer, nodeData.node);
-    });
-    this._setMarkedCount(count);
-  }
-
-  cleanMarked() {
-    var marked = this.$.output.querySelectorAll('span.marked');
-    if (marked.length === 0) {
-      return;
-    }
-
-    Array.from(marked).forEach((node) => {
-      let txt = '';
-      for (let i = 0, len = node.childNodes.length; i < len; i++) {
-        let child = node.childNodes[i];
-        if (child.nodeType === 3) {
-          txt += child.nodeValue;
-        } else {
-          txt += child.innerText;
-        }
-      }
-      let replacement = document.createTextNode(txt);
-      node.parentNode.replaceChild(replacement, node);
     });
   }
 }

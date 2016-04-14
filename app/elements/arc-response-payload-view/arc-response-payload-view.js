@@ -88,11 +88,23 @@ Polymer({
       type: Boolean,
       value: true,
       readOnly: true
+    },
+
+    // An element which should be searched for text.
+    _textSearch: {
+      type: HTMLElement,
+      value: function() {
+        return this.$.rawContent;
+      }
     }
   },
 
   observers: [
     '_selectedTabChanged(selectedTab)'
+  ],
+
+  behaviors: [
+    ArcBehaviors.TextSearchBehavior
   ],
 
   _selectedTabChanged: function(selectedTab) {
@@ -226,15 +238,28 @@ Polymer({
   _tabsChanged: function() {
     this.$.tabs.notifyResize();
   },
+
+  _searchBarOpenedChanged: function(e) {
+    // e.detail.opened;
+    // var value = e.detail.value;
+    console.log('--no-save', '_searchBarOpenedChanged', e.detail.opened);
+    this._searchInputChanged(e);
+  },
+
   // search in response tab
-  searchResponse: function(searchStr) {
+  _searchInputChanged: function(e) {
+    if (e.detail.lastTarget && e.detail.lastTarget !== this) {
+      return;
+    }
+    var elm = null;
     switch (this.selectedTab) {
       case 0:
         //raw
+        elm = this;
         break;
       case 1:
         //parsed
-        this.$.prism.mark(searchStr);
+        elm = this.$.prism;
         break;
       case 2:
         //json
@@ -243,6 +268,39 @@ Polymer({
         //xml
         break;
     }
+    if (elm) {
+      elm.cleanMarked();
+      elm.mark(e.detail.value);
+      let marked = elm.markedCount;
+      this.fire('iron-signal', {
+        name: 'search-mark-count',
+        data: {
+          count: marked,
+          searchTarget: this
+        }
+      });
+    }
+  },
+
+  _searchPositionChanged: function(e) {
+    if (e.detail.searchTarget && e.detail.searchTarget !== this) {
+      return;
+    }
+    var pos = e.detail.position;
+    var elm = null;
+    switch (this.selectedTab) {
+      case 0:
+        elm = this;
+        break;
+      case 1:
+        elm = this.$.prism;
+        break;
+    }
+    if (elm) {
+      elm.clearMarked();
+      elm.setMarked(pos);
+    }
+    console.log('--no-save', 'Search position changed.', pos, elm);
   }
 });
 })();

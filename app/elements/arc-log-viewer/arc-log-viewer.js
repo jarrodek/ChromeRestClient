@@ -62,7 +62,7 @@ Polymer({
   _getLogs: function() {
     arc.app.db.idb.open().then((db) => {
       let start = this.logs && this.logs.length ? this.logs.length - 1 : 0;
-      console.log('--no-save', 'start', start);
+      // console.log('--no-save', 'start', start);
       db.logs
         //.where('type').anyOf(this.allowedLogs)
         .reverse()
@@ -152,7 +152,7 @@ Polymer({
     if (this.levelError) {
       result.push('error');
     }
-    console.log('--no-save', '_computeFilterArray', result);
+    // console.log('--no-save', '_computeFilterArray', result);
     this.allowedLogs = result;
 
     if (this.opened) {

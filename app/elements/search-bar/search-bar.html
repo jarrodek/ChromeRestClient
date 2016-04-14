@@ -13,15 +13,21 @@
         border-radius: 2px;
         padding: 0 12px;
       }
+      .separator {
+        background-color: var(--paper-grey-500);
+        width: 2px;
+      }
     </style>
     <paper-input-container no-label-float>
-      <input is="iron-input" bind-value="{{value}}" placeholder="search text" autofocus/>
-      <div suffix>0 of 0</div>
+      <input is="iron-input" id="input" bind-value="{{value}}" placeholder="search text" autofocus/>
+      <div suffix>[[selected]] of [[searchCount]]</div>
     </paper-input-container>
     <span class="separator"></span>
-    <paper-icon-button icon="arc:keyboard-arrow-up" title="Previous"></paper-icon-button>
-    <paper-icon-button icon="arc:keyboard-arrow-down" title="Next"></paper-icon-button>
+    <paper-icon-button icon="arc:keyboard-arrow-up" title="Previous" on-tap="highlightPrevious"></paper-icon-button>
+    <paper-icon-button icon="arc:keyboard-arrow-down" title="Next" on-tap="highlightNext"></paper-icon-button>
     <paper-icon-button icon="close" title="Close" on-tap="close"></paper-icon-button>
+    <iron-signals on-iron-signal-search-mark-count="_onSearchMarkCount"></iron-signals>
+    <iron-a11y-keys id="a11y" target="[[input]]" keys="enter" on-keys-pressed="highlightNext"></iron-a11y-keys>
   </template>
   <script src="search-bar.js"></script>
 </dom-module>

@@ -40,6 +40,9 @@ the License.
             margin-top: 20px;
             margin-left: 16px;
           }
+          .arc-search-mark.selected {
+            background-color: var(--paper-orange-500);
+          }
         </style>
         <div class="empty-info" hidden$="[[!isEmpty]]">
           <arc-error-message icon="arc:sentiment-neutral">
@@ -91,6 +94,9 @@ the License.
             <chrome-image id="imageViewer"></chrome-image>
           </section>
         </iron-pages>
+        <iron-signals on-iron-signal-search-bar-opened-changed="_searchBarOpenedChanged"></iron-signals>
+        <iron-signals on-iron-signal-search-input-changed="_searchInputChanged"></iron-signals>
+        <iron-signals on-iron-signal-search-position-changed="_searchPositionChanged"></iron-signals>
       </template>
     </dom-module>
     <script src="arc-response-payload-view.js"></script>

@@ -167,19 +167,6 @@ Polymer({
     return !!(this.opened && this.routeParams && this.routeParams.type);
   },
 
-  // Called when the user press command/ctrl+f
-  onSearch: function() {
-    if (!this.requestControllerOpened) {
-      return;
-    }
-    var searchBar = document.querySelector('#content-search-bar');
-    if (!searchBar) {
-      console.warn('Search bar not available in document.');
-      return;
-    }
-    searchBar.open();
-  },
-
   onProjectEndpoints: function(enpointId) {
     if (this.request && String(this.request.id) === String(enpointId)) {
       return;

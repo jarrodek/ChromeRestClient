@@ -174,8 +174,12 @@
   };
 
   app.onSearch = () => {
-    var ctrl = document.querySelector('arc-request-controller');
-    ctrl.onSearch();
+    var searchBar = document.querySelector('#content-search-bar');
+    if (!searchBar) {
+      console.warn('Search bar was not available in document.');
+      return;
+    }
+    searchBar.open();
     arc.app.analytics.sendEvent('Shortcats usage', 'Called', 'Search');
   };
 
