@@ -1,3 +1,5 @@
+(function() {
+'use strict';
 Polymer({
   is: 'arc-log-viewer',
 
@@ -182,3 +184,4 @@ Polymer({
     arc.app.analytics.sendEvent('Engagement', 'Click', 'Export logs as file');
   }
 });
+})();

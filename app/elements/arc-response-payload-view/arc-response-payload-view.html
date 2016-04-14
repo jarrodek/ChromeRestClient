@@ -67,7 +67,7 @@ the License.
               <paper-icon-button title="Copy content to clipboard" icon="content-copy" on-tap="_clipboardCopy"></paper-icon-button>
               <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
             </div>
-            <prism-highlight code="[[raw]]" lang="[[parsedMode]]"></prism-highlight>
+            <prism-highlight id="prism" code="[[raw]]" lang="[[parsedMode]]"></prism-highlight>
           </section>
           <section hidden$="[[!isJson]]">
             <div class="actions-panel">

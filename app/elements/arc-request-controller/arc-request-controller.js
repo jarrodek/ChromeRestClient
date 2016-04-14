@@ -163,6 +163,23 @@ Polymer({
     arc.app.analytics.sendEvent('Engagement', 'Click', 'Save action initialization');
   },
 
+  get requestControllerOpened() {
+    return !!(this.opened && this.routeParams && this.routeParams.type);
+  },
+
+  // Called when the user press command/ctrl+f
+  onSearch: function() {
+    if (!this.requestControllerOpened) {
+      return;
+    }
+    var searchBar = document.querySelector('#content-search-bar');
+    if (!searchBar) {
+      console.warn('Search bar not available in document.');
+      return;
+    }
+    searchBar.open();
+  },
+
   onProjectEndpoints: function(enpointId) {
     if (this.request && String(this.request.id) === String(enpointId)) {
       return;
@@ -173,7 +190,7 @@ Polymer({
   },
 
   _prepareRequest: function() {
-    if (!this.opened || !this.routeParams || !this.routeParams.type) {
+    if (!this.requestControllerOpened) {
       return;
     }
     this._setResponse(null);
@@ -789,6 +806,41 @@ Polymer({
 
   _computeUrlPath: function(url) {
     return new URI(url).fragment('').search('').toString();
+  },
+
+  _getResponseView: function() {
+    var children = Polymer.dom(this).getEffectiveChildNodes();
+    children = children.filter((node) => node.nodeName === 'ARC-RESPONSE-VIEW');
+    if (!children[0]) {
+      // no response view
+      return null;
+    }
+    return children[0];
+  },
+
+  // handler for text search bar open.
+  _textSearchOpened: function(e) {
+    if (!this.requestControllerOpened) {
+      return;
+    }
+    var view = this._getResponseView();
+    if (!view) {
+      // no response view
+      return;
+    }
+    view.searchResponse(e.detail);
+  },
+  // Handler for text input change in text search bar.
+  _handleTextSearch: function(e) {
+    if (!this.requestControllerOpened) {
+      return;
+    }
+    var view = this._getResponseView();
+    if (!view) {
+      // no response view
+      return;
+    }
+    view.searchResponse(e.detail);
   }
 });
 })();

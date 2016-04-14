@@ -225,6 +225,24 @@ Polymer({
 
   _tabsChanged: function() {
     this.$.tabs.notifyResize();
+  },
+  // search in response tab
+  searchResponse: function(searchStr) {
+    switch (this.selectedTab) {
+      case 0:
+        //raw
+        break;
+      case 1:
+        //parsed
+        this.$.prism.mark(searchStr);
+        break;
+      case 2:
+        //json
+        break;
+      case 3:
+        //xml
+        break;
+    }
   }
 });
 })();

@@ -52,6 +52,14 @@ Polymer({
       value += stats.wait;
     }
     return Math.round(value);
+  },
+
+  searchResponse: function(searchStr) {
+    var view = this.$$('arc-response-payload-view');
+    if (!view) {
+      return;
+    }
+    view.searchResponse(searchStr);
   }
 });
 })();

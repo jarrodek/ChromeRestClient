@@ -173,6 +173,12 @@
     arc.app.analytics.sendEvent('Shortcats usage', 'Called', 'Open');
   };
 
+  app.onSearch = () => {
+    var ctrl = document.querySelector('arc-request-controller');
+    ctrl.onSearch();
+    arc.app.analytics.sendEvent('Shortcats usage', 'Called', 'Search');
+  };
+
   app._cancelEvent = (e) => {
     e.preventDefault();
     e.stopPropagation();

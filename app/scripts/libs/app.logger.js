@@ -52,8 +52,8 @@
         }
         callstack.splice(0, 2);
       }
-      arc.app.logger.handleLog(method, callstack, arr);
       original.apply(console, arguments);
+      arc.app.logger.handleLog(method, callstack, arr);
     };
   };
 
