@@ -124,6 +124,7 @@ class TestServer {
     this._setDelete();
     this._setMultipard();
     this._setRedirect();
+    this._setErrors();
   }
 
   _setMain() {
@@ -308,6 +309,15 @@ class TestServer {
     app.get('/redirect/dest', (req, res) => {
       res.set('Content-Type', 'text/html');
       res.send('<h1>You have been redirected</h1>');
+    });
+  }
+
+  _setErrors() {
+    app.get('/not-found', (req, res) => {
+      res.status(404).end();
+    });
+    app.get('/status-error', (req, res) => {
+      res.status(604).end();
     });
   }
 }
