@@ -153,6 +153,8 @@ var build = (done) => {
             Builder.buildBeta(options, done);
           }
         });
+      } else {
+        Builder.buildBeta(options, done);
       }
       break;
     case 'stable':
