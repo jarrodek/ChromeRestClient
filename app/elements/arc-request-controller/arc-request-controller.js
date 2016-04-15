@@ -278,6 +278,12 @@ Polymer({
     this.$.projects.objectId = id;
     this.$.projects.getObject()
     .then((project) => {
+      if (!project) {
+        StatusNotification.notify({
+          message: 'Project not found.'
+        });
+        return;
+      }
       this._restoreSaved(project.requestIds[0]);
       this._setUpProject(project);
     })
