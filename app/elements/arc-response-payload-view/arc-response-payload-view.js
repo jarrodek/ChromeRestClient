@@ -264,9 +264,11 @@ Polymer({
         break;
       case 2:
         //json
+        elm = this.$.jsonViewer;
         break;
       case 3:
         //xml
+        elm = this.$.xmlViewer;
         break;
     }
     if (elm) {
@@ -295,6 +297,13 @@ Polymer({
         break;
       case 1:
         elm = this.$.prism;
+        break;
+      case 2:
+        //json
+        elm = this.$.jsonViewer;
+        break;
+      case 3:
+        elm = this.$.xmlViewer;
         break;
     }
     if (elm) {

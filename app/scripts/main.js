@@ -172,16 +172,44 @@
     page('/saved');
     arc.app.analytics.sendEvent('Shortcats usage', 'Called', 'Open');
   };
-
+  app.mainHeaderTop = '64px';
   app.onSearch = () => {
     var searchBar = document.querySelector('#content-search-bar');
     if (!searchBar) {
       console.warn('Search bar was not available in document.');
       return;
     }
-    searchBar.open();
-    arc.app.analytics.sendEvent('Shortcats usage', 'Called', 'Search');
+    if (searchBar.opened) {
+      searchBar.focusInput();
+    } else {
+      searchBar.style.top = app.mainHeaderTop;
+      searchBar.open();
+      arc.app.analytics.sendEvent('Shortcats usage', 'Called', 'Search');
+    }
   };
+
+  window.addEventListener('paper-header-transform', function(e) {
+    var searchBar = Polymer.dom(document).querySelector('#content-search-bar');
+    if (!searchBar) {
+      console.warn('Search bar was not available in document.');
+      return;
+    }
+    // if (!searchBar.opened) {
+    //   return;
+    // }
+    var detail = e.detail;
+    var top = detail.height - detail.y;
+    if (top < 0) {
+      top = 0;
+    }
+    top = top + 'px';
+    if (searchBar.style.top === top) {
+      return;
+    }
+    app.mainHeaderTop = top;
+    searchBar.style.top = top;
+    // console.log('paper-header-transform', top);
+  });
 
   app._cancelEvent = (e) => {
     e.preventDefault();

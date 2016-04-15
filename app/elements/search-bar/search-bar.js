@@ -65,6 +65,7 @@
       var value = null;
       if (opened) {
         value = this.value;
+        this.focusInput();
       }
       this.fire('iron-signal', {
         name: 'search-bar-opened-changed',
@@ -73,6 +74,13 @@
           value: value
         }
       });
+    },
+
+    focusInput: function() {
+      this.async(() => {
+        this.$.input.focus();
+        this.$.input.select();
+      }, 1);
     },
 
     _valueChanged: function(value) {
@@ -107,7 +115,7 @@
             searchTarget: this.target
           }
         });
-        this._setSelected(1);
+        this._setSelected(0);
       } else if (n === 0) {
         this._setSelected(0);
       }
@@ -117,9 +125,16 @@
 
     // Send signal to highlight next occuance.
     highlightPrevious: function() {
+      var n = this.searchCount;
+      if (n === 0) {
+        if (this.selected !== 0) {
+          this._setSelected(0);
+        }
+        return;
+      }
       var pos = this.selected;
       if (pos <= 1) {
-        pos = this.searchCount;
+        pos = n;
       } else {
         pos--;
       }
@@ -134,8 +149,15 @@
     },
     // Send signal to highlight previous occuance.
     highlightNext: function() {
+      var n = this.searchCount;
+      if (n === 0) {
+        if (this.selected !== 0) {
+          this._setSelected(0);
+        }
+        return;
+      }
       var pos = this.selected;
-      if (pos >= this.searchCount) {
+      if (pos >= n) {
         pos = 1;
       } else {
         pos += 1;
