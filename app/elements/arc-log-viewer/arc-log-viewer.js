@@ -67,7 +67,7 @@ Polymer({
         //.where('type').anyOf(this.allowedLogs)
         .reverse()
         .offset(start)
-        .limit(150)
+        .limit(200)
         .sortBy('time')
         //.toArray() // do not use with sortBy
         .then((logs) => {

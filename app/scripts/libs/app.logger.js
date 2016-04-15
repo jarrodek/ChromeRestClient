@@ -52,15 +52,18 @@
         }
         callstack.splice(0, 2);
       }
+      let noSave = arr && arr[0] && arr[0] === '--no-save';
+      if (noSave) {
+        Array.prototype.shift.apply(arguments);
+      }
       original.apply(console, arguments);
-      arc.app.logger.handleLog(method, callstack, arr);
+      if (!noSave) {
+        arc.app.logger.handleLog(method, callstack, arr);
+      }
     };
   };
 
   arc.app.logger.handleLog = (method, stack, args) => {
-    if (args && args[0] && args[0] === '--no-save') {
-      return;
-    }
     var log = {
       'type': method,
       'stack': stack,
@@ -79,8 +82,20 @@
       return;
     }
     arc.app.db.idb.open().then((db) => {
-      arc.app.logger._db = db;
-      arc.app.logger.nextLog();
+      db.transaction('rw', db.logs, function*() {
+        var deleteCount = yield db.logs
+          .reverse()
+          .offset(200)
+          .delete();
+        console.log('--no-save','Cleared: ' + deleteCount + ' logs');
+      }).catch((e) => {
+        console.error('--no-save', e);
+      })
+      .finally(() => {
+        arc.app.logger._db = db;
+        arc.app.logger.nextLog();
+      });
+
     });
   };
 
