@@ -64,7 +64,8 @@ Polymer({
     }
   },
   observers: [
-    '_headerValuesChanged(headersList.*)'
+    '_headerValuesChanged(headersList.*)',
+    '_headersChanged(headers)'
   ],
   ready: function() {
     this.$.cm.setOption('extraKeys', {
@@ -215,8 +216,7 @@ Polymer({
         tabName = 'Raw tab';
         break;
       case 1:
-        var arr = arc.app.headers.toJSON(this.headers);
-        this.set('headersList', arr);
+        this._setHeadersList();
         tabName = 'Form tab';
         break;
       case 2:
@@ -232,6 +232,23 @@ Polymer({
     var index = this.$.headersList.indexForElement(e.target);
     this.splice('headersList', index, 1);
     this.updateHeaders();
+  },
+
+  _headersChanged: function(headers) {
+    if (this.tabSelected !== 1) {
+      return;
+    }
+    // it may come from updating a form value or from swithing to different request.
+    // See: https://github.com/jarrodek/ChromeRestClient/issues/439
+    var listHeaders = arc.app.headers.toString(this.headersList);
+    if (listHeaders !== headers) {
+      this._setHeadersList();
+    }
+  },
+  // Populate form with current headers.
+  _setHeadersList: function() {
+    var arr = arc.app.headers.toJSON(this.headers);
+    this.set('headersList', arr);
   },
 
   _headerValuesChanged: function(record) {
