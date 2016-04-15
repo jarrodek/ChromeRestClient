@@ -172,7 +172,9 @@
     page('/saved');
     arc.app.analytics.sendEvent('Shortcats usage', 'Called', 'Open');
   };
+  // Current "height" of the top header.
   app.mainHeaderTop = '64px';
+  // Called when ctrl/command + F combination has been pressed.
   app.onSearch = () => {
     var searchBar = document.querySelector('#content-search-bar');
     if (!searchBar) {
@@ -186,6 +188,15 @@
       searchBar.open();
       arc.app.analytics.sendEvent('Shortcats usage', 'Called', 'Search');
     }
+  };
+
+  app.textSearchBarOpened = () => {
+    var searchBar = document.querySelector('#content-search-bar');
+    if (!searchBar) {
+      console.warn('Search bar was not available in document.');
+      return;
+    }
+    searchBar.style.top = app.mainHeaderTop;
   };
 
   window.addEventListener('paper-header-transform', function(e) {
@@ -207,6 +218,9 @@
       return;
     }
     app.mainHeaderTop = top;
+    if (!searchBar.opened) {
+      return;
+    }
     searchBar.style.top = top;
     // console.log('paper-header-transform', top);
   });

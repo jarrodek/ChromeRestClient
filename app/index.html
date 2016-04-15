@@ -202,7 +202,7 @@
       <paper-button on-tap="closeOfflineMessage">close</paper-button>
     </paper-toast>
     <arc-log-viewer></arc-log-viewer>
-    <search-bar id="content-search-bar"></search-bar>
+    <search-bar id="content-search-bar" on-iron-overlay-opened="textSearchBarOpened"></search-bar>
   </template>
   <script src="bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
   <script src="bower_components/dexie-js/dist/dexie.min.js"></script>
