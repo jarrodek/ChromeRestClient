@@ -269,12 +269,12 @@
   };
 
   window.addEventListener('error', (e) => {
-    console.log('Window error event,', e);
+    console.log('--no-save', 'Window error event,', e);
+    var stack = e.error.stack;
+    var message = e.error.toString();
+    if (stack) {
+      message += '\n' + stack;
+    }
+    arc.app.analytics.sendException(message, false);
   });
-  window.onerror = function(error, url, line) {
-    console.log({
-      acc: 'error',
-      data: 'ERR:' + error + ' URL:' + url + ' L:' + line
-    });
-  };
 })(document, window);
