@@ -1,6 +1,5 @@
 (function() {
 'use strict';
-/* global Prism */
 
 class PrismHighlight {
   beforeRegister() {
@@ -44,6 +43,14 @@ class PrismHighlight {
         type: Boolean,
         value: false,
         readOnly: true
+      },
+
+      // An element which should be searched for text.
+      _textSearch: {
+        type: HTMLElement,
+        value: function() {
+          return this.$.output;
+        }
       }
     };
   }
@@ -51,6 +58,12 @@ class PrismHighlight {
   get observers() {
     return [
       '_highlight(code, lang)'
+    ];
+  }
+
+  get behaviors() {
+    return [
+      ArcBehaviors.TextSearchBehavior
     ];
   }
 

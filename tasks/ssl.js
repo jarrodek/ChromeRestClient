@@ -124,6 +124,7 @@ class TestServer {
     this._setDelete();
     this._setMultipard();
     this._setRedirect();
+    this._setErrors();
   }
 
   _setMain() {
@@ -258,7 +259,8 @@ class TestServer {
       //   headers: req.headers
       // });
       // busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
-      //   console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype);
+      //   console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' +
+      //   encoding + ', mimetype: ' + mimetype);
       //   file.on('data', function(data) {
       //     console.log('File [' + fieldname + '] got ' + data.length + ' bytes');
       //   });
@@ -266,7 +268,8 @@ class TestServer {
       //     console.log('File [' + fieldname + '] Finished');
       //   });
       // });
-      // busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
+      // busboy.on('field', function(fieldname, val, fieldnameTruncated,
+      //  valTruncated, encoding, mimetype) {
       //   console.log('Field [' + fieldname + ']: value: ' + inspect(val));
       // });
       // busboy.on('finish', function() {
@@ -308,6 +311,15 @@ class TestServer {
     app.get('/redirect/dest', (req, res) => {
       res.set('Content-Type', 'text/html');
       res.send('<h1>You have been redirected</h1>');
+    });
+  }
+
+  _setErrors() {
+    app.get('/not-found', (req, res) => {
+      res.status(404).end();
+    });
+    app.get('/status-error', (req, res) => {
+      res.status(604).end();
     });
   }
 }

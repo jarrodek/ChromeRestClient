@@ -81,8 +81,10 @@
     </paper-drawer-panel>
     <!-- <user-provider id="userProvider" authorized="{{appAuthorized}}" profile-image="{{profileUrl}}"></user-provider> -->
     <arc-drive-controller restore-on-file id="driveController"></arc-drive-controller>
-    <iron-a11y-keys id="a11y" target="{{document.body}}" keys="ctrl+s" on-keys-pressed="onSave"></iron-a11y-keys>
-    <iron-a11y-keys id="a11y" target="{{document.body}}" keys="ctrl+o" on-keys-pressed="onOpen"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="ctrl+s" on-keys-pressed="onSave"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="ctrl+o" on-keys-pressed="onOpen"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="ctrl+f" on-keys-pressed="onSearch"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="command+f" on-keys-pressed="onSearch"></iron-a11y-keys>
     <onboarding-tutorial id="onboarding" auto>
       <onboarding-page>
         <div class="welcome-message">
@@ -200,6 +202,7 @@
       <paper-button on-tap="closeOfflineMessage">close</paper-button>
     </paper-toast>
     <arc-log-viewer></arc-log-viewer>
+    <search-bar id="content-search-bar"></search-bar>
   </template>
   <script src="bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
   <script src="bower_components/dexie-js/dist/dexie.min.js"></script>

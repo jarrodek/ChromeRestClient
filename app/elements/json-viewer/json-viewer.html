@@ -119,7 +119,9 @@ The element will start parsing the data as soon as the `json` property change.
           div[data-expanded="false"] div[data-element] {
             display: none !important;
           }
-
+          .arc-search-mark.selected {
+            background-color: var(--paper-orange-500);
+          }
         </style>
         <paper-spinner active="[[working]]"></paper-spinner>
         <div class="error" hidden$="[[!isError]]">
