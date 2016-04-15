@@ -310,46 +310,29 @@ var Builder = {
           return;
         }
         data = JSON.parse(data);
-        var deps = data.app.background.scripts;
-        var backgroundScript = 'scripts/background.js';
-        deps = deps.filter((dep) => dep !== backgroundScript);
-        deps = deps.map((dep) => './app/' + dep);
-        //backgroundScript = 'background.js';
-        let depsFilename = 'scripts/background-deps.js';
-        let depsLocation = path.join(dest, depsFilename);
-        concat(deps, depsLocation, {
-          separator: '\n'
-        }, (err) => {
+        let targetName = Builder.targetDir;
+        //jscs:disable requireCamelCaseOrUpperCaseIdentifiers
+        //write new path to manifest
+        if (targetName === 'canary') {
+          data.name += ' - canary';
+          data.short_name += ' - canary';
+        } else if (targetName === 'dev') {
+          data.name += ' - dev';
+          data.short_name += ' - dev';
+        } else if (targetName === 'beta') {
+          data.name += ' - beta';
+          data.short_name += ' - beta';
+        }
+        //jscs:enable requireCamelCaseOrUpperCaseIdentifiers
+        delete data.key;
+        data = JSON.stringify(data, null, 2);
+        fs.writeFile(manifestFile, data, 'utf8', (err) => {
           if (err) {
             console.error('Error building background page dependencies file.', err);
             reject(err);
             return;
           }
-          let targetName = Builder.targetDir;
-          //jscs:disable requireCamelCaseOrUpperCaseIdentifiers
-          //write new path to manifest
-          data.app.background.scripts = [depsFilename, backgroundScript];
-          if (targetName === 'canary') {
-            data.name += ' - canary';
-            data.short_name += ' - canary';
-          } else if (targetName === 'dev') {
-            data.name += ' - dev';
-            data.short_name += ' - dev';
-          } else if (targetName === 'beta') {
-            data.name += ' - beta';
-            data.short_name += ' - beta';
-          }
-          //jscs:enable requireCamelCaseOrUpperCaseIdentifiers
-          delete data.key;
-          data = JSON.stringify(data, null, 2);
-          fs.writeFile(manifestFile, data, 'utf8', (err) => {
-            if (err) {
-              console.error('Error building background page dependencies file.', err);
-              reject(err);
-              return;
-            }
-            resolve();
-          });
+          resolve();
         });
       });
     });
@@ -436,8 +419,8 @@ gulp.task('copy', () => {
 
   var scripts = gulp.src([
     'app/scripts/**',
-    '!app/scripts/libs',
-    '!app/scripts/libs/*',
+    // '!app/scripts/libs',
+    // '!app/scripts/libs/*',
     '!app/scripts/code-mirror',
     '!app/scripts/code-mirror/**'
   ]).pipe(gulp.dest(path.join(dest,'scripts')));
@@ -458,24 +441,16 @@ gulp.task('copy', () => {
     '!app/bower_components/font-roboto-local/fonts/robotomono/**'
   ]).pipe(gulp.dest(path.join(dest,'bower_components')));
 
-  // var codeMirror = gulp.src([
-  //   'app/bower_components/codemirror/**/*'
-  // ]).pipe(gulp.dest(path.join(dest,'bower_components', 'codemirror')));
-
   // copy webworkers used in bower_components
   var webWorkers = gulp.src([
-    'bower_components/socket-fetch/decompress-worker.js'
+    'app/bower_components/socket-fetch/decompress-worker.js'
   ]).pipe(gulp.dest(path.join(dest, 'elements')));
 
   // zlib library need to placed folder up relativelly to decompress-worker
   var zlibLibrary = gulp.src([
-    'bower_components/zlib/bin/zlib_and_gzip.min.js'
+    'app/bower_components/zlib/bin/zlib_and_gzip.min.js'
   ]).pipe(gulp.dest(path.join(dest, 'zlib', 'bin')));
 
-  // var elements = gulp.src([
-  //   'app/elements/**/*',
-  //   '!app/elements/elements.html'
-  // ]).pipe(gulp.dest(path.join(dest,'elements')));
   var bowerDeps = [
     'chrome-platform-analytics/google-analytics-bundle.js',
     'dexie-js/dist/dexie.min.js',

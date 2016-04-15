@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
@@ -20,7 +21,7 @@
  *
  * @namespace
  */
-var arc = arc || {};
+window.arc = window.arc || {};
 /**
  * ARC app's namespace
  *
@@ -296,3 +297,4 @@ Object.defineProperty(arc.app.utils, 'releaseChannel', {
     throw new Error('releaseChannel can\'t be set.');
   }
 });
+}());

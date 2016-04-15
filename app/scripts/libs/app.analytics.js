@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
@@ -20,7 +21,7 @@
  *
  * @namespace
  */
-var arc = arc || {};
+window.arc = window.arc || {};
 /**
  * ARC app's namespace
  *
@@ -381,7 +382,7 @@ arc.app.analytics._debugHit = function(hit) {
   var params = hit.getParameters();
   console.groupCollapsed(
     '[Google Analytics] Running command: ga("send", "%s")',
-    hit.getHitType(), cat, act, lab);
+    hit.getHitType());
   arc.app.analytics._printHitData(params);
   console.groupEnd();
 };
@@ -536,3 +537,4 @@ arc.app.analytics.sendException = function(exception, isFatal) {
     tracker.sendException(exception, isFatal);
   });
 };
+}());

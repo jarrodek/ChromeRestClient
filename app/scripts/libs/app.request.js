@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
@@ -24,7 +25,7 @@
  *
  * @namespace
  */
-var arc = arc || {};
+window.arc = window.arc || {};
 /**
  * ARC app's namespace
  *
@@ -161,3 +162,4 @@ arc.app.server.request.getImportData = function(uids) {
 };
 
 arc.app.server.request.init();
+}());

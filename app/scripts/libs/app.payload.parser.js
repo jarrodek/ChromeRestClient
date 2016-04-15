@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 
 /* global URLParser */
@@ -203,3 +204,5 @@ class PayloadParser {
     };
   }
 }
+window.PayloadParser = PayloadParser;
+}());

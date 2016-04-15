@@ -3,8 +3,8 @@
   "name": "Advanced REST client",
   "short_name": "ARC",
   "description": "The web developers helper program to create and test custom HTTP requests.",
-  "version": "7.0.20.143",
-  "version_name": "7.0.20.143-beta",
+  "version": "7.1.20.156",
+  "version_name": "7.1.20.156-canary",
   "minimum_chrome_version": "47",
   "author": "Pawel Psztyc",
   "icons": {
@@ -76,12 +76,7 @@
   "app": {
     "background": {
       "scripts": [
-        "scripts/libs/app.polifils.js",
-        "bower_components/dexie-js/dist/dexie.min.js",
-        "bower_components/har/build/har.js",
         "scripts/libs/app.utils.js",
-        "scripts/libs/app.types.js",
-        "scripts/libs/app.db.idb.js",
         "scripts/background.js"
       ]
     }

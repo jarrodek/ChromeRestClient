@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
@@ -20,7 +21,7 @@
  *
  * @namespace
  */
-var arc = arc || {};
+window.arc = window.arc || {};
 /**
  * ARC app's namespace
  *
@@ -60,3 +61,4 @@ arc.app.clipboard._write = function(data) {
   document.execCommand('copy');
   clipboardholder.parentNode.removeChild(clipboardholder);
 };
+}());

@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
@@ -23,7 +24,7 @@ window.pendingAnalytics = window.pendingAnalytics || [];
  *
  * @namespace
  */
-var arc = arc || {};
+window.arc = window.arc || {};
 /**
  * ARC app's namespace
  *
@@ -238,3 +239,4 @@ arc.app.db.idb.downloadDefinitions = function() {
       return response.json();
     });
 };
+}());

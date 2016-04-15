@@ -84,7 +84,7 @@
     <iron-a11y-keys target="{{document.body}}" keys="ctrl+s" on-keys-pressed="onSave"></iron-a11y-keys>
     <iron-a11y-keys target="{{document.body}}" keys="ctrl+o" on-keys-pressed="onOpen"></iron-a11y-keys>
     <iron-a11y-keys target="{{document.body}}" keys="ctrl+f" on-keys-pressed="onSearch"></iron-a11y-keys>
-    <iron-a11y-keys target="{{document.body}}" keys="command+f" on-keys-pressed="onSearch"></iron-a11y-keys>
+    <!-- <iron-a11y-keys target="{{document.body}}" keys="command+f" on-keys-pressed="onSearch"></iron-a11y-keys> -->
     <onboarding-tutorial id="onboarding" auto>
       <onboarding-page>
         <div class="welcome-message">
@@ -209,7 +209,6 @@
   <script src="bower_components/har/build/har.js"></script>
   <script src="bower_components/lodash/lodash.js"></script>
   <script src="bower_components/uri.js/src/URI.js"></script>
-  <!-- build:js scripts/app.js -->
   <script src="scripts/libs/app.logger.js"></script>
   <script src="scripts/libs/app.router.js"></script>
   <script src="scripts/libs/app.utils.js"></script>
@@ -227,7 +226,6 @@
   <script src="scripts/libs/app.url.parser.js"></script>
   <script src="scripts/libs/app.payload.parser.js"></script>
   <script src="scripts/libs/app.clipboard.js"></script>
-  <!-- endbuild-->
   <!-- build:js scripts/code-mirror-custom.js -->
   <script src="scripts/code-mirror/mode/headers/headers.js"></script>
   <script src="scripts/code-mirror/addon/hint/http-headers.js"></script>

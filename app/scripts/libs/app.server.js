@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
@@ -20,7 +21,7 @@
  *
  * @namespace
  */
-var arc = arc || {};
+window.arc = window.arc || {};
 /**
  * ARC app's namespace
  *
@@ -35,7 +36,7 @@ arc.app = arc.app || {};
 arc.app.server = arc.app.server || {};
 /**
  * Currently logged in user ID.
- * 
+ *
  * @type {String}
  */
 arc.app.server.applicationUserId = null;
@@ -155,3 +156,4 @@ arc.app.server.getImportData = function(uids, callback) {
 };
 
 chrome.storage.onChanged.addListener(arc.app.server.authStateMayChanged);
+}());

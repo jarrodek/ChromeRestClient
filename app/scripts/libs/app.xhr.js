@@ -1,13 +1,14 @@
+(function () {
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -17,7 +18,7 @@
 /* global Headers, Request, Unibabel */
 /**
  * Library for constructing and making XHR calls.
- * 
+ *
  */
 
 /**
@@ -25,7 +26,7 @@
  *
  * @namespace
  */
-var arc = arc || {};
+window.arc = window.arc || {};
 /**
  * ARC app's namespace
  *
@@ -102,7 +103,7 @@ arc.app.xhr.run = function(id) {
 };
 /**
  * Extract information about the request from the HAR object.
- * This function will result with request object associated with the last reference in the pages 
+ * This function will result with request object associated with the last reference in the pages
  * property.
  *
  * @return {Promise} A promise that result with the request info object.
@@ -250,7 +251,7 @@ arc.app.xhr._readResponse = function(response) {
  * See http://stackoverflow.com/a/23329386/1127848
  *
  * @param {String} str A UTF-8 string
- * @return {Number} Size of the input string in butes 
+ * @return {Number} Size of the input string in butes
  */
 arc.app.xhr.byteLength = function(str) {
   var s = str.length;
@@ -267,3 +268,4 @@ arc.app.xhr.byteLength = function(str) {
   }
   return s;
 };
+}());

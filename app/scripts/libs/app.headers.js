@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
@@ -22,7 +23,7 @@
 /**
  * Advanced Rest Client namespace
  */
-var arc = arc || {};
+window.arc = window.arc || {};
 /**
  * ARC app's namespace
  */
@@ -262,3 +263,4 @@ arc.app.headers.replace = function(headers, name, value) {
   });
   return new Headers(obj);
 };
+}());

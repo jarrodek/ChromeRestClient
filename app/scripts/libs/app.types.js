@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
@@ -733,3 +734,10 @@ window.FileExport = FileExport;
 window.RequestLocalObject = RequestLocalObject;
 window.BasicAuth = BasicAuth;
 window.LogObject = LogObject;
+window.ServerExportedObject = ServerExportedObject;
+window.HistorySocketObject = HistorySocketObject;
+window.HistoryUrlObject = HistoryUrlObject;
+window.HttpStatusObject = HttpStatusObject;
+window.HttpHeaderObject = HttpHeaderObject;
+window.MagicVariableObject = MagicVariableObject;
+}());
