@@ -76,6 +76,7 @@ window.ArcBehaviors.TextSearchBehavior = {
       re.lastIndex = 0;
       let node = walker.currentNode;
       let value = node.nodeValue;
+      value = PayloadParser.htmlEscape(value);
       if (!re.test(value)) {
         continue;
       }

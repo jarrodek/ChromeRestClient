@@ -100,7 +100,8 @@ Polymer({
   },
 
   observers: [
-    '_selectedTabChanged(selectedTab)'
+    '_selectedTabChanged(selectedTab)',
+    '_rawChanged(raw)'
   ],
 
   behaviors: [
@@ -301,6 +302,10 @@ Polymer({
       elm.setMarked(pos);
     }
     console.log('--no-save', 'Search position changed.', pos, elm);
+  },
+
+  _rawChanged: function(raw) {
+    this.$.rawContent.innerHTML = PayloadParser.htmlEscape(raw);
   }
 });
 })();
