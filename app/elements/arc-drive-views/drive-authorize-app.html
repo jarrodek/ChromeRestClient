@@ -1,0 +1,56 @@
+<dom-module id="drive-authorize-app">
+  <template>
+    <style>
+    :host {
+      display: block;
+      margin: 24px 40px;
+      -webkit-overflow-scrolling: touch;
+      background: var(--paper-dialog-background-color, --primary-background-color);
+      color: var(--paper-dialog-color, --primary-text-color);
+      @apply(--paper-font-body1);
+      @apply(--shadow-elevation-16dp);
+      @apply(--paper-dialog);
+    }
+     :host > * {
+      padding: 0 24px;
+    }
+
+    h2 {
+      position: relative;
+      margin: 0;
+      @apply(--paper-font-title);
+      @apply(--paper-dialog-title);
+      padding-top: 24px;
+      padding-bottom: 24px;
+    }
+
+    .buttons {
+      position: relative;
+      padding: 8px 8px 8px 24px;
+      margin: 0 0 24px;
+      color: var(--paper-dialog-button-color, --primary-color);
+      @apply(--layout-horizontal);
+      @apply(--layout-end-justified);
+    }
+    </style>
+
+    <h2>Authorization required</h2>
+    <div>
+      <p>Before continue you need to authorize ARC. You will be asked for:</p>
+      <ul>
+        <li><b>View and manage Google Drive files and folders that you have opened or created with this app</b><br/>The app will have access to files that has been created by the app or previously opened by it. The app will search for it's own type of files only.</li>
+        <li><b>Add itself to Google Drive</b> <br/>The app will install itself in Drive UI so you'll be able to opend shared with you files and open files in app from Drive website.</li>
+        <li><b>View metadata for files in your Google Drive</b> <br/>Like name or date of creation or if this your file or shared with you. This informations are displayed in files list view.</li>
+      </ul>
+      <chrome-signin hidden$="[[authorizing]]" on-google-signin-attempted="_authorizing"></chrome-signin>
+      <div hidden$="[[!authorizing]]">
+        <p>Waiting for authorization...</p>
+        <paper-spinner active></paper-spinner>
+      </div>
+    </div>
+    <div class="buttons">
+      <paper-button dialog-dismiss="" on-tap="_back">Close</paper-button>
+    </div>
+  </template>
+  <script src="drive-authorize-app.js"></script>
+</dom-module>

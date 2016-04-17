@@ -390,13 +390,11 @@ Polymer({
    * Model will call `_requestObjectReady`
    */
   _saveHistory: function() {
-    this.$.requestModel.getByMethodUrl(this.request.url, this.request.method);
-    // if (this.request.id) {
-    //   this.$.requestModel.objectId = this.request.id;
-    //   this.$.requestModel.getObject();
-    // } else {
-    //   this.$.requestModel.getByMethodUrl(this.request.url, this.request.method);
-    // }
+    chrome.storage.sync.get({'HISTORY_ENABLED': true}, (r) => {
+      if (r.HISTORY_ENABLED) {
+        this.$.requestModel.getByMethodUrl(this.request.url, this.request.method);
+      }
+    });
   },
   /**
    * Save an URL in URL's history store for autofill helper.
@@ -409,38 +407,53 @@ Polymer({
     });
     this.$.historyurlModel.save();
   },
-
+  // Make a request.
   _callRequest: function() {
-    var request = Object.assign({}, this.request);
-    this.$.magicVariables.clear();
-    this.$.magicVariables.value = request.url;
-    this.$.magicVariables.parse()
-    .then((result) => {
-      request.url = result;
-      this.$.magicVariables.value = request.headers;
-      return this.$.magicVariables.parse();
-    })
-    .then((result) => {
-      request.headers = result;
-      this.$.magicVariables.value = request.payload;
-      return this.$.magicVariables.parse();
-    })
-    .then((result) => {
-      request.payload = result;
-      console.log('Parsed request', request);
-      this.async(() => {
-        this.$.socket.request = request;
-        this.$.socket.run();
-      });
-    })
-    .catch(() => {
+    // Copy the object so MagicVariables will not alter the view
+    this._applyMagicVariables(Object.assign({}, this.request))
+    .then((request) => {
+      // Make it async so errors will be handled by socket object.
       this.async(() => {
         this.$.socket.request = request;
         this.$.socket.run();
       });
     });
   },
-
+  // If turned on - apply magic variables to the request.
+  _applyMagicVariables: function(request) {
+    return new Promise((resolve) => {
+      chrome.storage.sync.get({'MAGICVARS_ENABLED': true}, (r) => {
+        if (!r.MAGICVARS_ENABLED) {
+          resolve(request);
+          return;
+        }
+        this.$.magicVariables.clear();
+        this.$.magicVariables.value = request.url;
+        this.$.magicVariables.parse()
+        .then((result) => {
+          request.url = result;
+          this.$.magicVariables.value = request.headers;
+          return this.$.magicVariables.parse();
+        })
+        .then((result) => {
+          request.headers = result;
+          this.$.magicVariables.value = request.payload;
+          return this.$.magicVariables.parse();
+        })
+        .then((result) => {
+          request.payload = result;
+          // console.log('Request with magic variables', request);
+        })
+        .catch((e) => {
+          console.error('Magic variables apply', e);
+        })
+        .finally(() => {
+          resolve(request);
+        });
+      });
+    });
+  },
+  // Handler called the the socket report success
   _responseReady: function(e) {
     if (e.detail.basicAuth) {
       this._openBasicAuthDialog();
@@ -450,7 +463,7 @@ Polymer({
     this._setActiveRequest(e.detail.request);
     this._saveHistory();
   },
-
+  // Returns true when passed object is trully.
   _computeHasResponse: function(response) {
     return !!response;
   },
@@ -479,17 +492,17 @@ Polymer({
     this.fileSuggestedName = 'response-export.' + ext;
     this.exportData();
   },
-
+  // Handler for file save success.
   onFileSaved: function() {
     StatusNotification.notify({
       message: 'File saved'
     });
   },
-
+  // Success handler for history object model.
   _historyUrlSaved: function() {
     console.info('History URL has been saved.');
   },
-
+  // Error handler for history object model.
   _historyUrlSaveError: function(e) {
     console.warn('Error saving into URLs history.', e);
   },
@@ -538,6 +551,7 @@ Polymer({
     //there will be no history save since there's nothing to save.
   },
 
+  // Called when the user saves current request.
   _saveRequest: function(e) {
     var name = e.detail.name;
     var override = e.detail.override || false;
@@ -581,7 +595,6 @@ Polymer({
   },
   /**
    * Save/update project with the request.
-   * TODO:140 fire event to update projects list in the menu.
    *
    * @param {String} name A name of the request. It's only relevant when creating new project.
    * @param {Number} requestId A request ID to be associated with the project.
@@ -678,7 +691,7 @@ Polymer({
       return insertId;
     });
   },
-
+  // Save object to Google Drive.
   _saveDrive: function(request) {
     var ctrl = document.body.querySelector('arc-drive-controller');
     if (!ctrl) {
@@ -704,7 +717,7 @@ Polymer({
     });
     arc.app.analytics.sendEvent('Engagement', 'Click', 'Save request to Drive');
   },
-
+  // Error handler for projects store.
   _projectSaveError: function() {
     StatusNotification.notify({
       message: 'Request was saved but not added to the project'
@@ -728,12 +741,19 @@ Polymer({
       this._setUpProject(project);
     });
   },
-
+  /**
+   * This function mimics chrome basic auth dialog.
+   * When the request return with 401 status and basic auth is required the app will open
+   * auth dialog for basic authentication.
+   *
+   * Login data are stored locally in the app so it will be prefilled when calling the same URL
+   * again.
+   *
+   * User can clear login and passwords in settings.
+   */
   _openBasicAuthDialog: function() {
     this.$.basicAuthDialog.open();
-
     var uri = this._computeUrlPath(this.request.url);
-
     this.$.basicAuthModel.query(uri)
     .then((data) => {
       if (data && data.length) {
@@ -752,7 +772,10 @@ Polymer({
     });
   },
 
-  // Toggle password visibility in basic auth dialog.
+  /**
+   * Toggle password visibility in basic auth dialog.
+   * TODO: Auth dialog should be an element and it's functionality should be enclosed in it.
+   */
   authTogglePassword: function(e) {
     var input = this.$.authDialogPassword;
     var icon = e.target;
@@ -796,11 +819,11 @@ Polymer({
       console.warn('Unable save auth basic data to the store', e);
     });
   },
-
+  // Returns url without query parameters and fragment part.
   _computeUrlPath: function(url) {
     return new URI(url).fragment('').search('').toString();
   },
-
+  // Returns response view element.
   _getResponseView: function() {
     var children = Polymer.dom(this).getEffectiveChildNodes();
     children = children.filter((node) => node.nodeName === 'ARC-RESPONSE-VIEW');
@@ -809,31 +832,6 @@ Polymer({
       return null;
     }
     return children[0];
-  },
-
-  // handler for text search bar open.
-  _textSearchOpened: function(e) {
-    if (!this.requestControllerOpened) {
-      return;
-    }
-    var view = this._getResponseView();
-    if (!view) {
-      // no response view
-      return;
-    }
-    view.searchResponse(e.detail);
-  },
-  // Handler for text input change in text search bar.
-  _handleTextSearch: function(e) {
-    if (!this.requestControllerOpened) {
-      return;
-    }
-    var view = this._getResponseView();
-    if (!view) {
-      // no response view
-      return;
-    }
-    view.searchResponse(e.detail);
   }
 });
 })();

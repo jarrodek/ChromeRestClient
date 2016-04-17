@@ -104,6 +104,13 @@ the License.
           <div>Show tutorial</div>
         </paper-item-body>
       </paper-item>
+      <paper-item hidden$="[[!isAuthorized]]">
+        <paper-item-body>
+          <div>Sign out and deauthorize the app from Google Services.</div>
+        </paper-item-body>
+        <chrome-signin is-authorized="{{isAuthorized}}"></chrome-signin>
+      </paper-item>
+
       <paper-dialog id="historyClearDialog" on-iron-overlay-closed="onClearDialogResult">
         <h2>Clear history</h2>
         <paper-dialog-scrollable>

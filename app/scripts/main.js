@@ -251,8 +251,12 @@
     if (cls) {
       document.body.classList.add(cls);
       Polymer.updateStyles();
-      if (cls === 'canary') {
-        app.$.canaryInfo.open();
+      if (channel === 'canary') {
+        chrome.storage.local.get({'showCanaryWarning': true}, (r) => {
+          if (r.showCanaryWarning) {
+            app.$.canaryInfo.open();
+          }
+        });
       }
     }
     if (channel === 'stable') {

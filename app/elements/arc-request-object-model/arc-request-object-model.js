@@ -102,8 +102,8 @@ Polymer({
           result = table.get(this.objectId);
         } else {
           //result = table.where('type').equals(this.requestType);
-          result = table.where(':id').noneOf(excludedRequests);
           if (this.requestType !== 'history') {
+            result = table.where(':id').noneOf(excludedRequests);
             result = result.and((item) => {
               if (!type) {
                 return true;
@@ -113,13 +113,19 @@ Polymer({
               }
               return item.type === type;
             });
+          } else {
+            result = table;
           }
         }
         if (this.sortBy) {
           if (indexes.indexOf(this.sortBy) === -1) {
             manualSort = true;
           } else {
-            result = result.sortBy(this.sortBy);
+            if (result.sortBy) {
+              result = result.sortBy(this.sortBy);
+            } else if (result.orderBy) {
+              result = result.orderBy(this.sortBy);
+            }
           }
         }
         if (result.toArray) {

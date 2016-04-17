@@ -69,7 +69,7 @@
       <paper-checkbox checked="{{selected}}"></paper-checkbox>
     </div>
     <div class="name-column" on-tap="_editName" hidden$="[[isHistory]]">{{request.name}}</div>
-    <div class="name-column" hidden$="[[!isHistory]]">[[arrayItem(request.har.pages.*, 0, 'startedDateTime')]]</div>
+    <div class="name-column" hidden$="[[!isHistory]]">[[computeHistoryTime(request.har.pages.*, 'startedDateTime')]]</div>
     <div class="method-column">{{request.method}}</div>
     <div class="url-column">{{request.url}}</div>
     <div class="type-column">

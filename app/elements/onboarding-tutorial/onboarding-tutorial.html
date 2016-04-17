@@ -45,6 +45,8 @@
         </template>
         </paper-radio-group>
       </div>
+      <div class="flex" hidden$="[[!noPagination]]">
+      </div>
       <div class="buttons">
         <paper-button hidden$="[[!showSkip]]" on-tap="skip">skip</paper-button>
         <paper-button hidden$="[[hidePrev]]" on-tap="prev" raised disabled$="[[!previousEnabled]]">previous</paper-button>
