@@ -61,6 +61,9 @@
           this.setTokenData(null);
           return;
         }
+        window.setTimeout(() => {
+          this.clearCache();
+        }, 1);
         // any aware will be ok.
         // In chrome apps token will exist until it's revoked.
         // To do this the app need to make a call to perform the operation.
@@ -344,14 +347,14 @@
      * A function to be called when the token has been revoked.
      */
     _tokenRevokedHandler: function() {
-      AuthEngine.clearCache()
+      // AuthEngine.clearCache()
       // .then(() => {
       //   // this._scopeChanged(this.scopes);
       //   // this.fire('google-signin-aware-signed-out');
       // })
-      .catch((e) => {
-        console.error('Unable to remove token.', e);
-      });
+      // .catch((e) => {
+      //   console.error('Unable to remove token.', e);
+      // });
     },
     /**
      * Revoke error handler.
