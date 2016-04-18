@@ -302,10 +302,16 @@ class TestServer {
   }
 
   _setRedirect() {
-    app.get('/redirect', (req, res) => {
+    app.get('/relative-redirect', (req, res) => {
+      res.redirect('/relative-redirect/step-1');
+    });
+    app.get('/relative-redirect/step-1', (req, res) => {
+      res.redirect('/relative-redirect/step-2');
+    });
+    app.get('/relative-redirect/step-2', (req, res) => {
       res.redirect('/redirect/dest');
     });
-    app.get('/redirect2', (req, res) => {
+    app.get('/redirect', (req, res) => {
       res.redirect('http://localhost:' + this.post + '/redirect/dest');
     });
     app.get('/redirect/dest', (req, res) => {
