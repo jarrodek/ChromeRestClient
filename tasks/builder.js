@@ -13,7 +13,7 @@ const usemin = require('gulp-usemin');
 const $ = require('gulp-load-plugins')();
 const runSequence = require('run-sequence');
 const merge = require('merge-stream');
-const concat = require('concatenate-files');
+// const concat = require('concatenate-files');
 const zipFolder = require('zip-folder');
 const uploader = require('./cws-uploader.js');
 
@@ -323,6 +323,8 @@ var Builder = {
           data.name += ' - beta';
           data.short_name += ' - beta';
         }
+        let cwsConfig = uploader.config;
+        data.oauth2.client_id = cwsConfig[targetName].clientId;
         //jscs:enable requireCamelCaseOrUpperCaseIdentifiers
         delete data.key;
         data = JSON.stringify(data, null, 2);
