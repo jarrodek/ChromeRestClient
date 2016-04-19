@@ -302,6 +302,14 @@ class TestServer {
   }
 
   _setRedirect() {
+    app.get('/fake-redirect', (req, res) => {
+      res.status(200);
+      res.set('Location', 'http://localhost:' + this.post + '/redirect/dest');
+      res.set('Content-Type', 'application/json');
+      res.set('Content-Length', 0);
+      res.end();
+      // res.redirect('/relative-redirect/step-1');
+    });
     app.get('/relative-redirect', (req, res) => {
       res.redirect('/relative-redirect/step-1');
     });
