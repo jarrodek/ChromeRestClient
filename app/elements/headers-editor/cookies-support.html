@@ -40,11 +40,52 @@
       @apply(--layout-horizontal);
       @apply(--layout-end-justified);
     }
+
+    .cookie-row {
+
+    }
+    .name-value {
+      @apply(--layout-horizontal);
+      @apply(--layout-flex);
+      @apply(--layout-relative);
+    }
+    .cookie-details {
+      @apply(--layout-horizontal);
+      @apply(--layout-flex);
+      @apply(--layout-wrap);
+    }
+    paper-dialog-scrollable {
+      min-height: 200px;
+    }
     </style>
     <div class="dialog">
-      <h2>Basic authorization</h2>
+      <h2>Cookies</h2>
       <paper-dialog-scrollable id="scrollable">
-        aaaa
+        <template is="dom-repeat" items="[[cookies]]" id="list">
+          <div class="cookie-row">
+            <div class="name-value">
+              <paper-input-container class="cookie-name" no-label-float inline>
+                <input is="iron-input" type="text" value="{{item.name::input}}" placeholder="Cookie name"/>
+              </paper-input-container>
+              <paper-input-container class="cookie-value" no-label-float inline>
+                <input is="iron-input" type="text" value="{{item.value::input}}" placeholder="Cookie value"/>
+              </paper-input-container>
+              <paper-icon-button icon="image:edit" title="Edit cookie details" on-tap="_openCookieDetail"></paper-icon-button>
+              <paper-icon-button icon="close" title="Remove cookie" on-tap="_removeCookie"></paper-icon-button>
+            </div>
+            <div class="cookie-details" hidden$="{{!item.details}}">
+              <paper-input-container class="cookie-domain" no-label-float inline>
+                <input is="iron-input" type="text" value="{{item.domain::input}}" placeholder="Cookie domain"/>
+              </paper-input-container>
+              <paper-input-container class="cookie-domain" no-label-float inline>
+                <input is="iron-input" type="text" value="{{item.path::input}}" placeholder="Cookie path"/>
+              </paper-input-container>
+            </div>
+          </div>
+        </template>
+        <div class="actions">
+          <paper-button raised on-tap="addEmptyCookie">Add cookie</paper-button>
+        </div>
       </paper-dialog-scrollable>
       <div class="buttons">
           <paper-button dialog-dismiss>Cancel</paper-button>
