@@ -17,7 +17,19 @@ Polymer({
   },
 
   provideSupport: function() {
-    var currentValue = this.target.value;
+    var currentValue;
+    if (this.model) {
+      currentValue = this.model.get('item.value');
+    } else if (this.target) {
+      currentValue = this.target.value;
+    } else {
+      currentValue = this.value;
+    }
+    this._setCurrentValues(currentValue);
+    this.open();
+  },
+  // Sets values in form from current inpits in headers editor
+  _setCurrentValues: function(currentValue) {
     if (currentValue) {
       currentValue = currentValue.replace('Basic ', '');
       currentValue = currentValue.replace('basic ', '');
@@ -36,11 +48,10 @@ Polymer({
         }
       }
     }
-    this.open();
   },
 
-  _cancel: function() {
-    this.close();
+  _cancel: function(e) {
+    this.cancel(e);
   },
 
   _select: function() {

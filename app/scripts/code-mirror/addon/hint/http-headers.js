@@ -89,7 +89,12 @@
     values: ['GET','POST','PUT','DELETE']
   }, {
     key: 'Access-Control-Request-Headers',
-    values: ['{list-of-headers}']
+    values: ['{list-of-headers}'],
+    params: {
+      'list-of-headers': {
+        type: String
+      }
+    }
   }, {
     key: 'Cache-Control',
     values: [
@@ -111,20 +116,42 @@
     values: ['close', 'keep-alive']
   }, {
     key: 'Content-MD5',
-    values: ['{md5-of-message}']
+    values: ['{md5-of-message}'],
+    params: {
+      'length-in-bytes': {
+        type: String
+      }
+    }
   }, {
     key: 'Content-Length',
-    values: ['{length-in-bytes}']
+    values: ['{length-in-bytes}'],
+    params: {
+      'length-in-bytes': {
+        type: Number
+      }
+    }
   }, {
     key: 'Content-Type',
-    values: contentTypes
+    values: contentTypes /*,
+    params: {
+      '*': {
+        type: String,
+        call: 'contentType'
+      }
+    }*/
   }, {
     key: 'Cookie',
     values: [
       '{cookie name}={cookie value}',
       '{cookie name}={cookie value}; expires={insert GMT date here}; domain={domain.com}; ' +
         'path=/; secure'
-    ]
+    ],
+    params: {
+      '*': {
+        type: String,
+        call: 'cookie'
+      }
+    }
   }, {
     key: 'Date',
     values: [
@@ -274,38 +301,76 @@
    */
   var getKeywords = function(headersStructure) {
     var keywords = [];
+    var clb = function(header, cm, data, completion) {
+      cm.replaceRange(completion.text + ': ', data.from, data.to);
+      CodeMirror.signal(cm, 'header-key-selected', completion.text);
+    };
     for (var i = 0; i < headersStructure.length; i++) {
       keywords.push({
         text: headersStructure[i].key,
-        hint: function(cm, data, completion) {
-          cm.replaceRange(completion.text + ': ', data.from, data.to);
-          CodeMirror.signal(cm, 'header-key-selected', completion.text);
-        }
+        hint: clb.bind(this, headersStructure[i])
       });
     }
     return keywords;
   };
   var getHeaderValuesFor = function(headersStructure, key) {
     var keywords = [];
+    var clb = function(header, cm, data, completion) {
+      cm.replaceRange(completion.text, data.from, data.to);
+      CodeMirror.signal(cm, 'header-value-selected', completion.text);
+
+      if (header.params && header.params['*'] && header.params['*'].call) {
+        let fromChar = Math.min(data.from.ch, data.to.ch);
+        let charTo = fromChar + completion.text.length;
+        let line = data.from.line;
+        cm.setSelection({
+          line: line,
+          ch: fromChar
+        },{
+          line: line,
+          ch: charTo
+        });
+        CodeMirror.signal(cm, 'header-value-support', {
+          type: header.params['*'],
+          key: header.key,
+          value: completion.text
+        });
+      } else {
+        let match = completion.text.match(/\{(.*?)\}/);
+        if (match) {
+          if (header.params && (match[1] in header.params)) {
+            let fromChar = Math.min(data.from.ch, data.to.ch);
+            let line = data.from.line;
+            fromChar += completion.text.indexOf('{');
+            let charTo = fromChar + match[1].length + 2;
+            cm.setSelection({line: line, ch: fromChar}, {line: line, ch: charTo});
+            CodeMirror.signal(cm, 'header-value-support', {
+              type: header.params[match[1]],
+              key: header.key,
+              value: completion.text
+            });
+          }
+        }
+      }
+    };
+
     for (var i = 0; i < headersStructure.length; i++) {
       if (headersStructure[i].key.toLowerCase() === key) {
-        if (headersStructure[i].values && headersStructure[i].values.length > 0) {
-          headersStructure[i].values.forEach(function(item) {
-            var completion = {
-              text: item,
-              hint: function(cm, data, completion) {
-                cm.replaceRange(completion.text, data.from, data.to);
-                CodeMirror.signal(cm, 'header-value-selected', completion.text);
-              }
-            };
-            keywords.push(completion);
-          });
+        var valuesLenght = headersStructure[i].values && headersStructure[i].values.length || 0;
+        for (var j = 0; j < valuesLenght; j++) {
+          let item = headersStructure[i].values[j];
+          var completion = {
+            text: item,
+            hint: clb.bind(this, headersStructure[i])
+          };
+          keywords.push(completion);
         }
         break;
       }
     }
     return keywords;
   };
+
   var cleanResults = function(text, keywords) {
     var results = [];
     var i = 0;
@@ -323,7 +388,7 @@
     return results;
   };
 
-  function getHints(editor, options) {
+  function getHints(editor) {
     var cur = editor.getCursor();
     var token = getToken(editor, cur);
     var tokenString = (!!token.string) ? '' : token.string.trim();
