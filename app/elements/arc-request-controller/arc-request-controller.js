@@ -411,6 +411,7 @@ Polymer({
   _callRequest: function() {
     // Copy the object so MagicVariables will not alter the view
     this._applyMagicVariables(Object.assign({}, this.request))
+    .then((request) => this._applyCookies(request))
     .then((request) => {
       // Make it async so errors will be handled by socket object.
       this.async(() => {
@@ -453,6 +454,55 @@ Polymer({
       });
     });
   },
+  /**
+   * Find and apply cookies to this request.
+   */
+  _applyCookies: function(request) {
+    return new Promise((resolve) => {
+      chrome.storage.sync.get({'useCookieStorage': true}, (r) => {
+        if (!r.useCookieStorage) {
+          resolve(request);
+          return;
+        }
+
+        this.$.cookieJar.getCookies()
+        .then(() => {
+          let cookie = this.$.cookieJar.cookie;
+          if (!cookie) {
+            resolve(request);
+            return;
+          }
+          cookie = cookie.trim();
+          if (!cookie) {
+            resolve(request);
+            return;
+          }
+          console.info('Cookies to send with the request: ', cookie);
+          let headers = arc.app.headers.toJSON(request.headers);
+          let found = false;
+          headers.forEach((header) => {
+            if (header.name.toLowerCase() === 'cookie') {
+              found = true;
+              header.value = header.value + '; ' + cookie;
+            }
+          });
+          if (!found) {
+            headers.push({
+              name: 'cookie',
+              value: cookie
+            });
+          }
+          request.headers = arc.app.headers.toString(headers);
+          resolve(request);
+        })
+        .catch((e) => {
+          console.error('Unable to apply cookies to the request', e);
+          resolve(request);
+        });
+      });
+    });
+
+  },
   // Handler called the the socket report success
   _responseReady: function(e) {
     if (e.detail.basicAuth) {
@@ -462,6 +512,7 @@ Polymer({
     this._setResponse(e.detail.response);
     this._setActiveRequest(e.detail.request);
     this._saveHistory();
+    this._saveCookies();
   },
   // Returns true when passed object is trully.
   _computeHasResponse: function(response) {
@@ -832,6 +883,10 @@ Polymer({
       return null;
     }
     return children[0];
+  },
+
+  _saveCookies: function() {
+    this.$.cookieJar.store();
   }
 });
 })();

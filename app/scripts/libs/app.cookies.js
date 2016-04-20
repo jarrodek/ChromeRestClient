@@ -55,12 +55,6 @@ class Cookie {
     for (let key in attrs) {
       this[key] = attrs[key];
     }
-    // if (!('path' in this)) {
-    //   this.path = '/';
-    // }
-    // if (!('httpOnly' in this)) {
-    //   this.httpOnly = true;
-    // }
   }
 
   toString() {
@@ -131,8 +125,14 @@ class Cookies {
     }
     cookies.split(/;/).map((cookie) => {
       let parts = cookie.split(/=/, 2);
-      let name = decodeURIComponent(parts[0].replace(/^\s+/, ''));
-      let value = parts.length > 1 ? decodeURIComponent(parts[1].replace(/\s+$/, '')) : null;
+      if (parts.length === 0) {
+        return;
+      }
+      let name = decodeURIComponent(parts[0].trim()).toLowerCase();
+      if (!name) {
+        return;
+      }
+      let value = parts.length > 1 ? decodeURIComponent(parts[1].trim()) : null;
       if (cookieParts.indexOf(name.toLowerCase()) !== -1) {
         if (list.length - 1 >= 0) {
           list[list.length - 1][name] = value;

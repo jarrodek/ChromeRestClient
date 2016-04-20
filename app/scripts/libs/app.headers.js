@@ -1,4 +1,4 @@
-(function () {
+(function() {
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
@@ -220,7 +220,7 @@ arc.app.headers.getContentType = function(headers) {
   // return ct;
 };
 /**
- * Replace value fir given headers in the headers.
+ * Replace value for given headers in the headers.
  *
  * @param {Array|String|Object} headers A headers object. Can be string, array of objects or
  * Headers object.

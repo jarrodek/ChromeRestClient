@@ -725,6 +725,118 @@ class LogObject extends BaseObject {
   }
 }
 
+class CookieObject extends BaseObject {
+  constructor(opts) {
+    super();
+    super.assertRequiredKeys(['name', 'domain'], opts);
+
+    this._expires = 0;
+    this.name = opts.name;
+    this.value = opts.value;
+    this.created = Date.now();
+    this.lastAccess = this.created;
+
+    if ('max-age' in opts) {
+      this.persistant = true;
+      this.maxAge = opts['max-age'];
+    } else if ('expires' in opts) {
+      this.persistant = true;
+      this.expires = opts.expires;
+    } else {
+      this.persistant = false;
+      // see http://stackoverflow.com/a/11526569/1127848
+      this._expires = new Date(8640000000000000).getTime();
+    }
+
+    // point 6. of https://tools.ietf.org/html/rfc6265#section-5.3
+    // says that the `hostOnly` attribute should be set to true.
+    // cookie-storage.js is responsible for handling this.
+    this.domain = opts.domain;
+    this.hostOnly = opts.hostOnly || false;
+
+    // point 7. of https://tools.ietf.org/html/rfc6265#section-5.3
+    // says that the `path` attribute must be set even if not present in the response.
+    // cookie-storage.js is responsible for handling this.
+    this.path = opts.path;
+
+    if ('secure' in opts) {
+      this.secure = opts.secure;
+    }
+
+    if ('httpOnly' in opts) {
+      this.httpOnly = opts.httpOnly;
+    }
+  }
+
+  set maxAge(max) {
+    max = Number(max);
+    if (max !== max) {
+      return;
+    }
+    this['max-age'] = max;
+    if (max < 0) {
+      // see http://stackoverflow.com/a/11526569/1127848
+      this._expires = new Date(8640000000000000).getTime();
+    } else {
+      var now = Date.now();
+      now += max;
+      this._expires = now;
+    }
+  }
+
+  get maxAge() {
+    return this['max-age'];
+  }
+
+  set expires(expires) {
+    if (expires instanceof Date) {
+      expires = expires.getTime();
+    } else if (typeof expires === 'string') {
+      let tmp = new Date(expires);
+      if (tmp.toString() === 'Invalid Date') {
+        expires = 0;
+      } else {
+        expires = tmp.getTime();
+      }
+    }
+    this._expires = expires;
+  }
+
+  get expires() {
+    return this._expires;
+  }
+
+  toString() {
+    return this.name + '=' + this.value;
+  }
+  /**
+   * Returns a Cookie as a HTTP header string.
+   */
+  toHeader() {
+    var header = this.toString();
+    var expires;
+    if (this._expires) {
+      expires = new Date(this._expires);
+      if (expires.toString() === 'Invalid Date') {
+        expires = new Date(0);
+      }
+    }
+    if (this.path) {
+      header += '; path=' + this.path;
+    }
+    if (expires) {
+      header += '; expires=' + expires.toUTCString();
+    }
+    if (this.domain) {
+      header += '; domain=' + this.domain;
+    }
+    if (this.httpOnly) {
+      header += '; httpOnly=' + this.httpOnly;
+    }
+    return header;
+  }
+}
+
 window.RequestObject = RequestObject;
 window.SavedRequestObject = SavedRequestObject;
 window.HistoryRequestObject = HistoryRequestObject;
@@ -740,4 +852,5 @@ window.HistoryUrlObject = HistoryUrlObject;
 window.HttpStatusObject = HttpStatusObject;
 window.HttpHeaderObject = HttpHeaderObject;
 window.MagicVariableObject = MagicVariableObject;
+window.CookieObject = CookieObject;
 }());
