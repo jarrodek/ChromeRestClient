@@ -316,11 +316,10 @@
 
   window.addEventListener('error', (e) => {
     console.log('--no-save', 'Window error event,', e);
-    var stack = e.error.stack;
-    var message = e.error.toString();
-    if (stack) {
-      message += '\n' + stack;
+    if (!e.detail.message) {
+      return;
     }
+    var message = '[Window]' + e.detail.message;
     arc.app.analytics.sendException(message, false);
   });
 })(document, window);

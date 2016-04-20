@@ -536,7 +536,7 @@ Polymer({
   /** Called then transport not finished the request because of error. */
   _onRequestError: function(e) {
     var msg = e.detail.message;
-    if (typeof message !== 'string') {
+    if (typeof msg !== 'string') {
       //it could be an Error object
       if (msg.message) {
         msg = msg.message;
