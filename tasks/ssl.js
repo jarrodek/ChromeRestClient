@@ -125,6 +125,7 @@ class TestServer {
     this._setMultipard();
     this._setRedirect();
     this._setErrors();
+    this._setEmptyResponses();
   }
 
   _setMain() {
@@ -302,6 +303,14 @@ class TestServer {
   }
 
   _setRedirect() {
+    app.get('/fake-redirect', (req, res) => {
+      res.status(200);
+      res.set('Location', 'http://localhost:' + this.post + '/redirect/dest');
+      res.set('Content-Type', 'application/json');
+      res.set('Content-Length', 0);
+      res.end();
+      // res.redirect('/relative-redirect/step-1');
+    });
     app.get('/relative-redirect', (req, res) => {
       res.redirect('/relative-redirect/step-1');
     });
@@ -326,6 +335,26 @@ class TestServer {
     });
     app.get('/status-error', (req, res) => {
       res.status(604).end();
+    });
+  }
+
+  _setEmptyResponses() {
+    app.all('/empty', (req, res) => {
+      var defaultStatus = 200;
+      var status = req.params.status;
+      if (status) {
+        status = Number(status);
+        if (status !== status) {
+          status = defaultStatus;
+        }
+      } else {
+        status = defaultStatus;
+      }
+      res.removeHeader('Date');
+      res.removeHeader('Connection');
+      res.removeHeader('Content-Length');
+      res.removeHeader('Transfer-Encoding');
+      res.status(status).end();
     });
   }
 }

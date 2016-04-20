@@ -1,3 +1,4 @@
+/* global HeadersBehaviors */
 Polymer({
   is: 'content-type-support',
   behaviors: [

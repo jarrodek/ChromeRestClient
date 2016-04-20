@@ -67,7 +67,8 @@
     var log = {
       'type': method,
       'stack': stack,
-      'time': Date.now(),
+      'created': Date.now(),
+      'time': performance.now(),
       'logs': JSON.stringify(args) //to avoid objects that
     };
     if (!arc.app.logger._db) {
@@ -106,11 +107,13 @@
   };
 
   arc.app.logger.appendLog = (log) => {
-    //console.log('--no-save','fileLoggerSave', e);
+    //console.log('--no-save','appendLog', e);
     arc.app.logger._db.logs.add(log)
-    .then(() => arc.app.logger.nextLog())
     .catch((e) => {
-      console.log('--no-save','fileLoggerSave', e);
-    });
+      window.setTimeout(() => {
+        console.log('--no-save','appendLog', e);
+      }, 1);
+    })
+    .then(() => arc.app.logger.nextLog());
   };
 })();

@@ -42,6 +42,7 @@
     "SavedRequestObject": true,
     "HistoryRequestObject": true,
     "BasicAuth": true,
-    "LogObject": true
+    "LogObject": true,
+    "CookieObject": true
   }
 }

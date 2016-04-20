@@ -10,13 +10,26 @@ Polymer({
 
   run: function() {
     var init = {};
+    var error = [];
     if (this.request.method) {
       init.method = this.request.method;
     }
     if (this.request.headers) {
       let headers = arc.app.headers.toJSON(this.request.headers);
       let obj = new Headers();
-      headers.forEach((item) => obj.append(item.name, item.value));
+      headers.forEach((item) => {
+        var name = item.name && item.name.trim();
+        if (!name) {
+          error.push('Header name is invalid');
+        } else {
+          try {
+            obj.append(item.name, item.value);
+          } catch (e) {
+            console.error(e.message);
+            error.push(e.message);
+          }
+        }
+      });
       init.headers = obj;
     }
 
@@ -25,28 +38,51 @@ Polymer({
       let fd = new FormData();
       this.request.files.forEach((field) => {
         field.files.forEach((file) => {
-          fd.append(field.name, file);
+          try {
+            fd.append(field.name, file);
+          } catch (e) {
+            console.error(e.message);
+            error.push(e.message);
+          }
         });
       });
       let params = PayloadParser.stringToArray(this.request.payload);
       params.forEach((pair) => {
-        fd.append(pair.name, pair.value);
+        try {
+          fd.append(pair.name, pair.value);
+        } catch (e) {
+          console.error(e.message);
+          error.push(e.message);
+        }
       });
       init.body = fd;
     } else if (this.request.payload) {
       init.body = this.request.payload;
     }
+    if (error.length > 0) {
+      this.fire('error', {
+        message: error.join(' \n')
+      });
+      return;
+    }
     init.debug = true;
     init.timeout = 20000;
     this.connection = new SocketFetch(this.request.url, init);
-    this.connection.fetch().then((response) => {
-      this._processResponse(response);
-    }).catch((cause) => {
-      console.error('Error during fetch', cause);
-      this.fire('error', {
-        message: cause
+    try {
+      this.connection.fetch().then((response) => {
+        this._processResponse(response);
+      }).catch((cause) => {
+        console.error('Error during fetch', cause);
+        this.fire('error', {
+          message: cause
+        });
       });
-    });
+    } catch (e) {
+      console.error('Error during fetch', e);
+      this.fire('error', {
+        message: e.message
+      });
+    }
   },
 
   _processResponse: function(response) {
@@ -59,7 +95,12 @@ Polymer({
     result.ok = response.ok;
     var ct = (response.headers && response.headers.get) ?
       response.headers.get('content-type') : null;
-    if (ct && ct.indexOf('image') !== -1 &&
+    var cl = (response.headers && response.headers.get) ?
+      Number(response.headers.get('content-length')) : null;
+    if (cl && cl === 0) {
+      result.body = '';
+      this._finishRequest(this.connection.request, result);
+    } else if (ct && ct.indexOf('image') !== -1 &&
       ct.indexOf('xml') === -1) {
       response.blob()
       .then((blob) => {
@@ -67,11 +108,21 @@ Polymer({
         return this._finishRequest(this.connection.request, result);
       });
     } else if (ct && ct.indexOf('json') !== -1) {
-      response.json()
-      .then((json) => {
-        result.body = json;
+      try {
+        response.json()
+        .then((json) => {
+          result.body = json;
+          return this._finishRequest(this.connection.request, result);
+        })
+        .catch((e) => {
+          console.warn('Something is wrong with the response.', e);
+          result.body = '';
+          return this._finishRequest(this.connection.request, result);
+        });
+      } catch (e) {
+        result.body = '';
         return this._finishRequest(this.connection.request, result);
-      });
+      }
     } else {
       response.text()
       .then((text) => {

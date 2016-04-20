@@ -1,6 +1,8 @@
 (function() {
 'use strict';
 
+/* global HeadersBehaviors */
+
 window.HeadersBehaviors = window.HeadersBehaviors || {};
 /**
  * A `FillSupportBehavior` is a base behavior for headers fill support in the app.
@@ -13,9 +15,14 @@ window.HeadersBehaviors = window.HeadersBehaviors || {};
  *
  * Elements must implement `provideSupport()` function which will run the element. At the time
  * of calling this function the `target` property will be already set. This function should use this
- * property to read current state of the input field.
+ * property to read current state of the input field. If the property is not set then the `model`
+ * property will be used to obtain or set data.
+ * If either `target` and `model` property are not set then the `value` property will be used
+ * to set current values.
  *
  * The element should call `setValue()` function to finish support and update value of the header.
+ * If this element is not attached to another input element or template element then the host
+ * element should listen for `iron-overlay-closed` event.
  *
  * @polymerBehavior HeadersBehaviors.FillSupportBehavior
  */
@@ -43,18 +50,25 @@ window.HeadersBehaviors.FillSupportBehaviorImpl = {
      */
     model: {
       type: Object
+    },
+    /**
+     * If either target or model is provided then the value attribute will be filled
+     * with user input value.
+     */
+    value: {
+      type: String
     }
   },
 
-  observers: [
-    '_targetChanged(target, isAttached)'
-  ],
-
-  _targetChanged: function(target, isAttached) {
-    if (!isAttached) {
-      return;
-    }
-  },
+  // observers: [
+  //   '_targetChanged(target, isAttached)'
+  // ],
+  //
+  // _targetChanged: function(target, isAttached) {
+  //   if (!isAttached) {
+  //     return;
+  //   }
+  // },
   /**
    * Funtion to be implemented by elements.
    * Called when the user requested fill support for supported header.
@@ -70,8 +84,10 @@ window.HeadersBehaviors.FillSupportBehaviorImpl = {
   setValue: function(value) {
     if (this.model) {
       this.model.set('item.value', value);
-    } else {
+    } else if (this.target) {
       this.target.value = value;
+    } else {
+      this.value = value;
     }
     this.close();
     arc.app.analytics.sendEvent('Headers editor', 'Fill support', 'Value provided from ' +
@@ -80,7 +96,7 @@ window.HeadersBehaviors.FillSupportBehaviorImpl = {
 };
 window.HeadersBehaviors.FillSupportBehavior = [
   HeadersBehaviors.FillSupportBehaviorImpl,
-  Polymer.IronOverlayBehavior,
+  Polymer.PaperDialogBehavior,
   Polymer.IronScrollTargetBehavior
 ];
 })();
