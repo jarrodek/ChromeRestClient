@@ -70,6 +70,18 @@ the License.
       </paper-item>
       <paper-item>
         <paper-item-body two-line="">
+          <div>Use internall cookie storage</div>
+          <div secondary>Saves received cookies and send them as would browser do</div>
+        </paper-item-body>
+        <paper-toggle-button checked="{{values.useCookieStorage}}"></paper-toggle-button>
+      </paper-item>
+      <paper-item on-tap="cookiesClearClick">
+        <paper-item-body>
+          <div>Clear cookies</div>
+        </paper-item-body>
+      </paper-item>
+      <paper-item>
+        <paper-item-body two-line="">
           <div>
             Send anonymous usage data
           </div>
@@ -141,6 +153,16 @@ the License.
         <h2>Clear saved passwords</h2>
         <paper-dialog-scrollable>
           <p>This will remove all saved passwords for basic authentication.</p>
+        </paper-dialog-scrollable>
+        <div class="buttons">
+          <paper-button dialog-dismiss="">Cancel</paper-button>
+          <paper-button dialog-confirm="" autofocus="">Remove</paper-button>
+        </div>
+      </paper-dialog>
+      <paper-dialog id="cookieClearDialog" on-iron-overlay-closed="onClearCookiesResult">
+        <h2>Clear cookie storage</h2>
+        <paper-dialog-scrollable>
+          <p>This will remove all cookies received from endpoints.</p>
         </paper-dialog-scrollable>
         <div class="buttons">
           <paper-button dialog-dismiss="">Cancel</paper-button>

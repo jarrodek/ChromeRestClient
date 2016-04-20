@@ -140,7 +140,7 @@ Polymer({
     result = result.map((item) => new CookieObject(item));
     this.set('cookies', result);
   },
-  // Removed cookies that has been set for different domain.
+  // Remove cookies that has been set for different domain.
   _filter: function(cookies) {
     var domain = this.uri.domain();
     // var secured = this.uri.protocol() === 'https';
@@ -151,15 +151,15 @@ Polymer({
     }
     var path = this._getPath(this.url);
     var validCookies = cookies.filter((cookie) => {
+      if (!cookie.path) {
+        cookie.path = path;
+      }
       let cDomain = cookie.domain;
       if (!cDomain) {
         cookie.domain = domain;
         // point 6. of https://tools.ietf.org/html/rfc6265#section-5.3
         cookie.hostOnly = true;
         return true;
-      }
-      if (!cookie.path) {
-        cookie.path = path;
       }
       return this._matchDomain(domain, cDomain);
     });
@@ -301,6 +301,9 @@ Polymer({
    * @return {Boolean} True when paths matches.
    */
   _matchPath: function(hostPath, cookiePath) {
+    if (!cookiePath || !hostPath) {
+      return true;
+    }
     if (hostPath === cookiePath) {
       return true;
     }

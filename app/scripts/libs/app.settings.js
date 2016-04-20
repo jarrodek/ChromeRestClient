@@ -42,12 +42,9 @@ arc.app.settings = arc.app.settings || {};
 arc.app.settings.getConfig = function() {
   return new Promise(function(resolve) {
     var values = {
-      'DEBUG_ENABLED': false,
       'HISTORY_ENABLED': true,
       'MAGICVARS_ENABLED': true,
-      'CMH_ENABLED': true,
-      'CMP_ENABLED': true,
-      'useIdb': true
+      'useCookieStorage': true
     };
     try {
       chrome.storage.sync.get(values, function(result) {

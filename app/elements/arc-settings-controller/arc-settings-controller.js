@@ -153,6 +153,10 @@ Polymer({
     this.$.passwordsClearDialog.open();
   },
 
+  cookiesClearClick: function() {
+    this.$.cookieClearDialog.open();
+  },
+
   onClearDialogResult: function(e) {
     if (e.detail.canceled || !e.detail.confirmed) {
       return;
@@ -201,9 +205,36 @@ Polymer({
       _db.close();
     })
     .catch((e) => {
-      console.error('Error clearing the history', e);
+      console.error('Error clearing passwords', e);
       StatusNotification.notify({
         message: 'Unable to clear passwords store'
+      });
+      throw e;
+    });
+  },
+
+  onClearCookiesResult: function(e) {
+    if (e.detail.canceled || !e.detail.confirmed) {
+      return;
+    }
+    var _db;
+    arc.app.db.idb.open().then((db) => {
+      _db = db;
+      return db.table('cookies').clear();
+    })
+    .then((deleteCount) => {
+      console.log('Deleted ' + deleteCount + ' objects');
+      StatusNotification.notify({
+        message: 'Cookies store cleared'
+      });
+    })
+    .then(() => {
+      _db.close();
+    })
+    .catch((e) => {
+      console.error('Error clearing cookies storage', e);
+      StatusNotification.notify({
+        message: 'Unable to clear cookies store'
       });
       throw e;
     });
