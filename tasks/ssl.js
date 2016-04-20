@@ -125,6 +125,7 @@ class TestServer {
     this._setMultipard();
     this._setRedirect();
     this._setErrors();
+    this._setEmptyResponses();
   }
 
   _setMain() {
@@ -334,6 +335,26 @@ class TestServer {
     });
     app.get('/status-error', (req, res) => {
       res.status(604).end();
+    });
+  }
+
+  _setEmptyResponses() {
+    app.all('/empty', (req, res) => {
+      var defaultStatus = 200;
+      var status = req.params.status;
+      if (status) {
+        status = Number(status);
+        if (status !== status) {
+          status = defaultStatus;
+        }
+      } else {
+        status = defaultStatus;
+      }
+      res.removeHeader('Date');
+      res.removeHeader('Connection');
+      res.removeHeader('Content-Length');
+      res.removeHeader('Transfer-Encoding');
+      res.status(status).end();
     });
   }
 }

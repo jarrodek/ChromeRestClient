@@ -41,6 +41,10 @@
       @apply(--layout-end-justified);
     }
 
+    .actions-row {
+      margin-bottom: 8px;
+    }
+
     .cookie-row {
 
     }
@@ -55,7 +59,13 @@
       @apply(--layout-wrap);
     }
     paper-dialog-scrollable {
-      min-height: 200px;
+      /*min-height: 200px;*/
+    }
+    paper-input-container {
+      margin-right: 8px;
+    }
+    .cookie-details {
+      margin-bottom: 12px;
     }
     </style>
     <div class="dialog">
@@ -80,16 +90,19 @@
               <paper-input-container class="cookie-domain" no-label-float inline>
                 <input is="iron-input" type="text" value="{{item.path::input}}" placeholder="Cookie path"/>
               </paper-input-container>
+              <paper-input-container class="cookie-domain" no-label-float inline>
+                <input is="iron-input" type="datetime-local" value="{{item.expires::input}}" placeholder="Expires"/>
+              </paper-input-container>
             </div>
           </div>
         </template>
-        <div class="actions">
+        <div class="actions-row">
           <paper-button raised on-tap="addEmptyCookie">Add cookie</paper-button>
         </div>
       </paper-dialog-scrollable>
       <div class="buttons">
           <paper-button dialog-dismiss>Cancel</paper-button>
-          <paper-button dialog-confirm>Accept</paper-button>
+          <paper-button dialog-confirm on-tap="_setValue">Accept</paper-button>
       </div>
     </div>
   </template>
