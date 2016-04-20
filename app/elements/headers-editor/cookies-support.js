@@ -18,6 +18,13 @@ Polymer({
       type: Boolean,
       value: true
     },
+    // list of cookies displayed in a form.
+    cookies: {
+      type: Array,
+      value: function() {
+        return [];
+      }
+    }
     // sizingTarget: {
     //   type: Object,
     //   value: function() {
@@ -53,6 +60,25 @@ Polymer({
   _select: function() {
 
     this.setValue('');
+  },
+
+  addEmptyCookie: function() {
+    this.push('cookies', {
+      'name': '',
+      'value': ''
+    });
+    this.notifyResize();
+  },
+
+  _removeCookie: function(e) {
+    var index = this.$.list.indexForElement(e.target);
+    this.splice('cookies', index, 1);
+    // this.updateHeaders();
+  },
+
+  _openCookieDetail: function(e) {
+    var model = this.$.list.modelForElement(e.target);
+    model.set('item.details', !model.get('item.details'));
   }
 
 });

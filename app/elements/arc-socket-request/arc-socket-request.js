@@ -59,7 +59,12 @@ Polymer({
     result.ok = response.ok;
     var ct = (response.headers && response.headers.get) ?
       response.headers.get('content-type') : null;
-    if (ct && ct.indexOf('image') !== -1 &&
+    var cl = (response.headers && response.headers.get) ?
+      Number(response.headers.get('content-length')) : null;
+    if (cl && cl === 0) {
+      result.body = '';
+      this._finishRequest(this.connection.request, result);
+    } else if (ct && ct.indexOf('image') !== -1 &&
       ct.indexOf('xml') === -1) {
       response.blob()
       .then((blob) => {
@@ -67,11 +72,21 @@ Polymer({
         return this._finishRequest(this.connection.request, result);
       });
     } else if (ct && ct.indexOf('json') !== -1) {
-      response.json()
-      .then((json) => {
-        result.body = json;
+      try {
+        response.json()
+        .then((json) => {
+          result.body = json;
+          return this._finishRequest(this.connection.request, result);
+        })
+        .catch((e) => {
+          console.warn('Something is wrong with the response.', e);
+          result.body = '';
+          return this._finishRequest(this.connection.request, result);
+        });
+      } catch (e) {
+        result.body = '';
         return this._finishRequest(this.connection.request, result);
-      });
+      }
     } else {
       response.text()
       .then((text) => {
