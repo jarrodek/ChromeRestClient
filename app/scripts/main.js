@@ -140,6 +140,9 @@
   app._onFeatureProjectEndpoints = (e) => {
     app._featureCalled('projectEndpoints', e.detail.item.dataset.id);
   };
+  app._onFeatureBack = (e) => {
+    app._featureCalled('back', e);
+  };
   // called when any component want to change request link.
   document.body.addEventListener('action-link-change', (e) => {
     var url = e.detail.url;
