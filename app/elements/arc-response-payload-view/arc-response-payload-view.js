@@ -97,17 +97,27 @@ Polymer({
       value: function() {
         return this.$.rawContent;
       }
-    }
+    },
+    contentPreview: Boolean
   },
 
   observers: [
     '_selectedTabChanged(selectedTab)',
-    '_rawChanged(raw)'
+    '_rawChanged(raw)',
+    '_contentPreviewChanged(contentPreview)'
   ],
 
   behaviors: [
     ArcBehaviors.TextSearchBehavior
   ],
+
+  attached: function() {
+    this.listen(window, 'message', '_onExternalMessage');
+  },
+
+  detached: function() {
+    this.unlisten(window, 'message', '_onExternalMessage');
+  },
 
   _selectedTabChanged: function(selectedTab) {
     var tabName;
@@ -128,6 +138,7 @@ Polymer({
         tabName = 'Image tab';
         break;
     }
+    this.contentPreview = false;
     if (this.isAttached) {
       arc.app.analytics.sendEvent('Response payload', 'Tab switched', tabName);
     }
@@ -141,6 +152,7 @@ Polymer({
     this._setIsImage(false);
     this._setIsEmpty(false);
     this._setParsedMode(undefined);
+    this.contentPreview = false;
   },
 
   _payloadChanged: function() {
@@ -317,12 +329,62 @@ Polymer({
   _rawChanged: function(raw) {
     this.$.rawContent.innerHTML = PayloadParser.htmlEscape(raw);
   },
-
-  _previewResponse: function() {
-    this.$.webView;
-    // chrome.runtime.getBackgroundPage((bg) => {
-    //   bg.arc.bg.openPreview(this.raw);
-    // });
+  // Handler for RAW preview click
+  _togglePreviewResponse: function() {
+    this.contentPreview = !this.contentPreview;
+  },
+  // Handler for `this.contentPreview` change.
+  _contentPreviewChanged: function(val) {
+    if (!this.isAttached) {
+      return;
+    }
+    if (val) {
+      this._openResponsePreview();
+    } else {
+      this._closeResponsePreview();
+    }
+  },
+  // Opens response preview in new layer
+  _openResponsePreview: function() {
+    if (!this.isAttached) {
+      return;
+    }
+    this.$.webView.contentWindow.postMessage({
+      'rawResponse': this.raw
+    }, '*');
+    this.$.webView.removeAttribute('hidden');
+    this.$.rawContent.setAttribute('hidden', true);
+    this.$.prism.setAttribute('hidden', true);
+  },
+  // Closes response preview
+  _closeResponsePreview: function() {
+    if (!this.isAttached) {
+      return;
+    }
+    this.$.webView.setAttribute('hidden', true);
+    this.$.webView.contentWindow.postMessage({
+      'cleanUp': true
+    }, '*');
+    this.$.rawContent.removeAttribute('hidden');
+    this.$.prism.removeAttribute('hidden');
+  },
+  // a message received from the external page using window.postMessage.
+  _onExternalMessage: function(e) {
+    if (!this.isAttached) {
+      return;
+    }
+    if (!e || !e.data) {
+      return;
+    }
+    if ('preview-window-height' in e.data) {
+      let height = e.data['preview-window-height'];
+      if (!height) {
+        this.$.webView.style.height = 'auto';
+      } else {
+        this.$.webView.style.height = e.data['preview-window-height'] + 'px';
+      }
+      // console.log('setting up client height', e.data['preview-window-height']);
+    }
   }
 });
 })();

@@ -66,11 +66,8 @@ Polymer({
    *
    * @param {String} newVal New value of the URL.
    */
-  _urlChanged: function(newVal) {
-    console.log('URL CHANGED', newVal);
+  _urlChanged: function() {
     if (this.detailed && !this.internalUrlSet) {
-      console.log('FORM UPDATED');
-      // clear the form
       this.updateForm();
     }
   },
