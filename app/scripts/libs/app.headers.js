@@ -1,4 +1,4 @@
-(function () {
+(function() {
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
@@ -220,7 +220,7 @@ arc.app.headers.getContentType = function(headers) {
   // return ct;
 };
 /**
- * Replace value fir given headers in the headers.
+ * Replace value for given headers in the headers.
  *
  * @param {Array|String|Object} headers A headers object. Can be string, array of objects or
  * Headers object.
@@ -262,5 +262,35 @@ arc.app.headers.replace = function(headers, name, value) {
     obj[header.name] = header.value;
   });
   return new Headers(obj);
+};
+/**
+ * Get error message for given header string.
+ * @param {Header|Array|String} input A headers to check.
+ * @return {String?} An error message or null if the headers are valid.
+ */
+arc.app.headers.getError = function(input) {
+  if (!input) {
+    return null;
+  }
+  if (!(input instanceof Array)) {
+    input = arc.app.headers.toJSON(input);
+  }
+  var msg = [];
+  for (var i = 0, len = input.length; i < len; i++) {
+    let name = input[i].name;
+    let value = input[i].value;
+    if (!name || !name.trim()) {
+      msg[msg.length] = 'Header name can\'t be empty';
+    } else if (/\s/.test(name)) {
+      msg[msg.length] = 'Header name should not contain whitespaces';
+    }
+    if (!value || !value.trim()) {
+      msg[msg.length] = 'Header value should not be empty';
+    }
+  }
+  if (msg.length > 0) {
+    return msg.join('\n');
+  }
+  return null;
 };
 }());

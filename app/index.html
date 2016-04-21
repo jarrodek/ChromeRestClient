@@ -32,6 +32,7 @@
         <!-- Main Toolbar -->
         <paper-toolbar id="mainToolbar" class="main-toolbar">
           <paper-icon-button class="toolbar-hide" icon="menu" paper-drawer-toggle></paper-icon-button>
+          <paper-icon-button feature="back" on-tap="_onFeatureBack" class="toolbar-hide" icon="arrow-back" title="Back"></paper-icon-button>
           <div class="title toolbar-hide">
             <span>[[pageTitle]]</span>
             <div class="project-endpoints" feature="projectEndpoints">
@@ -249,6 +250,7 @@
   <script src="scripts/libs/app.url.parser.js"></script>
   <script src="scripts/libs/app.payload.parser.js"></script>
   <script src="scripts/libs/app.clipboard.js"></script>
+  <script src="scripts/libs/app.cookies.js"></script>
   <!-- build:js scripts/code-mirror-custom.js -->
   <script src="scripts/code-mirror/mode/headers/headers.js"></script>
   <script src="scripts/code-mirror/addon/hint/http-headers.js"></script>

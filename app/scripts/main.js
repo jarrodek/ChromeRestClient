@@ -140,6 +140,9 @@
   app._onFeatureProjectEndpoints = (e) => {
     app._featureCalled('projectEndpoints', e.detail.item.dataset.id);
   };
+  app._onFeatureBack = (e) => {
+    app._featureCalled('back', e);
+  };
   // called when any component want to change request link.
   document.body.addEventListener('action-link-change', (e) => {
     var url = e.detail.url;
@@ -316,11 +319,10 @@
 
   window.addEventListener('error', (e) => {
     console.log('--no-save', 'Window error event,', e);
-    var stack = e.error.stack;
-    var message = e.error.toString();
-    if (stack) {
-      message += '\n' + stack;
+    if (!e.detail.message) {
+      return;
     }
+    var message = '[Window]' + e.detail.message;
     arc.app.analytics.sendException(message, false);
   });
 })(document, window);

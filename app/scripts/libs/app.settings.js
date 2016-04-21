@@ -1,4 +1,4 @@
-(function () {
+(function() {
 'use strict';
 /*******************************************************************************
  * Copyright 2016 Pawel Psztyc, The ARC team
@@ -42,12 +42,10 @@ arc.app.settings = arc.app.settings || {};
 arc.app.settings.getConfig = function() {
   return new Promise(function(resolve) {
     var values = {
-      'DEBUG_ENABLED': false,
       'HISTORY_ENABLED': true,
       'MAGICVARS_ENABLED': true,
-      'CMH_ENABLED': true,
-      'CMP_ENABLED': true,
-      'useIdb': true
+      'useCookieStorage': true,
+      'requestDefaultTimeout': 30
     };
     try {
       chrome.storage.sync.get(values, function(result) {

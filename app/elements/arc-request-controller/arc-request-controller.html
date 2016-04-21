@@ -61,6 +61,7 @@ This approach have some implications.
     <arc-project-object-model id="projects" on-error="_projectSaveError" on-save="_projectSavedHandler"></arc-project-object-model>
     <arc-magic-variables id="magicVariables" scope="[[project.id]]"></arc-magic-variables>
     <arc-basicauth-model id="basicAuthModel"></arc-basicauth-model>
+    <cookie-storage id="cookieJar" url="[[request.url]]" cookie="{{requestCookie}}" response-headers="[[response.headers]]"></cookie-storage>
     <paper-dialog id="basicAuthDialog"
       entry-animation="slide-from-top-animation"
       exit-animation="slide-up-animation"

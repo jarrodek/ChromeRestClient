@@ -9,43 +9,144 @@ Polymer({
   },
 
   run: function() {
-    var init = {};
-    if (this.request.method) {
-      init.method = this.request.method;
-    }
-    if (this.request.headers) {
-      let headers = arc.app.headers.toJSON(this.request.headers);
-      let obj = new Headers();
-      headers.forEach((item) => obj.append(item.name, item.value));
-      init.headers = obj;
-    }
-
-    if (this.request.files && this.request.files.length > 0) {
-      // create FormData from the form
-      let fd = new FormData();
-      this.request.files.forEach((field) => {
-        field.files.forEach((file) => {
-          fd.append(field.name, file);
+    this._getRequestTimeout()
+    .then((timeout) => {
+      return this._prepareRequest({
+        timeout: timeout
+      });
+    })
+    .catch((e) => {
+      this.fire('error', {
+        message: e.message
+      });
+      return null;
+    })
+    .then((init) => {
+      if (!init) {
+        // error catched.
+        return;
+      }
+      this.connection = new SocketFetch(this.request.url, init);
+      try {
+        return this.connection.fetch()
+        .then((response) => {
+          this._processResponse(response);
         });
-      });
-      let params = PayloadParser.stringToArray(this.request.payload);
-      params.forEach((pair) => {
-        fd.append(pair.name, pair.value);
-      });
-      init.body = fd;
-    } else if (this.request.payload) {
-      init.body = this.request.payload;
-    }
-    init.debug = true;
-    init.timeout = 20000;
-    this.connection = new SocketFetch(this.request.url, init);
-    this.connection.fetch().then((response) => {
-      this._processResponse(response);
-    }).catch((cause) => {
+      } catch (e) {
+        console.error('Error during fetch', e);
+        this.fire('error', {
+          message: e.message
+        });
+        return null;
+      }
+    })
+    .catch((cause) => {
       console.error('Error during fetch', cause);
       this.fire('error', {
         message: cause
       });
+    });
+  },
+  // Get default timeout for the request from sync storage.
+  _getRequestTimeout: function() {
+    return new Promise((resolve) => {
+      chrome.storage.sync.get({'requestDefaultTimeout': 30}, (r) => {
+        let t = Number(r.requestDefaultTimeout);
+        if (t !== t) {
+          t = 0;
+        }
+        let result = t * 1000; //to miliseconds.
+        resolve(result);
+      });
+    });
+  },
+
+  _prepareRequest: function(opts) {
+    return new Promise((resolve, reject) => {
+      var init = {};
+      if (this.request.method) {
+        init.method = this.request.method;
+      }
+      if (this.request.headers) {
+        let headers = arc.app.headers.toJSON(this.request.headers);
+        let obj = new Headers();
+        let rejected = false;
+        headers.forEach((item) => {
+          if (rejected) {
+            return;
+          }
+          var name = item.name && item.name.trim();
+          if (!name) {
+            reject(new Error('Header name is invalid'));
+            return;
+          } else {
+            try {
+              obj.append(item.name, item.value);
+            } catch (e) {
+              console.error(e.message);
+              reject(e);
+              rejected = true;
+              return;
+            }
+          }
+        });
+        if (rejected) {
+          return;
+        }
+        init.headers = obj;
+      }
+
+      if (this.request.files && this.request.files.length > 0) {
+        // create FormData from the form
+        let fd = new FormData();
+        let rejected = false;
+        this.request.files.forEach((field) => {
+          if (rejected) {
+            return;
+          }
+          field.files.forEach((file) => {
+            if (rejected) {
+              return;
+            }
+            try {
+              fd.append(field.name, file);
+            } catch (e) {
+              console.error(e.message);
+              rejected = true;
+              reject(e);
+              return;
+            }
+          });
+        });
+        if (rejected) {
+          return;
+        }
+        let params = PayloadParser.stringToArray(this.request.payload);
+        params.forEach((pair) => {
+          if (rejected) {
+            return;
+          }
+          try {
+            fd.append(pair.name, pair.value);
+          } catch (e) {
+            console.error(e.message);
+            rejected = true;
+            reject(new Error('Request parameters are invalid.'));
+            return;
+          }
+        });
+        init.body = fd;
+      } else if (this.request.payload) {
+        init.body = this.request.payload;
+      }
+      init.debug = true;
+      if ('timeout' in opts) {
+        var tm = opts.timeout;
+        if (tm > 0) {
+          init.timeout = tm;
+        }
+      }
+      resolve(init);
     });
   },
 
@@ -59,7 +160,12 @@ Polymer({
     result.ok = response.ok;
     var ct = (response.headers && response.headers.get) ?
       response.headers.get('content-type') : null;
-    if (ct && ct.indexOf('image') !== -1 &&
+    var cl = (response.headers && response.headers.get) ?
+      Number(response.headers.get('content-length')) : null;
+    if (cl && cl === 0) {
+      result.body = '';
+      this._finishRequest(this.connection.request, result);
+    } else if (ct && ct.indexOf('image') !== -1 &&
       ct.indexOf('xml') === -1) {
       response.blob()
       .then((blob) => {
@@ -67,11 +173,25 @@ Polymer({
         return this._finishRequest(this.connection.request, result);
       });
     } else if (ct && ct.indexOf('json') !== -1) {
-      response.json()
-      .then((json) => {
-        result.body = json;
+      try {
+        response.json()
+        .then((json) => {
+          result.body = json;
+          return this._finishRequest(this.connection.request, result);
+        })
+        .catch((e) => {
+          console.warn('Something is wrong with the response.', e);
+          try {
+            result.body = arc.app.utils.arrayBufferToString(this.connection.response.rawResponse);
+          } catch (e) {
+            result.body = '';
+          }
+          return this._finishRequest(this.connection.request, result);
+        });
+      } catch (e) {
+        result.body = '';
         return this._finishRequest(this.connection.request, result);
-      });
+      }
     } else {
       response.text()
       .then((text) => {
