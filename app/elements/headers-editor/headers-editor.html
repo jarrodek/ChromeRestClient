@@ -88,11 +88,13 @@
         <div class="headers-form">
           <template is="dom-repeat" id="headersList" items="{{headersList}}" on-dom-change="_onHeadersFormRender">
             <div class="form-row">
-              <paper-input-container class="header-name" no-label-float inline>
-                <input is="iron-input" on-focus="_headerNameFocus" type="text" value="{{item.name::input}}" placeholder="Header name"/>
+              <paper-input-container class="header-name" no-label-float inline auto-validate>
+                <input is="iron-input" on-focus="_headerNameFocus" type="text" value="{{item.name::input}}" placeholder="Header name" required pattern="\S*"/>
+                <paper-input-error>Header name is not valid</paper-input-error>
               </paper-input-container>
-              <paper-input-container class="header-value" no-label-float inline>
-                <input is="iron-input" name="headerValue" type="text" value="{{item.value::input}}" placeholder="Header value" />
+              <paper-input-container class="header-value" no-label-float inline auto-validate>
+                <input is="iron-input" name="headerValue" type="text" value="{{item.value::input}}" placeholder="Header value" required/>
+                <paper-input-error>Header value should not be empty</paper-input-error>
               </paper-input-container>
               <div class="edit-header">
                 <paper-icon-button icon="image:edit" title="Edit header value" on-tap="_openHeaderSupport"></paper-icon-button>

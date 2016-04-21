@@ -285,7 +285,7 @@ arc.app.headers.getError = function(input) {
       msg[msg.length] = 'Header name should not contain whitespaces';
     }
     if (!value || !value.trim()) {
-      msg[msg.length] = 'Header name should not be empty';
+      msg[msg.length] = 'Header value should not be empty';
     }
   }
   if (msg.length > 0) {
