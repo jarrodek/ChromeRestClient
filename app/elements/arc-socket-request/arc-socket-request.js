@@ -116,7 +116,11 @@ Polymer({
         })
         .catch((e) => {
           console.warn('Something is wrong with the response.', e);
-          result.body = '';
+          try {
+            result.body = arc.app.utils.arrayBufferToString(this.connection.response.rawResponse);
+          } catch (e) {
+            result.body = '';
+          }
           return this._finishRequest(this.connection.request, result);
         });
       } catch (e) {
