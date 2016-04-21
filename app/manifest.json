@@ -86,5 +86,8 @@
       ],
       "title": "Open from Google Drive"
     }
+  },
+  "sandbox": {
+    "pages": ["html-preview.html"]
   }
 }

@@ -316,6 +316,13 @@ Polymer({
 
   _rawChanged: function(raw) {
     this.$.rawContent.innerHTML = PayloadParser.htmlEscape(raw);
+  },
+
+  _previewResponse: function() {
+    this.$.webView;
+    // chrome.runtime.getBackgroundPage((bg) => {
+    //   bg.arc.bg.openPreview(this.raw);
+    // });
   }
 });
 })();

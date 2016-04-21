@@ -77,6 +77,23 @@ arc.bg.notifyBetaUpdate = () => {
   });
 };
 
+arc.bg.openPreview = (rawResponse) => {
+  chrome.app.window.create('html-preview.html', {
+    'id': 'html-preview',
+    'bounds': {
+      'width': 400,
+      'height': 400
+    }
+  }, (win) => {
+
+    console.log('sending a message to the content window', win.contentWindow);
+
+    win.contentWindow.postMessage({
+      'rawResponse': rawResponse
+    });
+  });
+};
+
 /**
  * Notifications support.
  *
