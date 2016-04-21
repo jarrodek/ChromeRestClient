@@ -177,6 +177,12 @@ class TestServer {
       res.set('Content-Type', 'application/json');
       res.send(json);
     });
+    app.get('/json-error', (req, res) => {
+      var json = fs.readFileSync('./tasks/test-data/json1.json', 'utf8');
+      res.set('Content-Type', 'application/json');
+      json = '[Eroor]: An error occured' + json;
+      res.send(json);
+    });
   }
 
   _setXML() {
