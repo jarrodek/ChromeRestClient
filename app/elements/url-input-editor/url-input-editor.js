@@ -70,6 +70,7 @@ Polymer({
     if (this.detailed && !this.internalUrlSet) {
       this.updateForm();
     }
+    this.revalidate();
   },
   /**
    * Toggle the view.
@@ -232,6 +233,7 @@ Polymer({
     if (!this.url) {
       return;
     }
+
     /* global URI, URLParser */
     URI.escapeQuerySpace = false;
     var data = new URLParser(this.url);
@@ -240,17 +242,26 @@ Polymer({
     for (let param of data.paramsList) {
       let key = param.name;
       let value = param.value;
-
       key = isEncode ? URLParser.encodeQueryString(key) : URLParser.decodeQueryString(key);
       value = isEncode ? URLParser.encodeQueryString(value) : URLParser.decodeQueryString(value);
-
       param.name = key;
       param.value = value;
-
       result.add(param);
     }
+    var path = data.path;
+    if (isEncode && path) {
+      if (/\s/.test(path)) {
+        let parts = path.split('/');
+        parts = parts.map((cmp) => URLParser.encodeQueryString(cmp));
+        path = parts.join('/');
+      }
+    } else {
+      path = URLParser.decodeQueryString(path);
+    }
+    data.path = path;
     data.paramsList = result;
-    this._setUrl(data.toString());
+    this.set('url', data.toString());
+    this.revalidate();
   },
   /**
    * Replace `&` with `;`
@@ -341,6 +352,20 @@ Polymer({
   // Handler called when the context menu has been opened.
   _menuOpened: function() {
     arc.app.analytics.sendEvent('Request view', 'URL widget toggle', 'Open menu');
+  },
+
+  revalidate: function() {
+    var nodes = Polymer.dom(this.$$('.params-list')).querySelectorAll('.param-value input');
+    if (!nodes) {
+      return;
+    }
+    var fn = (node) => {
+      this.async(() => {
+        node.validate();
+      }, 1);
+    };
+    nodes.forEach(fn);
+    this.$.masterUrl.validate();
   }
 });
 })();
