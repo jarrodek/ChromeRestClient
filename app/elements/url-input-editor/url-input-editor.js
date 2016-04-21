@@ -15,8 +15,7 @@ Polymer({
      */
     url: {
       type: String,
-      notify: true,
-      observer: '_urlChanged'
+      notify: true
     },
     // True when detailed view is enabled.
     detailed: {
@@ -59,13 +58,18 @@ Polymer({
     // True when a suggestion box for the URL is opened.
     suggesionsOpened: Boolean
   },
+  observers: [
+    '_urlChanged(url)'
+  ],
   /**
    * Called when the URL value change.
    *
    * @param {String} newVal New value of the URL.
    */
   _urlChanged: function(newVal) {
-    if (this.detailed && (!newVal || newVal.length === 0)) {
+    console.log('URL CHANGED', newVal);
+    if (this.detailed && !this.internalUrlSet) {
+      console.log('FORM UPDATED');
       // clear the form
       this.updateForm();
     }
@@ -130,8 +134,15 @@ Polymer({
     if (this.anchorValue) {
       url += '#' + this.anchorValue;
     }
-    this.set('url', url);
+    this._setUrl(url);
   },
+
+  _setUrl: function(url) {
+    this.internalUrlSet = true;
+    this.set('url', url);
+    this.internalUrlSet = false;
+  },
+
   /**
    * Crerate / update form data from the URL.
    */
@@ -242,7 +253,7 @@ Polymer({
       result.add(param);
     }
     data.paramsList = result;
-    this.set('url', data.toString());
+    this._setUrl(data.toString());
   },
   /**
    * Replace `&` with `;`
@@ -269,7 +280,7 @@ Polymer({
     data.queryDelimiter = delim;
     data.setQueryFromCurrentParams();
     var url = data.toString();
-    this.set('url', url);
+    this._setUrl(url);
   },
   /** Called when URL params form has been renederd. */
   _onParamsRender: function() {
@@ -298,14 +309,14 @@ Polymer({
     var url = this.url;
     if (url && url.indexOf('://') === -1) {
       url = 'https://' + url;
-      this.set('url', url);
+      this._setUrl(url);
     }
     this.fire('send');
   },
   // Hanlder for suggestion selected event.
   _onSuggestionSelected: function(e) {
     var value = e.detail.value;
-    this.set('url', value);
+    this._setUrl(value);
   },
   // Handler called when the `paper-autocomplete` request a suggestions.
   _queryUrlHistory: function(e) {
