@@ -67,6 +67,10 @@
       .form-row.has-support .edit-header {
         display: initial;
       }
+      .cmError{
+        @apply(--paper-font-common-base);
+        color: #dd2c00;
+      }
     </style>
     <paper-tabs selected="{{tabSelected}}">
       <paper-tab>Raw headers</paper-tab>
@@ -77,6 +81,7 @@
     <iron-pages selected="{{tabSelected}}">
       <section>
         <code-mirror mode="http-headers" theme="cm-arc" on-change="valueChanged" value="{{headers}}" id="cm"></code-mirror>
+        <div class="cmError" hidden$="[[valid]]">[[errorMessage]]</div>
       </section>
       <section class="headers-list">
         <label class="headers-title">HTTP headers</label>
