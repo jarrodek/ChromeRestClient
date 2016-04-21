@@ -6,7 +6,7 @@ Polymer({
   /**
    * Event called when the user press enter in any field in the editor.
    * The event will not be called if the suggestion box is opened.
-   * 
+   *
    * @event send
    */
   properties: {
