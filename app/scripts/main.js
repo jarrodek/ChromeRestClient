@@ -192,6 +192,12 @@
       arc.app.analytics.sendEvent('Shortcats usage', 'Called', 'Search');
     }
   };
+  // Called when ctrl/command + n called to open new window.
+  app.onNewWindow = () => {
+    chrome.runtime.getBackgroundPage(function(bg) {
+      bg.arc.bg.openWindow();
+    });
+  };
 
   app.textSearchBarOpened = () => {
     var searchBar = document.querySelector('#content-search-bar');
