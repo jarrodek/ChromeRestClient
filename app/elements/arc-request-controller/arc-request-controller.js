@@ -886,6 +886,14 @@ Polymer({
   },
 
   _saveCookies: function() {
+    var headers = [];
+    if (this.response.redirects && this.response.redirects.length) {
+      this.response.redirects.forEach((r) => {
+        let redirectHeaders = arc.app.headers.toJSON(r.headers);
+        headers.push(redirectHeaders);
+      });
+    }
+    headers.push(this.request.headers);
     this.$.cookieJar.store();
   }
 });

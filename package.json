@@ -20,6 +20,7 @@
     "confirm-simple": "^1.0.3",
     "connect-busboy": "0.0.2",
     "connect-modrewrite": "^0.8.5",
+    "cookie-parser": "^1.4.1",
     "crisper": "^2.0.1",
     "del": "^2.0.2",
     "express": "^4.13.4",

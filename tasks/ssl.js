@@ -9,8 +9,10 @@ const multer = require('multer'); // v1.0.5
 const upload = multer(); // for parsing multipart/form-data
 // const coBusboy = require('co-busboy');
 // var Busboy = require('busboy');
+const cookieParser = require('cookie-parser');
 const busboy = require('connect-busboy');
 
+app.use(cookieParser());
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({
   extended: true
@@ -207,7 +209,8 @@ class TestServer {
   }
 
   _setCookie() {
-    app.get('/cookie', (req, res) => {
+    //set random cookies
+    app.get('/cookies/random', (req, res) => {
       var Chance = require('chance');
       var chance = new Chance();
       for (var i = 0; i < 10; i++) {
@@ -238,6 +241,24 @@ class TestServer {
       });
       res.set('Content-Type', 'text/html');
       res.send('<h1>Cookies are set</h1>');
+    });
+    //set cookies getting param keys as cookie name and param value as cookie value.
+    app.get('/cookies/set', (req, res) => {
+      let params = req.params;
+      for (let key in params) {
+        res.cookie(key, params[key], {
+          path: '/'
+        });
+      }
+      res.redirect('/cookies');
+    });
+    //list cookies
+    app.get('/cookies', function(req, res) {
+      let resp = {
+        cookies: req.cookies
+      };
+      res.set('Content-Type', 'application/json');
+      res.send(resp);
     });
   }
 

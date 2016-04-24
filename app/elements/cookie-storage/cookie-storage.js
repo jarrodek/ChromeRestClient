@@ -36,6 +36,8 @@ Polymer({
   /**
    * Extracts cookies from `this.responseHeaders` and if any cookies are there it stores them
    * in the datastore.
+   *
+   * TODO: support cookie deletion.
    */
   store: function() {
     var headers = this.responseHeaders;
