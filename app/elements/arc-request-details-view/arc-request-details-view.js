@@ -14,7 +14,15 @@ Polymer({
   },
 
   _computeHasPayload: function(request) {
-    return request.har.entries[0].request.postData.text;
+    if (!request) {
+      return false;
+    }
+    var entries = request.har.entries;
+    if (!entries || entries.length === 0) {
+      return false;
+    }
+    var pos = this.isHistory ? entries.length - 1 : 0;
+    return !!entries[pos].request.postData.text;
   },
 
   arrayItem: function(change, index, path) {

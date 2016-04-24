@@ -62,9 +62,13 @@ Polymer({
     return cls;
   },
   _statusCodeChanged: function() {
-    if (!this.statusCode) {
+    var reqErr = this.statusMessage === 'Request error';
+    if (!this.statusCode || reqErr) {
       this._scdTitle = 'No response';
       this._scdBody = 'The response was empty';
+      if (reqErr) {
+        this.statusCode = 0;
+      }
       return;
     }
     this.$.statusModel.objectId = this.statusCode;
