@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
@@ -25,13 +26,13 @@
  *
  * @namespace
  */
-var drive = {};
+window.drive = {};
 /**
  * Authorize the app in Google Drive service.
  *
  * @return {Promise} Fulfilled promise with auth token or reject.
  */
-drive.auth = function() {
+window.drive.auth = function() {
   return new Promise((resolve, reject) => {
     chrome.identity.getAuthToken({'interactive': true}, (authToken) => {
       if (chrome.runtime.lastError) {
@@ -49,28 +50,28 @@ drive.auth = function() {
  *
  * @namespace
  */
-drive.file = {};
+window.drive.file = {};
 /**
  * File meta boundary for POST calls.
  */
-drive.file.boundary = 'ARCFormBoundary49nr1hyovoq1tt9';
-drive.file.delimiter = '\r\n--' + drive.file.boundary + '\r\n';
-drive.file.closeDelimiter = '\r\n--' + drive.file.boundary + '--';
+window.drive.file.boundary = 'ARCFormBoundary49nr1hyovoq1tt9';
+window.drive.file.delimiter = '\r\n--' + window.drive.file.boundary + '\r\n';
+window.drive.file.closeDelimiter = '\r\n--' + window.drive.file.boundary + '--';
 /**
  * Drive's registered content type.
  * It will be used to search for app's files in the Drive.
  * Drive's handlers will recognize the app and will run it from Drive UI.
  */
-drive.file.mime = 'application/restclient+data';
+window.drive.file.mime = 'application/restclient+data';
 /**
  * Extension name for files stored in Google Drive.
  */
-drive.file.extension = 'arc';
+window.drive.file.extension = 'arc';
 /**
  * A list of allowed resources (file metadata) in the file create request.
  * See https://developers.google.com/drive/v3/reference/files/create for full list.
  */
-drive.file.allowedResource = [
+window.drive.file.allowedResource = [
   'appProperties', 'contentHints', 'createdTime', 'description', 'folderColorRgb', 'id',
   'mimeType', 'modifiedTime', 'name', 'parents', 'properties', 'starred', 'viewedByMeTime',
   'viewersCanCopyContent', 'writersCanShare'
@@ -91,10 +92,10 @@ drive.file.allowedResource = [
  *    - {String} mimeType - A media mime type
  *    - {String|Object} body - A content to save.
  */
-drive.file.create = function(config) {
+window.drive.file.create = function(config) {
   return new Promise((resolve, reject) => {
     try {
-      config = drive.file.ensureDriveFileConfig(config);
+      config = window.drive.file.ensureDriveFileConfig(config);
     } catch (e) {
       reject(e);
       return;
@@ -102,9 +103,9 @@ drive.file.create = function(config) {
     if (!config.resource.contentHints || !config.resource.contentHints.thumbnail ||
       !config.resource.contentHints.image) {
       let at;
-      drive.auth()
+      window.drive.auth()
       .then((_at) => at = _at)
-      .then(drive.file._appSafeIcon)
+      .then(window.drive.file._appSafeIcon)
       .then((file) => {
         if (!config.resource.contentHints) {
           config.resource.contentHints = {};
@@ -113,15 +114,15 @@ drive.file.create = function(config) {
           image: file,
           mimeType: 'image/png'
         };
-        return drive.file._uploadFile(at, config);
+        return window.drive.file._uploadFile(at, config);
       })
       .then(resolve)
       .catch(reject);
     } else {
       let at;
-      drive.auth()
+      window.drive.auth()
       .then((_at) => at = _at)
-      .then(() => drive.file._uploadFile(at, config))
+      .then(() => window.drive.file._uploadFile(at, config))
       .then(resolve)
       .catch(reject);
     }
@@ -134,18 +135,18 @@ drive.file.create = function(config) {
  * @param {Object} config The same as for `create` function.
  * @return {Promise} Fulfilled promise with file properties (the response).
  */
-drive.file.update = function(fileId, config) {
+window.drive.file.update = function(fileId, config) {
   return new Promise((resolve, reject) => {
     try {
-      config = drive.file.ensureDriveFileConfig(config);
+      config = window.drive.file.ensureDriveFileConfig(config);
     } catch (e) {
       reject(e);
       return;
     }
     let at;
-    drive.auth()
+    window.drive.auth()
     .then((_at) => at = _at)
-    .then(() => drive.file._uploadUpdate(fileId, at, config))
+    .then(() => window.drive.file._uploadUpdate(fileId, at, config))
     .then(resolve)
     .catch(reject);
   });
@@ -154,7 +155,7 @@ drive.file.update = function(fileId, config) {
  * Ensure that the file has correct configuration and throw an error if not.
  * Also it will add a mime type of the file if not present.
  */
-drive.file.ensureDriveFileConfig = function(config) {
+window.drive.file.ensureDriveFileConfig = function(config) {
   if (!('resource' in config) ||
       !('media' in config)) {
     throw new Error('Invalid arguments.');
@@ -163,7 +164,7 @@ drive.file.ensureDriveFileConfig = function(config) {
   let error = false;
   let invalidArguments = [];
   names.forEach((key) => {
-    if (drive.file.allowedResource.indexOf(key) === -1) {
+    if (window.drive.file.allowedResource.indexOf(key) === -1) {
       error = true;
       invalidArguments.push(key);
     }
@@ -171,26 +172,26 @@ drive.file.ensureDriveFileConfig = function(config) {
   if (error) {
     throw new Error('Unknown argument for resource: ' + invalidArguments.join(', '));
   }
-  if (!config.resource.mimeType && drive.file.mime) {
-    config.resource.mimeType = drive.file.mime;
+  if (!config.resource.mimeType && window.drive.file.mime) {
+    config.resource.mimeType = window.drive.file.mime;
   }
   return config;
 };
 /**
  * Perform upload action.
  */
-drive.file._uploadFile = function(accessToken, options) {
+window.drive.file._uploadFile = function(accessToken, options) {
   var init = {
     method: 'POST',
-    body: drive.file._getPayload(options),
-    headers: drive.file._getUploadHeaders(accessToken),
+    body: window.drive.file._getPayload(options),
+    headers: window.drive.file._getUploadHeaders(accessToken),
   };
   return fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', init)
   .then(function(response) {
     return response.json();
   });
 };
-drive.file._appSafeIcon = () => {
+window.drive.file._appSafeIcon = () => {
   return new Promise((resolve) => {
     let url = chrome.runtime.getURL ? chrome.runtime.getURL('/assets/arc_icon_128.png') :
       '/app/assets/arc_icon_128.png'; // for test cases
@@ -211,11 +212,11 @@ drive.file._appSafeIcon = () => {
     });
   });
 };
-drive.file._uploadUpdate = function(fileId, accessToken, options) {
+window.drive.file._uploadUpdate = function(fileId, accessToken, options) {
   var init = {
     method: 'PATCH',
-    body: drive.file._getPayload(options),
-    headers: drive.file._getUploadHeaders(accessToken),
+    body: window.drive.file._getPayload(options),
+    headers: window.drive.file._getUploadHeaders(accessToken),
   };
   return fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`,
     init)
@@ -226,21 +227,21 @@ drive.file._uploadUpdate = function(fileId, accessToken, options) {
     throw e;
   });
 };
-drive.file._getUploadHeaders = function(accessToken) {
+window.drive.file._getUploadHeaders = function(accessToken) {
   var headers = new Headers();
   headers.set('Authorization', 'Bearer ' + accessToken);
-  headers.set('Content-Type', 'multipart/related; boundary="' + drive.file.boundary + '"');
+  headers.set('Content-Type', 'multipart/related; boundary="' + window.drive.file.boundary + '"');
   return headers;
 };
-drive.file._getPayload = function(config) {
+window.drive.file._getPayload = function(config) {
   var content;
   if (typeof config.media.body !== 'string') {
     content = JSON.stringify(config.media.body);
   } else {
     content = config.media.body;
   }
-  var d = drive.file.delimiter;
-  var cd = drive.file.closeDelimiter;
+  var d = window.drive.file.delimiter;
+  var cd = window.drive.file.closeDelimiter;
   let meta = JSON.stringify(config.resource);
 
   let body = `${d}Content-Type: application/json; charset=UTF-8\r\n\r\n${meta}`;
@@ -374,3 +375,4 @@ drive.file._getPayload = function(config) {
 //     });
 //   }
 // };
+}());

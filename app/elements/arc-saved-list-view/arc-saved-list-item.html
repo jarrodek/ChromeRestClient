@@ -34,6 +34,10 @@
       @apply(--table-url-value);
     }
 
+    .type-column {
+      @apply(--table-type-value);
+    }
+
     .action-column {
       @apply(--table-action-value);
     }
@@ -49,6 +53,7 @@
       padding: 0 24px;
       margin-top: 12px;
     }
+
     .type-column iron-icon {
       color: rgba(0, 0, 0, 0.57);
     }
@@ -69,7 +74,7 @@
       <paper-checkbox checked="{{selected}}"></paper-checkbox>
     </div>
     <div class="name-column" on-tap="_editName" hidden$="[[isHistory]]">{{request.name}}</div>
-    <div class="name-column" hidden$="[[!isHistory]]">[[arrayItem(request.har.pages.*, 0, 'startedDateTime')]]</div>
+    <div class="name-column" hidden$="[[!isHistory]]">[[computeHistoryTime(request.har.pages.*, 'startedDateTime')]]</div>
     <div class="method-column">{{request.method}}</div>
     <div class="url-column">{{request.url}}</div>
     <div class="type-column">

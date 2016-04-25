@@ -41,6 +41,9 @@
     "DriveRequestObject": true,
     "SavedRequestObject": true,
     "HistoryRequestObject": true,
-    "BasicAuth": true
+    "BasicAuth": true,
+    "LogObject": true,
+    "Cookie": true,
+    "Cookies": true
   }
 }

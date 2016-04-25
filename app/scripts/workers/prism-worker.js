@@ -12,7 +12,9 @@ importScripts(
   '/bower_components/prism/plugins/autolinker/prism-autolinker.min.js',
   'prism-modes.js'
 );
-
+function getLanguagePath(lang) {
+  return Prism.plugins.mods.path + 'prism-' + lang + '.min.js';
+}
 /**
  * Load a grammar with its dependencies
  * @param {string} lang
@@ -42,9 +44,7 @@ var loadLanguages = function(langs, success, error) {
     loadLanguage(lang);
   });
 };
-function getLanguagePath(lang) {
-  return Prism.plugins.mods.path + 'prism-' + lang + '.min.js';
-}
+
 Prism.plugins.mods.langs.forEach(function(lang) {
   loadLanguage(lang);
 });
@@ -130,7 +130,7 @@ function makeTokens(obj) {
   }
 }
 function stringify(data) {
-  var data = makeTokens(data.tokens);
+  data = makeTokens(data.tokens);
   return Prism.Token.stringify(Prism.util.encode(data));
 }
 self.onmessage = function(e) {

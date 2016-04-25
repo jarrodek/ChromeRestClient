@@ -47,13 +47,13 @@
     #### Examples
 
     ```
-    <google-signin></google-signin>
-    <google-signin label-signin="Sign-in" scopes="https://www.googleapis.com/auth/drive">
-    </google-signin>
-    <google-signin theme="dark" width="iconOnly" scopes="https://www.googleapis.com/auth/drive">
-    </google-signin>
+    <chrome-signin></chrome-signin>
+    <chrome-signin label-signin="Sign-in" scopes="https://www.googleapis.com/auth/drive">
+    </chrome-signin>
+    <chrome-signin theme="dark" width="iconOnly" scopes="https://www.googleapis.com/auth/drive">
+    </chrome-signin>
     ```
-    
+
     See https://elements.polymer-project.org/elements/google-signin for more information
   */
   Polymer({
@@ -244,8 +244,9 @@
       if (newVal) {
         if (this.needAdditionalAuth) {
           this.fire('google-signin-necessary');
+        } else {
+          this.fire('google-signin-success');
         }
-        this.fire('google-signin-success');
       } else {
         this.fire('google-signed-out');
       }
@@ -275,8 +276,10 @@
      * The dialog will be blocked by a popup blocker unless called inside click handler.
      */
     signIn: function() {
+      this.fire('google-signin-attempted');
       this.$.aware.signIn();
     },
+
     _signInKeyPress: function(e) {
       if (e.which === 13 || e.keyCode === 13 || e.which === 32 || e.keyCode === 32) {
         e.preventDefault();

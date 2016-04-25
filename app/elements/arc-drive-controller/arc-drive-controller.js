@@ -20,11 +20,8 @@ Polymer({
      * True if the app is authorized.
      */
     appAuthorized: Boolean,
-    /**
-     * True if the user is not signed in to the Chrome.
-     * In this case use of identity API is not possible.
-     */
-    notSignedIn: Boolean,
+    // True if user is not signed in to Chrome.
+    chromeSignedIn: Boolean,
     /**
      * Indicating that the component is working.
      */
@@ -42,10 +39,6 @@ Polymer({
      * File search term entered by the user.
      */
     query: String,
-    /**
-     * Auth headers set by <user-provider> element.
-     */
-    authHeaders: Object,
     /**
      * List of files retreived from Drive API.
      */
@@ -97,25 +90,47 @@ Polymer({
    */
   selectFile: function() {
     this._setErrorMessage(null);
-    this.viewSelected = 0;
+    if (!this.chromeSignedIn) {
+      this.viewSelected = 3;
+      this.open();
+      return;
+    }
     if (!this.appAuthorized) {
-      this.$.userProvider.authorize(true)
-      .then(() => {
-        this.selectFile();
-      })
-      .catch(() => {
-        this.viewSelected = 3;
-        this.open();
-      });
+      this.viewSelected = 4;
+      this.open();
+      // this.$.chromeSigninAware.signIn(true);
     } else {
-      //this.withBackdrop = true;
+      this.viewSelected = 0;
       this.open();
       if (!this.items || this.items.length === 0) {
         this.loadMoreData();
       }
+      arc.app.analytics.sendEvent('Drive integration', 'Open', 'Open drive picker');
     }
-    arc.app.analytics.sendEvent('Drive integration', 'Open', 'Open drive picker');
   },
+
+  signinHandler: function() {
+    if (!this.opened) {
+      return;
+    }
+    switch (this.viewSelected) {
+      case 4:
+        this.selectFile();
+        break;
+    }
+  },
+
+  handleSignOut: function() {
+    if (!this.opened) {
+      return;
+    }
+    if (!this.chromeSignedIn) {
+      this.viewSelected = 3;
+    } else {
+      this.close();
+    }
+  },
+
   /**
    * Query the Drive API to download files list.
    * This function will only download files created aby the app (with app's contant type).
@@ -142,6 +157,9 @@ Polymer({
       params.pageToken = this.nextPageToken;
     }
     this.queryParams = params;
+    this.$.query.headers = {
+      'Authorization': 'Bearer ' + this.$.chromeSigninAware.accessToken
+    };
     this.$.query.generateRequest();
   },
   /**
@@ -201,6 +219,9 @@ Polymer({
     }
     this.set('loading', true);
     this.set('fileId', id);
+    this.$.download.headers = {
+      'Authorization': 'Bearer ' + this.$.chromeSigninAware.accessToken
+    };
     this.$.download.generateRequest();
   },
   /**

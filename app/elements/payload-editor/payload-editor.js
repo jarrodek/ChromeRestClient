@@ -21,7 +21,8 @@ Polymer({
      */
     contentType: {
       type: String,
-      observer: '_onContentTypeChanged'
+      observer: '_onContentTypeChanged',
+      notify: true
     },
     /**
      * Currently selected tab.
@@ -250,6 +251,14 @@ Polymer({
 
   _computeHasFiles: function(no) {
     return !!no;
+  },
+
+  _updateContentType: function(e) {
+    var ct = e.target.dataset.ct;
+    if (!ct) {
+      return;
+    }
+    this.contentType = ct;
   }
 });
 })();

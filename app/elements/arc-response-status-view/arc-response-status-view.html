@@ -86,16 +86,28 @@ the License.
             margin-top: 12px;
           }
 
+          .source-message {
+            margin: 16px;
+          }
+          .source-message pre {
+            font-size: 15px;
+            word-break: break-all;
+            white-space: pre-line;
+          }
+          .text {
+            -webkit-user-select: text;
+            cursor: text;
+          }
         </style>
         <div class="status-row">
-          <div class="status-label">Status:</div>
-          <div class="status-value status">
+          <div class="status-label text">Status:</div>
+          <div class="status-value status text">
             <span class$="{{_computeStatusClass(statusCode)}}">
               <span>{{statusCode}}</span>:
               <span>{{statusMessage}}</span>
             </span>
             <paper-icon-button on-tap="showStatusInfo" icon="help" class="response-status-help"></paper-icon-button>
-            <span>
+            <span class="text">
               Loading time: {{loadingTime}} ms
             </span>
           </div>
@@ -111,6 +123,12 @@ the License.
           </section>
           <section>
             <arc-headers-display-view on-tap="_handleLink" headers="{{requestHeadersArray}}"></arc-headers-display-view>
+            <div class="source-message text">
+              <h5>Source message</h5>
+              <pre>
+[[httpMessage]]
+              </pre>
+            </div>
           </section>
           <section>
             <template is="dom-if" if="{{!redirectData.length}}">
@@ -121,11 +139,11 @@ the License.
             <template is="dom-if" if="{{redirectData.length}}">
               <template is="dom-repeat" items="{{redirectData}}">
                 <div class="status-row">
-                  <div class="status-label">
+                  <div class="status-label text">
                     #<span>{{_computeIndexName(index)}}</span>
                   </div>
                   <div class="redirect-value" on-tap="_handleLink">
-                    <div class="status-value status">
+                    <div class="status-value status text">
                       <span>To:
                         <span>
                           <!-- TODO: Handle links differently and not show link if there is no actually a link -->

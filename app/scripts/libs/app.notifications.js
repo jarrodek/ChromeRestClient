@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
@@ -19,6 +20,20 @@
  * A base object for all types with helper methods.
  */
 class StatusNotification {
+
+  static get TIME_SHORT() {
+    return 3000;
+  }
+  static get TIME_MEDIUM() {
+    return 7000;
+  }
+  static get TIME_LONG() {
+    return 12000;
+  }
+  static get TIME_INFINITY() {
+    return 0;
+  }
+
   /**
    * Special type of notification when the user see a message and have more than one option
    * to click. Status element will always include "dismiss" message.
@@ -78,7 +93,5 @@ class StatusNotification {
     toast.open();
   }
 }
-StatusNotification.TIME_SHORT = 3000;
-StatusNotification.TIME_MEDIUM = 7000;
-StatusNotification.TIME_LONG = 12000;
-StatusNotification.TIME_INFINITY = 0;
+window.StatusNotification = StatusNotification;
+}());

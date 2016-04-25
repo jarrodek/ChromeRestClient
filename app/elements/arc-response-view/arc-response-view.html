@@ -28,9 +28,20 @@ the License.
         border: 1px var(--main-section-border-color) solid;
         margin: 12px;
       }
+      .empty-info {
+        @apply(--paper-font-body1);
+        color: var(--paper-grey-500);
+        margin: 12px;
+        padding: 0 16px;
+      }
     </style>
-    <arc-response-status-view loading-time="[[loadingTime]]" status-code="[[response.status]]" status-message="[[response.statusText]]" response-headers="[[response.headers]]" request-headers="[[request.headers]]" redirect-data="[[response.redirects]]"></arc-response-status-view>
-    <arc-response-payload-view payload="[[response.body]]" headers="[[response.headers]]"></arc-response-payload-view>
+    <arc-response-status-view loading-time="[[loadingTime]]" status-code="[[response.status]]" status-message="[[response.statusText]]" response-headers="[[response.headers]]" request-headers="[[request.headers]]" http-message="[[request.messageSent]]" redirect-data="[[response.redirects]]"></arc-response-status-view>
+    <template is="dom-if" if="[[hasResponse]]">
+      <arc-response-payload-view id="payloadView" payload="[[response.body]]" headers="[[response.headers]]"></arc-response-payload-view>
+    </template>
+    <template is="dom-if" if="[[!hasResponse]]">
+      <p class="empty-info">This response do not carry a payload.</p>
+    </template>
   </template>
   <script src="arc-response-view.js"></script>
 </dom-module>

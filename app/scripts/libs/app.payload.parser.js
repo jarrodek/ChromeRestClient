@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 
 /* global URLParser */
@@ -20,6 +21,47 @@
  * A class containing methods to parse request payload.
  */
 class PayloadParser {
+
+  static get AMP_RE() {
+    return new RegExp(/&/g);
+  }
+  static get GT_RE() {
+    return new RegExp(/>/g);
+  }
+
+  static get LT_RE() {
+    return new RegExp(/</g);
+  }
+  static get SQUOT_RE() {
+    return new RegExp(/'/g);
+  }
+  static get QUOT_RE() {
+    return new RegExp(/"/g);
+  }
+  /**
+   * Escape HTML to save HTML text.
+   *
+   * @param {String} s A HTML string to be escaped.
+   */
+  static htmlEscape(s) {
+    if (s.indexOf('&') !== -1) {
+      s = s.replace(PayloadParser.AMP_RE, '&amp;');
+    }
+    if (s.indexOf('<') !== -1) {
+      s = s.replace(PayloadParser.LT_RE, '&lt;');
+    }
+    if (s.indexOf('>') !== -1) {
+      s = s.replace(PayloadParser.GT_RE, '&gt;');
+    }
+    if (s.indexOf('"') !== -1) {
+      s = s.replace(PayloadParser.QUOT_RE, '&quot;');
+    }
+    if (s.indexOf('\'') !== -1) {
+      s = s.replace(PayloadParser.SQUOT_RE, '&#39;');
+    }
+    return s;
+  }
+
   /**
    * Parse input array to string x-www-form-urlencoded
    *
@@ -162,3 +204,5 @@ class PayloadParser {
     };
   }
 }
+window.PayloadParser = PayloadParser;
+}());

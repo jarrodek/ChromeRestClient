@@ -1,4 +1,5 @@
 (function() {
+'use strict';
 Polymer({
   is: 'arc-response-payload-view',
   properties: {
@@ -88,12 +89,35 @@ Polymer({
       type: Boolean,
       value: true,
       readOnly: true
-    }
+    },
+
+    // An element which should be searched for text.
+    _textSearch: {
+      type: HTMLElement,
+      value: function() {
+        return this.$.rawContent;
+      }
+    },
+    contentPreview: Boolean
   },
 
   observers: [
-    '_selectedTabChanged(selectedTab)'
+    '_selectedTabChanged(selectedTab)',
+    '_rawChanged(raw)',
+    '_contentPreviewChanged(contentPreview)'
   ],
+
+  behaviors: [
+    ArcBehaviors.TextSearchBehavior
+  ],
+
+  attached: function() {
+    this.listen(window, 'message', '_onExternalMessage');
+  },
+
+  detached: function() {
+    this.unlisten(window, 'message', '_onExternalMessage');
+  },
 
   _selectedTabChanged: function(selectedTab) {
     var tabName;
@@ -114,6 +138,7 @@ Polymer({
         tabName = 'Image tab';
         break;
     }
+    this.contentPreview = false;
     if (this.isAttached) {
       arc.app.analytics.sendEvent('Response payload', 'Tab switched', tabName);
     }
@@ -127,6 +152,7 @@ Polymer({
     this._setIsImage(false);
     this._setIsEmpty(false);
     this._setParsedMode(undefined);
+    this.contentPreview = false;
   },
 
   _payloadChanged: function() {
@@ -225,6 +251,140 @@ Polymer({
 
   _tabsChanged: function() {
     this.$.tabs.notifyResize();
+  },
+
+  _searchBarOpenedChanged: function(e) {
+    // e.detail.opened;
+    // var value = e.detail.value;
+    console.log('--no-save', '_searchBarOpenedChanged', e.detail.opened);
+    this._searchInputChanged(e);
+  },
+
+  // search in response tab
+  _searchInputChanged: function(e) {
+    if (e.detail.lastTarget && e.detail.lastTarget !== this) {
+      return;
+    }
+    var elm = null;
+    switch (this.selectedTab) {
+      case 0:
+        //raw
+        elm = this;
+        break;
+      case 1:
+        //parsed
+        elm = this.$.prism;
+        break;
+      case 2:
+        //json
+        elm = this.$.jsonViewer;
+        break;
+      case 3:
+        //xml
+        elm = this.$.xmlViewer;
+        break;
+    }
+    if (elm) {
+      elm.cleanMarked();
+      elm.mark(e.detail.value);
+      let marked = elm.markedCount;
+      this.fire('iron-signal', {
+        name: 'search-mark-count',
+        data: {
+          count: marked,
+          searchTarget: this
+        }
+      });
+    }
+  },
+
+  _searchPositionChanged: function(e) {
+    if (e.detail.searchTarget && e.detail.searchTarget !== this) {
+      return;
+    }
+    var pos = e.detail.position;
+    var elm = null;
+    switch (this.selectedTab) {
+      case 0:
+        elm = this;
+        break;
+      case 1:
+        elm = this.$.prism;
+        break;
+      case 2:
+        //json
+        elm = this.$.jsonViewer;
+        break;
+      case 3:
+        elm = this.$.xmlViewer;
+        break;
+    }
+    if (elm) {
+      elm.clearMarked();
+      elm.setMarked(pos);
+    }
+    console.log('--no-save', 'Search position changed.', pos, elm);
+  },
+
+  _rawChanged: function(raw) {
+    this.$.rawContent.innerHTML = PayloadParser.htmlEscape(raw);
+  },
+  // Handler for RAW preview click
+  _togglePreviewResponse: function() {
+    this.contentPreview = !this.contentPreview;
+  },
+  // Handler for `this.contentPreview` change.
+  _contentPreviewChanged: function(val) {
+    if (!this.isAttached) {
+      return;
+    }
+    if (val) {
+      this._openResponsePreview();
+    } else {
+      this._closeResponsePreview();
+    }
+  },
+  // Opens response preview in new layer
+  _openResponsePreview: function() {
+    if (!this.isAttached) {
+      return;
+    }
+    this.$.webView.contentWindow.postMessage({
+      'rawResponse': this.raw
+    }, '*');
+    this.$.webView.removeAttribute('hidden');
+    this.$.rawContent.setAttribute('hidden', true);
+    this.$.prism.setAttribute('hidden', true);
+  },
+  // Closes response preview
+  _closeResponsePreview: function() {
+    if (!this.isAttached) {
+      return;
+    }
+    this.$.webView.setAttribute('hidden', true);
+    this.$.webView.contentWindow.postMessage({
+      'cleanUp': true
+    }, '*');
+    this.$.rawContent.removeAttribute('hidden');
+    this.$.prism.removeAttribute('hidden');
+  },
+  // a message received from the external page using window.postMessage.
+  _onExternalMessage: function(e) {
+    if (!this.isAttached) {
+      return;
+    }
+    if (!e || !e.data) {
+      return;
+    }
+    if ('preview-window-height' in e.data) {
+      let height = e.data['preview-window-height'];
+      if (!height) {
+        this.$.webView.style.height = 'auto';
+      } else {
+        this.$.webView.style.height = e.data['preview-window-height'] + 'px';
+      }
+      // console.log('setting up client height', e.data['preview-window-height']);
+    }
   }
 });
 })();

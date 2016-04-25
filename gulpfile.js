@@ -144,7 +144,18 @@ var build = (done) => {
       Builder.buildDev(options, done);
       break;
     case 'beta':
-      Builder.buildBeta(options, done);
+      if (!options.isHotfix) {
+        let confirm = require('confirm-simple');
+        confirm('Upgrade the version major version?', ['ok', 'cancel'] , (ok) => {
+          if (!ok) {
+            done();
+          } else {
+            Builder.buildBeta(options, done);
+          }
+        });
+      } else {
+        Builder.buildBeta(options, done);
+      }
       break;
     case 'stable':
       Builder.buildStable(options, done);

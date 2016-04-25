@@ -1,3 +1,4 @@
+(function() {
 'use strict';
 /*******************************************************************************
  * Copyright 2016 Pawel Psztyc, The ARC team
@@ -20,7 +21,7 @@
  *
  * @namespace
  */
-var arc = arc || {};
+window.arc = window.arc || {};
 /**
  * ARC app's namespace
  *
@@ -35,18 +36,16 @@ arc.app = arc.app || {};
 arc.app.settings = arc.app.settings || {};
 /**
  * Get current user configuration stored in sync storage.
- * 
+ *
  * @return {Promise}
  */
 arc.app.settings.getConfig = function() {
   return new Promise(function(resolve) {
     var values = {
-      'DEBUG_ENABLED': false,
       'HISTORY_ENABLED': true,
       'MAGICVARS_ENABLED': true,
-      'CMH_ENABLED': true,
-      'CMP_ENABLED': true,
-      'useIdb': true
+      'useCookieStorage': true,
+      'requestDefaultTimeout': 30
     };
     try {
       chrome.storage.sync.get(values, function(result) {
@@ -60,7 +59,7 @@ arc.app.settings.getConfig = function() {
 };
 /**
  * Save user configuration to sync storage.
- * 
+ *
  * @param  {String} key A configuration key to be saved
  * @param  {Boolean} value A value to be saved
  *
@@ -78,3 +77,4 @@ arc.app.settings.observe = function(callback) {
     callback(changes, area);
   });
 };
+}());
