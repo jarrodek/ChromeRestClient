@@ -607,7 +607,13 @@ Polymer({
     var name = e.detail.name;
     var override = e.detail.override || false;
     var toDrive = e.detail.isDrive || false;
-    this.set('request.type', 'save');
+    // Check if current request object is a history object.
+    // If yes, override it.
+    var isHistory = this.request.id && !this.request.isSaved && !this.request.isDrive;
+    if (isHistory) {
+      override = true;
+    }
+    this.set('request.type', 'saved');
     if (toDrive) {
       this.set('request.isDrive', true);
     } else {
@@ -705,6 +711,7 @@ Polymer({
         result.name = current.name;
         // this.set('request', current);
         result = this.$.requestModel.replaceData(result, current, this.response);
+        result.type = current.type;
         this.$.requestModel.requestType = current.type;
         this.$.requestModel.data = result;
         return this.$.requestModel.save()

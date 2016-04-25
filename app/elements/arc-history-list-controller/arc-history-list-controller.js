@@ -32,5 +32,10 @@ Polymer({
   _dbError: function(e) {
     console.error('_dbError', e);
     arc.app.analytics.sendException('History-ctrl::' + JSON.stringify(e));
+  },
+
+  resetView: function() {
+    var view = this.$$('arc-history-list-view');
+    view.closeDetailsPanel();
   }
 });

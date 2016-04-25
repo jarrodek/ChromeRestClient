@@ -74,6 +74,7 @@ window.ArcBehaviors.RequestsListControllerBehaviorImpl = {
     window.setTimeout(function() {
       this.resetQuery();
     }.bind(this), 250);
+    this.resetView();
   },
   queryPage: function() {
     if (!this.isShowing) {
@@ -221,6 +222,10 @@ window.ArcBehaviors.RequestsListControllerBehaviorImpl = {
       return;
     }
     ctrl.selectFile();
+  },
+
+  resetView: function() {
+    
   }
 };
 window.ArcBehaviors.RequestsListControllerBehavior = [

@@ -96,7 +96,7 @@
     <template is="dom-if" if="[[_hasPayload]]">
       <div class="payload">
         <div class="camption">Payload</div>
-        <pre>[[request.har.entries.0.request.postData.text]]</pre>
+        <pre>[[_payloadValue(request)]]</pre>
       </div>
     </template>
   </template>
