@@ -62,45 +62,46 @@ An `arc-saved-list-view` element is a element responsible for displaying a list 
         padding-left: 56px;
         height: initial;
         min-height: 24px;
+        -webkit-user-select: text;
       }
-      ;
+
       --table-method-column: {
         @apply(--table-base-cell);
         min-width: 100px;
         max-width: 100px;
       }
-      ;
+
       --table-method-value: {
         @apply(--table-method-column);
         padding-left: 56px;
         height: auto;
+        -webkit-user-select: text;
+        cursor: text;
       }
-      ;
+
       --table-url-column: {
         @apply(--table-base-cell);
         @apply(--layout-flex);
         text-overflow: ellipsis;
         overflow: hidden;
       }
-      ;
       --table-url-value: {
         @apply(--table-url-column);
         padding-left: 56px;
         height: auto;
+        -webkit-user-select: text;
+        cursor: text;
       }
-      ;
       --table-action-column: {
         @apply(--table-base-cell);
         padding-right: 24px;
       }
-      ;
       --table-action-value: {
         @apply(--table-action-column);
         padding-left: 56px;
         padding-right: 16px;
         height: auto;
       }
-      ;
     }
 
     h1 {
