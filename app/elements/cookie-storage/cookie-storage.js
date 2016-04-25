@@ -20,9 +20,9 @@ Polymer({
       notify: true
     },
     /**
-     * A list of response headers to extract cookies from.
+     * A response object received from socket-fetch library.
      */
-    responseHeaders: Array,
+    response: Object,
     // List of Cookies found in the `this.responseHeaders` attribute.
     cookies: {
       type: Array,
@@ -40,14 +40,14 @@ Polymer({
    * TODO: support cookie deletion.
    */
   store: function() {
-    var headers = this.responseHeaders;
-    if (!headers || headers.length === 0 || !this.url) {
+    var response = this.response;
+    if (!response || !this.url) {
       return;
     }
     this.uri = new URI(this.url);
+
     this.extract();
-    return this._find()
-    .then((existing) => this._store(existing));
+    this._store();
   },
   /**
    * Get cookies that should be send with given request for given URL.
@@ -68,42 +68,56 @@ Polymer({
   },
 
   /**
-   * Store cookies in storage
-   *
-   * @param {Array} existing A list of existing cookies from the store.
+   * Store cookies in storage.
+   * It assumes that all cookies set in the `this.cookies` attribute are ready to be stored.
    */
-  _store: function(existing) {
+  _store: function() {
     var cookies = this.cookies;
     if (!cookies || cookies.length === 0) {
       return Dexie.Promise.resolve();
     }
-    var existingSize = existing.length || 0;
-    cookies.forEach((item) => {
-      if (!item.name) {
+    var cookiesDomains = [];
+    var toStore = {};
+    cookies.forEach((c) => {
+      if (!c.domain) {
         return;
       }
-      let found = null;
-      let itemName = item.name.toLowerCase();
-      for (let i = 0; i < existingSize; i++) {
-        if (existing[i].name.toLowerCase() === itemName) {
-          found = existing[i];
-          break;
-        }
+      cookiesDomains.push(c.domain);
+      if (!(c.domain in toStore)) {
+        toStore[c.domain] = new Cookies('', 'http://' + c.domain + '/');
       }
-      if (found) {
-        item.created = found.created;
-      }
+      toStore[c.domain].cookies.push(c);
     });
-
     return arc.app.db.idb.open()
     .then((db) => {
-      return db.transaction('rw', db.cookies, () => {
-        var promises = [];
-        cookies.forEach((item) => promises.push(db.cookies.put(item)));
-        existing.forEach((item) => promises.push(db.cookies.delete(item.uuid)));
-        return Dexie.Promise.all(promises)
-        .catch((e) => {
-          console.error('--no-save', e);
+      return db.transaction('rw', db.cookies, function() {
+        return db.cookies.where('_domain').anyOfIgnoreCase(cookiesDomains)
+        .toArray()
+        .then((stored) => {
+          let parsers = {};
+          stored.forEach((c) => {
+            if (!(c.domain in parsers)) {
+              // the protocol is not imaportant here
+              parsers[c.domain] = new Cookies('', 'http://' + c.domain + '/');
+            }
+            parsers[c.domain].cookies.push(c);
+          });
+          let save = [];
+          for (let domain in parsers) {
+            parsers[domain].merge(toStore[domain], 'uuid');
+            save = save.concat(parsers[domain].cookies);
+            delete toStore[domain];
+          }
+          // add new ones
+          for (let domain in toStore) {
+            save = save.concat(toStore[domain].cookies);
+          }
+          db.cookies.bulkPut(save)
+          .catch(Dexie.BulkError, (e) => {
+            console.error('Come cookies did not succeed. However, ' +
+              (save.length - e.failures.length) + ' cookies (out of ' +  save.length +
+              ') was added successfully');
+          });
         });
       })
       .finally(() => {
@@ -113,83 +127,48 @@ Polymer({
   },
 
   /**
-   * Extracts cookies from `this.responseHeaders` and set in to the `cookies` array
+   * Extracts cookies from `this.response` and set them to the `cookies` array.
    */
   extract: function() {
     var result = [];
-    var headers = this.responseHeaders;
-    if (!headers || headers.length === 0) {
+    var response = this.response;
+    if (!response) {
       this.set('cookies', result);
       return;
     }
-    var setCookie = null;
-    for (let i = 0, len = headers.length; i < len; i++) {
-      let header = headers[i];
-      if (header.name && header.name.toLowerCase() === 'set-cookie') {
-        setCookie = header.value;
-        break;
+    var parsers = [];
+    if (this.response.redirects && this.response.redirects.length) {
+      this.response.redirects.forEach((r) => {
+        if (r.headers.has && r.headers.has('set-cookie')) {
+          let parser = new Cookies(r.headers.get('set-cookie'), r.requestUrl);
+          parser.filter();
+          parser.clearExpired();
+          parsers.push(parser);
+        }
+      });
+    }
+    if (response.headers.has && response.headers.has('set-cookie')) {
+      let parser = new Cookies(response.headers.get('set-cookie'), this.url);
+      parser.filter();
+      parser.clearExpired();
+      parsers.push(parser);
+    }
+    if (parsers.length === 0) {
+      this.set('cookies', result);
+      return;
+    }
+    var mainParser = null;
+    parsers.forEach((parser) => {
+      if (!mainParser) {
+        mainParser = parser;
+        return;
       }
-    }
-    if (!setCookie) {
-      this.set('cookies', result);
-      return;
-    }
-    var c = new Cookies(setCookie).cookies;
-    if (c) {
-      result = c;
-    }
-    result = this._filter(result);
-    result = result.map((item) => new CookieObject(item));
+      mainParser.merge(parser);
+    });
+    result = mainParser.cookies;
     this.set('cookies', result);
   },
-  // Remove cookies that has been set for different domain.
-  _filter: function(cookies) {
-    var domain = this.uri.domain();
-    // var secured = this.uri.protocol() === 'https';
-    if (!domain) {
-      return;
-    } else {
-      domain = domain.toLowerCase();
-    }
-    var path = this._getPath(this.url);
-    var validCookies = cookies.filter((cookie) => {
-      if (!cookie.path) {
-        cookie.path = path;
-      }
-      let cDomain = cookie.domain;
-      if (!cDomain) {
-        cookie.domain = domain;
-        // point 6. of https://tools.ietf.org/html/rfc6265#section-5.3
-        cookie.hostOnly = true;
-        return true;
-      }
-      return this._matchDomain(domain, cDomain);
-    });
-    return validCookies;
-    // this.set('cookies', validCookies);
-  },
-  // find cookies in the datastore that matches received cookies.
-  _find: function() {
-    var cookies = this.cookies;
-    if (!cookies || cookies.length === 0) {
-      return Dexie.Promise.resolve([]);
-    }
-    return this._findDomainCookies()
-    .then((existing) => {
-      if (!existing || existing.length === 0) {
-        return [];
-      }
-      var names = [];
-      cookies.forEach((item) => {
-        if (!item.name) {
-          return;
-        }
-        names.push(item.name);
-      });
-      existing = existing.filter((item) => names.indexOf(item.name) !== -1);
-      return existing;
-    });
-  },
+
   // Finds cookies that matches current domain and path
   _findDomainCookies: function() {
     return arc.app.db.idb.open()
@@ -198,7 +177,7 @@ Polymer({
       let domain = this.uri.domain();
       return db.cookies.toCollection()
         .filter((item) => {
-          return this._matchDomain(domain, item.domain) && this._matchPath(path, item.path);
+          return this._matchDomain(domain, item._domain) && this._matchPath(path, item.path);
         })
         .toArray()
         .finally(() => {
@@ -309,7 +288,8 @@ Polymer({
     if (hostPath === cookiePath) {
       return true;
     }
-    var index = cookiePath.indexOf(hostPath);
+    // var index = cookiePath.indexOf(hostPath);
+    var index = hostPath.indexOf(cookiePath);
     if (index === 0 && cookiePath[cookiePath.length - 1] === '/') {
       return true;
     }

@@ -112,6 +112,20 @@ arc.app.db.idb.open = function() {
         logs: '&time,type',
         cookies: '&uuid,domain,path,name,[domain+path]'
       });
+    db.version(6)
+      .stores({
+        headers: '&[key+type],key,type',
+        statuses: '&key',
+        historyUrls: '&url',
+        historySockets: '&url',
+        requestObject: '++id,url,method,[url+method],type,_name',
+        serverExportObjects: '[serverId+requestId],serverId,requestId',
+        projectObjects: '++id,*requestIds',
+        variables: '++id,variable,type',
+        basicAuth: '&url',
+        logs: '&time,type',
+        cookies: '&uuid,_domain,name'
+      });
     arc.app.db.idb.mapsObjects(db);
     arc.app.db.idb.addHooks(db);
 
@@ -156,7 +170,7 @@ arc.app.db.idb.mapsObjects = function(db) {
   db.variables.mapToClass(MagicVariableObject);
   db.basicAuth.mapToClass(BasicAuth);
   db.logs.mapToClass(LogObject);
-  db.cookies.mapToClass(CookieObject);
+  db.cookies.mapToClass(Cookie);
 };
 arc.app.db.idb.addHooks = function(db) {
   var createUpdateTime = (primKey, obj) => {

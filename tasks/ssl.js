@@ -244,7 +244,9 @@ class TestServer {
     });
     //set cookies getting param keys as cookie name and param value as cookie value.
     app.get('/cookies/set', (req, res) => {
-      let params = req.params;
+      let params = req.query;
+      console.log('Dumping params');
+      console.log(params);
       for (let key in params) {
         res.cookie(key, params[key], {
           path: '/'

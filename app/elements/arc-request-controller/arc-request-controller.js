@@ -886,14 +886,15 @@ Polymer({
   },
 
   _saveCookies: function() {
-    var headers = [];
-    if (this.response.redirects && this.response.redirects.length) {
-      this.response.redirects.forEach((r) => {
-        let redirectHeaders = arc.app.headers.toJSON(r.headers);
-        headers.push(redirectHeaders);
-      });
-    }
-    headers.push(this.request.headers);
+    // var responses = [];
+    // if (this.response.redirects && this.response.redirects.length) {
+    //   this.response.redirects.forEach((r) => {
+    //     // let redirectHeaders = arc.app.headers.toJSON(r.headers);
+    //     responses.push(r);
+    //   });
+    // }
+    // responses.push(this.response);
+    this.$.cookieJar.response = this.response;
     this.$.cookieJar.store();
   }
 });
