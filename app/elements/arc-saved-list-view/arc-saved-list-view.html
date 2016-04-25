@@ -213,6 +213,7 @@ An `arc-saved-list-view` element is a element responsible for displaying a list 
             <neon-animated-pages id="tableTitle" selected="[[tableHeaderState]]" entry-animation="slide-from-right-animation" exit-animation="slide-left-animation">
               <neon-animatable>
                 <h1>
+                  <!-- <span hidden$="[[!isSearch]]">Search: [[searchTerm]]</span> -->
                   &nbsp;
                   <paper-spinner-lite alt="Loading contacts list" active="{{querying}}"></paper-spinner-lite>
                 </h1>

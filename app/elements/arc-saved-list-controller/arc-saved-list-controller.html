@@ -36,7 +36,19 @@ the License.
     </style>
     <paper-progress indeterminate hidden$="[[!querying]]"></paper-progress>
     <template is="dom-if" if="{{hasListData}}">
-      <arc-saved-list-view requests="{{listData}}" querying="[[querying]]" sort="{{sortBy}}" dir="{{sortDirection}}" on-name-changed="_requestNameChanged" on-clear-data="_clearDataStore" on-export-requested="_onExportRequested" on-delete-requested="_onDeleteRequested" on-content-scroll="_viewScrolling" querying="[[querying]]" on-open-drive="openDrive"></arc-saved-list-view>
+      <arc-saved-list-view
+        requests="{{listData}}"
+        querying="[[querying]]"
+        search-term="[[searchQuery]]"
+        is-search="[[isSearch]]"
+        sort="{{sortBy}}"
+        dir="{{sortDirection}}"
+        on-name-changed="_requestNameChanged"
+        on-clear-data="_clearDataStore"
+        on-export-requested="_onExportRequested"
+        on-delete-requested="_onDeleteRequested"
+        on-content-scroll="_viewScrolling"
+        on-open-drive="openDrive"></arc-saved-list-view>
       <onboarding-tutorial id="saved" auto>
         <onboarding-page>
           <h2>New saved requests lists</h2>
@@ -58,7 +70,7 @@ the License.
       </onboarding-tutorial>
     </template>
     <template is="dom-if" if="{{isEmpty}}">
-      <arc-saved-list-empty on-open-drive="openDrive"></arc-saved-list-empty>
+      <arc-saved-list-empty on-open-drive="openDrive" search-term="[[searchQuery]]"></arc-saved-list-empty>
     </template>
     <arc-request-object-model id="model" on-data-ready="_dataRead" search-term="[[searchQuery]]" on-error="_dbError" request-type="saved" limit="[[limit]]" offset="[[offset]]" sort-by="[[sortBy]]" direction=[[sortDirection]]></arc-request-object-model>
     <arc-request-object-model id="saveModel" auto on-save="_requestSaved" request-type="saved"></arc-request-object-model>

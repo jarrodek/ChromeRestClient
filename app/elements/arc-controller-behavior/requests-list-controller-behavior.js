@@ -225,7 +225,7 @@ window.ArcBehaviors.RequestsListControllerBehaviorImpl = {
   },
 
   resetView: function() {
-    
+
   }
 };
 window.ArcBehaviors.RequestsListControllerBehavior = [

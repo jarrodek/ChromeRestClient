@@ -82,13 +82,18 @@ Polymer({
         if (this.searchTerm) {
           let term = String(this.searchTerm).toLowerCase();
           result = table.filter((ro) => {
-            if (ro.type !== type) {
+            if (excludedRequests.indexOf(ro.id) !== -1) {
               return false;
+            }
+            if (type !== 'history') {
+              if (ro.type !== type && ro.type !== 'drive') {
+                return false;
+              }
             }
             if (ro.url.toLowerCase().indexOf(term) !== -1) {
               return true;
             }
-            if (ro._name && ro._name.indexOf(term) !== -1) {
+            if (ro._name && ro._name.toLowerCase().indexOf(term) !== -1) {
               return true;
             }
             if (ro.method.toLowerCase().indexOf(term) !== -1) {
