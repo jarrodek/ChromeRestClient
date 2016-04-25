@@ -36,7 +36,7 @@ An `arc-history-list-view` element is a element responsible for displaying a lis
 
       --table-base-cell: {
         padding-right: 16px;
-        padding-left: 56px;
+        padding-left: 40px;
         position: relative;
         height: 100%;
       }
@@ -50,9 +50,10 @@ An `arc-history-list-view` element is a element responsible for displaying a lis
 
       --table-name-column: {
         @apply(--table-base-cell);
-        min-width: 120px;
-        max-width: 120px;
-        padding-left: 40px;
+        /*min-width: 120px;
+        max-width: 120px;*/
+        width: 25%;
+        padding-left: 8px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -60,7 +61,7 @@ An `arc-history-list-view` element is a element responsible for displaying a lis
 
       --table-name-value: {
         @apply(--table-name-column);
-        padding-left: 56px;
+        padding-left: 24px;
         height: initial;
         min-height: 24px;
         -webkit-user-select: text;
@@ -72,10 +73,10 @@ An `arc-history-list-view` element is a element responsible for displaying a lis
         min-width: 100px;
         max-width: 100px;
       }
-      ;
+
       --table-method-value: {
         @apply(--table-method-column);
-        padding-left: 56px;
+        padding-left: 40px;
         height: auto;
         -webkit-user-select: text;
         cursor: text;
@@ -90,7 +91,7 @@ An `arc-history-list-view` element is a element responsible for displaying a lis
 
       --table-url-value: {
         @apply(--table-url-column);
-        padding-left: 56px;
+        padding-left: 40px;
         height: auto;
         -webkit-user-select: text;
         cursor: text;
@@ -107,7 +108,7 @@ An `arc-history-list-view` element is a element responsible for displaying a lis
         padding-right: 16px;
         height: auto;
       }
-      
+
     }
 
     h1 {

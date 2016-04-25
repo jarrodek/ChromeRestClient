@@ -32,34 +32,36 @@ An `arc-saved-list-view` element is a element responsible for displaying a list 
         color: rgba(0, 0, 0, 0.87);
         border-bottom: 1px rgba(0, 0, 0, 0.12) solid;
       }
-      ;
+
       --table-base-cell: {
         padding-right: 16px;
-        padding-left: 56px;
+        padding-left: 40px;
         position: relative;
         height: 100%;
       }
       --table-checkbox-column: {
         padding-left: 16px;
       }
-      ;
+
       --table-checkbox-value: {
         @apply(--table-checkbox-column);
       }
-      ;
+
       --table-name-column: {
         @apply(--table-base-cell);
-        min-width: 120px;
-        max-width: 120px;
-        padding-left: 40px;
+        /*min-width: 120px;
+        max-width: 120px;*/
+        /*@apply(--layout-flex);*/
+        width: 30%;
+        padding-left: 8px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      ;
+
       --table-name-value: {
         @apply(--table-name-column);
-        padding-left: 56px;
+        padding-left: 24px;
         height: initial;
         min-height: 24px;
         -webkit-user-select: text;
@@ -73,7 +75,7 @@ An `arc-saved-list-view` element is a element responsible for displaying a list 
 
       --table-method-value: {
         @apply(--table-method-column);
-        padding-left: 56px;
+        padding-left: 40px;
         height: auto;
         -webkit-user-select: text;
         cursor: text;
@@ -87,7 +89,7 @@ An `arc-saved-list-view` element is a element responsible for displaying a list 
       }
       --table-url-value: {
         @apply(--table-url-column);
-        padding-left: 56px;
+        padding-left: 40px;
         height: auto;
         -webkit-user-select: text;
         cursor: text;
@@ -98,7 +100,7 @@ An `arc-saved-list-view` element is a element responsible for displaying a list 
       }
       --table-action-value: {
         @apply(--table-action-column);
-        padding-left: 56px;
+        padding-left: 40px;
         padding-right: 16px;
         height: auto;
       }
