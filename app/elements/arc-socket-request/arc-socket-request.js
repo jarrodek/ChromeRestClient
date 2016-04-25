@@ -152,6 +152,7 @@ Polymer({
 
   _processResponse: function(response) {
     var result = {};
+    result._headers = response.headers;
     result.headers = arc.app.headers.toJSON(response.headers);
     result.status = response.status;
     result.statusText = response.statusText;

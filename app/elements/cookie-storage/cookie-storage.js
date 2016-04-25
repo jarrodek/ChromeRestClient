@@ -147,8 +147,8 @@ Polymer({
         }
       });
     }
-    if (response.headers.has && response.headers.has('set-cookie')) {
-      let parser = new Cookies(response.headers.get('set-cookie'), this.url);
+    if (response._headers.has && response._headers.has('set-cookie')) {
+      let parser = new Cookies(response._headers.get('set-cookie'), this.url);
       parser.filter();
       parser.clearExpired();
       parsers.push(parser);
