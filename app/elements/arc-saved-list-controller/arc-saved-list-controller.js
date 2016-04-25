@@ -29,6 +29,11 @@ Polymer({
   _dbError: function(e) {
     console.error('_dbError', e);
     arc.app.analytics.sendException('Saved-ctrl::' + JSON.stringify(e));
+  },
+
+  resetView: function() {
+    var view = this.$$('arc-saved-list-view');
+    view.closeDetailsPanel();
   }
 });
 })();

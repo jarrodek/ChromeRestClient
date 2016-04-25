@@ -343,12 +343,17 @@ class URLParser {
     if (hasPassword || hasUser) {
       result += '@';
     }
-    result += this.host;
-
+    if (this.host) {
+      result += this.host;
+    }
     if (this._port) {
       result += ':' + this._port;
     }
-    result += this.path;
+    if (this.path) {
+      result += this.path;
+    } else {
+      result += '/';
+    }
     if (this._query && this._query.trim() !== '') {
       result += '?' + this._query;
     }

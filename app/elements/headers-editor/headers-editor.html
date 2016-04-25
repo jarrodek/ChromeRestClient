@@ -67,6 +67,10 @@
       .form-row.has-support .edit-header {
         display: initial;
       }
+      .cmError{
+        @apply(--paper-font-common-base);
+        color: #dd2c00;
+      }
     </style>
     <paper-tabs selected="{{tabSelected}}">
       <paper-tab>Raw headers</paper-tab>
@@ -77,17 +81,20 @@
     <iron-pages selected="{{tabSelected}}">
       <section>
         <code-mirror mode="http-headers" theme="cm-arc" on-change="valueChanged" value="{{headers}}" id="cm"></code-mirror>
+        <div class="cmError" hidden$="[[valid]]">[[errorMessage]]</div>
       </section>
       <section class="headers-list">
         <label class="headers-title">HTTP headers</label>
         <div class="headers-form">
           <template is="dom-repeat" id="headersList" items="{{headersList}}" on-dom-change="_onHeadersFormRender">
             <div class="form-row">
-              <paper-input-container class="header-name" no-label-float inline>
-                <input is="iron-input" on-focus="_headerNameFocus" type="text" value="{{item.name::input}}" placeholder="Header name"/>
+              <paper-input-container class="header-name" no-label-float inline auto-validate>
+                <input is="iron-input" on-focus="_headerNameFocus" type="text" value="{{item.name::input}}" placeholder="Header name" required pattern="\S*"/>
+                <paper-input-error>Header name is not valid</paper-input-error>
               </paper-input-container>
-              <paper-input-container class="header-value" no-label-float inline>
-                <input is="iron-input" name="headerValue" type="text" value="{{item.value::input}}" placeholder="Header value" />
+              <paper-input-container class="header-value" no-label-float inline auto-validate>
+                <input is="iron-input" name="headerValue" type="text" value="{{item.value::input}}" placeholder="Header value" required/>
+                <paper-input-error>Header value should not be empty</paper-input-error>
               </paper-input-container>
               <div class="edit-header">
                 <paper-icon-button icon="image:edit" title="Edit header value" on-tap="_openHeaderSupport"></paper-icon-button>

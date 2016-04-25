@@ -4,6 +4,8 @@
     :host {
       /*@apply(--layout-vertical);*/
       display: block;
+      position: fixed;
+      width: 360px;
       --section-element: {
         min-height: 48px;
         padding: 0 16px;
@@ -73,6 +75,10 @@
       @apply(--paper-font-caption);
       color: #737373;
     }
+    .text {
+      -webkit-user-select: text;
+      cursor: text;
+    }
     </style>
     <paper-toolbar>
       <h2>Request details</h2>
@@ -80,12 +86,12 @@
     </paper-toolbar>
     <div class="request-name" hidden$="[[!request.name]]">
       <p class="caption">Request name</p>
-      <p>[[request.name]]</p>
+      <p class="text">[[request.name]]</p>
     </div>
     <div class="url-group">
       <p class="caption">Request details</p>
-      <span class="method">{{request.method}}</span>
-      <span class="url">{{request.url}}</span>
+      <span class="method text">{{request.method}}</span>
+      <span class="url text">{{request.url}}</span>
     </div>
     <div class="headers">
       <div class="camption">Headers</div>
@@ -94,7 +100,7 @@
     <template is="dom-if" if="[[_hasPayload]]">
       <div class="payload">
         <div class="camption">Payload</div>
-        <pre>[[request.har.entries.0.request.postData.text]]</pre>
+        <pre class="text">[[_payloadValue(request)]]</pre>
       </div>
     </template>
   </template>

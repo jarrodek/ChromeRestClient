@@ -32,6 +32,11 @@ TODO: The list shouldn't be defined in the view. It should be stored in IDB or i
     :host {
       display: block;
     }
+    .custom-name {
+      --paper-input-container: {
+        display: inline-block;
+      }
+    }
     </style>
     <paper-radio-group selected="{{method}}">
       <paper-radio-button name="GET">GET</paper-radio-button>
@@ -39,13 +44,20 @@ TODO: The list shouldn't be defined in the view. It should be stored in IDB or i
       <paper-radio-button name="PUT">PUT</paper-radio-button>
       <paper-radio-button name="DELETE">DELETE</paper-radio-button>
     </paper-radio-group>
-    <paper-dropdown-menu label="Other methods">
+    <paper-dropdown-menu label="Other methods" opened="{{methodManuOpened}}" hidden$="[[showCustom]]">
       <paper-listbox class="dropdown-content" selected="{{method}}" attr-for-selected="data-method">
         <paper-item data-method="PATCH">PATCH</paper-item>
         <paper-item data-method="HEAD">HEAD</paper-item>
+        <paper-item data-method="CONNECT">CONNECT</paper-item>
         <paper-item data-method="OPTIONS">OPTIONS</paper-item>
+        <paper-item data-method="TRACE">TRACE</paper-item>
+        <paper-item data-method="">custom</paper-item>
       </paper-listbox>
     </paper-dropdown-menu>
+    <paper-input-container class="custom-name" inline hidden$="[[!showCustom]]">
+      <label>Custom method</label>
+      <input id="customMethod" is="iron-input" type="text" value="{{method::input}}" placeholder="Mathod name">
+    </paper-input-container>
     <paper-dropdown-menu label="Custom content type" hidden$="{{!isPayload}}" no-label-float>
       <paper-listbox class="dropdown-content" selected="{{contentType}}" attr-for-selected="data-type">
         <paper-item data-type="application/json">application/json</paper-item>

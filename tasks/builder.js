@@ -435,7 +435,7 @@ gulp.task('copy', () => {
   // Copy over only the bower_components we need
   // These are things which cannot be vulcanized
   var bower = gulp.src([
-    'app/bower_components/{webcomponentsjs,font-roboto-local,codemirror,prism/components}/**/*',
+    'app/bower_components/{webcomponentsjs,font-roboto-local,codemirror,prism/components,cookie-parser}/**/*',
     '!app/bower_components/codemirror/lib/**',
     '!app/bower_components/codemirror/theme/**',
     '!app/bower_components/codemirror/keymap/**',

@@ -32,11 +32,12 @@
         <!-- Main Toolbar -->
         <paper-toolbar id="mainToolbar" class="main-toolbar">
           <paper-icon-button class="toolbar-hide" icon="menu" paper-drawer-toggle></paper-icon-button>
+          <paper-icon-button feature="back" on-tap="_onFeatureBack" class="toolbar-hide" icon="arrow-back" title="Back"></paper-icon-button>
           <div class="title toolbar-hide">
             <span>[[pageTitle]]</span>
             <div class="project-endpoints" feature="projectEndpoints">
               <template is="dom-if" if="[[projectEndpoints.length]]">
-                <paper-dropdown-menu label="Project endpoints">
+                <paper-dropdown-menu label="Project endpoints" horizontal-align="left">
                   <paper-menu selected="[[selectedRequest]]" attr-for-selected="data-id" class="dropdown-content" on-iron-select="_onFeatureProjectEndpoints">
                     <template is="dom-repeat" items="{{projectEndpoints}}">
                       <paper-item data-id$="[[item.id]]">[[item.name]]</paper-item>
@@ -84,6 +85,7 @@
     <iron-a11y-keys target="{{document.body}}" keys="ctrl+s meta+s" on-keys-pressed="onSave"></iron-a11y-keys>
     <iron-a11y-keys target="{{document.body}}" keys="ctrl+o meta+o" on-keys-pressed="onOpen"></iron-a11y-keys>
     <iron-a11y-keys target="{{document.body}}" keys="ctrl+f meta+f" on-keys-pressed="onSearch"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="ctrl+n meta+n" on-keys-pressed="onNewWindow"></iron-a11y-keys>
     <onboarding-tutorial id="onboarding" auto>
       <onboarding-page>
         <div class="welcome-message">
@@ -232,6 +234,7 @@
   <script src="bower_components/har/build/har.js"></script>
   <script src="bower_components/lodash/lodash.js"></script>
   <script src="bower_components/uri.js/src/URI.js"></script>
+  <script src="bower_components/cookie-parser/cookie-parser.js"></script>
   <script src="scripts/libs/app.logger.js"></script>
   <script src="scripts/libs/app.router.js"></script>
   <script src="scripts/libs/app.utils.js"></script>
@@ -249,7 +252,6 @@
   <script src="scripts/libs/app.url.parser.js"></script>
   <script src="scripts/libs/app.payload.parser.js"></script>
   <script src="scripts/libs/app.clipboard.js"></script>
-  <script src="scripts/libs/app.cookies.js"></script>
   <!-- build:js scripts/code-mirror-custom.js -->
   <script src="scripts/code-mirror/mode/headers/headers.js"></script>
   <script src="scripts/code-mirror/addon/hint/http-headers.js"></script>

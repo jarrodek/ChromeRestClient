@@ -159,6 +159,7 @@
       if (!this.matchRegex) {
         return;
       }
+      console.time('Search in response');
       var walker = document.createTreeWalker(
         this._textSearch,
         NodeFilter.SHOW_TEXT,
@@ -188,6 +189,7 @@
           count++;
         }
       }
+      console.timeEnd('Search in response');
       return count;
     },
     // added by Yanosh Kunsh to include utf-8 string comparison
@@ -290,6 +292,7 @@
      * @param {String} input A word to search.
      */
     mark: function(input) {
+      console.time('Mark text in response');
       this.cleanMarked();
       var count = 0;
 
@@ -301,12 +304,16 @@
           count = this.searchWords(this._textSearch);
         }
       }
+      console.time('Sending marked cout signal');
       this._setMarkedCount(count);
+      console.timeEnd('Sending marked cout signal');
+      console.timeEnd('Mark text in response');
     },
     /**
      * Clean markers and restore original view.
      */
     cleanMarked: function() {
+      console.time('Clear marked text in response');
       var arr = this._textSearch.getElementsByTagName('MARK');
       var el;
       while (arr.length && (el = arr[0])) {
@@ -314,6 +321,7 @@
         parent.replaceChild(el.firstChild, el);
         parent.normalize();
       }
+      console.timeEnd('Clear marked text in response');
     },
     /**
      * Highlights marked word and scolls the view to the position of the word if not visible

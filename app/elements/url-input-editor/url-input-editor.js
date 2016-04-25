@@ -6,7 +6,7 @@ Polymer({
   /**
    * Event called when the user press enter in any field in the editor.
    * The event will not be called if the suggestion box is opened.
-   * 
+   *
    * @event send
    */
   properties: {
@@ -15,8 +15,7 @@ Polymer({
      */
     url: {
       type: String,
-      notify: true,
-      observer: '_urlChanged'
+      notify: true
     },
     // True when detailed view is enabled.
     detailed: {
@@ -59,16 +58,19 @@ Polymer({
     // True when a suggestion box for the URL is opened.
     suggesionsOpened: Boolean
   },
+  observers: [
+    '_urlChanged(url)'
+  ],
   /**
    * Called when the URL value change.
    *
    * @param {String} newVal New value of the URL.
    */
-  _urlChanged: function(newVal) {
-    if (this.detailed && (!newVal || newVal.length === 0)) {
-      // clear the form
+  _urlChanged: function() {
+    if (this.detailed && !this.internalUrlSet) {
       this.updateForm();
     }
+    this.revalidate();
   },
   /**
    * Toggle the view.
@@ -130,8 +132,15 @@ Polymer({
     if (this.anchorValue) {
       url += '#' + this.anchorValue;
     }
-    this.set('url', url);
+    this._setUrl(url);
   },
+
+  _setUrl: function(url) {
+    this.internalUrlSet = true;
+    this.set('url', url);
+    this.internalUrlSet = false;
+  },
+
   /**
    * Crerate / update form data from the URL.
    */
@@ -224,6 +233,7 @@ Polymer({
     if (!this.url) {
       return;
     }
+
     /* global URI, URLParser */
     URI.escapeQuerySpace = false;
     var data = new URLParser(this.url);
@@ -232,17 +242,26 @@ Polymer({
     for (let param of data.paramsList) {
       let key = param.name;
       let value = param.value;
-
       key = isEncode ? URLParser.encodeQueryString(key) : URLParser.decodeQueryString(key);
       value = isEncode ? URLParser.encodeQueryString(value) : URLParser.decodeQueryString(value);
-
       param.name = key;
       param.value = value;
-
       result.add(param);
     }
+    var path = data.path;
+    if (isEncode && path) {
+      if (/\s/.test(path)) {
+        let parts = path.split('/');
+        parts = parts.map((cmp) => URLParser.encodeQueryString(cmp));
+        path = parts.join('/');
+      }
+    } else {
+      path = URLParser.decodeQueryString(path);
+    }
+    data.path = path;
     data.paramsList = result;
     this.set('url', data.toString());
+    this.revalidate();
   },
   /**
    * Replace `&` with `;`
@@ -269,7 +288,7 @@ Polymer({
     data.queryDelimiter = delim;
     data.setQueryFromCurrentParams();
     var url = data.toString();
-    this.set('url', url);
+    this._setUrl(url);
   },
   /** Called when URL params form has been renederd. */
   _onParamsRender: function() {
@@ -298,14 +317,14 @@ Polymer({
     var url = this.url;
     if (url && url.indexOf('://') === -1) {
       url = 'https://' + url;
-      this.set('url', url);
+      this._setUrl(url);
     }
     this.fire('send');
   },
   // Hanlder for suggestion selected event.
   _onSuggestionSelected: function(e) {
     var value = e.detail.value;
-    this.set('url', value);
+    this._setUrl(value);
   },
   // Handler called when the `paper-autocomplete` request a suggestions.
   _queryUrlHistory: function(e) {
@@ -333,6 +352,20 @@ Polymer({
   // Handler called when the context menu has been opened.
   _menuOpened: function() {
     arc.app.analytics.sendEvent('Request view', 'URL widget toggle', 'Open menu');
+  },
+
+  revalidate: function() {
+    var nodes = Polymer.dom(this.$$('.params-list')).querySelectorAll('.param-value input');
+    if (!nodes) {
+      return;
+    }
+    var fn = (node) => {
+      this.async(() => {
+        node.validate();
+      }, 1);
+    };
+    nodes.forEach(fn);
+    this.$.masterUrl.validate();
   }
 });
 })();

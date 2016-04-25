@@ -16,6 +16,11 @@ Polymer({
     values: {
       type: Object
     },
+    // Currently displayed page.
+    page: {
+      type: Number,
+      value: 0
+    },
     /**
      * A handler for a storage change event.
      *
@@ -58,7 +63,8 @@ Polymer({
     }
   },
   observers: [
-    '_onValueChange(values.*)'
+    '_onValueChange(values.*)',
+    '_settingsPageChanged(page)'
   ],
 
   onShow: function() {
@@ -68,6 +74,33 @@ Polymer({
 
   onHide: function() {
     this._setPageTitle('');
+  },
+
+  onBack: function() {
+    this.page = 0;
+  },
+
+  _settingsPageChanged: function(page) {
+    if (!this.opened) {
+      return;
+    }
+    this.releaseFeatures();
+    this.set('toolbarFeatures', []);
+    switch (page) {
+      case 0:
+        this._setPageTitle('Settings');
+        break;
+      case 1:
+        this._setPageTitle('Timeout settings');
+        this.push('toolbarFeatures','back');
+        this.requestFeatures();
+        break;
+      case 2:
+        this._setPageTitle('Magic variables settings');
+        this.push('toolbarFeatures','back');
+        this.requestFeatures();
+        break;
+    }
   },
 
   ready: function() {
@@ -129,12 +162,6 @@ Polymer({
     console.log('Setting changed', key, value);
     this.fire('settings-saved', o);
     arc.app.analytics.sendEvent('Settings usage', key, value + '');
-  },
-  /**
-   * Open the dialog with magic variables explanation.
-   */
-  openMagicVariablesDialog: function() {
-    this.$.magicVatDialog.open();
   },
 
   showTutorial: function() {
@@ -263,6 +290,39 @@ Polymer({
 
   _openApps: function() {
     window.open('chrome://apps');
+  },
+
+  computeTimeoutLabel(requestDefaultTimeout) {
+    return requestDefaultTimeout > 0 ?
+      `Timeout request after ${requestDefaultTimeout} seconds`  : 'No timeout';
+  },
+
+  computeMvLabel: function(mvEnabled) {
+    return mvEnabled > 0 ?
+      'Enabled'  : 'Disabled';
+  },
+
+  _showPage: function(e) {
+    var path = e.path;
+    var page = null;
+    while (true) {
+      let _elm = path.shift();
+      if (!_elm) {
+        return;
+      }
+      if (_elm.nodeName === 'PAPER-ITEM') {
+        page = _elm.dataset.page;
+        break;
+      }
+    }
+    if (page === null) {
+      return;
+    }
+    page = Number(page);
+    if (page !== page) {
+      return;
+    }
+    this.page = page;
   }
 });
 })();

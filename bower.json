@@ -1,5 +1,5 @@
 {
-  "name": "Advanced Rest Client",
+  "name": "advanced-rest-client",
   "description": "The web developers helper program to create and test custom HTTP requests.",
   "homepage": "https://advancedrestclient.com/",
   "keywords": [
@@ -32,7 +32,8 @@
     "lodash": "jarrodek/lodash#^4.6.2",
     "uri.js": "medialize/URI.js#^1.17.0",
     "zlib": "imaya/zlib.js#^0.2.0",
-    "paper-autocomplete": "jarrodek/paper-autocomplete#^1.0.1"
+    "paper-autocomplete": "jarrodek/paper-autocomplete#^1.0.1",
+    "cookie-parser": "jarrodek/cookie-parser#^1.0.2"
   },
   "devDependencies": {
     "web-component-tester": "*"
@@ -42,5 +43,5 @@
   "resolutions": {
     "lodash": "^4.6.2"
   },
-  "version": "7.7.27"
+  "version": "7.7.28"
 }

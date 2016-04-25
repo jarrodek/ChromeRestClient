@@ -14,7 +14,28 @@ Polymer({
   },
 
   _computeHasPayload: function(request) {
-    return request.har.entries[0].request.postData.text;
+    return !!this._payloadValue(request);
+  },
+
+  _payloadValue(request) {
+    if (!request) {
+      return false;
+    }
+    var entries = request.har.entries;
+    if (!entries || entries.length === 0) {
+      return false;
+    }
+    var _request;
+    if (!this.isHistory) {
+      if (request.referenceEntry || request.referenceEntry === 0) {
+        _request = entries[request.referenceEntry].request;
+      } else {
+        _request = entries[0].request; // take the first one.
+      }
+    } else {
+      _request = entries[entries.length - 1].request; // take the last one.
+    }
+    return _request.postData.text;
   },
 
   arrayItem: function(change, index, path) {

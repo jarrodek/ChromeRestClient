@@ -185,6 +185,6 @@ class Cookies {
   }
 }
 
-window.Cookies = Cookies;
-window.Cookie = Cookie;
+// window.Cookies = Cookies;
+// window.Cookie = Cookie;
 }());
