@@ -215,7 +215,13 @@ Polymer({
     if (!payload) {
       return;
     }
-    this._setRaw(JSON.stringify(payload));
+    if (typeof payload === 'string') {
+      if (payload !== this.raw) {
+        this._setRaw(payload);
+      }
+    } else {
+      this._setRaw(JSON.stringify(payload));
+    }
     this._setIsRaw(true);
     this._setIsJson(true);
 
@@ -384,6 +390,31 @@ Polymer({
         this.$.webView.style.height = e.data['preview-window-height'] + 'px';
       }
       // console.log('setting up client height', e.data['preview-window-height']);
+    }
+  },
+
+  _codeForceMenuAction: function(e) {
+    var action = e.target.selectedItem.dataset.action;
+    e.target.selected = -1;
+    if (!action) {
+      return;
+    }
+    var gaLabel = '';
+    switch (action) {
+      case 'json':
+        this._displayJSON(this.raw);
+        gaLabel = 'Force json';
+        break;
+      case 'xml':
+        this.$.xmlViewer.xml = this.raw;
+        this._setIsXml(true);
+        this.selectedTab = 3;
+        this._tabsChanged();
+        gaLabel = 'Force xml';
+        break;
+    }
+    if (gaLabel) {
+      arc.app.analytics.sendEvent('Response view', 'Payload preview', gaLabel);
     }
   }
 });

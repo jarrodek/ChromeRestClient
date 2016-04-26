@@ -83,6 +83,13 @@ the License.
               <paper-icon-button title="Copy content to clipboard" icon="content-copy" on-tap="_clipboardCopy"></paper-icon-button>
               <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
               <paper-icon-button title="Preview response" icon="visibility" on-tap="_togglePreviewResponse"></paper-icon-button>
+              <paper-menu-button horizontal-align="right">
+                <paper-icon-button icon="code" class="dropdown-trigger"></paper-icon-button>
+                <paper-menu class="dropdown-content" on-iron-select="_codeForceMenuAction">
+                  <paper-item data-action="json">Open as JSON</paper-item>
+                  <paper-item data-action="xml">Open as XML</paper-item>
+                </paper-menu>
+              </paper-menu-button>
             </div>
             <prism-highlight id="prism" code="[[raw]]" lang="[[parsedMode]]"></prism-highlight>
           </section>

@@ -148,6 +148,10 @@ class TestServer {
     app.delete('/', (req, res) => {
       res.sendStatus(204);
     });
+
+    app.get('/no-response', (req, res) => {
+      // res.sendStatus(204);
+    });
   }
 
   _setBasicAuth() {
@@ -173,16 +177,21 @@ class TestServer {
       res.set('Content-Type', 'application/json');
       res.send(json);
     });
-    app.get('/json2', (req, res) => {
+    app.get('/json/2', (req, res) => {
       var json = fs.readFileSync('./tasks/test-data/json2.json', 'utf8');
       // res.status(200).send('OK');
       res.set('Content-Type', 'application/json');
       res.send(json);
     });
-    app.get('/json-error', (req, res) => {
+    app.get('/json/error', (req, res) => {
       var json = fs.readFileSync('./tasks/test-data/json1.json', 'utf8');
       res.set('Content-Type', 'application/json');
       json = '[Eroor]: An error occured' + json;
+      res.send(json);
+    });
+    app.get('/json/html', (req, res) => {
+      var json = fs.readFileSync('./tasks/test-data/json1.json', 'utf8');
+      res.set('Content-Type', 'text/html');
       res.send(json);
     });
   }
