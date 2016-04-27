@@ -35,7 +35,16 @@ the License.
         padding: 0 16px;
       }
     </style>
-    <arc-response-status-view loading-time="[[loadingTime]]" status-code="[[response.status]]" status-message="[[response.statusText]]" response-headers="[[response.headers]]" request-headers="[[request.headers]]" http-message="[[request.messageSent]]" redirect-data="[[response.redirects]]"></arc-response-status-view>
+    <arc-response-status-view
+      loading-time="[[loadingTime]]"
+      status-code="[[response.status]]"
+      status-message="[[response.statusText]]"
+      response-headers="[[response.headers]]"
+      request-headers="[[request.headers]]"
+      http-message="[[request.messageSent]]"
+      redirect-data="[[response.redirects]]"
+      timings="[[response.stats]]"
+      redirect-timings="[[_computeRedirectTimings(response.redirects)]]"></arc-response-status-view>
     <template is="dom-if" if="[[hasResponse]]">
       <arc-response-payload-view id="payloadView" payload="[[response.body]]" headers="[[response.headers]]"></arc-response-payload-view>
     </template>

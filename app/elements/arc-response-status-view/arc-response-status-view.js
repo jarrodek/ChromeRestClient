@@ -4,33 +4,65 @@
 Polymer({
   is: 'arc-response-status-view',
   properties: {
+    // A status code part of the status header.
     statusCode: {
       type: Number,
       observer: '_statusCodeChanged'
     },
+    // A status message part of the status header.
     statusMessage: String,
+    // Calculated loading time.
     loadingTime: Number,
+    // An array of the response headers.
     responseHeaders: Array,
+    // A headers object of tge request headers
     requestHeaders: Headers,
+    // Raw HTTP message sent to the server.
     httpMessage: String,
+    // Array of the request headers.
     requestHeadersArray: {
       type: Array,
       computed: '_computeRequestHeaders(requestHeaders)'
     },
+    // An array of redirect responses.
     redirectData: {
       type: Array,
       value: []
     },
     _scdTitle: String,
     _scdBody: String,
+    // Currently selected tab.
     selectedTab: {
       type: Number,
       value: 0
+    },
+    // HAR timings object to display
+    timings: Object,
+    // Timing of the final response (excluding redirects).
+    redirectTimings: {
+      type: Array,
+      value: function() {
+        return [];
+      }
+    },
+    // True if there are redirects data available.
+    hasRedirects: {
+      type: Boolean,
+      value: false,
+      readOnly: true
+    },
+
+    requestTotalTime: {
+      type: Number,
+      value: 0,
+      readOnly: true
     }
   },
 
   observers: [
-    '_selectedTabChanged(selectedTab)'
+    '_selectedTabChanged(selectedTab)',
+    '_redirectsChanged(redirectData, redirectTimings)',
+    '_computeRequestTime(redirectTimings, timings)'
   ],
 
   _selectedTabChanged: function(selectedTab) {
@@ -143,6 +175,43 @@ Polymer({
     // console.log(requestHeaders);
     // return [];
     return arc.app.headers.toJSON(requestHeaders);
+  },
+
+  _redirectsChanged: function(redirectData) {
+    var has =  !!(redirectData && redirectData.length);
+    this._setHasRedirects(has);
+  },
+
+  _computeRequestTime: function(redirectTimings, timings) {
+    var time = 0;
+    if (!!redirectTimings && redirectTimings.length) {
+      redirectTimings.forEach((timing) => time += this._computeHarTime(timing));
+    }
+    time += this._computeHarTime(timings);
+    time = Math.round(time * 1000) / 1000;
+    this._setRequestTotalTime(time);
+  },
+
+  _computeHarTime: function(har) {
+    var fullTime = 0;
+    var connect = Number(har.connect);
+    var receive = Number(har.receive);
+    var send = Number(har.send);
+    var wait = Number(har.wait);
+    if (connect !== connect || connect < 0) {
+      connect = 0;
+    }
+    if (receive !== receive || receive < 0) {
+      receive = 0;
+    }
+    if (send !== send || send < 0) {
+      send = 0;
+    }
+    if (wait !== wait || wait < 0) {
+      wait = 0;
+    }
+    fullTime += connect + receive + send + wait;
+    return fullTime;
   }
 });
 })();
