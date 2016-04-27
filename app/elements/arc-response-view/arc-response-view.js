@@ -52,6 +52,15 @@ Polymer({
       value += stats.wait;
     }
     return Math.round(value);
+  },
+
+  _computeRedirectTimings: function(redirects) {
+    if (!redirects || redirects.length === 0) {
+      return [];
+    }
+    var timings = [];
+    redirects.forEach((r) => timings.push(r.stats));
+    return timings;
   }
 });
 })();
