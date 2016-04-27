@@ -116,12 +116,15 @@ the License.
           <paper-tab>Response headers (<span>{{responseHeaders.length}}</span>)</paper-tab>
           <paper-tab>Request headers (<span>{{requestHeadersArray.length}}</span>)</paper-tab>
           <paper-tab>Redirects (<span>{{redirectData.length}}</span>)</paper-tab>
+          <paper-tab>Timings</paper-tab>
         </paper-tabs>
         <iron-pages selected="{{selectedTab}}">
           <section>
+            <!-- Response headers -->
             <arc-headers-display-view on-tap="_handleLink" headers="{{responseHeaders}}"></arc-headers-display-view>
           </section>
           <section>
+            <!-- Request headers -->
             <arc-headers-display-view on-tap="_handleLink" headers="{{requestHeadersArray}}"></arc-headers-display-view>
             <div class="source-message text">
               <h5>Source message</h5>
@@ -131,6 +134,7 @@ the License.
             </div>
           </section>
           <section>
+            <!-- Redirects -->
             <template is="dom-if" if="{{!redirectData.length}}">
               <div class="no-redirects-container">
                 <p class="no-redirects-info">There were no redirects during this request</p>
@@ -158,6 +162,10 @@ the License.
                 </div>
               </template>
             </template>
+            <!-- ! Redirects -->
+          </section>
+          <section>
+            <!-- Timings -->
           </section>
         </iron-pages>
         <paper-dialog id="statusCodeInfo">
