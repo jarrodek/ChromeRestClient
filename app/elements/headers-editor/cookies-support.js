@@ -120,7 +120,7 @@ Polymer({
       }
       cookies.set(item.name, item.value, opts);
     });
-    var result = cookies.toHeader();
+    var result = cookies.toString(true);
     this.setValue(result);
   },
 
