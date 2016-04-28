@@ -1,3 +1,6 @@
+(function() {
+'use strict';
+
 Polymer({
   is: 'arc-project-controller',
   behaviors: [
@@ -32,6 +35,10 @@ Polymer({
     'delete': '_deleteRequested',
     'export': 'exportProject'
   },
+
+  observers: [
+    '_projectNameChanged(project.name)'
+  ],
 
   onShow: function() {
     this._setPageTitle('Project');
@@ -81,7 +88,13 @@ Polymer({
   },
 
   _projectSaved: function() {
-    // console.log('_projectSaved', e);
+    console.log('_projectSaved');
+  },
+
+  _projectNameChanged: function() {
+    this.$.project.save();
+    // this.$.project.data = this.project;
+    // console.log('_projectNameChanged',a,b);
   },
 
   _requestNameChanged: function(e) {
@@ -205,3 +218,4 @@ Polymer({
     });
   }
 });
+})();

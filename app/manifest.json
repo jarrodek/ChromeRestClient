@@ -3,8 +3,8 @@
   "name": "Advanced REST client",
   "short_name": "ARC",
   "description": "The web developers helper program to create and test custom HTTP requests.",
-  "version": "6.13.14.109",
-  "version_name": "6.13.14.109-stable",
+  "version": "7.9.29.181",
+  "version_name": "7.9.29.181-canary",
   "minimum_chrome_version": "47",
   "author": "Pawel Psztyc",
   "icons": {
@@ -18,7 +18,6 @@
     "storage",
     "unlimitedStorage",
     "identity",
-    "identity.email",
     "syncFileSystem",
     {
       "fileSystem": [
@@ -68,20 +67,14 @@
     "scopes": [
       "https://www.googleapis.com/auth/drive.file",
       "https://www.googleapis.com/auth/drive.install",
-      "https://www.googleapis.com/auth/drive.metadata.readonly",
-      "profile"
+      "https://www.googleapis.com/auth/drive.metadata.readonly"
     ]
   },
   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCcwog3RvKBNlbE9nxa06ruwxAKR2kauzTVWYN4e1uFK8g3ScGxqG08gvuzgbOlbIO0TNHXdkJzf6DY0EPH0w8wUYDNlyav4DToaB2pdJAjcHOPsvUwktc0N0Y6ABrnreww23ZvNfqHuF0+u/Zzn3vGEFjHIcG2LGMXgP3R0QgdDQIDAQAB",
   "app": {
     "background": {
       "scripts": [
-        "scripts/libs/app.polifils.js",
-        "bower_components/dexie-js/dist/dexie.min.js",
-        "bower_components/har/build/har.js",
         "scripts/libs/app.utils.js",
-        "scripts/libs/app.types.js",
-        "scripts/libs/app.db.idb.js",
         "scripts/background.js"
       ]
     }
@@ -93,5 +86,10 @@
       ],
       "title": "Open from Google Drive"
     }
+  },
+  "sandbox": {
+    "pages": [
+      "html-preview.html"
+    ]
   }
 }

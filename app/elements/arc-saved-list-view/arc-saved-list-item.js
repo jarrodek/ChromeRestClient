@@ -136,8 +136,8 @@ Polymer({
     }
   },
 
-  arrayItem: function(change, index, path) {
-    var date = Object.ensureDate({}, 'date', this.get(path, change.base[index]));
+  computeHistoryTime: function(change, path) {
+    var date = Object.ensureDate({}, 'date', this.get(path, change.base[change.base.length - 1]));
     var options = {
       year: 'numeric',
       month: 'numeric',
@@ -158,7 +158,7 @@ Polymer({
     }
     page(url);
   },
-  
+
   _deleteItem: function() {
     this.fire('delete', {
       request: this.request

@@ -140,6 +140,14 @@ window.ArcBehaviors.ListControllerBehavior = {
       type: Boolean,
       value: true,
       readOnly: true
+    },
+
+    //True if the search query has been applied
+    isSearch: {
+      type: Boolean,
+      value: false,
+      readOnly: true,
+      notify: true
     }
   },
 
@@ -204,6 +212,7 @@ window.ArcBehaviors.ListControllerBehavior = {
    * Reset data to initial state.
    */
   resetQuery: function() {
+    this._setIsSearch(false);
     this.listData = [];
     this.page = 0;
     this.hasMore = true;
@@ -214,6 +223,7 @@ window.ArcBehaviors.ListControllerBehavior = {
    */
   onSearch: function() {
     this.resetQuery();
+    this._setIsSearch(true);
     this.queryPage();
   },
   /**

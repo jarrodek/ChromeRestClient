@@ -1,0 +1,110 @@
+<dom-module id="cookies-support">
+  <template>
+    <style>
+    :host {
+      display: block;
+      margin: 24px 40px;
+      -webkit-overflow-scrolling: touch;
+      background: var(--paper-dialog-background-color, --primary-background-color);
+      color: var(--paper-dialog-color, --primary-text-color);
+      @apply(--paper-font-body1);
+      @apply(--shadow-elevation-16dp);
+      @apply(--paper-dialog);
+    }
+
+    :host .dialog > * {
+      margin-top: 20px;
+      padding: 0 24px;
+    }
+
+    :host > .dialog > *:first-child {
+      margin-top: 24px;
+    }
+    :host > .dialog > *:last-child {
+      margin-bottom: 24px;
+    }
+
+    :host > .dialog > h2 {
+      position: relative;
+      margin: 0;
+      @apply(--paper-font-title);
+      @apply(--paper-dialog-title);
+    }
+
+    :host > .dialog > .buttons {
+      position: relative;
+      padding: 8px 8px 8px 24px;
+      margin: 0;
+      margin-bottom: 24px;
+      color: var(--paper-dialog-button-color, --primary-color);
+      @apply(--layout-horizontal);
+      @apply(--layout-end-justified);
+    }
+
+    .actions-row {
+      margin-bottom: 8px;
+    }
+
+    .cookie-row {
+
+    }
+    .name-value {
+      @apply(--layout-horizontal);
+      @apply(--layout-flex);
+      @apply(--layout-relative);
+    }
+    .cookie-details {
+      @apply(--layout-horizontal);
+      @apply(--layout-flex);
+      @apply(--layout-wrap);
+    }
+    paper-dialog-scrollable {
+      /*min-height: 200px;*/
+    }
+    paper-input-container {
+      margin-right: 8px;
+    }
+    .cookie-details {
+      margin-bottom: 12px;
+    }
+    </style>
+    <div class="dialog">
+      <h2>Cookies</h2>
+      <paper-dialog-scrollable id="scrollable">
+        <template is="dom-repeat" items="[[cookies]]" id="list">
+          <div class="cookie-row">
+            <div class="name-value">
+              <paper-input-container class="cookie-name" no-label-float inline>
+                <input is="iron-input" type="text" value="{{item.name::input}}" placeholder="Cookie name"/>
+              </paper-input-container>
+              <paper-input-container class="cookie-value" no-label-float inline>
+                <input is="iron-input" type="text" value="{{item.value::input}}" placeholder="Cookie value"/>
+              </paper-input-container>
+              <paper-icon-button icon="image:edit" title="Edit cookie details" on-tap="_openCookieDetail"></paper-icon-button>
+              <paper-icon-button icon="close" title="Remove cookie" on-tap="_removeCookie"></paper-icon-button>
+            </div>
+            <div class="cookie-details" hidden$="{{!item.details}}">
+              <paper-input-container class="cookie-domain" no-label-float inline>
+                <input is="iron-input" type="text" value="{{item.domain::input}}" placeholder="Cookie domain"/>
+              </paper-input-container>
+              <paper-input-container class="cookie-domain" no-label-float inline>
+                <input is="iron-input" type="text" value="{{item.path::input}}" placeholder="Cookie path"/>
+              </paper-input-container>
+              <paper-input-container class="cookie-domain" no-label-float inline>
+                <input is="iron-input" type="datetime-local" value="{{item.expires::input}}" placeholder="Expires"/>
+              </paper-input-container>
+            </div>
+          </div>
+        </template>
+        <div class="actions-row">
+          <paper-button raised on-tap="addEmptyCookie">Add cookie</paper-button>
+        </div>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+          <paper-button dialog-dismiss>Cancel</paper-button>
+          <paper-button dialog-confirm on-tap="_setValue">Accept</paper-button>
+      </div>
+    </div>
+  </template>
+  <script src="cookies-support.js"></script>
+</dom-module>

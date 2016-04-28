@@ -61,11 +61,26 @@ Polymer({
     activeAutocompleteNameField: {
       type: HTMLElement,
       readOnly: true
-    }
+    },
+    // True when the headers are valid HTTP headers
+    valid: {
+      type: Boolean,
+      value: true,
+      notify: true,
+      readOnly: true
+    },
+    // Error message to diplay when the headers are not valid.
+    errorMessage: String
   },
   observers: [
-    '_headerValuesChanged(headersList.*)'
+    '_headerValuesChanged(headersList.*)',
+    '_headersChanged(headers)'
   ],
+
+  listeners: {
+    'iron-overlay-closed': '_headersSupportClosed'
+  },
+
   ready: function() {
     this.$.cm.setOption('extraKeys', {
       'Ctrl-Space': function(cm) {
@@ -79,13 +94,102 @@ Polymer({
       arc.app.analytics.sendEvent('Headers editor', 'CM value picked', e));
     this.$.cm.editor.on('header-key-selected', (e) =>
       arc.app.analytics.sendEvent('Headers editor', 'CM name picked', e));
+    this.$.cm.editor.on('header-value-support', (e) => this.onCodeMirrorHeadersSupport(e));
   },
+  // Handler for code-mirror header hints selected.
+  onCodeMirrorHeadersSupport: function(init) {
+    if (!init.type || !init.type.call) {
+      return;
+    }
+    var openResult;
+    switch (init.type.call) {
+      case 'authorizationBasic':
+        openResult = this._openCmBasicAuth();
+        break;
+      case 'cookie':
+        openResult = this._openCmCookies();
+        break;
+    }
+    if (openResult) {
+      this.cmSupportData = init;
+    } else {
+      this.cmSupportData = null;
+    }
+  },
+
+  _headersSupportClosed: function(e) {
+    if (e.detail.canceled) {
+      if (this.cmSupportData) {
+        this.cmSupportData = null;
+      }
+      return;
+    }
+    var init = this.cmSupportData;
+    this.cmSupportData = null;
+    if (!init) {
+      return;
+    }
+    var elm;
+    var value;
+    switch (init.type.call) {
+      case 'authorizationBasic':
+        elm = this.__getSupportElmForHeader('authorization');
+        if (elm) {
+          value = elm.value;
+          if (value) {
+            value = value.replace('Basic ', '');
+          }
+        }
+        break;
+      case 'cookie':
+        elm = this.__getSupportElmForHeader('cookie');
+        if (elm) {
+          value = elm.value;
+        }
+    }
+    if (!elm || !value) {
+      return;
+    }
+    this.$.cm.editor.replaceSelection(value);
+    // console.log('_headersSupportClosed', e);
+  },
+  // Open basic auth support for code mirror.
+  _openCmBasicAuth: function() {
+    var elm = this.__getSupportElmForHeader('authorization');
+    if (!elm) {
+      return false;
+    }
+    elm.target = undefined;
+    elm.model = undefined;
+    elm.provideSupport();
+    return true;
+  },
+
+  // Open cookies support for code mirror.
+  _openCmCookies: function() {
+    var elm = this.__getSupportElmForHeader('cookie');
+    if (!elm) {
+      return false;
+    }
+    elm.target = undefined;
+    elm.model = undefined;
+    elm.provideSupport();
+    return true;
+  },
+
   /**
    * Called by CodeMirror editor.
    * When something change n the headers list, detect content type header.
    */
   valueChanged: function() {
     this._detectContentType();
+    var error = arc.app.headers.getError(this.headers);
+    if (error) {
+      this._setValid(false);
+      this.set('errorMessage', error);
+    } else {
+      this._setValid(true);
+    }
   },
   /**
    * Insert a Content-Type header into a headers list if it is not on the list already.
@@ -215,8 +319,7 @@ Polymer({
         tabName = 'Raw tab';
         break;
       case 1:
-        var arr = arc.app.headers.toJSON(this.headers);
-        this.set('headersList', arr);
+        this._setHeadersList();
         tabName = 'Form tab';
         break;
       case 2:
@@ -232,6 +335,23 @@ Polymer({
     var index = this.$.headersList.indexForElement(e.target);
     this.splice('headersList', index, 1);
     this.updateHeaders();
+  },
+
+  _headersChanged: function(headers) {
+    if (this.tabSelected !== 1) {
+      return;
+    }
+    // it may come from updating a form value or from swithing to different request.
+    // See: https://github.com/jarrodek/ChromeRestClient/issues/439
+    var listHeaders = arc.app.headers.toString(this.headersList);
+    if (listHeaders !== headers) {
+      this._setHeadersList();
+    }
+  },
+  // Populate form with current headers.
+  _setHeadersList: function() {
+    var arr = arc.app.headers.toJSON(this.headers);
+    this.set('headersList', arr);
   },
 
   _headerValuesChanged: function(record) {

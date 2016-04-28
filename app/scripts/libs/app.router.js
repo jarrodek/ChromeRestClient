@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
@@ -18,7 +19,7 @@
 /**
  * Advanced Rest Client namespace
  */
-var arc = arc || {};
+ window.arc = window.arc || {};
 /**
  * ARC app's namespace
  */
@@ -206,6 +207,6 @@ arc.app.router.parse = function(str) {
   if (path) {
     tokens.push(path);
   }
-
   return tokens;
 };
+}());

@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
@@ -23,7 +24,7 @@ window.pendingAnalytics = window.pendingAnalytics || [];
  *
  * @namespace
  */
-var arc = arc || {};
+window.arc = window.arc || {};
 /**
  * ARC app's namespace
  *
@@ -84,15 +85,50 @@ arc.app.db.idb.open = function() {
         variables: '++id,variable,type',
         basicAuth: '&url'
       });
-    db.projectObjects.mapToClass(ProjectObject);
-    db.serverExportObjects.mapToClass(ServerExportedObject);
-    db.requestObject.mapToClass(RequestObject);
-    db.historySockets.mapToClass(HistorySocketObject);
-    db.historyUrls.mapToClass(HistoryUrlObject);
-    db.statuses.mapToClass(HttpStatusObject);
-    db.headers.mapToClass(HttpHeaderObject);
-    db.variables.mapToClass(MagicVariableObject);
-    db.basicAuth.mapToClass(BasicAuth);
+    db.version(4)
+      .stores({
+        headers: '&[key+type],key,type',
+        statuses: '&key',
+        historyUrls: '&url',
+        historySockets: '&url',
+        requestObject: '++id,url,method,[url+method],type,_name',
+        serverExportObjects: '[serverId+requestId],serverId,requestId',
+        projectObjects: '++id,*requestIds',
+        variables: '++id,variable,type',
+        basicAuth: '&url',
+        logs: '&time,type'
+      });
+    db.version(5)
+      .stores({
+        headers: '&[key+type],key,type',
+        statuses: '&key',
+        historyUrls: '&url',
+        historySockets: '&url',
+        requestObject: '++id,url,method,[url+method],type,_name',
+        serverExportObjects: '[serverId+requestId],serverId,requestId',
+        projectObjects: '++id,*requestIds',
+        variables: '++id,variable,type',
+        basicAuth: '&url',
+        logs: '&time,type',
+        cookies: '&uuid,domain,path,name,[domain+path]'
+      });
+    db.version(6)
+      .stores({
+        headers: '&[key+type],key,type',
+        statuses: '&key',
+        historyUrls: '&url',
+        historySockets: '&url',
+        requestObject: '++id,url,method,[url+method],type,_name',
+        serverExportObjects: '[serverId+requestId],serverId,requestId',
+        projectObjects: '++id,*requestIds',
+        variables: '++id,variable,type',
+        basicAuth: '&url',
+        logs: '&time,type',
+        cookies: '&uuid,_domain,name'
+      });
+    arc.app.db.idb.mapsObjects(db);
+    arc.app.db.idb.addHooks(db);
+
     db.on('error', function(error) {
       console.error('IndexedDB global error', error);
       let pending = arc.app.analytics.sendException('IDB error:: ' + JSON.stringify(error));
@@ -109,7 +145,6 @@ arc.app.db.idb.open = function() {
       .then(() => arc.app.db.idb.upgraded = true)
       .catch(() => arc.app.db.idb.upgraded = false);
     });
-    arc.app.db.idb.addHooks(db);
     db.open()
       .then(function() {
         resolve(db);
@@ -124,6 +159,19 @@ arc.app.db.idb.open = function() {
       });
   });
 };
+arc.app.db.idb.mapsObjects = function(db) {
+  db.projectObjects.mapToClass(ProjectObject);
+  db.serverExportObjects.mapToClass(ServerExportedObject);
+  db.requestObject.mapToClass(RequestObject);
+  db.historySockets.mapToClass(HistorySocketObject);
+  db.historyUrls.mapToClass(HistoryUrlObject);
+  db.statuses.mapToClass(HttpStatusObject);
+  db.headers.mapToClass(HttpHeaderObject);
+  db.variables.mapToClass(MagicVariableObject);
+  db.basicAuth.mapToClass(BasicAuth);
+  db.logs.mapToClass(LogObject);
+  db.cookies.mapToClass(Cookie);
+};
 arc.app.db.idb.addHooks = function(db) {
   var createUpdateTime = (primKey, obj) => {
     obj.updateTime = Date.now();
@@ -133,6 +181,9 @@ arc.app.db.idb.addHooks = function(db) {
       updateTime: Date.now()
     };
   };
+  var createDbUuid = () => {
+    return arc.app.utils.uuid();
+  };
   db.projectObjects.hook('creating', createUpdateTime);
   db.projectObjects.hook('updating', updateUpdateTime);
 
@@ -141,6 +192,8 @@ arc.app.db.idb.addHooks = function(db) {
 
   db.variables.hook('creating', createUpdateTime);
   db.variables.hook('updating', updateUpdateTime);
+
+  db.cookies.hook('creating', createDbUuid);
 };
 /**
  * Populate database with initial data
@@ -152,12 +205,12 @@ arc.app.db.idb.populateDatabase = function(db) {
   return db.statuses.count()
     .then((count) => {
       if (count > 0) {
-        console.info('Database already populated');
+        // console.info('Database already populated');
         return Dexie.Promise.resolve(null);
       }
       return arc.app.db.idb.downloadDefinitions()
         .catch(function() {
-          console.warn('Definitions wasn\'t there. skipping definitions installation.');
+          console.warn('Definitions wasn\'t there. Skipping definitions installation.');
           return Dexie.Promise.reject(new Error('Definitions location error'));
         });
     })
@@ -224,3 +277,4 @@ arc.app.db.idb.downloadDefinitions = function() {
       return response.json();
     });
 };
+}());

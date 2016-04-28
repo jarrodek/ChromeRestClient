@@ -58,6 +58,8 @@
       color: rgba(0, 0, 0, 0.87);
       font-size: 13px;
       padding: 16px 24px !important;
+      -webkit-user-select: text;
+      cursor: text;
     }
 
     .direction-column,
@@ -111,6 +113,10 @@
       @apply(--section-padding);
       padding-right: 24px;
     }
+
+    .send-file {
+      margin: 20px;
+    }
     </style>
     <div class="remote-address-line">
       <div hidden$="{{connected}}" class="connection-info-line">
@@ -146,11 +152,9 @@
         </section>
         <section>
           <file-drop id="fileDrop" on-file-ready="_onFile"></file-drop>
-          <paper-button class="action-button" on-tap="_sendFileMessage" disabled$="{{!fileSendEnabled}}">send</paper-button>
+          <paper-button class="action-button send-file" on-tap="_sendFileMessage" disabled$="{{!fileSendEnabled}}">send</paper-button>
         </section>
       </iron-pages>
-
-
     </div>
     <div class="padding-section" hidden$="{{hideLog}}">
       <div class="table">

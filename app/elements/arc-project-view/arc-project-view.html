@@ -12,7 +12,7 @@
           color: rgba(0, 0, 0, 0.87);
           border-bottom: 1px rgba(0, 0, 0, 0.12) solid;
         }
-        ;
+
         --table-base-cell: {
           padding-right: 16px;
           padding-left: 56px;
@@ -22,11 +22,11 @@
         --table-checkbox-column: {
           padding-left: 16px;
         }
-        ;
+
         --table-checkbox-value: {
           @apply(--table-checkbox-column);
         }
-        ;
+
         --table-name-column: {
           @apply(--table-base-cell);
           min-width: 120px;
@@ -36,26 +36,30 @@
           text-overflow: ellipsis;
           white-space: nowrap;
         }
-        ;
+
         --table-name-value: {
           @apply(--table-name-column);
           padding-left: 56px;
           height: initial;
           min-height: 24px;
+          -webkit-user-select: text;
+          cursor: text;
         }
-        ;
+
         --table-method-column: {
           @apply(--table-base-cell);
           min-width: 100px;
           max-width: 100px;
         }
-        ;
+
         --table-method-value: {
           @apply(--table-method-column);
           padding-left: 56px;
           height: auto;
+          -webkit-user-select: text;
+          cursor: text;
         }
-        ;
+
         --table-url-column: {
           @apply(--table-base-cell);
           @apply(--layout-flex);
@@ -67,20 +71,22 @@
           @apply(--table-url-column);
           padding-left: 56px;
           height: auto;
+          -webkit-user-select: text;
+          cursor: text;
         }
-        ;
+
         --table-action-column: {
           @apply(--table-base-cell);
           padding-right: 24px;
         }
-        ;
+
         --table-action-value: {
           @apply(--table-action-column);
           padding-left: 56px;
           padding-right: 16px;
           height: auto;
         }
-        ;
+        
       }
       .project-info {
         @apply(--layout-horizontal);

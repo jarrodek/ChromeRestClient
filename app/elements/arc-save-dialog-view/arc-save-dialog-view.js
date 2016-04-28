@@ -36,7 +36,8 @@ Polymer({
      * New project name
      */
     newProjectName: {
-      type: String
+      type: String,
+      value: ''
     },
     /**
      * Existing project ID.
@@ -61,7 +62,8 @@ Polymer({
     this.name = '';
     this.isProject = false;
     this.projectId = undefined;
-    this.newProjectName = undefined;
+    this.newProjectName = '';
+    this.set('projects', []);
   },
 
   _cancel: function() {

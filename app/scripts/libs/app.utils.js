@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
@@ -20,7 +21,7 @@
  *
  * @namespace
  */
-var arc = arc || {};
+window.arc = window.arc || {};
 /**
  * ARC app's namespace
  *
@@ -296,3 +297,20 @@ Object.defineProperty(arc.app.utils, 'releaseChannel', {
     throw new Error('releaseChannel can\'t be set.');
   }
 });
+/**
+ * Convert ArrayBuffer to readable form
+ * @param {ArrayBuffer} buff
+ * @returns {String} Converted string
+ */
+arc.app.utils.arrayBufferToString = function(buff) {
+  if (this.aborted) {
+    return '';
+  }
+  var array = new Uint8Array(buff);
+  var str = '';
+  for (var i = 0; i < array.length; ++i) {
+    str += String.fromCharCode(array[i]);
+  }
+  return str;
+};
+}());

@@ -82,13 +82,18 @@ Polymer({
         if (this.searchTerm) {
           let term = String(this.searchTerm).toLowerCase();
           result = table.filter((ro) => {
-            if (ro.type !== type) {
+            if (excludedRequests.indexOf(ro.id) !== -1) {
               return false;
+            }
+            if (type !== 'history') {
+              if (ro.type !== type && ro.type !== 'drive') {
+                return false;
+              }
             }
             if (ro.url.toLowerCase().indexOf(term) !== -1) {
               return true;
             }
-            if (ro._name && ro._name.indexOf(term) !== -1) {
+            if (ro._name && ro._name.toLowerCase().indexOf(term) !== -1) {
               return true;
             }
             if (ro.method.toLowerCase().indexOf(term) !== -1) {
@@ -102,8 +107,8 @@ Polymer({
           result = table.get(this.objectId);
         } else {
           //result = table.where('type').equals(this.requestType);
-          result = table.where(':id').noneOf(excludedRequests);
           if (this.requestType !== 'history') {
+            result = table.where(':id').noneOf(excludedRequests);
             result = result.and((item) => {
               if (!type) {
                 return true;
@@ -113,13 +118,19 @@ Polymer({
               }
               return item.type === type;
             });
+          } else {
+            result = table;
           }
         }
         if (this.sortBy) {
           if (indexes.indexOf(this.sortBy) === -1) {
             manualSort = true;
           } else {
-            result = result.sortBy(this.sortBy);
+            if (result.sortBy) {
+              result = result.sortBy(this.sortBy);
+            } else if (result.orderBy) {
+              result = result.orderBy(this.sortBy);
+            }
           }
         }
         if (result.toArray) {

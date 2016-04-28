@@ -20,6 +20,7 @@
   app.selectedRequest = null;
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
+    arc.app.logger.initConsole();
     app.updateBranding();
   });
 
@@ -32,6 +33,7 @@
     //event will be handled in elements/routing.html
     let event = new Event('initializeRouting');
     window.dispatchEvent(event);
+    arc.app.logger.initDbLogger();
   });
   //When changin route this will scroll page top. This is called from router.
   app.scrollPageToTop = function() {
@@ -138,6 +140,9 @@
   app._onFeatureProjectEndpoints = (e) => {
     app._featureCalled('projectEndpoints', e.detail.item.dataset.id);
   };
+  app._onFeatureBack = (e) => {
+    app._featureCalled('back', e);
+  };
   // called when any component want to change request link.
   document.body.addEventListener('action-link-change', (e) => {
     var url = e.detail.url;
@@ -170,6 +175,64 @@
     page('/saved');
     arc.app.analytics.sendEvent('Shortcats usage', 'Called', 'Open');
   };
+  // Current "height" of the top header.
+  app.mainHeaderTop = '64px';
+  // Called when ctrl/command + F combination has been pressed.
+  app.onSearch = () => {
+    var searchBar = document.querySelector('#content-search-bar');
+    if (!searchBar) {
+      console.warn('Search bar was not available in document.');
+      return;
+    }
+    if (searchBar.opened) {
+      searchBar.focusInput();
+    } else {
+      searchBar.style.top = app.mainHeaderTop;
+      searchBar.open();
+      arc.app.analytics.sendEvent('Shortcats usage', 'Called', 'Search');
+    }
+  };
+  // Called when ctrl/command + n called to open new window.
+  app.onNewWindow = () => {
+    chrome.runtime.getBackgroundPage(function(bg) {
+      bg.arc.bg.openWindow();
+    });
+  };
+
+  app.textSearchBarOpened = () => {
+    var searchBar = document.querySelector('#content-search-bar');
+    if (!searchBar) {
+      console.warn('Search bar was not available in document.');
+      return;
+    }
+    searchBar.style.top = app.mainHeaderTop;
+  };
+
+  window.addEventListener('paper-header-transform', function(e) {
+    var searchBar = Polymer.dom(document).querySelector('#content-search-bar');
+    if (!searchBar) {
+      console.warn('Search bar was not available in document.');
+      return;
+    }
+    // if (!searchBar.opened) {
+    //   return;
+    // }
+    var detail = e.detail;
+    var top = detail.height - detail.y;
+    if (top < 0) {
+      top = 0;
+    }
+    top = top + 'px';
+    if (searchBar.style.top === top) {
+      return;
+    }
+    app.mainHeaderTop = top;
+    if (!searchBar.opened) {
+      return;
+    }
+    searchBar.style.top = top;
+    // console.log('paper-header-transform', top);
+  });
 
   app._cancelEvent = (e) => {
     e.preventDefault();
@@ -197,8 +260,12 @@
     if (cls) {
       document.body.classList.add(cls);
       Polymer.updateStyles();
-      if (cls === 'canary') {
-        app.$.canaryInfo.open();
+      if (channel === 'canary') {
+        chrome.storage.local.get({'showCanaryWarning': true}, (r) => {
+          if (r.showCanaryWarning) {
+            app.$.canaryInfo.open();
+          }
+        });
       }
     }
     if (channel === 'stable') {
@@ -255,4 +322,13 @@
   app.closeOfflineMessage = () => {
     app.$.offlineToast.close();
   };
+
+  window.addEventListener('error', (e) => {
+    console.log('--no-save', 'Window error event,', e);
+    if (!e.detail.message) {
+      return;
+    }
+    var message = '[Window]' + e.detail.message;
+    arc.app.analytics.sendException(message, false);
+  });
 })(document, window);

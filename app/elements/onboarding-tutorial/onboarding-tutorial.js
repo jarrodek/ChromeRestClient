@@ -94,7 +94,7 @@ Polymer({
     Polymer.dom(this.$.content).unobserveNodes(this._observer);
   },
 
-  _childNodesChanged: function(info) {
+  _childNodesChanged: function() {
     var children = Polymer.dom(this).getEffectiveChildNodes();
     children = children.filter((node) => node.nodeType === Node.ELEMENT_NODE);
     this.set('pages', children);

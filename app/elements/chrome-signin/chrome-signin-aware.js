@@ -61,6 +61,9 @@
           this.setTokenData(null);
           return;
         }
+        window.setTimeout(() => {
+          this.clearCache();
+        }, 1);
         // any aware will be ok.
         // In chrome apps token will exist until it's revoked.
         // To do this the app need to make a call to perform the operation.
@@ -257,7 +260,8 @@
         type: Boolean,
         notify: true,
         readOnly: true,
-        value: false
+        value: false,
+        observer: '_isAuthorizedChanged'
       },
       /**
        * If provided it will change scopes provided in the manifest file.
@@ -325,7 +329,14 @@
      * the user is not signed in to Chrome or error ocurred during the request.
      */
     signIn: function(interactive) {
-      AuthEngine.signIn(interactive);
+      AuthEngine.signIn(interactive)
+      .catch((e) => {
+        if (e.message && e.message.indexOf('did not approve') !== -1) {
+          this.fire('chrome-signin-aware-canceled');
+        } else {
+          this.fire('chrome-signin-aware-error', e);
+        }
+      });
     },
     /** signs user out */
     signOut: function() {
@@ -336,7 +347,14 @@
      * A function to be called when the token has been revoked.
      */
     _tokenRevokedHandler: function() {
-      AuthEngine.clearCache();
+      // AuthEngine.clearCache()
+      // .then(() => {
+      //   // this._scopeChanged(this.scopes);
+      //   // this.fire('google-signin-aware-signed-out');
+      // })
+      // .catch((e) => {
+      //   console.error('Unable to remove token.', e);
+      // });
     },
     /**
      * Revoke error handler.
@@ -379,8 +397,10 @@
         this._setSignedIn(true);
         this._restore();
       } else {
-        this.setTokenData(null);
+        this._setSignedIn(false);
+        AuthEngine.setTokenData(null);
       }
+      this._scopeChanged(this.scopes);
     },
 
     _scopeChanged: function(newVal) {
@@ -389,12 +409,15 @@
       var newAuthorized = this.isAuthorized && AuthEngine.hasGrantedScopes(this.scopes);
       if (newAuthorized !== this.isAuthorized) {
         this._setIsAuthorized(newAuthorized);
-        if (newAuthorized) {
-          this.fire('google-signin-aware-success');
-        } else {
-          this.fire('google-signin-aware-signed-out');
-          this.setTokenData(null);
-        }
+      }
+    },
+
+    _isAuthorizedChanged: function(isAuthorized) {
+      if (isAuthorized) {
+        this.fire('chrome-signin-aware-success');
+      } else {
+        this.fire('chrome-signin-aware-signed-out');
+        AuthEngine.setTokenData(null);
       }
     }
   });

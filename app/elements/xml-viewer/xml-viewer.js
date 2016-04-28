@@ -55,8 +55,20 @@ Polymer({
       value: function() {
         return this._workerError.bind(this);
       }
+    },
+
+    // An element which should be searched for text.
+    _textSearch: {
+      type: HTMLElement,
+      value: function() {
+        return this.$.output;
+      }
     }
   },
+
+  behaviors: [
+    ArcBehaviors.TextSearchBehavior
+  ],
 
   detatch: function() {
     if (!this._worker) {

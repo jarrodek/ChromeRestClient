@@ -21,35 +21,115 @@ The `<arc-request-error-view>` displays an error associated with the request.
     <arc-request-error-view message="You are offline"></arc-request-error-view>
 -->
 <html>
-  <head></head>
-  <body>
-    <dom-module id="arc-request-error-view">
-      <template>
-        <style>
-          :host {
-            @apply(--layout-horizontal);
-            @apply(--layout-center);
-          }
-          .error-icon {
-            width: 128px;
-            height: 128px;
-            color: rgba(0,0,0,0.56);
-          }
-          .error-desc {
-            @apply(--paper-font-subhead);
-            color: var(--google-red-500);
-          }
 
-        </style>
+<head></head>
+
+<body>
+  <dom-module id="arc-request-error-view">
+    <template>
+      <style>
+      :host {
+        @apply(--layout-vertical);
+        @apply(--layout-flex);
+        -webkit-user-select: text;
+        margin: 0 16px;
+      }
+
+      .message-wrapper {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      .error-icon {
+        width: 128px;
+        height: 128px;
+        color: rgba(0, 0, 0, 0.56);
+      }
+
+      .error-desc {
+        @apply(--paper-font-subhead);
+        color: var(--google-red-500);
+      }
+      .error-code {
+        color: var(--paper-grey-500);
+      }
+      .inherit {
+        color: inherit !important;
+        background-color: inherit !important;
+        text-decoration: inherit !important;
+      }
+      </style>
+      <div class="message-wrapper">
         <div>
           <iron-icon class="error-icon" icon="arc:sentiment-very-dissatisfied"></iron-icon>
         </div>
         <div class="error-desc">
-          <p>There was an error during the request</p>
-          <p>[[message]]</p>
+          <iron-pages selected="{{detailsPage}}">
+            <section>
+              <p>There was an error during the request</p>
+              <p>[[message]]</p>
+            </section>
+            <section>
+              <h3>Install self signed certificate in Chrome</h3>
+              <p>The app cen't work if the self-signed certificate is not installed in Chrome.</p>
+              <a class="inherit" href="http://restforchrome.blogspot.co.uk/2016/04/advanced-rest-client.html" target="_blank">
+                <paper-button raised>Tell me more</paper-button>
+              </a>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <h3>The connection can't be made</h3>
+              <p>
+                Please, check if:
+              </p>
+              <ul>
+                <li>you and remote machine are connected to the internet,</li>
+                <li>all required services (like www) are up and running on server</li>
+                <li>port number is correct</li>
+                <li>url is correct</li>
+              </ul>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <h3>Certificate is invalid for given domain</h3>
+              <p>There's no way of fixing this issue with the app. Certificate presented to the browser has different CN (common name field) than the domain of the request.</p>
+              <p>Please, generate certificate again with proper domain name or use free certificate service <a href="https://letsencrypt.org/" target="_blank">letsencrypt.org</a> to get a new certificate.</p>
+              <a class="inherit" href="http://restforchrome.blogspot.co.uk/2016/04/advanced-rest-client.html" target="_blank">
+                <paper-button raised>Tell me more</paper-button>
+              </a>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <h3>Abort / timeout</h3>
+              <p>The request has been aborted manually or because of the conection timeout. There were no response from the server but the connection wasn't closed.</p>
+              <p>You can adjust timeout in settings.</p>
+              <p>
+                Try to:
+              </p>
+              <ul>
+                <li>add "Connection: close" header which should be used by the server to close the connection after it finish generating response</li>
+              </ul>
+              <p>
+                Please, check if:
+              </p>
+              <ul>
+                <li>all required services (like www) are up and running on server</li>
+                <li>method is correct</li>
+                <li>port number is correct</li>
+                <li>url is correct</li>
+                <li>all required headers and/or payload has been added to the request</li>
+              </ul>
+              <h4>Example</h4>
+              <p>
+                Sometimes it may happen when you use <b>http</b> protocol instead of <b>https</b>. Also it may happen when you use different URL (port / protocol) and the server is not configured properly.
+              </p>
+            </section>
+          </iron-pages>
         </div>
-      </template>
-    </dom-module>
-    <script src="arc-request-error-view.js"></script>
-  </body>
+      </div>
+    </template>
+  </dom-module>
+  <script src="arc-request-error-view.js"></script>
+</body>
+
 </html>

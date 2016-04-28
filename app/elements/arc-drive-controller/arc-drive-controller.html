@@ -10,10 +10,27 @@
       <drive-error-message id="diveError" message="[[errorMessage]]"></drive-error-message>
       <drive-open-from-drive-ui></drive-open-from-drive-ui>
       <chrome-not-signedin-view></chrome-not-signedin-view>
+      <drive-authorize-app></drive-authorize-app>
     </iron-pages>
-    <iron-ajax id="query" url="https://www.googleapis.com/drive/v3/files" params="{{queryParams}}" handle-as="json" on-response="_handleListResponse" on-error="_handleDriveApiError" headers="{{authHeaders}}" debounce-duration="300"></iron-ajax>
-    <iron-ajax id="download" url="https://www.googleapis.com/drive/v3/files/[[fileId]]?alt=media" handle-as="json" on-response="_handleDownloadResponse" on-error="_handleDriveApiError" headers="{{authHeaders}}" debounce-duration="300"></iron-ajax>
-    <user-provider auth-headers="{{authHeaders}}" id="userProvider" authorized="{{appAuthorized}}" not-signed-in="{{notSignedIn}}"></user-provider>
+    <iron-ajax id="query"
+      url="https://www.googleapis.com/drive/v3/files"
+      params="{{queryParams}}"
+      handle-as="json"
+      on-response="_handleListResponse"
+      on-error="_handleDriveApiError"
+      debounce-duration="300"></iron-ajax>
+    <iron-ajax id="download"
+      url="https://www.googleapis.com/drive/v3/files/[[fileId]]?alt=media"
+      handle-as="json"
+      on-response="_handleDownloadResponse"
+      on-error="_handleDriveApiError"
+      debounce-duration="300"></iron-ajax>
+    <chrome-signin-aware
+      id="chromeSigninAware"
+      is-authorized="{{appAuthorized}}"
+      signed-in="{{chromeSignedIn}}"
+      on-chrome-signin-aware-success="signinHandler"
+      on-chrome-signin-aware-signed-out="handleSignOut"></google-signin-aware>
   </template>
   <script src="arc-drive-controller.js"></script>
 </dom-module>
