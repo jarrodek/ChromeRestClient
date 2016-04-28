@@ -214,7 +214,7 @@ An `arc-history-list-view` element is a element responsible for displaying a lis
     }
     </style>
     <paper-drawer-panel drawer-width="360px" id="details" force-narrow="[[narrowDrawer]]" right-drawer disable-edge-swipe>
-      <arc-request-details-view drawer is-history request="{{detailedRequest}}" on-close="closeDetailsPanel"></arc-request-details-view>
+      <arc-request-details-view drawer is-history request="{{detailedRequest}}" on-close="closeDetailsPanel" narrow="[[narrowDrawer]]"></arc-request-details-view>
       <div class="table" id="table" main>
         <div class$="{{_computeTableHeaderClass(selected.*)}}">
           <div class="table-header-info">

@@ -1,8 +1,6 @@
 'use strict';
 
 var gulp = require('gulp');
-var $ = require('gulp-load-plugins')();
-var crisper = require('gulp-crisper');
 var minimist = require('minimist');
 require('./tasks/dev-server.js');
 
@@ -37,46 +35,21 @@ var Cli = {
 };
 // Lint JavaScript files
 gulp.task('lint', function() {
-  return gulp.src([
-      'app/scripts/**/*.js',
-      'app/elements/**/*.js',
-      'app/elements/**/*.html',
-      '!app/scripts/workers/**/*.js',
-      'gulpfile.js'
-    ])
-    // JSCS has not yet a extract option
-    .pipe($.if('*.html', $.htmlExtract({
-      strip: true
-    })))
-    .pipe($.jshint())
-    .pipe($.jscs())
-    .pipe($.jscsStylish.combineWithHintResults())
-    .pipe($.jshint.reporter('jshint-stylish'))
-    .pipe($.jshint.reporter('fail'));
+  var lint = require('./tasks/lint.js');
+  return lint();
 });
-/**
- * Make all elements from ./app/elements/ CSP ready
- */
-gulp.task('crisper-elements', function() {
-  gulp.src('app/elements/**/*.html')
-    .pipe(crisper({
-      scriptInHead: false,
-      onlySplit: false,
-      alwaysWriteScript: false
-    }))
-    .pipe(gulp.dest('app/elements/'));
-});
-/**
- * Make all bower_components CSP ready
- */
-gulp.task('crisper-bower', function() {
-  gulp.src('app/bower_components/**/*.html')
-    .pipe(crisper({
-      scriptInHead: false,
-      onlySplit: false,
-      alwaysWriteScript: false
-    }))
-    .pipe(gulp.dest('app/bower_components/'));
+// tasks to be prformed when bower is updated.
+gulp.task('bower-update', (done) => {
+  var bu = require('./tasks/bower-update.js');
+  bu.postInstall()
+  .then(() => {
+    console.log('Project builded after bower update.');
+    done();
+  })
+  .catch((e) => {
+    console.log('unable to build project after bower update.');
+    done(e);
+  });
 });
 // Load tasks for web-component-tester
 // Adds tasks for `gulp test`
@@ -216,12 +189,12 @@ var publish = (done) => {
 gulp.task('build', build);
 gulp.task('publish', publish);
 
-var testServer = (done) => {
+var testServer = () => {
   let srv = require('./tasks/ssl.js');
   srv.create();
 };
-
 gulp.task('test-server', testServer);
+gulp.task('srv', testServer);
 
 gulp.task('test', function(done) {
   var analyzer = require('./tasks/tree-analyzer.js');

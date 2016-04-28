@@ -181,7 +181,7 @@ Polymer({
           return this._finishRequest(this.connection.request, result);
         })
         .catch((e) => {
-          console.warn('Something is wrong with the response.', e);
+          console.warn('Something is wrong with the response.', e.message);
           try {
             result.body = arc.app.utils.arrayBufferToString(this.connection.response.rawResponse);
           } catch (e) {

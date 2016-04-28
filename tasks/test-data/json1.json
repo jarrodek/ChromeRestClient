@@ -11,6 +11,7 @@
   "link4": "ftp://www.google.pl/webhp?sourceid",
   "link5": "http://www.google.pl/webhp?sourceid",
   "link6": "/somepoint.php",
+  "link7": "www.example.com?p=http://www.example1.com",
   "long": 18014398509481984419,
   "long2": 7329270081369171000,
   "array": ["string1", "string2", "string3 string3 string3 string3 string3 string3"],

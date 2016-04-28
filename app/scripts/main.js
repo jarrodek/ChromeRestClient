@@ -222,11 +222,14 @@
     if (top < 0) {
       top = 0;
     }
-    top = top + 'px';
-    if (searchBar.style.top === top) {
+    // top = top + 'px';
+    if (searchBar.style.top === top + 'px') {
       return;
     }
-    app.mainHeaderTop = top;
+    app.mainHeaderTop = top + 'px';
+    app.fire('iron-signal', {name: 'main-header-transform', data: {
+      top: top
+    }});
     if (!searchBar.opened) {
       return;
     }
@@ -325,7 +328,7 @@
 
   window.addEventListener('error', (e) => {
     console.log('--no-save', 'Window error event,', e);
-    if (!e.detail.message) {
+    if (!e.detail || !e.detail.message) {
       return;
     }
     var message = '[Window]' + e.detail.message;
