@@ -80,7 +80,8 @@ Polymer({
   },
   observers: [
     '_updateTabsState(withForm)',
-    '_valuesListChanged(valuesList.*)'
+    '_valuesListChanged(valuesList.*)',
+    '_valueChanged(value)'
   ],
   /**
    * Update headers array from form values to the HTTP string.
@@ -93,7 +94,9 @@ Polymer({
       return;
     }
     var value = PayloadParser.arrayToString(this.valuesList);
+    this.internalChange = true;
     this.set('value', value);
+    this.internalChange = false;
   },
   /** Append empty param row. */
   appendEmptyParam: function() {
@@ -122,7 +125,9 @@ Polymer({
   /** Encode payload button press handler */
   encodePaylod: function() {
     var value = PayloadParser.encodeUrlEncoded(this.value);
+    this.internalChange = true;
     this.set('value', value);
+    this.internalChange = false;
     if (this.tabSelected === 1) {
       let arr = PayloadParser.stringToArray(value);
       this.set('valuesList', arr);
@@ -131,7 +136,9 @@ Polymer({
   /** Decode payload button press handler */
   decodePaylod: function() {
     var value = PayloadParser.decodeUrlEncoded(this.value);
+    this.internalChange = true;
     this.set('value', value);
+    this.internalChange = false;
     if (this.tabSelected === 1) {
       let arr = PayloadParser.stringToArray(value);
       this.set('valuesList', arr);
@@ -157,8 +164,7 @@ Polymer({
         tabName = 'Raw tab';
         break;
       case 1:
-        let arr = PayloadParser.stringToArray(this.value);
-        this.set('valuesList', arr);
+        this.setFormValues();
         tabName = 'Form tab';
         break;
       case 2:
@@ -169,6 +175,12 @@ Polymer({
       arc.app.analytics.sendEvent('Payload editor', 'Tab switched', tabName);
     }
   },
+  // Sets the form editor from current value.
+  setFormValues: function() {
+    var arr = PayloadParser.stringToArray(this.value);
+    this.set('valuesList', arr);
+  },
+
   /** Compute if form tab should be shown. */
   _computeWithForm: function(contentType) {
     return contentType && contentType.indexOf('x-www-form-urlencoded') !== -1;
@@ -259,6 +271,15 @@ Polymer({
       return;
     }
     this.contentType = ct;
+  },
+
+  _valueChanged: function() {
+    if (this.internalChange) {
+      return;
+    }
+    if (this.tabSelected === 1) {
+      this.setFormValues();
+    }
   }
 });
 })();

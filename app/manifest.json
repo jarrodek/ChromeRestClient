@@ -3,8 +3,8 @@
   "name": "Advanced REST client",
   "short_name": "ARC",
   "description": "The web developers helper program to create and test custom HTTP requests.",
-  "version": "7.9.29.181",
-  "version_name": "7.9.29.181-canary",
+  "version": "7.12.30.187",
+  "version_name": "7.12.30.187-canary",
   "minimum_chrome_version": "47",
   "author": "Pawel Psztyc",
   "icons": {
@@ -29,34 +29,6 @@
     "clipboardWrite",
     "notifications"
   ],
-  "commands": {
-    "command-save-data": {
-      "suggested_key": {
-        "default": "Ctrl+S",
-        "mac": "Command+S"
-      },
-      "description": "Save current state"
-    },
-    "command-open-request": {
-      "suggested_key": {
-        "default": "Ctrl+O",
-        "mac": "Command+O"
-      },
-      "description": "Open request"
-    },
-    "command-open-window": {
-      "suggested_key": {
-        "default": "Ctrl+N"
-      },
-      "description": "Open new window"
-    },
-    "command-restore-window": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+N"
-      },
-      "description": "Restore closed window"
-    }
-  },
   "sockets": {
     "tcp": {
       "connect": "*"
@@ -75,6 +47,9 @@
     "background": {
       "scripts": [
         "scripts/libs/app.utils.js",
+        "bower_components/dexie-js/dist/dexie.min.js",
+        "scripts/libs/app.idb.js",
+        "scripts/libs/app.idb.schema.js",
         "scripts/background.js"
       ]
     }

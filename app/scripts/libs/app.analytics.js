@@ -16,6 +16,7 @@
  * the License.
  ******************************************************************************/
 /* global fetch, analytics */
+window.pendingAnalytics = window.pendingAnalytics || [];
 /**
  * Advanced Rest Client namespace
  *
@@ -83,6 +84,7 @@ arc.app.analytics.init = function() {
   if (arc.app.analytics.debug) {
     console.groupEnd();
   }
+  arc.app.analytics._sendPending();
 };
 /**
  * Initialize trackers.
@@ -132,7 +134,6 @@ arc.app.analytics.setAnalyticsPermitted = function(permitted) {
     });
   });
 };
-
 /**
  * Initialize and set up custom dimmenstion that are used by the app.
  */
@@ -535,6 +536,32 @@ arc.app.analytics.sendException = function(exception, isFatal) {
   }
   arc.app.analytics._trackers.forEach(function(tracker) {
     tracker.sendException(exception, isFatal);
+  });
+};
+// Sends pending events if any.
+arc.app.analytics._sendPending = function() {
+  chrome.runtime.getBackgroundPage((bg) => {
+    var a = window.pendingAnalytics;
+    if (!(a instanceof Array)) {
+      a = [];
+    }
+    if (bg && bg.pendingAnalytics && bg.pendingAnalytics.length) {
+      a = a.concat(bg.pendingAnalytics);
+    }
+    if (!a.length) {
+      return;
+    }
+    a.forEach((info) => {
+      switch(info.type) {
+        case 'exception':
+          arc.app.analytics.sendException(info.params[0], info.params[1]);
+          break;
+        case 'event':
+          let p = info.params;
+          arc.app.analytics.sendEvent(p[0], p[1], p[2], p[3]);
+          break;
+      }
+    });
   });
 };
 }());

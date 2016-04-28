@@ -41,6 +41,9 @@ Polymer({
   ],
 
   _update: function(record) {
+    if (!record.base) {
+      return;
+    }
     var fullTime = 0;
     var connect = Number(record.base.connect);
     var receive = Number(record.base.receive);

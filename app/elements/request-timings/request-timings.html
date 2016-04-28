@@ -6,6 +6,8 @@
       padding: 16px 24px;
       --paper-progress-height: 12px;
       --paper-progress-container-color: #F5F5F5;
+      --paper-progress-active-color: #F5F5F5;
+      --paper-progress-secondary-color: #4a4;
     }
 
     .row {
@@ -40,6 +42,7 @@
 
     .total {
       margin-top: 12px;
+      padding-top: 12px;
       font-weight: 500;
       border-top: 2px var(--paper-grey-200) solid;
     }
@@ -63,7 +66,7 @@
         Time to connect:
       </div>
       <div class="timing-chart">
-        <paper-progress value="[[connect]]" max="[[fullTime]]" step="0.0001"></paper-progress>
+        <paper-progress value="0" secondary-progress="[[connect]]" max="[[fullTime]]" step="0.0001"></paper-progress>
       </div>
       <span class="timing-value">[[round(timings.connect)]] ms</span>
     </div>
@@ -72,7 +75,7 @@
         Send time:
       </div>
       <div class="timing-chart">
-        <paper-progress value="[[send]]" start="[[connect]]" max="[[fullTime]]" step="0.0001"></paper-progress>
+        <paper-progress secondary-progress="[[computeStart(connect, send)]]" value="[[connect]]" max="[[fullTime]]" step="0.0001"></paper-progress>
       </div>
       <span class="timing-value">[[round(timings.send)]] ms</span>
     </div>
@@ -81,7 +84,7 @@
         Wait time:
       </div>
       <div class="timing-chart">
-        <paper-progress value="[[wait]]" start="[[computeStart(connect, send)]]" max="[[fullTime]]" step="0.0001"></paper-progress>
+        <paper-progress secondary-progress="[[computeStart(connect, send, wait)]]" value="[[computeStart(connect, send)]]" max="[[fullTime]]" step="0.0001"></paper-progress>
       </div>
       <span class="timing-value">[[round(timings.wait)]] ms</span>
     </div>
@@ -90,7 +93,7 @@
         Receive time:
       </div>
       <div class="timing-chart">
-        <paper-progress value="[[receive]]" start="[[computeStart(connect, send, wait)]]" max="[[fullTime]]" step="0.0001"></paper-progress>
+        <paper-progress secondary-progress="[[computeStart(connect, send, wait, receive)]]" value="[[computeStart(connect, send, wait)]]" max="[[fullTime]]" step="0.0001"></paper-progress>
       </div>
       <span class="timing-value">[[round(timings.receive)]] ms</span>
     </div>

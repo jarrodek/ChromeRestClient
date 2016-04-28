@@ -33,8 +33,7 @@
     "uri.js": "medialize/URI.js#^1.17.0",
     "zlib": "imaya/zlib.js#^0.2.0",
     "paper-autocomplete": "jarrodek/paper-autocomplete#^1.0.1",
-    "cookie-parser": "jarrodek/cookie-parser#^1.0.2",
-    "paper-progress": "jarrodek/paper-progress#^1.0.10"
+    "cookie-parser": "jarrodek/cookie-parser#^1.0.2"
   },
   "devDependencies": {
     "web-component-tester": "*"
@@ -44,5 +43,5 @@
   "resolutions": {
     "lodash": "^4.6.2"
   },
-  "version": "7.9.29"
+  "version": "7.12.30"
 }
