@@ -6,6 +6,9 @@
       display: block;
       position: fixed;
       width: 360px;
+      overflow: auto;
+      height: calc(100% - 64px) !important;
+
       --section-element: {
         min-height: 48px;
         padding: 0 16px;
@@ -103,6 +106,7 @@
         <pre class="text">[[_payloadValue(request)]]</pre>
       </div>
     </template>
+    <iron-signals on-iron-signal-main-header-transform="_headerTransformed"></iron-signals>
   </template>
   <script src="arc-request-details-view.js"></script>
 </dom-module>

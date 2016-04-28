@@ -10,7 +10,9 @@ Polymer({
       type: Boolean,
       value: false,
       computed: '_computeHasPayload(request)'
-    }
+    },
+    // true if drawer is opened.
+    narrow: Boolean
   },
 
   _computeHasPayload: function(request) {
@@ -64,6 +66,16 @@ Polymer({
 
   closeDrawer: function() {
     this.fire('close');
+  },
+
+  _headerTransformed: function(e) {
+    if (this.narrow) {
+      return;
+    }
+    var value = e.detail.top + 'px';
+    var style = Polymer.dom(this).node.style;
+    style.setProperty('top', value);
+    style.setProperty('height', `calc(100% - ${value})`, 'important');
   }
 });
 })();
