@@ -328,7 +328,7 @@
 
   window.addEventListener('error', (e) => {
     console.log('--no-save', 'Window error event,', e);
-    if (!e.detail.message) {
+    if (!e.detail || !e.detail.message) {
       return;
     }
     var message = '[Window]' + e.detail.message;
