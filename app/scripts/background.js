@@ -57,10 +57,21 @@ arc.bg.onLaunched = (lunchData) => {
  */
 arc.bg.onInstalled = (details) => {
   switch (details.reason) {
+    case 'install':
+      arc.bg.installDatabase();
+      break;
     case 'update':
       arc.bg.notifyBetaUpdate();
+      arc.bg.installDatabase();
       break;
   }
+};
+
+arc.bg.installDatabase = () => {
+  var db = arc.app.db.idb._getDb({checkInstall: true});
+  db.open().then(function() {
+    db.close();
+  });
 };
 /**
  * If the beta channel, notify user about new version.
