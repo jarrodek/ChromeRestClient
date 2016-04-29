@@ -82,6 +82,9 @@
       -webkit-user-select: text;
       cursor: text;
     }
+    .actions {
+      @apply(--section-element);
+    }
     </style>
     <paper-toolbar>
       <h2>Request details</h2>
@@ -98,14 +101,25 @@
     </div>
     <div class="headers">
       <div class="camption">Headers</div>
-      <pre>[[_computeHeaders(request)]]</pre>
+      <pre>[[_computeHeaders(entry)]]</pre>
     </div>
-    <template is="dom-if" if="[[_hasPayload]]">
+    <template is="dom-if" if="[[hasPayload]]">
       <div class="payload">
         <div class="camption">Payload</div>
-        <pre class="text">[[_payloadValue(request)]]</pre>
+        <pre class="text">[[_payloadValue(entry)]]</pre>
       </div>
     </template>
+    <div class="actions">
+      <paper-button raised on-tap="_navigateItem">Open</paper-button>
+      <!-- <paper-dropdown-menu label="Open version from">
+        <paper-menu selected="{{selectedVersion}}" attr-for-selected="data-index" class="dropdown-content">
+          <template is="dom-repeat" items="{{request.har.entries}}">
+            <paper-item data-index$="[[index]]">[[item.startedDateTime]]</paper-item>
+          </template>
+        </paper-menu>
+      </paper-dropdown-menu> -->
+    </div>
+    <!-- <date-time date$="[[item.startedDateTime]]"></date-time> -->
     <iron-signals on-iron-signal-main-header-transform="_headerTransformed"></iron-signals>
   </template>
   <script src="arc-request-details-view.js"></script>

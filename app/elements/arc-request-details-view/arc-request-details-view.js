@@ -5,55 +5,69 @@ Polymer({
   is: 'arc-request-details-view',
   properties: {
     request: Object,
-    isHistory: Boolean,
-    _hasPayload: {
+    isHistory: {
       type: Boolean,
-      value: false,
-      computed: '_computeHasPayload(request)'
+      value: false
+    },
+    hasPayload: {
+      type: Boolean,
+      value: false
     },
     // true if drawer is opened.
-    narrow: Boolean
+    narrow: Boolean,
+    selectedVersion: Number,
+    entry: Object
   },
 
-  _computeHasPayload: function(request) {
-    return !!this._payloadValue(request);
-  },
+  observers: [
+    '_computeSelectedVersion(isHistory, request.*)',
+    '_computeEntry(selectedVersion)',
+    '_computeHasPayload(entry)'
+  ],
 
-  _payloadValue(request) {
+  _computeSelectedVersion: function(isHistory) {
+    var request = this.request;
     if (!request) {
-      return false;
+      return;
     }
-    var entries = request.har.entries;
-    if (!entries || entries.length === 0) {
-      return false;
-    }
-    var _request;
-    if (!this.isHistory) {
+    var index = null;
+    if (!isHistory) {
       if (request.referenceEntry || request.referenceEntry === 0) {
-        _request = entries[request.referenceEntry].request;
+        index = request.referenceEntry;
       } else {
-        _request = entries[0].request; // take the first one.
+        index = 0;
       }
     } else {
-      _request = entries[entries.length - 1].request; // take the last one.
+      index = request.har.entries.length - 1;
     }
-    return _request.postData.text;
+    this.selectedVersion = index;
+  },
+
+  _computeEntry: function(selectedVersion) {
+    var entry = this.request.har.entries[selectedVersion];
+    this.entry = entry;
+  },
+
+  _computeHasPayload: function(entry) {
+    this.hasPayload = !!this._payloadValue(entry);
+  },
+
+  _payloadValue(entry) {
+    if (!entry || !entry.request) {
+      return false;
+    }
+    return entry.request.postData.text;
   },
 
   arrayItem: function(change, index, path) {
     return this.get(path, change.base[index]);
   },
 
-  _computeHeaders: function(request) {
-    var entries = request.har.entries;
-    var hd;
-    if (entries && entries.length > 0) {
-      let index = 0;
-      if (this.isHistory) {
-        index = entries.length - 1;
-      }
-      hd = request.har.entries[index].request.headers;
+  _computeHeaders: function(entry) {
+    if (!entry) {
+      return '(no headers)';
     }
+    var hd = entry.request.headers;
     if (!hd || hd.length === 0) {
       return '(no headers)';
     }
@@ -76,6 +90,16 @@ Polymer({
     var style = Polymer.dom(this).node.style;
     style.setProperty('top', value);
     style.setProperty('height', `calc(100% - ${value})`, 'important');
-  }
+  },
+
+  _navigateItem: function() {
+    var url;
+    if (this.isHistory) {
+      url = 'request/history/' + this.request.id + '/' + this.selectedVersion;
+    } else {
+      url = 'request/saved/' + this.request.id + '/' + this.selectedVersion;
+    }
+    arc.app.router.redirect(url);
+  },
 });
 })();
