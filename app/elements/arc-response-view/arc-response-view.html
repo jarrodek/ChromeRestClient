@@ -36,6 +36,7 @@ the License.
       }
     </style>
     <arc-response-status-view
+      response-error="[[response.error]]"
       loading-time="[[loadingTime]]"
       status-code="[[response.status]]"
       status-message="[[response.statusText]]"
@@ -43,10 +44,15 @@ the License.
       request-headers="[[request.headers]]"
       http-message="[[request.messageSent]]"
       redirect-data="[[response.redirects]]"
-      timings="[[response.stats]]"
+      request-timings="[[response.stats]]"
       redirect-timings="[[_computeRedirectTimings(response.redirects)]]"></arc-response-status-view>
     <template is="dom-if" if="[[hasResponse]]">
-      <arc-response-payload-view id="payloadView" payload="[[response.body]]" headers="[[response.headers]]"></arc-response-payload-view>
+      <template is="dom-if" if="[[!isError]]">
+        <arc-response-payload-view id="payloadView" payload="[[response.body]]" headers="[[response.headers]]"></arc-response-payload-view>
+      </template>
+      <template is="dom-if" if="[[isError]]">
+        <arc-request-error-view message="[[response.error.message]]"></arc-request-error-view>
+      </template>
     </template>
     <template is="dom-if" if="[[!hasResponse]]">
       <p class="empty-info">This response do not carry a payload.</p>

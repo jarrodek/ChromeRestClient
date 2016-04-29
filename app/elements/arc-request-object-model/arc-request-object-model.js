@@ -557,6 +557,13 @@ Polymer({
     if (!('startedDateTime' in entryParams)) {
       entryParams.startedDateTime = new Date();
     }
+    // For errored responses
+    if (!responseParams.status) {
+      responseParams.status = '"0"';
+    }
+    if (!responseParams.statusText) {
+      responseParams.statusText = 'No response';
+    }
     entryParams.response = new HAR.Response(responseParams);
     return new HAR.Entry(entryParams);
   },

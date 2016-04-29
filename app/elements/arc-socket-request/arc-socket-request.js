@@ -152,6 +152,13 @@ Polymer({
 
   _processResponse: function(response) {
     var result = {};
+    if (response.error && typeof response.error !== 'function') {
+      result.redirects = Array.from(response.redirects);
+      result.error = response.error;
+      this._finishRequest(this.connection.request, result);
+      return;
+    }
+
     result._headers = response.headers;
     result.headers = arc.app.headers.toJSON(response.headers);
     result.status = response.status;
@@ -190,7 +197,11 @@ Polymer({
           return this._finishRequest(this.connection.request, result);
         });
       } catch (e) {
-        result.body = '';
+        try {
+          result.body = arc.app.utils.arrayBufferToString(this.connection.response.rawResponse);
+        } catch (e) {
+          result.body = '';
+        }
         return this._finishRequest(this.connection.request, result);
       }
     } else {

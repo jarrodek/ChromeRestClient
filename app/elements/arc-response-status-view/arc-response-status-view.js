@@ -18,7 +18,19 @@ Polymer({
     // A headers object of tge request headers
     requestHeaders: Headers,
     // Raw HTTP message sent to the server.
-    httpMessage: String,
+    httpMessage: {
+      type: String,
+      value: function() {
+        return 'Message wasn\'t sent';
+      }
+    },
+    responseError: Object,
+    // Calculated to be true if responseError object is set.
+    isError: {
+      type: Boolean,
+      value: false,
+      readOnly: true
+    },
     // Array of the request headers.
     requestHeadersArray: {
       type: Array,
@@ -37,7 +49,10 @@ Polymer({
       value: 0
     },
     // HAR timings object to display
-    timings: Object,
+    requestTimings: {
+      type: Object,
+      notify: true
+    },
     // Timing of the final response (excluding redirects).
     redirectTimings: {
       type: Array,
@@ -51,10 +66,10 @@ Polymer({
       value: false,
       readOnly: true
     },
-
-    requestTotalTime: {
-      type: Number,
-      value: 0,
+    // True if there was a response headers. False when error.
+    hasResponseHeaders: {
+      type: Boolean,
+      value: false,
       readOnly: true
     }
   },
@@ -62,8 +77,15 @@ Polymer({
   observers: [
     '_selectedTabChanged(selectedTab)',
     '_redirectsChanged(redirectData, redirectTimings)',
-    '_computeRequestTime(redirectTimings, timings)'
+    '_computeError(responseError.*)',
+    '_checkHttpMessage(httpMessage.*)',
+    '_computeHasResponseHeaders(responseHeaders)',
+    '_errorChanged(isError)'
   ],
+
+  attached: function() {
+    this._checkHttpMessage();
+  },
 
   _selectedTabChanged: function(selectedTab) {
     var tabName;
@@ -81,6 +103,11 @@ Polymer({
     if (this.isAttached) {
       arc.app.analytics.sendEvent('Response status', 'Tab switched', tabName);
     }
+  },
+
+  _errorChanged: function() {
+    this.$.tabs.notifyResize();
+    this.selectedTab = 0;
   },
 
   _computeStatusClass: function(code) {
@@ -182,36 +209,27 @@ Polymer({
     this._setHasRedirects(has);
   },
 
-  _computeRequestTime: function(redirectTimings, timings) {
-    var time = 0;
-    if (!!redirectTimings && redirectTimings.length) {
-      redirectTimings.forEach((timing) => time += this._computeHarTime(timing));
+  _computeError: function() {
+    var re = this.responseError;
+    if (typeof re === 'function') {
+      // Regular Response object has error() function.
+      this._setIsError(false);
+      return;
     }
-    time += this._computeHarTime(timings);
-    time = Math.round(time * 1000) / 1000;
-    this._setRequestTotalTime(time);
+    this._setIsError(!!re);
   },
 
-  _computeHarTime: function(har) {
-    var fullTime = 0;
-    var connect = Number(har.connect);
-    var receive = Number(har.receive);
-    var send = Number(har.send);
-    var wait = Number(har.wait);
-    if (connect !== connect || connect < 0) {
-      connect = 0;
+  _checkHttpMessage: function() {
+    // console.log('aaaaaaaaaaaaaaaaaaaaaa');
+    if (!!this.httpMessage) {
+      return;
     }
-    if (receive !== receive || receive < 0) {
-      receive = 0;
-    }
-    if (send !== send || send < 0) {
-      send = 0;
-    }
-    if (wait !== wait || wait < 0) {
-      wait = 0;
-    }
-    fullTime += connect + receive + send + wait;
-    return fullTime;
+    this.set('httpMessage', 'Message wasn\'t sent');
+  },
+
+  _computeHasResponseHeaders: function(responseHeaders) {
+    var res = responseHeaders && responseHeaders.length;
+    this._setHasResponseHeaders(res);
   }
 });
 })();

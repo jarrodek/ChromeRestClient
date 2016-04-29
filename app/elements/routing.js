@@ -66,12 +66,23 @@ window.addEventListener('initializeRouting', function() {
     app.params = params;
     app.route = 'request';
   });
+  // arc.app.router.register('/request/saved/:savedId/:indexId', function(ctx) {
+  //   ctx.params.type = 'saved';
+  //   app.params = ctx.params;
+  //   app.route = 'request';
+  // });
   arc.app.router.register('/request/saved/:savedId', function(ctx) {
     ctx.params.type = 'saved';
     app.params = ctx.params;
     app.route = 'request';
   });
+
   arc.app.router.register('/request/history/:historyId', function(ctx) {
+    ctx.params.type = 'history';
+    app.params = ctx.params;
+    app.route = 'request';
+  });
+  arc.app.router.register('/request/history/:historyId/:indexId', function(ctx) {
     ctx.params.type = 'history';
     app.params = ctx.params;
     app.route = 'request';

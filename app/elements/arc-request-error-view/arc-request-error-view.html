@@ -58,6 +58,9 @@ The `<arc-request-error-view>` displays an error associated with the request.
         background-color: inherit !important;
         text-decoration: inherit !important;
       }
+      p, h3 {
+        cursor: text;
+      }
       </style>
       <div class="message-wrapper">
         <div>
@@ -66,19 +69,24 @@ The `<arc-request-error-view>` displays an error associated with the request.
         <div class="error-desc">
           <iron-pages selected="{{detailsPage}}">
             <section>
-              <p>There was an error during the request</p>
-              <p>[[message]]</p>
+              <!-- 0 -->
+              <h3>The requested URL can't be reached</h3>
+              <p>The service might be temporarily down or it may have moved permanently to a new web address.</p>
+              <p class="error-code">[[message]]</p>
             </section>
             <section>
+              <!-- 1 -->
               <h3>Install self signed certificate in Chrome</h3>
-              <p>The app cen't work if the self-signed certificate is not installed in Chrome.</p>
+              <p>The app can't work if the self-signed certificate is not installed in Chrome.</p>
               <a class="inherit" href="http://restforchrome.blogspot.co.uk/2016/04/advanced-rest-client.html" target="_blank">
                 <paper-button raised>Tell me more</paper-button>
               </a>
               <p class="error-code">[[message]]</p>
             </section>
             <section>
-              <h3>The connection can't be made</h3>
+              <!-- 2 -->
+              <h3>The requested URL be reached</h3>
+              <p>The service refused to connect.</p>
               <p>
                 Please, check if:
               </p>
@@ -88,18 +96,24 @@ The `<arc-request-error-view>` displays an error associated with the request.
                 <li>port number is correct</li>
                 <li>url is correct</li>
               </ul>
+              <p>Search Google for <a href="https://www.google.com/search?q=chrome%20network%20error%20102" target="_blank">chrome network error 102</a></p>
               <p class="error-code">[[message]]</p>
             </section>
             <section>
+              <!-- 3 -->
               <h3>Certificate is invalid for given domain</h3>
-              <p>There's no way of fixing this issue with the app. Certificate presented to the browser has different CN (common name field) than the domain of the request.</p>
-              <p>Please, generate certificate again with proper domain name or use free certificate service <a href="https://letsencrypt.org/" target="_blank">letsencrypt.org</a> to get a new certificate.</p>
+              <p>Certificate presented to the app has different CN (common name) than the domain of the request.</p>
+              <p>Please, generate certificate again with valid domain name or use free certificate service like <a href="https://letsencrypt.org/" target="_blank">letsencrypt.org</a> to get a new certificate.</p>
               <a class="inherit" href="http://restforchrome.blogspot.co.uk/2016/04/advanced-rest-client.html" target="_blank">
                 <paper-button raised>Tell me more</paper-button>
+              </a>
+              <a class="inherit" href="https://bugs.chromium.org/p/chromium/issues/detail?id=603104" target="_blank">
+                <paper-button raised>See CR bug</paper-button>
               </a>
               <p class="error-code">[[message]]</p>
             </section>
             <section>
+              <!-- 4 -->
               <h3>Abort / timeout</h3>
               <p>The request has been aborted manually or because of the conection timeout. There were no response from the server but the connection wasn't closed.</p>
               <p>You can adjust timeout in settings.</p>
@@ -123,6 +137,261 @@ The `<arc-request-error-view>` displays an error associated with the request.
               <p>
                 Sometimes it may happen when you use <b>http</b> protocol instead of <b>https</b>. Also it may happen when you use different URL (port / protocol) and the server is not configured properly.
               </p>
+            </section>
+            <section>
+              <!-- 5 -->
+              <h3>The requested URL can't be reached</h3>
+              <p>The service is unreachable.</p>
+              <p>Search Google for <a href="https://www.google.com/search?q=chrome%20network%20error%20109" target="_blank">chrome network error 109</a></p>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 6 -->
+              <h3>The requested URL can’t provide a secure connection</h3>
+              <p><b>The URL</b> didn’t accept your login certificate or your login certificate may have expired.</p>
+              <p>Try contacting the system admin.</p>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 7 -->
+              <h3>The URL is blocked</h3>
+              <p>The person who set up this computer has chosen to block this site.</p>
+              <p>Try contacting the system admin.</p>
+              <p><b>Check your administrator's policies</b></p>
+              <p>Visit <b>chrome://policy</b> to see the list of blacklisted URLs and other policies enforced by your system administrator.</p>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 8 -->
+              <h3>The URL is blocked</h3>
+              <p>Requests to the server have been blocked by an extension.</p>
+              <p>Try</p>
+              <ul>
+                <li>Again...</li>
+                <li>Disabling your extensions</li>
+              </ul>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 9 -->
+              <h3>There is no Internet connection</h3>
+              <p>Chrome OS hasn’t completed its initial setup.</p>
+              <ul>
+                <li>Fix your connection using the <a href="data:text/html,chromewebdata#buttons" target="_blank">diagnostics app</a></li>
+                <li>Sign out and complete setup</li>
+              </ul>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 10 -->
+              <h3>Certificate error</h3>
+              <p>Certificate presented to the app is invalid.</p>
+              <p>Please, generate certificate again or use free certificate service like <a href="https://letsencrypt.org/" target="_blank">letsencrypt.org</a> to get a new certificate.</p>
+              <a class="inherit" href="http://restforchrome.blogspot.co.uk/2016/04/advanced-rest-client.html" target="_blank">
+                <paper-button raised>Tell me more</paper-button>
+              </a>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 11 -->
+              <h3>The requested URL can't be reached</h3>
+              <p>The service unexpectedly closed the connection.</p>
+              <p>Try</p>
+              <ul>
+                <li>Again...</li>
+                <li>Checking the connection</li>
+                <li>Checking the proxy and the firewall</li>
+              </ul>
+              <p class="error-code">[[message]]</p>
+              <p><b>Check your Internet connection</b></p>
+              <p>Check any cables and reboot any routers, modems or other network devices you may be using.</p>
+              <p><b>Allow Chrome to access the network in your firewall or antivirus settings.</b></p>
+              <p>If it is already listed as a program allowed to access the network, try removing it from the list and adding it again.</p>
+              <p><b>If you use a proxy server...</b></p>
+              <p>Check your proxy settings or contact your network administrator to make sure that the proxy server is working. If you don't believe you should be using a proxy server: Go to the Chrome menu > Settings > + Show advanced settings > Change proxy settings... and make sure your configuration is set to "no proxy" or "direct."</p>
+            </section>
+            <section>
+              <!-- 12 -->
+              <h3>The requested URL can't be reached</h3>
+              <p>The service is unreachable.</p>
+              <p>Search Google for <a href="https://www.google.co.uk/search?q=chrome%20network%20error%20104" target="_blank">chrome network error 104</a></p>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 13 -->
+              <h3>The requested URL can't be reached</h3>
+              <p>The service refused to connect.</p>
+              <p>Search Google for <a href="https://www.google.com/search?q=chrome%20network%20error%20102" target="_blank">chrome network error 102</a></p>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 14 -->
+              <h3>The requested URL can't be reached</h3>
+              <p>The service took too long to respond.</p>
+              <p>Search Google for <a href="https://www.google.com/search?q=chrome%20network%20error%20118" target="_blank">chrome network error 118</a></p>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 15 -->
+              <h3>The requested URL isn’t working</h3>
+              <p>The service unexpectedly closed the connection.</p>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 16 -->
+              <h3>The requested URL was not found</h3>
+              <p>It may have been moved or deleted.</p>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 17 -->
+              <h3>The requested URL can’t be reached</h3>
+              <p>This site on the company, organisation or school intranet has the same URL as an external website.</p>
+              <p>Try contacting your system administrator.</p>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 18 -->
+              <h3>There is no Internet connection</h3>
+              <p>Your computer is offline.</p>
+              <p>Try:</p>
+              <ul>
+                <li>Checking the network cable or router</li>
+                <li>Resetting the modem or router</li>
+                <li>Reconnecting to Wi-Fi</li>
+              </ul>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 19 -->
+              <h3>The requested URL can't be reached</h3>
+              <p>The service's server DNS address could not be found.</p>
+              <p>Search Google for <a href="https://www.google.com/search?q=chrome%20network%20error%20105" target="_blank">chrome network error 105</a></p>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 20 -->
+              <h3>The requested URL can't be reached</h3>
+              <p>The service might be temporarily down or it may have moved permanently to a new web address.</p>
+              <p>Search Google for <a href="https://www.google.com/search?q=chrome%20network%20error%20137" target="_blank">chrome network error 137</a></p>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 21 -->
+              <h3>Your Internet access is blocked</h3>
+              <p>Firewall or antivirus software may have blocked the connection.</p>
+              <p>Try:</p>
+              <ul>
+                <li>Checking the connection</li>
+                <li>Checking firewall and antivirus configurations</li>
+              </ul>
+              <p class="error-code">[[message]]</p>
+              <p><b>Check your Internet connection</b></p>
+              <p>Check any cables and reboot any routers, modems or other network devices you may be using.</p>
+              <p><b>Allow Chrome to access the network in your firewall or antivirus settings</b></p>
+              <p>If it is already listed as a program allowed to access the network, try removing it from the list and adding it again.</p>
+            </section>
+            <section>
+              <!-- 22 -->
+              <h3>Your connection was interrupted</h3>
+              <p>A network change was detected.</p>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 23 -->
+              <h3>Your connection was interrupted</h3>
+              <p>Your computer went to sleep. Zzzzzzz.</p>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 24 -->
+              <h3>There is no Internet connection</h3>
+              <p>There is something wrong with the proxy server or the address is incorrect.</p>
+              <p>Try:</p>
+              <ul>
+                <li>Checking the proxy address</li>
+                <li>Contacting the system admin</li>
+              </ul>
+              <p class="error-code">[[message]]</p>
+              <p><b>If you use a proxy server...</b></p>
+              <p>Check your proxy settings or contact your network administrator to make sure that the proxy server is working. If you don't believe you should be using a proxy server: Go to the Chrome menu > Settings > + Show advanced settings > Change proxy settings... and make sure your configuration is set to "no proxy" or "direct."</p>
+            </section>
+            <section>
+              <!-- 25 -->
+              <h3>The requested URL isn’t working</h3>
+              <p>The service sent an invalid response.</p>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 26 -->
+              <h3>The requested URL can’t provide a secure connection</h3>
+              <p><b>The URL</b> sent an invalid response.</p>
+              <p><a href="https://support.google.com/chrome?p=ir_ssl_error" target="_blank">Learn more</a> about this problem.</p>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 27 -->
+              <h3>The requested URL can’t provide a secure connection</h3>
+              <p>The server presented a certificate that doesn't match built-in expectations. These expectations are included for certain, high-security websites in order to protect you.</p>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 28 -->
+              <h3>The requested URL can’t provide a secure connection</h3>
+              <p>The server doesn't adhere to security standards.</p>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 29 -->
+              <h3>The requested URL can’t provide a secure connection</h3>
+              <p>The server uses an unsupported protocol.</p>
+              <p class="error-code">[[message]]</p>
+              <p><b>Unsupported protocol</b></p>
+              <p>The client and server don't support a common SSL protocol version or cipher suite. This is likely to be caused when the server needs RC4, which is no longer considered secure.</p>
+            </section>
+            <section>
+              <!-- 30 -->
+              <h3>The requested URL can’t provide a secure connection</h3>
+              <p>The server doesn't adhere to security standards.</p>
+              <p><a href="https://support.google.com/chrome?p=dh_error&" target="_blank">Learn more</a> about this problem.</p>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 31 -->
+              <h3>Access to network-error was denied</h3>
+              <p>The server hosting the web page might be overloaded or under maintenance. In order to avoid generating too much traffic and make the situation worse, requests to this URL have been temporarily disallowed.</p>
+              <p class="error-code">[[message]]</p>
+            </section>
+            <section>
+              <!-- 32 -->
+              <h3>The requested URL can't be reached</h3>
+              <p>The service took too long to respond.</p>
+              <p>Try</p>
+              <ul>
+                <li>Again...</li>
+                <li>Checking the connection</li>
+                <li>Checking the proxy and the firewall</li>
+              </ul>
+              <p class="error-code">[[message]]</p>
+              <p><b>Check your Internet connection</b></p>
+              <p>Check any cables and reboot any routers, modems or other network devices you may be using.</p>
+              <p><b>Allow Chrome to access the network in your firewall or antivirus settings.</b></p>
+              <p>If it is already listed as a program allowed to access the network, try removing it from the list and adding it again.</p>
+              <p><b>If you use a proxy server...</b></p>
+              <p>Check your proxy settings or contact your network administrator to make sure that the proxy server is working. If you don't believe you should be using a proxy server: Go to the Chrome menu > Settings > + Show advanced settings > Change proxy settings... and make sure your configuration is set to "no proxy" or "direct."</p>
+            </section>
+            <section>
+              <!-- 33 -->
+              <h3>The requested URL isn’t working</h3>
+              <p>The service redirected you too many times.</p>
+              <p>Try</p>
+              <ul>
+                <li>Again...</li>
+                <li>Clearing your cookies</li>
+              </ul>
+              <p class="error-code">[[message]]</p>
+              <p><b>Clearing your cookies</b></p>
+              <p>Go to app's settings and click on "Clear cookies".</p>
             </section>
           </iron-pages>
         </div>
