@@ -137,8 +137,8 @@ Polymer({
       return;
     }
     var parsers = [];
-    if (this.response.redirects && this.response.redirects.length) {
-      this.response.redirects.forEach((r) => {
+    if (response.redirects && response.redirects.length) {
+      response.redirects.forEach((r) => {
         if (r.headers.has && r.headers.has('set-cookie')) {
           let parser = new Cookies(r.headers.get('set-cookie'), r.requestUrl);
           parser.filter();
@@ -147,7 +147,7 @@ Polymer({
         }
       });
     }
-    if (response._headers.has && response._headers.has('set-cookie')) {
+    if (response._headers && response._headers.has && response._headers.has('set-cookie')) {
       let parser = new Cookies(response._headers.get('set-cookie'), this.url);
       parser.filter();
       parser.clearExpired();

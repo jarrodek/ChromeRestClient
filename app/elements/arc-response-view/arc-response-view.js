@@ -15,11 +15,17 @@ Polymer({
       type: Boolean,
       value: true,
       readOnly: true
+    },
+    isError: {
+      type: Boolean,
+      value: false,
+      readOnly: true
     }
   },
 
   observers: [
-    '_requestMethodChanged(request.method)'
+    '_requestMethodChanged(request.method)',
+    '_responseChanged(response)'
   ],
 
   _requestMethodChanged: function(newMethod) {
@@ -30,11 +36,22 @@ Polymer({
     }
   },
 
+  _responseChanged: function(response) {
+    if (response.error && typeof response.error !== 'function') {
+      this._setIsError(true);
+    } else {
+      this._setIsError(false);
+    }
+  },
+
   _computeLoadingTime: function(response) {
     if (!response) {
       return 0;
     }
     var stats = response.stats;
+    if (!stats) {
+      return 0;
+    }
     var value = 0;
     if (stats.connect) {
       value += stats.connect;

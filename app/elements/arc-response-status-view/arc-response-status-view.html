@@ -116,35 +116,39 @@ the License.
       <div class="status-row">
         <div class="status-label text">Status:</div>
         <div class="status-value status text">
-          <span class$="{{_computeStatusClass(statusCode)}}">
-              <span>{{statusCode}}</span>:
-          <span>{{statusMessage}}</span>
-          </span>
-          <paper-icon-button on-tap="showStatusInfo" icon="help" class="response-status-help"></paper-icon-button>
-          <span class="text">
-              Loading time: {{loadingTime}} ms
+          <template is="dom-if" if="[[!isError]]">
+            <span class$="{{_computeStatusClass(statusCode)}}">
+                <span>{{statusCode}}</span>: <span>{{statusMessage}}</span>
             </span>
+            <paper-icon-button on-tap="showStatusInfo" icon="help" class="response-status-help"></paper-icon-button>
+            <span class="text">Loading time: {{loadingTime}} ms</span>
+          </template>
+          <template is="dom-if" if="[[isError]]">
+            <p>Error in the response.</p>
+          </template>
         </div>
       </div>
-      <paper-tabs selected="{{selectedTab}}">
-        <paper-tab>Response headers (<span>{{responseHeaders.length}}</span>)</paper-tab>
+      <paper-tabs selected="{{selectedTab}}" id="tabs">
+        <template is="dom-if" if="[[hasResponseHeaders]]">
+          <paper-tab>Response headers (<span>{{responseHeaders.length}}</span>)</paper-tab>
+        </template>
         <paper-tab>Request headers (<span>{{requestHeadersArray.length}}</span>)</paper-tab>
         <paper-tab>Redirects (<span>{{redirectData.length}}</span>)</paper-tab>
         <paper-tab>Timings</paper-tab>
       </paper-tabs>
       <iron-pages selected="{{selectedTab}}">
-        <section>
-          <!-- Response headers -->
-          <arc-headers-display-view on-tap="_handleLink" headers="{{responseHeaders}}"></arc-headers-display-view>
-        </section>
+        <template is="dom-if" if="[[hasResponseHeaders]]">
+          <section>
+            <!-- Response headers -->
+            <arc-headers-display-view on-tap="_handleLink" headers="{{responseHeaders}}"></arc-headers-display-view>
+          </section>
+        </template>
         <section>
           <!-- Request headers -->
           <arc-headers-display-view on-tap="_handleLink" headers="{{requestHeadersArray}}"></arc-headers-display-view>
           <div class="source-message text">
             <h5>Source message</h5>
-            <pre>
-[[httpMessage]]
-              </pre>
+            <pre>[[httpMessage]]</pre>
           </div>
         </section>
         <section>
@@ -179,33 +183,9 @@ the License.
         </section>
         <section>
           <!-- Timings -->
-          <template is="dom-if" if="[[hasRedirects]]">
-            <h3 class="sub-title">Redirects</h3>
-            <template is="dom-repeat" items="{{redirectTimings}}">
-              <div class="timings-row">
-                <div class="status-label text">
-                  #<span>{{_computeIndexName(index)}}</span>
-                </div>
-                <div class="redirect-value">
-                  <request-timings timings="[[item]]"></request-timings>
-                </div>
-              </div>
-            </template>
-            <h3 class="sub-title">Final request</h3>
-            <div class="timings-row">
-              <div class="status-label text"></div>
-              <div class="redirect-value">
-                <request-timings timings="[[timings]]"></request-timings>
-              </div>
-            </div>
-            <div class="status-row">
-              <div class="flex"></div>
-              <span class="timing-value total">[[requestTotalTime]] ms</span>
-            </div>
-          </template>
-          <template is="dom-if" if="[[!hasRedirects]]">
-            <request-timings timings="[[timings]]"></request-timings>
-          </template>
+          <request-timings-panel
+            redirect-timings="[[redirectTimings]]"
+            request-timings="[[requestTimings]]"></request-timings-panel>
         </section>
       </iron-pages>
       <paper-dialog id="statusCodeInfo">
