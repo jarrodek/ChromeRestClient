@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>search-bar-basic</title>
+  <script src="../../../bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../../bower_components/web-component-tester/browser.js"></script>
+  <!-- Import the element to test -->
+  <link rel="import" href="../../../bower_components/polymer/polymer.html">
+  <link rel="import" href="../../../bower_components/iron-overlay-behavior/iron-overlay-behavior.html">
+  <link rel="import" href="../../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
+  <link rel="import" href="../../../scripts/libs/app.url.parser.js">
+  <link rel="import" href="../url-input-editor.html">
+</head>
+<body>
+  <test-fixture id="editor">
+    <template>
+      <url-input-editor></url-input-editor>
+    </template>
+  </test-fixture>
+  <script>
+  suite('`url-input-editor` tests', function() {
+    var editor;
+    setup(function() {
+      editor = fixture('editor');
+    });
+
+    test('Should parse URL details', function(done) {
+      var url = 'https://sub.domain.com/path/to/resource?param=value&other=value';
+      editor.url = url;
+      editor.detailed = true;
+      window.setTimeout(() => {
+        expect(editor.hostValue).to.be.equal('https://sub.domain.com',
+          'Host value is invalid');
+        expect(editor.pathValue).to.be.equal('/path/to/resource',
+          'Path value is invalid');
+        done();
+      }, 0);
+
+    });
+  });
+  </script>
+</dody>

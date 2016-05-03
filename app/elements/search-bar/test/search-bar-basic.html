@@ -48,6 +48,21 @@
       bar._setSearchCount(1);
       bar.highlightNext();
     });
+
+    test('Element should fire search-position-changed event (previous)', function(done) {
+      var fn = function(e) {
+        expect(e.detail.name).to.equal('search-position-changed');
+        expect(e.detail.data.position).to.equal(2);
+        done();
+      };
+
+      bar.value = 'test';
+      bar.addEventListener('iron-signal', fn);
+      bar._setSearchCount(5);
+      bar._setSelected(4);
+      bar.highlightPrevious();
+    });
+
   });
   </script>
 </dody>
