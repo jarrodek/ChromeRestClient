@@ -235,7 +235,6 @@ Polymer({
     if (!this.headersList) {
       return;
     }
-
     var headers = arc.app.headers.toString(this.headersList);
     this.set('headers', headers);
   },
@@ -355,6 +354,10 @@ Polymer({
   },
 
   _headerValuesChanged: function(record) {
+    if (record && record.path && record.path === 'headersList.length') {
+      // Not interested in it.
+      return;
+    }
     // path == 'headersList' means the object was initialized.
     if (!record || !record.path || record.path === 'headersList') {
       //initilize headers support
@@ -481,17 +484,28 @@ accept-language: en-US,en;q=0.8\n`;
     if (value) {
       value = value.toLowerCase();
     }
-    var r = /#(\d)+/;
-    var index = Number(path.match(r)[1]);
+
+    var all = record.base;
+    var len = all.length;
+    var index;
+    for (var i = 0; i < len; i++) {
+      if (all[i].name === record.value) {
+        index = i;
+        break;
+      }
+    }
+    if (index === undefined) {
+      return;
+    }
     this.__provideSupport(value, index);
   },
   __provideSupport: function(headerName, index) {
-    var elm = this.__getSupportElmForHeader(headerName);
     var parent = Polymer.dom(this.root)
       .querySelector('.headers-form .form-row:nth-child(' + (index + 1) + ')');
     if (!parent) {
       return;
     }
+    var elm = this.__getSupportElmForHeader(headerName);
     // console.log('Header ', headerName, ' at index ', index, elm ? 'has' : 'has no', 'support');
     if (!elm) {
       parent.classList.remove('has-support');
