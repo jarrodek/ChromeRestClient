@@ -108,7 +108,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       readModel.query()
       .catch((e) => {
         window.setTimeout(() => {
-          console.info(e);
+          // console.info(e);
           expect(e).to.not.exist;
           done();
         }, 0);

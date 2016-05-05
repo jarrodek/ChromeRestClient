@@ -1,6 +1,5 @@
 (function() {
 'use strict';
-
 var arc = window.arc || {};
 
 Polymer({

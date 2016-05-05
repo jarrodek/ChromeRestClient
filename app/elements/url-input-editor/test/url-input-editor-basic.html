@@ -10,8 +10,8 @@
   <link rel="import" href="../../../bower_components/polymer/polymer.html">
   <link rel="import" href="../../../bower_components/iron-overlay-behavior/iron-overlay-behavior.html">
   <link rel="import" href="../../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
-  <link rel="import" href="../../../scripts/libs/app.url.parser.js">
   <link rel="import" href="../url-input-editor.html">
+  <script src="../../../scripts/libs/app.url.parser.js"></script>
 </head>
 <body>
   <test-fixture id="editor">
@@ -36,7 +36,7 @@
         expect(editor.pathValue).to.be.equal('/path/to/resource',
           'Path value is invalid');
         done();
-      }, 0);
+      }, 10);
 
     });
   });

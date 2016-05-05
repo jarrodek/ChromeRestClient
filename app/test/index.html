@@ -18,17 +18,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <script src="../bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
     <script src="../bower_components/web-component-tester/browser.js"></script>
+    <script src="../scripts/libs/app.url.parser.js"></script>
   </head>
 
   <body>
 
     <script>
       WCT.loadSuites([
+        'url-parser-basic.html',
         'database-basic.html',
         'headers-parser-basic.html',
         'magic-variables-basic.html',
-        '../elements/search-bar/test/search-bar-basic.html'
-        // '../elements/url-input-editor/test/url-input-editor-basic.html'
+        '../elements/search-bar/test/search-bar-basic.html',
+        '../elements/url-input-editor/test/url-input-editor-basic.html'
       ]);
     </script>
 
