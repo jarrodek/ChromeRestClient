@@ -32,6 +32,7 @@
   arc.app.logger._db = null;
   // See http://tobyho.com/2012/07/27/taking-over-console-log/
   arc.app.logger.initConsole = function() {
+    // return;
     var methods = ['log', 'warn', 'error', 'info'];
     methods.forEach(function(method) {
       arc.app.logger._intercept(method);

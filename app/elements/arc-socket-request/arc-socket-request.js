@@ -140,6 +140,9 @@ Polymer({
         init.body = this.request.payload;
       }
       init.debug = true;
+      if (this.request.auth) {
+        init.auth = this.request.auth;
+      }
       if ('timeout' in opts) {
         var tm = opts.timeout;
         if (tm > 0) {
@@ -166,6 +169,7 @@ Polymer({
     result.redirects = Array.from(response.redirects);
     result.stats = response.stats;
     result.ok = response.ok;
+    result.auth = response.auth;
     var ct = (response.headers && response.headers.get) ?
       response.headers.get('content-type') : null;
     var cl = (response.headers && response.headers.get) ?
@@ -214,22 +218,12 @@ Polymer({
   },
 
   _finishRequest: function(request, response) {
-    var isBasicAuth = false;
-    if (response.headers && response.headers.length) {
-      response.headers.forEach((header) => {
-        if (header.name.toLowerCase() === 'www-authenticate') {
-          if (header.value.toLowerCase().indexOf('basic ') === 0) {
-            isBasicAuth = true;
-          }
-        }
-      });
-    }
     var detail = {
       request: request,
       response: response
     };
-    if (isBasicAuth) {
-      detail.basicAuth = true;
+    if (response.auth) {
+      detail.auth = response.auth;
     }
     this.fire('ready', detail);
   },

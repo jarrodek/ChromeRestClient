@@ -415,6 +415,10 @@ Polymer({
     .then((request) => {
       // Make it async so errors will be handled by socket object.
       this.async(() => {
+        if (this.auth) {
+          // request.auth = this.auth;
+          this.auth = undefined;
+        }
         this.$.socket.request = request;
         this.$.socket.run();
       });
@@ -505,8 +509,17 @@ Polymer({
   },
   // Handler called the the socket report success
   _responseReady: function(e) {
-    if (e.detail.basicAuth) {
-      this._openBasicAuthDialog();
+    if (e.detail.auth) {
+      switch (e.detail.auth.method) {
+        case 'basic':
+          this._openBasicAuthDialog();
+          break;
+        case 'digest':
+          this.auth = e.detail.auth;
+          this._openBasicAuthDialog();
+          break;
+      }
+
     }
     this._setRequestLoading(false);
     this._setResponse(e.detail.response);
@@ -816,15 +829,26 @@ Polymer({
     .then((data) => {
       if (data && data.length) {
         let auth = data[0];
-        if (!auth || !auth.encoded) {
+        if (!auth) {
           return;
         }
-        let authData = atob(auth.encoded).split(':');
-        if (authData[0]) {
-          this.$.authDialogLogin.value = authData[0];
-        }
-        if (authData[1]) {
-          this.$.authDialogPassword.value = authData[1];
+        if (this.auth && this.method === 'digest') {
+          if (!auth.uid || !auth.passwd) {
+            return;
+          }
+          this.$.authDialogLogin.value = auth.uid;
+          this.$.authDialogPassword.value = auth.passwd;
+        } else {
+          if (!auth.encoded) {
+            return;
+          }
+          let authData = atob(auth.encoded).split(':');
+          if (authData[0]) {
+            this.$.authDialogLogin.value = authData[0];
+          }
+          if (authData[1]) {
+            this.$.authDialogPassword.value = authData[1];
+          }
         }
       }
     });
@@ -853,7 +877,14 @@ Polymer({
     }
     if (detail.confirmed) {
       //append the auth header and send the request again.
-      this._reRunWithBasic();
+      if (this.auth && this.auth.method === 'basic') {
+        this._reRunWithBasic();
+      }
+      // if (this.auth && this.auth.method === 'digest') {
+      //   this._reRunWithDigest();
+      // } else {
+      //   this._reRunWithBasic();
+      // }
     }
   },
   // Re-run current request with basic auth value from the auth dialog.
@@ -877,6 +908,23 @@ Polymer({
       console.warn('Unable save auth basic data to the store', e);
     });
   },
+
+  _reRunWithDigest: function() {
+    this.auth.uid = this.$.authDialogLogin.value;
+    this.auth.passwd = this.$.authDialogPassword.value;
+    var uri = this._computeUrlPath(this.request.url);
+    this.sendRequest();
+    this.$.basicAuthModel.data = {
+      'url': uri,
+      'uid': this.auth.uid,
+      'passwd': this.auth.passwd
+    };
+    this.$.basicAuthModel.save()
+    .catch((e) => {
+      console.warn('Unable save auth basic data to the store', e);
+    });
+  },
+
   // Returns url without query parameters and fragment part.
   _computeUrlPath: function(url) {
     return new URI(url).fragment('').search('').toString();
