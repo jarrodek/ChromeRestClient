@@ -58,6 +58,18 @@ Polymer({
     var enc = `${this.login}:${this.password}`;
     var value = 'Basic ' + btoa(enc);
     this.setValue(value);
-  }
+  },
+
+  authTogglePassword: function(e) {
+    var input = this.$.authDialogPassword;
+    var icon = e.target;
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.icon = 'visibility-off';
+    } else {
+      input.type = 'password';
+      icon.icon = 'visibility';
+    }
+  },
 });
 })();

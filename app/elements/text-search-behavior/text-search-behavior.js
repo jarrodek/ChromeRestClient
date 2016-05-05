@@ -134,7 +134,8 @@
      */
     _compile: function(input) {
       input = input.replace(/\\([^u]|$)/g, '$1');
-      input = input.replace(/[^\w\\\s']+/g, '').replace(/\s+/g, '|');
+      input = input.replace(/([\.\+\?\{\}\[\]\|=:\$\^])+/g, '\\$1').replace(/\s+/g, '|');
+      // input = input.replace(/[^\w\\\s']+/g, '').replace(/\s+/g, '|');
       input = input.replace(/^\||\|$/g, '');
       input = this.addAccents(input);
       if (input) {
@@ -318,6 +319,9 @@
       var el;
       while (arr.length && (el = arr[0])) {
         var parent = el.parentNode;
+        if (!el.firstChild) {
+          continue;
+        }
         parent.replaceChild(el.firstChild, el);
         parent.normalize();
       }
