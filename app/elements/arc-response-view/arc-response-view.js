@@ -37,7 +37,7 @@ Polymer({
   },
 
   _responseChanged: function(response) {
-    if (response.error && typeof response.error !== 'function') {
+    if (response && response.error && typeof response.error !== 'function') {
       this._setIsError(true);
     } else {
       this._setIsError(false);

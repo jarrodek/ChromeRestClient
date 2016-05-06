@@ -877,9 +877,7 @@ Polymer({
     }
     if (detail.confirmed) {
       //append the auth header and send the request again.
-      if (this.auth && this.auth.method === 'basic') {
-        this._reRunWithBasic();
-      }
+      this._reRunWithBasic();
       // if (this.auth && this.auth.method === 'digest') {
       //   this._reRunWithDigest();
       // } else {
@@ -908,7 +906,7 @@ Polymer({
       console.warn('Unable save auth basic data to the store', e);
     });
   },
-
+  //TODO: create new model for storing digest login and passwords.
   _reRunWithDigest: function() {
     this.auth.uid = this.$.authDialogLogin.value;
     this.auth.passwd = this.$.authDialogPassword.value;
