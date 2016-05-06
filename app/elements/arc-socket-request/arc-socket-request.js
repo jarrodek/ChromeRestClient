@@ -23,8 +23,10 @@ Polymer({
     })
     .then((init) => {
       if (!init) {
-        // error catched.
-        return;
+        this.fire('error', {
+          message: 'The request object could not be initialized'
+        });
+        return null;
       }
       this.connection = new SocketFetch(this.request.url, init);
       try {

@@ -28,16 +28,32 @@
 
     test('Should parse URL details', function(done) {
       var url = 'https://sub.domain.com/path/to/resource?param=value&other=value';
-      editor.url = url;
       editor.detailed = true;
+      editor.url = url;
       window.setTimeout(() => {
         expect(editor.hostValue).to.be.equal('https://sub.domain.com',
           'Host value is invalid');
         expect(editor.pathValue).to.be.equal('/path/to/resource',
           'Path value is invalid');
+        expect(editor.paramsList).to.be.a('array',
+          'paramsList value is not an array');
         done();
       }, 10);
+    });
 
+    test('Should parse URL with user and password', function(done) {
+      var url = 'https://test:test@sub.domain.com/path/to/resource?param=value&other=value';
+      editor.detailed = true;
+      editor.url = url;
+      window.setTimeout(() => {
+        expect(editor.hostValue).to.be.equal('https://test:test@sub.domain.com',
+          'Host value is invalid');
+        expect(editor.pathValue).to.be.equal('/path/to/resource',
+          'Path value is invalid');
+        expect(editor.paramsList).to.be.a('array',
+          'paramsList value is not an array');
+        done();
+      }, 10);
     });
   });
   </script>
