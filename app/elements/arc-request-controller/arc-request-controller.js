@@ -416,7 +416,7 @@ Polymer({
       // Make it async so errors will be handled by socket object.
       this.async(() => {
         if (this.auth) {
-          // request.auth = this.auth;
+          request.auth = this.auth;
           this.auth = undefined;
         }
         this.$.socket.request = request;
@@ -518,8 +518,10 @@ Polymer({
           this.auth = e.detail.auth;
           this._openBasicAuthDialog();
           break;
+        case 'ntlm':
+          this.$.ntlmAuthDialog.open();
+          break;
       }
-
     }
     this._setRequestLoading(false);
     this._setResponse(e.detail.response);
@@ -921,6 +923,25 @@ Polymer({
     .catch((e) => {
       console.warn('Unable save auth basic data to the store', e);
     });
+  },
+
+  _ntlmAuthDataReady: function(e) {
+    this.auth = {};
+    this.auth.uid = e.detail.uid;
+    this.auth.passwd = e.detail.passwd;
+    this.auth.domain = e.detail.domain;
+    this.auth.method = 'ntlm';
+    // var uri = this._computeUrlPath(this.request.url);
+    this.sendRequest();
+    // this.$.basicAuthModel.data = {
+    //   'url': uri,
+    //   'uid': this.auth.uid,
+    //   'passwd': this.auth.passwd
+    // };
+    // this.$.basicAuthModel.save()
+    // .catch((e) => {
+    //   console.warn('Unable save auth basic data to the store', e);
+    // });
   },
 
   // Returns url without query parameters and fragment part.
