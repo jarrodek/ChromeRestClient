@@ -1,4 +1,4 @@
-(function () {
+(function() {
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
@@ -84,7 +84,7 @@ arc.app.db.idb.mapsObjects = function(db) {
   db.statuses.mapToClass(HttpStatusObject);
   db.headers.mapToClass(HttpHeaderObject);
   db.variables.mapToClass(MagicVariableObject);
-  db.basicAuth.mapToClass(BasicAuth);
+  db.basicAuth.mapToClass(AuthData);
   db.logs.mapToClass(LogObject);
   db.cookies.mapToClass(Cookie);
 };
