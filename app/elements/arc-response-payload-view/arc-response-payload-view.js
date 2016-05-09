@@ -242,9 +242,17 @@ Polymer({
   /**
    * Save to clipboard.
    */
-  _clipboardCopy: function() {
+  _clipboardCopy: function(e) {
+    e = Polymer.dom(e);
+    var source = e.localTarget.dataset.source;
+    var data = '';
+    if (source === 'json') {
+      data = JSON.stringify(this.$.jsonViewer.json, null, 2);
+    } else {
+      data = this.raw;
+    }
     this.fire('clipboard-write', {
-      data: this.raw
+      data: data
     });
     arc.app.analytics.sendEvent('Response payload', 'Content action', 'Copy to clipboard');
   },
