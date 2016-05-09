@@ -689,15 +689,13 @@ class MagicVariableObject extends BaseObject {
 /**
  * A class representing a Basic auth store object.
  * User can save basic auth data in the store and use it every time when the request is made.
- * If the request require
  */
-class BasicAuth extends BaseObject {
+class AuthData extends BaseObject {
   constructor(opts) {
     super();
     super.assertRequiredKeys(['url'], opts);
 
     this.url = opts.url;
-    this.encoded = opts.encoded || undefined;
   }
 }
 
@@ -844,7 +842,7 @@ window.DriveRequestObject = DriveRequestObject;
 window.ProjectObject = ProjectObject;
 window.FileExport = FileExport;
 window.RequestLocalObject = RequestLocalObject;
-window.BasicAuth = BasicAuth;
+window.AuthData = AuthData;
 window.LogObject = LogObject;
 window.ServerExportedObject = ServerExportedObject;
 window.HistorySocketObject = HistorySocketObject;

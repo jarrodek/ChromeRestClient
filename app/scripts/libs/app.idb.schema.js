@@ -122,6 +122,24 @@
         logs: '&time,type',
         cookies: '&uuid,_domain,name'
       });
+    db.version(7)
+      .stores({
+        headers: '&[key+type],key,type',
+        statuses: '&key',
+        historyUrls: '&url',
+        historySockets: '&url',
+        requestObject: '++id,url,method,[url+method],type,_name',
+        serverExportObjects: '[serverId+requestId],serverId,requestId',
+        projectObjects: '++id,*requestIds',
+        variables: '++id,variable,type',
+        basicAuth: '&url,type',
+        logs: '&time,type',
+        cookies: '&uuid,_domain,name'
+      }).upgrade(function(tx) {
+        tx.basicAuth.toCollection().modify(function(item) {
+          item.type = 'basic';
+        });
+      });
     if (opts.checkInstall) {
       db.on('ready', function() {
         if (arc.app.db.idb.upgraded) {

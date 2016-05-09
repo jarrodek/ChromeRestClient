@@ -90,6 +90,18 @@ Polymer({
     project: {
       type: Object,
       readOnly: true
+    },
+    /**
+     * A list that holds auth data used in current session.
+     * When the user pass an authentication data to the request (as a reaction to 401 response)
+     * the auth data are in this list for further use in the same session and apply them to
+     * the request automatically.
+     */
+    authDataList: {
+      type: Array,
+      value: function() {
+        return [];
+      }
     }
   },
 
@@ -161,6 +173,38 @@ Polymer({
     }
     ui.open();
     arc.app.analytics.sendEvent('Engagement', 'Click', 'Save action initialization');
+  },
+
+  /**
+   * Sends current request.
+   */
+  sendRequest: function() {
+    if (!this.request) {
+      StatusNotification.notify({
+        message: 'Request not ready'
+      });
+      return;
+    }
+    if (!this.request.url) {
+      StatusNotification.notify({
+        message: 'Add URL to the request first'
+      });
+      return;
+    }
+    this._setIsError(false);
+    this._setResponse(null);
+    this._setRequestLoading(true);
+    this._saveUrl();
+    this._callRequest();
+    arc.app.analytics.sendEvent('Engagement', 'Click', 'Request start');
+    // Will help arrange methods bar according to importance of elements.
+    arc.app.analytics.sendEvent('Request', 'Method', this.request.method);
+  },
+
+  abortRequest: function() {
+    this._setRequestLoading(false);
+    this.$.socket.abort();
+    arc.app.analytics.sendEvent('Engagement', 'Click', 'Request abort');
   },
 
   get requestControllerOpened() {
@@ -360,31 +404,7 @@ Polymer({
       this._setPageTitle(name);
     }
   },
-  /**
-   * Sends current request.
-   */
-  sendRequest: function() {
-    if (!this.request.url) {
-      StatusNotification.notify({
-        message: 'Add URL to the request first'
-      });
-      return;
-    }
-    this._setIsError(false);
-    this._setResponse(null);
-    this._setRequestLoading(true);
-    this._saveUrl();
-    this._callRequest();
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Request start');
-    // Will help arrange methods bar according to importance of elements.
-    arc.app.analytics.sendEvent('Request', 'Method', this.request.method);
-  },
 
-  abortRequest: function() {
-    this._setRequestLoading(false);
-    this.$.socket.abort();
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Request abort');
-  },
   /**
    * Saves request and response in the history store.
    * Model will call `_requestObjectReady`
@@ -412,11 +432,12 @@ Polymer({
     // Copy the object so MagicVariables will not alter the view
     this._applyMagicVariables(Object.assign({}, this.request))
     .then((request) => this._applyCookies(request))
+    .then((request) => this._applyAuthorization(request))
     .then((request) => {
       // Make it async so errors will be handled by socket object.
       this.async(() => {
         if (this.auth) {
-          // request.auth = this.auth;
+          request.auth = this.auth;
           this.auth = undefined;
         }
         this.$.socket.request = request;
@@ -505,8 +526,63 @@ Polymer({
         });
       });
     });
-
   },
+
+  _applyAuthorization: function(request) {
+    var rl = this.authDataList;
+    if (!rl || !rl.length) {
+      return Promise.resolve(request);
+    }
+    return new Promise((resolve) => {
+      let url = request.url.toLowerCase();
+      let auth = null;
+      for (var i = 0, len = rl.length; i < len; i++) {
+        let cn = rl[i].url.toLowerCase();
+        if (cn[cn.length - 1] === '/') {
+          cn = cn.substr(0, cn.length - 1);
+        }
+        if (url.indexOf(cn) === 0) {
+          auth = rl[i];
+          break;
+        }
+      }
+
+      if (!auth) {
+        resolve(request);
+        return;
+      }
+
+      switch (auth.type) {
+        case 'ntlm':
+          this._setNtlmAuthData(auth.uid, auth.passwd, auth.domain);
+          resolve(request);
+          return;
+        case 'basic':
+          if (!auth.encoded) {
+            resolve(request);
+            return;
+          }
+          let authData = atob(auth.encoded).split(':');
+          let login = null;
+          let passwd = null;
+          if (authData[0]) {
+            login = authData[0];
+          }
+          if (authData[1]) {
+            passwd = authData[1];
+          }
+          if (!login || !passwd) {
+            resolve(request);
+            return;
+          }
+          this._setBasicAuthData(login, passwd);
+          resolve(request);
+          return;
+      }
+
+    });
+  },
+
   // Handler called the the socket report success
   _responseReady: function(e) {
     if (e.detail.auth) {
@@ -518,8 +594,10 @@ Polymer({
           this.auth = e.detail.auth;
           this._openBasicAuthDialog();
           break;
+        case 'ntlm':
+          this._openNtlmAuthDialog();
+          break;
       }
-
     }
     this._setRequestLoading(false);
     this._setResponse(e.detail.response);
@@ -825,7 +903,7 @@ Polymer({
   _openBasicAuthDialog: function() {
     this.$.basicAuthDialog.open();
     var uri = this._computeUrlPath(this.request.url);
-    this.$.basicAuthModel.query(uri)
+    this.$.authDataModel.query(uri, 'basic')
     .then((data) => {
       if (data && data.length) {
         let auth = data[0];
@@ -850,6 +928,23 @@ Polymer({
             this.$.authDialogPassword.value = authData[1];
           }
         }
+      }
+    });
+  },
+
+  _openNtlmAuthDialog: function() {
+    this.$.ntlmAuthDialog.open();
+    var uri = this._computeUrlPath(this.request.url);
+    this.$.authDataModel.query(uri, 'ntlm')
+    .then((data) => {
+      if (data && data.length) {
+        let auth = data[0];
+        if (!auth) {
+          return;
+        }
+        this.$.ntlmAuthDialog.login = auth.uid;
+        this.$.ntlmAuthDialog.password = auth.passwd;
+        this.$.ntlmAuthDialog.domain = auth.domain;
       }
     });
   },
@@ -889,44 +984,88 @@ Polymer({
   _reRunWithBasic: function() {
     var login = this.$.authDialogLogin.value;
     var password = this.$.authDialogPassword.value;
-    var enc = `${login}:${password}`;
+    var encoded = this._setBasicAuthData(login, password);
+    this.sendRequest();
+
+    var uri = this._computeUrlPath(this.request.url);
+    var authData = {
+      'url': uri,
+      'encoded': encoded,
+      'type': 'basic'
+    };
+
+    this.$.authDataModel.data = authData;
+    this.$.authDataModel.save()
+    .catch((e) => {
+      console.warn('Unable save auth basic data to the store', e);
+    });
+    this.authDataList.push(authData);
+  },
+
+  _setBasicAuthData: function(uid, passwd) {
+    var enc = `${uid}:${passwd}`;
     var encoded = btoa(enc);
     var value = 'Basic ' + encoded;
     var headers = arc.app.headers.replace(this.request.headers, 'authorization', value);
     this.set('request.headers', headers);
-    this.sendRequest();
-
-    var uri = this._computeUrlPath(this.request.url);
-    this.$.basicAuthModel.data = {
-      'url': uri,
-      'encoded': encoded
-    };
-    this.$.basicAuthModel.save()
-    .catch((e) => {
-      console.warn('Unable save auth basic data to the store', e);
-    });
+    return encoded;
   },
+
   //TODO: create new model for storing digest login and passwords.
   _reRunWithDigest: function() {
     this.auth.uid = this.$.authDialogLogin.value;
     this.auth.passwd = this.$.authDialogPassword.value;
-    var uri = this._computeUrlPath(this.request.url);
     this.sendRequest();
-    this.$.basicAuthModel.data = {
+
+    var uri = this._computeUrlPath(this.request.url);
+    var authData = {
       'url': uri,
       'uid': this.auth.uid,
-      'passwd': this.auth.passwd
+      'passwd': this.auth.passwd,
+      'type': 'digest'
     };
-    this.$.basicAuthModel.save()
+    this.$.authDataModel.data = authData;
+    this.$.authDataModel.save()
     .catch((e) => {
       console.warn('Unable save auth basic data to the store', e);
     });
+    this.authDataList.push(authData);
+  },
+  // Called when NTLM auth dialog closes.
+  _ntlmAuthDataReady: function(e) {
+    var d = e.detail;
+    this._setNtlmAuthData(d.uid, d.passwd, d.domain);
+    this.sendRequest();
+
+    var uri = this._computeUrlPath(this.request.url);
+    var authData = {
+      'url': uri,
+      'uid': d.uid,
+      'passwd': d.passwd,
+      'domain': d.domain,
+      'type': 'ntlm'
+    };
+    this.$.authDataModel.data = authData;
+    this.$.authDataModel.save()
+    .catch((e) => {
+      console.warn('Unable save auth basic data to the store', e);
+    });
+    this.authDataList.push(authData);
+  },
+
+  _setNtlmAuthData: function(uid, passwd, domain) {
+    this.auth = {};
+    this.auth.uid = uid;
+    this.auth.passwd = passwd;
+    this.auth.domain = domain;
+    this.auth.method = 'ntlm';
   },
 
   // Returns url without query parameters and fragment part.
   _computeUrlPath: function(url) {
     return new URI(url).fragment('').search('').toString();
   },
+
   // Returns response view element.
   _getResponseView: function() {
     var children = Polymer.dom(this).getEffectiveChildNodes();
