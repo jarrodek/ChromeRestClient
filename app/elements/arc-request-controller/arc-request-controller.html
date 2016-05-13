@@ -48,9 +48,33 @@ This approach have some implications.
       #basicAuthDialog {
         top: 10px;
       }
+      .cookie-exchange-banner {
+        margin: 0 16px;
+        margin-bottom: 24px;
+      }
+      .cookie-monster {
+        margin-left: 24px;
+      }
+      .cookie-exchange-banner p {
+        @apply(--paper-font-body2);
+      }
+      .inherit {
+        color: inherit !important;
+        background-color: inherit !important;
+      }
     </style>
     <content id="contentNode"></content>
-
+    <div class="cookie-exchange-banner" hidden$="[[!showCookieBanner]]">
+      <h2>
+        Missing cookies?
+        <img src="/assets/cookie-monster.png" width="166" height="112" class="cookie-monster"/>
+      </h2>
+      <p>The app is not able to read cookies set in Chrome browser. If you authenticated yourself in a Chrome tab cookies are not transfered automatically.</p>
+      <p>Install ARC cookie exchange extension and synchronize cookies between the app and Chrome.</p>
+      <a href="https://chrome.google.com/webstore/detail/apcedakaoficjlofohhcmkkljehnmebp" class="inherit" target="_blank">
+        <paper-button raised>Install ARC cookie exchange</paper-button>
+      </a>
+    </div>
     <arc-request-error-view hidden$=[[!isError]] message="[[errorMessage]]"></arc-request-error-view>
     <chrome-storage auto id="latest" type="local" name="latestRequest" value="{{request}}"  value-as="RequestLocalObject" on-read="_latestLoaded"></chrome-storage>
     <arc-socket-request id="socket" on-ready="_responseReady" on-error="_onRequestError"></arc-socket-request>
@@ -62,6 +86,7 @@ This approach have some implications.
     <arc-magic-variables id="magicVariables" scope="[[project.id]]"></arc-magic-variables>
     <arc-authdata-model id="authDataModel"></arc-authdata-model>
     <cookie-storage id="cookieJar" url="[[request.url]]" cookie="{{requestCookie}}" response-headers="[[response.headers]]"></cookie-storage>
+    <cookie-exchange external-id="apcedakaoficjlofohhcmkkljehnmebp" id="cookieExchange"></cookie-exchange>
     <ntlm-dialog id="ntlmAuthDialog" url="[[request.url]]" on-auth-data="_ntlmAuthDataReady"></ntlm-dialog>
     <paper-dialog id="basicAuthDialog"
       entry-animation="slide-from-top-animation"

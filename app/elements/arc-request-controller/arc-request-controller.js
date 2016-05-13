@@ -102,6 +102,11 @@ Polymer({
       value: function() {
         return [];
       }
+    },
+    // Try when the view shout display a cookie exchange extension banner.
+    showCookieBanner: {
+      type: Boolean,
+      value: false
     }
   },
 
@@ -136,6 +141,7 @@ Polymer({
     this._setUpProject(undefined);
     this._setPageTitle('Request');
     this._setIsError(false);
+    this.showCookieBanner = false;
     page('/request/current');
     arc.app.analytics.sendEvent('Engagement', 'Click', 'Clear all');
   },
@@ -196,6 +202,7 @@ Polymer({
     this._setRequestLoading(true);
     this._saveUrl();
     this._callRequest();
+    this.showCookieBanner = false;
     arc.app.analytics.sendEvent('Engagement', 'Click', 'Request start');
     // Will help arrange methods bar according to importance of elements.
     arc.app.analytics.sendEvent('Request', 'Method', this.request.method);
@@ -483,6 +490,21 @@ Polymer({
    * Find and apply cookies to this request.
    */
   _applyCookies: function(request) {
+    return this._applySessionCookies(request)
+      .then((request) => this._applyCookiesExchange(request));
+  },
+
+  // Applies cookies from the proxy extension (from Chrome).
+  _applyCookiesExchange: function(request) {
+    if (!this.$.cookieExchange.connected) {
+      return Promise.resolve(request);
+    }
+    this.$.cookieExchange.applyCookies(request);
+    return Promise.resolve(request);
+  },
+
+  // Applies cookies from internall session management.
+  _applySessionCookies: function(request) {
     return new Promise((resolve) => {
       chrome.storage.sync.get({'useCookieStorage': true}, (r) => {
         if (!r.useCookieStorage) {
@@ -598,6 +620,7 @@ Polymer({
           this._openNtlmAuthDialog();
           break;
       }
+      this.showCookieBanner = true;
     }
     this._setRequestLoading(false);
     this._setResponse(e.detail.response);
