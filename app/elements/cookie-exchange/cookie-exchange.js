@@ -17,51 +17,13 @@
       // True if the app is connected to the external extension.
       connected: {
         type: Boolean,
-        value: false,
         notify: true
-      },
-      // A port to another extension.
-      port: {
-        type: Object,
-        readOnly: true
-      },
-
-      _messageListener: {
-        type: Function,
-        value: function() {
-          return this._processMessage.bind(this);
-        }
       }
     },
 
     observers: [
-      '_connect(externalId)',
       '_setCookieCache(connected)'
     ],
-
-    // Attempt to connect to external extension.
-    _connect: function(externalId) {
-      var port = chrome.runtime.connect(externalId);
-      var connected = true;
-      port.onDisconnect.addListener(() => {
-        connected = false;
-        if (this.connected) {
-          this.set('connected', false);
-        }
-        this._setPort(undefined);
-        port.onMessage.removeListener(this._messageListener);
-      });
-
-      port.onMessage.addListener(this._messageListener);
-
-      this.async(() => {
-        // Still have connection so the extension is installed.
-        if (connected) {
-          this.set('connected', true);
-        }
-      }, 500); // Async so the connection can resolve itself.
-      this._setPort(port);
-    },
 
     // When connected, refresh cookie cache.
     _setCookieCache: function(connected) {
@@ -70,7 +32,9 @@
         return;
       }
 
-      this.port.postMessage({payload: 'get-cookies'});
+      this.$.sync.postMessage({
+        payload: 'get-cookies'
+      });
     },
     // Process a message returned by the port.
     _processMessage: function(msg) {
@@ -79,7 +43,9 @@
       }
       switch (msg.payload) {
         case 'cookie-changed':
-          this.port.postMessage({payload: 'get-cookies'});
+          this.$.sync.postMessage({
+            payload: 'get-cookies'
+          });
           break;
         case 'get-cookies':
           this.cookies = msg.cookies;
@@ -99,7 +65,7 @@
       host = host.toLowerCase();
       var c = this.cookies;
       var str = '';
-      var cookieFn  = (cookie) => {
+      var cookieFn = (cookie) => {
         if (str) {
           str += '; ';
         }

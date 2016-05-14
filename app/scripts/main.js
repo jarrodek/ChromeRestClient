@@ -143,6 +143,9 @@
   app._onFeatureBack = (e) => {
     app._featureCalled('back', e);
   };
+  app._onFeatureXhrToggle = (e) => {
+    app._featureCalled('xhrtoggle', e);
+  };
   // called when any component want to change request link.
   document.body.addEventListener('action-link-change', (e) => {
     var url = e.detail.url;

@@ -54,6 +54,7 @@ paper-toolbar > *[feature] {
   display: none;
 }
 paper-toolbar[back] > *[feature="back"],
+paper-toolbar[xhrtoggle] > *[feature="xhrtoggle"],
 paper-toolbar[search] > *[feature="search"],
 paper-toolbar[open] > *[feature="open"],
 paper-toolbar[save] > *[feature="save"],

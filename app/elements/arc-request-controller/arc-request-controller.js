@@ -13,7 +13,7 @@ Polymer({
      */
     toolbarFeatures: {
       type: Array,
-      value: ['clearAll', 'loader', 'save', 'projectEndpoints']
+      value: ['clearAll', 'loader', 'save', 'projectEndpoints', 'xhrtoggle']
     },
     /**
      * Current request data.
@@ -144,6 +144,11 @@ Polymer({
     this.showCookieBanner = false;
     page('/request/current');
     arc.app.analytics.sendEvent('Engagement', 'Click', 'Clear all');
+  },
+
+  onXhrtoggle: function(e) {
+    this.useXhr = e.target.checked;
+    arc.app.analytics.sendEvent('Request', 'Use XHR', this.useXhr + '');
   },
   /**
    * Handler for save request click / shortcut.
@@ -447,8 +452,13 @@ Polymer({
           request.auth = this.auth;
           this.auth = undefined;
         }
-        this.$.socket.request = request;
-        this.$.socket.run();
+        if (this.useXhr) {
+          this.$.xhr.request = request;
+          this.$.xhr.run();
+        } else {
+          this.$.socket.request = request;
+          this.$.socket.run();
+        }
       });
     });
   },
