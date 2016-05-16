@@ -73,7 +73,10 @@ Polymer({
       readOnly: true
     },
     // If true, some tabs are hidden because some data are unavailable in XHR request.
-    isXhr:  Boolean
+    isXhr: {
+      type: Boolean,
+      value: false
+    }
   },
 
   observers: [
@@ -82,7 +85,8 @@ Polymer({
     '_computeError(responseError.*)',
     '_checkHttpMessage(httpMessage.*)',
     '_computeHasResponseHeaders(responseHeaders)',
-    '_errorChanged(isError)'
+    '_errorChanged(isError)',
+    '_errorChanged(isXhr)'
   ],
 
   attached: function() {

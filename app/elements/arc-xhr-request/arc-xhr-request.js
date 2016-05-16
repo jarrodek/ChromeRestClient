@@ -12,7 +12,7 @@
       request: Object,
       // If true the request has been aborted and the response shouldn't be reported.
       aborted: Boolean,
-      // Set by chrome-connect element. 
+      // Set by chrome-connect element.
       connected: {
         type: Boolean,
         notify: true
@@ -92,7 +92,7 @@
         msg.log.forEach((log) => console.log(log));
       }
       if (msg.error) {
-        var detail = {
+        let detail = {
           request: {
             xhr: true
           },
@@ -139,7 +139,7 @@
         response.body = response.response;
       }
       delete response.response;
-      var detail = {
+      let detail = {
         request: {
           xhr: true
         },
