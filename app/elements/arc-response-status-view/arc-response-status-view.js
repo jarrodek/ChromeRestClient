@@ -71,7 +71,9 @@ Polymer({
       type: Boolean,
       value: false,
       readOnly: true
-    }
+    },
+    // If true, some tabs are hidden because some data are unavailable in XHR request.
+    isXhr:  Boolean
   },
 
   observers: [

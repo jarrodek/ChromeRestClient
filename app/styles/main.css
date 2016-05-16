@@ -54,7 +54,6 @@ paper-toolbar > *[feature] {
   display: none;
 }
 paper-toolbar[back] > *[feature="back"],
-paper-toolbar[xhrtoggle] > *[feature="xhrtoggle"],
 paper-toolbar[search] > *[feature="search"],
 paper-toolbar[open] > *[feature="open"],
 paper-toolbar[save] > *[feature="save"],
@@ -68,4 +67,7 @@ paper-toolbar[back] > *[feature="back"] {
 }
 paper-toolbar[back] > *[paper-drawer-toggle] {
   display: none !important;
+}
+paper-toolbar[xhrtoggle] > *[feature="xhrtoggle"] {
+  display: flex;
 }

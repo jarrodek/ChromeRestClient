@@ -43,12 +43,31 @@
         value: function() {
           return this._processMessage.bind(this);
         }
+      },
+      // Allowed clients that the app will accept connection from.
+      allowedClients: {
+        type: Array,
+        value: function() {
+          return [
+            'apcedakaoficjlofohhcmkkljehnmebp'
+          ];
+        },
+        readOnly: true
       }
     },
 
     observers: [
       '_connect(extensionId)'
     ],
+
+    attached: function() {
+      this._extListener = this._processExternalMessage.bind(this);
+      chrome.runtime.onMessageExternal.addListener(this._extListener);
+    },
+
+    detached: function() {
+      chrome.runtime.onMessageExternal.removeListener(this._extListener);
+    },
 
     // Attempt to connect to external extension.
     _connect: function(extensionId) {
@@ -62,9 +81,7 @@
         this._setPort(undefined);
         port.onMessage.removeListener(this._messageListener);
       });
-
       port.onMessage.addListener(this._messageListener);
-
       this.async(() => {
         // Still have connection so the extension is installed.
         if (connected) {
@@ -95,6 +112,19 @@
     _processMessage: function(msg) {
       this._setLastMessage(msg);
       this.fire('message', msg);
+    },
+
+    _processExternalMessage: function(message, sender) {
+      if (this.allowedClients.indexOf(sender.id) === -1) {
+        console.warn('Unauthorized connection.');
+        return;
+      }
+      if (!message) {
+        return;
+      }
+      if (message.loaded) {
+        this._connect(this.extensionId);
+      }
     }
 
   });

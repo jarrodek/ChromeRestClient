@@ -107,7 +107,9 @@ Polymer({
     showCookieBanner: {
       type: Boolean,
       value: false
-    }
+    },
+    // True if the proxy extension is installed.
+    xhrConnected: Boolean
   },
 
   listeners: {
@@ -147,6 +149,11 @@ Polymer({
   },
 
   onXhrtoggle: function(e) {
+    if (!this.xhrConnected && e.target.checked) {
+      e.target.checked = false;
+      this.$.proxyDialog.open();
+      return;
+    }
     this.useXhr = e.target.checked;
     arc.app.analytics.sendEvent('Request', 'Use XHR', this.useXhr + '');
   },
@@ -215,7 +222,12 @@ Polymer({
 
   abortRequest: function() {
     this._setRequestLoading(false);
-    this.$.socket.abort();
+    if (this.useXhr) {
+      this.$.xhr.abort();
+    } else {
+      this.$.socket.abort();
+    }
+
     arc.app.analytics.sendEvent('Engagement', 'Click', 'Request abort');
   },
 

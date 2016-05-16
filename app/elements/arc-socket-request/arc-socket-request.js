@@ -178,7 +178,7 @@ Polymer({
       Number(response.headers.get('content-length')) : null;
     if (cl && cl === 0) {
       result.body = '';
-      this._finishRequest(this.connection.request, result);
+      return this._finishRequest(this.connection.request, result);
     } else if (ct && ct.indexOf('image') !== -1 &&
       ct.indexOf('xml') === -1) {
       response.blob()
@@ -220,6 +220,7 @@ Polymer({
   },
 
   _finishRequest: function(request, response) {
+    request.xhr = false;
     var detail = {
       request: request,
       response: response

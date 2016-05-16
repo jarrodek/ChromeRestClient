@@ -1,0 +1,45 @@
+<link rel="import" href="../../styles/dialog-styles.html">
+
+<dom-module id="install-proxy-dialog">
+  <template>
+    <style include="dialog-styles"></style>
+    <style>
+      :host {}
+      .the-button {
+        @apply(--layout-vertical);
+        @apply(--layout-center-center);
+      }
+      .inherit {
+        color: inherit !important;
+        background-color: inherit !important;
+      }
+    </style>
+    <div class="dialog">
+      <h2>ARC proxy extension</h2>
+      <div>
+        <p>ARC proxy extension will help you in some cases where the app can't handle requests properly:</p>
+        <ul>
+          <li>Certificates errors - app can't connect to the endpoint with invalid certificate</li>
+          <li>Cookies - network session is separated from the Chrome and cookies can't be read by the app</li>
+        </ul>
+        <p>Installing the extension the app will get access to the cookies stored by Chrome. Also the app will be able to make XHR connection from Chrome so it will be possible to make a connection to invalid certificate (you must accept the certificate in Chrome tab).</p>
+        <p>However, making an XHR connection you will:</p>
+        <ul>
+          <li>Not be able to set or read some headers (like Cookie, Referrer)</li>
+          <li>Not have an controll over headers set by the browser (Referrer, User-Agent, etc)</li>
+          <li>Lose information about request timings</li>
+          <li>Lose information about redirects</li>
+        </ul>
+        <div class="the-button">
+          <a class="inherit" href="https://chrome.google.com/webstore/detail/apcedakaoficjlofohhcmkkljehnmebp" target="_blank">
+            <paper-button raised>Install ARC proxy extension</paper-button>
+          </a>
+        </div>
+      </div>
+      <div class="buttons">
+          <paper-button dialog-dismiss>Close</paper-button>
+      </div>
+    </div>
+  </template>
+</dom-module>
+<script src="install-proxy-dialog.js"></script>

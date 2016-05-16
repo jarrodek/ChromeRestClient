@@ -132,9 +132,11 @@ the License.
         <template is="dom-if" if="[[hasResponseHeaders]]">
           <paper-tab>Response headers (<span>{{responseHeaders.length}}</span>)</paper-tab>
         </template>
-        <paper-tab>Request headers (<span>{{requestHeadersArray.length}}</span>)</paper-tab>
-        <paper-tab>Redirects (<span>{{redirectData.length}}</span>)</paper-tab>
-        <paper-tab>Timings</paper-tab>
+        <template is="dom-if" if="[[!isXhr]]">
+          <paper-tab>Request headers (<span>{{requestHeadersArray.length}}</span>)</paper-tab>
+          <paper-tab>Redirects (<span>{{redirectData.length}}</span>)</paper-tab>
+          <paper-tab>Timings</paper-tab>
+        </template>
       </paper-tabs>
       <iron-pages selected="{{selectedTab}}">
         <template is="dom-if" if="[[hasResponseHeaders]]">
@@ -143,50 +145,52 @@ the License.
             <arc-headers-display-view on-tap="_handleLink" headers="{{responseHeaders}}"></arc-headers-display-view>
           </section>
         </template>
-        <section>
-          <!-- Request headers -->
-          <arc-headers-display-view on-tap="_handleLink" headers="{{requestHeadersArray}}"></arc-headers-display-view>
-          <div class="source-message text">
-            <h5>Source message</h5>
-            <pre>[[httpMessage]]</pre>
-          </div>
-        </section>
-        <section>
-          <!-- Redirects -->
-          <template is="dom-if" if="{{!redirectData.length}}">
-            <div class="no-redirects-container">
-              <p class="no-redirects-info">There were no redirects during this request</p>
+        <template is="dom-if" if="[[!isXhr]]">
+          <section>
+            <!-- Request headers -->
+            <arc-headers-display-view on-tap="_handleLink" headers="{{requestHeadersArray}}"></arc-headers-display-view>
+            <div class="source-message text">
+              <h5>Source message</h5>
+              <pre>[[httpMessage]]</pre>
             </div>
-          </template>
-          <template is="dom-if" if="{{redirectData.length}}">
-            <template is="dom-repeat" items="{{redirectData}}">
-              <div class="status-row">
-                <div class="status-label text">
-                  #<span>{{_computeIndexName(index)}}</span>
-                </div>
-                <div class="redirect-value" on-tap="_handleLink">
-                  <div class="status-value status text">
-                    <span>To:
-                        <span>
-                          <!-- TODO: Handle links differently and not show link if there is no actually a link -->
-                          <a href="{{_computeRedirectLocation(item.headers)}}" class="auto-link">{{_computeRedirectLocation(item.headers)}}</a>
-                        </span> with status
-                    <span>{{item.status}} {{item.statusText}}</span>
-                    </span>
-                  </div>
-                  <arc-headers-display-view headers="{{_computeRedirectHeaders(item.headers)}}"></arc-headers-display-view>
-                </div>
+          </section>
+          <section>
+            <!-- Redirects -->
+            <template is="dom-if" if="{{!redirectData.length}}">
+              <div class="no-redirects-container">
+                <p class="no-redirects-info">There were no redirects during this request</p>
               </div>
             </template>
-          </template>
-          <!-- ! Redirects -->
-        </section>
-        <section>
-          <!-- Timings -->
-          <request-timings-panel
-            redirect-timings="[[redirectTimings]]"
-            request-timings="[[requestTimings]]"></request-timings-panel>
-        </section>
+            <template is="dom-if" if="{{redirectData.length}}">
+              <template is="dom-repeat" items="{{redirectData}}">
+                <div class="status-row">
+                  <div class="status-label text">
+                    #<span>{{_computeIndexName(index)}}</span>
+                  </div>
+                  <div class="redirect-value" on-tap="_handleLink">
+                    <div class="status-value status text">
+                      <span>To:
+                          <span>
+                            <!-- TODO: Handle links differently and not show link if there is no actually a link -->
+                            <a href="{{_computeRedirectLocation(item.headers)}}" class="auto-link">{{_computeRedirectLocation(item.headers)}}</a>
+                          </span> with status
+                      <span>{{item.status}} {{item.statusText}}</span>
+                      </span>
+                    </div>
+                    <arc-headers-display-view headers="{{_computeRedirectHeaders(item.headers)}}"></arc-headers-display-view>
+                  </div>
+                </div>
+              </template>
+            </template>
+            <!-- ! Redirects -->
+          </section>
+          <section>
+            <!-- Timings -->
+            <request-timings-panel
+              redirect-timings="[[redirectTimings]]"
+              request-timings="[[requestTimings]]"></request-timings-panel>
+          </section>
+        </template>
       </iron-pages>
       <paper-dialog id="statusCodeInfo">
         <h2>{{_scdTitle}}</h2>
