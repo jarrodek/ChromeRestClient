@@ -215,6 +215,12 @@ class TestServer {
       res.set('Content-Type', 'application/xml');
       res.send(json);
     });
+    app.get('/xml4', (req, res) => {
+      var json = fs.readFileSync('./tasks/test-data/xml4.xml', 'utf8');
+      // res.status(200).send('OK');
+      res.set('Content-Type', 'application/xml');
+      res.send(json);
+    });
   }
 
   uuid() {
