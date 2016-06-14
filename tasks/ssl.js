@@ -215,6 +215,12 @@ class TestServer {
       res.set('Content-Type', 'application/xml');
       res.send(json);
     });
+    app.get('/xml4', (req, res) => {
+      var json = fs.readFileSync('./tasks/test-data/xml4.xml', 'utf8');
+      // res.status(200).send('OK');
+      res.set('Content-Type', 'application/xml');
+      res.send(json);
+    });
   }
 
   uuid() {
@@ -405,6 +411,12 @@ class TestServer {
     app.get('/redirect', (req, res) => {
       res.redirect('http://localhost:' + this.post + '/redirect/dest');
     });
+    app.post('/post-redirect', (req, res) => {
+      res.redirect(303, 'http://localhost:' + this.post + '/redirect/dest');
+    });
+    app.get('/get-redirect', (req, res) => {
+      res.redirect(303, 'http://localhost:' + this.post + '/redirect/dest');
+    });
     app.get('/redirect/dest', (req, res) => {
       res.set('Content-Type', 'text/html');
       res.send('<h1>You have been redirected</h1>');
@@ -437,6 +449,11 @@ class TestServer {
       res.removeHeader('Content-Length');
       res.removeHeader('Transfer-Encoding');
       res.status(status).end();
+    });
+
+    app.all('/null', (req, res) => {
+      res.set('Content-Type', 'application/json');
+      res.send('null');
     });
   }
 }
