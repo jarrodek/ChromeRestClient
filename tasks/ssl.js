@@ -411,6 +411,12 @@ class TestServer {
     app.get('/redirect', (req, res) => {
       res.redirect('http://localhost:' + this.post + '/redirect/dest');
     });
+    app.post('/post-redirect', (req, res) => {
+      res.redirect(303, 'http://localhost:' + this.post + '/redirect/dest');
+    });
+    app.get('/get-redirect', (req, res) => {
+      res.redirect(303, 'http://localhost:' + this.post + '/redirect/dest');
+    });
     app.get('/redirect/dest', (req, res) => {
       res.set('Content-Type', 'text/html');
       res.send('<h1>You have been redirected</h1>');
@@ -443,6 +449,11 @@ class TestServer {
       res.removeHeader('Content-Length');
       res.removeHeader('Transfer-Encoding');
       res.status(status).end();
+    });
+
+    app.all('/null', (req, res) => {
+      res.set('Content-Type', 'application/json');
+      res.send('null');
     });
   }
 }
