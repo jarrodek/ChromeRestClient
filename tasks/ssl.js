@@ -3,7 +3,8 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const basicAuth = require('basic-auth');
-const app = require('express')();
+const express = require('express');
+const app = express();
 const bodyParser = require('body-parser');
 const multer = require('multer'); // v1.0.5
 const upload = multer(); // for parsing multipart/form-data
@@ -11,6 +12,9 @@ const upload = multer(); // for parsing multipart/form-data
 // var Busboy = require('busboy');
 const cookieParser = require('cookie-parser');
 const busboy = require('connect-busboy');
+const router = express.Router();
+
+app.use(router);
 
 app.use(cookieParser());
 app.use(bodyParser.json()); // for parsing application/json
@@ -421,6 +425,34 @@ class TestServer {
       res.set('Content-Type', 'text/html');
       res.send('<h1>You have been redirected</h1>');
     });
+
+    // Redirect the request with defined status code
+    app.all('/redirect/:status', (req, res) => {
+      let status = parseInt(req.params.status);
+      if (status !== status) {
+        res.set('Content-Type', 'text/html');
+        res.send('<h1>Unknown status to send.</h1>');
+        return;
+      }
+      res.redirect(status, 'http://localhost:' + this.post + '/redirect/dest');
+    });
+    // Redirect request n times.
+    app.all('/redirect/n/:count', (req, res) => {
+      let count = Number(req.params.count);
+      if (count !== count) {
+        count = 0;
+      }
+
+      if (count <= 0) {
+        res.set('Content-Type', 'text/html');
+        res.send('<h1>You have been redirected</h1>');
+      } else {
+        let url = 'http://localhost:' + this.post + '/redirect/n/';
+        url += (count - 1);
+        res.redirect(url);
+      }
+    });
+
   }
 
   _setErrors() {
