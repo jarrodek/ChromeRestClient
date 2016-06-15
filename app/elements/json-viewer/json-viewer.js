@@ -79,13 +79,30 @@ Polymer({
   },
   // Called when `json` property changed. It starts parsing the data.
   _changed: function() {
-    if (!this.json) {
-      return;
-    }
-    this._setWorking(true);
+    // if (!this.json) {
+    //   return;
+    // }
+
     this._setIsError(false);
     this.$.output.innerText = '';
 
+    if (this.json === null) {
+      let html = '<div class="prettyPrint"><span class="nullValue">null';
+      html += '</span></div>';
+      this.$.output.innerHTML = html;
+      this.$.output.removeAttribute('hidden');
+      return;
+    }
+
+    if (this.json === false) {
+      let html = '<div class="prettyPrint"><span class="booleanValue">false';
+      html += '</span></div>';
+      this.$.output.innerHTML = html;
+      this._setShowOutput(true);
+      return;
+    }
+
+    this._setWorking(true);
     if (!this._worker) {
       let worker = new Worker('/scripts/workers/jsonviewer.js');
       worker.addEventListener('message', this._workerDataHandler);
@@ -112,7 +129,7 @@ Polymer({
   },
   // Compute if output should be shown.
   _computeShowOutput: function(working, isError, json) {
-    return !working && !isError && !!json;
+    return !working && !isError && (!!json && json !== null && json !== false);
   },
   // Called when the user click on the display area. It will handle view toggle and links clicks.
   _handleDisplayClick: function(e) {

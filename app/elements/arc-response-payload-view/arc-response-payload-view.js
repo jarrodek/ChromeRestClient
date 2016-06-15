@@ -158,6 +158,12 @@ Polymer({
   _payloadChanged: function() {
     this._resetTabs();
     var payload = this.payload;
+    // console.info('Determinig if the payload is empty');
+    // console.dir(payload);
+    if (payload === null || payload === false) {
+      this._displayJSON(payload);
+      return;
+    }
     if (!payload) {
       this._setIsEmpty(true);
       return;
@@ -212,9 +218,9 @@ Polymer({
   },
   /** Display parsed JSON */
   _displayJSON: function(payload) {
-    if (!payload) {
-      return;
-    }
+    // if (!payload) {
+    //   return;
+    // }
     if (typeof payload === 'string') {
       if (payload !== this.raw) {
         this._setRaw(payload);
