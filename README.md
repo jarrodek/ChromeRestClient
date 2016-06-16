@@ -1,8 +1,7 @@
 Advanced Rest Client Application - the Chrome App
 =================
 
-This branch is to update the app to the Chrome packaged apps.
-It's in active development **and it's not working yet**.
+[![Stories in Ready](https://badge.waffle.io/jarrodek/advanced-rest-client.png?label=ready&title=Ready)](http://waffle.io/jarrodek/advanced-rest-client)
 
 ## Developer preview
 I assume you have [Node.js][1] already installed on your machine.
