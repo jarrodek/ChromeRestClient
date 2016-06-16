@@ -1,7 +1,7 @@
 Advanced Rest Client Application - the Chrome App
 =================
 
-[![Stories in Ready](https://badge.waffle.io/jarrodek/advanced-rest-client.png?label=ready&title=Ready)](http://waffle.io/jarrodek/advanced-rest-client)
+[![Stories in Ready](https://badge.waffle.io/jarrodek/ChromeRestClient.svg?label=ready&title=Ready)](http://waffle.io/jarrodek/ChromeRestClient)
 
 ## Developer preview
 I assume you have [Node.js][1] already installed on your machine.
