@@ -14,6 +14,17 @@ As for now projects were a set of not related requests that the user would like 
 
 The launch bug is https://github.com/jarrodek/ChromeRestClient/issues/509
 
+## Project modulation and web components
+
+The project will be consisted with reusable web components. Each element will have its own repository and the app itself will be a responsible for connecting web component's logic and theming.
+
+In other words, each component of the app (like URL editor, headers editor or response status viewer) will have it's own git repository managed by Bower dependency management system. Other apps can use as many components as they require as long as it fit the license requirements.
+
+That leads to...
+
+## Dual licensing
+Soon ARC will be dual licensed. For all open source and freeware projects the license will not change. However commercial or not open source project will be able to use the components as long as they put information about the source of the components used in their projects.
+
 ## Magic variables and expressions
 The magic variables was described in details in my blog posts: https://restforchrome.blogspot.co.uk/2012/11/introduce-magic-variables.html.
 
@@ -33,3 +44,6 @@ Basically, it is a system of creating and executing macros in the context of the
 
 ## RAML discovery from the history
 The app is collecting history of the user interaction with different endpoint. Based on this information the app can **locally** scan for project definition (RAML definition) and reverse engineer the API structure from it. Then the app can suggest creation of the project and document the API. Next time when the user will hit the endpoint the app suggest the parameters available for the endpoint and types of the expected response.
+
+## Detailed roadmap
+The file [Advanced Rest Client Roadmap](https://docs.google.com/spreadsheets/d/1FSh5OiT13xmJo7cohR_sCOpJPqLYwXyQQZfHFYFZgTk/edit#gid=0) contains detailed roadmap for the app and targeted time of the release (quarter). This file may and probably will change depending on the requirements and progress on design and development. It will however give you an overview of the implementation timings.  
