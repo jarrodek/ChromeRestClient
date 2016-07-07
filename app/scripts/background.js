@@ -102,8 +102,8 @@ arc.bg.notifyBetaUpdate = () => {
  */
 arc.bg.recordSession = () => {
   arc.app.arc.getAppId((appId) => {
-    let url = 'https://chromerestclient.appspot.com/_ah/api/arcSessions/v1/record/';
-    url += appId + '/';
+    let url = 'https://chromerestclient.appspot.com/_ah/api/analytics/v1/record/?ai=';
+    url += appId + '&t=';
     url += Date.now();
     fetch(url, {
       method: 'POST'
