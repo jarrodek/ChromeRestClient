@@ -102,9 +102,11 @@ arc.bg.notifyBetaUpdate = () => {
  */
 arc.bg.recordSession = () => {
   arc.app.arc.getAppId((appId) => {
-    let url = 'https://chromerestclient.appspot.com/_ah/api/analytics/v1/record/?ai=';
+    let d = new Date();
+    let url = 'http://api.chromerestclient.com/analytics/record?ai=';
     url += appId + '&t=';
-    url += Date.now();
+    url += d.getTime() + '&tz=';
+    url += d.getTimezoneOffset();
     fetch(url, {
       method: 'POST'
     }).then((response) => {
