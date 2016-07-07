@@ -1,5 +1,9 @@
 'use strict';
-
+/**
+ * Global object for error reporting.
+ * The analytics.js file will get the data from here and report errors to the GA.
+ */
+var pendingAnalytics = [];
 /**
  * Advanced Rest Client namespace.
  *
@@ -27,9 +31,11 @@ arc.bg.openWindow = (url) => {
     url, {
       id: id,
       bounds: {
-        width: 1000,
+        width: 1200,
         height: 800
       }
+    }, function() {
+      arc.bg.recordSession();
     }
   );
 };
@@ -85,6 +91,30 @@ arc.bg.notifyBetaUpdate = () => {
     if (granted) {
       arc.bg.notifications.displayUpdate(arc.app.utils.releaseChannel);
     }
+  });
+};
+/**
+ * Very base replacement for GA session counter.
+ * According to T&C of GA users must have ability to disable GA in the app.
+ * However usage stats are crutial for the app.
+ * This function will send generated an nonymous ID to the app's backed to record the session.
+ * This is the only information send to the backed (time and generated ID)
+ */
+arc.bg.recordSession = () => {
+  arc.app.arc.getAppId((appId) => {
+    let url = 'https://chromerestclient.appspot.com/_ah/api/arcSessions/v1/record/';
+    url += appId + '/';
+    url += Date.now();
+    fetch(url, {
+      method: 'POST'
+    }).then((response) => {
+      if (!response.ok) {
+        pendingAnalytics.push({
+          'type': 'exception',
+          'params': ['Unable send session recording to the backend: ' + response.code, false]
+        });
+      }
+    });
   });
 };
 
