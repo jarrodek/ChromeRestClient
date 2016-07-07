@@ -46,6 +46,7 @@
   "app": {
     "background": {
       "scripts": [
+        "scripts/libs/app.js",
         "scripts/libs/app.utils.js",
         "bower_components/dexie-js/dist/dexie.min.js",
         "scripts/libs/app.idb.js",
