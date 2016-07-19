@@ -350,6 +350,12 @@ Polymer({
   // Populate form with current headers.
   _setHeadersList: function() {
     var arr = arc.app.headers.toJSON(this.headers);
+    if (!arr || !arr.length) {
+      arr = [{
+        name: '',
+        value: ''
+      }];
+    }
     this.set('headersList', arr);
   },
 
