@@ -351,7 +351,7 @@ var Builder = {
         day: 'numeric'
       };
       var date = new Intl.DateTimeFormat(undefined, options).format(new Date());
-      date = date.replace(/\//g,'-');
+      date = date.replace(/\//g, '-');
       let fileName = `${Builder.target}-${Builder.version}@${date}.zip`;
       let dist = path.join(Builder.distTarget, fileName);
       fsensure.dir.exists(Builder.distTarget, (err) => {
@@ -417,7 +417,7 @@ gulp.task('copy', () => {
 
   var assets = gulp.src([
     'app/assets/*',
-  ]).pipe(gulp.dest(path.join(dest,'assets')));
+  ]).pipe(gulp.dest(path.join(dest, 'assets')));
 
   var scripts = gulp.src([
     'app/scripts/**',
@@ -425,12 +425,12 @@ gulp.task('copy', () => {
     // '!app/scripts/libs/*',
     '!app/scripts/code-mirror',
     '!app/scripts/code-mirror/**'
-  ]).pipe(gulp.dest(path.join(dest,'scripts')));
+  ]).pipe(gulp.dest(path.join(dest, 'scripts')));
 
   var styles = gulp.src([
     'app/styles/*',
     '!app/styles/*.html'
-  ]).pipe(gulp.dest(path.join(dest,'styles')));
+  ]).pipe(gulp.dest(path.join(dest, 'styles')));
 
   // Copy over only the bower_components we need
   // These are things which cannot be vulcanized
@@ -441,7 +441,7 @@ gulp.task('copy', () => {
     '!app/bower_components/codemirror/keymap/**',
     '!app/bower_components/codemirror/*',
     '!app/bower_components/font-roboto-local/fonts/robotomono/**'
-  ]).pipe(gulp.dest(path.join(dest,'bower_components')));
+  ]).pipe(gulp.dest(path.join(dest, 'bower_components')));
 
   // copy webworkers used in bower_components
   var webWorkers = gulp.src([
@@ -464,7 +464,7 @@ gulp.task('copy', () => {
   ];
   var dependencies = gulp.src([
     `app/bower_components/{${bowerDeps.join(',')}}`,
-  ]).pipe(gulp.dest(path.join(dest,'bower_components')));
+  ]).pipe(gulp.dest(path.join(dest, 'bower_components')));
 
   return merge(
       app, bower, webWorkers, assets, scripts, styles,
