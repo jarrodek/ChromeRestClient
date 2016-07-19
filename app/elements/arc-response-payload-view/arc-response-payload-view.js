@@ -388,21 +388,21 @@ Polymer({
     this.$.webView.contentWindow.postMessage({
       'rawResponse': this.raw
     }, '*');
-    this.$.webView.removeAttribute('hidden');
-    this.$.rawContent.setAttribute('hidden', true);
-    this.$.prism.setAttribute('hidden', true);
+    // this.$.webView.removeAttribute('hidden');
+    // this.$.rawContent.setAttribute('hidden', true);
+    // this.$.prism.setAttribute('hidden', true);
   },
   // Closes response preview
   _closeResponsePreview: function() {
     if (!this.isAttached) {
       return;
     }
-    this.$.webView.setAttribute('hidden', true);
+    // this.$.webView.setAttribute('hidden', true);
     this.$.webView.contentWindow.postMessage({
       'cleanUp': true
     }, '*');
-    this.$.rawContent.removeAttribute('hidden');
-    this.$.prism.removeAttribute('hidden');
+    // this.$.rawContent.removeAttribute('hidden');
+    // this.$.prism.removeAttribute('hidden');
   },
   // a message received from the external page using window.postMessage.
   _onExternalMessage: function(e) {
