@@ -55,6 +55,20 @@ the License.
             background-color: #fff;
             border: 0;
           }
+          .binary-info {
+            @apply(--layout-horizontal);
+            @apply(--layout-center-center);
+            margin: 24px 0;
+          }
+          .binary-desc {
+            @apply(--paper-font-subhead);
+            margin-left: 24px;
+          }
+          .binary-icon {
+            width: 128px;
+            height: 128px;
+            color: rgba(0, 0, 0, 0.56);
+          }
         </style>
         <div class="empty-info" hidden$="[[!isEmpty]]">
           <arc-error-message icon="arc:sentiment-neutral">
@@ -67,6 +81,7 @@ the License.
           <paper-tab hidden$="[[!isJson]]">JSON</paper-tab>
           <paper-tab hidden$="[[!isXml]]">XML</paper-tab>
           <paper-tab hidden$="[[!isImage]]">Image</paper-tab>
+          <paper-tab hidden$="[[!isBinary]]">Binary</paper-tab>
         </paper-tabs>
         <iron-pages selected="{{selectedTab}}">
           <section hidden$="[[!isRaw]]">
@@ -113,6 +128,18 @@ the License.
               <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
             </div>
             <chrome-image id="imageViewer"></chrome-image>
+          </section>
+          <section hidden$="[[!isBinary]]">
+            <div class="binary-info">
+              <div>
+                <iron-icon class="binary-icon" icon="arc:cloud-download"></iron-icon>
+              </div>
+              <div class="binary-desc">
+                <p>Received sata is a binary file.</p>
+                <p>You can save it to your drive to preview its content</p>
+                <paper-button on-tap="_saveFile" raised>save file</paper-button>
+              </div>
+            </div>
           </section>
         </iron-pages>
         <!-- <webview id="webView" url="html-preview.html"></webview> -->

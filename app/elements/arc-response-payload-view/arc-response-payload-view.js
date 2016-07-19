@@ -90,7 +90,13 @@ Polymer({
       value: true,
       readOnly: true
     },
-
+    // True if the received data are binary.
+    isBinary: {
+      type: Boolean,
+      value: false,
+      readOnly: true,
+      observer: '_tabsChanged'
+    },
     // An element which should be searched for text.
     _textSearch: {
       type: HTMLElement,
@@ -98,6 +104,7 @@ Polymer({
         return this.$.rawContent;
       }
     },
+
     contentPreview: Boolean
   },
 
@@ -151,6 +158,7 @@ Polymer({
     this._setIsXml(false);
     this._setIsImage(false);
     this._setIsEmpty(false);
+    this._setIsBinary(false);
     this._setParsedMode(undefined);
     this.contentPreview = false;
   },
@@ -199,6 +207,14 @@ Polymer({
   },
   /** Display blob. Most commonly it will be image data */
   _displayBlob: function(payload) {
+    var ct = arc.app.headers.getContentType(this.headers);
+    if (ct && ct.indexOf('image') === -1) {
+      // This is a binary file.
+      this._setIsBinary(true);
+      this.selectedTab = 5;
+      this._tabsChanged();
+      return;
+    }
     this._setIsImage(true);
 
     this.selectedTab = 4;

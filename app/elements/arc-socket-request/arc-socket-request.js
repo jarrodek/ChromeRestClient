@@ -210,6 +210,30 @@ Polymer({
         }
         return this._finishRequest(this.connection.request, result);
       }
+    } else if (ct && ct.indexOf('application/octet-stream') === 0) {
+      try {
+        response.blob()
+        .then((blob) => {
+          result.body = blob;
+          return this._finishRequest(this.connection.request, result);
+        })
+        .catch((e) => {
+          console.warn('Something is wrong with the response.', e.message);
+          try {
+            result.body = arc.app.utils.arrayBufferToString(this.connection.response.rawResponse);
+          } catch (e) {
+            result.body = '';
+          }
+          return this._finishRequest(this.connection.request, result);
+        });
+      } catch (e) {
+        try {
+          result.body = arc.app.utils.arrayBufferToString(this.connection.response.rawResponse);
+        } catch (e) {
+          result.body = '';
+        }
+        return this._finishRequest(this.connection.request, result);
+      }
     } else {
       response.text()
       .then((text) => {
