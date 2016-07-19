@@ -759,6 +759,9 @@ Polymer({
     }
     if (!override) {
       this.set('request.id', undefined);
+      if (toDrive) {
+        this.set('request.driveId', undefined);
+      }
     }
     this.set('request.name', name);
     //always save to local store, origin is not important.
