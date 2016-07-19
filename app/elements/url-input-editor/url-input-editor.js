@@ -63,6 +63,9 @@ Polymer({
     '_urlChanged(url)',
     '_detailedChanged(detailed)'
   ],
+  listeners: {
+    'blur': '_elementBlur'
+  },
   /**
    * Called when the URL value change.
    *
@@ -383,6 +386,15 @@ Polymer({
     nodes.forEach(fn);
     var master = this.$.masterUrl;
     return master.validate && master.validate();
+  },
+
+  _elementBlur: function() {
+    var url = this.url;
+    try {
+      new URL(url);
+    } catch (e) {
+      this.$.invalidUrlToast.open();
+    }
   }
 });
 })();
