@@ -153,7 +153,7 @@ class TestServer {
       res.sendStatus(204);
     });
 
-    app.get('/no-response', (req, res) => {
+    app.get('/no-response', () => {
       // res.sendStatus(204);
     });
   }
@@ -251,6 +251,7 @@ class TestServer {
   }
 
   _setCookie() {
+
     app.get('/store/CatalogActor/getProduct', (req, res) => {
       var cookie = null;
       var regenerate = false;
@@ -272,6 +273,7 @@ class TestServer {
       }
       res.send(message);
     });
+
     //set random cookies
     app.get('/cookies/random', (req, res) => {
       var Chance = require('chance');
@@ -317,6 +319,17 @@ class TestServer {
       }
       res.redirect('/cookies');
     });
+    //delete cookies getting param keys as cookie name and param value as cookie value.
+    app.get('/cookies/delete', (req, res) => {
+      let params = req.query;
+      for (let key in params) {
+        res.cookie(key, params[key], {
+          path: '/',
+          maxAge: -86400000
+        });
+      }
+      res.redirect('/cookies');
+    });
     //list cookies
     app.get('/cookies', function(req, res) {
       let resp = {
@@ -325,6 +338,7 @@ class TestServer {
       res.set('Content-Type', 'application/json');
       res.send(resp);
     });
+
   }
 
   _setPost() {

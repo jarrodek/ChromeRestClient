@@ -1135,6 +1135,7 @@ Polymer({
     // }
     // responses.push(this.response);
     this.$.cookieJar.response = this.response;
+    // debugger;
     this.$.cookieJar.store();
   }
 });

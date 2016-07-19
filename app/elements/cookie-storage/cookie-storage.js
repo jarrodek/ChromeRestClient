@@ -30,6 +30,13 @@ Polymer({
       value: function() {
         return [];
       }
+    },
+    // List of expired Cookies (as per server response) that should be removed
+    expired: {
+      type: Array,
+      value: function() {
+        return [];
+      }
     }
   },
 
@@ -48,6 +55,7 @@ Polymer({
 
     this.extract();
     this._store();
+    this._removeExpired();
   },
   /**
    * Get cookies that should be send with given request for given URL.
@@ -126,12 +134,58 @@ Polymer({
     });
   },
 
+  // Removed cookies identified as to be removed per server request.
+  _removeExpired: function() {
+    console.log('Remove expired cookies', this.expired);
+    var exp = this.expired;
+    if (!exp || !exp.length) {
+      return;
+    }
+    var cookiesDomains = [];
+    var toRemove = {};
+    exp.forEach((c) => {
+      if (!c.domain) {
+        return;
+      }
+      cookiesDomains.push(c.domain);
+      if (!(c.domain in toRemove)) {
+        toRemove[c.domain] = [c];
+      } else {
+        toRemove[c.domain].push(c);
+      }
+    });
+    return arc.app.db.idb.open()
+    .then((db) => {
+      return db.transaction('rw', db.cookies, function() {
+        return db.cookies.where('_domain').anyOfIgnoreCase(cookiesDomains)
+        .toArray()
+        .then((stored) => {
+          var removeObjects = []; // DB object's keys
+          stored.forEach((c) => {
+            var cookies = toRemove[c.domain];
+            for (let i = 0, len = cookies.length; i < len; i++) {
+              if (cookies[i].name === c.name) {
+                removeObjects.push(c.uuid);
+                break;
+              }
+            }
+          });
+          return db.cookies.where(':id').anyOf(removeObjects).delete();
+        });
+      })
+      .finally(() => {
+        db.close();
+      });
+    });
+  },
+
   /**
    * Extracts cookies from `this.response` and set them to the `cookies` array.
    */
   extract: function() {
     var result = [];
     var response = this.response;
+    var expired = [];
     if (!response) {
       this.set('cookies', result);
       return;
@@ -142,7 +196,10 @@ Polymer({
         if (r.headers.has && r.headers.has('set-cookie')) {
           let parser = new Cookies(r.headers.get('set-cookie'), r.requestUrl);
           parser.filter();
-          parser.clearExpired();
+          let exp = parser.clearExpired();
+          if (exp && exp.length) {
+            expired = expired.concat(exp);
+          }
           parsers.push(parser);
         }
       });
@@ -150,7 +207,10 @@ Polymer({
     if (response._headers && response._headers.has && response._headers.has('set-cookie')) {
       let parser = new Cookies(response._headers.get('set-cookie'), this.url);
       parser.filter();
-      parser.clearExpired();
+      let exp = parser.clearExpired();
+      if (exp && exp.length) {
+        expired = expired.concat(exp);
+      }
       parsers.push(parser);
     }
     if (parsers.length === 0) {
@@ -167,6 +227,7 @@ Polymer({
     });
     result = mainParser.cookies;
     this.set('cookies', result);
+    this.set('expired', expired);
   },
 
   // Finds cookies that matches current domain and path
