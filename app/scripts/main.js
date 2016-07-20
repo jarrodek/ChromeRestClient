@@ -22,6 +22,7 @@
   app.addEventListener('dom-change', function() {
     arc.app.logger.initConsole();
     app.updateBranding();
+    app.runTutorials();
   });
 
   // event fired when the app is initialized and can remove loader.
@@ -337,4 +338,26 @@
     var message = '[Window]' + e.detail.message;
     arc.app.analytics.sendException(message, false);
   });
+
+  app.runTutorials = () => {
+    /// XHR toggle tutorial
+    chrome.storage.sync.get({'tutorials': []}, (r) => {
+      if (r.tutorials.indexOf('xhrElementTutorial') !== -1) {
+        return;
+      }
+      app.$.xhrProxyTutorial.target = app.$.xhrToggle;
+    });
+  };
+
+  app._closeXhrTutorial = () => {
+    app.$.xhrProxyTutorial.hide();
+    chrome.storage.sync.get({'tutorials': []}, (r) => {
+      if (r.tutorials.indexOf('xhrElementTutorial') !== -1) {
+        return;
+      }
+      r.tutorials.push('xhrElementTutorial');
+      chrome.storage.sync.set(r);
+    });
+  };
+
 })(document, window);

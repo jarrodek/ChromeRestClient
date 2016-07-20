@@ -47,7 +47,7 @@
               </template>
             </div>
           </div>
-          <paper-toggle-button feature="xhrtoggle" on-change="_onFeatureXhrToggle" class="toolbar-hide xhr-switch" title="Use XHR instead of socket">Use XHR</paper-toggle-button>
+          <paper-toggle-button id="xhrToggle" feature="xhrtoggle" on-change="_onFeatureXhrToggle" class="toolbar-hide xhr-switch" title="Use XHR instead of socket">Use XHR</paper-toggle-button>
           <paper-icon-button feature="open" on-tap="_onFeatureOpen" class="toolbar-hide" icon="folder-open" title="Open"></paper-icon-button>
           <paper-icon-button feature="save" on-tap="_onFeatureSave" class="toolbar-hide" icon="save" title="Save"></paper-icon-button>
           <paper-icon-button feature="export" on-tap="_onFeatureExport" class="toolbar-hide" icon="communication:import-export" title="Export list"></paper-icon-button>
@@ -229,6 +229,13 @@
     </paper-toast>
     <arc-log-viewer></arc-log-viewer>
     <search-bar id="content-search-bar" on-iron-overlay-opened="textSearchBarOpened"></search-bar>
+    <element-tutorial id="xhrProxyTutorial">
+      <div tutorial>
+        <p>You can proxy the request throught Chrome instead of using socket connection.</p>
+        <p>Enable XHR proxy when having issues with <b>expired certificates</b> or <b>proxy/vpn</b> connections.</p>
+        <paper-button raised class="tutorial-button" on-tap="_closeXhrTutorial">Got it</paper-button>
+      </div>
+    </element-tutorial>
   </template>
   <script src="bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
   <script src="bower_components/dexie-js/dist/dexie.min.js"></script>
