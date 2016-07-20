@@ -1,43 +1,49 @@
 <dom-module id="wsse-support" assetpath="headers-editor/">
   <template>
     <style>
-      :host {
-        display: block;
-        margin: 24px 40px;
-        -webkit-overflow-scrolling: touch;
-        background: var(--paper-dialog-background-color, --primary-background-color);
-        color: var(--paper-dialog-color, --primary-text-color);
-        @apply(--paper-font-body1);
-        @apply(--shadow-elevation-16dp);
-        @apply(--paper-dialog);
-      }
+    :host {
+      display: block;
+      margin: 24px 40px;
+      -webkit-overflow-scrolling: touch;
+      background: var(--paper-dialog-background-color, --primary-background-color);
+      color: var(--paper-dialog-color, --primary-text-color);
+      @apply(--paper-font-body1);
+      @apply(--shadow-elevation-16dp);
+      @apply(--paper-dialog);
+    }
 
-      :host > * {
-        padding: 0 24px;
-      }
+    :host> * {
+      padding: 0 24px;
+    }
 
-      h2 {
-        position: relative;
-        margin: 0;
-        @apply(--paper-font-title);
-        @apply(--paper-dialog-title);
-      }
+    h2 {
+      position: relative;
+      margin: 0;
+      @apply(--paper-font-title);
+      @apply(--paper-dialog-title);
+    }
 
-      .title-area {
-        padding-top: 24px;
-        padding-bottom: 24px;
-        @apply(--layout-horizontal);
-      }
+    .title-area {
+      padding-top: 24px;
+      padding-bottom: 24px;
+      @apply(--layout-horizontal);
+    }
 
-      .buttons {
-        position: relative;
-        padding: 8px 8px 8px 24px;
-        margin: 0;
-        margin-bottom: 24px;
-        color: var(--paper-dialog-button-color, --primary-color);
-        @apply(--layout-horizontal);
-        @apply(--layout-end-justified);
-      }
+    .buttons {
+      position: relative;
+      padding: 8px 8px 8px 24px;
+      margin: 0;
+      margin-bottom: 24px;
+      color: var(--paper-dialog-button-color, --primary-color);
+      @apply(--layout-horizontal);
+      @apply(--layout-end-justified);
+    }
+    .row {
+      margin: 16px 0;
+    }
+    paper-input {
+      min-width: 360px;
+    }
     </style>
     <div class="title-area" id="titleArea">
       <h2 class="flex">WSSE authorization</h2>
@@ -45,16 +51,21 @@
     <div class="form">
       <paper-input label="User name" value="{{login}}" type="text"></paper-input>
       <paper-input label="Password" type="password" id="authDialogPassword" value="{{password}}">
-        <paper-icon-button suffix="" on-tap="authTogglePassword" icon="visibility" alt="Show password icon"
-                           title="Show password"></paper-icon-button>
+        <paper-icon-button suffix on-tap="authTogglePassword" icon="visibility" alt="Show password icon" title="Show password"></paper-icon-button>
       </paper-input>
-      <paper-input label="Nonce (empty to auto generate)" value="{{nonce}}" type="text"></paper-input>
+      <div class="row">
+        <paper-checkbox checked="{{autogenNonce}}">Generate nonce automatically</paper-checkbox>
+        <paper-input label="Nonce (e.g. 79de86f9d641629f)" value="{{nonce}}" type="text" hidden$="[[autogenNonce]]"></paper-input>
+      </div>
       <paper-checkbox checked="{{nonceAsBase64}}">Encode none to base 64</paper-checkbox>
-      <paper-input label="Created (empty to auto generate)" value="{{date}}" type="text"></paper-input>
+      <div class="row">
+        <paper-checkbox checked="{{autogenTimestamp}}">Generate timestamp automatically</paper-checkbox>
+        <paper-input label="Timestamp (e.g. 2016-07-20T17:07:42.673Z)" value="{{date}}" type="text" hidden$="[[autogenTimestamp]]"></paper-input>
+      </div>
     </div>
     <div class="buttons">
       <paper-button dialog-dismiss="" on-tap="_cancel">Cancel</paper-button>
-      <paper-button dialog-confirm="" on-tap="_select">Select</paper-button>
+      <paper-button dialog-confirm="" on-tap="_select">Apply</paper-button>
     </div>
   </template>
   <script src="wsse-support.js"></script>
