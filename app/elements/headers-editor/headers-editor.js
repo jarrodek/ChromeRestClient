@@ -515,8 +515,14 @@ accept-language: en-US,en;q=0.8\n`;
     // console.log('Header ', headerName, ' at index ', index, elm ? 'has' : 'has no', 'support');
     if (!elm) {
       parent.classList.remove('has-support');
+      if (parent.supportElm) {
+        parent.supportElm.disableSupport();
+        parent.supportElm = null;
+      }
     } else {
       parent.classList.add('has-support');
+      parent.supportElm = elm;
+      parent.supportElm.enableSupport();
     }
   },
 
