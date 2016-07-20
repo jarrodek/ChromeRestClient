@@ -20,6 +20,7 @@ function XMLViewer(data) {
   this.latestError = null;
 
   var parser = new DOMImplementation();
+  parser.errorChecking = false;
   try {
     this.xml = parser.loadXML(data);
   } catch (e) {
