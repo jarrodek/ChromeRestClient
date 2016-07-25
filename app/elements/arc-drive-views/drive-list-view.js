@@ -14,10 +14,14 @@ Polymer({
     isSelected: {
       type: Boolean,
       value: true,
-      computed: '_computeIsSelected(selectedItem)'
+      readOnly: true
     },
     loading: Boolean
   },
+
+  observers: [
+    '_computeIsSelected(selectedItem)'
+  ],
 
   loadMoreData: function() {
     this.fire('more-data');
@@ -32,11 +36,11 @@ Polymer({
   },
 
   computeSelectedClass: function(selected) {
-    return selected ? 'iron-selected' : '';
+    return 'list-item' + (selected ? ' iron-selected' : '');
   },
 
   _computeIsSelected: function(selectedItem) {
-    return !!selectedItem;
+    this._setIsSelected(!!selectedItem);
   },
 
   openSearch: function() {

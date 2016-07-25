@@ -73,6 +73,15 @@
       color: rgba(0,0,0,0.54);
       margin-right: 12px;
     }
+    .list-item {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      height: 48px;
+      padding: 0 12px;
+    }
+    .iron-selected {
+      background-color: #e0e0e0;
+    }
     </style>
     <div class="title-area" id="titleArea">
       <h2 class="flex">Select Drive file <paper-spinner-lite active="[[loading]]"></paper-spinner-lite></h2>
@@ -82,15 +91,21 @@
       </div>
     </div>
     <iron-scroll-threshold on-lower-threshold="loadMoreData" id="threshold">
-      <iron-list scroll-target="threshold" items="[[items]]" selected-item="{{selectedItem}}" id="list" as="item" selected-as="selected" index-as="index" selection-enabled="">
+      <iron-list
+        scroll-target="threshold"
+        items="[[items]]"
+        selected-item="{{selectedItem}}"
+        id="list"
+        selected-as="selected"
+        selection-enabled>
         <template>
-          <paper-item tabindex$="[[index]]" class$="[[computeSelectedClass(selected)]]">
+          <div class$="[[computeSelectedClass(selected)]]">
             <div class="flex">[[item.name]]</div>
             <template is="dom-if" if="[[item.shared]]">
               <iron-icon icon="folder-shared" class="shared-icon" title="Shared with you"></iron-icon>
             </template>
             <date-time date="[[item.createdTime]]" second="" month="short"></date-time>
-          </paper-item>
+          </div>
         </template>
       </iron-list>
     </iron-scroll-threshold>
