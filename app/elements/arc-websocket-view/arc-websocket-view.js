@@ -37,6 +37,12 @@ Polymer({
       type: Boolean,
       value: false
     },
+    // True when the connection should be automatically reconnected after connection lost.
+    autoReconnect: {
+      type: Boolean,
+      value: true,
+      notify: true
+    },
     /**
      * Hide messages input if true.
      *

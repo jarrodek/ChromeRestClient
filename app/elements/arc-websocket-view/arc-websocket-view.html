@@ -117,15 +117,20 @@
     .send-file {
       margin: 20px;
     }
+    .connection-info-line paper-checkbox {
+      margin-left: 24px;
+    }
     </style>
     <div class="remote-address-line">
       <div hidden$="{{connected}}" class="connection-info-line">
         <paper-input label="Socket URL" value="{{url}}" class="url-input"></paper-input>
         <paper-button class="action-button" disabled$="[[connectDisabled]]" on-tap="_connect">connect</paper-button>
+        <paper-checkbox checked="{{autoReconnect}}">Reconnect automatically</paper-checkbox>
       </div>
       <div hidden$="{{!connected}}" class="connection-info-line">
         <p class="connection-info">Connected to <span>[[url]]</span></p>
         <paper-button on-tap="_disconnect" raised>disconnect</paper-button>
+        <paper-checkbox checked="{{autoReconnect}}">Reconnect automatically</paper-checkbox>
       </div>
     </div>
     <div class="padding-section welcome-info" hidden$="{{!_computeInitialInfoVisible(connected, connecting, retrying)}}">

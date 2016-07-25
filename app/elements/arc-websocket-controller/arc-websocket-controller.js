@@ -45,7 +45,8 @@ Polymer({
     lastSocketUrl: {
       type: String,
       value: 'ws://echo.websocket.org'
-    }
+    },
+    noRetry: Boolean
   },
 
   onShow: function() {
@@ -137,6 +138,10 @@ Polymer({
     if (this.lastSocketUrl) {
       this.$.view.url = this.lastSocketUrl;
     }
+  },
+
+  _autoReconnectChanged: function(e) {
+    this.noRetry = !e.detail.value;
   }
 });
 })();
