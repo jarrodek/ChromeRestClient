@@ -58,7 +58,7 @@
   "url_handlers": {
     "google_drive_open": {
       "matches": [
-        "https://api.chromerestclient.com/GDrive.html/GDrive.html*"
+        "https://api.chromerestclient.com/GDrive.html*"
       ],
       "title": "Open from Google Drive"
     }
