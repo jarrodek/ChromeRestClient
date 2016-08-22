@@ -96,12 +96,15 @@ the License.
 
       .source-message {
         margin: 16px;
+        overflow: auto;
       }
 
       .source-message pre {
-        font-size: 15px;
+        /*font-size: 15px;
         word-break: break-all;
-        white-space: pre-line;
+        white-space: pre-line;*/
+        word-break: break-all;
+        @apply(--paper-font-code1);
       }
 
       .text {
