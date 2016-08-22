@@ -112,6 +112,16 @@ the License.
       .sub-title {
         padding: 0 24px;
       }
+
+      paper-tab > paper-badge {
+        --paper-badge-margin-left: 12px;
+        --paper-badge-margin-bottom: -12px;
+        --paper-badge-background: var(--paper-blue-500);
+      }
+
+      paper-badge.empty {
+        --paper-badge-background: var(--paper-grey-500);
+      }
       </style>
       <div class="status-row">
         <div class="status-label text">Status:</div>
@@ -130,11 +140,20 @@ the License.
       </div>
       <paper-tabs selected="{{selectedTab}}" id="tabs">
         <template is="dom-if" if="[[hasResponseHeaders]]">
-          <paper-tab>Response headers (<span>{{responseHeaders.length}}</span>)</paper-tab>
+          <paper-tab>
+            <span id="rh">Response headers</span>
+            <paper-badge for="rh" class$="[[_computeBageClass(responseHeaders.length)]]" label="[[responseHeaders.length]]"></paper-badge>
+          </paper-tab>
         </template>
         <template is="dom-if" if="[[!isXhr]]">
-          <paper-tab>Request headers (<span>{{requestHeadersArray.length}}</span>)</paper-tab>
-          <paper-tab>Redirects (<span>{{redirectData.length}}</span>)</paper-tab>
+          <paper-tab>
+            <span id="rqh">Request headers</span>
+            <paper-badge for="rqh" class$="[[_computeBageClass(requestHeadersArray.length)]]" label="[[requestHeadersArray.length]]"></paper-badge>
+          </paper-tab>
+          <paper-tab>
+            <span id="rd">Redirects</span>
+            <paper-badge for="rd" class$="[[_computeBageClass(redirectData.length)]]" label="[[redirectData.length]]"></paper-badge>
+          </paper-tab>
           <paper-tab>Timings</paper-tab>
         </template>
       </paper-tabs>
@@ -186,9 +205,7 @@ the License.
           </section>
           <section>
             <!-- Timings -->
-            <request-timings-panel
-              redirect-timings="[[redirectTimings]]"
-              request-timings="[[requestTimings]]"></request-timings-panel>
+            <request-timings-panel redirect-timings="[[redirectTimings]]" request-timings="[[requestTimings]]"></request-timings-panel>
           </section>
         </template>
       </iron-pages>

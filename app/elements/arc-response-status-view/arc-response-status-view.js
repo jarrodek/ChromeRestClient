@@ -236,6 +236,10 @@ Polymer({
   _computeHasResponseHeaders: function(responseHeaders) {
     var res = responseHeaders && responseHeaders.length;
     this._setHasResponseHeaders(res);
+  },
+
+  _computeBageClass: function(cnt) {
+    return cnt === 0 ? 'empty' : '';
   }
 });
 })();
