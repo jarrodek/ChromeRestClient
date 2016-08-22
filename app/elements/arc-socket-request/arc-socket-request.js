@@ -176,6 +176,8 @@ Polymer({
     result.stats = response.stats;
     result.ok = response.ok;
     result.auth = response.auth;
+    result.rawBody = arc.app.utils.arrayBufferToString(this.connection.response.rawResponse);
+
     var ct = (response.headers && response.headers.get) ?
       response.headers.get('content-type') : null;
     var cl = (response.headers && response.headers.get) ?

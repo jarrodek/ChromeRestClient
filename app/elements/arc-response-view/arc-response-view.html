@@ -49,7 +49,7 @@ the License.
       redirect-timings="[[_computeRedirectTimings(response.redirects)]]"></arc-response-status-view>
     <template is="dom-if" if="[[hasResponse]]">
       <template is="dom-if" if="[[!isError]]">
-        <arc-response-payload-view id="payloadView" payload="[[response.body]]" headers="[[response.headers]]"></arc-response-payload-view>
+        <arc-response-payload-view id="payloadView" payload="[[response.body]]" raw="[[response.rawBody]]" headers="[[response.headers]]"></arc-response-payload-view>
       </template>
       <template is="dom-if" if="[[isError]]">
         <arc-request-error-view message="[[response.error.message]]"></arc-request-error-view>

@@ -17,10 +17,7 @@ Polymer({
     /**
      * Raw tab data.
      */
-    raw: {
-      type: String,
-      readOnly: true
-    },
+    raw: String,
     /**
      * If set, the parsed tab should be visible,
      * and the CodeMirror parser will parce the content of `this.raw`.
@@ -186,7 +183,7 @@ Polymer({
   },
   /** Parse response as string */
   _displayString: function(payload) {
-    this._setRaw(payload);
+    // this._setRaw(payload);
     this._setIsRaw(true);
 
     var ct = arc.app.headers.getContentType(this.headers);
@@ -215,35 +212,37 @@ Polymer({
       this._tabsChanged();
       return;
     }
+
     this._setIsImage(true);
 
     this.selectedTab = 4;
     this._tabsChanged();
     this.$.imageViewer.blob = payload;
 
-    var fr = new FileReader();
-    fr.onloadend = (e) => {
-      this._setRaw(e.target.result);
-      this._setIsRaw(true);
-    };
-    fr.onerror = () => {
-      this._setRaw('Unable to read binnary data as string.');
-      this._setIsRaw(true);
-    };
-    fr.readAsText(payload);
+    this._setIsRaw(true);
+    // var fr = new FileReader();
+    // fr.onloadend = (e) => {
+    //   this._setRaw(e.target.result);
+    //   this._setIsRaw(true);
+    // };
+    // fr.onerror = () => {
+    //   this._setRaw('Unable to read binnary data as string.');
+    //   this._setIsRaw(true);
+    // };
+    // fr.readAsText(payload);
   },
   /** Display parsed JSON */
   _displayJSON: function(payload) {
     // if (!payload) {
     //   return;
     // }
-    if (typeof payload === 'string') {
-      if (payload !== this.raw) {
-        this._setRaw(payload);
-      }
-    } else {
-      this._setRaw(JSON.stringify(payload));
-    }
+    // if (typeof payload === 'string') {
+    //   if (payload !== this.raw) {
+    //     this._setRaw(payload);
+    //   }
+    // } else {
+    //   this._setRaw(JSON.stringify(payload));
+    // }
     this._setIsRaw(true);
     this._setIsJson(true);
 

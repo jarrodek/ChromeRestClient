@@ -27,9 +27,11 @@ the License.
           .raw-content {
             margin: 2px 0px;
             overflow: auto;
-            font-family: monospace;
-            font-size: 13px;
+            /*font-family: monospace;*/
+            /*font-size: 13px;*/
+            @apply(--paper-font-code1);
             -webkit-user-select: text;
+            white-space: pre;
           }
           .raw-content.wrap {
             white-space: pre-wrap;
