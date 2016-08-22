@@ -92,11 +92,22 @@ the License.
       .form-info > div {
         @apply(--layout-vertical);
       }
+      paper-tab > paper-badge {
+        --paper-badge-margin-left: 60px;
+        --paper-badge-margin-bottom: 0px;
+        --paper-badge-background: var(--paper-blue-700);
+      }
+      paper-badge.empty {
+        opacity: 0;
+      }
     </style>
     <paper-tabs selected="{{tabSelected}}" id="tabs">
       <paper-tab>Raw payload</paper-tab>
       <paper-tab>Data form</paper-tab>
-      <paper-tab>Files ([[filesCount]])</paper-tab>
+      <paper-tab>
+        <span>Files</span>
+        <paper-badge class$="[[_computeFileBageClass(filesCount)]]" label="[[filesCount]]"></paper-badge>
+      </paper-tab>
     </paper-tabs>
     <iron-pages selected="{{tabSelected}}">
       <section>
