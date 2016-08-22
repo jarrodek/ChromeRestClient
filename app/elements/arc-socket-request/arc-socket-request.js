@@ -98,49 +98,53 @@ Polymer({
         init.headers = obj;
       }
 
-      if (this.request.files && this.request.files.length > 0) {
-        // create FormData from the form
-        let fd = new FormData();
-        let rejected = false;
-        this.request.files.forEach((field) => {
+      if (init.method !== 'GET' && init.method !== 'HEAD') {
+
+        if (this.request.files && this.request.files.length > 0) {
+          // create FormData from the form
+          let fd = new FormData();
+          let rejected = false;
+          this.request.files.forEach((field) => {
+            if (rejected) {
+              return;
+            }
+            field.files.forEach((file) => {
+              if (rejected) {
+                return;
+              }
+              try {
+                fd.append(field.name, file);
+              } catch (e) {
+                console.error(e.message);
+                rejected = true;
+                reject(e);
+                return;
+              }
+            });
+          });
           if (rejected) {
             return;
           }
-          field.files.forEach((file) => {
+          let params = PayloadParser.stringToArray(this.request.payload);
+          params.forEach((pair) => {
             if (rejected) {
               return;
             }
             try {
-              fd.append(field.name, file);
+              fd.append(pair.name, pair.value);
             } catch (e) {
               console.error(e.message);
               rejected = true;
-              reject(e);
+              reject(new Error('Request parameters are invalid.'));
               return;
             }
           });
-        });
-        if (rejected) {
-          return;
+          init.body = fd;
+        } else if (this.request.payload) {
+          init.body = this.request.payload;
         }
-        let params = PayloadParser.stringToArray(this.request.payload);
-        params.forEach((pair) => {
-          if (rejected) {
-            return;
-          }
-          try {
-            fd.append(pair.name, pair.value);
-          } catch (e) {
-            console.error(e.message);
-            rejected = true;
-            reject(new Error('Request parameters are invalid.'));
-            return;
-          }
-        });
-        init.body = fd;
-      } else if (this.request.payload) {
-        init.body = this.request.payload;
       }
+
       init.debug = true;
       if (this.request.auth) {
         init.auth = this.request.auth;
