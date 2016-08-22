@@ -33,7 +33,7 @@ Polymer({
      */
     isRaw: {
       type: Boolean,
-      value: false,
+      value: true,
       readOnly: true,
       observer: '_tabsChanged'
     },
@@ -149,7 +149,7 @@ Polymer({
   },
 
   _resetTabs: function() {
-    this._setIsRaw(false);
+    // this._setIsRaw(false);
     this._setIsParsed(false);
     this._setIsJson(false);
     this._setIsXml(false);
@@ -184,7 +184,7 @@ Polymer({
   /** Parse response as string */
   _displayString: function(payload) {
     // this._setRaw(payload);
-    this._setIsRaw(true);
+    // this._setIsRaw(true);
 
     var ct = arc.app.headers.getContentType(this.headers);
     if (ct) {
@@ -219,7 +219,7 @@ Polymer({
     this._tabsChanged();
     this.$.imageViewer.blob = payload;
 
-    this._setIsRaw(true);
+    // this._setIsRaw(true);
     // var fr = new FileReader();
     // fr.onloadend = (e) => {
     //   this._setRaw(e.target.result);
@@ -243,7 +243,7 @@ Polymer({
     // } else {
     //   this._setRaw(JSON.stringify(payload));
     // }
-    this._setIsRaw(true);
+    // this._setIsRaw(true);
     this._setIsJson(true);
 
     this.selectedTab = 2;
