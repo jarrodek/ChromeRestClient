@@ -83,10 +83,10 @@
     </paper-drawer-panel>
     <!-- <user-provider id="userProvider" authorized="{{appAuthorized}}" profile-image="{{profileUrl}}"></user-provider> -->
     <arc-drive-controller restore-on-file id="driveController"></arc-drive-controller>
-    <iron-a11y-keys target="{{document.body}}" keys="ctrl+s meta+s" on-keys-pressed="onSave"></iron-a11y-keys>
-    <iron-a11y-keys target="{{document.body}}" keys="ctrl+o meta+o" on-keys-pressed="onOpen"></iron-a11y-keys>
-    <iron-a11y-keys target="{{document.body}}" keys="ctrl+f meta+f" on-keys-pressed="onSearch"></iron-a11y-keys>
-    <iron-a11y-keys target="{{document.body}}" keys="ctrl+n meta+n" on-keys-pressed="onNewWindow"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('s')]]" on-keys-pressed="onSave"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('o')]]" on-keys-pressed="onOpen"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('f')]]" on-keys-pressed="onSearch"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('n')]]" on-keys-pressed="onNewWindow"></iron-a11y-keys>
     <onboarding-tutorial id="onboarding" auto>
       <onboarding-page>
         <div class="welcome-message">

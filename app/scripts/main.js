@@ -360,4 +360,12 @@
     });
   };
 
+  app._computeA11yButtons = (key) => {
+    var isMac = navigator.platform.indexOf('Mac') !== -1;
+    if (isMac) {
+      return 'meta+' + key;
+    }
+    return 'ctrl+' + key;
+  };
+
 })(document, window);
