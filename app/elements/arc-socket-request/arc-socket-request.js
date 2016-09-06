@@ -176,7 +176,8 @@ Polymer({
     result.stats = response.stats;
     result.ok = response.ok;
     result.auth = response.auth;
-    result.rawBody = arc.app.utils.arrayBufferToString(this.connection.response.rawResponse);
+    var decoder = new TextDecoder();
+    result.rawBody = decoder.decode(this.connection.response.rawResponse);
 
     var ct = (response.headers && response.headers.get) ?
       response.headers.get('content-type') : null;
@@ -202,7 +203,7 @@ Polymer({
         .catch((e) => {
           console.warn('Something is wrong with the response.', e.message);
           try {
-            result.body = arc.app.utils.arrayBufferToString(this.connection.response.rawResponse);
+            result.body = decoder.decode(this.connection.response.rawResponse);
           } catch (e) {
             result.body = '';
           }
@@ -210,7 +211,7 @@ Polymer({
         });
       } catch (e) {
         try {
-          result.body = arc.app.utils.arrayBufferToString(this.connection.response.rawResponse);
+          result.body = decoder.decode(this.connection.response.rawResponse);
         } catch (e) {
           result.body = '';
         }
@@ -226,7 +227,7 @@ Polymer({
         .catch((e) => {
           console.warn('Something is wrong with the response.', e.message);
           try {
-            result.body = arc.app.utils.arrayBufferToString(this.connection.response.rawResponse);
+            result.body = decoder.decode(this.connection.response.rawResponse);
           } catch (e) {
             result.body = '';
           }
@@ -234,7 +235,7 @@ Polymer({
         });
       } catch (e) {
         try {
-          result.body = arc.app.utils.arrayBufferToString(this.connection.response.rawResponse);
+          result.body = decoder.decode(this.connection.response.rawResponse);
         } catch (e) {
           result.body = '';
         }
