@@ -84,6 +84,9 @@ the License.
       paper-material:last-child {
         margin-bottom: 0;
       }
+      .link {
+        cursor: pointer;
+      }
       </style>
       <neon-animated-pages selected="{{page}}"
        entry-animation="slide-from-right-animation"
@@ -154,6 +157,11 @@ the License.
                 </paper-item-body>
                 <chrome-signin></chrome-signin>
               </paper-item>
+              <paper-item class="link" on-tap="openPrivacyPolicy">
+                <paper-item-body>
+                  <div>Privacy policy</div>
+                </paper-item-body>
+              </paper-item>
             </paper-material>
             <paper-material elevation="1">
               <h2 class="subhead">Other</h2>
@@ -186,6 +194,7 @@ the License.
                   <div>Show tutorial</div>
                 </paper-item-body>
               </paper-item>
+
             </paper-material>
           </section>
         </neon-animatable>
