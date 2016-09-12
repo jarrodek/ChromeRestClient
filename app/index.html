@@ -47,6 +47,7 @@
               </template>
             </div>
           </div>
+          <paper-toggle-button id="xhrToggle" feature="xhrtoggle" on-change="_onFeatureXhrToggle" class="toolbar-hide xhr-switch" title="Use XHR instead of socket">Use XHR</paper-toggle-button>
           <paper-icon-button feature="open" on-tap="_onFeatureOpen" class="toolbar-hide" icon="folder-open" title="Open"></paper-icon-button>
           <paper-icon-button feature="save" on-tap="_onFeatureSave" class="toolbar-hide" icon="save" title="Save"></paper-icon-button>
           <paper-icon-button feature="export" on-tap="_onFeatureExport" class="toolbar-hide" icon="communication:import-export" title="Export list"></paper-icon-button>
@@ -82,10 +83,11 @@
     </paper-drawer-panel>
     <!-- <user-provider id="userProvider" authorized="{{appAuthorized}}" profile-image="{{profileUrl}}"></user-provider> -->
     <arc-drive-controller restore-on-file id="driveController"></arc-drive-controller>
-    <iron-a11y-keys target="{{document.body}}" keys="ctrl+s meta+s" on-keys-pressed="onSave"></iron-a11y-keys>
-    <iron-a11y-keys target="{{document.body}}" keys="ctrl+o meta+o" on-keys-pressed="onOpen"></iron-a11y-keys>
-    <iron-a11y-keys target="{{document.body}}" keys="ctrl+f meta+f" on-keys-pressed="onSearch"></iron-a11y-keys>
-    <iron-a11y-keys target="{{document.body}}" keys="ctrl+n meta+n" on-keys-pressed="onNewWindow"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('s')]]" on-keys-pressed="onSave"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('o')]]" on-keys-pressed="onOpen"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('f')]]" on-keys-pressed="onSearch"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('n')]]" on-keys-pressed="onNewWindow"></iron-a11y-keys>
+
     <onboarding-tutorial id="onboarding" auto>
       <onboarding-page>
         <div class="welcome-message">
@@ -177,6 +179,7 @@
         <div class="onboarding-image-page">
           <div class="image">
             <iron-icon icon="arc:shield"></iron-icon>
+            <paper-button on-tap="followLink" data-href="https://docs.google.com/document/d/1BzrKQ0NxFXuDIe2zMA-0SZBNU0P46MHr4GftZmoLUQU/edit" raised>Privacy policy</paper-button>
           </div>
           <div class="description">
             <p>
@@ -228,6 +231,17 @@
     </paper-toast>
     <arc-log-viewer></arc-log-viewer>
     <search-bar id="content-search-bar" on-iron-overlay-opened="textSearchBarOpened"></search-bar>
+    <element-tutorial id="xhrProxyTutorial">
+      <div tutorial>
+        <p>You can proxy the request through Chrome instead of the app.</p>
+        <p>Enable XHR proxy if you have issues with:</p>
+        <ul>
+          <li>expired certificates</li>
+          <li><b>proxy and vpn</b> connections</li>
+        </ul>
+        <paper-button raised class="tutorial-button" on-tap="_closeXhrTutorial">Got it</paper-button>
+      </div>
+    </element-tutorial>
   </template>
   <script src="bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
   <script src="bower_components/dexie-js/dist/dexie.min.js"></script>
@@ -243,8 +257,6 @@
   <script src="scripts/libs/app.idb.js"></script>
   <script src="scripts/libs/app.idb.schema.js"></script>
   <script src="scripts/libs/app.js"></script>
-  <script src="scripts/libs/app.server.js"></script>
-  <script src="scripts/libs/app.request.js"></script>
   <script src="scripts/libs/app.settings.js"></script>
   <script src="scripts/libs/app.drive.js"></script>
   <script src="scripts/libs/app.importer.js"></script>

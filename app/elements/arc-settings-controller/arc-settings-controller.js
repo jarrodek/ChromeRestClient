@@ -92,12 +92,12 @@ Polymer({
         break;
       case 1:
         this._setPageTitle('Timeout settings');
-        this.push('toolbarFeatures','back');
+        this.push('toolbarFeatures', 'back');
         this.requestFeatures();
         break;
       case 2:
         this._setPageTitle('Magic variables settings');
-        this.push('toolbarFeatures','back');
+        this.push('toolbarFeatures', 'back');
         this.requestFeatures();
         break;
     }
@@ -323,6 +323,11 @@ Polymer({
       return;
     }
     this.page = page;
+  },
+
+  openPrivacyPolicy: function() {
+    window
+    .open('https://docs.google.com/document/d/1BzrKQ0NxFXuDIe2zMA-0SZBNU0P46MHr4GftZmoLUQU/edit');
   }
 });
 })();

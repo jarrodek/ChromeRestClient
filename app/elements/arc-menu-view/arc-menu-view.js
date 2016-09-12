@@ -129,6 +129,12 @@
       window.open('https://github.com/jarrodek/ChromeRestClient/issues/new?body=' + message);
     },
 
+    openNewWindow: function() {
+      chrome.runtime.getBackgroundPage(function(bg) {
+        bg.arc.bg.openWindow();
+      });
+    },
+
     _actionsMenuOpened: function() {
       this.$.actionsMenu.selected = -1;
     },

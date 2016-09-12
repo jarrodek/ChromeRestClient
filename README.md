@@ -1,24 +1,32 @@
 Advanced Rest Client Application - the Chrome App
 =================
 
-This branch is to update the app to the Chrome packaged apps.
-It's in active development **and it's not working yet**.
+Welcome to the ARC's project repository. Please, read [CONTRIBUTING.md](CONTRIBUTING.md) and [ROADMAP.md](ROADMAP.md) files for more information.
 
-## Developer preview
+[![Stories in Ready](https://badge.waffle.io/jarrodek/ChromeRestClient.svg?label=ready&title=Ready)](http://waffle.io/jarrodek/ChromeRestClient)
+
+## Developent
+You are welcome to contribute to the project. To start developing use following instructions.
+
+
 I assume you have [Node.js][1] already installed on your machine.
 
-Start with getting the code
+Start with forking the repository and getting the code
+```shell
+git clone https://github.com/[your username]/ChromeRestClient.git
+```
+
+If you're not planing to contribute (you will not send a pull request) you can clone this repository:
 ```shell
 git clone https://github.com/jarrodek/ChromeRestClient.git
 ```
 
-When ready go to the directory and switch to a `chrome-app` branch
+When ready go to the directory:
 ```shell
 cd ChromeRestClient
-git checkout chrome-app
 ```
 
-Next install dependencies:
+Then install dependencies:
 ```shell
 npm install && bower install
 ```
@@ -27,14 +35,16 @@ Take a coffee break. It will take a while... You can also install [gifi][gifi], 
 ![](https://raw.githubusercontent.com/vdemedes/gifi/master/media/demo.gif)
 
 
-
-
-Well, the app is ready to develop / preview. You can either load the app from chrome://extensions/ page (check "Developer mode" check box) or run command:
+Well, at this point the app is ready to develop. You can either load the app from chrome://extensions/ page (check "Developer mode" check box) or run command:
 ```shell
 npm run arc
 ```
 
 Thanks for testing and don't forget to file an issue report if you find a bug.
+You are also welcome to send a pull request with bug fixes. Please, read [CONTRIBUTING.md](CONTRIBUTING.md) file first.
+
+## App design docs for developers
+Please, read wiki in this repository.
 
 ## CSP troubles
 If you run into trouble caused by CSP environment you can run following command:

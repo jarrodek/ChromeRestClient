@@ -1,4 +1,4 @@
-(function () {
+(function() {
 'use strict';
 
 /* global URLParser */
@@ -87,6 +87,7 @@ class PayloadParser {
     });
     return result;
   }
+
   /**
    * Parse input string to array of x-www-form-urlencoded form parameters.
    *
@@ -103,19 +104,63 @@ class PayloadParser {
     var htmlInputCheck = /^([^\\=]{1,})=(.*)$/m;
     if (!htmlInputCheck.test(input)) {
       //replace chome inspector data.
-      input = input.replace(/^([^\\:]{1,}):(.*)$/gm, '$1=$2&').replace(/\n/gm,'');
+      input = input.replace(/^([^\\:]{1,}):(.*)$/gm, '$1=$2&').replace(/\n/gm, '');
       input = input.substr(0, input.length - 1);
     }
-    var parts = input.split('&');
-    parts.forEach((line) => {
-      var obj = PayloadParser._paramLineToFormObject(line);
-      if (!obj) {
-        return;
-      }
-      result.push(obj);
-    });
+
+    result = PayloadParser._createParamsArray(input);
     return result;
   }
+  /**
+   * Converts a string to an array with objects containing name and value keys
+   * @param {String} input An input string
+   * @return {Array.<Object>} An array of params with `name` and `value` keys.
+   */
+  static _createParamsArray(input) {
+    var result = [];
+    if (!input) {
+      return result;
+    }
+    var state = 0; // 0 - reading name, 1 - reading value
+    var i = 0;
+    var _tmpName = '';
+    var _tmpValue = '';
+    while (true) {
+      let ch = input[i++];
+      if (ch === undefined) {
+        if (_tmpValue || _tmpName) {
+          result[result.length] = {
+            name: _tmpName,
+            value: _tmpValue
+          };
+        }
+        break;
+      }
+      if (ch === '=') {
+        if (state !== 1) {
+          state = 1;
+          continue;
+        }
+      }
+      if (ch === '&') {
+        state = 0;
+        result[result.length] = {
+          name: _tmpName,
+          value: _tmpValue
+        };
+        _tmpName = '';
+        _tmpValue = '';
+        continue;
+      }
+      if (state === 0) {
+        _tmpName += ch;
+      } else if (state === 1) {
+        _tmpValue += ch;
+      }
+    }
+    return result;
+  }
+
   /**
    * Encode payload to x-www-form-urlencoded string.
    *
@@ -182,6 +227,7 @@ class PayloadParser {
    *
    * @param {String} input A input line of x-www-form-urlencoded text tike `param=value`
    * @return {Object} A parsed object with `name` and `value` keys.
+   * @deprecated It's old parser. Use `_createParamsArray` instead.
    */
   static _paramLineToFormObject(input) {
     if (!input) {

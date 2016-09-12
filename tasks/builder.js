@@ -15,7 +15,7 @@ const runSequence = require('run-sequence');
 const merge = require('merge-stream');
 // const concat = require('concatenate-files');
 const zipFolder = require('zip-folder');
-const uploader = require('./cws-uploader.js');
+// const uploader = require('./cws-uploader.js');
 
 var Builder = {
   commitMessage: '',
@@ -23,6 +23,13 @@ var Builder = {
   target: 'canary',
   targetDir: 'canary',
   version: '0.0.0.0',
+
+  get uploader() {
+    if (!Builder._uploader) {
+      Builder._uploader = require('./cws-uploader.js');
+    }
+    return Builder._uploader;
+  },
   /**
    * Build a canary release.
    * 1. Bump version
@@ -130,15 +137,15 @@ var Builder = {
    * Upload the package to CWS.
    */
   _uploadPackage: (buildPath) => {
-    return uploader.auth()
-    .then(() => uploader.uploadItem(buildPath, Builder.targetDir));
+    return Builder.uploader.auth()
+    .then(() => Builder.uploader.uploadItem(buildPath, Builder.targetDir));
   },
   /**
    * Publish package after it has been uploaded. If it is done in the same run it does not require
    * another auth.
    */
   _publishPackage: () => {
-    return uploader.publishTarget(Builder.targetDir);
+    return Builder.uploader.publishTarget(Builder.targetDir);
   },
 
   get buildTarget() {
@@ -323,7 +330,7 @@ var Builder = {
           data.name += ' - beta';
           data.short_name += ' - beta';
         }
-        let cwsConfig = uploader.config;
+        let cwsConfig = Builder.uploader.config;
         data.oauth2.client_id = cwsConfig[targetName].clientId;
         //jscs:enable requireCamelCaseOrUpperCaseIdentifiers
         delete data.key;
@@ -351,7 +358,7 @@ var Builder = {
         day: 'numeric'
       };
       var date = new Intl.DateTimeFormat(undefined, options).format(new Date());
-      date = date.replace(/\//g,'-');
+      date = date.replace(/\//g, '-');
       let fileName = `${Builder.target}-${Builder.version}@${date}.zip`;
       let dist = path.join(Builder.distTarget, fileName);
       fsensure.dir.exists(Builder.distTarget, (err) => {
@@ -417,7 +424,7 @@ gulp.task('copy', () => {
 
   var assets = gulp.src([
     'app/assets/*',
-  ]).pipe(gulp.dest(path.join(dest,'assets')));
+  ]).pipe(gulp.dest(path.join(dest, 'assets')));
 
   var scripts = gulp.src([
     'app/scripts/**',
@@ -425,12 +432,12 @@ gulp.task('copy', () => {
     // '!app/scripts/libs/*',
     '!app/scripts/code-mirror',
     '!app/scripts/code-mirror/**'
-  ]).pipe(gulp.dest(path.join(dest,'scripts')));
+  ]).pipe(gulp.dest(path.join(dest, 'scripts')));
 
   var styles = gulp.src([
     'app/styles/*',
     '!app/styles/*.html'
-  ]).pipe(gulp.dest(path.join(dest,'styles')));
+  ]).pipe(gulp.dest(path.join(dest, 'styles')));
 
   // Copy over only the bower_components we need
   // These are things which cannot be vulcanized
@@ -441,7 +448,7 @@ gulp.task('copy', () => {
     '!app/bower_components/codemirror/keymap/**',
     '!app/bower_components/codemirror/*',
     '!app/bower_components/font-roboto-local/fonts/robotomono/**'
-  ]).pipe(gulp.dest(path.join(dest,'bower_components')));
+  ]).pipe(gulp.dest(path.join(dest, 'bower_components')));
 
   // copy webworkers used in bower_components
   var webWorkers = gulp.src([
@@ -464,7 +471,7 @@ gulp.task('copy', () => {
   ];
   var dependencies = gulp.src([
     `app/bower_components/{${bowerDeps.join(',')}}`,
-  ]).pipe(gulp.dest(path.join(dest,'bower_components')));
+  ]).pipe(gulp.dest(path.join(dest, 'bower_components')));
 
   return merge(
       app, bower, webWorkers, assets, scripts, styles,

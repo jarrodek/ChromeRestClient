@@ -22,18 +22,18 @@
     "dexie-js": "dfahlander/Dexie.js#latest",
     "har": "jarrodek/har#latest",
     "chrome-platform-analytics": "GoogleChrome/chrome-platform-analytics#ca1.6.0d",
-    "file-reader": "jarrodek/file-reader#latest",
-    "web-socket": "jarrodek/web-socket#latest",
-    "socket-fetch": "jarrodek/socket-fetch#latest",
-    "chrome-app-filesystem": "jarrodek/chrome-app-filesystem#latest",
-    "chrome-storage": "jarrodek/chrome-storage#latest",
-    "chrome-image": "jarrodek/chrome-image#1.0.0",
-    "code-mirror": "jarrodek/code-mirror#latest",
+    "socket-fetch": "advanced-rest-client/socket-fetch#^1.0.63",
+    "chrome-app-filesystem": "advanced-rest-client/chrome-app-filesystem#master",
+    "chrome-image": "advanced-rest-client/chrome-image#1.0.0",
+    "code-mirror": "advanced-rest-client/code-mirror#master",
     "lodash": "jarrodek/lodash#^4.6.2",
     "uri.js": "medialize/URI.js#^1.17.0",
     "zlib": "imaya/zlib.js#^0.2.0",
-    "paper-autocomplete": "jarrodek/paper-autocomplete#^1.0.1",
-    "cookie-parser": "jarrodek/cookie-parser#^1.0.2"
+    "paper-autocomplete": "advanced-rest-client/paper-autocomplete#^1.0.1",
+    "cookie-parser": "advanced-rest-client/cookie-parser#^1.0.2",
+    "crypto-js": "^3.1.6",
+    "web-socket": "advanced-rest-client/web-socket#^1.0.5",
+    "file-reader": "advanced-rest-client/file-reader#^1.0.3"
   },
   "devDependencies": {
     "web-component-tester": "*"
@@ -43,5 +43,5 @@
   "resolutions": {
     "lodash": "^4.6.2"
   },
-  "version": "7.12.30"
+  "version": "7.35.47"
 }

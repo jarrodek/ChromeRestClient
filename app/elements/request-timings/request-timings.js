@@ -40,9 +40,17 @@ Polymer({
     '_update(timings.*)'
   ],
 
+  detached: function() {
+    this._setFullTime(0);
+    this._setConnect(0);
+    this._setReceive(0);
+    this._setSend(0);
+    this._setWait(0);
+  },
+
   _update: function(record) {
     if (!record.base) {
-      return;
+      record.base = {}; // will be set to 0
     }
     var fullTime = 0;
     var connect = Number(record.base.connect);
@@ -81,7 +89,7 @@ Polymer({
     if (!power || power !== power) {
       power = 4;
     }
-    power = Math.pow(2, power);
+    power = Math.pow(10, power);
     return Math.round(value * power) / power;
   },
 

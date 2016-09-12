@@ -48,20 +48,47 @@ This approach have some implications.
       #basicAuthDialog {
         top: 10px;
       }
+      .cookie-exchange-banner {
+        margin: 0 16px;
+        margin-bottom: 24px;
+      }
+      .cookie-monster {
+        margin-left: 24px;
+      }
+      .cookie-exchange-banner p {
+        @apply(--paper-font-body2);
+      }
+      .inherit {
+        color: inherit !important;
+        background-color: inherit !important;
+      }
     </style>
     <content id="contentNode"></content>
-
+    <div class="cookie-exchange-banner" hidden$="[[!showCookieBanner]]">
+      <h2>
+        Missing cookies?
+        <img src="/assets/cookie-monster.png" width="166" height="112" class="cookie-monster"/>
+      </h2>
+      <p>The app is not able to read cookies set in Chrome browser. If you authenticated yourself in a Chrome tab cookies are not transfered automatically.</p>
+      <p>Install ARC cookie exchange extension and synchronize cookies between the app and Chrome.</p>
+      <a href="https://chrome.google.com/webstore/detail/apcedakaoficjlofohhcmkkljehnmebp" class="inherit" target="_blank">
+        <paper-button raised>Install ARC cookie exchange</paper-button>
+      </a>
+    </div>
     <arc-request-error-view hidden$=[[!isError]] message="[[errorMessage]]"></arc-request-error-view>
     <chrome-storage auto id="latest" type="local" name="latestRequest" value="{{request}}"  value-as="RequestLocalObject" on-read="_latestLoaded"></chrome-storage>
     <arc-socket-request id="socket" on-ready="_responseReady" on-error="_onRequestError"></arc-socket-request>
+    <arc-xhr-request id="xhr" on-ready="_responseReady" on-error="_onRequestError" connected="{{xhrConnected}}"></arc-xhr-request>
     <arc-historyurl-model id="historyurlModel" on-save="_historyUrlSaved" on-error="_historyUrlSaveError"></arc-historyurl-model>
     <arc-request-object-model id="requestModel" on-data-ready="_requestObjectReady"></arc-request-object-model>
     <arc-request-object-model id="requestQueryModel" on-data-ready="_requestObjectRestored"></arc-request-object-model>
     <arc-request-object-model id="projectQueryModel" on-data-ready="_projectEndpointsRestored"></arc-request-object-model>
     <arc-project-object-model id="projects" on-error="_projectSaveError" on-save="_projectSavedHandler"></arc-project-object-model>
     <arc-magic-variables id="magicVariables" scope="[[project.id]]"></arc-magic-variables>
-    <arc-basicauth-model id="basicAuthModel"></arc-basicauth-model>
+    <arc-authdata-model id="authDataModel"></arc-authdata-model>
     <cookie-storage id="cookieJar" url="[[request.url]]" cookie="{{requestCookie}}" response-headers="[[response.headers]]"></cookie-storage>
+    <cookie-exchange external-id="apcedakaoficjlofohhcmkkljehnmebp" id="cookieExchange"></cookie-exchange>
+    <ntlm-dialog id="ntlmAuthDialog" url="[[request.url]]" on-auth-data="_ntlmAuthDataReady"></ntlm-dialog>
     <paper-dialog id="basicAuthDialog"
       entry-animation="slide-from-top-animation"
       exit-animation="slide-up-animation"
@@ -79,6 +106,7 @@ This approach have some implications.
         <paper-button dialog-confirm>Log in</paper-button>
       </div>
     </paper-dialog>
+    <install-proxy-dialog id="proxyDialog"></install-proxy-dialog>
   </template>
   <script src="arc-request-controller.js"></script>
 </dom-module>

@@ -1,0 +1,65 @@
+<dom-module id="request-timings-panel">
+  <template>
+    <style>
+    :host {
+      display: block;
+    }
+    .status-row,
+    .timings-row {
+      @apply(--layout-horizontal);
+      @apply(--paper-font-subhead);
+      @apply(--layout-center);
+      padding: 0 0 0 24px;
+      min-height: 56px;
+    }
+    .status-row {
+      padding-right: 24px;
+    }
+    .sub-title {
+      padding: 0 24px;
+    }
+    .status-label {
+      width: 80px;
+      @apply(--paper-font-subhead);
+    }
+    .text {
+      -webkit-user-select: text;
+      cursor: text;
+    }
+    .redirect-value {
+      margin-top: 12px;
+      @apply(--layout-flex);
+    }
+    </style>
+    <template is="dom-if" if="[[hasRedirects]]">
+      <h3 class="sub-title">Redirects</h3>
+      <template is="dom-repeat" items="[[redirectTimings]]">
+        <div class="timings-row">
+          <div class="status-label text">
+            #<span>{{_computeIndexName(index)}}</span>
+          </div>
+          <div class="redirect-value">
+            <request-timings timings="[[item]]"></request-timings>
+          </div>
+        </div>
+      </template>
+      <template is="dom-if" if="[[hasTimings]]">
+        <h3 class="sub-title">Final request</h3>
+        <div class="timings-row">
+          <div class="status-label text"></div>
+          <div class="redirect-value">
+            <request-timings timings="[[requestTimings]]"></request-timings>
+          </div>
+        </div>
+      </template>
+      <div class="status-row">
+        <div class="flex"></div>
+        <span class="timing-value total text">[[requestTotalTime]] ms</span>
+      </div>
+    </template>
+    <template is="dom-if" if="[[!hasRedirects]]">
+      <request-timings timings="[[requestTimings]]"></request-timings>
+    </template>
+  </template>
+  <script src="request-timings-panel.js"></script>
+</dom-module>

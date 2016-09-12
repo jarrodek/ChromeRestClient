@@ -3,7 +3,8 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const basicAuth = require('basic-auth');
-const app = require('express')();
+const express = require('express');
+const app = express();
 const bodyParser = require('body-parser');
 const multer = require('multer'); // v1.0.5
 const upload = multer(); // for parsing multipart/form-data
@@ -11,6 +12,9 @@ const upload = multer(); // for parsing multipart/form-data
 // var Busboy = require('busboy');
 const cookieParser = require('cookie-parser');
 const busboy = require('connect-busboy');
+const router = express.Router();
+
+app.use(router);
 
 app.use(cookieParser());
 app.use(bodyParser.json()); // for parsing application/json
@@ -149,7 +153,7 @@ class TestServer {
       res.sendStatus(204);
     });
 
-    app.get('/no-response', (req, res) => {
+    app.get('/no-response', () => {
       // res.sendStatus(204);
     });
   }
@@ -215,6 +219,12 @@ class TestServer {
       res.set('Content-Type', 'application/xml');
       res.send(json);
     });
+    app.get('/xml4', (req, res) => {
+      var json = fs.readFileSync('./tasks/test-data/xml4.xml', 'utf8');
+      // res.status(200).send('OK');
+      res.set('Content-Type', 'application/xml');
+      res.send(json);
+    });
   }
 
   uuid() {
@@ -241,6 +251,7 @@ class TestServer {
   }
 
   _setCookie() {
+
     app.get('/store/CatalogActor/getProduct', (req, res) => {
       var cookie = null;
       var regenerate = false;
@@ -262,6 +273,7 @@ class TestServer {
       }
       res.send(message);
     });
+
     //set random cookies
     app.get('/cookies/random', (req, res) => {
       var Chance = require('chance');
@@ -307,6 +319,17 @@ class TestServer {
       }
       res.redirect('/cookies');
     });
+    //delete cookies getting param keys as cookie name and param value as cookie value.
+    app.get('/cookies/delete', (req, res) => {
+      let params = req.query;
+      for (let key in params) {
+        res.cookie(key, params[key], {
+          path: '/',
+          maxAge: -86400000
+        });
+      }
+      res.redirect('/cookies');
+    });
     //list cookies
     app.get('/cookies', function(req, res) {
       let resp = {
@@ -315,6 +338,7 @@ class TestServer {
       res.set('Content-Type', 'application/json');
       res.send(resp);
     });
+
   }
 
   _setPost() {
@@ -405,10 +429,44 @@ class TestServer {
     app.get('/redirect', (req, res) => {
       res.redirect('http://localhost:' + this.post + '/redirect/dest');
     });
+    app.post('/post-redirect', (req, res) => {
+      res.redirect(303, 'http://localhost:' + this.post + '/redirect/dest');
+    });
+    app.get('/get-redirect', (req, res) => {
+      res.redirect(303, 'http://localhost:' + this.post + '/redirect/dest');
+    });
     app.get('/redirect/dest', (req, res) => {
       res.set('Content-Type', 'text/html');
       res.send('<h1>You have been redirected</h1>');
     });
+
+    // Redirect the request with defined status code
+    app.all('/redirect/:status', (req, res) => {
+      let status = parseInt(req.params.status);
+      if (status !== status) {
+        res.set('Content-Type', 'text/html');
+        res.send('<h1>Unknown status to send.</h1>');
+        return;
+      }
+      res.redirect(status, 'http://localhost:' + this.post + '/redirect/dest');
+    });
+    // Redirect request n times.
+    app.all('/redirect/n/:count', (req, res) => {
+      let count = Number(req.params.count);
+      if (count !== count) {
+        count = 0;
+      }
+
+      if (count <= 0) {
+        res.set('Content-Type', 'text/html');
+        res.send('<h1>You have been redirected</h1>');
+      } else {
+        let url = 'http://localhost:' + this.post + '/redirect/n/';
+        url += (count - 1);
+        res.redirect(url);
+      }
+    });
+
   }
 
   _setErrors() {
@@ -437,6 +495,11 @@ class TestServer {
       res.removeHeader('Content-Length');
       res.removeHeader('Transfer-Encoding');
       res.status(status).end();
+    });
+
+    app.all('/null', (req, res) => {
+      res.set('Content-Type', 'application/json');
+      res.send('null');
     });
   }
 }

@@ -5,7 +5,6 @@ const OAuth2Client = google.auth.OAuth2;
 const http = require('http');
 const url = require('url');
 const querystring = require('querystring');
-const secrets = require('../../.credantials/arc.json');
 const openBrowser = require('open');
 
 function AuthClient(options) {
@@ -14,6 +13,17 @@ function AuthClient(options) {
   this._options = options || {
     scopes: []
   };
+  var secrets;
+  try {
+    secrets = require('../../.credantials/arc.json');
+  } catch (e) {
+    console.error('The credantials file not found. ');
+    console.error('You won\t be ablr to publish the app. ');
+    self.execute = function() {
+      return Promise.reject(new Error('../../.credantials/arc.json file not found.'));
+    };
+    return;
+  }
   this.oAuth2Client = new OAuth2Client(
     secrets.web.clientId,
     secrets.web.clientSecret,

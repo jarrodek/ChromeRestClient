@@ -1,15 +1,16 @@
 Polymer({
-  is: 'arc-basicauth-model',
+  is: 'arc-authdata-model',
   behaviors: [
     ArcBehaviors.ArcModelBehavior
   ],
-  query: function(url) {
+  query: function(url, type) {
     return arc.app.db.idb.open()
       .then((db) => {
         url = url.toLowerCase();
         return db.basicAuth
           .where('url')
           .startsWithIgnoreCase(url)
+          .and((item) => item.type === type)
           .toArray()
           .finally(() => {
             db.close();

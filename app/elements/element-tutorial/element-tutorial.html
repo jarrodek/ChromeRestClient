@@ -1,0 +1,58 @@
+<dom-module id="element-tutorial">
+  <template>
+    <style>
+    :host {
+      display: block;
+      top: 0px;
+      bottom: 0px;
+      left: 0px;
+      right: 0px;
+      position: absolute;
+      --element-tutorial-top: 0px;
+      --element-tutorial-left: 0px;
+      --element-tutorial-width: 60px;
+      --element-tutorial-height: 60px;
+      --element-tutorial-radius: 300px;
+      --element-tutorial-background-color: #00A1DF;
+
+      --element-tutorial-content-top: 0;
+      --element-tutorial-content-left: 0;
+      @apply(--layout-horizontal);
+    }
+
+    :host:before {
+      content: '';
+      position: absolute;
+
+      top: var(--element-tutorial-top);
+      left: var(--element-tutorial-left);
+
+      width: var(--element-tutorial-width);
+      height: var(--element-tutorial-height);
+
+      border-radius: 50%;
+      box-shadow: -100px 100px 0px var(--element-tutorial-radius) var(--element-tutorial-background-color);
+
+      transition: box-shadow 1s ease-in-out;
+    }
+
+    :host ::content *[tutorial] {
+      position: fixed;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+      color: rgba(255, 255, 255, 0.87);
+      @apply(--paper-font-title);
+      @apply(--element-tutorial-content);
+
+      top: var(--element-tutorial-content-top);
+      left: var(--element-tutorial-content-left);
+    }
+    :host([opened]) ::content *[tutorial] {
+      opacity: 1;
+    }
+
+    </style>
+    <content id="content" select="[tutorial]"></content>
+  </template>
+</dom-module>
+<script src="element-tutorial.js"></script>

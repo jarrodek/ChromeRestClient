@@ -22,6 +22,7 @@
   app.addEventListener('dom-change', function() {
     arc.app.logger.initConsole();
     app.updateBranding();
+    app.runTutorials();
   });
 
   // event fired when the app is initialized and can remove loader.
@@ -142,6 +143,9 @@
   };
   app._onFeatureBack = (e) => {
     app._featureCalled('back', e);
+  };
+  app._onFeatureXhrToggle = (e) => {
+    app._featureCalled('xhrtoggle', e);
   };
   // called when any component want to change request link.
   document.body.addEventListener('action-link-change', (e) => {
@@ -334,4 +338,34 @@
     var message = '[Window]' + e.detail.message;
     arc.app.analytics.sendException(message, false);
   });
+
+  app.runTutorials = () => {
+    /// XHR toggle tutorial
+    chrome.storage.sync.get({'tutorials': []}, (r) => {
+      if (r.tutorials.indexOf('xhrElementTutorial') !== -1) {
+        return;
+      }
+      app.$.xhrProxyTutorial.target = app.$.xhrToggle;
+    });
+  };
+
+  app._closeXhrTutorial = () => {
+    app.$.xhrProxyTutorial.hide();
+    chrome.storage.sync.get({'tutorials': []}, (r) => {
+      if (r.tutorials.indexOf('xhrElementTutorial') !== -1) {
+        return;
+      }
+      r.tutorials.push('xhrElementTutorial');
+      chrome.storage.sync.set(r);
+    });
+  };
+
+  app._computeA11yButtons = (key) => {
+    var isMac = navigator.platform.indexOf('Mac') !== -1;
+    if (isMac) {
+      return 'meta+' + key;
+    }
+    return 'ctrl+' + key;
+  };
+
 })(document, window);

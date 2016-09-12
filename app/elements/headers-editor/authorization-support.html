@@ -43,8 +43,10 @@
       <h2 class="flex">Basic authorization</h2>
     </div>
     <div class="form">
-      <paper-input label="User name" value="{{login}}"></paper-input>
-      <paper-input label="Password (visible)" value="{{password}}"></paper-input>
+      <paper-input label="User name" value="{{login}}" type="text"></paper-input>
+      <paper-input label="Password" type="password" id="authDialogPassword" value="{{password}}">
+        <paper-icon-button suffix on-tap="authTogglePassword" icon="visibility" alt="Show password icon" title="Show password"></paper-icon-button>
+      </paper-input>
     </div>
     <div class="buttons">
       <paper-button dialog-dismiss on-tap="_cancel">Cancel</paper-button>

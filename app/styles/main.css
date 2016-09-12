@@ -68,3 +68,12 @@ paper-toolbar[back] > *[feature="back"] {
 paper-toolbar[back] > *[paper-drawer-toggle] {
   display: none !important;
 }
+paper-toolbar[xhrtoggle] > *[feature="xhrtoggle"] {
+  display: flex;
+}
+
+
+.tutorial-button {
+  background-color: #fff;
+  color: #00A1DF;
+}

@@ -17,10 +17,7 @@ Polymer({
     /**
      * Raw tab data.
      */
-    raw: {
-      type: String,
-      readOnly: true
-    },
+    raw: String,
     /**
      * If set, the parsed tab should be visible,
      * and the CodeMirror parser will parce the content of `this.raw`.
@@ -36,7 +33,7 @@ Polymer({
      */
     isRaw: {
       type: Boolean,
-      value: false,
+      value: true,
       readOnly: true,
       observer: '_tabsChanged'
     },
@@ -90,7 +87,13 @@ Polymer({
       value: true,
       readOnly: true
     },
-
+    // True if the received data are binary.
+    isBinary: {
+      type: Boolean,
+      value: false,
+      readOnly: true,
+      observer: '_tabsChanged'
+    },
     // An element which should be searched for text.
     _textSearch: {
       type: HTMLElement,
@@ -98,6 +101,7 @@ Polymer({
         return this.$.rawContent;
       }
     },
+
     contentPreview: Boolean
   },
 
@@ -145,19 +149,27 @@ Polymer({
   },
 
   _resetTabs: function() {
-    this._setIsRaw(false);
+    // this._setIsRaw(false);
     this._setIsParsed(false);
     this._setIsJson(false);
     this._setIsXml(false);
     this._setIsImage(false);
     this._setIsEmpty(false);
+    this._setIsBinary(false);
     this._setParsedMode(undefined);
     this.contentPreview = false;
   },
 
   _payloadChanged: function() {
     this._resetTabs();
+    this._setParsedMode(undefined);
     var payload = this.payload;
+    // console.info('Determinig if the payload is empty');
+    // console.dir(payload);
+    if (payload === null || payload === false) {
+      this._displayJSON(payload);
+      return;
+    }
     if (!payload) {
       this._setIsEmpty(true);
       return;
@@ -172,8 +184,8 @@ Polymer({
   },
   /** Parse response as string */
   _displayString: function(payload) {
-    this._setRaw(payload);
-    this._setIsRaw(true);
+    // this._setRaw(payload);
+    // this._setIsRaw(true);
 
     var ct = arc.app.headers.getContentType(this.headers);
     if (ct) {
@@ -193,36 +205,46 @@ Polymer({
   },
   /** Display blob. Most commonly it will be image data */
   _displayBlob: function(payload) {
+    var ct = arc.app.headers.getContentType(this.headers);
+    if (ct && ct.indexOf('image') === -1) {
+      // This is a binary file.
+      this._setIsBinary(true);
+      this.selectedTab = 5;
+      this._tabsChanged();
+      return;
+    }
+
     this._setIsImage(true);
 
     this.selectedTab = 4;
     this._tabsChanged();
     this.$.imageViewer.blob = payload;
 
-    var fr = new FileReader();
-    fr.onloadend = (e) => {
-      this._setRaw(e.target.result);
-      this._setIsRaw(true);
-    };
-    fr.onerror = () => {
-      this._setRaw('Unable to read binnary data as string.');
-      this._setIsRaw(true);
-    };
-    fr.readAsText(payload);
+    // this._setIsRaw(true);
+    // var fr = new FileReader();
+    // fr.onloadend = (e) => {
+    //   this._setRaw(e.target.result);
+    //   this._setIsRaw(true);
+    // };
+    // fr.onerror = () => {
+    //   this._setRaw('Unable to read binnary data as string.');
+    //   this._setIsRaw(true);
+    // };
+    // fr.readAsText(payload);
   },
   /** Display parsed JSON */
   _displayJSON: function(payload) {
-    if (!payload) {
-      return;
-    }
-    if (typeof payload === 'string') {
-      if (payload !== this.raw) {
-        this._setRaw(payload);
-      }
-    } else {
-      this._setRaw(JSON.stringify(payload));
-    }
-    this._setIsRaw(true);
+    // if (!payload) {
+    //   return;
+    // }
+    // if (typeof payload === 'string') {
+    //   if (payload !== this.raw) {
+    //     this._setRaw(payload);
+    //   }
+    // } else {
+    //   this._setRaw(JSON.stringify(payload));
+    // }
+    // this._setIsRaw(true);
     this._setIsJson(true);
 
     this.selectedTab = 2;
@@ -242,9 +264,17 @@ Polymer({
   /**
    * Save to clipboard.
    */
-  _clipboardCopy: function() {
+  _clipboardCopy: function(e) {
+    e = Polymer.dom(e);
+    var source = e.localTarget.dataset.source;
+    var data = '';
+    if (source === 'json') {
+      data = JSON.stringify(this.$.jsonViewer.json, null, 2);
+    } else {
+      data = this.raw;
+    }
     this.fire('clipboard-write', {
-      data: this.raw
+      data: data
     });
     arc.app.analytics.sendEvent('Response payload', 'Content action', 'Copy to clipboard');
   },
@@ -333,6 +363,7 @@ Polymer({
   },
 
   _rawChanged: function(raw) {
+    this._setParsedMode(undefined);
     this.$.rawContent.innerHTML = PayloadParser.htmlEscape(raw);
   },
   // Handler for RAW preview click
@@ -358,21 +389,21 @@ Polymer({
     this.$.webView.contentWindow.postMessage({
       'rawResponse': this.raw
     }, '*');
-    this.$.webView.removeAttribute('hidden');
-    this.$.rawContent.setAttribute('hidden', true);
-    this.$.prism.setAttribute('hidden', true);
+    // this.$.webView.removeAttribute('hidden');
+    // this.$.rawContent.setAttribute('hidden', true);
+    // this.$.prism.setAttribute('hidden', true);
   },
   // Closes response preview
   _closeResponsePreview: function() {
     if (!this.isAttached) {
       return;
     }
-    this.$.webView.setAttribute('hidden', true);
+    // this.$.webView.setAttribute('hidden', true);
     this.$.webView.contentWindow.postMessage({
       'cleanUp': true
     }, '*');
-    this.$.rawContent.removeAttribute('hidden');
-    this.$.prism.removeAttribute('hidden');
+    // this.$.rawContent.removeAttribute('hidden');
+    // this.$.prism.removeAttribute('hidden');
   },
   // a message received from the external page using window.postMessage.
   _onExternalMessage: function(e) {

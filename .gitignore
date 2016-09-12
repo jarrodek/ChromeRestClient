@@ -1,6 +1,7 @@
 .project
 .vscode
 .imdone
+.DS_Store
 node_modules
 bower_components
 build

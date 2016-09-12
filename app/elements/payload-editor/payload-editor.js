@@ -280,6 +280,10 @@ Polymer({
     if (this.tabSelected === 1) {
       this.setFormValues();
     }
+  },
+
+  _computeFileBageClass: function(cnt) {
+    return cnt === 0 ? 'empty' : '';
   }
 });
 })();

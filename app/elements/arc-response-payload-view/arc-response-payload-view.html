@@ -27,9 +27,11 @@ the License.
           .raw-content {
             margin: 2px 0px;
             overflow: auto;
-            font-family: monospace;
-            font-size: 13px;
+            /*font-family: monospace;*/
+            /*font-size: 13px;*/
+            @apply(--paper-font-code1);
             -webkit-user-select: text;
+            white-space: pre;
           }
           .raw-content.wrap {
             white-space: pre-wrap;
@@ -55,6 +57,20 @@ the License.
             background-color: #fff;
             border: 0;
           }
+          .binary-info {
+            @apply(--layout-horizontal);
+            @apply(--layout-center-center);
+            margin: 24px 0;
+          }
+          .binary-desc {
+            @apply(--paper-font-subhead);
+            margin-left: 24px;
+          }
+          .binary-icon {
+            width: 128px;
+            height: 128px;
+            color: rgba(0, 0, 0, 0.56);
+          }
         </style>
         <div class="empty-info" hidden$="[[!isEmpty]]">
           <arc-error-message icon="arc:sentiment-neutral">
@@ -67,20 +83,21 @@ the License.
           <paper-tab hidden$="[[!isJson]]">JSON</paper-tab>
           <paper-tab hidden$="[[!isXml]]">XML</paper-tab>
           <paper-tab hidden$="[[!isImage]]">Image</paper-tab>
+          <paper-tab hidden$="[[!isBinary]]">Binary</paper-tab>
         </paper-tabs>
         <iron-pages selected="{{selectedTab}}">
           <section hidden$="[[!isRaw]]">
             <div class="actions-panel">
-              <paper-icon-button title="Copy content to clipboard" icon="content-copy" on-tap="_clipboardCopy"></paper-icon-button>
+              <paper-icon-button title="Copy content to clipboard" icon="content-copy" data-source="raw" on-tap="_clipboardCopy"></paper-icon-button>
               <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
               <paper-icon-button title="Preview response" icon="visibility" on-tap="_togglePreviewResponse"></paper-icon-button>
               <paper-icon-button title="Wrap or unwrap text" icon="editor:wrap-text" toggles on-tap="_toggleTextWrap"></paper-icon-button>
             </div>
-            <div id="rawContent" class="raw-content"></div>
+            <div id="rawContent" class="raw-content" hidden$="[[contentPreview]]"></div>
           </section>
           <section hidden$="[[!isParsed]]">
             <div class="actions-panel">
-              <paper-icon-button title="Copy content to clipboard" icon="content-copy" on-tap="_clipboardCopy"></paper-icon-button>
+              <paper-icon-button title="Copy content to clipboard" icon="content-copy" data-source="parsed" on-tap="_clipboardCopy"></paper-icon-button>
               <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
               <paper-icon-button title="Preview response" icon="visibility" on-tap="_togglePreviewResponse"></paper-icon-button>
               <paper-menu-button horizontal-align="right">
@@ -91,32 +108,45 @@ the License.
                 </paper-menu>
               </paper-menu-button>
             </div>
-            <prism-highlight id="prism" code="[[raw]]" lang="[[parsedMode]]"></prism-highlight>
+            <prism-highlight id="prism" code="[[raw]]" lang="[[parsedMode]]" hidden$="[[contentPreview]]"></prism-highlight>
           </section>
           <section hidden$="[[!isJson]]">
             <div class="actions-panel">
-              <paper-icon-button title="Copy content to clipboard" icon="content-copy" on-tap="_clipboardCopy"></paper-icon-button>
+              <paper-icon-button title="Copy content to clipboard" icon="content-copy" data-source="json" on-tap="_clipboardCopy"></paper-icon-button>
               <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
             </div>
             <json-viewer id="jsonViewer"></json-viewer>
           </section>
           <section hidden$="[[!isXml]]">
             <div class="actions-panel">
-              <paper-icon-button title="Copy content to clipboard" icon="content-copy" on-tap="_clipboardCopy"></paper-icon-button>
+              <paper-icon-button title="Copy content to clipboard" icon="content-copy" data-source="xml" on-tap="_clipboardCopy"></paper-icon-button>
               <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
+              <paper-icon-button title="Preview response" icon="visibility" on-tap="_togglePreviewResponse"></paper-icon-button>
             </div>
-            <xml-viewer id="xmlViewer"></xml-viewer>
+            <xml-viewer id="xmlViewer" hidden$="[[contentPreview]]"></xml-viewer>
           </section>
           <section hidden$="[[!isImage]]">
             <div class="actions-panel">
-              <paper-icon-button title="Copy content to clipboard" icon="content-copy" on-tap="_clipboardCopy"></paper-icon-button>
+              <paper-icon-button title="Copy content to clipboard" icon="content-copy" data-source="image" on-tap="_clipboardCopy"></paper-icon-button>
               <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
             </div>
             <chrome-image id="imageViewer"></chrome-image>
           </section>
+          <section hidden$="[[!isBinary]]">
+            <div class="binary-info">
+              <div>
+                <iron-icon class="binary-icon" icon="arc:cloud-download"></iron-icon>
+              </div>
+              <div class="binary-desc">
+                <p>Received data is a binary file.</p>
+                <p>You can save it to your drive to preview its content</p>
+                <paper-button on-tap="_saveFile" raised>save file</paper-button>
+              </div>
+            </div>
+          </section>
         </iron-pages>
         <!-- <webview id="webView" url="html-preview.html"></webview> -->
-        <iframe id="webView" src="/html-preview.html" hidden></iframe>
+        <iframe id="webView" src="/html-preview.html" hidden$="[[!contentPreview]]"></iframe>
         <iron-signals on-iron-signal-search-bar-opened-changed="_searchBarOpenedChanged"></iron-signals>
         <iron-signals on-iron-signal-search-input-changed="_searchInputChanged"></iron-signals>
         <iron-signals on-iron-signal-search-position-changed="_searchPositionChanged"></iron-signals>

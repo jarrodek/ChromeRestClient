@@ -31,7 +31,17 @@
         height: calc(100% - 60px);
       }
       .pages {
-        @apply(--layout-flex);
+        /*@apply(--layout-flex);*/
+      }
+
+      @media (max-width: 600px) {
+        :host .actions {
+          @apply(--layout-vertical);
+          @apply(--layout-center);
+        }
+        :host neon-animated-pages {
+          height: calc(100% - 108px);
+        }
       }
     </style>
     <neon-animated-pages id="pages" selected="{{selectedPage}}" entry-animation="slide-from-right-animation" exit-animation="slide-left-animation">

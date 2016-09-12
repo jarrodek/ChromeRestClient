@@ -81,14 +81,15 @@
           <paper-icon-button icon="settings" data-route="settings" data-place$="{{baseUrl}}settings" title="Settings"></paper-icon-button>
           <paper-icon-button icon="info" data-route="about" data-place$="{{baseUrl}}about" title="About app"></paper-icon-button>
           <paper-icon-button icon="bug-report" title="File a bug report" on-tap="newIssueReport"></paper-icon-button>
+          <paper-icon-button icon="open-in-new" title="Open new window" on-tap="openNewWindow"></paper-icon-button>
         </div>
         <paper-menu-button vertical-align="bottom" horizontal-align="left">
           <paper-icon-button icon="more-vert" class="dropdown-trigger" on-tap="_actionsMenuOpened"></paper-icon-button>
           <paper-menu class="dropdown-content" id="actionsMenu" on-iron-select="_contextMenuAction">
-            <paper-icon-item data-action="new-app-window">
+            <!-- <paper-icon-item data-action="new-app-window">
               <iron-icon icon="open-in-new" item-icon title="Open new window"></iron-icon>
               Open new window
-            </paper-icon-item>
+            </paper-icon-item> -->
             <paper-icon-item data-action="rate-review">
               <iron-icon icon="arc:rate-review" item-icon title="Rate &amp; review the app"></iron-icon>
               Rate and review

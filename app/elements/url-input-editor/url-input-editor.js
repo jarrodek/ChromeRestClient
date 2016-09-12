@@ -1,5 +1,6 @@
 (function() {
 'use strict';
+var arc = window.arc || {};
 
 Polymer({
   is: 'url-input-editor',
@@ -59,8 +60,12 @@ Polymer({
     suggesionsOpened: Boolean
   },
   observers: [
-    '_urlChanged(url)'
+    '_urlChanged(url)',
+    '_detailedChanged(detailed)'
   ],
+  listeners: {
+    'blur': '_elementBlur'
+  },
   /**
    * Called when the URL value change.
    *
@@ -79,15 +84,23 @@ Polymer({
    */
   toggle: function() {
     this.detailed = !this.detailed;
-    var stateName = this.detailed ? 'Details form' : 'Single line';
-    if (this.detailed) {
+  },
+
+  _detailedChanged: function(detailed) {
+    var stateName;
+    if (detailed) {
       this.async(() => {
         this.updateForm();
       }, 0);
+      stateName = 'Details form';
     } else {
       this.async(() => {
         this.updateUrl();
       }, 0);
+      stateName = 'Single line';
+    }
+    if (!arc || !arc.app || !arc.app.analytics) {
+      return;
     }
     arc.app.analytics.sendEvent('Request view', 'URL widget toggle', stateName);
   },
@@ -209,6 +222,9 @@ Polymer({
         break;
       default:
         console.warn('Unknown action: %s', action);
+    }
+    if (!arc || !arc.app || !arc.app.analytics) {
+      return;
     }
     if (gaLabel) {
       arc.app.analytics.sendEvent('Request view', 'URL widget context menu action', gaLabel);
@@ -351,6 +367,9 @@ Polymer({
   },
   // Handler called when the context menu has been opened.
   _menuOpened: function() {
+    if (!arc || !arc.app || !arc.app.analytics) {
+      return;
+    }
     arc.app.analytics.sendEvent('Request view', 'URL widget toggle', 'Open menu');
   },
 
@@ -361,11 +380,21 @@ Polymer({
     }
     var fn = (node) => {
       this.async(() => {
-        node.validate();
+        return node.validate && node.validate();
       }, 1);
     };
     nodes.forEach(fn);
-    this.$.masterUrl.validate();
+    var master = this.$.masterUrl;
+    return master.validate && master.validate();
+  },
+
+  _elementBlur: function() {
+    var url = this.url;
+    try {
+      new URL(url);
+    } catch (e) {
+      this.$.invalidUrlToast.open();
+    }
   }
 });
 })();

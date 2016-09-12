@@ -111,6 +111,7 @@ Polymer({
       if (state) {
         return;
       }
+      this.fire('tutorial-open');
       this.open();
     });
   },
@@ -146,6 +147,7 @@ Polymer({
     }
     this._saveTutorialPassed();
     this.close();
+    this.fire('tutorial-close');
   },
 
   skip: function() {
