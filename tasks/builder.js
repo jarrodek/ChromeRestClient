@@ -130,8 +130,6 @@ var Builder = {
   },
 
   _buildPackage: function() {
-    console.log(this.uploader.config);
-    process.exit(1);
     return Builder._copyApp()
     .then(() => Builder._createPackage());
   },
@@ -310,6 +308,8 @@ var Builder = {
   },
   //combine all manifest dependecies into one file
   _processManifest: () => {
+    console.log(this.uploader.config);
+    process.exit(1);
     return new Promise((resolve, reject) => {
       let dest = Builder.buildTarget;
       let manifestFile = path.join(dest, 'manifest.json');
