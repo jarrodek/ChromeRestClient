@@ -330,6 +330,7 @@ var Builder = {
           data.name += ' - beta';
           data.short_name += ' - beta';
         }
+        console.log(this);
         let cwsConfig = this.uploader.config;
         data.oauth2.client_id = cwsConfig[targetName].clientId;
         //jscs:enable requireCamelCaseOrUpperCaseIdentifiers
