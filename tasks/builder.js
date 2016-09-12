@@ -130,6 +130,8 @@ var Builder = {
   },
 
   _buildPackage: function() {
+    console.log(this.uploader.config);
+    process.exit(1);
     return Builder._copyApp()
     .then(() => Builder._createPackage());
   },
@@ -308,7 +310,6 @@ var Builder = {
   },
   //combine all manifest dependecies into one file
   _processManifest: () => {
-    var self = this;
     return new Promise((resolve, reject) => {
       let dest = Builder.buildTarget;
       let manifestFile = path.join(dest, 'manifest.json');
@@ -331,8 +332,7 @@ var Builder = {
           data.name += ' - beta';
           data.short_name += ' - beta';
         }
-        console.log(self);
-        let cwsConfig = self.uploader.config;
+        let cwsConfig = this.uploader.config;
         data.oauth2.client_id = cwsConfig[targetName].clientId;
         //jscs:enable requireCamelCaseOrUpperCaseIdentifiers
         delete data.key;
