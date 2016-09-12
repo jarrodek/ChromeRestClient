@@ -287,6 +287,10 @@ arc.app.headers.getError = function(input) {
     if (!value || !value.trim()) {
       msg[msg.length] = 'Header value should not be empty';
     }
+    if (name && name.toLowerCase() === 'host') {
+      // https://github.com/jarrodek/ChromeRestClient/issues/771
+      msg[msg.length] = '"Host" header should not be used and will be removed from the request.';
+    }
   }
   if (msg.length > 0) {
     return msg.join('\n');

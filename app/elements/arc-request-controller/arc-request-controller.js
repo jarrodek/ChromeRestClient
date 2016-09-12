@@ -457,6 +457,7 @@ Polymer({
     this._applyMagicVariables(Object.assign({}, this.request))
     .then((request) => this._applyCookies(request))
     .then((request) => this._applyAuthorization(request))
+    .then((request) => this._filterHeaders(request))
     .then((request) => {
       // Make it async so errors will be handled by socket object.
       this.async(() => {
@@ -624,6 +625,34 @@ Polymer({
           return;
       }
 
+    });
+  },
+
+  /**
+   * Filter headers that should not be passed to the transport.
+   * See https://github.com/jarrodek/ChromeRestClient/issues/771
+   *
+   * @param {Object} request Current request
+   * @return {[type]}
+   */
+  _filterHeaders: function(request) {
+    return new Promise((resolve) => {
+      let headers = arc.app.headers.toJSON(request.headers);
+      if (!headers || !headers.length) {
+        resolve(request);
+        return;
+      }
+      let forbidden = ['host'];
+      headers = headers.filter((item) => {
+        let name = item.name;
+        if (!name) {
+          return false;
+        }
+        name = name.toLowerCase();
+        return forbidden.indexOf(name) === -1;
+      });
+      request.headers = arc.app.headers.toString(headers);
+      resolve(request);
     });
   },
 
