@@ -162,6 +162,7 @@ Polymer({
 
   _payloadChanged: function() {
     this._resetTabs();
+    this._setParsedMode(undefined);
     var payload = this.payload;
     // console.info('Determinig if the payload is empty');
     // console.dir(payload);
@@ -362,6 +363,7 @@ Polymer({
   },
 
   _rawChanged: function(raw) {
+    this._setParsedMode(undefined);
     this.$.rawContent.innerHTML = PayloadParser.htmlEscape(raw);
   },
   // Handler for RAW preview click
