@@ -15,7 +15,7 @@ const runSequence = require('run-sequence');
 const merge = require('merge-stream');
 // const concat = require('concatenate-files');
 const zipFolder = require('zip-folder');
-const uploader = require('./cws-uploader.js');
+// const uploader = require('./cws-uploader.js');
 
 var Builder = {
   commitMessage: '',
@@ -23,6 +23,13 @@ var Builder = {
   target: 'canary',
   targetDir: 'canary',
   version: '0.0.0.0',
+
+  get uploader() {
+    if (!this._uploader) {
+      this._uploader = require('./cws-uploader.js');
+    }
+    return this._uploader;
+  },
   /**
    * Build a canary release.
    * 1. Bump version
@@ -130,15 +137,15 @@ var Builder = {
    * Upload the package to CWS.
    */
   _uploadPackage: (buildPath) => {
-    return uploader.auth()
-    .then(() => uploader.uploadItem(buildPath, Builder.targetDir));
+    return this.uploader.auth()
+    .then(() => this.uploader.uploadItem(buildPath, Builder.targetDir));
   },
   /**
    * Publish package after it has been uploaded. If it is done in the same run it does not require
    * another auth.
    */
   _publishPackage: () => {
-    return uploader.publishTarget(Builder.targetDir);
+    return this.uploader.publishTarget(Builder.targetDir);
   },
 
   get buildTarget() {
@@ -323,7 +330,7 @@ var Builder = {
           data.name += ' - beta';
           data.short_name += ' - beta';
         }
-        let cwsConfig = uploader.config;
+        let cwsConfig = this.uploader.config;
         data.oauth2.client_id = cwsConfig[targetName].clientId;
         //jscs:enable requireCamelCaseOrUpperCaseIdentifiers
         delete data.key;
