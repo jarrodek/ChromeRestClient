@@ -308,7 +308,7 @@ var Builder = {
   },
   //combine all manifest dependecies into one file
   _processManifest: () => {
-    console.log(this.uploader.config);
+    console.log(Builder.uploader.config);
     process.exit(1);
     return new Promise((resolve, reject) => {
       let dest = Builder.buildTarget;
