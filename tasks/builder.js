@@ -25,10 +25,10 @@ var Builder = {
   version: '0.0.0.0',
 
   get uploader() {
-    if (!this._uploader) {
-      this._uploader = require('./cws-uploader.js');
+    if (!Builder._uploader) {
+      Builder._uploader = require('./cws-uploader.js');
     }
-    return this._uploader;
+    return Builder._uploader;
   },
   /**
    * Build a canary release.
@@ -137,15 +137,15 @@ var Builder = {
    * Upload the package to CWS.
    */
   _uploadPackage: (buildPath) => {
-    return this.uploader.auth()
-    .then(() => this.uploader.uploadItem(buildPath, Builder.targetDir));
+    return Builder.uploader.auth()
+    .then(() => Builder.uploader.uploadItem(buildPath, Builder.targetDir));
   },
   /**
    * Publish package after it has been uploaded. If it is done in the same run it does not require
    * another auth.
    */
   _publishPackage: () => {
-    return this.uploader.publishTarget(Builder.targetDir);
+    return Builder.uploader.publishTarget(Builder.targetDir);
   },
 
   get buildTarget() {
@@ -308,8 +308,6 @@ var Builder = {
   },
   //combine all manifest dependecies into one file
   _processManifest: () => {
-    console.log(Builder.uploader.config);
-    process.exit(1);
     return new Promise((resolve, reject) => {
       let dest = Builder.buildTarget;
       let manifestFile = path.join(dest, 'manifest.json');
@@ -332,7 +330,7 @@ var Builder = {
           data.name += ' - beta';
           data.short_name += ' - beta';
         }
-        let cwsConfig = this.uploader.config;
+        let cwsConfig = Builder.uploader.config;
         data.oauth2.client_id = cwsConfig[targetName].clientId;
         //jscs:enable requireCamelCaseOrUpperCaseIdentifiers
         delete data.key;
