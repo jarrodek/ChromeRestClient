@@ -27,18 +27,33 @@ Polymer({
       this.hidden = true;
       return;
     }
+    this._scheduleOpen();
+  },
+
+  _scheduleOpen: function(time) {
+    time = time || 3000;
+    if (!this.target) {
+      return;
+    }
     this.async(function() {
+      if (this.otherOpened) {
+        return;
+      }
       this.hidden = false;
-      this.updateSizing(target);
-    }, 2250);
+      this.updateSizing(this.target);
+    }, time);
   },
 
   attached: function() {
     this.listen(window, 'resize', '_onResize');
+    this.listen(document.body, 'tutorial-open', '_tutorialOpened');
+    this.listen(document.body, 'tutorial-close', '_tutorialClosed');
   },
 
   detached: function() {
     this.unlisten(window, 'resize', '_onResize');
+    this.unlisten(document.body, 'tutorial-open', '_tutorialOpened');
+    this.unlisten(document.body, 'tutorial-close', '_tutorialClosed');
   },
 
   updateSizing: function(target) {
@@ -70,7 +85,11 @@ Polymer({
     this.updateStyles();
 
     this.async(function() {
+      if (this.otherOpened) {
+        return;
+      }
       this.opened = true;
+      this.fire('tutorial-open');
     }, 500);
   },
 
@@ -119,6 +138,16 @@ Polymer({
     this.updateStyles();
     this.async(function() {
       this.hidden = true;
+      this.fire('tutorial-close');
     }, 1000);
+  },
+
+  _tutorialOpened: function() {
+    this.otherOpened = true;
+  },
+
+  _tutorialClosed: function() {
+    this.otherOpened = false;
+    this._scheduleOpen(2000);
   }
 });
