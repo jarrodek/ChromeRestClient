@@ -87,7 +87,7 @@
     <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('o')]]" on-keys-pressed="onOpen"></iron-a11y-keys>
     <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('f')]]" on-keys-pressed="onSearch"></iron-a11y-keys>
     <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('n')]]" on-keys-pressed="onNewWindow"></iron-a11y-keys>
-    
+
     <onboarding-tutorial id="onboarding" auto>
       <onboarding-page>
         <div class="welcome-message">
@@ -232,8 +232,12 @@
     <search-bar id="content-search-bar" on-iron-overlay-opened="textSearchBarOpened"></search-bar>
     <element-tutorial id="xhrProxyTutorial">
       <div tutorial>
-        <p>You can proxy the request through Chrome instead of using a socket connection.</p>
-        <p>Enable XHR proxy if you have issues with <b>expired certificates</b> or <b>proxy and vpn</b> connections.</p>
+        <p>You can proxy the request through Chrome instead of the app.</p>
+        <p>Enable XHR proxy if you have issues with:</p>
+        <ul>
+          <li>expired certificates</li>
+          <li><b>proxy and vpn</b> connections</li>
+        </ul>
         <paper-button raised class="tutorial-button" on-tap="_closeXhrTutorial">Got it</paper-button>
       </div>
     </element-tutorial>

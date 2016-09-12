@@ -146,8 +146,11 @@ Polymer({
     this.otherOpened = true;
   },
 
-  _tutorialClosed: function() {
+  _tutorialClosed: function(e) {
     this.otherOpened = false;
+    if (e.target === this) {
+      return;
+    }
     this._scheduleOpen(2000);
   }
 });
