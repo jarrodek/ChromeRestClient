@@ -124,6 +124,7 @@
       response.ok = true;
       response.auth = {};
       response.stats = response.stats;
+      response.rawBody = response.response;
 
       var ct = hObj.get('content-type');
       var cl = Number(hObj.get('content-length'));
