@@ -364,7 +364,11 @@ Polymer({
 
   _rawChanged: function(raw) {
     this._setParsedMode(undefined);
-    this.$.rawContent.innerHTML = PayloadParser.htmlEscape(raw);
+    if (!raw) {
+      this.$.rawContent.innerHTML = '';
+    } else {
+      this.$.rawContent.innerHTML = PayloadParser.htmlEscape(raw);
+    }
   },
   // Handler for RAW preview click
   _togglePreviewResponse: function() {
