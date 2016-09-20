@@ -156,6 +156,14 @@ class TestServer {
     app.get('/no-response', () => {
       // res.sendStatus(204);
     });
+
+    app.get('/issue787', (req, res) => {
+      res.status(204);
+      res.set('Content-Type', 'application/json');
+      res.set('X-Test', 'value');
+      res.send('{"code":204,"message":"No Content"}');
+      res.end();
+    });
   }
 
   _setBasicAuth() {
