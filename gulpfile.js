@@ -2,6 +2,8 @@
 
 var gulp = require('gulp');
 var minimist = require('minimist');
+var conventionalChangelog = require('gulp-conventional-changelog');
+var fs = require('fs');
 require('./tasks/dev-server.js');
 
 var Cli = {
@@ -204,4 +206,20 @@ gulp.task('test', function(done) {
     console.error(e.stack);
     done();
   });
+});
+
+gulp.task('changelog', function() {
+  return gulp.src('CHANGELOG.md', {
+    buffer: false
+  })
+  .pipe(conventionalChangelog({
+    preset: 'eslint',
+    releaseCount: 0
+  }))
+  .pipe(gulp.dest('./'));
+
+  // return conventionalChangelog({
+  //   preset: 'eslint',
+  //   releaseCount: 0
+  // }).pipe(fs.createWriteStream('CHANGELOG.md'));
 });

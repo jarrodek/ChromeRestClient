@@ -34,6 +34,7 @@
     "gulp-babel": "^6.1.1",
     "gulp-cli": "^1.2.1",
     "gulp-connect": "^2.3.1",
+    "gulp-conventional-changelog": "^1.1.0",
     "gulp-crisper": "^1.0.0",
     "gulp-foreach": "^0.1.0",
     "gulp-git": "^1.7.0",
