@@ -134,6 +134,8 @@ Polymer({
   },
 
   onClearAll: function() {
+    this.oldRequest = this.request;
+    this.oldHash = location.hash.substr(1);
     let base = new RequestLocalObject({
       url: '',
       method: 'GET'
@@ -146,6 +148,24 @@ Polymer({
     this.showCookieBanner = false;
     page('/request/current');
     arc.app.analytics.sendEvent('Engagement', 'Click', 'Clear all');
+    this.$.clearRollback.open();
+  },
+
+  _undoClear: function() {
+    if (this.oldRequest) {
+      this.set('request', this.oldRequest);
+    }
+    if (this.oldHash) {
+      page(this.oldHash);
+    }
+    this.$.clearRollback.close();
+  },
+
+  _clearUndoClear: function() {
+    this.async(() => {
+      this.oldRequest = undefined;
+      this.oldHash = undefined;
+    }, 1000);
   },
 
   onXhrtoggle: function(e) {
