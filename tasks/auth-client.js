@@ -18,7 +18,7 @@ function AuthClient(options) {
     secrets = require('../../.credantials/arc.json');
   } catch (e) {
     console.error('The credantials file not found. ');
-    console.error('You won\t be ablr to publish the app. ');
+    console.error('You won\'t be able to publish the app. ');
     self.execute = function() {
       return Promise.reject(new Error('../../.credantials/arc.json file not found.'));
     };

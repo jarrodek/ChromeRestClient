@@ -1,0 +1,22 @@
+{
+  "canary": {
+    "id": "ffgciingieijajcbpkockcbknajffbel",
+    "publishTo": "trustedTesters",
+    "clientId": "592877543090-74gs0o76s274rab3vht2j6e60vb62pfm.apps.googleusercontent.com"
+  },
+  "dev" : {
+    "id": "okeafnfmgoafdfbcjkanpgmjanccpell",
+    "publishTo": "trustedTesters",
+    "clientId": "592877543090-fgvbeqjcr5410l8lt5njsncrr65pk1b9.apps.googleusercontent.com"
+  },
+  "beta" : {
+    "id": "epgngalmiadbjnoompchcohonhidjanm",
+    "publishTo": "trustedTesters",
+    "clientId": "592877543090-sve7q3vseoagoq1cbtlgruo206imkrs0.apps.googleusercontent.com"
+  },
+  "stable" : {
+    "id": "hgmloofddffdnphfgcellkdfbfbjeloo",
+    "publishTo": "default",
+    "clientId": "592877543090-6tqu3mbhcbc3437cfj5f0ahjtui5tjac.apps.googleusercontent.com"
+  }
+}
