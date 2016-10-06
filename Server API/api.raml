@@ -11,15 +11,14 @@ documentation:
     content: !include docs/gettings-started.md
 mediaType: application/json
 protocols: HTTPS
-schemas:
- - RequestListSchema: !include schemas/requestlist.schema
- - RequestSchema: !include schemas/request.schema
- - PermissionSchema: !include schemas/permission.schema
- - PermissionListSchema: !include schemas/permissionlist.schema
- - HarSchema: !include schemas/har/log.json
- - ProjectSchema: !include schemas/project.schema
- - ProjectListSchema: !include schemas/projectlist.schema
 types:
+  RequestListSchema: !include schemas/requestlist.schema
+  RequestSchema: !include schemas/request.schema
+  PermissionSchema: !include schemas/permission.schema
+  PermissionListSchema: !include schemas/permissionlist.schema
+  HarSchema: !include schemas/har/log.json
+  ProjectSchema: !include schemas/project.schema
+  ProjectListSchema: !include schemas/projectlist.schema
   AppResponse:
    type: object
    description: |
@@ -108,7 +107,7 @@ types:
    description: OK response for project data request
    schema: ProjectSchema
 securitySchemes:
-  - oauth_2_0: !include security-schemes/oauth_2_0.raml
+  oauth_2_0: !include security-schemes/oauth_2_0.raml
 securedBy: [ oauth_2_0: {scopes: [PROFILE, EMAIL]}]
 traits:
   paged: !include traits/paged.raml
