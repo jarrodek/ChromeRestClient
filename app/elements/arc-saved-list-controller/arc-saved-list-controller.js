@@ -33,6 +33,10 @@ Polymer({
 
   resetView: function() {
     var view = this.$$('arc-saved-list-view');
+    if (!view) {
+      console.warn('Saved view not present!');
+      return;
+    }
     view.closeDetailsPanel();
   }
 });

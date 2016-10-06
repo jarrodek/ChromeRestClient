@@ -43,21 +43,19 @@
     var original = console[method];
     console[method] = function() {
       let arr = Array.from(arguments);
-      let callstack = [];
-      try {
-        o.dont.exist += 0;
-      } catch (e) {
-        let lines = e.stack.split('\n');
-        for (var i = 0, len = lines.length; i < len; i++) {
-          callstack.push(lines[i]);
-        }
+      let callstack = new Error('').stack.split('\n');
+      if (callstack && callstack.length) {
         callstack.splice(0, 2);
+        callstack[0] = callstack[0].replace(/\s+at\s/, '');
       }
       let noSave = arr && arr[0] && arr[0] === '--no-save';
       if (noSave) {
         Array.prototype.shift.apply(arguments);
       }
       original.apply(console, arguments);
+      if (['warn', 'error'].indexOf(method) !== -1) {
+        console.trace();
+      }
       if (!noSave) {
         arc.app.logger.handleLog(method, callstack, arr);
       }
@@ -89,7 +87,7 @@
           .reverse()
           .offset(200)
           .delete();
-        console.log('--no-save','Cleared: ' + deleteCount + ' logs');
+        console.log('--no-save', 'Cleared: ' + deleteCount + ' logs');
       }).catch((e) => {
         console.error('--no-save', e);
       })
@@ -112,7 +110,7 @@
     arc.app.logger._db.logs.add(log)
     .catch((e) => {
       window.setTimeout(() => {
-        console.log('--no-save','appendLog', e);
+        console.log('--no-save', 'appendLog', e);
       }, 1);
     })
     .then(() => arc.app.logger.nextLog());

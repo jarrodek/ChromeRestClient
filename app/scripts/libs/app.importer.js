@@ -237,7 +237,12 @@ arc.app.importer._createHARfromSql = function(item) {
 /**
  * Prepare data for export.
  */
-arc.app.importer.prepareExport = function() {
+arc.app.importer.prepareExport = function(opts) {
+  opts = opts || {};
+  var noProjects = false;
+  if (opts.type && opts.type === 'history') {
+    noProjects = true;
+  }
   var db;
   const result = {
     requests: [],
@@ -246,9 +251,13 @@ arc.app.importer.prepareExport = function() {
   return arc.app.db.idb.open()
     .then(function(_db) {
       db = _db;
+      if (opts.type) {
+        return db.requestObject
+          .where('type')
+          .equals('saved')
+          .toArray();
+      }
       return db.requestObject
-        .where('type')
-        .equals('saved')
         .toArray();
     })
     .then(function(requests) {
@@ -256,6 +265,9 @@ arc.app.importer.prepareExport = function() {
         requests.forEach((item) => item._har = new HAR.Log(item._har));
       }
       result.requests = requests;
+      if (noProjects) {
+        return [];
+      }
       return db.projectObjects
         .toArray();
     })

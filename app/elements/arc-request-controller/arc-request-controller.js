@@ -22,7 +22,7 @@ Polymer({
     request: {
       type: Object,
       notify: true,
-      observer: '_requestChanged'
+      // observer: '_requestChanged'
     },
     /**
      * Route params passed from the router.
@@ -438,10 +438,10 @@ Polymer({
     }
   },
 
-  _requestChanged: function() {
-    console.log('_requestChanged', this.request);
-    //this.request.name
-  },
+  // _requestChanged: function() {
+  // console.log('_requestChanged', this.request);
+  //this.request.name
+  // },
 
   _requestNameChanged: function(name) {
     if (name) {
