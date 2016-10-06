@@ -55,7 +55,7 @@ window.ArcBehaviors.RequestsListControllerBehaviorImpl = {
 
     toolbarFeatures: {
       type: Array,
-      value: ['search', 'clearAll']
+      value: ['search', 'clearAll', 'export']
     }
   },
   observers: [
@@ -222,6 +222,28 @@ window.ArcBehaviors.RequestsListControllerBehaviorImpl = {
       return;
     }
     ctrl.selectFile();
+  },
+
+  onExport: function() {
+    var type = this.dataset.route;
+    arc.app.importer.prepareExport({type: type}).then((data) => {
+      this.exportContent = data;
+      var date = new Date();
+      var day = date.getDate();
+      var year = date.getFullYear();
+      var month = date.getMonth() + 1;
+      this.fileSuggestedName = 'arc-export-' + day + '-' + month + '-' + year + '-' +
+        type + '.json';
+      this.exportMime = 'json';
+      this.exportData();
+      arc.app.analytics.sendEvent('Engagement', 'Click', 'Export saved as file');
+    }).catch((e) => {
+      console.error(e);
+      StatusNotification.notify({
+        message: 'Unable to export data :(',
+        timeout: StatusNotification.TIME_MEDIUM
+      });
+    });
   },
 
   resetView: function() {

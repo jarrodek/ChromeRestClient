@@ -4,7 +4,8 @@
 Polymer({
   is: 'arc-settings-controller',
   behaviors: [
-    ArcBehaviors.ArcControllerBehavior
+    ArcBehaviors.ArcControllerBehavior,
+    ArcBehaviors.ArcFileExportBehavior
   ],
   properties: {
     /**
@@ -328,6 +329,26 @@ Polymer({
   openPrivacyPolicy: function() {
     window
     .open('https://docs.google.com/document/d/1BzrKQ0NxFXuDIe2zMA-0SZBNU0P46MHr4GftZmoLUQU/edit');
+  },
+
+  dumpClick: function() {
+    arc.app.importer.prepareExport().then((data) => {
+      this.exportContent = data;
+      var date = new Date();
+      var day = date.getDate();
+      var year = date.getFullYear();
+      var month = date.getMonth() + 1;
+      this.fileSuggestedName = 'arc-export-' + day + '-' + month + '-' + year + '-all.json';
+      this.exportMime = 'json';
+      this.exportData();
+      arc.app.analytics.sendEvent('Engagement', 'Click', 'Export saved as file');
+    }).catch((e) => {
+      console.error(e);
+      StatusNotification.notify({
+        message: 'Unable to export data :(',
+        timeout: StatusNotification.TIME_MEDIUM
+      });
+    });
   }
 });
 })();
