@@ -36,6 +36,10 @@ Polymer({
 
   resetView: function() {
     var view = this.$$('arc-history-list-view');
+    if (!view) {
+      console.warn('History view not present!');
+      return;
+    }
     view.closeDetailsPanel();
   }
 });
