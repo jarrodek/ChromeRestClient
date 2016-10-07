@@ -164,8 +164,6 @@ Polymer({
     this._resetTabs();
     this._setParsedMode(undefined);
     var payload = this.payload;
-    // console.info('Determinig if the payload is empty');
-    // console.dir(payload);
     if (payload === null || payload === false) {
       this._displayJSON(payload);
       return;
@@ -195,7 +193,6 @@ Polymer({
         this.selectedTab = 3;
         this._tabsChanged();
       } else {
-        // console.log('SETTING UP PARSE MODE', ct);
         this._setParsedMode(ct);
         this._setIsParsed(true);
         this.selectedTab = 1;
@@ -290,9 +287,6 @@ Polymer({
   },
 
   _searchBarOpenedChanged: function(e) {
-    // e.detail.opened;
-    // var value = e.detail.value;
-    console.log('--no-save', '_searchBarOpenedChanged', e.detail.opened);
     this._searchInputChanged(e);
   },
 
@@ -359,7 +353,6 @@ Polymer({
       elm.clearMarked();
       elm.setMarked(pos);
     }
-    console.log('--no-save', 'Search position changed.', pos, elm);
   },
 
   _rawChanged: function(raw) {
@@ -424,7 +417,6 @@ Polymer({
       } else {
         this.$.webView.style.height = e.data['preview-window-height'] + 'px';
       }
-      // console.log('setting up client height', e.data['preview-window-height']);
     }
   },
 

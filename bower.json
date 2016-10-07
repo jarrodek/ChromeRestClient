@@ -37,7 +37,9 @@
     "chrome-storage": "advanced-rest-client/chrome-storage#^1.0.2",
     "arc-definitions": "advanced-rest-client/arc-definitions#^1.0.1",
     "arc-database": "advanced-rest-client/arc-database#^1.0.4",
-    "app-pouchdb-quick-search": "advanced-rest-client/app-pouchdb-quick-search#^1.0.4"
+    "app-pouchdb-quick-search": "advanced-rest-client/app-pouchdb-quick-search#^1.0.4",
+    "app-pouchdb-collate": "advanced-rest-client/app-pouchdb-collate#^1.0.1",
+    "app-logger": "advanced-rest-client/app-logger#^0.0.2"
   },
   "devDependencies": {
     "web-component-tester": "*"

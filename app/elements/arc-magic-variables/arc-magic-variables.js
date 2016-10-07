@@ -121,7 +121,6 @@ Polymer({
     return this._getRules()
     .then(() => this._setupGroupRules())
     .then(() => {
-      // console.log(this._groups);
       if (typeof this.value === 'string') {
         return this._applyString(this.value);
       } else {
@@ -202,7 +201,6 @@ Polymer({
   _apply: function(str, key, value) {
     key = key.replace('${', '');
     key = key.replace('}', '');
-    // console.log('_apply', str, key, value);
     var regGeneral = new RegExp('\\$\\{' + key + '\\}', 'gm');
     var regGroup = new RegExp('\\$\\{(' + key + ':\\d+)\\}', 'gm');
     value = this._parseValue(key, value);
@@ -216,7 +214,6 @@ Polymer({
       } else {
         _value = value;
       }
-      // console.log('Replacing in general rule', key, _value, this._groups);
       str = str.replace(regGeneral, _value);
     }
     if (regGroup.test(str)) {
@@ -262,16 +259,13 @@ Polymer({
         if (!matches) {
           break;
         }
-        //console.log('aaaaaaaaaaaaaaaaa', orygKey, matches);
         let groupKey = matches[1];
         let key = matches[2];
         if (key === orygKey) {
           value = value.replace(matches[0], '[recursive]');
           continue;
         }
-        // console.log('Generating: %s, %s, %s, %s', groupKey, key, value, !!matches[3]);
         let _value = this._getGroupValue(groupKey, key, value, !!matches[3]);
-        // console.log('Generated: %s, %s', key, _value, this._groups);
         value = this._apply(value, key, _value);
       }
     }
@@ -289,7 +283,6 @@ Polymer({
    * @param {String} A generated / cached value for given groupKey.
    */
   _getGroupValue: function(groupKey, key, defaultValue, dontCache) {
-    //console.log('BBBBBBBBBBBBBBBB', groupKey, key, defaultValue, dontCache);
     var value;
     if ((groupKey in this._groups) && !dontCache) {
       value = this._groups[groupKey];

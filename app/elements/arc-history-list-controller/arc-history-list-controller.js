@@ -30,14 +30,14 @@ Polymer({
    * Generic function to be called on database error.
    */
   _dbError: function(e) {
-    console.error('_dbError', e);
+    this.fire('app-log', {'message': e, 'level': 'error'});
     arc.app.analytics.sendException('History-ctrl::' + JSON.stringify(e));
   },
 
   resetView: function() {
     var view = this.$$('arc-history-list-view');
     if (!view) {
-      console.warn('History view not present!');
+      this.fire('app-log', {'message': 'History view not present!', 'level': 'warning'});
       return;
     }
     view.closeDetailsPanel();

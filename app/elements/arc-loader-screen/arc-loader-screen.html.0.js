@@ -46,7 +46,6 @@ Polymer({
   },
 
   _openedChanged: function() {
-    //console.log('Opened changed: ', this.opened);
     if (this.opened) {
       this.style.display = 'inherit';
       this.playAnimation('entry');

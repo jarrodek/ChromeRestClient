@@ -69,7 +69,6 @@ Polymer({
     } else {
       this.set('contentType', undefined);
     }
-    //console.log('_requestChanged deep in path', changes);
   },
 
   _masterUrlChanged: function() {

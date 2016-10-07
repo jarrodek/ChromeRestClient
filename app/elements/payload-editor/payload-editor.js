@@ -185,10 +185,7 @@ Polymer({
   _computeWithForm: function(contentType) {
     return contentType && contentType.indexOf('x-www-form-urlencoded') !== -1;
   },
-  // valueChanged: function() {
-  //   console.log('payload editor:: value changed', this.value);
-  //   //TODO:170 if this important?
-  // },
+
   /** Notify tabs resizer ehrn programatically number of tabs changed. */
   _updateTabsState: function() {
     this.$.tabs.notifyResize();

@@ -303,7 +303,6 @@ Polymer({
           });
           return;
         }
-        // console.log('Opening drive', id);
         ctrl.openItemAsRequest(id);
         break;
       default:
@@ -339,7 +338,6 @@ Polymer({
     if (e.detail.data) {
       this.debounce('restore.request', function() {
         let request = this.$.requestQueryModel.toLocalRequest(this.routeParams.type === 'history');
-        // console.info('Restored request', request);
         this.set('request', request);
         if (request.name) {
           this._setPageTitle(request.name);
@@ -376,7 +374,10 @@ Polymer({
       this._setUpProject(project);
     })
     .catch((cause) => {
-      console.error('_restoreProject', cause);
+      this.fire('app-log', {
+        'message': ['Error restoring project.', cause],
+        'level': 'error'
+      });
       StatusNotification.notify({
         message: 'Project data not found in the datastore.'
       });
@@ -437,11 +438,6 @@ Polymer({
       }
     }
   },
-
-  // _requestChanged: function() {
-  // console.log('_requestChanged', this.request);
-  //this.request.name
-  // },
 
   _requestNameChanged: function(name) {
     if (name) {
@@ -518,10 +514,12 @@ Polymer({
         })
         .then((result) => {
           request.payload = result;
-          // console.log('Request with magic variables', request);
         })
         .catch((e) => {
-          console.error('Magic variables apply', e);
+          this.fire('app-log', {
+            'message': ['Magic variables', e],
+            'level': 'error'
+          });
         })
         .finally(() => {
           resolve(request);
@@ -567,7 +565,10 @@ Polymer({
             resolve(request);
             return;
           }
-          console.info('Cookies to send with the request: ', cookie);
+          this.fire('app-log', {
+            'message': ['Cookies to send with the request:', cookie],
+            'level': 'info'
+          });
           let headers = arc.app.headers.toJSON(request.headers);
           let found = false;
           headers.forEach((header) => {
@@ -586,7 +587,10 @@ Polymer({
           resolve(request);
         })
         .catch((e) => {
-          console.error('Unable to apply cookies to the request', e);
+          this.fire('app-log', {
+            'message': ['Unable to apply cookies to the request', e],
+            'level': 'error'
+          });
           resolve(request);
         });
       });
@@ -736,11 +740,13 @@ Polymer({
   },
   // Success handler for history object model.
   _historyUrlSaved: function() {
-    console.info('History URL has been saved.');
   },
   // Error handler for history object model.
   _historyUrlSaveError: function(e) {
-    console.warn('Error saving into URLs history.', e);
+    this.fire('app-log', {
+      'message': ['Error saving into URLs history.', e],
+      'level': 'error'
+    });
   },
   /**
    * Called when the request object has been read from the datastore.
@@ -941,7 +947,7 @@ Polymer({
   _saveDrive: function(request) {
     var ctrl = document.body.querySelector('arc-drive-controller');
     if (!ctrl) {
-      console.warn('Drive controller not found!');
+      this.fire('app-log', {'message': ['Drive controller not found!'], 'level': 'error'});
       return;
     }
     ctrl.exportDrive(request, request.name)
@@ -955,7 +961,7 @@ Polymer({
         message: 'File saved'
       });
     }).catch((error) => {
-      console.error('Unable insert to Drive.', error);
+      this.fire('app-log', {'message': ['Unable insert to Drive', error], 'level': 'error'});
       StatusNotification.notify({
         message: 'Unable upload file to Drive'
       });
@@ -1094,7 +1100,10 @@ Polymer({
     this.$.authDataModel.data = authData;
     this.$.authDataModel.save()
     .catch((e) => {
-      console.warn('Unable save auth basic data to the store', e);
+      this.fire('app-log', {
+        'message': ['Unable save auth basic data to the store', e],
+        'level': 'warning'
+      });
     });
     this.authDataList.push(authData);
   },
@@ -1124,7 +1133,10 @@ Polymer({
     this.$.authDataModel.data = authData;
     this.$.authDataModel.save()
     .catch((e) => {
-      console.warn('Unable save auth basic data to the store', e);
+      this.fire('app-log', {
+        'message': ['Unable save auth basic data to the store', e],
+        'level': 'error'
+      });
     });
     this.authDataList.push(authData);
   },
@@ -1145,7 +1157,10 @@ Polymer({
     this.$.authDataModel.data = authData;
     this.$.authDataModel.save()
     .catch((e) => {
-      console.warn('Unable save auth basic data to the store', e);
+      this.fire('app-log', {
+        'message': ['Unable save auth basic data to the store', e],
+        'level': 'error'
+      });
     });
     this.authDataList.push(authData);
   },
@@ -1168,23 +1183,17 @@ Polymer({
     var children = Polymer.dom(this).getEffectiveChildNodes();
     children = children.filter((node) => node.nodeName === 'ARC-RESPONSE-VIEW');
     if (!children[0]) {
-      // no response view
+      this.fire('app-log', {
+        'message': ['There\'s no response view'],
+        'level': 'info'
+      });
       return null;
     }
     return children[0];
   },
 
   _saveCookies: function() {
-    // var responses = [];
-    // if (this.response.redirects && this.response.redirects.length) {
-    //   this.response.redirects.forEach((r) => {
-    //     // let redirectHeaders = arc.app.headers.toJSON(r.headers);
-    //     responses.push(r);
-    //   });
-    // }
-    // responses.push(this.response);
     this.$.cookieJar.response = this.response;
-    // debugger;
     this.$.cookieJar.store();
   }
 });

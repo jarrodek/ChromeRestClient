@@ -50,7 +50,10 @@ Polymer({
         return data;
       })
       .catch((cause) => {
-        console.error(cause);
+        this.fire('app-log', {
+          'message': ['RequestObject query', cause],
+          'level': 'error'
+        });
         this.fire('error', {
           error: cause
         });
@@ -137,7 +140,10 @@ Polymer({
           result = result.toArray();
         }
         return result.catch((cause) => {
-          console.error(cause);
+          this.fire('app-log', {
+            'message': ['RequestObject query', cause],
+            'level': 'error'
+          });
           this.fire('error', {
             error: cause
           });
@@ -180,7 +186,10 @@ Polymer({
         });
         return data;
       }).catch((cause) => {
-        console.error(cause);
+        this.fire('app-log', {
+          'message': ['RequestObject query', cause],
+          'level': 'error'
+        });
         this.fire('error', {
           error: cause
         });
@@ -207,7 +216,10 @@ Polymer({
       if (this.forceDeleteAll) {
         return this._deleteAll();
       } else {
-        console.warn('Nothing to delete.');
+        this.fire('app-log', {
+          'message': ['Nothing to delete'],
+          'level': 'info'
+        });
       }
     }
     return this.genericRemove('requestObject');

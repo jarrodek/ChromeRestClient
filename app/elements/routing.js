@@ -129,17 +129,6 @@ window.addEventListener('initializeRouting', function() {
   });
   window.page = arc.app.router.redirect;
   arc.app.router.start();
-  //
-  // // 404
-  // page('*', function() {
-  //   //console.warn('redirecting unknown page.');
-  //   page.redirect('/');
-  // });
-  //
-  // page({
-  //   hashbang: true,
-  //   popstate: false
-  // });
 
   let event = new Event('ArcInitialized');
   window.dispatchEvent(event);

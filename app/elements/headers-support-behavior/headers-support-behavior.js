@@ -59,22 +59,15 @@ window.HeadersBehaviors.FillSupportBehaviorImpl = {
       type: String
     }
   },
-
-  // observers: [
-  //   '_targetChanged(target, isAttached)'
-  // ],
-  //
-  // _targetChanged: function(target, isAttached) {
-  //   if (!isAttached) {
-  //     return;
-  //   }
-  // },
   /**
    * Funtion to be implemented by elements.
    * Called when the user requested fill support for supported header.
    */
   provideSupport: function() {
-    console.error('Header support not provided!');
+    this.fire('app-log', {
+      'message': ['Header support not provided!',],
+      'level': 'error'
+    });
   },
   /**
    * Sets a value to the text field and (if set) to the model.

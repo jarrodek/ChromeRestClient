@@ -27,14 +27,20 @@ Polymer({
    * Generic function to be called on database error.
    */
   _dbError: function(e) {
-    console.error('_dbError', e);
+    this.fire('app-log', {
+      'message': ['Database error', e],
+      'level': 'info'
+    });
     arc.app.analytics.sendException('Saved-ctrl::' + JSON.stringify(e));
   },
 
   resetView: function() {
     var view = this.$$('arc-saved-list-view');
     if (!view) {
-      console.warn('Saved view not present!');
+      this.fire('app-log', {
+        'message': ['Saved view not present'],
+        'level': 'warn'
+      });
       return;
     }
     view.closeDetailsPanel();

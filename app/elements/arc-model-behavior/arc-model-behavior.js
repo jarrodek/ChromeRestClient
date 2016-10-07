@@ -199,7 +199,8 @@ window.ArcBehaviors.ArcModelBehavior = {
         return data;
       })
       .catch((cause) => {
-        console.error(cause);
+        var msg = 'arc-model::genericGetObject::';
+        this.fire('app-log', {'message': [msg, cause], 'level': 'warning'});
         arc.app.analytics.sendException('arc-model::genericGetObject::' +
           JSON.stringify(cause), false);
         this.fire('error', {
@@ -321,7 +322,6 @@ window.ArcBehaviors.ArcModelBehavior = {
           if (this.forceDeleteAll) {
             return table.toCollection().delete();
           }
-          console.warn('nothing to delete...');
         })
         .then(() => {
           this.set('data', null);
@@ -329,6 +329,7 @@ window.ArcBehaviors.ArcModelBehavior = {
           this.fire('deleted');
         })
         .catch((e) => {
+          this.fire('app-log', {'message': ['arc-model::genericRemove::', e], 'level': 'error'});
           arc.app.analytics.sendException('arc-model::genericRemove::' +
             JSON.stringify(e), false);
           this.fire('error', {

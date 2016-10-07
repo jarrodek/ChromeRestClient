@@ -121,7 +121,10 @@ class PrismHighlight {
 
   _onWorkerError(e) {
     this._setWorking(false);
-    console.error('Hightligt worker error', e);
+    this.fire('app-log', {
+      'message': ['Hightligt worker error', e],
+      'level': 'error'
+    });
     var html = `<arc-error-message>
       <p>${e.message}</p>
     </arc-error-message>`;

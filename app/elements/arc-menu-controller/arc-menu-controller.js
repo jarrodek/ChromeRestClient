@@ -23,7 +23,10 @@
         this._observeHistoryEnabled();
         this._updateHistoryStatus();
       } catch (e) {
-        console.error('Error occurred constructing the arc-menu', e);
+        this.fire('app-log', {
+          'message': ['Error occurred constructing the arc-menu', e],
+          'level': 'error'
+        });
         arc.app.analytics.sendException('arc-menu::ready::' + e.message, false);
       }
     },
@@ -53,7 +56,10 @@
       try {
         chrome.storage.onChanged.addListener(this._historyObserver);
       } catch (e) {
-        console.error('Error setting up storage listener', e);
+        this.fire('app-log', {
+          'message': ['Error setting up storage listener'. e],
+          'level': 'error'
+        });
         arc.app.analytics.sendException('arc-menu::ready::' + e.message, false);
       }
     },
@@ -65,8 +71,9 @@
      */
     updateProjectName: function(projectId, projectName) {
       if (this.project === null) {
-        console.warn('Trying to update a project name when project list is empty. ' +
-          'Try insert new project first.');
+        var msg = 'Trying to update a project name when project list is empty. ' +
+          'Try insert new project first.';
+        this.fire('app-log', {'message': msg, 'level': 'error'});
         return;
       }
       this.projects.forEach((project, i) => {
@@ -80,8 +87,7 @@
      *
      * @param {Number} projectId Database id for the project
      */
-    appendProject: function(projectId) {
-      console.info('append project ', projectId);
+    appendProject: function(/*projectId*/) {
       this.$.model.query();
     },
     /**
@@ -89,8 +95,9 @@
      */
     removeProject: function(projectId) {
       if (this.project === null) {
-        console.warn('Trying to remove a project when project list is empty. ' +
-          'Try insert new project first.');
+        var msg = 'Trying to remove a project when project list is empty. ' +
+          'Try insert new project first.';
+        this.fire('app-log', {'message': msg, 'level': 'warning'});
         return;
       }
       this.projects.forEach((project, i) => {
@@ -112,7 +119,8 @@
           }
         });
       } catch (e) {
-        console.error('Error setting up storage listener', e);
+        var msg = 'Error setting up storage listener';
+        this.fire('app-log', {'message': [msg, e], 'level': 'warning'});
         arc.app.analytics.sendException('arc-menu::ready::' + e.message, false);
       }
     },

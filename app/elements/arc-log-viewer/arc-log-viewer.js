@@ -62,14 +62,11 @@ Polymer({
   _getLogs: function() {
     arc.app.db.idb.open().then((db) => {
       let start = this.logs && this.logs.length ? this.logs.length - 1 : 0;
-      // console.log('--no-save', 'start', start);
       db.logs
-        //.where('type').anyOf(this.allowedLogs)
         .reverse()
         .offset(start)
         .limit(200)
         .sortBy('time')
-        //.toArray() // do not use with sortBy
         .then((logs) => {
           if (!logs || !logs.length) {
             return;
@@ -78,9 +75,7 @@ Polymer({
             if (!this.logs) {
               this.logs = [];
             }
-            // console.log('--no-save', logs);
             logs = logs.concat(this.logs);
-            // console.log('--no-save', logs);
             this.set('logs', logs);
           });
         })
@@ -152,7 +147,6 @@ Polymer({
     if (this.levelError) {
       result.push('error');
     }
-    // console.log('--no-save', '_computeFilterArray', result);
     this.allowedLogs = result;
 
     if (this.opened) {
@@ -161,7 +155,6 @@ Polymer({
   },
 
   sortList: function(a, b) {
-    // console.log('--no-save', 'sortList', a, b);
     if (a.time > b.time) {
       return -1;
     }

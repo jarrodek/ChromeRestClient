@@ -35,7 +35,10 @@ Polymer({
           this._processResponse(response);
         });
       } catch (e) {
-        console.error('Error during fetch', e);
+        this.fire('app-log', {
+          'message': ['Error during fetch.', e],
+          'level': 'error'
+        });
         this.fire('error', {
           message: e.message
         });
@@ -43,7 +46,10 @@ Polymer({
       }
     })
     .catch((cause) => {
-      console.error('Error during fetch', cause);
+      this.fire('app-log', {
+        'message': ['Error during fetch.', cause],
+        'level': 'error'
+      });
       this.fire('error', {
         message: cause
       });
@@ -85,7 +91,10 @@ Polymer({
             try {
               obj.append(item.name, item.value);
             } catch (e) {
-              console.error(e.message);
+              this.fire('app-log', {
+                'message': e,
+                'level': 'error'
+              });
               reject(e);
               rejected = true;
               return;
@@ -115,7 +124,10 @@ Polymer({
               try {
                 fd.append(field.name, file);
               } catch (e) {
-                console.error(e.message);
+                this.fire('app-log', {
+                  'message': e,
+                  'level': 'error'
+                });
                 rejected = true;
                 reject(e);
                 return;
@@ -133,7 +145,10 @@ Polymer({
             try {
               fd.append(pair.name, pair.value);
             } catch (e) {
-              console.error(e.message);
+              this.fire('app-log', {
+                'message': e,
+                'level': 'error'
+              });
               rejected = true;
               reject(new Error('Request parameters are invalid.'));
               return;
@@ -201,7 +216,10 @@ Polymer({
           return this._finishRequest(this.connection.request, result);
         })
         .catch((e) => {
-          console.warn('Something is wrong with the response.', e.message);
+          this.fire('app-log', {
+            'message': ['Something is wrong with the response.', e],
+            'level': 'error'
+          });
           try {
             result.body = decoder.decode(this.connection.response.rawResponse);
           } catch (e) {
@@ -225,7 +243,10 @@ Polymer({
           return this._finishRequest(this.connection.request, result);
         })
         .catch((e) => {
-          console.warn('Something is wrong with the response.', e.message);
+          this.fire('app-log', {
+            'message': ['Something is wrong with the response.', e],
+            'level': 'error'
+          });
           try {
             result.body = decoder.decode(this.connection.response.rawResponse);
           } catch (e) {

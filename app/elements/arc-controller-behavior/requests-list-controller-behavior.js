@@ -80,7 +80,6 @@ window.ArcBehaviors.RequestsListControllerBehaviorImpl = {
     if (!this.isShowing) {
       return;
     }
-    // console.log('Querying page for results');
     this._setQuerying(true);
     this.$.model.query();
   },
@@ -146,7 +145,8 @@ window.ArcBehaviors.RequestsListControllerBehaviorImpl = {
 
   _selectedRemoveError: function(e) {
     this.removedCopy = null;
-    console.error('_dbError', e);
+    this.fire('app-log', {'message': '_selectedRemoveError: ' + e.message, stack: e.stack,
+      'level': 'error'});
     StatusNotification.notify({
       message: 'Unable remove data from storage.'
     });
@@ -238,7 +238,7 @@ window.ArcBehaviors.RequestsListControllerBehaviorImpl = {
       this.exportData();
       arc.app.analytics.sendEvent('Engagement', 'Click', 'Export saved as file');
     }).catch((e) => {
-      console.error(e);
+      this.fire('app-log', {'message': 'onExport: ' + e.message, stack: e.stack, 'level': 'error'});
       StatusNotification.notify({
         message: 'Unable to export data :(',
         timeout: StatusNotification.TIME_MEDIUM

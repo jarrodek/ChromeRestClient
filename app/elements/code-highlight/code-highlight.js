@@ -74,9 +74,7 @@ Polymer({
   },
 
   _runParser: function(mode) {
-    console.time('CodeMirror highlight');
     CodeMirror.runMode(this.code, mode, this._appendParsed.bind(this));
-    console.timeEnd('CodeMirror highlight');
   },
 
   _callLoadedEnd: function() {
@@ -104,30 +102,8 @@ Polymer({
       this._setCol(0);
       return;
     }
-    // var content = '';
-    // var col = this.col;
-    // // replace tabs
-    // for (var pos = 0;;) {
-    //   let idx = text.indexOf('\t', pos);
-    //   if (idx === -1) {
-    //     content += text.slice(pos);
-    //     col += text.length - pos;
-    //     break;
-    //   } else {
-    //     col += idx - pos;
-    //     content += text.slice(pos, idx);
-    //     var size = CodeMirror.defaults.tabSize - col % CodeMirror.defaults.tabSize;
-    //     col += size;
-    //     for (var i = 0; i < size; ++i) {
-    //       content += ' ';
-    //     }
-    //     pos = idx + 1;
-    //   }
-    // }
-    // this._setCol(col);
     var content = text;
     if (style) {
-      // console.log(style);
       var sp = this.$.output.appendChild(document.createElement('span'));
       sp.className = 'cm-' + style.replace(/ +/g, ' cm-');
       sp.appendChild(document.createTextNode(content));

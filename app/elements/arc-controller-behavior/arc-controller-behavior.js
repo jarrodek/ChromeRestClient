@@ -102,14 +102,12 @@ window.ArcBehaviors.ArcControllerBehaviorImpl = {
    */
   _onOpenedChanged: function() {
     if (this.opened) {
-      // console.log('onShow', this.nodeName);
       this.onShow();
       this.isShowing = true;
       if (this.requestFeatures) {
         this.requestFeatures();
       }
     } else {
-      // console.log('onHide', this.nodeName);
       this.onHide();
       this.isShowing = false;
       if (this.releaseFeatures) {

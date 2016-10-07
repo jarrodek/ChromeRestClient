@@ -64,23 +64,23 @@ Polymer({
       direction: 'in'
     });
     this.push('messages', message);
-    //console.log(message);
   },
 
   _onDisconnected: function() {
-    // console.log('disconnected');
     this._setConnecting(false);
     this._setConnected(false);
   },
 
   _onConnected: function() {
-    // console.log('_onConnected');
     this._setConnecting(false);
     this._setConnected(true);
   },
 
   _onError: function(e) {
-    console.error(e.detail.error);
+    this.fire('app-log', {
+      'message': ['No support for given header.', e.detail.error],
+      'level': 'error'
+    });
     this._setConnecting(false);
   },
 

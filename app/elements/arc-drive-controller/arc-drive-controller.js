@@ -211,7 +211,7 @@ Polymer({
    */
   openItemAsRequest: function(id) {
     if (!id) {
-      console.warn('Trying to open Drive item without ID');
+      this.fire('app-log', {'message': 'Trying to open Drive item without ID', 'level': 'warning'});
       return;
     }
     if (!this.opened) {
@@ -261,7 +261,6 @@ Polymer({
    * Ajax call to Drive API error handler
    */
   _handleDriveApiError: function(e) {
-    // console.log('_handleDriveApiError', e);
     this.set('loading', false);
     var message = null;
     var isBackMessage = true;
@@ -350,7 +349,7 @@ Polymer({
         }
       })
       .catch((e) => {
-        console.error('PATCH error', e);
+        this.fire('app-log', {'message': ['PATCH error', e], 'level': 'error'});
       });
     }
     return drive.file.create({

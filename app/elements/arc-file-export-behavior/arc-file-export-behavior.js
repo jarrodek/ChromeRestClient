@@ -134,7 +134,10 @@ window.ArcBehaviors.ArcFileExportBehavior = {
           break;
         default:
           this.fileWriter.mime = this.exportMime;
-          console.warn('Setting up unsupported mime type for file writer.');
+          this.fire('app-log', {
+            'message': 'Setting up unsupported mime type for file writer.',
+            'level': 'warning'
+          });
       }
     }
   },

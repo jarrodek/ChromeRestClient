@@ -56,7 +56,7 @@ Polymer({
       this._setDataReady(true);
     }.bind(this))
     .catch((cause) => {
-      console.error(cause);
+      this.fire('app-log', {'message': cause, 'level': 'error'});
       StatusNotification.notify({
         message: cause.message
       });
@@ -95,7 +95,7 @@ Polymer({
       message: e.detail.message
     });
     arc.app.analytics.sendException(e.detail.message, true);
-    console.error('_saveFileError', e);
+    this.fire('app-log', {'message': ['_saveFileError', e], 'level': 'error'});
   },
 
   _cancelExport: function() {

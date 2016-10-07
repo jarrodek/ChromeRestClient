@@ -142,7 +142,6 @@ Polymer({
 
   _onStatusInfoReady: function(e) {
     var result = e.detail.data;
-    // console.log(result);
     if (result && result.label) {
       this._scdTitle = this.statusCode + ': ' + result.label;
     } else {
@@ -205,8 +204,6 @@ Polymer({
   },
 
   _computeRequestHeaders: function(requestHeaders) {
-    // console.log(requestHeaders);
-    // return [];
     return arc.app.headers.toJSON(requestHeaders);
   },
 
@@ -226,7 +223,6 @@ Polymer({
   },
 
   _checkHttpMessage: function() {
-    // console.log('aaaaaaaaaaaaaaaaaaaaaa');
     if (!!this.httpMessage) {
       return;
     }

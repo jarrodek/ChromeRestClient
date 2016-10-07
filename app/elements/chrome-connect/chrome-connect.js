@@ -1,5 +1,4 @@
 (function() {
-
   'use strict';
   Polymer({
     /**
@@ -93,12 +92,12 @@
 
     /**
      * Sends message to external extension.
-     * An error event will fire if trying to send a message on non existing port. Port is not created
-     * if the extension / app that is trying to connect is not installed or do not accept externall
-     * connections.
+     * An error event will fire if trying to send a message on non existing port.
+     * Port is not created if the extension / app that is trying to connect is not
+     * installed or do not accept externall connections.
      *
-     * @param {Any} msg Message to send. A message can contain any valid JSON object (null, boolean,
-     *  number, string, array, or object).
+     * @param {Any} msg Message to send. A message can contain any valid JSON object
+     * (null, boolean, number, string, array, or object).
      */
     postMessage: function(msg) {
       var p = this.port;

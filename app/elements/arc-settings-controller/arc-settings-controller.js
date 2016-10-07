@@ -160,7 +160,6 @@ Polymer({
       'key': key,
       'value': value
     };
-    console.log('Setting changed', key, value);
     this.fire('settings-saved', o);
     arc.app.analytics.sendEvent('Settings usage', key, value + '');
   },
@@ -194,8 +193,7 @@ Polymer({
       _db = db;
       return db.requestObject.where('type').equals('history').delete();
     })
-    .then((deleteCount) => {
-      console.log('Deleted ' + deleteCount + ' objects');
+    .then(() => {
       StatusNotification.notify({
         message: 'History has been cleared'
       });
@@ -204,10 +202,13 @@ Polymer({
       _db.close();
     })
     .catch((e) => {
+      this.fire('app-log', {
+        'message': ['Unable to clear history.', e],
+        'level': 'error'
+      });
       StatusNotification.notify({
         message: 'Unable to clear history'
       });
-      console.error('Error clearing the history', e);
       throw e;
     });
 
@@ -223,8 +224,7 @@ Polymer({
       _db = db;
       return db.table('basicAuth').clear();
     })
-    .then((deleteCount) => {
-      console.log('Deleted ' + deleteCount + ' objects');
+    .then(() => {
       StatusNotification.notify({
         message: 'Passwords store cleared'
       });
@@ -233,7 +233,10 @@ Polymer({
       _db.close();
     })
     .catch((e) => {
-      console.error('Error clearing passwords', e);
+      this.fire('app-log', {
+        'message': ['Error to clear passwords.', e],
+        'level': 'error'
+      });
       StatusNotification.notify({
         message: 'Unable to clear passwords store'
       });
@@ -250,8 +253,7 @@ Polymer({
       _db = db;
       return db.table('cookies').clear();
     })
-    .then((deleteCount) => {
-      console.log('Deleted ' + deleteCount + ' objects');
+    .then(() => {
       StatusNotification.notify({
         message: 'Cookies store cleared'
       });
@@ -260,7 +262,10 @@ Polymer({
       _db.close();
     })
     .catch((e) => {
-      console.error('Error clearing cookies storage', e);
+      this.fire('app-log', {
+        'message': ['Error clearing cookies storage.', e],
+        'level': 'error'
+      });
       StatusNotification.notify({
         message: 'Unable to clear cookies store'
       });
@@ -280,7 +285,6 @@ Polymer({
         }
       });
     } else {
-      console.info('Removing notifications permission');
       chrome.permissions.remove({permissions: ['notifications']});
     }
   },
@@ -343,7 +347,10 @@ Polymer({
       this.exportData();
       arc.app.analytics.sendEvent('Engagement', 'Click', 'Export saved as file');
     }).catch((e) => {
-      console.error(e);
+      this.fire('app-log', {
+        'message': ['Export data.', e],
+        'level': 'error'
+      });
       StatusNotification.notify({
         message: 'Unable to export data :(',
         timeout: StatusNotification.TIME_MEDIUM

@@ -68,7 +68,6 @@ Polymer({
       });
       return;
     }
-    // console.log('_projectReady', project);
     this.set('project', project);
     this.$.requestModel.objectId = project.requestIds;
     this.$.requestModel.query();
@@ -79,22 +78,19 @@ Polymer({
     if (!requests) {
       return;
     }
-    // console.log('_requestReady', requests);
     this.set('requests', requests);
   },
 
   _projectError: function(e) {
-    console.log('_projectError', e);
+    this.fire('app-log', {'message': ['Project ctrl', e], 'level': 'error'});
   },
 
   _projectSaved: function() {
-    console.log('_projectSaved');
+
   },
 
   _projectNameChanged: function() {
     this.$.project.save();
-    // this.$.project.data = this.project;
-    // console.log('_projectNameChanged',a,b);
   },
 
   _requestNameChanged: function(e) {
@@ -107,7 +103,7 @@ Polymer({
   },
 
   _requestSaveError: function(e) {
-    console.error('Error updating the request', e);
+    this.fire('app-log', {'message': ['Request udate', e], 'level': 'error'});
     StatusNotification.notify({
       message: 'Unable to update request data. ' + e.message
     });
@@ -115,7 +111,6 @@ Polymer({
   },
 
   _requestSaved: function() {
-    // console.info('The request has been updated');
   },
 
   _deleteRequested: function(e) {
@@ -145,7 +140,7 @@ Polymer({
         }.bind(this));
       })
       .catch((e) => {
-        console.error('Error deleting the request', e);
+        this.fire('app-log', {'message': ['Request delete', e], 'level': 'error'});
         StatusNotification.notify({
           message: 'Unable to delete the request. ' + e.message
         });
@@ -159,13 +154,11 @@ Polymer({
       this.$.requestSaveModel.objectId = requestToRemove;
       this.$.requestSaveModel.remove()
       .then(() => {
-        console.log('Requests has been deleted.');
         this.$.requestSaveModel.auto = true;
         this.$.project.auto = false;
         return this.$.project.remove();
       })
       .then(() => {
-        console.log('Project has been deleted.');
         this.$.project.auto = true;
         this.async(() => {
           StatusNotification.notify({
@@ -175,7 +168,7 @@ Polymer({
         });
       })
       .catch((e) => {
-        console.error('Error deleting the project', e);
+        this.fire('app-log', {'message': ['Deleting project::', e], 'level': 'error'});
         StatusNotification.notify({
           message: 'Unable to delete the project. ' + e.message
         });

@@ -122,9 +122,13 @@ Polymer({
           }
           db.cookies.bulkPut(save)
           .catch(Dexie.BulkError, (e) => {
-            console.error('Come cookies did not succeed. However, ' +
+            var message = 'Some cookies did not succeed. However, ' +
               (save.length - e.failures.length) + ' cookies (out of ' +  save.length +
-              ') was added successfully');
+              ') was added successfully';
+            this.fire('app-log', {
+              'message': [message, e],
+              'level': 'warn'
+            });
           });
         });
       })
@@ -136,7 +140,6 @@ Polymer({
 
   // Removed cookies identified as to be removed per server request.
   _removeExpired: function() {
-    console.log('Remove expired cookies', this.expired);
     var exp = this.expired;
     if (!exp || !exp.length) {
       return;

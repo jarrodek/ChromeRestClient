@@ -151,7 +151,6 @@ Polymer({
       return;
     }
     this.$.cm.editor.replaceSelection(value);
-    // console.log('_headersSupportClosed', e);
   },
   // Open basic auth support for code mirror.
   _openCmBasicAuth: function() {
@@ -223,10 +222,14 @@ Polymer({
    * @param {String} type A predefined type to display.
    */
   displayWarning: function(type) {
-    console.warn('Content type header not present but it should be: ' + type);
+    this.fire('app-log', {
+      'message': ['Content type header not present but it should be: ' + type],
+      'level': 'warn'
+    });
   },
-  hideWarningn: function(type) {
-    console.info('Content type header is present now: ' + type);
+
+  hideWarningn: function(/*type*/) {
+
   },
   /**
    * Update headers array from form values to the HTTP string.
@@ -372,10 +375,8 @@ Polymer({
           this.__provideSupport(header.name, index);
         });
       });
-      // console.log('aaaaaa',record);
       return;
     }
-    // console.log('aaaaaa',record);
     this.updateHeaders();
     this._provideSupport(record);
   },
@@ -424,13 +425,15 @@ accept-language: en-US,en;q=0.8\n`;
     var elm = Polymer.dom(this.root)
       .querySelector('.headers-form .form-row:nth-child(' + (index + 1) + ') paper-autocomplete');
     if (!elm) {
-      console.warn('Autocomplete element not found.');
+      this.fire('app-log', {
+        'message': ['Autocomplete element not found.'],
+        'level': 'warn'
+      });
       return;
     }
     elm.target = e.target;
     this._setActiveHeaderNameField(e.target);
     this._setActiveAutocompleteNameField(elm);
-    // console.log(e.target, elm);
   },
   /**
    * Handler for autosuggestion element.
@@ -512,7 +515,6 @@ accept-language: en-US,en;q=0.8\n`;
       return;
     }
     var elm = this.__getSupportElmForHeader(headerName);
-    // console.log('Header ', headerName, ' at index ', index, elm ? 'has' : 'has no', 'support');
     if (!elm) {
       parent.classList.remove('has-support');
     } else {
@@ -532,7 +534,10 @@ accept-language: en-US,en;q=0.8\n`;
     var item = this.$.headersList.itemForElement(e.target);
     var elm = this.__getSupportElmForHeader(item.name);
     if (!elm) {
-      console.error('No support for given header', e);
+      this.fire('app-log', {
+        'message': ['No support for given header.', e],
+        'level': 'error'
+      });
       return;
     }
     var index = this.$.headersList.indexForElement(e.target);
@@ -540,7 +545,10 @@ accept-language: en-US,en;q=0.8\n`;
       .querySelector('.headers-form .form-row:nth-child(' + (index + 1) +
         ') input[name="headerValue"]');
     if (!input) {
-      console.error('Input field has not been found.');
+      this.fire('app-log', {
+        'message': ['Input field has not been found.'],
+        'level': 'error'
+      });
       return;
     }
     var model = this.$.headersList.modelForElement(e.target);
