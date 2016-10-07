@@ -247,6 +247,15 @@
         <paper-button raised class="tutorial-button" on-tap="_closeXhrTutorial">Got it</paper-button>
       </div>
     </element-tutorial>
+
+    <!-- Elements on new app -->
+    <arc-database id="requests" store="requests"></arc-database>
+    <arc-database id="harData" store="harData"></arc-database>
+    <arc-database id="harIndex" store="harIndex"></arc-database>
+    <app-pouchdb-quick-search id="q" include-docs adapter="idb" db-name="harIndex" on-data="_qdbResults"
+      highlighting highlighting-pre="<mark>"
+      highlighting-post="</mark>"></app-pouchdb-quick-search>
+
   </template>
   <script src="bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
   <script src="bower_components/dexie-js/dist/dexie.min.js"></script>
