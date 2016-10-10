@@ -176,6 +176,9 @@ Polymer({
 
   _processResponse: function(response) {
     var result = {};
+    this.async(() => {
+      this.processLogs(response.logs);
+    }, 1);
     if (response.error && typeof response.error !== 'function') {
       result.redirects = Array.from(response.redirects);
       result.error = response.error;
@@ -288,6 +291,20 @@ Polymer({
       return;
     }
     this.connection.abort();
+  },
+
+  processLogs(logs) {
+    logs = logs.map((item) => {
+      if (item instanceof Array) {
+        return item.join(' ');
+      }
+      return String(item);
+    });
+    this.fire('app-log', {
+      'message': logs.join('\n'),
+      'stack': 'arc-socket-request.js\nsocket-fetch.js',
+      'level': 'debug'
+    });
   }
 });
 })();
