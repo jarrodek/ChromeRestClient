@@ -54,34 +54,41 @@ Polymer({
   updateLogs: function(opened) {
     if (!opened) {
       this.set('logs', []);
+      this.queryOptions = undefined;
       return;
     }
     this._getLogs();
   },
 
   _getLogs: function() {
-    arc.app.db.idb.open().then((db) => {
-      let start = this.logs && this.logs.length ? this.logs.length - 1 : 0;
-      db.logs
-        .reverse()
-        .offset(start)
-        .limit(200)
-        .sortBy('time')
-        .then((logs) => {
-          if (!logs || !logs.length) {
-            return;
-          }
-          this.async(() => {
-            if (!this.logs) {
-              this.logs = [];
-            }
-            logs = logs.concat(this.logs);
-            this.set('logs', logs);
-          });
-        })
-        .finally(() => {
-          db.close();
-        });
+    if (!this.queryOptions) {
+      this.queryOptions = {
+        limit: 25,
+        descending: true,
+        // jscs:disable
+        include_docs: true
+        // jscs:enable
+      };
+    }
+
+    this.$.db.db.allDocs(this.queryOptions)
+    .then((response) => {
+      var items = [];
+      if (response && response.rows.length > 0) {
+        this.queryOptions.startkey = response.rows[response.rows.length - 1];
+        this.queryOptions.skip = 1;
+        items = response.rows;
+      } else {
+        items = [];
+      }
+      items = items.concat(this.logs);
+      this.set('logs', items);
+    })
+    .catch((e) => {
+      this.fire('app-log', {
+        message: e,
+        level: 'error'
+      });
     });
   },
 
@@ -121,7 +128,9 @@ Polymer({
     if (!stack) {
       return 'unknown file';
     }
-    return stack[0];
+    var list = stack.split('\n');
+    var file = list.find((i) => i.indexOf('app-logger.js') === -1);
+    return file || 'unknown file';
   },
 
   _showDetails: function(e) {
@@ -129,7 +138,7 @@ Polymer({
     if (!item) {
       return;
     }
-    this.set('details', item);
+    this.set('details', item.doc);
     this.showDetails = true;
   },
 

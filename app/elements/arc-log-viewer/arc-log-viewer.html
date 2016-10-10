@@ -115,11 +115,7 @@
     </div>
     <div class="details" hidden$="[[!showDetails]]">
       <div class="log-data"><p class$="[[details.type]]">[[_computeLog(details.logs)]]</p></div>
-      <div class="log-stack">
-        <template is="dom-repeat" items="[[details.stack]]" on-dom-change="notifyResize">
-          <p>{{item}}</p>
-        </template>
-      </div>
+      <div class="log-stack"><pre>[[details.stack]]</p></pre>
       <paper-button raised on-tap="hideDetails">hide</paper-button>
     </div>
     <paper-dialog-scrollable id="scrollable">
@@ -128,8 +124,8 @@
         <template id="list" is="dom-repeat" items="[[logs]]" on-dom-change="notifyResize">
           <paper-item class$="[[item.type]]" on-dblclick="_showDetails">
             <paper-item-body two-line>
-              <div><span class="time">[<date-time year month day date="[[item.time]]"></date-time>]</span> [[_computeLog(item.logs)]]</div>
-              <div secondary>[[_computeFile(item.stack)]]</div>
+              <div><span class="time">[<date-time year month day date="[[item.doc.time]]"></date-time>]</span> [[_computeLog(item.doc.logs)]]</div>
+              <div secondary>[[_computeFile(item.doc.stack)]]</div>
             </paper-item-body>
           </paper-item>
         </template>
@@ -140,6 +136,7 @@
       <paper-button dialog-dismiss>close</paper-button>
       <!-- <paper-button dialog-confirm>Accept</paper-button> -->
     </div>
+    <arc-database id="db" store="logs"></arc-database>
   </template>
   <script src="arc-log-viewer.js"></script>
 </dom-module>
