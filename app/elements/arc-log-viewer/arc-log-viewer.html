@@ -85,10 +85,10 @@
       margin-left: 2em;
       -webkit-user-select: text;
     }
-    .details {
+    /*.details {
       border-bottom: 1px var(--paper-grey-300) solid;
       padding-bottom: 16px;
-    }
+    }*/
     .actions {
       @apply(--layout-horizontal);
       @apply(--layout-center);
@@ -104,37 +104,31 @@
       App logs
     </h2>
     <div class="actions">
-      <!-- <div class="filters">
-        <paper-checkbox checked="{{levelLog}}">log</paper-checkbox>
-        <paper-checkbox checked="{{levelInfo}}">info</paper-checkbox>
-        <paper-checkbox checked="{{levelWarning}}">warning</paper-checkbox>
-        <paper-checkbox checked="{{levelError}}">error</paper-checkbox>
-      </div> -->
       <paper-icon-button icon="refresh" title="refresh logs" on-tap="_refreshLogs"></paper-icon-button>
       <paper-icon-button icon="file-download" on-tap="exportLogs"></paper-icon-button>
     </div>
-    <div class="details" hidden$="[[!showDetails]]">
-      <div class="log-data"><p class$="[[details.type]]">[[_computeLog(details.logs)]]</p></div>
-      <div class="log-stack"><pre>[[details.stack]]</p></pre>
-      <paper-button raised on-tap="hideDetails">hide</paper-button>
-    </div>
     <paper-dialog-scrollable id="scrollable">
-      <div>
-        <!-- sort="sortList" -->
-        <template id="list" is="dom-repeat" items="[[logs]]" on-dom-change="notifyResize">
-          <paper-item class$="[[item.type]]" on-dblclick="_showDetails">
-            <paper-item-body two-line>
-              <div><span class="time">[<date-time year month day date="[[item.doc.time]]"></date-time>]</span> [[_computeLog(item.doc.logs)]]</div>
-              <div secondary>[[_computeFile(item.doc.stack)]]</div>
-            </paper-item-body>
-          </paper-item>
-        </template>
-        <!-- <paper-button raised on-tap="_getLogs">loadMore</paper-button> -->
-      </div>
+      <iron-pages selected="[[viewId]]">
+        <section>
+          <template id="list" is="dom-repeat" items="[[logs]]" on-dom-change="notifyResize">
+            <paper-item class$="[[item.type]]" on-dblclick="_showDetails">
+              <paper-item-body two-line>
+                <div><span class="time">[<date-time year month day date="[[item.doc.time]]"></date-time>]</span> [[_computeLog(item.doc.logs)]]</div>
+                <div secondary>[[_computeFile(item.doc.stack)]]</div>
+              </paper-item-body>
+            </paper-item>
+          </template>
+          <paper-button raised on-tap="_getLogs" disabled$="[[noMoreLogs]]">Load more logs</paper-button>
+        </section>
+        <section>
+          <div class="log-data"><p class$="[[details.type]]">[[_computeLog(details.logs)]]</p></div>
+          <div class="log-stack"><pre>[[details.stack]]</pre></div>
+          <paper-button on-tap="hideDetails">hide details</paper-button>
+        </section>
+      </iron-pages>
     </paper-dialog-scrollable>
     <div class="buttons">
       <paper-button dialog-dismiss>close</paper-button>
-      <!-- <paper-button dialog-confirm>Accept</paper-button> -->
     </div>
     <arc-database id="db" store="logs"></arc-database>
   </template>
