@@ -20,7 +20,6 @@
   app.selectedRequest = null;
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
-    arc.app.logger.initConsole();
     app.updateBranding();
     app.runTutorials();
   });
@@ -34,7 +33,6 @@
     //event will be handled in elements/routing.html
     let event = new Event('initializeRouting');
     window.dispatchEvent(event);
-    arc.app.logger.initDbLogger();
   });
   //When changin route this will scroll page top. This is called from router.
   app.scrollPageToTop = function() {
@@ -331,7 +329,6 @@
   };
 
   window.addEventListener('error', (e) => {
-    console.log('--no-save', 'Window error event,', e);
     if (!e.detail || !e.detail.message) {
       return;
     }
