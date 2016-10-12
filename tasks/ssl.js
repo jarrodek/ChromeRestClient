@@ -13,9 +13,9 @@ const upload = multer(); // for parsing multipart/form-data
 const cookieParser = require('cookie-parser');
 const busboy = require('connect-busboy');
 const router = express.Router();
+const ntlm = require('express-ntlm');
 
 app.use(router);
-
 app.use(cookieParser());
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({
@@ -29,7 +29,7 @@ app.use(function(req, res, next) {
   }
   req.busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
     console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding +
-    ', mimetype: ' + mimetype);
+      ', mimetype: ' + mimetype);
     file.on('data', function(data) {
       console.log('File [' + fieldname + '] got ' + data.length + ' bytes');
     });
@@ -38,7 +38,8 @@ app.use(function(req, res, next) {
     });
   });
   req.busboy.on('field', function(fieldname, val
-  /*, fieldnameTruncated, valTruncated, encoding, mimetype*/) {
+    /*, fieldnameTruncated, valTruncated, encoding, mimetype*/
+  ) {
     console.log('Field [' + fieldname + ']: value: ' + val);
   });
   req.busboy.on('finish', function() {
@@ -46,6 +47,14 @@ app.use(function(req, res, next) {
   });
   req.pipe(req.busboy);
 });
+
+app.use('/ntlm', ntlm({
+  debug: function() {
+    var args = Array.prototype.slice.apply(arguments);
+    console.log.apply(null, args);
+  }
+}));
+
 // app.use(function* (next) {
 //   console.log('Next function called');
 //   if (!this.request.is('multipart/*')) {
@@ -132,6 +141,7 @@ class TestServer {
     this._setRedirect();
     this._setErrors();
     this._setEmptyResponses();
+    this._setNtlm();
   }
 
   _setMain() {
@@ -508,6 +518,30 @@ class TestServer {
     app.all('/null', (req, res) => {
       res.set('Content-Type', 'application/json');
       res.send('null');
+    });
+  }
+
+  _setNtlm() {
+    app.get('/ntlm', (req, res) => {
+      res.status(200);
+      res.set('Location', 'http://localhost:' + this.post + '/redirect/dest');
+      res.set('Content-Type', 'application/json');
+      res.set('Content-Length', 0);
+      res.end();
+    });
+    app.post('/ntlm', (req, res) => {
+      res.status(200);
+      var response = Object.assign({}, {
+        'body': req.body,
+        'query': req.query,
+        headers: req.headers
+      });
+      console.log(req.body, req.query);
+      console.log(req.headers);
+      console.log(req);
+      res.set('Content-Type', 'application/json');
+      res.send(response);
+      res.end();
     });
   }
 }
