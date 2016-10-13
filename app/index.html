@@ -255,11 +255,13 @@
     <arc-database id="logs" store="logs"></arc-database>
     <arc-database id="variables" store="variables"></arc-database>
     <arc-database id="environments" store="environments"></arc-database>
+
     <app-pouchdb-quick-search id="q" include-docs adapter="idb" db-name="harIndex" on-data="_qdbResults"
       highlighting highlighting-pre="<mark>"
       highlighting-post="</mark>"></app-pouchdb-quick-search>
     <app-pouchdb-collate></app-pouchdb-collate>
     <app-logger></app-logger>
+    <app-db-upgrade-1016></app-db-upgrade-1016>
   </template>
   <script src="bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
   <script src="bower_components/dexie-js/dist/dexie.min.js"></script>
