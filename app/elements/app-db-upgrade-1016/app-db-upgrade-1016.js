@@ -26,12 +26,18 @@ Polymer({
       var msg = 'Databse schema upgrade finished with great success!';
       msg += ' And few nights working at home..';
       console.info(msg);
+
+      this.fire('upgrade-102016-completed');
     })
     .catch((e) => {
       var msg = 'Database upgrade error. Please, file an issue report at ';
       msg += 'https://github.com/jarrodek/ChromeRestClient/issues';
       console.error(msg);
       console.error(e);
+
+      this.fire('upgrade-102016-error', {
+        error: e
+      });
     });
   },
 
