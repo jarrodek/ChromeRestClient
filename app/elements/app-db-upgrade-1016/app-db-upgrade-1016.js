@@ -49,7 +49,7 @@ Polymer({
       new PouchDB('legacy-projects').destroy(),
       new PouchDB('history-requests').destroy(),
       new PouchDB('external-requests').destroy(),
-      new PouchDB('arc-cookies').destroy(),
+      new PouchDB('cookies').destroy(),
       new PouchDB('auth-data').destroy()
     ]);
   },
@@ -413,7 +413,7 @@ Polymer({
     this.fire('upgrade-102016', {
       message: 'Inserting cookies (' + data.length + ')'
     });
-    var db = new PouchDB('arc-cookies');
+    var db = new PouchDB('cookies');
     return db.bulkDocs(data);
   },
 
