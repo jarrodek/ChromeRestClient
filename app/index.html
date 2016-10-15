@@ -249,12 +249,16 @@
     </element-tutorial>
 
     <!-- Elements on new app -->
-    <arc-database id="requests" store="requests"></arc-database>
-    <arc-database id="harData" store="harData"></arc-database>
-    <arc-database id="harIndex" store="harIndex"></arc-database>
+    <arc-database id="savedRequests" store="saved-requests"></arc-database>
+    <arc-database id="historyRequests" store="history-requests"></arc-database>
+    <arc-database id="externalRequests" store="external-requests"></arc-database>
+    <arc-database id="projects" store="legacy-projects"></arc-database>
     <arc-database id="logs" store="logs"></arc-database>
+    <arc-database id="history-data" store="history-data"></arc-database>
     <arc-database id="variables" store="variables"></arc-database>
     <arc-database id="environments" store="environments"></arc-database>
+    <arc-database id="authData" store="auth-data"></arc-database>
+    <arc-database id="cookieData" store="cookies"></arc-database>
 
     <app-pouchdb-quick-search id="q" include-docs adapter="idb" db-name="harIndex" on-data="_qdbResults"
       highlighting highlighting-pre="<mark>"
@@ -262,7 +266,7 @@
     <app-pouchdb-collate></app-pouchdb-collate>
     <app-logger></app-logger>
     <app-db-upgrade-1016></app-db-upgrade-1016>
-
+    <legacyproject-related-requests project-id="[[selectedProject]]" related-requests="{{projectEndpoints}}"></legacyproject-related-requests>
   </template>
   <script src="bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
   <script src="bower_components/dexie-js/dist/dexie.min.js"></script>

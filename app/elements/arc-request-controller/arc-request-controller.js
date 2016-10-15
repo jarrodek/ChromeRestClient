@@ -109,7 +109,12 @@ Polymer({
       value: false
     },
     // True if the proxy extension is installed.
-    xhrConnected: Boolean
+    xhrConnected: Boolean,
+
+    currentProjectId: String,
+    projectRelatedRequests: Array,
+    // Current request ID. It's related to project's list. It can be changed from the outside.
+    selectedRequest: String
   },
 
   listeners: {
@@ -121,7 +126,9 @@ Polymer({
 
   observers: [
     '_requestNameChanged(request.name)',
-    '_requestIdChanged(request.id)'
+    '_requestIdChanged(request.id)',
+    '_projectRelatedRequestsChanged(projectRelatedRequests.*)',
+    '_projectSelectedRequestChanged(selectedRequest)'
   ],
 
   onShow: function() {
@@ -352,8 +359,20 @@ Polymer({
       });
     }
   },
-
+  /**
+   * Request data for legacy project.
+   *
+   * @deprecated This function is obsolite. With new database `_requestProjectData()` should be
+   * used.
+   */
   _restoreProject: function(id) {
+    if (this.usePouchDb) {
+      this.currentProjectId = id;
+      this.fire('selected-project', {
+        id: id
+      });
+      return;
+    }
     id = parseInt(id);
     if (!id || id !== id) {
       StatusNotification.notify({
@@ -404,8 +423,23 @@ Polymer({
       app.selectedRequest = null;
       return;
     }
-    this.$.projectQueryModel.objectId = this.project.requestIds;
-    this.$.projectQueryModel.query();
+    if (!this.usePouchDb) {
+      this.$.projectQueryModel.objectId = this.project.requestIds;
+      this.$.projectQueryModel.query();
+    }
+  },
+  
+  _projectRelatedRequestsChanged: function() {
+    if (this.projectRelatedRequests && this.projectRelatedRequests.length) {
+      this.set('selectedRequest', this.projectRelatedRequests[0]._id);
+    }
+  },
+
+  _projectSelectedRequestChanged: function(selectedRequest) {
+    this.fire('selected-request', {
+      id: selectedRequest
+    });
+    this._restoreSaved(selectedRequest);
   },
 
   /**

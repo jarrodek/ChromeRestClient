@@ -16,8 +16,17 @@
       noHistory: {
         type: Boolean,
         value: false
+      },
+      // If set, the controller will use pouch db as a database connector and new database schema.
+      usePouchDb: {
+        type: Boolean
       }
     },
+
+    observers: [
+      '_usePouchDbChanged(usePouchDb)'
+    ],
+
     ready: function() {
       try {
         this._observeHistoryEnabled();
@@ -31,7 +40,6 @@
       }
     },
     attached: function() {
-      this.refreshProjects();
       this.listen(document.body, 'project-removed', 'refreshProjects');
     },
     detached: function() {
@@ -43,11 +51,47 @@
     _navigateRequested: function(e) {
       page(e.detail.url);
     },
+    _usePouchDbChanged: function() {
+      this.refreshProjects();
+    },
     /**
      * Refresh projects list and display new list.
      */
     refreshProjects: function() {
-      this.$.model.query();
+      if (this.usePouchDb) {
+        let e = this.fire('arc-database-query', {
+          store: 'legacy-projects',
+          selector: '_id $exists true',
+          sort: ['_id'],
+          fields: ['_id', 'order', 'name']
+        });
+        e.detail.result
+        .then((result) => {
+          result.sort((a, b) => {
+            if (a.order === b.order) {
+              return 0;
+            }
+            if (a.order > b.order) {
+              return 1;
+            }
+            if (a.order < b.order) {
+              return -1;
+            }
+          });
+          result = result.map((i) => {
+            i.id = i._id;
+            return i;
+          });
+          this.set('projects', result);
+        })
+        .catch((err) => {
+          arc.app.analytics.sendException(err.message, true);
+          this.fire('app-log', {'message': err, 'level': 'error'});
+        });
+      } else {
+        this.$.model.query();
+      }
+
     },
     /**
      * Attach listener to chrome local storage to listen for history settings change.

@@ -18,14 +18,25 @@
    * The same as above.
    */
   app.selectedRequest = null;
+  app.selectedProject = undefined;
   app.upgrading = false;
   app.usePouchDb = false;
+  app.observers = [
+
+  ];
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
     app.updateBranding();
     app.runTutorials();
   });
-
+  // Called when current request changed.
+  window.addEventListener('selected-request', (e) => {
+    app.selectedRequest = e.detail.id;
+  });
+  // Called when current project changed
+  window.addEventListener('selected-project', (e) => {
+    app.selectedProject = e.detail.id;
+  });
   // event fired when the app is initialized and can remove loader.
   window.addEventListener('ArcInitialized', function() {
     document.querySelector('arc-loader-screen').close();
@@ -347,6 +358,12 @@
     }
     var message = '[Window]' + e.detail.message;
     arc.app.analytics.sendException(message, false);
+  });
+
+  window.addEventListener('unhandledrejection', (event) => {
+    event.preventDefault();
+    let reason = event.reason;
+    console.warn('Unhandled promise rejection: ' + (reason && (reason.stack || reason)));
   });
 
   app.runTutorials = () => {

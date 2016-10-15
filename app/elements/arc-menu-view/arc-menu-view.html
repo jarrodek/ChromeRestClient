@@ -61,7 +61,7 @@
           <template is="dom-if" if="{{!projects}}">
             <paper-item>No projects here</paper-item>
           </template>
-          <template is="dom-repeat" items="{{projects}}" sort="{{computeSort(projects)}}">
+          <template is="dom-repeat" items="{{projects}}">
             <paper-item data-route$="request/project/{{item.id}}" class="project-item">
               <div class="project-name" data-place$="{{baseUrl}}request/project/{{item.id}}">{{item.name}}</div>
               <paper-icon-button class="edit-project-icon" data-place$="{{baseUrl}}project/{{item.id}}/edit" icon="arc:mode-edit" alt="Edit project"></paper-icon-button>
