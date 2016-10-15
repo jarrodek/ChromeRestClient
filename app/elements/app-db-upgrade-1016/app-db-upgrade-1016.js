@@ -16,6 +16,21 @@ Polymer({
     this.checkIsUpgraded()
     .then((isDone) => {
       if (isDone) {
+        return this.fire('database-upgrades-ready', {
+          value: '1016'
+        });
+      }
+      console.log('firing database-upgrades-needed');
+      return this.fire('database-upgrades-needed', {
+        value: '1016'
+      });
+    });
+  },
+
+  initScript: function() {
+    this.checkIsUpgraded()
+    .then((isDone) => {
+      if (isDone) {
         return;
       }
       return this.beforeUpgrade()
@@ -26,8 +41,13 @@ Polymer({
       var msg = 'Databse schema upgrade finished with great success!';
       msg += ' And few nights working at home..';
       console.info(msg);
-
-      this.fire('upgrade-102016-completed');
+      this.fire('database-upgrades-status', {
+        value: '1016',
+        message: 'Databse schema upgrade finished with great success!'
+      });
+      return this.fire('database-upgrades-ready', {
+        value: '1016'
+      });
     })
     .catch((e) => {
       var msg = 'Database upgrade error. Please, file an issue report at ';
@@ -35,14 +55,19 @@ Polymer({
       console.error(msg);
       console.error(e);
 
-      this.fire('upgrade-102016-error', {
-        error: e
+      this.fire('database-upgrade-error', {
+        error: e,
+        value: '1016'
       });
     });
   },
 
   // Clean up databases
   beforeUpgrade: function() {
+    this.fire('database-upgrades-status', {
+      value: '1016',
+      message: 'Deleting new databases if exists.'
+    });
     return Promise.all([
       new PouchDB('history-data').destroy(),
       new PouchDB('saved-requests').destroy(),
@@ -55,6 +80,10 @@ Polymer({
   },
 
   checkIsUpgraded: function() {
+    this.fire('database-upgrades-status', {
+      value: '1016',
+      message: 'Checking if upgrade is required.'
+    });
     return new Promise((resolve) => {
       chrome.storage.local.get({'upgrades': []}, (data) => {
         if (data.upgrades.indexOf('102016') !== -1) {
@@ -67,6 +96,11 @@ Polymer({
   },
 
   setStatusUpgraded: function() {
+    this.fire('database-upgrades-status', {
+      value: '1016',
+      message: 'Setting upgrade flags'
+    });
+    // return Promise.resolve();
     return new Promise((resolve) => {
       chrome.storage.local.get({'upgrades': []}, (data) => {
         if (data.upgrades.indexOf('102016') === -1) {
@@ -82,11 +116,13 @@ Polymer({
   initUpgrade: function() {
     return arc.app.importer.prepareExport()
     .then((data) => this.processPackage(data))
-    .then(() => this.copyCookies());
+    .then(() => this.copyCookies())
+    .then(() => this.copyAuthData());
   },
 
   processPackage: function(data) {
-    this.fire('upgrade-102016', {
+    this.fire('database-upgrades-status', {
+      value: '1016',
       message: 'Initializing upgrade'
     });
     // In new structure projects do not have a refference to request ids.
@@ -99,7 +135,7 @@ Polymer({
 
     var parsedRequests;
     var parsedProjects;
-    this.prepareRequestsArrays(requests)
+    return this.prepareRequestsArrays(requests)
     .then((result) => {
       parsedRequests = result;
       return this._processProjects(projects);
@@ -122,7 +158,8 @@ Polymer({
   },
   // Returns an array of saved, history and har objects.
   prepareRequestsArrays: function(requests) {
-    this.fire('upgrade-102016', {
+    this.fire('database-upgrades-status', {
+      value: '1016',
       message: 'Processing requests data'
     });
     return new Promise((resolve, reject) => {
@@ -283,7 +320,8 @@ Polymer({
   },
 
   _processProjects: function(projects) {
-    this.fire('upgrade-102016', {
+    this.fire('database-upgrades-status', {
+      value: '1016',
       message: 'Processing projects data'
     });
     if (!projects || !projects.length) {
@@ -355,7 +393,8 @@ Polymer({
     if (!data || !data.length) {
       return Promise.resolve();
     }
-    this.fire('upgrade-102016', {
+    this.fire('database-upgrades-status', {
+      value: '1016',
       message: 'Inserting projects (' + data.length + ')'
     });
     var db = new PouchDB('legacy-projects');
@@ -366,7 +405,8 @@ Polymer({
     if (!data || !data.length) {
       return Promise.resolve();
     }
-    this.fire('upgrade-102016', {
+    this.fire('database-upgrades-status', {
+      value: '1016',
       message: 'Inserting saved requests (' + data.length + ')'
     });
     var db = new PouchDB('saved-requests');
@@ -377,7 +417,8 @@ Polymer({
     if (!data || !data.length) {
       return Promise.resolve();
     }
-    this.fire('upgrade-102016', {
+    this.fire('database-upgrades-status', {
+      value: '1016',
       message: 'Inserting history (' + data.length + ')'
     });
     var db = new PouchDB('history-requests');
@@ -388,7 +429,8 @@ Polymer({
     if (!data || !data.length) {
       return Promise.resolve();
     }
-    this.fire('upgrade-102016', {
+    this.fire('database-upgrades-status', {
+      value: '1016',
       message: 'Inserting external data (' + data.length + ')'
     });
     var db = new PouchDB('external-requests');
@@ -399,7 +441,8 @@ Polymer({
     if (!data || !data.length) {
       return Promise.resolve();
     }
-    this.fire('upgrade-102016', {
+    this.fire('database-upgrades-status', {
+      value: '1016',
       message: 'Inserting history (HAR) data (' + data.length + ')'
     });
     var db = new PouchDB('history-data');
@@ -410,7 +453,8 @@ Polymer({
     if (!data || !data.length) {
       return Promise.resolve();
     }
-    this.fire('upgrade-102016', {
+    this.fire('database-upgrades-status', {
+      value: '1016',
       message: 'Inserting cookies (' + data.length + ')'
     });
     var db = new PouchDB('cookies');
@@ -421,7 +465,8 @@ Polymer({
     if (!data || !data.length) {
       return Promise.resolve();
     }
-    this.fire('upgrade-102016', {
+    this.fire('database-upgrades-status', {
+      value: '1016',
       message: 'Inserting auth data (' + data.length + ')'
     });
     var db = new PouchDB('auth-data');
@@ -432,7 +477,8 @@ Polymer({
     if (!projects || !projects.length) {
       return;
     }
-    this.fire('upgrade-102016', {
+    this.fire('database-upgrades-status', {
+      value: '1016',
       message: 'Associating legacy projects with requests'
     });
     data.saved = data.saved || [];
@@ -458,6 +504,10 @@ Polymer({
   },
 
   copyCookies: function() {
+    this.fire('database-upgrades-status', {
+      value: '1016',
+      message: 'Processing cookies data'
+    });
     return new Promise((resolve, reject) => {
       var db;
       var error;
@@ -500,6 +550,10 @@ Polymer({
   },
 
   copyAuthData: function() {
+    this.fire('database-upgrades-status', {
+      value: '1016',
+      message: 'Processing auth data'
+    });
     return new Promise((resolve, reject) => {
       var db;
       var error;

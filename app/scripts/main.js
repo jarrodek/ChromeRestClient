@@ -18,6 +18,8 @@
    * The same as above.
    */
   app.selectedRequest = null;
+  app.upgrading = false;
+  app.usePouchDb = false;
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
     app.updateBranding();
@@ -30,10 +32,21 @@
   });
   window.addEventListener('WebComponentsReady', function() {
     // console.log('Components are ready');
-    //event will be handled in elements/routing.html
+    // event will be handled in elements/routing.html
+    if (app.upgrading) {
+      return;
+    }
+    app.initRouting();
+  });
+  app.initRouting = () => {
+    if (app.routingInitialized) {
+      console.warn('Routing is already initialized.');
+      return;
+    }
+    app.routingInitialized = true;
     let event = new Event('initializeRouting');
     window.dispatchEvent(event);
-  });
+  };
   //When changin route this will scroll page top. This is called from router.
   app.scrollPageToTop = function() {
     app.$.headerPanelMain.scrollToTop(true);
@@ -365,4 +378,79 @@
     return 'ctrl+' + key;
   };
 
+  // called when the database upgrade element request database upgrade.
+  // It will register source int the app._dbUpgrades array
+  // and run upgrade screen.
+  window.addEventListener('database-upgrades-needed', (e) => app._onDatabaseUpgradeRequired(e));
+  window.addEventListener('app-initialize-upgrade', () => app._initUpgrades());
+  window.addEventListener('database-upgrades-ready', (e) => app._dbUpgradeReady(e));
+  window.addEventListener('database-upgrades-status', (e) => app._upgradeStatus(e));
+  window.addEventListener('database-upgrade-error', (e) => app._upgradeStatus(e));
+  window.addEventListener('app-upgrade-screen-coninue-errored', () => app._continueErrored());
+  window.addEventListener('app-upgrade-screen-closed', () => {
+    app.initRouting();
+  });
+  app._onDatabaseUpgradeRequired = (e) => {
+    if (!app._dbUpgrades) {
+      app._dbUpgrades = [];
+      app.launchUpgradeScreen();
+      app.upgrading = true;
+    }
+    app._dbUpgrades.push({
+      target: e.target,
+      id: e.value
+    });
+  };
+
+  app.launchUpgradeScreen = () => {
+    var el = document.createElement('app-upgrade-screen');
+    document.body.appendChild(el);
+    el.opened = true;
+  };
+  app._initUpgrades = () => {
+    if (!app._dbUpgrades || !app._dbUpgrades.length) {
+      document.querySelector('app-upgrade-screen').finished = true;
+      return;
+    }
+    var target = app._dbUpgrades[0];
+    if (!target) {
+      document.querySelector('app-upgrade-screen').finished = true;
+      return;
+    }
+    target.target.initScript();
+  };
+  app._dbUpgradeReady = (e) => {
+    app.set('usePouchDb', true);
+    app._upgradeReady(e);
+  };
+  app._upgradeReady = (e) => {
+    if (!app._dbUpgrades || !app._dbUpgrades.length) {
+      let elm = document.querySelector('app-upgrade-screen');
+      if (elm) {
+        elm.finished = true;
+      }
+      return;
+    }
+    var target = e.target;
+    var index = app._dbUpgrades.findIndex((i) => i.target === target);
+    if (index === -1) {
+      return;
+    }
+    app._dbUpgrades.splice(index, 1);
+    if (!app._dbUpgrades.length) {
+      document.querySelector('app-upgrade-screen').finished = true;
+      app.initRouting();
+    } else {
+      app._initUpgrades();
+    }
+  };
+  app._continueErrored = () => {
+    // Current updrage script errored.
+    // continue with next or exit if there's no more upgrades.
+    app._dbUpgrades.shift();
+    app._initUpgrades();
+  };
+  app._upgradeStatus = (e) => {
+    app.fire('app-upgrade-screen-log', e.detail);
+  };
 })(document, window);

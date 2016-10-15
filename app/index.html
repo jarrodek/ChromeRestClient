@@ -25,7 +25,7 @@
                     <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
                 </paper-toolbar> -->
         <!-- App Menu -->
-        <arc-menu-controller id="appMenu" route="[[route]]" base-url="[[baseUrl]]"></arc-menu-controller>
+        <arc-menu-controller use-pouch-db="[[usePouchDb]]" id="appMenu" route="[[route]]" base-url="[[baseUrl]]"></arc-menu-controller>
       </paper-scroll-header-panel>
       <!-- Main Area -->
       <paper-scroll-header-panel main id="headerPanelMain">
@@ -66,20 +66,20 @@
         <!-- Main Content -->
         <div class="content">
           <neon-animated-pages id="pages" attr-for-selected="data-route" selected-attribute="opened" selected="[[route]]" entry-animation="slide-from-right-animation" exit-animation="slide-left-animation">
-            <arc-request-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" request-loading="{{requestLoading}}" has-response="{{hasResponse}}" opened="{{requestOpened}}" request="{{request}}" response="{{response}}" active-request="{{activeRequest}}" route-params="[[params]]" data-route="request">
+            <arc-request-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" request-loading="{{requestLoading}}" has-response="{{hasResponse}}" opened="{{requestOpened}}" request="{{request}}" response="{{response}}" active-request="{{activeRequest}}" route-params="[[params]]" data-route="request">
               <arc-request-view on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" request-loading="[[requestLoading]]" opened="{{requestOpened}}" request="{{request}}"></arc-request-view>
               <template is="dom-if" if="[[hasResponse]]">
                 <arc-response-view opened="[[requestOpened]]" response="[[response]]" request="[[activeRequest]]"></arc-response-view>
               </template>
               <arc-save-dialog-view on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" id="saveRequestUi"></arc-save-dialog-view>
             </arc-request-controller>
-            <arc-websocket-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="socket"></arc-websocket-controller>
-            <arc-history-list-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" main on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" search-query="[[searchTerm]]" data-route="history"></arc-history-list-controller>
-            <arc-saved-list-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" search-query="[[searchTerm]]" data-route="saved"></arc-saved-list-controller>
-            <arc-data-io-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="dataimport" on-data-imported="_dataImportedHandler"></arc-data-io-controller>
-            <arc-settings-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="settings"></arc-settings-controller>
-            <arc-about-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="about"></arc-about-controller>
-            <arc-project-controller project="{{currentProject}}" requests="{{currentRequests}}" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="project" route-params="[[params]]">
+            <arc-websocket-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="socket"></arc-websocket-controller>
+            <arc-history-list-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" main on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" search-query="[[searchTerm]]" data-route="history"></arc-history-list-controller>
+            <arc-saved-list-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" search-query="[[searchTerm]]" data-route="saved"></arc-saved-list-controller>
+            <arc-data-io-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="dataimport" on-data-imported="_dataImportedHandler"></arc-data-io-controller>
+            <arc-settings-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="settings"></arc-settings-controller>
+            <arc-about-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="about"></arc-about-controller>
+            <arc-project-controller use-pouch-db="[[usePouchDb]]" project="{{currentProject}}" requests="{{currentRequests}}" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="project" route-params="[[params]]">
               <arc-project-view project="{{currentProject}}" requests="[[currentRequests]]"></arc-project-view>
             </arc-project-controller>
           </neon-animated-pages>
@@ -262,6 +262,7 @@
     <app-pouchdb-collate></app-pouchdb-collate>
     <app-logger></app-logger>
     <app-db-upgrade-1016></app-db-upgrade-1016>
+
   </template>
   <script src="bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
   <script src="bower_components/dexie-js/dist/dexie.min.js"></script>
