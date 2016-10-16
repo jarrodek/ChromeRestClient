@@ -36,6 +36,9 @@
   // Called when current project changed
   window.addEventListener('selected-project', (e) => {
     app.selectedProject = e.detail.id;
+    if (!app.selectedProject) {
+      app.projectEndpoints = [];
+    }
   });
   // event fired when the app is initialized and can remove loader.
   window.addEventListener('ArcInitialized', function() {
@@ -145,7 +148,10 @@
     if (!(fnName in src)) {
       console.warn(`Function ${fnName} is undefined for ${src.nodeName}`);
     } else {
-      src[fnName](event);
+      src[fnName]({
+        detail: event,
+        source: 'feature'
+      });
     }
   };
   app._onFeatureOpen = (e) => {
@@ -191,11 +197,19 @@
     app.$.appMenu.refreshProjects();
   });
 
-  app.onSave = () => {
-    var ctrl = document.querySelector('arc-request-controller');
-    ctrl.onSave();
-    arc.app.analytics.sendEvent('Shortcats usage', 'Called', 'Save');
+  app.onSave = (e, detail) => {
+    var ctrl = document.querySelector('arc-request-controller, request-panel');
+    ctrl.onSave({
+      source: 'shortcut',
+      shift: detail.keyboardEvent.shiftKey
+    });
+    var label = 'Save';
+    if (detail.keyboardEvent.shiftKey) {
+      label += ' (shift)';
+    }
+    arc.app.analytics.sendEvent('Shortcats usage', 'Called', label);
   };
+  app.onSaveShift = (e, detail) => app.onSave(e, detail);
 
   app.onOpen = () => {
     page('/saved');
@@ -387,12 +401,19 @@
     });
   };
 
-  app._computeA11yButtons = (key) => {
+  app._computeA11yButtons = (key, hasShift) => {
     var isMac = navigator.platform.indexOf('Mac') !== -1;
+    var cmd = '';
     if (isMac) {
-      return 'meta+' + key;
+      cmd += 'meta+';
+    } else {
+      cmd += 'ctrl+';
     }
-    return 'ctrl+' + key;
+    if (hasShift) {
+      cmd += 'shift+';
+    }
+    cmd += key;
+    return cmd;
   };
 
   // called when the database upgrade element request database upgrade.
@@ -469,5 +490,20 @@
   };
   app._upgradeStatus = (e) => {
     app.fire('app-upgrade-screen-log', e.detail);
+  };
+
+  app._mainPageSelected = (e) => {
+    if (app.route !== 'request') {
+      return;
+    }
+    var elm = e.detail.item.querySelector('*:not(template)');
+    elm.opened = true;
+  };
+  app._mainPageDeselected = (e) => {
+    var elm = e.detail.item.querySelector('*:not(template)');
+    if (!elm || elm.nodeName !== 'REQUEST-PANEL') {
+      return;
+    }
+    elm.opened = false;
   };
 })(document, window);

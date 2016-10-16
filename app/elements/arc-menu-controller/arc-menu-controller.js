@@ -59,40 +59,44 @@
      */
     refreshProjects: function() {
       if (this.usePouchDb) {
-        let e = this.fire('arc-database-query', {
-          store: 'legacy-projects',
-          selector: '_id $exists true',
-          sort: ['_id'],
-          fields: ['_id', 'order', 'name']
-        });
-        e.detail.result
-        .then((result) => {
-          result.sort((a, b) => {
-            if (a.order === b.order) {
-              return 0;
-            }
-            if (a.order > b.order) {
-              return 1;
-            }
-            if (a.order < b.order) {
-              return -1;
-            }
-          });
-          result = result.map((i) => {
-            i.id = i._id;
-            return i;
-          });
-          this.set('projects', result);
-        })
-        .catch((err) => {
-          arc.app.analytics.sendException(err.message, true);
-          this.fire('app-log', {'message': err, 'level': 'error'});
-        });
+        this._queryProjects();
       } else {
         this.$.model.query();
       }
-
     },
+
+    _queryProjects: function() {
+      let e = this.fire('arc-database-query', {
+        store: 'legacy-projects',
+        selector: '_id $exists true',
+        sort: ['_id'],
+        fields: ['_id', 'order', 'name']
+      });
+      e.detail.result
+      .then((result) => {
+        result.sort((a, b) => {
+          if (a.order === b.order) {
+            return 0;
+          }
+          if (a.order > b.order) {
+            return 1;
+          }
+          if (a.order < b.order) {
+            return -1;
+          }
+        });
+        result = result.map((i) => {
+          i.id = i._id;
+          return i;
+        });
+        this.set('projects', result);
+      })
+      .catch((err) => {
+        arc.app.analytics.sendException(err.message, true);
+        this.fire('app-log', {'message': err, 'level': 'error'});
+      });
+    },
+
     /**
      * Attach listener to chrome local storage to listen for history settings change.
      */
@@ -132,7 +136,11 @@
      * @param {Number} projectId Database id for the project
      */
     appendProject: function(/*projectId*/) {
-      this.$.model.query();
+      if (this.usePouchDb) {
+        this._queryProjects();
+      } else {
+        this.$.model.query();
+      }
     },
     /**
      * Remove project from the UI.

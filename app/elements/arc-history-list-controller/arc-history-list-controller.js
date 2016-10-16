@@ -12,6 +12,10 @@ Polymer({
       type: String,
       value: 'desc',
       notify: true
+    },
+    isHistory: {
+      type: Boolean,
+      value: true
     }
   },
 

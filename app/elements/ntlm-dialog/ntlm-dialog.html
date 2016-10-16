@@ -23,6 +23,9 @@
           <paper-button dialog-confirm on-tap="_setValue">Accept</paper-button>
       </div>
     </div>
+    <template is="dom-if" if="[[usePouchDb]]" restamp="true">
+      <app-pouchdb-document db-name="auth-data" id="doc" doc-id="{{credentialsPath}}" data="{{savedAuth}}"></app-pouchdb-document>
+    </template>
   </template>
 </dom-module>
 <script src="ntlm-dialog.js"></script>

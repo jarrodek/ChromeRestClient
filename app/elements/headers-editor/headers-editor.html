@@ -73,7 +73,7 @@
       }
     </style>
     <paper-tabs selected="{{tabSelected}}">
-      <paper-tab>Raw headers</paper-tab>
+      <paper-tab>Raw headers [[usePouchDb]]</paper-tab>
       <paper-tab>Headers form</paper-tab>
       <paper-tab>Headers sets</paper-tab>
       <!-- <paper-tab>Authorization</paper-tab> -->
@@ -100,7 +100,7 @@
                 <paper-icon-button icon="image:edit" title="Edit header value" on-tap="_openHeaderSupport"></paper-icon-button>
               </div>
               <paper-icon-button icon="close" title="Remove header" on-tap="_removeHeader"></paper-icon-button>
-              <paper-autocomplete loader on-query="_queryHeaderName" on-selected="_onHeaderNameSelected"></paper-autocomplete>
+              <paper-autocomplete on-query="_queryHeaderName" on-selected="_onHeaderNameSelected"></paper-autocomplete>
             </div>
           </template>
         </div>
@@ -121,6 +121,7 @@
         </paper-menu>
       </section> -->
     </iron-pages>
+    <iron-meta id="meta" key="usePouchDb"></iron-meta>
     <arc-header-object-model id="headerModel" on-data-ready="_setNameSuggestions"></arc-header-object-model>
     <content-type-support></content-type-support>
     <authorization-support></authorization-support>

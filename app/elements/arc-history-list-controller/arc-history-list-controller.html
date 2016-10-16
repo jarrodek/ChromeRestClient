@@ -36,7 +36,7 @@ the License.
     </style>
     <paper-progress indeterminate hidden$="[[!querying]]"></paper-progress>
     <template is="dom-if" if="{{hasListData}}">
-      <arc-history-list-view querying="[[querying]]" is-history sort="{{sortBy}}" dir="{{sortDirection}}" requests="{{listData}}" on-clear-data="_clearDataStore" on-export-requested="_onExportRequested" on-delete-requested="_onDeleteRequested" on-content-scroll="_viewScrolling" querying="[[querying]]"></arc-history-list-view>
+      <arc-history-list-view use-pouch-db="[[usePouchDb]]" querying="[[querying]]" is-history sort="{{sortBy}}" dir="{{sortDirection}}" requests="{{listData}}" on-clear-data="_clearDataStore" on-export-requested="_onExportRequested" on-delete-requested="_onDeleteRequested" on-content-scroll="_viewScrolling" querying="[[querying]]"></arc-history-list-view>
       <onboarding-tutorial id="history" auto>
         <onboarding-page>
           <h2>New history list</h2>
@@ -60,6 +60,7 @@ the License.
     <template is="dom-if" if="{{isEmpty}}">
       <arc-saved-list-empty on-open-drive="openDrive"></arc-saved-list-empty>
     </template>
+    <iron-meta id="meta" key="usePouchDb"></iron-meta>
     <arc-request-object-model id="model" search-term="[[searchQuery]]" on-data-ready="_dataRead" on-error="_dbError" request-type="history" limit="[[limit]]" offset="[[offset]]" sort-by="[[sortBy]]" direction=[[sortDirection]]></arc-request-object-model>
     <arc-request-object-model id="saveModel" auto on-save="_requestSaved" request-type="history"></arc-request-object-model>
     <arc-request-object-model id="deleteModel" on-deleted="_selectedRemoved" on-error="_selectedRemoveError" request-type="history"></arc-request-object-model>

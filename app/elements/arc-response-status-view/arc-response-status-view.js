@@ -136,8 +136,19 @@ Polymer({
       }
       return;
     }
-    this.$.statusModel.objectId = this.statusCode;
-    this.$.statusModel.query();
+    if (this.$.meta.byKey('usePouchDb')) {
+      let event = this.fire('query-status-codes', {
+        'code': this.statusCode
+      });
+      let statusCode = event.detail.statusCode;
+      if (statusCode) {
+        event.detail.data = statusCode;
+        this._onStatusInfoReady(event);
+      }
+    } else {
+      this.$.statusModel.objectId = this.statusCode;
+      this.$.statusModel.query();
+    }
   },
 
   _onStatusInfoReady: function(e) {

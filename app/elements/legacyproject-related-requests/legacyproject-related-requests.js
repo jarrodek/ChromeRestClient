@@ -10,53 +10,45 @@
       projectId: String,
       relatedRequests: {
         type: Array,
-        notify: true,
-        value: function() {
-          return [];
-        }
+        notify: true
       }
     },
 
     observers: [
-      '_projectChanged(projectId)'
+      '_query(projectId)'
     ],
 
-    _projectChanged: function() {
-      this.set('relatedRequests', []);
-      let e = this.fire('arc-database-query', {
-        store: 'saved-requests',
-        selector: 'legacyProject $eq \'' + this.projectId + '\'',
-        sort: ['_id'],
-        fields: ['_id', 'name']
-      });
-      e.detail.result
-      .then((result) => {
-        result.sort((a, b) => {
-          if (a.name === b.name) {
-            return 0;
-          }
-          if (a.name > b.name) {
-            return 1;
-          }
-          if (a.name < b.name) {
-            return -1;
-          }
-        });
-        result = result.map((i) => {
-          i.id = i._id;
-          return i;
-        });
-        this.set('relatedRequests', result);
+    _query: function(projectId) {
+      if (!projectId) {
+        return;
+      }
+      if (!this.db) {
+        this.db = new PouchDB('saved-requests');
+      }
+      this.db.createIndex({
+        index: {
+          fields: ['legacyProject']
+        }
       })
-      .catch((err) => {
-        arc.app.analytics.sendException(err.message, true);
-        this.fire('app-log', {
-          'message': err,
-          'level': 'error'
+      .then(() => {
+        return this.db.find({
+          selector: {
+            legacyProject: projectId
+          },
+          fields: ['_id', 'name']
         });
-        this.fire('error', {
-          'error': err
-        });
+      })
+      .then((r) => this.__processData(r))
+      .then((r) => this.set('relatedRequests', r));
+    },
+
+    __processData: function(result) {
+      if (!result.docs.length) {
+        return [];
+      }
+      return result.docs.map((i) => {
+        i.id = i._id;
+        return i;
       });
     }
   });

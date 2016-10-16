@@ -114,7 +114,11 @@ Polymer({
     currentProjectId: String,
     projectRelatedRequests: Array,
     // Current request ID. It's related to project's list. It can be changed from the outside.
-    selectedRequest: String
+    selectedRequest: String,
+    /**
+     * Endpoints related to current legacy project.
+     */
+    projectEndpoints: Array
   },
 
   listeners: {
@@ -288,7 +292,11 @@ Polymer({
         this._restoreSaved(this.routeParams.historyId);
         break;
       case 'project':
-        this._restoreProject(this.routeParams.projectid);
+        if (this.usePouchDb) {
+          this.set('currentProjectId', this.routeParams.projectid);
+        } else {
+          this._restoreProject(this.routeParams.projectid);
+        }
         break;
       case 'current':
         this.$.requestQueryModel.data = this.request;
@@ -362,8 +370,7 @@ Polymer({
   /**
    * Request data for legacy project.
    *
-   * @deprecated This function is obsolite. With new database `_requestProjectData()` should be
-   * used.
+   * @deprecated This function is obsolite. Use `this.currentProjectId` instead an listeners.
    */
   _restoreProject: function(id) {
     if (this.usePouchDb) {
@@ -428,7 +435,7 @@ Polymer({
       this.$.projectQueryModel.query();
     }
   },
-  
+
   _projectRelatedRequestsChanged: function() {
     if (this.projectRelatedRequests && this.projectRelatedRequests.length) {
       this.set('selectedRequest', this.projectRelatedRequests[0]._id);

@@ -526,7 +526,10 @@ class TestServer {
       res.status(200);
       res.set('Location', 'http://localhost:' + this.post + '/redirect/dest');
       res.set('Content-Type', 'application/json');
-      res.set('Content-Length', 0);
+      res.send({
+        state: 'authotized',
+        type: 'ntlm'
+      });
       res.end();
     });
     app.post('/ntlm', (req, res) => {

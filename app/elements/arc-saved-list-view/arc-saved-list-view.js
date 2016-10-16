@@ -10,7 +10,8 @@ Polymer({
 
   properties: {
     searchTerm: String,
-    isSearch: Boolean
+    isSearch: Boolean,
+    usePouchDb: Boolean
   },
 
   openDrive: function() {

@@ -45,8 +45,23 @@ Polymer({
   _displayHeaderInfo: function(e) {
     var item = e.model.get('item');
     var header = item.name.toLowerCase();
-    this.$.model.objectId = [header, this.type];
-    this.$.model.getObject();
+    if (this.$.meta.byKey('usePouchDb')) {
+      var event = this.fire('query-headers', {
+        'type': 'response',
+        'query': header
+      });
+      var headers = event.detail.headers;
+      if (headers.length) {
+        var result = headers[0];
+        this._hdTitle = result.key;
+        this._hdBody = result.desc;
+        this._hdExample = result.example;
+        this.$.headerInfo.open();
+      }
+    } else {
+      this.$.model.objectId = [header, this.type];
+      this.$.model.getObject();
+    }
     arc.app.analytics.sendEvent('Response status', 'Display header info', header);
   },
   /** Called when model returned data */

@@ -217,6 +217,11 @@ window.ArcBehaviors.ListControllerBehavior = {
     this.page = 0;
     this.hasMore = true;
     this._setQuerying(false);
+    this.pagination = {
+      limit: this.limit,
+      dir: this.sortDirection,
+      field: this.sortBy
+    };
   },
   /**
    * Resets current query and perform a new query with new criteria.

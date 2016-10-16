@@ -75,7 +75,8 @@ Polymer({
       new PouchDB('history-requests').destroy(),
       new PouchDB('external-requests').destroy(),
       new PouchDB('cookies').destroy(),
-      new PouchDB('auth-data').destroy()
+      new PouchDB('auth-data').destroy(),
+      new PouchDB('url-history').destroy()
     ]);
   },
 
@@ -117,7 +118,8 @@ Polymer({
     return arc.app.importer.prepareExport()
     .then((data) => this.processPackage(data))
     .then(() => this.copyCookies())
-    .then(() => this.copyAuthData());
+    .then(() => this.copyAuthData())
+    .then(() => this.copyUrlHistory());
   },
 
   processPackage: function(data) {
@@ -473,6 +475,18 @@ Polymer({
     return db.bulkDocs(data);
   },
 
+  _insertUrlData: function(data) {
+    if (!data || !data.length) {
+      return Promise.resolve();
+    }
+    this.fire('database-upgrades-status', {
+      value: '1016',
+      message: 'Inserting url history (' + data.length + ')'
+    });
+    var db = new PouchDB('url-history');
+    return db.bulkDocs(data);
+  },
+
   _assignProjects: function(data, projects) {
     if (!projects || !projects.length) {
       return;
@@ -494,6 +508,7 @@ Polymer({
         for (let k = 0; k < savedLen; k++) {
           if (data.saved[k].origin === rId) {
             if (!data.saved[k].legacyProject) {
+              data.saved[k].request._id += '/' + newProjectId;
               data.saved[k].request.legacyProject = newProjectId;
               break;
             }
@@ -573,6 +588,46 @@ Polymer({
         });
       })
       .then((toInsert) => this._insertAuthData(toInsert))
+      .catch((err) => {
+        error = err;
+      })
+      .finally(function() {
+        db.close();
+        // Escape Dexie promise system.
+        if (error) {
+          return reject();
+        }
+        resolve();
+      });
+    });
+  },
+
+  copyUrlHistory: function() {
+    this.fire('database-upgrades-status', {
+      value: '1016',
+      message: 'Processing url history'
+    });
+    return new Promise((resolve, reject) => {
+      var db;
+      var error;
+      arc.app.db.idb.open()
+      .then((_db) => {
+        db = _db;
+        return db.historyUrls.toArray();
+      })
+      .then((arr) => {
+        if (!arr || !arr.length) {
+          return null;
+        }
+        return arr.map((i) => {
+          i = Object.assign({}, i);
+          i._id = i.url;
+          delete i.url;
+          i.cnt = 1;
+          return i;
+        });
+      })
+      .then((toInsert) => this._insertUrlData(toInsert))
       .catch((err) => {
         error = err;
       })

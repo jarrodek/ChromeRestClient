@@ -1,14 +1,14 @@
 (function() {
   'use strict';
   Polymer({
-    is: 'ntlm-dialog',
+    is: 'basic-auth-dialog',
     behaviors: [
       Polymer.PaperDialogBehavior
     ],
 
     properties: {
       // User login
-      login: {
+      username: {
         type: String,
         value: ''
       },
@@ -17,14 +17,8 @@
         type: String,
         value: ''
       },
-      // User login domain
-      domain: {
-        type: String,
-        value: 'workgroup'
-      },
       // Current URL.
       url: String,
-      usePouchDb: Boolean,
       entryAnimation: {
         type: String,
         value: 'slide-from-top-animation'
@@ -44,8 +38,18 @@
       '_savedAuthChanged(savedAuth.*)'
     ],
 
+    _setValue: function() {
+      this.fire('basic-auth-data-ready', {
+        encoded: btoa(this.username + ':' + this.password)
+      });
+      if (!this.savedAuth || !this.savedAuth.encoded ||
+        this.decoded[0] !== this.username || this.decoded[1] !== this.password) {
+        this._updateData();
+      }
+    },
+
     _computeCredentialsPath: function(url) {
-      var path = 'ntlm/';
+      var path = 'basic/';
       if (url) {
         path += encodeURIComponent(url);
       }
@@ -53,42 +57,31 @@
     },
 
     _savedAuthChanged: function() {
-      var a = this.savedAuth;
-      if (!a || !a.uid || !this.url) {
+      if (!this.savedAuth || !this.savedAuth.encoded || !this.url) {
         return;
       }
-      this.login = a.uid;
-      this.password = a.passwd;
-      this.domain = a.domain;
-    },
-
-    _setValue: function() {
-      this.fire('auth-data', {
-        uid: this.login,
-        passwd: this.password,
-        domain: this.domain
-      });
-      if (this.usePouchDb) {
-        if (!this.savedAuth || this.savedAuth.uid !== this.login ||
-          this.savedAuth.passwd !== this.password || this.savedAuth.domain !== this.domain) {
-          this._updateData();
-        }
+      let authData = atob(this.savedAuth.encoded).split(':');
+      if (authData[0]) {
+        this.set('username', authData[0]);
       }
+      if (authData[1]) {
+        this.set('password', authData[1]);
+      }
+      this.decoded = authData;
     },
 
     _updateData: function() {
-      if (!this.usePouchDb || !this.url) {
+      if (!this.url) {
         return;
       }
+      var encoded = btoa(this.username + ':' + this.password);
       if (!this.savedAuth) {
         this.savedAuth = {
-          _id: 'ntlm/' + encodeURIComponent(this.url)
+          _id: 'basic/' + encodeURIComponent(this.url)
         };
       }
-      this.savedAuth.uid = this.login;
-      this.savedAuth.passwd = this.password;
-      this.savedAuth.domain = this.domain;
-      this.$$('#doc').save();
+      this.savedAuth.encoded = encoded;
+      this.$.doc.save();
     }
 
   });
