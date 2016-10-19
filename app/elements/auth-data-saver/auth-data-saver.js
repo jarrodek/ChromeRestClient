@@ -27,6 +27,9 @@
 
     // To be called before sending the request to apply an authorization header if required.
     applyAuthorization: function(request) {
+      if (!request.headers) {
+        request.headers = '';
+      }
       if (request.headers.match(/authorization:\s?basic\s[a-zA-Z0-9]+=/gim) !== null) {
         // Already has authorization.
         return Promise.resolve(request);

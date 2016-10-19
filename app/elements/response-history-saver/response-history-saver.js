@@ -54,17 +54,47 @@
 
     _updateHistory: function(req, res) {
       var rTime = new Date(res.stats.startTime).getTime();
-      var k = encodeURIComponent(req.url) + '/' + req.method + '/' + rTime;
-      var _doc = {
-        _id: k,
-        created: rTime,
-        headers: req.headers,
-        method: req.method,
-        payload: req.payload,
-        url: req.url
-      };
+      var today = this._getDayToday(rTime);
+      var k = encodeURIComponent(req.url) + '/' + req.method + '/' + today;
+
       var db = new PouchDB('history-requests');
-      return db.put(_doc).then(() => db.close());
+      return db.get(k).then((r) => {
+        r.updated = rTime;
+        return db.put(r);
+      }).catch((e) => {
+        if (e.status !== 404) {
+          throw e;
+        }
+        let _doc = {
+          _id: k,
+          created: rTime,
+          updated: rTime,
+          headers: req.headers,
+          method: req.method,
+          payload: req.payload,
+          url: req.url
+        };
+        return db.put(_doc);
+      })
+      .then(() => db.close());
+    },
+
+    /**
+     * Setss hours, minutes, seconds and ms to 0 and returns timestamp.
+     *
+     * @return {Number} Timestamp to the day.
+     */
+    _getDayToday(timestamp) {
+      var d = new Date(timestamp);
+      var tCheck = d.getTime();
+      if (tCheck !== tCheck) {
+        throw new Error('Invalid timestamp: ' + timestamp);
+      }
+      d.setMilliseconds(0);
+      d.setSeconds(0);
+      d.setMinutes(0);
+      d.setHours(0);
+      return d.getTime();
     }
   });
 })();

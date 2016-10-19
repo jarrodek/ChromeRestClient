@@ -324,7 +324,9 @@
 
       let base = {
         url: '',
-        method: 'GET'
+        method: 'GET',
+        headers: '',
+        payload: ''
       };
       this.set('request', base);
       this._setResponse(null);

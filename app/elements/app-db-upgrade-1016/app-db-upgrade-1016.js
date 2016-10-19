@@ -166,6 +166,18 @@ Polymer({
     });
     return new Promise((resolve, reject) => {
       this._parsePartRequests(requests, resolve, reject);
+    })
+    .then((result) => {
+      // remove duplicates from the history.
+      let ids = [];
+      result.history = result.history.filter((item) => {
+        if (ids.indexOf(item.request._id) === -1) {
+          ids[ids.length] = item.request._id;
+          return true;
+        }
+        return false;
+      });
+      return result;
     });
   },
   /**
@@ -225,17 +237,29 @@ Polymer({
    * Parser for the history request
    * ## The history request object.
    * The request object is consisted with following properties:
-   * - _id: url + '/' + method + '/' + date
+   * - _id: url + '/' + method + '/' + date (as today only)
    * - url: String
    * - method: String
    * - headers: String
    * - payload: String
    * - created: time
+   *
+   * The timestamp in the key represents current day only according to the
+   * updateTime property (from the old structure). Each history entry can be saved
+   * once per day.
+   *
    * @return {Object|null}
    */
   _parseHistoryItem: function(item) {
+    var today;
+    try {
+      today = this._getDayToday(item.updateTime);
+    } catch (e) {
+      today = this._getDayToday(Date.now());
+    }
+
     var obj = {
-      _id: encodeURIComponent(item.url) + '/' + item.method + '/' + item.updateTime,
+      _id: encodeURIComponent(item.url) + '/' + item.method + '/' + today,
       method: item.method,
       url: item.url
     };
@@ -258,6 +282,7 @@ Polymer({
       request: obj
     };
   },
+
   /**
    * Parser for the saved request
    * ## The request object.
@@ -640,6 +665,23 @@ Polymer({
         resolve();
       });
     });
+  },
+  /**
+   * Setss hours, minutes, seconds and ms to 0 and returns timestamp.
+   *
+   * @return {Number} Timestamp to the day.
+   */
+  _getDayToday(timestamp) {
+    var d = new Date(timestamp);
+    var tCheck = d.getTime();
+    if (tCheck !== tCheck) {
+      throw new Error('Invalid timestamp: ' + timestamp);
+    }
+    d.setMilliseconds(0);
+    d.setSeconds(0);
+    d.setMinutes(0);
+    d.setHours(0);
+    return d.getTime();
   }
 });
 })();
