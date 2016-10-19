@@ -48,7 +48,7 @@ Polymer({
   resetView: function() {
     var view = this.$$('arc-history-list-view');
     if (!view) {
-      this.fire('app-log', {'message': 'History view not present!', 'level': 'warning'});
+      this.fire('app-log', {'message': 'History view not present!', 'level': 'warn'});
       return;
     }
     view.closeDetailsPanel();

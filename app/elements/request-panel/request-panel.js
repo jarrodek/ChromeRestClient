@@ -183,11 +183,12 @@
         case 'saved':
           this.requestType = this.routeParams.type;
           // decode and encode this because router is parsing it wong!
-          this.set('savedId', this.routeParams.savedId);
+          this.set('savedId', decodeURIComponent(this.routeParams.savedId));
           break;
         case 'history':
           this.requestType = this.routeParams.type;
-          this.set('historyId', this.routeParams.historyId);
+          this.set('historyId', decodeURIComponent(this.routeParams.historyId));
+          console.log('SET history ID ', this.historyId);
           break;
         case 'drive':
           this.requestType = this.routeParams.type;
@@ -228,6 +229,7 @@
 
     _proxyRequestChanged: function() {
       var r = this.proxyRequest;
+      console.log('_proxyRequestChanged', r);
       if (!r || !r._id) {
         return;
       }
@@ -273,7 +275,7 @@
     // Informs other element that the request ID has changed.
     _requestIdChanged: function(id) {
       this.fire('selected-request', {
-        id: id
+        id: encodeURIComponent(id)
       });
       if (!id) {
         return;
