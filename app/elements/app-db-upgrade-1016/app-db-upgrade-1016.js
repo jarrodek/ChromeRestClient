@@ -261,7 +261,8 @@ Polymer({
     var obj = {
       _id: encodeURIComponent(item.url) + '/' + item.method + '/' + today,
       method: item.method,
-      url: item.url
+      url: item.url,
+      updated: new Date(item.updateTime).getTime()
     };
     // payload and headers
     var entries = item.har.entries;
@@ -275,7 +276,10 @@ Polymer({
         t = Date.now();
       }
       obj.created = t;
+    } else {
+      obj.created = obj.updated;
     }
+
     return {
       originId: item.id,
       historyData: this.processHar(item.har),

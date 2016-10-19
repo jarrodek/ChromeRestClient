@@ -83,7 +83,6 @@
                 </arc-request-controller>
               </template>
             </section>
-
             <arc-websocket-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="socket"></arc-websocket-controller>
             <arc-history-list-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" main on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" search-query="[[searchTerm]]" data-route="history"></arc-history-list-controller>
             <arc-saved-list-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" search-query="[[searchTerm]]" data-route="saved"></arc-saved-list-controller>

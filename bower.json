@@ -41,7 +41,8 @@
     "app-pouchdb-collate": "advanced-rest-client/app-pouchdb-collate#^1.0.1",
     "app-logger": "advanced-rest-client/app-logger#~0.0.2",
     "uuid-generator": "advanced-rest-client/uuid-generator#^1.0.4",
-    "paper-masked-input": "advanced-rest-client/paper-masked-input#^1.0.4"
+    "paper-masked-input": "advanced-rest-client/paper-masked-input#^1.0.4",
+    "history-panel": "advanced-rest-client/history-panel#^1.0.1"
   },
   "devDependencies": {
     "web-component-tester": "*"

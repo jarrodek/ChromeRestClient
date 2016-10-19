@@ -56,7 +56,9 @@
       toolbarFeatures: {
         type: Array,
         value: ['search', 'clearAll', 'export']
-      }
+      },
+
+      queryPagePouchDb: Boolean
     },
     observers: [
       '_sortChanged(sortBy, sortDirection)'
@@ -85,81 +87,11 @@
       }
       this._setQuerying(true);
       if (this.$.meta.byKey('usePouchDb')) {
-        this._paginateHistorySort();
+        this.set('queryPagePouchDb', true);
+        return;
       } else {
         this.$.model.query();
       }
-    },
-
-    _paginateHistorySort: function() {
-      if (this.sortBy === 'har.pages.-1.startedDateTime') {
-        this.sortBy = 'created';
-        return;
-      }
-      var field = this.sortBy || 'created';
-      var dir = this.sortDirection || 'asc';
-      if (!this.pagination) {
-        this.pagination = {
-          limit: this.limit,
-          dir: dir,
-          field: field
-        };
-      }
-      if (dir !== this.pagination.dir || field !== this.pagination.field) {
-        this.pagination = {
-          limit: this.limit,
-          dir: dir,
-          field: field
-        };
-      }
-      var db;
-      if (this.isHistory) {
-        db = new PouchDB('history-requests');
-      } else {
-        db = new PouchDB('saved-requests');
-      }
-
-      var indexFields = [field];
-      if (!this.isHistory) {
-        indexFields.push('legacyProject');
-      }
-      return db.createIndex({
-        index: {
-          fields: indexFields
-        }
-      })
-      .then(() => {
-        let selector = {};
-        let sort = {};
-        sort[field] = dir;
-
-        selector[field] = {
-          $gte: 0
-        };
-
-        if (!this.isHistory) {
-          selector.legacyProject = {
-            '$gt': null
-          };
-        }
-        return db.find({
-          sort: [sort],
-          selector: selector,
-          limit: this.pagination.limit,
-          skip: this.pagination.skip
-        });
-      })
-      .then((r) => {
-        if (!this.pagination.skip) {
-          this.pagination.skip = r.docs.length;
-        } else {
-          this.pagination.skip += r.docs.length;
-        }
-        r.docs.forEach((item) => item.selected = false);
-        console.log('Appending results');
-        this.appendResults(r.docs);
-      })
-      .catch((e) => console.error(e));
     },
 
     _dataRead: function(e) {
@@ -295,6 +227,9 @@
       if (this.view) {
         this.view.warnClearAll();
         arc.app.analytics.sendEvent('Engagement', 'Click', 'Clear all requested');
+      } else {
+        // new System.
+        this.warnClearAll();
       }
     },
     openDrive: function() {
@@ -335,7 +270,9 @@
 
     resetView: function() {
 
-    }
+    },
+
+    warnClearAll: function() {}
   };
   window.ArcBehaviors.RequestsListControllerBehavior = [
     ArcBehaviors.ListControllerBehavior,
