@@ -78,6 +78,7 @@ Polymer({
     if (!panel) {
       return;
     }
+    this.listData = panel.historyData;
     if (queryPagePouchDb) {
       if (this.searchQuery) {
         panel.searchQuery = this.searchQuery;
