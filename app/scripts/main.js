@@ -166,6 +166,9 @@
   app._onFeatureClearAll = (e) => {
     app._featureCalled('clearAll', e);
   };
+  app._onFeatureDrive = (e) => {
+    app._featureCalled('drive', e);
+  };
   app._onFeatureProjectEndpoints = (e) => {
     app._featureCalled('projectEndpoints', e.detail.item.dataset.id);
   };

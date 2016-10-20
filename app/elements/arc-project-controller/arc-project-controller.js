@@ -27,7 +27,9 @@ Polymer({
     requests: {
       type: Array,
       notify: true
-    }
+    },
+    usePouchDb: Boolean,
+    projectId: String
   },
 
   listeners: {
@@ -37,7 +39,8 @@ Polymer({
   },
 
   observers: [
-    '_projectNameChanged(project.name)'
+    '_projectNameChanged(project.name)',
+    '_prepareProjectNew(opened, usePouchDb, routeParams.projectId)'
   ],
 
   onShow: function() {
@@ -52,12 +55,42 @@ Polymer({
     if (!this.opened || !this.routeParams) {
       return;
     }
+    if (this.usePouchDb) {
+      return;
+    }
     var projectId = Number(this.routeParams.projectId);
     if (projectId !== projectId) {
       // NaN !== NaN
       return;
     }
     this.$.project.objectId = projectId;
+  },
+
+  _getDb: function() {
+    return new PouchDB('legacy-projects');
+  },
+
+  _prepareProjectNew: function(opened, usePouchDb, projectId) {
+    if (!opened || !usePouchDb || !projectId) {
+      return;
+    }
+    this.set('projectId', projectId);
+    // var db = this._getDb();
+    // db.get(projectId)
+    // .then((project) => {
+    //   this.set('project', project);
+    // })
+    // .catch((e) => {
+    //   this.fire('app-log', {
+    //     'message': e,
+    //     'level': 'error'
+    //   });
+    //   console.error('Unable to find project data', e);
+    //   StatusNotification.notify({
+    //     message: 'Unable to find project data in local database.'
+    //   });
+    // });
+    // console.log('opened, usePouchDb, projectId', opened, usePouchDb, projectId);
   },
 
   _projectReady: function(e) {
@@ -81,6 +114,10 @@ Polymer({
     this.set('requests', requests);
   },
 
+  _computeAuto: function(usePouchDb) {
+    return usePouchDb === false;
+  },
+
   _projectError: function(e) {
     this.fire('app-log', {'message': ['Project ctrl', e], 'level': 'error'});
   },
@@ -90,6 +127,9 @@ Polymer({
   },
 
   _projectNameChanged: function() {
+    if (this.usePouchDb) {
+      return;
+    }
     this.$.project.save();
   },
 

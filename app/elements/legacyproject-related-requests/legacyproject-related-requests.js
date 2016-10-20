@@ -39,7 +39,13 @@
         });
       })
       .then((r) => this.__processData(r))
-      .then((r) => this.set('relatedRequests', r));
+      .then((r) => this.set('relatedRequests', r))
+      .then(() => {
+        return this.db.close();
+      })
+      .then(() => {
+        this.db = null;
+      });
     },
 
     __processData: function(result) {

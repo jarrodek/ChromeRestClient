@@ -53,22 +53,23 @@ paper-toolbar[mode="search"] #mainSearchInput {
 paper-toolbar > *[feature] {
   display: none;
 }
-paper-toolbar[back] > *[feature="back"],
-paper-toolbar[search] > *[feature="search"],
-paper-toolbar[open] > *[feature="open"],
-paper-toolbar[save] > *[feature="save"],
-paper-toolbar[export] > *[feature="export"],
-paper-toolbar[clearAll] > *[feature="clearAll"],
-paper-toolbar[projectEndpoints] > *[feature="projectEndpoints"] {
+paper-toolbar[back] > paper-icon-button[feature="back"],
+paper-toolbar[search] > div[feature="search"],
+paper-toolbar[open] > paper-icon-button[feature="open"],
+paper-toolbar[save] > paper-icon-button[feature="save"],
+paper-toolbar[export] > paper-icon-button[feature="export"],
+paper-toolbar[clearAll] > paper-icon-button[feature="clearAll"],
+paper-toolbar[drive] > paper-icon-button[feature="drive"],
+paper-toolbar[projectEndpoints] > div[feature="projectEndpoints"] {
   display: initial;
 }
-paper-toolbar[back] > *[feature="back"] {
+paper-toolbar[back] > paper-icon-button[feature="back"] {
   margin-right: 16px;
 }
-paper-toolbar[back] > *[paper-drawer-toggle] {
-  display: none !important;
+body paper-toolbar[back] > paper-icon-button[paper-drawer-toggle] {
+  display: none;
 }
-paper-toolbar[xhrtoggle] > *[feature="xhrtoggle"] {
+paper-toolbar[xhrtoggle] > paper-toggle-button[feature="xhrtoggle"] {
   display: flex;
 }
 

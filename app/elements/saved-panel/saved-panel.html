@@ -1,0 +1,82 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/history-panel/request-details-drawer.html">
+<link rel="import" href="../../bower_components/history-panel/pouchdb.html">
+<link rel="import" href="../saved-list-items/saved-list-items.html">
+<dom-module id="saved-panel">
+  <template>
+    <style>
+     :host {
+      display: block;
+    }
+
+    h1 {
+      @apply(--page-title-text);
+      @apply(--layout-flex);
+      color: var(--paper-blue-700);
+      font-weight: 300;
+    }
+
+    .table-options {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      opacity: 1;
+      transition: opacity 0.2s cubic-bezier(0.47, 0, 0.75, 0.72);
+    }
+
+    .table-options.inactive {
+      opacity: 0;
+    }
+
+    .selected-actions {
+      @apply(--layout-horizontal);
+      padding-right: 16px;
+      color: rgba(0, 0, 0, .57);
+    }
+
+    paper-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+    </style>
+    <paper-drawer-panel hidden$="[[isEmpty]]" drawer-width="360px" id="details" force-narrow="[[narrowDrawer]]" right-drawer disable-edge-swipe disable-swipe>
+      <request-details-drawer request="{{detailedRequest}}" on-request-details-drawer-open="_onOpenRequested" on-close="closeDetailsPanel" narrow="[[narrowDrawer]]"></request-details-drawer>
+      <div main>
+        <div class="status-bar">
+          <section class$="[[_computeOptionsTableClass(optionsState)]]">
+            <h1>[[currentSelection.length]] item selected</h1>
+            <div class="selected-actions">
+              <paper-icon-button icon="file-download" id="exportSelected" on-tap="_exportSelected"></paper-icon-button>
+              <paper-icon-button icon="delete" id="deleteSelected" on-tap="_deleteSelected"></paper-icon-button>
+              <paper-tooltip for="exportSelected">Export selected to file</paper-tooltip>
+              <paper-tooltip for="deleteSelected">Delete selected</paper-tooltip>
+            </div>
+          </section>
+        </div>
+        <saved-list-items id="saved"
+          items="[[savedData]]"
+          selected-items="{{currentSelection}}"
+          has-selection="{{hasSelection}}"
+          on-saved-list-threshold="loadNext"
+          on-saved-list-item-open="_onOpenRequested"
+          on-saved-list-item-delete="_onDeleteRequested"
+          on-saved-list-item-selection-changed="_selectionChanged"></saved-list-items>
+      </div>
+    </paper-drawer-panel>
+    <template is="dom-if" if="{{isEmpty}}">
+      <arc-saved-list-empty search-term="[[searchQuery]]"></arc-saved-list-empty>
+    </template>
+    <paper-toast text="Select request first." id="noSelectionToast"></paper-toast>
+    <paper-progress indeterminate hidden$="[[!querying]]"></paper-progress>
+    <paper-dialog id="dataClearDialog" on-iron-overlay-closed="onClearDialogResult">
+      <h2>Clear saved list</h2>
+      <p>This will remove all data from the Google Drive store.</p>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus>Clear</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+  <script src="saved-panel.js"></script>
+</dom-module>

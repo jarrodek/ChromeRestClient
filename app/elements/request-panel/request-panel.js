@@ -215,6 +215,9 @@
           this.requestType = 'saved';
           this.set('projectId', this.routeParams.projectid);
           break;
+        case 'current':
+          console.log('What to do???');
+          break;
         default:
           this.restoreLatest();
           break;
