@@ -43,7 +43,7 @@
       this.listen(document.body, 'project-removed', 'refreshProjects');
     },
     detached: function() {
-      this.listen(document.body, 'project-removed', 'refreshProjects');
+      this.unlisten(document.body, 'project-removed', 'refreshProjects');
     },
     /**
      * User clicked on a navigation element.

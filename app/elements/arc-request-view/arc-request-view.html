@@ -31,12 +31,17 @@ the License.
       .action-panel > * {
         margin-left: 12px;
       }
+      .status {
+        @apply(--layout-flex);
+        color: #757575;
+      }
     </style>
     <url-input-editor url="{{masterUrl}}"></url-input-editor>
     <method-selector method="{{request.method}}" is-payload="{{isPayload}}" content-type="{{contentType}}"></method-selector>
     <headers-editor is-payload="{{isPayload}}" content-type="{{contentType}}" headers="{{requestHeaders}}" on-headers-changed="_headersChanged"></headers-editor>
     <payload-editor hidden$="{{!isPayload}}" content-type="{{contentType}}" value="{{request.payload}}" files-list="{{request.files}}"></payload-editor>
     <div class="action-panel">
+      <div class="status">[[statusMessage]]</div>
       <paper-progress indeterminate hidden$="[[!requestLoading]]"></paper-progress>
       <paper-button raised class="action-button" hidden$="[[requestLoading]]" on-tap="_sendRequest">send</paper-button>
       <paper-button raised class="action-button" hidden$="[[!requestLoading]]"on-tap="_abortRequest">abort</paper-button>

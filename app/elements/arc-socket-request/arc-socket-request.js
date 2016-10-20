@@ -29,6 +29,15 @@ Polymer({
         return null;
       }
       this.connection = new SocketFetch(this.request.url, init);
+      this.connection.addEventListener('firstbyte', (e) => {
+        this.fire('request-first-byte-received', e.detail);
+      });
+      this.connection.addEventListener('loadend', (e) => {
+        this.fire('request-load-end', e.detail);
+      });
+      this.connection.addEventListener('sendheaders', (e) => {
+        this.fire('request-headers-sent', e.detail);
+      });
       try {
         return this.connection.fetch()
         .then((response) => {

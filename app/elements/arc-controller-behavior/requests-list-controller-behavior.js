@@ -85,11 +85,11 @@
       if (!this.isShowing) {
         return;
       }
-      this._setQuerying(true);
       if (this.$.meta.byKey('usePouchDb')) {
         this.set('queryPagePouchDb', true);
         return;
       } else {
+        this._setQuerying(true);
         this.$.model.query();
       }
     },

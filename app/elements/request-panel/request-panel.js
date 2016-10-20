@@ -120,7 +120,9 @@
       },
       // True if the proxy extension is installed.
       xhrConnected: Boolean,
-      contentType: String
+      contentType: String,
+      // Status mesage to pass to the request panel.
+      statusMessage: String
     },
 
     observers: [
@@ -129,14 +131,20 @@
       '_projectEndpointsChanged(currentProjectEndpoints.*)',
       '_projectIdChanged(projectId)',
       '_requestIdChanged(request._id)',
-      '_proxyRequestChanged(proxyRequest.*)'
+      '_proxyRequestChanged(proxyRequest.*)',
+      '_getRequestData(historyId)',
+      '_getRequestData(savedId)',
+      '_getRequestData(externalId)'
     ],
 
     listeners: {
       'send': 'sendRequest',
       'abort': 'abortRequest',
       'save-file': '_saveToFile',
-      'save-request': '_saveRequest'
+      'save-request': '_saveRequest',
+      'request-first-byte-received': '_requestStatusChanged',
+      'request-load-end': '_requestStatusChanged',
+      'request-headers-sent': '_requestStatusChanged'
     },
 
     detached: function() {
@@ -161,6 +169,7 @@
         'type': 'screenview',
         'name': 'Request - project endpoint'
       });
+      this.requestType = 'saved';
       this.set('savedId', e.detail);
     },
 
@@ -188,7 +197,6 @@
         case 'history':
           this.requestType = this.routeParams.type;
           this.set('historyId', decodeURIComponent(this.routeParams.historyId));
-          console.log('SET history ID ', this.historyId);
           break;
         case 'drive':
           this.requestType = this.routeParams.type;
@@ -204,6 +212,7 @@
           ctrl.openItemAsRequest(id);
           break;
         case 'project':
+          this.requestType = 'saved';
           this.set('projectId', this.routeParams.projectid);
           break;
         default:
@@ -222,6 +231,56 @@
       this.showCookieBanner = false;
     },
 
+    _getRequestData: function(id) {
+      if (!id) {
+        return;
+      }
+      var type = this.requestType || 'saved';
+      var dbName;
+      switch (type) {
+        case 'saved':
+          dbName = 'saved-requests';
+          break;
+        case 'history':
+          dbName = 'history-requests';
+          break;
+        case 'drive':
+          dbName = 'external-requests';
+          break;
+        default:
+          this.fire('app-log', {
+            'message': `${type} is not recognizable type of the request.`,
+            'level': 'error'
+          });
+          console.error('Can\'t restore request data. Type is unknown.', type);
+          this.fire('send-analytics', {
+            type: 'exception',
+            description: 'Can\'t restore request of a type: ' + type + ' (RequestPanel)',
+            fatal: true
+          });
+          StatusNotification.notify({
+            message: 'Enter URL first.'
+          });
+          return;
+      }
+      var db = new PouchDB(dbName);
+      db.get(id)
+      .then((r) => {
+        r.type = type;
+        this.set('proxyRequest', r);
+      })
+      .catch((e) => {
+        this.fire('app-log', {
+          'message': e,
+          'level': 'error'
+        });
+        console.error('Can\'t restore request data', e);
+        StatusNotification.notify({
+          message: 'Request do not exists in local database.'
+        });
+      });
+    },
+
     // Returns true when passed object is trully.
     _computeHasResponse: function(response) {
       return !!response;
@@ -234,6 +293,7 @@
         return;
       }
       var base = {
+        type: r.type,
         headers: r.headers,
         legacyProject: r.legacyProject,
         method: r.method,
@@ -275,7 +335,7 @@
     // Informs other element that the request ID has changed.
     _requestIdChanged: function(id) {
       this.fire('selected-request', {
-        id: encodeURIComponent(id)
+        id: id
       });
       if (!id) {
         return;
@@ -373,8 +433,16 @@
         return;
       }
 
-      var isDrive = !!this.externalId;
-      var isSaved = !!this.savedId;
+      var type = this.request.type;
+      var isDrive;
+      var isSaved;
+      if (type) {
+        isDrive = type === 'drive';
+        isSaved = type === 'saved';
+      } else {
+        isDrive = !!this.externalId;
+        isSaved = !!this.savedId;
+      }
       if ((isDrive || isSaved) && opts.source === 'shortcut' && !opts.shift) {
         return this._saveCurrent();
       }
@@ -453,9 +521,10 @@
         if (newProjectName) {
           p = this._saveNewProject(newProjectName)
           .then((result) => {
+            this.fire('project-saved');
             projectId = result._id;
             newProjectName = undefined;
-            data.legacyProject = result._id;
+            data.legacyProject = result.id;
           });
         } else {
           data.legacyProject = projectId;
@@ -473,9 +542,29 @@
             if (driveId) {
               this.proxyRequest.driveId = driveId;
             }
-            return this.$.extRequest.save();
+            this.$.extRequest.data = this.proxyRequest;
+            return this.$.extRequest.save()
+            .catch((e) => {
+              if (e.status === 404) {
+                // It wasn't in the external data, put it there.
+                let copy = Object.assign({}, this.proxyRequest);
+                delete this.proxyRequest._id;
+                delete this.proxyRequest._rev;
+                this.$.extRequest.data = this.proxyRequest;
+                return this.$.extRequest.save()
+                .then(() => {
+                  if (override) {
+                    this.$.savedRequest.data = copy;
+                    return this.$.savedRequest.destroy();
+                  }
+                });
+              } else {
+                throw e;
+              }
+            });
           });
         } else {
+          this.$.savedRequest.data = this.proxyRequest;
           return this.$.savedRequest.save();
         }
       })
@@ -486,11 +575,13 @@
         } else {
           res = this.$.savedRequest.data;
         }
+
+        this.requestType = toDrive ? 'drive' : 'saved';
         this.set('savedId', toDrive ? undefined : res._id);
         this.set('historyId', undefined);
         this.set('externalId', toDrive ? res._id : undefined);
         if (toProject) {
-          this.set('projectId', projectId);
+          this.set('projectId', res.legacyProject);
         }
       })
       .then(() => {
@@ -564,15 +655,31 @@
      * ui icon.
      */
     _saveCurrent: function() {
-      var isDrive = !!this.externalId;
-      var isSaved = !!this.savedId;
+      var type = this.request.type;
+      var isDrive;
+      var isSaved;
+      if (type) {
+        isDrive = type === 'drive';
+        isSaved = type === 'saved';
+      } else {
+        isDrive = !!this.externalId;
+        isSaved = !!this.savedId;
+      }
       var data = Object.assign({}, this.proxyRequest, this.request);
       this.proxyRequest = data;
       var p;
       if (isSaved) {
+        this.$.savedRequest.data = this.proxyRequest;
         p = this.$.savedRequest.save();
       } else if (isDrive) {
-        p = this.$.extRequest.save().then(() => this._saveDrive(data, data.name));
+        p = this._saveDrive(data, data.name).then((insertResult) => {
+          var driveId = insertResult.id;
+          if (driveId) {
+            this.proxyRequest.driveId = driveId;
+          }
+          this.$.extRequest.data = this.proxyRequest;
+          return this.$.extRequest.save();
+        });
       } else {
         p = Promise.reject(new Error('Called quick save but it\'s not restored request'));
       }
@@ -590,6 +697,7 @@
      * Sends current request.
      */
     sendRequest: function() {
+      this.set('statusMessage', '');
       if (!this.request) {
         StatusNotification.notify({
           message: 'Request not ready'
@@ -864,7 +972,10 @@
     _saveHistory: function() {
       chrome.storage.sync.get({'HISTORY_ENABLED': true}, (r) => {
         if (r.HISTORY_ENABLED) {
-          this.$.responseSaver.saveHistory(this.request, this.response);
+          this.$.responseSaver.saveHistory(this.request, this.response)
+          .catch((e) => {
+            this.fire('app-log', {'message': ['Unable save history.', e], 'level': 'error'});
+          });
         }
       });
     },
@@ -872,6 +983,42 @@
     _saveCookies: function() {
       this.$.cookieJar.response = this.response;
       this.$.cookieJar.store();
+    },
+
+    /** Called then transport not finished the request because of error. */
+    _onRequestError: function(e) {
+      var msg = e.detail.message;
+      if (typeof msg !== 'string') {
+        //it could be an Error object
+        if (msg.message) {
+          msg = msg.message;
+        } else {
+          msg = null;
+        }
+      }
+
+      this._setIsError(true);
+      this._setErrorMessage(msg);
+      this._setRequestLoading(false);
+      this.set('statusMessage', 'Unsuccessful request');
+      //there will be no history save since there's nothing to save.
+    },
+
+    _requestStatusChanged: function(e) {
+      var msg = '';
+      switch (e.type) {
+        case 'request-headers-sent':
+          msg = 'Headers sent (' + e.detail.bytesWritten + ' bytes). Waiting for data.';
+          break;
+        case 'request-first-byte-received':
+          msg = 'Receiving data';
+          break;
+        case 'request-load-end':
+          msg = '';
+          break;
+        default: return;
+      }
+      this.set('statusMessage', msg);
     }
   });
 })();

@@ -28,7 +28,8 @@ Polymer({
   ],
 
   observers: [
-    '_queryPagePouchDbChanged(queryPagePouchDb)'
+    '_queryPagePouchDbChanged(queryPagePouchDb)',
+    '_openedChanged(opened,queryPagePouchDb)'
   ],
 
   get view() {
@@ -114,7 +115,7 @@ Polymer({
       });
       this.fire('app-log', {
         message: ['Error deleting entries', e],
-        level: error
+        level: e
       });
       console.error(e);
     })
@@ -162,7 +163,7 @@ Polymer({
       });
       this.fire('app-log', {
         message: ['Error deleting database', e],
-        level: error
+        level: e
       });
       console.error(e);
     });
@@ -171,5 +172,25 @@ Polymer({
   _onItemOpenRequested: function(e, detail) {
     var url = 'request/history/' + encodeURIComponent(detail.id);
     page(url);
+  },
+
+  _openedChanged: function(opened, queryPagePouchDb) {
+    if (!queryPagePouchDb) {
+      return;
+    }
+    this.debounce('refresh-history', () => {
+      var panel = this.$$('history-panel');
+      if (!panel) {
+        return;
+      }
+      if (!opened) {
+        panel.historyData = [];
+      } else {
+        if (!panel.historyData.length) {
+          panel.refresh();
+        }
+      }
+    }, 1);
+
   }
 });

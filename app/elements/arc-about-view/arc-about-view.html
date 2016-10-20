@@ -83,6 +83,14 @@
       <h2>Changelog</h2>
       <div class="changelog">
 
+        <p class="paper-font-title">10/20/2016</p>
+        <ul class="paper-font-body1">
+          <li>Upgraded application database schema. It will make performance better while listing/querying history</li>
+          <li>Added status message to the request action bar. Now it will inform the user when request headers has been sent and when first byte of message arrived</li>
+          <li>History now will becomed a timeline of request made in the past. Each section in the timeline is a day when a request occured. Each request is now counded once per day.</li>
+          <li>Now CTRL/command + S will automatically save the request if it's already saved (in project or in saved list). To bring save dialog add SHIFT key to the combination.</li>
+        </ul>
+
         <p class="paper-font-title">10/6/2016</p>
         <ul class="paper-font-body1">
           <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/812" target="_blank">#812</a>: Number in tabs is not alligned</li>
