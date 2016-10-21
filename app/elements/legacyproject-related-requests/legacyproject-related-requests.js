@@ -29,7 +29,7 @@
       }
       var filelds = ['_id', 'name'];
       if (this.allData) {
-        filelds = filelds.concat(['url', 'method', 'created', 'headers', 'payload']);
+        filelds = undefined;
       }
       this.db.createIndex({
         index: {
