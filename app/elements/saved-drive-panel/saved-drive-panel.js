@@ -69,7 +69,8 @@
     },
 
     behaviors: [
-      ArcBehaviors.ArcFileExportBehavior
+      ArcBehaviors.ArcFileExportBehavior,
+      ArcBehaviors.DeleteRevertableBehavior
     ],
 
     observers: [
@@ -311,13 +312,18 @@
     },
 
     deleteItems: function(items) {
-      var db = this._getDb();
-      var p = items.map((i) => db.remove(i));
-      Promise.all(p).then(() => {
-        this.debounce('refresh-saved', () => {
-          this.refresh();
-        }, 200);
-      }).catch((e) => {
+      this._deleteRevertable('external-requests', items)
+      .then((res) => {
+        let items = res.map((i) => i.id);
+        this.fire('request-db-removed', {
+          items: items,
+          type: 'external'
+        });
+        var data = this.driveData;
+        data = data.filter((i) => items.indexOf(i._id) === -1);
+        this.set('driveData', data);
+      })
+      .catch((e) => {
         StatusNotification.notify({
           message: 'Error deleting entries. ' + e.message
         });
@@ -326,9 +332,17 @@
           level: e
         });
         console.error(e);
-      })
-      .then(() => {
-        db.close();
+      });
+    },
+
+    _onDocumentsRestored: function(response) {
+      var docs = response.rows.map((i) => i.doc);
+      var res = this.driveData.concat(docs);
+      res = this._processResults(res);
+      this.set('driveData', res);
+      this.fire('request-db-restored', {
+        items: docs,
+        type: 'external'
       });
     },
 
@@ -347,6 +361,12 @@
         e.detail.item._id = r.id;
         e.detail.item._rev = r.rev;
         this.driveData[e.detail.index] = e.detail.item;
+        this.fire('request-db-changed', {
+          value: e.detail.item,
+          type: 'external',
+          rev: r.rev,
+          id: r.id
+        });
       })
       .catch((e) => {
         StatusNotification.notify({
@@ -384,6 +404,9 @@
         console.error(e);
       })
       .then(() => {
+        this.fire('request-db-cleared', {
+          type: 'saved'
+        });
         this.refresh();
       });
     },
@@ -394,6 +417,9 @@
         state = true;
       }
       this.set('isEmpty', state);
+    },
+    _openDrive: function() {
+      this.fire('open-drive');
     }
   });
 })();

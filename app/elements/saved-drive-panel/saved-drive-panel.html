@@ -2,6 +2,7 @@
 <link rel="import" href="../../bower_components/history-panel/request-details-drawer.html">
 <link rel="import" href="../../bower_components/history-panel/pouchdb.html">
 <link rel="import" href="../saved-list-items/saved-list-items.html">
+<link rel="import" href="../delete-revertable-behavior/delete-revertable-behavior.html">
 <dom-module id="saved-drive-panel">
   <template>
     <style>
@@ -19,11 +20,14 @@
     .table-options {
       @apply(--layout-horizontal);
       @apply(--layout-center);
+    }
+
+    .table-options .hiddable {
       opacity: 1;
       transition: opacity 0.2s cubic-bezier(0.47, 0, 0.75, 0.72);
     }
 
-    .table-options.inactive {
+    .table-options.inactive .hiddable {
       opacity: 0;
     }
 
@@ -39,22 +43,30 @@
       left: 0;
       width: 100%;
     }
+
+    .toggle {
+      margin-left: 12px;
+    }
     </style>
     <paper-drawer-panel hidden$="[[isEmpty]]" drawer-width="360px" id="details" force-narrow="[[narrowDrawer]]" right-drawer disable-edge-swipe disable-swipe>
       <request-details-drawer request="{{detailedRequest}}" on-request-details-drawer-open="_onOpenRequested" on-close="closeDetailsPanel" narrow="[[narrowDrawer]]"></request-details-drawer>
       <div main>
         <div class="status-bar">
           <section class$="[[_computeOptionsTableClass(optionsState)]]">
-            <h1>[[currentSelection.length]] item selected</h1>
+            <paper-checkbox class="toggle" id="toggleAll" checked="{{toggleSelectAll}}"></paper-checkbox>
+            <h1 class="hiddable">[[currentSelection.length]] item selected</h1>
             <div class="selected-actions">
-              <paper-icon-button icon="file-download" id="exportSelected" on-tap="_exportSelected"></paper-icon-button>
-              <paper-icon-button icon="delete" id="deleteSelected" on-tap="_deleteSelected"></paper-icon-button>
+              <paper-icon-button class="hiddable" icon="arc:file-download" id="exportSelected" on-tap="_exportSelected"></paper-icon-button>
+              <paper-icon-button class="hiddable" icon="arc:delete" id="deleteSelected" on-tap="_deleteSelected"></paper-icon-button>
+              <paper-icon-button icon="arc:drive-color" id="openDrive" on-tap="_openDrive"></paper-icon-button>
               <paper-tooltip for="exportSelected">Export selected to file</paper-tooltip>
               <paper-tooltip for="deleteSelected">Delete selected</paper-tooltip>
+              <paper-tooltip position="left" for="openDrive">Open from Google Drive</paper-tooltip>
             </div>
           </section>
         </div>
         <saved-list-items id="saved"
+          select-all="{{toggleSelectAll}}"
           items="[[driveData]]"
           selected-items="{{currentSelection}}"
           has-selection="{{hasSelection}}"

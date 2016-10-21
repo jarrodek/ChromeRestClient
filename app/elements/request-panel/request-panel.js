@@ -141,7 +141,7 @@
       'send': 'sendRequest',
       'abort': 'abortRequest',
       'save-file': '_saveToFile',
-      'save-request': '_saveRequest',
+      'save-request': '_onSaveRequest',
       'request-first-byte-received': '_requestStatusChanged',
       'request-load-end': '_requestStatusChanged',
       'request-headers-sent': '_requestStatusChanged'
@@ -269,8 +269,11 @@
       var db = new PouchDB(dbName);
       db.get(id)
       .then((r) => {
-        r.type = type;
-        this.set('proxyRequest', r);
+        return db.close()
+        .then(() => {
+          r.type = type;
+          this.set('proxyRequest', r);
+        });
       })
       .catch((e) => {
         this.fire('app-log', {
@@ -282,6 +285,33 @@
           message: 'Request do not exists in local database.'
         });
       });
+    },
+
+    _saveRequest: function(dbName, data) {
+      var db = new PouchDB(dbName);
+      var res;
+      var p;
+      if (!data._rev) {
+        // avoid conflicts.
+        p = db.get(data._id).then((r) => {
+          data._rev = r._rev;
+        })
+        .catch((e) => {
+          if (e.status === 404) {
+            // object do not exists and can be created.
+            return;
+          }
+          throw e;
+        });
+      } else {
+        p = Promise.resolve();
+      }
+      return p.then(() => db.put(data))
+      .then((r) => {
+        res = r;
+        return db.close();
+      })
+      .then(() => res);
     },
 
     // Returns true when passed object is trully.
@@ -472,7 +502,7 @@
         'label': 'Save action initialization'
       });
     },
-    _saveRequest: function(e) {
+    _onSaveRequest: function(e) {
       var name = e.detail.name;
       var override = e.detail.override || false;
       var toDrive = e.detail.isDrive || false;
@@ -545,20 +575,17 @@
             if (driveId) {
               this.proxyRequest.driveId = driveId;
             }
-            this.$.extRequest.data = this.proxyRequest;
-            return this.$.extRequest.save()
+            return this._saveRequest('external-requests', this.proxyRequest)
             .catch((e) => {
               if (e.status === 404) {
                 // It wasn't in the external data, put it there.
                 let copy = Object.assign({}, this.proxyRequest);
                 delete this.proxyRequest._id;
                 delete this.proxyRequest._rev;
-                this.$.extRequest.data = this.proxyRequest;
-                return this.$.extRequest.save()
+                return this._saveRequest('external-requests', this.proxyRequest)
                 .then(() => {
                   if (override) {
-                    this.$.savedRequest.data = copy;
-                    return this.$.savedRequest.destroy();
+                    return this._saveRequest('saved-requests', this.proxyRequest);
                   }
                 });
               } else {
@@ -567,22 +594,15 @@
             });
           });
         } else {
-          this.$.savedRequest.data = this.proxyRequest;
-          return this.$.savedRequest.save();
+          return this._saveRequest('saved-requests', this.proxyRequest);
         }
       })
-      .then(() => {
-        var res;
-        if (toDrive) {
-          res = this.$.extRequest.data;
-        } else {
-          res = this.$.savedRequest.data;
-        }
-
+      .then((res) => {
         this.requestType = toDrive ? 'drive' : 'saved';
         this.set('savedId', toDrive ? undefined : res._id);
         this.set('historyId', undefined);
         this.set('externalId', toDrive ? res._id : undefined);
+        this.proxyRequest.rev = res.rev;
         if (toProject) {
           this.set('projectId', res.legacyProject);
         }
@@ -650,6 +670,9 @@
       return e.detail.result;
     },
 
+    _readRequestData: function() {
+
+    },
     /**
      * Shortcut for save current request without the UI dialog.
      * It's only called when the user restored saved request (also works with drive).
@@ -672,21 +695,24 @@
       this.proxyRequest = data;
       var p;
       if (isSaved) {
-        this.$.savedRequest.data = this.proxyRequest;
-        p = this.$.savedRequest.save();
+        // this.$.savedRequest.data = this.proxyRequest;
+        // p = this.$.savedRequest.save();
+        p = this._saveRequest('saved-requests', this.proxyRequest);
       } else if (isDrive) {
         p = this._saveDrive(data, data.name).then((insertResult) => {
           var driveId = insertResult.id;
           if (driveId) {
             this.proxyRequest.driveId = driveId;
           }
-          this.$.extRequest.data = this.proxyRequest;
-          return this.$.extRequest.save();
+          // this.$.extRequest.data = this.proxyRequest;
+          // return this.$.extRequest.save();
+          return this._saveRequest('external-requests', this.proxyRequest);
         });
       } else {
         p = Promise.reject(new Error('Called quick save but it\'s not restored request'));
       }
-      p.then(() => {
+      p.then((r) => {
+        this.proxyRequest._rev = r.rev;
         this.$.requestSavedToast.open();
       })
       .catch((e) => {

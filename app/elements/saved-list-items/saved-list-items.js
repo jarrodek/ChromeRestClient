@@ -81,11 +81,14 @@
         value: function() {
           return this.$.nameChangeInput;
         }
-      }
+      },
+
+      selectAll: Boolean
     },
 
     observers: [
-      '_sizeChanged(items.length)'
+      '_sizeChanged(items.length)',
+      '_toggleSelectAll(selectAll)'
     ],
     listeners: {
       'iron-select': '_onSelectItem',
@@ -193,6 +196,20 @@
     _nameEditorClosed: function() {
       this.currentEditredModel = null;
       this.$.nameChangeInput.value = '';
+    },
+
+    _toggleSelectAll: function(selectAll) {
+      if (selectAll) {
+        if (this.selectedItems.length === this.items.length) {
+          return;
+        }
+        this.items.forEach((i) => this.$.list.selectItem(i));
+      } else {
+        if (this.selectedItems.length === 0) {
+          return;
+        }
+        this.items.forEach((i) => this.$.list.deselectItem(i));
+      }
     }
   });
 })();
