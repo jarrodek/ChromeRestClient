@@ -11,7 +11,9 @@
       relatedRequests: {
         type: Array,
         notify: true
-      }
+      },
+      // If true then a request object will contain all data. Otherwise only name and id.
+      allData: Boolean
     },
 
     observers: [
@@ -25,6 +27,10 @@
       if (!this.db) {
         this.db = new PouchDB('saved-requests');
       }
+      var filelds = ['_id', 'name'];
+      if (this.allData) {
+        filelds = filelds.concat(['url', 'method', 'created', 'headers', 'payload']);
+      }
       this.db.createIndex({
         index: {
           fields: ['legacyProject']
@@ -35,7 +41,7 @@
           selector: {
             legacyProject: projectId
           },
-          fields: ['_id', 'name']
+          fields: filelds
         });
       })
       .then((r) => this.__processData(r))
