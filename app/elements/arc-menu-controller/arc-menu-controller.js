@@ -41,9 +41,11 @@
     },
     attached: function() {
       this.listen(document.body, 'project-removed', 'refreshProjects');
+      this.listen(document.body, 'project-name-changed', '_updateProjectName');
     },
     detached: function() {
       this.unlisten(document.body, 'project-removed', 'refreshProjects');
+      this.unlisten(document.body, 'project-name-changed', '_updateProjectName');
     },
     /**
      * User clicked on a navigation element.
@@ -194,6 +196,15 @@
 
     _signOutRequested: function() {
       this.$.auth.signOut();
+    },
+
+    _updateProjectName: function(e) {
+      var projectId = e.detail.projectId;
+      var index = this.projects.findIndex((i) => i._id === projectId);
+      if (index === -1) {
+        return;
+      }
+      this.set('projects.' + index + '.name', e.detail.name);
     }
   });
 })();

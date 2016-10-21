@@ -75,22 +75,6 @@ Polymer({
       return;
     }
     this.set('projectId', projectId);
-    // var db = this._getDb();
-    // db.get(projectId)
-    // .then((project) => {
-    //   this.set('project', project);
-    // })
-    // .catch((e) => {
-    //   this.fire('app-log', {
-    //     'message': e,
-    //     'level': 'error'
-    //   });
-    //   console.error('Unable to find project data', e);
-    //   StatusNotification.notify({
-    //     message: 'Unable to find project data in local database.'
-    //   });
-    // });
-    // console.log('opened, usePouchDb, projectId', opened, usePouchDb, projectId);
   },
 
   _projectReady: function(e) {
@@ -127,6 +111,11 @@ Polymer({
   },
 
   _projectNameChanged: function() {
+    this.fire('project-name-changed', {
+      projectId: this.projectId,
+      project: this.project,
+      name: this.project.name
+    });
     if (this.usePouchDb) {
       return;
     }
@@ -135,6 +124,33 @@ Polymer({
 
   _requestNameChanged: function(e) {
     e.preventDefault();
+    if (this.usePouchDb) {
+
+      let event = this.fire('request-name-change', {
+        'dbName': 'saved-requests',
+        'name': e.detail.item.name,
+        'id': e.detail.item.id
+      });
+      if (event.detail.error) {
+        console.error(event.detail.message);
+        return;
+      }
+      event.detail.result
+      .then((request) => {
+        let index = this.requests.findIndex((i) => i._id === request._id);
+        if (index === -1) {
+          console.error('Unable to find index.');
+          return;
+        }
+        this.set('requests.' + index + '._rev', request._rev);
+      })
+      .catch((e) => {
+        StatusNotification.notify({
+          message: e.message
+        });
+      });
+      return;
+    }
     var request = e.detail.item;
     if (!request) {
       return;
@@ -153,8 +169,22 @@ Polymer({
   _requestSaved: function() {
   },
 
-  _deleteRequested: function(e) {
-    var data = e.detail;
+  _deleteRequestedNew: function(e, detail) {
+    if (detail.request) {
+      return this._deleteRequest(detail);
+    }
+  },
+
+  _deleteRequest: function(detail) {
+    console.log('_deleteRequest', detail);
+  },
+
+  _deleteRequested: function(e, data) {
+    if (this.usePouchDb) {
+      this._deleteRequestedNew(e, data);
+      return;
+    }
+
     if (data.request) {
       // delete request
       let requestId = data.request.id;

@@ -599,12 +599,12 @@
       })
       .then((res) => {
         this.requestType = toDrive ? 'drive' : 'saved';
-        this.set('savedId', toDrive ? undefined : res._id);
+        this.set('savedId', toDrive ? undefined : res.id);
         this.set('historyId', undefined);
-        this.set('externalId', toDrive ? res._id : undefined);
+        this.set('externalId', toDrive ? res.id : undefined);
         this.proxyRequest.rev = res.rev;
         if (toProject) {
-          this.set('projectId', res.legacyProject);
+          this.set('projectId', this.proxyRequest.legacyProject);
         }
       })
       .then(() => {
