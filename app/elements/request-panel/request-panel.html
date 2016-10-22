@@ -51,14 +51,9 @@
     <paper-toast id="clearRollback" duration="5000" text="Request cleared" on-iron-overlay-closed="_clearUndoClear">
       <paper-button on-tap="_undoClear" class="yellow-button">Undo</paper-button>
     </paper-toast>
-    <app-pouchdb-document db-name="legacy-projects" doc-id="[[projectId]]" data="{{currentProjectData}}"></app-pouchdb-document>
-    <legacyproject-related-requests project-id="[[projectId]]" related-requests="{{currentProjectEndpoints}}"></legacyproject-related-requests>
+    <!-- <legacyproject-related-requests project-id="[[projectId]]" related-requests="{{currentProjectEndpoints}}"></legacyproject-related-requests> -->
     <uuid-generator id="uuid"></uuid-generator>
-    <!-- <app-pouchdb-document id="savedRequest" db-name="saved-requests" doc-id="{{savedId}}"></app-pouchdb-document>
-    <app-pouchdb-document id="historyRequest" db-name="history-requests" doc-id="{{historyId}}"></app-pouchdb-document>
-    <app-pouchdb-document id="extRequest" db-name="external-requests" doc-id="{{externalId}}"></app-pouchdb-document> -->
     <url-history-saver id="urlHistory"></url-history-saver>
-
     <paper-toast text="Your request has been saved. Add SHIFT key to display save dialog." id="requestSavedToast"></paper-toast>
   </template>
   <script src="request-panel.js"></script>

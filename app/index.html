@@ -10,11 +10,17 @@
   <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
   <link rel="import" href="bower_components/font-roboto-local/roboto.html">
   <link rel="import" href="elements/elements.html">
-  <!-- <link rel="import" href="elements/arc-elements.html"> -->
   <style is="custom-style" include="shared-styles"></style>
 </head>
 
-<body unresolved class="">
+<body unresolved>
+  <div class="loader">
+    <div class="spinner">
+      <div class="bounce1"></div>
+      <div class="bounce2"></div>
+      <div class="bounce3"></div>
+    </div>
+  </div>
   <template is="dom-bind" id="app">
     <iron-meta id="meta" key="usePouchDb" value="{{usePouchDb}}"></iron-meta>
     <arc-loader-screen id="appLOader" opened></arc-loader-screen>
@@ -233,11 +239,14 @@
         </div>
       </onboarding-page>
     </onboarding-tutorial>
-    <paper-dialog id="canaryInfo">
+    <paper-dialog id="canaryInfo" on-iron-overlay-closed="_canaryInfoClosed">
       <h2>You are using the cannary channel</h2>
       <paper-dialog-scrollable>
         This version is not for production and it's daily build of the app.<br/>
         Probably it is not working and you shouldn't use it unless you know what you are doing.
+        <div>
+          <paper-checkbox id="canaryMemoDontShow">Don't show this message in future</paper-checkbox>
+        </div>
       </paper-dialog-scrollable>
       <div class="buttons">
         <paper-button dialog-dismiss>Close</paper-button>
@@ -282,6 +291,7 @@
     <legacyproject-related-requests project-id="[[selectedProject]]" related-requests="{{projectEndpoints}}"></legacyproject-related-requests>
     <arc-definitions></arc-definitions>
     <request-model></request-model>
+    <project-model></project-model>
   </template>
   <script src="bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
   <script src="bower_components/dexie-js/dist/dexie.min.js"></script>

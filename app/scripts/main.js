@@ -35,7 +35,7 @@
   });
   // Called when current project changed
   window.addEventListener('selected-project', (e) => {
-    app.selectedProject = e.detail.id;
+    app.set('selectedProject', e.detail.id);
     if (!app.selectedProject) {
       app.projectEndpoints = [];
     }
@@ -319,6 +319,11 @@
       elm.parentNode.removeChild(elm);
     }
   };
+  app._canaryInfoClosed = () => {
+    if (app.$.canaryMemoDontShow.checked) {
+      chrome.storage.local.set({'showCanaryWarning': false});
+    }
+  };
   /**
    * Used by elements to open a browser window/tab.
    * Element must have data-href attribute set with value of the URL to open.
@@ -509,4 +514,14 @@
     }
     elm.opened = false;
   };
+  window.addEventListener('open-drive-selector', () => {
+    let ctrl = document.body.querySelector('arc-drive-controller');
+    if (!ctrl) {
+      StatusNotification.notify({
+        message: 'Drive controller not found.'
+      });
+      return;
+    }
+    ctrl.selectFile();
+  });
 })(document, window);

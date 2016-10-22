@@ -6,14 +6,10 @@ Polymer({
 
   properties: {
     usePouchDb: Boolean,
-    requestTypeTab: {
-      type: Number,
-      value: 0
-    },
 
     toolbarFeatures: {
       type: Array,
-      value: ['search', 'clearAll', 'export', 'drive']
+      value: ['search', 'clearAll', 'export']
     },
   },
 
@@ -26,10 +22,6 @@ Polymer({
   observers: [
     '_openedChanged(opened,usePouchDb)'
   ],
-
-  listeners: {
-    'open-drive': 'onDrive'
-  },
 
   /**
    * Resets current query and perform a new query with new criteria.
@@ -73,10 +65,6 @@ Polymer({
   resetView: function() {
     var view = this.$$('arc-saved-list-view');
     if (!view) {
-      this.fire('app-log', {
-        'message': ['Saved view not present'],
-        'level': 'warn'
-      });
       return;
     }
     view.closeDetailsPanel();
@@ -96,7 +84,7 @@ Polymer({
   },
 
   warnClearAll: function() {
-    var panel = this.$$(this.requestTypeTab === 0 ? 'saved-panel' : 'saved-drive-panel');
+    var panel = this.$$('saved-panel');
     panel.warnClearAll();
   },
 
@@ -105,40 +93,20 @@ Polymer({
       return;
     }
     var p1 = this.$$('saved-panel');
-    var p2 = this.$$('saved-drive-panel');
     if (!opened) {
       if (p1) {
         p1.savedData = [];
       }
-      if (p2) {
-        p2.driveData = [];
-      }
     } else {
       if (p1) {
         p1.refresh();
-      }
-      if (p2) {
-        p2.refresh();
       }
     }
   },
 
   _pouchDbQuery: function() {
     var p1 = this.$$('saved-panel');
-    var p2 = this.$$('saved-drive-panel');
     p1.searchQuery = this.searchQuery;
-    p2.searchQuery = this.searchQuery;
-  },
-
-  onDrive: function() {
-    let ctrl = document.body.querySelector('arc-drive-controller');
-    if (!ctrl) {
-      StatusNotification.notify({
-        message: 'Drive controller not found.'
-      });
-      return;
-    }
-    ctrl.selectFile();
   }
 });
 })();

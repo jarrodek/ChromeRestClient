@@ -36,7 +36,8 @@ Polymer({
   listeners: {
     'name-changed': '_requestNameChanged',
     'delete': '_deleteRequested',
-    'export': 'exportProject'
+    'export': 'exportProject',
+    'project-related-requests-read': '_cancelEvent'
   },
 
   observers: [
@@ -75,6 +76,16 @@ Polymer({
     if (!opened || !usePouchDb || !projectId) {
       return;
     }
+    var event = this.fire('project-read', {
+      id: projectId
+    });
+    if (event.detail.error) {
+      console.error(event.detail.message);
+      return;
+    }
+    event.detail.result.then((result) => {
+      this.set('project', result);
+    });
     this.set('projectId', projectId);
   },
 
@@ -112,15 +123,27 @@ Polymer({
   },
 
   _projectNameChanged: function() {
-    this.fire('project-name-changed', {
+    if (this.usePouchDb) {
+      this.cancelDebouncer('project-name-change-request');
+      this.debounce('project-name-change-request', this._pouchNameChanged.bind(this), 250);
+      return;
+    }
+    this.$.project.save();
+  },
+
+  _pouchNameChanged: function() {
+    var event = this.fire('project-name-change', {
       projectId: this.projectId,
       project: this.project,
       name: this.project.name
     });
-    if (this.usePouchDb) {
+    if (event.detail.error) {
+      console.error(event.detail.message);
       return;
     }
-    this.$.project.save();
+    event.detail.result.then((result) => {
+      this.project._rev = result._rev;
+    });
   },
 
   _requestNameChanged: function(e) {
@@ -194,8 +217,14 @@ Polymer({
     }
     event.detail.result
     .then(() => {
-      var db = this._getDb();
-      return db.remove(this.project);
+      let e = this.fire('project-object-delete', {
+        id: this.project._id,
+        rev: this.project._rev
+      });
+      if (e.detail.error) {
+        throw e.detail.message;
+      }
+      return e.detail.result;
     })
     .then(() => {
       page('request/latest');
@@ -336,6 +365,11 @@ Polymer({
     StatusNotification.notify({
       message: 'Project saved in file. '
     });
+  },
+
+  _cancelEvent: function(e) {
+    e.preventDefault();
+    e.stopPropagation();
   }
 });
 })();

@@ -70,13 +70,8 @@
     observers: [
       '_observeSelection(hasSelection)',
       '_searchQueryChanged(searchQuery)',
-      '_queryComplete(querying, savedData.length)',
-      '_toggleSelectAll(toggleSelectAll)'
+      '_queryComplete(querying, savedData.length)'
     ],
-
-    _toggleSelectAll: function(toggleSelectAll) {
-      console.log('toggleSelectAll', toggleSelectAll);
-    },
 
     listeners: {
       'saved-list-item-name-changed': '_savedNameChangeRequested'
@@ -358,18 +353,18 @@
       e.preventDefault();
       e.stopPropagation();
 
-      throw 'USE MODEL!!!!!!!!!';
-      var db = this._getDb();
-      db.put(e.detail.item).then((r) => {
-        e.detail.item._id = r.id;
-        e.detail.item._rev = r.rev;
-        this.savedData[e.detail.index] = e.detail.item;
-        this.fire('request-db-changed', {
-          value: e.detail.item,
-          type: 'saved',
-          rev: r.rev,
-          id: r.id
-        });
+      let event = this.fire('request-name-change', {
+        'dbName': 'saved-requests',
+        'name': e.detail.item.name,
+        'request': e.detail.item
+      });
+      if (event.detail.error) {
+        console.error(event.detail.message);
+        return;
+      }
+      event.detail.result
+      .then((request) => {
+        this.savedData[e.detail.index] = request;
       })
       .catch((e) => {
         StatusNotification.notify({
@@ -380,9 +375,6 @@
           level: e
         });
         console.error(e);
-      })
-      .then(() => {
-        db.close();
       });
     },
 
@@ -423,8 +415,7 @@
     },
 
     _openDrive: function() {
-      throw 'MOVE HANDLER TO MAIN SCRIPT!!!!';
-      this.fire('open-drive');
+      this.fire('open-drive-selector');
     }
   });
 })();

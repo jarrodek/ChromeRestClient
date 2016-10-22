@@ -147,8 +147,16 @@
       'request-headers-sent': '_requestStatusChanged'
     },
 
+    attached: function() {
+      // See <legacyproject-related-requests>
+      this.listen(document, 'project-related-requests-read', '_onLegacyProjectRelatedRead');
+      this.listen(document, 'request-object-changed', '_onRequestChangedDb');
+    },
+
     detached: function() {
       this.$.latest.auto = false;
+      this.unlisten(document, 'project-related-requests-read', '_onLegacyProjectRelatedRead');
+      this.unlisten(document, 'request-object-changed', '_onRequestChangedDb');
     },
 
     onShow: function() {
@@ -269,11 +277,8 @@
       var db = new PouchDB(dbName);
       db.get(id)
       .then((r) => {
-        return db.close()
-        .then(() => {
-          r.type = type;
-          this.set('proxyRequest', r);
-        });
+        r.type = type;
+        this.set('proxyRequest', r);
       })
       .catch((e) => {
         this.fire('app-log', {
@@ -289,7 +294,6 @@
 
     _saveRequest: function(dbName, data) {
       var db = new PouchDB(dbName);
-      var res;
       var p;
       if (!data._rev) {
         // avoid conflicts.
@@ -308,10 +312,8 @@
       }
       return p.then(() => db.put(data))
       .then((r) => {
-        res = r;
-        return db.close();
-      })
-      .then(() => res);
+        return r;
+      });
     },
 
     // Returns true when passed object is trully.
@@ -361,6 +363,9 @@
     },
     // Sets a title if name has changed.
     _requestNameChanged: function(name) {
+      if (!this.requestControllerOpened) {
+        return;
+      }
       if (name) {
         this._setPageTitle(name);
       }
@@ -387,6 +392,8 @@
         return;
       }
       if (this.currentProjectEndpoints && this.currentProjectEndpoints.length) {
+        console.info('Setting project\'s first endpoint', this.currentProjectEndpoints[0]._id);
+        this.requestType = 'saved';
         this.set('savedId', this.currentProjectEndpoints[0]._id);
       }
     },
@@ -394,6 +401,29 @@
     _projectIdChanged: function(id) {
       this.fire('selected-project', {
         id: id
+      });
+      if (!id) {
+        return;
+      }
+      var event = this.fire('project-read', {
+        id: id
+      });
+      if (event.detail.error) {
+        console.error(event.detail.message);
+        return;
+      }
+      event.detail.result.then((result) => {
+        console.info('Setting project data', result);
+        this.set('currentProjectData', result);
+      })
+      .catch((e) => {
+        if (e.status === 404) {
+          this.set('request.legacyProject', null);
+          this.set('proxyRequest.legacyProject', null);
+          this.set('projectId', undefined);
+        } else {
+          console.error('Unable restore project', e);
+        }
       });
     },
 
@@ -502,6 +532,7 @@
         'label': 'Save action initialization'
       });
     },
+    // Handler for save dialog close.
     _onSaveRequest: function(e) {
       var name = e.detail.name;
       var override = e.detail.override || false;
@@ -580,12 +611,12 @@
               if (e.status === 404) {
                 // It wasn't in the external data, put it there.
                 let copy = Object.assign({}, this.proxyRequest);
-                delete this.proxyRequest._id;
-                delete this.proxyRequest._rev;
-                return this._saveRequest('external-requests', this.proxyRequest)
+                delete copy._id;
+                delete copy._rev;
+                return this._saveRequest('external-requests', copy)
                 .then(() => {
                   if (override) {
-                    return this._saveRequest('saved-requests', this.proxyRequest);
+                    return this._saveRequest('saved-requests', copy);
                   }
                 });
               } else {
@@ -637,6 +668,11 @@
           message: 'Unable to save the file. ' + e.message
         });
       });
+    },
+    // Requested to save request in project
+    _saveAsProject: function(opts) {
+      var override = opts.override || false;
+
     },
 
     _saveDrive: function(request, name) {
@@ -1048,6 +1084,20 @@
         default: return;
       }
       this.set('statusMessage', msg);
+    },
+
+    _onLegacyProjectRelatedRead: function(e) {
+      if (e.detail.projectId !== this.projectId) {
+        return;
+      }
+      this.set('currentProjectEndpoints', e.detail.items);
+    },
+
+    _onRequestChangedDb: function(e, detail) {
+      if (detail.request._id !== this.request._id) {
+        return;
+      }
+      this.set('request', detail.request);
     }
   });
 })();

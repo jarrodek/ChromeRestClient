@@ -22,6 +22,45 @@ body {
   src: local('Material Icons'), local('MaterialIcons-Regular'), url(/assets/MaterialIcons-Regular.woff2) format('woff2');
 }
 
+body .loader {
+  display: none;
+}
+body[unresolved] .loader {
+  display: flex;
+  height: 100%;
+  align-items: center;
+}
+.loader .spinner {
+  margin: 100px auto 0;
+  width: 70px;
+  text-align: center;
+}
+
+.loader .spinner > div {
+  width: 18px;
+  height: 18px;
+  background-color: #00A1DF;
+
+  border-radius: 100%;
+  display: inline-block;
+  animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+}
+
+.loader .spinner .bounce1 {
+  animation-delay: -0.32s;
+}
+
+.loader .spinner .bounce2 {
+  animation-delay: -0.16s;
+}
+
+@keyframes sk-bouncedelay {
+  0%, 80%, 100% {
+    transform: scale(0);
+  } 40% {
+    transform: scale(1.0);
+  }
+}
 
 /* Search bar states */
 

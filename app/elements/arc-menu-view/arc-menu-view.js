@@ -33,8 +33,19 @@
       withToast: {
         type: Boolean,
         reflectToAttribute: true
-      }
+      },
+
+      hasProjects: {
+        type: Boolean,
+        computed: '_computeHasProjects(projects.length)'
+      },
+
+      selectedProject: String
     },
+
+    observers: [
+      'selectedProjectChanged(selectedProject)'
+    ],
 
     attached: function() {
       this.listen(document.body, 'iron-announce', '_onToastShown');
@@ -44,6 +55,10 @@
     detached: function() {
       this.unlisten(document.body, 'iron-announce', '_onToastShown');
       this.unlisten(document.body, 'iron-overlay-closed', '_onToastClosed');
+    },
+
+    _computeHasProjects: function(length) {
+      return !!length;
     },
 
     _onToastShown: function(e) {
@@ -162,6 +177,19 @@
           }
           logViewer.open();
           break;
+      }
+    },
+
+    _computeProjectSelected: function(pId, selected) {
+      return pId === selected;
+    },
+
+    selectedProjectChanged: function(selectedProject) {
+      if (!selectedProject) {
+        return;
+      }
+      if (!this.$.projectsSubmenu.opened) {
+        this.$.projectsSubmenu.opened = true;
       }
     }
   });

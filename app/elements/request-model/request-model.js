@@ -77,10 +77,10 @@
         });
         return request;
       })
-      .then((request) => {
-        return db.close()
-        .then(() => request);
-      })
+      // .then((request) => {
+      //   return db.close()
+      //   .then(() => request);
+      // })
       .catch((e) => this._handleException(e));
     },
 
@@ -107,8 +107,8 @@
       }
       e.detail.result = p
       .then((r) => {
-        request = r;
-        return db.put(r);
+        request = Object.assign({}, r, request);
+        return db.put(request);
       })
       .then((insertResult) => {
         var oldRev = request._rev;
@@ -119,10 +119,10 @@
         });
         return request;
       })
-      .then((request) => {
-        return db.close()
-        .then(() => request);
-      })
+      // .then((request) => {
+      //   return db.close()
+      //   .then(() => request);
+      // })
       .catch((e) => this._handleException(e));
     },
 

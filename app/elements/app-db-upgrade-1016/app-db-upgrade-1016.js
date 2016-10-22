@@ -73,7 +73,6 @@ Polymer({
       new PouchDB('saved-requests').destroy(),
       new PouchDB('legacy-projects').destroy(),
       new PouchDB('history-requests').destroy(),
-      new PouchDB('external-requests').destroy(),
       new PouchDB('cookies').destroy(),
       new PouchDB('auth-data').destroy(),
       new PouchDB('url-history').destroy()
@@ -155,7 +154,6 @@ Polymer({
     .then(() => this._assignProjects(parsedRequests, parsedProjects))
     .then(() => this._insertSavedRequests(parsedRequests.saved))
     .then(() => this._insertHistorydRequests(parsedRequests.history))
-    .then(() => this._insertDrivedRequests(parsedRequests.external))
     .then(() => this._insertHistoryData(parsedRequests.har));
   },
   // Returns an array of saved, history and har objects.
@@ -186,17 +184,15 @@ Polymer({
    *
    *
    */
-  _parsePartRequests: function(requests, resolve, reject, saved, history, har, external) {
+  _parsePartRequests: function(requests, resolve, reject, saved, history, har) {
     saved = saved || [];
     history = history || [];
     har = har || [];
-    external = external || [];
     if (requests.length === 0) {
       resolve({
         saved: saved,
         history: history,
-        har: har,
-        external: external
+        har: har
       });
       return;
     }
@@ -221,7 +217,7 @@ Polymer({
         har = har.concat(result.historyData);
       } else if (item.type === 'drive') {
         let result = this._parseDriveItem(item);
-        external.push({
+        saved.push({
           origin: result.originId,
           request: result.request
         });
@@ -230,7 +226,7 @@ Polymer({
     }
     requests.splice(0, len);
     this.async(() => {
-      this._parsePartRequests(requests, resolve, reject, saved, history, har, external);
+      this._parsePartRequests(requests, resolve, reject, saved, history, har);
     }, 1);
   },
   /**
@@ -306,7 +302,8 @@ Polymer({
       _id: encodeURIComponent(item.name) + '/' + encodeURIComponent(item.url) + '/' + item.method,
       name: item.name,
       method: item.method,
-      url: item.url
+      url: item.url,
+      type: 'saved'
     };
     // payload and headers
     var harIndex = item.referenceEntry || 0;
@@ -456,18 +453,6 @@ Polymer({
     return db.bulkDocs(data.map((i) => i.request));
   },
 
-  _insertDrivedRequests: function(data) {
-    if (!data || !data.length) {
-      return Promise.resolve();
-    }
-    this.fire('database-upgrades-status', {
-      value: '1016',
-      message: 'Inserting external data (' + data.length + ')'
-    });
-    var db = new PouchDB('external-requests');
-    return db.bulkDocs(data.map((i) => i.request));
-  },
-
   _insertHistoryData: function(data) {
     if (!data || !data.length) {
       return Promise.resolve();
@@ -581,14 +566,14 @@ Polymer({
         error = err;
       })
       .finally(function() {
-        db.close();
         // Escape Dexie promise system.
-        if (error) {
-          return reject(); // <- like building node modules using promises... terrible
-          // I mean, really, people, learn to use promises!
-          // And learn how should it be used. Def not like Dexie does.
-        }
-        resolve();
+        window.setTimeout(() => {
+          if (error) {
+            console.error('Error during upgrade', error);
+            return reject();
+          }
+          resolve();
+        }, 0);
       });
     });
   },
@@ -621,12 +606,14 @@ Polymer({
         error = err;
       })
       .finally(function() {
-        db.close();
         // Escape Dexie promise system.
-        if (error) {
-          return reject();
-        }
-        resolve();
+        window.setTimeout(() => {
+          if (error) {
+            console.error('Error during upgrade', error);
+            return reject();
+          }
+          resolve();
+        }, 0);
       });
     });
   },
@@ -661,12 +648,14 @@ Polymer({
         error = err;
       })
       .finally(function() {
-        db.close();
         // Escape Dexie promise system.
-        if (error) {
-          return reject();
-        }
-        resolve();
+        window.setTimeout(() => {
+          if (error) {
+            console.error('Error during upgrade', error);
+            return reject();
+          }
+          resolve();
+        }, 0);
       });
     });
   },

@@ -18,8 +18,6 @@ the License.
 <link rel="import" href="../arc-saved-list-view/arc-saved-list-empty.html">
 <link rel="import" href="../arc-saved-list-view/arc-saved-list-view.html">
 <link rel="import" href="../saved-panel/saved-panel.html">
-<link rel="import" href="../saved-drive-panel/saved-drive-panel.html">
-
 <!--
 `arc-saved-list-controller` controlls behavior of the saved requests list.
 
@@ -54,14 +52,7 @@ the License.
     </style>
     <paper-progress indeterminate hidden$="[[!querying]]"></paper-progress>
     <template is="dom-if" if="[[_computePouchDbView(opened, usePouchDb)]]">
-      <paper-tabs selected="{{requestTypeTab}}">
-        <paper-tab>Saved requests</paper-tab>
-        <paper-tab>Google Drive requests</paper-tab>
-      </paper-tabs>
-      <iron-pages selected="[[requestTypeTab]]">
-        <saved-panel querying="{{querying}}" on-querying-changed="_onQueryingChanged"></saved-panel>
-        <saved-drive-panel querying="{{querying}}" on-querying-changed="_onQueryingChanged"></saved-drive-panel>
-      </iron-pages>
+      <saved-panel querying="{{querying}}" on-querying-changed="_onQueryingChanged"></saved-panel>
     </template>
     <template is="dom-if" if="[[_computeLegacyView(opened, usePouchDb)]]" restamp="true">
       <template is="dom-if" if="{{hasListData}}">

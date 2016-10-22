@@ -61,8 +61,7 @@ window.ArcBehaviors.DeleteRevertableBehavior = {
     return db.bulkDocs(items)
     .then((res) => {
       this._handleDeletedItems(res);
-      return db.close()
-      .then(() => res);
+      return res;
     });
   },
 
@@ -114,8 +113,7 @@ window.ArcBehaviors.DeleteRevertableBehavior = {
         // There was an error.
         return;
       }
-      return this._handleReverted(db, r)
-      .then(() => db.close());
+      return this._handleReverted(db, r);
     });
   },
 
