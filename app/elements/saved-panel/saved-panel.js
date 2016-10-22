@@ -317,7 +317,7 @@
       this._deleteRevertable('saved-requests', items)
       .then((res) => {
         let items = res.map((i) => i.id);
-        this.fire('request-db-removed', {
+        this.fire('request-objects-deleted', {
           items: items,
           type: 'saved'
         });
@@ -342,7 +342,7 @@
       var res = this.savedData.concat(docs);
       res = this._processResults(res);
       this.set('savedData', res);
-      this.fire('request-db-restored', {
+      this.fire('request-objects-restored', {
         items: docs,
         type: 'saved'
       });
@@ -358,6 +358,7 @@
       e.preventDefault();
       e.stopPropagation();
 
+      throw 'USE MODEL!!!!!!!!!';
       var db = this._getDb();
       db.put(e.detail.item).then((r) => {
         e.detail.item._id = r.id;
@@ -406,7 +407,7 @@
         console.error(e);
       })
       .then(() => {
-        this.fire('request-db-cleared', {
+        this.fire('request-objects-cleared', {
           type: 'saved'
         });
         this.refresh();
@@ -422,6 +423,7 @@
     },
 
     _openDrive: function() {
+      throw 'MOVE HANDLER TO MAIN SCRIPT!!!!';
       this.fire('open-drive');
     }
   });

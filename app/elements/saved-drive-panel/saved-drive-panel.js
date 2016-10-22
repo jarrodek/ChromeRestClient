@@ -315,7 +315,7 @@
       this._deleteRevertable('external-requests', items)
       .then((res) => {
         let items = res.map((i) => i.id);
-        this.fire('request-db-removed', {
+        this.fire('request-objects-deleted', {
           items: items,
           type: 'external'
         });
@@ -340,7 +340,7 @@
       var res = this.driveData.concat(docs);
       res = this._processResults(res);
       this.set('driveData', res);
-      this.fire('request-db-restored', {
+      this.fire('request-objects-restored', {
         items: docs,
         type: 'external'
       });
@@ -355,13 +355,13 @@
     _savedNameChangeRequested: function(e) {
       e.preventDefault();
       e.stopPropagation();
-
+      throw 'USE MODEL!!!!!!!!!';
       var db = this._getDb();
       db.put(e.detail.item).then((r) => {
         e.detail.item._id = r.id;
         e.detail.item._rev = r.rev;
         this.driveData[e.detail.index] = e.detail.item;
-        this.fire('request-db-changed', {
+        this.fire('request-object-changed', {
           value: e.detail.item,
           type: 'external',
           rev: r.rev,
@@ -404,7 +404,7 @@
         console.error(e);
       })
       .then(() => {
-        this.fire('request-db-cleared', {
+        this.fire('request-objects-cleared', {
           type: 'saved'
         });
         this.refresh();

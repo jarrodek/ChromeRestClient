@@ -56,9 +56,8 @@ window.ArcBehaviors.DeleteRevertableBehavior = {
    */
   _deleteRevertable: function(dbName, items) {
     this.__revertableDbName = dbName;
-    var db = this._getDb();
+    var db = this.__revertableGetDb();
     items.forEach((i) => i._deleted = true);
-
     return db.bulkDocs(items)
     .then((res) => {
       this._handleDeletedItems(res);
@@ -92,7 +91,7 @@ window.ArcBehaviors.DeleteRevertableBehavior = {
   },
 
   _revertDeleted: function(deleteResult) {
-    var db = this._getDb();
+    var db = this.__revertableGetDb();
     var p = deleteResult.map((i) => db.get(i.id, {rev: i.rev}));
 
     return Promise.all(p)

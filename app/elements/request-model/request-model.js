@@ -7,12 +7,14 @@
       this.listen(document, 'request-name-change', '_handleNameChange');
       this.listen(document, 'request-object-change', '_handleObjectSave');
       this.listen(document, 'request-object-delete', '_handleObjectDelete');
+      this.listen(document, 'request-objects-delete', '_handleObjectsDelete');
     },
 
     detached: function() {
       this.unlisten(document, 'request-name-change', '_handleNameChange');
       this.unlisten(document, 'request-object-change', '_handleObjectSave');
       this.unlisten(document, 'request-object-delete', '_handleObjectDelete');
+      this.unlisten(document, 'request-objects-delete', '_handleObjectsDelete');
     },
 
     _getDb: function(dbName) {
@@ -82,7 +84,7 @@
       .catch((e) => this._handleException(e));
     },
 
-    _handleObjectSave: function(e) {
+    _handleObjectSave: function(e, detail) {
       e.preventDefault();
       e.stopPropagation();
       if (!detail.dbName) {
@@ -124,7 +126,7 @@
       .catch((e) => this._handleException(e));
     },
 
-    _handleObjectDelete: function(e) {
+    _handleObjectDelete: function(e, detail) {
       e.preventDefault();
       e.stopPropagation();
       if (!detail.dbName) {
@@ -168,6 +170,48 @@
         fatal: true
       });
       throw e;
+    },
+
+    _handleObjectsDelete: function(e, detail) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!detail.dbName) {
+        e.detail.error = true;
+        e.detail.message = 'Store name must be provided';
+        return;
+      }
+
+      if (!detail.items) {
+        e.detail.error = true;
+        e.detail.message = 'Provide items ids to delete.';
+        return;
+      }
+
+      var db = this._getDb(detail.dbName);
+      var oldData = [];
+      e.detail.result = db.allDocs({
+        keys: detail.items
+      })
+      .then((res) => {
+        res = res.rows.filter((i) => {
+          if (i.error) {
+            console.error(i);
+            return false;
+          }
+          return true;
+        });
+        oldData = res;
+        return Promise.all(res.map((i) => db.remove(i.id, i.value.rev)));
+      })
+      .then(() => {
+        oldData.forEach((i) => {
+          this.fire('request-object-deleted', {
+            id: i._id,
+            oldRev: i._rev
+          });
+        });
+      })
+      .catch((e) => this._handleException(e));
     }
   });
 })();

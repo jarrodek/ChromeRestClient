@@ -5,7 +5,8 @@ Polymer({
   is: 'arc-project-controller',
   behaviors: [
     ArcBehaviors.ArcControllerBehavior,
-    ArcBehaviors.ArcFileExportBehavior
+    ArcBehaviors.ArcFileExportBehavior,
+    ArcBehaviors.DeleteRevertableBehavior
   ],
 
   properties: {
@@ -172,11 +173,67 @@ Polymer({
   _deleteRequestedNew: function(e, detail) {
     if (detail.request) {
       return this._deleteRequest(detail);
+    } else if (detail.project) {
+      this._deleteProjectNew();
     }
   },
 
+  _deleteProjectNew: function() {
+    var requests = [];
+    if (this.requests && this.requests.length) {
+      requests = this.requests.map((i) => i._id);
+    }
+    var event = this.fire('request-objects-delete', {
+      dbName: 'saved-requests',
+      items: requests
+    });
+
+    if (event.detail.error) {
+      console.error(event.detail.message);
+      return;
+    }
+    event.detail.result
+    .then(() => {
+      var db = this._getDb();
+      return db.remove(this.project);
+    })
+    .then(() => {
+      page('request/latest');
+    });
+  },
+
   _deleteRequest: function(detail) {
-    console.log('_deleteRequest', detail);
+    this._deleteRevertable('saved-requests', [detail.request])
+    .then((res) => {
+      let items = res.map((i) => i.id);
+      this.fire('request-objects-deleted', {
+        items: items,
+        type: 'saved'
+      });
+      var data = this.requests;
+      data = data.filter((i) => items.indexOf(i._id) === -1);
+      this.set('requests', data);
+    })
+    .catch((e) => {
+      StatusNotification.notify({
+        message: 'Error deleting entries. ' + e.message
+      });
+      this.fire('app-log', {
+        message: ['Error deleting entries', e],
+        level: e
+      });
+      console.error(e);
+    });
+  },
+
+  _onDocumentsRestored: function(response) {
+    var docs = response.rows.map((i) => i.doc);
+    var res = this.requests.concat(docs);
+    this.set('requests', res);
+    this.fire('request-objects-restored', {
+      items: docs,
+      type: 'saved'
+    });
   },
 
   _deleteRequested: function(e, data) {
