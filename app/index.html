@@ -292,6 +292,22 @@
     <request-model></request-model>
     <project-model></project-model>
     <url-history-model></url-history-model>
+
+    <app-analytics debug tracking-id="UA-18021184-6" app-name="ARC">
+      <template is="dom-repeat" items="[[gaCustomDimensions]]">
+        <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+      </template>
+    </app-analytics>
+    <!-- <app-analytics tracking-id="UA-18021184-14" app-name="ARC">
+      <template is="dom-repeat" items="[[gaCustomDimensions]]">
+        <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+      </template>
+    </app-analytics>
+    <app-analytics tracking-id="UA-71458341-2" app-name="ARC">
+      <template is="dom-repeat" items="[[gaCustomDimensions]]">
+        <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+      </template>
+    </app-analytics> -->
   </template>
   <script src="bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
   <script src="bower_components/dexie-js/dist/dexie.min.js"></script>

@@ -42,7 +42,7 @@
     "app-logger": "advanced-rest-client/app-logger#~0.0.2",
     "uuid-generator": "advanced-rest-client/uuid-generator#^1.0.4",
     "paper-masked-input": "advanced-rest-client/paper-masked-input#^1.0.4",
-    "app-analytics": "advanced-rest-client/app-analytics#^1.0.4"
+    "app-analytics": "advanced-rest-client/app-analytics#^1.0.5"
   },
   "devDependencies": {
     "web-component-tester": "*"

@@ -21,9 +21,7 @@
   app.selectedProject = undefined;
   app.upgrading = false;
   app.usePouchDb = false;
-  app.observers = [
-
-  ];
+  app.gaCustomDimensions = [];
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
     app.updateBranding();
@@ -50,6 +48,7 @@
     if (app.upgrading) {
       return;
     }
+    app.initAnalytics();
     app.initRouting();
   });
   app.initRouting = () => {
@@ -525,4 +524,39 @@
     }
     ctrl.selectFile();
   });
+
+  app.initAnalytics = () => {
+    var appVersion = arc.app.utils.appVer;
+    var chromeVer = arc.app.utils.chromeVersion;
+    var manifest = (chrome.runtime && chrome.runtime.getManifest) ?
+      chrome.runtime.getManifest() : null;
+    // jscs:disable
+    var manifestName = manifest ? manifest.version_name : '(not set)';
+    // jscs:enable
+    var channel = null;
+    if (manifestName === '(not set)') {
+      channel = 'not a chrome env';
+    } else if (manifestName.indexOf('canary') !== -1) {
+      channel = 'canary';
+    } else if (manifestName.indexOf('dev') !== -1) {
+      channel = 'dev';
+    } else if (manifestName.indexOf('beta') !== -1) {
+      channel = 'beta';
+    } else {
+      channel = 'stable';
+    }
+
+    app.push('gaCustomDimensions', {
+      index: 1,
+      value: chromeVer
+    });
+    app.push('gaCustomDimensions', {
+      index: 2,
+      value: appVersion
+    });
+    app.push('gaCustomDimensions', {
+      index: 5,
+      value: channel
+    });
+  };
 })(document, window);
