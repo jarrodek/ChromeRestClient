@@ -210,6 +210,14 @@
         }
         this.items.forEach((i) => this.$.list.deselectItem(i));
       }
+    },
+
+    _computeDriveClass: function(type) {
+      return type === 'google-drive' ? '' : 'invisible';
+    },
+
+    _computeProjectClass: function(id) {
+      return id ? '' : 'invisible';
     }
   });
 })();
