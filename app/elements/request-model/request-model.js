@@ -92,7 +92,7 @@
         e.detail.message = 'Store name must be provided';
         return;
       }
-      if (!detail.request || !!detail.request._id) {
+      if (!detail.request) {
         e.detail.error = true;
         e.detail.message = 'You must set request object';
         return;
@@ -101,13 +101,20 @@
       var p;
       var request = detail.request;
       if (!request._rev) {
-        p = db.get(request._id);
+        p = db.get(request._id).catch((e) => {
+          if (e.status === 404) {
+            // create new
+            return {};
+          }
+          this._handleException(e);
+        });
       } else {
         p = Promise.resolve(request);
       }
       e.detail.result = p
       .then((r) => {
         request = Object.assign({}, r, request);
+        request.updated = Date.now();
         return db.put(request);
       })
       .then((insertResult) => {

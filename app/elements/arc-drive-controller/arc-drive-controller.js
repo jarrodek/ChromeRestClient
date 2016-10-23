@@ -241,9 +241,8 @@ Polymer({
       response = response.requests[0];
     }
     let obj = arc.app.importer.normalizeRequest(response);
-    obj.type = 'drive';
+    obj.type = 'google-drive';
     obj.driveId = this.fileId;
-    obj.isDrive = true;
     this.set('loading', false);
     this.close();
     delete obj.id;

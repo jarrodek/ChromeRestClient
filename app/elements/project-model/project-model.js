@@ -101,7 +101,7 @@
       e.preventDefault();
       e.stopPropagation();
 
-      if (!detail.request || !!detail.request._id) {
+      if (!detail.project || !detail.project._id) {
         e.detail.error = true;
         e.detail.message = 'You must set project object';
         return;
@@ -110,13 +110,20 @@
       var p;
       var project = detail.project;
       if (!project._rev) {
-        p = db.get(project._id);
+        p = db.get(project._id).catch((e) => {
+          if (e.status === 404) {
+            // create new
+            return {};
+          }
+          this._handleException(e);
+        });
       } else {
-        p = Promise.resolve(project);
+        p = Promise.resolve({});
       }
       e.detail.result = p
       .then((r) => {
         project = Object.assign({}, r, project);
+        project.updated = Date.now();
         return db.put(project);
       })
       .then((insertResult) => {

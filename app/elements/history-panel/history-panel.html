@@ -101,7 +101,17 @@ Custom property | Description | Default
             </section>
           </iron-pages>
         </div>
-        <history-list-items id="history" items="[[historyData]]" selected-items="{{currentSelection}}" has-selection="{{hasSelection}}" on-history-list-threshold="loadNext" on-history-list-item-open="_onOpenRequested" on-history-list-item-delete="_onDeleteRequested" on-history-list-item-selection-changed="_selectionChanged"></history-list-items>
+        <history-list-items
+          id="history"
+          items="[[historyData]]"
+          selected-items="{{currentSelection}}"
+          has-selection="{{hasSelection}}"
+          query="[[searchQuery]]"
+          is-search-results="[[_cmputeIsSearch(searchQuery)]]"
+          on-history-list-threshold="loadNext"
+          on-history-list-item-open="_onOpenRequested"
+          on-history-list-item-delete="_onDeleteRequested"
+          on-history-list-item-selection-changed="_selectionChanged"></history-list-items>
       </div>
     </paper-drawer-panel>
     <paper-toast text="Select request first." id="noSelectionToast"></paper-toast>

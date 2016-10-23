@@ -54,7 +54,9 @@
     <!-- <legacyproject-related-requests project-id="[[projectId]]" related-requests="{{currentProjectEndpoints}}"></legacyproject-related-requests> -->
     <uuid-generator id="uuid"></uuid-generator>
     <url-history-saver id="urlHistory"></url-history-saver>
-    <paper-toast text="Your request has been saved. Add SHIFT key to display save dialog." id="requestSavedToast"></paper-toast>
+    <request-saver id="requestSaver" request="[[request]]" on-request-saved="_requestSavedHandler" on-error="_requestSaveErrorHandler"></request-saver>
+    <paper-toast text="Your request has been saved. Add SHIFT key to display save dialog." id="requestSavedFastToast"></paper-toast>
+    <paper-toast text="Request has been saved" id="requestSavedToast"></paper-toast>
   </template>
   <script src="request-panel.js"></script>
 </dom-module>

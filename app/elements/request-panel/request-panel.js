@@ -207,8 +207,8 @@
           this.set('historyId', decodeURIComponent(this.routeParams.historyId));
           break;
         case 'drive':
-          this.requestType = this.routeParams.type;
-          this._restoreDrive(this.routeParams.driveId);
+          // This is not really a request. It ment to open a drive item.
+          // Drive data will be called via /current route.
           let id = this.routeParams.driveId;
           let ctrl = document.body.querySelector('arc-drive-controller');
           if (!ctrl) {
@@ -256,7 +256,7 @@
           dbName = 'history-requests';
           break;
         case 'drive':
-          dbName = 'external-requests';
+          dbName = 'saved-requests';
           break;
         default:
           this.fire('app-log', {
@@ -500,7 +500,7 @@
       var isDrive;
       var isSaved;
       if (type) {
-        isDrive = type === 'drive';
+        isDrive = type === 'google-drive';
         isSaved = type === 'saved';
       } else {
         isDrive = !!this.externalId;
@@ -540,7 +540,7 @@
       var toProject = e.detail.isProject || false;
       var projectId = toProject ? e.detail.projectId : undefined;
       var newProjectName = toProject ? projectId ? undefined : e.detail.projectName : undefined;
-      var isDrive = !!this.externalId;
+      var isDrive = this.request.type === 'google-drive';
       var isSaved = !!this.savedId;
       if (toProject && !newProjectName && !projectId) {
         StatusNotification.notify({
@@ -549,166 +549,66 @@
         return;
       }
 
-      var data;
-      if (override) {
-        if (isSaved || isDrive) {
-          data = Object.assign({}, this.proxyRequest, this.request);
-        } else {
-          data = Object.assign({}, this.request);
-          if (data._id) {
-            delete data._id;
-          }
-          if (data.driveId) {
-            delete data.driveId;
-          }
-        }
-      } else {
-        data = Object.assign({}, this.request);
-        if (data._id) {
-          delete data._id;
-        }
-        if (data.driveId) {
-          delete data.driveId;
-        }
-      }
-      data.name = name;
-      if (!data._id) {
-        data._id = encodeURIComponent(data.name) + '/' + encodeURIComponent(data.url) + '/' +
-          data.method;
-        if (toProject) {
-          data._id += '/' + (newProjectName ? encodeURIComponent(newProjectName) : projectId);
-        }
-      }
+      this.$.requestSaver.override = override;
+      this.$.requestSaver.requestName = name;
+      this.$.requestSaver.saveToDrive = toDrive;
+      this.$.requestSaver.saveToProject = toProject;
+      this.$.requestSaver.saveToProjectId = projectId;
+      this.$.requestSaver.saveToProjectName = newProjectName;
+      this.$.requestSaver.currentIsDrive = isDrive;
+      this.$.requestSaver.currentIsSaved = isSaved;
+      this.$.requestSaver.save();
+    },
 
-      var p;
-      if (toProject) {
-        if (newProjectName) {
-          p = this._saveNewProject(newProjectName)
-          .then((result) => {
-            this.fire('project-saved');
-            projectId = result._id;
-            newProjectName = undefined;
-            data.legacyProject = result.id;
-          });
-        } else {
-          data.legacyProject = projectId;
-          p = Promise.resolve();
-        }
-      } else {
-        p = Promise.resolve();
+    _requestSavedHandler: function(e, detail) {
+      e.stopPropagation();
+      var r = detail.request;
+      this.requestType = 'saved';
+      this.set('savedId', r._id);
+      this.set('historyId', undefined);
+      if (r.legacyProject && r.legacyProject !== this.projectId) {
+        this.set('projectId', r.legacyProject);
+      } else if (!r.legacyProject && this.projectId) {
+        this.set('projectId', undefined);
       }
+      this.$.requestSavedToast.open();
+      this.request = r;
 
-      p.then(() => {
-        this.proxyRequest = data;
-        if (toDrive) {
-          return this._saveDrive(data, name).then((insertResult) => {
-            var driveId = insertResult.id;
-            if (driveId) {
-              this.proxyRequest.driveId = driveId;
-            }
-            return this._saveRequest('external-requests', this.proxyRequest)
-            .catch((e) => {
-              if (e.status === 404) {
-                // It wasn't in the external data, put it there.
-                let copy = Object.assign({}, this.proxyRequest);
-                delete copy._id;
-                delete copy._rev;
-                return this._saveRequest('external-requests', copy)
-                .then(() => {
-                  if (override) {
-                    return this._saveRequest('saved-requests', copy);
-                  }
-                });
-              } else {
-                throw e;
-              }
-            });
-          });
-        } else {
-          return this._saveRequest('saved-requests', this.proxyRequest);
-        }
-      })
-      .then((res) => {
-        this.requestType = toDrive ? 'drive' : 'saved';
-        this.set('savedId', toDrive ? undefined : res.id);
-        this.set('historyId', undefined);
-        this.set('externalId', toDrive ? res.id : undefined);
-        this.proxyRequest.rev = res.rev;
-        if (toProject) {
-          this.set('projectId', this.proxyRequest.legacyProject);
-        }
-      })
-      .then(() => {
-        var saveType = [];
-        if (override) {
-          saveType.push('override');
-        }
-        if (toDrive) {
-          saveType.push('drive');
-        }
-        if (toProject) {
-          saveType.push('project');
-        }
-        this.fire('send-analytics', {
-          'type': 'event',
-          'category': 'Engagement',
-          'action': 'Click',
-          'label': 'Save request'
-        });
-        this.fire('send-analytics', {
-          'type': 'event',
-          'category': 'Request',
-          'action': 'Save type',
-          'label': saveType.join(',')
-        });
-      })
-      .catch((e) => {
-        this.fire('app-log', {'message': ['Unable save data.', e], 'level': 'error'});
-        StatusNotification.notify({
-          message: 'Unable to save the file. ' + e.message
-        });
+      var saveType = [];
+      if (detail.override) {
+        saveType.push('override');
+      }
+      if (detail.toDrive) {
+        saveType.push('drive');
+      }
+      if (detail.toProject) {
+        saveType.push('project');
+      }
+      this.fire('send-analytics', {
+        'type': 'event',
+        'category': 'Engagement',
+        'action': 'Click',
+        'label': 'Save request'
+      });
+      this.fire('send-analytics', {
+        'type': 'event',
+        'category': 'Request',
+        'action': 'Save type',
+        'label': saveType.join(',')
       });
     },
-    // Requested to save request in project
-    _saveAsProject: function(opts) {
-      var override = opts.override || false;
 
-    },
-
-    _saveDrive: function(request, name) {
-      var ctrl = document.body.querySelector('arc-drive-controller');
-      if (!ctrl) {
-        //this.fire('app-log', {'message': ['Drive controller not found!'], 'level': 'error'});
-        return Promise.reject(new Error('Drive controller not found!'));
-      }
-      return ctrl.exportDrive(request, name);
-    },
-
-    _saveNewProject: function(projectName) {
-      if (!projectName) {
-        return Promise.reject(new Error('Can not add new project without a name.'));
-      }
-      var t = Date.now();
-      var _doc = {
-        _id: this.$.uuid.generate(),
-        created: t,
-        updated: t,
-        order: 0,
-        name: projectName
-      };
-      var e = this.fire('arc-database-insert', {
-        store: 'legacy-projects',
-        docs: _doc
+    _requestSaveErrorHandler: function(e) {
+      console.error('Save request error', e);
+      this.fire('app-log', {
+        'message': ['Unable to save the request.', e],
+        'level': 'error'
       });
-      if (!e.detail.result) {
-        return Promise.reject(new Error('Database is missing.'));
-      }
-      return e.detail.result;
+      StatusNotification.notify({
+        message: 'Unable to save the request. ' + e.message
+      });
     },
 
-    _readRequestData: function() {
-
-    },
     /**
      * Shortcut for save current request without the UI dialog.
      * It's only called when the user restored saved request (also works with drive).
@@ -721,42 +621,25 @@
       var isDrive;
       var isSaved;
       if (type) {
-        isDrive = type === 'drive';
+        isDrive = type === 'google-drive';
         isSaved = type === 'saved';
       } else {
-        isDrive = !!this.externalId;
+        isDrive = false;
         isSaved = !!this.savedId;
       }
       var data = Object.assign({}, this.proxyRequest, this.request);
       this.proxyRequest = data;
-      var p;
-      if (isSaved) {
-        // this.$.savedRequest.data = this.proxyRequest;
-        // p = this.$.savedRequest.save();
-        p = this._saveRequest('saved-requests', this.proxyRequest);
-      } else if (isDrive) {
-        p = this._saveDrive(data, data.name).then((insertResult) => {
-          var driveId = insertResult.id;
-          if (driveId) {
-            this.proxyRequest.driveId = driveId;
-          }
-          // this.$.extRequest.data = this.proxyRequest;
-          // return this.$.extRequest.save();
-          return this._saveRequest('external-requests', this.proxyRequest);
-        });
-      } else {
-        p = Promise.reject(new Error('Called quick save but it\'s not restored request'));
-      }
-      p.then((r) => {
-        this.proxyRequest._rev = r.rev;
-        this.$.requestSavedToast.open();
-      })
-      .catch((e) => {
-        this.fire('app-log', {
-          'message': ['Magic variables', e],
-          'level': 'error'
-        });
-      });
+
+      this.$.requestSaver.override = true;
+      this.$.requestSaver.saveToDrive = isDrive;
+      this.$.requestSaver.saveToProject = !!data.legacyProject;
+      this.$.requestSaver.saveToProjectId = data.legacyProject;
+      this.$.requestSaver.saveToProjectName = undefined;
+      this.$.requestSaver.currentIsDrive = isDrive;
+      this.$.requestSaver.currentIsSaved = isSaved;
+      this.$.requestSaver.save();
+
+      //this.$.requestSavedFastToast.open();
     },
     /**
      * Sends current request.

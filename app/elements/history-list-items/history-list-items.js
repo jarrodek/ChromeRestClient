@@ -72,12 +72,22 @@ Polymer({
      */
     hasGrouping: {
       type: Boolean
+    },
+    // If provided it will highlight given word(s) on the list
+    query: String,
+    // Set this if the list is a search result
+    isSearchResults: {
+      type: Boolean,
+      value: false
     }
   },
+
+  behaviors: [ArcBehaviors.TextSearchBehavior],
 
   observers: [
     '_sizeChanged(items.length)'
   ],
+
   listeners: {
     'iron-select': '_onSelectItem',
     'iron-deselect': '_onSelectItem',
@@ -85,6 +95,7 @@ Polymer({
     'iron-changed': '_onSelectItem',
     'iron-change': '_onSelectItem'
   },
+
   hostAttributes: {
     'role': 'list'
   },
@@ -98,19 +109,23 @@ Polymer({
     }
   },
 
-  _computeHistoryTime: function(timestamp) {
+  _computeHistoryTime: function(timestamp, isSearchResults) {
     if (!timestamp) {
       return '';
     }
     var d = new Date(Number(timestamp));
     var options = {
-      // year: 'numeric',
-      // month: 'numeric',
-      // day: 'numeric',
       hour: 'numeric',
-      minute: 'numeric',
-      // second: 'numeric'
+      minute: 'numeric'
     };
+    if (isSearchResults) {
+      options = Object.assign(options, {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+    }
     try {
       return new Intl.DateTimeFormat(undefined, options).format(d);
     } catch (e) {

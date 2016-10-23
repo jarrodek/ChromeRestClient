@@ -302,6 +302,10 @@
         this.fire('history-panel-delete-items', {
           items: items
         });
+      },
+
+      _cmputeIsSearch: function(searchQuery) {
+        return !!searchQuery;
       }
     });
   })();
