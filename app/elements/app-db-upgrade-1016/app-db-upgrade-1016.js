@@ -255,7 +255,7 @@ Polymer({
     }
 
     var obj = {
-      _id: encodeURIComponent(item.url) + '/' + item.method + '/' + today,
+      _id: today + '/' + encodeURIComponent(item.url) + '/' + item.method,
       method: item.method,
       url: item.url,
       updated: new Date(item.updateTime).getTime()

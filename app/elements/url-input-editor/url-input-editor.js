@@ -57,7 +57,10 @@ Polymer({
       }
     },
     // True when a suggestion box for the URL is opened.
-    suggesionsOpened: Boolean
+    suggesionsOpened: Boolean,
+    usePouchDb: {
+      type: Boolean
+    }
   },
   observers: [
     '_urlChanged(url)',
@@ -65,6 +68,18 @@ Polymer({
   ],
   listeners: {
     'blur': '_elementBlur'
+  },
+
+  attached: function() {
+    this.listen(document, 'use-pouch-db', '_setUsePouchDb');
+  },
+
+  detached: function() {
+    this.unlisten(document, 'use-pouch-db', '_setUsePouchDb');
+  },
+
+  _setUsePouchDb: function() {
+    this.set('usePouchDb', true);
   },
   /**
    * Called when the URL value change.
@@ -349,8 +364,23 @@ Polymer({
       this.$.autocomplete.source = [];
       return;
     }
-    this.$.model.objectId = value;
-    this.$.model.query();
+    var usePouchDb = this.$.meta.byKey('usePouchDb');
+
+    if (!usePouchDb) {
+      this.$.model.objectId = value;
+      this.$.model.query();
+    } else {
+      let event = this.fire('url-history-object-query', {
+        q: value
+      });
+      event.detail.result.then((data) => {
+        var suggestions = data.map((item) => item._id);
+        this.$.autocomplete.source = suggestions;
+      })
+      .catch(() => {
+        this.$.autocomplete.source = [];
+      });
+    }
   },
   /**
    * Handler called when the suggestions data are ready and should be passed to the

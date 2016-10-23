@@ -466,6 +466,7 @@
     target.target.initScript();
   };
   app._dbUpgradeReady = (e) => {
+    app.fire('use-pouch-db');
     app.set('usePouchDb', true);
     app._upgradeReady(e);
   };

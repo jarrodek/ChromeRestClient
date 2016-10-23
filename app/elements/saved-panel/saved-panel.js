@@ -135,7 +135,7 @@
           ids.push(item._id);
           this.push('savedData', item);
         });
-        return ids;
+        return this._fullSearch(q, ids);
       })
       .catch((e) => {
         this._setQuerying(false);
@@ -144,10 +144,6 @@
           level: 'error'
         });
         console.error('Query saved', e);
-      })
-      .then((ids) => {
-        db.close();
-        this._fullSearch(q, ids);
       });
     },
 
@@ -156,39 +152,36 @@
 
       var mm = Math.round(100 / q.split(/\s/).length);
       var db = this._getDb();
-      db.search({
-          query: q,
-          fields: ['headers', 'payload'],
-          // jscs:disable
-          include_docs: true,
-          // jscs:enable
-          mm: mm + '%'
-        }).then((r) => {
-          this._setQuerying(false);
-          if (!r || !r.rows || !r.rows.length) {
-            return;
-          }
-          if (ids && ids.length) {
-            r.rows = r.rows.filter((i) => ids.indexOf(i.id) === -1);
-          }
-          if (!r.rows.length) {
-            return;
-          }
-          r.rows.forEach((item) => {
-            this.push('savedData', item.doc);
-          });
-        })
-        .catch((e) => {
-          this._setQuerying(false);
-          this.fire('app-log', {
-            message: ['Query saved', e],
-            level: 'error'
-          });
-          console.error('Query saved', e);
-        })
-        .then(() => {
-          db.close();
+      return db.search({
+        query: q,
+        fields: ['headers', 'payload'],
+        // jscs:disable
+        include_docs: true,
+        // jscs:enable
+        mm: mm + '%'
+      }).then((r) => {
+        this._setQuerying(false);
+        if (!r || !r.rows || !r.rows.length) {
+          return;
+        }
+        if (ids && ids.length) {
+          r.rows = r.rows.filter((i) => ids.indexOf(i.id) === -1);
+        }
+        if (!r.rows.length) {
+          return;
+        }
+        r.rows.forEach((item) => {
+          this.push('savedData', item.doc);
         });
+      })
+      .catch((e) => {
+        this._setQuerying(false);
+        this.fire('app-log', {
+          message: ['Query saved', e],
+          level: 'error'
+        });
+        console.error('Query saved', e);
+      });
     },
 
     loadNext: function() {
@@ -224,9 +217,6 @@
           level: 'error'
         });
         console.error('Query saved', e);
-      })
-      .then(() => {
-        db.close();
       });
     },
 

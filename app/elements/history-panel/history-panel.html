@@ -1,0 +1,111 @@
+<!--
+@license
+Copyright 2016 The Advanced REST client authors <arc@mulesoft.com>
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../history-list-items/history-list-items.html">
+<link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../../bower_components/paper-drawer-panel/paper-drawer-panel.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/paper-styles/typography.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="request-details-drawer.html">
+<!--
+`<history-panel>` ARC's requests history view
+
+This element is not ready to use with new system. It supports old system
+and eventually will be transformed to the new architecture.
+
+Please don't use it.
+
+### Example
+```
+<history-panel>
+</history-panel>
+```
+
+### Styling
+`<history-panel>` provides the following custom properties and mixins for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--history-panel` | Mixin applied to the element | `{}`
+
+@group UI Elements
+@element history-panel
+@demo demo/index.html
+-->
+<dom-module id="history-panel">
+  <template>
+    <style>
+     :host {
+      display: block;
+    }
+
+    h1 {
+      @apply(--page-title-text);
+      @apply(--layout-flex);
+      color: var(--paper-blue-700);
+      font-weight: 300;
+    }
+
+    .table-options {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+    }
+
+    .selected-actions {
+      @apply(--layout-horizontal);
+      padding-right: 16px;
+      color: rgba(0, 0, 0, .57);
+    }
+
+    .empty {
+      height: 58px;
+      display: block;
+    }
+
+    paper-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+    </style>
+    <paper-drawer-panel drawer-width="360px" id="details" force-narrow="[[narrowDrawer]]" right-drawer="" disable-edge-swipe="" disable-swipe="">
+      <request-details-drawer is-history="" request="{{detailedRequest}}" on-request-details-drawer-open="_onOpenRequested" on-close="closeDetailsPanel" narrow="[[narrowDrawer]]"></request-details-drawer>
+      <div main="">
+        <div class="status-bar">
+          <iron-pages selected="[[optionsState]]">
+            <section class="empty"></section>
+            <section class="table-options">
+              <h1>[[currentSelection.length]] item selected</h1>
+              <div class="selected-actions">
+                <paper-icon-button icon="file-download" id="exportSelected" on-tap="_exportSelected"></paper-icon-button>
+                <paper-icon-button icon="delete" id="deleteSelected" on-tap="_deleteSelected"></paper-icon-button>
+                <paper-tooltip for="exportSelected">Export selected to file</paper-tooltip>
+                <paper-tooltip for="deleteSelected">Delete selected</paper-tooltip>
+              </div>
+            </section>
+          </iron-pages>
+        </div>
+        <history-list-items id="history" items="[[historyData]]" selected-items="{{currentSelection}}" has-selection="{{hasSelection}}" on-history-list-threshold="loadNext" on-history-list-item-open="_onOpenRequested" on-history-list-item-delete="_onDeleteRequested" on-history-list-item-selection-changed="_selectionChanged"></history-list-items>
+      </div>
+    </paper-drawer-panel>
+    <paper-toast text="Select request first." id="noSelectionToast"></paper-toast>
+    <paper-progress indeterminate="" hidden$="[[!querying]]"></paper-progress>
+  </template>
+</dom-module>
+<script src="history-panel.js"></script>

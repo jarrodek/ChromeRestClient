@@ -1,0 +1,190 @@
+<!--
+@license
+Copyright 2016 The Advanced REST client authors <arc@mulesoft.com>
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/paper-styles/typography.html">
+<link rel="import" href="../../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+<!--
+A `<history-list-items>` element renders a list of fistory items.
+
+It should be used in a ARC requests history list view.
+
+## Example
+```
+<history-list id="history" items="[[list]]"></history-list>
+```
+The `list` attribute is a list of requests to display.
+The `list` will not change from the inside of the element and every state
+change is informed via events.
+
+It is safe to load a lot of results into the list. This element uses
+the `iron-list` element that renders only a potion of items  to fit
+available space.
+
+## Adding pagination
+Simplest solution is just to override the `items` array with new values.
+It will cause list reset though and it will jump to fisrt element.
+To avoid it you can use element's `addItems` function.
+However the element will not notify back change in the list so other elements
+or app will not notice element's array change.
+
+To avoid this update the array of items as follows:
+```
+const newItems = new Array(100);
+newItems.forEach((i) => this.push('existingItems', i));
+```
+It will push new elements - one by one - to the end of the array and notify
+paths each time the new element will be added.
+
+### Styling
+`<history-list-items>` provides the following custom properties and mixins for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--history-list-items-element` | Mixin to be applied to the element itself | `{}`
+`--history-list-items` | Mixin applied to each list item | `{}`
+`--history-list-items-url` | Mixin applied to the URL display element. Note that it is a inline element. | `{}`
+`--history-list-items-method` | Mixin applied to the method display element. Note that it is a inline element. | `{}`
+`--history-list-items-height` | Height of the list item. | `60px`
+`--history-list-items-background-color` | Background color of the list. | `transparent`
+`--history-list-items-selected-background-color` | Selection color for list items. | `#E0E0E0`
+`--history-list-items-meta-row-color` | Font color of the bottom "meta" row (the one with time information.) | `#757575`
+`--history-list-items-meta-row-font-size` | Font size of the bottom "meta" row (the one with time information.) | `12px`
+`--history-list-items-open-background-color` | Background color of the "open" button. | `#1E88E5`
+`--history-list-items-open-color` | Font color of the "open" button. | `white`
+
+You can style checkbox with paper-checkbox styles like:
+```
+:host {
+  --paper-checkbox-checked-color: #1E88E5;
+}
+```
+
+@group UI Elements
+@element history-list-items
+@demo demo/index.html
+-->
+<dom-module id="history-list-items">
+  <template>
+    <style>
+     :host {
+      display: block;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      /*--paper-checkbox-checked-color: #1E88E5;*/
+      @apply(--history-list-items-element);
+    }
+
+    .history-item {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      @apply(--paper-font-body1);
+      font-size: 14px;
+      height: var(--history-list-items-height, 60px);
+      background-color: var(--history-list-items-background-color, transparent);
+      @apply(--history-list-items);
+    }
+
+    .history-item.selected {
+      background-color: var(--history-list-items-selected-background-color, #E0E0E0);
+    }
+
+    .checkbox-column {
+      @apply(--layout);
+      @apply(--layout-center-center);
+      height: 48px;
+      width: 48px;
+    }
+
+    .data-column {
+      @apply(--layout-vertical);
+      @apply(--layout-flex);
+      min-width: 0;
+    }
+
+    .url-method-row {
+      @apply(--layout-horizontal);
+    }
+
+    .method {
+      margin-right: 8px;
+      @apply(--history-list-items-method);
+    }
+
+    .url {
+      @apply(--layout-flex);
+      @apply(--paper-font-common-nowrap);
+      @apply(--history-list-items-url);
+    }
+
+    .meta-row {
+      color: var(--history-list-items-meta-row-color, #757575);
+      font-size: var(--history-list-items-meta-row-font-size, 12px);
+    }
+
+    .action-column {
+      @apply(--layout-horizontal);
+    }
+
+    .open-action {
+      background-color: var(--history-list-items-open-background-color, #1E88E5);
+      color: var(--history-list-items-open-color, white);
+    }
+
+    .group-header {
+      font-weight: bold;
+      border-bottom: 1px solid #ddd;
+      color: #333;
+      margin-top: 20px;
+      padding: 15px 12px;
+    }
+
+    iron-list {
+      flex: 1 1 auto;
+    }
+    </style>
+    <iron-list id="list" items="[[items]]" selected-items="{{selectedItems}}" multi-selection="" selection-enabled="">
+      <template>
+        <div>
+          <div class="group-header" hidden$="[[!item.hasHeader]]">[[item.header]]</div>
+          <div class$="[[_computeRowClass(selected)]]" tabindex$="[[tabIndex]]" aria-label$="Select/Deselect [[item.url]]">
+            <div class="checkbox-column">
+              <paper-checkbox on-tap="_toggleCheckbox" checked="[[selected]]"></paper-checkbox>
+            </div>
+            <div class="data-column">
+              <div class="url-method-row">
+                <span class="method">{{item.method}}</span>
+                <span class="url">{{item.url}}</span>
+              </div>
+              <div class="meta-row">
+                <span class="time">[[_computeHistoryTime(item.updated)]]</span>
+              </div>
+            </div>
+            <div class="action-column">
+              <paper-button on-tap="_deleteItem">delete</paper-button>
+              <paper-button class="open-action" on-tap="_navigateItem">open</paper-button>
+            </div>
+          </div>
+        </div>
+      </template>
+    </iron-list>
+    <iron-scroll-threshold id="scrollTheshold" lower-threshold="[[threshold]]" on-lower-threshold="_thresholdReached" scroll-target="list">
+    </iron-scroll-threshold>
+  </template>
+  </dom-module>
+<script src="history-list-items.js"></script></body></html>
