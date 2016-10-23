@@ -117,7 +117,7 @@
       var db = this._getDb();
       this._setQuerying(true);
       db.allDocs().then((r) => {
-        let matches = r.rows.filter((i) => i.id.indexOf(encodedQ) !== -1);
+        let matches = r.rows.filter((i) => i.id.toLowerCase().indexOf(encodedQ) !== -1);
         if (!matches.length) {
           this._setQuerying(false);
           return;

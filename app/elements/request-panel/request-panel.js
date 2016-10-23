@@ -667,7 +667,7 @@
       // Deta below will be send to GA server as a custom data.
       // They will help arrange the UI according to importance of elements and usage.
       // method (6), hasHeaders (7), hasPayload (8), hasFiles (9), contentType (10)
-      var cm = [{
+      var cd = [{
         index: 6,
         value: this.request.method
       },{
@@ -681,7 +681,7 @@
         value: (this.request.files && this.request.files.length) ? 'Yes' : 'No'
       }];
       if (this.contentType) {
-        cm[cm.length] = {
+        cd[cd.length] = {
           index: 10,
           value: this.contentType
         };
@@ -691,7 +691,7 @@
         'category': 'Engagement',
         'action': 'Click',
         'label': 'Request start',
-        'customDimensions': cm
+        'customDimensions': cd
       });
     },
 

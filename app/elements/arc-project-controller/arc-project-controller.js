@@ -167,6 +167,7 @@ Polymer({
           return;
         }
         this.set('requests.' + index + '._rev', request._rev);
+        this.set('requests.' + index + '._id', request._id);
       })
       .catch((e) => {
         StatusNotification.notify({

@@ -81,7 +81,29 @@
         return Promise.resolve();
       })
       .then(() => {
+        // If the name changed then if must change the entire object because ID must change
+        // In this case the old request must be deleted.
+        let newName = encodeURIComponent(r.name);
+        let oldName = r._id.split('/')[0];
+        if (oldName !== newName) {
+          let event = this.fire('request-objects-delete', {
+            items: [r._id],
+            dbName: 'saved-requests'
+          });
+          return event.detail.result.then(() => {
+            let id = encodeURIComponent(r.name) + '/' + encodeURIComponent(r.url) + '/' + r.method;
+            if (this.saveToProject) {
+              id += '/' + r.legacyProject;
+            }
+            r._id = id;
+            delete r._rev;
+          });
+        }
+        return Promise.resolve();
+      })
+      .then(() => {
         // At this point there is a reference to project (if needed) and Google Drive (if added)
+
         let event = this.fire('request-object-change', {
           request: r,
           dbName: 'saved-requests'
