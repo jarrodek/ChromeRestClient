@@ -26,13 +26,8 @@
     },
 
     observers: [
-      '_usePouchDbChanged(usePouchDb)',
-      '_projectsChanged(projects.*)'
+      '_usePouchDbChanged(usePouchDb)'
     ],
-
-    _projectsChanged: function() {
-      console.log('_projectsChanged', this.projects);
-    },
 
     ready: function() {
       try {
@@ -147,15 +142,19 @@
     },
 
     _updateProject: function(e, detail) {
+      var p = detail.project;
+      p.id = p._id;
       if (!this.projects || !this.projects.length) {
+        this.push('projects', p);
         return;
       }
-      var index = this.projects.findIndex((i) => i._id === detail.project._id);
+      var index = this.projects.findIndex((i) => i._id === p._id);
       if (index === -1) {
+        this.push('projects', p);
         return;
       }
-      this.set('projects.' + index + '.name', detail.project.name);
-      this.set('projects.' + index + '.order', detail.project.order);
+      this.set('projects.' + index + '.name', p.name);
+      this.set('projects.' + index + '.order', p.order);
     },
 
     /**
