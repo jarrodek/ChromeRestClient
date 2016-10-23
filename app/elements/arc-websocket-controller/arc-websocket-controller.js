@@ -77,11 +77,15 @@ Polymer({
   },
 
   _onError: function(e) {
+    console.error(e.detail.error);
     this.fire('app-log', {
       'message': ['No support for given header.', e.detail.error],
       'level': 'error'
     });
     this._setConnecting(false);
+    StatusNotification.notify({
+      message: e.detail.error.message || 'Unknown error occured'
+    });
   },
 
   _connect: function(e) {
