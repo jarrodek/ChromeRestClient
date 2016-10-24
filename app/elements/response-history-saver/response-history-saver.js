@@ -32,20 +32,53 @@
           totalTime += t;
         }
       });
+      // ID generation, see arc.app.importer._processHar for details.
+      let url;
+      try {
+        url = new URL(req.url);
+        url.search = '';
+        url.hash = '';
+        url = url.toString();
+      } catch (e) {
+        let i = req.url.indexOf('?');
+        if (i !== -1) {
+          url = req.url.substr(0, i);
+        } else {
+          url = req.url;
+        }
+      }
+      let id = encodeURIComponent(url) + '/' + req.method + '/' + this.$.uuid.generate();
+      // Add some data size calculations
+      let responseHeadersSize = arc.app.utils.calculateBytes(responseHeaders);
+      let responsePayloadSize = arc.app.utils.calculateBytes(res.rawBody);
+      let requestPayloadSize = arc.app.utils.calculateBytes(req.payload);
+      let requestHeadersSize = arc.app.utils.calculateBytes(req.headers);
       var _doc = {
-        _id: this.$.uuid.generate(),
-        headers: req.headers,
-        payload: req.payload,
-        url: req.url,
-        method: req.method,
+        _id: id,
         timings: timings,
         totalTime: totalTime,
         created: new Date(res.stats.startTime).getTime(),
+        request: {
+          headers: req.headers,
+          payload: req.payload,
+          url: req.url,
+          method: req.method,
+        },
         response: {
           statusCode: res.status,
           statusText: res.statusText,
           headers: responseHeaders,
           payload: res.rawBody
+        },
+        stats: {
+          request: {
+            headersSize: requestHeadersSize,
+            payloadSize: requestPayloadSize
+          },
+          response: {
+            headersSize: responseHeadersSize,
+            payloadSize: responsePayloadSize
+          }
         }
       };
       var db = new PouchDB('history-data');
