@@ -137,27 +137,83 @@ arc.app.importer.saveFileData = function(data) {
     });
 };
 arc.app.importer.normalizeRequest = function(item) {
-  if (item.kind) {
-    let har = item._har ? item._har : item.har;
-    if (har) {
-      item.har = new HAR.Log(har);
-    }
-    delete item._har;
-    item = new RequestObject(item);
+  delete item.id;
+  delete item._id;
+  delete item._rev;
+
+  if (item.kind === 'ARC#RequestObject') {
+    return arc.app.importer._parseLegacySavedItem(item);
+  } else if (item.kind === 'ARC#RequestData') {
+    delete item.kind;
     return item;
   }
+
   try {
     let obj = arc.app.importer._createHARfromSql(item);
     //just for import, to be removed before save.
     if (item.project) {
       obj.project = item.project;
     }
+    obj = arc.app.importer._parseLegacySavedItem(obj);
+    obj.type = 'history';
     return obj;
   } catch (e) {
     console.error('Unable to import request object', item, e.message);
     arc.app.analytics.sendException('Importer exception (normalize): ' + e.message, false);
   }
   return null;
+};
+
+/**
+ * Parser for the legacy saved request
+ * ## The request object.
+ * The request object is consisted with following properties:
+ * - name: String
+ * - url: String
+ * - method: String
+ * - headers: String
+ * - payload: String
+ * - created: time
+ * - legacyProject: 0
+ * @return {Object|null}
+ */
+arc.app.importer._parseLegacySavedItem = function(item) {
+  var obj = {
+    name: item.name,
+    method: item.method,
+    url: item.url,
+    type: item.type === 'drive' ? 'google-drive' : 'saved'
+  };
+  // payload and headers
+  var harIndex = item.referenceEntry || 0;
+  var entries = item.har ? item.har.entries : null;
+  if (!entries) {
+    return obj;
+  }
+  var entry;
+  if (harIndex || harIndex === 0) {
+    entry = entries[harIndex];
+  } else {
+    entry = entries[0];
+  }
+  if (entry) {
+    let harRequest = entry.request;
+
+    if (harRequest.headers && harRequest.headers.length) {
+      obj.headers = harRequest.headers.map((item) => {
+        return item.name + ': ' + item.value;
+      }).join('\n');
+    } else {
+      obj.headers = '';
+    }
+    obj.payload = harRequest.postData.text;
+    let t = new Date(entry.startedDateTime).getTime();
+    if (t !== t) {
+      t = Date.now();
+    }
+    obj.created = t;
+  }
+  return obj;
 };
 /**
  * To be used to transform old system data to new data structure.
@@ -205,6 +261,9 @@ arc.app.importer._createHARfromSql = function(item) {
       text: item.payload
     });
     request.postData = post;
+  }
+  if (!item.time) {
+    item.time = Date.now();
   }
   request.headers = requestHeaders;
   var page = new HAR.Page({
