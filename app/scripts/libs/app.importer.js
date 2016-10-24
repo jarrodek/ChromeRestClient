@@ -37,6 +37,10 @@ arc.app.importer._getHistoryDb = function() {
 arc.app.importer._getProjectsDb = function() {
   return new PouchDB('legacy-projects');
 };
+arc.app.importer._getHistoryDataDb = function() {
+  return new PouchDB('history-data');
+};
+
 /**
  * Save imported from file data.
  */
@@ -154,9 +158,292 @@ arc.app.importer.saveFileDataPouchDb = function(data) {
     case 'ARC#SavedDataExport':
     case 'ARC#HistoryDataExport':
       return arc.app.importer._saveFileDataPouchDbNew(data);
-    default:
+    case 'ARC#requestsDataExport':
       return arc.app.importer._saveFileDataPouchDbOld(data);
+    default:
+      return Promise.reject('This file is no longer supported.');
   }
+};
+
+arc.app.importer._saveFileDataPouchDbOld = function(data) {
+  // In new structure projects do not have a refference to request ids.
+  // It's the other way around. It's a bad pattern for object stores but
+  // it must suffice for now.
+  var projects = data.projects;
+  // Requests are de-centralized. History is placed in it's own store, saved the same.
+  // Also HAR data is stored in it's own store where each HAR objects is another data object.
+  var requests = data.requests;
+
+  var parsedRequests;
+  var parsedProjects;
+  return arc.app.importer._saveFileDataOldprepareRequestsArrays(requests)
+  .then((result) => {
+    parsedRequests = result;
+    return arc.app.importer._saveFileDataOldProcessProjects(projects);
+  })
+  .then((result) => {
+    parsedProjects = result;
+    return arc.app.importer._insertLegacyProjects(result);
+  })
+  .then((inserts) => {
+    parsedProjects = parsedProjects.map((item, i) => {
+      item.insertId = inserts[i].id;
+      return item;
+    });
+  })
+  .then(() => arc.app.importer._assignLegacyProjects(parsedRequests, parsedProjects))
+  .then(() => arc.app.importer._insertSavedRequests(parsedRequests.saved))
+  .then(() => arc.app.importer._insertHistorydRequests(parsedRequests.history))
+  .then(() => arc.app.importer._insertHistoryData(parsedRequests.har));
+};
+arc.app.importer._saveFileDataOldProcessProjects = function(projects) {
+  if (!projects || !projects.length) {
+    return [];
+  }
+  var list = projects.map((item) => {
+    if (!item.requestIds || !item.requestIds.length) {
+      return null;
+    }
+    return {
+      updateData: item.requestIds,
+      legacyProject: {
+        _id: app.$.uuid.generate(),
+        name: item.name,
+        order: item.order,
+        updated: item.updateTime,
+        created: item.created
+      }
+    };
+  });
+  return list.filter((i) => i !== null);
+};
+// Returns an array of saved, history and har objects.
+arc.app.importer._saveFileDataOldprepareRequestsArrays = function(requests) {
+  return new Promise((resolve, reject) => {
+    arc.app.importer._saveFileDataOldParsePartRequests(requests, resolve, reject);
+  })
+  .then((result) => {
+    // remove duplicates from the history.
+    let ids = [];
+    result.history = result.history.filter((item) => {
+      if (ids.indexOf(item.request._id) === -1) {
+        ids[ids.length] = item.request._id;
+        return true;
+      }
+      return false;
+    });
+    return result;
+  });
+};
+/**
+ * To give a browser a chance to enter to the main loop the work is split to chunks.
+ * With this approach the app will not block main thread and will not show "ANR" screen.
+ */
+arc.app.importer._saveFileDataOldParsePartRequests = function(requests, resolve, reject, saved,
+  history, har) {
+  saved = saved || [];
+  history = history || [];
+  har = har || [];
+  if (requests.length === 0) {
+    resolve({
+      saved: saved,
+      history: history,
+      har: har
+    });
+    return;
+  }
+  var len = Math.min(requests.length, 200);
+  // Up to 200 loop iteration at once.
+  // Then the function return and release main loop.
+  for (let i = 0; i < len; i++) {
+    let item = requests[i];
+    if (item.type === 'history') {
+      let result = arc.app.importer._saveFileDataOldParseHistoryItem(item);
+      history.push({
+        origin: result.originId,
+        request: result.request
+      });
+      har = har.concat(result.historyData);
+    } else if (item.type === 'saved') {
+      let result = arc.app.importer._saveFileDataOldParseSavedItem(item);
+      saved.push({
+        origin: result.originId,
+        request: result.request
+      });
+      har = har.concat(result.historyData);
+    } else if (item.type === 'drive') {
+      let result = arc.app.importer._saveFileDataOldParseDriveItem(item);
+      saved.push({
+        origin: result.originId,
+        request: result.request
+      });
+      har = har.concat(result.historyData);
+    }
+  }
+  requests.splice(0, len);
+  window.setTimeout(() => {
+    arc.app.importer._saveFileDataOldParsePartRequests(requests, resolve, reject, saved,
+      history, har);
+  }, 1);
+},
+/**
+ * Parser for the history request
+ * ## The history request object.
+ * The request object is consisted with following properties:
+ * - _id: url + '/' + method + '/' + date (as today only)
+ * - url: String
+ * - method: String
+ * - headers: String
+ * - payload: String
+ * - created: time
+ *
+ * The timestamp in the key represents current day only according to the
+ * updateTime property (from the old structure). Each history entry can be saved
+ * once per day.
+ *
+ * @return {Object|null}
+ */
+arc.app.importer._saveFileDataOldParseHistoryItem = function(item) {
+  var today;
+  try {
+    today = arc.app.importer._getDayToday(item.updateTime);
+  } catch (e) {
+    today = arc.app.importer._getDayToday(Date.now());
+  }
+  var obj = {
+    _id: today + '/' + encodeURIComponent(item.url) + '/' + item.method,
+    method: item.method,
+    url: item.url,
+    updated: new Date(item.updateTime).getTime()
+  };
+  // payload and headers
+  var entries = item.har.entries;
+  var entry = entries[entries.length - 1];
+  if (entry) {
+    let harRequest = entry.request;
+    obj.headers = arc.app.importer._parseHarHeders(harRequest.headers);
+    obj.payload = harRequest.postData.text;
+    let t = new Date(entry.startedDateTime).getTime();
+    if (t !== t) {
+      t = Date.now();
+    }
+    obj.created = t;
+  } else {
+    obj.created = obj.updated;
+  }
+  return {
+    originId: item.id,
+    historyData: arc.app.importer._processHar(item.har),
+    request: obj
+  };
+};
+/**
+ * Parser for the saved request
+ * ## The request object.
+ * The request object is consisted with following properties:
+ * - _id: name + '/' + url + '/' + method
+ * - name: String
+ * - url: String
+ * - method: String
+ * - headers: String
+ * - payload: String
+ * - created: time
+ * - legacyProject: 0
+ * @return {Object|null}
+ */
+arc.app.importer._saveFileDataOldParseSavedItem = function(item) {
+  var obj = {
+    _id: encodeURIComponent(item.name) + '/' + encodeURIComponent(item.url) + '/' + item.method,
+    name: item.name,
+    method: item.method,
+    url: item.url,
+    type: 'saved'
+  };
+  // payload and headers
+  var harIndex = item.referenceEntry || 0;
+  var entries = item.har.entries;
+  var entry;
+  if (harIndex || harIndex === 0) {
+    entry = entries[harIndex];
+  } else {
+    entry = entries[0];
+  }
+  if (entry) {
+    let harRequest = entry.request;
+    obj.headers = arc.app.importer._parseHarHeders(harRequest.headers);
+    obj.payload = harRequest.postData.text;
+    let t = new Date(entry.startedDateTime).getTime();
+    if (t !== t) {
+      t = Date.now();
+    }
+    obj.created = t;
+  }
+  return {
+    originId: item.id,
+    historyData: arc.app.importer._processHar(item.har),
+    request: obj
+  };
+};
+// The same as saved but with drive id
+arc.app.importer._saveFileDataOldParseDriveItem = function(item) {
+  var result = arc.app.importer._saveFileDataOldParseSavedItem(item);
+  result.request.driveId = item.driveId;
+  result.request.type = 'google-drive';
+  return result;
+};
+// @returns {!String}
+arc.app.importer._parseHarHeders = function(headersArray) {
+  if (!headersArray || !headersArray.length) {
+    return '';
+  }
+  return headersArray.map((item) => {
+    return item.name + ': ' + item.value;
+  }).join('\n');
+};
+
+/**
+ * The history data object.
+ * - _id: autogenerated.
+ * - headers
+ * - payload
+ * - url
+ * - method
+ * - response: Object
+ *   - statusCode
+ *   - statusText
+ *   - headers
+ *   - payload
+ * - timings
+ * - created: int!
+ */
+arc.app.importer._processHar = function(har) {
+  if (!har || !har.entries || !har.entries.length) {
+    return null;
+  }
+  return har.entries.map((item) => {
+    let req = item.request;
+    let res = item.response;
+    let cd = new Date(item.startedDateTime).getTime();
+    if (cd !== cd) {
+      cd = Date.now();
+    }
+    return {
+      _id: app.$.uuid.generate(),
+      headers: arc.app.importer._parseHarHeders(req.headers),
+      payload: req.postData.text,
+      url: req.url,
+      method: req.method,
+      timings: item.timings,
+      totalTime: item.time,
+      created: cd,
+      response: {
+        statusCode: res.status,
+        statusText: res.statusText,
+        headers: arc.app.importer._parseHarHeders(res.headers),
+        payload: res.content.text
+      }
+    };
+  });
 };
 arc.app.importer._saveFileDataPouchDbNew = function(data) {
   // first save project data and associate _ids with requests.
@@ -304,6 +591,59 @@ arc.app.importer._handleConflictedInserts = function(db, conflicted) {
   })
   .then((_data) => db.bulkDocs(_data))
   .then((r) => console.info('Conflicted insert', r));
+};
+arc.app.importer._insertLegacyProjects = function(data) {
+  if (!data || !data.length) {
+    return Promise.resolve();
+  }
+  return arc.app.importer._getProjectsDb()
+    .bulkDocs(data.map((i) => i.legacyProject));
+},
+arc.app.importer._insertSavedRequests = function(data) {
+  if (!data || !data.length) {
+    return Promise.resolve();
+  }
+  return arc.app.importer._getSavedDb()
+    .bulkDocs(data.map((i) => i.request));
+},
+arc.app.importer._insertHistorydRequests = function(data) {
+  if (!data || !data.length) {
+    return Promise.resolve();
+  }
+  return arc.app.importer._getHistoryDb()
+    .bulkDocs(data.map((i) => i.request));
+},
+arc.app.importer._insertHistoryData = function(data) {
+  if (!data || !data.length) {
+    return Promise.resolve();
+  }
+  return arc.app.importer._getHistoryDataDb().bulkDocs(data);
+};
+arc.app.importer._assignLegacyProjects = function(data, projects) {
+  if (!projects || !projects.length) {
+    return;
+  }
+  data.saved = data.saved || [];
+  var savedLen = data.saved.length;
+  for (let i = 0, pLen = projects.length; i < pLen; i++) {
+    let project = projects[i];
+    if (!project || !project.insertId) {
+      continue;
+    }
+    let newProjectId = project.insertId;
+    for (let j = 0, rLen = project.updateData.length; j < rLen; j++) {
+      let rId = project.updateData[j];
+      for (let k = 0; k < savedLen; k++) {
+        if (data.saved[k].origin === rId) {
+          if (!data.saved[k].legacyProject) {
+            data.saved[k].request._id += '/' + newProjectId;
+            data.saved[k].request.legacyProject = newProjectId;
+            break;
+          }
+        }
+      }
+    }
+  }
 };
 arc.app.importer.normalizeRequest = function(item) {
   delete item.id;
@@ -495,6 +835,7 @@ arc.app.importer.prepareExport = function(opts) {
     })
     .then(function(requests) {
       if (requests && requests.length) {
+        requests = requests.filter((item) => !!item._har);
         requests.forEach((item) => item._har = new HAR.Log(item._har));
       }
       result.requests = requests;

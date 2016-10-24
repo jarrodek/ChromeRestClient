@@ -241,6 +241,10 @@
 
       _computeHistoryTime: function(date) {
         var d = new Date(Number(date));
+        var _t = d.getTime();
+        if (_t !== _t) {
+          return '';
+        }
         var options = {
           weekday: 'long',
           year: 'numeric',
