@@ -388,7 +388,7 @@
   window.addEventListener('unhandledrejection', (event) => {
     event.preventDefault();
     let reason = event.reason;
-    console.warn('Unhandled promise rejection: ' + (reason && (reason.stack || reason)));
+    console.error('Unhandled promise rejection: ' + (reason && (reason.stack || reason)));
   });
 
   app.runTutorials = () => {

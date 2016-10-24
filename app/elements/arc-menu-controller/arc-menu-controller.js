@@ -75,16 +75,20 @@
       }
     },
 
+    _getDb: function() {
+      return new PouchDB('legacy-projects');
+    },
+
     _queryProjects: function() {
-      let e = this.fire('arc-database-query', {
-        store: 'legacy-projects',
-        selector: '_id $exists true',
-        sort: ['_id'],
-        fields: ['_id', 'order', 'name']
-      });
-      e.detail.result
+
+      this._getDb().allDocs({
+        // jscs:disable
+        include_docs: true
+        // jscs:enable
+      })
       .then((result) => {
-        result.sort((a, b) => {
+        result = result.rows.map((i) => i.doc);
+        result = result.sort((a, b) => {
           if (a.order === b.order) {
             return 0;
           }
