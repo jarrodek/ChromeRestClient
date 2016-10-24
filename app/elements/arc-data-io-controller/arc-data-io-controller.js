@@ -75,27 +75,28 @@ Polymer({
    */
   _importFileData: function(e) {
     this._setLoading(true);
+
     arc.app.importer.saveFileData(e.detail.data)
-      .then(function() {
-        StatusNotification.notify({
-          message: 'Data saved',
-          timeout: StatusNotification.TIME_SHORT
-        });
-        this.fire('data-imported');
-      }.bind(this))
-      .catch(function(cause) {
-        this.fire('app-log', {'message': ['Data import error: ', cause], 'level': 'error'});
-        StatusNotification.notify({
-          message: 'Unable to import data. Error details has been send ' +
-            'to the developer.',
-          timeout: StatusNotification.TIME_SHORT
-        });
-        arc.app.analytics.sendException('arc-data-import-controller::connectAppServer' +
-          cause.message, false);
-      })
-      .finally(function() {
-        this._setLoading(false);
-      }.bind(this));
+    .then(() => {
+      StatusNotification.notify({
+        message: 'Data saved',
+        timeout: StatusNotification.TIME_SHORT
+      });
+      this.fire('data-imported');
+      this._setLoading(false);
+    })
+    .catch((cause) => {
+      console.error('Import data error', cause);
+      this.fire('app-log', {'message': ['Data import error: ', cause], 'level': 'error'});
+      StatusNotification.notify({
+        message: 'Unable to import data. Error details has been send ' +
+          'to the developer.',
+        timeout: StatusNotification.TIME_SHORT
+      });
+      arc.app.analytics.sendException('arc-data-import-controller::connectAppServer' +
+        cause.message, false);
+      this._setLoading(false);
+    });
     arc.app.analytics.sendEvent('Settings usage', 'Import data', 'From file');
   },
   /** Authorize the app. */

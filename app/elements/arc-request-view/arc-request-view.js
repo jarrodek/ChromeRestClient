@@ -48,7 +48,9 @@ Polymer({
      * Tru if request is loading at the moment.
      * Will display a progress bar.
      */
-    requestLoading: Boolean
+    requestLoading: Boolean,
+    // A message to display in the action bar.
+    statusMessage: String
   },
 
   observers: [

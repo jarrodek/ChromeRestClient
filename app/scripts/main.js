@@ -21,9 +21,7 @@
   app.selectedProject = undefined;
   app.upgrading = false;
   app.usePouchDb = false;
-  app.observers = [
-
-  ];
+  app.gaCustomDimensions = [];
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
     app.updateBranding();
@@ -35,7 +33,7 @@
   });
   // Called when current project changed
   window.addEventListener('selected-project', (e) => {
-    app.selectedProject = e.detail.id;
+    app.set('selectedProject', e.detail.id);
     if (!app.selectedProject) {
       app.projectEndpoints = [];
     }
@@ -50,6 +48,7 @@
     if (app.upgrading) {
       return;
     }
+    app.initAnalytics();
     app.initRouting();
   });
   app.initRouting = () => {
@@ -166,6 +165,9 @@
   app._onFeatureClearAll = (e) => {
     app._featureCalled('clearAll', e);
   };
+  app._onFeatureDrive = (e) => {
+    app._featureCalled('drive', e);
+  };
   app._onFeatureProjectEndpoints = (e) => {
     app._featureCalled('projectEndpoints', e.detail.item.dataset.id);
   };
@@ -219,6 +221,10 @@
   app.mainHeaderTop = '64px';
   // Called when ctrl/command + F combination has been pressed.
   app.onSearch = () => {
+    if (app.route !== 'request') {
+      app.openSearch();
+      return;
+    }
     var searchBar = document.querySelector('#content-search-bar');
     if (!searchBar) {
       console.warn('Search bar was not available in document.');
@@ -316,6 +322,11 @@
       elm.parentNode.removeChild(elm);
     }
   };
+  app._canaryInfoClosed = () => {
+    if (app.$.canaryMemoDontShow.checked) {
+      chrome.storage.local.set({'showCanaryWarning': false});
+    }
+  };
   /**
    * Used by elements to open a browser window/tab.
    * Element must have data-href attribute set with value of the URL to open.
@@ -377,7 +388,7 @@
   window.addEventListener('unhandledrejection', (event) => {
     event.preventDefault();
     let reason = event.reason;
-    console.warn('Unhandled promise rejection: ' + (reason && (reason.stack || reason)));
+    console.error('Unhandled promise rejection: ' + (reason && (reason.stack || reason)));
   });
 
   app.runTutorials = () => {
@@ -458,6 +469,7 @@
     target.target.initScript();
   };
   app._dbUpgradeReady = (e) => {
+    app.fire('use-pouch-db');
     app.set('usePouchDb', true);
     app._upgradeReady(e);
   };
@@ -505,5 +517,50 @@
       return;
     }
     elm.opened = false;
+  };
+  window.addEventListener('open-drive-selector', () => {
+    let ctrl = document.body.querySelector('arc-drive-controller');
+    if (!ctrl) {
+      StatusNotification.notify({
+        message: 'Drive controller not found.'
+      });
+      return;
+    }
+    ctrl.selectFile();
+  });
+
+  app.initAnalytics = () => {
+    var appVersion = arc.app.utils.appVer;
+    var chromeVer = arc.app.utils.chromeVersion;
+    var manifest = (chrome.runtime && chrome.runtime.getManifest) ?
+      chrome.runtime.getManifest() : null;
+    // jscs:disable
+    var manifestName = manifest ? manifest.version_name : '(not set)';
+    // jscs:enable
+    var channel = null;
+    if (manifestName === '(not set)') {
+      channel = 'not a chrome env';
+    } else if (manifestName.indexOf('canary') !== -1) {
+      channel = 'canary';
+    } else if (manifestName.indexOf('dev') !== -1) {
+      channel = 'dev';
+    } else if (manifestName.indexOf('beta') !== -1) {
+      channel = 'beta';
+    } else {
+      channel = 'stable';
+    }
+
+    app.push('gaCustomDimensions', {
+      index: 1,
+      value: chromeVer
+    });
+    app.push('gaCustomDimensions', {
+      index: 2,
+      value: appVersion
+    });
+    app.push('gaCustomDimensions', {
+      index: 5,
+      value: channel
+    });
   };
 })(document, window);

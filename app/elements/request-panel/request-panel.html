@@ -22,7 +22,7 @@
       background-color: inherit !important;
     }
     </style>
-    <arc-request-view request-loading="[[requestLoading]]" opened="{{opened}}" request="{{request}}" content-type="{{contentType}}"></arc-request-view>
+    <arc-request-view status-message="[[statusMessage]]" request-loading="[[requestLoading]]" opened="{{opened}}" request="{{request}}" content-type="{{contentType}}"></arc-request-view>
     <template is="dom-if" if="[[hasResponse]]">
       <arc-response-view opened="[[opened]]" response="[[response]]" request="[[activeRequest]]"></arc-response-view>
     </template>
@@ -43,7 +43,7 @@
     <arc-socket-request id="socket" on-ready="_responseReady" on-error="_onRequestError"></arc-socket-request>
     <arc-xhr-request id="xhr" on-ready="_responseReady" on-error="_onRequestError" connected="{{xhrConnected}}"></arc-xhr-request>
     <arc-magic-variables id="magicVariables" scope="[[project.id]]"></arc-magic-variables>
-    <cookie-storage id="cookieJar" url="[[request.url]]" cookie="{{requestCookie}}" response-headers="[[response.headers]]"></cookie-storage>
+    <cookie-storage use-pouch-db="true" id="cookieJar" url="[[request.url]]" cookie="{{requestCookie}}" response-headers="[[response.headers]]"></cookie-storage>
     <cookie-exchange external-id="apcedakaoficjlofohhcmkkljehnmebp" id="cookieExchange"></cookie-exchange>
     <auth-data-saver id="authSaver" on-resend-auth-request="_resendAuthRequest" headers="{{request.headers}}" url="[[request.url]]"></auth-data-saver>
     <response-history-saver id="responseSaver"></response-history-saver>
@@ -51,15 +51,12 @@
     <paper-toast id="clearRollback" duration="5000" text="Request cleared" on-iron-overlay-closed="_clearUndoClear">
       <paper-button on-tap="_undoClear" class="yellow-button">Undo</paper-button>
     </paper-toast>
-    <app-pouchdb-document db-name="legacy-projects" doc-id="[[projectId]]" data="{{currentProjectData}}"></app-pouchdb-document>
-    <legacyproject-related-requests project-id="[[projectId]]" related-requests="{{currentProjectEndpoints}}"></legacyproject-related-requests>
+    <!-- <legacyproject-related-requests project-id="[[projectId]]" related-requests="{{currentProjectEndpoints}}"></legacyproject-related-requests> -->
     <uuid-generator id="uuid"></uuid-generator>
-    <app-pouchdb-document id="savedRequest" db-name="saved-requests" doc-id="{{savedId}}" data="{{proxyRequest}}"></app-pouchdb-document>
-    <app-pouchdb-document id="historyRequest" db-name="history-requests" doc-id="{{historyId}}" data="{{proxyRequest}}"></app-pouchdb-document>
-    <app-pouchdb-document id="extRequest" db-name="external-requests" doc-id="{{externalId}}" data="{{proxyRequest}}"></app-pouchdb-document>
     <url-history-saver id="urlHistory"></url-history-saver>
-
-    <paper-toast text="Your request has been saved. Add SHIFT key to display save dialog." id="requestSavedToast"></paper-toast>
+    <request-saver id="requestSaver" request="[[request]]" on-request-saved="_requestSavedHandler" on-error="_requestSaveErrorHandler"></request-saver>
+    <paper-toast text="Your request has been saved. Add SHIFT key to display save dialog." id="requestSavedFastToast"></paper-toast>
+    <paper-toast text="Request has been saved" id="requestSavedToast"></paper-toast>
   </template>
   <script src="request-panel.js"></script>
 </dom-module>

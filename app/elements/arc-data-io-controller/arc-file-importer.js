@@ -53,7 +53,7 @@ Polymer({
     if (e.detail.result) {
       try {
         let result = JSON.parse(e.detail.result);
-        if (!(result.projects && result.requests)) {
+        if (!(result.projects || result.requests || result.history)) {
           if ('headers' in result && 'url' in result && 'method' in result) {
             //old file.
             this.importData = {
@@ -76,8 +76,8 @@ Polymer({
           this._resetFileDrop();
           this._setImporting(false);
         }
-
       } catch (e) {
+        console.error('File read error', e);
         this.fire('app-log', {
           'message': ['arc-data-import::_importFileReady::JSON.parse::error', e],
           'level': 'error'

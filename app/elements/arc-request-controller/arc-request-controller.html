@@ -110,9 +110,6 @@ This approach have some implications.
     <paper-toast id="clearRollback" duration="5000" text="Request cleared" on-iron-overlay-closed="_clearUndoClear">
       <paper-button on-tap="_undoClear" class="yellow-button">Undo</paper-button>
     </paper-toast>
-    <!-- New database system -->
-    <app-pouchdb-document db-name="legacy-projects" doc-id="{{currentProjectId}}" data="{{currentProjectData}}"></app-pouchdb-document>
-    <legacyproject-related-requests project-id="[[currentProjectId]]" related-requests="{{projectEndpoints}}"></legacyproject-related-requests>
   </template>
   <script src="arc-request-controller.js"></script>
 </dom-module>

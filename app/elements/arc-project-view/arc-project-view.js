@@ -16,7 +16,7 @@ Polymer({
   exportProject: function() {
     this.fire('export');
   },
-  // Handler to delete ptoject click.
+  // Handler to delete project click.
   deleteProject: function() {
     this.$.projectDeleteDialog.open();
   },

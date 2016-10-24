@@ -39,10 +39,15 @@ Example:
       height: 100%;
     }
 
-    .table {}
+    .table {
+      @apply(--layout-vertical);
+      @apply(--layout-flex);
+    }
 
     .table-header {
       height: 64px;
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
     }
 
     .table-columns {
@@ -51,6 +56,8 @@ Example:
       font-weight: 500;
       color: rgba(0, 0, 0, 0.54);
       font-size: 12px;
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
     }
 
     .table-values {
@@ -58,6 +65,8 @@ Example:
       font-family: 'Roboto';
       color: rgba(0, 0, 0, 0.87);
       font-size: 13px;
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
     }
 
     .project-column,
@@ -111,33 +120,59 @@ Example:
     .table-columns:last-child {
       border-bottom: 1px rgba(0, 0, 0, 0) solid;
     }
+
     </style>
     <template>
-      <div class="flex layout vertical table">
-        <div class="table-header layout horizontal center">
+      <div class="table">
+        <div class="table-header">
           <h2 class="flex">Import preview</h2>
           <paper-button raised="" class="actionButton" on-tap="importTap">import</paper-button>
           <paper-button on-tap="cancelTap">cancel</paper-button>
         </div>
-        <div class="table-columns layout horizontal center">
-          <div class="project-column" id="projectColumn">Project</div>
-          <div class="name-column" id="nameColumn">Name</div>
-          <div class="method-column" id="methodColumn">Method</div>
-          <div class="url-column" id="urlColumn">URL</div>
-          <paper-tooltip for="projectColumn">If the request has been added to the project it will display project name</paper-tooltip>
-          <paper-tooltip for="nameColumn">The request name added when saving</paper-tooltip>
-          <paper-tooltip for="methodColumn">The request HTTP method</paper-tooltip>
-          <paper-tooltip for="urlColumn">Full URL saved with the request</paper-tooltip>
-        </div>
-        <template is="dom-repeat" items="{{requests}}">
-          <div class="table-values layout horizontal center">
-            <div class="project-column">{{_computeProjectName(item, projects)}}</div>
-            <div class="name-column">{{item.name}}</div>
-            <div class="method-column">{{item.method}}</div>
-            <div class="url-column">{{item.url}}</div>
+
+        <section hidden$="[[!hasSaved]]">
+          <div class="table-columns">
+            <h3>Saved requests</h3>
           </div>
-        </template>
-        <div class="table-columns layout horizontal center">
+          <div class="table-columns">
+            <div class="project-column" id="projectColumn">Project</div>
+            <div class="name-column" id="nameColumn">Name</div>
+            <div class="method-column" id="methodColumn">Method</div>
+            <div class="url-column" id="urlColumn">URL</div>
+            <paper-tooltip for="projectColumn">If the request has been added to the project it will display project name</paper-tooltip>
+            <paper-tooltip for="nameColumn">The request name added when saving</paper-tooltip>
+            <paper-tooltip for="methodColumn">The request HTTP method</paper-tooltip>
+            <paper-tooltip for="urlColumn">Full URL of the request</paper-tooltip>
+          </div>
+          <template is="dom-repeat" items="[[requests]]">
+            <div class="table-values">
+              <div class="project-column">[[_computeProjectName(item, projects)]]</div>
+              <div class="name-column">[[item.name]]</div>
+              <div class="method-column">[[item.method]]</div>
+              <div class="url-column">[[item.url]]</div>
+            </div>
+          </template>
+        </section>
+
+        <section hidden$="[[!hasHistory]]">
+          <div class="table-columns">
+            <h3>History data</h3>
+          </div>
+          <div class="table-columns">
+            <div class="method-column" id="methodColumn2">Method</div>
+            <div class="url-column" id="urlColumn2">URL</div>
+            <paper-tooltip for="methodColumn2">The request HTTP method</paper-tooltip>
+            <paper-tooltip for="urlColumn2">Full URL of the request</paper-tooltip>
+          </div>
+          <template is="dom-repeat" items="[[history]]">
+            <div class="table-values">
+              <div class="method-column">[[item.method]]</div>
+              <div class="url-column">[[item.url]]</div>
+            </div>
+          </template>
+        </section>
+
+        <div class="table-columns">
           <div class="flex"></div>
           <paper-button raised="" class="actionButton" on-tap="importTap">import</paper-button>
           <paper-button on-tap="cancelTap">cancel</paper-button>

@@ -20,7 +20,9 @@
       // If set, the controller will use pouch db as a database connector and new database schema.
       usePouchDb: {
         type: Boolean
-      }
+      },
+
+      selectedProject: String
     },
 
     observers: [
@@ -41,9 +43,17 @@
     },
     attached: function() {
       this.listen(document.body, 'project-removed', 'refreshProjects');
+      this.listen(document, 'project-object-deleted', 'refreshProjects');
+      this.listen(document, 'project-object-changed', '_updateProject');
+      this.listen(document.body, 'project-name-changed', '_updateProjectName');
+      this.listen(document, 'selected-project', '_updateProjectSelection');
     },
     detached: function() {
-      this.listen(document.body, 'project-removed', 'refreshProjects');
+      this.unlisten(document.body, 'project-removed', 'refreshProjects');
+      this.unlisten(document, 'project-object-deleted', 'refreshProjects');
+      this.unlisten(document, 'project-object-changed', '_updateProject');
+      this.unlisten(document.body, 'project-name-changed', '_updateProjectName');
+      this.unlisten(document, 'selected-project', '_updateProjectSelection');
     },
     /**
      * User clicked on a navigation element.
@@ -65,16 +75,20 @@
       }
     },
 
+    _getDb: function() {
+      return new PouchDB('legacy-projects');
+    },
+
     _queryProjects: function() {
-      let e = this.fire('arc-database-query', {
-        store: 'legacy-projects',
-        selector: '_id $exists true',
-        sort: ['_id'],
-        fields: ['_id', 'order', 'name']
-      });
-      e.detail.result
+
+      this._getDb().allDocs({
+        // jscs:disable
+        include_docs: true
+        // jscs:enable
+      })
       .then((result) => {
-        result.sort((a, b) => {
+        result = result.rows.map((i) => i.doc);
+        result = result.sort((a, b) => {
           if (a.order === b.order) {
             return 0;
           }
@@ -130,6 +144,23 @@
         }
       });
     },
+
+    _updateProject: function(e, detail) {
+      var p = detail.project;
+      p.id = p._id;
+      if (!this.projects || !this.projects.length) {
+        this.push('projects', p);
+        return;
+      }
+      var index = this.projects.findIndex((i) => i._id === p._id);
+      if (index === -1) {
+        this.push('projects', p);
+        return;
+      }
+      this.set('projects.' + index + '.name', p.name);
+      this.set('projects.' + index + '.order', p.order);
+    },
+
     /**
      * Add newly created project to the list.
      *
@@ -194,6 +225,19 @@
 
     _signOutRequested: function() {
       this.$.auth.signOut();
+    },
+
+    _updateProjectName: function(e) {
+      var projectId = e.detail.projectId;
+      var index = this.projects.findIndex((i) => i._id === projectId);
+      if (index === -1) {
+        return;
+      }
+      this.set('projects.' + index + '.name', e.detail.name);
+    },
+
+    _updateProjectSelection: function(e, detail) {
+      this.set('selectedProject', detail.id);
     }
   });
 })();

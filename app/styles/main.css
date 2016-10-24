@@ -22,6 +22,45 @@ body {
   src: local('Material Icons'), local('MaterialIcons-Regular'), url(/assets/MaterialIcons-Regular.woff2) format('woff2');
 }
 
+body .loader {
+  display: none;
+}
+body[unresolved] .loader {
+  display: flex;
+  height: 100%;
+  align-items: center;
+}
+.loader .spinner {
+  margin: 100px auto 0;
+  width: 70px;
+  text-align: center;
+}
+
+.loader .spinner > div {
+  width: 18px;
+  height: 18px;
+  background-color: #00A1DF;
+
+  border-radius: 100%;
+  display: inline-block;
+  animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+}
+
+.loader .spinner .bounce1 {
+  animation-delay: -0.32s;
+}
+
+.loader .spinner .bounce2 {
+  animation-delay: -0.16s;
+}
+
+@keyframes sk-bouncedelay {
+  0%, 80%, 100% {
+    transform: scale(0);
+  } 40% {
+    transform: scale(1.0);
+  }
+}
 
 /* Search bar states */
 
@@ -53,22 +92,23 @@ paper-toolbar[mode="search"] #mainSearchInput {
 paper-toolbar > *[feature] {
   display: none;
 }
-paper-toolbar[back] > *[feature="back"],
-paper-toolbar[search] > *[feature="search"],
-paper-toolbar[open] > *[feature="open"],
-paper-toolbar[save] > *[feature="save"],
-paper-toolbar[export] > *[feature="export"],
-paper-toolbar[clearAll] > *[feature="clearAll"],
-paper-toolbar[projectEndpoints] > *[feature="projectEndpoints"] {
+paper-toolbar[back] > paper-icon-button[feature="back"],
+paper-toolbar[search] > div[feature="search"],
+paper-toolbar[open] > paper-icon-button[feature="open"],
+paper-toolbar[save] > paper-icon-button[feature="save"],
+paper-toolbar[export] > paper-icon-button[feature="export"],
+paper-toolbar[clearAll] > paper-icon-button[feature="clearAll"],
+paper-toolbar[drive] > paper-icon-button[feature="drive"],
+paper-toolbar[projectEndpoints] > div[feature="projectEndpoints"] {
   display: initial;
 }
-paper-toolbar[back] > *[feature="back"] {
+paper-toolbar[back] > paper-icon-button[feature="back"] {
   margin-right: 16px;
 }
-paper-toolbar[back] > *[paper-drawer-toggle] {
-  display: none !important;
+body paper-toolbar[back] > paper-icon-button[paper-drawer-toggle] {
+  display: none;
 }
-paper-toolbar[xhrtoggle] > *[feature="xhrtoggle"] {
+paper-toolbar[xhrtoggle] > paper-toggle-button[feature="xhrtoggle"] {
   display: flex;
 }
 

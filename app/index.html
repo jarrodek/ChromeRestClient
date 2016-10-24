@@ -10,11 +10,17 @@
   <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
   <link rel="import" href="bower_components/font-roboto-local/roboto.html">
   <link rel="import" href="elements/elements.html">
-  <!-- <link rel="import" href="elements/arc-elements.html"> -->
   <style is="custom-style" include="shared-styles"></style>
 </head>
 
-<body unresolved class="">
+<body unresolved>
+  <div class="loader">
+    <div class="spinner">
+      <div class="bounce1"></div>
+      <div class="bounce2"></div>
+      <div class="bounce3"></div>
+    </div>
+  </div>
   <template is="dom-bind" id="app">
     <iron-meta id="meta" key="usePouchDb" value="{{usePouchDb}}"></iron-meta>
     <arc-loader-screen id="appLOader" opened></arc-loader-screen>
@@ -49,17 +55,19 @@
             </div>
           </div>
           <paper-toggle-button id="xhrToggle" feature="xhrtoggle" on-change="_onFeatureXhrToggle" class="toolbar-hide xhr-switch" title="Use XHR instead of socket">Use XHR</paper-toggle-button>
-          <paper-icon-button id="openFeature" feature="open" on-tap="_onFeatureOpen" class="toolbar-hide" icon="folder-open" title="Open"></paper-icon-button>
-          <paper-icon-button id="saveFeature" feature="save" on-tap="_onFeatureSave" class="toolbar-hide" icon="save" title="Save"></paper-icon-button>
-          <paper-icon-button id="exportFeature" feature="export" on-tap="_onFeatureExport" class="toolbar-hide" icon="communication:import-export" title="Export list"></paper-icon-button>
-          <paper-icon-button id="clearallFeature" feature="clearAll" on-tap="_onFeatureClearAll" class="toolbar-hide" icon="communication:clear-all"></paper-icon-button>
+          <paper-icon-button id="openFeature" feature="open" on-tap="_onFeatureOpen" class="toolbar-hide" icon="arc:folder-open" title="Open"></paper-icon-button>
+          <paper-icon-button id="saveFeature" feature="save" on-tap="_onFeatureSave" class="toolbar-hide" icon="arc:save" title="Save"></paper-icon-button>
+          <paper-icon-button id="exportFeature" feature="export" on-tap="_onFeatureExport" class="toolbar-hide" icon="arc:import-export" title="Export list"></paper-icon-button>
+          <paper-icon-button id="clearallFeature" feature="clearAll" on-tap="_onFeatureClearAll" class="toolbar-hide" icon="arc:clear-all"></paper-icon-button>
+          <paper-icon-button id="driveFeature" feature="drive" on-tap="_onFeatureDrive" class="toolbar-hide" icon="arc:drive"></paper-icon-button>
           <paper-tooltip for="openFeature" offset="0" animation-delay="100">Open</paper-tooltip>
           <paper-tooltip for="saveFeature" offset="0" animation-delay="100">Save</paper-tooltip>
           <paper-tooltip for="exportFeature" offset="0" animation-delay="100">Export list</paper-tooltip>
           <paper-tooltip for="clearallFeature" offset="0" animation-delay="100">Clear all</paper-tooltip>
+          <paper-tooltip for="driveFeature" offset="0" animation-delay="100">Open from Google Drive</paper-tooltip>
 
           <div id="search-bar" feature="search" class="toolbar-hide" mode="search">
-            <paper-icon-button icon="search" title="Search" on-tap="openSearch"></paper-icon-button>
+            <paper-icon-button icon="arc:search" title="Search" on-tap="openSearch"></paper-icon-button>
             <input is="iron-input" type="search" value="{{searchTerm::input}}" class="flex main-search-input" id="mainSearchInput"></input>
           </div>
           <!--<paper-icon-button icon="more-vert"></paper-icon-button> -->
@@ -83,7 +91,6 @@
                 </arc-request-controller>
               </template>
             </section>
-
             <arc-websocket-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="socket"></arc-websocket-controller>
             <arc-history-list-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" main on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" search-query="[[searchTerm]]" data-route="history"></arc-history-list-controller>
             <arc-saved-list-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" search-query="[[searchTerm]]" data-route="saved"></arc-saved-list-controller>
@@ -232,11 +239,14 @@
         </div>
       </onboarding-page>
     </onboarding-tutorial>
-    <paper-dialog id="canaryInfo">
+    <paper-dialog id="canaryInfo" on-iron-overlay-closed="_canaryInfoClosed">
       <h2>You are using the cannary channel</h2>
       <paper-dialog-scrollable>
         This version is not for production and it's daily build of the app.<br/>
         Probably it is not working and you shouldn't use it unless you know what you are doing.
+        <div>
+          <paper-checkbox id="canaryMemoDontShow">Don't show this message in future</paper-checkbox>
+        </div>
       </paper-dialog-scrollable>
       <div class="buttons">
         <paper-button dialog-dismiss>Close</paper-button>
@@ -263,7 +273,6 @@
     <!-- Elements on new app -->
     <arc-database id="savedRequests" store="saved-requests"></arc-database>
     <arc-database id="historyRequests" store="history-requests"></arc-database>
-    <arc-database id="externalRequests" store="external-requests"></arc-database>
     <arc-database id="projects" store="legacy-projects"></arc-database>
     <arc-database id="logs" store="logs"></arc-database>
     <arc-database id="history-data" store="history-data"></arc-database>
@@ -280,6 +289,26 @@
     <app-db-upgrade-1016></app-db-upgrade-1016>
     <legacyproject-related-requests project-id="[[selectedProject]]" related-requests="{{projectEndpoints}}"></legacyproject-related-requests>
     <arc-definitions></arc-definitions>
+    <request-model></request-model>
+    <project-model></project-model>
+    <url-history-model></url-history-model>
+    <!-- UUID generator is used in data importer. It has reference to element's id. -->
+    <uuid-generator id="uuid"></uuid-generator>
+    <app-analytics debug tracking-id="UA-18021184-6" app-name="ARC">
+      <template is="dom-repeat" items="[[gaCustomDimensions]]">
+        <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+      </template>
+    </app-analytics>
+    <!-- <app-analytics tracking-id="UA-18021184-14" app-name="ARC">
+      <template is="dom-repeat" items="[[gaCustomDimensions]]">
+        <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+      </template>
+    </app-analytics>
+    <app-analytics tracking-id="UA-71458341-2" app-name="ARC">
+      <template is="dom-repeat" items="[[gaCustomDimensions]]">
+        <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+      </template>
+    </app-analytics> -->
   </template>
   <script src="bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
   <script src="bower_components/dexie-js/dist/dexie.min.js"></script>

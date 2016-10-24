@@ -1,4 +1,4 @@
-(function () {
+(function() {
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
@@ -659,11 +659,9 @@ class FileExport extends BaseObject {
     this.version = arc.app.utils.appVer;
 
     if (!(opts.requests instanceof Array)) {
-      console.warn('The opts.requests is not an array. Overriding');
       opts.requests = [];
     }
     if (!(opts.projects instanceof Array)) {
-      console.warn('The opts.projects is not an array. Overriding');
       opts.projects = [];
     }
     opts.requests.forEach((item) => item.kind = 'ARC#RequestObject');

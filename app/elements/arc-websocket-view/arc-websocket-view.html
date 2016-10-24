@@ -123,7 +123,7 @@
     </style>
     <div class="remote-address-line">
       <div hidden$="{{connected}}" class="connection-info-line">
-        <paper-input label="Socket URL" value="{{url}}" class="url-input"></paper-input>
+        <paper-input label="Socket URL" value="{{url}}" on-keydown="_urlKeyDown" class="url-input"></paper-input>
         <paper-button class="action-button" disabled$="[[connectDisabled]]" on-tap="_connect">connect</paper-button>
         <paper-checkbox checked="{{autoReconnect}}">Reconnect automatically</paper-checkbox>
       </div>

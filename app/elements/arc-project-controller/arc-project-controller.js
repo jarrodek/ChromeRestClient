@@ -5,7 +5,8 @@ Polymer({
   is: 'arc-project-controller',
   behaviors: [
     ArcBehaviors.ArcControllerBehavior,
-    ArcBehaviors.ArcFileExportBehavior
+    ArcBehaviors.ArcFileExportBehavior,
+    ArcBehaviors.DeleteRevertableBehavior
   ],
 
   properties: {
@@ -27,17 +28,21 @@ Polymer({
     requests: {
       type: Array,
       notify: true
-    }
+    },
+    usePouchDb: Boolean,
+    projectId: String
   },
 
   listeners: {
     'name-changed': '_requestNameChanged',
     'delete': '_deleteRequested',
-    'export': 'exportProject'
+    'export': 'exportProject',
+    'project-related-requests-read': '_cancelEvent'
   },
 
   observers: [
-    '_projectNameChanged(project.name)'
+    '_projectNameChanged(project.name)',
+    '_prepareProjectNew(opened, usePouchDb, routeParams.projectId)'
   ],
 
   onShow: function() {
@@ -52,12 +57,36 @@ Polymer({
     if (!this.opened || !this.routeParams) {
       return;
     }
+    if (this.usePouchDb) {
+      return;
+    }
     var projectId = Number(this.routeParams.projectId);
     if (projectId !== projectId) {
       // NaN !== NaN
       return;
     }
     this.$.project.objectId = projectId;
+  },
+
+  _getDb: function() {
+    return new PouchDB('legacy-projects');
+  },
+
+  _prepareProjectNew: function(opened, usePouchDb, projectId) {
+    if (!opened || !usePouchDb || !projectId) {
+      return;
+    }
+    var event = this.fire('project-read', {
+      id: projectId
+    });
+    if (event.detail.error) {
+      console.error(event.detail.message);
+      return;
+    }
+    event.detail.result.then((result) => {
+      this.set('project', result);
+    });
+    this.set('projectId', projectId);
   },
 
   _projectReady: function(e) {
@@ -81,6 +110,10 @@ Polymer({
     this.set('requests', requests);
   },
 
+  _computeAuto: function(usePouchDb) {
+    return usePouchDb === false;
+  },
+
   _projectError: function(e) {
     this.fire('app-log', {'message': ['Project ctrl', e], 'level': 'error'});
   },
@@ -90,11 +123,59 @@ Polymer({
   },
 
   _projectNameChanged: function() {
+    if (this.usePouchDb) {
+      this.cancelDebouncer('project-name-change-request');
+      this.debounce('project-name-change-request', this._pouchNameChanged.bind(this), 250);
+      return;
+    }
     this.$.project.save();
+  },
+
+  _pouchNameChanged: function() {
+    var event = this.fire('project-name-change', {
+      projectId: this.projectId,
+      project: this.project,
+      name: this.project.name
+    });
+    if (event.detail.error) {
+      console.error(event.detail.message);
+      return;
+    }
+    event.detail.result.then((result) => {
+      this.project._rev = result._rev;
+    });
   },
 
   _requestNameChanged: function(e) {
     e.preventDefault();
+    if (this.usePouchDb) {
+
+      let event = this.fire('request-name-change', {
+        'dbName': 'saved-requests',
+        'name': e.detail.item.name,
+        'id': e.detail.item.id
+      });
+      if (event.detail.error) {
+        console.error(event.detail.message);
+        return;
+      }
+      event.detail.result
+      .then((request) => {
+        let index = this.requests.findIndex((i) => i._id === request._id);
+        if (index === -1) {
+          console.error('Unable to find index.');
+          return;
+        }
+        this.set('requests.' + index + '._rev', request._rev);
+        this.set('requests.' + index + '._id', request._id);
+      })
+      .catch((e) => {
+        StatusNotification.notify({
+          message: e.message
+        });
+      });
+      return;
+    }
     var request = e.detail.item;
     if (!request) {
       return;
@@ -113,8 +194,84 @@ Polymer({
   _requestSaved: function() {
   },
 
-  _deleteRequested: function(e) {
-    var data = e.detail;
+  _deleteRequestedNew: function(e, detail) {
+    if (detail.request) {
+      return this._deleteRequest(detail);
+    } else if (detail.project) {
+      this._deleteProjectNew();
+    }
+  },
+
+  _deleteProjectNew: function() {
+    var requests = [];
+    if (this.requests && this.requests.length) {
+      requests = this.requests.map((i) => i._id);
+    }
+    var event = this.fire('request-objects-delete', {
+      dbName: 'saved-requests',
+      items: requests
+    });
+
+    if (event.detail.error) {
+      console.error(event.detail.message);
+      return;
+    }
+    event.detail.result
+    .then(() => {
+      let e = this.fire('project-object-delete', {
+        id: this.project._id,
+        rev: this.project._rev
+      });
+      if (e.detail.error) {
+        throw e.detail.message;
+      }
+      return e.detail.result;
+    })
+    .then(() => {
+      page('request/latest');
+    });
+  },
+
+  _deleteRequest: function(detail) {
+    this._deleteRevertable('saved-requests', [detail.request])
+    .then((res) => {
+      let items = res.map((i) => i.id);
+      this.fire('request-objects-deleted', {
+        items: items,
+        type: 'saved'
+      });
+      var data = this.requests;
+      data = data.filter((i) => items.indexOf(i._id) === -1);
+      this.set('requests', data);
+    })
+    .catch((e) => {
+      StatusNotification.notify({
+        message: 'Error deleting entries. ' + e.message
+      });
+      this.fire('app-log', {
+        message: ['Error deleting entries', e],
+        level: e
+      });
+      console.error(e);
+    });
+  },
+
+  _onDocumentsRestored: function(response) {
+    var docs = response.rows.map((i) => i.doc);
+    var res = this.requests.concat(docs);
+    this.set('requests', res);
+    this.fire('request-objects-restored', {
+      items: docs,
+      type: 'saved'
+    });
+  },
+
+  _deleteRequested: function(e, data) {
+    if (this.usePouchDb) {
+      this._deleteRequestedNew(e, data);
+      return;
+    }
+
     if (data.request) {
       // delete request
       let requestId = data.request.id;
@@ -192,7 +349,8 @@ Polymer({
   exportProject: function() {
     this.exportContent = arc.app.importer.createExportObject({
       requests: this.requests,
-      projects: [this.project]
+      projects: [this.project],
+      type: 'saved'
     });
     var date = new Date();
     var day = date.getDate();
@@ -209,6 +367,11 @@ Polymer({
     StatusNotification.notify({
       message: 'Project saved in file. '
     });
+  },
+
+  _cancelEvent: function(e) {
+    e.preventDefault();
+    e.stopPropagation();
   }
 });
 })();

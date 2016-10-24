@@ -44,14 +44,16 @@ Example:
         <file-drop id="fileDrop" on-file-ready="_onImportFile"></file-drop>
       </section>
     </template>
-    
+
     <div id="fileImportSpinner">
       <paper-spinner active="[[importFileReader]]" alt="Preparing data"></paper-spinner>
     </div>
-
-    <template is="dom-if" if="{{isFileImport}}">
-      <arc-import-data-table-view projects="[[importData.projects]]" requests="[[importData.requests]]" on-import-action="_importTableAction"></arc-import-data-table-view>
-    </template>
+    <arc-import-data-table-view
+      hidden$="[[!isFileImport]]"
+      projects="[[importData.projects]]"
+      requests="[[importData.requests]]"
+      history="[[importData.history]]"
+      on-import-action="_importTableAction"></arc-import-data-table-view>
     <file-reader id="fileReader" loading="{{importFileReader}}" readas="text" on-file-read="_importFileReady" on-file-error="_importFileError" auto=""></file-reader>
   </template>
   <script src="arc-file-importer.js"></script>

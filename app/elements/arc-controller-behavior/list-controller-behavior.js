@@ -187,6 +187,7 @@ window.ArcBehaviors.ListControllerBehavior = {
     var ending = scroller.scrollHeight - scroller.scrollTop - this.scrollMargin <=
       scroller.offsetHeight;
     if (ending) {
+      console.log('_setQuerying(true)');
       this._setQuerying(true);
       this.queryPage();
     }

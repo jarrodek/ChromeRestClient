@@ -49,16 +49,21 @@
         }
       };
       var db = new PouchDB('history-data');
-      return db.put(_doc).then(() => db.close());
+      return db.put(_doc)
+      .then(() => console.info('History data saved'))
+      .catch((e) => {
+        console.error('Response history saver error (data)', e);
+      });
     },
 
     _updateHistory: function(req, res) {
       var rTime = new Date(res.stats.startTime).getTime();
       var today = this._getDayToday(rTime);
-      var k = encodeURIComponent(req.url) + '/' + req.method + '/' + today;
+      var k = today + '/' + encodeURIComponent(req.url) + '/' + req.method;
 
       var db = new PouchDB('history-requests');
-      return db.get(k).then((r) => {
+      return db.get(k)
+      .then((r) => {
         r.updated = rTime;
         return db.put(r);
       }).catch((e) => {
@@ -76,7 +81,10 @@
         };
         return db.put(_doc);
       })
-      .then(() => db.close());
+      .then(() => console.info('Updated history object'))
+      .catch((e) => {
+        console.error('Response history saver error (history)', e);
+      });
     },
 
     /**
