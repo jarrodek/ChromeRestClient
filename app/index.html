@@ -55,10 +55,10 @@
             </div>
           </div>
           <paper-toggle-button id="xhrToggle" feature="xhrtoggle" on-change="_onFeatureXhrToggle" class="toolbar-hide xhr-switch" title="Use XHR instead of socket">Use XHR</paper-toggle-button>
-          <paper-icon-button id="openFeature" feature="open" on-tap="_onFeatureOpen" class="toolbar-hide" icon="folder-open" title="Open"></paper-icon-button>
-          <paper-icon-button id="saveFeature" feature="save" on-tap="_onFeatureSave" class="toolbar-hide" icon="save" title="Save"></paper-icon-button>
-          <paper-icon-button id="exportFeature" feature="export" on-tap="_onFeatureExport" class="toolbar-hide" icon="communication:import-export" title="Export list"></paper-icon-button>
-          <paper-icon-button id="clearallFeature" feature="clearAll" on-tap="_onFeatureClearAll" class="toolbar-hide" icon="communication:clear-all"></paper-icon-button>
+          <paper-icon-button id="openFeature" feature="open" on-tap="_onFeatureOpen" class="toolbar-hide" icon="arc:folder-open" title="Open"></paper-icon-button>
+          <paper-icon-button id="saveFeature" feature="save" on-tap="_onFeatureSave" class="toolbar-hide" icon="arc:save" title="Save"></paper-icon-button>
+          <paper-icon-button id="exportFeature" feature="export" on-tap="_onFeatureExport" class="toolbar-hide" icon="arc:import-export" title="Export list"></paper-icon-button>
+          <paper-icon-button id="clearallFeature" feature="clearAll" on-tap="_onFeatureClearAll" class="toolbar-hide" icon="arc:clear-all"></paper-icon-button>
           <paper-icon-button id="driveFeature" feature="drive" on-tap="_onFeatureDrive" class="toolbar-hide" icon="arc:drive"></paper-icon-button>
           <paper-tooltip for="openFeature" offset="0" animation-delay="100">Open</paper-tooltip>
           <paper-tooltip for="saveFeature" offset="0" animation-delay="100">Save</paper-tooltip>
@@ -67,7 +67,7 @@
           <paper-tooltip for="driveFeature" offset="0" animation-delay="100">Open from Google Drive</paper-tooltip>
 
           <div id="search-bar" feature="search" class="toolbar-hide" mode="search">
-            <paper-icon-button icon="search" title="Search" on-tap="openSearch"></paper-icon-button>
+            <paper-icon-button icon="arc:search" title="Search" on-tap="openSearch"></paper-icon-button>
             <input is="iron-input" type="search" value="{{searchTerm::input}}" class="flex main-search-input" id="mainSearchInput"></input>
           </div>
           <!--<paper-icon-button icon="more-vert"></paper-icon-button> -->
@@ -292,7 +292,8 @@
     <request-model></request-model>
     <project-model></project-model>
     <url-history-model></url-history-model>
-
+    <!-- UUID generator is used in data importer. It has reference to element's id. -->
+    <uuid-generator id="uuid"></uuid-generator>
     <app-analytics debug tracking-id="UA-18021184-6" app-name="ARC">
       <template is="dom-repeat" items="[[gaCustomDimensions]]">
         <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>

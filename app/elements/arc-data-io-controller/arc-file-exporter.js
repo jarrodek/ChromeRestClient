@@ -49,7 +49,9 @@ Polymer({
    * (depending on number of entries).
    */
   _prepareData: function() {
-    arc.app.importer.prepareExport()
+    arc.app.importer.prepareExport({
+      type: 'all' // dump all data available.
+    })
     .then(function(data) {
       this.exportContent = data;
       this._setLoading(false);

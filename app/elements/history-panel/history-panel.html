@@ -21,6 +21,7 @@ the License.
 <link rel="import" href="../../bower_components/paper-styles/typography.html">
 <link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="../delete-revertable-behavior/delete-revertable-behavior.html">
 <link rel="import" href="request-details-drawer.html">
 <!--
 `<history-panel>` ARC's requests history view
@@ -66,6 +67,16 @@ Custom property | Description | Default
       @apply(--layout-center);
     }
 
+    .table-options .hiddable {
+      opacity: 1;
+      transition: opacity 0.2s cubic-bezier(0.47, 0, 0.75, 0.72);
+    }
+
+    .table-options.inactive .hiddable {
+      pointer-events: none;
+      opacity: 0;
+    }
+
     .selected-actions {
       @apply(--layout-horizontal);
       padding-right: 16px;
@@ -83,26 +94,28 @@ Custom property | Description | Default
       left: 0;
       width: 100%;
     }
+
+    .toggle {
+      margin-left: 12px;
+    }
     </style>
     <paper-drawer-panel drawer-width="360px" id="details" force-narrow="[[narrowDrawer]]" right-drawer="" disable-edge-swipe="" disable-swipe="">
       <request-details-drawer is-history="" request="{{detailedRequest}}" on-request-details-drawer-open="_onOpenRequested" on-close="closeDetailsPanel" narrow="[[narrowDrawer]]"></request-details-drawer>
-      <div main="">
+      <div main>
         <div class="status-bar">
-          <iron-pages selected="[[optionsState]]">
-            <section class="empty"></section>
-            <section class="table-options">
-              <h1>[[currentSelection.length]] item selected</h1>
-              <div class="selected-actions">
-                <paper-icon-button icon="file-download" id="exportSelected" on-tap="_exportSelected"></paper-icon-button>
-                <paper-icon-button icon="delete" id="deleteSelected" on-tap="_deleteSelected"></paper-icon-button>
-                <paper-tooltip for="exportSelected">Export selected to file</paper-tooltip>
-                <paper-tooltip for="deleteSelected">Delete selected</paper-tooltip>
-              </div>
-            </section>
-          </iron-pages>
+          <section class$="[[_computeOptionsTableClass(optionsState)]]">
+            <paper-checkbox class="toggle" id="toggleAll" checked="{{toggleSelectAll}}"></paper-checkbox>
+            <h1 class="hiddable">[[currentSelection.length]] item selected</h1>
+            <div class="selected-actions">
+              <paper-icon-button class="hiddable" icon="arc:file-download" id="exportSelected" on-tap="_exportSelected"></paper-icon-button>
+              <paper-icon-button class="hiddable" icon="arc:delete" id="deleteSelected" on-tap="_deleteSelected"></paper-icon-button>
+              <paper-tooltip position="left" for="exportSelected">Export selected to file</paper-tooltip>
+              <paper-tooltip position="left" for="deleteSelected">Delete selected</paper-tooltip>
+            </div>
+          </section>
         </div>
         <history-list-items
-          id="history"
+          select-all="[[toggleSelectAll]]"
           items="[[historyData]]"
           selected-items="{{currentSelection}}"
           has-selection="{{hasSelection}}"
@@ -116,6 +129,14 @@ Custom property | Description | Default
     </paper-drawer-panel>
     <paper-toast text="Select request first." id="noSelectionToast"></paper-toast>
     <paper-progress indeterminate="" hidden$="[[!querying]]"></paper-progress>
+    <paper-dialog id="dataClearDialog" on-iron-overlay-closed="onClearDialogResult">
+      <h2>Clear saved list</h2>
+      <p>This will remove all data from the Google Drive store.</p>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus>Clear</paper-button>
+      </div>
+    </paper-dialog>
   </template>
 </dom-module>
 <script src="history-panel.js"></script>

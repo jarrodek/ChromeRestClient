@@ -79,13 +79,16 @@ Polymer({
     isSearchResults: {
       type: Boolean,
       value: false
-    }
+    },
+
+    selectAll: Boolean
   },
 
   behaviors: [ArcBehaviors.TextSearchBehavior],
 
   observers: [
-    '_sizeChanged(items.length)'
+    '_sizeChanged(items.length)',
+    '_toggleSelectAll(selectAll)'
   ],
 
   listeners: {
@@ -187,5 +190,19 @@ Polymer({
       index: model.get('index'),
       selected: this.selectedItems.indexOf(model.get('item')) === -1
     });
-  }
+  },
+
+  _toggleSelectAll: function(selectAll) {
+    if (selectAll) {
+      if (this.selectedItems.length === this.items.length) {
+        return;
+      }
+      this.items.forEach((i) => this.$.list.selectItem(i));
+    } else {
+      if (this.selectedItems.length === 0) {
+        return;
+      }
+      this.items.forEach((i) => this.$.list.deselectItem(i));
+    }
+  },
 });

@@ -221,6 +221,10 @@
   app.mainHeaderTop = '64px';
   // Called when ctrl/command + F combination has been pressed.
   app.onSearch = () => {
+    if (app.route !== 'request') {
+      app.openSearch();
+      return;
+    }
     var searchBar = document.querySelector('#content-search-bar');
     if (!searchBar) {
       console.warn('Search bar was not available in document.');

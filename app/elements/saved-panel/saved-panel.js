@@ -286,7 +286,8 @@
         return;
       }
       this.exportContent = arc.app.importer.createExportObject({
-        requests: this.currentSelection
+        requests: this.currentSelection,
+        type: 'saved'
       });
       var date = new Date();
       var day = date.getDate();

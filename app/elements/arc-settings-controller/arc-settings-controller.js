@@ -336,7 +336,9 @@ Polymer({
   },
 
   dumpClick: function() {
-    arc.app.importer.prepareExport().then((data) => {
+    arc.app.importer.prepareExport({
+      type: 'all'
+    }).then((data) => {
       this.exportContent = data;
       var date = new Date();
       var day = date.getDate();

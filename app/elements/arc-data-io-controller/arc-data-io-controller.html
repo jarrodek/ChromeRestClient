@@ -44,11 +44,11 @@ Example:
         <paper-spinner active="true" alt="Preparing data"></paper-spinner>
       </div>
     </template>
-    <template is="dom-if" if="{{!loading}}">
-      <template is="dom-if" if="{{_showFileImport}}">
+    <template is="dom-if" if="[[!loading]]">
+      <template is="dom-if" if="[[_showFileImport]]">
         <arc-file-importer class="import-file-section" importing="{{_fileImporting}}" on-import="_importFileData"></arc-file-importer>
       </template>
-      <template is="dom-if" if="{{_showFileExport}}">
+      <template is="dom-if" if="[[_showFileExport]]">
         <arc-file-exporter class="import-file-section" exporting="{{_fileExporting}}"></arc-file-exporter>
       </template>
       <!--

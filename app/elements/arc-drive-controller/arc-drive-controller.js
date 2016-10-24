@@ -335,7 +335,8 @@ Polymer({
     this.viewSelected = 0;
     var exportObj = arc.app.importer.createExportObject({
       requests: [requestObject],
-      projects: []
+      projects: [],
+      type: 'saved'
     });
     if (driveId) {
       return drive.file.update(driveId, {

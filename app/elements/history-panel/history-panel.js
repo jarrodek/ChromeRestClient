@@ -65,6 +65,11 @@
         }
       },
 
+      behaviors: [
+        ArcBehaviors.ArcFileExportBehavior,
+        ArcBehaviors.DeleteRevertableBehavior
+      ],
+
       observers: [
         '_observeSelection(hasSelection)',
         '_searchQueryChanged(searchQuery)'
@@ -293,19 +298,96 @@
           this.$.noSelectionToast.open();
           return;
         }
-        this.fire('history-panel-export-items', {
-          items: this.currentSelection
+        var copy = this.currentSelection.map((i) =>  Object.assign({}, i));
+        copy.forEach((i) => {
+          delete i.hasHeader;
+          delete i.header;
         });
+        this.exportContent = arc.app.importer.createExportObject({
+          history: copy,
+          type: 'history'
+        });
+        var date = new Date();
+        var day = date.getDate();
+        var year = date.getFullYear();
+        var month = date.getMonth() + 1;
+        this.fileSuggestedName = 'arc-export-' + day + '-' + month + '-' + year + '-saved.json';
+        this.exportMime = 'json';
+        this.exportData();
+        arc.app.analytics.sendEvent('Engagement', 'Click', 'Export selected history as file');
       },
 
       deleteItems: function(items) {
-        this.fire('history-panel-delete-items', {
-          items: items
+        this._deleteRevertable('history-requests', items)
+        .then((res) => {
+          let items = res.map((i) => i.id);
+          this.fire('request-objects-deleted', {
+            items: items,
+            type: 'history'
+          });
+          var data = this.historyData;
+          data = data.filter((i) => items.indexOf(i._id) === -1);
+          this.set('historyData', data);
+        })
+        .catch((e) => {
+          StatusNotification.notify({
+            message: 'Error deleting entries. ' + e.message
+          });
+          this.fire('app-log', {
+            message: ['Error deleting entries', e],
+            level: e
+          });
+          console.error(e);
+        });
+      },
+
+      _onDocumentsRestored: function(response) {
+        var docs = response.rows.map((i) => i.doc);
+        var res = this.historyData.concat(docs);
+        res = this._processResults(res);
+        this.set('historyData', res);
+        this.fire('request-objects-restored', {
+          items: docs,
+          type: 'history'
         });
       },
 
       _cmputeIsSearch: function(searchQuery) {
         return !!searchQuery;
+      },
+
+      warnClearAll: function() {
+        this.$.dataClearDialog.opened = true;
+      },
+
+      onClearDialogResult: function(e, detail) {
+        if (!detail.confirmed) {
+          return;
+        }
+        var db = this._getDb();
+        db.destroy()
+        .catch((e) => {
+          StatusNotification.notify({
+            message: 'Error deleting database. ' + e.message
+          });
+          this.fire('app-log', {
+            message: ['Error deleting database', e],
+            level: e
+          });
+          console.error(e);
+        })
+        .then(() => {
+          this.fire('request-objects-cleared', {
+            type: 'history'
+          });
+          this.refresh();
+        });
+      },
+
+      _computeOptionsTableClass: function(optionsState) {
+        var clazz = 'table-options';
+        clazz += (optionsState === 0 ? ' inactive' : '');
+        return clazz;
       }
     });
   })();

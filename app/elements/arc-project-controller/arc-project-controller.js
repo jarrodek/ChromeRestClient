@@ -349,7 +349,8 @@ Polymer({
   exportProject: function() {
     this.exportContent = arc.app.importer.createExportObject({
       requests: this.requests,
-      projects: [this.project]
+      projects: [this.project],
+      type: 'saved'
     });
     var date = new Date();
     var day = date.getDate();

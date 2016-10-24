@@ -1,4 +1,4 @@
-(function () {
+(function() {
 'use strict';
 /*******************************************************************************
  * Copyright 2012 Pawel Psztyc
@@ -28,10 +28,22 @@ arc.app = arc.app || {};
  * A namespace for the file importer / exporter.
  */
 arc.app.importer = arc.app.importer || {};
+arc.app.importer._getSavedDb = function() {
+  return new PouchDB('saved-requests');
+};
+arc.app.importer._getHistoryDb = function() {
+  return new PouchDB('history-requests');
+};
+arc.app.importer._getProjectsDb = function() {
+  return new PouchDB('legacy-projects');
+};
 /**
  * Save imported from file data.
  */
 arc.app.importer.saveFileData = function(data) {
+  if (app.usePouchDb) {
+    return arc.app.importer.saveFileDataPouchDb(data);
+  }
   const requests = [];
   const isLegacy = data.kind === undefined ? true : false;
   data.requests.forEach((item) => {
@@ -135,6 +147,163 @@ arc.app.importer.saveFileData = function(data) {
           db.close();
         });
     });
+};
+arc.app.importer.saveFileDataPouchDb = function(data) {
+  switch (data.kind) {
+    case 'ARC#SavedHistoryDataExport':
+    case 'ARC#SavedDataExport':
+    case 'ARC#HistoryDataExport':
+      return arc.app.importer._saveFileDataPouchDbNew(data);
+    default:
+      return arc.app.importer._saveFileDataPouchDbOld(data);
+  }
+};
+arc.app.importer._saveFileDataPouchDbNew = function(data) {
+  // first save project data and associate _ids with requests.
+  var p;
+  if (data.projects && data.projects.length) {
+    var projectsData = data.projects.map((i) => {
+      let oldId = i._referenceId;
+      delete i._referenceId;
+      i._id = app.$.uuid.generate();
+      return {
+        oldId: oldId,
+        save: i
+      };
+    });
+    let db = arc.app.importer._getProjectsDb();
+    p = db.bulkDocs(projectsData.map((i) => i.save))
+    .then((result) => {
+      console.info('Inserted projects', result);
+      result.forEach((item, index) => {
+        let data = projectsData[index];
+        data.save._id = item.id;
+        data.save._rev = item.rev;
+        projectsData[index] = data;
+      });
+      return projectsData;
+    });
+  } else {
+    console.info('Import does not have project data. Passing.');
+    p = Promise.resolve([]);
+  }
+
+  return p.then((projects) => {
+    if (!data.requests || !data.requests.length) {
+      console.info('Import does not have saved data. Passing.');
+      return Promise.resolve();
+    }
+    let requestsSize = data.requests.length;
+    // associate requests with projects
+    projects.forEach((projectData) => {
+      // search for request that has _referenceLegacyProject equal projectData.oldId
+      for (var i = 0; i < requestsSize; i++) {
+        if (data.requests[i]._referenceLegacyProject &&
+          data.requests[i]._referenceLegacyProject === projectData.oldId) {
+          delete data.requests[i]._referenceLegacyProject;
+          data.requests[i].legacyProject = projectData.save._id;
+        }
+      }
+    });
+    data.requests.forEach((i) => {
+      delete i._referenceId;
+      delete i._har;
+      i._id = encodeURIComponent(i.name) + '/' + encodeURIComponent(i.url) + '/' + i.method;
+      if (i.legacyProject) {
+        i._id += '/' + i.legacyProject;
+      }
+    });
+    // projects are associated and now it the requests can be saved
+    let db = arc.app.importer._getSavedDb();
+    return db.bulkDocs(data.requests)
+    .then((r) => {
+      console.info('Inserted saved', r);
+      // resolve conflicts
+      let conflicted = [];
+      r.forEach((item, index) => {
+        if (item.error && item.status === 409) {
+          // It exists in the database and it needs a _rev to update objects.
+          conflicted[conflicted.length] = data.requests[index];
+        } else if (item.error) {
+          console.error('Can not insted saved request into the datastore.', item);
+        }
+      });
+      if (conflicted.length) {
+        return arc.app.importer._handleConflictedInserts(db, conflicted);
+      }
+      return Promise.resolve();
+    })
+    .catch((e) => {
+      console.error('Insert saved requests error', e, data.requests);
+      throw e;
+    });
+  })
+  .then(() => {
+    if (!data.history || !data.history.length) {
+      console.info('Import does not have history data. Passing.');
+      return Promise.resolve();
+    }
+
+    data.requests.forEach((i) => {
+      delete i._referenceId;
+      delete i._har;
+      let today;
+      try {
+        today = arc.app.importer._getDayToday(i.updated);
+      } catch (e) {
+        today = arc.app.importer._getDayToday(Date.now());
+      }
+      i._id = today + '/' + encodeURIComponent(i.url) + '/' + i.method;
+    });
+    // append history.
+    let db = arc.app.importer._getHistoryDb();
+    return db.bulkDocs(data.history)
+    .then((r) => {
+      console.info('Inserted history', r);
+      // resolve conflicts
+      let conflicted = [];
+      r.forEach((item, index) => {
+        if (item.error && item.status === 409) {
+          // It exists in the database and it needs a _rev to update objects.
+          conflicted[conflicted.length] = data.history[index];
+        } else if (item.error) {
+          console.error('Can not insted saved request into the datastore.', item);
+        }
+      });
+      if (conflicted.length) {
+        return arc.app.importer._handleConflictedInserts(db, conflicted);
+      }
+      return Promise.resolve();
+    })
+    .catch((e) => {
+      console.error('Insert saved requests error', e, data.history);
+      throw e;
+    });
+  });
+};
+arc.app.importer._handleConflictedInserts = function(db, conflicted) {
+  return db.allDocs({keys: conflicted.map((i) => i._id)})
+  .then((result) => {
+    let promises = result.rows.map((i, index) => {
+      // i.id + i.value.rev + i.value.deleted
+      if (i.value.deleted) {
+        return db.get(i.id, {rev: i.value.rev})
+        .then((r) => {
+          r._deleted = false;
+          return db.put(r);
+        })
+        .then((result) => {
+          conflicted[index]._rev = result.rev || result._rev;
+          return conflicted[index];
+        });
+      }
+      conflicted[index]._rev = i.value.rev;
+      return Promise.resolve(conflicted[index]);
+    });
+    return Promise.all(promises);
+  })
+  .then((_data) => db.bulkDocs(_data))
+  .then((r) => console.info('Conflicted insert', r));
 };
 arc.app.importer.normalizeRequest = function(item) {
   delete item.id;
@@ -293,10 +462,15 @@ arc.app.importer._createHARfromSql = function(item) {
   });
   return obj;
 };
+
 /**
  * Prepare data for export.
  */
 arc.app.importer.prepareExport = function(opts) {
+  /* global app */
+  if (app.usePouchDb) {
+    return arc.app.importer.prepareExportPouchDb(opts);
+  }
   opts = opts || {};
   var noProjects = false;
   if (opts.type && opts.type === 'history') {
@@ -340,6 +514,75 @@ arc.app.importer.prepareExport = function(opts) {
       db.close();
     });
 };
+
+arc.app.importer.prepareExportPouchDb = function(opts) {
+  opts = opts || {};
+  if (!opts.type) {
+    return Promise.reject(new Error('Type of export must be set.'));
+  }
+
+  var exportHistory = opts.type === 'history' || opts.type === 'all';
+  var exportSaved = opts.type === 'saved' || opts.type === 'all';
+  var exportProjects = opts.type === 'saved' || opts.type === 'all';
+
+  const exportData = {
+    type: opts.type
+  };
+  if (exportHistory) {
+    exportData.history = [];
+  }
+  if (exportSaved) {
+    exportData.requests = [];
+  }
+  if (exportProjects) {
+    exportData.projects = [];
+  }
+  var p;
+  if (exportHistory) {
+    p = arc.app.importer._getHistoryDb().allDocs({
+      // jscs:disable
+      include_docs: true
+      // jscs:enable
+    })
+    .then((result) => {
+      exportData.history = result.rows.map((i) => i.doc);
+      return Promise.resolve();
+    });
+  } else {
+    p = Promise.resolve();
+  }
+  return p.then(() => {
+    if (exportSaved) {
+      return arc.app.importer._getSavedDb().allDocs({
+        // jscs:disable
+        include_docs: true
+        // jscs:enable
+      })
+      .then((result) => {
+        exportData.requests = result.rows.map((i) => i.doc);
+        return Promise.resolve();
+      });
+    }
+    return Promise.resolve();
+  })
+  .then(() => {
+    if (exportProjects) {
+      return arc.app.importer._getProjectsDb().allDocs({
+        // jscs:disable
+        include_docs: true
+        // jscs:enable
+      })
+      .then((result) => {
+        exportData.projects = result.rows.map((i) => i.doc);
+        return Promise.resolve();
+      });
+    }
+  })
+  .then(() => {
+    return arc.app.importer.createExportObjectPouchDb(exportData);
+  });
+};
+
 /**
  * Create a proper export object that have required export definitions.
  *
@@ -348,10 +591,82 @@ arc.app.importer.prepareExport = function(opts) {
  *  projects - A list of projects to be exported
  */
 arc.app.importer.createExportObject = function(opts) {
+  if (app.usePouchDb) {
+    return arc.app.importer.createExportObjectPouchDb(opts);
+  }
   let exportObject = new FileExport({
     requests: opts.requests,
     projects: opts.projects
   });
   return exportObject;
+};
+
+arc.app.importer.createExportObjectPouchDb = function(opts) {
+  var result = {
+    createdAt: new Date().toISOString(),
+    version: arc.app.utils.appVer
+  };
+
+  switch (opts.type) {
+    case 'all': result.kind = 'ARC#SavedHistoryDataExport'; break;
+    case 'saved': result.kind = 'ARC#SavedDataExport'; break;
+    case 'history': result.kind = 'ARC#HistoryDataExport'; break;
+    default: throw new Error('Unknown export type');
+  }
+
+  if (opts.requests && opts.requests.length) {
+    opts.requests = opts.requests.map((i) => {
+      // to associate projects and requests during import.
+      if (i.legacyProject) {
+        i._referenceLegacyProject = i.legacyProject;
+        delete i.legacyProject;
+      }
+      delete i._rev;
+      delete i._id;
+      i.kind = 'ARC#RequestData';
+      return i;
+    });
+    result.requests = opts.requests;
+  }
+
+  if (opts.projects && opts.projects.length) {
+    opts.projects = opts.projects.map((i) => {
+      i._referenceId = i._id; // to associate projects and requests during import.
+      delete i._rev;
+      delete i._id;
+      i.kind = 'ARC#ProjectData';
+      return i;
+    });
+    result.projects = opts.projects;
+  }
+
+  if (opts.history && opts.history.length) {
+    opts.history = opts.history.map((i) => {
+      delete i._rev;
+      delete i._id;
+      i.kind = 'ARC#HistoryData';
+      return i;
+    });
+    result.history = opts.history;
+  }
+
+  return result;
+};
+/**
+ * Setss hours, minutes, seconds and ms to 0 and returns timestamp.
+ *
+ * @return {Number} Timestamp to the day.
+ */
+arc.app.importer._getDayToday = function(timestamp) {
+  var d = new Date(timestamp);
+  var tCheck = d.getTime();
+  if (tCheck !== tCheck) {
+    throw new Error('Invalid timestamp: ' + timestamp);
+  }
+  d.setMilliseconds(0);
+  d.setSeconds(0);
+  d.setMinutes(0);
+  d.setHours(0);
+  return d.getTime();
 };
 }());
