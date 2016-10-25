@@ -64,20 +64,11 @@ arc.bg.onLaunched = (lunchData) => {
 arc.bg.onInstalled = (details) => {
   switch (details.reason) {
     case 'install':
-      arc.bg.installDatabase();
       break;
     case 'update':
       arc.bg.notifyBetaUpdate();
-      arc.bg.installDatabase();
       break;
   }
-};
-
-arc.bg.installDatabase = () => {
-  var db = arc.app.db.idb._getDb({checkInstall: true});
-  db.open().then(function() {
-    db.close();
-  });
 };
 /**
  * If the beta channel, notify user about new version.
@@ -119,24 +110,6 @@ arc.bg.recordSession = () => {
     });
   });
 };
-
-// arc.bg.openPreview = (rawResponse) => {
-//   chrome.app.window.create('html-preview.html', {
-//     'id': 'html-preview',
-//     'bounds': {
-//       'width': 400,
-//       'height': 400
-//     }
-//   }, (win) => {
-//
-//     console.log('sending a message to the content window', win.contentWindow);
-//
-//     win.contentWindow.postMessage({
-//       'rawResponse': rawResponse
-//     });
-//   });
-// };
-
 /**
  * Notifications support.
  *
@@ -217,9 +190,3 @@ arc.bg.notifications.displayUpdate = (channel) => {
 chrome.app.runtime.onLaunched.addListener(arc.bg.onLaunched);
 chrome.runtime.onInstalled.addListener(arc.bg.onInstalled);
 arc.bg.notifications.listen();
-/**
- * Called when user use one of the commands registered in the manifest file.
- */
-// chrome.commands.onCommand.addListener(function(command) {
-//   console.log('Command:', command);
-// });
