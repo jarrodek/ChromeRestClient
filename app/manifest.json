@@ -46,8 +46,6 @@
   "app": {
     "background": {
       "scripts": [
-        "scripts/libs/app.js",
-        "scripts/libs/app.utils.js",
         "scripts/background.js"
       ]
     }
