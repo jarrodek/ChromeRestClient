@@ -1,6 +1,5 @@
 (function(document, window) {
   'use strict';
-  arc.app.analytics.init();
 
   let app = document.querySelector('#app');
   app.baseUrl = '/';
@@ -22,6 +21,9 @@
   app.upgrading = false;
   app.usePouchDb = false;
   app.gaCustomDimensions = [];
+  app.appVersion = arc.app.utils.appVer;
+  app.appId = chrome.runtime && chrome.runtime.id ? chrome.runtime.id : 'not-in-chrome-app';
+  app.analyticsDisabled = false;
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
     app.updateBranding();
@@ -209,13 +211,23 @@
     if (detail.keyboardEvent.shiftKey) {
       label += ' (shift)';
     }
-    arc.app.analytics.sendEvent('Shortcats usage', 'Called', label);
+    app.fire('send-analytics', {
+      type: 'event',
+      category: 'Shortcats usage',
+      action: 'Called',
+      label: label
+    });
   };
   app.onSaveShift = (e, detail) => app.onSave(e, detail);
 
   app.onOpen = () => {
     page('/saved');
-    arc.app.analytics.sendEvent('Shortcats usage', 'Called', 'Open');
+    app.fire('send-analytics', {
+      type: 'event',
+      category: 'Shortcats usage',
+      action: 'Called',
+      label: 'Open'
+    });
   };
   // Current "height" of the top header.
   app.mainHeaderTop = '64px';
@@ -235,7 +247,12 @@
     } else {
       searchBar.style.top = app.mainHeaderTop;
       searchBar.open();
-      arc.app.analytics.sendEvent('Shortcats usage', 'Called', 'Search');
+      app.fire('send-analytics', {
+        type: 'event',
+        category: 'Shortcats usage',
+        action: 'Called',
+        label: 'Search'
+      });
     }
   };
   // Called when ctrl/command + n called to open new window.
@@ -382,13 +399,22 @@
       return;
     }
     var message = '[Window]' + e.detail.message;
-    arc.app.analytics.sendException(message, false);
+    app.fire('send-analytics', {
+      type: 'exception',
+      description: message,
+      fatal: false
+    });
   });
 
   window.addEventListener('unhandledrejection', (event) => {
     event.preventDefault();
     let reason = event.reason;
     console.error('Unhandled promise rejection: ' + (reason && (reason.stack || reason)));
+    app.fire('send-analytics', {
+      type: 'exception',
+      description: (reason && (reason.stack || reason)),
+      fatal: false
+    });
   });
 
   app.runTutorials = () => {
@@ -472,6 +498,10 @@
     app.fire('use-pouch-db');
     app.set('usePouchDb', true);
     app._upgradeReady(e);
+    app.push('gaCustomDimensions', {
+      index: 4,
+      value: 'PouchDb'
+    });
   };
   app._upgradeReady = (e) => {
     if (!app._dbUpgrades || !app._dbUpgrades.length) {
@@ -530,6 +560,11 @@
   });
 
   app.initAnalytics = () => {
+    chrome.storage.local.get({
+      'google-analytics.analytics.tracking-permitted': true
+    }, (data) => {
+      app.analyticsDisabled = !Boolean(data['google-analytics.analytics.tracking-permitted']);
+    });
     var appVersion = arc.app.utils.appVer;
     var chromeVer = arc.app.utils.chromeVersion;
     var manifest = (chrome.runtime && chrome.runtime.getManifest) ?
@@ -562,5 +597,17 @@
       index: 5,
       value: channel
     });
+
+    arc.app.analytics.getChannelName().then((channel) => {
+      app.push('gaCustomDimensions', {
+        index: 3,
+        value: channel
+      });
+    });
   };
+
+  window.addEventListener('analytics-permitted-change', (e) => {
+    var permitted = e.detail.permitted;
+    app.set('analyticsDisabled', !permitted);
+  });
 })(document, window);

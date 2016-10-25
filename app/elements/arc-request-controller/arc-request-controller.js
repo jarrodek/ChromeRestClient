@@ -159,7 +159,12 @@ Polymer({
     this._setIsError(false);
     this.showCookieBanner = false;
     page('/request/current');
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Clear all');
+
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Engagement',
+      action: 'Clear all'
+    });
     this.$.clearRollback.open();
   },
 
@@ -187,7 +192,12 @@ Polymer({
       return;
     }
     this.useXhr = e.target.checked;
-    arc.app.analytics.sendEvent('Request', 'Use XHR', this.useXhr + '');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Engagement',
+      action: 'Use XHR',
+      label: this.useXhr + ''
+    });
   },
   /**
    * Handler for save request click / shortcut.
@@ -222,7 +232,11 @@ Polymer({
       ui.projectId = this.project.id;
     }
     ui.open();
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Save action initialization');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Engagement',
+      action: 'Save action initialization'
+    });
   },
 
   /**
@@ -247,9 +261,19 @@ Polymer({
     this._saveUrl();
     this._callRequest();
     this.showCookieBanner = false;
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Request start');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Engagement',
+      action: 'Click',
+      label: 'Request start'
+    });
     // Will help arrange methods bar according to importance of elements.
-    arc.app.analytics.sendEvent('Request', 'Method', this.request.method);
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Request',
+      action: 'Method',
+      label: this.request.method
+    });
   },
 
   abortRequest: function() {
@@ -260,7 +284,11 @@ Polymer({
       this.$.socket.abort();
     }
 
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Request abort');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Engagement',
+      action: 'Request abort'
+    });
   },
 
   get requestControllerOpened() {
@@ -272,7 +300,10 @@ Polymer({
       return;
     }
     // this one is not going throught the router.
-    arc.app.analytics.sendScreen('Request - project endpoint');
+    this.fire('send-analytics', {
+      type: 'screenview',
+      name: 'Request - project endpoint'
+    });
     this._restoreSaved(enpointId);
   },
 
@@ -894,9 +925,18 @@ Polymer({
     if (e.detail.isProject) {
       saveType.push('project');
     }
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Save request');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Engagement',
+      action: 'Save request'
+    });
     // weill help arrange UI according to importance of elements.
-    arc.app.analytics.sendEvent('Request', 'Save type', saveType.join(','));
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Request',
+      action: 'Save type',
+      label: saveType.join(',')
+    });
   },
   /**
    * Save/update project with the request.
@@ -1019,9 +1059,18 @@ Polymer({
       StatusNotification.notify({
         message: 'Unable upload file to Drive'
       });
-      arc.app.analytics.sendException(JSON.stringify(error), false);
+      this.fire('send-analytics', {
+        type: 'exception',
+        description: 'arc-req-ctrl:' + error.message,
+        fatal: false
+      });
     });
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Save request to Drive');
+
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Data export',
+      action: 'Request to Drive'
+    });
   },
   // Error handler for projects store.
   _projectSaveError: function() {

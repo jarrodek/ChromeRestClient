@@ -38,7 +38,11 @@
           'message': ['Error occurred constructing the arc-menu', e],
           'level': 'error'
         });
-        arc.app.analytics.sendException('arc-menu::ready::' + e.message, false);
+        this.fire('send-analytics', {
+          type: 'exception',
+          description: 'arc-menu:' + e.message,
+          fatal: false
+        });
       }
     },
     attached: function() {
@@ -106,7 +110,11 @@
         this.set('projects', result);
       })
       .catch((err) => {
-        arc.app.analytics.sendException(err.message, true);
+        this.fire('send-analytics', {
+          type: 'exception',
+          description: 'arc-menu:' + err.message,
+          fatal: false
+        });
         this.fire('app-log', {'message': err, 'level': 'error'});
       });
     },
@@ -122,7 +130,11 @@
           'message': ['Error setting up storage listener'. e],
           'level': 'error'
         });
-        arc.app.analytics.sendException('arc-menu::ready::' + e.message, false);
+        this.fire('send-analytics', {
+          type: 'exception',
+          description: 'arc-menu:' + e.message,
+          fatal: false
+        });
       }
     },
     /**
@@ -204,7 +216,11 @@
       } catch (e) {
         var msg = 'Error setting up storage listener';
         this.fire('app-log', {'message': [msg, e], 'level': 'warning'});
-        arc.app.analytics.sendException('arc-menu::ready::' + e.message, false);
+        this.fire('send-analytics', {
+          type: 'exception',
+          description: 'arc-menu:' + e.message,
+          fatal: false
+        });
       }
     },
 

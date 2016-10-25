@@ -34,8 +34,6 @@
         })
         .catch((error) => {
           this.fire('app-log', {'message': ['Error in query', error], 'level': 'warning'});
-          arc.app.analytics.sendException('arc-historyurl-model::query::' +
-            JSON.stringify(error), false);
           this.fire('error', {
             error: error
           });

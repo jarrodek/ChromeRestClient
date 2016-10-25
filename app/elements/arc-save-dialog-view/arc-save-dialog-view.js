@@ -143,7 +143,11 @@ Polymer({
       this.set('projects', result);
     })
     .catch((err) => {
-      arc.app.analytics.sendException(err.message, true);
+      this.fire('send-analytics', {
+        type: 'exception',
+        description: 'save-dialog-view:' + err.message,
+        fatal: false
+      });
       this.fire('app-log', {'message': err, 'level': 'error'});
     });
   },

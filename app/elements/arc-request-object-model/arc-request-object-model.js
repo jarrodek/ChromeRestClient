@@ -241,8 +241,11 @@ Polymer({
             this.fire('deleted');
           })
           .catch((e) => {
-            arc.app.analytics.sendException('request-model::_deleteAll::' +
-              JSON.stringify(e), false);
+            this.fire('send-analytics', {
+              type: 'exception',
+              description: e.message,
+              fatal: false
+            });
             this.fire('error', {
               error: e
             });
@@ -269,8 +272,11 @@ Polymer({
               });
             })
             .catch((e) => {
-              arc.app.analytics.sendException('request-model::_deleteAll2::' +
-                JSON.stringify(e), false);
+              this.fire('send-analytics', {
+                type: 'exception',
+                description: e.message,
+                fatal: false
+              });
               this.fire('error', {
                 error: e
               });
@@ -294,8 +300,11 @@ Polymer({
             return excluded;
           })
           .catch((e) => {
-            arc.app.analytics.sendException('request-model::_deleteAll2::' +
-              JSON.stringify(e), false);
+            this.fire('send-analytics', {
+              type: 'exception',
+              description: e.message,
+              fatal: false
+            });
             this.fire('error', {
               error: e
             });

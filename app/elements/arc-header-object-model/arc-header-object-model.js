@@ -31,8 +31,11 @@ Polymer({
       })
       .catch((cause) => {
         this.fire('app-log', {'message': cause, 'level': 'error'});
-        arc.app.analytics.sendException('arc-model::queryAutocomplete::' +
-          JSON.stringify(cause), false);
+        this.fire('send-analytics', {
+          type: 'exception',
+          description: cause.message,
+          fatal: true
+        });
         this.fire('error', {
           error: cause
         });
@@ -67,8 +70,11 @@ Polymer({
       })
       .catch((cause) => {
         this.fire('app-log', {'message': cause, 'level': 'error'});
-        arc.app.analytics.sendException('arc-model::genericGetObject::' +
-          JSON.stringify(cause), false);
+        this.fire('send-analytics', {
+          type: 'exception',
+          description: 'genericGetObject:' + cause.message,
+          fatal: false
+        });
         this.fire('error', {
           error: cause
         });

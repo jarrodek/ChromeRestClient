@@ -90,10 +90,22 @@ Polymer({
       }.bind(this)
     });
     // this data will help prioritize code-mirror support for headers.
-    this.$.cm.editor.on('header-value-selected', (e) =>
-      arc.app.analytics.sendEvent('Headers editor', 'CM value picked', e));
-    this.$.cm.editor.on('header-key-selected', (e) =>
-      arc.app.analytics.sendEvent('Headers editor', 'CM name picked', e));
+    this.$.cm.editor.on('header-value-selected', (e) => {
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Headers editor',
+        action: 'CM value picked',
+        label: e
+      });
+    });
+    this.$.cm.editor.on('header-key-selected', (e) => {
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Headers editor',
+        action: 'CM name picked',
+        label: e
+      });
+    });
     this.$.cm.editor.on('header-value-support', (e) => this.onCodeMirrorHeadersSupport(e));
   },
   // Handler for code-mirror header hints selected.
@@ -329,7 +341,12 @@ Polymer({
         break;
     }
     if (this.isAttached) {
-      arc.app.analytics.sendEvent('Headers editor', 'Tab switched', tabName);
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Headers editor',
+        action: 'Tab switched',
+        label: tabName
+      });
     }
   },
 
@@ -489,7 +506,13 @@ accept-language: en-US,en;q=0.8\n`;
     if (index || index === 0) {
       this.set(['headersList', index, 'name'], value);
     }
-    arc.app.analytics.sendEvent('Headers editor', 'Fill support', 'Name selected');
+
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Headers editor',
+      action: 'Fill support',
+      label: 'Name selected'
+    });
   },
   /**
    * Called when the headers list has changed.

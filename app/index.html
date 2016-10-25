@@ -300,23 +300,48 @@
     <url-history-model></url-history-model>
     <!-- UUID generator is used in data importer. It has reference to element's id. -->
     <uuid-generator id="uuid"></uuid-generator>
-    <app-analytics debug tracking-id="UA-18021184-6" app-name="ARC">
+
+    <app-analytics
+      tracking-id="UA-18021184-6"
+      app-name="ARC"
+      app-id="[[appId]]"
+      app-version="[[appVersion]]"
+      disable-tracking="{{analyticsDisabled}}"
+      data-source="chrome-app" debug>
+      <template is="dom-repeat" items="[[gaCustomMetrics]]">
+        <app-analytics-custom type="metric" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+      </template>
       <template is="dom-repeat" items="[[gaCustomDimensions]]">
         <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
       </template>
     </app-analytics>
-    <!-- <app-analytics tracking-id="UA-18021184-14" app-name="ARC">
+    <app-analytics tracking-id="UA-18021184-14"
+      app-name="ARC"
+      app-id="[[appId]]"
+      app-version="[[appVersion]]"
+      data-source="chrome-app"
+      disable-tracking="{{analyticsDisabled}}">
+      <template is="dom-repeat" items="[[gaCustomMetrics]]">
+        <app-analytics-custom type="metric" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+      </template>
       <template is="dom-repeat" items="[[gaCustomDimensions]]">
         <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
       </template>
     </app-analytics>
-    <app-analytics tracking-id="UA-71458341-2" app-name="ARC">
+    <app-analytics tracking-id="UA-71458341-2"
+      app-name="ARC"
+      app-id="[[appId]]"
+      app-version="[[appVersion]]"
+      data-source="chrome-app"
+      disable-tracking="{{analyticsDisabled}}">
+      <template is="dom-repeat" items="[[gaCustomMetrics]]">
+        <app-analytics-custom type="metric" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+      </template>
       <template is="dom-repeat" items="[[gaCustomDimensions]]">
         <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
       </template>
-    </app-analytics> -->
+    </app-analytics>
   </template>
-  <script src="bower_components/chrome-platform-analytics/google-analytics-bundle.js"></script>
   <script src="bower_components/dexie-js/dist/dexie.min.js"></script>
   <script src="bower_components/har/build/har.js"></script>
   <script src="bower_components/lodash/lodash.js"></script>

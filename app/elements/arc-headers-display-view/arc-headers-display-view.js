@@ -62,7 +62,13 @@ Polymer({
       this.$.model.objectId = [header, this.type];
       this.$.model.getObject();
     }
-    arc.app.analytics.sendEvent('Response status', 'Display header info', header);
+
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Response status',
+      action: 'Display header info',
+      label: header
+    });
   },
   /** Called when model returned data */
   _onHeaderData: function(e) {

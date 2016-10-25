@@ -107,7 +107,12 @@ Polymer({
         break;
     }
     if (this.isAttached) {
-      arc.app.analytics.sendEvent('Response status', 'Tab switched', tabName);
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Response status',
+        action: 'Tab switched',
+        label: tabName
+      });
     }
   },
 
@@ -172,7 +177,12 @@ Polymer({
 
   showStatusInfo: function() {
     this.$.statusCodeInfo.open();
-    arc.app.analytics.sendEvent('Response status', 'Display status info', this.statusCode);
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Response status',
+      action: 'Display status info',
+      label: this.statusCode
+    });
   },
   /** Compute index to 1-based index. */
   _computeIndexName: function(index) {
@@ -186,7 +196,12 @@ Polymer({
       this.fire('action-link-change', {
         url: e2.rootTarget.href
       });
-      arc.app.analytics.sendEvent('Response status', 'Link change', 'From response headers');
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Response status',
+        action: 'Link change',
+        label: 'From response headers'
+      });
     }
   },
 

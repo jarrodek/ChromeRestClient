@@ -94,7 +94,11 @@ Polymer({
     this._setConnecting(true);
     this.$.socket.open();
     this.lastSocketUrl = this.$.socket.url;
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Connect to socket');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Web sockets',
+      action: 'Connect to socket'
+    });
   },
 
   _disconnect: function() {
@@ -109,7 +113,11 @@ Polymer({
     this.push('messages', message);
     this.$.socket.message = message.isBinary ? message.binaryData : message.message;
     this.$.socket.send();
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Send message to socket');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Web sockets',
+      action: 'Send message'
+    });
   },
 
   _downloadBinary: function(e) {
@@ -136,6 +144,11 @@ Polymer({
     this.exportContent = this.messages;
     this.exportMime = 'json';
     this.exportData();
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Web sockets',
+      action: 'Export messages to file'
+    });
   },
 
   _restoredHandler: function() {
