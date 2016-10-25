@@ -465,33 +465,12 @@ accept-language: en-US,en;q=0.8\n`;
       this.activeAutocompleteNameField.source = [];
       return;
     }
-    if (this.$.meta.byKey('usePouchDb')) {
-      let event = this.fire('query-headers', {
-        'type': 'request',
-        'query': value
-      });
-      let headers = event.detail.headers;
-      var suggestions = headers.map((item) => item.key);
-      this.activeAutocompleteNameField.source = suggestions;
-    } else {
-      this.$.headerModel.objectId = value;
-      this.$.headerModel.queryAutocomplete();
-    }
-  },
-  /**
-   * Handler for model's data ready event.
-   * This method sets received values into the suggestions of header name field.
-   *
-   * @param {Event} e The `data-ready` event of the model.
-   * @deprecated Old database system
-   */
-  _setNameSuggestions: function(e) {
-    var data = e.detail.data;
-    if (!data) {
-      this.activeAutocompleteNameField.source = [];
-      return;
-    }
-    var suggestions = data.map((item) => item.key);
+    let event = this.fire('query-headers', {
+      'type': 'request',
+      'query': value
+    });
+    let headers = event.detail.headers;
+    var suggestions = headers.map((item) => item.key);
     this.activeAutocompleteNameField.source = suggestions;
   },
 

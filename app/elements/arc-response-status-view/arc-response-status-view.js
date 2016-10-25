@@ -91,6 +91,9 @@ Polymer({
 
   attached: function() {
     this._checkHttpMessage();
+    if (this.statusCode) {
+      this._statusCodeChanged();
+    }
   },
 
   _selectedTabChanged: function(selectedTab) {
@@ -141,18 +144,13 @@ Polymer({
       }
       return;
     }
-    if (this.$.meta.byKey('usePouchDb')) {
-      let event = this.fire('query-status-codes', {
-        'code': this.statusCode
-      });
-      let statusCode = event.detail.statusCode;
-      if (statusCode) {
-        event.detail.data = statusCode;
-        this._onStatusInfoReady(event);
-      }
-    } else {
-      this.$.statusModel.objectId = this.statusCode;
-      this.$.statusModel.query();
+    let event = this.fire('query-status-codes', {
+      'code': this.statusCode
+    });
+    let statusCode = event.detail.statusCode;
+    if (statusCode) {
+      event.detail.data = statusCode;
+      this._onStatusInfoReady(event);
     }
   },
 
