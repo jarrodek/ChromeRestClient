@@ -439,7 +439,7 @@
         this.$.proxyDialog.open();
         return;
       }
-      this.useXhr = e.target.checked;
+      this.useXhr = e.detail.target.checked;
       this.fire('send-analytics', {
         type: 'event',
         category: 'Request',

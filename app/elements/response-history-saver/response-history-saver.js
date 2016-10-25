@@ -90,6 +90,9 @@
     },
 
     _updateHistory: function(req, res) {
+      if (!res.stats.startTime) {
+        res.stats.startTime = Date.now();
+      }
       var rTime = new Date(res.stats.startTime).getTime();
       var today = this._getDayToday(rTime);
       var k = today + '/' + encodeURIComponent(req.url) + '/' + req.method;
