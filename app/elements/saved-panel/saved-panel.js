@@ -64,7 +64,10 @@
         notify: true
       },
 
-      isEmpty: Boolean
+      isEmpty: {
+        type: Boolean,
+        value: false
+      }
     },
 
     observers: [
@@ -74,7 +77,8 @@
     ],
 
     listeners: {
-      'saved-list-item-name-changed': '_savedNameChangeRequested'
+      'saved-list-item-name-changed': '_savedNameChangeRequested',
+      'open-drive': '_openDrive'
     },
 
     behaviors: [
@@ -105,6 +109,7 @@
     refresh() {
       delete this.queryOptions.startkey;
       delete this.queryOptions.skip;
+      this._setQuerying(true);
       this.set('savedData', []);
       this.loadNext();
     },
@@ -172,6 +177,12 @@
         }
         r.rows.forEach((item) => {
           this.push('savedData', item.doc);
+        });
+        this.fire('send-analytics', {
+          type: 'event',
+          category: 'Search',
+          action: 'Query history',
+          label: 'Saved panel'
         });
       })
       .catch((e) => {
@@ -296,7 +307,12 @@
       this.fileSuggestedName = 'arc-export-' + day + '-' + month + '-' + year + '-saved.json';
       this.exportMime = 'json';
       this.exportData();
-      arc.app.analytics.sendEvent('Engagement', 'Click', 'Export selected saved as file');
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Data export',
+        action: 'Selected saved as file',
+        label: 'saved panel'
+      });
     },
 
     deleteItems: function(items) {
@@ -331,6 +347,12 @@
       this.fire('request-objects-restored', {
         items: docs,
         type: 'saved'
+      });
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Data delete',
+        action: 'Restore deleted from toast',
+        label: 'Saved panel'
       });
     },
 

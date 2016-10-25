@@ -172,7 +172,12 @@ Polymer({
         break;
     }
     if (this.isAttached) {
-      arc.app.analytics.sendEvent('Payload editor', 'Tab switched', tabName);
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Payload editor',
+        action: 'Tab switched',
+        label: tabName
+      });
     }
   },
   // Sets the form editor from current value.

@@ -54,7 +54,14 @@ window.addEventListener('initializeRouting', function() {
         }
         break;
     }
-    arc.app.analytics.sendScreen(screenName);
+    var event = new CustomEvent('send-analytics', {
+      detail: {
+        type: 'screenview',
+        name: screenName,
+        bubbles: true
+      }
+    });
+    document.dispatchEvent(event);
     next();
   }
   // Routes

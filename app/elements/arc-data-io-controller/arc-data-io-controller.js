@@ -93,23 +93,20 @@ Polymer({
           'to the developer.',
         timeout: StatusNotification.TIME_SHORT
       });
-      arc.app.analytics.sendException('arc-data-import-controller::connectAppServer' +
-        cause.message, false);
+      this.fire('send-analytics', {
+        type: 'exception',
+        description: 'arc-data-import-controller' + cause.message,
+        fatal: false
+      });
       this._setLoading(false);
     });
-    arc.app.analytics.sendEvent('Settings usage', 'Import data', 'From file');
-  },
-  /** Authorize the app. */
-  // _connectAppServer: function() {
-  //   this.$.userProvider.authorize(true)
-  //   .catch((err) => {
-  //     StatusNotification.notify({
-  //       message: 'Unable to authorize.',
-  //       timeout: StatusNotification.TIME_SHORT
-  //     });
-  //     arc.app.analytics.sendException('arc-data-import-controller::connectAppServer' +
-  //       err.message, false);
-  //   });
-  // }
+
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Settings usage',
+      action: 'Import data',
+      label: 'From file'
+    });
+  }
 });
 })();

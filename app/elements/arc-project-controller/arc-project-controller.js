@@ -188,7 +188,11 @@ Polymer({
     StatusNotification.notify({
       message: 'Unable to update request data. ' + e.message
     });
-    arc.app.analytics.sendException('UpdateProjectRequest::' + e.detail.message);
+    this.fire('send-analytics', {
+      type: 'exception',
+      description: e.detail.message,
+      fatal: false
+    });
   },
 
   _requestSaved: function() {
@@ -301,9 +305,19 @@ Polymer({
         StatusNotification.notify({
           message: 'Unable to delete the request. ' + e.message
         });
-        arc.app.analytics.sendException('DeleteProjectRequest::' + e.detail.message);
+        this.fire('send-analytics', {
+          type: 'exception',
+          description: e.detail.message,
+          fatal: false
+        });
       });
-      arc.app.analytics.sendEvent('Engagement', 'Click', 'Delete project request');
+
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Data delete',
+        action: 'Delete project\'s request',
+        label: 'Project controller'
+      });
     } else if (data.project) {
       // delete project
       var requestToRemove = data.project.requestIds;
@@ -329,9 +343,19 @@ Polymer({
         StatusNotification.notify({
           message: 'Unable to delete the project. ' + e.message
         });
-        arc.app.analytics.sendException('DeleteProject::' + e.detail.message);
+        this.fire('send-analytics', {
+          type: 'exception',
+          description: e.detail.message,
+          fatal: false
+        });
       });
-      arc.app.analytics.sendEvent('Engagement', 'Click', 'Delete project');
+
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Data delete',
+        action: 'Delete project',
+        label: 'Project view'
+      });
     }
   },
 
@@ -360,7 +384,12 @@ Polymer({
       year + '-export.json';
     this.exportMime = 'json';
     this.exportData();
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Export project as file');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Engagement',
+      action: 'Click',
+      label: 'Export project as file'
+    });
   },
 
   onFileSaved: function() {

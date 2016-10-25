@@ -49,7 +49,12 @@ Polymer({
   _requestNameChanged: function(e) {
     var item = e.detail.item;
     this.$.saveModel.data = item;
-    arc.app.analytics.sendEvent('Saved view', 'Update', 'Request name');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Saved view',
+      action: 'Update',
+      label: 'Request name'
+    });
   },
   /**
    * Generic function to be called on database error.
@@ -59,7 +64,11 @@ Polymer({
       'message': ['Database error', e],
       'level': 'info'
     });
-    arc.app.analytics.sendException('Saved-ctrl::' + JSON.stringify(e));
+    this.fire('send-analytics', {
+      type: 'exception',
+      description: e.message,
+      fatal: false
+    });
   },
 
   resetView: function() {

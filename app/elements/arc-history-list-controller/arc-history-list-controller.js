@@ -43,7 +43,11 @@ Polymer({
    */
   _dbError: function(e) {
     this.fire('app-log', {'message': e, 'level': 'error'});
-    arc.app.analytics.sendException('History-ctrl::' + JSON.stringify(e));
+    this.fire('send-analytics', {
+      type: 'exception',
+      description: 'History-ctrl:' + e.message,
+      fatal: false
+    });
   },
 
   resetView: function() {
@@ -134,7 +138,12 @@ Polymer({
     this.fileSuggestedName = 'arc-export-' + day + '-' + month + '-' + year + '-history.json';
     this.exportMime = 'json';
     this.exportData();
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Export selected history as file');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Data export',
+      action: 'selected history as file',
+      label: 'History panel'
+    });
   },
 
   warnClearAll: function() {

@@ -40,7 +40,14 @@ Polymer({
     this._setDataReady(false);
     this.debounce('export-click', function() {
       this._prepareData();
-      arc.app.analytics.sendEvent('Settings usage', 'Export data', 'Generate file');
+
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Settings usage',
+        action: 'Export data',
+        label: 'Generate file'
+      });
+
     }, 50);
   },
   /**
@@ -62,7 +69,11 @@ Polymer({
       StatusNotification.notify({
         message: cause.message
       });
-      arc.app.analytics.sendException(cause.message, false);
+      this.fire('send-analytics', {
+        type: 'exception',
+        description: cause.message,
+        fatal: false
+      });
     });
   },
   _saveData: function() {
@@ -96,7 +107,11 @@ Polymer({
     StatusNotification.notify({
       message: e.detail.message
     });
-    arc.app.analytics.sendException(e.detail.message, true);
+    this.fire('send-analytics', {
+      type: 'exception',
+      description: e.detail.message,
+      fatal: false
+    });
     this.fire('app-log', {'message': ['_saveFileError', e], 'level': 'error'});
   },
 

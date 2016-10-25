@@ -128,7 +128,11 @@
       this.fileSuggestedName = 'arc-export-' + day + '-' + month + '-' + year + '-export.json';
       this.exportMime = 'json';
       this.exportData();
-      arc.app.analytics.sendEvent('Engagement', 'Click', 'Export saved as file');
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Data export',
+        action: 'Saved as file'
+      });
     },
 
     onFileSaved: function() {
@@ -150,7 +154,12 @@
       this.removedCopy = Array.from(items);
       this.$.deleteModel.data = items;
       this.$.deleteModel.remove();
-      arc.app.analytics.sendEvent('Engagement', 'Click', 'Delete saved list');
+
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Data delete',
+        action: 'Delete saved list'
+      });
     },
 
     _selectedRemoveError: function(e) {
@@ -163,7 +172,11 @@
       StatusNotification.notify({
         message: 'Unable remove data from storage.'
       });
-      arc.app.analytics.sendException('DeleteSavedSelected::' + e.detail.message);
+      this.fire('send-analytics', {
+        type: 'exception',
+        description: 'DeleteSavedSelected' + e.detail.message,
+        fatal: false
+      });
     },
 
     _selectedRemoved: function() {
@@ -194,7 +207,12 @@
     },
     _revertDeleted: function() {
       this.$.saveModel.data = this.removedCopy;
-      arc.app.analytics.sendEvent('Engagement', 'Click', 'Removed reverted');
+
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Data delete',
+        action: 'Restore deleted from toast'
+      });
     },
     _requestSaved: function() {
       if (this.removedCopy) {
@@ -220,13 +238,22 @@
       }
       this.resetQuery();
       this.queryPage();
-      arc.app.analytics.sendEvent('Engagement', 'Sort change', 'Request list');
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Engagement',
+        action: 'Sort change',
+        label: 'Request list'
+      });
     },
 
     onClearAll: function() {
       if (this.view) {
         this.view.warnClearAll();
-        arc.app.analytics.sendEvent('Engagement', 'Click', 'Clear all requested');
+        this.fire('send-analytics', {
+          type: 'event',
+          category: 'Data delete',
+          action: 'Clear all requested'
+        });
       } else {
         // new System.
         this.warnClearAll();
@@ -254,7 +281,12 @@
           type + '.json';
         this.exportMime = 'json';
         this.exportData();
-        arc.app.analytics.sendEvent('Engagement', 'Click', 'Export saved as file');
+
+        this.fire('send-analytics', {
+          type: 'event',
+          category: 'Data export',
+          action: 'Export saved as file'
+        });
       }).catch((e) => {
         this.fire('app-log', {
           'message': 'onExport: ' + e.message,

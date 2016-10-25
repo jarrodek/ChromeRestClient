@@ -114,10 +114,12 @@ Polymer({
       }, 0);
       stateName = 'Single line';
     }
-    if (!arc || !arc.app || !arc.app.analytics) {
-      return;
-    }
-    arc.app.analytics.sendEvent('Request view', 'URL widget toggle', stateName);
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Request view',
+      action: 'URL widget toggle',
+      label: stateName
+    });
   },
   /**
    * Update the URL from detailed form values.
@@ -237,12 +239,16 @@ Polymer({
         break;
       default:
         console.warn('Unknown action: %s', action);
+        gaLabel = 'Unknown action';
     }
-    if (!arc || !arc.app || !arc.app.analytics) {
-      return;
-    }
+
     if (gaLabel) {
-      arc.app.analytics.sendEvent('Request view', 'URL widget context menu action', gaLabel);
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Request view',
+        action: 'URL widget context menu action',
+        label: gaLabel
+      });
     }
   },
   /**
@@ -397,10 +403,12 @@ Polymer({
   },
   // Handler called when the context menu has been opened.
   _menuOpened: function() {
-    if (!arc || !arc.app || !arc.app.analytics) {
-      return;
-    }
-    arc.app.analytics.sendEvent('Request view', 'URL widget toggle', 'Open menu');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Request view',
+      action: 'URL widget toggle',
+      label: 'Open menu'
+    });
   },
 
   revalidate: function() {

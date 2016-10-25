@@ -83,8 +83,12 @@ window.HeadersBehaviors.FillSupportBehaviorImpl = {
       this.value = value;
     }
     this.close();
-    arc.app.analytics.sendEvent('Headers editor', 'Fill support', 'Value provided from ' +
-      this.headerSupport);
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Headers editor',
+      action: 'Fill support',
+      label: 'Set value in support dialog'
+    });
   }
 };
 window.HeadersBehaviors.FillSupportBehavior = [

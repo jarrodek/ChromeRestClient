@@ -98,6 +98,7 @@
       refresh() {
         delete this.queryOptions.startkey;
         delete this.queryOptions.skip;
+        this._setQuerying(true);
         this.set('historyData', []);
         this.loadNext();
       },
@@ -166,6 +167,12 @@
           }
           r.rows.forEach((item) => {
             this.push('historyData', item.doc);
+          });
+          this.fire('send-analytics', {
+            type: 'event',
+            category: 'Search',
+            action: 'Query history',
+            label: 'History panel'
           });
         })
         .catch((e) => {
@@ -318,7 +325,12 @@
         this.fileSuggestedName = 'arc-export-' + day + '-' + month + '-' + year + '-saved.json';
         this.exportMime = 'json';
         this.exportData();
-        arc.app.analytics.sendEvent('Engagement', 'Click', 'Export selected history as file');
+        this.fire('send-analytics', {
+          type: 'event',
+          category: 'Data export',
+          action: 'Selected history as file',
+          label: 'History panel'
+        });
       },
 
       deleteItems: function(items) {
@@ -353,6 +365,13 @@
         this.fire('request-objects-restored', {
           items: docs,
           type: 'history'
+        });
+
+        this.fire('send-analytics', {
+          type: 'event',
+          category: 'Data delete',
+          action: 'Restore deleted from toast',
+          label: 'History panel'
         });
       },
 

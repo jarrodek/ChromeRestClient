@@ -70,7 +70,7 @@ Polymer({
 
   onShow: function() {
     this._setPageTitle('Settings');
-    this.set('gaEnabled', arc.app.analytics.enabled);
+    this.set('gaEnabled', !app.analyticsDisabled);
   },
 
   onHide: function() {
@@ -161,7 +161,12 @@ Polymer({
       'value': value
     };
     this.fire('settings-saved', o);
-    arc.app.analytics.sendEvent('Settings usage', key, value + '');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Settings usage',
+      action: key,
+      label: value + ''
+    });
   },
 
   showTutorial: function() {
@@ -200,7 +205,12 @@ Polymer({
         message: 'History has been cleared'
       });
     });
-    arc.app.analytics.sendEvent('Settings usage', 'Clear history', 'true');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Settings usage',
+      action: 'Clear history',
+      label: 'true'
+    });
   },
 
   _clearHistoryLegacy: function() {
@@ -357,7 +367,9 @@ Polymer({
   },
 
   _gaSettingTapped: function() {
-    arc.app.analytics.setAnalyticsPermitted(this.gaEnabled);
+    this.fire('analytics-permitted-change', {
+      permitted: Boolean(this.gaEnabled)
+    });
   },
 
   _notificationsTapped: function() {
@@ -430,7 +442,12 @@ Polymer({
       this.fileSuggestedName = 'arc-export-' + day + '-' + month + '-' + year + '-all.json';
       this.exportMime = 'json';
       this.exportData();
-      arc.app.analytics.sendEvent('Engagement', 'Click', 'Export saved as file');
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Engagement',
+        action: 'Click',
+        label: 'Export saved as file'
+      });
     }).catch((e) => {
       this.fire('app-log', {
         'message': ['Export data.', e],

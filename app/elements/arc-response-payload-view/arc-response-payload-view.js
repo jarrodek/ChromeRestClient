@@ -144,7 +144,12 @@ Polymer({
     }
     this.contentPreview = false;
     if (this.isAttached) {
-      arc.app.analytics.sendEvent('Response payload', 'Tab switched', tabName);
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Response payload',
+        action: 'Tab switched',
+        label: tabName
+      });
     }
   },
 
@@ -252,10 +257,20 @@ Polymer({
   _toggleTextWrap: function(e) {
     if (e.target.active) {
       this.$.rawContent.classList.add('wrap');
-      arc.app.analytics.sendEvent('Response payload', 'Content action', 'Wrap text');
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Response payload',
+        action: 'Content action',
+        label: 'Wrap text'
+      });
     } else {
       this.$.rawContent.classList.remove('wrap');
-      arc.app.analytics.sendEvent('Response payload', 'Content action', 'Unwrap text');
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Response payload',
+        action: 'Content action',
+        label: 'Unwrap text'
+      });
     }
   },
   /**
@@ -273,13 +288,23 @@ Polymer({
     this.fire('clipboard-write', {
       data: data
     });
-    arc.app.analytics.sendEvent('Response payload', 'Content action', 'Copy to clipboard');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Response payload',
+      action: 'Content action',
+      label: 'Copy to clipboard'
+    });
   },
 
   _saveFile: function() {
     // arc-request-controller listen to this event
     this.fire('save-file');
-    arc.app.analytics.sendEvent('Response payload', 'Content action', 'Save as file');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Response payload',
+      action: 'Content action',
+      label: 'Save as file'
+    });
   },
 
   _tabsChanged: function() {
@@ -439,9 +464,15 @@ Polymer({
         this._tabsChanged();
         gaLabel = 'Force xml';
         break;
+      default: gaLabel = '[unknown]';
     }
     if (gaLabel) {
-      arc.app.analytics.sendEvent('Response view', 'Payload preview', gaLabel);
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Response payload',
+        action: 'Payload preview',
+        label: gaLabel
+      });
     }
   }
 });

@@ -309,7 +309,12 @@
       this.fileSuggestedName = 'arc-export-' + day + '-' + month + '-' + year + '-saved-drive.json';
       this.exportMime = 'json';
       this.exportData();
-      arc.app.analytics.sendEvent('Engagement', 'Click', 'Export selected saved drive as file');
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Data export',
+        action: 'selected saved drive as file',
+        label: 'saved drive panel'
+      });
     },
 
     deleteItems: function(items) {

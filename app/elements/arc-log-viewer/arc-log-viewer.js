@@ -148,7 +148,12 @@ Polymer({
     this.fileSuggestedName = 'arc-log-export.json';
     this.exportMime = 'json';
     this.exportData();
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Export logs as file');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Data export',
+      action: 'Logs as file',
+      label: 'Log viewer'
+    });
   }
 });
 })();

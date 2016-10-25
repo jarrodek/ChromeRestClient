@@ -14,7 +14,6 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 -->
-
 <!--
 The `<json-viewer>` element is responsible for parsing and displaying the JSON content of the response.
 
@@ -24,112 +23,139 @@ Data returned by the worker are immediately displayed in the output.
 
 The element will start parsing the data as soon as the `json` property change.
 -->
-<html>
-  <head></head>
-  <body>
-    <dom-module id="json-viewer">
-      <template>
-        <style>
-          :host {
-            display: block;
-            font-family: monospace;
-            font-size: 10pt;
-            color: black;
-            cursor: text;
-            -webkit-user-select: text;
-          }
-          .prettyPrint {}
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../js-max-number-error/js-max-number-error.html">
+<dom-module id="json-viewer">
+  <template>
+    <style>
+     :host {
+      display: block;
+      font-family: monospace;
+      font-size: 10pt;
+      color: black;
+      cursor: text;
+      -webkit-user-select: text;
+    }
 
-          .numeric,
-          .nullValue,
-          .booleanValue,
-          .stringValue,
-          .keyName {}
+    .prettyPrint {
+      padding: 8px;
+    }
 
-          .stringValue {
-            white-space: normal;
-          }
+    .stringValue {
+      white-space: normal;
+    }
 
-          .brace {
-            display: inline-block;
-          }
+    .brace {
+      display: inline-block;
+    }
 
-          .numeric {
-            color: blue;
-          }
+    .numeric {
+      color: blue;
+    }
 
-          .nullValue {
-            color: #708;
-          }
+    .nullValue {
+      color: #708;
+    }
 
-          .booleanValue {
-            color: #708;
-          }
+    .booleanValue {
+      color: #708;
+    }
 
-          .punctuation {
-            color: black;
-          }
+    .punctuation {
+      color: black;
+    }
 
-          .stringValue {
-            color: #48A;
-          }
+    .stringValue {
+      color: #48A;
+    }
 
-          .node {
-            position: relative;
-            white-space: nowrap;
-            margin-bottom: 5px;
-            word-wrap: break-word;
-          }
+    .node {
+      position: relative;
+      white-space: nowrap;
+      margin-bottom: 5px;
+      word-wrap: break-word;
+    }
 
-          .arrayCounter {
-            color: gray;
-            font-size: 11px;
-          }
-          .arrayCounter:before {
-            /* 	content: "size"; */
-          }
+    .array-counter {
+      color: gray;
+      font-size: 11px;
+    }
 
-          .keyName {
-            color: rgb(206, 123, 0);
-          }
+    .array-counter::before {
+      content: "Array[" attr(count) "]";
+      user-select: none;
+      pointer-events: none;
+    }
 
-          .rootElementToggleButton {
-            position: absolute;
-            top: 0;
-            left: -9px;
-            font-size: 14px;
-            cursor: pointer;
-            font-weight: bold;
-          }
+    *[data-expanded="false"]>.array-counter::before {
+      content: "Array[" attr(count) "] ...";
+      user-select: none;
+      pointer-events: none;
+    }
 
-          .arrayKeyNumber {
-            color: rgb(119, 119, 119);
-          }
+    .array-key-number::before {
+      content: "" attr(index) ":";
+      user-select: none;
+      pointer-events: none;
+    }
 
-          .infoRow {
-            display: none;
-            margin: 0 7px;
-            text-indent: 0;
-          }
+    .key-name {
+      color: rgb(206, 123, 0);
+    }
 
-          div[data-expanded="false"] div[collapse-indicator] {
-            display: inline-block !important;
-          }
+    .rootElementToggleButton {
+      position: absolute;
+      top: 0;
+      left: -9px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: bold;
+      user-select: none;
+    }
 
-          div[data-expanded="false"] div[data-element] {
-            display: none !important;
-          }
-          .arc-search-mark.selected {
-            background-color: var(--paper-orange-500);
-          }
-        </style>
-        <paper-spinner active="[[working]]"></paper-spinner>
-        <div class="error" hidden$="[[!isError]]">
-          <p>There was an error parsing JSON data</p>
-        </div>
-        <output id="output" hidden$="[[!showOutput]]" on-tap="_handleDisplayClick"></output>
-      </template>
-    </dom-module>
-    <script src="json-viewer.js"></script>
-  </body>
-</html>
+    .rootElementToggleButton::after {
+      content: "-";
+    }
+
+    .array-key-number {
+      color: rgb(119, 119, 119);
+    }
+
+    .info-row {
+      display: none;
+      margin: 0 7px;
+      text-indent: 0;
+    }
+
+    div[data-expanded="false"] div[collapse-indicator] {
+      display: inline-block !important;
+    }
+
+    div[data-expanded="false"] div[data-element] {
+      display: none !important;
+    }
+
+    .arc-search-mark.selected {
+      background-color: var(--paper-orange-500);
+    }
+
+    div[data-expanded="false"] .punctuation.hidden {
+      opacity: 0;
+    }
+
+    .hidden {
+      color: rgba(0, 0, 0, 0.24);
+    }
+
+    a[response-anchor] {
+      color: #1976d2;
+    }
+    </style>
+    <paper-spinner active="[[working]]"></paper-spinner>
+    <div class="error" hidden$="[[!isError]]">
+      <p>There was an error parsing JSON data</p>
+    </div>
+    <output id="output" hidden$="[[!showOutput]]" on-tap="_handleDisplayClick"></output>
+  </template>
+</dom-module>
+<script src="json-viewer.js"></script>

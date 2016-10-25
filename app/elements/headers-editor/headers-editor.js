@@ -90,10 +90,22 @@ Polymer({
       }.bind(this)
     });
     // this data will help prioritize code-mirror support for headers.
-    this.$.cm.editor.on('header-value-selected', (e) =>
-      arc.app.analytics.sendEvent('Headers editor', 'CM value picked', e));
-    this.$.cm.editor.on('header-key-selected', (e) =>
-      arc.app.analytics.sendEvent('Headers editor', 'CM name picked', e));
+    this.$.cm.editor.on('header-value-selected', (e) => {
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Headers editor',
+        action: 'CM value picked',
+        label: e
+      });
+    });
+    this.$.cm.editor.on('header-key-selected', (e) => {
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Headers editor',
+        action: 'CM name picked',
+        label: e
+      });
+    });
     this.$.cm.editor.on('header-value-support', (e) => this.onCodeMirrorHeadersSupport(e));
   },
   // Handler for code-mirror header hints selected.
@@ -329,7 +341,12 @@ Polymer({
         break;
     }
     if (this.isAttached) {
-      arc.app.analytics.sendEvent('Headers editor', 'Tab switched', tabName);
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Headers editor',
+        action: 'Tab switched',
+        label: tabName
+      });
     }
   },
 
@@ -448,33 +465,12 @@ accept-language: en-US,en;q=0.8\n`;
       this.activeAutocompleteNameField.source = [];
       return;
     }
-    if (this.$.meta.byKey('usePouchDb')) {
-      let event = this.fire('query-headers', {
-        'type': 'request',
-        'query': value
-      });
-      let headers = event.detail.headers;
-      var suggestions = headers.map((item) => item.key);
-      this.activeAutocompleteNameField.source = suggestions;
-    } else {
-      this.$.headerModel.objectId = value;
-      this.$.headerModel.queryAutocomplete();
-    }
-  },
-  /**
-   * Handler for model's data ready event.
-   * This method sets received values into the suggestions of header name field.
-   *
-   * @param {Event} e The `data-ready` event of the model.
-   * @deprecated Old database system
-   */
-  _setNameSuggestions: function(e) {
-    var data = e.detail.data;
-    if (!data) {
-      this.activeAutocompleteNameField.source = [];
-      return;
-    }
-    var suggestions = data.map((item) => item.key);
+    let event = this.fire('query-headers', {
+      'type': 'request',
+      'query': value
+    });
+    let headers = event.detail.headers;
+    var suggestions = headers.map((item) => item.key);
     this.activeAutocompleteNameField.source = suggestions;
   },
 
@@ -489,7 +485,13 @@ accept-language: en-US,en;q=0.8\n`;
     if (index || index === 0) {
       this.set(['headersList', index, 'name'], value);
     }
-    arc.app.analytics.sendEvent('Headers editor', 'Fill support', 'Name selected');
+
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Headers editor',
+      action: 'Fill support',
+      label: 'Name selected'
+    });
   },
   /**
    * Called when the headers list has changed.

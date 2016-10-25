@@ -106,7 +106,11 @@ Polymer({
     });
     this._resetFileDrop();
     this.fire('app-log', {'message': ['arc-data-import::_importFileError', e], 'level': 'error'});
-    arc.app.analytics.sendException(e.detail.message, true);
+    this.fire('send-analytics', {
+      type: 'exception',
+      description: e.detail.message,
+      fatal: true
+    });
   },
   /** Compute is file is being imported. */
   _computeFileImportPreview: function(importData) {
