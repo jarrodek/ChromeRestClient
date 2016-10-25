@@ -74,8 +74,14 @@
         </paper-toolbar>
         <!-- Main Content -->
         <div class="content">
-          <neon-animated-pages id="pages" attr-for-selected="data-route" selected-attribute="opened" selected="[[route]]" entry-animation="slide-from-right-animation" exit-animation="slide-left-animation" on-iron-select="_mainPageSelected" on-iron-deselect="_mainPageDeselected">
-
+          <!-- iron-pages -->
+          <iron-pages id="pages"
+            class="mainPages"
+            attr-for-selected="data-route"
+            selected-attribute="opened"
+            selected="[[route]]"
+            on-iron-select="_mainPageSelected"
+            on-iron-deselect="_mainPageDeselected">
             <section data-route="request" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent">
               <template is="dom-if" if="[[usePouchDb]]" restamp="true">
                 <!-- new request panel using pouch DB. -->
@@ -100,7 +106,7 @@
             <arc-project-controller use-pouch-db="[[usePouchDb]]" project="{{currentProject}}" requests="{{currentRequests}}" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="project" route-params="[[params]]">
               <arc-project-view project="{{currentProject}}" requests="[[currentRequests]]"></arc-project-view>
             </arc-project-controller>
-          </neon-animated-pages>
+          </iron-pages>
         </div>
       </paper-scroll-header-panel>
     </paper-drawer-panel>

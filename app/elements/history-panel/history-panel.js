@@ -98,6 +98,7 @@
       refresh() {
         delete this.queryOptions.startkey;
         delete this.queryOptions.skip;
+        this._setQuerying(true);
         this.set('historyData', []);
         this.loadNext();
       },

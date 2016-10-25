@@ -117,3 +117,7 @@ paper-toolbar[xhrtoggle] > paper-toggle-button[feature="xhrtoggle"] {
   background-color: #fff;
   color: #00A1DF;
 }
+
+.mainPages > * {
+  height: 100%;
+}

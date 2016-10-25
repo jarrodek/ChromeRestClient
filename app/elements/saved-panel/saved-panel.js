@@ -64,7 +64,10 @@
         notify: true
       },
 
-      isEmpty: Boolean
+      isEmpty: {
+        type: Boolean,
+        value: false
+      }
     },
 
     observers: [
@@ -74,7 +77,8 @@
     ],
 
     listeners: {
-      'saved-list-item-name-changed': '_savedNameChangeRequested'
+      'saved-list-item-name-changed': '_savedNameChangeRequested',
+      'open-drive': '_openDrive'
     },
 
     behaviors: [
@@ -105,6 +109,7 @@
     refresh() {
       delete this.queryOptions.startkey;
       delete this.queryOptions.skip;
+      this._setQuerying(true);
       this.set('savedData', []);
       this.loadNext();
     },
