@@ -26,7 +26,12 @@
       /*@apply(--layout-end-justified);*/
       position: relative;
       bottom: 0;
-      transition: bottom 200ms ease-in-out;
+      transition: bottom 200ms ease-in-out, background-color 800ms ease-in-out;
+      background-color: transparent;
+    }
+
+    :host([is-request]) .bottom-menu {
+      background-color: #eee;
     }
 
     .icon-buttons {
@@ -54,6 +59,10 @@
     .project-item[selected] {
       background-color: rgba(25, 118, 210, 0.24);
       font-weight: 500;
+    }
+
+    paper-menu-button {
+      padding: 0;
     }
     </style>
     <paper-menu selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap">

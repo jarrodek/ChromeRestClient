@@ -122,7 +122,8 @@
       xhrConnected: Boolean,
       contentType: String,
       // Status mesage to pass to the request panel.
-      statusMessage: String
+      statusMessage: String,
+      exporeAssistantActive: Boolean
     },
 
     observers: [
@@ -379,6 +380,10 @@
         return;
       }
       this.associateProject();
+      // this.debounce('history-analyser', () => {
+      //   this.$.historyAnalyser.url = this.request.url;
+      //   this.$.historyAnalyser.method = this.request.method;
+      // }, 500);
     },
 
     associateProject: function() {
@@ -911,6 +916,7 @@
       this._setActiveRequest(e.detail.request);
       this._saveHistory();
       this._saveCookies();
+      this._appendStats();
     },
 
     _resendAuthRequest: function() {
@@ -981,6 +987,17 @@
         return;
       }
       this.set('request', detail.request);
+    },
+
+    _requestsStatsAnalysed: function() {
+      if (!this.$.historyAnalyser.hasAnyData) {
+        // force close assistant panel ?? or empty info screen?
+        return;
+      }
+    },
+
+    _appendStats: function() {
+      
     }
   });
 })();

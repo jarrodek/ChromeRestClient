@@ -40,11 +40,16 @@
         computed: '_computeHasProjects(projects.length)'
       },
 
-      selectedProject: String
+      selectedProject: String,
+      isRequest: {
+        type: Boolean,
+        reflectToAttribute: true
+      }
     },
 
     observers: [
-      'selectedProjectChanged(selectedProject)'
+      'selectedProjectChanged(selectedProject)',
+      '_routeChanged(route)'
     ],
 
     attached: function() {
@@ -55,6 +60,10 @@
     detached: function() {
       this.unlisten(document.body, 'iron-announce', '_onToastShown');
       this.unlisten(document.body, 'iron-overlay-closed', '_onToastClosed');
+    },
+
+    _routeChanged: function(route) {
+      this.isRequest = route === 'request';
     },
 
     _computeHasProjects: function(length) {
