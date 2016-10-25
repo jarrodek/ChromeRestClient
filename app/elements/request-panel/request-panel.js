@@ -434,8 +434,8 @@
     },
 
     onXhrtoggle: function(e) {
-      if (!this.xhrConnected && e.target.checked) {
-        e.target.checked = false;
+      if (!this.xhrConnected && e.detail.target.checked) {
+        e.detail.target.checked = false;
         this.$.proxyDialog.open();
         return;
       }

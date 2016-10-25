@@ -97,7 +97,7 @@ arc.bg.getAppId = () => {
       'APP_ID': null
     }, function(result) {
       if (!result.APP_ID) {
-        result.APP_ID = arc.bg.uuid.uuid();
+        result.APP_ID = arc.bg.uuid();
         chrome.storage.local.set(result, function() {
           resolve(result.APP_ID);
         });
