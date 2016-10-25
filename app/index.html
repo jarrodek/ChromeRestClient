@@ -307,7 +307,7 @@
       app-id="[[appId]]"
       app-version="[[appVersion]]"
       disable-tracking="{{analyticsDisabled}}"
-      data-source="chrome-app" debug>
+      data-source="chrome-app">
       <template is="dom-repeat" items="[[gaCustomMetrics]]">
         <app-analytics-custom type="metric" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
       </template>
