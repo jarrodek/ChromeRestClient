@@ -64,7 +64,8 @@ Polymer({
       value: function() {
         return this.$.output;
       }
-    }
+    },
+    raw: String
   },
 
   behaviors: [
@@ -109,7 +110,10 @@ Polymer({
       worker.addEventListener('error', this._workerErrorHandler);
       this._worker = worker;
     }
-    this._worker.postMessage(this.json);
+    this._worker.postMessage({
+      json: this.json,
+      raw: this.raw
+    });
   },
   // Called when worker data received.
   _workerData: function(e) {
