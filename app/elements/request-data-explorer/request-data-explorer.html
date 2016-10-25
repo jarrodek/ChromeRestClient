@@ -1,0 +1,224 @@
+<script src="../../bower_components/chart.js/dist/Chart.bundle.js"></script>
+
+<dom-module id="request-data-explorer">
+  <template>
+    <style>
+      :host {
+        display: block;
+        height: 100%;
+        width: 320px;
+        background-color: #e0e0e0;
+        @apply(--shadow-elevation-6dp);
+        position: fixed;
+        bottom: 0;
+        overflow: auto;
+        top: 64px;
+        opacity: 0;
+        transition: opacity 0.3s linear;
+      }
+
+      :host([opened]) {
+        opacity: 1;
+      }
+
+      .title-bar {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      .title {
+        margin-left: 16px;
+        font-size: 18px;
+        @apply(--layout-flex);
+      }
+
+      .data-explorer h3 {
+        margin-left: 16px;
+        margin-bottom: 8px;
+        padding-bottom: 0;
+      }
+
+      .data-explorer {
+        @apply(--shadow-elevation-4dp);
+        background-color: #fff;
+        padding: 8px;
+      }
+
+      .separate {
+        height: 8px;
+      }
+
+      .median {
+        margin: 16px;
+        font-size: 21px;
+        font-weight: 400;
+      }
+      .median .label {
+        color: rgba(0, 0, 0, 0.4);
+      }
+
+      .bottom-margin {
+        height: 114px;
+        display: block;
+      }
+
+      .desc {
+        color: rgba(0, 0, 0, 0.4);
+        font-size: 12px;
+        margin: 0px 0px 16px 16px;
+      }
+
+      .intro {
+        @apply(--layout-vertical);
+        @apply(--layout-center-center);
+        height: 100%;
+        text-align: center;
+        padding: 16px;
+      }
+
+      .intro iron-icon {
+        width: 80px;
+        height: 80px;
+        color: rgba(25, 118, 210, 0.54);
+      }
+
+      .intro .head {
+        font-weight: 500;
+      }
+
+    </style>
+    <div class="title-bar">
+      <h3 class="title">History analysis</h3>
+      <paper-icon-button icon="arc:close" on-tap="_close"></paper-icon-button>
+    </div>
+
+    <section class="intro" hidden$="[[hasAnyData]]">
+      <iron-icon icon="arc:insert-chart"></iron-icon>
+      <p class="head">Get history analysis instantly</p>
+      <p>Each time you make a request or recall saved request you'll see performance history of selected endpoint.</p>
+    </section>
+
+    <section class="data-explorer" hidden$="[[!presence.times.totals]]">
+      <h3>Response time</h3>
+      <p class="desc">Total time from staring a request to last received byte.</p>
+      <div class="chart-block">
+        <canvas id="totalTimes" width="288" height="100"></canvas>
+      </div>
+      <div class="median">
+        <span class="label">Median</span> <span class="value">[[medians.total]] ms.</span>
+      </div>
+    </section>
+
+    <section class="data-explorer" hidden$="[[!presence.times.connects]]">
+      <h3>Connect time</h3>
+      <p class="desc">Time required to establish connection to the remote machine.</p>
+      <div class="chart-block">
+        <canvas id="connectTime" width="288" height="100"></canvas>
+      </div>
+      <div class="median">
+        <span class="label">Median</span> <span class="value">[[medians.connect]] ms.</span>
+      </div>
+    </section>
+
+    <section class="data-explorer" hidden$="[[!presence.times.ssl]]">
+      <h3>SSL negotiations</h3>
+      <p class="desc">Time required to establish a secure connection to the remote machine.</p>
+      <div class="chart-block">
+        <canvas id="sslTime" width="288" height="100"></canvas>
+      </div>
+      <div class="median">
+        <span class="label">Median</span> <span class="value">[[medians.ssl]] ms.</span>
+      </div>
+    </section>
+
+    <section class="data-explorer" hidden$="[[!presence.times.sents]]">
+      <h3>Message send time</h3>
+      <p class="desc">Time to transport request headers and payload data.</p>
+      <div class="chart-block">
+        <canvas id="sendTime" width="288" height="100"></canvas>
+      </div>
+      <div class="median">
+        <span class="label">Median</span> <span class="value">[[medians.sent]] ms.</span>
+      </div>
+    </section>
+
+    <section class="data-explorer" hidden$="[[!presence.times.ttfb]]">
+      <h3>Time to first byte</h3>
+      <p class="desc">Time between sending a message and receiving first byte.</p>
+      <div class="chart-block">
+        <canvas id="timeToFirstByte" width="288" height="100"></canvas>
+      </div>
+      <div class="median">
+        <span class="label">Median</span> <span class="value">[[medians.ttfb]] ms.</span>
+      </div>
+    </section>
+
+    <section class="data-explorer " hidden$="[[!presence.times.receiveds]]">
+      <h3>Data receive time</h3>
+      <p class="desc">Time required to receive full message from the remote machine.</p>
+      <div class="chart-block">
+        <canvas id="receivingTime" width="288" height="100"></canvas>
+      </div>
+      <div class="median">
+        <span class="label">Median</span> <span class="value">[[medians.receiving]] ms.</span>
+      </div>
+    </section>
+    <div class="separate"></div>
+    <section class="data-explorer" hidden$="[[!presence.sizes.request.headers]]">
+      <h3>Request headers size</h3>
+      <p class="desc">Size of the HTTP headers sent with the request.</p>
+      <div class="chart-block">
+        <canvas id="requestHeaderSizes" width="288" height="100"></canvas>
+      </div>
+      <div class="median">
+        <span class="label">Median</span> <span class="value">[[medians.requestHeaders]] bytes</span>
+      </div>
+    </section>
+
+    <section class="data-explorer" hidden$="[[!presence.sizes.request.body]]">
+      <h3>Request payload size</h3>
+      <p class="desc">Size of the body sent with the request.</p>
+      <div class="chart-block">
+        <canvas id="requestPayloadSizes" width="288" height="100"></canvas>
+      </div>
+      <div class="median">
+        <span class="label">Median</span> <span class="value">[[medians.requestHeaders]] bytes</span>
+      </div>
+    </section>
+    <div class="separate"></div>
+    <section class="data-explorer" hidden$="[[!presence.sizes.response.headers]]">
+      <h3>Response headers size</h3>
+      <p class="desc">Size of the HTTP headers received from the remote machine.</p>
+      <div class="chart-block">
+        <canvas id="responseHeaderSizes" width="288" height="100"></canvas>
+      </div>
+      <div class="median">
+        <span class="label">Median</span> <span class="value">[[medians.responseHeaders]] bytes</span>
+      </div>
+    </section>
+
+    <section class="data-explorer" hidden$="[[!presence.sizes.response.body]]">
+      <h3>Response payload size</h3>
+      <p class="desc">Size of the body received from the remote machine.</p>
+      <div class="chart-block">
+        <canvas id="responsePayloadSizes" width="288" height="100"></canvas>
+      </div>
+      <div class="median">
+        <span class="label">Median</span> <span class="value">[[medians.responseBody]] bytes</span>
+      </div>
+    </section>
+    <div class="separate"></div>
+
+    <section class="data-explorer" hidden$="[[!presence.statuses]]">
+      <h3>Response codes</h3>
+      <p class="desc">Status codes returned by this endpoint.</p>
+      <div class="chart-block">
+        <canvas id="statusesChart" width="288" height="150"></canvas>
+      </div>
+    </section>
+
+    <div id="bottomMargin" class="bottom-margin"></div>
+    <iron-signals on-iron-signal-main-header-transform="_headerTransformed"></iron-signals>
+  </template>
+  <script src="request-data-explorer.js"></script>
+</dom-module>

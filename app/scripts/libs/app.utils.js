@@ -248,11 +248,6 @@ Object.defineProperty(arc.app.utils, 'osInfo', {
       case 'Android':
         osVersion = /Android ([\.\_\d]+)/.exec(nAgt)[1];
         break;
-
-      case 'iOS':
-        osVersion = /OS (\d+)_(\d+)_?(\d+)?/.exec(nVer);
-        osVersion = osVersion[1] + '.' + osVersion[2] + '.' + (osVersion[3] | 0);
-        break;
     }
     arc.app.utils._osInfo = {
       osName: os,
