@@ -246,7 +246,7 @@ Polymer({
   },
 
   _computeBageClass: function(cnt) {
-    return cnt === 0 ? 'empty' : '';
+    return cnt === 0 ? 'badge empty' : 'badge';
   }
 });
 })();
