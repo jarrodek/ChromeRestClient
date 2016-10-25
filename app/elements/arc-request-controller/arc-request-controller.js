@@ -125,7 +125,8 @@ Polymer({
     'send': 'sendRequest',
     'abort': 'abortRequest',
     'save-file': '_saveToFile',
-    'save-request': '_saveRequest'
+    'save-request': '_saveRequest',
+    'is-payload-changed': '_isPayloadChanged'
   },
 
   observers: [
@@ -515,6 +516,7 @@ Polymer({
     .then((request) => this._applyCookies(request))
     .then((request) => this._applyAuthorization(request))
     .then((request) => this._filterHeaders(request))
+    .then((request) => this._cleanReqestToSend(request))
     .then((request) => {
       // Make it async so errors will be handled by socket object.
       this.async(() => {
@@ -531,6 +533,17 @@ Polymer({
         }
       });
     });
+  },
+  _isPayloadChanged: function(e) {
+    this.isPayload = e.detail.value;
+  },
+
+  _cleanReqestToSend: function(request) {
+    if (typeof this.isPayload !== 'undefined' && !this.isPayload) {
+      delete request.files;
+      request.payload = '';
+    }
+    return request;
   },
   // If turned on - apply magic variables to the request.
   _applyMagicVariables: function(request) {

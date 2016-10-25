@@ -145,7 +145,8 @@
       'save-request': '_onSaveRequest',
       'request-first-byte-received': '_requestStatusChanged',
       'request-load-end': '_requestStatusChanged',
-      'request-headers-sent': '_requestStatusChanged'
+      'request-headers-sent': '_requestStatusChanged',
+      'is-payload-changed': '_isPayloadChanged'
     },
 
     attached: function() {
@@ -723,6 +724,7 @@
       .then((request) => this._applyCookies(request))
       .then((request) => this.$.authSaver.applyAuthorization(request))
       .then((request) => this._filterHeaders(request))
+      .then((request) => this._cleanReqestToSend(request))
       .then((request) => {
         // Make it async so errors will be handled by socket object.
         this.async(() => {
@@ -739,6 +741,18 @@
           }
         });
       });
+    },
+
+    _isPayloadChanged: function(e) {
+      this.isPayload = e.detail.value;
+    },
+
+    _cleanReqestToSend: function(request) {
+      if (typeof this.isPayload !== 'undefined' && !this.isPayload) {
+        delete request.files;
+        request.payload = '';
+      }
+      return request;
     },
     // If turned on - apply magic variables to the request.
     _applyMagicVariables: function(request) {
@@ -997,7 +1011,7 @@
     },
 
     _appendStats: function() {
-      
+
     }
   });
 })();
