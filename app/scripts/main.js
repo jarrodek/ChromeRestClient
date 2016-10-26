@@ -183,10 +183,18 @@
   document.body.addEventListener('action-link-change', (e) => {
     var url = e.detail.url;
     if (app.request.url && url.indexOf('/') === 0) {
-      /* global URLParser */
-      let p = new URLParser(app.request.url);
-      url = p.protocol + '://' + p.authority + url;
-      app.set('request.url', url);
+      var parser;
+      try {
+        parser = new URL(app.request.url);
+        url = parser.origin + url;
+        app.set('request.url', url);
+      } catch (e) {
+        console.log('URL parse error', e);
+        this.fire('app-log', {
+          message: e
+        });
+        app.set('request.url', url);
+      }
     } else {
       app.set('request.url', url);
     }
