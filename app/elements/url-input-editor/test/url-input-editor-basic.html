@@ -11,7 +11,6 @@
   <link rel="import" href="../../../bower_components/iron-overlay-behavior/iron-overlay-behavior.html">
   <link rel="import" href="../../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
   <link rel="import" href="../url-input-editor.html">
-  <script src="../../../scripts/libs/app.url.parser.js"></script>
 </head>
 <body>
   <test-fixture id="editor">
@@ -40,21 +39,21 @@
         done();
       }, 10);
     });
-
-    test('Should parse URL with user and password', function(done) {
-      var url = 'https://test:test@sub.domain.com/path/to/resource?param=value&other=value';
-      editor.detailed = true;
-      editor.url = url;
-      window.setTimeout(() => {
-        expect(editor.hostValue).to.be.equal('https://test:test@sub.domain.com',
-          'Host value is invalid');
-        expect(editor.pathValue).to.be.equal('/path/to/resource',
-          'Path value is invalid');
-        expect(editor.paramsList).to.be.a('array',
-          'paramsList value is not an array');
-        done();
-      }, 10);
-    });
+    // Case below is no more supported.
+    // test('Should parse URL with user and password', function(done) {
+    //   var url = 'https://test:test@sub.domain.com/path/to/resource?param=value&other=value';
+    //   editor.detailed = true;
+    //   editor.url = url;
+    //   window.setTimeout(() => {
+    //     expect(editor.hostValue).to.be.equal('https://test:test@sub.domain.com',
+    //       'Host value is invalid');
+    //     expect(editor.pathValue).to.be.equal('/path/to/resource',
+    //       'Path value is invalid');
+    //     expect(editor.paramsList).to.be.a('array',
+    //       'paramsList value is not an array');
+    //     done();
+    //   }, 10);
+    // });
   });
   </script>
 </dody>

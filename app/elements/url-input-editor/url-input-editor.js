@@ -201,12 +201,14 @@ Polymer({
     this.set('hostValue', parser.origin);
     this.set('pathValue', parser.pathname);
     this.set('anchorValue', hash);
-    this.set('paramsList', Array.from(parser.searchParams).map((i) => {
-      return {
-        name: i[0],
-        value: i[1]
-      };
-    }));
+    if (parser.searchParams) {
+      this.set('paramsList', Array.from(parser.searchParams).map((i) => {
+        return {
+          name: i[0],
+          value: i[1]
+        };
+      }));
+    }
   },
   /**
    * Adds empty line of URL params to the detailed form of URL parameters.
