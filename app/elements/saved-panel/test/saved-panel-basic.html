@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>search-bar-basic</title>
+  <script src="../../../bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../../bower_components/web-component-tester/browser.js"></script>
+  <!-- Import the element to test -->
+  <link rel="import" href="../../../bower_components/polymer/polymer.html">
+  <link rel="import" href="../../../bower_components/iron-overlay-behavior/iron-overlay-behavior.html">
+  <link rel="import" href="../../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
+  <link rel="import" href="../saved-panel.html">
+</head>
+<body>
+  <test-fixture id="panel">
+    <template>
+      <saved-panel></saved-panel>
+    </template>
+  </test-fixture>
+  <script>
+  suite('`saved-panel` tests', function() {
+    var panel;
+    setup(function() {
+      panel = fixture('panel');
+    });
+    test('Should query when refresh', function(done) {
+      panel.addEventListener('results-page-loaded', function(e) {
+        done();
+      });
+      panel.addEventListener('results-page-error', function(e) {
+        done(e.detail.error);
+      });
+      panel.refresh();
+      expect(panel.querying).to.be.equal(true,
+        'Not querying on startup');
+    });
+  });
+  </script>
+</dody>

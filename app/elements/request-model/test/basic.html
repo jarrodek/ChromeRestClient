@@ -1,0 +1,171 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>search-bar-basic</title>
+  <script src="../../../bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../../bower_components/web-component-tester/browser.js"></script>
+  <!-- Import the element to test -->
+  <link rel="import" href="../../../bower_components/polymer/polymer.html">
+  <link rel="import" href="../../../bower_components/iron-test-helpers/iron-test-helpers.html">
+  <link rel="import" href="../request-model.html">
+  <script src="../../../test/chance.js"></script>
+</head>
+<body>
+  <test-fixture id="model">
+    <template>
+      <request-model ></request-model>
+    </template>
+  </test-fixture>
+  <script>
+  suite('`request-model` tests', function() {
+    var panel;
+    setup(function() {
+      panel = fixture('model');
+    });
+
+    function dispatchCustomEvent(type, data, obj) {
+      var event = new CustomEvent(type, {
+        detail: data,
+        bubbles: true,
+        cancelable: true
+      });
+      obj.dispatchEvent(event);
+      return event;
+    }
+    /* Type: saved or google-drive */
+    function generateRequestSavedObject(type) {
+      var isPayload = chance.bool();
+      var payloadMethods = ['POST', 'PUT', 'DELETE', 'OPTIONS'];
+      var otherMethods = ['GET', 'HEAD'];
+      var headersSize = chance.integer({
+        min: 0,
+        max: 10
+      });
+      var headers = '';
+      for (var i = 0; i < headersSize; i++) {
+        headers += 'X-' + chance.word() + ': ' + chance.word() + '\n';
+      }
+      if (isPayload) {
+        headers += 'content-type: application/x-www-form-urlencoded';
+      }
+      var payload = isPayload ? chance.paragraph() : '';
+      var requestName = chance.sentence({words: 2});
+      var item = {
+        url: chance.url(),
+        method: chance.pick(isPayload ? payloadMethods : otherMethods),
+        headers: headers,
+        payload: payload,
+        created: chance.hammertime(),
+        type: type || 'saved',
+        name: requestName
+      };
+      item._id = encodeURIComponent(item.name) + '/' +
+        encodeURIComponent(item.url) + '/' + item.method;
+      return item;
+    };
+
+    test('Should save saved request - event based', function(done) {
+      var r = generateRequestSavedObject();
+
+      panel.addEventListener('request-object-changed', (e) => {
+        expect(e.detail.request._id).to.be.equal(r._id);
+        expect(e.detail.request._rev).to.be.a('string');
+        done();
+      });
+
+      panel.addEventListener('error', (e) => {
+        done(e.detail.error);
+      });
+
+      dispatchCustomEvent('request-object-change', {
+        dbName: 'saved-requests',
+        request: r
+      }, panel);
+    });
+
+    test('Should save saved request - promise-event based', function(done) {
+      var r = generateRequestSavedObject();
+      var event = dispatchCustomEvent('request-object-change', {
+        dbName: 'saved-requests',
+        request: r
+      }, panel);
+
+      expect(event.detail.error).to.be.undefined;
+      event.detail.result
+      .then((result) => {
+        expect(result._id).to.be.equal(r._id,
+          'Not querying on startup');
+        expect(result._rev).to.be.a('string');
+        done();
+      })
+      .catch((e) => {
+        done(e);
+      });
+    });
+
+    test('Should delete the request - event based', function(done) {
+      var r = generateRequestSavedObject();
+      panel.addEventListener('request-object-changed', (e) => {
+        expect(e.detail.request._id).to.be.equal(r._id);
+        expect(e.detail.request._rev).to.be.a('string');
+        r._rev = e.detail.request._rev;
+
+        dispatchCustomEvent('request-object-delete', {
+          dbName: 'saved-requests',
+          id: e.detail.request._id,
+          rev: e.detail.request._rev
+        }, panel);
+      });
+      panel.addEventListener('request-object-deleted', (e) => {
+        expect(e.detail.id).to.be.equal(r._id);
+        expect(e.detail.oldRev).to.be.equal(r._rev);
+        done();
+      });
+      panel.addEventListener('error', (e) => {
+        done(e.detail.error);
+      });
+
+      dispatchCustomEvent('request-object-change', {
+        dbName: 'saved-requests',
+        request: r
+      }, panel);
+    });
+
+    test('Should delete the request - promise-event based', function(done) {
+      var r = generateRequestSavedObject();
+      var event = dispatchCustomEvent('request-object-change', {
+        dbName: 'saved-requests',
+        request: r
+      }, panel);
+
+      expect(event.detail.error).to.be.undefined;
+      event.detail.result
+      .then((result) => {
+        expect(result._id).to.be.equal(r._id);
+        expect(result._rev).to.be.a('string');
+        r._rev = result._rev;
+      })
+      .then(() => {
+        let e = dispatchCustomEvent('request-object-delete', {
+          dbName: 'saved-requests',
+          id: r._id,
+          rev: r._rev
+        }, panel);
+        expect(e.detail.error).to.be.undefined;
+        return e.detail.result;
+      })
+      .then((result) => {
+        expect(result.id).to.be.equal(r._id);
+        expect(result.oldRev).to.be.equal(r._rev);
+        expect(result.rev).to.be.a('string');
+        done();
+      })
+      .catch((e) => {
+        done(e);
+      });
+    });
+  });
+  </script>
+</dody>

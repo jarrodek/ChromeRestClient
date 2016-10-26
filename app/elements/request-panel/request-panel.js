@@ -777,15 +777,13 @@
           })
           .then((result) => {
             request.payload = result;
+            resolve(request);
           })
           .catch((e) => {
             this.fire('app-log', {
               'message': ['Magic variables', e],
               'level': 'error'
             });
-          })
-          .finally(() => {
-            resolve(request);
           });
         });
       });
