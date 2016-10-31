@@ -21,6 +21,7 @@ the License.
 <link rel="import" href="../../bower_components/paper-styles/typography.html">
 <link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../delete-revertable-behavior/delete-revertable-behavior.html">
+<link rel="import" href="../arc-history-list-view/history-list-empty.html">
 <link rel="import" href="request-details-drawer.html">
 <!--
 `<history-panel>` ARC's requests history view
@@ -128,7 +129,7 @@ Custom property | Description | Default
           on-history-list-item-selection-changed="_selectionChanged"></history-list-items>
       </div>
     </paper-drawer-panel>
-    <arc-saved-list-empty hidden$="[[!isEmpty]]" search-term="[[searchQuery]]" is-history></arc-saved-list-empty>
+    <history-list-empty hidden$="[[!isEmpty]]"></history-list-empty>
     <paper-toast text="Select request first." id="noSelectionToast"></paper-toast>
     <paper-dialog id="dataClearDialog" on-iron-overlay-closed="onClearDialogResult">
       <h2>Clear saved list</h2>
