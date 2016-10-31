@@ -292,7 +292,10 @@ Polymer({
         if (oldVal === 1) {
           this.updateHeaders();
         }
-        this.$.cm.editor.refresh();
+        this.async(() => {
+          // To be sure that the editor is visible
+          this.$.cm.editor.refresh();
+        }, 1);
         tabName = 'Raw tab';
         break;
       case 1:
@@ -303,7 +306,7 @@ Polymer({
         tabName = 'Predefined tab';
         break;
     }
-    if (this.isAttached) {
+    if (this.isAttached && oldVal !== undefined) {
       this.fire('send-analytics', {
         type: 'event',
         category: 'Headers editor',
