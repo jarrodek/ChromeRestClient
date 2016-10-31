@@ -271,7 +271,6 @@
       if (!(input instanceof Array)) {
         input = this.headersToJSON(input);
       }
-      console.log(input);
       var msg = [];
       var hasContentType = false;
       for (var i = 0, len = input.length; i < len; i++) {

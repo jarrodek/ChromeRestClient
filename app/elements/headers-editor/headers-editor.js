@@ -203,17 +203,13 @@ Polymer({
    * If it is not defined then an warning message will be shown.
    */
   ensureContentTypeHeader: function() {
+    if (!this.contentType) {
+      return;
+    }
     var arr = this.headersToJSON(this.headers);
     var ct = this.getContentType(arr);
     if (!!ct) {
-      this.hideWarningn('content-type-missing');
       return;
-    }
-    if (!this.contentType) {
-      this.displayWarning('content-type-missing');
-      return;
-    } else {
-      this.hideWarningn('content-type-missing');
     }
     arr.push({
       name: 'Content-Type',
@@ -221,24 +217,6 @@ Polymer({
     });
     var headers = this.headersToString(arr);
     this.set('headers', headers);
-  },
-  /**
-   * Display a dialog with error message.
-   *
-   * @param {String} type A predefined type to display.
-   */
-  displayWarning: function(type) {
-    this.fire('app-log', {
-      'message': ['Content type header not present but it should be: ' + type],
-      'level': 'warn'
-    });
-  },
-
-  hideWarningn: function(type) {
-    this.fire('app-log', {
-      'message': ['Content type header is present now: ' + type],
-      'level': 'warn'
-    });
   },
   /**
    * Update headers array from form values to the HTTP string.
@@ -265,20 +243,14 @@ Polymer({
       return;
     }
     if (!this.headers) {
-      if (this.isPayload) {
-        this.displayWarning('content-type-missing');
-      }
       return;
     }
     var ct = this.getContentType(this.headers);
     if (!ct) {
-      if (this.isPayload) {
-        this.displayWarning('content-type-missing');
-      }
+      this.set('contentType', null);
       return;
     }
     this.set('contentType', ct);
-    this.hideWarningn('content-type-missing');
   },
 
   _isPayloadChanged: function() {

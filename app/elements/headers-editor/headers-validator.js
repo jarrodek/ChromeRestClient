@@ -20,13 +20,11 @@ Polymer({
     /**
      * A HTTP headers message part as defined in HTTP spec.
      */
-    headers: String,
-    // Set to true when the request can carry a payload.
-    isPayload: Boolean
+    headers: String
   },
 
   observers: [
-    '_headersChanged(headers)'
+    '_headersChanged(headers, isPayload)'
   ],
 
   _headersChanged: function(headers) {
