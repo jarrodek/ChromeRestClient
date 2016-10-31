@@ -123,7 +123,14 @@
       contentType: String,
       // Status mesage to pass to the request panel.
       statusMessage: String,
-      exporeAssistantActive: Boolean
+      exporeAssistantActive: Boolean,
+      /**
+       * Display menu as there is a toast in the bottom displayed.
+       */
+      withToast: {
+        type: Boolean,
+        reflectToAttribute: true
+      }
     },
 
     observers: [
@@ -928,7 +935,6 @@
       this._setActiveRequest(e.detail.request);
       this._saveHistory();
       this._saveCookies();
-      this._appendStats();
     },
 
     _resendAuthRequest: function() {
@@ -1006,10 +1012,6 @@
         // force close assistant panel ?? or empty info screen?
         return;
       }
-    },
-
-    _appendStats: function() {
-
     }
   });
 })();

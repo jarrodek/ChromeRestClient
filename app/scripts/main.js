@@ -24,6 +24,8 @@
   app.appVersion = arc.app.utils.appVer;
   app.appId = chrome.runtime && chrome.runtime.id ? chrome.runtime.id : 'not-in-chrome-app';
   app.analyticsDisabled = false;
+  // Will be set to true when toas has been opened.
+  app.withToast = false;
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
     app.updateBranding();
@@ -617,5 +619,28 @@
   window.addEventListener('analytics-permitted-change', (e) => {
     var permitted = e.detail.permitted;
     app.set('analyticsDisabled', !permitted);
+  });
+
+  // Toast show UI animation.
+  window.addEventListener('iron-announce', (e) => {
+    var target = e.target;
+    if (!target) {
+      return;
+    }
+    if (target.nodeName === 'PAPER-TOAST') {
+      app.currentToast = target;
+      app.set('withToast', true);
+    }
+  });
+  // Toast close UI animation.
+  window.addEventListener('iron-overlay-closed', (e) => {
+    if (!app.currentToast) {
+      return;
+    }
+    if (app.currentToast !== e.target) {
+      return;
+    }
+    app.set('withToast', false);
+    app.currentToast = undefined;
   });
 })(document, window);

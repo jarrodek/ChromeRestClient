@@ -37,6 +37,11 @@
       @apply(--layout-horizontal);
       @apply(--layout-center);
       padding: 0 16px;
+      transition: bottom 200ms ease-in-out;
+    }
+
+    :host([with-toast]) .status-bar {
+      bottom: 72px;
     }
 
     .status-message {
