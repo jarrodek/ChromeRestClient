@@ -5,6 +5,8 @@
 Polymer({
   is: 'headers-editor',
 
+  behaviors: [ArcBehaviors.HeadersParserBehavior],
+
   properties: {
     /**
      * A HTTP headers message part as defined in HTTP spec.
@@ -65,12 +67,10 @@ Polymer({
     // True when the headers are valid HTTP headers
     valid: {
       type: Boolean,
-      value: true,
-      notify: true,
-      readOnly: true
+      notify: true
     },
     // Error message to diplay when the headers are not valid.
-    errorMessage: String
+    errorMessage: String,
   },
   observers: [
     '_headerValuesChanged(headersList.*)',
@@ -78,7 +78,8 @@ Polymer({
   ],
 
   listeners: {
-    'iron-overlay-closed': '_headersSupportClosed'
+    'iron-overlay-closed': '_headersSupportClosed',
+    'headers-set-selected': '_headersSetSelected'
   },
 
   ready: function() {
@@ -194,13 +195,6 @@ Polymer({
    */
   valueChanged: function() {
     this._detectContentType();
-    var error = arc.app.headers.getError(this.headers);
-    if (error) {
-      this._setValid(false);
-      this.set('errorMessage', error);
-    } else {
-      this._setValid(true);
-    }
   },
   /**
    * Insert a Content-Type header into a headers list if it is not on the list already.
@@ -209,8 +203,8 @@ Polymer({
    * If it is not defined then an warning message will be shown.
    */
   ensureContentTypeHeader: function() {
-    var arr = arc.app.headers.toJSON(this.headers);
-    var ct = arc.app.headers.getContentType(arr);
+    var arr = this.headersToJSON(this.headers);
+    var ct = this.getContentType(arr);
     if (!!ct) {
       this.hideWarningn('content-type-missing');
       return;
@@ -225,7 +219,7 @@ Polymer({
       name: 'Content-Type',
       value: this.contentType
     });
-    var headers = arc.app.headers.toString(arr);
+    var headers = this.headersToString(arr);
     this.set('headers', headers);
   },
   /**
@@ -240,8 +234,11 @@ Polymer({
     });
   },
 
-  hideWarningn: function(/*type*/) {
-
+  hideWarningn: function(type) {
+    this.fire('app-log', {
+      'message': ['Content type header is present now: ' + type],
+      'level': 'warn'
+    });
   },
   /**
    * Update headers array from form values to the HTTP string.
@@ -250,7 +247,7 @@ Polymer({
     if (!this.headersList) {
       return;
     }
-    var headers = arc.app.headers.toString(this.headersList);
+    var headers = this.headersToString(this.headersList);
     this.set('headers', headers);
   },
 
@@ -273,7 +270,7 @@ Polymer({
       }
       return;
     }
-    var ct = arc.app.headers.getContentType(this.headers);
+    var ct = this.getContentType(this.headers);
     if (!ct) {
       if (this.isPayload) {
         this.displayWarning('content-type-missing');
@@ -294,7 +291,7 @@ Polymer({
     if (!this.isPayload || !this.contentType) {
       return;
     }
-    var arr = arc.app.headers.toJSON(this.headers);
+    var arr = this.headersToJSON(this.headers);
     var updated = false;
     var notChanged = false; //True when values are equal, no change needed.
     arr.map(function(item) {
@@ -318,7 +315,7 @@ Polymer({
         value: this.contentType
       });
     }
-    var headers = arc.app.headers.toString(arr);
+    var headers = this.headersToString(arr);
     this.set('headers', headers);
   },
   /** Called when tab selection changed */
@@ -362,14 +359,14 @@ Polymer({
     }
     // it may come from updating a form value or from swithing to different request.
     // See: https://github.com/jarrodek/ChromeRestClient/issues/439
-    var listHeaders = arc.app.headers.toString(this.headersList);
+    var listHeaders = this.headersToString(this.headersList);
     if (listHeaders !== headers) {
       this._setHeadersList();
     }
   },
   // Populate form with current headers.
   _setHeadersList: function() {
-    var arr = arc.app.headers.toJSON(this.headers);
+    var arr = this.headersToJSON(this.headers);
     if (!arr || !arr.length) {
       arr = [{
         name: '',
@@ -568,6 +565,16 @@ accept-language: en-US,en;q=0.8\n`;
     elm.target = input;
     elm.model = model;
     elm.provideSupport();
+  },
+
+  _headersSetSelected: function(e, detail) {
+    var headers = this.headers;
+    if (headers && headers[headers.length - 1] !== '\n') {
+      headers += '\n';
+    }
+    headers += detail.set;
+    this.set('headers', headers);
+    this.tabSelected = 0;
   }
 });
 })();
