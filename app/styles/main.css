@@ -121,3 +121,8 @@ paper-toolbar[xhrtoggle] > paper-toggle-button[feature="xhrtoggle"] {
 .mainPages > * {
   height: 100%;
 }
+
+.offline-toast {
+  background-color: #FDD835;
+  color: #000;
+}
