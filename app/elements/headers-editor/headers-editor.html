@@ -106,6 +106,11 @@
       /*border-top: 1px rgba(0, 0, 0, 0.36) solid;*/
       border: 1px rgba(0, 0, 0, 0.14) solid;
     }
+
+    .add-button {
+      color: var(--primary-color);
+    }
+
     </style>
 
     <div class="content">
@@ -116,10 +121,7 @@
         <!-- <paper-tab>Authorization</paper-tab> -->
       </paper-tabs>
       <iron-pages selected="{{tabSelected}}">
-        <section>
-          <code-mirror mode="http-headers" theme="cm-arc" on-change="valueChanged" value="{{headers}}" id="cm"></code-mirror>
-          <div class="cmError" hidden$="[[valid]]">[[errorMessage]]</div>
-        </section>
+        <code-mirror mode="http-headers" theme="cm-arc" on-change="valueChanged" value="{{headers}}" id="cm"></code-mirror>
         <section class="headers-list">
           <label class="headers-title">HTTP headers</label>
           <div class="headers-form">
@@ -141,17 +143,9 @@
               </div>
             </template>
           </div>
-          <paper-button raised on-tap="appendEmptyHeader">Add</paper-button>
+          <paper-button class="add-button" on-tap="appendEmptyHeader">Add header</paper-button>
         </section>
         <headers-sets-selector is-payload="[[isPayload]]"></headers-sets-selector>
-        <!-- <section>
-          <h4>Use predefined sets below to insert headers into the editor</h4>
-          <h5>Default Chrome headers</h5>
-          <code>
-            <pre>[[headersDefaults]]</pre>
-          </code>
-          <paper-button raised on-tap="_insertDefaultSet">Use this set</paper-button>
-        </section> -->
       </iron-pages>
     </div>
 

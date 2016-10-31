@@ -42,10 +42,6 @@ Polymer({
       type: Array,
       value: []
     },
-    headersDefaults: {
-      type: String,
-      computed: '_computeHeadersDefaults(isPayload)'
-    },
     /**
      * It is currently focused input field for header name.
      * This field will receive autocomplete support.
@@ -68,9 +64,7 @@ Polymer({
     valid: {
       type: Boolean,
       notify: true
-    },
-    // Error message to diplay when the headers are not valid.
-    errorMessage: String,
+    }
   },
   observers: [
     '_headerValuesChanged(headersList.*)',
@@ -381,29 +375,6 @@ Polymer({
     } catch (e) {
 
     }
-  },
-  /* Compute default headers string. */
-  _computeHeadersDefaults: function(isPayload) {
-    var txt = `accept: application/json
-accept-encoding: gzip, deflate
-accept-language: en-US,en;q=0.8\n`;
-    if (isPayload) {
-      txt += 'content-type: application/json\n';
-    }
-    txt += `user-agent: ${navigator.userAgent}`;
-    return txt;
-  },
-  // Insert predefined default set into the editor
-  _insertDefaultSet: function() {
-    var headers = this.headers;
-    if (headers && headers[headers.length - 1] !== '\n') {
-      headers += '\n';
-    }
-    headers += this.headersDefaults;
-    this.set('headers', headers);
-    this.tabSelected = 0;
-    // this.$.cm.editor.setValue(headers);
-    // this.headers = headers;
   },
 
   _headerNameFocus: function(e) {
