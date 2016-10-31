@@ -62,6 +62,10 @@
           type: Boolean,
           readOnly: true,
           notify: true
+        },
+        isEmpty: {
+          type: Boolean,
+          value: false
         }
       },
 
@@ -72,7 +76,8 @@
 
       observers: [
         '_observeSelection(hasSelection)',
-        '_searchQueryChanged(searchQuery)'
+        '_searchQueryChanged(searchQuery)',
+        '_queryComplete(querying, historyData.length)'
       ],
 
       _observeSelection: function(hasSelection) {
@@ -411,6 +416,14 @@
         var clazz = 'table-options';
         clazz += (optionsState === 0 ? ' inactive' : '');
         return clazz;
+      },
+
+      _queryComplete: function(querying, length) {
+        var state = false;
+        if (!querying && !length) {
+          state = true;
+        }
+        this.set('isEmpty', state);
       }
     });
   })();
