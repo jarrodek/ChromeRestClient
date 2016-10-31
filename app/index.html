@@ -32,7 +32,7 @@
                     <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
                 </paper-toolbar> -->
         <!-- App Menu -->
-        <arc-menu-controller use-pouch-db="[[usePouchDb]]" id="appMenu" route="[[route]]" base-url="[[baseUrl]]"></arc-menu-controller>
+        <arc-menu-controller use-pouch-db="[[usePouchDb]]" id="appMenu" with-toast="[[withToast]]" route="[[route]]" base-url="[[baseUrl]]"></arc-menu-controller>
       </paper-scroll-header-panel>
       <!-- Main Area -->
       <paper-scroll-header-panel main id="headerPanelMain">
@@ -85,7 +85,7 @@
             <section data-route="request" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent">
               <template is="dom-if" if="[[usePouchDb]]" restamp="true">
                 <!-- new request panel using pouch DB. -->
-                <request-panel request-loading="{{requestLoading}}" has-response="{{hasResponse}}" opened="{{requestOpened}}" request="{{request}}" response="{{response}}" active-request="{{activeRequest}}" route-params="[[params]]"></request-panel>
+                <request-panel request-loading="{{requestLoading}}" has-response="{{hasResponse}}" opened="{{requestOpened}}" request="{{request}}" response="{{response}}" active-request="{{activeRequest}}" route-params="[[params]]" with-toast="[[withToast]]"></request-panel>
               </template>
               <template is="dom-if" if="[[!usePouchDb]]" restamp="true">
                 <arc-request-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" request-loading="{{requestLoading}}" has-response="{{hasResponse}}" opened="{{requestOpened}}" request="{{request}}" response="{{response}}" active-request="{{activeRequest}}" route-params="[[params]]">
@@ -359,7 +359,6 @@
   <script src="scripts/libs/app.importer.js"></script>
   <script src="scripts/libs/app.analytics.js"></script>
   <script src="scripts/libs/app.notifications.js"></script>
-  <script src="scripts/libs/app.url.parser.js"></script>
   <script src="scripts/libs/app.payload.parser.js"></script>
   <script src="scripts/libs/app.clipboard.js"></script>
   <!-- build:js scripts/code-mirror-custom.js -->

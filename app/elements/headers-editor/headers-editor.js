@@ -5,6 +5,8 @@
 Polymer({
   is: 'headers-editor',
 
+  behaviors: [ArcBehaviors.HeadersParserBehavior],
+
   properties: {
     /**
      * A HTTP headers message part as defined in HTTP spec.
@@ -40,10 +42,6 @@ Polymer({
       type: Array,
       value: []
     },
-    headersDefaults: {
-      type: String,
-      computed: '_computeHeadersDefaults(isPayload)'
-    },
     /**
      * It is currently focused input field for header name.
      * This field will receive autocomplete support.
@@ -65,12 +63,8 @@ Polymer({
     // True when the headers are valid HTTP headers
     valid: {
       type: Boolean,
-      value: true,
-      notify: true,
-      readOnly: true
-    },
-    // Error message to diplay when the headers are not valid.
-    errorMessage: String
+      notify: true
+    }
   },
   observers: [
     '_headerValuesChanged(headersList.*)',
@@ -78,7 +72,8 @@ Polymer({
   ],
 
   listeners: {
-    'iron-overlay-closed': '_headersSupportClosed'
+    'iron-overlay-closed': '_headersSupportClosed',
+    'headers-set-selected': '_headersSetSelected'
   },
 
   ready: function() {
@@ -194,13 +189,6 @@ Polymer({
    */
   valueChanged: function() {
     this._detectContentType();
-    var error = arc.app.headers.getError(this.headers);
-    if (error) {
-      this._setValid(false);
-      this.set('errorMessage', error);
-    } else {
-      this._setValid(true);
-    }
   },
   /**
    * Insert a Content-Type header into a headers list if it is not on the list already.
@@ -209,39 +197,20 @@ Polymer({
    * If it is not defined then an warning message will be shown.
    */
   ensureContentTypeHeader: function() {
-    var arr = arc.app.headers.toJSON(this.headers);
-    var ct = arc.app.headers.getContentType(arr);
-    if (!!ct) {
-      this.hideWarningn('content-type-missing');
+    if (!this.contentType) {
       return;
     }
-    if (!this.contentType) {
-      this.displayWarning('content-type-missing');
+    var arr = this.headersToJSON(this.headers);
+    var ct = this.getContentType(arr);
+    if (!!ct) {
       return;
-    } else {
-      this.hideWarningn('content-type-missing');
     }
     arr.push({
       name: 'Content-Type',
       value: this.contentType
     });
-    var headers = arc.app.headers.toString(arr);
+    var headers = this.headersToString(arr);
     this.set('headers', headers);
-  },
-  /**
-   * Display a dialog with error message.
-   *
-   * @param {String} type A predefined type to display.
-   */
-  displayWarning: function(type) {
-    this.fire('app-log', {
-      'message': ['Content type header not present but it should be: ' + type],
-      'level': 'warn'
-    });
-  },
-
-  hideWarningn: function(/*type*/) {
-
   },
   /**
    * Update headers array from form values to the HTTP string.
@@ -250,7 +219,7 @@ Polymer({
     if (!this.headersList) {
       return;
     }
-    var headers = arc.app.headers.toString(this.headersList);
+    var headers = this.headersToString(this.headersList);
     this.set('headers', headers);
   },
 
@@ -268,20 +237,14 @@ Polymer({
       return;
     }
     if (!this.headers) {
-      if (this.isPayload) {
-        this.displayWarning('content-type-missing');
-      }
       return;
     }
-    var ct = arc.app.headers.getContentType(this.headers);
+    var ct = this.getContentType(this.headers);
     if (!ct) {
-      if (this.isPayload) {
-        this.displayWarning('content-type-missing');
-      }
+      this.set('contentType', null);
       return;
     }
     this.set('contentType', ct);
-    this.hideWarningn('content-type-missing');
   },
 
   _isPayloadChanged: function() {
@@ -294,7 +257,7 @@ Polymer({
     if (!this.isPayload || !this.contentType) {
       return;
     }
-    var arr = arc.app.headers.toJSON(this.headers);
+    var arr = this.headersToJSON(this.headers);
     var updated = false;
     var notChanged = false; //True when values are equal, no change needed.
     arr.map(function(item) {
@@ -318,7 +281,7 @@ Polymer({
         value: this.contentType
       });
     }
-    var headers = arc.app.headers.toString(arr);
+    var headers = this.headersToString(arr);
     this.set('headers', headers);
   },
   /** Called when tab selection changed */
@@ -362,14 +325,14 @@ Polymer({
     }
     // it may come from updating a form value or from swithing to different request.
     // See: https://github.com/jarrodek/ChromeRestClient/issues/439
-    var listHeaders = arc.app.headers.toString(this.headersList);
+    var listHeaders = this.headersToString(this.headersList);
     if (listHeaders !== headers) {
       this._setHeadersList();
     }
   },
   // Populate form with current headers.
   _setHeadersList: function() {
-    var arr = arc.app.headers.toJSON(this.headers);
+    var arr = this.headersToJSON(this.headers);
     if (!arr || !arr.length) {
       arr = [{
         name: '',
@@ -412,29 +375,6 @@ Polymer({
     } catch (e) {
 
     }
-  },
-  /* Compute default headers string. */
-  _computeHeadersDefaults: function(isPayload) {
-    var txt = `accept: application/json
-accept-encoding: gzip, deflate
-accept-language: en-US,en;q=0.8\n`;
-    if (isPayload) {
-      txt += 'content-type: application/json\n';
-    }
-    txt += `user-agent: ${navigator.userAgent}`;
-    return txt;
-  },
-  // Insert predefined default set into the editor
-  _insertDefaultSet: function() {
-    var headers = this.headers;
-    if (headers && headers[headers.length - 1] !== '\n') {
-      headers += '\n';
-    }
-    headers += this.headersDefaults;
-    this.set('headers', headers);
-    this.tabSelected = 0;
-    // this.$.cm.editor.setValue(headers);
-    // this.headers = headers;
   },
 
   _headerNameFocus: function(e) {
@@ -568,6 +508,16 @@ accept-language: en-US,en;q=0.8\n`;
     elm.target = input;
     elm.model = model;
     elm.provideSupport();
+  },
+
+  _headersSetSelected: function(e, detail) {
+    var headers = this.headers;
+    if (headers && headers[headers.length - 1] !== '\n') {
+      headers += '\n';
+    }
+    headers += detail.set;
+    this.set('headers', headers);
+    this.tabSelected = 0;
   }
 });
 })();

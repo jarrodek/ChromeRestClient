@@ -121,7 +121,8 @@
       let encodedQ = encodeURIComponent(q.toLowerCase());
       var db = this._getDb();
       this._setQuerying(true);
-      db.allDocs().then((r) => {
+      db.allDocs()
+      .then((r) => {
         let matches = r.rows.filter((i) => i.id.toLowerCase().indexOf(encodedQ) !== -1);
         if (!matches.length) {
           this._setQuerying(false);
@@ -140,7 +141,18 @@
           ids.push(item._id);
           this.push('savedData', item);
         });
-        return this._fullSearch(q, ids);
+        return this._fullSearch(q, ids)
+        .then(() => {
+
+          this.fire('results-page-loaded');
+          this.fire('send-analytics', {
+            type: 'event',
+            category: 'Search',
+            action: 'Query history',
+            label: 'Saved panel'
+          });
+
+        });
       })
       .catch((e) => {
         this._setQuerying(false);
@@ -178,12 +190,6 @@
         r.rows.forEach((item) => {
           this.push('savedData', item.doc);
         });
-        this.fire('send-analytics', {
-          type: 'event',
-          category: 'Search',
-          action: 'Query history',
-          label: 'Saved panel'
-        });
       })
       .catch((e) => {
         this._setQuerying(false);
@@ -192,6 +198,9 @@
           level: 'error'
         });
         console.error('Query saved', e);
+        this.fire('results-page-error', {
+          error: e
+        });
       });
     },
 
@@ -220,6 +229,7 @@
           });
         }
         this._setQuerying(false);
+        this.fire('results-page-loaded');
       })
       .catch((e) => {
         this._setQuerying(false);
@@ -228,6 +238,9 @@
           level: 'error'
         });
         console.error('Query saved', e);
+        this.fire('results-page-error', {
+          error: e
+        });
       });
     },
 

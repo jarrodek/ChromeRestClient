@@ -24,6 +24,8 @@
   app.appVersion = arc.app.utils.appVer;
   app.appId = chrome.runtime && chrome.runtime.id ? chrome.runtime.id : 'not-in-chrome-app';
   app.analyticsDisabled = false;
+  // Will be set to true when toas has been opened.
+  app.withToast = false;
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
     app.updateBranding();
@@ -183,10 +185,18 @@
   document.body.addEventListener('action-link-change', (e) => {
     var url = e.detail.url;
     if (app.request.url && url.indexOf('/') === 0) {
-      /* global URLParser */
-      let p = new URLParser(app.request.url);
-      url = p.protocol + '://' + p.authority + url;
-      app.set('request.url', url);
+      var parser;
+      try {
+        parser = new URL(app.request.url);
+        url = parser.origin + url;
+        app.set('request.url', url);
+      } catch (e) {
+        console.log('URL parse error', e);
+        this.fire('app-log', {
+          message: e
+        });
+        app.set('request.url', url);
+      }
     } else {
       app.set('request.url', url);
     }
@@ -609,5 +619,28 @@
   window.addEventListener('analytics-permitted-change', (e) => {
     var permitted = e.detail.permitted;
     app.set('analyticsDisabled', !permitted);
+  });
+
+  // Toast show UI animation.
+  window.addEventListener('iron-announce', (e) => {
+    var target = e.target;
+    if (!target) {
+      return;
+    }
+    if (target.nodeName === 'PAPER-TOAST') {
+      app.currentToast = target;
+      app.set('withToast', true);
+    }
+  });
+  // Toast close UI animation.
+  window.addEventListener('iron-overlay-closed', (e) => {
+    if (!app.currentToast) {
+      return;
+    }
+    if (app.currentToast !== e.target) {
+      return;
+    }
+    app.set('withToast', false);
+    app.currentToast = undefined;
   });
 })(document, window);

@@ -128,6 +128,15 @@
         return db.put(request);
       })
       .then((insertResult) => {
+
+        if (!insertResult.ok) {
+          var e = new Error('Insert result is not OK.');
+          this.fire('error', {
+            error: e
+          });
+          return Promise.reject(e);
+        }
+
         var oldRev = request._rev;
         request._rev = insertResult.rev;
         this.fire('request-object-changed', {
@@ -153,18 +162,28 @@
       }
       var id = detail.id;
       var rev = detail.rev;
-      if (!id || !!rev) {
+      if (!id || !rev) {
         e.detail.error = true;
         e.detail.message = 'You must set request id and rev';
         return;
       }
       var db = this._getDb(detail.dbName);
       e.detail.result = db.remove(id, rev)
-      .then(() => {
-        this.fire('request-object-deleted', {
-          id: id,
+      .then((result) => {
+        if (!result.ok) {
+          var e = new Error('Delete result is not OK.');
+          this.fire('error', {
+            error: e
+          });
+          return Promise.reject(e);
+        }
+        let returnData = {
+          id: result.id,
+          rev: result.rev,
           oldRev: rev
-        });
+        };
+        this.fire('request-object-deleted', returnData);
+        return returnData;
       })
       .catch((e) => this._handleException(e));
     },
@@ -185,6 +204,9 @@
         type: 'exception',
         description: message,
         fatal: true
+      });
+      this.fire('error', {
+        error: e
       });
       throw e;
     },

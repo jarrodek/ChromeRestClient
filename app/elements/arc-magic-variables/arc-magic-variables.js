@@ -75,14 +75,15 @@ Polymer({
    * When finish rules will be available in the `rules` array.
    */
   _getRules: function() {
-    if (this.rules) {
-      return Promise.resolve(this.rules);
-    }
-    return this.$.variableModel.query()
-    .then((rules) => {
-      this._setRules(rules);
-      return rules;
-    });
+    return Promise.resolve(this.rules);
+    // if (this.rules) {
+    //   return Promise.resolve(this.rules);
+    // }
+    // return this.$.variableModel.query()
+    // .then((rules) => {
+    //   this._setRules(rules);
+    //   return rules;
+    // });
   },
   /**
    * Before parsing, setup all finally defined roules.

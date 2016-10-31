@@ -22,7 +22,9 @@
         type: Boolean
       },
 
-      selectedProject: String
+      selectedProject: String,
+      // Just to pass to the view.
+      withToast: Boolean
     },
 
     observers: [

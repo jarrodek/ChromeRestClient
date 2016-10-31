@@ -45,7 +45,8 @@
     "chart.js": "^2.3.0"
   },
   "devDependencies": {
-    "web-component-tester": "*"
+    "web-component-tester": "*",
+    "iron-test-helpers": "PolymerElements/iron-test-helpers#^1.2.5"
   },
   "ignore": [],
   "main": "app/index.html",

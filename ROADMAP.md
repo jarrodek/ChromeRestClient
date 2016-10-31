@@ -45,5 +45,28 @@ Basically, it is a system of creating and executing macros in the context of the
 ## RAML discovery from the history
 The app is collecting history of the user interaction with different endpoint. Based on this information the app can **locally** scan for project definition (RAML definition) and reverse engineer the API structure from it. Then the app can suggest creation of the project and document the API. Next time when the user will hit the endpoint the app suggest the parameters available for the endpoint and types of the expected response.
 
-## Detailed roadmap
-The file [Advanced Rest Client Roadmap](https://docs.google.com/spreadsheets/d/1FSh5OiT13xmJo7cohR_sCOpJPqLYwXyQQZfHFYFZgTk/edit#gid=0) contains detailed roadmap for the app and targeted time of the release (quarter). This file may and probably will change depending on the requirements and progress on design and development. It will however give you an overview of the implementation timings.  
+## Request panel redesign
+Having support for RAML specification the app can do much more in terms of supporting the UI. Request panel will have new UI for projects with documentation presented inline with the parameters forms. New autofill will use types definition to pre-fill parameters.
+See [the prototype](https://jarrodek.github.io/arc-prototype/arc-prototype/app/index.html) for more details. Select left menu and then RAML request.
+
+## External integration
+Integration with external tools and platforms including, but not limited to:
+- Android
+- Chromecast
+- Web snippets to run the ARC from a web page button
+- Chrome / FF extension to that supports popular API provider web pages to add a "Run with ARC" button
+- Chrome DevTools integration
+
+## Native platforms
+Because of Chrome Apps deprecation the app will be moved to native platforms and Chrome extension. Chrome extensions has different API and use of app will be limited. Read more in this blog post:
+https://restforchrome.blogspot.com/2016/09/beyond-chrome-apps-arc-as-native-app.html
+
+## Request debugger
+For native clients (with socket support) the app will introduce the request debugger. A tool similar to JavaScript debugger in Chrome Dev Tools where you can set a breakpoint and pause the execution of code but for the request.
+In this debugger user will be able to to set breakpoint at set points of the request, alter parameters and continue the request. It will give advanced tool to manipulate the request during the execution and allow to use this mechanism in other app's planned features like request series described in [this ticket](https://github.com/jarrodek/ChromeRestClient/issues/499).
+
+## Summary
+This is the plan for coming months for planned features. The plan may change depending on product development progress and changed in the environment.
+This project is and will be open to any suggestions. Please, file an issue report and ask for a feature to be implemented.
+
+ARC also is looking for a team members ready to develop new features and make the API tooling better. Contact me via issue tracker or any other Channel.
