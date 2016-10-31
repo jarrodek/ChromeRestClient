@@ -64,6 +64,12 @@ Polymer({
     valid: {
       type: Boolean,
       notify: true
+    },
+
+    displayStatus: {
+      type: Boolean,
+      value: true,
+      computed: '_computeShowStatus(tabSelected)'
     }
   },
   observers: [
@@ -521,6 +527,13 @@ Polymer({
     headers += detail.set;
     this.set('headers', headers);
     this.tabSelected = 0;
+  },
+
+  _computeShowStatus: function(tabSelected) {
+    if (tabSelected === 2 || tabSelected === 3) {
+      return false;
+    }
+    return true;
   }
 });
 })();

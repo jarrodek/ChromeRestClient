@@ -26,6 +26,8 @@
   app.analyticsDisabled = false;
   // Will be set to true when toas has been opened.
   app.withToast = false;
+  // Selected environment for magic variables.
+  app.variablesEnvironment = 'default';
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
     app.updateBranding();
@@ -642,5 +644,8 @@
     }
     app.set('withToast', false);
     app.currentToast = undefined;
+  });
+  window.addEventListener('variables-environment-changed', (e) => {
+    app.variablesEnvironment = e.detail.env;
   });
 })(document, window);

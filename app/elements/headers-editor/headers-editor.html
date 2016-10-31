@@ -14,6 +14,7 @@
 <link rel="import" href="headers-validator.html">
 <link rel="import" href="headers-editor-status.html">
 <link rel="import" href="../headers-sets-selector/headers-sets-selector.html">
+<link rel="import" href="../variables-editor/variables-editor.html">
 <!-- Put the code mirror additional libraries into separate repository -->
 <script src="../../scripts/code-mirror/mode/headers/headers.js"></script>
 <script src="../../scripts/code-mirror/addon/hint/http-headers.js"></script>
@@ -118,7 +119,7 @@
         <paper-tab>Raw headers [[usePouchDb]]</paper-tab>
         <paper-tab>Headers form</paper-tab>
         <paper-tab>Headers sets</paper-tab>
-        <!-- <paper-tab>Authorization</paper-tab> -->
+        <paper-tab>Variables</paper-tab>
       </paper-tabs>
       <iron-pages selected="{{tabSelected}}">
         <code-mirror mode="http-headers" theme="cm-arc" on-change="valueChanged" value="{{headers}}" id="cm"></code-mirror>
@@ -146,10 +147,11 @@
           <paper-button class="add-button" on-tap="appendEmptyHeader">Add header</paper-button>
         </section>
         <headers-sets-selector is-payload="[[isPayload]]"></headers-sets-selector>
+        <variables-editor></variables-editor>
       </iron-pages>
     </div>
 
-    <headers-editor-status headers-size="[[headersSize]]" valid$="[[valid]]" error-message="[[headersErrorMessage]]"></headers-editor-status>
+    <headers-editor-status hidden$="[[!displayStatus]]" headers-size="[[headersSize]]" valid$="[[valid]]" error-message="[[headersErrorMessage]]"></headers-editor-status>
 
     <headers-validator headers="[[headers]]" valid="{{valid}}" is-payload="[[isPayload]]" error-message="{{headersErrorMessage}}"></headers-validator>
     <bytes-counter value="[[headers]]" bytes="{{headersSize}}"></bytes-counter>

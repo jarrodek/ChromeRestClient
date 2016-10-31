@@ -130,6 +130,13 @@
       withToast: {
         type: Boolean,
         reflectToAttribute: true
+      },
+      // Selected environment for variables.
+      currentEnvironment: String,
+      hasSelectedEnvironment: {
+        type: Boolean,
+        value: false,
+        computed: '_computeEnvSelected(currentEnvironment)'
       }
     },
 
@@ -160,12 +167,14 @@
       // See <legacyproject-related-requests>
       this.listen(document, 'project-related-requests-read', '_onLegacyProjectRelatedRead');
       this.listen(document, 'request-object-changed', '_onRequestChangedDb');
+      this.listen(window, 'variables-environment-changed', '_onVarsEnvChanged');
     },
 
     detached: function() {
       this.$.latest.auto = false;
       this.unlisten(document, 'project-related-requests-read', '_onLegacyProjectRelatedRead');
       this.unlisten(document, 'request-object-changed', '_onRequestChangedDb');
+      this.unlisten(window, 'variables-environment-changed', '_onVarsEnvChanged');
     },
 
     onShow: function() {
@@ -770,6 +779,7 @@
             return;
           }
           this.$.magicVariables.clear();
+          this.$.magicVariables.environment = this.currentEnvironment || 'default';
           this.$.magicVariables.value = request.url;
           this.$.magicVariables.parse()
           .then((result) => {
@@ -1012,6 +1022,14 @@
         // force close assistant panel ?? or empty info screen?
         return;
       }
+    },
+
+    _onVarsEnvChanged: function(e) {
+      this.set('currentEnvironment', e.detail.env);
+    },
+
+    _computeEnvSelected: function(currentEnvironment) {
+      return !!currentEnvironment;
     }
   });
 })();

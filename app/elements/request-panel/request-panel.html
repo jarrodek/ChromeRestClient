@@ -101,6 +101,10 @@
       width: 320px;
     }
 
+    .env-info {
+      color: rgba(0, 0, 0, 0.54);
+    }
+
     </style>
     <div class="content" assistant$="[[exporeAssistantActive]]">
       <div class="request-area">
@@ -137,6 +141,7 @@
 
     <div class="status-bar">
       <div class="status-message">[[statusMessage]]</div>
+      <div class="env-info" hidden$="[[!hasSelectedEnvironment]]">Selected environment: [[currentEnvironment]]</div>
       <div class="stats-assistant" hidden$="[[!analyserHasData]]">
         <paper-button toggles active="{{exporeAssistantActive}}">
           <iron-icon class="explore-icon" icon="arc:insert-chart"></iron-icon>

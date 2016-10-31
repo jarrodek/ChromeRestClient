@@ -100,6 +100,11 @@
       var db = new PouchDB('history-requests');
       return db.get(k)
       .then((r) => {
+        //cookie: test=${authToken}
+        r.headers = req.headers;
+        r.method = req.method;
+        r.payload = req.payload;
+        r.url = req.url;
         r.updated = rTime;
         return db.put(r);
       }).catch((e) => {
