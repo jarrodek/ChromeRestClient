@@ -123,7 +123,21 @@
       contentType: String,
       // Status mesage to pass to the request panel.
       statusMessage: String,
-      exporeAssistantActive: Boolean
+      exporeAssistantActive: Boolean,
+      /**
+       * Display menu as there is a toast in the bottom displayed.
+       */
+      withToast: {
+        type: Boolean,
+        reflectToAttribute: true
+      },
+      // Selected environment for variables.
+      currentEnvironment: String,
+      hasSelectedEnvironment: {
+        type: Boolean,
+        value: false,
+        computed: '_computeEnvSelected(currentEnvironment)'
+      }
     },
 
     observers: [
@@ -153,12 +167,14 @@
       // See <legacyproject-related-requests>
       this.listen(document, 'project-related-requests-read', '_onLegacyProjectRelatedRead');
       this.listen(document, 'request-object-changed', '_onRequestChangedDb');
+      this.listen(window, 'variables-environment-changed', '_onVarsEnvChanged');
     },
 
     detached: function() {
       this.$.latest.auto = false;
       this.unlisten(document, 'project-related-requests-read', '_onLegacyProjectRelatedRead');
       this.unlisten(document, 'request-object-changed', '_onRequestChangedDb');
+      this.unlisten(window, 'variables-environment-changed', '_onVarsEnvChanged');
     },
 
     onShow: function() {
@@ -763,6 +779,7 @@
             return;
           }
           this.$.magicVariables.clear();
+          this.$.magicVariables.environment = this.currentEnvironment || 'default';
           this.$.magicVariables.value = request.url;
           this.$.magicVariables.parse()
           .then((result) => {
@@ -777,14 +794,13 @@
           })
           .then((result) => {
             request.payload = result;
+            resolve(request);
           })
           .catch((e) => {
             this.fire('app-log', {
               'message': ['Magic variables', e],
               'level': 'error'
             });
-          })
-          .finally(() => {
             resolve(request);
           });
         });
@@ -803,7 +819,9 @@
       if (!this.$.cookieExchange.connected) {
         return Promise.resolve(request);
       }
-      this.$.cookieExchange.applyCookies(request);
+      try {
+        this.$.cookieExchange.applyCookies(request);
+      } catch (e) {}
       return Promise.resolve(request);
     },
 
@@ -930,7 +948,6 @@
       this._setActiveRequest(e.detail.request);
       this._saveHistory();
       this._saveCookies();
-      this._appendStats();
     },
 
     _resendAuthRequest: function() {
@@ -1010,8 +1027,12 @@
       }
     },
 
-    _appendStats: function() {
+    _onVarsEnvChanged: function(e) {
+      this.set('currentEnvironment', e.detail.env);
+    },
 
+    _computeEnvSelected: function(currentEnvironment) {
+      return !!currentEnvironment;
     }
   });
 })();

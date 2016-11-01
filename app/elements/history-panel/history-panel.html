@@ -20,8 +20,8 @@ the License.
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/paper-styles/typography.html">
 <link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
-<link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../delete-revertable-behavior/delete-revertable-behavior.html">
+<link rel="import" href="../arc-history-list-view/history-list-empty.html">
 <link rel="import" href="request-details-drawer.html">
 <!--
 `<history-panel>` ARC's requests history view
@@ -53,6 +53,8 @@ Custom property | Description | Default
     <style>
      :host {
       display: block;
+      position: relative;
+      height: 100%;
     }
 
     h1 {
@@ -99,7 +101,7 @@ Custom property | Description | Default
       margin-left: 12px;
     }
     </style>
-    <paper-drawer-panel drawer-width="360px" id="details" force-narrow="[[narrowDrawer]]" right-drawer="" disable-edge-swipe="" disable-swipe="">
+    <paper-drawer-panel hidden$="[[isEmpty]]" drawer-width="360px" id="details" force-narrow="[[narrowDrawer]]" right-drawer="" disable-edge-swipe="" disable-swipe="">
       <request-details-drawer is-history="" request="{{detailedRequest}}" on-request-details-drawer-open="_onOpenRequested" on-close="closeDetailsPanel" narrow="[[narrowDrawer]]"></request-details-drawer>
       <div main>
         <div class="status-bar">
@@ -127,8 +129,8 @@ Custom property | Description | Default
           on-history-list-item-selection-changed="_selectionChanged"></history-list-items>
       </div>
     </paper-drawer-panel>
+    <history-list-empty hidden$="[[!isEmpty]]"></history-list-empty>
     <paper-toast text="Select request first." id="noSelectionToast"></paper-toast>
-    <paper-progress indeterminate="" hidden$="[[!querying]]"></paper-progress>
     <paper-dialog id="dataClearDialog" on-iron-overlay-closed="onClearDialogResult">
       <h2>Clear saved list</h2>
       <p>This will remove all data from the Google Drive store.</p>

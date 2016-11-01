@@ -1,1 +1,0 @@
-arc.app.db.init();

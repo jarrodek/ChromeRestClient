@@ -45,7 +45,8 @@
     "chart.js": "^2.3.0"
   },
   "devDependencies": {
-    "web-component-tester": "*"
+    "web-component-tester": "*",
+    "iron-test-helpers": "PolymerElements/iron-test-helpers#^1.2.5"
   },
   "ignore": [],
   "main": "app/index.html",
@@ -53,5 +54,5 @@
     "lodash": "^4.6.2",
     "chrome-platform-analytics": "ca1.6.0d"
   },
-  "version": "8.0.49"
+  "version": "8.1.49"
 }

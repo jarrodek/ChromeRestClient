@@ -37,6 +37,16 @@
       @apply(--layout-horizontal);
       @apply(--layout-center);
       padding: 0 16px;
+      transition: bottom 200ms ease-in-out;
+    }
+
+    :host([with-toast]) .status-bar {
+      bottom: 72px;
+    }
+
+    :host([with-toast]) #dataExplorer[opened] {
+      bottom: 104px;
+      height: initial;
     }
 
     .status-message {
@@ -91,6 +101,10 @@
       width: 320px;
     }
 
+    .env-info {
+      color: rgba(0, 0, 0, 0.54);
+    }
+
     </style>
     <div class="content" assistant$="[[exporeAssistantActive]]">
       <div class="request-area">
@@ -127,6 +141,7 @@
 
     <div class="status-bar">
       <div class="status-message">[[statusMessage]]</div>
+      <div class="env-info" hidden$="[[!hasSelectedEnvironment]]">Selected environment: [[currentEnvironment]]</div>
       <div class="stats-assistant" hidden$="[[!analyserHasData]]">
         <paper-button toggles active="{{exporeAssistantActive}}">
           <iron-icon class="explore-icon" icon="arc:insert-chart"></iron-icon>

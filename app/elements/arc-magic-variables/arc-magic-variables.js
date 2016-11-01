@@ -53,7 +53,9 @@ Polymer({
      */
     scope: {
       type: Number
-    }
+    },
+
+    environment: String
   },
   /**
    * This function should be called when groups should be cleared.
@@ -78,8 +80,16 @@ Polymer({
     if (this.rules) {
       return Promise.resolve(this.rules);
     }
-    return this.$.variableModel.query()
+    var env = this.environment || 'default';
+    var db = new PouchDB('variables');
+    return db.allDocs({
+      // jscs:disable
+      include_docs: true
+      // jscs:enable
+    })
+    .then((r) => r.rows.filter((i) => i.doc.environment === env && i.doc.enabled === true))
     .then((rules) => {
+      rules = rules.map((i) => i.doc);
       this._setRules(rules);
       return rules;
     });
@@ -135,6 +145,7 @@ Polymer({
     })
     .catch((e) => {
       this.fire('error', e);
+      return this.value;
     });
   },
   /**
@@ -177,15 +188,7 @@ Polymer({
     if (!this.rules || !this.rules.length) {
       return str;
     }
-    var globalRules = this.rules.filter((g) => g.type === 'global');
-    globalRules.forEach((rule) => {
-      str = this._apply(str, rule.variable, rule.value);
-    });
-    if (!this.scope) {
-      return str;
-    }
-    var scopedRules = this.rules.filter((g) => g.type === 'scoped' && g.project === this.scope);
-    scopedRules.forEach((rule) => {
+    this.rules.forEach((rule) => {
       str = this._apply(str, rule.variable, rule.value);
     });
     return str;

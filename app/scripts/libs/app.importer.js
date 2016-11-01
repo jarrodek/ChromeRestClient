@@ -157,6 +157,7 @@ arc.app.importer.saveFileDataPouchDb = function(data) {
     case 'ARC#SavedHistoryDataExport':
     case 'ARC#SavedDataExport':
     case 'ARC#HistoryDataExport':
+
       return arc.app.importer._saveFileDataPouchDbNew(data);
     case 'ARC#requestsDataExport':
       return arc.app.importer._saveFileDataPouchDbOld(data);
@@ -499,7 +500,7 @@ arc.app.importer._saveFileDataPouchDbNew = function(data) {
     let db = arc.app.importer._getProjectsDb();
     p = db.bulkDocs(projectsData.map((i) => i.save))
     .then((result) => {
-      console.info('Inserted projects', result);
+      // console.info('Inserted projects', result);
       result.forEach((item, index) => {
         let data = projectsData[index];
         data.save._id = item.id;
@@ -515,7 +516,7 @@ arc.app.importer._saveFileDataPouchDbNew = function(data) {
 
   return p.then((projects) => {
     if (!data.requests || !data.requests.length) {
-      console.info('Import does not have saved data. Passing.');
+      // console.info('Import does not have saved data. Passing.');
       return Promise.resolve();
     }
     let requestsSize = data.requests.length;
@@ -542,7 +543,7 @@ arc.app.importer._saveFileDataPouchDbNew = function(data) {
     let db = arc.app.importer._getSavedDb();
     return db.bulkDocs(data.requests)
     .then((r) => {
-      console.info('Inserted saved', r);
+      // console.info('Inserted saved', r);
       // resolve conflicts
       let conflicted = [];
       r.forEach((item, index) => {
@@ -569,12 +570,11 @@ arc.app.importer._saveFileDataPouchDbNew = function(data) {
       return Promise.resolve();
     }
 
-    data.requests.forEach((i) => {
-      delete i._referenceId;
-      delete i._har;
+    data.history.forEach((i) => {
+      delete i.kind;
       let today;
       try {
-        today = arc.app.importer._getDayToday(i.updated);
+        today = arc.app.importer._getDayToday(i.updated || i.created);
       } catch (e) {
         today = arc.app.importer._getDayToday(Date.now());
       }
@@ -584,7 +584,7 @@ arc.app.importer._saveFileDataPouchDbNew = function(data) {
     let db = arc.app.importer._getHistoryDb();
     return db.bulkDocs(data.history)
     .then((r) => {
-      console.info('Inserted history', r);
+      // console.info('Inserted history', r);
       // resolve conflicts
       let conflicted = [];
       r.forEach((item, index) => {
