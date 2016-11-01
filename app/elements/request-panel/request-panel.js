@@ -137,6 +137,11 @@
         type: Boolean,
         value: false,
         computed: '_computeEnvSelected(currentEnvironment)'
+      },
+
+      narrowLayout: {
+        type: Boolean,
+        reflectToAttribute: true
       }
     },
 

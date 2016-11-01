@@ -37,11 +37,15 @@
       @apply(--layout-horizontal);
       @apply(--layout-center);
       padding: 0 16px;
-      transition: bottom 200ms ease-in-out;
+      transition: bottom 200ms ease-in-out, left 300ms ease-in-out;
     }
 
     :host([with-toast]) .status-bar {
       bottom: 72px;
+    }
+
+    :host([narrow-layout]) .status-bar {
+      left: 0px;
     }
 
     :host([with-toast]) #dataExplorer[opened] {
