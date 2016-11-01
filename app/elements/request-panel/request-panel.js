@@ -154,7 +154,8 @@
       '_proxyRequestChanged(proxyRequest.*)',
       '_getRequestData(historyId)',
       '_getRequestData(savedId)',
-      '_getRequestData(externalId)'
+      '_getRequestData(externalId)',
+      '_exporeAssistantActiveChanged(exporeAssistantActive)'
     ],
 
     listeners: {
@@ -1038,6 +1039,15 @@
 
     _computeEnvSelected: function(currentEnvironment) {
       return !!currentEnvironment;
+    },
+
+    _exporeAssistantActiveChanged: function(exporeAssistantActive) {
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Request',
+        action: 'Explore assistant activated',
+        label: exporeAssistantActive + ''
+      });
     }
   });
 })();
