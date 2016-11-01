@@ -87,7 +87,7 @@ Polymer({
       include_docs: true
       // jscs:enable
     })
-    .then((r) => r.rows.filter((i) => i.doc.environment === env))
+    .then((r) => r.rows.filter((i) => i.doc.environment === env && i.doc.enabled === true))
     .then((rules) => {
       rules = rules.map((i) => i.doc);
       this._setRules(rules);
