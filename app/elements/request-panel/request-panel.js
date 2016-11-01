@@ -801,6 +801,7 @@
               'message': ['Magic variables', e],
               'level': 'error'
             });
+            resolve(request);
           });
         });
       });
@@ -818,7 +819,9 @@
       if (!this.$.cookieExchange.connected) {
         return Promise.resolve(request);
       }
-      this.$.cookieExchange.applyCookies(request);
+      try {
+        this.$.cookieExchange.applyCookies(request);
+      } catch (e) {}
       return Promise.resolve(request);
     },
 

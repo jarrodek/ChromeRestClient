@@ -145,6 +145,7 @@ Polymer({
     })
     .catch((e) => {
       this.fire('error', e);
+      return this.value;
     });
   },
   /**
