@@ -43,8 +43,11 @@
     .remove-button:hover {
       color: #e64a19;
     }
+    .env-selector {
+      @apply(--layout-horizontal);
+    }
     .env-selector paper-icon-button {
-      vertical-align: bottom;
+      align-self: flex-end;
     }
     .app-link {
       text-decoration: none;
@@ -53,6 +56,13 @@
       padding: 24px 24px 24px 24px;
       background-color: #E1F5FE;
       font-size: 15px;
+    }
+    .flex {
+      @apply(--layout-flex);
+    }
+    .help {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
     }
     </style>
     <section>
@@ -67,6 +77,13 @@
         </paper-dropdown-menu>
         <paper-icon-button on-tap="addEnvironment" class="add-button add-env" title="Add new environment" icon="arc:add-circle-outline"></paper-icon-button>
         <paper-icon-button hidden$="[[hideRemoved]]" on-tap="removeEnvironment" class="remove-button" title="Remove this environment" icon="arc:remove-circle-outline"></paper-icon-button>
+        <div class="flex"></div>
+        <div class="help" hidden$="[[noVariables]]">
+          <p>Learn more about the variables and environments</p>
+          <a href="https://restforchrome.blogspot.co.uk/2016/11/variables-and-environments-in-advanced.html" target="_blank" class="app-link">
+            <paper-button raised class="action-button">Learn more</paper-button>
+          </a>
+        </div>
       </div>
       <iron-collapse id="editor">
         <div class="add-editor">
