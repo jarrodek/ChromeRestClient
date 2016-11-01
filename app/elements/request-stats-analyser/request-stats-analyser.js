@@ -195,18 +195,35 @@
           uri = url;
         }
       }
+      // console.time('History data analyser - search');
+      // console.time('History data analyser - all');
+      this.startTime = performance.now();
+      // performance.mark('history-data-analyser-start');
       var seek = encodeURIComponent(uri) + '/' + method;
       var db = this._getDb();
       db.allDocs()
-      .then((r) => r.rows.filter((i) => i.id.indexOf(seek) !== -1))
-      .then((items) => db.allDocs({
-        keys: items.map((i) => i.id),
-        // jscs:disable
-        include_docs: true
-        // jscs:enable
-      }))
-      .then((r) => r.rows.map((i) => i.doc))
-      .then((r) => this._processData(r))
+      .then((r) => {
+        // performance.mark('history-data-analyser-keys-query');
+        return r.rows.filter((i) => i.id.indexOf(seek) !== -1);
+      })
+      .then((items) => {
+        // performance.mark('history-data-analyser-keys-filter');
+        return db.allDocs({
+          keys: items.map((i) => i.id),
+          // jscs:disable
+          include_docs: true
+          // jscs:enable
+        });
+      })
+      .then((r) => {
+        // performance.mark('history-data-analyser-getting-data');
+        return r.rows.map((i) => i.doc);
+      })
+      .then((r) => {
+        // performance.mark('history-data-analyser-mapping-data');
+        // console.timeEnd('History data analyser - search');
+        return this._processData(r);
+      })
       .catch((e) => {
         console.error(e);
         this._setAnalysing(false);
@@ -215,7 +232,6 @@
 
     _processWorkerData: function(e) {
       var data = e.data;
-
       this.set('medians', data.medians);
       this.set('times', data.times);
       this.set('sizes', data.sizes);
@@ -223,9 +239,22 @@
       this.set('presence', data.presence);
       this._setAnalysing(false);
       this.fire('request-stats-analysed');
+      // console.timeEnd('History data analyser - process');
+      // console.timeEnd('History data analyser - all');
+      // performance.mark('history-data-analyser-processing');
+      var execTime = performance.now() - this.startTime;
+      console.log('execTime', execTime);
+      this.fire('send-analytics', {
+        type: 'timing',
+        category: 'History assistant',
+        variable: 'Analysing history',
+        value: execTime
+      });
     },
 
     _processData: function(docs) {
+      // console.time('History data analyser - process');
+      // performance.mark('history-data-analyser-process-data');
       if (this._worker) {
         return this._worker.postMessage(docs);
       }
