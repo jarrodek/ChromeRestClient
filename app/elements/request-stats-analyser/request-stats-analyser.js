@@ -199,14 +199,16 @@
       // console.time('History data analyser - all');
       this.startTime = performance.now();
       // performance.mark('history-data-analyser-start');
-      var seek = encodeURIComponent(uri) + '/' + method;
+      var seek = encodeURIComponent(uri) + '/' + method + '/';
       var db = this._getDb();
       db.allDocs()
       .then((r) => {
+        console.log(r);
         // performance.mark('history-data-analyser-keys-query');
-        return r.rows.filter((i) => i.id.indexOf(seek) !== -1);
+        return r.rows.filter((i) => i.id.indexOf(seek) === 0);
       })
       .then((items) => {
+        console.log(items);
         // performance.mark('history-data-analyser-keys-filter');
         return db.allDocs({
           keys: items.map((i) => i.id),

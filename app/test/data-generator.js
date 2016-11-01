@@ -2,8 +2,7 @@
 /**
  * This is similar to mock-data.js but generates data for the new structure.
  *
- * <script src="test/chance.js"></script>
- * <script src="test/data-generator.js"></script>
+ * <script src="test/chance.js"></script><script src="test/data-generator.js"></script>
  */
 /* global chance */
 if (typeof chance === 'undefined') {
