@@ -46,6 +46,14 @@
     .env-selector paper-icon-button {
       vertical-align: bottom;
     }
+    .app-link {
+      text-decoration: none;
+    }
+    .doc-frame {
+      padding: 24px 24px 24px 24px;
+      background-color: #E1F5FE;
+      font-size: 15px;
+    }
     </style>
     <section>
       <div class="env-selector">
@@ -77,8 +85,13 @@
         <variable-item doc-id="[[item._id]]" item="[[item]]"></variable-item>
       </template>
       <template is="dom-if" if="[[noVariables]]" restamp="true">
-        <p>Create variables and insert them in the request.</p>
-        <p>Just put variable name in format ${variable name} into any request field and the value will be inserted at run time.</p>
+        <div class="doc-frame">
+          <p>Create variables and insert them into the request.</p>
+          <p>Just put variable name in format <i>${variable name}</i> into any request field and the value will be inserted at run time.</p>
+          <a href="https://restforchrome.blogspot.co.uk/2016/11/variables-and-environments-in-advanced.html" target="_blank" class="app-link">
+            <paper-button raised class="action-button">Learn more</paper-button>
+          </a>
+        </div>
       </template>
     </section>
     <section>
