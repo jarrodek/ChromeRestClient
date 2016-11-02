@@ -142,8 +142,15 @@ You can style checkbox with paper-checkbox styles like:
     }
 
     .open-action {
-      background-color: var(--history-list-items-open-background-color, #1E88E5);
-      color: var(--history-list-items-open-color, white);
+      @apply(--action-button);
+      background-color: var(--history-list-items-open-background-color);
+      color: var(--history-list-items-open-color);
+    }
+
+    .action-button:hover {
+      @apply(--action-button-hover);
+      background-color: var(--history-list-items-open-background-color-hover);
+      color: var(--history-list-items-open-color-hover);
     }
 
     .group-header {

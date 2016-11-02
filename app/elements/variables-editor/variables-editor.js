@@ -100,6 +100,11 @@ Polymer({
       environment: this.currentEnvironment,
       enabled: false
     });
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Variables editor',
+      action: 'Add variable'
+    });
   },
 
   _onVariableDeleted: function(e) {
@@ -108,6 +113,11 @@ Polymer({
     if (index !== -1) {
       this.splice('variables', index, 1);
     }
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Variables editor',
+      action: 'Delete variable'
+    });
   },
 
   addEnvironment: function() {
@@ -154,6 +164,11 @@ Polymer({
       this.set('variables', []);
       this._addVariable();
     });
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Variables editor',
+      action: 'Add environment'
+    });
   },
 
   _refreshEnvironments: function() {
@@ -175,6 +190,11 @@ Polymer({
     this.fire('variables-environment-changed', {
       env: currentEnvironment
     });
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Variables editor',
+      action: 'Select environment'
+    });
   },
 
   removeEnvironment: function() {
@@ -192,6 +212,11 @@ Polymer({
     item._deleted = true;
     db.put(item).then(() => {
       this.splice('environments', index, 1);
+    });
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Variables editor',
+      action: 'Delete environment'
     });
   }
 });

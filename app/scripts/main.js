@@ -28,6 +28,7 @@
   app.withToast = false;
   // Selected environment for magic variables.
   app.variablesEnvironment = 'default';
+  app.narrowLayout = false;
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
     app.updateBranding();
