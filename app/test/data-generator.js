@@ -99,30 +99,47 @@ function generateHistoryData(opts) {
       'https://facebook.com',
       'https://github.com',
       'https://linkedin.com',
-      'https://restforchrome.blogspot.com'
+      'https://restforchrome.blogspot.com',
+      'http://localhost:8081/json'
     ];
-    let index = chance.integer({min: 0, max: urls.length});
+    let index = chance.integer({min: 0, max: urls.length - 1});
     url = urls[index];
+    if (!url) {
+      throw new Error('DATA GENERATION ERROR. URL is empty.');
+    }
   } else {
     url = chance.url();
   }
+  var t = createTimings();
+  var httpMethod = chance.pick(isPayload ? payloadMethods : otherMethods);
   var item = {
-    'url': url,
-    'method': chance.pick(isPayload ? payloadMethods : otherMethods),
-    'headers': headers,
-    'payload': payload,
-    'created': chance.hammertime(),
-    'response': {
+    _id: encodeURIComponent(url) + '/' + httpMethod + '/' + uuid(),
+    created: chance.hammertime(),
+    request: {
+      url: url,
+      method: httpMethod,
+      headers: headers,
+      payload: payload,
+    },
+    response: {
       headers: responseHeaders,
       payload: responsePayload,
       statusCode: 200,
       statusText: 'OK'
-    }
+    },
+    stats: {
+      request: {
+        headersSize: headers ? headers.length : 0,
+        payloadSize: payload ? payload.length : 0
+      },
+      response: {
+        headersSize: responseHeaders ? responseHeaders.length : 0,
+        payloadSize: responsePayload ? responsePayload.length : 0
+      }
+    },
+    timings: t.timings,
+    totalTime: t.totalTime
   };
-  var t = createTimings();
-  item.timings = t.timings;
-  item.totalTime = t.totalTime;
-  item._id = encodeURIComponent(item.url) + '/' + item.method + '/' + uuid();
   return item;
 }
 
@@ -228,6 +245,6 @@ function insertMockData(howMany) {
 function insertPredictableData(howMany) {
   howMany = howMany || 200;
   var historyData = generatePredictableHistoryDataList(howMany);
-  console.log('Data generated', historyData);
+  console.log('Data generated');
   return new PouchDB('history-data').bulkDocs(historyData);
 }

@@ -126,15 +126,12 @@
       '_responseChanged(response.*)'
     ],
 
-    _getDb: function() {
-      return new PouchDB('history-data');
-    },
-
     _hasArrayData: function(arr) {
       return !!(arr.base && arr.base.length);
     },
 
     _hasAnyData: function() {
+      // debugger;
       var t = Array.from(arguments);
       return t.some((i) => i === true);
     },
@@ -195,44 +192,64 @@
           uri = url;
         }
       }
-      // console.time('History data analyser - search');
-      // console.time('History data analyser - all');
+      if (uri[uri.length - 1] === '/') {
+        uri = uri.substr(0, uri.length - 1);
+      }
       this.startTime = performance.now();
-      // performance.mark('history-data-analyser-start');
-      var seek = encodeURIComponent(uri) + '/' + method + '/';
-      var db = this._getDb();
-      db.allDocs()
-      .then((r) => {
-        console.log(r);
-        // performance.mark('history-data-analyser-keys-query');
-        return r.rows.filter((i) => i.id.indexOf(seek) === 0);
-      })
-      .then((items) => {
-        console.log(items);
-        // performance.mark('history-data-analyser-keys-filter');
-        return db.allDocs({
-          keys: items.map((i) => i.id),
-          // jscs:disable
-          include_docs: true
-          // jscs:enable
-        });
-      })
-      .then((r) => {
-        // performance.mark('history-data-analyser-getting-data');
-        return r.rows.map((i) => i.doc);
-      })
-      .then((r) => {
-        // performance.mark('history-data-analyser-mapping-data');
-        // console.timeEnd('History data analyser - search');
-        return this._processData(r);
-      })
-      .catch((e) => {
-        console.error(e);
-        this._setAnalysing(false);
-      });
+      this._getHistoryData(uri, method);
     },
+    // Creates a worker (if needed) and gets data from the indexedDB.
+    _getHistoryData: function(url, method) {
+      var post = {
+        url: url,
+        method: method
+      };
+      if (this._collectorWorker) {
+        return this._collectorWorker.postMessage(post);
+      }
+      var blob = new Blob([this.$.dataCollectionWorker.textContent]);
+      this._collectorWorkerUrl = window.URL.createObjectURL(blob);
+      this._collectorWorker = new Worker(this._collectorWorkerUrl);
+      this._collectorWorker.onmessage = this._processCollectorData.bind(this);
+      this._collectorWorker.onerror = this._processCollectorError.bind(this);
+      this._collectorWorker.postMessage(post);
+    },
+    // Process data returned from the collector worker.
+    _processCollectorData: function(e) {
+      console.info('Data collection time: ', e.data.time);
+      var list = e.data.data;
+      if (!list || !list.length) {
+        this._setAnalysing(false);
+        this.clear();
+        console.info('No data found');
+        return;
+      }
+      this._processRawData(list);
 
-    _processWorkerData: function(e) {
+    },
+    // Collector worker error ocurred.
+    _processCollectorError: function(e) {
+      this.fire('app-log', {
+        level: 'error',
+        message: ['Collecting history data error', e]
+      });
+      this._setAnalysing(false);
+      this.clear();
+    },
+    // Process raw history data
+    _processRawData: function(docs) {
+      if (this._worker) {
+        return this._worker.postMessage(docs);
+      }
+      var blob = new Blob([this.$.worker.textContent]);
+      this._workerUrl = window.URL.createObjectURL(blob);
+      this._worker = new Worker(this._workerUrl);
+      this._worker.onmessage = this._processAnalysedData.bind(this);
+      this._worker.onerror = this._processAnalyserError.bind(this);
+      this._worker.postMessage(docs);
+    },
+    // Process data that has been already analysed
+    _processAnalysedData: function(e) {
       var data = e.data;
       this.set('medians', data.medians);
       this.set('times', data.times);
@@ -241,11 +258,10 @@
       this.set('presence', data.presence);
       this._setAnalysing(false);
       this.fire('request-stats-analysed');
-      // console.timeEnd('History data analyser - process');
-      // console.timeEnd('History data analyser - all');
-      // performance.mark('history-data-analyser-processing');
+
       var execTime = performance.now() - this.startTime;
-      console.log('execTime', execTime);
+      console.info('Processing history data time', execTime);
+
       this.fire('send-analytics', {
         type: 'timing',
         category: 'History assistant',
@@ -253,18 +269,14 @@
         value: execTime
       });
     },
-
-    _processData: function(docs) {
-      // console.time('History data analyser - process');
-      // performance.mark('history-data-analyser-process-data');
-      if (this._worker) {
-        return this._worker.postMessage(docs);
-      }
-      var blob = new Blob([this.$.worker.textContent]);
-      this._workerUrl = window.URL.createObjectURL(blob);
-      this._worker = new Worker(this._workerUrl);
-      this._worker.onmessage = this._processWorkerData.bind(this);
-      this._worker.postMessage(docs);
+    // There was an error in data analyser.
+    _processAnalyserError: function(e) {
+      this.fire('app-log', {
+        level: 'error',
+        message: ['Analysing history data error', e]
+      });
+      this._setAnalysing(false);
+      this.clear();
     },
     /**
      * Calculate a median from the array of numbers.

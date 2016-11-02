@@ -5,6 +5,120 @@
       display: none;
     }
     </style>
+    <script id="dataCollectionWorker" type="javascript/worker">
+    var processor = {};
+    // Get the connection to the database
+    processor.getDatabase = function() {
+      return new Promise((resolve, reject) => {
+        let request = indexedDB.open('_pouch_history-data');
+        request.onerror = function(event) {
+          reject(event);
+        };
+        request.onsuccess = function(event) {
+          resolve(event.target.result);
+        };
+      });
+    };
+    processor.queryKeys = function(db, url, method) {
+      return new Promise((resolve, reject) => {
+        let transaction = db.transaction(['document-store'], 'readonly');
+        let objectStore = transaction.objectStore('document-store');
+        let key = encodeURIComponent(url) + '/' + method + '/';
+        // console.log('Query keys for', key);
+        var keyRange = IDBKeyRange.bound(key, key + '\uffff', true, true);
+        let request = objectStore.openKeyCursor(keyRange);
+        let keys = [];
+        request.onsuccess = function(event) {
+          let cursor = event.target.result;
+          if(cursor) {
+            keys[keys.length] = cursor.key;
+            cursor.continue();
+          } else {
+            // console.log('Has keys', keys);
+            resolve(keys);
+          }
+        };
+        request.onerror = function(event) {
+          console.error(event);
+        };
+      });
+    }
+    processor.queryKeyValues = function(store, key) {
+      return new Promise((resolve, reject) => {
+        let request = store.get(key);
+        request.onsuccess = function(event) {
+          resolve(request.result);
+        };
+        request.onerror = function() {
+          resolve(null);
+        };
+      });
+    };
+    processor.readHistoryData = function(store, seq) {
+      return new Promise((resolve, reject) => {
+        let request = store.get(seq);
+        request.onsuccess = function(event) {
+          resolve(request.result);
+        };
+        request.onerror = function() {
+          resolve(null);
+        };
+      });
+    }
+    processor.getHistoryData = function(url, method) {
+      var startTime = performance.now();
+      var db;
+      return processor.getDatabase()
+      .then((_db) => {
+        db = _db;
+        return processor.queryKeys(_db, url, method);
+      })
+      .then((list) => {
+        if (!list || !list.length) {
+          return [];
+        }
+        let transaction = db.transaction(['document-store'], 'readonly');
+        let store = transaction.objectStore('document-store');
+        return Promise.all(list.map((i) => processor.queryKeyValues(store, i)))
+        .then((list) => list.filter((i) => i !== null && i.deletedOrLocal === '0'));
+      })
+      .then((list) => {
+        if (!list || !list.length) {
+          return [];
+        }
+        let transaction = db.transaction(['by-sequence'], 'readonly');
+        let store = transaction.objectStore('by-sequence');
+        return Promise.all(list.map((i) => processor.readHistoryData(store, i.seq)))
+        .then((list) => list.filter((i) => i !== null))
+        .then((list) => {
+          list.sort((a, b) => {
+            if (a.created > b.created) {
+              return 1;
+            }
+            if (a.created < b.created) {
+              return -1;
+            }
+            return 0;
+          });
+          return list;
+        });
+      })
+      .then((data) => {
+        let execTime = performance.now() - startTime;
+        return {
+          data: data,
+          time: execTime
+        };
+      });
+    }
+    self.onmessage = function(e) {
+      // debugger;
+      processor.getHistoryData(e.data.url, e.data.method)
+      .then((data) => {
+        self.postMessage(data);
+      });
+    };
+    </script>
     <script id="worker" type="javascript/worker">
       var calculateMedian = function(arr) {
         if (!arr || !arr.length) {
