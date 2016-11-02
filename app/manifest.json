@@ -3,8 +3,8 @@
   "name": "Advanced REST client",
   "short_name": "ARC",
   "description": "The web developers helper program to create and test custom HTTP requests.",
-  "version": "8.4.51.274",
-  "version_name": "8.4.51.274-canary",
+  "version": "8.4.52.274",
+  "version_name": "8.4.52.274-dev",
   "minimum_chrome_version": "49",
   "author": "Pawel Psztyc",
   "icons": {
