@@ -44,6 +44,14 @@
                   display: true
                 }
               }]
+            },
+            // tooltips: {
+            //   enabled: false
+            // },
+            elements: {
+              point: {
+                radius: 1
+              }
             }
           };
         }
@@ -69,46 +77,63 @@
     ],
 
     _hasTotals: function(hasData, labels) {
-      this._updateTimeChart('totalTimes', hasData, labels, this.times.totals);
+      this.async(function() {
+        this._updateTimeChart('totalTimes', hasData, labels, this.times.totals);
+      }, 400);
     },
-
     _hasTtfb: function(hasData, labels) {
-      this._updateTimeChart('timeToFirstByte', hasData, labels, this.times.ttfb);
+      this.async(function() {
+        this._updateTimeChart('timeToFirstByte', hasData, labels, this.times.ttfb);
+      }, 700);
     },
-
     _hasConnects: function(hasData, labels) {
-      this._updateTimeChart('connectTime', hasData, labels, this.times.connects);
+      this.async(function() {
+        this._updateTimeChart('connectTime', hasData, labels, this.times.connects);
+      }, 1000);
     },
-
     _hasSsl: function(hasData, labels) {
-      this._updateTimeChart('sslTime', hasData, labels, this.times.ssl);
+      this.async(function() {
+        this._updateTimeChart('sslTime', hasData, labels, this.times.ssl);
+      }, 1300);
     },
-
     _hasSents: function(hasData, labels) {
-      this._updateTimeChart('sendTime', hasData, labels, this.times.sents);
+      this.async(function() {
+        this._updateTimeChart('sendTime', hasData, labels, this.times.sents);
+      }, 1600);
     },
-
     _hasReceivings: function(hasData, labels) {
-      this._updateTimeChart('receivingTime', hasData, labels, this.times.receiveds);
+      this.async(function() {
+        this._updateTimeChart('receivingTime', hasData, labels, this.times.receiveds);
+      }, 1900);
     },
 
     _hasRequestBody: function(hasData, labels) {
-      this._updateSizeChart('requestPayloadSizes', hasData, labels, this.sizes.request.body, true);
+      this.async(function() {
+        this._updateSizeChart('requestPayloadSizes', hasData, labels, this.sizes.request.body,
+          true);
+      }, 2200);
     },
 
     _hasResponseBody: function(hasData, labels) {
-      this._updateSizeChart('responsePayloadSizes', hasData, labels, this.sizes.response.body,
-        false);
+      this.async(function() {
+        this._updateSizeChart('responsePayloadSizes', hasData, labels, this.sizes.response.body,
+          false);
+      }, 2500);
+
     },
 
     _hasRequestHeaders: function(hasData, labels) {
-      this._updateSizeChart('requestHeaderSizes', hasData, labels, this.sizes.request.headers,
-        true);
+      this.async(function() {
+        this._updateSizeChart('requestHeaderSizes', hasData, labels, this.sizes.request.headers,
+          true);
+      }, 2800);
     },
 
     _hasResponseHeaders: function(hasData, labels) {
-      this._updateSizeChart('responseHeaderSizes', hasData, labels, this.sizes.response.headers,
-        false);
+      this.async(function() {
+        this._updateSizeChart('responseHeaderSizes', hasData, labels, this.sizes.response.headers,
+          false);
+      }, 3100);
     },
 
     _updateTimeChart: function(name, hasData, labels, arr) {
@@ -118,6 +143,9 @@
       var chartName = name + 'Chart';
       var chart = this[chartName];
       if (chart) {
+        if (chart.data.datasets[0].data === arr) {
+          return;
+        }
         chart.data.datasets[0].data = arr;
         chart.data.labels = labels;
         chart.update();
