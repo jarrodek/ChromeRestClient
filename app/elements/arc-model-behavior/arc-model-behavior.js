@@ -162,8 +162,11 @@ window.ArcBehaviors.ArcModelBehavior = {
             return id;
           })
           .catch((e) => {
-            arc.app.analytics.sendException('arc-model::genericSave::' +
-              JSON.stringify(e), false);
+            this.fire('send-analytics', {
+              type: 'exception',
+              description: 'generic-save:' + e.message,
+              fatal: false
+            });
             this.fire('error', {
               error: e
             });
@@ -199,9 +202,13 @@ window.ArcBehaviors.ArcModelBehavior = {
         return data;
       })
       .catch((cause) => {
-        console.error(cause);
-        arc.app.analytics.sendException('arc-model::genericGetObject::' +
-          JSON.stringify(cause), false);
+        var msg = 'arc-model::genericGetObject::';
+        this.fire('app-log', {'message': [msg, cause], 'level': 'warning'});
+        this.fire('send-analytics', {
+          type: 'exception',
+          description: 'generic get:' + cause.message,
+          fatal: false
+        });
         this.fire('error', {
           error: cause
         });
@@ -272,8 +279,11 @@ window.ArcBehaviors.ArcModelBehavior = {
       })
       .catch((cause) => {
         console.error('Error in generic query', cause);
-        arc.app.analytics.sendException('arc-model::genericQuery::' +
-          JSON.stringify(cause), false);
+        this.fire('send-analytics', {
+          type: 'exception',
+          description: 'generic query:' + cause.message,
+          fatal: false
+        });
         this.fire('error', {
           error: cause
         });
@@ -321,7 +331,6 @@ window.ArcBehaviors.ArcModelBehavior = {
           if (this.forceDeleteAll) {
             return table.toCollection().delete();
           }
-          console.warn('nothing to delete...');
         })
         .then(() => {
           this.set('data', null);
@@ -329,8 +338,12 @@ window.ArcBehaviors.ArcModelBehavior = {
           this.fire('deleted');
         })
         .catch((e) => {
-          arc.app.analytics.sendException('arc-model::genericRemove::' +
-            JSON.stringify(e), false);
+          this.fire('app-log', {'message': ['arc-model::genericRemove::', e], 'level': 'error'});
+          this.fire('send-analytics', {
+            type: 'exception',
+            description: 'generic get:' + e.message,
+            fatal: false
+          });
           this.fire('error', {
             error: e
           });

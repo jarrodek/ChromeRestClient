@@ -237,5 +237,11 @@ Polymer({
 
   _exportMessages: function() {
     this.fire('messages-download');
+  },
+
+  _urlKeyDown: function(e) {
+    if (e.keyCode === 13) {
+      this._connect();
+    }
   }
 });

@@ -26,7 +26,13 @@
       /*@apply(--layout-end-justified);*/
       position: relative;
       bottom: 0;
+      /*transition: bottom 200ms ease-in-out, background-color 800ms ease-in-out;*/
       transition: bottom 200ms ease-in-out;
+      background-color: transparent;
+    }
+
+    :host([is-request]) .bottom-menu {
+      background-color: #eee;
     }
 
     .icon-buttons {
@@ -44,6 +50,8 @@
     }
     .project-name {
       @apply(--layout-flex);
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
     .edit-project-icon {
       display: none;
@@ -51,35 +59,41 @@
     .project-item:hover .edit-project-icon {
       display: initial;
     }
+    .project-item[selected] {
+      background-color: rgba(25, 118, 210, 0.24);
+      font-weight: 500;
+    }
+
+    paper-menu-button {
+      padding: 0;
+    }
     </style>
     <paper-menu selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap">
-      <paper-item data-route="request" data-place$="{{baseUrl}}">Request</paper-item>
-      <paper-item data-route="socket" data-place$="{{baseUrl}}socket">Socket</paper-item>
-      <paper-submenu>
+      <paper-item data-route="request" data-place$="[[baseUrl]]">Request</paper-item>
+      <paper-item data-route="socket" data-place$="[[baseUrl]]socket">Socket</paper-item>
+      <paper-submenu id="projectsSubmenu">
         <paper-item class="menu-trigger">Projects</paper-item>
         <paper-menu class="menu-content sublist" selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap">
-          <template is="dom-if" if="{{!projects}}">
-            <paper-item>No projects here</paper-item>
-          </template>
-          <template is="dom-repeat" items="{{projects}}" sort="{{computeSort(projects)}}">
-            <paper-item data-route$="request/project/{{item.id}}" class="project-item">
-              <div class="project-name" data-place$="{{baseUrl}}request/project/{{item.id}}">{{item.name}}</div>
-              <paper-icon-button class="edit-project-icon" data-place$="{{baseUrl}}project/{{item.id}}/edit" icon="arc:mode-edit" alt="Edit project"></paper-icon-button>
+          <paper-item hidden$="[[hasProjects]]">No projects here</paper-item>
+          <template is="dom-repeat" items="[[projects]]">
+            <paper-item data-route$="request/project/[[item.id]]" class="project-item" selected$="[[_computeProjectSelected(item.id, selectedProject)]]">
+              <div class="project-name" data-place$="[[baseUrl]]request/project/[[item.id]]">[[item.name]]</div>
+              <paper-icon-button class="edit-project-icon" data-place$="[[baseUrl]]project/[[item.id]]/edit" icon="arc:mode-edit" alt="Edit project"></paper-icon-button>
             </paper-item>
           </template>
         </paper-menu>
       </paper-submenu>
-      <paper-item data-route="saved" data-place$="{{baseUrl}}saved">Saved</paper-item>
+      <paper-item data-route="saved" data-place$="[[baseUrl]]saved">Saved</paper-item>
       <template is="dom-if" if="{{!noHistory}}">
-        <paper-item data-route="history" data-place$="{{baseUrl}}history">History</paper-item>
+        <paper-item data-route="history" data-place$="[[baseUrl]]history">History</paper-item>
       </template>
-      <paper-item data-route="dataimport" data-place$="{{baseUrl}}dataimport">Import / export</paper-item>
+      <paper-item data-route="dataimport" data-place$="[[baseUrl]]dataimport">Import / export</paper-item>
     </paper-menu>
     <section class="bottom-menu" id="bottomMenu" on-tap="_itemTap">
       <div class="icon-buttons">
         <div class="visible-icons">
-          <paper-icon-button icon="settings" data-route="settings" data-place$="{{baseUrl}}settings" title="Settings"></paper-icon-button>
-          <paper-icon-button icon="info" data-route="about" data-place$="{{baseUrl}}about" title="About app"></paper-icon-button>
+          <paper-icon-button icon="settings" data-route="settings" data-place$="[[baseUrl]]settings" title="Settings"></paper-icon-button>
+          <paper-icon-button icon="info" data-route="about" data-place$="[[baseUrl]]about" title="About app"></paper-icon-button>
           <paper-icon-button icon="bug-report" title="File a bug report" on-tap="newIssueReport"></paper-icon-button>
           <paper-icon-button icon="open-in-new" title="Open new window" on-tap="openNewWindow"></paper-icon-button>
         </div>

@@ -1,0 +1,147 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/paper-styles/typography.html">
+<link rel="import" href="../../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<dom-module id="saved-list-items">
+  <template>
+    <style>
+     :host {
+      display: block;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      /*--paper-checkbox-checked-color: #1E88E5;*/
+      @apply(--history-list-items-element);
+    }
+
+    .history-item {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      @apply(--paper-font-body1);
+      font-size: 14px;
+      height: var(--history-list-items-height, 48px);
+      background-color: var(--history-list-items-background-color, transparent);
+      @apply(--history-list-items);
+    }
+
+    .history-item.selected {
+      background-color: var(--history-list-items-selected-background-color, #E0E0E0);
+    }
+
+    .checkbox-column {
+      @apply(--layout);
+      @apply(--layout-center-center);
+      height: 48px;
+      width: 48px;
+    }
+
+    .name-column {
+      margin-right: 12px;
+      font-weight: 500;
+      @apply(--layout-flex);
+      position: relative;
+    }
+
+    .data-column {
+      @apply(--layout-horizontal);
+      @apply(--layout-flex-2);
+      min-width: 0;
+    }
+
+    .method {
+      margin-right: 8px;
+      @apply(--history-list-items-method);
+    }
+
+    .url {
+      @apply(--layout-flex);
+      @apply(--paper-font-common-nowrap);
+      @apply(--history-list-items-url);
+    }
+
+    .action-column {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+    }
+
+    .action-column iron-icon {
+      color: rgba(0, 0, 0, 0.54);
+    }
+
+    .open-action {
+      @apply(--action-button);
+      background-color: var(--history-list-items-open-background-color);
+      color: var(--history-list-items-open-color);
+    }
+
+    .action-button:hover {
+      @apply(--action-button-hover);
+      background-color: var(--history-list-items-open-background-color-hover);
+      color: var(--history-list-items-open-color-hover);
+    }
+
+    .name-change-popover {
+      background-color: white;
+      padding: 16px;
+      @apply(--shadow-elevation-4dp);
+    }
+
+    .group-header {
+      font-weight: bold;
+      border-bottom: 1px solid #ddd;
+      color: #333;
+      margin-top: 20px;
+      padding: 15px 12px;
+    }
+
+    iron-list {
+      flex: 1 1 auto;
+    }
+
+    .invisible {
+      visibility: hidden;
+    }
+    </style>
+    <iron-list id="list" items="[[items]]" selected-items="{{selectedItems}}" multi-selection selection-enabled>
+      <template>
+        <div>
+          <div class$="[[_computeRowClass(selected)]]" tabindex$="[[tabIndex]]" aria-label$="Select/Deselect [[item.url]]">
+            <div class="checkbox-column">
+              <paper-checkbox on-tap="_toggleCheckbox" checked="[[selected]]"></paper-checkbox>
+            </div>
+            <div class="name-column" title$="[[item.name]]">
+              <span class="name" on-tap="_editName">[[item.name]]</span>
+            </div>
+            <div class="data-column">
+              <span class="method">[[item.method]]</span>
+              <span class="url" title$="[[item.url]]">[[item.url]]</span>
+            </div>
+            <div class="action-column">
+              <span>
+                <iron-icon icon="arc:drive" class$="[[_computeDriveClass(item.type)]]"></iron-icon>
+                <paper-tooltip position="left">Saved on Google Drive</paper-tooltip>
+              </span>
+              <span>
+                <iron-icon icon="arc:collections-bookmark" class$="[[_computeProjectClass(item.legacyProject)]]"></iron-icon>
+                <paper-tooltip position="left">Belongs to a project</paper-tooltip>
+              </span>
+              <paper-button on-tap="_deleteItem">delete</paper-button>
+              <paper-button class="open-action" on-tap="_navigateItem">open</paper-button>
+            </div>
+          </div>
+        </div>
+      </template>
+    </iron-list>
+    <iron-scroll-threshold id="scrollTheshold" lower-threshold="[[threshold]]" on-lower-threshold="_thresholdReached" scroll-target="list"></iron-scroll-threshold>
+    <iron-dropdown id="nameChange" always-on-top focus-target="[[_nameInput]]" on-iron-overlay-closed="_nameEditorClosed">
+      <div class="dropdown-content name-change-popover">
+        <paper-input label="Request name" id="nameChangeInput" on-keydown="_nameKeyDown"></paper-input>
+      </div>
+    </iron-dropdown>
+  </template>
+  <script src="saved-list-items.js"></script>
+</dom-module>

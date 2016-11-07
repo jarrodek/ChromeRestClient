@@ -54,7 +54,14 @@ window.addEventListener('initializeRouting', function() {
         }
         break;
     }
-    arc.app.analytics.sendScreen(screenName);
+    var event = new CustomEvent('send-analytics', {
+      detail: {
+        type: 'screenview',
+        name: screenName,
+        bubbles: true
+      }
+    });
+    document.dispatchEvent(event);
     next();
   }
   // Routes
@@ -129,17 +136,6 @@ window.addEventListener('initializeRouting', function() {
   });
   window.page = arc.app.router.redirect;
   arc.app.router.start();
-  //
-  // // 404
-  // page('*', function() {
-  //   //console.warn('redirecting unknown page.');
-  //   page.redirect('/');
-  // });
-  //
-  // page({
-  //   hashbang: true,
-  //   popstate: false
-  // });
 
   let event = new Event('ArcInitialized');
   window.dispatchEvent(event);

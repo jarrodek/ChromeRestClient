@@ -48,7 +48,8 @@ Polymer({
     /**
      * List of available projects
      */
-    projects: Array
+    projects: Array,
+    usePouchDb: Boolean
   },
   listeners: {
     'iron-overlay-opened': '_updateProjects'
@@ -108,7 +109,47 @@ Polymer({
   },
 
   _updateProjects: function() {
-    this.$.projects.query();
+    if (this.usePouchDb) {
+      this._queryProjects();
+    } else {
+      this.$.projects.query();
+    }
+  },
+
+  _queryProjects: function() {
+    let e = this.fire('arc-database-query', {
+      store: 'legacy-projects',
+      selector: '_id $exists true',
+      sort: ['_id'],
+      fields: ['_id', 'order', 'name']
+    });
+    e.detail.result
+    .then((result) => {
+      result.sort((a, b) => {
+        if (a.order === b.order) {
+          return 0;
+        }
+        if (a.order > b.order) {
+          return 1;
+        }
+        if (a.order < b.order) {
+          return -1;
+        }
+      });
+      result = result.map((i) => {
+        i.id = i._id;
+        return i;
+      });
+      this.set('projects', result);
+    })
+    .catch((err) => {
+      this.fire('send-analytics', {
+        type: 'exception',
+        description: 'save-dialog-view:' + err.message,
+        fatal: false
+      });
+      this.fire('app-log', {'message': err, 'level': 'error'});
+    });
   },
 
   _projectsRead: function(e) {

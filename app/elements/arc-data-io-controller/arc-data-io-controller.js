@@ -75,40 +75,38 @@ Polymer({
    */
   _importFileData: function(e) {
     this._setLoading(true);
+
     arc.app.importer.saveFileData(e.detail.data)
-      .then(function() {
-        StatusNotification.notify({
-          message: 'Data saved',
-          timeout: StatusNotification.TIME_SHORT
-        });
-        this.fire('data-imported');
-      }.bind(this))
-      .catch(function(cause) {
-        console.error('Data import error.', cause);
-        StatusNotification.notify({
-          message: 'Unable to import data. Error details has been send ' +
-            'to the developer.',
-          timeout: StatusNotification.TIME_SHORT
-        });
-        arc.app.analytics.sendException('arc-data-import-controller::connectAppServer' +
-          cause.message, false);
-      })
-      .finally(function() {
-        this._setLoading(false);
-      }.bind(this));
-    arc.app.analytics.sendEvent('Settings usage', 'Import data', 'From file');
-  },
-  /** Authorize the app. */
-  // _connectAppServer: function() {
-  //   this.$.userProvider.authorize(true)
-  //   .catch((err) => {
-  //     StatusNotification.notify({
-  //       message: 'Unable to authorize.',
-  //       timeout: StatusNotification.TIME_SHORT
-  //     });
-  //     arc.app.analytics.sendException('arc-data-import-controller::connectAppServer' +
-  //       err.message, false);
-  //   });
-  // }
+    .then(() => {
+      StatusNotification.notify({
+        message: 'Data saved',
+        timeout: StatusNotification.TIME_SHORT
+      });
+      this.fire('data-imported');
+      this._setLoading(false);
+    })
+    .catch((cause) => {
+      console.error('Import data error', cause);
+      this.fire('app-log', {'message': ['Data import error: ', cause], 'level': 'error'});
+      StatusNotification.notify({
+        message: 'Unable to import data. Error details has been send ' +
+          'to the developer.',
+        timeout: StatusNotification.TIME_SHORT
+      });
+      this.fire('send-analytics', {
+        type: 'exception',
+        description: 'arc-data-import-controller' + cause.message,
+        fatal: false
+      });
+      this._setLoading(false);
+    });
+
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Settings usage',
+      action: 'Import data',
+      label: 'From file'
+    });
+  }
 });
 })();

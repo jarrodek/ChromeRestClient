@@ -30,48 +30,28 @@ var SafeHtmlUtils = {
 
 class JSONViewer {
   constructor(data) {
+    var jsonData = data.json;
+    this.rawData = data.raw || '';
+    this._numberIndexes = {}; // Regexp number indexes
     this.linkRegExp = /([^"\s&;<>]*:\/\/[^"\s<>]*)(&quot;|&lt;|&gt;)?/gim;
     this.jsonValue = null;
     this.latestError = null;
     this.elementsCounter = 0;
-    if (typeof data === 'string') {
+    if (typeof jsonData === 'string') {
       try {
-        this.jsonValue = JSON.parse(data);
+        this.jsonValue = JSON.parse(jsonData);
       } catch (e) {
         this.latestError = e.message;
       }
     } else {
-      this.jsonValue = data;
+      this.jsonValue = jsonData;
     }
-  }
-
-  get STYLE() {
-    if (this._styles) {
-      return this._styles;
-    }
-    this._styles = {
-      prettyPrint: 'prettyPrint',
-      numeric: 'numeric',
-      nullValue: 'nullValue',
-      booleanValue: 'booleanValue',
-      punctuation: 'punctuation',
-      stringValue: 'stringValue',
-      node: 'node',
-      arrayCounter: 'arrayCounter',
-      keyName: 'keyName',
-      rootElementToggleButton: 'rootElementToggleButton',
-      infoRow: 'infoRow',
-      brace: 'brace',
-      leftMargin: 25,
-      arrayKeyNumber: 'arrayKeyNumber'
-    };
-    return this._styles;
   }
   /**
    * Get created HTML content.
    */
   getHTML() {
-    var parsedData = '<div class="' + this.STYLE.prettyPrint + '">';
+    var parsedData = '<div class="prettyPrint">';
     parsedData += this.parse(this.jsonValue);
     parsedData += '</div>';
 
@@ -85,7 +65,9 @@ class JSONViewer {
   /**
    * Parse JSON data
    */
-  parse(data) {
+  parse(data, opts) {
+    opts = opts || {};
+
     var result = '';
     if (data === null) {
       result += this.parseNullValue();
@@ -100,28 +82,53 @@ class JSONViewer {
     } else {
       result += this.parseObject(data);
     }
+    if (opts.hasNextSibling && !opts.holdComa) {
+      result += '<span class="punctuation hidden">,</span>';
+    }
     return result;
   }
 
   parseNullValue() {
     var result = '';
-    result += '<span class="' + this.STYLE.nullValue + '">';
+    result += '<span class="nullValue">';
     result += 'null';
     result += '</span>';
     return result;
   }
 
   parseNumericValue(number) {
+    var expectedNumber;
+    if (number > Number.MAX_SAFE_INTEGER) {
+      let comp = String(number);
+      comp = comp.substr(0, 15);
+      let r = new RegExp(comp + '(\\d+),', 'gim');
+      if (comp in this._numberIndexes) {
+        r.lastIndex = this._numberIndexes[comp];
+      }
+      let result = r.exec(this.rawData);
+      if (result) {
+        this._numberIndexes[comp] = result.index;
+        expectedNumber = comp + result[1];
+      }
+    }
+
     var result = '';
-    result += '<span class="' + this.STYLE.numeric + '">';
+    result += '<span class="numeric">';
+    if (expectedNumber) {
+      result += '<js-max-number-error class="number-error" expected-number="' + expectedNumber +
+        '">';
+    }
     result += number + '';
+    if (expectedNumber) {
+      result += '</js-max-number-error>';
+    }
     result += '</span>';
     return result;
   }
 
   parseBooleanValue(bool) {
     var result = '';
-    result += '<span class="' + this.STYLE.booleanValue + '">';
+    result += '<span class="booleanValue">';
     if (bool !== null && bool !== undefined) {
       result += bool + '';
     } else {
@@ -138,41 +145,39 @@ class JSONViewer {
       value = SafeHtmlUtils.htmlEscape(value);
       if (value.slice(0, 1) === '/') {
         value = '<a title="Click to insert into URL field" response-anchor add-root-url href="' +
-					value + '">' + value + '</a>';
+          value + '">' + value + '</a>';
       }
     } else {
       value = 'null';
     }
-    result += '<span class="' + this.STYLE.punctuation + '">&quot;</span>';
-    result += '<span class="' + this.STYLE.stringValue + '">';
+    result += '<span class="punctuation">&quot;</span>';
+    result += '<span class="stringValue">';
     result += value;
     result += '</span>';
-    result += '<span class="' + this.STYLE.punctuation + '">&quot;</span>';
+    result += '<span class="punctuation">&quot;</span>';
     return result;
   }
 
   parseObject(object) {
-    var pairs = [];
-    for (var key in object) {
-      if (!object.hasOwnProperty(key)) {
-        continue;
-      }
-      pairs[pairs.length] = key;
-      pairs[pairs.length] = object[key];
-    }
-    var cnt = pairs.length;
+
     var result = '';
-    result += '<div class="' + this.STYLE.punctuation + ' ' +
-			this.STYLE.brace + '">{</div>';
-    result += '<div collapse-indicator class="' + this.STYLE.infoRow + '">...</div>';
-    for (var i = 0; i < cnt; i = i + 2) {
-      var key = pairs[i];
-      var value = pairs[i + 1];
+    result += '<div class="punctuation brace">{</div>';
+    result += '<div collapse-indicator class="info-row">...</div>';
+
+    Object.getOwnPropertyNames(object).forEach((key, i, arr) => {
+      let value = object[key];
+
+      let lastSibling = (i + 1) === arr.length;
+      let parseOpts = {
+        hasNextSibling: !lastSibling
+      };
+      if (value instanceof Array) {
+        parseOpts.holdComa = true;
+      }
       var elementNo = this.elementsCounter++;
-      var data = this.parse(value);
+      var data = this.parse(value, parseOpts);
       var hasManyChildren = this.elementsCounter - elementNo > 1;
-      result += '<div data-element="' + elementNo + '" style="margin-left: ' +
-				this.STYLE.leftMargin + 'px" class="' + this.STYLE.node + '">';
+      result += '<div data-element="' + elementNo + '" style="margin-left: 24px" class="node">';
       var _nan = isNaN(key);
       if (_nan) {
         result += '"';
@@ -183,45 +188,40 @@ class JSONViewer {
       }
       result += ': ' + data;
       if (hasManyChildren) {
-        result += '<div data-toggle="' + elementNo + '" class="' +
-					this.STYLE.rootElementToggleButton + '">-</div>';
+        result += '<div data-toggle="' + elementNo + '" class="rootElementToggleButton"></div>';
       }
       result += '</div>';
-    }
-    result += '<div class="' + this.STYLE.punctuation + ' ' +
-			this.STYLE.brace + '">}</div>';
+    });
+    result += '<div class="punctuation brace">}</div>';
     return result;
   }
 
   parseArray(array) {
     var cnt = array.length;
     var result = '';
-    result += '<div class="' + this.STYLE.punctuation + ' ' +
-			this.STYLE.brace + '">[</div>';
-    result += '<div collapse-indicator class="' + this.STYLE.infoRow + '">...</div>';
-    result += '<span class="' + this.STYLE.arrayCounter + '">' + cnt + '</span>';
-    result += '<span class="' + this.STYLE.punctuation + ' ' + this.STYLE.brace +
-			'">]</span>';
-    for (var i = 0; i < cnt; i++) {
+    result += '<span class="punctuation hidden">[</span>';
+    result += '<span class="array-counter brace punctuation" count="' + cnt + '"></span>';
+    for (let i = 0; i < cnt; i++) {
       var elementNo = this.elementsCounter++;
-      var data = this.parse(array[i]);
+
+      let lastSibling = (i + 1) === cnt;
+      var data = this.parse(array[i], {hasNextSibling: !lastSibling});
       var hasManyChildren = this.elementsCounter - elementNo > 1;
-      result += '<div data-element="' + elementNo + '" style="margin-left: ' +
-				this.STYLE.leftMargin + 'px" class="' + this.STYLE.node + '">';
-      result += '<span class="' + this.STYLE.arrayKeyNumber + '">' + i + ': &nbsp;</span>';
+      result += '<div data-element="' + elementNo + '" style="margin-left: 24px" class="node">';
+      result += '<span class="array-key-number" index="' + i + '"> &nbsp;</span>';
       result += data;
       if (hasManyChildren) {
-        result += '<div data-toggle="' + elementNo + '" class="' +
-					this.STYLE.rootElementToggleButton + '">-</div>';
+        result += '<div data-toggle="' + elementNo + '" class="rootElementToggleButton"></div>';
       }
       result += '</div>';
     }
+    result += '<span class="punctuation hidden">],</span>';
     return result;
   }
 
   parseKey(key) {
     var result = '';
-    result += '<span class="' + this.STYLE.keyName + '">' + key + '</span>';
+    result += '<span class="key-name">' + key + '</span>';
     return result;
   }
 }

@@ -44,6 +44,8 @@
     "AuthData": true,
     "LogObject": true,
     "Cookie": true,
-    "Cookies": true
+    "Cookies": true,
+    "PouchDB": true,
+    "URI": true
   }
 }

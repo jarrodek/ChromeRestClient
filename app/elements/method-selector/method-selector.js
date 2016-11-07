@@ -24,7 +24,7 @@ Polymer({
       type: String,
       notify: true
     },
-    methodManuOpened: {
+    methodMenuOpened: {
       type: Boolean,
       value: false
     },
@@ -37,7 +37,7 @@ Polymer({
 
   observers: [
     // '_ensureContentType(isPayload)',
-    '_dropdownMenuOpened(methodManuOpened, method)'
+    '_dropdownMenuOpened(methodMenuOpened, method)'
   ],
 
   get standardMethods() {

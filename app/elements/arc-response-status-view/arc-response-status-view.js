@@ -91,6 +91,9 @@ Polymer({
 
   attached: function() {
     this._checkHttpMessage();
+    if (this.statusCode) {
+      this._statusCodeChanged();
+    }
   },
 
   _selectedTabChanged: function(selectedTab) {
@@ -107,7 +110,12 @@ Polymer({
         break;
     }
     if (this.isAttached) {
-      arc.app.analytics.sendEvent('Response status', 'Tab switched', tabName);
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Response status',
+        action: 'Tab switched',
+        label: tabName
+      });
     }
   },
 
@@ -136,13 +144,18 @@ Polymer({
       }
       return;
     }
-    this.$.statusModel.objectId = this.statusCode;
-    this.$.statusModel.query();
+    let event = this.fire('query-status-codes', {
+      'code': this.statusCode
+    });
+    let statusCode = event.detail.statusCode;
+    if (statusCode) {
+      event.detail.data = statusCode;
+      this._onStatusInfoReady(event);
+    }
   },
 
   _onStatusInfoReady: function(e) {
     var result = e.detail.data;
-    // console.log(result);
     if (result && result.label) {
       this._scdTitle = this.statusCode + ': ' + result.label;
     } else {
@@ -162,7 +175,12 @@ Polymer({
 
   showStatusInfo: function() {
     this.$.statusCodeInfo.open();
-    arc.app.analytics.sendEvent('Response status', 'Display status info', this.statusCode);
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Response status',
+      action: 'Display status info',
+      label: this.statusCode
+    });
   },
   /** Compute index to 1-based index. */
   _computeIndexName: function(index) {
@@ -176,7 +194,12 @@ Polymer({
       this.fire('action-link-change', {
         url: e2.rootTarget.href
       });
-      arc.app.analytics.sendEvent('Response status', 'Link change', 'From response headers');
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Response status',
+        action: 'Link change',
+        label: 'From response headers'
+      });
     }
   },
 
@@ -205,8 +228,6 @@ Polymer({
   },
 
   _computeRequestHeaders: function(requestHeaders) {
-    // console.log(requestHeaders);
-    // return [];
     return arc.app.headers.toJSON(requestHeaders);
   },
 
@@ -226,7 +247,6 @@ Polymer({
   },
 
   _checkHttpMessage: function() {
-    // console.log('aaaaaaaaaaaaaaaaaaaaaa');
     if (!!this.httpMessage) {
       return;
     }
@@ -239,7 +259,7 @@ Polymer({
   },
 
   _computeBageClass: function(cnt) {
-    return cnt === 0 ? 'empty' : '';
+    return cnt === 0 ? 'badge empty' : 'badge';
   }
 });
 })();

@@ -34,7 +34,8 @@ arc.bg.openWindow = (url) => {
         width: 1200,
         height: 800
       }
-    }, function() {
+    },
+    function() {
       arc.bg.recordSession();
     }
   );
@@ -63,35 +64,80 @@ arc.bg.onLaunched = (lunchData) => {
  */
 arc.bg.onInstalled = (details) => {
   switch (details.reason) {
-    case 'install':
-      arc.bg.installDatabase();
-      break;
     case 'update':
       arc.bg.notifyBetaUpdate();
-      arc.bg.installDatabase();
       break;
   }
 };
-
-arc.bg.installDatabase = () => {
-  var db = arc.app.db.idb._getDb({checkInstall: true});
-  db.open().then(function() {
-    db.close();
+arc.bg.uuid = function() {
+  // jscs:disable
+  /* jshint ignore:start */
+  var lut = [];
+  for (var i = 0; i < 256; i++) {
+    lut[i] = (i < 16 ? '0' : '') + (i).toString(16);
+  }
+  var fn = function() {
+    var d0 = Math.random() * 0xffffffff | 0;
+    var d1 = Math.random() * 0xffffffff | 0;
+    var d2 = Math.random() * 0xffffffff | 0;
+    var d3 = Math.random() * 0xffffffff | 0;
+    return lut[d0 & 0xff] + lut[d0 >> 8 & 0xff] + lut[d0 >> 16 & 0xff] +
+      lut[d0 >> 24 & 0xff] + '-' + lut[d1 & 0xff] + lut[d1 >> 8 & 0xff] + '-' +
+      lut[d1 >> 16 & 0x0f | 0x40] + lut[d1 >> 24 & 0xff] + '-' + lut[d2 & 0x3f | 0x80] +
+      lut[d2 >> 8 & 0xff] + '-' + lut[d2 >> 16 & 0xff] + lut[d2 >> 24 & 0xff] +
+      lut[d3 & 0xff] + lut[d3 >> 8 & 0xff] + lut[d3 >> 16 & 0xff] + lut[d3 >> 24 & 0xff];
+  };
+  return fn();
+  // jscs:enable
+  /* jshint ignore:end */
+};
+arc.bg.getAppId = () => {
+  return new Promise((resolve) => {
+    chrome.storage.local.get({
+      'APP_ID': null
+    }, function(result) {
+      if (!result.APP_ID) {
+        result.APP_ID = arc.bg.uuid();
+        chrome.storage.local.set(result, function() {
+          resolve(result.APP_ID);
+        });
+      } else {
+        resolve(result.APP_ID);
+      }
+    });
   });
+};
+arc.bg.releaseChannel = () => {
+  var manifest = chrome.runtime.getManifest();
+  // jscs:disable
+  var manifestName = manifest.version_name;
+  // jscs:enable
+  var release = null;
+  if (manifestName.indexOf('beta') !== -1) {
+    release = 'beta';
+  } else if (manifestName.indexOf('dev') !== -1) {
+    release = 'dev';
+  } else if (manifestName.indexOf('canary') !== -1) {
+    release = 'canary';
+  } else {
+    release = 'stable';
+  }
+  return release;
 };
 /**
  * If the beta channel, notify user about new version.
  */
 arc.bg.notifyBetaUpdate = () => {
-  if (!arc.app.utils.releaseChannel || arc.app.utils.releaseChannel === 'stable') {
+  var channel = arc.bg.releaseChannel();
+  if (!channel || channel === 'stable') {
     return;
   }
   arc.bg.notifications.canNotify()
-  .then((granted) => {
-    if (granted) {
-      arc.bg.notifications.displayUpdate(arc.app.utils.releaseChannel);
-    }
-  });
+    .then((granted) => {
+      if (granted) {
+        arc.bg.notifications.displayUpdate(channel);
+      }
+    });
 };
 /**
  * Very base replacement for GA session counter.
@@ -101,7 +147,7 @@ arc.bg.notifyBetaUpdate = () => {
  * This is the only information send to the backed (time and generated ID)
  */
 arc.bg.recordSession = () => {
-  arc.app.arc.getAppId((appId) => {
+  arc.bg.getAppId().then((appId) => {
     let d = new Date();
     let url = 'http://api.chromerestclient.com/analytics/record?ai=';
     url += appId + '&t=';
@@ -109,34 +155,9 @@ arc.bg.recordSession = () => {
     url += d.getTimezoneOffset();
     fetch(url, {
       method: 'POST'
-    }).then((response) => {
-      if (!response.ok) {
-        pendingAnalytics.push({
-          'type': 'exception',
-          'params': ['Unable send session recording to the backend: ' + response.code, false]
-        });
-      }
-    });
+    }).catch(() => {});
   });
 };
-
-// arc.bg.openPreview = (rawResponse) => {
-//   chrome.app.window.create('html-preview.html', {
-//     'id': 'html-preview',
-//     'bounds': {
-//       'width': 400,
-//       'height': 400
-//     }
-//   }, (win) => {
-//
-//     console.log('sending a message to the content window', win.contentWindow);
-//
-//     win.contentWindow.postMessage({
-//       'rawResponse': rawResponse
-//     });
-//   });
-// };
-
 /**
  * Notifications support.
  *
@@ -150,7 +171,9 @@ arc.bg.notifications = {};
  */
 arc.bg.notifications.canNotify = () => {
   return new Promise((resolve) => {
-    chrome.permissions.contains({permissions: ['notifications']}, (granted) => {
+    chrome.permissions.contains({
+      permissions: ['notifications']
+    }, (granted) => {
       resolve(granted);
     });
   });
@@ -160,12 +183,12 @@ arc.bg.notifications.canNotify = () => {
  */
 arc.bg.notifications.listen = () => {
   arc.bg.notifications.canNotify()
-  .then((granted) => {
-    if (granted) {
-      chrome.notifications.onClicked.addListener(arc.bg.notifications.onClicked);
-      chrome.notifications.onButtonClicked.addListener(arc.bg.notifications.onButtonClicked);
-    }
-  });
+    .then((granted) => {
+      if (granted) {
+        chrome.notifications.onClicked.addListener(arc.bg.notifications.onClicked);
+        chrome.notifications.onButtonClicked.addListener(arc.bg.notifications.onButtonClicked);
+      }
+    });
 };
 arc.bg.notifications.onClicked = (notificationId) => {
   switch (notificationId) {
@@ -196,14 +219,11 @@ arc.bg.notifications.displayUpdate = (channel) => {
     iconUrl: 'assets/arc_icon_128.png',
     title: 'Advanced REST Client updated',
     message: msg,
-    buttons: [
-      {
-        title: 'Open app'
-      },
-      {
-        title: 'Close'
-      }
-    ],
+    buttons: [{
+      title: 'Open app'
+    }, {
+      title: 'Close'
+    }],
     isClickable: true
   };
   chrome.notifications.create(`${channel}-update`, opts);
@@ -217,9 +237,3 @@ arc.bg.notifications.displayUpdate = (channel) => {
 chrome.app.runtime.onLaunched.addListener(arc.bg.onLaunched);
 chrome.runtime.onInstalled.addListener(arc.bg.onInstalled);
 arc.bg.notifications.listen();
-/**
- * Called when user use one of the commands registered in the manifest file.
- */
-// chrome.commands.onCommand.addListener(function(command) {
-//   console.log('Command:', command);
-// });

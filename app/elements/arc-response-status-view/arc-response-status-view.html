@@ -115,15 +115,24 @@ the License.
       .sub-title {
         padding: 0 24px;
       }
-
-      paper-tab > paper-badge {
-        --paper-badge-margin-left: 12px;
-        --paper-badge-margin-bottom: -12px;
-        --paper-badge-background: var(--paper-blue-500);
+      paper-tab > span {
+        display: block;
       }
 
-      paper-badge.empty {
-        --paper-badge-background: var(--paper-grey-500);
+      .badge {
+        background-color: var(--paper-blue-500);
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        font-size: 12px;
+        color: #fff;
+        margin-left: 12px;
+        @apply(--layout-horizontal);
+        @apply(--layout-center-center);
+      }
+
+      .badge.empty {
+        background-color: var(--paper-grey-500);
       }
       </style>
       <div class="status-row">
@@ -144,18 +153,18 @@ the License.
       <paper-tabs selected="{{selectedTab}}" id="tabs">
         <template is="dom-if" if="[[hasResponseHeaders]]">
           <paper-tab>
-            <span id="rh">Response headers</span>
-            <paper-badge for="rh" class$="[[_computeBageClass(responseHeaders.length)]]" label="[[responseHeaders.length]]"></paper-badge>
+            <span>Response headers</span>
+            <span class$="[[_computeBageClass(responseHeaders.length)]]">[[responseHeaders.length]]</span>
           </paper-tab>
         </template>
         <template is="dom-if" if="[[!isXhr]]">
           <paper-tab>
-            <span id="rqh">Request headers</span>
-            <paper-badge for="rqh" class$="[[_computeBageClass(requestHeadersArray.length)]]" label="[[requestHeadersArray.length]]"></paper-badge>
+            <span>Request headers</span>
+            <span class$="[[_computeBageClass(requestHeadersArray.length)]]">[[requestHeadersArray.length]]</span>
           </paper-tab>
           <paper-tab>
-            <span id="rd">Redirects</span>
-            <paper-badge for="rd" class$="[[_computeBageClass(redirectData.length)]]" label="[[redirectData.length]]"></paper-badge>
+            <span>Redirects</span>
+            <span class$="[[_computeBageClass(redirectData.length)]]">[[redirectData.length]]</span>
           </paper-tab>
           <paper-tab>Timings</paper-tab>
         </template>
@@ -219,7 +228,6 @@ the License.
           <paper-button dialog-confirm autofocus>Close</paper-button>
         </div>
       </paper-dialog>
-      <arc-status-object-model id="statusModel" on-data-ready="_onStatusInfoReady" on-error="_onStatusInfoError"></arc-status-object-model>
     </template>
   </dom-module>
   <script src="arc-response-status-view.js"></script>

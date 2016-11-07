@@ -54,13 +54,13 @@ arc.app.db.idb.open = function() {
     var db = arc.app.db.idb._getDb();
     arc.app.db.idb.mapsObjects(db);
     arc.app.db.idb.addHooks(db);
-    db.on('error', function(error) {
-      console.error('IndexedDB global error', error);
-      let pending = arc.app.analytics.sendException('IDB error:: ' + JSON.stringify(error));
-      if (pending) {
-        window.pendingAnalytics[window.pendingAnalytics.length] = pending;
-      }
-    });
+    // db.on('error', function(error) {
+    //   console.error('IndexedDB global error', error);
+    //   let pending = arc.app.analytics.sendException('IDB error:: ' + JSON.stringify(error));
+    //   if (pending) {
+    //     window.pendingAnalytics[window.pendingAnalytics.length] = pending;
+    //   }
+    // });
     db.open()
       .then(function() {
         resolve(db);

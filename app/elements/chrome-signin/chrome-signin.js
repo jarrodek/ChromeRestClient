@@ -267,7 +267,6 @@
           case WidthValue.ICON_ONLY:
             return '';
           default:
-            console.warn('bad width value: ', width);
             return LabelValue.STANDARD;
         }
       }

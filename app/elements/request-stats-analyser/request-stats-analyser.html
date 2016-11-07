@@ -1,0 +1,382 @@
+<dom-module id="request-stats-analyser">
+  <template>
+    <style>
+     :host {
+      display: none;
+    }
+    </style>
+    <script id="dataCollectionWorker" type="javascript/worker">
+    var processor = {};
+    // Get the connection to the database
+    processor.getDatabase = function() {
+      return new Promise((resolve, reject) => {
+        let request = indexedDB.open('_pouch_history-data');
+        request.onerror = function(event) {
+          reject(event);
+        };
+        request.onsuccess = function(event) {
+          resolve(event.target.result);
+        };
+      });
+    };
+    processor.queryKeys = function(db, url, method) {
+      return new Promise((resolve, reject) => {
+        let transaction = db.transaction(['document-store'], 'readonly');
+        let objectStore = transaction.objectStore('document-store');
+        let key = encodeURIComponent(url) + '/' + method + '/';
+        // console.log('Query keys for', key);
+        var keyRange = IDBKeyRange.bound(key, key + '\uffff', true, true);
+        let request = objectStore.openCursor(keyRange);
+        let keys = [];
+        request.onsuccess = function(event) {
+          let cursor = event.target.result;
+          if(cursor) {
+            if (cursor.value.deletedOrLocal !== '0') {
+              cursor.continue();
+              return;
+            }
+            keys[keys.length] = cursor.value.seq;
+            cursor.continue();
+          } else {
+            // console.log('Has keys', keys);
+            resolve(keys);
+          }
+        };
+        request.onerror = function(event) {
+          console.error(event);
+        };
+      });
+    }
+    processor.readHistoryData = function(store, seq) {
+      return new Promise((resolve, reject) => {
+        let request = store.get(seq);
+        request.onsuccess = function(event) {
+          resolve(request.result);
+        };
+        request.onerror = function() {
+          resolve(null);
+        };
+      });
+    }
+    processor.getHistoryData = function(url, method) {
+      var startTime = performance.now();
+      var db;
+      return processor.getDatabase()
+      .then((_db) => {
+        db = _db;
+        return processor.queryKeys(_db, url, method);
+      })
+      .then((list) => {
+        if (!list || !list.length) {
+          return [];
+        }
+        let transaction = db.transaction(['by-sequence'], 'readonly');
+        let store = transaction.objectStore('by-sequence');
+        return Promise.all(list.map((i) => processor.readHistoryData(store, i)))
+        .then((list) => list.filter((i) => i !== null))
+        .then((list) => {
+          list.sort((a, b) => {
+            if (a.created > b.created) {
+              return 1;
+            }
+            if (a.created < b.created) {
+              return -1;
+            }
+            return 0;
+          });
+          return list;
+        });
+      })
+      .then((data) => {
+        let execTime = performance.now() - startTime;
+        return {
+          data: data,
+          time: execTime
+        };
+      });
+    }
+    self.onmessage = function(e) {
+      // debugger;
+      processor.getHistoryData(e.data.url, e.data.method)
+      .then((data) => {
+        self.postMessage(data);
+      });
+    };
+    </script>
+    <script id="worker" type="javascript/worker">
+      var calculateMedian = function(arr) {
+        if (!arr || !arr.length) {
+          return 0;
+        }
+        if (arr.length === 1) {
+          return Math.round(arr[0]);
+        }
+        var copy = arr.slice(0).sort(function(a, b) {
+          return a - b;
+        });
+        var half = Math.floor(copy.length / 2);
+        if (copy.length % 2 === 0) {
+          // If there is an even number of results,
+          // the median will be the mean of the two central numbers.
+          return Math.round((copy[half - 1] + copy[half]) / 2.0);
+        }
+        // If there is an odd number of results, the median is the middle number.
+        return Math.round(copy[half]);
+      };
+      var processData = function(docs) {
+        var totalTimes = [];
+        var timesToFirstByte = [];
+        var sentTimes = [];
+        var receivingTimes = [];
+        var connectTimes = [];
+        var sslTimes = [];
+        var requestPayloadSizes = [];
+        var requestHeaderSizes = [];
+        var responsePayloadSizes = [];
+        var responseHeaderSizes = [];
+        var requestPayloadTimes = [];
+        var responsePayloadTimes = [];
+        var requestHeadersTimes = [];
+        var responseHeadersTimes = [];
+        var times = [];
+        var codes = {};
+        docs.sort(function(a, b) {
+          return a.created - b.created;
+        });
+        docs.forEach((item) => {
+          if (item.totalTime > 0) {
+            totalTimes[totalTimes.length] = item.totalTime;
+          } else {
+            // This object is corrupted!
+            return;
+          }
+          let time = new Date(item.created).toLocaleString();
+          times[times.length] = time;
+          if (item.timings.wait < 0) {
+            item.timings.wait = 0;
+          }
+          timesToFirstByte[timesToFirstByte.length] = item.timings.wait;
+          if (item.timings.send < 0) {
+            item.timings.send = 0;
+          }
+          sentTimes[sentTimes.length] = item.timings.send;
+          if (item.timings.receive < 0) {
+            item.timings.receive = 0;
+          }
+          receivingTimes[receivingTimes.length] = item.timings.receive;
+          if (item.timings.connect < 0) {
+            item.timings.connect = 0;
+          }
+          connectTimes[connectTimes.length] = item.timings.connect;
+          if (item.timings.ssl < 0) {
+            item.timings.ssl = 0;
+          }
+          sslTimes[sslTimes.length] = item.timings.ssl;
+          if (item.stats.request.payloadSize > 0) {
+            requestPayloadSizes[requestPayloadSizes.length] = item.stats.request.payloadSize;
+            requestPayloadTimes[requestPayloadTimes.length] = time;
+          }
+          if (item.stats.request.headersSize > 0) {
+            requestHeaderSizes[requestHeaderSizes.length] = item.stats.request.headersSize;
+            requestHeadersTimes[requestHeadersTimes.length] = time;
+          }
+          if (item.stats.response.payloadSize > 0) {
+            responsePayloadSizes[responsePayloadSizes.length] = item.stats.response.payloadSize;
+            responsePayloadTimes[responsePayloadTimes.length] = time;
+          }
+          if (item.stats.response.headersSize > 0) {
+            responseHeaderSizes[responseHeaderSizes.length] = item.stats.response.headersSize;
+            responseHeadersTimes[responseHeadersTimes.length] = time;
+          }
+          // Status code
+          if (item.response.statusCode) {
+            if (item.response.statusCode in codes) {
+              codes[item.response.statusCode]++;
+            } else {
+              codes[item.response.statusCode] = 1;
+            }
+          }
+        });
+        // dirty check for ssl
+        var hasSsl = sslTimes.some((i) => i > 0);
+        if (!hasSsl) {
+          sslTimes = [];
+        }
+
+        // parse status codes
+        var statusCodes = {
+          labels: [],
+          values: []
+        };
+        for (var code in codes) {
+          statusCodes.labels[statusCodes.labels.length] = String(code);
+          statusCodes.values[statusCodes.values.length] = codes[code];
+        }
+
+        self.postMessage({
+          medians: {
+            total: calculateMedian(totalTimes),
+            sent: calculateMedian(sentTimes),
+            ttfb: calculateMedian(timesToFirstByte),
+            receiving: calculateMedian(receivingTimes),
+            connect: calculateMedian(connectTimes),
+            ssl: hasSsl ? calculateMedian(sslTimes) : 0,
+            requestBody: calculateMedian(requestPayloadSizes),
+            requestHeaders: calculateMedian(requestHeaderSizes),
+            responseBody: calculateMedian(responsePayloadSizes),
+            responseHeaders: calculateMedian(responseHeaderSizes)
+          },
+          times: {
+            totals: totalTimes,
+            ttfb: timesToFirstByte,
+            sents: sentTimes,
+            receiveds: receivingTimes,
+            connects: connectTimes,
+            labels: times,
+            ssl: sslTimes
+          },
+          sizes: {
+            request: {
+              body: requestPayloadSizes,
+              headers: requestHeaderSizes,
+              bLabels: requestPayloadTimes,
+              hLabels: requestHeadersTimes
+            },
+            response: {
+              body: responsePayloadSizes,
+              headers: responseHeaderSizes,
+              bLabels: responsePayloadTimes,
+              hLabels: responseHeadersTimes
+            }
+          },
+          statuses: statusCodes,
+          presence: {
+            times: {
+              totals: !!(totalTimes && totalTimes.length),
+              ttfb: !!(timesToFirstByte && timesToFirstByte.length),
+              sents: !!(sentTimes && sentTimes.length),
+              receiveds: !!(receivingTimes && receivingTimes.length),
+              connects: !!(connectTimes && connectTimes.length),
+              labels: !!(times && times.length),
+              ssl: hasSsl
+            },
+            sizes: {
+              request: {
+                body: !!(requestPayloadSizes && requestPayloadSizes.length),
+                headers: !!(requestHeaderSizes && requestHeaderSizes.length)
+              },
+              response: {
+                body: !!(responsePayloadSizes && responsePayloadSizes.length),
+                headers: !!(responseHeaderSizes && responseHeaderSizes.length)
+              }
+            },
+            statuses: !!(statusCodes.labels && statusCodes.labels.length)
+          }
+        });
+      };
+      self.onmessage = function(e) {
+        processData(e.data);
+      };
+    </script>
+    <script id="responseProcess" type="javascript/worker">
+    var calculateBytes = function(str) {
+      if (!str || !str.length || typeof str !== 'string') {
+        return 0;
+      }
+      var s = str.length;
+      for (var i = str.length - 1; i >= 0; i--) {
+        var code = str.charCodeAt(i);
+        if (code > 0x7f && code <= 0x7ff) {
+          s++;
+        } else if (code > 0x7ff && code <= 0xffff) {
+          s += 2;
+        }
+        if (code >= 0xDC00 && code <= 0xDFFF) {
+          i--; //trail surrogate
+        }
+      }
+      return s;
+    };
+    var headersToString = function(arr) {
+      if (!arr || !arr.length || !arr.map) {
+        return '';
+      }
+      return arr.map((header) => {
+        let result = '';
+        let key = header.name;
+        let value = header.value;
+        if (key && key.trim() !== '') {
+          result += key + ': ';
+          if (value && value.trim() !== '') {
+            result += value;
+          }
+        }
+        return result;
+      }).join('\n');
+    }
+    var processData = function(request, response) {
+      var timings = response.stats;
+      var time = new Date(timings.startTime).toLocaleString();
+      var totalTime = 0;
+      if (timings.connect > 0) {
+        totalTime += timings.connect;
+      }
+      if (timings.receive > 0) {
+        totalTime += timings.receive;
+      }
+      if (timings.send > 0) {
+        totalTime += timings.send;
+      }
+      if (timings.wait > 0) {
+        totalTime += timings.wait;
+      }
+      if (timings.ssl > 0) {
+        totalTime += timings.ssl;
+      }
+      var result = {
+        times: {
+          label: time,
+          total: totalTime,
+          ttfb: timings.wait,
+          connect: timings.connect,
+          received: timings.receive,
+          sent: timings.send,
+          ssl: timings.ssl
+        },
+        sizes: {
+          request: {},
+          response: {}
+        }
+      };
+
+      var requestHeadrsSize = calculateBytes(request.headers);
+      if (requestHeadrsSize) {
+        result.sizes.request.hLabel = time;
+        result.sizes.request.headers = requestHeadrsSize;
+      }
+      var requestPayloadSize = calculateBytes(request.payload);
+      if (requestPayloadSize) {
+        result.sizes.request.bLabel = time;
+        result.sizes.request.body = requestPayloadSize;
+      }
+      var hStr = headersToString(response.headers);
+      var responseHeadrsSize = calculateBytes(hStr);
+      if (responseHeadrsSize) {
+        result.sizes.response.hLabel = time;
+        result.sizes.response.headers = responseHeadrsSize;
+      }
+      var responseBodySize = calculateBytes(response.rawBody);
+      if (responseBodySize) {
+        result.sizes.response.bLabel = time;
+        result.sizes.response.body = responseBodySize;
+      }
+
+      self.postMessage(result);
+    };
+    self.onmessage = function(e) {
+      processData(e.data.request, e.data.response);
+    };
+    </script>
+  </template>
+  <script src="request-stats-analyser.js"></script>
+</dom-module>

@@ -103,19 +103,17 @@ Altrought the history hash is not used in REST services and is used only in clie
     }
     </style>
     <div class="simple" opened$="{{detailed}}">
-      <paper-icon-button id="toggleButton" icon="hardware:keyboard-arrow-right" on-tap="toggle"></paper-icon-button>
+      <paper-icon-button id="toggleButton" icon="arc:keyboard-arrow-right" on-tap="toggle"></paper-icon-button>
       <paper-input-container class="main-input" no-label-float auto-validate>
         <input is="iron-input" type="url" value="{{url::input}}" placeholder="Request URL" id="masterUrl" pattern="\S*"/>
         <paper-input-error>You may want to encode this value before sending it to the server</paper-input-error>
       </paper-input-container>
       <paper-input label="Host" value="{{hostValue}}" class="host-input" on-input="updateUrl"></paper-input>
       <paper-menu-button horizontal-align="right" id="urlContextMenuButton">
-        <paper-icon-button icon="more-vert" class="dropdown-trigger" on-tap="_menuOpened"></paper-icon-button>
+        <paper-icon-button icon="arc:more-vert" class="dropdown-trigger" on-tap="_menuOpened"></paper-icon-button>
         <paper-menu class="dropdown-content" id="urlContextMenu" on-iron-select="_contextMenuAction">
           <paper-item data-action="encParamsAction">Encode URL</paper-item>
           <paper-item data-action="decParamsAction">Decode URL</paper-item>
-          <paper-item data-action="replAmpAction">Replace "&amp;" with ";"</paper-item>
-          <paper-item data-action="replSemiAction">Replace ";" with "&amp;"</paper-item>
         </paper-menu>
       </paper-menu-button>
     </div>
@@ -145,6 +143,7 @@ Altrought the history hash is not used in REST services and is used only in clie
     <paper-autocomplete target="[[masterUrlElement]]" id="autocomplete" loader on-query="_queryUrlHistory" opened="{{suggesionsOpened}}" on-selected="_onSuggestionSelected"></paper-autocomplete>
     <arc-historyurl-model id="model" on-data-ready="_setSuggestions"></arc-historyurl-model>
     <paper-toast text="Entered URL is invalid." id="invalidUrlToast"></paper-toast>
+    <iron-meta id="meta"></iron-meta>
   </template>
   <script src="url-input-editor.js"></script>
 </dom-module>

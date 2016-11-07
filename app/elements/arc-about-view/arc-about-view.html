@@ -52,6 +52,9 @@
     .paper-font-body1 {
       @apply(--paper-font-body1);
     }
+    li > iron-icon {
+      color: #F57C00;
+    }
     </style>
     <section class="about-section padding-section">
       <div class="about-row">
@@ -62,7 +65,7 @@
       </div>
       <div class="about-row">
         Source code at
-        <a href="https://github.com/jarrodek/ChromeRestClient" target="_blank">GitHub</a> under Apache License.
+        <a href="https://github.com/jarrodek/ChromeRestClient" target="_blank">GitHub</a> under Apache License (for open source projects) or CC-BY-4.0 (for not open source or commercial projects).
       </div>
       <div class="about-row">
         Report issues at
@@ -82,6 +85,31 @@
     <section class="about-section padding-section">
       <h2>Changelog</h2>
       <div class="changelog">
+
+        <p class="paper-font-title">Version 8</p>
+        <ul class="paper-font-body1">
+          <li><iron-icon icon="arc:new-releases"></iron-icon>Upgraded application database schema. It will support better performance while listing/querying history and saved requests data.</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>Added request history explorer. When selecting saved/history request the app will automatically bring history data and present it on a charts</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>Added status message to the request action bar. And the action bar. Now it will inform the user when request headers has been sent and when first byte of message arrived</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>New headers sets. Now you can define own headers sets and access them in the request panel. Headers sets is a way to easily insert predefined set of headers into the request headers form.</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>Variables editor and environment manager. Now you can create variables and organize them using environments. Select an anvironment and all variables defined in it will be applied to the request.</li>
+          <li>File import / export format has changed. Though, the app will support old file format.</li>
+          <li>History now will becomed a timeline of request made in the past. Each section in the timeline is a day when a request occured. Each request is now counded once per day.</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>Now CTRL/command + S will automatically save the request if it's already saved (in project or in saved list). To bring save dialog add SHIFT key to the combination.</li>
+          <li>When using sockets now socket URL will handle ENTER key properly by making a connection. Also added toast with error message when something is wrong. The error message will contain message directly from web socket.</li>
+          <li>Projects are now deprecated. They will be changed in future releases into new form. However app will support them for at least a year.</li>
+          <li>Current databae changes supports future chamges in the app. Become a beta tester to have early access to new functionalities and to give early feedback on app changes. Read <a target="_blank" href="https://restforchrome.blogspot.co.uk/2016/03/join-advanced-rest-client-beta-program.html">this blog post</a> for more information.</li>
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/805" target="_blank">#805</a>: Parsed JSON view should display commas. Now it will be possible to copy part of the JSON string as a valid JSON object.</li>
+          <li>Fixed (finally!) issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/234" target="_blank">#234</a>: JSON tab does not handle numbers above 15 digits long. Now the JSON tab display warning about wrong format but also display real value.</li>
+        </ul>
+
+        <p class="paper-font-title">10/6/2016</p>
+        <ul class="paper-font-body1">
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/812" target="_blank">#812</a>: Number in tabs is not alligned</li>
+          <li>Removed unused observer and console print</li>
+          <li>Added new export options in htistory / saved list and in settings</li>
+          <li>Errors will automatically print trace information into the console. <a href="https://github.com/jarrodek/ChromeRestClient/wiki/debugging" target="_blank">Read more about debugging</a></li>
+        </ul>
 
         <p class="paper-font-title">9/20/2016</p>
         <ul class="paper-font-body1">

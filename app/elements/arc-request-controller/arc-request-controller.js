@@ -22,7 +22,7 @@ Polymer({
     request: {
       type: Object,
       notify: true,
-      observer: '_requestChanged'
+      // observer: '_requestChanged'
     },
     /**
      * Route params passed from the router.
@@ -109,19 +109,31 @@ Polymer({
       value: false
     },
     // True if the proxy extension is installed.
-    xhrConnected: Boolean
+    xhrConnected: Boolean,
+
+    currentProjectId: String,
+    projectRelatedRequests: Array,
+    // Current request ID. It's related to project's list. It can be changed from the outside.
+    selectedRequest: String,
+    /**
+     * Endpoints related to current legacy project.
+     */
+    projectEndpoints: Array
   },
 
   listeners: {
     'send': 'sendRequest',
     'abort': 'abortRequest',
     'save-file': '_saveToFile',
-    'save-request': '_saveRequest'
+    'save-request': '_saveRequest',
+    'is-payload-changed': '_isPayloadChanged'
   },
 
   observers: [
     '_requestNameChanged(request.name)',
-    '_requestIdChanged(request.id)'
+    '_requestIdChanged(request.id)',
+    '_projectRelatedRequestsChanged(projectRelatedRequests.*)',
+    '_projectSelectedRequestChanged(selectedRequest)'
   ],
 
   onShow: function() {
@@ -147,7 +159,12 @@ Polymer({
     this._setIsError(false);
     this.showCookieBanner = false;
     page('/request/current');
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Clear all');
+
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Engagement',
+      action: 'Clear all'
+    });
     this.$.clearRollback.open();
   },
 
@@ -175,7 +192,12 @@ Polymer({
       return;
     }
     this.useXhr = e.target.checked;
-    arc.app.analytics.sendEvent('Request', 'Use XHR', this.useXhr + '');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Engagement',
+      action: 'Use XHR',
+      label: this.useXhr + ''
+    });
   },
   /**
    * Handler for save request click / shortcut.
@@ -210,7 +232,11 @@ Polymer({
       ui.projectId = this.project.id;
     }
     ui.open();
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Save action initialization');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Engagement',
+      action: 'Save action initialization'
+    });
   },
 
   /**
@@ -235,9 +261,19 @@ Polymer({
     this._saveUrl();
     this._callRequest();
     this.showCookieBanner = false;
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Request start');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Engagement',
+      action: 'Click',
+      label: 'Request start'
+    });
     // Will help arrange methods bar according to importance of elements.
-    arc.app.analytics.sendEvent('Request', 'Method', this.request.method);
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Request',
+      action: 'Method',
+      label: this.request.method
+    });
   },
 
   abortRequest: function() {
@@ -248,7 +284,11 @@ Polymer({
       this.$.socket.abort();
     }
 
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Request abort');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Engagement',
+      action: 'Request abort'
+    });
   },
 
   get requestControllerOpened() {
@@ -260,7 +300,10 @@ Polymer({
       return;
     }
     // this one is not going throught the router.
-    arc.app.analytics.sendScreen('Request - project endpoint');
+    this.fire('send-analytics', {
+      type: 'screenview',
+      name: 'Request - project endpoint'
+    });
     this._restoreSaved(enpointId);
   },
 
@@ -281,7 +324,11 @@ Polymer({
         this._restoreSaved(this.routeParams.historyId);
         break;
       case 'project':
-        this._restoreProject(this.routeParams.projectid);
+        if (this.usePouchDb) {
+          this.set('currentProjectId', this.routeParams.projectid);
+        } else {
+          this._restoreProject(this.routeParams.projectid);
+        }
         break;
       case 'current':
         this.$.requestQueryModel.data = this.request;
@@ -303,7 +350,6 @@ Polymer({
           });
           return;
         }
-        // console.log('Opening drive', id);
         ctrl.openItemAsRequest(id);
         break;
       default:
@@ -339,7 +385,6 @@ Polymer({
     if (e.detail.data) {
       this.debounce('restore.request', function() {
         let request = this.$.requestQueryModel.toLocalRequest(this.routeParams.type === 'history');
-        // console.info('Restored request', request);
         this.set('request', request);
         if (request.name) {
           this._setPageTitle(request.name);
@@ -354,8 +399,19 @@ Polymer({
       });
     }
   },
-
+  /**
+   * Request data for legacy project.
+   *
+   * @deprecated This function is obsolite. Use `this.currentProjectId` instead an listeners.
+   */
   _restoreProject: function(id) {
+    if (this.usePouchDb) {
+      this.currentProjectId = id;
+      this.fire('selected-project', {
+        id: id
+      });
+      return;
+    }
     id = parseInt(id);
     if (!id || id !== id) {
       StatusNotification.notify({
@@ -376,7 +432,10 @@ Polymer({
       this._setUpProject(project);
     })
     .catch((cause) => {
-      console.error('_restoreProject', cause);
+      this.fire('app-log', {
+        'message': ['Error restoring project.', cause],
+        'level': 'error'
+      });
       StatusNotification.notify({
         message: 'Project data not found in the datastore.'
       });
@@ -403,8 +462,23 @@ Polymer({
       app.selectedRequest = null;
       return;
     }
-    this.$.projectQueryModel.objectId = this.project.requestIds;
-    this.$.projectQueryModel.query();
+    if (!this.usePouchDb) {
+      this.$.projectQueryModel.objectId = this.project.requestIds;
+      this.$.projectQueryModel.query();
+    }
+  },
+
+  _projectRelatedRequestsChanged: function() {
+    if (this.projectRelatedRequests && this.projectRelatedRequests.length) {
+      this.set('selectedRequest', this.projectRelatedRequests[0]._id);
+    }
+  },
+
+  _projectSelectedRequestChanged: function(selectedRequest) {
+    this.fire('selected-request', {
+      id: selectedRequest
+    });
+    this._restoreSaved(selectedRequest);
   },
 
   /**
@@ -436,11 +510,6 @@ Polymer({
         this.associateProject();
       }
     }
-  },
-
-  _requestChanged: function() {
-    console.log('_requestChanged', this.request);
-    //this.request.name
   },
 
   _requestNameChanged: function(name) {
@@ -478,6 +547,7 @@ Polymer({
     .then((request) => this._applyCookies(request))
     .then((request) => this._applyAuthorization(request))
     .then((request) => this._filterHeaders(request))
+    .then((request) => this._cleanReqestToSend(request))
     .then((request) => {
       // Make it async so errors will be handled by socket object.
       this.async(() => {
@@ -494,6 +564,17 @@ Polymer({
         }
       });
     });
+  },
+  _isPayloadChanged: function(e) {
+    this.isPayload = e.detail.value;
+  },
+
+  _cleanReqestToSend: function(request) {
+    if (typeof this.isPayload !== 'undefined' && !this.isPayload) {
+      delete request.files;
+      request.payload = '';
+    }
+    return request;
   },
   // If turned on - apply magic variables to the request.
   _applyMagicVariables: function(request) {
@@ -518,10 +599,12 @@ Polymer({
         })
         .then((result) => {
           request.payload = result;
-          // console.log('Request with magic variables', request);
         })
         .catch((e) => {
-          console.error('Magic variables apply', e);
+          this.fire('app-log', {
+            'message': ['Magic variables', e],
+            'level': 'error'
+          });
         })
         .finally(() => {
           resolve(request);
@@ -567,7 +650,10 @@ Polymer({
             resolve(request);
             return;
           }
-          console.info('Cookies to send with the request: ', cookie);
+          this.fire('app-log', {
+            'message': ['Cookies to send with the request:', cookie],
+            'level': 'info'
+          });
           let headers = arc.app.headers.toJSON(request.headers);
           let found = false;
           headers.forEach((header) => {
@@ -586,7 +672,10 @@ Polymer({
           resolve(request);
         })
         .catch((e) => {
-          console.error('Unable to apply cookies to the request', e);
+          this.fire('app-log', {
+            'message': ['Unable to apply cookies to the request', e],
+            'level': 'error'
+          });
           resolve(request);
         });
       });
@@ -736,11 +825,13 @@ Polymer({
   },
   // Success handler for history object model.
   _historyUrlSaved: function() {
-    console.info('History URL has been saved.');
   },
   // Error handler for history object model.
   _historyUrlSaveError: function(e) {
-    console.warn('Error saving into URLs history.', e);
+    this.fire('app-log', {
+      'message': ['Error saving into URLs history.', e],
+      'level': 'error'
+    });
   },
   /**
    * Called when the request object has been read from the datastore.
@@ -834,9 +925,18 @@ Polymer({
     if (e.detail.isProject) {
       saveType.push('project');
     }
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Save request');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Engagement',
+      action: 'Save request'
+    });
     // weill help arrange UI according to importance of elements.
-    arc.app.analytics.sendEvent('Request', 'Save type', saveType.join(','));
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Request',
+      action: 'Save type',
+      label: saveType.join(',')
+    });
   },
   /**
    * Save/update project with the request.
@@ -941,7 +1041,7 @@ Polymer({
   _saveDrive: function(request) {
     var ctrl = document.body.querySelector('arc-drive-controller');
     if (!ctrl) {
-      console.warn('Drive controller not found!');
+      this.fire('app-log', {'message': ['Drive controller not found!'], 'level': 'error'});
       return;
     }
     ctrl.exportDrive(request, request.name)
@@ -955,13 +1055,22 @@ Polymer({
         message: 'File saved'
       });
     }).catch((error) => {
-      console.error('Unable insert to Drive.', error);
+      this.fire('app-log', {'message': ['Unable insert to Drive', error], 'level': 'error'});
       StatusNotification.notify({
         message: 'Unable upload file to Drive'
       });
-      arc.app.analytics.sendException(JSON.stringify(error), false);
+      this.fire('send-analytics', {
+        type: 'exception',
+        description: 'arc-req-ctrl:' + error.message,
+        fatal: false
+      });
     });
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Save request to Drive');
+
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Data export',
+      action: 'Request to Drive'
+    });
   },
   // Error handler for projects store.
   _projectSaveError: function() {
@@ -1094,7 +1203,10 @@ Polymer({
     this.$.authDataModel.data = authData;
     this.$.authDataModel.save()
     .catch((e) => {
-      console.warn('Unable save auth basic data to the store', e);
+      this.fire('app-log', {
+        'message': ['Unable save auth basic data to the store', e],
+        'level': 'warning'
+      });
     });
     this.authDataList.push(authData);
   },
@@ -1124,7 +1236,10 @@ Polymer({
     this.$.authDataModel.data = authData;
     this.$.authDataModel.save()
     .catch((e) => {
-      console.warn('Unable save auth basic data to the store', e);
+      this.fire('app-log', {
+        'message': ['Unable save auth basic data to the store', e],
+        'level': 'error'
+      });
     });
     this.authDataList.push(authData);
   },
@@ -1145,7 +1260,10 @@ Polymer({
     this.$.authDataModel.data = authData;
     this.$.authDataModel.save()
     .catch((e) => {
-      console.warn('Unable save auth basic data to the store', e);
+      this.fire('app-log', {
+        'message': ['Unable save auth basic data to the store', e],
+        'level': 'error'
+      });
     });
     this.authDataList.push(authData);
   },
@@ -1168,23 +1286,17 @@ Polymer({
     var children = Polymer.dom(this).getEffectiveChildNodes();
     children = children.filter((node) => node.nodeName === 'ARC-RESPONSE-VIEW');
     if (!children[0]) {
-      // no response view
+      this.fire('app-log', {
+        'message': ['There\'s no response view'],
+        'level': 'info'
+      });
       return null;
     }
     return children[0];
   },
 
   _saveCookies: function() {
-    // var responses = [];
-    // if (this.response.redirects && this.response.redirects.length) {
-    //   this.response.redirects.forEach((r) => {
-    //     // let redirectHeaders = arc.app.headers.toJSON(r.headers);
-    //     responses.push(r);
-    //   });
-    // }
-    // responses.push(this.response);
     this.$.cookieJar.response = this.response;
-    // debugger;
     this.$.cookieJar.store();
   }
 });

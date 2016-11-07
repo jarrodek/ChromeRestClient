@@ -1,7 +1,6 @@
 (function() {
 'use strict';
 
-/* global URLParser */
 /*******************************************************************************
  * Copyright 2016 Pawel Psztyc, The ARC team
  *
@@ -176,8 +175,8 @@ class PayloadParser {
       input = PayloadParser.stringToArray(input);
     }
     input.forEach((obj) => {
-      obj.name = URLParser.encodeQueryString(obj.name);
-      obj.value = URLParser.encodeQueryString(obj.value);
+      obj.name = PayloadParser.encodeQueryString(obj.name);
+      obj.value = PayloadParser.encodeQueryString(obj.value);
     });
     if (isArray) {
       return input;
@@ -200,8 +199,8 @@ class PayloadParser {
       input = PayloadParser.stringToArray(input);
     }
     input.forEach((obj) => {
-      obj.name = URLParser.decodeQueryString(obj.name);
-      obj.value = URLParser.decodeQueryString(obj.value);
+      obj.name = PayloadParser.decodeQueryString(obj.name);
+      obj.value = PayloadParser.decodeQueryString(obj.value);
     });
     if (isArray) {
       return input;
@@ -248,6 +247,65 @@ class PayloadParser {
       name: name,
       value: value
     };
+  }
+  /**
+   * Returns a string where all characters that are not valid for a URL
+   * component have been escaped. The escaping of a character is done by
+   * converting it into its UTF-8 encoding and then encoding each of the
+   * resulting bytes as a %xx hexadecimal escape sequence.
+   * <p>
+   * Note: this method will convert any the space character into its escape
+   * short form, '+' rather than %20. It should therefore only be used for
+   * query-string parts.
+   *
+   * <p>
+   * The following character sets are <em>not</em> escaped by this method:
+   * <ul>
+   * <li>ASCII digits or letters</li>
+   * <li>ASCII punctuation characters:
+   *
+   * <pre>- _ . ! ~ * ' ( )</pre>
+   * </li>
+   * </ul>
+   * </p>
+   *
+   * <p>
+   * Notice that this method <em>does</em> encode the URL component delimiter
+   * characters:<blockquote>
+   *
+   * <pre>
+   * ; / ? : &amp; = + $ , #
+   * </pre>
+   *
+   * </blockquote>
+   * </p>
+   *
+   * @param {String} str A string containing invalid URL characters
+   * @return {String} a string with all invalid URL characters escaped
+   */
+  static encodeQueryString(str) {
+    if (!str) {
+      return str;
+    }
+    var regexp = /%20/g;
+    return encodeURIComponent(str).replace(regexp, '+');
+  }
+  /**
+   * Returns a string where all URL component escape sequences have been
+   * converted back to their original character representations.
+   *
+   * Note: this method will convert the space character escape short form, '+',
+   * into a space. It should therefore only be used for query-string parts.
+   *
+   * @param {String} str string containing encoded URL component sequences
+   * @return {String} string with no encoded URL component encoded sequences
+   */
+  static decodeQueryString(str) {
+    if (!str) {
+      return str;
+    }
+    var regexp = /\+/g;
+    return decodeURIComponent(str.replace(regexp, '%20'));
   }
 }
 window.PayloadParser = PayloadParser;

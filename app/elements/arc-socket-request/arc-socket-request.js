@@ -29,13 +29,25 @@ Polymer({
         return null;
       }
       this.connection = new SocketFetch(this.request.url, init);
+      this.connection.addEventListener('firstbyte', (e) => {
+        this.fire('request-first-byte-received', e.detail);
+      });
+      this.connection.addEventListener('loadend', (e) => {
+        this.fire('request-load-end', e.detail);
+      });
+      this.connection.addEventListener('sendheaders', (e) => {
+        this.fire('request-headers-sent', e.detail);
+      });
       try {
         return this.connection.fetch()
         .then((response) => {
           this._processResponse(response);
         });
       } catch (e) {
-        console.error('Error during fetch', e);
+        this.fire('app-log', {
+          'message': ['Error during fetch.', e],
+          'level': 'error'
+        });
         this.fire('error', {
           message: e.message
         });
@@ -43,7 +55,10 @@ Polymer({
       }
     })
     .catch((cause) => {
-      console.error('Error during fetch', cause);
+      this.fire('app-log', {
+        'message': ['Error during fetch.', cause],
+        'level': 'error'
+      });
       this.fire('error', {
         message: cause
       });
@@ -85,7 +100,10 @@ Polymer({
             try {
               obj.append(item.name, item.value);
             } catch (e) {
-              console.error(e.message);
+              this.fire('app-log', {
+                'message': e,
+                'level': 'error'
+              });
               reject(e);
               rejected = true;
               return;
@@ -115,7 +133,10 @@ Polymer({
               try {
                 fd.append(field.name, file);
               } catch (e) {
-                console.error(e.message);
+                this.fire('app-log', {
+                  'message': e,
+                  'level': 'error'
+                });
                 rejected = true;
                 reject(e);
                 return;
@@ -133,7 +154,10 @@ Polymer({
             try {
               fd.append(pair.name, pair.value);
             } catch (e) {
-              console.error(e.message);
+              this.fire('app-log', {
+                'message': e,
+                'level': 'error'
+              });
               rejected = true;
               reject(new Error('Request parameters are invalid.'));
               return;
@@ -161,6 +185,9 @@ Polymer({
 
   _processResponse: function(response) {
     var result = {};
+    this.async(() => {
+      this.processLogs(response.logs);
+    }, 1);
     if (response.error && typeof response.error !== 'function') {
       result.redirects = Array.from(response.redirects);
       result.error = response.error;
@@ -201,7 +228,10 @@ Polymer({
           return this._finishRequest(this.connection.request, result);
         })
         .catch((e) => {
-          console.warn('Something is wrong with the response.', e.message);
+          this.fire('app-log', {
+            'message': ['Something is wrong with the response.', e],
+            'level': 'error'
+          });
           try {
             result.body = decoder.decode(this.connection.response.rawResponse);
           } catch (e) {
@@ -225,7 +255,10 @@ Polymer({
           return this._finishRequest(this.connection.request, result);
         })
         .catch((e) => {
-          console.warn('Something is wrong with the response.', e.message);
+          this.fire('app-log', {
+            'message': ['Something is wrong with the response.', e],
+            'level': 'error'
+          });
           try {
             result.body = decoder.decode(this.connection.response.rawResponse);
           } catch (e) {
@@ -267,6 +300,20 @@ Polymer({
       return;
     }
     this.connection.abort();
+  },
+
+  processLogs(logs) {
+    logs = logs.map((item) => {
+      if (item instanceof Array) {
+        return item.join(' ');
+      }
+      return String(item);
+    });
+    this.fire('app-log', {
+      'message': logs.join('\n'),
+      'stack': 'arc-socket-request.js\nsocket-fetch.js',
+      'level': 'debug'
+    });
   }
 });
 })();

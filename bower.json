@@ -21,7 +21,6 @@
     "HTML5-History-API": "devote/HTML5-History-API#latest",
     "dexie-js": "dfahlander/Dexie.js#latest",
     "har": "jarrodek/har#latest",
-    "chrome-platform-analytics": "GoogleChrome/chrome-platform-analytics#ca1.6.0d",
     "socket-fetch": "advanced-rest-client/socket-fetch#^1.0.63",
     "chrome-app-filesystem": "advanced-rest-client/chrome-app-filesystem#master",
     "chrome-image": "advanced-rest-client/chrome-image#1.0.0",
@@ -34,15 +33,26 @@
     "crypto-js": "^3.1.6",
     "web-socket": "advanced-rest-client/web-socket#^1.0.5",
     "file-reader": "advanced-rest-client/file-reader#^1.0.3",
-    "chrome-storage": "advanced-rest-client/chrome-storage#^1.0.2"
+    "chrome-storage": "advanced-rest-client/chrome-storage#^1.0.2",
+    "arc-definitions": "advanced-rest-client/arc-definitions#^1.0.3",
+    "arc-database": "advanced-rest-client/arc-database#^1.0.4",
+    "app-pouchdb-quick-search": "advanced-rest-client/app-pouchdb-quick-search#^1.0.4",
+    "app-pouchdb-collate": "advanced-rest-client/app-pouchdb-collate#^1.0.1",
+    "app-logger": "advanced-rest-client/app-logger#~0.0.2",
+    "uuid-generator": "advanced-rest-client/uuid-generator#^1.0.4",
+    "paper-masked-input": "advanced-rest-client/paper-masked-input#^1.0.4",
+    "app-analytics": "advanced-rest-client/app-analytics#^1.0.5",
+    "chart.js": "^2.3.0"
   },
   "devDependencies": {
-    "web-component-tester": "*"
+    "web-component-tester": "*",
+    "iron-test-helpers": "PolymerElements/iron-test-helpers#^1.2.5"
   },
   "ignore": [],
   "main": "app/index.html",
   "resolutions": {
-    "lodash": "^4.6.2"
+    "lodash": "^4.6.2",
+    "chrome-platform-analytics": "ca1.6.0d"
   },
-  "version": "7.36.47"
+  "version": "8.6.52"
 }

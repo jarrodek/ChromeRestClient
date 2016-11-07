@@ -70,7 +70,11 @@
         this.signinAwares[0].$.revokeRequest.generateRequest();
       })
       .catch((e) => {
-        console.error('Revoke error', e);
+        var e = new CustomEvent('app-log', {detail: {
+          'message': ['Token revoke error.', e],
+          'level': 'error'
+        }});
+        document.dispatchEvent(e);
         //this.fire('error', e);
       });
     },
@@ -147,7 +151,6 @@
             if (!!error) {
               this.setTokenData(null);
               if (error.message === 'The user is not signed in.') {
-                console.info('Not signed in to chrome.');
                 this.signinAwares.forEach((aware) => {
                   this.signedIn = false;
                   aware._setSignedIn(false);
@@ -353,14 +356,17 @@
       //   // this.fire('google-signin-aware-signed-out');
       // })
       // .catch((e) => {
-      //   console.error('Unable to remove token.', e);
+      //
       // });
     },
     /**
      * Revoke error handler.
      */
-    _tokenRevokeError: function() {
-      console.warn('Token revoke failed.');
+    _tokenRevokeError: function(e) {
+      this.fire('app-log', {
+        'message': ['Token revoke failed.', e],
+        'level': 'error'
+      });
     },
 
     /**
@@ -387,7 +393,10 @@
           //bad request - accessToken not ready.
           break;
         default:
-          console.log('tokenInfoError', e);
+          this.fire('app-log', {
+            'message': ['Token info error.', e],
+            'level': 'error'
+          });
       }
     },
 

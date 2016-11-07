@@ -16,8 +16,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <link rel="import" href="../bower_components/polymer/polymer.html">
     <script src="../bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
     <script src="../bower_components/web-component-tester/browser.js"></script>
-    <link rel="import" href="database-import.html">
+    <link rel="import" href="types-import.html">
     <link rel="import" href="../elements/arc-magic-variables/arc-magic-variables.html">
+    <link rel="import" href="../bower_components/app-pouchdb/pouchdb.html">
   </head>
 
   <body>
@@ -26,43 +27,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <arc-magic-variables></arc-magic-variables>
       </template>
     </test-fixture>
-    <test-fixture id="model">
-      <template>
-        <arc-variable-object-model></arc-variable-object-model>
-      </template>
-    </test-fixture>
 
     <script>
       var basic;
-      var model;
-      var ruleObject;
-      var ruleObjectWithWariable;
       setup((done) => {
         basic = fixture('basic');
-        model = fixture('model');
-        if (ruleObject) {
-          done();
-          return;
-        }
-        model.forceDeleteAll = true;
-        model.genericRemove('variables')
-        .then(() => {
-          ruleObject = new MagicVariableObject({
-            'variable': 'test-variable',
-            'value': 'test-value',
-            'type': 'global',
-            'project': 0
-          });
-          ruleObjectWithWariable = new MagicVariableObject({
-            'variable': 'test-variable-with-enclosed-variable',
-            'value': 'test-value ${test-variable}',
-            'type': 'global',
-            'project': 0
-          });
-          model.data = [ruleObject, ruleObjectWithWariable];
-          model.save();
-          done();
-        });
+        done();
       });
 
       test('Should apply random function and fire event', function(done) {
@@ -81,6 +51,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           expect(e).to.not.exist;
           done();
         };
+        console.log(basic);
         basic.addEventListener('parsed', clb);
         basic.addEventListener('error', errorFn);
         basic.clear();
@@ -109,7 +80,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
       });
       test('Should apply time function and fire event', function(done) {
-        var str = 'X-Value: Random:${random}';
+        var str = 'X-Value: Random:${now}';
         var clb = (e) => {
           basic.removeEventListener('parsed', clb);
           var parsed = e.detail.result;
@@ -133,7 +104,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         basic.parse();
       });
       test('Should apply time function and return promise', function(done) {
-        var str = 'X-Value: Random:${random}';
+        var str = 'X-Value: Random:${now}';
         basic.clear();
         basic.value = str;
         basic.parse().catch((e) => {
@@ -151,55 +122,59 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }, 0);
         });
       });
-      test('Should apply custom rule and fire event', function(done) {
-        var str = 'X-Value: Variable:${test-variable}';
-        var clb = (e) => {
-          basic.removeEventListener('parsed', clb);
-          var parsed = e.detail.result;
-          expect(parsed).to.be.a('string');
-          var compare = 'X-Value: Variable:' + ruleObject.value;
-          expect(parsed, `Applying global rules error`).to.equal(compare);
-          done();
-        };
-        var errorFn = (e) => {
-          basic.removeEventListener('error', errorFn);
-          window.setTimeout(() => {
-            console.info(e);
-            expect(e).to.not.exist;
-            done();
-          }, 0);
-        };
-        basic.addEventListener('parsed', clb);
-        basic.addEventListener('error', errorFn);
-        basic.clear();
-        basic.value = str;
-        basic.parse();
-      });
-      test('Should apply custom rule with variable and fire event', function(done) {
-        var str = `X-Value: Variable:\${${ruleObjectWithWariable.variable}}`;
-        var clb = (e) => {
-          basic.removeEventListener('parsed', clb);
-          var parsed = e.detail.result;
-          expect(parsed).to.be.a('string');
-          var compare = 'X-Value: Variable:' + ruleObjectWithWariable.value.replace('${' +
-            ruleObject.variable + '}', ruleObject.value);
-          expect(parsed, `Applying global rules error`).to.equal(compare);
-          done();
-        };
-        var errorFn = (e) => {
-          basic.removeEventListener('error', errorFn);
-          window.setTimeout(() => {
-            console.info(e);
-            expect(e).to.not.exist;
-            done();
-          }, 0);
-        };
-        basic.addEventListener('parsed', clb);
-        basic.addEventListener('error', errorFn);
-        basic.clear();
-        basic.value = str;
-        basic.parse();
-      });
+      //
+      // Test below ar unescesary. They are not used in the app and
+      // will change in future.
+      //
+      // test('Should apply custom rule and fire event', function(done) {
+      //   var str = 'X-Value: Variable:${test-variable}';
+      //   var clb = (e) => {
+      //     basic.removeEventListener('parsed', clb);
+      //     var parsed = e.detail.result;
+      //     expect(parsed).to.be.a('string');
+      //     var compare = 'X-Value: Variable:' + ruleObject.value;
+      //     expect(parsed, `Applying global rules error`).to.equal(compare);
+      //     done();
+      //   };
+      //   var errorFn = (e) => {
+      //     basic.removeEventListener('error', errorFn);
+      //     window.setTimeout(() => {
+      //       console.info(e);
+      //       expect(e).to.not.exist;
+      //       done();
+      //     }, 0);
+      //   };
+      //   basic.addEventListener('parsed', clb);
+      //   basic.addEventListener('error', errorFn);
+      //   basic.clear();
+      //   basic.value = str;
+      //   basic.parse();
+      // });
+      // test('Should apply custom rule with variable and fire event', function(done) {
+      //   var str = `X-Value: Variable:\${${ruleObjectWithWariable.variable}}`;
+      //   var clb = (e) => {
+      //     basic.removeEventListener('parsed', clb);
+      //     var parsed = e.detail.result;
+      //     expect(parsed).to.be.a('string');
+      //     var compare = 'X-Value: Variable:' + ruleObjectWithWariable.value.replace('${' +
+      //       ruleObject.variable + '}', ruleObject.value);
+      //     expect(parsed, `Applying global rules error`).to.equal(compare);
+      //     done();
+      //   };
+      //   var errorFn = (e) => {
+      //     basic.removeEventListener('error', errorFn);
+      //     window.setTimeout(() => {
+      //       console.info(e);
+      //       expect(e).to.not.exist;
+      //       done();
+      //     }, 0);
+      //   };
+      //   basic.addEventListener('parsed', clb);
+      //   basic.addEventListener('error', errorFn);
+      //   basic.clear();
+      //   basic.value = str;
+      //   basic.parse();
+      // });
 
       test('Should apply rule with group and fire event', function(done) {
         var str = 'X-Value: Variable:${random:1}';

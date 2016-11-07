@@ -57,7 +57,10 @@ Polymer({
       }
     },
     // True when a suggestion box for the URL is opened.
-    suggesionsOpened: Boolean
+    suggesionsOpened: Boolean,
+    usePouchDb: {
+      type: Boolean
+    }
   },
   observers: [
     '_urlChanged(url)',
@@ -65,6 +68,18 @@ Polymer({
   ],
   listeners: {
     'blur': '_elementBlur'
+  },
+
+  attached: function() {
+    this.listen(document, 'use-pouch-db', '_setUsePouchDb');
+  },
+
+  detached: function() {
+    this.unlisten(document, 'use-pouch-db', '_setUsePouchDb');
+  },
+
+  _setUsePouchDb: function() {
+    this.set('usePouchDb', true);
   },
   /**
    * Called when the URL value change.
@@ -99,10 +114,12 @@ Polymer({
       }, 0);
       stateName = 'Single line';
     }
-    if (!arc || !arc.app || !arc.app.analytics) {
-      return;
-    }
-    arc.app.analytics.sendEvent('Request view', 'URL widget toggle', stateName);
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Request view',
+      action: 'URL widget toggle',
+      label: stateName
+    });
   },
   /**
    * Update the URL from detailed form values.
@@ -158,20 +175,40 @@ Polymer({
    * Crerate / update form data from the URL.
    */
   updateForm: function() {
-    var data = new URLParser(this.url);
-    var hostField = '';
-    if (!data.protocol) {
-      hostField = 'http://';
-    } else {
-      hostField = data.protocol + '://';
+    var url = this.url;
+    if (url.indexOf('http') !== 0) {
+      url = 'http://' + url;
     }
-    if (data.authority) {
-      hostField += data.authority;
+    var parser;
+    try {
+      parser = new URL(url);
+    } catch (e) {
+      this.set('hostValue', this.url);
+      console.log('URL parse error', e);
+      this.fire('app-log', {
+        message: e
+      });
+      return;
     }
-    this.set('hostValue', hostField);
-    this.set('pathValue', data.path);
-    this.set('anchorValue', data.anchor);
-    this.set('paramsList', Array.from(data.paramsList));
+    var hash = '';
+    if (parser.hash) {
+      if (parser.hash[0] === '#') {
+        hash = parser.hash.substr(1);
+      } else {
+        hash = parser.hash;
+      }
+    }
+    this.set('hostValue', parser.origin);
+    this.set('pathValue', parser.pathname);
+    this.set('anchorValue', hash);
+    if (parser.searchParams) {
+      this.set('paramsList', Array.from(parser.searchParams).map((i) => {
+        return {
+          name: i[0],
+          value: i[1]
+        };
+      }));
+    }
   },
   /**
    * Adds empty line of URL params to the detailed form of URL parameters.
@@ -212,22 +249,18 @@ Polymer({
         this.decodeParameters();
         gaLabel = 'Decode parameters';
         break;
-      case 'replAmpAction':
-        this.replaceAmp();
-        gaLabel = 'Replace & with ;';
-        break;
-      case 'replSemiAction':
-        this.replaceSemicolon();
-        gaLabel = 'Replace ; with &';
-        break;
       default:
         console.warn('Unknown action: %s', action);
+        gaLabel = 'Unknown action';
     }
-    if (!arc || !arc.app || !arc.app.analytics) {
-      return;
-    }
+
     if (gaLabel) {
-      arc.app.analytics.sendEvent('Request view', 'URL widget context menu action', gaLabel);
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Request view',
+        action: 'URL widget context menu action',
+        label: gaLabel
+      });
     }
   },
   /**
@@ -246,65 +279,43 @@ Polymer({
    * HTTP encode or decode query parameters depending on [type].
    */
   _decodeEncode: function(type) {
-    if (!this.url) {
+    var url = this.url;
+    if (!url) {
       return;
     }
-
-    /* global URI, URLParser */
-    URI.escapeQuerySpace = false;
-    var data = new URLParser(this.url);
-    var isEncode = type === 'encode';
-    var result = new Set();
-    for (let param of data.paramsList) {
-      let key = param.name;
-      let value = param.value;
-      key = isEncode ? URLParser.encodeQueryString(key) : URLParser.decodeQueryString(key);
-      value = isEncode ? URLParser.encodeQueryString(value) : URLParser.decodeQueryString(value);
-      param.name = key;
-      param.value = value;
-      result.add(param);
+    if (url.indexOf('http') !== 0) {
+      url = 'http://' + url;
     }
-    var path = data.path;
+    var parser;
+    try {
+      parser = new URL(url);
+    } catch (e) {
+      console.log('URL parse error', e);
+      this.fire('app-log', {
+        message: e
+      });
+      return;
+    }
+    var isEncode = type === 'encode';
+    Array.from(parser.searchParams).forEach((i) => {
+      parser.searchParams.delete(i[0]);
+      let k = isEncode ? this.encodeQueryString(i[0]) : this.decodeQueryString(i[0]);
+      let v = isEncode ? this.encodeQueryString(i[1]) : this.decodeQueryString(i[1]);
+      parser.searchParams.set(k, v);
+    });
+    var path = parser.pathname;
     if (isEncode && path) {
       if (/\s/.test(path)) {
         let parts = path.split('/');
-        parts = parts.map((cmp) => URLParser.encodeQueryString(cmp));
+        parts = parts.map((cmp) => this.encodeQueryString(cmp));
         path = parts.join('/');
       }
     } else {
-      path = URLParser.decodeQueryString(path);
+      path = this.decodeQueryString(path);
     }
-    data.path = path;
-    data.paramsList = result;
-    this.set('url', data.toString());
+    parser.pathname = path;
+    this.set('url', parser.toString());
     this.revalidate();
-  },
-  /**
-   * Replace `&` with `;`
-   */
-  replaceAmp: function() {
-    this._replaceQueryDelim(';');
-  },
-  /**
-   * Replace `;` with `&`
-   */
-  replaceSemicolon: function() {
-    this._replaceQueryDelim('&');
-  },
-  /**
-   * Replace delimiter for query params.
-   *
-   * @param {String} delim A new delimiter to be used.
-   */
-  _replaceQueryDelim: function(delim) {
-    if (!this.url) {
-      return;
-    }
-    var data = new URLParser(this.url);
-    data.queryDelimiter = delim;
-    data.setQueryFromCurrentParams();
-    var url = data.toString();
-    this._setUrl(url);
   },
   /** Called when URL params form has been renederd. */
   _onParamsRender: function() {
@@ -349,8 +360,23 @@ Polymer({
       this.$.autocomplete.source = [];
       return;
     }
-    this.$.model.objectId = value;
-    this.$.model.query();
+    var usePouchDb = this.$.meta.byKey('usePouchDb');
+
+    if (!usePouchDb) {
+      this.$.model.objectId = value;
+      this.$.model.query();
+    } else {
+      let event = this.fire('url-history-object-query', {
+        q: value
+      });
+      event.detail.result.then((data) => {
+        var suggestions = data.map((item) => item._id);
+        this.$.autocomplete.source = suggestions;
+      })
+      .catch(() => {
+        this.$.autocomplete.source = [];
+      });
+    }
   },
   /**
    * Handler called when the suggestions data are ready and should be passed to the
@@ -367,10 +393,12 @@ Polymer({
   },
   // Handler called when the context menu has been opened.
   _menuOpened: function() {
-    if (!arc || !arc.app || !arc.app.analytics) {
-      return;
-    }
-    arc.app.analytics.sendEvent('Request view', 'URL widget toggle', 'Open menu');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Request view',
+      action: 'URL widget toggle',
+      label: 'Open menu'
+    });
   },
 
   revalidate: function() {
@@ -395,6 +423,65 @@ Polymer({
     } catch (e) {
       this.$.invalidUrlToast.open();
     }
+  },
+  /**
+   * Returns a string where all characters that are not valid for a URL
+   * component have been escaped. The escaping of a character is done by
+   * converting it into its UTF-8 encoding and then encoding each of the
+   * resulting bytes as a %xx hexadecimal escape sequence.
+   * <p>
+   * Note: this method will convert any the space character into its escape
+   * short form, '+' rather than %20. It should therefore only be used for
+   * query-string parts.
+   *
+   * <p>
+   * The following character sets are <em>not</em> escaped by this method:
+   * <ul>
+   * <li>ASCII digits or letters</li>
+   * <li>ASCII punctuation characters:
+   *
+   * <pre>- _ . ! ~ * ' ( )</pre>
+   * </li>
+   * </ul>
+   * </p>
+   *
+   * <p>
+   * Notice that this method <em>does</em> encode the URL component delimiter
+   * characters:<blockquote>
+   *
+   * <pre>
+   * ; / ? : &amp; = + $ , #
+   * </pre>
+   *
+   * </blockquote>
+   * </p>
+   *
+   * @param {String} str A string containing invalid URL characters
+   * @return {String} a string with all invalid URL characters escaped
+   */
+  encodeQueryString: function(str) {
+    if (!str) {
+      return str;
+    }
+    var regexp = /%20/g;
+    return encodeURIComponent(str).replace(regexp, '+');
+  },
+  /**
+   * Returns a string where all URL component escape sequences have been
+   * converted back to their original character representations.
+   *
+   * Note: this method will convert the space character escape short form, '+',
+   * into a space. It should therefore only be used for query-string parts.
+   *
+   * @param {String} str string containing encoded URL component sequences
+   * @return {String} string with no encoded URL component encoded sequences
+   */
+  decodeQueryString: function(str) {
+    if (!str) {
+      return str;
+    }
+    var regexp = /\+/g;
+    return decodeURIComponent(str.replace(regexp, '%20'));
   }
 });
 })();

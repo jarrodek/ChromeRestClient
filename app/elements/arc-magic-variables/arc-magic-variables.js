@@ -53,7 +53,9 @@ Polymer({
      */
     scope: {
       type: Number
-    }
+    },
+
+    environment: String
   },
   /**
    * This function should be called when groups should be cleared.
@@ -78,8 +80,16 @@ Polymer({
     if (this.rules) {
       return Promise.resolve(this.rules);
     }
-    return this.$.variableModel.query()
+    var env = this.environment || 'default';
+    var db = new PouchDB('variables');
+    return db.allDocs({
+      // jscs:disable
+      include_docs: true
+      // jscs:enable
+    })
+    .then((r) => r.rows.filter((i) => i.doc.environment === env && i.doc.enabled === true))
     .then((rules) => {
+      rules = rules.map((i) => i.doc);
       this._setRules(rules);
       return rules;
     });
@@ -121,7 +131,6 @@ Polymer({
     return this._getRules()
     .then(() => this._setupGroupRules())
     .then(() => {
-      // console.log(this._groups);
       if (typeof this.value === 'string') {
         return this._applyString(this.value);
       } else {
@@ -136,6 +145,7 @@ Polymer({
     })
     .catch((e) => {
       this.fire('error', e);
+      return this.value;
     });
   },
   /**
@@ -178,15 +188,7 @@ Polymer({
     if (!this.rules || !this.rules.length) {
       return str;
     }
-    var globalRules = this.rules.filter((g) => g.type === 'global');
-    globalRules.forEach((rule) => {
-      str = this._apply(str, rule.variable, rule.value);
-    });
-    if (!this.scope) {
-      return str;
-    }
-    var scopedRules = this.rules.filter((g) => g.type === 'scoped' && g.project === this.scope);
-    scopedRules.forEach((rule) => {
+    this.rules.forEach((rule) => {
       str = this._apply(str, rule.variable, rule.value);
     });
     return str;
@@ -202,7 +204,6 @@ Polymer({
   _apply: function(str, key, value) {
     key = key.replace('${', '');
     key = key.replace('}', '');
-    // console.log('_apply', str, key, value);
     var regGeneral = new RegExp('\\$\\{' + key + '\\}', 'gm');
     var regGroup = new RegExp('\\$\\{(' + key + ':\\d+)\\}', 'gm');
     value = this._parseValue(key, value);
@@ -216,7 +217,6 @@ Polymer({
       } else {
         _value = value;
       }
-      // console.log('Replacing in general rule', key, _value, this._groups);
       str = str.replace(regGeneral, _value);
     }
     if (regGroup.test(str)) {
@@ -262,16 +262,13 @@ Polymer({
         if (!matches) {
           break;
         }
-        //console.log('aaaaaaaaaaaaaaaaa', orygKey, matches);
         let groupKey = matches[1];
         let key = matches[2];
         if (key === orygKey) {
           value = value.replace(matches[0], '[recursive]');
           continue;
         }
-        // console.log('Generating: %s, %s, %s, %s', groupKey, key, value, !!matches[3]);
         let _value = this._getGroupValue(groupKey, key, value, !!matches[3]);
-        // console.log('Generated: %s, %s', key, _value, this._groups);
         value = this._apply(value, key, _value);
       }
     }
@@ -289,7 +286,6 @@ Polymer({
    * @param {String} A generated / cached value for given groupKey.
    */
   _getGroupValue: function(groupKey, key, defaultValue, dontCache) {
-    //console.log('BBBBBBBBBBBBBBBB', groupKey, key, defaultValue, dontCache);
     var value;
     if ((groupKey in this._groups) && !dontCache) {
       value = this._groups[groupKey];

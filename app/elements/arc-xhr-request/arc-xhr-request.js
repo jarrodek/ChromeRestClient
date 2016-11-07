@@ -122,7 +122,7 @@
       response.headers = h;
       response.redirects = [];
       response.ok = true;
-      response.auth = {};
+      response.auth = msg.auth || {};
       response.stats = response.stats;
       response.rawBody = response.response;
 
@@ -144,7 +144,8 @@
         request: {
           xhr: true
         },
-        response: response
+        response: response,
+        auth: msg.auth || undefined
       };
       this.fire('ready', detail);
     },

@@ -16,23 +16,50 @@
       noHistory: {
         type: Boolean,
         value: false
-      }
+      },
+      // If set, the controller will use pouch db as a database connector and new database schema.
+      usePouchDb: {
+        type: Boolean
+      },
+
+      selectedProject: String,
+      // Just to pass to the view.
+      withToast: Boolean
     },
+
+    observers: [
+      '_usePouchDbChanged(usePouchDb)'
+    ],
+
     ready: function() {
       try {
         this._observeHistoryEnabled();
         this._updateHistoryStatus();
       } catch (e) {
-        console.error('Error occurred constructing the arc-menu', e);
-        arc.app.analytics.sendException('arc-menu::ready::' + e.message, false);
+        this.fire('app-log', {
+          'message': ['Error occurred constructing the arc-menu', e],
+          'level': 'error'
+        });
+        this.fire('send-analytics', {
+          type: 'exception',
+          description: 'arc-menu:' + e.message,
+          fatal: false
+        });
       }
     },
     attached: function() {
-      this.refreshProjects();
       this.listen(document.body, 'project-removed', 'refreshProjects');
+      this.listen(document, 'project-object-deleted', 'refreshProjects');
+      this.listen(document, 'project-object-changed', '_updateProject');
+      this.listen(document.body, 'project-name-changed', '_updateProjectName');
+      this.listen(document, 'selected-project', '_updateProjectSelection');
     },
     detached: function() {
-      this.listen(document.body, 'project-removed', 'refreshProjects');
+      this.unlisten(document.body, 'project-removed', 'refreshProjects');
+      this.unlisten(document, 'project-object-deleted', 'refreshProjects');
+      this.unlisten(document, 'project-object-changed', '_updateProject');
+      this.unlisten(document.body, 'project-name-changed', '_updateProjectName');
+      this.unlisten(document, 'selected-project', '_updateProjectSelection');
     },
     /**
      * User clicked on a navigation element.
@@ -40,12 +67,60 @@
     _navigateRequested: function(e) {
       page(e.detail.url);
     },
+    _usePouchDbChanged: function() {
+      this.refreshProjects();
+    },
     /**
      * Refresh projects list and display new list.
      */
     refreshProjects: function() {
-      this.$.model.query();
+      if (this.usePouchDb) {
+        this._queryProjects();
+      } else {
+        this.$.model.query();
+      }
     },
+
+    _getDb: function() {
+      return new PouchDB('legacy-projects');
+    },
+
+    _queryProjects: function() {
+
+      this._getDb().allDocs({
+        // jscs:disable
+        include_docs: true
+        // jscs:enable
+      })
+      .then((result) => {
+        result = result.rows.map((i) => i.doc);
+        result = result.sort((a, b) => {
+          if (a.order === b.order) {
+            return 0;
+          }
+          if (a.order > b.order) {
+            return 1;
+          }
+          if (a.order < b.order) {
+            return -1;
+          }
+        });
+        result = result.map((i) => {
+          i.id = i._id;
+          return i;
+        });
+        this.set('projects', result);
+      })
+      .catch((err) => {
+        this.fire('send-analytics', {
+          type: 'exception',
+          description: 'arc-menu:' + err.message,
+          fatal: false
+        });
+        this.fire('app-log', {'message': err, 'level': 'error'});
+      });
+    },
+
     /**
      * Attach listener to chrome local storage to listen for history settings change.
      */
@@ -53,8 +128,15 @@
       try {
         chrome.storage.onChanged.addListener(this._historyObserver);
       } catch (e) {
-        console.error('Error setting up storage listener', e);
-        arc.app.analytics.sendException('arc-menu::ready::' + e.message, false);
+        this.fire('app-log', {
+          'message': ['Error setting up storage listener'. e],
+          'level': 'error'
+        });
+        this.fire('send-analytics', {
+          type: 'exception',
+          description: 'arc-menu:' + e.message,
+          fatal: false
+        });
       }
     },
     /**
@@ -65,8 +147,9 @@
      */
     updateProjectName: function(projectId, projectName) {
       if (this.project === null) {
-        console.warn('Trying to update a project name when project list is empty. ' +
-          'Try insert new project first.');
+        var msg = 'Trying to update a project name when project list is empty. ' +
+          'Try insert new project first.';
+        this.fire('app-log', {'message': msg, 'level': 'error'});
         return;
       }
       this.projects.forEach((project, i) => {
@@ -75,22 +158,43 @@
         }
       });
     },
+
+    _updateProject: function(e, detail) {
+      var p = detail.project;
+      p.id = p._id;
+      if (!this.projects || !this.projects.length) {
+        this.push('projects', p);
+        return;
+      }
+      var index = this.projects.findIndex((i) => i._id === p._id);
+      if (index === -1) {
+        this.push('projects', p);
+        return;
+      }
+      this.set('projects.' + index + '.name', p.name);
+      this.set('projects.' + index + '.order', p.order);
+    },
+
     /**
      * Add newly created project to the list.
      *
      * @param {Number} projectId Database id for the project
      */
-    appendProject: function(projectId) {
-      console.info('append project ', projectId);
-      this.$.model.query();
+    appendProject: function(/*projectId*/) {
+      if (this.usePouchDb) {
+        this._queryProjects();
+      } else {
+        this.$.model.query();
+      }
     },
     /**
      * Remove project from the UI.
      */
     removeProject: function(projectId) {
       if (this.project === null) {
-        console.warn('Trying to remove a project when project list is empty. ' +
-          'Try insert new project first.');
+        var msg = 'Trying to remove a project when project list is empty. ' +
+          'Try insert new project first.';
+        this.fire('app-log', {'message': msg, 'level': 'warning'});
         return;
       }
       this.projects.forEach((project, i) => {
@@ -112,8 +216,13 @@
           }
         });
       } catch (e) {
-        console.error('Error setting up storage listener', e);
-        arc.app.analytics.sendException('arc-menu::ready::' + e.message, false);
+        var msg = 'Error setting up storage listener';
+        this.fire('app-log', {'message': [msg, e], 'level': 'warning'});
+        this.fire('send-analytics', {
+          type: 'exception',
+          description: 'arc-menu:' + e.message,
+          fatal: false
+        });
       }
     },
 
@@ -134,6 +243,19 @@
 
     _signOutRequested: function() {
       this.$.auth.signOut();
+    },
+
+    _updateProjectName: function(e) {
+      var projectId = e.detail.projectId;
+      var index = this.projects.findIndex((i) => i._id === projectId);
+      if (index === -1) {
+        return;
+      }
+      this.set('projects.' + index + '.name', e.detail.name);
+    },
+
+    _updateProjectSelection: function(e, detail) {
+      this.set('selectedProject', detail.id);
     }
   });
 })();

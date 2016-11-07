@@ -105,7 +105,12 @@ Polymer({
       if (!this.items || this.items.length === 0) {
         this.loadMoreData();
       }
-      arc.app.analytics.sendEvent('Drive integration', 'Open', 'Open drive picker');
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Drive integration',
+        action: 'Open',
+        label: 'Open drive picker'
+      });
     }
   },
 
@@ -186,7 +191,12 @@ Polymer({
     this.debounce('query', function() {
       this._resetQuery();
     }, 300);
-    arc.app.analytics.sendEvent('Drive integration', 'Search', 'Search for file');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Drive integration',
+      action: 'Search',
+      label: 'Search for file'
+    });
   },
   /**
    * Reset current query data.
@@ -201,7 +211,12 @@ Polymer({
    */
   _fileSelected: function(e) {
     this.openItemAsRequest(e.detail.selected.id);
-    arc.app.analytics.sendEvent('Drive integration', 'Open', 'Open file');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Drive integration',
+      action: 'Open',
+      label: 'Open file'
+    });
   },
   /**
    * Open a Google Drive item as a request item.
@@ -211,7 +226,7 @@ Polymer({
    */
   openItemAsRequest: function(id) {
     if (!id) {
-      console.warn('Trying to open Drive item without ID');
+      this.fire('app-log', {'message': 'Trying to open Drive item without ID', 'level': 'warning'});
       return;
     }
     if (!this.opened) {
@@ -241,9 +256,8 @@ Polymer({
       response = response.requests[0];
     }
     let obj = arc.app.importer.normalizeRequest(response);
-    obj.type = 'drive';
+    obj.type = 'google-drive';
     obj.driveId = this.fileId;
-    obj.isDrive = true;
     this.set('loading', false);
     this.close();
     delete obj.id;
@@ -261,7 +275,6 @@ Polymer({
    * Ajax call to Drive API error handler
    */
   _handleDriveApiError: function(e) {
-    // console.log('_handleDriveApiError', e);
     this.set('loading', false);
     var message = null;
     var isBackMessage = true;
@@ -337,7 +350,8 @@ Polymer({
     this.viewSelected = 0;
     var exportObj = arc.app.importer.createExportObject({
       requests: [requestObject],
-      projects: []
+      projects: [],
+      type: 'saved'
     });
     if (driveId) {
       return drive.file.update(driveId, {
@@ -350,7 +364,7 @@ Polymer({
         }
       })
       .catch((e) => {
-        console.error('PATCH error', e);
+        this.fire('app-log', {'message': ['PATCH error', e], 'level': 'error'});
       });
     }
     return drive.file.create({

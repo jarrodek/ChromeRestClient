@@ -1,0 +1,121 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-styles/paper-styles.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<dom-module id="headers-sets-selector">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        max-height: 500px;
+        overflow: auto;
+
+        --paper-card-header-text: {
+          @apply(--paper-font-body2);
+        }
+
+        --paper-card-content: {
+          padding-top: 0px;
+        }
+
+        --paper-card-actions: {
+          font-size: 14px;
+        }
+      }
+      .intro {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        @apply(--paper-font-body1);
+        color: rgba(0,0,0,0.54);
+        font-size: 15px;
+      }
+      .intro > * {
+        margin-right: 8px;
+      }
+      .add-button {
+        color: var(--primary-color);
+      }
+      paper-card {
+        display: block;
+        width: 100%;
+        margin-bottom: 20px;
+        border: 1px rgba(0,0,0,0.12) solid;
+      }
+
+      .use-button {
+        color: var(--primary-color);
+      }
+
+      .left-buttons {
+        @apply(--layout-flex);
+      }
+      .card-actions {
+        @apply(--layout-horizontal);
+      }
+
+      .code {
+        @apply(--paper-font-code1);
+        font-weight: 400;
+      }
+      .header-line span {
+        margin-left: 8px;
+      }
+
+      .add-editor {
+        margin: 0 12px 24px 12px;
+        max-width: 700px;
+      }
+
+      .headers-content {
+        white-space: pre-line;
+      }
+
+    </style>
+    <div class="intro">
+      <iron-icon icon="arc:info-outline"></iron-icon>
+      <p>Use predefined sets below to insert headers into the editor</p>
+      <paper-icon-button on-tap="addSet" class="add-button" title="Add new set" icon="arc:add-circle-outline"></paper-icon-button>
+    </div>
+
+    <iron-collapse id="editor">
+      <div class="add-editor">
+        <paper-input id="editorSetName" label="Headers set name" error-message="Name is required" required auto-validate></paper-input>
+        <paper-textarea id="editorSetContent" label="Headers set content" required></paper-textarea>
+        <paper-button on-tap="addSetSave" class="action-button">Save set</paper-button>
+        <paper-button on-tap="cancelAddSet" class="">Cancel</paper-button>
+      </div>
+    </iron-collapse>
+
+    <template is="dom-repeat" items="[[availableSets]]" id="repeater">
+      <paper-card heading="[[item.name]]" elevation="0">
+        <template is="dom-if" if="[[_isEditorEnabled(item.editorEnabled)]]">
+          <div class="card-content">
+            <paper-input label="Headers set name" error-message="Name is required" required auto-validate value="{{item.name}}"></paper-input>
+            <paper-textarea label="Headers set content" required value="{{item.headers}}"></paper-textarea>
+          </div>
+          <div class="card-actions">
+            <paper-button class="use-button" on-tap="_updateSet">Update set</paper-button>
+          </div>
+        </template>
+        <template is="dom-if" if="[[!_isEditorEnabled(item.editorEnabled)]]">
+          <div class="card-content code selectable-text headers-content">[[item.headers]]</div>
+          <div class="card-actions">
+            <div class="left-buttons">
+              <paper-button hidden$="[[!item.editable]]" class="use-button" on-tap="_editSet">Edit</paper-button>
+              <paper-button hidden$="[[!item.deletable]]" on-tap="_deleteSet">Delete</paper-button>
+            </div>
+            <paper-button class="use-button" on-tap="_useSet">Use this set</paper-button>
+          </div>
+        </template>
+      </paper-card>
+    </template>
+    <paper-toast text="" id="errorToast"></paper-toast>
+  </template>
+  <script src="headers-sets-selector.js"></script>
+</dom-module>

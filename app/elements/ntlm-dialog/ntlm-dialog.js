@@ -23,20 +23,43 @@
         value: 'workgroup'
       },
       // Current URL.
-      url: String
+      url: String,
+      usePouchDb: Boolean,
+      entryAnimation: {
+        type: String,
+        value: 'slide-from-top-animation'
+      },
+      exitAnimation: {
+        type: String,
+        value: 'slide-up-animation'
+      },
+      savedAuth: Object,
+      credentialsPath: {
+        type: String,
+        computed: '_computeCredentialsPath(url)'
+      }
     },
 
-    // Toggle password visibility
-    togglePassword: function(e) {
-      var input = this.$.password;
-      var icon = e.target;
-      if (input.type === 'password') {
-        input.type = 'text';
-        icon.icon = 'visibility-off';
-      } else {
-        input.type = 'password';
-        icon.icon = 'visibility';
+    observers: [
+      '_savedAuthChanged(savedAuth.*)'
+    ],
+
+    _computeCredentialsPath: function(url) {
+      var path = 'ntlm/';
+      if (url) {
+        path += encodeURIComponent(url);
       }
+      return path;
+    },
+
+    _savedAuthChanged: function() {
+      var a = this.savedAuth;
+      if (!a || !a.uid || !this.url) {
+        return;
+      }
+      this.login = a.uid;
+      this.password = a.passwd;
+      this.domain = a.domain;
     },
 
     _setValue: function() {
@@ -45,6 +68,27 @@
         passwd: this.password,
         domain: this.domain
       });
+      if (this.usePouchDb) {
+        if (!this.savedAuth || this.savedAuth.uid !== this.login ||
+          this.savedAuth.passwd !== this.password || this.savedAuth.domain !== this.domain) {
+          this._updateData();
+        }
+      }
+    },
+
+    _updateData: function() {
+      if (!this.usePouchDb || !this.url) {
+        return;
+      }
+      if (!this.savedAuth) {
+        this.savedAuth = {
+          _id: 'ntlm/' + encodeURIComponent(this.url)
+        };
+      }
+      this.savedAuth.uid = this.login;
+      this.savedAuth.passwd = this.password;
+      this.savedAuth.domain = this.domain;
+      this.$$('#doc').save();
     }
 
   });

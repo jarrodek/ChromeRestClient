@@ -452,7 +452,8 @@ gulp.task('copy', () => {
 
   // copy webworkers used in bower_components
   var webWorkers = gulp.src([
-    'app/bower_components/socket-fetch/decompress-worker.js'
+    'app/bower_components/socket-fetch/decompress-worker.js',
+    'app/bower_components/arc-definitions/definitions.json'
   ]).pipe(gulp.dest(path.join(dest, 'elements')));
 
   // zlib library need to placed folder up relativelly to decompress-worker

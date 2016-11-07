@@ -50,11 +50,10 @@ Polymer({
    * Handler called when the files has been read.
    */
   _importFileReady: function(e) {
-    // console.info('File read', e.detail.result);
     if (e.detail.result) {
       try {
         let result = JSON.parse(e.detail.result);
-        if (!(result.projects && result.requests)) {
+        if (!(result.projects || result.requests || result.history)) {
           if ('headers' in result && 'url' in result && 'method' in result) {
             //old file.
             this.importData = {
@@ -77,9 +76,12 @@ Polymer({
           this._resetFileDrop();
           this._setImporting(false);
         }
-
       } catch (e) {
-        console.error('arc-data-import::_importFileReady::JSON.parse::error', e);
+        console.error('File read error', e);
+        this.fire('app-log', {
+          'message': ['arc-data-import::_importFileReady::JSON.parse::error', e],
+          'level': 'error'
+        });
         StatusNotification.notify({
           message: 'Unable to parse the file.'
         });
@@ -103,8 +105,12 @@ Polymer({
       message: 'File read error.'
     });
     this._resetFileDrop();
-    console.error('arc-data-import::_importFileError', e);
-    arc.app.analytics.sendException(e.detail.message, true);
+    this.fire('app-log', {'message': ['arc-data-import::_importFileError', e], 'level': 'error'});
+    this.fire('send-analytics', {
+      type: 'exception',
+      description: e.detail.message,
+      fatal: true
+    });
   },
   /** Compute is file is being imported. */
   _computeFileImportPreview: function(importData) {

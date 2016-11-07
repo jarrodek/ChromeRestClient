@@ -115,7 +115,7 @@ the License.
               <paper-icon-button title="Copy content to clipboard" icon="content-copy" data-source="json" on-tap="_clipboardCopy"></paper-icon-button>
               <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
             </div>
-            <json-viewer id="jsonViewer"></json-viewer>
+            <json-viewer id="jsonViewer" raw="[[raw]]"></json-viewer>
           </section>
           <section hidden$="[[!isXml]]">
             <div class="actions-panel">

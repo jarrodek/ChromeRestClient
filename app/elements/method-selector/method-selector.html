@@ -23,7 +23,6 @@ The element also displays the Content-Type header value. It has some predefined 
 but a change to the `contentType` property will update the list item if it is available or display
 `Custom content type` if the user used different Content-Type header value.
 
-TODO: It may be useful to analyse user's content-types and put most common on the top of the list. It also includes values not defined in the list.
 TODO: The list shouldn't be defined in the view. It should be stored in IDB or in the file and generated dynamically.
 -->
 <dom-module id="method-selector">
@@ -43,10 +42,10 @@ TODO: The list shouldn't be defined in the view. It should be stored in IDB or i
       <paper-radio-button name="POST">POST</paper-radio-button>
       <paper-radio-button name="PUT">PUT</paper-radio-button>
       <paper-radio-button name="DELETE">DELETE</paper-radio-button>
+      <paper-radio-button name="PATCH">PATCH</paper-radio-button>
     </paper-radio-group>
-    <paper-dropdown-menu label="Other methods" opened="{{methodManuOpened}}" hidden$="[[showCustom]]">
+    <paper-dropdown-menu label="Other methods" opened="{{methodMenuOpened}}" hidden$="[[showCustom]]">
       <paper-listbox class="dropdown-content" selected="{{method}}" attr-for-selected="data-method">
-        <paper-item data-method="PATCH">PATCH</paper-item>
         <paper-item data-method="HEAD">HEAD</paper-item>
         <paper-item data-method="CONNECT">CONNECT</paper-item>
         <paper-item data-method="OPTIONS">OPTIONS</paper-item>

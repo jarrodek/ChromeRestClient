@@ -48,7 +48,8 @@ Polymer({
     canDelete: {
       type: Boolean,
       value: false
-    }
+    },
+    usePouchDb: Boolean
   },
 
   behaviors: [
@@ -137,7 +138,13 @@ Polymer({
   },
 
   computeHistoryTime: function(change, path) {
-    var date = Object.ensureDate({}, 'date', this.get(path, change.base[change.base.length - 1]));
+    var date;
+    if (path) {
+      date = Object.ensureDate({}, 'date', this.get(path, change.base[change.base.length - 1]));
+    } else {
+      date = Object.ensureDate({}, 'date', change);
+    }
+
     var options = {
       year: 'numeric',
       month: 'numeric',
@@ -152,9 +159,9 @@ Polymer({
   _navigateItem: function() {
     var url;
     if (this.isHistory) {
-      url = 'request/history/' + this.request.id;
+      url = 'request/history/' + (this.request.id || this.request._id);
     } else {
-      url = 'request/saved/' + this.request.id;
+      url = 'request/saved/' + (this.request.id || this.request._id);
     }
     page(url);
   },

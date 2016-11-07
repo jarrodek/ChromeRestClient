@@ -64,24 +64,28 @@ Polymer({
       direction: 'in'
     });
     this.push('messages', message);
-    //console.log(message);
   },
 
   _onDisconnected: function() {
-    // console.log('disconnected');
     this._setConnecting(false);
     this._setConnected(false);
   },
 
   _onConnected: function() {
-    // console.log('_onConnected');
     this._setConnecting(false);
     this._setConnected(true);
   },
 
   _onError: function(e) {
     console.error(e.detail.error);
+    this.fire('app-log', {
+      'message': ['No support for given header.', e.detail.error],
+      'level': 'error'
+    });
     this._setConnecting(false);
+    StatusNotification.notify({
+      message: e.detail.error.message || 'Unknown error occured'
+    });
   },
 
   _connect: function(e) {
@@ -90,7 +94,11 @@ Polymer({
     this._setConnecting(true);
     this.$.socket.open();
     this.lastSocketUrl = this.$.socket.url;
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Connect to socket');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Web sockets',
+      action: 'Connect to socket'
+    });
   },
 
   _disconnect: function() {
@@ -105,7 +113,11 @@ Polymer({
     this.push('messages', message);
     this.$.socket.message = message.isBinary ? message.binaryData : message.message;
     this.$.socket.send();
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Send message to socket');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Web sockets',
+      action: 'Send message'
+    });
   },
 
   _downloadBinary: function(e) {
@@ -132,6 +144,11 @@ Polymer({
     this.exportContent = this.messages;
     this.exportMime = 'json';
     this.exportData();
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Web sockets',
+      action: 'Export messages to file'
+    });
   },
 
   _restoredHandler: function() {

@@ -5,6 +5,8 @@
 Polymer({
   is: 'headers-editor',
 
+  behaviors: [ArcBehaviors.HeadersParserBehavior],
+
   properties: {
     /**
      * A HTTP headers message part as defined in HTTP spec.
@@ -40,10 +42,6 @@ Polymer({
       type: Array,
       value: []
     },
-    headersDefaults: {
-      type: String,
-      computed: '_computeHeadersDefaults(isPayload)'
-    },
     /**
      * It is currently focused input field for header name.
      * This field will receive autocomplete support.
@@ -65,12 +63,14 @@ Polymer({
     // True when the headers are valid HTTP headers
     valid: {
       type: Boolean,
-      value: true,
-      notify: true,
-      readOnly: true
+      notify: true
     },
-    // Error message to diplay when the headers are not valid.
-    errorMessage: String
+
+    displayStatus: {
+      type: Boolean,
+      value: true,
+      computed: '_computeShowStatus(tabSelected)'
+    }
   },
   observers: [
     '_headerValuesChanged(headersList.*)',
@@ -78,7 +78,8 @@ Polymer({
   ],
 
   listeners: {
-    'iron-overlay-closed': '_headersSupportClosed'
+    'iron-overlay-closed': '_headersSupportClosed',
+    'headers-set-selected': '_headersSetSelected'
   },
 
   ready: function() {
@@ -90,10 +91,22 @@ Polymer({
       }.bind(this)
     });
     // this data will help prioritize code-mirror support for headers.
-    this.$.cm.editor.on('header-value-selected', (e) =>
-      arc.app.analytics.sendEvent('Headers editor', 'CM value picked', e));
-    this.$.cm.editor.on('header-key-selected', (e) =>
-      arc.app.analytics.sendEvent('Headers editor', 'CM name picked', e));
+    this.$.cm.editor.on('header-value-selected', (e) => {
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Headers editor',
+        action: 'CM value picked',
+        label: e
+      });
+    });
+    this.$.cm.editor.on('header-key-selected', (e) => {
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Headers editor',
+        action: 'CM name picked',
+        label: e
+      });
+    });
     this.$.cm.editor.on('header-value-support', (e) => this.onCodeMirrorHeadersSupport(e));
   },
   // Handler for code-mirror header hints selected.
@@ -151,7 +164,6 @@ Polymer({
       return;
     }
     this.$.cm.editor.replaceSelection(value);
-    // console.log('_headersSupportClosed', e);
   },
   // Open basic auth support for code mirror.
   _openCmBasicAuth: function() {
@@ -183,13 +195,6 @@ Polymer({
    */
   valueChanged: function() {
     this._detectContentType();
-    var error = arc.app.headers.getError(this.headers);
-    if (error) {
-      this._setValid(false);
-      this.set('errorMessage', error);
-    } else {
-      this._setValid(true);
-    }
   },
   /**
    * Insert a Content-Type header into a headers list if it is not on the list already.
@@ -198,35 +203,20 @@ Polymer({
    * If it is not defined then an warning message will be shown.
    */
   ensureContentTypeHeader: function() {
-    var arr = arc.app.headers.toJSON(this.headers);
-    var ct = arc.app.headers.getContentType(arr);
-    if (!!ct) {
-      this.hideWarningn('content-type-missing');
+    if (!this.contentType) {
       return;
     }
-    if (!this.contentType) {
-      this.displayWarning('content-type-missing');
+    var arr = this.headersToJSON(this.headers);
+    var ct = this.getContentType(arr);
+    if (!!ct) {
       return;
-    } else {
-      this.hideWarningn('content-type-missing');
     }
     arr.push({
       name: 'Content-Type',
       value: this.contentType
     });
-    var headers = arc.app.headers.toString(arr);
+    var headers = this.headersToString(arr);
     this.set('headers', headers);
-  },
-  /**
-   * Display a dialog with error message.
-   *
-   * @param {String} type A predefined type to display.
-   */
-  displayWarning: function(type) {
-    console.warn('Content type header not present but it should be: ' + type);
-  },
-  hideWarningn: function(type) {
-    console.info('Content type header is present now: ' + type);
   },
   /**
    * Update headers array from form values to the HTTP string.
@@ -235,7 +225,7 @@ Polymer({
     if (!this.headersList) {
       return;
     }
-    var headers = arc.app.headers.toString(this.headersList);
+    var headers = this.headersToString(this.headersList);
     this.set('headers', headers);
   },
 
@@ -253,20 +243,14 @@ Polymer({
       return;
     }
     if (!this.headers) {
-      if (this.isPayload) {
-        this.displayWarning('content-type-missing');
-      }
       return;
     }
-    var ct = arc.app.headers.getContentType(this.headers);
+    var ct = this.getContentType(this.headers);
     if (!ct) {
-      if (this.isPayload) {
-        this.displayWarning('content-type-missing');
-      }
+      this.set('contentType', null);
       return;
     }
     this.set('contentType', ct);
-    this.hideWarningn('content-type-missing');
   },
 
   _isPayloadChanged: function() {
@@ -279,7 +263,7 @@ Polymer({
     if (!this.isPayload || !this.contentType) {
       return;
     }
-    var arr = arc.app.headers.toJSON(this.headers);
+    var arr = this.headersToJSON(this.headers);
     var updated = false;
     var notChanged = false; //True when values are equal, no change needed.
     arr.map(function(item) {
@@ -303,7 +287,7 @@ Polymer({
         value: this.contentType
       });
     }
-    var headers = arc.app.headers.toString(arr);
+    var headers = this.headersToString(arr);
     this.set('headers', headers);
   },
   /** Called when tab selection changed */
@@ -314,7 +298,10 @@ Polymer({
         if (oldVal === 1) {
           this.updateHeaders();
         }
-        this.$.cm.editor.refresh();
+        this.async(() => {
+          // To be sure that the editor is visible
+          this.$.cm.editor.refresh();
+        }, 1);
         tabName = 'Raw tab';
         break;
       case 1:
@@ -325,8 +312,13 @@ Polymer({
         tabName = 'Predefined tab';
         break;
     }
-    if (this.isAttached) {
-      arc.app.analytics.sendEvent('Headers editor', 'Tab switched', tabName);
+    if (this.isAttached && oldVal !== undefined) {
+      this.fire('send-analytics', {
+        type: 'event',
+        category: 'Headers editor',
+        action: 'Tab switched',
+        label: tabName
+      });
     }
   },
 
@@ -342,14 +334,14 @@ Polymer({
     }
     // it may come from updating a form value or from swithing to different request.
     // See: https://github.com/jarrodek/ChromeRestClient/issues/439
-    var listHeaders = arc.app.headers.toString(this.headersList);
+    var listHeaders = this.headersToString(this.headersList);
     if (listHeaders !== headers) {
       this._setHeadersList();
     }
   },
   // Populate form with current headers.
   _setHeadersList: function() {
-    var arr = arc.app.headers.toJSON(this.headers);
+    var arr = this.headersToJSON(this.headers);
     if (!arr || !arr.length) {
       arr = [{
         name: '',
@@ -372,10 +364,8 @@ Polymer({
           this.__provideSupport(header.name, index);
         });
       });
-      // console.log('aaaaaa',record);
       return;
     }
-    // console.log('aaaaaa',record);
     this.updateHeaders();
     this._provideSupport(record);
   },
@@ -395,42 +385,21 @@ Polymer({
 
     }
   },
-  /* Compute default headers string. */
-  _computeHeadersDefaults: function(isPayload) {
-    var txt = `accept: application/json
-accept-encoding: gzip, deflate
-accept-language: en-US,en;q=0.8\n`;
-    if (isPayload) {
-      txt += 'content-type: application/json\n';
-    }
-    txt += `user-agent: ${navigator.userAgent}`;
-    return txt;
-  },
-  // Insert predefined default set into the editor
-  _insertDefaultSet: function() {
-    var headers = this.headers;
-    if (headers && headers[headers.length - 1] !== '\n') {
-      headers += '\n';
-    }
-    headers += this.headersDefaults;
-    this.set('headers', headers);
-    this.tabSelected = 0;
-    // this.$.cm.editor.setValue(headers);
-    // this.headers = headers;
-  },
 
   _headerNameFocus: function(e) {
     var index = this.$.headersList.indexForElement(e.target);
     var elm = Polymer.dom(this.root)
       .querySelector('.headers-form .form-row:nth-child(' + (index + 1) + ') paper-autocomplete');
     if (!elm) {
-      console.warn('Autocomplete element not found.');
+      this.fire('app-log', {
+        'message': ['Autocomplete element not found.'],
+        'level': 'warn'
+      });
       return;
     }
     elm.target = e.target;
     this._setActiveHeaderNameField(e.target);
     this._setActiveAutocompleteNameField(elm);
-    // console.log(e.target, elm);
   },
   /**
    * Handler for autosuggestion element.
@@ -445,22 +414,12 @@ accept-language: en-US,en;q=0.8\n`;
       this.activeAutocompleteNameField.source = [];
       return;
     }
-    this.$.headerModel.objectId = value;
-    this.$.headerModel.queryAutocomplete();
-  },
-  /**
-   * Handler for model's data ready event.
-   * This method sets received values into the suggestions of header name field.
-   *
-   * @param {Event} e The `data-ready` event of the model.
-   */
-  _setNameSuggestions: function(e) {
-    var data = e.detail.data;
-    if (!data) {
-      this.activeAutocompleteNameField.source = [];
-      return;
-    }
-    var suggestions = data.map((item) => item.key);
+    let event = this.fire('query-headers', {
+      'type': 'request',
+      'query': value
+    });
+    let headers = event.detail.headers;
+    var suggestions = headers.map((item) => item.key);
     this.activeAutocompleteNameField.source = suggestions;
   },
 
@@ -475,7 +434,13 @@ accept-language: en-US,en;q=0.8\n`;
     if (index || index === 0) {
       this.set(['headersList', index, 'name'], value);
     }
-    arc.app.analytics.sendEvent('Headers editor', 'Fill support', 'Name selected');
+
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Headers editor',
+      action: 'Fill support',
+      label: 'Name selected'
+    });
   },
   /**
    * Called when the headers list has changed.
@@ -512,7 +477,6 @@ accept-language: en-US,en;q=0.8\n`;
       return;
     }
     var elm = this.__getSupportElmForHeader(headerName);
-    // console.log('Header ', headerName, ' at index ', index, elm ? 'has' : 'has no', 'support');
     if (!elm) {
       parent.classList.remove('has-support');
     } else {
@@ -532,7 +496,10 @@ accept-language: en-US,en;q=0.8\n`;
     var item = this.$.headersList.itemForElement(e.target);
     var elm = this.__getSupportElmForHeader(item.name);
     if (!elm) {
-      console.error('No support for given header', e);
+      this.fire('app-log', {
+        'message': ['No support for given header.', e],
+        'level': 'error'
+      });
       return;
     }
     var index = this.$.headersList.indexForElement(e.target);
@@ -540,13 +507,33 @@ accept-language: en-US,en;q=0.8\n`;
       .querySelector('.headers-form .form-row:nth-child(' + (index + 1) +
         ') input[name="headerValue"]');
     if (!input) {
-      console.error('Input field has not been found.');
+      this.fire('app-log', {
+        'message': ['Input field has not been found.'],
+        'level': 'error'
+      });
       return;
     }
     var model = this.$.headersList.modelForElement(e.target);
     elm.target = input;
     elm.model = model;
     elm.provideSupport();
+  },
+
+  _headersSetSelected: function(e, detail) {
+    var headers = this.headers;
+    if (headers && headers[headers.length - 1] !== '\n') {
+      headers += '\n';
+    }
+    headers += detail.set;
+    this.set('headers', headers);
+    this.tabSelected = 0;
+  },
+
+  _computeShowStatus: function(tabSelected) {
+    if (tabSelected === 2 || tabSelected === 3) {
+      return false;
+    }
+    return true;
   }
 });
 })();

@@ -4,37 +4,22 @@ Polymer({
   is: 'arc-log-viewer',
 
   properties: {
-    logs: Array,
-    details: Object,
-    showDetails: {
-      type: Boolean,
-      value: false
-    },
-    levelLog: {
-      type: Boolean,
-      value: true,
-      observer: '_computeFilterArray'
-    },
-    levelInfo: {
-      type: Boolean,
-      value: true,
-      observer: '_computeFilterArray'
-    },
-    levelWarning: {
-      type: Boolean,
-      value: true,
-      observer: '_computeFilterArray'
-    },
-    levelError: {
-      type: Boolean,
-      value: true,
-      observer: '_computeFilterArray'
-    },
-    allowedLogs: {
+    logs: {
       type: Array,
       value: function() {
         return [];
       }
+    },
+    details: Object,
+    // Either 0 (list of logs) or 1 (log details)
+    viewId: {
+      type: Number,
+      value: 0
+    },
+    // Number of records per page.
+    pageLimit: {
+      type: Number,
+      value: 30
     }
   },
 
@@ -53,45 +38,58 @@ Polymer({
 
   updateLogs: function(opened) {
     if (!opened) {
-      this.set('logs', []);
+      this.reset();
       return;
     }
     this._getLogs();
   },
 
+  reset: function() {
+    this.set('logs', []);
+    this.queryOptions = undefined;
+    this.noMoreLogs = false;
+  },
+
   _getLogs: function() {
-    arc.app.db.idb.open().then((db) => {
-      let start = this.logs && this.logs.length ? this.logs.length - 1 : 0;
-      // console.log('--no-save', 'start', start);
-      db.logs
-        //.where('type').anyOf(this.allowedLogs)
-        .reverse()
-        .offset(start)
-        .limit(200)
-        .sortBy('time')
-        //.toArray() // do not use with sortBy
-        .then((logs) => {
-          if (!logs || !logs.length) {
-            return;
-          }
-          this.async(() => {
-            if (!this.logs) {
-              this.logs = [];
-            }
-            // console.log('--no-save', logs);
-            logs = logs.concat(this.logs);
-            // console.log('--no-save', logs);
-            this.set('logs', logs);
-          });
-        })
-        .finally(() => {
-          db.close();
-        });
+    if (!this.queryOptions) {
+      this.queryOptions = {
+        limit: this.pageLimit,
+        descending: true,
+        // jscs:disable
+        include_docs: true
+        // jscs:enable
+      };
+    }
+
+    this.$.db.db.allDocs(this.queryOptions)
+    .then((response) => {
+      var items = [];
+      if (response && response.rows.length > 0) {
+        this.queryOptions.startkey = response.rows[response.rows.length - 1].key;
+        this.queryOptions.skip = 1;
+        items = response.rows;
+      } else {
+        items = [];
+      }
+      if (items.length === 0) {
+        this.noMoreLogs = true;
+        return;
+      } else if (items.length < this.pageLimit) {
+        this.noMoreLogs = true;
+      }
+      items = items.concat(this.logs);
+      this.set('logs', items);
+    })
+    .catch((e) => {
+      this.fire('app-log', {
+        message: e,
+        level: 'error'
+      });
     });
   },
 
   hideDetails: function() {
-    this.showDetails = false;
+    this.viewId = 0;
     this.notifyResize();
   },
 
@@ -126,7 +124,9 @@ Polymer({
     if (!stack) {
       return 'unknown file';
     }
-    return stack[0];
+    var list = stack.split('\n');
+    var file = list.find((i) => i.indexOf('app-logger.js') === -1);
+    return file || 'unknown file';
   },
 
   _showDetails: function(e) {
@@ -134,45 +134,12 @@ Polymer({
     if (!item) {
       return;
     }
-    this.set('details', item);
-    this.showDetails = true;
-  },
-
-  _computeFilterArray: function() {
-    var result = [];
-    if (this.levelLog) {
-      result.push('log');
-    }
-    if (this.levelInfo) {
-      result.push('info');
-    }
-    if (this.levelWarning) {
-      result.push('warning');
-    }
-    if (this.levelError) {
-      result.push('error');
-    }
-    // console.log('--no-save', '_computeFilterArray', result);
-    this.allowedLogs = result;
-
-    if (this.opened) {
-      this._refreshLogs();
-    }
-  },
-
-  sortList: function(a, b) {
-    // console.log('--no-save', 'sortList', a, b);
-    if (a.time > b.time) {
-      return -1;
-    }
-    if (a.time < b.time) {
-      return 1;
-    }
-    return 0;
+    this.set('details', item.doc);
+    this.viewId = 1;
   },
 
   _refreshLogs: function() {
-    this.set('logs', []);
+    this.reset();
     this._getLogs();
   },
 
@@ -181,7 +148,12 @@ Polymer({
     this.fileSuggestedName = 'arc-log-export.json';
     this.exportMime = 'json';
     this.exportData();
-    arc.app.analytics.sendEvent('Engagement', 'Click', 'Export logs as file');
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Data export',
+      action: 'Logs as file',
+      label: 'Log viewer'
+    });
   }
 });
 })();

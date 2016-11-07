@@ -27,9 +27,12 @@ Polymer({
         return data;
       })
       .catch((cause) => {
-        console.error(cause);
-        arc.app.analytics.sendException('arc-model::queryAutocomplete::' +
-          JSON.stringify(cause), false);
+        this.fire('app-log', {'message': cause.message, stack: cause.stack, 'level': 'error'});
+        this.fire('send-analytics', {
+          type: 'exception',
+          description: cause.message,
+          fatal: false
+        });
         this.fire('error', {
           error: cause
         });
