@@ -160,6 +160,9 @@ Polymer({
     })
     .then(() => {
       return this._getRequestAndProcessData(projects);
+    })
+    .then(() => {
+      window.clearTimeout(this._longTaskTimeout);
     });
   },
   // Recursively process request data
