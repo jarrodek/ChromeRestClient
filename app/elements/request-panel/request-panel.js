@@ -449,6 +449,10 @@
           this.set('request.legacyProject', null);
           this.set('proxyRequest.legacyProject', null);
           this.set('projectId', undefined);
+          this.fire('app-log', {
+            'message': ['Project is not in database.', e],
+            'level': 'warn'
+          });
         } else {
           console.error('Unable restore project', e);
         }

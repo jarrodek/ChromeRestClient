@@ -12,6 +12,20 @@
 Polymer({
   is: 'app-db-upgrade-1016',
 
+  attached: function() {
+    this.listen(window, 'dump-data-requests-read', '_onDumpRequestReadProgress');
+  },
+
+  detached: function() {
+    this.unlisten(window, 'dump-data-requests-read', '_onDumpRequestReadProgress');
+  },
+
+  _onDumpRequestReadProgress: function(e) {
+    if (e.detail.readCount) {
+      this._requestsReadCount = e.detail.readCount;
+    }
+  },
+
   ready: function() {
     this.checkIsUpgraded()
     .then((isDone) => {
@@ -20,7 +34,6 @@ Polymer({
           value: '1016'
         });
       }
-      console.log('firing database-upgrades-needed');
       return this.fire('database-upgrades-needed', {
         value: '1016'
       });
@@ -114,42 +127,98 @@ Polymer({
   },
 
   initUpgrade: function() {
-    return arc.app.importer.prepareExport()
-    .then((data) => this.processPackage(data))
+    this.fire('database-upgrades-status', {
+      value: '1016',
+      message: 'Initializing upgrade'
+    });
+    this.fire('database-upgrades-status', {
+      value: '1016',
+      message: 'Getting data from old database'
+    });
+
+    this._longTaskCounter = 0;
+    this._longTaskTimeout = window.setTimeout(this.longTaskInfo.bind(this), 15000);
+
+    return this._processRequestData()
     .then(() => this.copyCookies())
     .then(() => this.copyAuthData())
     .then(() => this.copyUrlHistory());
   },
 
-  processPackage: function(data) {
+  _processRequestData: function() {
+    var projects = [];
+    return arc.app.importer.prepareExportProjectsToPouchDb()
+    .then((result) => this._processProjects(result))
+    .then((p) => {
+      projects = p;
+      return this._insertLegacyProjects(p);
+    })
+    .then((inserts) => {
+      projects.forEach((item, i) => {
+        item.insertId = inserts[i].id;
+      });
+    })
+    .then(() => {
+      return this._getRequestAndProcessData(projects);
+    });
+  },
+  // Recursively process request data
+  _getRequestAndProcessData: function(projects, part) {
+    var hasPartialResults = false;
+    part = part || 0;
+
     this.fire('database-upgrades-status', {
       value: '1016',
-      message: 'Initializing upgrade'
+      message: 'Reading history data, part ' + (part + 1)
     });
+
+    return arc.app.importer.prepareRequestsExportToPouchDb(part)
+    .then((data) => {
+      part++;
+      // window.clearTimeout(this._longTaskTimeout);
+      hasPartialResults = data.partial;
+      data = data.result;
+      return this.processPackage(projects, data);
+    })
+    .then(() => {
+      if (hasPartialResults) {
+        return this._getRequestAndProcessData(projects, part);
+      }
+      return Promise.resolve();
+    });
+  },
+
+  longTaskInfo: function() {
+    window.clearTimeout(this._longTaskTimeout);
+    var message = 'Reading database takes longer than expected. You must have a lot of data ' +
+      'in the datastore. ';
+    message += 'Still working...';
+    this.fire('database-upgrades-status', {
+      value: '1016',
+      message: message
+    });
+    this._longTaskCounter++;
+    if (this._longTaskCounter === 2) {
+      this.fire('database-upgrades-long-task', {
+        value: '1016'
+      });
+    } else {
+      this._longTaskTimeout = window.setTimeout(this.longTaskInfo.bind(this), 15000);
+    }
+  },
+
+  processPackage: function(parsedProjects, requests) {
     // In new structure projects do not have a refference to request ids.
     // It's the other way around. It's a bad pattern for object stores but
     // it must suffice for now.
-    var projects = data.projects;
+
     // Requests are de-centralized. History is placed in it's own store, saved the same.
     // Also HAR data is stored in it's own store where each HAR objects is another data object.
-    var requests = data.requests;
 
     var parsedRequests;
-    var parsedProjects;
     return this.prepareRequestsArrays(requests)
     .then((result) => {
       parsedRequests = result;
-      return this._processProjects(projects);
-    })
-    .then((result) => {
-      parsedProjects = result;
-      return this._insertLegacyProjects(result);
-    })
-    .then((inserts) => {
-      parsedProjects = parsedProjects.map((item, i) => {
-        item.insertId = inserts[i].id;
-        return item;
-      });
     })
     .then(() => arc.app.importer._assignLegacyProjects(parsedRequests, parsedProjects))
     .then(() => this._insertSavedRequests(parsedRequests.saved))
