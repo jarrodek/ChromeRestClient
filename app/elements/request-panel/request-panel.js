@@ -347,7 +347,7 @@
 
     _proxyRequestChanged: function() {
       var r = this.proxyRequest;
-      console.log('_proxyRequestChanged', r);
+      // console.log('_proxyRequestChanged', r);
       if (!r || !r._id) {
         return;
       }
