@@ -192,14 +192,16 @@
           uri = url;
         }
       }
-      if (uri[uri.length - 1] === '/') {
-        uri = uri.substr(0, uri.length - 1);
-      }
+      // if (uri[uri.length - 1] === '/') {
+      //   uri = uri.substr(0, uri.length - 1);
+      // }
+      // console.log('Running worker for ', url, method);
       this.startTime = performance.now();
       this._getHistoryData(uri, method);
     },
     // Creates a worker (if needed) and gets data from the indexedDB.
     _getHistoryData: function(url, method) {
+
       var post = {
         url: url,
         method: method
@@ -332,6 +334,49 @@
 
     _processResponseWorkerData: function(e) {
       var data = e.data;
+      if (!this.times.labels) {
+        this.times.labels = [];
+      }
+      if (!this.times.totals) {
+        this.times.totals = [];
+      }
+      if (!this.times.ttfb) {
+        this.times.ttfb = [];
+      }
+      if (!this.times.connects) {
+        this.times.connects = [];
+      }
+      if (!this.times.receiveds) {
+        this.times.receiveds = [];
+      }
+      if (!this.times.sents) {
+        this.times.sents = [];
+      }
+      if (!this.times.ssl) {
+        this.times.ssl = [];
+      }
+      if (!this.sizes.request) {
+        this.sizes.request = {
+          hLabels: [],
+          headers: []
+        };
+      }
+      if (!this.sizes.request) {
+        this.sizes.request = {
+          hLabels: [],
+          headers: [],
+          bLabels: [],
+          body: []
+        };
+      }
+      if (!this.sizes.response) {
+        this.sizes.response = {
+          hLabels: [],
+          headers: [],
+          bLabels: [],
+          body: []
+        };
+      }
       this.push('times.labels', data.times.label);
       this.push('times.totals', data.times.total);
       this.push('times.ttfb', data.times.ttfb);
@@ -374,6 +419,12 @@
       this.set('medians.responseHeaders', this.calculateMedian(this.sizes.response.headers));
 
       if (!this.statuses.labels || !this.statuses.labels.length) {
+        this.statuses = {
+          labels: [],
+          values: []
+        };
+      }
+      if (!this.statuses) {
         this.statuses = {
           labels: [],
           values: []

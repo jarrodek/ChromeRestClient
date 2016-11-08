@@ -473,6 +473,7 @@
   window.addEventListener('app-initialize-upgrade', () => app._initUpgrades());
   window.addEventListener('database-upgrades-ready', (e) => app._dbUpgradeReady(e));
   window.addEventListener('database-upgrades-status', (e) => app._upgradeStatus(e));
+  window.addEventListener('database-upgrades-long-task', (e) => app._upgradeHeavyDuty(e));
   window.addEventListener('database-upgrade-error', (e) => app._upgradeStatus(e));
   window.addEventListener('app-upgrade-screen-coninue-errored', () => app._continueErrored());
   window.addEventListener('app-upgrade-screen-closed', () => {
@@ -536,6 +537,9 @@
     } else {
       app._initUpgrades();
     }
+  };
+  app._upgradeHeavyDuty = () => {
+    document.querySelector('app-upgrade-screen').heavyDuty = true;
   };
   app._continueErrored = () => {
     // Current updrage script errored.

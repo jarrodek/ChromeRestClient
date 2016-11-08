@@ -143,9 +143,6 @@
       var chartName = name + 'Chart';
       var chart = this[chartName];
       if (chart) {
-        if (chart.data.datasets[0].data === arr) {
-          return;
-        }
         chart.data.datasets[0].data = arr;
         chart.data.labels = labels;
         chart.update();

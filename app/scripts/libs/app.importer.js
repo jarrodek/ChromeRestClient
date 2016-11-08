@@ -144,7 +144,7 @@ arc.app.importer.saveFileData = function(data) {
         })
         .catch(function(error) {
           console.error('An error occurred when importing data.', error);
-          arc.app.analytics.sendException('Importer exception: ' + error.message, false);
+          // arc.app.analytics.sendException('Importer exception: ' + error.message, false);
           throw error;
         })
         .finally(function() {
@@ -318,7 +318,7 @@ arc.app.importer._saveFileDataOldParseHistoryItem = function(item) {
     updated: new Date(item.updateTime).getTime()
   };
   // payload and headers
-  var entries = item.har.entries;
+  var entries = item._har.entries;
   var entry = entries[entries.length - 1];
   if (entry) {
     let harRequest = entry.request;
@@ -334,7 +334,7 @@ arc.app.importer._saveFileDataOldParseHistoryItem = function(item) {
   }
   return {
     originId: item.id,
-    historyData: arc.app.importer._processHar(item.har),
+    historyData: arc.app.importer._processHar(item._har),
     request: obj
   };
 };
@@ -354,15 +354,16 @@ arc.app.importer._saveFileDataOldParseHistoryItem = function(item) {
  */
 arc.app.importer._saveFileDataOldParseSavedItem = function(item) {
   var obj = {
-    _id: encodeURIComponent(item.name) + '/' + encodeURIComponent(item.url) + '/' + item.method,
-    name: item.name,
+    _id: encodeURIComponent(item.name || item._name) + '/' + encodeURIComponent(item.url) +
+      '/' + item.method,
+    name: item.name || item._name,
     method: item.method,
     url: item.url,
     type: 'saved'
   };
   // payload and headers
   var harIndex = item.referenceEntry || 0;
-  var entries = item.har.entries;
+  var entries = item._har.entries;
   var entry;
   if (harIndex || harIndex === 0) {
     entry = entries[harIndex];
@@ -381,7 +382,7 @@ arc.app.importer._saveFileDataOldParseSavedItem = function(item) {
   }
   return {
     originId: item.id,
-    historyData: arc.app.importer._processHar(item.har),
+    historyData: arc.app.importer._processHar(item._har),
     request: obj
   };
 };
@@ -419,6 +420,7 @@ arc.app.importer._parseHarHeders = function(headersArray) {
  */
 arc.app.importer._processHar = function(har) {
   if (!har || !har.entries || !har.entries.length) {
+    console.warn('This should not happen!');
     return null;
   }
   return har.entries.map((item) => {
@@ -706,7 +708,7 @@ arc.app.importer.normalizeRequest = function(item) {
     return obj;
   } catch (e) {
     console.error('Unable to import request object', item, e.message);
-    arc.app.analytics.sendException('Importer exception (normalize): ' + e.message, false);
+    // arc.app.analytics.sendException('Importer exception (normalize): ' + e.message, false);
   }
   return null;
 };
@@ -869,6 +871,7 @@ arc.app.importer.prepareExport = function(opts) {
           .toArray();
       }
       return db.requestObject
+        .limit(10000)
         .toArray();
     })
     .then(function(requests) {
@@ -892,6 +895,108 @@ arc.app.importer.prepareExport = function(opts) {
     .finally(function() {
       db.close();
     });
+};
+arc.app.importer._cacheDb = null;
+arc.app.importer.getDatabase = function() {
+  if (arc.app.importer._cacheDb) {
+    return Promise.resolve(arc.app.importer._cacheDb);
+  }
+  return new Promise((resolve, reject) => {
+    let request = window.indexedDB.open('arc');
+    request.onerror = function(event) {
+      reject(event);
+    };
+    request.onsuccess = function(event) {
+      arc.app.importer._cacheDb = event.target.result;
+      resolve(event.target.result);
+    };
+  });
+};
+
+arc.app.importer.prepareRequestsExportToPouchDb = function(part) {
+  return arc.app.importer._prepareRequestsExportToPouchDb(part)
+  .then((data) => {
+    if (data.result && data.result.length) {
+      data.result = data.result.filter((item) => !!item._har);
+      // data.result.forEach((item) => item._har = new HAR.Log(item._har));
+    }
+    return data;
+  });
+};
+
+arc.app.importer.prepareExportProjectsToPouchDb = function() {
+  return arc.app.importer.getDatabase()
+  .then((db) => {
+    return new Promise((resolve) => {
+      let transaction = db.transaction(['projectObjects'], 'readonly');
+      let objectStore = transaction.objectStore('projectObjects');
+      let request = objectStore.openCursor();
+      let data = [];
+      request.onsuccess = function(event) {
+        let cursor = event.target.result;
+        if (cursor) {
+          data[data.length] = cursor.value;
+          cursor.continue();
+        } else {
+          // console.log('Has keys', keys);
+          resolve(data);
+        }
+      };
+      request.onerror = function(event) {
+        console.error(event);
+      };
+    });
+  });
+};
+arc.app.importer._prepareRequestsExportToPouchDb = function(part) {
+  var limit = 10000;
+  part = part || 0;
+  var dbFromIndex = (limit * part);
+
+  return arc.app.importer.getDatabase()
+  .then((db) => {
+    return new Promise((resolve) => {
+      let transaction = db.transaction(['requestObject'], 'readonly');
+      let objectStore = transaction.objectStore('requestObject');
+      let advanced = dbFromIndex === 0;
+      let data = [];
+      objectStore.openCursor().onsuccess = function(event) {
+        var cursor = event.target.result;
+        if (!cursor) {
+          resolve({
+            partial: false,
+            result: data
+          });
+          return;
+        }
+        if (!advanced) {
+          try {
+            console.log('Advancing cursor by', dbFromIndex);
+            cursor.advance(dbFromIndex);
+          } catch (e) {
+            // moved past size.
+            resolve({
+              partial: false,
+              result: data
+            });
+            return;
+          }
+          advanced = true;
+          return;
+        }
+        data[data.length] = cursor.value;
+        if (data.length >= limit) {
+          // console.log('Reached limit', limit);
+          resolve({
+            partial: true,
+            result: data
+          });
+          return;
+        }
+        cursor.continue();
+      };
+    });
+  });
 };
 
 arc.app.importer.prepareExportPouchDb = function(opts) {

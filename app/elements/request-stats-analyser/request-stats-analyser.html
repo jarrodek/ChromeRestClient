@@ -7,6 +7,7 @@
     </style>
     <script id="dataCollectionWorker" type="javascript/worker">
     var processor = {};
+    var maxRecords = 1000; // What to do with it?
     // Get the connection to the database
     processor.getDatabase = function() {
       return new Promise((resolve, reject) => {
@@ -24,21 +25,25 @@
         let transaction = db.transaction(['document-store'], 'readonly');
         let objectStore = transaction.objectStore('document-store');
         let key = encodeURIComponent(url) + '/' + method + '/';
-        // console.log('Query keys for', key);
         var keyRange = IDBKeyRange.bound(key, key + '\uffff', true, true);
         let request = objectStore.openCursor(keyRange);
         let keys = [];
+        let i = 0;
         request.onsuccess = function(event) {
           let cursor = event.target.result;
           if(cursor) {
+            i++;
             if (cursor.value.deletedOrLocal !== '0') {
               cursor.continue();
               return;
             }
             keys[keys.length] = cursor.value.seq;
-            cursor.continue();
+            if (i >= maxRecords) {
+              resolve(keys);
+            } else {
+              cursor.continue();
+            }
           } else {
-            // console.log('Has keys', keys);
             resolve(keys);
           }
         };

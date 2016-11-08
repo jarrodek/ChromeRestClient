@@ -165,12 +165,26 @@
     :host([finished][errored]) .end-info {
       display: block;
     }
+
+    .heavy-duty-info {
+      display: none;
+    }
+
+    :host([heavy-duty]:not([finished])) .heavy-duty-info {
+      display: block;
+      @apply(--paper-font-body2);
+    }
     </style>
     <div id="content">
       <h1 id="welcome">Welcome</h1>
       <h1 id="upgrading">Upgrading ARC</h1>
       <h1 id="finished">Upgrade complete</h1>
       <h1 id="finishedErrored">Upgrade incomplete</h1>
+
+      <p class="heavy-duty-info">
+        The task takes more time than usual. Probably there's a lot of data to process. The app is responding and the upgrade will finish when all data will be processed.<br/>
+        Sorry for long execution time and any inconvenience.
+      </p>
 
       <div id="log" class="selectable-text">
         <div id="currentLog" hidden="[[allLogs]]">

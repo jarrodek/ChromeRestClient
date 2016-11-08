@@ -39,6 +39,9 @@
     },
 
     _override: function() {
+      // When project change then request ID must change as weel.
+      // Because the project change is before request save I need a flag to determine chnage.
+      var projectHasChanged = false;
       var r = this.request;
       if (!r._id) {
         return this.fire('error', {
@@ -52,13 +55,20 @@
       var p;
       if (this.saveToProject) {
         if (this.saveToProjectId) {
-          r.legacyProject  = this.saveToProjectId;
+          if (r.legacyProject !== this.saveToProjectId) {
+            projectHasChanged = true;
+            r.legacyProject  = this.saveToProjectId;
+          }
         } else if (this.saveToProjectName) {
           p = this._createProject()
           .then((result) => {
+            projectHasChanged = true;
             r.legacyProject = result._id;
           });
         }
+      } else if (r.legacyProject) {
+        projectHasChanged = true;
+        delete r.legacyProject;
       }
       if (!p) {
         p = Promise.resolve();
@@ -85,7 +95,7 @@
         // In this case the old request must be deleted.
         let newName = encodeURIComponent(r.name);
         let oldName = r._id.split('/')[0];
-        if (oldName !== newName) {
+        if (oldName !== newName || projectHasChanged) {
           let event = this.fire('request-objects-delete', {
             items: [r._id],
             dbName: 'saved-requests'
