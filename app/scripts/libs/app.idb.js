@@ -67,10 +67,10 @@ arc.app.db.idb.open = function() {
       })
       .catch(function(error) {
         console.error('IDB open main catch block', error);
-        let pending = arc.app.analytics.sendException('IDB create error::' + JSON.stringify(error));
-        if (pending) {
-          window.pendingAnalytics[window.pendingAnalytics.length] = pending;
-        }
+        // let pending = arc.app.analytics.sendException('IDB create error::' + JSON.stringify(error));
+        // if (pending) {
+        //   window.pendingAnalytics[window.pendingAnalytics.length] = pending;
+        // }
         reject(error);
       });
   });

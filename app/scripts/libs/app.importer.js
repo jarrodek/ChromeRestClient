@@ -144,7 +144,7 @@ arc.app.importer.saveFileData = function(data) {
         })
         .catch(function(error) {
           console.error('An error occurred when importing data.', error);
-          arc.app.analytics.sendException('Importer exception: ' + error.message, false);
+          // arc.app.analytics.sendException('Importer exception: ' + error.message, false);
           throw error;
         })
         .finally(function() {
@@ -706,7 +706,7 @@ arc.app.importer.normalizeRequest = function(item) {
     return obj;
   } catch (e) {
     console.error('Unable to import request object', item, e.message);
-    arc.app.analytics.sendException('Importer exception (normalize): ' + e.message, false);
+    // arc.app.analytics.sendException('Importer exception (normalize): ' + e.message, false);
   }
   return null;
 };
