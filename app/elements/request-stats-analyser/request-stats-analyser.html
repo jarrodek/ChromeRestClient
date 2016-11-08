@@ -41,7 +41,7 @@
             keys[keys.length] = cursor.value.seq;
             if (i >= maxRecords) {
               resolve(keys);
-            } esle {
+            } else {
               cursor.continue();
             }
           } else {
