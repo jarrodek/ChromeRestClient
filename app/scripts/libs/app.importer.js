@@ -356,7 +356,7 @@ arc.app.importer._saveFileDataOldParseSavedItem = function(item) {
   var obj = {
     _id: encodeURIComponent(item.name || item._name) + '/' + encodeURIComponent(item.url) +
       '/' + item.method,
-    name: item.name,
+    name: item.name || item._name,
     method: item.method,
     url: item.url,
     type: 'saved'

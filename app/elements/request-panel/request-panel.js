@@ -1033,6 +1033,7 @@
     _requestsStatsAnalysed: function() {
       if (!this.$.historyAnalyser.hasAnyData) {
         // force close assistant panel ?? or empty info screen?
+        this.exporeAssistantActive = false;
         return;
       }
     },

@@ -25,7 +25,6 @@
         let transaction = db.transaction(['document-store'], 'readonly');
         let objectStore = transaction.objectStore('document-store');
         let key = encodeURIComponent(url) + '/' + method + '/';
-        // console.log('Query keys for', key);
         var keyRange = IDBKeyRange.bound(key, key + '\uffff', true, true);
         let request = objectStore.openCursor(keyRange);
         let keys = [];
@@ -45,7 +44,6 @@
               cursor.continue();
             }
           } else {
-            // console.log('Has keys', keys);
             resolve(keys);
           }
         };
