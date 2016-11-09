@@ -76,13 +76,14 @@
 
     .content {
       @apply(--layout-horizontal);
-      height: 100%;
+      min-height: 100%;
     }
 
     .request-area {
       /*@apply(--layout-flex);*/
       transition: width 300ms ease-in-out;
       width: 100%;
+      margin-bottom: 48px;
     }
 
     .content[assistant] .request-area {

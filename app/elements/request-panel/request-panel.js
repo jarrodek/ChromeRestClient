@@ -347,7 +347,7 @@
 
     _proxyRequestChanged: function() {
       var r = this.proxyRequest;
-      console.log('_proxyRequestChanged', r);
+      // console.log('_proxyRequestChanged', r);
       if (!r || !r._id) {
         return;
       }
@@ -449,6 +449,10 @@
           this.set('request.legacyProject', null);
           this.set('proxyRequest.legacyProject', null);
           this.set('projectId', undefined);
+          this.fire('app-log', {
+            'message': ['Project is not in database.', e],
+            'level': 'warn'
+          });
         } else {
           console.error('Unable restore project', e);
         }
@@ -1029,6 +1033,7 @@
     _requestsStatsAnalysed: function() {
       if (!this.$.historyAnalyser.hasAnyData) {
         // force close assistant panel ?? or empty info screen?
+        this.exporeAssistantActive = false;
         return;
       }
     },

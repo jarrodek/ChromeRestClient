@@ -54,6 +54,11 @@ Polymer({
       type: Boolean,
       value: false,
       reflectToAttribute: true
+    },
+    heavyDuty: {
+      type: Boolean,
+      value: false,
+      reflectToAttribute: true
     }
   },
 
