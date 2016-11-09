@@ -118,7 +118,11 @@
       if (!q) {
         return this.refresh();
       }
-      let encodedQ = encodeURIComponent(q.toLowerCase());
+      q = q.toLowerCase();
+      if (q[0] === '_') {
+        q = q.substr(1);
+      }
+      let encodedQ = encodeURIComponent();
       var db = this._getDb();
       this._setQuerying(true);
       db.allDocs()

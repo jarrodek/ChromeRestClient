@@ -353,10 +353,15 @@ arc.app.importer._saveFileDataOldParseHistoryItem = function(item) {
  * @return {Object|null}
  */
 arc.app.importer._saveFileDataOldParseSavedItem = function(item) {
+  var requestName = item.name || item._name;
+  var keyName = requestName;
+  if (keyName && keyName[0] === '_') {
+    keyName = keyName.substr(1);
+  }
   var obj = {
-    _id: encodeURIComponent(item.name || item._name) + '/' + encodeURIComponent(item.url) +
+    _id: encodeURIComponent(keyName) + '/' + encodeURIComponent(item.url) +
       '/' + item.method,
-    name: item.name || item._name,
+    name: requestName,
     method: item.method,
     url: item.url,
     type: 'saved'
