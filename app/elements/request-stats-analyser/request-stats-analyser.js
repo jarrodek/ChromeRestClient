@@ -355,24 +355,26 @@
       if (!this.times.ssl) {
         this.times.ssl = [];
       }
-      if (!this.sizes.request) {
+      if (!this.sizes.request.headers || !this.sizes.request.headers.length) {
         this.sizes.request = {
           hLabels: [],
           headers: []
         };
       }
-      if (!this.sizes.request) {
+      if (!this.sizes.request.body || !this.sizes.request.body.length) {
         this.sizes.request = {
-          hLabels: [],
-          headers: [],
           bLabels: [],
           body: []
         };
       }
-      if (!this.sizes.response) {
-        this.sizes.response = {
+      if (!this.sizes.response.headers || !this.sizes.response.headers.length) {
+        this.sizes.request = {
           hLabels: [],
-          headers: [],
+          headers: []
+        };
+      }
+      if (!this.sizes.response.body || !this.sizes.response.body.length) {
+        this.sizes.request = {
           bLabels: [],
           body: []
         };
