@@ -89,8 +89,7 @@ Polymer({
       console.error('Import data error', cause);
       this.fire('app-log', {'message': ['Data import error: ', cause], 'level': 'error'});
       StatusNotification.notify({
-        message: 'Unable to import data. Error details has been send ' +
-          'to the developer.',
+        message: 'Unable to import data. ' + cause.message,
         timeout: StatusNotification.TIME_SHORT
       });
       this.fire('send-analytics', {
