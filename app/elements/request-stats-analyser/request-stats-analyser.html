@@ -22,6 +22,9 @@
     };
     processor.queryKeys = function(db, url, method) {
       return new Promise((resolve, reject) => {
+        if (!db.objectStoreNames.contains('document-store')) {
+          return reject(new Error('The database is not initialized.'));
+        }
         let transaction = db.transaction(['document-store'], 'readonly');
         let objectStore = transaction.objectStore('document-store');
         let key = encodeURIComponent(url) + '/' + method + '/';
@@ -98,6 +101,9 @@
           data: data,
           time: execTime
         };
+      })
+      .catch((e) => {
+        throw e;
       });
     }
     self.onmessage = function(e) {

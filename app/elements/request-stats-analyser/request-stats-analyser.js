@@ -236,6 +236,11 @@
         message: ['Collecting history data error', e]
       });
       this._setAnalysing(false);
+      this.fire('send-analytics', {
+        type: 'exception',
+        description: e.message,
+        fatal: false
+      });
       this.clear();
     },
     // Process raw history data
@@ -355,29 +360,37 @@
       if (!this.times.ssl) {
         this.times.ssl = [];
       }
-      if (!this.sizes.request.headers || !this.sizes.request.headers.length) {
+      if (!this.sizes.request) {
         this.sizes.request = {
           hLabels: [],
-          headers: []
+          headers: [],
+          bLabels: [],
+          body: []
         };
+      }
+      if (!this.sizes.response) {
+        this.sizes.response = {
+          hLabels: [],
+          headers: [],
+          bLabels: [],
+          body: []
+        };
+      }
+      if (!this.sizes.request.headers || !this.sizes.request.headers.length) {
+        this.sizes.request.hLabels =  [];
+        this.sizes.request.headers = [];
       }
       if (!this.sizes.request.body || !this.sizes.request.body.length) {
-        this.sizes.request = {
-          bLabels: [],
-          body: []
-        };
+        this.sizes.request.bLabels =  [];
+        this.sizes.request.body = [];
       }
       if (!this.sizes.response.headers || !this.sizes.response.headers.length) {
-        this.sizes.response = {
-          hLabels: [],
-          headers: []
-        };
+        this.sizes.response.hLabels =  [];
+        this.sizes.response.headers = [];
       }
       if (!this.sizes.response.body || !this.sizes.response.body.length) {
-        this.sizes.response = {
-          bLabels: [],
-          body: []
-        };
+        this.sizes.response.bLabels =  [];
+        this.sizes.response.body = [];
       }
       this.push('times.labels', data.times.label);
       this.push('times.totals', data.times.total);
