@@ -310,6 +310,7 @@ arc.app.importer._saveFileDataOldParseHistoryItem = function(item) {
   } catch (e) {
     today = arc.app.importer._getDayToday(Date.now());
   }
+  item.updateTime = item.updateTime || Date.now();
   var obj = {
     _id: today + '/' + encodeURIComponent(item.url) + '/' + item.method,
     method: item.method,
