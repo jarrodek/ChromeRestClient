@@ -368,13 +368,13 @@
         };
       }
       if (!this.sizes.response.headers || !this.sizes.response.headers.length) {
-        this.sizes.request = {
+        this.sizes.response = {
           hLabels: [],
           headers: []
         };
       }
       if (!this.sizes.response.body || !this.sizes.response.body.length) {
-        this.sizes.request = {
+        this.sizes.response = {
           bLabels: [],
           body: []
         };
