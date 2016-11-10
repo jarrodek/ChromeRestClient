@@ -578,9 +578,21 @@
 
   app.initAnalytics = () => {
     chrome.storage.local.get({
-      'google-analytics.analytics.tracking-permitted': true
+      'google-analytics.analytics.tracking-permitted': true,
+      'google-analytics.analytics.settings-transferred': false
     }, (data) => {
-      app.analyticsDisabled = !Boolean(data['google-analytics.analytics.tracking-permitted']);
+      if (data['google-analytics.analytics.settings-transferred']) {
+        return;
+      }
+      app.async(() => {
+        if (data['google-analytics.analytics.tracking-permitted'] === 'false' ||
+          data['google-analytics.analytics.tracking-permitted'] === false) {
+          app.analyticsDisabled = true;
+        } else {
+          app.analyticsDisabled = false;
+        }
+      }, 2000);
+      chrome.storage.local.set({'google-analytics.analytics.settings-transferred': true}, () => {});
     });
     var appVersion = arc.app.utils.appVer;
     var chromeVer = arc.app.utils.chromeVersion;
