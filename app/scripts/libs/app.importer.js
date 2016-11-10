@@ -157,7 +157,6 @@ arc.app.importer.saveFileDataPouchDb = function(data) {
     case 'ARC#SavedHistoryDataExport':
     case 'ARC#SavedDataExport':
     case 'ARC#HistoryDataExport':
-
       return arc.app.importer._saveFileDataPouchDbNew(data);
     case 'ARC#requestsDataExport':
       return arc.app.importer._saveFileDataPouchDbOld(data);
@@ -311,6 +310,7 @@ arc.app.importer._saveFileDataOldParseHistoryItem = function(item) {
   } catch (e) {
     today = arc.app.importer._getDayToday(Date.now());
   }
+  item.updateTime = item.updateTime || Date.now();
   var obj = {
     _id: today + '/' + encodeURIComponent(item.url) + '/' + item.method,
     method: item.method,
@@ -318,7 +318,8 @@ arc.app.importer._saveFileDataOldParseHistoryItem = function(item) {
     updated: new Date(item.updateTime).getTime()
   };
   // payload and headers
-  var entries = item._har.entries;
+  var har = item._har || item.har;
+  var entries = har.entries;
   var entry = entries[entries.length - 1];
   if (entry) {
     let harRequest = entry.request;
@@ -334,7 +335,7 @@ arc.app.importer._saveFileDataOldParseHistoryItem = function(item) {
   }
   return {
     originId: item.id,
-    historyData: arc.app.importer._processHar(item._har),
+    historyData: arc.app.importer._processHar(har),
     request: obj
   };
 };
@@ -368,26 +369,30 @@ arc.app.importer._saveFileDataOldParseSavedItem = function(item) {
   };
   // payload and headers
   var harIndex = item.referenceEntry || 0;
-  var entries = item._har.entries;
-  var entry;
-  if (harIndex || harIndex === 0) {
-    entry = entries[harIndex];
-  } else {
-    entry = entries[0];
-  }
-  if (entry) {
-    let harRequest = entry.request;
-    obj.headers = arc.app.importer._parseHarHeders(harRequest.headers);
-    obj.payload = harRequest.postData.text;
-    let t = new Date(entry.startedDateTime).getTime();
-    if (t !== t) {
-      t = Date.now();
+  var har = item._har || item.har;
+  if (har) {
+    var entries = har.entries;
+    var entry;
+    if (harIndex || harIndex === 0) {
+      entry = entries[harIndex];
+    } else {
+      entry = entries[0];
     }
-    obj.created = t;
+    if (entry) {
+      let harRequest = entry.request;
+      obj.headers = arc.app.importer._parseHarHeders(harRequest.headers);
+      obj.payload = harRequest.postData.text;
+      let t = new Date(entry.startedDateTime).getTime();
+      if (t !== t) {
+        t = Date.now();
+      }
+      obj.created = t;
+    }
   }
+
   return {
     originId: item.id,
-    historyData: arc.app.importer._processHar(item._har),
+    historyData: arc.app.importer._processHar(har),
     request: obj
   };
 };
