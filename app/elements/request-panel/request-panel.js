@@ -142,6 +142,11 @@
       narrowLayout: {
         type: Boolean,
         reflectToAttribute: true
+      },
+      // An URL value for the assistant
+      assistantUrl: {
+        type: String,
+        readOnly: true
       }
     },
 
@@ -155,7 +160,8 @@
       '_getRequestData(historyId)',
       '_getRequestData(savedId)',
       '_getRequestData(externalId)',
-      '_exporeAssistantActiveChanged(exporeAssistantActive)'
+      '_exporeAssistantActiveChanged(exporeAssistantActive)',
+      '_wholeRequestChanged(request)'
     ],
 
     listeners: {
@@ -174,6 +180,7 @@
       this.listen(document, 'project-related-requests-read', '_onLegacyProjectRelatedRead');
       this.listen(document, 'request-object-changed', '_onRequestChangedDb');
       this.listen(window, 'variables-environment-changed', '_onVarsEnvChanged');
+      this.listen(window, 'url-input-changed', '_urlInputChanged');
     },
 
     detached: function() {
@@ -181,6 +188,7 @@
       this.unlisten(document, 'project-related-requests-read', '_onLegacyProjectRelatedRead');
       this.unlisten(document, 'request-object-changed', '_onRequestChangedDb');
       this.unlisten(window, 'variables-environment-changed', '_onVarsEnvChanged');
+      this.unlisten(window, 'url-input-changed', '_urlInputChanged');
     },
 
     onShow: function() {
@@ -746,26 +754,44 @@
     // Make a request.
     _callRequest: function() {
       // Copy the object so MagicVariables will not alter the view
-      this._applyMagicVariables(Object.assign({}, this.request))
+      var request = Object.assign({}, this.request);
+      var self = this;
+      var executed = false;
+      var run = function(request) {
+        if (executed) {
+          return;
+        }
+        executed = true;
+        // Make it async so errors will be handled by socket object.
+        self.async(() => {
+          if (self.$.authSaver.auth) {
+            request.auth = self.$.authSaver.auth;
+            self.$.authSaver.auth = undefined;
+          }
+          if (self.useXhr) {
+            self.$.xhr.request = request;
+            self.$.xhr.run();
+          } else {
+            self.$.socket.request = request;
+            self.$.socket.run();
+          }
+        });
+      };
+      // A failsafe if there's an issue with the DB. It will give 2.5s to execute queries
+      // and if code below do not return in that time the request will be executed
+      // without applying variables, cookies etc
+      var timeout = window.setTimeout(function() {
+        run(request);
+      }, 2500);
+
+      this._applyMagicVariables(request)
       .then((request) => this._applyCookies(request))
       .then((request) => this.$.authSaver.applyAuthorization(request))
       .then((request) => this._filterHeaders(request))
       .then((request) => this._cleanReqestToSend(request))
       .then((request) => {
-        // Make it async so errors will be handled by socket object.
-        this.async(() => {
-          if (this.$.authSaver.auth) {
-            request.auth = this.$.authSaver.auth;
-            this.$.authSaver.auth = undefined;
-          }
-          if (this.useXhr) {
-            this.$.xhr.request = request;
-            this.$.xhr.run();
-          } else {
-            this.$.socket.request = request;
-            this.$.socket.run();
-          }
-        });
+        window.clearTimeout(timeout);
+        run(request);
       });
     },
 
@@ -1053,6 +1079,18 @@
         action: 'Explore assistant activated',
         label: exporeAssistantActive + ''
       });
+    },
+    /**
+     * Handler for the change event sent bu the url editor.
+     * When the value change (not the input as a change to any character) it sets an URL for
+     * the assistant so it can perform a search only if the URL is final.
+     */
+    _urlInputChanged: function(e) {
+      this._setAssistantUrl(e.detail.url);
+    },
+
+    _wholeRequestChanged: function(request) {
+      this._setAssistantUrl(request.url);
     }
   });
 })();

@@ -92,6 +92,12 @@ Polymer({
     }
     this.revalidate();
   },
+
+  _urlChangedNotify: function() {
+    this.fire('url-input-changed', {
+      url: this.url
+    });
+  },
   /**
    * Toggle the view.
    * TODO: This should change only the `detailed` property value and change observer should
