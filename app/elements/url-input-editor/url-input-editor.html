@@ -109,7 +109,7 @@ Altrought the history hash is not used in REST services and is used only in clie
     <div class="simple" opened$="{{detailed}}">
       <paper-icon-button id="toggleButton" icon="arc:keyboard-arrow-right" on-tap="toggle"></paper-icon-button>
       <paper-input-container class="main-input" no-label-float auto-validate>
-        <input is="iron-input" type="url" value="{{url::input}}" placeholder="Request URL" id="masterUrl" pattern="\S*"/>
+        <input is="iron-input" on-change="_urlChangedNotify" type="url" value="{{url::input}}" placeholder="Request URL" id="masterUrl" pattern="\S*"/>
         <paper-input-error>You may want to encode this value before sending it to the server</paper-input-error>
       </paper-input-container>
       <paper-input label="Host" value="{{hostValue}}" class="host-input" on-input="updateUrl"></paper-input>

@@ -228,6 +228,16 @@
       },
 
       _processResults: function(res) {
+        res = res.map((item) => {
+          if (!item.updated || item.updated !== item.updated) {
+            if (item.created && item.created === item.created) {
+              item.updated = item.created;
+            } else {
+              item.updated = Date.now();
+            }
+          }
+          return item;
+        });
         // sort by updated
         res.sort((a, b) => {
           if (a.updated > b.updated) {
@@ -424,6 +434,53 @@
           state = true;
         }
         this.set('isEmpty', state);
+      },
+
+      // _checkDataIntegrity: function() {
+      //   chrome.storage.local.get({
+      //     'history-panel.data-integrity.checked': false
+      //   }, (data) => {
+      //     this.async(() => {
+      //       if (data['history-panel.data-integrity.checked'] === 'false' ||
+      //         data['history-panel.data-integrity.checked'] === false) {
+      //         // this.__controllUpdatedProperty();
+      //       }
+      //     }, 2000);
+      //     // chrome.storage.local.set({'history-panel.data-integrity.checked': true}, () => {});
+      //   });
+      // },
+
+      __controllUpdatedProperty: function() {
+        var db = new PouchDB('history-requests');
+        db.allDocs({
+          // jscs:disable
+          include_docs: true
+          // jscs:enable
+        })
+        .then((result) => {
+          var promises = result.rows.map((item) => {
+            let changed = false;
+            if (!item.doc.updated || item.doc.updated !== item.doc.updated) {
+              if (item.doc.created && item.doc.created === item.doc.created) {
+                item.doc.updated = item.doc.created;
+              } else {
+                item.doc.updated = Date.now();
+              }
+              changed = true;
+            }
+            if (changed) {
+              return db.put(item.doc);
+            }
+            return Promise.resolve();
+          });
+          return Promise.all(promises);
+        })
+        .then(() => {
+          console.log('Alright, should be OK now.');
+        })
+        .catch((e) => {
+          console.error('Too much data to handle, I guess.', e);
+        });
       }
     });
   })();
