@@ -376,19 +376,23 @@
           body: []
         };
       }
-      if (!this.sizes.request.headers || !this.sizes.request.headers.length) {
+      if (!this.sizes.request.headers || !this.sizes.request.headers.length ||
+          !this.sizes.request.hLabels || !this.sizes.request.headers.hLabels) {
         this.sizes.request.hLabels =  [];
         this.sizes.request.headers = [];
       }
-      if (!this.sizes.request.body || !this.sizes.request.body.length) {
+      if (!this.sizes.request.body || !this.sizes.request.body.length ||
+          !this.sizes.request.bLabels || !this.sizes.request.bLabels.length) {
         this.sizes.request.bLabels =  [];
         this.sizes.request.body = [];
       }
-      if (!this.sizes.response.headers || !this.sizes.response.headers.length) {
+      if (!this.sizes.response.headers || !this.sizes.response.headers.length ||
+          !this.sizes.response.hLabels || !this.sizes.response.hLabels.length) {
         this.sizes.response.hLabels =  [];
         this.sizes.response.headers = [];
       }
-      if (!this.sizes.response.body || !this.sizes.response.body.length) {
+      if (!this.sizes.response.body || !this.sizes.response.body.length ||
+          !this.sizes.response.bLabels || !this.sizes.response.bLabels.length) {
         this.sizes.response.bLabels =  [];
         this.sizes.response.body = [];
       }
