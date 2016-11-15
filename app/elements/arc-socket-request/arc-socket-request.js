@@ -185,9 +185,9 @@ Polymer({
 
   _processResponse: function(response) {
     var result = {};
-    this.async(() => {
-      this.processLogs(response.logs);
-    }, 1);
+    // this.async(() => {
+    //   this.processLogs(response.logs);
+    // }, 1);
     if (response.error && typeof response.error !== 'function') {
       result.redirects = Array.from(response.redirects);
       result.error = response.error;

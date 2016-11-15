@@ -1090,6 +1090,10 @@
     },
 
     _wholeRequestChanged: function(request) {
+      if (!request) {
+        this._setAssistantUrl(undefined);
+        return;
+      }
       this._setAssistantUrl(request.url);
     }
   });
