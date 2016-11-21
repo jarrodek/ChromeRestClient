@@ -149,7 +149,6 @@ Polymer({
   _requestNameChanged: function(e) {
     e.preventDefault();
     if (this.usePouchDb) {
-
       let event = this.fire('request-name-change', {
         'dbName': 'saved-requests',
         'name': e.detail.item.name,

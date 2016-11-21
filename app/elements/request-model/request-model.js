@@ -71,7 +71,7 @@
       .then(() => {
         let r = request;
         let id = encodeURIComponent(r.name) + '/' + encodeURIComponent(r.url) + '/' + r.method;
-        if (this.saveToProject) {
+        if (r.legacyProject) {
           id += '/' + r.legacyProject;
         }
         r._id = id;
