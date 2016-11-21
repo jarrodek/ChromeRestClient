@@ -117,12 +117,14 @@ Polymer({
   },
 
   _queryProjects: function() {
-    let e = this.fire('arc-database-query', {
-      store: 'legacy-projects',
-      selector: '_id $exists true',
-      sort: ['_id'],
-      fields: ['_id', 'order', 'name']
-    });
+    let e = this.fire('project-model-query', {});
+    if (!e.detail.result) {
+      this.fire('app-log', {
+        message: ['error query project for save dialog', e.detail.message]
+      });
+      return;
+    }
+    
     e.detail.result
     .then((result) => {
       result.sort((a, b) => {

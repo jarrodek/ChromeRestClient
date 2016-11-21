@@ -8,6 +8,7 @@
       this.listen(document, 'project-name-change', '_handleNameChange');
       this.listen(document, 'project-object-change', '_handleObjectSave');
       this.listen(document, 'project-object-delete', '_handleObjectDelete');
+      this.listen(document, 'project-model-query', '_queryHandler');
     },
 
     detached: function() {
@@ -15,6 +16,7 @@
       this.unlisten(document, 'project-name-change', '_handleNameChange');
       this.unlisten(document, 'project-object-change', '_handleObjectSave');
       this.unlisten(document, 'project-object-delete', '_handleObjectDelete');
+      this.unlisten(document, 'project-model-query', '_queryHandler');
     },
 
     _getDb: function() {
@@ -162,6 +164,23 @@
         });
       })
       .catch((e) => this._handleException(e));
+    },
+
+    _queryHandler: function(e) {
+      if (!e.detail) {
+        throw new Error('The `detail` object must be set prior sending the event');
+      }
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      var db = this._getDb();
+      e.detail.result = db.allDocs({
+        // jscs:disable
+        include_docs: true
+        // jscs:enable
+      })
+      .then(function(r) {
+        return r.rows.map(function(i) { return i.doc; });
+      });
     },
 
     _handleException: function(e) {
