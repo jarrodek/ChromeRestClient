@@ -187,21 +187,37 @@
   // called when any component want to change request link.
   document.body.addEventListener('action-link-change', (e) => {
     var url = e.detail.url;
-    if (app.request.url && url.indexOf('/') === 0) {
+    var setUrl = function(url) {
+      if (app.usePouchDb) {
+        let panel = document.querySelector('request-panel');
+        panel.request.url = url;
+      } else {
+        app.set('request.url', url);
+      }
+    };
+    var getUrl = function() {
+      if (app.usePouchDb) {
+        return document.querySelector('request-panel').request.url;
+      } else {
+        return app.get('request.url');
+      }
+    };
+    var currentUrl = getUrl();
+    if (currentUrl && url.indexOf('/') === 0) {
       var parser;
       try {
-        parser = new URL(app.request.url);
+        parser = new URL(currentUrl);
         url = parser.origin + url;
-        app.set('request.url', url);
+        setUrl(url);
       } catch (e) {
         console.log('URL parse error', e);
         this.fire('app-log', {
           message: e
         });
-        app.set('request.url', url);
+        setUrl(url);
       }
     } else {
-      app.set('request.url', url);
+      setUrl(url);
     }
     app.scrollPageToTop();
   });

@@ -84,11 +84,10 @@
             on-iron-deselect="_mainPageDeselected">
             <section data-route="request" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent">
               <template is="dom-if" if="[[usePouchDb]]" restamp="true">
-                <!-- new request panel using pouch DB. -->
-                <request-panel narrow-layout="[[narrowLayout]]" request-loading="{{requestLoading}}" has-response="{{hasResponse}}" opened="{{requestOpened}}" request="{{request}}" response="{{response}}" active-request="{{activeRequest}}" route-params="[[params]]" with-toast="[[withToast]]"></request-panel>
+                <request-panel narrow-layout="[[narrowLayout]]" route-params="[[params]]" with-toast="[[withToast]]"></request-panel>
               </template>
               <template is="dom-if" if="[[!usePouchDb]]" restamp="true">
-                <arc-request-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" request-loading="{{requestLoading}}" has-response="{{hasResponse}}" opened="{{requestOpened}}" request="{{request}}" response="{{response}}" active-request="{{activeRequest}}" route-params="[[params]]">
+                <arc-request-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" request-loading="{{requestLoading}}" has-response="{{hasResponse}}" opened="{{requestOpened}}" request="{{request}}" response="{{response}}" active-request="{{activeRequest}}" route-params="[[params]]">
                   <arc-request-view on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" request-loading="[[requestLoading]]" opened="{{requestOpened}}" request="{{request}}"></arc-request-view>
                   <template is="dom-if" if="[[hasResponse]]">
                     <arc-response-view opened="[[requestOpened]]" response="[[response]]" request="[[activeRequest]]"></arc-response-view>

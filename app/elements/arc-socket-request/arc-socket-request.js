@@ -8,6 +8,11 @@ Polymer({
     connection: Object
   },
 
+  clear: function() {
+    this.connection = undefined;
+    this.request = undefined;
+  },
+
   run: function() {
     this._getRequestTimeout()
     .then((timeout) => {
@@ -293,13 +298,17 @@ Polymer({
       detail.auth = response.auth;
     }
     this.fire('ready', detail);
+    this.clear();
   },
 
   abort: function() {
     if (!this.connection) {
       return;
     }
-    this.connection.abort();
+    try {
+      this.connection.abort();
+    } catch (e) {}
+    this.clear();
   },
 
   processLogs(logs) {
