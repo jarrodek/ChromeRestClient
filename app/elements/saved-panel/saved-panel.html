@@ -82,7 +82,6 @@
     </paper-drawer-panel>
     <arc-saved-list-empty hidden$="[[!isEmpty]]" search-term="[[searchQuery]]"></arc-saved-list-empty>
     <paper-toast text="Select request first." id="noSelectionToast"></paper-toast>
-    <!-- <paper-progress indeterminate hidden$="[[!querying]]"></paper-progress> -->
     <paper-dialog id="dataClearDialog" on-iron-overlay-closed="onClearDialogResult">
       <h2>Clear saved list</h2>
       <p>This will remove all data from the Google Drive store.</p>

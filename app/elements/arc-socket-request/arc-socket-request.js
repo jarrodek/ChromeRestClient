@@ -177,7 +177,7 @@ Polymer({
         }
       }
 
-      init.debug = true;
+      init.debug = false;
       if (this.request.auth) {
         init.auth = this.request.auth;
       }
@@ -196,6 +196,7 @@ Polymer({
     // this.async(() => {
     //   this.processLogs(response.logs);
     // }, 1);
+    delete response.logs;
     if (response.error && typeof response.error !== 'function') {
       result.redirects = Array.from(response.redirects);
       result.error = response.error;

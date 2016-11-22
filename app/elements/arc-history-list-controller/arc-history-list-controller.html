@@ -45,6 +45,7 @@ the License.
     <paper-progress indeterminate hidden$="[[!querying]]"></paper-progress>
     <template is="dom-if" if="[[_computePouchDbView(opened, usePouchDb)]]" restamp="true">
       <history-panel
+        opened="[[opened]]"
         on-history-panel-delete-items="_onItemDeleteRequested"
         on-history-panel-export-items="_onItemExportRequested"
         on-history-panel-open-item="_onItemOpenRequested"
@@ -73,10 +74,11 @@ the License.
           </onboarding-page>
         </onboarding-tutorial>
       </template>
+      <template is="dom-if" if="{{!hasListData}}">
+        <arc-saved-list-empty on-open-drive="openDrive"></arc-saved-list-empty>
+      </template>
     </template>
-    <template is="dom-if" if="{{isEmpty}}">
-      <arc-saved-list-empty on-open-drive="openDrive"></arc-saved-list-empty>
-    </template>
+
     <paper-dialog id="dataClearDialog" on-iron-overlay-closed="onClearDialogResult">
       <h2>Clear history</h2>
       <p>This will remove all data from the history store. Would you like to continue?</p>

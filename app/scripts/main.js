@@ -18,8 +18,6 @@
    */
   app.selectedRequest = null;
   app.selectedProject = undefined;
-  app.upgrading = false;
-  app.usePouchDb = false;
   app.gaCustomDimensions = [];
   app.appVersion = arc.app.utils.appVer;
   app.appId = chrome.runtime && chrome.runtime.id ? chrome.runtime.id : 'not-in-chrome-app';
@@ -29,10 +27,24 @@
   // Selected environment for magic variables.
   app.variablesEnvironment = 'default';
   app.narrowLayout = false;
+  app.upgrading = false;
+  app.usePouchDb = undefined;
+  app.initialized = false;
+  /**
+   * Returns true when both parameteres are trully.
+   *
+   * The `template` will always render `arc-request-controller` and it's children even if in a
+   * moment it should be turned off.
+   * The app will wait until upgrade script finish and the set up the `initialized` flag.
+   */
+  app.canRender = (status, dataSource, elementIsRequestPanel) => {
+    console.log('app.canRender', status, dataSource, elementIsRequestPanel);
+    return status && dataSource && elementIsRequestPanel === 'true';
+  };
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
     app.updateBranding();
-    app.runTutorials();
+    //
   });
   // Called when current request changed.
   window.addEventListener('selected-request', (e) => {
@@ -48,15 +60,16 @@
   // event fired when the app is initialized and can remove loader.
   window.addEventListener('ArcInitialized', function() {
     document.querySelector('arc-loader-screen').close();
+    app.runTutorials();
+    app.initialized = true;
   });
   window.addEventListener('WebComponentsReady', function() {
-    // console.log('Components are ready');
-    // event will be handled in elements/routing.html
-    if (app.upgrading) {
-      return;
-    }
     app.initAnalytics();
-    app.initRouting();
+    // if (app.upgrading) {
+    //   return;
+    // }
+    // app.initAnalytics();
+    // app.initRouting();
   });
   app.initRouting = () => {
     if (app.routingInitialized) {
@@ -91,11 +104,6 @@
     var searchFn = function(e) {
       //inform controller about search action
       app._featureCalled('search', e);
-      // Array.from(document.querySelectorAll('[search-query]')).forEach((ctrl) => {
-      //   if (ctrl.onSearch) {
-      //     ctrl.onSearch();
-      //   }
-      // });
     };
     var blurFn = function(e) {
       let input = document.querySelector('#mainSearchInput');
@@ -450,6 +458,8 @@
     /// XHR toggle tutorial
     chrome.storage.sync.get({'tutorials': []}, (r) => {
       if (r.tutorials.indexOf('xhrElementTutorial') !== -1) {
+        app.$.xhrProxyTutorial.parentNode.removeChild(app.$.xhrProxyTutorial);
+        delete app.$.xhrProxyTutorial;
         return;
       }
       app.$.xhrProxyTutorial.target = app.$.xhrToggle;
@@ -539,6 +549,7 @@
       if (elm) {
         elm.finished = true;
       }
+      app.initRouting();
       return;
     }
     var target = e.target;

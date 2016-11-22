@@ -844,6 +844,7 @@
             return this.$.magicVariables.parse();
           })
           .then((result) => {
+            this.$.magicVariables.clear();
             request.payload = result;
             resolve(request);
           })
@@ -888,6 +889,7 @@
           this.$.cookieJar.getCookies()
           .then(() => {
             let cookie = this.$.cookieJar.cookie;
+            this.$.cookieJar.reset();
             if (!cookie) {
               resolve(request);
               return;
@@ -1018,7 +1020,10 @@
 
     _saveCookies: function() {
       this.$.cookieJar.response = this.response;
-      this.$.cookieJar.store();
+      this.$.cookieJar.store()
+      .then(() => {
+        this.$.cookieJar.reset();
+      });
     },
 
     /** Called then transport not finished the request because of error. */

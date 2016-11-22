@@ -67,13 +67,15 @@
       isEmpty: {
         type: Boolean,
         value: false
-      }
+      },
+      opened: Boolean
     },
 
     observers: [
       '_observeSelection(hasSelection)',
       '_searchQueryChanged(searchQuery)',
-      '_queryComplete(querying, savedData.length)'
+      '_queryComplete(querying, savedData.length)',
+      '_openedChanged(opened)'
     ],
 
     listeners: {
@@ -85,6 +87,16 @@
       ArcBehaviors.ArcFileExportBehavior,
       ArcBehaviors.DeleteRevertableBehavior
     ],
+
+    _openedChanged: function(opened) {
+      if (opened) {
+        this._searchQueryChanged('');
+      } else {
+        this.savedData = [];
+        this.detailedRequest = undefined;
+        this.currentSelection = undefined;
+      }
+    },
 
     _observeSelection: function(hasSelection) {
       if (hasSelection) {
@@ -122,7 +134,7 @@
       if (q[0] === '_') {
         q = q.substr(1);
       }
-      let encodedQ = encodeURIComponent();
+      let encodedQ = encodeURIComponent(q);
       var db = this._getDb();
       this._setQuerying(true);
       db.allDocs()

@@ -24,7 +24,9 @@
 
       selectedProject: String,
       // Just to pass to the view.
-      withToast: Boolean
+      withToast: Boolean,
+      // It will display a loader when set to true
+      loading: Boolean
     },
 
     observers: [
@@ -47,6 +49,7 @@
         });
       }
     },
+
     attached: function() {
       this.listen(document.body, 'project-removed', 'refreshProjects');
       this.listen(document, 'project-object-deleted', 'refreshProjects');
@@ -54,6 +57,7 @@
       this.listen(document.body, 'project-name-changed', '_updateProjectName');
       this.listen(document, 'selected-project', '_updateProjectSelection');
     },
+
     detached: function() {
       this.unlisten(document.body, 'project-removed', 'refreshProjects');
       this.unlisten(document, 'project-object-deleted', 'refreshProjects');
@@ -67,6 +71,7 @@
     _navigateRequested: function(e) {
       page(e.detail.url);
     },
+
     _usePouchDbChanged: function() {
       this.refreshProjects();
     },
@@ -86,7 +91,6 @@
     },
 
     _queryProjects: function() {
-
       this._getDb().allDocs({
         // jscs:disable
         include_docs: true
@@ -110,8 +114,10 @@
           return i;
         });
         this.set('projects', result);
+        this.loading = false;
       })
       .catch((err) => {
+        this.loading = false;
         this.fire('send-analytics', {
           type: 'exception',
           description: 'arc-menu:' + err.message,
