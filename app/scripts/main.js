@@ -38,7 +38,6 @@
    * The app will wait until upgrade script finish and the set up the `initialized` flag.
    */
   app.canRender = (status, dataSource, elementIsRequestPanel) => {
-    console.log('app.canRender', status, dataSource, elementIsRequestPanel);
     return status && dataSource && elementIsRequestPanel === 'true';
   };
   // Event fired when all components has been initialized.
