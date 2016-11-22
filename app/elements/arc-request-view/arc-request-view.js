@@ -57,6 +57,16 @@ Polymer({
     '_requestChanged(request, request.*)'
   ],
 
+  detached: function() {
+    this.opened = undefined;
+    this.request = undefined;
+    this.masterUrl = undefined;
+    this.contentType = undefined;
+    this.requestHeaders = undefined;
+    this.requestLoading = undefined;
+    this.statusMessage = undefined;
+  },
+
   _requestChanged: function() {
     if (!this.opened) {
       return;

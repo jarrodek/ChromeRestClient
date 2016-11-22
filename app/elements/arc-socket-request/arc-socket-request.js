@@ -46,7 +46,10 @@ Polymer({
       try {
         return this.connection.fetch()
         .then((response) => {
-          this._processResponse(response);
+          window.requestAnimationFrame(() => {
+            this._processResponse(response);
+          });
+
         });
       } catch (e) {
         this.fire('app-log', {
@@ -209,7 +212,7 @@ Polymer({
     result.ok = response.ok;
     result.auth = response.auth;
     var decoder = new TextDecoder();
-    result.rawBody = decoder.decode(this.connection.response.rawResponse);
+    result.rawBody = decoder.decode(response.rawResponse);
 
     var ct = (response.headers && response.headers.get) ?
       response.headers.get('content-type') : null;
@@ -238,7 +241,7 @@ Polymer({
             'level': 'error'
           });
           try {
-            result.body = decoder.decode(this.connection.response.rawResponse);
+            result.body = decoder.decode(response.rawResponse);
           } catch (e) {
             result.body = '';
           }
@@ -246,7 +249,7 @@ Polymer({
         });
       } catch (e) {
         try {
-          result.body = decoder.decode(this.connection.response.rawResponse);
+          result.body = decoder.decode(response.rawResponse);
         } catch (e) {
           result.body = '';
         }
@@ -265,7 +268,7 @@ Polymer({
             'level': 'error'
           });
           try {
-            result.body = decoder.decode(this.connection.response.rawResponse);
+            result.body = decoder.decode(response.rawResponse);
           } catch (e) {
             result.body = '';
           }
@@ -273,7 +276,7 @@ Polymer({
         });
       } catch (e) {
         try {
-          result.body = decoder.decode(this.connection.response.rawResponse);
+          result.body = decoder.decode(response.rawResponse);
         } catch (e) {
           result.body = '';
         }
@@ -297,8 +300,10 @@ Polymer({
     if (response.auth) {
       detail.auth = response.auth;
     }
-    this.fire('ready', detail);
-    this.clear();
+    window.requestAnimationFrame(() => {
+      this.fire('ready', detail);
+      this.clear();
+    });
   },
 
   abort: function() {
