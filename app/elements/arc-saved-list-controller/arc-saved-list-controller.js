@@ -89,6 +89,12 @@ Polymer({
   },
 
   warnClearAll: function() {
+    if (this.usePouchDb) {
+      this.warnClearAllPouchDb();
+    }
+  },
+
+  warnClearAllPouchDb: function() {
     var panel = this.$$('saved-panel');
     panel.warnClearAll();
   },
