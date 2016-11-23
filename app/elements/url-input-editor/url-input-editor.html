@@ -143,7 +143,6 @@ Altrought the history hash is not used in REST services and is used only in clie
       </div>
       <paper-input label="Hash" value="{{anchorValue}}" class="anchor-input"></paper-input>
     </div>
-    <iron-a11y-keys id="a11y" target="{{this.$.masterUrl}}" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
     <paper-autocomplete vertical-offset="-8" horizontal-offset="24" target="[[masterUrlElement]]" id="autocomplete" loader on-query="_queryUrlHistory" opened="{{suggesionsOpened}}" on-selected="_onSuggestionSelected"></paper-autocomplete>
     <arc-historyurl-model id="model" on-data-ready="_setSuggestions"></arc-historyurl-model>
     <paper-toast text="Entered URL is invalid." id="invalidUrlToast"></paper-toast>

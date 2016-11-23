@@ -67,7 +67,8 @@ Polymer({
     '_detailedChanged(detailed)'
   ],
   listeners: {
-    'blur': '_elementBlur'
+    'blur': '_elementBlur',
+    'keydown': '_keyDownHandler'
   },
 
   attached: function() {
@@ -191,6 +192,7 @@ Polymer({
     } catch (e) {
       this.set('hostValue', this.url);
       console.log('URL parse error', e);
+      console.log('The url was', url);
       this.fire('app-log', {
         message: e
       });
@@ -365,7 +367,7 @@ Polymer({
    * A handler called when the user press "enter" in any of the form fields.
    * This will send a `send` event.
    */
-  onEnter: function() {
+  _onEnter: function() {
     if (this.suggesionsOpened) {
       return;
     }
@@ -376,11 +378,13 @@ Polymer({
     }
     this.fire('send');
   },
+
   // Hanlder for suggestion selected event.
   _onSuggestionSelected: function(e) {
     var value = e.detail.value;
     this._setUrl(value);
   },
+
   // Handler called when the `paper-autocomplete` request a suggestions.
   _queryUrlHistory: function(e) {
     var value = e.detail.value;
@@ -451,6 +455,17 @@ Polymer({
     } catch (e) {
       this.$.invalidUrlToast.open();
     }
+  },
+
+  _keyDownHandler: function(e) {
+    e = Polymer.dom(e);
+    if (e.rootTarget.nodeName !== 'INPUT') {
+      return;
+    }
+    if (e.event.keyCode !== 13) {
+      return;
+    }
+    this._onEnter();
   },
   /**
    * Returns a string where all characters that are not valid for a URL
