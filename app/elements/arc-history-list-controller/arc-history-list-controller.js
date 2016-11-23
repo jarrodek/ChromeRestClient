@@ -28,8 +28,7 @@ Polymer({
   ],
 
   observers: [
-    '_queryPagePouchDbChanged(queryPagePouchDb)',
-    '_openedChanged(opened,queryPagePouchDb)'
+    '_queryPagePouchDbChanged(queryPagePouchDb)'
   ],
 
   get view() {
@@ -67,36 +66,39 @@ Polymer({
   },
 
   _onQueryingChanged: function(e, detail) {
+    // if (this.usePouchDb) {
+    //   return;
+    // }
     this._setQuerying(detail.value);
-    this._queryingpdbinternall = detail.value;
-    if (!detail.value) {
-      this.set('queryPagePouchDb', false);
-    }
+    // this._queryingpdbinternall = detail.value;
+    // if (!detail.value) {
+    //   this.set('queryPagePouchDb', false);
+    // }
   },
 
   _queryPagePouchDbChanged: function(queryPagePouchDb) {
-    if (this._queryingpdbinternall === undefined) {
-      return;
-    }
-    var panel = this.$$('history-panel');
-    if (!panel) {
-      return;
-    }
-    this.listData = panel.historyData;
-    if (queryPagePouchDb) {
-      if (this.searchQuery) {
-        panel.searchQuery = this.searchQuery;
-      } else {
-        panel.searchQuery = undefined;
-        panel.refresh();
-      }
-    } else {
-      if (!panel.historyData.length) {
-        this._setIsEmpty(true);
-      } else {
-        this._setIsEmpty(false);
-      }
-    }
+    // if (this._queryingpdbinternall === undefined) {
+    //   return;
+    // }
+    // var panel = this.$$('history-panel');
+    // if (!panel) {
+    //   return;
+    // }
+    // this.listData = panel.historyData;
+    // if (queryPagePouchDb) {
+    //   if (this.searchQuery) {
+    //     panel.searchQuery = this.searchQuery;
+    //   } else {
+    //     panel.searchQuery = undefined;
+    //     panel.refresh();
+    //   }
+    // } else {
+    //   if (!panel.historyData.length) {
+    //     this._setIsEmpty(true);
+    //   } else {
+    //     this._setIsEmpty(false);
+    //   }
+    // }
   },
 
   _getDb: function() {
@@ -177,25 +179,5 @@ Polymer({
   _onItemOpenRequested: function(e, detail) {
     var url = 'request/history/' + encodeURIComponent(detail.id);
     page(url);
-  },
-
-  _openedChanged: function(opened, queryPagePouchDb) {
-    if (!queryPagePouchDb) {
-      return;
-    }
-    this.debounce('refresh-history', () => {
-      var panel = this.$$('history-panel');
-      if (!panel) {
-        return;
-      }
-      if (!opened) {
-        panel.historyData = [];
-      } else {
-        if (!panel.historyData.length) {
-          panel.refresh();
-        }
-      }
-    }, 1);
-
   }
 });

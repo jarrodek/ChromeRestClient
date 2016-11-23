@@ -44,7 +44,9 @@
       isRequest: {
         type: Boolean,
         reflectToAttribute: true
-      }
+      },
+      // It will display a loader when set to true
+      loading: Boolean
     },
 
     observers: [

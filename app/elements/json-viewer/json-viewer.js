@@ -80,14 +80,15 @@ Polymer({
   },
   // Called when `json` property changed. It starts parsing the data.
   _changed: function() {
-    // if (!this.json) {
-    //   return;
-    // }
 
     this._setIsError(false);
     this.$.output.innerText = '';
+    var json = this.json;
+    if (json === undefined) {
+      return;
+    }
 
-    if (this.json === null) {
+    if (json === null) {
       let html = '<div class="prettyPrint"><span class="nullValue">null';
       html += '</span></div>';
       this.$.output.innerHTML = html;
@@ -95,7 +96,7 @@ Polymer({
       return;
     }
 
-    if (this.json === false) {
+    if (json === false) {
       let html = '<div class="prettyPrint"><span class="booleanValue">false';
       html += '</span></div>';
       this.$.output.innerHTML = html;
@@ -111,7 +112,7 @@ Polymer({
       this._worker = worker;
     }
     this._worker.postMessage({
-      json: this.json,
+      json: json,
       raw: this.raw
     });
   },

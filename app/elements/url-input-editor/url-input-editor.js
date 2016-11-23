@@ -67,7 +67,8 @@ Polymer({
     '_detailedChanged(detailed)'
   ],
   listeners: {
-    'blur': '_elementBlur'
+    'blur': '_elementBlur',
+    'keydown': '_keyDownHandler'
   },
 
   attached: function() {
@@ -191,6 +192,7 @@ Polymer({
     } catch (e) {
       this.set('hostValue', this.url);
       console.log('URL parse error', e);
+      console.log('The url was', url);
       this.fire('app-log', {
         message: e
       });
@@ -302,25 +304,47 @@ Polymer({
       });
       return;
     }
-    var isEncode = type === 'encode';
-    Array.from(parser.searchParams).forEach((i) => {
-      parser.searchParams.delete(i[0]);
-      let k = isEncode ? this.encodeQueryString(i[0]) : this.decodeQueryString(i[0]);
-      let v = isEncode ? this.encodeQueryString(i[1]) : this.decodeQueryString(i[1]);
-      parser.searchParams.set(k, v);
-    });
-    var path = parser.pathname;
-    if (isEncode && path) {
-      if (/\s/.test(path)) {
-        let parts = path.split('/');
-        parts = parts.map((cmp) => this.encodeQueryString(cmp));
-        path = parts.join('/');
+    if (type === 'decode') {
+      let decoded = [];
+      for (let p of parser.searchParams) {
+        let k = this.decodeQueryString(p[0]);
+        let v = this.decodeQueryString(p[1]);
+        decoded[decoded.length] = k + '=' + v;
       }
+      let path = parser.pathname;
+      if (path) {
+        path = this.decodeQueryString(path);
+      }
+      let finalUrl = parser.origin;
+      if (path) {
+        finalUrl += path;
+      }
+      if (decoded.length) {
+        finalUrl += '?' + decoded.join('&');
+      }
+      let h = parser.hash;
+      if (h) {
+        finalUrl += h;
+      }
+      this.set('url', finalUrl);
     } else {
-      path = this.decodeQueryString(path);
+      // URL is a parser and toString return ready string.
+      // this.set('url', parser.toString());
+      let finalUrl = parser.origin;
+      let path = parser.pathname;
+      if (path) {
+        finalUrl += path;
+      }
+      let sp = parser.searchParams.toString();
+      if (sp) {
+        finalUrl += '?' + sp;
+      }
+      let h = parser.hash;
+      if (h) {
+        finalUrl += h;
+      }
+      this.set('url', finalUrl);
     }
-    parser.pathname = path;
-    this.set('url', parser.toString());
     this.revalidate();
   },
   /** Called when URL params form has been renederd. */
@@ -343,7 +367,7 @@ Polymer({
    * A handler called when the user press "enter" in any of the form fields.
    * This will send a `send` event.
    */
-  onEnter: function() {
+  _onEnter: function() {
     if (this.suggesionsOpened) {
       return;
     }
@@ -354,11 +378,13 @@ Polymer({
     }
     this.fire('send');
   },
+
   // Hanlder for suggestion selected event.
   _onSuggestionSelected: function(e) {
     var value = e.detail.value;
     this._setUrl(value);
   },
+
   // Handler called when the `paper-autocomplete` request a suggestions.
   _queryUrlHistory: function(e) {
     var value = e.detail.value;
@@ -429,6 +455,17 @@ Polymer({
     } catch (e) {
       this.$.invalidUrlToast.open();
     }
+  },
+
+  _keyDownHandler: function(e) {
+    e = Polymer.dom(e);
+    if (e.rootTarget.nodeName !== 'INPUT') {
+      return;
+    }
+    if (e.event.keyCode !== 13) {
+      return;
+    }
+    this._onEnter();
   },
   /**
    * Returns a string where all characters that are not valid for a URL

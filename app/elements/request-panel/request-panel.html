@@ -117,7 +117,6 @@
         <template is="dom-if" if="[[hasResponse]]">
           <arc-response-view opened="[[opened]]" response="[[response]]" request="[[activeRequest]]"></arc-response-view>
         </template>
-        <arc-save-dialog-view id="saveRequestUi"></arc-save-dialog-view>
         <div class="cookie-exchange-banner" hidden$="[[!showCookieBanner]]">
           <h2>
             Missing cookies?
@@ -159,7 +158,7 @@
     <arc-socket-request id="socket" on-ready="_responseReady" on-error="_onRequestError"></arc-socket-request>
     <arc-xhr-request id="xhr" on-ready="_responseReady" on-error="_onRequestError" connected="{{xhrConnected}}"></arc-xhr-request>
     <arc-magic-variables id="magicVariables" scope="[[project.id]]"></arc-magic-variables>
-    <cookie-storage use-pouch-db="true" id="cookieJar" url="[[request.url]]" cookie="{{requestCookie}}" response-headers="[[response.headers]]"></cookie-storage>
+    <cookie-storage use-pouch-db="true" id="cookieJar" url="[[request.url]]"></cookie-storage>
     <cookie-exchange external-id="apcedakaoficjlofohhcmkkljehnmebp" id="cookieExchange"></cookie-exchange>
     <auth-data-saver id="authSaver"
       on-resend-auth-request="_resendAuthRequest"

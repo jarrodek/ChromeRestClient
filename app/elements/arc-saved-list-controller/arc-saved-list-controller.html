@@ -52,7 +52,7 @@ the License.
     </style>
     <paper-progress indeterminate hidden$="[[!querying]]"></paper-progress>
     <template is="dom-if" if="[[_computePouchDbView(opened, usePouchDb)]]">
-      <saved-panel querying="{{querying}}" on-querying-changed="_onQueryingChanged"></saved-panel>
+      <saved-panel querying="{{querying}}" on-querying-changed="_onQueryingChanged" opened="[[opened]]"></saved-panel>
     </template>
     <template is="dom-if" if="[[_computeLegacyView(opened, usePouchDb)]]" restamp="true">
       <template is="dom-if" if="{{hasListData}}">

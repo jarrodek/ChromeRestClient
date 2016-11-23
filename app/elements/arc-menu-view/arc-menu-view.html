@@ -67,6 +67,10 @@
     paper-menu-button {
       padding: 0;
     }
+
+    paper-progress {
+      width: 100%;
+    }
     </style>
     <paper-menu selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap">
       <paper-item data-route="request" data-place$="[[baseUrl]]">Request</paper-item>
@@ -74,6 +78,7 @@
       <paper-submenu id="projectsSubmenu">
         <paper-item class="menu-trigger">Projects</paper-item>
         <paper-menu class="menu-content sublist" selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap">
+          <paper-progress hidden$="[[!loading]]" indeterminate></paper-progress>
           <paper-item hidden$="[[hasProjects]]">No projects here</paper-item>
           <template is="dom-repeat" items="[[projects]]">
             <paper-item data-route$="request/project/[[item.id]]" class="project-item" selected$="[[_computeProjectSelected(item.id, selectedProject)]]">

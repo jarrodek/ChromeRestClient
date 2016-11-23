@@ -76,6 +76,7 @@ Polymer({
     if (!opened || !usePouchDb || !projectId) {
       return;
     }
+    this.requests = [];
     var event = this.fire('project-read', {
       id: projectId
     });
@@ -149,18 +150,20 @@ Polymer({
   _requestNameChanged: function(e) {
     e.preventDefault();
     if (this.usePouchDb) {
+
       let event = this.fire('request-name-change', {
         'dbName': 'saved-requests',
         'name': e.detail.item.name,
         'id': e.detail.item.id
       });
+      let updatedId = e.detail.item.id;
       if (event.detail.error) {
         console.error(event.detail.message);
         return;
       }
       event.detail.result
       .then((request) => {
-        let index = this.requests.findIndex((i) => i._id === request._id);
+        let index = this.requests.findIndex((i) => i._id === updatedId);
         if (index === -1) {
           console.error('Unable to find index.');
           return;
@@ -173,6 +176,7 @@ Polymer({
           message: e.message
         });
       });
+
       return;
     }
     var request = e.detail.item;

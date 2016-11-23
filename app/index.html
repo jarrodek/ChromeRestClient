@@ -12,27 +12,15 @@
   <link rel="import" href="elements/elements.html">
   <style is="custom-style" include="shared-styles"></style>
 </head>
-
-<body unresolved>
-  <div class="loader">
-    <div class="spinner">
-      <div class="bounce1"></div>
-      <div class="bounce2"></div>
-      <div class="bounce3"></div>
-    </div>
-  </div>
+<body>
   <template is="dom-bind" id="app">
     <iron-meta id="meta" key="usePouchDb" value="{{usePouchDb}}"></iron-meta>
     <arc-loader-screen id="appLOader" opened></arc-loader-screen>
     <paper-drawer-panel responsive-width="1000px" id="paperDrawerPanel" narrow="{{narrowLayout}}">
       <paper-scroll-header-panel drawer>
-        <!-- Drawer Toolbar -->
-        <!-- <paper-toolbar>
-                    <div class="title">Title</div>
-                    <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
-                </paper-toolbar> -->
-        <!-- App Menu -->
-        <arc-menu-controller use-pouch-db="[[usePouchDb]]" id="appMenu" with-toast="[[withToast]]" route="[[route]]" base-url="[[baseUrl]]"></arc-menu-controller>
+        <template is="dom-if" if="[[initialized]]">
+            <arc-menu-controller loading use-pouch-db="[[usePouchDb]]" id="appMenu" with-toast="[[withToast]]" route="[[route]]" base-url="[[baseUrl]]"></arc-menu-controller>
+        </template>
       </paper-scroll-header-panel>
       <!-- Main Area -->
       <paper-scroll-header-panel main id="headerPanelMain">
@@ -83,10 +71,10 @@
             on-iron-select="_mainPageSelected"
             on-iron-deselect="_mainPageDeselected">
             <section data-route="request" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent">
-              <template is="dom-if" if="[[usePouchDb]]" restamp="true">
+              <template is="dom-if" if="[[canRender(initialized,usePouchDb,'true')]]">
                 <request-panel narrow-layout="[[narrowLayout]]" route-params="[[params]]" with-toast="[[withToast]]"></request-panel>
               </template>
-              <template is="dom-if" if="[[!usePouchDb]]" restamp="true">
+              <template is="dom-if" if="[[canRender(initialized,usePouchDb,'false')]]">
                 <arc-request-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" request-loading="{{requestLoading}}" has-response="{{hasResponse}}" opened="{{requestOpened}}" request="{{request}}" response="{{response}}" active-request="{{activeRequest}}" route-params="[[params]]">
                   <arc-request-view on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" request-loading="[[requestLoading]]" opened="{{requestOpened}}" request="{{request}}"></arc-request-view>
                   <template is="dom-if" if="[[hasResponse]]">
@@ -344,8 +332,8 @@
   <script src="bower_components/dexie-js/dist/dexie.min.js"></script>
   <script src="bower_components/har/build/har.js"></script>
   <script src="bower_components/lodash/lodash.js"></script>
-  <script src="bower_components/uri.js/src/URI.js"></script>
-  <script src="bower_components/cookie-parser/cookie-parser.js"></script>
+  <!-- <script src="bower_components/uri.js/src/URI.min.js"></script> -->
+  <!-- <script src="bower_components/cookie-parser/cookie-parser.js"></script> -->
   <script src="scripts/libs/app.router.js"></script>
   <script src="scripts/libs/app.utils.js"></script>
   <script src="scripts/libs/app.types.js"></script>

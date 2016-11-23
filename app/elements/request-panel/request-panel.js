@@ -172,7 +172,8 @@
       'request-first-byte-received': '_requestStatusChanged',
       'request-load-end': '_requestStatusChanged',
       'request-headers-sent': '_requestStatusChanged',
-      'is-payload-changed': '_isPayloadChanged'
+      'is-payload-changed': '_isPayloadChanged',
+      'iron-overlay-closed': '_dialogClosedHandler'
     },
 
     attached: function() {
@@ -549,9 +550,9 @@
       if ((isDrive || isSaved) && opts.source === 'shortcut' && !opts.shift) {
         return this._saveCurrent();
       }
-
-      var ui = this.$.saveRequestUi;
-      ui.reset();
+      var ui = document.createElement('arc-save-dialog-view');
+      // ui.reset();
+      ui.noCancelOnOutsideClick = true;
       ui.isDrive = isDrive;
       if (isSaved || isDrive) {
         if (this.request._id) {
@@ -564,7 +565,8 @@
         ui.projectId = this.projectId;
       }
       ui.usePouchDb = true;
-      ui.open();
+      Polymer.dom(this.root).appendChild(ui);
+      ui.opened = true;
       this.fire('send-analytics', {
         'type': 'event',
         'category': 'Engagement',
@@ -598,6 +600,19 @@
       this.$.requestSaver.currentIsDrive = isDrive;
       this.$.requestSaver.currentIsSaved = isSaved;
       this.$.requestSaver.save();
+    },
+
+    _dialogClosedHandler: function(e) {
+      e = Polymer.dom(e);
+      if (e.rootTarget.nodeName !== 'ARC-SAVE-DIALOG-VIEW') {
+        return;
+      }
+      var root = Polymer.dom(this.root);
+      var dialog = root.querySelector('arc-save-dialog-view');
+      if (!dialog) {
+        return;
+      }
+      root.removeChild(dialog);
     },
 
     _requestSavedHandler: function(e, detail) {
@@ -829,6 +844,7 @@
             return this.$.magicVariables.parse();
           })
           .then((result) => {
+            this.$.magicVariables.clear();
             request.payload = result;
             resolve(request);
           })
@@ -873,6 +889,7 @@
           this.$.cookieJar.getCookies()
           .then(() => {
             let cookie = this.$.cookieJar.cookie;
+            this.$.cookieJar.reset();
             if (!cookie) {
               resolve(request);
               return;
@@ -1003,7 +1020,10 @@
 
     _saveCookies: function() {
       this.$.cookieJar.response = this.response;
-      this.$.cookieJar.store();
+      this.$.cookieJar.store()
+      .then(() => {
+        this.$.cookieJar.reset();
+      });
     },
 
     /** Called then transport not finished the request because of error. */
@@ -1086,7 +1106,9 @@
      * the assistant so it can perform a search only if the URL is final.
      */
     _urlInputChanged: function(e) {
-      this._setAssistantUrl(e.detail.url);
+      window.requestAnimationFrame(() => {
+        this._setAssistantUrl(e.detail.url);
+      });
     },
 
     _wholeRequestChanged: function(request) {
@@ -1094,7 +1116,9 @@
         this._setAssistantUrl(undefined);
         return;
       }
-      this._setAssistantUrl(request.url);
+      window.requestAnimationFrame(() => {
+        this._setAssistantUrl(request.url);
+      });
     }
   });
 })();

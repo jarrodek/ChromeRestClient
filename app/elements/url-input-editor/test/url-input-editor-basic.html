@@ -6,6 +6,8 @@
   <title>search-bar-basic</title>
   <script src="../../../bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
   <script src="../../../bower_components/web-component-tester/browser.js"></script>
+  <script src="../../../bower_components/iron-test-helpers/test-helpers.js"></script>
+  <script src="../../../bower_components/iron-test-helpers/mock-interactions.js"></script>
   <!-- Import the element to test -->
   <link rel="import" href="../../../bower_components/polymer/polymer.html">
   <link rel="import" href="../../../bower_components/iron-overlay-behavior/iron-overlay-behavior.html">
@@ -18,14 +20,20 @@
       <url-input-editor></url-input-editor>
     </template>
   </test-fixture>
+  <test-fixture id="url">
+    <template>
+      <url-input-editor url="http://ux.mulesoft.com/path?param"></url-input-editor>
+    </template>
+  </test-fixture>
   <script>
-  suite('`url-input-editor` tests', function() {
+  // jshint ignore: start
+  suite('Basic tests', function() {
     var editor;
     setup(function() {
       editor = fixture('editor');
     });
 
-    test('Should parse URL details', function(done) {
+    test('Should update details', function(done) {
       var url = 'https://sub.domain.com/path/to/resource?param=value&other=value';
       editor.detailed = true;
       editor.url = url;
@@ -39,21 +47,46 @@
         done();
       }, 10);
     });
-    // Case below is no more supported.
-    // test('Should parse URL with user and password', function(done) {
-    //   var url = 'https://test:test@sub.domain.com/path/to/resource?param=value&other=value';
-    //   editor.detailed = true;
-    //   editor.url = url;
-    //   window.setTimeout(() => {
-    //     expect(editor.hostValue).to.be.equal('https://test:test@sub.domain.com',
-    //       'Host value is invalid');
-    //     expect(editor.pathValue).to.be.equal('/path/to/resource',
-    //       'Path value is invalid');
-    //     expect(editor.paramsList).to.be.a('array',
-    //       'paramsList value is not an array');
-    //     done();
-    //   }, 10);
-    // });
+
+    test('Should encode URL', function() {
+      var url = 'http://192.168.2.252/service/board/1/edit?description=We\'ll keep your precious' +
+        ' pup fed, watered, walked and socialized during their stay.';
+      var comp = 'http://192.168.2.252/service/board/1/edit?description=We%27ll+keep+your+' +
+        'precious+pup+fed%2C+watered%2C+walked+and+socialized+during+their+stay.';
+      editor.url = url;
+      editor.encodeParameters();
+      expect(editor.url).to.be.equal(comp);
+    });
+
+    test('Should decode URL', function() {
+      var comp = 'http://192.168.2.252/service/board/1/edit?description=We\'ll keep your precious' +
+        ' pup fed, watered, walked and socialized during their stay.';
+      var url = 'http://192.168.2.252/service/board/1/edit?description=We%27ll+keep+your+' +
+        'precious+pup+fed%2C+watered%2C+walked+and+socialized+during+their+stay.';
+      editor.url = url;
+      editor.decodeParameters();
+      expect(editor.url).to.be.equal(comp);
+    });
+
+  });
+
+  suite('Events test', function() {
+    var editor;
+    setup(function() {
+      editor = fixture('url');
+    });
+
+    test('URL is set', function() {
+      expect(editor.url).to.be.equal('http://ux.mulesoft.com/path?param');
+    });
+
+    test('Fire send on main field', function() {
+      var spy = sinon.stub();
+      editor.addEventListener('send', spy);
+      var input = Polymer.dom(editor.root).querySelector('#masterUrl');
+      MockInteractions.pressEnter(input);
+      assert.isTrue(spy.calledOnce, 'Send event was not fired');
+    });
   });
   </script>
 </dody>

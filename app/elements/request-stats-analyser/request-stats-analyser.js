@@ -131,7 +131,6 @@
     },
 
     _hasAnyData: function() {
-      // debugger;
       var t = Array.from(arguments);
       return t.some((i) => i === true);
     },
@@ -218,16 +217,15 @@
     },
     // Process data returned from the collector worker.
     _processCollectorData: function(e) {
-      console.info('Data collection time: ', e.data.time);
+      // console.info('Data collection time: ', e.data.time);
       var list = e.data.data;
       if (!list || !list.length) {
         this._setAnalysing(false);
         this.clear();
-        console.info('No data found');
+        // console.info('No data found');
         return;
       }
       this._processRawData(list);
-
     },
     // Collector worker error ocurred.
     _processCollectorError: function(e) {
@@ -267,7 +265,7 @@
       this.fire('request-stats-analysed');
 
       var execTime = performance.now() - this.startTime;
-      console.info('Processing history data time', execTime);
+      // console.info('Processing history data time', execTime);
 
       this.fire('send-analytics', {
         type: 'timing',
@@ -339,103 +337,95 @@
 
     _processResponseWorkerData: function(e) {
       var data = e.data;
-      if (!this.times.labels) {
-        this.times.labels = [];
-      }
-      if (!this.times.totals) {
-        this.times.totals = [];
-      }
-      if (!this.times.ttfb) {
-        this.times.ttfb = [];
-      }
-      if (!this.times.connects) {
-        this.times.connects = [];
-      }
-      if (!this.times.receiveds) {
-        this.times.receiveds = [];
-      }
-      if (!this.times.sents) {
-        this.times.sents = [];
-      }
-      if (!this.times.ssl) {
-        this.times.ssl = [];
-      }
-      if (!this.sizes.request) {
-        this.sizes.request = {
-          hLabels: [],
-          headers: [],
-          bLabels: [],
-          body: []
-        };
-      }
-      if (!this.sizes.response) {
-        this.sizes.response = {
-          hLabels: [],
-          headers: [],
-          bLabels: [],
-          body: []
-        };
-      }
-      if (!this.sizes.request.headers || !this.sizes.request.headers.length ||
-          !this.sizes.request.hLabels || !this.sizes.request.headers.hLabels) {
-        this.sizes.request.hLabels =  [];
-        this.sizes.request.headers = [];
-      }
-      if (!this.sizes.request.body || !this.sizes.request.body.length ||
-          !this.sizes.request.bLabels || !this.sizes.request.bLabels.length) {
-        this.sizes.request.bLabels =  [];
-        this.sizes.request.body = [];
-      }
-      if (!this.sizes.response.headers || !this.sizes.response.headers.length ||
-          !this.sizes.response.hLabels || !this.sizes.response.hLabels.length) {
-        this.sizes.response.hLabels =  [];
-        this.sizes.response.headers = [];
-      }
-      if (!this.sizes.response.body || !this.sizes.response.body.length ||
-          !this.sizes.response.bLabels || !this.sizes.response.bLabels.length) {
-        this.sizes.response.bLabels =  [];
-        this.sizes.response.body = [];
-      }
-      this.push('times.labels', data.times.label);
-      this.push('times.totals', data.times.total);
-      this.push('times.ttfb', data.times.ttfb);
-      this.push('times.connects', data.times.connect);
-      this.push('times.receiveds', data.times.received);
-      this.push('times.sents', data.times.sent);
+      window.requestAnimationFrame(() => {
+        try {
+          this._computeWorkerData(data);
+        } catch (e) {
+          this.fire('app-log', {
+            message: ['stats-analyser', e]
+          });
+        }
+      });
+    },
+
+    _computeWorkerData: function(data) {
+      var times = {
+        labels: this.times.labels || [],
+        totals: this.times.totals || [],
+        ttfb: this.times.ttfb || [],
+        connects: this.times.connects || [],
+        receiveds: this.times.receiveds || [],
+        sents: this.times.sents || []
+      };
+      times.labels.push(data.times.label);
+      times.totals.push(data.times.total);
+      times.ttfb.push(data.times.ttfb);
+      times.connects.push(data.times.connect);
+      times.receiveds.push(data.times.received);
+      times.sents.push(data.times.sent);
+
       if (data.times.ssl && (data.times.ssl > -1 || (this.time.ssl && this.time.ssl.length))) {
         if (data.times.ssl === -1) {
           data.times.ssl = 0;
         }
-        this.push('times.ssl', data.times.ssl);
+        times.ssl = this.times.ssl || [];
+        times.ssl.push(data.times.ssl);
       }
 
+      var medians = {
+        total: this.calculateMedian(this.times.totals),
+        ttfb: this.calculateMedian(this.times.ttfb),
+        sent: this.calculateMedian(this.times.sents),
+        receiving: this.calculateMedian(this.times.receiveds),
+        connect: this.calculateMedian(this.times.connects),
+        ssl: this.calculateMedian(this.times.connects),
+        requestBody: this.calculateMedian(this.sizes.request.body),
+        requestHeaders: this.calculateMedian(this.sizes.request.headers),
+        responseBody: this.calculateMedian(this.sizes.response.body),
+        responseHeaders: this.calculateMedian(this.sizes.response.headers)
+      };
+
+      this.set('times', times);
+      this.set('medians', medians);
+
+      var sizes = {
+        request: {
+          hLabels: this.sizes.request.hLabels || [],
+          headers: this.sizes.request.headers || [],
+          bLabels: this.sizes.request.bLabels || [],
+          body: this.sizes.request.body || []
+        },
+        response: {
+          hLabels: this.sizes.response.hLabels || [],
+          headers: this.sizes.response.headers || [],
+          bLabels: this.sizes.response.bLabels || [],
+          body: this.sizes.response.body || []
+        }
+      };
+      var hasChanged = false;
       if (data.sizes.request.headers) {
-        this.push('sizes.request.hLabels', data.sizes.request.hLabel);
-        this.push('sizes.request.headers', data.sizes.request.headers);
+        sizes.request.hLabels.push(data.sizes.request.hLabel);
+        sizes.request.headers.push(data.sizes.request.headers);
+        hasChanged = true;
       }
       if (data.sizes.request.body) {
-        this.push('sizes.request.bLabels', data.sizes.request.bLabel);
-        this.push('sizes.request.body', data.sizes.request.body);
+        sizes.request.bLabels.push(data.sizes.request.bLabel);
+        sizes.request.body.push(data.sizes.request.body);
+        hasChanged = true;
       }
       if (data.sizes.response.headers) {
-        this.push('sizes.response.hLabels', data.sizes.response.hLabel);
-        this.push('sizes.response.headers', data.sizes.response.headers);
+        sizes.response.hLabels.push(data.sizes.response.hLabel);
+        sizes.response.headers.push(data.sizes.response.headers);
+        hasChanged = true;
       }
       if (data.sizes.response.body) {
-        this.push('sizes.response.bLabels', data.sizes.response.bLabel);
-        this.push('sizes.response.body', data.sizes.response.body);
+        sizes.response.bLabels.push(data.sizes.response.bLabel);
+        sizes.response.body.push(data.sizes.response.body);
+        hasChanged = true;
       }
-
-      this.set('medians.total', this.calculateMedian(this.times.totals));
-      this.set('medians.ttfb', this.calculateMedian(this.times.ttfb));
-      this.set('medians.sent', this.calculateMedian(this.times.sents));
-      this.set('medians.receiving', this.calculateMedian(this.times.receiveds));
-      this.set('medians.connect', this.calculateMedian(this.times.connects));
-      this.set('medians.ssl', this.calculateMedian(this.times.ssl));
-      this.set('medians.requestBody', this.calculateMedian(this.sizes.request.body));
-      this.set('medians.requestHeaders', this.calculateMedian(this.sizes.request.headers));
-      this.set('medians.responseBody', this.calculateMedian(this.sizes.response.body));
-      this.set('medians.responseHeaders', this.calculateMedian(this.sizes.response.headers));
+      if (hasChanged) {
+        this.set('sizes', sizes);
+      }
 
       if (!this.statuses.labels || !this.statuses.labels.length) {
         this.statuses = {
