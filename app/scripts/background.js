@@ -64,6 +64,16 @@ arc.bg.onLaunched = (lunchData) => {
  */
 arc.bg.onInstalled = (details) => {
   switch (details.reason) {
+    case 'install':
+      chrome.storage.local.get({'upgrades': []}, (data) => {
+        if (data.upgrades.indexOf('102016') === -1) {
+          data.upgrades.push('102016');
+          chrome.storage.local.set(data, () => {
+
+          });
+        }
+      });
+      break;
     case 'update':
       arc.bg.notifyBetaUpdate();
       break;

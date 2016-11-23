@@ -938,6 +938,9 @@ arc.app.importer.prepareExportProjectsToPouchDb = function() {
   return arc.app.importer.getDatabase()
   .then((db) => {
     return new Promise((resolve) => {
+      if (!db.objectStoreNames.contains('projectObjects')) {
+        return resolve([]);
+      }
       let transaction = db.transaction(['projectObjects'], 'readonly');
       let objectStore = transaction.objectStore('projectObjects');
       let request = objectStore.openCursor();
@@ -966,6 +969,12 @@ arc.app.importer._prepareRequestsExportToPouchDb = function(part) {
   return arc.app.importer.getDatabase()
   .then((db) => {
     return new Promise((resolve) => {
+      if (!db.objectStoreNames.contains('requestObject')) {
+        return resolve({
+          partial: false,
+          result: []
+        });
+      }
       let transaction = db.transaction(['requestObject'], 'readonly');
       let objectStore = transaction.objectStore('requestObject');
       let advanced = dbFromIndex === 0;

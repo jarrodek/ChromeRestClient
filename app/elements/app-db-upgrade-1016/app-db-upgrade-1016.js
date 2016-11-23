@@ -49,6 +49,9 @@ Polymer({
       return this.beforeUpgrade()
       .then(() => this.initUpgrade());
     })
+    .catch(() => {
+
+    })
     .then(() => this.setStatusUpgraded())
     .then(() => {
       var msg = 'Databse schema upgrade finished with great success!';
@@ -89,7 +92,18 @@ Polymer({
       new PouchDB('cookies').destroy(),
       new PouchDB('auth-data').destroy(),
       new PouchDB('url-history').destroy()
-    ]);
+    ])
+    .then(() => {
+      return Promise.all([
+        new PouchDB('history-data').info(),
+        new PouchDB('saved-requests').info(),
+        new PouchDB('legacy-projects').info(),
+        new PouchDB('history-requests').info(),
+        new PouchDB('cookies').info(),
+        new PouchDB('auth-data').info(),
+        new PouchDB('url-history').info()
+      ]);
+    });
   },
 
   checkIsUpgraded: function() {
@@ -99,12 +113,27 @@ Polymer({
     });
     return new Promise((resolve) => {
       chrome.storage.local.get({'upgrades': []}, (data) => {
-        if (data.upgrades.indexOf('102016') !== -1) {
-          resolve(true);
-        } else {
-          resolve(false);
-        }
+        resolve(data.upgrades.indexOf('102016') !== -1);
       });
+    })
+    .then((result) => {
+      if (!result) {
+        return this._checkOldDatabase();
+      } else {
+        return result;
+      }
+    });
+  },
+
+  _checkOldDatabase: function() {
+    return new Promise((resolve) => {
+      var request = window.indexedDB.open('arc');
+      request.onsuccess = function(e) {
+        resolve(e.target.result.objectStoreNames.length === 0);
+      };
+      request.onerror = function() {
+        resolve(false);
+      };
     });
   },
 
@@ -115,7 +144,7 @@ Polymer({
     });
     // return Promise.resolve();
     return new Promise((resolve) => {
-      chrome.storage.local.get({'upgrades': []}, (data) => {
+      chrome.storage.local.get({'upgrades': [], 'APP_ID': null}, (data) => {
         if (data.upgrades.indexOf('102016') === -1) {
           data.upgrades.push('102016');
           chrome.storage.local.set(data, () => {
@@ -140,6 +169,11 @@ Polymer({
     this._longTaskTimeout = window.setTimeout(this.longTaskInfo.bind(this), 15000);
 
     return this._processRequestData()
+    .then((hasdData) => {
+      if (!hasdData) {
+        throw new Error('No data');
+      }
+    })
     .then(() => this.copyCookies())
     .then(() => this.copyAuthData())
     .then(() => this.copyUrlHistory());
@@ -161,14 +195,16 @@ Polymer({
     .then(() => {
       return this._getRequestAndProcessData(projects);
     })
-    .then(() => {
+    .then((size) => {
       window.clearTimeout(this._longTaskTimeout);
+      return size && projects.length;
     });
   },
   // Recursively process request data
-  _getRequestAndProcessData: function(projects, part) {
+  _getRequestAndProcessData: function(projects, part, size) {
     var hasPartialResults = false;
     part = part || 0;
+    size = size || 0;
 
     this.fire('database-upgrades-status', {
       value: '1016',
@@ -181,13 +217,17 @@ Polymer({
       // window.clearTimeout(this._longTaskTimeout);
       hasPartialResults = data.partial;
       data = data.result;
-      return this.processPackage(projects, data);
+      var currentSize = data.length;
+      size += currentSize;
+      if (currentSize) {
+        return this.processPackage(projects, data);
+      }
     })
     .then(() => {
       if (hasPartialResults) {
-        return this._getRequestAndProcessData(projects, part);
+        return this._getRequestAndProcessData(projects, part, size);
       }
-      return Promise.resolve();
+      return Promise.resolve(size);
     });
   },
 
