@@ -19,7 +19,7 @@
     <paper-drawer-panel responsive-width="1000px" id="paperDrawerPanel" narrow="{{narrowLayout}}">
       <paper-scroll-header-panel drawer>
         <template is="dom-if" if="[[initialized]]">
-            <arc-menu-controller loading use-pouch-db="[[usePouchDb]]" id="appMenu" with-toast="[[withToast]]" route="[[route]]" base-url="[[baseUrl]]"></arc-menu-controller>
+            <arc-menu-controller loading use-pouch-db="[[usePouchDb]]" with-toast="[[withToast]]" route="[[route]]" base-url="[[baseUrl]]"></arc-menu-controller>
         </template>
       </paper-scroll-header-panel>
       <!-- Main Area -->

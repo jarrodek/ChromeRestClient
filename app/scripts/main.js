@@ -90,7 +90,7 @@
 
   // A handler called when data has been imported to the app.
   app._dataImportedHandler = function() {
-    app.$.appMenu.refreshProjects();
+    document.querySelector('arc-menu-controller').refreshProjects();
   };
   /**
    * Open search bar and notify opener about changes.
@@ -234,7 +234,7 @@
     arc.app.clipboard.write(data);
   });
   document.body.addEventListener('project-saved', () => {
-    app.$.appMenu.refreshProjects();
+    document.querySelector('arc-menu-controller').refreshProjects();
   });
 
   app.onSave = (e, detail) => {
