@@ -28,7 +28,7 @@
       // if (projectId === this._lastReadProjectId) {
       //   return;
       // }
-      console.time('Related request query');
+      // console.time('Related request query');
       this._lastReadProjectId = projectId;
       var db = new PouchDB('saved-requests');
 
@@ -52,7 +52,7 @@
       .then((r) => this.__processData(r))
       .then((r) => {
         this.set('relatedRequests', r);
-        console.timeEnd('Related request query');
+        // console.timeEnd('Related request query');
         this.fire('project-related-requests-read', {
           projectId: projectId,
           items: r

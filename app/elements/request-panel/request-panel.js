@@ -450,7 +450,7 @@
         return;
       }
       event.detail.result.then((result) => {
-        console.info('Setting project data', result);
+        // console.info('Setting project data', result);
         this.set('currentProjectData', result);
       })
       .catch((e) => {
