@@ -1,6 +1,6 @@
 {
   "name": "advanced-rest-client",
-  "version": "8.17.59",
+  "version": "8.16.59",
   "scripts": {
     "lint": "gulp lint",
     "test": "gulp test",
