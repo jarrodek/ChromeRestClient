@@ -7,7 +7,7 @@
         display: block;
       }
     </style>
-    <content></content>
+    <content id="children"></content>
     <arc-request-object-model id="requestModel" on-data-ready="_requestReady"></arc-request-object-model>
     <arc-project-object-model auto="[[_computeAuto(usePouchDb)]]" id="project" on-data-ready="_projectReady" on-error="_projectError" on-save="_projectSaved"></arc-project-object-model>
     <arc-request-object-model auto="[[_computeAuto(usePouchDb)]]" id="requestSaveModel" on-error="_requestSaveError" on-save="_requestSaved"></arc-request-object-model>

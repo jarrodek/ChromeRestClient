@@ -37,12 +37,13 @@ Polymer({
     'name-changed': '_requestNameChanged',
     'delete': '_deleteRequested',
     'export': 'exportProject',
-    'project-related-requests-read': '_cancelEvent'
+    'project-related-requests-read': '_cancelEvent',
+    'project-name-changed': '_projectNameChangedInView'
   },
 
   observers: [
-    '_projectNameChanged(project.name)',
-    '_prepareProjectNew(opened, usePouchDb, routeParams.projectId)'
+    '_prepareProjectNew(opened, usePouchDb, routeParams.projectId)',
+    '_projectChanged(project.*)'
   ],
 
   onShow: function() {
@@ -51,6 +52,7 @@ Polymer({
   },
   onHide: function() {
     this._setPageTitle('');
+    this.projectId = undefined;
   },
   // prepare project data to show.
   _prepareProject: function() {
@@ -123,7 +125,12 @@ Polymer({
 
   },
 
-  _projectNameChanged: function() {
+  // Handler for name change in the view.
+  _projectNameChangedInView: function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    this.project = e.detail.project;
     if (this.usePouchDb) {
       this.cancelDebouncer('project-name-change-request');
       this.debounce('project-name-change-request', this._pouchNameChanged.bind(this), 250);
@@ -149,8 +156,9 @@ Polymer({
 
   _requestNameChanged: function(e) {
     e.preventDefault();
-    if (this.usePouchDb) {
+    e.stopPropagation();
 
+    if (this.usePouchDb) {
       let event = this.fire('request-name-change', {
         'dbName': 'saved-requests',
         'name': e.detail.item.name,
@@ -170,6 +178,7 @@ Polymer({
         }
         this.set('requests.' + index + '._rev', request._rev);
         this.set('requests.' + index + '._id', request._id);
+        this.set('requests.' + index + '.id', request._id);
       })
       .catch((e) => {
         StatusNotification.notify({
@@ -404,6 +413,14 @@ Polymer({
   _cancelEvent: function(e) {
     e.preventDefault();
     e.stopPropagation();
+  },
+
+  _projectChanged: function() {
+    var view = Polymer.dom(this).queryDistributedElements('arc-project-view')[0];
+    if (!view) {
+      return console.error('The project controller view couldn\'t be found.');
+    }
+    view.project = this.project;
   }
 });
 })();

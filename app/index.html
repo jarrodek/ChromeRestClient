@@ -90,8 +90,8 @@
             <arc-data-io-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="dataimport" on-data-imported="_dataImportedHandler"></arc-data-io-controller>
             <arc-settings-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="settings"></arc-settings-controller>
             <arc-about-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="about"></arc-about-controller>
-            <arc-project-controller use-pouch-db="[[usePouchDb]]" project="{{currentProject}}" requests="{{currentRequests}}" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="project" route-params="[[params]]">
-              <arc-project-view project="{{currentProject}}" requests="[[currentRequests]]"></arc-project-view>
+            <arc-project-controller use-pouch-db="[[usePouchDb]]" requests="{{currentRequests}}" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="project" route-params="[[params]]">
+              <arc-project-view requests="[[currentRequests]]"></arc-project-view>
             </arc-project-controller>
           </iron-pages>
         </div>

@@ -7,11 +7,11 @@ Polymer({
    */
   properties: {
     project: {
-      type: Object,
-      notify: true
+      type: Object
     },
     requests: Array
   },
+
   // Handler to export ptoject click.
   exportProject: function() {
     this.fire('export');
@@ -32,4 +32,14 @@ Polymer({
       project: this.project
     });
   },
+  /**
+   * Sends an event that will be catched by the **controller** and the controller will request
+   * name change from model. Controller must be aware of change and view should not operate
+   * on data directly.
+   */
+  _projectNameChanged: function() {
+    this.fire('project-name-changed', {
+      project: this.project
+    });
+  }
 });

@@ -57,6 +57,7 @@
       }
       var db = this._getDb(detail.dbName);
       var p;
+      var oldRev;
       if (!request) {
         p = db.get(requestId);
       } else {
@@ -69,17 +70,17 @@
         return db.remove(r._id, r._rev);
       })
       .then(() => {
-        let r = request;
-        let id = encodeURIComponent(r.name) + '/' + encodeURIComponent(r.url) + '/' + r.method;
-        if (r.legacyProject) {
-          id += '/' + r.legacyProject;
+        let id = encodeURIComponent(request.name) + '/' + encodeURIComponent(request.url) +
+          '/' + request.method;
+        if (request.legacyProject) {
+          id += '/' + request.legacyProject;
         }
-        r._id = id;
-        delete r._rev;
-        return db.put(r);
+        request._id = id;
+        oldRev = request._rev;
+        delete request._rev;
+        return db.put(request);
       })
       .then((insertResult) => {
-        var oldRev = request._rev;
         request._rev = insertResult.rev;
         this.fire('request-object-changed', {
           request: request,
