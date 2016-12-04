@@ -65,7 +65,12 @@ Polymer({
         return this.$.output;
       }
     },
-    raw: String
+    raw: String,
+    // Performance check helper.
+    _parserMarkCount: {
+      type: Number,
+      value: 0
+    }
   },
 
   behaviors: [
@@ -103,6 +108,7 @@ Polymer({
       this._setShowOutput(true);
       return;
     }
+    window.performance.mark('mark_start_json_parser_worker');
 
     this._setWorking(true);
     if (!this._worker) {
@@ -111,6 +117,7 @@ Polymer({
       worker.addEventListener('error', this._workerErrorHandler);
       this._worker = worker;
     }
+
     this._worker.postMessage({
       json: json,
       raw: this.raw
@@ -126,6 +133,10 @@ Polymer({
     } else {
       this.$.output.innerHTML = data.message;
     }
+    window.performance.mark('mark_end_json_parser_worker');
+    this._parserMarkCount++;
+    window.performance.measure('measure_json_parser_' + this._parserMarkCount,
+      'mark_start_json_parser_worker', 'mark_end_json_parser_worker');
   },
   // Called when workr error received.
   _workerError: function() {

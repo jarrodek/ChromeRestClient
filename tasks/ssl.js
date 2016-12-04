@@ -205,6 +205,18 @@ class TestServer {
       res.set('Content-Type', 'application/json');
       res.send(json);
     });
+    app.get('/json/3', (req, res) => {
+      var json = fs.readFileSync('./tasks/test-data/quicker-response-export.json', 'utf8');
+      // res.status(200).send('OK');
+      res.set('Content-Type', 'application/json');
+      res.send(json);
+    });
+    app.get('/json/4', (req, res) => {
+      var json = fs.readFileSync('./tasks/test-data/slow-response-export.json', 'utf8');
+      // res.status(200).send('OK');
+      res.set('Content-Type', 'application/json');
+      res.send(json);
+    });
     app.get('/json/error', (req, res) => {
       var json = fs.readFileSync('./tasks/test-data/json1.json', 'utf8');
       res.set('Content-Type', 'application/json');
