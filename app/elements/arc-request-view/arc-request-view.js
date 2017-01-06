@@ -57,7 +57,12 @@ Polymer({
     '_requestChanged(request, request.*)'
   ],
 
+  attached: function() {
+    this.listen(window, 'restore-request', '_onRequestRestore');
+  },
+
   detached: function() {
+    this.unlisten(window, 'restore-request', '_onRequestRestore');
     this.opened = undefined;
     this.request = undefined;
     this.masterUrl = undefined;
@@ -111,6 +116,11 @@ Polymer({
 
   _abortRequest: function() {
     this.fire('abort');
+  },
+
+  _onRequestRestore: function(e) {
+    this.set('request', e.detail.request);
+    page('/request/current');
   }
 });
 })();

@@ -122,11 +122,6 @@
     app.pageTitle = e.detail.title;
   });
 
-  document.body.addEventListener('restore-request', (e) => {
-    app.set('request', e.detail.request);
-    page('/request/current');
-  });
-
   /**
    * Read more about requesting features in ArcHasToolbarBehavior behavior file.
    * Also change main.css in features section.
