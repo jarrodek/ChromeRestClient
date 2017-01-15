@@ -59,10 +59,20 @@ the License.
             }
             let transaction = db.transaction(['document-store'], 'readonly');
             let objectStore = transaction.objectStore('document-store');
-            let keyRequest = objectStore.getAllKeys();
+            let keyRequest = objectStore.openCursor();
+            let keys = [];
             keyRequest.onsuccess = (event) => {
-              let keys = event.target.result;
-              Processor.processEmptyData(projectIds, keys);
+              var cursor = event.target.result;
+              if(cursor) {
+                if (cursor.value.deletedOrLocal !== '0') {
+                  cursor.continue();
+                  return;
+                }
+                keys[keys.length] = cursor.key;
+                cursor.continue();
+              } else {
+                Processor.processEmptyData(projectIds, keys);
+              }
             };
           };
         },
