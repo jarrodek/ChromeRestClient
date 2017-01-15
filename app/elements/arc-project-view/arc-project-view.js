@@ -41,5 +41,18 @@ Polymer({
     this.fire('project-name-changed', {
       project: this.project
     });
+  },
+
+  _isEmptyArray: function(obj) {
+    if (!obj || !obj.length) {
+      return true;
+    }
+    return false;
+  },
+
+  _deleteEmptyProject: function() {
+    this.fire('delete', {
+      project: this.project
+    });
   }
 });
