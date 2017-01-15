@@ -30,7 +30,8 @@
     },
 
     observers: [
-      '_usePouchDbChanged(usePouchDb)'
+      '_usePouchDbChanged(usePouchDb)',
+      '_projectsListChanged(projects.*)'
     ],
 
     ready: function() {
@@ -52,7 +53,7 @@
 
     attached: function() {
       this.listen(document.body, 'project-removed', 'refreshProjects');
-      this.listen(document, 'project-object-deleted', 'refreshProjects');
+      this.listen(document, 'project-object-deleted', '_projectDeleted');
       this.listen(document, 'project-object-changed', '_updateProject');
       this.listen(document.body, 'project-name-changed', '_updateProjectName');
       this.listen(document, 'selected-project', '_updateProjectSelection');
@@ -60,7 +61,7 @@
 
     detached: function() {
       this.unlisten(document.body, 'project-removed', 'refreshProjects');
-      this.unlisten(document, 'project-object-deleted', 'refreshProjects');
+      this.unlisten(document, 'project-object-deleted', '_projectDeleted');
       this.unlisten(document, 'project-object-changed', '_updateProject');
       this.unlisten(document.body, 'project-name-changed', '_updateProjectName');
       this.unlisten(document, 'selected-project', '_updateProjectSelection');
@@ -262,6 +263,75 @@
 
     _updateProjectSelection: function(e, detail) {
       this.set('selectedProject', detail.id);
+    },
+
+    _projectDeleted: function(e) {
+      var id = e.detail.id;
+      var list = this.projects;
+      var index = list.findIndex((item) => item.id === id);
+      if (index === -1) {
+        return;
+      }
+      this.splice('projects', index, 1);
+    },
+
+    _projectsListChanged: function(record) {
+      if (!record || !record.base) {
+        return;
+      }
+      if (record.path !== 'projects') {
+        // Only when refresing the projects.
+        return;
+      }
+      var projects = record.base;
+      if (!projects || !projects.length) {
+        return;
+      }
+      var projectIds = projects.map((item) => {
+        return item.id;
+      });
+      this._findEmptyProjects(projectIds);
+    },
+    /**
+     * The function will iterate over the request object keys and check
+     * if projects has any request that exists.
+     * If it doesn't exists it will mark it as a project without request.
+     *
+     * @param {Array<String>} projectIds A list of project IDs.
+     */
+    _findEmptyProjects: function(projectIds) {
+      this.debounce('find-empty-projects', function() {
+        if (!this._processEmptyWorker) {
+          var blob = new Blob([this.$.emptyProjectsProcess.textContent]);
+          this._processEmptyWorkerUrl = window.URL.createObjectURL(blob);
+          this._processEmptyWorker = new Worker(this._processEmptyWorkerUrl);
+          this._processEmptyWorker.onmessage =
+            this._processWorkerResponse.bind(this);
+        }
+        this._processEmptyWorker.postMessage({
+          projects: projectIds
+        });
+      }, 1500);
+    },
+    // Processes the response form the web worker.
+    _processWorkerResponse: function(e) {
+      var data = e.data;
+      if (data.error) {
+        return console.error(data.message);
+      }
+      this._setEmptyProjects(data.result);
+    },
+    // Updates the list of projects and sets the `isEmpty` property.
+    _setEmptyProjects: function(ids) {
+      if (!ids || !ids.length) {
+        return;
+      }
+      var list = this.projects;
+      list.forEach((item, i) => {
+        if (ids.indexOf(item.id) !== -1) {
+          this.set(['projects', i, 'isEmpty'], true);
+        }
+      });
     }
   });
 })();

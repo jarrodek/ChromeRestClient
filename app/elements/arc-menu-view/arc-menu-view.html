@@ -71,6 +71,13 @@
     paper-progress {
       width: 100%;
     }
+
+    .empty-request-icon {
+      width: 16px;
+      height: 16px;
+      color: orange;
+      margin-right: 4px;
+    }
     </style>
     <paper-menu selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap">
       <paper-item data-route="request" data-place$="[[baseUrl]]">Request</paper-item>
@@ -82,6 +89,7 @@
           <paper-item hidden$="[[hasProjects]]">No projects here</paper-item>
           <template is="dom-repeat" items="[[projects]]">
             <paper-item data-route$="request/project/[[item.id]]" class="project-item" selected$="[[_computeProjectSelected(item.id, selectedProject)]]">
+              <iron-icon hidden$="[[!item.isEmpty]]" icon="icons:warning" class="empty-request-icon" title="This project has no requests"></iron-icon>
               <div class="project-name" data-place$="[[baseUrl]]request/project/[[item.id]]">[[item.name]]</div>
               <paper-icon-button class="edit-project-icon" data-place$="[[baseUrl]]project/[[item.id]]/edit" icon="arc:mode-edit" alt="Edit project"></paper-icon-button>
             </paper-item>
