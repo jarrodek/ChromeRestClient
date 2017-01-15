@@ -63,6 +63,8 @@ arc.app.db.idb.open = function() {
     // });
     db.open()
       .then(function() {
+        var e = new CustomEvent('dexie-js-opened', {bubbles: true});
+        document.body.dispatchEvent(e);
         resolve(db);
       })
       .catch(function(error) {

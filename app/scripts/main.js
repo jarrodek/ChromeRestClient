@@ -526,7 +526,10 @@
       document.querySelector('app-upgrade-screen').finished = true;
       return;
     }
-    target.target.initScript();
+    arc.app.db.idb.open()
+    .then(() => {
+      target.target.initScript();
+    });
   };
   app._dbUpgradeReady = (e) => {
     app.fire('use-pouch-db');
