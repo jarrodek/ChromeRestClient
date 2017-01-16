@@ -304,9 +304,7 @@
     },
 
     _enableAssistant: function() {
-      this.fire('change-settings', {
-        apiAssistant: true
-      });
+      arc.app.settings.saveConfig('apiAssistant', true);
     }
   });
 })();
