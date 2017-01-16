@@ -118,13 +118,56 @@
         computed: '_hasAnyData(presence.times.totals, presence.sizes.request.body, ' +
           'presence.sizes.request.headers, presence.sizes.response.body, ' +
           'presence.sizes.response.headers)'
+      },
+
+      /**
+       * A handler for a storage change event.
+       *
+       * @type {Function}
+       */
+      _storageObserver: {
+        type: Function,
+        value: function() {
+          return this._onStorageChanged.bind(this);
+        }
+      },
+      // True if the API assistant is enabled, false otherwise. If disabled this element do nothing
+      enabled: {
+        type: Boolean,
+        notify: true,
+        observer: '_enabledChanged'
       }
     },
 
     observers: [
-      '_autoAnalyseData(url, method)',
-      '_responseChanged(response.*)'
+      '_autoAnalyseData(enabled, url, method)',
+      '_responseChanged(enabled, response.*)'
     ],
+
+    ready: function() {
+      arc.app.settings.getConfig()
+      .then((values) => {
+        this.set('enabled', values.apiAssistant);
+      });
+      chrome.storage.onChanged.addListener(this._storageObserver);
+    },
+
+    /**
+     * A callback called when the value of any storage change.
+     * This view should handle external changes to the store.
+     */
+    _onStorageChanged: function(changes) {
+      if (!('apiAssistant' in changes)) {
+        return;
+      }
+      this.set('enabled', changes.apiAssistant.newValue);
+    },
+
+    _enabledChanged: function(enabled) {
+      if (!enabled) {
+        this.clear();
+      }
+    },
 
     _hasArrayData: function(arr) {
       return !!(arr.base && arr.base.length);
@@ -135,7 +178,10 @@
       return t.some((i) => i === true);
     },
 
-    _autoAnalyseData: function(a, b) {
+    _autoAnalyseData: function(enabled, a, b) {
+      if (!enabled) {
+        return;
+      }
       this.debounce('history-analyser', () => {
         this.analyseData(a, b);
       }, 1000);
@@ -306,7 +352,10 @@
       return Math.round(copy[half]);
     },
 
-    _responseChanged: function() {
+    _responseChanged: function(enabled) {
+      if (!enabled) {
+        return;
+      }
       if (!this.response || !this.response.stats) {
         // not ready.
         return;

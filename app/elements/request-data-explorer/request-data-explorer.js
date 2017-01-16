@@ -5,6 +5,8 @@
     is: 'request-data-explorer',
 
     properties: {
+      // Sets API assistant state. If false it will display "enable assistant" message.
+      assistantEnabled: Boolean,
       opened: {
         type: Boolean,
         notify: true,
@@ -299,6 +301,12 @@
 
     _close: function() {
       this.opened = false;
+    },
+
+    _enableAssistant: function() {
+      this.fire('change-settings', {
+        apiAssistant: true
+      });
     }
   });
 })();

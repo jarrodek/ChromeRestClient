@@ -96,6 +96,9 @@
       <iron-icon icon="arc:insert-chart"></iron-icon>
       <p class="head">Get history analysis instantly</p>
       <p>Each time you make a request or recall saved request you'll see performance history of selected endpoint.</p>
+      <template is="dom-if" if="[[!assistantEnabled]]">
+        <paper-button raised on-tap="_enableAssistant">get started</paper-button>
+      </template>
     </section>
 
     <section class="data-explorer" hidden$="[[!presence.times.totals]]">

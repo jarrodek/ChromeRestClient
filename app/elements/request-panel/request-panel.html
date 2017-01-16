@@ -139,7 +139,8 @@
           times="[[analysedTimes]]"
           sizes="[[analysedSizes]]"
           statuses="[[analysedStatuses]]"
-          presence="[[presenceInfo]]"></request-data-explorer>
+          presence="[[presenceInfo]]"
+          assistant-enabled="[[apiAssistantEnabled]]"></request-data-explorer>
       </div>
     </div>
 
@@ -185,7 +186,8 @@
       sizes="{{analysedSizes}}"
       presence="{{presenceInfo}}"
       statuses="{{analysedStatuses}}"
-      on-request-stats-analysed="_requestsStatsAnalysed"></request-stats-analyser>
+      on-request-stats-analysed="_requestsStatsAnalysed"
+      enabled="{{apiAssistantEnabled}}"></request-stats-analyser>
     <paper-toast text="Your request has been saved. Add SHIFT key to display save dialog."
       id="requestSavedFastToast"></paper-toast>
     <paper-toast text="Request has been saved" id="requestSavedToast"></paper-toast>
