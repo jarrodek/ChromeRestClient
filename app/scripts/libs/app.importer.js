@@ -161,7 +161,8 @@ arc.app.importer.saveFileDataPouchDb = function(data) {
     case 'ARC#requestsDataExport':
       return arc.app.importer._saveFileDataPouchDbOld(data);
     default:
-      return Promise.reject('This file is no longer supported.');
+      return arc.app.importer.insertLegacyImport(data);
+      // return Promise.reject('This file is no longer supported.');
   }
 };
 
@@ -1171,5 +1172,136 @@ arc.app.importer._getDayToday = function(timestamp) {
   d.setMinutes(0);
   d.setHours(0);
   return d.getTime();
+};
+
+arc.app.importer.insertLegacyImport = function(data) {
+  var projects = arc.app.importer.transformLegacyProjects(data.projects);
+  // {"id":Number, "name":String, "created":Number}
+  // {created: Number, name: String, order: 0, updated: Number}
+  var requests = arc.app.importer.transformLegacyRequests(data.requests, projects);
+  // Structure
+  // {
+  //  "id":Number,
+  //  "encoding": String,
+  //  "headers": String,
+  //  "method": String,
+  //  "name": String,
+  //  "payload": String,
+  //  "project": Number,
+  //  "time": Number,
+  //  "url": String,
+  //  "driveId": String
+  // }
+  // transform into
+  // {
+  //  created: Number,
+  //  headers: String,
+  //  legacyProject: String,
+  //  method: String,
+  //  name: String
+  //  payload: String,
+  //  type: String,
+  //  url: String,
+  //  driveId?: String
+  // }
+  projects = projects.map((item) => {
+    delete item._oldId;
+    return item;
+  });
+  var projectsDb = arc.app.importer._getProjectsDb();
+  return projectsDb.bulkDocs(projects)
+  .then(() => {
+    let db = arc.app.importer._getSavedDb();
+    return db.bulkDocs(requests)
+    .then((r) => {
+      // resolve conflicts
+      let conflicted = [];
+      r.forEach((item, index) => {
+        if (item.error && item.status === 409) {
+          // It exists in the database and it needs a _rev to update objects.
+          conflicted[conflicted.length] = data.requests[index];
+        } else if (item.error) {
+          console.error('Can\'t insted saved request into the datastore.', item);
+        }
+      });
+      if (conflicted.length) {
+        return arc.app.importer._handleConflictedInserts(db, conflicted);
+      }
+      return Promise.resolve();
+    })
+    .catch((e) => {
+      console.error('Insert saved requests error', e, data.requests);
+      throw e;
+    });
+  });
+};
+arc.app.importer.transformLegacyProjects = function(projects) {
+  if (!projects || !(projects instanceof Array) || !projects.length) {
+    return [];
+  }
+  return projects.map((item) => {
+    let created = Number(item.created);
+    if (created !== created) {
+      created = Date.now();
+    }
+    return {
+      _id: app.$.uuid.generate(),
+      created: created,
+      name: item.name,
+      order: 0,
+      updated: created,
+      _oldId: item.id
+    };
+  });
+};
+arc.app.importer.transformLegacyRequests = function(requests, projects) {
+  if (!requests || !(requests instanceof Array) || !requests.length) {
+    return [];
+  }
+  return requests.map((item) => {
+    // generate an ID
+    item.name = item.name || 'unnamed';
+    let _id = encodeURIComponent(item.name) + '/' + encodeURIComponent(item.url) + '/' +
+      item.method;
+    let legacyProject = arc.app.importer.findProject(item.project, projects);
+    if (legacyProject) {
+      _id += '/' + legacyProject._id;
+    }
+
+    let created = Number(item.time);
+    if (created !== created) {
+      created = Date.now();
+    }
+
+    let result = {
+      _id: _id,
+      created: created,
+      headers: item.headers,
+      legacyProject: legacyProject ? legacyProject._id : undefined,
+      method: item.method,
+      name: item.name,
+      payload: item.payload,
+      type: 'saved',
+      url: item.url
+    };
+
+    if (item.driveId) {
+      result.driveId = item.driveId;
+      result.type = 'google-drive';
+    }
+
+    return result;
+  });
+};
+
+arc.app.importer.findProject = function(projectId, projects) {
+  if (!projectId || !projects || !(projects instanceof Array) || !projects.length) {
+    return;
+  }
+  for (var i = 0, len = projects.length; i < len; i++) {
+    if (projects[i]._oldId === projectId) {
+      return projects[i];
+    }
+  }
 };
 }());
