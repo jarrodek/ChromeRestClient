@@ -138,7 +138,7 @@ Polymer({
    */
   _onStorageChanged: function(changes) {
     var keys = Object.keys(changes);
-    var accepted = ['HISTORY_ENABLED', 'MAGICVARS_ENABLED'];
+    var accepted = ['HISTORY_ENABLED', 'MAGICVARS_ENABLED', 'apiAssistant'];
     keys.forEach(function(key) {
       if (accepted.indexOf(key) !== -1 && this.values[key] !== changes[key].newValue) {
         this.set('values.' + key, changes[key].newValue);

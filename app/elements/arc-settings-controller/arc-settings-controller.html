@@ -96,10 +96,8 @@ the License.
         margin-bottom: 8px;
       }
       </style>
-      <neon-animated-pages selected="{{page}}"
-       entry-animation="slide-from-right-animation"
-       exit-animation="slide-left-animation">
-        <neon-animatable>
+      <iron-pages selected="{{page}}">
+
           <section>
             <paper-material elevation="1">
               <h2 class="subhead">Stored data</h2>
@@ -208,8 +206,8 @@ the License.
 
             </paper-material>
           </section>
-        </neon-animatable>
-        <neon-animatable>
+
+        <section>
           <paper-item class="single-page-item">
             <paper-item-body>
               <div>Request timeout</div>
@@ -226,8 +224,8 @@ the License.
           <p class="single-page-description">
             Set the value to positive number to set the time (in seconds) after which the request will timeout.
           </p>
-        </neon-animatable>
-        <neon-animatable>
+        </section>
+        <section>
           <paper-item class="single-page-item">
             <paper-item-body>
               <div>Magic variables</div>
@@ -253,8 +251,8 @@ the License.
             ${random:[group_number]} where the [group_number] is an identifier that you can use to recall the same variable later.
           </p>
           <p class="single-page-description">Learn more about MagicVariables on a blog post: <a href="http://restforchrome.blogspot.co.uk/2012/11/introduce-magic-variables.html" target="_blank">Introduce: Magic Variables</a></p>
-        </neon-animatable>
-      </neon-animated-pages>
+        </section>
+      </iron-pages>
       <paper-dialog id="clearDatastoreDialog" on-iron-overlay-closed="_onClearDatastoreDialogResult">
         <h2>Clear stored data</h2>
         <paper-dialog-scrollable>
