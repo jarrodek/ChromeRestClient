@@ -177,195 +177,6 @@ Polymer({
     tutorial.open();
   },
 
-  historyClearClick: function() {
-    this.$.historyClearDialog.open();
-  },
-
-  passwordsClearClick: function() {
-    this.$.passwordsClearDialog.open();
-  },
-
-  cookiesClearClick: function() {
-    this.$.cookieClearDialog.open();
-  },
-
-  onClearDialogResult: function(e) {
-    if (e.detail.canceled || !e.detail.confirmed) {
-      return;
-    }
-    var p;
-    /* global app */
-    if (app.usePouchDb) {
-      p = this._clearHistory();
-    } else {
-      p = this._clearHistoryLegacy();
-    }
-    p.then(() => {
-      StatusNotification.notify({
-        message: 'History has been cleared'
-      });
-    });
-    this.fire('send-analytics', {
-      type: 'event',
-      category: 'Settings usage',
-      action: 'Clear history',
-      label: 'true'
-    });
-  },
-
-  _clearHistoryLegacy: function() {
-    var _db;
-    return arc.app.db.idb.open().then((db) => {
-      _db = db;
-      return db.requestObject.where('type').equals('history').delete();
-    })
-    .then(() => {
-      _db.close();
-      this.fire('request-objects-cleared', {
-        type: 'history'
-      });
-    })
-    .catch((e) => {
-      this.fire('app-log', {
-        'message': ['Unable to clear history.', e],
-        'level': 'error'
-      });
-      StatusNotification.notify({
-        message: 'Unable to clear history. ' + e.message
-      });
-      throw e;
-    });
-  },
-
-  _clearHistory: function() {
-    var db = new PouchDB('history-requests');
-    return db.destroy()
-    .catch((e) => {
-      StatusNotification.notify({
-        message: 'Unable to clear history. ' + e.message
-      });
-      this.fire('app-log', {
-        message: ['Error deleting database', e],
-        level: e
-      });
-      console.error(e);
-    })
-    .then(() => {
-      this.fire('request-objects-cleared', {
-        type: 'history'
-      });
-    });
-  },
-
-  onClearPasswordsResult: function(e) {
-    if (e.detail.canceled || !e.detail.confirmed) {
-      return;
-    }
-    var p;
-    /* global app */
-    if (app.usePouchDb) {
-      p = this._clearPasswords();
-    } else {
-      p = this._clearPasswordsLegacy();
-    }
-    p.then(() => {
-      StatusNotification.notify({
-        message: 'Passwords has been cleared'
-      });
-    });
-  },
-
-  _clearPasswordsLegacy: function() {
-    var _db;
-    return arc.app.db.idb.open()
-    .then((db) => {
-      _db = db;
-      return db.table('basicAuth').clear();
-    })
-    .then(() => {
-      _db.close();
-    })
-    .catch((e) => {
-      this.fire('app-log', {
-        'message': ['Error to clear passwords.', e],
-        'level': 'error'
-      });
-      StatusNotification.notify({
-        message: 'Unable to clear passwords data. ' + e.message
-      });
-      throw e;
-    });
-  },
-
-  _clearPasswords: function() {
-    var db = new PouchDB('auth-data');
-    return db.destroy()
-    .catch((e) => {
-      StatusNotification.notify({
-        message: 'Unable to clear passwords data. ' + e.message
-      });
-      this.fire('app-log', {
-        message: ['Error deleting database', e],
-        level: e
-      });
-      console.error(e);
-    });
-  },
-
-  onClearCookiesResult: function(e) {
-    if (e.detail.canceled || !e.detail.confirmed) {
-      return;
-    }
-    var p;
-    /* global app */
-    if (app.usePouchDb) {
-      p = this._clearCookies();
-    } else {
-      p = this._clearCookiesLegacy();
-    }
-    p.then(() => {
-      StatusNotification.notify({
-        message: 'Cookies data has been cleared'
-      });
-    });
-  },
-
-  _clearCookiesLegacy: function() {
-    var _db;
-    return arc.app.db.idb.open().then((db) => {
-      _db = db;
-      return db.table('cookies').clear();
-    })
-    .then(() => {
-      _db.close();
-    })
-    .catch((e) => {
-      this.fire('app-log', {
-        'message': ['Error clearing cookies storage.', e],
-        'level': 'error'
-      });
-      StatusNotification.notify({
-        message: 'Unable to clear cookies store'
-      });
-      throw e;
-    });
-  },
-
-  _clearCookies: function() {
-    var db = new PouchDB('cookies');
-    return db.destroy()
-    .catch((e) => {
-      StatusNotification.notify({
-        message: 'Unable to clear cookies data. ' + e.message
-      });
-      this.fire('app-log', {
-        message: ['Error deleting database', e],
-        level: e
-      });
-      console.error(e);
-    });
-  },
-
   _gaSettingTapped: function() {
     this.fire('analytics-permitted-change', {
       permitted: Boolean(this.gaEnabled)
@@ -456,6 +267,41 @@ Polymer({
       StatusNotification.notify({
         message: 'Unable to export data :(',
         timeout: StatusNotification.TIME_MEDIUM
+      });
+    });
+  },
+
+  clearDatastore: function() {
+    this.$.clearDatastoreDialog.open();
+  },
+
+  _deleteSavedChanged: function(e) {
+    this.$.deleteProjectsOption.disabled = e.target.checked;
+    if (e.target.checked) {
+      this.$.deleteProjectsOption.checked = true;
+    }
+  },
+
+  _onClearDatastoreDialogResult: function(e) {
+    if (e.detail.canceled || !e.detail.confirmed) {
+      return;
+    }
+    var clear = this.$.clearForm.serialize();
+    var dbs = Object.keys(clear);
+    if (dbs.indexOf('saved-requests') !== -1) {
+      dbs.push('legacy-projects');
+    }
+    StatusNotification.notify({
+      message: 'Removing data from the store...'
+    });
+    var p = dbs.map((db) => new PouchDB(db).destroy());
+    Promise.all(p).then(() => {
+      StatusNotification.notify({
+        message: 'Data cleared'
+      });
+    }).catch((e) => {
+      StatusNotification.notify({
+        message: 'Data clear error: ' + e.message
       });
     });
   }

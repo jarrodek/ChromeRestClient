@@ -87,6 +87,14 @@ the License.
       .link {
         cursor: pointer;
       }
+
+      #clearForm {
+        @apply(--layout-vertical);
+      }
+
+      #clearForm paper-checkbox {
+        margin-bottom: 8px;
+      }
       </style>
       <neon-animated-pages selected="{{page}}"
        entry-animation="slide-from-right-animation"
@@ -102,11 +110,6 @@ the License.
                 </paper-item-body>
                 <paper-toggle-button checked="{{values.HISTORY_ENABLED}}"></paper-toggle-button>
               </paper-item>
-              <paper-item on-tap="historyClearClick">
-                <paper-item-body>
-                  <div>Clear history</div>
-                </paper-item-body>
-              </paper-item>
               <paper-item>
                 <paper-item-body two-line="">
                   <div>Collect cookies</div>
@@ -114,21 +117,23 @@ the License.
                 </paper-item-body>
                 <paper-toggle-button checked="{{values.useCookieStorage}}"></paper-toggle-button>
               </paper-item>
-              <paper-item on-tap="cookiesClearClick">
-                <paper-item-body>
-                  <div>Clear cookies</div>
-                </paper-item-body>
-              </paper-item>
-              <paper-item on-tap="passwordsClearClick">
+              <paper-item>
                 <paper-item-body two-line="">
-                  <div>Clear password</div>
-                  <div secondary="true">Remove passwords saved for basic authentication.</div>
+                  <div>History analysis</div>
+                  <div secondary>Performs history analysis on historical request data. It shows the history charts in the request panel.</div>
                 </paper-item-body>
+                <paper-toggle-button checked="{{values.apiAssistant}}"></paper-toggle-button>
               </paper-item>
               <paper-item on-tap="dumpClick">
                 <paper-item-body two-line>
-                  <div>Save your data to file</div>
+                  <div>Save stored data to file</div>
                   <div secondary="true">Save history, saved requests and projects data to file.</div>
+                </paper-item-body>
+              </paper-item>
+              <paper-item on-tap="clearDatastore">
+                <paper-item-body two-line>
+                  <div>Clear stored data</div>
+                  <div secondary="true">This will remove all data stored by the application. This can't be undo unless the export file has been created.</div>
                 </paper-item-body>
               </paper-item>
             </paper-material>
@@ -250,31 +255,19 @@ the License.
           <p class="single-page-description">Learn more about MagicVariables on a blog post: <a href="http://restforchrome.blogspot.co.uk/2012/11/introduce-magic-variables.html" target="_blank">Introduce: Magic Variables</a></p>
         </neon-animatable>
       </neon-animated-pages>
-
-      <paper-dialog id="historyClearDialog" on-iron-overlay-closed="onClearDialogResult">
-        <h2>Clear history</h2>
+      <paper-dialog id="clearDatastoreDialog" on-iron-overlay-closed="_onClearDatastoreDialogResult">
+        <h2>Clear stored data</h2>
         <paper-dialog-scrollable>
-          <p>This will remove all data from the history store. Would you like to continue?</p>
-        </paper-dialog-scrollable>
-        <div class="buttons">
-          <paper-button dialog-dismiss="">Cancel</paper-button>
-          <paper-button dialog-confirm="" autofocus="">Clear</paper-button>
-        </div>
-      </paper-dialog>
-      <paper-dialog id="passwordsClearDialog" on-iron-overlay-closed="onClearPasswordsResult">
-        <h2>Clear saved passwords</h2>
-        <paper-dialog-scrollable>
-          <p>This will remove all saved passwords for basic authentication.</p>
-        </paper-dialog-scrollable>
-        <div class="buttons">
-          <paper-button dialog-dismiss="">Cancel</paper-button>
-          <paper-button dialog-confirm="" autofocus="">Remove</paper-button>
-        </div>
-      </paper-dialog>
-      <paper-dialog id="cookieClearDialog" on-iron-overlay-closed="onClearCookiesResult">
-        <h2>Clear cookie storage</h2>
-        <paper-dialog-scrollable>
-          <p>This will remove all cookies received from endpoints.</p>
+          <p>What to remove?</p>
+          <form is="iron-form" id="clearForm">
+            <paper-checkbox id="deleteSavedOption" on-iron-change="_deleteSavedChanged" name="saved-requests" checked>Saved requests (will also delete projects)</paper-checkbox>
+            <paper-checkbox id="deleteProjectsOption" name="legacy-projects" checked>Projects</paper-checkbox>
+            <paper-checkbox name="history-requests" checked>Requests history</paper-checkbox>
+            <paper-checkbox name="history-data" checked>History data stored for performance analysis</paper-checkbox>
+            <paper-checkbox name="cookies" checked>Cookies</paper-checkbox>
+            <paper-checkbox name="auth-data" checked>Saved passwords</paper-checkbox>
+            <paper-checkbox name="url-history" checked>URLs history (autofill data)</paper-checkbox>
+          </form>
         </paper-dialog-scrollable>
         <div class="buttons">
           <paper-button dialog-dismiss="">Cancel</paper-button>
