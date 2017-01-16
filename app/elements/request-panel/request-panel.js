@@ -132,7 +132,10 @@
         reflectToAttribute: true
       },
       // Selected environment for variables.
-      currentEnvironment: String,
+      currentEnvironment: {
+        type: String,
+        value: 'default'
+      },
       hasSelectedEnvironment: {
         type: Boolean,
         value: false,
