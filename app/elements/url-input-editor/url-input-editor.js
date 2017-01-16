@@ -60,7 +60,9 @@ Polymer({
     suggesionsOpened: Boolean,
     usePouchDb: {
       type: Boolean
-    }
+    },
+    // If true than the URL contains a variables. Some error checks will be disabled.
+    hasVariables: Boolean
   },
   observers: [
     '_urlChanged(url)',
@@ -87,7 +89,12 @@ Polymer({
    *
    * @param {String} newVal New value of the URL.
    */
-  _urlChanged: function() {
+  _urlChanged: function(url) {
+    if (/\$\{(.)+\}/.test(url)) {
+      this.hasVariables = true;
+    } else {
+      this.hasVariables = false;
+    }
     if (this.detailed && !this.internalUrlSet) {
       this.updateForm();
     }
@@ -133,9 +140,15 @@ Polymer({
    */
   updateUrl: function() {
     var url = this.hostValue;
-    if (url.indexOf('://') === -1) {
-      // no schema, adding "http" by default
-      url = 'http://' + url;
+
+    // Check if host is a variable.
+    if (url.indexOf('${') === -1) {
+      if (url.indexOf('://') === -1) {
+        // no schema, adding "http" by default
+        url = 'http://' + url;
+      }
+    } else {
+      url += '/';
     }
     if (url.substr(-1) !== '/') {
       url += '/';
@@ -183,13 +196,22 @@ Polymer({
    */
   updateForm: function() {
     var url = this.url;
-    if (url.indexOf('http') !== 0) {
+    if (!this.hasVariables && url.indexOf('http') !== 0) {
       url = 'http://' + url;
     }
     var parser;
     try {
       parser = new URL(url);
     } catch (e) {
+      if (this.hasVariables) {
+        if (url.indexOf('${') === 0) {
+          // host is a variable.
+          var varPos = url.indexOf('}');
+          this.set('hostValue', url.substr(0, varPos + 1));
+          this.set('pathValue', url.substr(varPos + 1));
+          return;
+        }
+      }
       this.set('hostValue', this.url);
       console.log('URL parse error', e);
       console.log('The url was', url);
@@ -453,6 +475,9 @@ Polymer({
     try {
       new URL(url);
     } catch (e) {
+      if (this.hasVariables) {
+        return;
+      }
       this.$.invalidUrlToast.open();
     }
   },
