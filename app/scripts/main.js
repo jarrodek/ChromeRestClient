@@ -293,6 +293,18 @@
     });
   };
 
+  app.onSend = () => {
+    if (app.route !== 'request') {
+      return;
+    }
+    var panel = document.querySelector('request-panel');
+    if (!panel) {
+      console.warn('The request panel is undefined');
+      return;
+    }
+    panel.sendRequest();
+  };
+
   app.textSearchBarOpened = () => {
     var searchBar = document.querySelector('#content-search-bar');
     if (!searchBar) {

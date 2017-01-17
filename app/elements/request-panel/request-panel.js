@@ -1122,6 +1122,10 @@
       window.requestAnimationFrame(() => {
         this._setAssistantUrl(request.url);
       });
+    },
+
+    _onShortcutSend: function(e) {
+      console.log('_onShortcutSend', e);
     }
   });
 })();
