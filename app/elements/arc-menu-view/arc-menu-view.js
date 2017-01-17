@@ -63,8 +63,24 @@
     },
 
     _itemTap: function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
       e = Polymer.dom(e);
-      var place = e.localTarget.dataset.place;
+      var path = e.path;
+      var place;
+      while (true) {
+        var _node = path.shift();
+        if (_node && (_node === this || _node === document.body)) {
+          break;
+        } else if (_node && _node.dataset && _node.dataset.place) {
+          place = _node.dataset.place;
+          break;
+        }
+      }
+      if (!place) {
+        return;
+      }
       if (place) {
         this.fire('navigate', {
           url: place

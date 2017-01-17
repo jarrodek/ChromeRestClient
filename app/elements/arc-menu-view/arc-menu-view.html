@@ -88,9 +88,9 @@
           <paper-progress hidden$="[[!loading]]" indeterminate></paper-progress>
           <paper-item hidden$="[[hasProjects]]">No projects here</paper-item>
           <template is="dom-repeat" items="[[projects]]">
-            <paper-item data-route$="request/project/[[item.id]]" class="project-item" selected$="[[_computeProjectSelected(item.id, selectedProject)]]">
+            <paper-item data-route$="request/project/[[item.id]]" data-place$="[[baseUrl]]request/project/[[item.id]]" class="project-item" selected$="[[_computeProjectSelected(item.id, selectedProject)]]">
               <iron-icon hidden$="[[!item.isEmpty]]" icon="icons:warning" class="empty-request-icon" title="This project has no requests"></iron-icon>
-              <div class="project-name" data-place$="[[baseUrl]]request/project/[[item.id]]">[[item.name]]</div>
+              <div class="project-name">[[item.name]]</div>
               <paper-icon-button class="edit-project-icon" data-place$="[[baseUrl]]project/[[item.id]]/edit" icon="arc:mode-edit" alt="Edit project"></paper-icon-button>
             </paper-item>
           </template>
@@ -113,10 +113,6 @@
         <paper-menu-button vertical-align="bottom" horizontal-align="left">
           <paper-icon-button icon="more-vert" class="dropdown-trigger" on-tap="_actionsMenuOpened"></paper-icon-button>
           <paper-menu class="dropdown-content" id="actionsMenu" on-iron-select="_contextMenuAction">
-            <!-- <paper-icon-item data-action="new-app-window">
-              <iron-icon icon="open-in-new" item-icon title="Open new window"></iron-icon>
-              Open new window
-            </paper-icon-item> -->
             <paper-icon-item data-action="rate-review">
               <iron-icon icon="arc:rate-review" item-icon title="Rate &amp; review the app"></iron-icon>
               Rate and review
@@ -128,10 +124,6 @@
           </paper-menu>
         </paper-menu-button>
       </div>
-      <!--
-      <paper-item on-tap="_onAuth" hidden$="{{appAuthorized}}" disabled="[[requestingAuth]]">Sign in</paper-item>
-      <paper-item on-tap="_onSignOut" hidden$="{{!appAuthorized}}">Sign out</paper-item>
-      -->
     </section>
   </template>
   <script src="arc-menu-view.js"></script>
