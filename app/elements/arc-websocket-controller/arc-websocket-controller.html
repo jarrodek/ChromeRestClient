@@ -1,11 +1,39 @@
 <script src="web-socket-message.js"></script>
 
+<link rel="import" href="arc-websocket-icons.html">
+
 <dom-module id="arc-websocket-controller">
   <template>
     <style>
-      :host {
-        display: block;
-      }
+    :host {
+      @apply(--layout-vertical);
+    }
+    .welcome-info {
+      @apply(--layout-vertical);
+      @apply(--layout-center-center);
+      @apply(--layout-flex);
+      margin-top: 40px;
+      color: rgba(0,0,0,0.54);
+      background-color: #EEEEEE;
+    }
+
+    .info-headline {
+      @apply(--paper-font-headline);
+      margin: 0px 16px;
+      text-align: center;
+    }
+
+    .intro-image {
+      width: 256px;
+      height: 256px;
+      color: rgb(61, 158, 255);
+      margin-top: 60px;
+    }
+
+    paper-progress {
+      width: 320px;
+      margin: 16px 24px;
+    }
     </style>
     <arc-websocket-view
       on-connect-requested="_connect"
@@ -19,14 +47,35 @@
       connecting="[[connecting]]"
       connected="[[connected]]"
       retrying="[[retrying]]"
-      id="view"></arc-websocket-view>
-    <web-socket id="socket" retrying="{{retrying}}"
+      id="view"
+      url="{{lastSocketUrl}}"></arc-websocket-view>
+    <paper-progress indeterminate hidden$="[[!loadingHistory]]"></paper-progress>
+
+    <template is="dom-if" if="[[!connected]]">
+      <websocket-history-view opened="[[opened]]" has-data="{{hasHistoryData}}" loading="{{loadingHistory}}"></websocket-history-view>
+    </template>
+    <template is="dom-if" if="[[_canShowEmptyScreen(connected, hasHistoryData, loadingHistory)]]" restamp="true">
+      <div class="welcome-info">
+        <p class="info-headline">Connect to remote server using web sockets and debug it.</p>
+        <p>Learn more about Web Sockets at <a href="http://www.websocket.org/" target="_blank">websocket.org</a></p>
+        <iron-icon class="intro-image" icon="websocket-icons:empty-state"></iron-icon>
+      </div>
+    </template>
+    <web-socket id="socket"
+      retrying="{{retrying}}"
       no-retry="[[noRetry]]"
       on-message="_messageReceived"
       on-disconnected="_onDisconnected"
       on-connected="_onConnected"
       on-error="_onError"></web-socket>
-    <chrome-storage id="store" type="local" name="lastSocket" value="{{lastSocketUrl}}" on-load="_restoredHandler" on-load-empty="_restoredHandler"></chrome-storage>
+    <chrome-storage
+      auto="[[isReady]]"
+      id="store"
+      type="local"
+      name="lastSocket"
+      value="{{lastSocketUrl}}"
+      on-load="_restoredHandler"
+      on-load-empty="_restoredHandler"></chrome-storage>
   </template>
   <script src="arc-websocket-controller.js"></script>
 </dom-module>

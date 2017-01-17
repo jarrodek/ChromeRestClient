@@ -98,7 +98,20 @@ Polymer({
     selectedTab: {
       type: Number,
       value: 1
-    }
+    },
+    /**
+     * An input filed for the URL value.
+     * It is used by `paper-autocomplete` element as an input target.
+     */
+    socketUrl: {
+      readOnly: true,
+      type: HTMLElement,
+      value: function() {
+        return this.$.socketUrl;
+      }
+    },
+    // Will be set to true when the URL suggestion are opened.
+    suggesionsOpened: Boolean
   },
 
   observers: [
@@ -119,8 +132,12 @@ Polymer({
    * A user clicked on the connect button.
    */
   _connect: function() {
+    if (this.suggesionsOpened) {
+      // Accepting suggestions.
+      return;
+    }
     if (this.url.trim() === '') {
-      this.emptyAddress.open();
+      this.$.emptyAddress.opened = true;
       return;
     }
     this.fire('connect-requested', {
@@ -242,6 +259,38 @@ Polymer({
   _urlKeyDown: function(e) {
     if (e.keyCode === 13) {
       this._connect();
+    }
+  },
+
+  _queryUrlHistory: function(e) {
+    var value = e.detail.value;
+    let event = this.fire('websocket-url-history-object-query', {
+      q: value
+    });
+    if (!event.detail.result) {
+      return;
+    }
+    event.detail.result.then((data) => {
+      var suggestions = data.map((item) => item._id);
+      this.$.autocomplete.source = suggestions;
+    })
+    .catch(() => {
+      this.$.autocomplete.source = [];
+    });
+  },
+
+  _onSuggestionSelected: function() {
+    this.async(() => {
+      this._connect();
+    }, 1);
+
+  },
+
+  _messageKeydown: function(e) {
+    if (e.keyCode === 13 && e.shiftKey) {
+      e.preventDefault();
+      e.stopPropagation();
+      this._sendMessage();
     }
   }
 });

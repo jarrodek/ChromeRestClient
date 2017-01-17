@@ -3,6 +3,7 @@
     <style>
     :host {
       display: block;
+      position: relative;
     }
 
     .remote-address-line {
@@ -16,21 +17,14 @@
       @apply(--layout-horizontal);
       @apply(--layout-center);
       margin-top: 24px;
+      position: relative;
     }
 
     .connection-info {
       margin-right: 8px;
     }
 
-    .welcome-info {
-      @apply(--layout-vertical);
-      margin-top: 40px;
-      color: rgba(0,0,0,0.58);
-    }
 
-    .info-headline {
-      @apply(--paper-font-headline);
-    }
 
     .url-input {
       min-width: 320px;
@@ -120,10 +114,14 @@
     .connection-info-line paper-checkbox {
       margin-left: 24px;
     }
+
+    paper-autocomplete {
+      bottom: 0;
+    }
     </style>
     <div class="remote-address-line">
       <div hidden$="{{connected}}" class="connection-info-line">
-        <paper-input label="Socket URL" value="{{url}}" on-keydown="_urlKeyDown" class="url-input"></paper-input>
+        <paper-input id="socketUrl" label="Socket URL" value="{{url}}" on-keydown="_urlKeyDown" class="url-input"></paper-input>
         <paper-button class="action-button" disabled$="[[connectDisabled]]" on-tap="_connect">connect</paper-button>
         <paper-checkbox checked="{{autoReconnect}}">Reconnect automatically</paper-checkbox>
       </div>
@@ -132,10 +130,6 @@
         <paper-button on-tap="_disconnect" raised>disconnect</paper-button>
         <paper-checkbox checked="{{autoReconnect}}">Reconnect automatically</paper-checkbox>
       </div>
-    </div>
-    <div class="padding-section welcome-info" hidden$="{{!_computeInitialInfoVisible(connected, connecting, retrying)}}">
-      <p class="info-headline">Connect to remote server using web sockets and debug it.</p>
-      <p>Learn more about Web Sockets at <a href="http://www.websocket.org/" target="_blank">websocket.org</a></p>
     </div>
     <div class="padding-section" hidden$="{{!connecting}}">
       <p>Connecting to the remote server...</p>
@@ -152,7 +146,7 @@
       </paper-tabs>
       <iron-pages selected="{{selectedTab}}">
         <section>
-          <paper-textarea label="Message to send" value="{{message}}"></paper-textarea>
+          <paper-textarea label="Message to send" value="{{message}}" on-keydown="_messageKeydown"></paper-textarea>
           <paper-button class="action-button" on-tap="_sendMessage" disabled$="{{!messageSendEnabled}}">send</paper-button>
         </section>
         <section>
@@ -188,6 +182,16 @@
       </div>
     </div>
     <paper-toast text="You must enter remote address. Eg. ws://echo.websocket.org" id="emptyAddress"></paper-toast>
+    <paper-autocomplete
+      vertical-offset="24"
+      horizontal-offset="24"
+      target="[[socketUrl]]"
+      id="autocomplete"
+      loader
+      open-on-focus
+      on-query="_queryUrlHistory"
+      on-selected="_onSuggestionSelected"
+      opened="{{suggesionsOpened}}"></paper-autocomplete>
   </template>
   <script src="arc-websocket-view.js"></script>
 </dom-module>
