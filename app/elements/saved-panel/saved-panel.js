@@ -88,6 +88,28 @@
       ArcBehaviors.DeleteRevertableBehavior
     ],
 
+    attached: function() {
+      this.listen(window, 'datastrores-destroyed', '_onDatabaseDestroy');
+    },
+
+    detached: function() {
+      this.unlisten(window, 'datastrores-destroyed', '_onDatabaseDestroy');
+    },
+
+    _onDatabaseDestroy: function(e) {
+      var databases = e.detail.datastores;
+      if (!databases || !databases.length) {
+        return;
+      }
+      if (databases.indexOf('saved-requests') === -1) {
+        return;
+      }
+      var db = this._getDb();
+      db.close().then(function() {
+        console.log('The saved-requests database has been closed.');
+      });
+    },
+
     _openedChanged: function(opened) {
       if (opened) {
         this._searchQueryChanged('');
