@@ -49,6 +49,7 @@
     "PouchDB": true,
     "URI": true,
     "fixture": true,
-    "expect": true
+    "expect": true,
+    "app": true
   }
 }

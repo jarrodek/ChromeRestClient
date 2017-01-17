@@ -194,25 +194,21 @@ Polymer({
       chrome.permissions.remove({permissions: ['notifications']});
     }
   },
-
+  // Handler to click on the "show tutorial" action.
   _showAddToDesktopTutotial: function() {
     this.$.addShortcutsToDesktop.open();
   },
-
-  _openApps: function() {
-    window.open('chrome://apps');
-  },
-
-  computeTimeoutLabel(requestDefaultTimeout) {
+  // Computes label for the timeout settings control.
+  computeTimeoutLabel: function(requestDefaultTimeout) {
     return requestDefaultTimeout > 0 ?
       `Timeout request after ${requestDefaultTimeout} seconds`  : 'No timeout';
   },
-
+  // Computes magic variables switch button label.
   computeMvLabel: function(mvEnabled) {
     return mvEnabled > 0 ?
       'Enabled'  : 'Disabled';
   },
-
+  // Shows internall sub-page 
   _showPage: function(e) {
     var path = e.path;
     var page = null;
@@ -271,17 +267,28 @@ Polymer({
     });
   },
 
+  /**
+   * Handler to be called on clear data action.
+   * Opens the settings & confirmation dialog.
+   */
   clearDatastore: function() {
     this.$.clearDatastoreDialog.open();
   },
-
+  /**
+   * Handler to be called when the user selects to delete requests data.
+   * It will select and disable "projects" option as required when clearing the requests.
+   * If the state is deselected then the "clear projects" option will become active again.
+   */
   _deleteSavedChanged: function(e) {
     this.$.deleteProjectsOption.disabled = e.target.checked;
     if (e.target.checked) {
       this.$.deleteProjectsOption.checked = true;
     }
   },
-
+  /**
+   * Handler to be called when the clear data dialog has been closed.
+   * It it's not canceled then it will clear (destroy) selected datastores.
+   */
   _onClearDatastoreDialogResult: function(e) {
     if (e.detail.canceled || !e.detail.confirmed) {
       return;
@@ -298,6 +305,9 @@ Polymer({
     Promise.all(p).then(() => {
       StatusNotification.notify({
         message: 'Data cleared'
+      });
+      this.fire('datastrores-destroyed', {
+        datastores: dbs
       });
     }).catch((e) => {
       StatusNotification.notify({
