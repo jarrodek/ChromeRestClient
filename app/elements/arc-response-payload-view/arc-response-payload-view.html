@@ -77,7 +77,7 @@ the License.
             <p>The response was empty</p>
           </arc-error-message>
         </div>
-        <paper-tabs selected="{{selectedTab}}" id="tabs">
+        <paper-tabs selected="{{selectedTab}}" id="tabs" hidden$="[[isEmpty]]">
           <paper-tab hidden$="[[!isRaw]]">Raw</paper-tab>
           <paper-tab hidden$="[[!isParsed]]">Parsed</paper-tab>
           <paper-tab hidden$="[[!isJson]]">JSON</paper-tab>
@@ -85,7 +85,7 @@ the License.
           <paper-tab hidden$="[[!isImage]]">Image</paper-tab>
           <paper-tab hidden$="[[!isBinary]]">Binary</paper-tab>
         </paper-tabs>
-        <iron-pages selected="{{selectedTab}}">
+        <iron-pages selected="{{selectedTab}}" hidden$="[[isEmpty]]">
           <section hidden$="[[!isRaw]]">
             <div class="actions-panel">
               <paper-icon-button title="Copy content to clipboard" icon="content-copy" data-source="raw" on-tap="_clipboardCopy"></paper-icon-button>
