@@ -76,11 +76,15 @@ Polymer({
     isXhr: {
       type: Boolean,
       value: false
+    },
+    // True if the collapsable element is opened
+    opened: {
+      type: Boolean,
+      value: false
     }
   },
 
   observers: [
-    '_selectedTabChanged(selectedTab)',
     '_redirectsChanged(redirectData, redirectTimings)',
     '_computeError(responseError.*)',
     '_checkHttpMessage(httpMessage.*)',
@@ -96,92 +100,33 @@ Polymer({
     }
   },
 
-  _selectedTabChanged: function(selectedTab) {
-    var tabName;
-    switch (selectedTab) {
-      case 0:
-        tabName = 'Response headers';
-        break;
-      case 1:
-        tabName = 'Request headers';
-        break;
-      case 2:
-        tabName = 'Redirects';
-        break;
-    }
-    if (this.isAttached) {
-      this.fire('send-analytics', {
-        type: 'event',
-        category: 'Response status',
-        action: 'Tab switched',
-        label: tabName
-      });
-    }
-  },
-
   _errorChanged: function() {
-    this.$.tabs.notifyResize();
     this.selectedTab = 0;
   },
 
   _computeStatusClass: function(code) {
-    var cls = 'status-color';
+    var cls = 'status-code-value';
     if (code >= 500 || code === 0) {
       cls += ' error';
     }
     if (code >= 400 && code < 500) {
       cls += ' warning';
     }
+    if (code >= 300 && code < 400) {
+      cls += ' info';
+    }
     return cls;
   },
   _statusCodeChanged: function() {
     var reqErr = this.statusMessage === 'Request error';
     if (!this.statusCode || reqErr) {
-      this._scdTitle = 'No response';
-      this._scdBody = 'The response was empty';
       if (reqErr) {
         this.statusCode = 0;
       }
       return;
     }
-    let event = this.fire('query-status-codes', {
-      'code': this.statusCode
-    });
-    let statusCode = event.detail.statusCode;
-    if (statusCode) {
-      event.detail.data = statusCode;
-      this._onStatusInfoReady(event);
-    }
   },
 
-  _onStatusInfoReady: function(e) {
-    var result = e.detail.data;
-    if (result && result.label) {
-      this._scdTitle = this.statusCode + ': ' + result.label;
-    } else {
-      this._scdTitle = 'Status code: ' + this.statusCode;
-    }
-    if (result && result.desc) {
-      this._scdBody = result.desc;
-    } else {
-      this._scdBody = 'There is no definition for this status code in the application :(';
-    }
-  },
-
-  _onStatusInfoError: function() {
-    this._scdTitle = 'Status code: ' + this.statusCode;
-    this._scdBody = 'There is no definition for this status code in the application :(';
-  },
-
-  showStatusInfo: function() {
-    this.$.statusCodeInfo.open();
-    this.fire('send-analytics', {
-      type: 'event',
-      category: 'Response status',
-      action: 'Display status info',
-      label: this.statusCode
-    });
-  },
   /** Compute index to 1-based index. */
   _computeIndexName: function(index) {
     return index + 1;
@@ -260,6 +205,26 @@ Polymer({
 
   _computeBageClass: function(cnt) {
     return cnt === 0 ? 'badge empty' : 'badge';
+  },
+
+  _roundTime: function(num) {
+    num = Number(num);
+    if (num !== num) {
+      return '';
+    }
+    return num.toFixed(2);
+  },
+  // Toggles collapsable element.
+  toggleCollapse: function() {
+    this.opened = !this.opened;
+  },
+  // Computes class for the toggle's button icon.
+  _computeToggleIconClass: function(opened) {
+    var clazz = 'toggle-icon';
+    if (opened) {
+      clazz += ' opened';
+    }
+    return clazz;
   }
 });
 })();

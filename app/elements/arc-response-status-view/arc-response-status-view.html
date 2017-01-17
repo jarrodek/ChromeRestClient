@@ -22,7 +22,7 @@ the License.
   <dom-module id="arc-response-status-view">
     <template>
       <style include="paper-material">
-      :host {
+       :host {
         @apply(--layout-vertical);
       }
 
@@ -31,9 +31,11 @@ the License.
         @apply(--layout-horizontal);
         @apply(--paper-font-subhead);
         @apply(--layout-center);
-        padding: 0 24px;
-        /*border-bottom: 1px var(--main-section-border-color) solid;*/
         min-height: 56px;
+      }
+
+      .status-row {
+        border-bottom: 1px var(--response-status-view-status-info-border-color, #e5e5e5) solid;
       }
 
       .timings-row {
@@ -41,7 +43,7 @@ the License.
       }
 
       .status-label {
-        width: 80px;
+        width: 40px;
         @apply(--paper-font-subhead);
       }
 
@@ -49,15 +51,11 @@ the License.
         @apply(--layout-flex);
         @apply(--layout-horizontal);
         @apply(--layout-center);
+        @apply(--response-status-view-status-container);
       }
 
-      .response-status-help {
-        color: rgba(0, 0, 0, 0.24);
-        transition: color 300ms ease-in-out;
-      }
-
-      .response-status-help:hover {
-        color: rgba(33, 150, 243, 1);
+      .status-value>span {
+        display: block;
       }
 
       .status-value.status {
@@ -67,6 +65,15 @@ the License.
       .redirect-value {
         margin-top: 12px;
         @apply(--layout-flex);
+      }
+
+      .no-redirects-container {
+        @apply(--layout-vertical);
+        @apply(--layout-center);
+      }
+
+      .no-redirects-info {
+        @apply(--paper-font-body2);
       }
 
       .status-color {
@@ -79,19 +86,6 @@ the License.
 
       .status-color.error {
         color: var(--paper-red-700);
-      }
-
-      .no-redirects-container {
-        @apply(--layout-vertical);
-        @apply(--layout-center);
-      }
-
-      .no-redirects-info {
-        @apply(--paper-font-body2);
-      }
-
-      app-headers-display {
-        margin-top: 12px;
       }
 
       .source-message {
@@ -115,119 +109,180 @@ the License.
       .sub-title {
         padding: 0 24px;
       }
-      paper-tab > span {
+
+      paper-tab>span {
         display: block;
       }
 
       .badge {
-        background-color: var(--paper-blue-500);
+        display: block;
+        background-color: var(--response-status-view-badge-background, --accent-color);
+        color: var(--response-status-view-badge-color, #fff);
         width: 20px;
         height: 20px;
         border-radius: 50%;
         font-size: 12px;
-        color: #fff;
         margin-left: 12px;
         @apply(--layout-horizontal);
         @apply(--layout-center-center);
       }
 
       .badge.empty {
-        background-color: var(--paper-grey-500);
+        background-color: var(--response-status-view-empty-badge-background, #9e9e9e);
+        color: var(--response-status-view-empty-badge-color, #fff);
+      }
+
+      .status-value.status.text>span:not(:first-child) {
+        margin-left: 8px;
+      }
+
+      .status-code-value {
+        padding: 4px 8px;
+        color: #fff;
+        border-radius: 2px;
+        background-color: var(--arc-status-code-color-200, rgba(56, 142, 60, 1));
+      }
+
+      .info.status-code-value {
+        background-color: var(--arc-status-code-color-300, rgba(48, 63, 159, 1));
+      }
+
+      .warning.status-code-value {
+        background-color: var(--arc-status-code-color-400, rgba(245, 124, 0, 1));
+      }
+
+      .error.status-code-value {
+        background-color: var(--arc-status-code-color-500, rgba(211, 47, 47, 1));
+      }
+
+      .response-time {
+        color: var(--response-status-view-loading-time-color, rgba(0, 0, 0, 0.54));
+        margin-left: 8px;
+      }
+
+      .status-info {
+        @apply(--layout-flex);
+      }
+
+      .toggle-button {
+        color: var(--response-status-view-toggle-icon-color, rgba(0, 0, 0, 0.54));
+        transition: color 0.25s linear;
+      }
+
+      .toggle-icon {
+        transform: rotateZ(0deg);
+        transition: transform 0.3s linear;
+      }
+
+      .toggle-icon.opened {
+        transform: rotateZ(-180deg);
+      }
+
+      .toggle-button:hover {
+        color: var(--response-status-view-toggle-icon-hover-color, rgba(0, 0, 0, 0.78));
+      }
+
+      .xhr-title {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        padding: 0px 16px;
+        @apply(--arc-font-subhead);
+      }
+
+      .redirect-location {
+        margin-left: 8px;
+      }
+
+      .response-error-label {
+        margin-left: 12px;
+        color: var(--arc-status-code-color-500, rgba(211, 47, 47, 1));
       }
       </style>
       <div class="status-row">
-        <div class="status-label text">Status:</div>
-        <div class="status-value status text">
+        <div class="status-value status">
           <template is="dom-if" if="[[!isError]]">
-            <span class$="{{_computeStatusClass(statusCode)}}">
-                <span>{{statusCode}}</span>: <span>{{statusMessage}}</span>
-            </span>
-            <paper-icon-button on-tap="showStatusInfo" icon="help" class="response-status-help"></paper-icon-button>
-            <span class="text">Loading time: {{loadingTime}} ms</span>
+            <div class="status-info text">
+              <span class$="[[_computeStatusClass(statusCode)]]">[[statusCode]] [[statusMessage]]</span>
+              <span class="response-time" hidden$="[[!loadingTime]]">[[_roundTime(loadingTime)]] ms</span>
+            </div>
+            <div class="status-details">
+              <paper-button on-tap="toggleCollapse" class="toggle-button" title="Toogle response headers">
+                Details
+                <iron-icon icon="arc:expand-more" class$="[[_computeToggleIconClass(opened)]]"></iron-icon>
+              </paper-button>
+            </div>
           </template>
           <template is="dom-if" if="[[isError]]">
-            <p>Error in the response.</p>
+            <span class="error status-code-value">0</span>
+            <span class="response-time" hidden$="[[!loadingTime]]">[[_roundTime(loadingTime)]] ms</span>
+            <p class="response-error-label">Error in the response.</p>
           </template>
         </div>
       </div>
-      <paper-tabs selected="{{selectedTab}}" id="tabs">
-        <template is="dom-if" if="[[hasResponseHeaders]]">
-          <paper-tab>
-            <span>Response headers</span>
-            <span class$="[[_computeBageClass(responseHeaders.length)]]">[[responseHeaders.length]]</span>
-          </paper-tab>
-        </template>
+      <iron-collapse opened="[[opened]]">
         <template is="dom-if" if="[[!isXhr]]">
-          <paper-tab>
-            <span>Request headers</span>
-            <span class$="[[_computeBageClass(requestHeadersArray.length)]]">[[requestHeadersArray.length]]</span>
-          </paper-tab>
-          <paper-tab>
-            <span>Redirects</span>
-            <span class$="[[_computeBageClass(redirectData.length)]]">[[redirectData.length]]</span>
-          </paper-tab>
-          <paper-tab>Timings</paper-tab>
-        </template>
-      </paper-tabs>
-      <iron-pages selected="{{selectedTab}}">
-        <template is="dom-if" if="[[hasResponseHeaders]]">
-          <section>
-            <!-- Response headers -->
-            <arc-headers-display-view on-tap="_handleLink" headers="{{responseHeaders}}"></arc-headers-display-view>
-          </section>
-        </template>
-        <template is="dom-if" if="[[!isXhr]]">
-          <section>
-            <!-- Request headers -->
-            <arc-headers-display-view on-tap="_handleLink" headers="{{requestHeadersArray}}"></arc-headers-display-view>
-            <div class="source-message text">
-              <h5>Source message</h5>
-              <pre>[[httpMessage]]</pre>
-            </div>
-          </section>
-          <section>
-            <!-- Redirects -->
-            <template is="dom-if" if="{{!redirectData.length}}">
-              <div class="no-redirects-container">
-                <p class="no-redirects-info">There were no redirects during this request</p>
+          <paper-tabs selected="{{selectedTab}}" id="tabs">
+            <paper-tab>
+              <span>Response headers</span>
+              <span class$="[[_computeBageClass(responseHeaders.length)]]">[[responseHeaders.length]]</span>
+            </paper-tab>
+            <paper-tab>
+              <span>Request headers</span>
+              <span class$="[[_computeBageClass(requestHeadersArray.length)]]">[[requestHeadersArray.length]]</span>
+            </paper-tab>
+            <paper-tab>
+              <span>Redirects</span>
+              <span class$="[[_computeBageClass(redirectData.length)]]">[[redirectData.length]]</span>
+            </paper-tab>
+            <paper-tab>Timings</paper-tab>
+          </paper-tabs>
+          <iron-pages selected="{{selectedTab}}">
+            <section>
+              <arc-headers-display-view on-tap="_handleLink" headers="{{responseHeaders}}"></arc-headers-display-view>
+            </section>
+            <section>
+              <!-- Request headers -->
+              <arc-headers-display-view on-tap="_handleLink" headers="{{requestHeadersArray}}"></arc-headers-display-view>
+              <div class="source-message text">
+                <h5>Source message</h5>
+                <pre>[[httpMessage]]</pre>
               </div>
-            </template>
-            <template is="dom-if" if="{{redirectData.length}}">
-              <template is="dom-repeat" items="{{redirectData}}">
-                <div class="status-row">
-                  <div class="status-label text">
-                    #<span>{{_computeIndexName(index)}}</span>
-                  </div>
-                  <div class="redirect-value" on-tap="_handleLink">
-                    <div class="status-value status text">
-                      <span>To:
-                          <span>
-                            <!-- TODO: Handle links differently and not show link if there is no actually a link -->
-                            <a href="{{_computeRedirectLocation(item.headers)}}" class="auto-link">{{_computeRedirectLocation(item.headers)}}</a>
-                          </span> with status
-                      <span>{{item.status}} {{item.statusText}}</span>
-                      </span>
-                    </div>
-                    <arc-headers-display-view headers="{{_computeRedirectHeaders(item.headers)}}"></arc-headers-display-view>
-                  </div>
+            </section>
+            <section>
+              <template is="dom-if" if="[[!redirectData.length]]">
+                <div class="no-redirects-container">
+                  <p class="no-redirects-info">There were no redirects during this request</p>
                 </div>
               </template>
-            </template>
-            <!-- ! Redirects -->
-          </section>
-          <section>
-            <!-- Timings -->
-            <request-timings-panel redirect-timings="[[redirectTimings]]" request-timings="[[requestTimings]]"></request-timings-panel>
-          </section>
+              <template is="dom-if" if="[[redirectData.length]]">
+                <template is="dom-repeat" items="[[redirectData]]">
+                  <div class="status-row">
+                    <div class="status-label text">
+                      #<span>[[_computeIndexName(index)]]</span>
+                    </div>
+                    <div class="redirect-value" on-tap="_handleLink">
+                      <div class="status-value status text">
+                        <span class$="[[_computeStatusClass(item.status)]]">[[item.status]] [[item.statusText]]</span>
+                        <span class="redirect-location">to: <a href="[[_computeRedirectLocation(item.headers)]]" class="auto-link">[[_computeRedirectLocation(item.headers)]]</a></span>
+                      </div>
+                      <arc-headers-display-view headers="[[_computeRedirectHeaders(item.headers)]]"></arc-headers-display-view>
+                    </div>
+                  </div>
+                </template>
+              </template>
+            </section>
+            <section>
+              <request-timings-panel redirect-timings="[[redirectTimings]]" request-timings="[[requestTimings]]"></request-timings-panel>
+            </section>
+          </iron-pages>
         </template>
-      </iron-pages>
-      <paper-dialog id="statusCodeInfo">
-        <h2>{{_scdTitle}}</h2>
-        <paper-dialog-scrollable>{{_scdBody}}</paper-dialog-scrollable>
-        <div class="buttons">
-          <paper-button dialog-confirm autofocus>Close</paper-button>
-        </div>
-      </paper-dialog>
+        <template is="dom-if" if="[[isXhr]]">
+          <template is="dom-if" if="[[hasResponseHeaders]]">
+            <h3 class="xhr-title">Response headers <span class$="[[_computeBageClass(responseHeaders)]]">[[_computeHeadersLength(responseHeaders)]]</span></h3>
+            <headers-list-view on-tap="_handleLink" headers="[[responseHeaders]]"></headers-list-view>
+          </template>
+        </template>
+      </iron-collapse>
     </template>
   </dom-module>
   <script src="arc-response-status-view.js"></script>
