@@ -208,7 +208,7 @@ Polymer({
     return mvEnabled > 0 ?
       'Enabled'  : 'Disabled';
   },
-  // Shows internall sub-page 
+  // Shows internall sub-page
   _showPage: function(e) {
     var path = e.path;
     var page = null;
