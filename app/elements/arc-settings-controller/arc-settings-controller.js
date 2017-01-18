@@ -238,9 +238,13 @@ Polymer({
   },
 
   dumpClick: function() {
+    StatusNotification.notify({
+      message: 'Preparing data. Wait a sec...'
+    });
     arc.app.importer.prepareExport({
       type: 'all'
-    }).then((data) => {
+    })
+    .then((data) => {
       this.exportContent = data;
       var date = new Date();
       var day = date.getDate();
@@ -255,7 +259,8 @@ Polymer({
         action: 'Click',
         label: 'Export saved as file'
       });
-    }).catch((e) => {
+    })
+    .catch((e) => {
       this.fire('app-log', {
         'message': ['Export data.', e],
         'level': 'error'
