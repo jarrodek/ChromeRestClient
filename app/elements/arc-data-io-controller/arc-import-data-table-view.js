@@ -22,15 +22,95 @@ Polymer({
      * A request history objects array.
      */
     history: Array,
+    // List of the history URLs to import.
+    urlHistory: Array,
+    // List of websocket history URLs to import.
+    websocketUrlHistory: Array,
+    // List of variables to import
+    variables: Array,
+    headersSets: Array,
+    authData: Array,
+    cookies: Array,
     // True if component has saved requests data
     hasSaved: {
       type: Boolean,
+      value: false,
       computed: '_computeHasData(requests)'
     },
     // True if component has history data
     hasHistory: {
       type: Boolean,
+      value: false,
       computed: '_computeHasData(history)'
+    },
+    // Computed value, `true` if the `urlHistory` has data.
+    hasUrlHistory: {
+      type: Boolean,
+      value: false,
+      computed: '_computeHasData(urlHistory)'
+    },
+    hasWebsocketUrlHistory: {
+      type: Boolean,
+      value: false,
+      computed: '_computeHasData(websocketUrlHistory)'
+    },
+    hasVariables: {
+      type: Boolean,
+      value: false,
+      computed: '_computeHasData(variables)'
+    },
+    hasHeadersSets: {
+      type: Boolean,
+      value: false,
+      computed: '_computeHasData(headersSets)'
+    },
+    hasAuthData: {
+      type: Boolean,
+      value: false,
+      computed: '_computeHasData(authData)'
+    },
+    hasCookies: {
+      type: Boolean,
+      value: false,
+      computed: '_computeHasData(cookies)'
+    },
+    exportTime: String,
+    exportVersion: String,
+    // True if the "saved" import section is opened
+    savedOpened: {
+      type: Boolean,
+      value: false
+    },
+    // True if the "history" import section is opened
+    historyOpened: {
+      type: Boolean,
+      value: false
+    },
+    // True if the "urls history" import section is opened
+    urlHistoryOpened: {
+      type: Boolean,
+      value: false
+    },
+    // True if the "urls history" import section is opened
+    websocketUrlHistoryOpened: {
+      type: Boolean,
+      value: false
+    },
+    variablesOpened: {
+      type: Boolean,
+      value: false
+    },
+    headersSetsOpened: {
+      type: Boolean,
+      value: false
+    },
+    authDataOpened: {
+      type: Boolean,
+      value: false
+    },
+    cookiesOpened: {
+      type: Boolean,
+      value: false
     }
   },
   /**
@@ -104,6 +184,62 @@ Polymer({
 
   _computeHasData: function(arr) {
     return !!(arr && arr.length);
+  },
+  // Computes number of items in the array
+  _countImport: function(data) {
+    if (!data) {
+      return 0;
+    }
+    return data.length;
+  },
+
+  _computeMetadataHidden: function(exportTime) {
+    return !exportTime;
+  },
+
+  _computeCollapseLabel: function(opened) {
+    return opened ? 'Hide' : 'Show';
+  },
+
+  // Computes class for the toggle's button icon.
+  _computeToggleIconClass: function(opened) {
+    var clazz = 'toggle-icon';
+    if (opened) {
+      clazz += ' opened';
+    }
+    return clazz;
+  },
+
+  _toggleSaved: function() {
+    this.savedOpened = !this.savedOpened;
+  },
+
+  _toggleHistory: function() {
+    this.historyOpened = !this.historyOpened;
+  },
+
+  _toggleUrlHistory: function() {
+    this.urlHistoryOpened = !this.urlHistoryOpened;
+  },
+
+  _toggleWebsocketUrlHistory: function() {
+    this.websocketUrlHistoryOpened = !this.websocketUrlHistoryOpened;
+  },
+
+  _toggleVariables: function() {
+    this.variablesOpened = !this.variablesOpened;
+  },
+
+  _toggleHeadersSets: function() {
+    this.headersSetsOpened = !this.headersSetsOpened;
+  },
+
+  _toggleAuthData: function() {
+    this.authDataOpened = !this.authDataOpened;
+  },
+
+  _toggleCookies: function() {
+    this.cookiesOpened = !this.cookiesOpened;
   }
 });
 })();

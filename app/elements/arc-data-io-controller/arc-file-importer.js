@@ -21,7 +21,8 @@ Polymer({
     /** True if import is initialized. */
     isFileImport: {
       type: Boolean,
-      computed: '_computeFileImportPreview(importData)'
+      computed: '_computeFileImportPreview(importData)',
+      notify: true
     },
     /**
      * True if user started importing a file.
@@ -130,6 +131,18 @@ Polymer({
     this._setImporting(false);
     this.importData = null;
     this._resetFileDrop();
+  },
+  /**
+   * Gets the data for given `variable` name from object.
+   *
+   * @param {Object} record Polymer's change record for an object
+   * @param {String} variable Variable name (object's key) where the data is
+   */
+  _computeData: function(record, variable) {
+    if (!record || !record.base) {
+      return;
+    }
+    return record.base[variable];
   }
 });
 })();

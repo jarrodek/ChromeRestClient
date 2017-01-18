@@ -23,12 +23,45 @@ Example:
 
 @group Controller Elements
 @element arc-data-import-controller
---><html><head></head><body><dom-module id="arc-data-io-controller">
+-->
+<dom-module id="arc-data-io-controller">
   <template>
     <style>
     :host {
+      background: #F5F5F5;
+      padding-bottom: 40px;
+      height: auto !important;
       @apply(--layout-vertical);
-      padding: 20px 0;
+      @apply(--layout-center);
+      @apply(--layout-start-justified);
+    }
+
+    paper-material {
+      background-color: #fff;
+      margin: 0 16px;
+    }
+
+    paper-material,
+    h2 {
+      max-width: 620px;
+      width: 100%;
+      transition: max-width 0.25s ease-in-out;
+    }
+
+    :host([has-import-data]) paper-material,
+    :host([has-import-data]) h2 {
+      max-width: calc(100% - 32px);
+      margin: 0 16px;
+    }
+
+    h2 {
+      @apply(--paper-font-body1);
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      height: 48px;
+      color: var(--accent-color);
+      margin: 0;
+      padding-left: 32px;
     }
 
     .import-file-section {
@@ -46,18 +79,19 @@ Example:
     </template>
     <template is="dom-if" if="[[!loading]]">
       <template is="dom-if" if="[[_showFileImport]]">
-        <arc-file-importer class="import-file-section" importing="{{_fileImporting}}" on-import="_importFileData"></arc-file-importer>
+        <h2>Data import</h2>
+        <paper-material elevation="1">
+          <arc-file-importer class="import-file-section" importing="{{_fileImporting}}" is-file-import="{{hasImportData}}" on-import="_importFileData"></arc-file-importer>
+        </paper-material>
+
       </template>
       <template is="dom-if" if="[[_showFileExport]]">
-        <arc-file-exporter class="import-file-section" exporting="{{_fileExporting}}"></arc-file-exporter>
+        <h2>Data export</h2>
+        <paper-material elevation="1">
+          <arc-file-exporter class="import-file-section" exporting="{{_fileExporting}}"></arc-file-exporter>
+        </paper-material>
       </template>
-      <!--
-      <template is="dom-if" if="{{_showServerOptions}}">
-        <arc-server-exporter on-connect="_connectAppServer" authorized="[[authorized]]"></arc-server-exporter>
-      </template>
-      -->
     </template>
   </template>
 </dom-module>
 <script src="arc-data-io-controller.js"></script>
-</body></html>

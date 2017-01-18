@@ -98,6 +98,10 @@ Polymer({
       return null;
     }
     return dir;
+  },
+
+  _computeMetadataHidden: function(exportTime) {
+    return !exportTime;
   }
 });
 })();

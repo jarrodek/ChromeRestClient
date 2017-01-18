@@ -53,6 +53,14 @@ Example:
       projects="[[importData.projects]]"
       requests="[[importData.requests]]"
       history="[[importData.history]]"
+      export-time="[[importData.createdAt]]"
+      export-version="[[importData.version]]"
+      url-history="[[_computeData(importData.*, 'url-history')]]"
+      websocket-url-history="[[_computeData(importData.*, 'websocket-url-history')]]"
+      variables="[[importData.variables]]"
+      headers-sets="[[_computeData(importData.*, 'headers-sets')]]"
+      auth-data="[[_computeData(importData.*, 'auth-data')]]"
+      cookies="[[importData.cookies]]"
       on-import-action="_importTableAction"></arc-import-data-table-view>
     <file-reader id="fileReader" loading="{{importFileReader}}" readas="text" on-file-read="_importFileReady" on-file-error="_importFileError" auto=""></file-reader>
   </template>
