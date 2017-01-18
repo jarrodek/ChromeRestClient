@@ -82,5 +82,17 @@ Polymer({
     this.async(() => {
       this.$.list.notifyResize();
     }, 1);
+  },
+
+  appendHistoryItem: function(object) {
+    if (!this.data) {
+      this.data = [];
+    }
+    var index = this.data.findIndex((item) => item._id === object._id);
+    if (index === -1) {
+      this.push('data', object);
+    } else {
+      this.set(['data', index], object);
+    }
   }
 });

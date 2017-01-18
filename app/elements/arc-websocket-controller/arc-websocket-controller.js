@@ -205,6 +205,7 @@ Polymer({
       this.fire('websocket-url-history-object-change', {
         item: doc
       });
+      this._appendHistoryItem(doc);
     });
   },
 
@@ -218,6 +219,14 @@ Polymer({
 
   _canShowEmptyScreen: function(connected, hasHistoryData, loadingHistory) {
     return !connected && !hasHistoryData && !loadingHistory;
+  },
+
+  _appendHistoryItem: function(item) {
+    var element = this.$$('websocket-history-view');
+    if (!element) {
+      return;
+    }
+    element.appendHistoryItem(item);
   }
 });
 })();
