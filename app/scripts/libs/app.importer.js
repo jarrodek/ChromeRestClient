@@ -332,7 +332,7 @@ arc.app.importer._saveFileDataOldParsePartRequests = function(requests, resolve,
     arc.app.importer._saveFileDataOldParsePartRequests(requests, resolve, reject, saved,
       history, har);
   }, 1);
-},
+};
 /**
  * Parser for the history request
  * ## The history request object.
@@ -695,21 +695,21 @@ arc.app.importer._insertLegacyProjects = function(data) {
   }
   return arc.app.importer._getProjectsDb()
     .bulkDocs(data.map((i) => i.legacyProject));
-},
+};
 arc.app.importer._insertSavedRequests = function(data) {
   if (!data || !data.length) {
     return Promise.resolve();
   }
   return arc.app.importer._getSavedDb()
     .bulkDocs(data.map((i) => i.request));
-},
+};
 arc.app.importer._insertHistorydRequests = function(data) {
   if (!data || !data.length) {
     return Promise.resolve();
   }
   return arc.app.importer._getHistoryDb()
     .bulkDocs(data.map((i) => i.request));
-},
+};
 arc.app.importer._insertHistoryData = function(data) {
   if (!data || !data.length) {
     return Promise.resolve();
@@ -1065,33 +1065,32 @@ arc.app.importer._prepareRequestsExportToPouchDb = function(part) {
   });
 };
 
+arc.app.importer._isAllowedExport = function(exportType, type) {
+  if (exportType instanceof Array) {
+    return exportType.indexOf(type) !== -1;
+  }
+  return exportType === type || exportType === 'all';
+};
+
 arc.app.importer.prepareExportPouchDb = function(opts) {
   opts = opts || {};
   if (!opts.type) {
     return Promise.reject(new Error('Type of export must be set.'));
   }
 
-  var exportHistory = opts.type === 'history' || opts.type === 'all';
-  var exportSaved = opts.type === 'saved' || opts.type === 'all';
-  var exportProjects = opts.type === 'saved' || opts.type === 'all';
-  var exportWebsocketHistory = opts.type === 'websocket' || opts.type === 'all';
-  var exportUrlHistory = opts.type === 'history-url' || opts.type === 'all';
-  var exportHeadersSets = opts.type === 'headers-sets' || opts.type === 'all';
-  var exportVariables = opts.type === 'variables' || opts.type === 'all';
-  var exportAuthData = opts.type === 'auth' || opts.type === 'all';
-  var exportCookies = opts.type === 'cookies' || opts.type === 'all';
+  var exportHistory = arc.app.importer._isAllowedExport(opts.type, 'history');
+  var exportSaved = arc.app.importer._isAllowedExport(opts.type, 'saved');
+  var exportProjects = arc.app.importer._isAllowedExport(opts.type, 'saved');
+  var exportWebsocketHistory = arc.app.importer._isAllowedExport(opts.type, 'websocket');
+  var exportUrlHistory = arc.app.importer._isAllowedExport(opts.type, 'history-url');
+  var exportHeadersSets = arc.app.importer._isAllowedExport(opts.type, 'headers-sets');
+  var exportVariables = arc.app.importer._isAllowedExport(opts.type, 'variables');
+  var exportAuthData = arc.app.importer._isAllowedExport(opts.type, 'auth');
+  var exportCookies = arc.app.importer._isAllowedExport(opts.type, 'cookies');
 
   const exportData = {
     type: opts.type
   };
-
-  /*
-  case 'history-data':
-    return arc.app.importer._getHistoryDataDb();
-
-  case 'cookies':
-    return arc.app.importer._getCookiesDb();
-  case 'auth-data': */
 
   var databases = {};
   if (exportHistory) {
@@ -1181,7 +1180,6 @@ arc.app.importer.createExportObjectPouchDb = function(opts) {
     });
     result.requests = opts.requests;
   }
-
   if (opts.projects && opts.projects.length) {
     opts.projects = opts.projects.map((i) => {
       i._referenceId = i._id; // to associate projects and requests during import.
@@ -1192,7 +1190,6 @@ arc.app.importer.createExportObjectPouchDb = function(opts) {
     });
     result.projects = opts.projects;
   }
-
   if (opts.history && opts.history.length) {
     opts.history = opts.history.map((i) => {
       delete i._rev;
@@ -1205,7 +1202,7 @@ arc.app.importer.createExportObjectPouchDb = function(opts) {
 
   if (('websocket-url-history' in opts) && opts['websocket-url-history'].length) {
     opts['websocket-url-history'] = opts['websocket-url-history'].map((i) => {
-      i.url = i._id;
+      i.key = i._id;
       delete i._rev;
       delete i._id;
       i.kind = 'ARC#WebsocketHistoryData';
@@ -1215,7 +1212,7 @@ arc.app.importer.createExportObjectPouchDb = function(opts) {
   }
   if (('url-history' in opts) && opts['url-history'].length) {
     opts['url-history'] = opts['url-history'].map((i) => {
-      i.url = i._id;
+      i.key = i._id;
       delete i._rev;
       delete i._id;
       i.kind = 'ARC#UrlHistoryData';
@@ -1266,7 +1263,6 @@ arc.app.importer.createExportObjectPouchDb = function(opts) {
     });
     result.cookies = opts.cookies;
   }
-
   return result;
 };
 /**

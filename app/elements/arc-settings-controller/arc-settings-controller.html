@@ -102,11 +102,18 @@ the License.
         cursor: pointer;
       }
 
-      #clearForm {
+      #exportDataDialog,
+      #clearDatastoreDialog {
+        min-width: 480px;
+      }
+
+      #clearForm,
+      #exportForm {
         @apply(--layout-vertical);
       }
 
-      #clearForm paper-checkbox {
+      #clearForm paper-checkbox,
+      #exportForm paper-checkbox {
         margin: 12px 0px;
       }
 
@@ -136,130 +143,126 @@ the License.
         border-right: 1px #f5f5f5 solid;
         margin-right: 12px;
       }
-
-      #clearDatastoreDialog {
-        min-width: 480px;
-      }
       </style>
       <iron-pages selected="{{page}}">
 
-          <section class="main-settings">
-            <h2 class="subhead">Stored data</h2>
-            <paper-material elevation="1">
-              <paper-item>
-                <paper-item-body two-line>
-                  <div>Collect history</div>
-                  <div secondary>Save requests made by the app for future use</div>
-                </paper-item-body>
-                <paper-toggle-button checked="{{values.HISTORY_ENABLED}}"></paper-toggle-button>
-              </paper-item>
-              <paper-item>
-                <paper-item-body two-line>
-                  <div>Collect cookies</div>
-                  <div secondary>Save received cookies and send them back as would browser do</div>
-                </paper-item-body>
-                <paper-toggle-button checked="{{values.useCookieStorage}}"></paper-toggle-button>
-              </paper-item>
-              <paper-item>
-                <paper-item-body two-line>
-                  <div>History analysis</div>
-                  <div secondary>Performs history analysis on historical request data. It shows the history charts in the request panel.</div>
-                </paper-item-body>
-                <paper-toggle-button checked="{{values.apiAssistant}}"></paper-toggle-button>
-              </paper-item>
-              <paper-item on-tap="dumpClick">
-                <paper-item-body two-line>
-                  <div>Save stored data to file</div>
-                  <div secondary>Save history, saved requests and projects data to file.</div>
-                </paper-item-body>
-                <iron-icon icon="open-in-new" class="" item-icon></iron-icon>
-              </paper-item>
-              <paper-item on-tap="clearDatastore">
-                <paper-item-body>
-                  <div>Clear stored data</div>
-                  <!-- <div secondary>This will remove all data stored by the application. This can't be undo unless the export file has been created.</div> -->
-                </paper-item-body>
-                <iron-icon icon="arrow-drop-down" class="nav-away-icon" item-icon></iron-icon>
-              </paper-item>
-            </paper-material>
+        <section class="main-settings">
+          <h2 class="subhead">Stored data</h2>
+          <paper-material elevation="1">
+            <paper-item>
+              <paper-item-body two-line>
+                <div>Collect history</div>
+                <div secondary>Save requests made by the app for future use</div>
+              </paper-item-body>
+              <paper-toggle-button checked="{{values.HISTORY_ENABLED}}"></paper-toggle-button>
+            </paper-item>
+            <paper-item>
+              <paper-item-body two-line>
+                <div>Collect cookies</div>
+                <div secondary>Save received cookies and send them back as would browser do</div>
+              </paper-item-body>
+              <paper-toggle-button checked="{{values.useCookieStorage}}"></paper-toggle-button>
+            </paper-item>
+            <paper-item>
+              <paper-item-body two-line>
+                <div>History analysis</div>
+                <div secondary>Performs history analysis on historical request data. It shows the history charts in the request panel.</div>
+              </paper-item-body>
+              <paper-toggle-button checked="{{values.apiAssistant}}"></paper-toggle-button>
+            </paper-item>
+            <paper-item on-tap="_exportDataRequested">
+              <paper-item-body two-line>
+                <div>Save stored data to file</div>
+                <div secondary>Save history, saved requests and projects data to file.</div>
+              </paper-item-body>
+              <iron-icon icon="arrow-drop-down" class="nav-away-icon" item-icon></iron-icon>
+            </paper-item>
+            <paper-item on-tap="clearDatastore">
+              <paper-item-body>
+                <div>Clear stored data</div>
+                <!-- <div secondary>This will remove all data stored by the application. This can't be undo unless the export file has been created.</div> -->
+              </paper-item-body>
+              <iron-icon icon="arrow-drop-down" class="nav-away-icon" item-icon></iron-icon>
+            </paper-item>
+          </paper-material>
 
-            <h2 class="subhead">Request behavior</h2>
-            <paper-material elevation="1">
-              <paper-item data-page="2" on-tap="_showPage">
-                <paper-item-body two-line>
-                  <div>
-                    Magic variables
-                  </div>
-                  <div secondary>[[computeMvLabel(values.MAGICVARS_ENABLED)]]</div>
-                </paper-item-body>
-                <iron-icon icon="arrow-drop-down" class="nav-away-icon" item-icon></iron-icon>
-              </paper-item>
-              <paper-item data-page="1" on-tap="_showPage">
-                <paper-item-body two-line>
-                  <div>
-                    Request timeout
-                  </div>
-                  <div secondary>[[computeTimeoutLabel(values.requestDefaultTimeout)]]</div>
-                </paper-item-body>
-                <iron-icon icon="arrow-drop-down" class="nav-away-icon" item-icon></iron-icon>
-              </paper-item>
-            </paper-material>
+          <h2 class="subhead">Request behavior</h2>
+          <paper-material elevation="1">
+            <paper-item data-page="2" on-tap="_showPage">
+              <paper-item-body two-line>
+                <div>
+                  Magic variables
+                </div>
+                <div secondary>[[computeMvLabel(values.MAGICVARS_ENABLED)]]</div>
+              </paper-item-body>
+              <iron-icon icon="arrow-drop-down" class="nav-away-icon" item-icon></iron-icon>
+            </paper-item>
+            <paper-item data-page="1" on-tap="_showPage">
+              <paper-item-body two-line>
+                <div>
+                  Request timeout
+                </div>
+                <div secondary>[[computeTimeoutLabel(values.requestDefaultTimeout)]]</div>
+              </paper-item-body>
+              <iron-icon icon="arrow-drop-down" class="nav-away-icon" item-icon></iron-icon>
+            </paper-item>
+          </paper-material>
 
-            <h2 class="subhead">Account and privacy</h2>
-            <paper-material elevation="1">
-              <paper-item>
-                <paper-item-body two-line class="button-margin">
-                  <div>Sign in or out from Google Services.</div>
-                  <div secondary>
-                    This is required to save or open files from Google Drive.
-                  </div>
-                </paper-item-body>
-                <chrome-signin></chrome-signin>
-              </paper-item>
-              <paper-item>
-                <paper-item-body two-line>
-                  <div>
-                    Send anonymous usage data
-                  </div>
-                  <div secondary="true">Make the ARC better by providing anonymous usage statistics.</div>
-                </paper-item-body>
-                <paper-toggle-button on-tap="_gaSettingTapped" checked="{{gaEnabled}}"></paper-toggle-button>
-              </paper-item>
-              <paper-item class="link" on-tap="openPrivacyPolicy">
-                <paper-item-body>
-                  <div>Privacy policy</div>
-                </paper-item-body>
-                <iron-icon icon="open-in-new" item-icon></iron-icon>
-              </paper-item>
+          <h2 class="subhead">Account and privacy</h2>
+          <paper-material elevation="1">
+            <paper-item>
+              <paper-item-body two-line class="button-margin">
+                <div>Sign in or out from Google Services.</div>
+                <div secondary>
+                  This is required to save or open files from Google Drive.
+                </div>
+              </paper-item-body>
+              <chrome-signin></chrome-signin>
+            </paper-item>
+            <paper-item>
+              <paper-item-body two-line>
+                <div>
+                  Send anonymous usage data
+                </div>
+                <div secondary="true">Make the ARC better by providing anonymous usage statistics.</div>
+              </paper-item-body>
+              <paper-toggle-button on-tap="_gaSettingTapped" checked="{{gaEnabled}}"></paper-toggle-button>
+            </paper-item>
+            <paper-item class="link" on-tap="openPrivacyPolicy">
+              <paper-item-body>
+                <div>Privacy policy</div>
+              </paper-item-body>
+              <iron-icon icon="open-in-new" item-icon></iron-icon>
+            </paper-item>
 
-            </paper-material>
+          </paper-material>
 
-            <h2 class="subhead">Other</h2>
-            <paper-material elevation="1">
-              <paper-item hidden$="[[!showNotifications]]">
-                <paper-item-body>
-                  <div>
-                    Show notification when app is updated
-                  </div>
-                </paper-item-body>
-                <paper-toggle-button on-tap="_notificationsTapped" checked="{{notificationsEnabled}}"></paper-toggle-button>
-              </paper-item>
-              <paper-item on-tap="_showAddToDesktopTutotial">
-                <paper-item-body>
-                  <div>
-                    Add shortcut to desktop
-                  </div>
-                </paper-item-body>
-                <iron-icon icon="arrow-drop-down" class="nav-away-icon" item-icon></iron-icon>
-              </paper-item>
-              <paper-item on-tap="showTutorial">
-                <paper-item-body>
-                  <div>Show tutorial</div>
-                </paper-item-body>
-                <iron-icon icon="arrow-drop-down" class="nav-away-icon" item-icon></iron-icon>
-              </paper-item>
-            </paper-material>
-          </section>
+          <h2 class="subhead">Other</h2>
+          <paper-material elevation="1">
+            <paper-item hidden$="[[!showNotifications]]">
+              <paper-item-body>
+                <div>
+                  Show notification when app is updated
+                </div>
+              </paper-item-body>
+              <paper-toggle-button on-tap="_notificationsTapped" checked="{{notificationsEnabled}}"></paper-toggle-button>
+            </paper-item>
+            <paper-item on-tap="_showAddToDesktopTutotial">
+              <paper-item-body>
+                <div>
+                  Add shortcut to desktop
+                </div>
+              </paper-item-body>
+              <iron-icon icon="arrow-drop-down" class="nav-away-icon" item-icon></iron-icon>
+            </paper-item>
+            <paper-item on-tap="showTutorial">
+              <paper-item-body>
+                <div>Show tutorial</div>
+              </paper-item-body>
+              <iron-icon icon="arrow-drop-down" class="nav-away-icon" item-icon></iron-icon>
+            </paper-item>
+          </paper-material>
+        </section>
 
         <section class="inner-settings">
 
@@ -331,8 +334,28 @@ the License.
           </form>
         </paper-dialog-scrollable>
         <div class="buttons">
-          <paper-button dialog-dismiss="">Cancel</paper-button>
-          <paper-button dialog-confirm="" autofocus="">Remove</paper-button>
+          <paper-button dialog-dismiss>Cancel</paper-button>
+          <paper-button dialog-confirm autofocus>Remove</paper-button>
+        </div>
+      </paper-dialog>
+      <paper-dialog id="exportDataDialog" on-iron-overlay-closed="_onExportDataDialogResult">
+        <h2>Data export</h2>
+        <paper-dialog-scrollable>
+          <p>What to include in the export file?</p>
+          <form is="iron-form" id="exportForm">
+            <paper-checkbox name="saved" checked>Saved requests and projects</paper-checkbox>
+            <paper-checkbox name="history" checked>Requests history</paper-checkbox>
+            <paper-checkbox name="cookies" checked>Cookies</paper-checkbox>
+            <paper-checkbox name="auth" checked>Saved passwords</paper-checkbox>
+            <paper-checkbox name="history-url" checked>URLs history (autofill data)</paper-checkbox>
+            <paper-checkbox name="websocket" checked>Web sockets history</paper-checkbox>
+            <paper-checkbox name="headers-sets" checked>Headers sets</paper-checkbox>
+            <paper-checkbox name="variables" checked>Variables and environments</paper-checkbox>
+          </form>
+        </paper-dialog-scrollable>
+        <div class="buttons">
+          <paper-button dialog-dismiss>Cancel</paper-button>
+          <paper-button dialog-confirm autofocus>Export</paper-button>
         </div>
       </paper-dialog>
       <onboarding-tutorial id="addShortcutsToDesktop">

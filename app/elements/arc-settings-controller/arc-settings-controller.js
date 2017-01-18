@@ -237,12 +237,29 @@ Polymer({
     .open('https://docs.google.com/document/d/1BzrKQ0NxFXuDIe2zMA-0SZBNU0P46MHr4GftZmoLUQU/edit');
   },
 
-  dumpClick: function() {
+  _exportDataRequested: function() {
+    this.$.exportDataDialog.open();
+  },
+
+  _onExportDataDialogResult: function(e) {
+    if (e.detail.canceled || !e.detail.confirmed) {
+      return;
+    }
+    var clear = this.$.exportForm.serialize();
+    var dbs = Object.keys(clear);
+    if (dbs.length === 8) {
+      dbs = 'all';
+    }
+
+    this._exportData(dbs);
+  },
+
+  _exportData: function(sources) {
     StatusNotification.notify({
       message: 'Preparing data. Wait a sec...'
     });
     arc.app.importer.prepareExport({
-      type: 'all'
+      type: sources
     })
     .then((data) => {
       this.exportContent = data;
