@@ -1,33 +1,12 @@
 <script src="web-socket-message.js"></script>
 
-<link rel="import" href="arc-websocket-icons.html">
+<link rel="import" href="../empty-states-screens/websockets-empty-history.html">
 
 <dom-module id="arc-websocket-controller">
   <template>
     <style>
     :host {
       @apply(--layout-vertical);
-    }
-    .welcome-info {
-      @apply(--layout-vertical);
-      @apply(--layout-center-center);
-      @apply(--layout-flex);
-      margin-top: 40px;
-      color: rgba(0,0,0,0.54);
-      background-color: #EEEEEE;
-    }
-
-    .info-headline {
-      @apply(--paper-font-headline);
-      margin: 0px 16px;
-      text-align: center;
-    }
-
-    .intro-image {
-      width: 256px;
-      height: 256px;
-      color: rgb(61, 158, 255);
-      margin-top: 60px;
     }
 
     paper-progress {
@@ -55,11 +34,7 @@
       <websocket-history-view opened="[[opened]]" has-data="{{hasHistoryData}}" loading="{{loadingHistory}}"></websocket-history-view>
     </template>
     <template is="dom-if" if="[[_canShowEmptyScreen(connected, hasHistoryData, loadingHistory)]]" restamp="true">
-      <div class="welcome-info">
-        <p class="info-headline">Connect to remote server using web sockets and debug it.</p>
-        <p>Learn more about Web Sockets at <a href="http://www.websocket.org/" target="_blank">websocket.org</a></p>
-        <iron-icon class="intro-image" icon="websocket-icons:empty-state"></iron-icon>
-      </div>
+      <websockets-empty-history></websockets-empty-history>
     </template>
     <web-socket id="socket"
       retrying="{{retrying}}"
