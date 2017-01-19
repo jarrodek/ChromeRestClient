@@ -12,6 +12,7 @@ body {
 
 html,
 body {
+  min-height: 100%;
   height: 100%;
 }
 
@@ -119,6 +120,7 @@ paper-toolbar[xhrtoggle] > paper-toggle-button[feature="xhrtoggle"] {
 }
 
 .mainPages > * {
+  min-height: 100%;
   height: 100%;
 }
 

@@ -208,7 +208,7 @@ Polymer({
     return mvEnabled > 0 ?
       'Enabled'  : 'Disabled';
   },
-  // Shows internall sub-page 
+  // Shows internall sub-page
   _showPage: function(e) {
     var path = e.path;
     var page = null;
@@ -237,10 +237,31 @@ Polymer({
     .open('https://docs.google.com/document/d/1BzrKQ0NxFXuDIe2zMA-0SZBNU0P46MHr4GftZmoLUQU/edit');
   },
 
-  dumpClick: function() {
+  _exportDataRequested: function() {
+    this.$.exportDataDialog.open();
+  },
+
+  _onExportDataDialogResult: function(e) {
+    if (e.detail.canceled || !e.detail.confirmed) {
+      return;
+    }
+    var clear = this.$.exportForm.serialize();
+    var dbs = Object.keys(clear);
+    if (dbs.length === 8) {
+      dbs = 'all';
+    }
+
+    this._exportData(dbs);
+  },
+
+  _exportData: function(sources) {
+    StatusNotification.notify({
+      message: 'Preparing data. Wait a sec...'
+    });
     arc.app.importer.prepareExport({
-      type: 'all'
-    }).then((data) => {
+      type: sources
+    })
+    .then((data) => {
       this.exportContent = data;
       var date = new Date();
       var day = date.getDate();
@@ -255,7 +276,8 @@ Polymer({
         action: 'Click',
         label: 'Export saved as file'
       });
-    }).catch((e) => {
+    })
+    .catch((e) => {
       this.fire('app-log', {
         'message': ['Export data.', e],
         'level': 'error'
@@ -302,17 +324,19 @@ Polymer({
       message: 'Removing data from the store...'
     });
     var p = dbs.map((db) => new PouchDB(db).destroy());
-    Promise.all(p).then(() => {
+    Promise.all(p)
+    .then(() => {
       StatusNotification.notify({
         message: 'Data cleared'
       });
-      this.fire('datastrores-destroyed', {
-        datastores: dbs
-      });
-    }).catch((e) => {
+    })
+    .catch((e) => {
       StatusNotification.notify({
         message: 'Data clear error: ' + e.message
       });
+    });
+    this.fire('datastrores-destroyed', {
+      datastores: dbs
     });
   }
 });

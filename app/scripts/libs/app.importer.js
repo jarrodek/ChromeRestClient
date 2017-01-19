@@ -40,6 +40,51 @@ arc.app.importer._getProjectsDb = function() {
 arc.app.importer._getHistoryDataDb = function() {
   return new PouchDB('history-data');
 };
+arc.app.importer._getWebsocketsHistoryDb = function() {
+  return new PouchDB('websocket-url-history');
+};
+arc.app.importer._getUrlHistoryDb = function() {
+  return new PouchDB('url-history');
+};
+arc.app.importer._getVariablesDb = function() {
+  return new PouchDB('variables');
+};
+arc.app.importer._getHeadersSetsDb = function() {
+  return new PouchDB('headers-sets');
+};
+arc.app.importer._getCookiesDb = function() {
+  return new PouchDB('cookies');
+};
+arc.app.importer._getAuthDataDb = function() {
+  return new PouchDB('auth-data');
+};
+
+arc.app.importer._getDatabase = function(name) {
+  switch (name) {
+    case 'saved-requests':
+      return arc.app.importer._getSavedDb();
+    case 'history-requests':
+      return arc.app.importer._getHistoryDb();
+    case 'legacy-projects':
+      return arc.app.importer._getProjectsDb();
+    case 'history-data':
+      return arc.app.importer._getHistoryDataDb();
+    case 'websocket-url-history':
+      return arc.app.importer._getWebsocketsHistoryDb();
+    case 'url-history':
+      return arc.app.importer._getUrlHistoryDb();
+    case 'variables':
+      return arc.app.importer._getVariablesDb();
+    case 'headers-sets':
+      return arc.app.importer._getHeadersSetsDb();
+    case 'cookies':
+      return arc.app.importer._getCookiesDb();
+    case 'auth-data':
+      return arc.app.importer._getAuthDataDb();
+    default:
+      throw new Error(`Database "${name}" unknown.`);
+  }
+};
 
 /**
  * Save imported from file data.
@@ -155,6 +200,7 @@ arc.app.importer.saveFileData = function(data) {
 arc.app.importer.saveFileDataPouchDb = function(data) {
   switch (data.kind) {
     case 'ARC#SavedHistoryDataExport':
+    case 'ARC#AllDataExport':
     case 'ARC#SavedDataExport':
     case 'ARC#HistoryDataExport':
       return arc.app.importer._saveFileDataPouchDbNew(data);
@@ -286,7 +332,7 @@ arc.app.importer._saveFileDataOldParsePartRequests = function(requests, resolve,
     arc.app.importer._saveFileDataOldParsePartRequests(requests, resolve, reject, saved,
       history, har);
   }, 1);
-},
+};
 /**
  * Parser for the history request
  * ## The history request object.
@@ -649,21 +695,21 @@ arc.app.importer._insertLegacyProjects = function(data) {
   }
   return arc.app.importer._getProjectsDb()
     .bulkDocs(data.map((i) => i.legacyProject));
-},
+};
 arc.app.importer._insertSavedRequests = function(data) {
   if (!data || !data.length) {
     return Promise.resolve();
   }
   return arc.app.importer._getSavedDb()
     .bulkDocs(data.map((i) => i.request));
-},
+};
 arc.app.importer._insertHistorydRequests = function(data) {
   if (!data || !data.length) {
     return Promise.resolve();
   }
   return arc.app.importer._getHistoryDb()
     .bulkDocs(data.map((i) => i.request));
-},
+};
 arc.app.importer._insertHistoryData = function(data) {
   if (!data || !data.length) {
     return Promise.resolve();
@@ -1019,69 +1065,77 @@ arc.app.importer._prepareRequestsExportToPouchDb = function(part) {
   });
 };
 
+arc.app.importer._isAllowedExport = function(exportType, type) {
+  if (exportType instanceof Array) {
+    return exportType.indexOf(type) !== -1;
+  }
+  return exportType === type || exportType === 'all';
+};
+
 arc.app.importer.prepareExportPouchDb = function(opts) {
   opts = opts || {};
   if (!opts.type) {
     return Promise.reject(new Error('Type of export must be set.'));
   }
 
-  var exportHistory = opts.type === 'history' || opts.type === 'all';
-  var exportSaved = opts.type === 'saved' || opts.type === 'all';
-  var exportProjects = opts.type === 'saved' || opts.type === 'all';
+  var exportHistory = arc.app.importer._isAllowedExport(opts.type, 'history');
+  var exportSaved = arc.app.importer._isAllowedExport(opts.type, 'saved');
+  var exportProjects = arc.app.importer._isAllowedExport(opts.type, 'saved');
+  var exportWebsocketHistory = arc.app.importer._isAllowedExport(opts.type, 'websocket');
+  var exportUrlHistory = arc.app.importer._isAllowedExport(opts.type, 'history-url');
+  var exportHeadersSets = arc.app.importer._isAllowedExport(opts.type, 'headers-sets');
+  var exportVariables = arc.app.importer._isAllowedExport(opts.type, 'variables');
+  var exportAuthData = arc.app.importer._isAllowedExport(opts.type, 'auth');
+  var exportCookies = arc.app.importer._isAllowedExport(opts.type, 'cookies');
 
   const exportData = {
     type: opts.type
   };
+
+  var databases = {};
   if (exportHistory) {
-    exportData.history = [];
+    databases['history-requests'] = 'history';
   }
   if (exportSaved) {
-    exportData.requests = [];
+    databases['saved-requests'] = 'requests';
   }
   if (exportProjects) {
-    exportData.projects = [];
+    databases['legacy-projects'] = 'projects';
   }
-  var p;
-  if (exportHistory) {
-    p = arc.app.importer._getHistoryDb().allDocs({
+  if (exportWebsocketHistory) {
+    databases['websocket-url-history'] = 'websocket-url-history';
+  }
+  if (exportUrlHistory) {
+    databases['url-history'] = 'url-history';
+  }
+  if (exportVariables) {
+    databases.variables = 'variables';
+  }
+  if (exportHeadersSets) {
+    databases['headers-sets'] = 'headers-sets';
+  }
+  if (exportAuthData) {
+    databases['auth-data'] = 'auth-data';
+  }
+  if (exportCookies) {
+    databases.cookies = 'cookies';
+  }
+
+  var promises = [];
+  Object.keys(databases).forEach((dbName) => {
+    let _promise = arc.app.importer._getDatabase(dbName)
+    .allDocs({
       // jscs:disable
       include_docs: true
       // jscs:enable
     })
     .then((result) => {
-      exportData.history = result.rows.map((i) => i.doc);
+      exportData[databases[dbName]] = result.rows.map((i) => i.doc);
       return Promise.resolve();
     });
-  } else {
-    p = Promise.resolve();
-  }
-  return p.then(() => {
-    if (exportSaved) {
-      return arc.app.importer._getSavedDb().allDocs({
-        // jscs:disable
-        include_docs: true
-        // jscs:enable
-      })
-      .then((result) => {
-        exportData.requests = result.rows.map((i) => i.doc);
-        return Promise.resolve();
-      });
-    }
-    return Promise.resolve();
-  })
-  .then(() => {
-    if (exportProjects) {
-      return arc.app.importer._getProjectsDb().allDocs({
-        // jscs:disable
-        include_docs: true
-        // jscs:enable
-      })
-      .then((result) => {
-        exportData.projects = result.rows.map((i) => i.doc);
-        return Promise.resolve();
-      });
-    }
-  })
+    promises.push(_promise);
+  });
+  return Promise.all(promises)
   .then(() => {
     return arc.app.importer.createExportObjectPouchDb(exportData);
   });
@@ -1108,15 +1162,9 @@ arc.app.importer.createExportObject = function(opts) {
 arc.app.importer.createExportObjectPouchDb = function(opts) {
   var result = {
     createdAt: new Date().toISOString(),
-    version: arc.app.utils.appVer
+    version: arc.app.utils.appVer,
+    kind: 'ARC#AllDataExport'
   };
-
-  switch (opts.type) {
-    case 'all': result.kind = 'ARC#SavedHistoryDataExport'; break;
-    case 'saved': result.kind = 'ARC#SavedDataExport'; break;
-    case 'history': result.kind = 'ARC#HistoryDataExport'; break;
-    default: throw new Error('Unknown export type');
-  }
 
   if (opts.requests && opts.requests.length) {
     opts.requests = opts.requests.map((i) => {
@@ -1132,7 +1180,6 @@ arc.app.importer.createExportObjectPouchDb = function(opts) {
     });
     result.requests = opts.requests;
   }
-
   if (opts.projects && opts.projects.length) {
     opts.projects = opts.projects.map((i) => {
       i._referenceId = i._id; // to associate projects and requests during import.
@@ -1143,7 +1190,6 @@ arc.app.importer.createExportObjectPouchDb = function(opts) {
     });
     result.projects = opts.projects;
   }
-
   if (opts.history && opts.history.length) {
     opts.history = opts.history.map((i) => {
       delete i._rev;
@@ -1154,6 +1200,69 @@ arc.app.importer.createExportObjectPouchDb = function(opts) {
     result.history = opts.history;
   }
 
+  if (('websocket-url-history' in opts) && opts['websocket-url-history'].length) {
+    opts['websocket-url-history'] = opts['websocket-url-history'].map((i) => {
+      i.key = i._id;
+      delete i._rev;
+      delete i._id;
+      i.kind = 'ARC#WebsocketHistoryData';
+      return i;
+    });
+    result['websocket-url-history'] = opts['websocket-url-history'];
+  }
+  if (('url-history' in opts) && opts['url-history'].length) {
+    opts['url-history'] = opts['url-history'].map((i) => {
+      i.key = i._id;
+      delete i._rev;
+      delete i._id;
+      i.kind = 'ARC#UrlHistoryData';
+      return i;
+    });
+    result['url-history'] = opts['url-history'];
+  }
+  if (opts.variables && opts.variables.length) {
+    opts.variables = opts.variables.map((i) => {
+      if (!i.environment) {
+        // PouchDB creates some views in the main datastore and it is added to
+        // get all docs function without any reason. It should be eleminated
+        return;
+      }
+      delete i._rev;
+      delete i._id;
+      i.kind = 'ARC#Variable';
+      return i;
+    });
+    result.variables = opts.variables.filter((i) => !!i);
+  }
+  if (('headers-sets' in opts) && opts['headers-sets'].length) {
+    opts['headers-sets'] = opts['headers-sets'].map((i) => {
+      delete i._rev;
+      delete i._id;
+      i.kind = 'ARC#HeadersSet';
+      return i;
+    });
+    result['headers-sets'] = opts['headers-sets'];
+  }
+  if (('auth-data' in opts) && opts['auth-data'].length) {
+    opts['auth-data'] = opts['auth-data'].map((i) => {
+      i.key = i._id;
+      delete i._rev;
+      delete i._id;
+      i.kind = 'ARC#AuthData';
+      return i;
+    });
+    result['auth-data'] = opts['auth-data'];
+  }
+  if (opts.cookies && opts.cookies.length) {
+    opts.cookies = opts.cookies.map((i) => {
+      i.key = i._id;
+      delete i._rev;
+      delete i._id;
+      i.kind = 'ARC#Cookie';
+      return i;
+    });
+    result.cookies = opts.cookies;
+  }
   return result;
 };
 /**

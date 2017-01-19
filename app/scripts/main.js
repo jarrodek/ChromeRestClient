@@ -701,4 +701,18 @@
   window.addEventListener('variables-environment-changed', (e) => {
     app.variablesEnvironment = e.detail.env;
   });
+  /* File import by drag'n'drop */
+  document.body.addEventListener('dragenter', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    var element = document.querySelector('drop-file-importer');
+    if (!element) {
+      return;
+    }
+    if (element.opened) {
+      element.opened = false;
+    } else {
+      element.opened = true;
+    }
+  });
 })(document, window);

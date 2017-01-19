@@ -42,7 +42,8 @@
     "uuid-generator": "advanced-rest-client/uuid-generator#^1.0.4",
     "paper-masked-input": "advanced-rest-client/paper-masked-input#^1.0.4",
     "app-analytics": "advanced-rest-client/app-analytics#^1.0.5",
-    "chart.js": "^2.3.0"
+    "chart.js": "^2.3.0",
+    "date-time": "advanced-rest-client/date-time#^0.1.2"
   },
   "devDependencies": {
     "web-component-tester": "*",

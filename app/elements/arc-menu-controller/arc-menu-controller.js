@@ -57,6 +57,8 @@
       this.listen(document, 'project-object-changed', '_updateProject');
       this.listen(document.body, 'project-name-changed', '_updateProjectName');
       this.listen(document, 'selected-project', '_updateProjectSelection');
+      this.listen(window, 'datastrores-destroyed', '_onDatabaseDestroy');
+      this.listen(window, 'data-imported', 'refreshProjects');
     },
 
     detached: function() {
@@ -65,6 +67,8 @@
       this.unlisten(document, 'project-object-changed', '_updateProject');
       this.unlisten(document.body, 'project-name-changed', '_updateProjectName');
       this.unlisten(document, 'selected-project', '_updateProjectSelection');
+      this.unlisten(window, 'datastrores-destroyed', '_onDatabaseDestroy');
+      this.unlisten(window, 'data-imported', 'refreshProjects');
     },
     /**
      * User clicked on a navigation element.
@@ -331,6 +335,21 @@
         if (ids.indexOf(item.id) !== -1) {
           this.set(['projects', i, 'isEmpty'], true);
         }
+      });
+    },
+
+    _onDatabaseDestroy: function(e) {
+      var databases = e.detail.datastores;
+      if (!databases || !databases.length) {
+        return;
+      }
+      if (databases.indexOf('legacy-projects') === -1) {
+        return;
+      }
+      this.set('projects', []);
+      var db = this._getDb();
+      db.close().then(function() {
+        console.log('The legacy-projects database has been closed.');
       });
     }
   });

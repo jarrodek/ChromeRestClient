@@ -1,0 +1,100 @@
+<link rel="import" href="arc-import-behavior.html">
+
+<dom-module id="drop-file-importer">
+  <template>
+    <style>
+    :host {
+      display: block;
+      top: 24px;
+      bottom: 24px;
+      left: 24px;
+      right: 24px;
+      position: fixed;
+      background-color: #fff;
+      @apply(--layout-vertical);
+    }
+
+    .header {
+      height: 48px;
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      background-color: rgb(61, 158, 255);
+    }
+
+    h1 {
+      @apply(--layout-flex);
+      @apply(--paper-font-headline);
+      padding: 0;
+      margin: 0;
+      color: #fff;
+      padding-left: 24px;
+    }
+
+    .close-button {
+      color: #fff;
+    }
+
+    .content {
+      border: 4px rgb(61, 158, 255) solid;
+      height: 100%;
+      @apply(--layout-flex);
+      @apply(--layout-vertical);
+    }
+
+    .dragging,
+    .loader,
+    .error {
+      @apply(--layout-vertical);
+      @apply(--layout-center-center);
+      @apply(--layout-flex);
+    }
+
+    .headline {
+      @apply(--paper-font-headline);
+    }
+
+    arc-import-data-table-view {
+      overflow: auto;
+      height: initial;
+    }
+    </style>
+    <div class="header">
+      <h1>
+        <iron-icon icon="file-upload"></iron-icon>
+        Import file
+      </h1>
+      <paper-button class="close-button" on-tap="close">
+        <iron-icon icon="close"></iron-icon>
+        close
+      </paper-button>
+    </div>
+    <div class="content">
+      <div class="dragging" hidden$="[[!dragging]]">
+        <p class="headline">Drop the file here</p>
+      </div>
+      <div class="loader" hidden$="[[_computeHideLoader(readingFile, importing)]]">
+        <paper-progress indeterminate></paper-progress>
+      </div>
+      <div class="error" hidden$="[[!isImportError]]">
+        <arc-error-message>
+          <p>[[importError]]</p>
+        </arc-error-message>
+      </div>
+      <arc-import-data-table-view
+        hidden$="[[_computeHidePreviewTable(isImportData, importing, isImportError)]]"
+        projects="[[importData.projects]]"
+        requests="[[importData.requests]]"
+        history="[[importData.history]]"
+        export-time="[[importData.createdAt]]"
+        export-version="[[importData.version]]"
+        url-history="[[_computeImportData(importData.*, 'url-history')]]"
+        websocket-url-history="[[_computeImportData(importData.*, 'websocket-url-history')]]"
+        variables="[[importData.variables]]"
+        headers-sets="[[_computeImportData(importData.*, 'headers-sets')]]"
+        auth-data="[[_computeImportData(importData.*, 'auth-data')]]"
+        cookies="[[importData.cookies]]"></arc-import-data-table-view>
+    </div>
+    <file-reader id="fileReader" loading="{{readingFile}}" readas="text" on-file-read="_importFileReady" on-file-error="_importFileError" auto></file-reader>
+  </template>
+  <script src="drop-file-importer.js"></script>
+</dom-module>

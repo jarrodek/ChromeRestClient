@@ -33,15 +33,13 @@ Polymer({
     _showFileExport: {
       type: Boolean,
       value: true,
-      computed: '_canShowFileExport(_fileImporting)'
+      computed: '_canShowFileExport(hasImportData)'
     },
-    /** `true` if server import / export options should be visible */
-    _showServerOptions: {
+    hasImportData: {
       type: Boolean,
-      value: true,
-      computed: '_canShowServerSection(_fileImporting, _fileExporting)'
-    },
-    authorized: Boolean
+      value: false,
+      reflectToAttribute: true
+    }
   },
   /**
    * Ping server for session state on show.
