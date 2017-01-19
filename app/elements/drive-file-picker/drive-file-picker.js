@@ -54,6 +54,10 @@ Polymer({
      */
     queryProperties: Object,
     /**
+     * If true then it will use a negation for `queryProperties`
+     */
+    queryPropertiesNot: Boolean,
+    /**
      * Mime type of the file to search.
      * By default it's internal ARC's mime type.
      */
@@ -149,7 +153,8 @@ Polymer({
     var qp = this.queryProperties;
     if (qp) {
       Object.keys(qp).forEach((key) => {
-        q += ` and properties has {key='${key}' and value='${qp[key]}'}`;
+        let negation = this.queryPropertiesNot ? ' not' : '';
+        q += ` and${negation} properties has {key='${key}' and value='${qp[key]}'}`;
       });
     }
     if (this.query) {
@@ -166,7 +171,6 @@ Polymer({
       params.pageToken = this.nextPageToken;
     }
     this._queryParams = params;
-    console.log(params);
     this.$.query.headers = {
       'Authorization': 'Bearer ' + this.$.chromeSigninAware.accessToken
     };

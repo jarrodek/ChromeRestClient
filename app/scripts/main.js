@@ -609,7 +609,7 @@
       });
       return;
     }
-    ctrl.selectFile();
+    ctrl.opened = true;
   });
 
   app.initAnalytics = () => {
