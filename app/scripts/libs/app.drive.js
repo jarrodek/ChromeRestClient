@@ -52,7 +52,7 @@ window.drive.isAuth = function() {
   return new Promise((resolve, reject) => {
     chrome.identity.getAuthToken({'interactive': false}, (authToken) => {
       if (chrome.runtime.lastError) {
-        return reject(chrome.runtime.lastError.message);
+        return reject(new Error(chrome.runtime.lastError.message));
       }
       resolve(!!authToken);
     });

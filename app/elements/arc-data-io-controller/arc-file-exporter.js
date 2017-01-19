@@ -137,6 +137,11 @@ Polymer({
       this.authenticated = authenticated;
     })
     .catch((e) => {
+      if (e.message === 'OAuth2 not granted or revoked.') {
+        this.checkingAuth = false;
+        this.authenticated = false;
+        return;
+      }
       this.reset();
       StatusNotification.notify({
         message: 'Authentication error. ' + e.message
