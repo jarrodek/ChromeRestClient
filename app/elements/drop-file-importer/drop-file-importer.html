@@ -57,6 +57,11 @@
       overflow: auto;
       height: initial;
     }
+
+    .info {
+      color: rgba(0, 0, 0, 0.54);
+      @apply(--paper-font-body1);
+    }
     </style>
     <div class="header">
       <h1>
@@ -74,6 +79,7 @@
       </div>
       <div class="loader" hidden$="[[_computeHideLoader(readingFile, importing)]]">
         <paper-progress indeterminate></paper-progress>
+        <p class="info">In case of big files it can take a while...</p>
       </div>
       <div class="error" hidden$="[[!isImportError]]">
         <arc-error-message>
