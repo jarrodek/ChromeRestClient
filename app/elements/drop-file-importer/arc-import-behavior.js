@@ -47,7 +47,8 @@ window.ArcBehaviors.ArcImportBehavior = {
     isImportData: {
       type: Boolean,
       value: false,
-      computed: '_computeIsData(importData)'
+      computed: '_computeIsData(importData)',
+      notify: true
     },
     /**
      * A flag set when the data is currently being importing into the store.

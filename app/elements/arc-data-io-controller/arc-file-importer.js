@@ -4,107 +4,57 @@
 //TODO:20 add importer for new data structure.
 Polymer({
   is: 'arc-file-importer',
-  /**
-   * Fired when the user click on import button.
-   *
-   * @event import
-   */
+
+  behaviors: [
+    ArcBehaviors.ArcImportBehavior
+  ],
+
   properties: {
-    /** Data to import. */
-    importData: {
-      type: Object,
-      value: {
-        projects: [],
-        requests: []
-      }
-    },
-    /** True if import is initialized. */
-    isFileImport: {
-      type: Boolean,
-      computed: '_computeFileImportPreview(importData)',
-      notify: true
-    },
-    /**
-     * True if user started importing a file.
-     * It will remain `true` until operation finish either by successful import or cancellation.
-     */
-    importing: {
-      notify: true,
-      readOnly: true,
+    // True when file read reads the file.
+    readingFile: {
       type: Boolean,
       value: false
-    },
-    importFileReader: Boolean
+    }
   },
+
+  listeners: {
+    'import-action': '_importAction'
+  },
+
+  // Opens a file selector.
+  selectFile: function() {
+    this.$$('input[type="file"]').click();
+  },
+
   /**
    * Handler called when file has been added by the user.
    */
   _onImportFile: function(e) {
-    var file = e.detail.file;
+    var file = e.target.files[0];
     if (!file) {
       return;
     }
-    this._setImporting(true);
+    this.set('readingFile', true);
     this.$.fileReader.blob = file;
   },
   /**
    * Handler called when the files has been read.
    */
   _importFileReady: function(e) {
-    if (e.detail.result) {
-      try {
-        let result = JSON.parse(e.detail.result);
-        if (!(result.projects || result.requests || result.history)) {
-          if ('headers' in result && 'url' in result && 'method' in result) {
-            //old file.
-            this.importData = {
-              projects: [],
-              requests: [result]
-            };
-            return;
-          }
-          StatusNotification.notify({
-            message: 'This is not an ARC file.'
-          });
-          throw new Error('Not an ARC file.');
-        }
-        this.importData = result;
-        if (!this.isFileImport) {
-          StatusNotification.notify({
-            message: 'File is empty'
-          });
-          this.importData = null;
-          this._resetFileDrop();
-          this._setImporting(false);
-        }
-      } catch (e) {
-        console.error('File read error', e);
-        this.fire('app-log', {
-          'message': ['arc-data-import::_importFileReady::JSON.parse::error', e],
-          'level': 'error'
-        });
-        StatusNotification.notify({
-          message: 'Unable to parse the file.'
-        });
-        this._resetFileDrop();
-        this._setImporting(false);
-      }
-    }
+    this.processImportData(e.detail.result);
+    this.set('readingFile', false);
+    this._resetFileDrop();
   },
+
   _resetFileDrop: function() {
-    var fileDrop = Polymer.dom(this.root).querySelector('#fileDrop');
-    if (fileDrop) {
-      fileDrop.reset();
-    }
+    this.$$('input[type="file"]').value = null;
   },
   /**
    * A handler called when the file can't be read.
    */
   _importFileError: function(e) {
-    this._setImporting(false);
-    StatusNotification.notify({
-      message: 'File read error.'
-    });
+    this.set('readingFile', false);
+    this.set('importError', 'The application was unable to read the file. ' + e.message);
     this._resetFileDrop();
     this.fire('app-log', {'message': ['arc-data-import::_importFileError', e], 'level': 'error'});
     this.fire('send-analytics', {
@@ -121,28 +71,33 @@ Polymer({
   /**
    * This handler is called when the user decide to import from file or cancel the operation.
    */
-  _importTableAction: function(e) {
+  _importAction: function(e) {
     var action = e.detail.action;
     if (action === 'import') {
-      this.fire('import', {
-        data: this.importData
+      this._importFileData(this.importData)
+      .then(() => {
+        if (!this.isImportError) {
+          this.opened = false;
+          StatusNotification.notify({
+            message: 'The data has been imported',
+            timeout: StatusNotification.TIME_SHORT
+          });
+        }
       });
+    } else {
+      this.opened = false;
     }
-    this._setImporting(false);
-    this.importData = null;
+    this.resetImport();
     this._resetFileDrop();
   },
-  /**
-   * Gets the data for given `variable` name from object.
-   *
-   * @param {Object} record Polymer's change record for an object
-   * @param {String} variable Variable name (object's key) where the data is
-   */
-  _computeData: function(record, variable) {
-    if (!record || !record.base) {
-      return;
-    }
-    return record.base[variable];
+
+  // Computes if the loader should be hidden.
+  _computeHideLoader: function(readingFile, importing) {
+    return !readingFile && !importing;
+  },
+  // Computes if data preview table should be hidden.
+  _computeHidePreviewTable: function(isImportData, importing, isImportError) {
+    return !isImportData || importing || isImportError;
   }
 });
 })();

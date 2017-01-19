@@ -13,7 +13,9 @@ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
---><!--
+-->
+<link rel="import" href="../drop-file-importer/arc-import-behavior.html">
+<!--
 The `arc-file-importer` element is a helper element for `arc-data-import-controller`
 that is responsible for file import.
 
@@ -23,46 +25,48 @@ Example:
 
 @group Controller Elements
 @element arc-file-importer
---><html><head></head><body><dom-module id="arc-file-importer">
+-->
+<dom-module id="arc-file-importer">
   <template>
     <style>
     :host {
-      @apply(--layout-vertical);
+      display: block;
     }
 
-    h2 {
-      @apply(--paper-font-title);
-    }
-
-    #fileDrop {
-      /*margin-left: 24px;*/
+    input[type="file"] {
+      display: none;
     }
     </style>
-    <template is="dom-if" if="{{!isFileImport}}">
-      <section id="fileImportSection">
-        <h2 class="section-title">Import from file</h2>
-        <file-drop id="fileDrop" on-file-ready="_onImportFile"></file-drop>
-      </section>
-    </template>
 
-    <div id="fileImportSpinner">
+    <div hidden$="[[_computeHideLoader(readingFile, importing)]]">
       <paper-spinner active="[[importFileReader]]" alt="Preparing data"></paper-spinner>
     </div>
+
+    <template is="dom-if" if="{{!isImportData}}">
+      <paper-button on-tap="selectFile" raised>Select file to import</paper-button>
+      <input type="file" on-change="_onImportFile">
+    </template>
+
+    <div class="error" hidden$="[[!isImportError]]">
+      <arc-error-message>
+        <p>[[importError]]</p>
+      </arc-error-message>
+    </div>
+
     <arc-import-data-table-view
-      hidden$="[[!isFileImport]]"
+      hidden$="[[_computeHidePreviewTable(isImportData, importing, isImportError)]]"
       projects="[[importData.projects]]"
       requests="[[importData.requests]]"
       history="[[importData.history]]"
       export-time="[[importData.createdAt]]"
       export-version="[[importData.version]]"
-      url-history="[[_computeData(importData.*, 'url-history')]]"
-      websocket-url-history="[[_computeData(importData.*, 'websocket-url-history')]]"
+      url-history="[[_computeImportData(importData.*, 'url-history')]]"
+      websocket-url-history="[[_computeImportData(importData.*, 'websocket-url-history')]]"
       variables="[[importData.variables]]"
-      headers-sets="[[_computeData(importData.*, 'headers-sets')]]"
-      auth-data="[[_computeData(importData.*, 'auth-data')]]"
-      cookies="[[importData.cookies]]"
-      on-import-action="_importTableAction"></arc-import-data-table-view>
-    <file-reader id="fileReader" loading="{{importFileReader}}" readas="text" on-file-read="_importFileReady" on-file-error="_importFileError" auto=""></file-reader>
+      headers-sets="[[_computeImportData(importData.*, 'headers-sets')]]"
+      auth-data="[[_computeImportData(importData.*, 'auth-data')]]"
+      cookies="[[importData.cookies]]"></arc-import-data-table-view>
+    <file-reader id="fileReader" loading="{{readingFile}}" readas="text" on-file-read="_importFileReady" on-file-error="_importFileError" auto=""></file-reader>
   </template>
   <script src="arc-file-importer.js"></script>
 </dom-module>

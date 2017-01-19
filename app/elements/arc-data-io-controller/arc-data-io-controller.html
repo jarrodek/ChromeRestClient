@@ -81,7 +81,7 @@ Example:
       <template is="dom-if" if="[[_showFileImport]]">
         <h2>Data import</h2>
         <paper-material elevation="1">
-          <arc-file-importer importing="{{_fileImporting}}" is-file-import="{{hasImportData}}" on-import="_importFileData"></arc-file-importer>
+          <arc-file-importer importing="{{_fileImporting}}" is-import-data="{{hasImportData}}" on-import="_importFileData"></arc-file-importer>
         </paper-material>
       </template>
       <template is="dom-if" if="[[_showFileExport]]">
