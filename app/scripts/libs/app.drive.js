@@ -46,6 +46,19 @@ window.drive.auth = function() {
   });
 };
 /**
+ * Checks if the user authenticated in the APP.
+ */
+window.drive.isAuth = function() {
+  return new Promise((resolve, reject) => {
+    chrome.identity.getAuthToken({'interactive': false}, (authToken) => {
+      if (chrome.runtime.lastError) {
+        return reject(new Error(chrome.runtime.lastError.message));
+      }
+      resolve(!!authToken);
+    });
+  });
+};
+/**
  * Files manipulation API.
  *
  * @namespace

@@ -46,14 +46,19 @@ Example:
     }
 
     paper-material,
-    h2 {
+    h2,
+    section {
       max-width: 620px;
       width: 100%;
       transition: max-width 0.25s ease-in-out;
     }
 
     :host([has-import-data]) paper-material,
-    :host([has-import-data]) h2 {
+    :host([has-import-data]) h2,
+    :host([has-import-data]) section,
+    :host([is-drive-import]) paper-material,
+    :host([is-drive-import]) h2,
+    :host([is-drive-import]) section {
       max-width: calc(100% - 32px);
       margin: 0 16px;
     }
@@ -71,25 +76,32 @@ Example:
     .padding-section {
       padding-left: 24px;
     }
+
+    :host([has-import-data]) .export-section,
+    :host([is-drive-import]) .export-section {
+      display: none;
+    }
     </style>
-    <template is="dom-if" if="{{loading}}">
+    <template is="dom-if" if="[[loading]]">
       <div class="padding-section">
         <paper-spinner active="true" alt="Preparing data"></paper-spinner>
       </div>
     </template>
     <template is="dom-if" if="[[!loading]]">
       <template is="dom-if" if="[[_showFileImport]]">
-        <h2>Data import</h2>
-        <paper-material elevation="1">
-          <arc-file-importer importing="{{_fileImporting}}" is-import-data="{{hasImportData}}" on-import="_importFileData"></arc-file-importer>
-        </paper-material>
+        <section class="import-section">
+          <h2>Data import</h2>
+          <paper-material elevation="1">
+            <arc-file-importer importing="{{_fileImporting}}" is-import-data="{{hasImportData}}" is-drive-import="{{isDriveImport}}"></arc-file-importer>
+          </paper-material>
+        </section>
       </template>
-      <template is="dom-if" if="[[_showFileExport]]">
+      <section class="export-section">
         <h2>Data export</h2>
         <paper-material elevation="1">
-          <arc-file-exporter exporting="{{_fileExporting}}"></arc-file-exporter>
+          <arc-file-exporter></arc-file-exporter>
         </paper-material>
-      </template>
+      </section>
     </template>
   </template>
 </dom-module>

@@ -71,7 +71,7 @@
             on-iron-select="_mainPageSelected"
             on-iron-deselect="_mainPageDeselected">
             <section data-route="request" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent">
-              <template is="dom-if" if="[[canRender(initialized,usePouchDb,'true')]]">
+              <template is="dom-if" if="[[canRender(initialized, usePouchDb, 'true')]]" on-dom-change="_requestPanelInitiallized">
                 <request-panel narrow-layout="[[narrowLayout]]" route-params="[[params]]" with-toast="[[withToast]]"></request-panel>
               </template>
               <template is="dom-if" if="[[canRender(initialized,usePouchDb,'false')]]">
@@ -98,7 +98,7 @@
       </paper-scroll-header-panel>
     </paper-drawer-panel>
     <!-- <user-provider id="userProvider" authorized="{{appAuthorized}}" profile-image="{{profileUrl}}"></user-provider> -->
-    <arc-drive-controller restore-on-file id="driveController"></arc-drive-controller>
+    <arc-drive-controller restore-on-file id="driveController" with-backdrop></arc-drive-controller>
     <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('s', 'true')]]" on-keys-pressed="onSaveShift"></iron-a11y-keys>
     <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('s')]]" on-keys-pressed="onSave"></iron-a11y-keys>
     <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('o')]]" on-keys-pressed="onOpen"></iron-a11y-keys>

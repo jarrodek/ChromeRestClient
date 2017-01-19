@@ -586,13 +586,30 @@
   app._upgradeStatus = (e) => {
     app.fire('app-upgrade-screen-log', e.detail);
   };
-
+  app._requestPanelInitiallized = () => {
+    if (app.route !== 'request') {
+      return;
+    }
+    var elm = document.querySelector('request-panel');
+    if (!elm) {
+      return;
+    }
+    elm.opened = true;
+  };
   app._mainPageSelected = (e) => {
     if (app.route !== 'request') {
       return;
     }
     var elm = e.detail.item.querySelector('*:not(template)');
-    elm.opened = true;
+    if (!elm) {
+      elm = document.querySelector('request-panel');
+    }
+    if (!elm) {
+      return;
+    }
+    if (!elm.opened) {
+      elm.opened = true;
+    }
   };
   app._mainPageDeselected = (e) => {
     var elm = e.detail.item.querySelector('*:not(template)');
@@ -609,7 +626,7 @@
       });
       return;
     }
-    ctrl.selectFile();
+    ctrl.opened = true;
   });
 
   app.initAnalytics = () => {
