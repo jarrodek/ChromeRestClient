@@ -50,6 +50,7 @@ Example:
 
     .table-header {
       height: 64px;
+      margin: 0 24px;
       @apply(--layout-horizontal);
       @apply(--layout-center);
     }
@@ -128,7 +129,6 @@ Example:
       color: rgba(0, 0, 0, 0.87);
       font-family: 'Roboto';
       font-weight: 400;
-      padding: 0 24px;
     }
 
     .table-values,
@@ -163,12 +163,20 @@ Example:
     .toggle-button:hover {
       color: var(--response-status-view-toggle-icon-hover-color, rgba(0, 0, 0, 0.78));
     }
+
+    paper-button:not(.actionButton) {
+      color: rgba(0, 0, 0, 0.54);
+    }
+
+    .bottom-actions {
+      margin-top: 20px;
+    }
     </style>
     <template>
       <div class="table">
         <div class="table-header">
           <h2 class="flex">Import preview</h2>
-          <paper-button raised="" class="actionButton" on-tap="importTap">import</paper-button>
+          <paper-button raised="" class="actionButton" on-tap="importTap" outofocus>import</paper-button>
           <paper-button on-tap="cancelTap">cancel</paper-button>
         </div>
 
@@ -357,7 +365,7 @@ Example:
           </iron-collapse>
         </section>
 
-        <div class="table-columns">
+        <div class="table-columns bottom-actions">
           <div class="flex"></div>
           <paper-button raised="" class="actionButton" on-tap="importTap">import</paper-button>
           <paper-button on-tap="cancelTap">cancel</paper-button>

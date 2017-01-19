@@ -58,6 +58,7 @@
       this.listen(document.body, 'project-name-changed', '_updateProjectName');
       this.listen(document, 'selected-project', '_updateProjectSelection');
       this.listen(window, 'datastrores-destroyed', '_onDatabaseDestroy');
+      this.listen(window, 'data-imported', 'refreshProjects');
     },
 
     detached: function() {
@@ -67,6 +68,7 @@
       this.unlisten(document.body, 'project-name-changed', '_updateProjectName');
       this.unlisten(document, 'selected-project', '_updateProjectSelection');
       this.unlisten(window, 'datastrores-destroyed', '_onDatabaseDestroy');
+      this.unlisten(window, 'data-imported', 'refreshProjects');
     },
     /**
      * User clicked on a navigation element.
