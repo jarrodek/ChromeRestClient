@@ -324,17 +324,19 @@ Polymer({
       message: 'Removing data from the store...'
     });
     var p = dbs.map((db) => new PouchDB(db).destroy());
-    Promise.all(p).then(() => {
+    Promise.all(p)
+    .then(() => {
       StatusNotification.notify({
         message: 'Data cleared'
       });
-      this.fire('datastrores-destroyed', {
-        datastores: dbs
-      });
-    }).catch((e) => {
+    })
+    .catch((e) => {
       StatusNotification.notify({
         message: 'Data clear error: ' + e.message
       });
+    });
+    this.fire('datastrores-destroyed', {
+      datastores: dbs
     });
   }
 });
