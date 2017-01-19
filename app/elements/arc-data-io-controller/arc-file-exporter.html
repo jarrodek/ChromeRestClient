@@ -33,11 +33,6 @@ Example:
     <style>
     :host {
       @apply(--layout-vertical);
-
-    }
-
-    h2 {
-      @apply(--paper-font-title);
     }
 
     #exportForm {
@@ -52,26 +47,30 @@ Example:
       @apply(--section-padding);
     }
 
+    .actions {
+      margin: 24px 0;
+    }
+
     .action-button {
       @apply(--action-button);
     }
 
-    .action-button:hover {
-      @apply(--action-button-hover);
+    p.description {
+      @apply(--paper-font-body2);
     }
 
-    p {
-      @apply(--paper-font-caption);
+    p.info {
+      @apply(--paper-font-body1);
+      color: rgba(0, 0, 0, 0.54);
     }
     </style>
-    <h2 class="section-title">Export local data</h2>
     <template is="dom-if" if="{{loading}}">
       <div class="padding-section">
         <paper-spinner active="true" alt="Preparing data"></paper-spinner>
       </div>
     </template>
-    <template is="dom-if" if="{{!loading}}">
-      <p>What to include in the export file?</p>
+    <template is="dom-if" if="[[_computeDisplaySelector(loading, exporting)]]">
+      <p class="description">What to include in the export file?</p>
       <form is="iron-form" id="exportForm">
         <paper-checkbox name="saved" checked>Saved requests and projects</paper-checkbox>
         <paper-checkbox name="history" checked>Requests history</paper-checkbox>
@@ -85,7 +84,12 @@ Example:
       <div class="actions">
         <paper-button class="action-button" on-tap="_prepareDataClick">Prepare data to export</paper-button>
       </div>
-      <p class="info">Depending on the amount of your local data this process can take a long time.</p>
+      <p class="info">Depending on the amount of your local data this process can take up to a minute.</p>
+    </template>
+    <template is="dom-if" if="[[dataReady]]">
+      <p class="description">Your data is ready.</p>
+      <paper-button raised="true" class="action-button" on-tap="_saveData">Download file</paper-button>
+      <paper-button on-tap="_cancelExport">Cancel</paper-button>
     </template>
   </template>
 </dom-module>

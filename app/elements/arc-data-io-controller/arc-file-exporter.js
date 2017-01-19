@@ -121,6 +121,10 @@ Polymer({
     this._setExporting(false);
     this._writableContent = null;
     this._fileSuggestedName = null;
+  },
+
+  _computeDisplaySelector: function(loading, exporting) {
+    return !loading && !exporting;
   }
 });
 })();
