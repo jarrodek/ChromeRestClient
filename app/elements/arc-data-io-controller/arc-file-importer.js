@@ -14,11 +14,48 @@ Polymer({
     readingFile: {
       type: Boolean,
       value: false
+    },
+    // true if the user requested google drive import
+    isDriveImport: {
+      type: Boolean,
+      value: false,
+      notify: true
+    },
+    // True when switching to the drive export and the app is checking for the authentication.
+    checkingAuth: {
+      type: Boolean,
+      value: false
+    },
+    // True if the authentication check returns true.
+    authenticated: {
+      type: Boolean,
+      value: false
+    },
+    // True if Google Drive operation pending
+    loading: Boolean,
+    // Drive query page token.
+    nextPageToken: String,
+    // Drive query oprions 
+    _driveQueryProperties: {
+      type: Object,
+      value: function() {
+        return {
+          isExport: true
+        };
+      }
     }
   },
 
   listeners: {
-    'import-action': '_importAction'
+    'import-action': '_importAction',
+    'drive-file-picker-data': '_onGoogleDriveDownload'
+  },
+
+  reset: function() {
+    this.checkingAuth = false;
+    this.authenticated = false;
+    this.isDriveImport = false;
+    this.readingFile = false;
   },
 
   // Opens a file selector.
@@ -98,6 +135,30 @@ Polymer({
   // Computes if data preview table should be hidden.
   _computeHidePreviewTable: function(isImportData, importing, isImportError) {
     return !isImportData || importing || isImportError;
+  },
+
+  _computeDisplayFileSelector: function(isImportData, isDriveImport) {
+    return !isImportData && !isDriveImport;
+  },
+  /**
+   * Starts the import from drive flow.
+   * It checks the authotization status. If the user didn't authorized the application then
+   * it displays an authorization form.
+   */
+  _importDriveFlow: function() {
+    this.isDriveImport = true;
+  },
+
+  _drivePickerCancel: function() {
+    this.isDriveImport = false;
+  },
+
+  _onGoogleDriveDownload: function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.processImportData(e.detail.content);
+    this.isDriveImport = false;
   }
+
 });
 })();

@@ -3,13 +3,9 @@
     <style>
     :host {
       display: block;
-      margin: 24px 40px;
-      -webkit-overflow-scrolling: touch;
       background: var(--paper-dialog-background-color, --primary-background-color);
       color: var(--paper-dialog-color, --primary-text-color);
       @apply(--paper-font-body1);
-      @apply(--shadow-elevation-16dp);
-      @apply(--paper-dialog);
     }
 
     :host > * {
@@ -20,7 +16,6 @@
       position: relative;
       margin: 0;
       @apply(--paper-font-title);
-      @apply(--paper-dialog-title);
     }
 
     .title-area {
@@ -104,7 +99,7 @@
             <template is="dom-if" if="[[item.shared]]">
               <iron-icon icon="folder-shared" class="shared-icon" title="Shared with you"></iron-icon>
             </template>
-            <date-time date="[[item.createdTime]]" second="" month="short"></date-time>
+            <date-time date="[[item.createdTime]]" year="numeric" month="short" day="numeric" hour="2-digit" minute="2-digit"></date-time>
           </div>
         </template>
       </iron-list>

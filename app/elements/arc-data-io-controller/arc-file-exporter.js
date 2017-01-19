@@ -35,7 +35,7 @@ Polymer({
     authenticated: {
       type: Boolean,
       value: false
-    },
+    }
   },
 
   listeners: {

@@ -15,6 +15,8 @@ License for the specific language governing permissions and limitations under
 the License.
 -->
 <link rel="import" href="../drop-file-importer/arc-import-behavior.html">
+<link rel="import" href="../drive-file-picker/drive-file-picker.html">
+
 <!--
 The `arc-file-importer` element is a helper element for `arc-data-import-controller`
 that is responsible for file import.
@@ -42,8 +44,9 @@ Example:
       <paper-spinner active="[[importFileReader]]" alt="Preparing data"></paper-spinner>
     </div>
 
-    <template is="dom-if" if="{{!isImportData}}">
+    <template is="dom-if" if="[[_computeDisplayFileSelector(isImportData, isDriveImport)]]">
       <paper-button on-tap="selectFile" raised>Select file to import</paper-button>
+      <paper-button on-tap="_importDriveFlow">Import from Google Drive</paper-button>
       <input type="file" on-change="_onImportFile">
     </template>
 
@@ -51,6 +54,10 @@ Example:
       <arc-error-message>
         <p>[[importError]]</p>
       </arc-error-message>
+    </div>
+
+    <div class="drive-import" hidden$="[[!isDriveImport]]">
+      <drive-file-picker on-cancel="_drivePickerCancel" opened="[[isDriveImport]]" query-properties="[[_driveQueryProperties]]"></drive-file-picker>
     </div>
 
     <arc-import-data-table-view
@@ -66,7 +73,7 @@ Example:
       headers-sets="[[_computeImportData(importData.*, 'headers-sets')]]"
       auth-data="[[_computeImportData(importData.*, 'auth-data')]]"
       cookies="[[importData.cookies]]"></arc-import-data-table-view>
-    <file-reader id="fileReader" loading="{{readingFile}}" readas="text" on-file-read="_importFileReady" on-file-error="_importFileError" auto=""></file-reader>
+    <file-reader id="fileReader" loading="{{readingFile}}" readas="text" on-file-read="_importFileReady" on-file-error="_importFileError" auto></file-reader>
   </template>
   <script src="arc-file-importer.js"></script>
 </dom-module>
