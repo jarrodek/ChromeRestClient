@@ -49,6 +49,9 @@ arc.app.importer._getUrlHistoryDb = function() {
 arc.app.importer._getVariablesDb = function() {
   return new PouchDB('variables');
 };
+arc.app.importer._getVariablesEnvsDb = function() {
+  return new PouchDB('variables-environments');
+};
 arc.app.importer._getHeadersSetsDb = function() {
   return new PouchDB('headers-sets');
 };
@@ -543,8 +546,32 @@ arc.app.importer._processHar = function(har) {
     };
   });
 };
+
+/**
+ * Newest system of data import / export.
+ * The import data can contain any of exoired file keys (which are mostly database' names)
+ * in import only what is available.
+ */
 arc.app.importer._saveFileDataPouchDbNew = function(data) {
-  // first save project data and associate _ids with requests.
+  var conflictResolution = 'importWins';
+  return arc.app.importer.__importRequestsData(data)
+  .then(() => arc.app.importer.__importHistoryData(data.history))
+  .then(() => arc.app.importer.__importDataWithGeneratedKey(data['websocket-url-history'], 'ARC#WebsocketHistoryData', 'websocket-url-history', conflictResolution))
+  .then(() => arc.app.importer.__importDataWithGeneratedKey(data['url-history'], 'ARC#UrlHistoryData', 'url-history', conflictResolution))
+  .then(() => arc.app.importer.__importDataWithGeneratedKey(data.cookies, 'ARC#Cookie', 'cookies', conflictResolution))
+  .then(() => arc.app.importer.__importDataWithGeneratedKey(data['auth-data'], 'ARC#AuthData', 'auth-data', conflictResolution))
+  .then(() => arc.app.importer.__importHeadersSets(data['headers-sets'], conflictResolution));
+
+  //"["variables","headers-sets"]"
+};
+/**
+ * Imports request and projects data in the Pounch DB structure.
+ */
+arc.app.importer.__importRequestsData = function(data) {
+  if (!data || !data.requests || !data.requests.length) {
+    console.info('Import does not have request data. Passing requests and projects.');
+    return Promise.resolve();
+  }
   var p;
   if (data.projects && data.projects.length) {
     var projectsData = data.projects.map((i) => {
@@ -622,49 +649,185 @@ arc.app.importer._saveFileDataPouchDbNew = function(data) {
       console.error('Insert saved requests error', e, data.requests);
       throw e;
     });
-  })
-  .then(() => {
-    if (!data.history || !data.history.length) {
-      console.info('Import does not have history data. Passing.');
-      return Promise.resolve();
-    }
-
-    data.history.forEach((i) => {
-      delete i.kind;
-      let today;
-      try {
-        today = arc.app.importer._getDayToday(i.updated || i.created);
-      } catch (e) {
-        today = arc.app.importer._getDayToday(Date.now());
-      }
-      i._id = today + '/' + encodeURIComponent(i.url) + '/' + i.method;
-    });
-    // append history.
-    let db = arc.app.importer._getHistoryDb();
-    return db.bulkDocs(data.history)
-    .then((r) => {
-      // console.info('Inserted history', r);
-      // resolve conflicts
-      let conflicted = [];
-      r.forEach((item, index) => {
-        if (item.error && item.status === 409) {
-          // It exists in the database and it needs a _rev to update objects.
-          conflicted[conflicted.length] = data.history[index];
-        } else if (item.error) {
-          console.error('Can not insted saved request into the datastore.', item);
-        }
-      });
-      if (conflicted.length) {
-        return arc.app.importer._handleConflictedInserts(db, conflicted);
-      }
-      return Promise.resolve();
-    })
-    .catch((e) => {
-      console.error('Insert saved requests error', e, data.history);
-      throw e;
-    });
   });
 };
+/**
+ * This function will import the history data into the store.
+ */
+arc.app.importer.__importHistoryData = function(data) {
+  if (!data || !data.length) {
+    console.info('Import does not have history data. Passing.');
+    return Promise.resolve();
+  }
+
+  data.forEach((i) => {
+    delete i.kind;
+    let today;
+    try {
+      today = arc.app.importer._getDayToday(i.updated || i.created);
+    } catch (e) {
+      today = arc.app.importer._getDayToday(Date.now());
+    }
+    i._id = today + '/' + encodeURIComponent(i.url) + '/' + i.method;
+  });
+  // append history.
+  let db = arc.app.importer._getHistoryDb();
+  return db.bulkDocs(data)
+  .then((r) => arc.app.importer.__resolveImportConflicts(db, r, data))
+  .catch((e) => {
+    console.error('Insert history data error', e, data);
+    throw e;
+  });
+};
+/**
+ * A common import function for all the data that have been exported with the database key
+ * and stored as a `key` property. In this case the key will be translated into the PouchDb `_id`
+ * propoerty and inserted into the database.
+ *
+ * @param {Array} data A data to insert
+ * @param {String} kind Item's `kind` property. If the `kind` value do not match the entry
+ * will be rejected from the inport.
+ * @param {String} dbName Database name used by the `_getDatabase()` function
+ * @param {Strong} conflictResolution Informs what to do when conflict occurr. If set to
+ * `importWins` then the import data will override values in the local storage. If set to
+ * `localWins` then will not attepmpt to override local data. By default (if not set) it is
+ * `importWins`. If it's not any of this two values then error will be raised.
+ */
+arc.app.importer.__importDataWithGeneratedKey = function(data, kind, dbName, conflictResolution) {
+  if (!data || !data.length) {
+    return Promise.resolve();
+  }
+
+  data = data.map((i) => {
+    if (!i.key || i.kind !== kind) {
+      return;
+    }
+    i._id = i.key;
+    delete i.kind;
+    delete i.key;
+    return i;
+  })
+  .filter((i) => !!i);
+
+  var db = arc.app.importer._getDatabase(dbName);
+  return db.bulkDocs(data)
+  .then((r) => arc.app.importer.__resolveImportConflicts(db, r, data, conflictResolution))
+  .catch((e) => {
+    console.error('Insert data error', e, data);
+    throw e;
+  });
+};
+/**
+ * Imports auth data from the data.
+ *
+ * @param {Array} data List of auth imports.
+ */
+arc.app.importer.__importHeadersSets = function(data, conflictResolution) {
+  if (!data || !data.length) {
+    return Promise.resolve();
+  }
+  data = data.map((i) => {
+    if (!i.key || i.kind !== 'ARC#HeadersSet') {
+      return;
+    }
+    delete i.kind;
+    i._id = app.$.uuid.generate();
+    return i;
+  })
+  .filter((i) => !!i);
+
+  var db = arc.app.importer._getHeadersSetsDb();
+  return db.bulkDocs(data)
+  .then((r) => arc.app.importer.__resolveImportConflicts(db, r, data, conflictResolution))
+  .catch((e) => {
+    console.error('Insert headers sets data error', e, data);
+    throw e;
+  });
+};
+/**
+ * Imports variables data from the data.
+ *
+ * @param {Array} data List of variable imports.
+ */
+arc.app.importer.__importVariables = function(data, conflictResolution) {
+  if (!data || !data.length) {
+    return Promise.resolve();
+  }
+  var environments = [];
+  data = data.map((i) => {
+    if (!i.key || i.kind !== 'ARC#Variable') {
+      return;
+    }
+    delete i.kind;
+    i._id = app.$.uuid.generate();
+    if (i.environment !== 'default' && environments.indexOf(i.environment) === -1) {
+      environments[environments.length] = i.environment;
+    }
+    return i;
+  })
+  .filter((i) => !!i);
+
+  var db = arc.app.importer._getVariablesDb();
+  return db.bulkDocs(data)
+  .then((r) => arc.app.importer.__resolveImportConflicts(db, r, data, conflictResolution))
+  .then(() => {
+    if (!environments.length) {
+      return Promise.resolve();
+    }
+    db = arc.app.importer._getVariablesEnvsDb();
+    environments = environments.map((name) => {
+      return {
+        _id: app.$.uuid.generate(),
+        created: Date.now(),
+        name: name
+      };
+    });
+    // This time never override co conflict check isn't required.
+    return db.bulkDocs(environments);
+  })
+  .catch((e) => {
+    console.error('Insert variable data error', e, data);
+    throw e;
+  });
+};
+/**
+ * Impoert conflict checks.
+ * It should be called after the insert into the datastore.
+ *
+ * @param {Object} db A PouchDb connection to the datastore.
+ * @param {Array} insertResponse A response from the PouchDb's insert action
+ * @param {Array} origData List of data that are should be inserted.
+ * @param {Strong} conflictResolution Informs what to do when conflict occurr. If set to
+ * `importWins` then the import data will override values in the local storage. If set to
+ * `localWins` then will not attepmpt to override local data. By default (if not set) it is
+ * `importWins`. If it's not any of this two values then error will be raised.
+ */
+arc.app.importer.__resolveImportConflicts = function(db, insertResponse, origData,
+  conflictResolution) {
+  conflictResolution = conflictResolution || 'importWins';
+  if (['importWins', 'localWins'].indexOf(conflictResolution) === -1) {
+    throw new Error('Value for the `conflictResolution` property is invalid', conflictResolution);
+  }
+  if (conflictResolution === 'localWins') {
+    return Promise.resolve();
+  }
+
+  var conflicted = [];
+  insertResponse.forEach((item, index) => {
+    if (item.error && item.status === 409) {
+      // It exists in the database and it needs a _rev to update objects.
+      conflicted[conflicted.length] = origData[index];
+    } else if (item.error) {
+      console.error('Can not insted the data into the datastore.', item);
+    }
+  });
+
+  if (conflicted.length) {
+    return arc.app.importer._handleConflictedInserts(db, conflicted);
+  }
+  return Promise.resolve();
+};
+
 arc.app.importer._handleConflictedInserts = function(db, conflicted) {
   return db.allDocs({keys: conflicted.map((i) => i._id)})
   .then((result) => {
