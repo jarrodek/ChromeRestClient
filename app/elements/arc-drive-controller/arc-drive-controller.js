@@ -57,7 +57,7 @@ Polymer({
       response = response.requests[0];
     }
     // TODO: Check if this is an export file and if it is, import it.
-    
+
     let obj = arc.app.importer.normalizeRequest(response);
     obj.type = 'google-drive';
     obj.driveId = this.fileId;
