@@ -99,7 +99,8 @@ Polymer({
   },
 
   observers: [
-    '_openedChanged(opened)'
+    '_openedChanged(opened)',
+    '_appAuthorizedChanged(_appAuthorized)'
   ],
 
   reset: function() {
@@ -110,6 +111,7 @@ Polymer({
     this._queryParams = undefined;
     this._nextPageToken = undefined;
     this.items = [];
+    this._fileId = undefined;
   },
 
   _openedChanged: function(opened) {
@@ -311,10 +313,25 @@ Polymer({
     }
     this.loading = true;
     this._fileId = id;
+    if (!this._appAuthorized) {
+      // will opbserve changes to this property and download file when ready.
+      return;
+    }
     this.$.download.headers = {
       'Authorization': 'Bearer ' + this.$.chromeSigninAware.accessToken
     };
     this.$.download.generateRequest();
+  },
+
+  _appAuthorizedChanged: function(appAuthorized) {
+    if (!appAuthorized) {
+      return;
+    }
+    var file = this._fileId;
+    if (!file) {
+      return;
+    }
+    this._downloadFile(file);
   },
 
   /**

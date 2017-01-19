@@ -56,6 +56,8 @@ Polymer({
     if (response.kind && response.requests) {
       response = response.requests[0];
     }
+    // TODO: Check if this is an export file and if it is, import it.
+    
     let obj = arc.app.importer.normalizeRequest(response);
     obj.type = 'google-drive';
     obj.driveId = this.fileId;
@@ -117,6 +119,15 @@ Polymer({
   _restoreDefaulView: function() {
     this.viewSelected = 0;
     this._setErrorMessage(null);
+  },
+  /**
+   * This function is called by the request panel.
+   * Opend the Google Drive item by its ID.
+   */
+  openItemAsRequest: function(id) {
+    this.opened = true;
+    var picker = this.$$('drive-file-picker');
+    picker._downloadFile(id);
   }
 });
 })();

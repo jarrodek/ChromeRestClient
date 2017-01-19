@@ -154,7 +154,7 @@
     },
 
     observers: [
-      '_routeChanged(routeParams)',
+      '_routeChanged(routeParams, requestControllerOpened)',
       '_requestNameChanged(request.name)',
       '_projectEndpointsChanged(currentProjectEndpoints.*)',
       '_projectIdChanged(projectId)',
@@ -197,7 +197,7 @@
 
     onShow: function() {
       this._setPageTitle('Request');
-      this._routeChanged();
+      // this._routeChanged();
     },
 
     onHide: function() {
@@ -217,11 +217,11 @@
       this.set('savedId', e.detail);
     },
 
-    _computeControllerOpened(opened) {
+    _computeControllerOpened(opened, type) {
       if (!opened) {
         return false;
       }
-      if (!this.routeParams || !this.routeParams.type) {
+      if (!type) {
         return false;
       }
       return true;
@@ -243,6 +243,7 @@
           this.set('historyId', decodeURIComponent(this.routeParams.historyId));
           break;
         case 'drive':
+
           // This is not really a request. It ment to open a drive item.
           // Drive data will be called via /current route.
           let id = this.routeParams.driveId;

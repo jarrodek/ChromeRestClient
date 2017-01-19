@@ -71,7 +71,7 @@
             on-iron-select="_mainPageSelected"
             on-iron-deselect="_mainPageDeselected">
             <section data-route="request" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent">
-              <template is="dom-if" if="[[canRender(initialized,usePouchDb,'true')]]">
+              <template is="dom-if" if="[[canRender(initialized, usePouchDb, 'true')]]" on-dom-change="_requestPanelInitiallized">
                 <request-panel narrow-layout="[[narrowLayout]]" route-params="[[params]]" with-toast="[[withToast]]"></request-panel>
               </template>
               <template is="dom-if" if="[[canRender(initialized,usePouchDb,'false')]]">
