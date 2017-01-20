@@ -142,6 +142,7 @@ class TestServer {
     this._setErrors();
     this._setEmptyResponses();
     this._setNtlm();
+    this._seStatusCodes();
   }
 
   _setMain() {
@@ -557,6 +558,19 @@ class TestServer {
       res.set('Content-Type', 'application/json');
       res.send(response);
       res.end();
+    });
+  }
+
+  _seStatusCodes() {
+    app.get('/status', (req, res) => {
+      let params = req.query;
+      let status = params.status ? parseInt(params.status) : 200;
+      let statusText = params.text || 200;
+      if (status !== status) {
+        status = 200;
+      }
+      res.statusMessage = statusText;
+      res.status(status).end();
     });
   }
 }

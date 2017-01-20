@@ -20,6 +20,10 @@ Polymer({
       type: Boolean,
       value: false,
       readOnly: true
+    },
+    _statusText: {
+      type: String,
+      computed: '_computeStatusText(response)'
     }
   },
 
@@ -27,6 +31,17 @@ Polymer({
     '_requestMethodChanged(request.method)',
     '_responseChanged(response)'
   ],
+
+  _computeStatusText: function(response) {
+    if (!response) {
+      return;
+    }
+    if (!response.statusText) {
+      return;
+    }
+    /* global escape */
+    return decodeURIComponent(escape(response.statusText));
+  },
 
   _requestMethodChanged: function(newMethod) {
     if (newMethod && newMethod === 'HEAD') {
