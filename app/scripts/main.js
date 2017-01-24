@@ -192,7 +192,7 @@
     var setUrl = function(url) {
       if (app.usePouchDb) {
         let panel = document.querySelector('request-panel');
-        panel.request.url = url;
+        panel.set('request.url', url);
       } else {
         app.set('request.url', url);
       }

@@ -121,6 +121,19 @@ Polymer({
   _onRequestRestore: function(e) {
     this.set('request', e.detail.request);
     page('/request/current');
+  },
+
+  _urlSuggestionsOpened: function(e) {
+    if (!e.detail.value) {
+      return;
+    }
+    var historyPanel = this.$$('history-context-panel');
+    if (!historyPanel) {
+      throw new Error('history-context-panel not available.');
+    }
+    if (historyPanel.opened) {
+      historyPanel.opened = false;
+    }
   }
 });
 })();

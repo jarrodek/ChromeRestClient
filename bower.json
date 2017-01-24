@@ -28,7 +28,7 @@
     "lodash": "jarrodek/lodash#^4.6.2",
     "uri.js": "medialize/URI.js#^1.17.0",
     "zlib": "imaya/zlib.js#^0.2.0",
-    "paper-autocomplete": "advanced-rest-client/paper-autocomplete#1.0.12",
+    "paper-autocomplete": "advanced-rest-client/paper-autocomplete#1.0.15",
     "cookie-parser": "advanced-rest-client/cookie-parser#^1.0.2",
     "crypto-js": "^3.1.6",
     "web-socket": "advanced-rest-client/web-socket#^1.0.5",
@@ -52,8 +52,7 @@
   "ignore": [],
   "main": "app/index.html",
   "resolutions": {
-    "lodash": "^4.6.2",
-    "paper-autocomplete": "1.0.12"
+    "lodash": "^4.6.2"
   },
   "version": "9.1.62"
 }

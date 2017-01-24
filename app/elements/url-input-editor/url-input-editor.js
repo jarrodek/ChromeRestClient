@@ -1,7 +1,5 @@
 (function() {
 'use strict';
-var arc = window.arc || {};
-
 Polymer({
   is: 'url-input-editor',
   /**
@@ -57,7 +55,10 @@ Polymer({
       }
     },
     // True when a suggestion box for the URL is opened.
-    suggesionsOpened: Boolean,
+    suggesionsOpened: {
+      type: Boolean,
+      notify: true
+    },
     usePouchDb: {
       type: Boolean
     },
