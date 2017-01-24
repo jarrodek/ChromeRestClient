@@ -117,6 +117,15 @@ arc.bg.getAppId = () => {
     });
   });
 };
+arc.bg.getAppAnonumousId = () => {
+  return new Promise((resolve) => {
+    chrome.storage.local.get({
+      'appAnonymousId': null
+    }, function(result) {
+      resolve(result.appAnonymousId);
+    });
+  });
+};
 arc.bg.releaseChannel = () => {
   var manifest = chrome.runtime.getManifest();
   // jscs:disable
@@ -150,21 +159,80 @@ arc.bg.notifyBetaUpdate = () => {
     });
 };
 /**
+ * To ensure anynomous app usage the app is using browser's build in crypto functions.
+ * It requires to generate some initial random data to encode a string.
+ *
+ * Generated values are not stored so they can't be used again. Clearing hashed app id
+ * (anonumousId) can't be restored.
+ */
+arc.bg.getAninimizedId = () => {
+  return arc.bg.getAppAnonumousId().then((anonymousId) => {
+    if (anonymousId) {
+      return anonymousId;
+    }
+    // The app id is kept locally and it's available to the app.
+    // It was used to identify user data on server storage.
+    // It's not used right now since there's no app's server data synchroznization
+    // but it's a subject to change.
+    let encodedDataBuffer;
+    return arc.bg.getAppId()
+    .then((appId) => {
+      let encoder = new TextEncoder('utf-8');
+      encodedDataBuffer = encoder.encode(appId);
+      let aesAlgorithmKeyGen = {
+        name: 'AES-CBC',
+        length: 128
+      };
+      return window.crypto.subtle.generateKey(aesAlgorithmKeyGen, false, ['encrypt']);
+    })
+    .then((cryptoKey) => {
+      let aesAlgorithmEncrypt = {
+        name: 'AES-CBC',
+        iv: window.crypto.getRandomValues(new Uint8Array(16))
+      };
+      return window.crypto.subtle.encrypt(aesAlgorithmEncrypt, cryptoKey, encodedDataBuffer);
+    })
+    .then((arrayBuffer) => {
+      let view = new Uint8Array(arrayBuffer);
+      let arr = Array.prototype.slice.call(view);
+      arr = arr.map(function(item) {
+        return String.fromCharCode(item);
+      });
+      return window.btoa(arr.join(''));
+    })
+    .then((base64) => {
+      return new Promise((resolve) => {
+        chrome.storage.local.set({
+          appAnonymousId: base64
+        }, function() {
+          resolve(base64);
+        });
+      });
+    });
+  });
+};
+/**
  * Very base replacement for GA session counter.
  * According to T&C of GA users must have ability to disable GA in the app.
- * However usage stats are crutial for the app.
+ * However usage (only usage which is # of app openings) stats are crutial for the app.
  * This function will send generated an nonymous ID to the app's backed to record the session.
  * This is the only information send to the backed (time and generated ID)
  */
 arc.bg.recordSession = () => {
-  arc.bg.getAppId().then((appId) => {
+  arc.bg.getAninimizedId().then((aid) => {
     let d = new Date();
-    let url = 'http://api.chromerestclient.com/analytics/record?ai=';
-    url += appId + '&t=';
-    url += d.getTime() + '&tz=';
-    url += d.getTimezoneOffset();
+    // let url = 'http://localhost:8080/analytics/record';
+    let url = 'http://api.chromerestclient.com/analytics/record';
+    let data = new FormData();
+    data.append('aid', aid); // anonymousId
+    data.append('t', d.getTime()); // time
+    data.append('tz', d.getTimezoneOffset()); //timezone
+    var headers = new Headers();
+    headers.append('x-api-version', '2');
     fetch(url, {
-      method: 'POST'
+      method: 'POST',
+      body: data,
+      headers: headers
     }).catch(() => {});
   });
 };
