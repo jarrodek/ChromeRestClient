@@ -267,7 +267,34 @@ Polymer({
       }
       return 0;
     });
+
+    var days = [];
+    res = res.map((item) => {
+      let d = this._computeHistoryTime(item._id.split('/')[0]);
+      if (days.indexOf(d) === -1) {
+        days[days.length] = d;
+        item.hasHeader = true;
+        item.header = d;
+      }
+      return item;
+    });
+
     return res;
+  },
+
+  _computeHistoryTime: function(date) {
+    var d = new Date(Number(date));
+    var _t = d.getTime();
+    if (_t !== _t) {
+      return '';
+    }
+    var options = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    };
+    return new Intl.DateTimeFormat(undefined, options).format(d);
   },
 
   _computeMethodClass: function(method) {

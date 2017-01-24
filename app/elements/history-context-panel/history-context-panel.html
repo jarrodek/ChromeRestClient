@@ -46,9 +46,9 @@ Set a `positionTarget` property to position the element on the input field.
       overflow: auto;
     }
     h3 {
-      @apply(--paper-font-caption);
+      @apply(--paper-font-subhead);
       padding-left: 16px;
-      color: rgba(0,0,0, 0.54);
+      /*color: rgba(0,0,0, 0.54);*/
       color: #00A2DF;
     }
 
@@ -93,12 +93,21 @@ Set a `positionTarget` property to position the element on the input field.
       overflow: hidden;
       font-size: 14px;
     }
+
+    .group-header {
+      font-weight: bold;
+      border-bottom: 1px solid #ddd;
+      color: rgba(0, 0, 0, 0.54);
+      margin-top: 20px;
+      padding: 12px 16px;
+    }
     </style>
     <paper-material elevation="2" id="container">
       <paper-progress hidden$="[[!querying]]" indeterminate></paper-progress>
       <h3>Recent history</h3>
-      <iron-selector selected="{{selectedItem}}" id="selector">
+      <iron-selector selected="{{selectedItem}}" id="selector" selectable="paper-item">
         <template is="dom-repeat" items="{{items}}" id="repeater">
+          <div class="group-header" hidden$="[[!item.hasHeader]]">[[item.header]]</div>
           <paper-item>
             <span class$="[[_computeMethodClass(item.method)]]">[[item.method]]</span>
             <span class="url">[[item.url]]</span>
