@@ -620,6 +620,7 @@ arc.app.importer.__importRequestsData = function(data) {
     data.requests.forEach((i) => {
       delete i._referenceId;
       delete i._har;
+      delete i._referenceLegacyProject;
       i._id = encodeURIComponent(i.name) + '/' + encodeURIComponent(i.url) + '/' + i.method;
       if (i.legacyProject) {
         i._id += '/' + i.legacyProject;
