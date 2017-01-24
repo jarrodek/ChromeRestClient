@@ -287,7 +287,7 @@ Polymer({
   },
 
   _messageKeydown: function(e) {
-    if (e.keyCode === 13 && e.shiftKey) {
+    if (e.keyCode === 13 && e.ctrlKey) {
       e.preventDefault();
       e.stopPropagation();
       this._sendMessage();
