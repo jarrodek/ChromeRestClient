@@ -106,7 +106,15 @@
         r.payload = req.payload;
         r.url = req.url;
         r.updated = rTime;
-        return db.put(r);
+        return db.put(r)
+        .then((insertResult) => {
+          r._rev = insertResult.rev;
+          this.fire('history-object-changed', {
+            id: r._id,
+            rev: r._rev,
+            item: r
+          });
+        });
       }).catch((e) => {
         if (e.status !== 404) {
           throw e;
@@ -120,9 +128,16 @@
           payload: req.payload,
           url: req.url
         };
-        return db.put(_doc);
+        return db.put(_doc)
+        .then((insertResult) => {
+          _doc._rev = insertResult.rev;
+          this.fire('history-object-changed', {
+            id: _doc._id,
+            rev: _doc._rev,
+            item: _doc
+          });
+        });
       })
-      .then(() => console.info('Updated history object'))
       .catch((e) => {
         console.error('Response history saver error (history)', e);
       });

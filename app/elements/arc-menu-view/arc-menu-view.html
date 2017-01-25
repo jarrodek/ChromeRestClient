@@ -1,3 +1,26 @@
+<!--
+@license
+Copyright 2016 Pawel Psztyc, The ARC team
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<!-- <link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html"> -->
+<link rel="import" href="../history-menu/history-menu.html">
+<link rel="import" href="../saved-menu/saved-menu.html">
+<link rel="import" href="../projects-menu/projects-menu.html">
+
 <dom-module id="arc-menu-view">
   <template>
     <style>
@@ -8,25 +31,16 @@
       @apply(--layout-vertical);
 
       --item-selected-background: #00A2DF;
-
-
-      --paper-item-focused: {
-        background-color: var(--item-selected-background);
-        color: #fff;
-      }
-
-      --paper-item-focused-before: {
-        background-color: transparent;
-      }
     }
 
-     :host(arc-menu-view[with-toast]) .bottom-menu {
+    :host(arc-menu-view[with-toast]) .bottom-menu {
       bottom: 72px;
     }
 
-    paper-menu {
+    .menu {
       @apply(--layout-flex);
-      background-color: #EEEEEE;
+      @apply(--layout-vertical);
+      overflow: hidden;
     }
 
     paper-item {
@@ -35,8 +49,21 @@
       background-color: var(--raml-docs-tree-item-background, transparent);
     }
 
+    paper-item:focus {
+      background-color: var(--item-selected-background);
+      color: #fff;
+    }
+
+    paper-item:focus::before {
+      background-color: transparent;
+    }
+
     paper-item.iron-selected {
       background-color: var(--item-selected-background);
+      color: #fff;
+    }
+
+    paper-item.iron-selected paper-icon-button {
       color: #fff;
     }
 
@@ -49,9 +76,10 @@
       bottom: 0;
       transition: bottom 200ms ease-in-out;
       background-color: transparent;
+      border-top: 1px #E0E0E0 solid;
     }
 
-     :host([is-request]) .bottom-menu {
+    :host([is-request]) .bottom-menu {
       background-color: #EEEEEE;
     }
 
@@ -65,56 +93,8 @@
       @apply(--layout-flex);
     }
 
-    .sublist {
-      padding-left: 20px;
-    }
-
-    .project-name {
-      @apply(--layout-flex);
-      text-overflow: ellipsis;
-      overflow: hidden;
-    }
-
-    .edit-project-icon {
-      display: none;
-    }
-
-    .project-item:hover .edit-project-icon {
-      display: initial;
-    }
-
-    .project-item[selected] {
-      background-color: #FF9800;
-      color: #fff;
-    }
-
-    paper-item.project-item {
-      --paper-item-focused: {
-        background-color: #FF9800;
-      }
-    }
-
-    paper-item.project-item[focused],
-    paper-item.project-item:focus {
-      background-color: #FF9800;
-    }
-
-    paper-item.project-item[focused] paper-icon-button,
-    paper-item.project-item[selected] paper-icon-button{
-      color: #fff;
-    }
-
-    paper-item.project-item[focused] paper-icon-button:hover,
-    paper-item.project-item[selected] paper-icon-button:hover {
-      color: var(--hover-button-accent-color);
-    }
-
     paper-menu-button {
       padding: 0;
-    }
-
-    paper-progress {
-      width: 100%;
     }
 
     .empty-request-icon {
@@ -123,35 +103,51 @@
       color: orange;
       margin-right: 4px;
     }
+
+    .toggle-icon {
+      transform: rotateZ(0deg);
+      transition: transform 0.3s linear;
+    }
+
+    .toggle-icon.opened {
+      transform: rotateZ(-180deg);
+    }
+
+    .flex {
+      @apply(--layout-flex);
+    }
     </style>
-    <paper-menu selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap">
-      <paper-item data-route="request" data-place$="[[baseUrl]]">Request</paper-item>
+
+    <iron-selector selected="[[route]]" attr-for-selected="data-route" rel="menu" on-tap="_itemTap" class="menu">
+      <paper-item data-route="request" data-place$="[[baseUrl]]">HTTP request</paper-item>
       <paper-item data-route="socket" data-place$="[[baseUrl]]socket">Socket</paper-item>
-      <paper-submenu id="projectsSubmenu">
-        <paper-item class="menu-trigger">Projects</paper-item>
-        <paper-menu class="menu-content sublist" selected="[[route]]" attr-for-selected="data-route" on-tap="_itemTap">
-          <paper-progress hidden$="[[!loading]]" indeterminate></paper-progress>
-          <paper-item hidden$="[[hasProjects]]">No projects here</paper-item>
-          <template is="dom-repeat" items="[[projects]]">
-            <paper-item data-route$="request/project/[[item.id]]" data-place$="[[baseUrl]]request/project/[[item.id]]" class="project-item" selected$="[[_computeProjectSelected(item.id, selectedProject)]]">
-              <iron-icon hidden$="[[!item.isEmpty]]" icon="icons:warning" class="empty-request-icon" title="This project has no requests"></iron-icon>
-              <div class="project-name">[[item.name]]</div>
-              <paper-icon-button class="edit-project-icon" data-place$="[[baseUrl]]project/[[item.id]]/edit" icon="arc:mode-edit" alt="Edit project"></paper-icon-button>
-            </paper-item>
-          </template>
-        </paper-menu>
-      </paper-submenu>
-      <paper-item data-route="saved" data-place$="[[baseUrl]]saved">Saved</paper-item>
       <template is="dom-if" if="{{!noHistory}}">
-        <paper-item data-route="history" data-place$="[[baseUrl]]history">History</paper-item>
+        <paper-item data-route="history" data-place$="[[baseUrl]]history">
+          <span class="flex">History</span>
+          <paper-icon-button icon="arc:expand-more" title="Toogle history quick list" class$="[[_computeToggleIconClass(historyOpened)]]" on-tap="_toggleHistoryOpened"></paper-icon-button>
+        </paper-item>
+        <history-menu hidden$="[[!historyOpened]]" opened="[[historyOpened]]"></history-menu>
       </template>
-      <paper-item data-route="dataimport" data-place$="[[baseUrl]]dataimport">Import / export</paper-item>
-    </paper-menu>
+      <paper-item data-route="saved" data-place$="[[baseUrl]]saved">
+        <span class="flex">Saved</span>
+        <paper-icon-button icon="arc:expand-more" title="Toogle saved quick list" class$="[[_computeToggleIconClass(savedOpened)]]" on-tap="_toggleSavedOpened"></paper-icon-button>
+      </paper-item>
+      <saved-menu hidden$="[[!savedOpened]]" opened="[[savedOpened]]"></saved-menu>
+
+      <paper-item on-tap="_toggleProjectsOpened" title="Toogle projects list">
+        <span class="flex">Projects</span>
+        <paper-icon-button icon="arc:expand-more" class$="[[_computeToggleIconClass(projectsOpened)]]"></paper-icon-button>
+      </paper-item>
+      <projects-menu hidden$="[[!projectsOpened]]" opened="[[projectsOpened]]" selected-project="[[selectedProject]]"></projects-menu>
+
+      <!-- <paper-item data-route="dataimport" data-place$="[[baseUrl]]dataimport">Import / export</paper-item> -->
+    </iron-selector>
+
     <section class="bottom-menu" id="bottomMenu" on-tap="_itemTap">
       <div class="icon-buttons">
         <div class="visible-icons">
           <paper-icon-button icon="settings" data-route="settings" data-place$="[[baseUrl]]settings" title="Settings"></paper-icon-button>
-          <paper-icon-button icon="info" data-route="about" data-place$="[[baseUrl]]about" title="About app"></paper-icon-button>
+          <paper-icon-button icon="communication:import-export" data-route="dataimport" data-place$="[[baseUrl]]dataimport" title="Import / Export options"></paper-icon-button>
           <paper-icon-button icon="bug-report" title="File a bug report" on-tap="newIssueReport"></paper-icon-button>
           <paper-icon-button icon="open-in-new" title="Open new window" on-tap="openNewWindow"></paper-icon-button>
         </div>
@@ -165,6 +161,10 @@
             <paper-icon-item data-action="view-logs">
               <iron-icon icon="list" item-icon title="See log collected by the app"></iron-icon>
               Logs
+            </paper-icon-item>
+            <paper-icon-item data-action="view-logs">
+              <iron-icon icon="info" item-icon title="See app information and changelog"></iron-icon>
+              About the ARC
             </paper-icon-item>
           </paper-menu>
         </paper-menu-button>

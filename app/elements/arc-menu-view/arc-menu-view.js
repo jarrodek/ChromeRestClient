@@ -12,10 +12,6 @@
        */
       baseUrl: String,
       /**
-       * A list of projects
-       */
-      projects: Array,
-      /**
        * Remove history from view if set to true.
        */
       noHistory: {
@@ -35,31 +31,36 @@
         reflectToAttribute: true
       },
 
-      hasProjects: {
-        type: Boolean,
-        computed: '_computeHasProjects(projects.length)'
-      },
-
       selectedProject: String,
       isRequest: {
         type: Boolean,
         reflectToAttribute: true
       },
       // It will display a loader when set to true
-      loading: Boolean
+      loading: Boolean,
+      // True if the history quick access panel is opened.
+      historyOpened: {
+        type: Boolean,
+        value: false
+      },
+      // True if the saved quick access panel is opened.
+      savedOpened: {
+        type: Boolean,
+        value: false
+      },
+      // True if the projects list panel is opened.
+      projectsOpened: {
+        type: Boolean,
+        value: false
+      },
     },
 
     observers: [
-      'selectedProjectChanged(selectedProject)',
       '_routeChanged(route)'
     ],
 
     _routeChanged: function(route) {
       this.isRequest = route === 'request';
-    },
-
-    _computeHasProjects: function(length) {
-      return !!length;
     },
 
     _itemTap: function(e) {
@@ -86,36 +87,6 @@
           url: place
         });
       }
-    },
-
-    /**
-     * Sort projects by name.
-     */
-    computeSort: function() {
-      return function(a, b) {
-        if (a.name > b.name) {
-          return 1;
-        }
-        if (a.name < b.name) {
-          return -1;
-        }
-        if (a.name === b.name) {
-          return 0;
-        }
-      };
-    },
-    /**
-     * Request app authorization.
-     * Can be calle only if the user hasn't authorized the app.
-     */
-    _onAuth: function() {
-      this.fire('authorize-requested');
-    },
-    /**
-     * Request to sign out from the app.
-     */
-    _onSignOut: function() {
-      this.fire('signout-requested');
     },
     /**
      * Opens an issue tracker - new issue report.
@@ -174,17 +145,31 @@
       }
     },
 
-    _computeProjectSelected: function(pId, selected) {
-      return pId === selected;
+    // Computes class for the toggle's button icon.
+    _computeToggleIconClass: function(opened) {
+      var clazz = 'toggle-icon';
+      if (opened) {
+        clazz += ' opened';
+      }
+      return clazz;
     },
 
-    selectedProjectChanged: function(selectedProject) {
-      if (!selectedProject) {
-        return;
-      }
-      if (!this.$.projectsSubmenu.opened) {
-        this.$.projectsSubmenu.opened = true;
-      }
+    _toggleHistoryOpened: function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.historyOpened = !this.historyOpened;
+    },
+
+    _toggleSavedOpened: function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.savedOpened = !this.savedOpened;
+    },
+
+    _toggleProjectsOpened: function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.projectsOpened = !this.projectsOpened;
     }
   });
 })();

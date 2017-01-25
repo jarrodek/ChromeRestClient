@@ -1,0 +1,270 @@
+<!--
+@license
+Copyright 2016 Pawel Psztyc, The ARC team
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-ripple/paper-ripple.html">
+<link rel="import" href="../../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../../bower_components/iron-overlay-behavior/iron-overlay-behavior.html">
+<link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../../bower_components/iron-scroll-target-behavior/iron-scroll-target-behavior.html">
+<link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
+<!--
+The panel displays an ARC history data (last entries) when the user focus (or otherwise trigger
+action) on the URL field.
+
+Set a `positionTarget` property to position the element on the input field.
+
+-->
+<dom-module id="projects-menu">
+  <template>
+    <style>
+    :host {
+      display: block;
+      overflow: auto;
+      background-color: #f7f7f7;
+      @apply(--layout-flex);
+      @apply(--layout-vertical);
+      @apply(--projects-menu);
+    }
+
+    .method {
+      margin-right: 8px;
+      display: block;
+      background: rgba(128, 128, 128, 0.24);
+      color: rgb(128, 128, 128);
+      padding: 2px 6px;
+      border-radius: 2px;
+      font-size: 13px;
+    }
+
+    .method.get {
+      background: rgba(0, 128, 0, 0.24);
+      color: rgb(0, 128, 0);
+    }
+
+    .method.post {
+      background: rgba(33, 150, 243, 0.24);
+      color: rgb(33, 150, 243);
+    }
+
+    paper-item:focus .method.post {
+      color: #fff;
+    }
+
+    .method.put {
+      background: rgba(255, 165, 0, 0.24);
+      color: rgb(255, 165, 0);
+    }
+
+    .method.delete {
+      background: rgba(244, 67, 54, 0.24);
+      color: rgb(244, 67, 54);
+    }
+
+    .method.patch {
+      background: rgba(156, 39, 176, 0.24);
+      color: rgb(156, 39, 176);
+    }
+
+    .url {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      font-size: 14px;
+    }
+
+    .group-header {
+      font-weight: bold;
+      border-bottom: 1px solid #ddd;
+      color: rgba(0, 0, 0, 0.54);
+      padding: 12px 16px;
+    }
+
+    paper-progress {
+      width: calc(100% - 32px);
+      margin: 0 16px;
+      position: absolute;
+    }
+
+    paper-item {
+      cursor: pointer;
+      transition: background-color 0.15s linear;
+      background-color: var(--raml-docs-tree-item-background, transparent);
+      padding-left: 28px;
+    }
+
+    paper-item.iron-selected {
+      background-color: var(--item-selected-background);
+      color: #fff;
+    }
+
+    paper-item:not(:focus):not(.iron-selected):not([selected]):hover {
+      background-color: #cccccc;
+    }
+
+    .project-name {
+      @apply(--layout-flex);
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .edit-project-icon {
+      display: none;
+    }
+
+    .project-item:hover .edit-project-icon {
+      display: initial;
+    }
+
+    .project-item[selected] {
+      background-color: #FF9800;
+      color: #fff;
+    }
+
+    paper-item.project-item {
+      --paper-item-focused: {
+        background-color: #FF9800;
+      }
+    }
+
+    paper-item.project-item[focused],
+    paper-item.project-item:focus {
+      background-color: #FF9800;
+    }
+
+    paper-item.project-item[focused] paper-icon-button,
+    paper-item.project-item[selected] paper-icon-button{
+      color: #fff;
+    }
+
+    paper-item.project-item[focused] paper-icon-button:hover,
+    paper-item.project-item[selected] paper-icon-button:hover {
+      color: var(--hover-button-accent-color);
+    }
+
+    .empty-info {
+      @apply(--paper-font-body1);
+      font-style: italic;
+      margin: 1em 16px;
+    }
+
+    .empty-message {
+      @apply(--layout-flex);
+      @apply(--layout-vertical);
+      @apply(--layout-center-center);
+      text-align: center;
+    }
+    </style>
+    <paper-progress hidden$="[[!querying]]" indeterminate></paper-progress>
+
+    <div class="empty-message" hidden$="[[!_computeShowEmptyMessage(hasItems, querying)]]">
+      <p class="empty-info">No projects here</p>
+      <p class="empty-info" hidden$="[[hasItems]]">Use ctrl / command + S to save current request in a project.</p>
+    </div>
+
+    <iron-selector selected="[[selectedProject]]" id="selector" attr-for-selected="data-id">
+      <template is="dom-repeat" items="[[items]]" id="repeater">
+        <paper-item data-id$="[[item._id]]" data-route$="request/project/[[item._id]]" data-place$="[[baseUrl]]request/project/[[item._id]]" class="project-item" selected$="[[_computeProjectSelected(item._id, selectedProject)]]">
+          <iron-icon hidden$="[[!item.isEmpty]]" icon="icons:warning" class="empty-request-icon" title="This project has no requests"></iron-icon>
+          <div class="project-name">[[item.name]]</div>
+          <paper-icon-button class="edit-project-icon" data-place$="[[baseUrl]]project/[[item._id]]/edit" icon="arc:mode-edit" alt="Edit project"></paper-icon-button>
+        </paper-item>
+      </template>
+    </iron-selector>
+    <iron-a11y-keys id="a11y" target="[[this]]" keys="up" on-keys-pressed="selectPrevious"></iron-a11y-keys>
+    <iron-a11y-keys id="a11y" target="[[this]]" keys="down" on-keys-pressed="selectNext"></iron-a11y-keys>
+    <iron-a11y-keys id="a11y" target="[[this]]" keys="enter" on-keys-pressed="acceptSelection"></iron-a11y-keys>
+
+    <script id="emptyProjectsProcess" type="javascript/worker">
+    var Processor = {
+      findEmptyProjects: function(projectIds) {
+        var request = indexedDB.open('_pouch_saved-requests');
+        request.onerror = function(event) {
+          self.postMessage({
+            error: true,
+            message: 'Can\'t open database.'
+          });
+        };
+        request.onsuccess = (event) => {
+          let db = event.target.result;
+          if (!db.objectStoreNames.contains('document-store')) {
+            self.postMessage({
+              error: true,
+              message: 'The database is not initialized.'
+            });
+            return;
+          }
+          let transaction = db.transaction(['document-store'], 'readonly');
+          let objectStore = transaction.objectStore('document-store');
+          let keyRequest = objectStore.openCursor();
+          let keys = [];
+          keyRequest.onsuccess = (event) => {
+            var cursor = event.target.result;
+            if(cursor) {
+              if (cursor.value.deletedOrLocal !== '0') {
+                cursor.continue();
+                return;
+              }
+              keys[keys.length] = cursor.key;
+              cursor.continue();
+            } else {
+              Processor.processEmptyData(projectIds, keys);
+            }
+          };
+        };
+      },
+
+      processEmptyData: function(projectIds, keys) {
+        if (!keys || !keys.length) {
+          self.postMessage({
+            result: []
+          });
+          return;
+        }
+        var emptyIds = [];
+        projectIds.forEach((pId) => {
+          let hasRequest = false;
+          for (var i = keys.length - 1; i >= 0; i--) {
+            let key = keys[i];
+            if (key && key.indexOf(pId) !== -1) {
+              // request for given project ID exists
+              if (!hasRequest) {
+                // so the project is not empty
+                hasRequest = true;
+              }
+              // reduce the array for given key so it will iterate less
+              // in next loop
+              keys.splice(i, 1);
+            }
+          }
+          if (!hasRequest) {
+            emptyIds[emptyIds.length] = pId;
+          }
+        });
+        self.postMessage({
+          result: emptyIds
+        });
+      }
+    };
+    self.onmessage = function(e) {
+      Processor.findEmptyProjects(e.data.projects);
+    };
+    </script>
+  </template>
+  <script src="projects-menu.js"></script>
+</dom-module>
