@@ -1,67 +1,35 @@
 Polymer({
   is: 'projects-menu',
 
+  behaviors: [
+    ArcBehaviors.MenuListBehavior
+  ],
+
   properties: {
-    /**
-     * Currently selected item on a history items list.
-     * @type {Number}
-     */
-    selectedItem: {
-      type: Number,
-      value: 0
-    },
-    /**
-     * History items found in the datastore.
-     */
-    items: Array,
-
-    hasItems: {
-      type: Boolean,
-      value: false,
-      computed: '_computeHasItems(items.*)'
-    },
-
-    isAttached: Boolean,
-
-    querying: {
-      type: Boolean,
-      readOnly: true
-    },
-
     // current query options
     queryOptions: {
       type: Object,
       readOnly: true,
       value: function() {
         return {
-          limit: 25,
-          descending: true,
           // jscs:disable
           include_docs: true
           // jscs:enable
         };
       }
     },
-
-    opened: {
+    includeDocs: {
       type: Boolean,
-      value: false
+      value: true
     },
-
     selectedProject: String,
-    route: String,
-    baseUrl: String,
+    route: String
   },
 
   observers: [
-    '_queryDataOnOpen(opened)',
     '_projectsListChanged(items.*)',
     'selectedProjectChanged(selectedProject)'
   ],
-
-  listeners: {
-    'tap': 'acceptSelection'
-  },
 
   attached: function() {
     this.listen(window, 'project-object-deleted', '_projectDeleted');
@@ -83,17 +51,16 @@ Polymer({
     if (!this.queryOptions) {
       return; // not ready
     }
-    delete this.queryOptions.startkey;
-    delete this.queryOptions.skip;
     this._setQuerying(false);
     this.set('items', []);
-    this.$.selector.selected = -1;
   },
 
-  _queryDataOnOpen: function(opened) {
+  _resetOnClosed: function(opened) {
     if (opened && (!this.items || !this.items.length)) {
       this._makeQuery();
       return;
+    } else if (opened) {
+      this.$.list.notifyResize();
     }
   },
 
@@ -106,67 +73,9 @@ Polymer({
   },
 
   /**
-   * Highlight previous suggestion
-   */
-  selectPrevious: function() {
-    if (!this.opened) {
-      return;
-    }
-    this.$.selector.selectPrevious();
-    this.ensureItemVisible(false);
-  },
-  /**
-   * Highlight next suggestion
-   */
-  selectNext: function() {
-    if (!this.opened) {
-      return;
-    }
-    this.$.selector.selectNext();
-    this.ensureItemVisible(true);
-  },
-  /**
-   * Ensure that the selected item is visible in the scroller.
-   * When there is more elements to show than space available (height)
-   * then some elements will be hidden. When the user use arrows to navigate
-   * the selection may get out from the screen. This function ensures that
-   * currently selected element is visible.
-   *
-   * @param {Boolean} bottom If trully it will ensure that the element is
-   * visible at the bottom of the container. On the top otherwise.
-   */
-  ensureItemVisible: function(bottom) {
-    if (!this.opened) {
-      return;
-    }
-    var container = this.scrollTarget;
-    var index = this.$.selector.selected;
-    if (bottom && index === 0) {
-      this.scroll(0);
-      return;
-    }
-    var toMove;
-    if (!bottom && index === this.suggestions.length - 1) {
-      toMove = container.scrollHeight - container.offsetHeight;
-      this.scroll(0, toMove);
-      return;
-    }
-    var item = this.$.selector.selectedItem;
-    var containerOffsetHeight = bottom ? container.offsetHeight : 0;
-    var itemOffsetHeight = bottom ? item.offsetHeight : 0;
-    var visible = containerOffsetHeight + container.scrollTop;
-    var treshold = item.offsetTop + itemOffsetHeight;
-    if (bottom && treshold > visible) {
-      toMove = item.offsetHeight + item.offsetTop - container.offsetHeight;
-      this.scroll(0, toMove);
-    } else if (!bottom && visible > treshold) {
-      this.scroll(0, treshold);
-    }
-  },
-  /**
    * Accepts currently selected suggestion and enters it into a text field.
    */
-  acceptSelection: function(e) {
+  _acceptSelection: function(e) {
     if (!this.opened) {
       return;
     }
@@ -190,44 +99,8 @@ Polymer({
     page(place);
   },
 
-  _makeQuery: function() {
-    this.debounce('legacy-projects-load-page', this._loadPage, 10);
-  },
-
   _getDb: function() {
     return new PouchDB('legacy-projects');
-  },
-
-  _loadPage: function() {
-    var db = this._getDb();
-    this._setQuerying(true);
-    if (!this.items) {
-      this.set('items', []);
-    }
-    if (!this.opened) {
-      this.opened = true;
-    }
-    db.allDocs(this.queryOptions)
-    .then((response) => {
-      if (response && response.rows.length > 0) {
-        this.queryOptions.startkey = response.rows[response.rows.length - 1].key;
-        this.queryOptions.skip = 1;
-        response = response.rows.map((i) => i.doc);
-        response = this._processResults(response);
-        response.forEach((item) => {
-          this.push('items', item);
-        });
-      }
-      this._setQuerying(false);
-    })
-    .catch((e) => {
-      this._setQuerying(false);
-      this.fire('app-log', {
-        message: ['Query history', e],
-        level: 'error'
-      });
-      console.error('Query history', e);
-    });
   },
 
   _processResults: function(res) {
@@ -245,41 +118,10 @@ Polymer({
     return res;
   },
 
-  _computeMethodClass: function(method) {
-    if (!method) {
-      return;
-    }
-    method = method.toLowerCase();
-    var clazz = 'method ';
-    switch (method) {
-      case 'get':
-      case 'post':
-      case 'put':
-      case 'delete':
-      case 'patch':
-        clazz += method;
-        break;
-    }
-    return clazz;
-  },
-
-  _scrollHandler: function() {
-    if (this.querying || !this.opened) {
-      return;
-    }
-    var elm = this;
-    if (!elm) {
-      return;
-    }
-    var delta = elm.scrollHeight - (elm.scrollTop + elm.offsetHeight);
-    if (delta < 120) {
-      this._makeQuery();
-    }
-  },
+  _scrollHandler: function() {},
 
   _updateProject: function(e, detail) {
     var p = detail.project;
-    p.id = p._id;
     if (!this.items || !this.items.length) {
       this.push('items', p);
       return;
@@ -342,6 +184,7 @@ Polymer({
         return item._id;
       });
       this._findEmptyProjects(projectIds);
+      this.$.list.notifyResize();
     }.bind(this), 200);
 
   },
@@ -381,17 +224,10 @@ Polymer({
     }
     var list = this.items;
     list.forEach((item, i) => {
-      if (ids.indexOf(item.id) !== -1) {
+      if (ids.indexOf(item._id) !== -1) {
         this.set(['items', i, 'isEmpty'], true);
       }
     });
-  },
-
-  _computeHasItems: function(record) {
-    if (!record || !record.base || !record.base.length) {
-      return false;
-    }
-    return true;
   },
 
   _computeProjectSelected: function(pId, selected) {
@@ -399,16 +235,14 @@ Polymer({
   },
 
   selectedProjectChanged: function(selectedProject) {
+    if (!selectedProject && selectedProject !== null) {
+      this.set('selectedProject', null);
+    }
     if (!selectedProject) {
       return;
     }
     if (!this.opened) {
-      this.opened = true;
+      this.set('opened', true);
     }
-  },
-
-  _computeShowEmptyMessage: function(hasItems, querying) {
-    return !hasItems && !querying;
   }
-
 });

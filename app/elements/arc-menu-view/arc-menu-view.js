@@ -50,8 +50,7 @@
       },
       // True if the projects list panel is opened.
       projectsOpened: {
-        type: Boolean,
-        value: false
+        type: Boolean
       },
     },
 

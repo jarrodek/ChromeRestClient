@@ -20,9 +20,8 @@ the License.
 <link rel="import" href="../../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../../bower_components/iron-overlay-behavior/iron-overlay-behavior.html">
 <link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
-<link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
-<link rel="import" href="../../bower_components/iron-scroll-target-behavior/iron-scroll-target-behavior.html">
 <link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="../arc-menu-view/menu-list-behavior.html">
 <!--
 The panel displays an ARC history data (last entries) when the user focus (or otherwise trigger
 action) on the URL field.
@@ -35,7 +34,6 @@ Set a `positionTarget` property to position the element on the input field.
     <style>
     :host {
       display: block;
-      overflow: auto;
       background-color: #f7f7f7;
       @apply(--layout-flex);
       @apply(--layout-vertical);
@@ -113,27 +111,30 @@ Set a `positionTarget` property to position the element on the input field.
       @apply(--layout-center-center);
       text-align: center;
     }
+
+    iron-list {
+      flex: 1 1 auto;
+    }
     </style>
     <paper-progress hidden$="[[!querying]]" indeterminate></paper-progress>
 
-    <div class="empty-message" hidden$="[[!_computeShowEmptyMessage(hasItems, querying)]]">
+    <div class="empty-message" hidden$="[[!dataUnavailable]]">
       <p class="empty-info">No history here</p>
       <p class="empty-info" hidden$="[[hasItems]]">Make a HTTP request and items will jump into this list.</p>
     </div>
 
-    <iron-selector selected="[[selectedItem]]" id="selector" selectable="paper-item">
-      <template is="dom-repeat" items="[[items]]" id="repeater">
-        <div class="group-header" hidden$="[[!item.hasHeader]]">[[item.header]]</div>
-        <paper-item>
-          <span class$="[[_computeMethodClass(item.method)]]">[[item.method]]</span>
-          <span class="url">[[item.url]]</span>
-          <paper-ripple></paper-ripple>
-        </paper-item>
+    <iron-list items="[[items]]" id="list" hidden$="[[!hasItems]]">
+      <template>
+        <div data-index$="[[index]]" title$="[[item.url]]">
+          <div class="group-header" hidden$="[[!item.hasHeader]]">[[item.header]]</div>
+          <paper-item>
+            <span class$="[[_computeMethodClass(item.method)]]">[[item.method]]</span>
+            <span class="url">[[item.url]]</span>
+            <paper-ripple></paper-ripple>
+          </paper-item>
+        </div>
       </template>
-    </iron-selector>
-    <iron-a11y-keys id="a11y" target="[[this]]" keys="up" on-keys-pressed="selectPrevious"></iron-a11y-keys>
-    <iron-a11y-keys id="a11y" target="[[this]]" keys="down" on-keys-pressed="selectNext"></iron-a11y-keys>
-    <iron-a11y-keys id="a11y" target="[[this]]" keys="enter" on-keys-pressed="acceptSelection"></iron-a11y-keys>
+    </iron-list>
   </template>
   <script src="history-menu.js"></script>
 </dom-module>

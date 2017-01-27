@@ -119,16 +119,16 @@ the License.
     </style>
 
     <iron-selector selected="[[route]]" attr-for-selected="data-route" rel="menu" on-tap="_itemTap" class="menu">
-      <paper-item data-route="request" data-place$="[[baseUrl]]">HTTP request</paper-item>
-      <paper-item data-route="socket" data-place$="[[baseUrl]]socket">Socket</paper-item>
-      <template is="dom-if" if="{{!noHistory}}">
-        <paper-item data-route="history" data-place$="[[baseUrl]]history">
+      <paper-item data-route="request" data-place="/">HTTP request</paper-item>
+      <paper-item data-route="socket" data-place="/socket">Socket</paper-item>
+      <template is="dom-if" if="[[!noHistory]]">
+        <paper-item data-route="history" data-place="/history">
           <span class="flex">History</span>
           <paper-icon-button icon="arc:expand-more" title="Toogle history quick list" class$="[[_computeToggleIconClass(historyOpened)]]" on-tap="_toggleHistoryOpened"></paper-icon-button>
         </paper-item>
         <history-menu hidden$="[[!historyOpened]]" opened="[[historyOpened]]"></history-menu>
       </template>
-      <paper-item data-route="saved" data-place$="[[baseUrl]]saved">
+      <paper-item data-route="saved" data-place="saved">
         <span class="flex">Saved</span>
         <paper-icon-button icon="arc:expand-more" title="Toogle saved quick list" class$="[[_computeToggleIconClass(savedOpened)]]" on-tap="_toggleSavedOpened"></paper-icon-button>
       </paper-item>
@@ -138,9 +138,7 @@ the License.
         <span class="flex">Projects</span>
         <paper-icon-button icon="arc:expand-more" class$="[[_computeToggleIconClass(projectsOpened)]]"></paper-icon-button>
       </paper-item>
-      <projects-menu hidden$="[[!projectsOpened]]" opened="[[projectsOpened]]" selected-project="[[selectedProject]]"></projects-menu>
-
-      <!-- <paper-item data-route="dataimport" data-place$="[[baseUrl]]dataimport">Import / export</paper-item> -->
+      <projects-menu hidden$="[[!projectsOpened]]" opened="{{projectsOpened}}" selected-project="[[selectedProject]]"></projects-menu>
     </iron-selector>
 
     <section class="bottom-menu" id="bottomMenu" on-tap="_itemTap">

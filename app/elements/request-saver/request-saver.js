@@ -74,6 +74,9 @@
         p = Promise.resolve();
       }
 
+      var originalId = r._id;
+      var originalRev = r._rev;
+
       return p.then(() => {
         if (this.saveToDrive) {
           delete r.driveId;
@@ -116,7 +119,9 @@
 
         let event = this.fire('request-object-change', {
           request: r,
-          dbName: 'saved-requests'
+          dbName: 'saved-requests',
+          originalId: originalId,
+          originalRev: originalRev
         });
         return event.detail.result;
       })

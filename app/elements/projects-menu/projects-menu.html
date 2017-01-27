@@ -20,9 +20,8 @@ the License.
 <link rel="import" href="../../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../../bower_components/iron-overlay-behavior/iron-overlay-behavior.html">
 <link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
-<link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
-<link rel="import" href="../../bower_components/iron-scroll-target-behavior/iron-scroll-target-behavior.html">
 <link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="../arc-menu-view/menu-list-behavior.html">
 <!--
 The panel displays an ARC history data (last entries) when the user focus (or otherwise trigger
 action) on the URL field.
@@ -35,7 +34,6 @@ Set a `positionTarget` property to position the element on the input field.
     <style>
     :host {
       display: block;
-      overflow: auto;
       background-color: #f7f7f7;
       @apply(--layout-flex);
       @apply(--layout-vertical);
@@ -169,26 +167,45 @@ Set a `positionTarget` property to position the element on the input field.
       @apply(--layout-center-center);
       text-align: center;
     }
+
+    paper-menu-button {
+      padding: 0;
+    }
+
+    .empty-request-icon {
+      width: 16px;
+      height: 16px;
+      color: orange;
+      margin-right: 4px;
+    }
+
+    .project-item[selected] .empty-request-icon {
+      color: #fff;
+    }
+
+    iron-list {
+      flex: 1 1 auto;
+    }
     </style>
     <paper-progress hidden$="[[!querying]]" indeterminate></paper-progress>
 
-    <div class="empty-message" hidden$="[[!_computeShowEmptyMessage(hasItems, querying)]]">
+    <div class="empty-message" hidden$="[[!dataUnavailable]]">
       <p class="empty-info">No projects here</p>
       <p class="empty-info" hidden$="[[hasItems]]">Use ctrl / command + S to save current request in a project.</p>
     </div>
 
-    <iron-selector selected="[[selectedProject]]" id="selector" attr-for-selected="data-id">
-      <template is="dom-repeat" items="[[items]]" id="repeater">
-        <paper-item data-id$="[[item._id]]" data-route$="request/project/[[item._id]]" data-place$="[[baseUrl]]request/project/[[item._id]]" class="project-item" selected$="[[_computeProjectSelected(item._id, selectedProject)]]">
-          <iron-icon hidden$="[[!item.isEmpty]]" icon="icons:warning" class="empty-request-icon" title="This project has no requests"></iron-icon>
-          <div class="project-name">[[item.name]]</div>
-          <paper-icon-button class="edit-project-icon" data-place$="[[baseUrl]]project/[[item._id]]/edit" icon="arc:mode-edit" alt="Edit project"></paper-icon-button>
-        </paper-item>
+    <iron-list items="[[items]]" id="list" hidden$="[[!hasItems]]">
+      <template>
+        <div data-place$="/request/project/[[item._id]]" title$="[[item.name]]">
+          <paper-item selected$="[[_computeProjectSelected(item._id, selectedProject)]]" class="project-item">
+            <iron-icon hidden$="[[!item.isEmpty]]" icon="icons:warning" class="empty-request-icon" title="This project has no requests"></iron-icon>
+            <div class="project-name">[[item.name]]</div>
+            <paper-icon-button class="edit-project-icon" data-place$="/project/[[item._id]]/edit" icon="arc:mode-edit" alt="Edit project"></paper-icon-button>
+            <paper-ripple></paper-ripple>
+          </paper-item>
+        </div>
       </template>
-    </iron-selector>
-    <iron-a11y-keys id="a11y" target="[[this]]" keys="up" on-keys-pressed="selectPrevious"></iron-a11y-keys>
-    <iron-a11y-keys id="a11y" target="[[this]]" keys="down" on-keys-pressed="selectNext"></iron-a11y-keys>
-    <iron-a11y-keys id="a11y" target="[[this]]" keys="enter" on-keys-pressed="acceptSelection"></iron-a11y-keys>
+    </iron-list>
 
     <script id="emptyProjectsProcess" type="javascript/worker">
     var Processor = {
