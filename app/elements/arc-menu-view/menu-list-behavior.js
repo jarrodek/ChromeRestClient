@@ -345,6 +345,25 @@ window.ArcBehaviors.MenuListBehaviorImpl = {
       }
     }
     return value;
+  },
+
+  /**
+   * Computes command label depending on a OS.
+   * For Mac it will be cmd + `key` and for the rest of the World it will be ctrl + `key`.
+   *
+   * @param {String} key The key combination as a sufix after the command key
+   * @return {String} Full command to display in command label.
+   */
+  _computeA11yCommand: function(key) {
+    var isMac = navigator.platform.indexOf('Mac') !== -1;
+    var cmd = '';
+    if (isMac) {
+      cmd += 'meta+';
+    } else {
+      cmd += 'ctrl+';
+    }
+    cmd += key;
+    return cmd;
   }
 };
 window.ArcBehaviors.MenuListBehavior = [

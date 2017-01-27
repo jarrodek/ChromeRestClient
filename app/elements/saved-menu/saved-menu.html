@@ -120,7 +120,7 @@ Set a `positionTarget` property to position the element on the input field.
 
     <div class="empty-message" hidden$="[[!dataUnavailable]]">
       <p class="empty-info">No requests here</p>
-      <p class="empty-info" hidden$="[[hasItems]]">Use ctrl / command + S to save current request.</p>
+      <p class="empty-info" hidden$="[[hasItems]]">Use <span class="code">[[_computeA11yCommand('s')]]</span> to save current request.</p>
     </div>
 
     <iron-list items="[[items]]" id="list" hidden$="[[!hasItems]]">
