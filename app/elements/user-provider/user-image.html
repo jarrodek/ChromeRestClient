@@ -58,7 +58,7 @@ Custom property | Description | Default
         <paper-ripple class="circle" fit=""></paper-ripple>
       </template>
       <template is="dom-if" if="{{!hasImage}}">
-        <paper-icon-button icon="account-circle" alt="Profile"></paper-icon-button>
+        <paper-icon-button icon="arc:account-circle" alt="Profile"></paper-icon-button>
       </template>
       <iron-ajax id="fileRequest" handle-as="blob" method="GET" on-error="_userPictureError" on-response="_userPictureResponse" url="{{profileImage}}"></iron-ajax>
     </template>

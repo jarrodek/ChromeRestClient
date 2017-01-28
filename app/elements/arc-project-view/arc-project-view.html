@@ -91,8 +91,8 @@
     </style>
     <section class="project-info">
       <paper-input noLabelFloat value="{{project.name}}" on-change="_projectNameChanged"></paper-input>
-      <paper-icon-button icon="file-download" id="exportProject" on-tap="exportProject"></paper-icon-button>
-      <paper-icon-button icon="delete" id="deleteProject" on-tap="deleteProject"></paper-icon-button>
+      <paper-icon-button icon="arc:file-download" id="exportProject" on-tap="exportProject"></paper-icon-button>
+      <paper-icon-button icon="arc:delete" id="deleteProject" on-tap="deleteProject"></paper-icon-button>
       <paper-tooltip for="exportProject">Export project to file</paper-tooltip>
       <paper-tooltip for="deleteProject">Delete project and associated requests</paper-tooltip>
     </section>
