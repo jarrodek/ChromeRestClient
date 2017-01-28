@@ -775,5 +775,20 @@
       return;
     }
     app.forceNarrowLayout = !app.forceNarrowLayout;
+    app.async(function() {
+      app.$.paperDrawerPanel.closeDrawer();
+    }, 1);
+  };
+  // Pin drawer back to the app.
+  app._pinDrawer = function() {
+    app.forceNarrowLayout = false;
+  };
+
+  app._computePinDrawerClass = function(forceNarrowLayout, narrowLayout) {
+    var clazz = 'drawer-pin';
+    if (forceNarrowLayout && narrowLayout) {
+      clazz += ' visible';
+    }
+    return clazz;
   };
 })(document, window);
