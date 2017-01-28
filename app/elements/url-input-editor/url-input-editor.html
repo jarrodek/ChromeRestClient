@@ -29,6 +29,9 @@ Altrought the history hash is not used in REST services and is used only in clie
       on-send="_sendAction"></url-input-editor>
 
 -->
+
+<link rel="import" href="../history-context-panel/history-context-panel.html">
+
 <dom-module id="url-input-editor">
   <template>
     <style>
@@ -120,6 +123,7 @@ Altrought the history hash is not used in REST services and is used only in clie
           <paper-item data-action="decParamsAction">Decode URL</paper-item>
         </paper-menu>
       </paper-menu-button>
+      <history-context-panel target="masterUrl"></history-context-panel>
     </div>
     <div class="detailed" opened$="{{detailed}}" on-input="updateUrl">
       <paper-input label="Path" value="{{pathValue}}" class="path-input" auto-validate pattern="\S*"

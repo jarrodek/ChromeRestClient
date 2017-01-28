@@ -33,22 +33,24 @@ Set a `positionTarget` property to position the element on the input field.
 <dom-module id="history-context-panel">
   <template>
     <style>
-    :host {
+     :host {
       position: absolute !important;
       left: 40px;
       top: 40px;
       @apply(--history-content-panel);
     }
+
     paper-material {
       background-color: white;
     }
+
     #container {
       overflow: auto;
     }
+
     h3 {
       @apply(--paper-font-subhead);
       padding-left: 16px;
-      /*color: rgba(0,0,0, 0.54);*/
       color: #00A2DF;
     }
 
@@ -104,7 +106,7 @@ Set a `positionTarget` property to position the element on the input field.
     </style>
     <paper-material elevation="2" id="container">
       <paper-progress hidden$="[[!querying]]" indeterminate></paper-progress>
-      <h3>Recent history</h3>
+      <h3 hidden$="[[!hasItems]]">Recent history</h3>
       <iron-selector selected="{{selectedItem}}" id="selector" selectable="paper-item">
         <template is="dom-repeat" items="{{items}}" id="repeater">
           <div class="group-header" hidden$="[[!item.hasHeader]]">[[item.header]]</div>
@@ -116,7 +118,6 @@ Set a `positionTarget` property to position the element on the input field.
         </template>
       </iron-selector>
     </paper-material>
-
     <iron-a11y-keys id="a11y" target="[[target]]" keys="up" on-keys-pressed="selectPrevious"></iron-a11y-keys>
     <iron-a11y-keys id="a11y" target="[[target]]" keys="down" on-keys-pressed="selectNext"></iron-a11y-keys>
     <iron-a11y-keys id="a11y" target="[[target]]" keys="enter" on-keys-pressed="acceptSelection"></iron-a11y-keys>

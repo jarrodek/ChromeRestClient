@@ -42,6 +42,12 @@ Polymer({
      */
     items: Array,
 
+    hasItems: {
+      type: Boolean,
+      value: false,
+      computed: '_computeHasItems(items.*)'
+    },
+
     isAttached: Boolean,
 
     querying: {
@@ -67,7 +73,8 @@ Polymer({
 
   observers: [
     '_targetChanged(target, isAttached)',
-    '_resetOnClosed(opened)'
+    '_resetOnClosed(opened)',
+    '_checkResults(querying, items)'
   ],
 
   listeners: {
@@ -160,7 +167,7 @@ Polymer({
       return;
     }
     var toMove;
-    if (!bottom && index === this.suggestions.length - 1) {
+    if (!bottom && index === this.items.length - 1) {
       toMove = container.scrollHeight - container.offsetHeight;
       this.scroll(0, toMove);
       return;
@@ -268,16 +275,36 @@ Polymer({
       return 0;
     });
 
+    var _now = new Date();
+    _now.setMilliseconds(0);
+    _now.setSeconds(0);
+    _now.setMinutes(0);
+    _now.setHours(0);
+    var today = _now.getTime();
+    var yesterday = today - 86400000; // 24 h milliseconds
+
     var days = [];
     res = res.map((item) => {
-      let d = this._computeHistoryTime(item._id.split('/')[0]);
-      if (days.indexOf(d) === -1) {
-        days[days.length] = d;
+      let info = this._computeHistoryTime(item._id.split('/')[0]);
+      if (!info) {
+        return null;
+      }
+      let date = info.formatted;
+      if (days.indexOf(date) === -1) {
+        days[days.length] = date;
+        let time = info.time;
+        if (time === today) {
+          item.today = true;
+          date = 'Today';
+        } else if (time === yesterday) {
+          date = 'Yesterday';
+        }
         item.hasHeader = true;
-        item.header = d;
+        item.header = date;
       }
       return item;
-    });
+    })
+    .filter((i) => !!i);
 
     return res;
   },
@@ -294,7 +321,10 @@ Polymer({
       month: 'long',
       day: 'numeric'
     };
-    return new Intl.DateTimeFormat(undefined, options).format(d);
+    return {
+      formatted: new Intl.DateTimeFormat(undefined, options).format(d),
+      time: _t
+    };
   },
 
   _computeMethodClass: function(method) {
@@ -327,6 +357,17 @@ Polymer({
     if (delta < 120) {
       this._makeQuery();
     }
+  },
+
+  _checkResults: function(querying, items) {
+    if (!querying && items && !items.length) {
+      this.opened = false;
+    }
+  },
+
+  _computeHasItems: function(record) {
+    var items = record.base;
+    return !!(items && items.length);
   }
 
 });

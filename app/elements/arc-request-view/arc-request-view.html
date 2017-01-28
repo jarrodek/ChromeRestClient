@@ -15,8 +15,6 @@ License for the specific language governing permissions and limitations under
 the License.
 -->
 <link rel="import" href="../../styles/shared-styles.html">
-<link rel="import" href="../history-context-panel/history-context-panel.html">
-
 
 <dom-module id="arc-request-view">
   <template>
@@ -44,7 +42,6 @@ the License.
     </style>
     <div class="url-input">
       <url-input-editor id="urlInputEditor" url="{{masterUrl}}" suggesions-opened="_urlSuggestionsOpened"></url-input-editor>
-      <history-context-panel target="urlInputEditor"></history-context-panel>
     </div>
     <method-selector method="{{request.method}}" is-payload="{{isPayload}}" content-type="{{contentType}}"></method-selector>
     <headers-editor is-payload="{{isPayload}}" content-type="{{contentType}}" headers="{{requestHeaders}}" on-headers-changed="_headersChanged"></headers-editor>
