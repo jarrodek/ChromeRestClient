@@ -20,7 +20,7 @@
 
       <paper-scroll-header-panel drawer>
         <paper-toolbar class="main-toolbar">
-          <paper-icon-button icon="menu" paper-drawer-toggle class="drawer-toggle-button" on-tap="_drawerToggle"></paper-icon-button>
+          <paper-icon-button icon="arc:menu" paper-drawer-toggle class="drawer-toggle-button" on-tap="_drawerToggle"></paper-icon-button>
           <div class="app-name">Advanced REST Client</div>
         </paper-toolbar>
         <template is="dom-if" if="[[initialized]]">
@@ -32,8 +32,8 @@
       <paper-scroll-header-panel main id="headerPanelMain">
         <!-- Main Toolbar -->
         <paper-toolbar id="mainToolbar" class="main-toolbar">
-          <paper-icon-button class="toolbar-hide" icon="menu" paper-drawer-toggle></paper-icon-button>
-          <paper-icon-button feature="back" on-tap="_onFeatureBack" class="toolbar-hide" icon="arrow-back" title="Back"></paper-icon-button>
+          <paper-icon-button class="toolbar-hide" icon="arc:menu" paper-drawer-toggle></paper-icon-button>
+          <paper-icon-button feature="back" on-tap="_onFeatureBack" class="toolbar-hide" icon="arc:arrow-back" title="Back"></paper-icon-button>
           <div class="title toolbar-hide">
             <span>[[pageTitle]]</span>
             <div class="project-endpoints" feature="projectEndpoints">
@@ -64,7 +64,7 @@
             <paper-icon-button icon="arc:search" title="Search" on-tap="openSearch"></paper-icon-button>
             <input is="iron-input" type="search" value="{{searchTerm::input}}" class="flex main-search-input" id="mainSearchInput"></input>
           </div>
-          <!--<paper-icon-button icon="more-vert"></paper-icon-button> -->
+          <!--<paper-icon-button icon="arc:more-vert"></paper-icon-button> -->
         </paper-toolbar>
         <!-- Main Content -->
         <div class="content">
@@ -123,7 +123,7 @@
         <h2>The app is now desktop app!</h2>
         <div class="onboarding-image-page">
           <div class="image">
-            <iron-icon icon="hardware:desktop-windows"></iron-icon>
+            <iron-icon icon="arc:desktop-windows"></iron-icon>
           </div>
           <div class="description">
             <ul>
@@ -143,7 +143,7 @@
         <div>
           <div class="onboarding-image-page">
             <div class="image">
-              <iron-icon icon="build"></iron-icon>
+              <iron-icon icon="arc:build"></iron-icon>
             </div>
             <div class="description">
               <ul>
@@ -170,7 +170,7 @@
         <div class="onboarding-image-page">
           <div class="image">
             <iron-icon icon="arc:drive-color"></iron-icon>
-            <iron-icon icon="communication:import-export"></iron-icon>
+            <iron-icon icon="arc:import-export"></iron-icon>
           </div>
           <div class="description">
             <p>Save and share your data on Google Drive</p>

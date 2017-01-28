@@ -161,8 +161,8 @@
           <div class="direction-column" id="directionColumn">Direction</div>
           <div class="time-column" id="timeColumn">Time</div>
           <div class="message-column flex" id="messageColumn">Message</div>
-          <paper-icon-button icon="file-download" id="downloadAllButton" on-tap="_exportMessages"></paper-icon-button>
-          <paper-icon-button icon="clear" id="clearButton" on-tap="_clearMessages"></paper-icon-button>
+          <paper-icon-button icon="arc:file-download" id="downloadAllButton" on-tap="_exportMessages"></paper-icon-button>
+          <paper-icon-button icon="arc:clear" id="clearButton" on-tap="_clearMessages"></paper-icon-button>
           <paper-tooltip for="directionColumn">Either 'in' for incoming or 'out' for outgoing messages</paper-tooltip>
           <paper-tooltip for="timeColumn">Event time</paper-tooltip>
           <paper-tooltip for="messageColumn">Message sent to / received from the server</paper-tooltip>
@@ -175,7 +175,7 @@
             <div class="time-column">{{_computeTime(item.time)}}</div>
             <div class="message-column">
               <span class="message">{{item.message}}</span>
-              <paper-icon-button hidden$="{{!item.isBinary}}" icon="file-download" on-tap="_downloadBinnary"></paper-icon-button>
+              <paper-icon-button hidden$="{{!item.isBinary}}" icon="arc:file-download" on-tap="_downloadBinnary"></paper-icon-button>
             </div>
           </div>
         </template>

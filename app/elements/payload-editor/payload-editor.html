@@ -133,7 +133,7 @@ the License.
               <paper-input-container class="param-value" no-label-float inline>
                 <input is="iron-input" type="text" value="{{item.value::input}}" placeholder="Param value"/>
               </paper-input-container>
-              <paper-icon-button icon="close" title="Remove param" on-tap="_removeParam"></paper-icon-button>
+              <paper-icon-button icon="arc:close" title="Remove param" on-tap="_removeParam"></paper-icon-button>
             </div>
           </template>
           <paper-button raised on-tap="appendEmptyParam" class="add-param-button">Add another parameter</paper-button>
@@ -163,12 +163,12 @@ the License.
                 </div>
               </template>
             </div>
-            <paper-icon-button icon="close" title="Remove file" on-tap="_removeFile"></paper-icon-button>
+            <paper-icon-button icon="arc:close" title="Remove file" on-tap="_removeFile"></paper-icon-button>
           </div>
         </template>
         <paper-button raised on-tap="appendEmptyFile" class="add-param-button">Add another file</paper-button>
         <div class="warning" hidden$="[[!hasFiles]]">
-          <iron-icon icon="info"></iron-icon> <span>The</span> <b>Content-Type</b> <span>header will be finally changed to "multipart/form-data" during the request.</span>
+          <iron-icon icon="arc:info"></iron-icon> <span>The</span> <b>Content-Type</b> <span>header will be finally changed to "multipart/form-data" during the request.</span>
         </div>
       </section>
     </iron-pages>

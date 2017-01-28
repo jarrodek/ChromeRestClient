@@ -198,7 +198,7 @@ Set a `positionTarget` property to position the element on the input field.
       <template>
         <div data-place$="/request/project/[[item._id]]" title$="[[item.name]]">
           <paper-item selected$="[[_computeProjectSelected(item._id, selectedProject)]]" class="project-item">
-            <iron-icon hidden$="[[!item.isEmpty]]" icon="icons:warning" class="empty-request-icon" title="This project has no requests"></iron-icon>
+            <iron-icon hidden$="[[!item.isEmpty]]" icon="arc:warning" class="empty-request-icon" title="This project has no requests"></iron-icon>
             <div class="project-name">[[item.name]]</div>
             <paper-icon-button class="edit-project-icon" data-place$="/project/[[item._id]]/edit" icon="arc:mode-edit" alt="Edit project"></paper-icon-button>
             <paper-ripple></paper-ripple>

@@ -232,15 +232,15 @@ An `arc-history-list-view` element is a element responsible for displaying a lis
           </div>
           <template is="dom-if" if="[[hasSelectedItems]]">
             <div class="selected-actions">
-              <paper-icon-button icon="file-download" id="exportSelected" on-tap="exportSelected"></paper-icon-button>
-              <paper-icon-button icon="delete" id="deleteSelected" on-tap="deleteSelected"></paper-icon-button>
+              <paper-icon-button icon="arc:file-download" id="exportSelected" on-tap="exportSelected"></paper-icon-button>
+              <paper-icon-button icon="arc:delete" id="deleteSelected" on-tap="deleteSelected"></paper-icon-button>
               <paper-tooltip for="exportSelected">Export selected to file</paper-tooltip>
               <paper-tooltip for="deleteSelected">Delete selected</paper-tooltip>
             </div>
           </template>
           <!-- <template is="dom-if" if="[[!hasSelectedItems]]">
             <paper-menu-button horizontal-align="right">
-              <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
+              <paper-icon-button icon="arc:more-vert" class="dropdown-trigger"></paper-icon-button>
               <paper-menu class="dropdown-content">
                 <paper-item on-tap="_confirmClearSaved">Remove all</paper-item>
               </paper-menu>
@@ -252,15 +252,15 @@ An `arc-history-list-view` element is a element responsible for displaying a lis
             <paper-checkbox checked="{{allChecked}}" on-tap="toggleAll"></paper-checkbox>
           </div>
           <div class="name-column layout horizontal center" id="nameColumn" on-tap="sortColumn" data-sort$="[[_computeTimeSort(usePouchDb)]]" data-sortoption$="{{computeSortColumn(sort,dir,'har.pages.-1.startedDateTime')}}">
-            <iron-icon icon="arrow-drop-down"></iron-icon>Time
+            <iron-icon icon="arc:arrow-drop-down"></iron-icon>Time
             <paper-ripple recenters></paper-ripple>
           </div>
           <div class="method-column layout horizontal center" id="methodColumn" on-tap="sortColumn" data-sort="method" data-sortoption$="{{computeSortColumn(sort,dir,'method')}}">
-            <iron-icon icon="arrow-drop-down"></iron-icon>Method
+            <iron-icon icon="arc:arrow-drop-down"></iron-icon>Method
             <paper-ripple recenters></paper-ripple>
           </div>
           <div class="url-column layout horizontal center" id="urlColumn" on-tap="sortColumn" data-sort="url" data-sortoption$="{{computeSortColumn(sort,dir,'url')}}">
-            <iron-icon icon="arrow-drop-down"></iron-icon>URL
+            <iron-icon icon="arc:arrow-drop-down"></iron-icon>URL
             <paper-ripple recenters></paper-ripple>
           </div>
           <div class="action-column layout horizontal center" id="actionColumn">Actions</div>

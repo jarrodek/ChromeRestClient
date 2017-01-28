@@ -44,7 +44,7 @@
         <paper-input-error>Variable value should not be empty</paper-input-error>
         <!-- <paper-icon-button suffix icon="arc:edit" title="Edit variable value in the editor" on-tap="_openVariableEditor"></paper-icon-button> -->
       </paper-input-container>
-      <paper-icon-button class="remove-button" icon="close" title="Remove variable" on-tap="_removeVariable"></paper-icon-button>
+      <paper-icon-button class="remove-button" icon="arc:close" title="Remove variable" on-tap="_removeVariable"></paper-icon-button>
     </div>
     <app-pouchdb-document id="doc" db-name="variables" doc-id="{{docId}}" data="{{item}}"></app-pouchdb-document>
   </template>
