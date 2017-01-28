@@ -16,11 +16,12 @@
   <template is="dom-bind" id="app">
     <iron-meta id="meta" key="usePouchDb" value="{{usePouchDb}}"></iron-meta>
     <arc-loader-screen id="appLOader" opened></arc-loader-screen>
-    <paper-drawer-panel responsive-width="1000px" id="paperDrawerPanel" narrow="{{narrowLayout}}" drawer-width="360px">
+    <paper-drawer-panel responsive-width="1000px" id="paperDrawerPanel" narrow="{{narrowLayout}}" drawer-width="[[drawerWidth]]">
       <paper-scroll-header-panel drawer>
         <template is="dom-if" if="[[initialized]]">
             <arc-menu-controller loading use-pouch-db="[[usePouchDb]]" with-toast="[[withToast]]" route="[[route]]" base-url="[[baseUrl]]"></arc-menu-controller>
         </template>
+        <div id="drawerResizer"></div>
       </paper-scroll-header-panel>
       <!-- Main Area -->
       <paper-scroll-header-panel main id="headerPanelMain">
@@ -330,6 +331,7 @@
       </template>
     </app-analytics>
     <drop-file-importer></drop-file-importer>
+    <chrome-storage auto storage="local" name="drawerWidth" value="{{_drawerWidth}}" on-chrome-storage-read="_drawerWidthRead" value-as="Number"></chrome-storage>
   </template>
   <script src="bower_components/dexie-js/dist/dexie.min.js"></script>
   <script src="bower_components/har/build/har.js"></script>
