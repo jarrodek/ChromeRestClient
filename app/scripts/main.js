@@ -27,6 +27,7 @@
   // Selected environment for magic variables.
   app.variablesEnvironment = 'default';
   app.narrowLayout = false;
+  app.forceNarrowLayout = false;
   app.upgrading = false;
   app.usePouchDb = undefined;
   app.initialized = false;
@@ -767,5 +768,12 @@
     if (e.detail.value) {
       app.set('drawerWidth', (e.detail.value + 'px'));
     }
+  };
+
+  app._drawerToggle = function() {
+    if (app.narrowLayout) {
+      return;
+    }
+    app.forceNarrowLayout = !app.forceNarrowLayout;
   };
 })(document, window);
