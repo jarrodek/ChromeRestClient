@@ -87,11 +87,6 @@
   app.closeDrawer = function() {
     app.$.paperDrawerPanel.closeDrawer();
   };
-
-  // A handler called when data has been imported to the app.
-  app._dataImportedHandler = function() {
-    document.querySelector('arc-menu-controller').refreshProjects();
-  };
   /**
    * Open search bar and notify opener about changes.
    */
