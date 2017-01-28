@@ -16,18 +16,25 @@
   <template is="dom-bind" id="app">
     <iron-meta id="meta" key="usePouchDb" value="{{usePouchDb}}"></iron-meta>
     <arc-loader-screen id="appLOader" opened></arc-loader-screen>
-    <paper-drawer-panel responsive-width="1000px" id="paperDrawerPanel" narrow="{{narrowLayout}}">
+    <paper-drawer-panel responsive-width="1000px" id="paperDrawerPanel" force-narrow="{{forceNarrowLayout}}" narrow="{{narrowLayout}}" drawer-width="[[drawerWidth]]" disable-edge-swipe disable-swipe>
+
       <paper-scroll-header-panel drawer>
+        <paper-toolbar class="main-toolbar">
+          <paper-icon-button icon="arc:menu" paper-drawer-toggle class="drawer-toggle-button" on-tap="_drawerToggle" title="Toggle drawer" alt="Drawer toggle icon"></paper-icon-button>
+          <div class="app-name flex">ARC</div>
+          <paper-icon-button icon="arc:pin-drawer" class$="[[_computePinDrawerClass(forceNarrowLayout, narrowLayout)]]" on-tap="_pinDrawer" title="Pin drawer" alt="Pin drawer"></paper-icon-button>
+        </paper-toolbar>
         <template is="dom-if" if="[[initialized]]">
             <arc-menu-controller loading use-pouch-db="[[usePouchDb]]" with-toast="[[withToast]]" route="[[route]]" base-url="[[baseUrl]]"></arc-menu-controller>
         </template>
+        <div id="drawerResizer"></div>
       </paper-scroll-header-panel>
       <!-- Main Area -->
       <paper-scroll-header-panel main id="headerPanelMain">
         <!-- Main Toolbar -->
         <paper-toolbar id="mainToolbar" class="main-toolbar">
-          <paper-icon-button class="toolbar-hide" icon="menu" paper-drawer-toggle></paper-icon-button>
-          <paper-icon-button feature="back" on-tap="_onFeatureBack" class="toolbar-hide" icon="arrow-back" title="Back"></paper-icon-button>
+          <paper-icon-button class="toolbar-hide" icon="arc:menu" paper-drawer-toggle title="Toggle drawer" alt="Drawer toggle icon"></paper-icon-button>
+          <paper-icon-button feature="back" on-tap="_onFeatureBack" class="toolbar-hide" icon="arc:arrow-back" title="Back"></paper-icon-button>
           <div class="title toolbar-hide">
             <span>[[pageTitle]]</span>
             <div class="project-endpoints" feature="projectEndpoints">
@@ -58,7 +65,7 @@
             <paper-icon-button icon="arc:search" title="Search" on-tap="openSearch"></paper-icon-button>
             <input is="iron-input" type="search" value="{{searchTerm::input}}" class="flex main-search-input" id="mainSearchInput"></input>
           </div>
-          <!--<paper-icon-button icon="more-vert"></paper-icon-button> -->
+          <!--<paper-icon-button icon="arc:more-vert"></paper-icon-button> -->
         </paper-toolbar>
         <!-- Main Content -->
         <div class="content">
@@ -87,7 +94,7 @@
             <arc-websocket-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="socket"></arc-websocket-controller>
             <arc-history-list-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" main on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" search-query="[[searchTerm]]" data-route="history"></arc-history-list-controller>
             <arc-saved-list-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" search-query="[[searchTerm]]" data-route="saved"></arc-saved-list-controller>
-            <arc-data-io-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="dataimport" on-data-imported="_dataImportedHandler"></arc-data-io-controller>
+            <arc-data-io-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="dataimport"></arc-data-io-controller>
             <arc-settings-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="settings"></arc-settings-controller>
             <arc-about-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="about"></arc-about-controller>
             <arc-project-controller use-pouch-db="[[usePouchDb]]" requests="{{currentRequests}}" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="project" route-params="[[params]]">
@@ -117,7 +124,7 @@
         <h2>The app is now desktop app!</h2>
         <div class="onboarding-image-page">
           <div class="image">
-            <iron-icon icon="hardware:desktop-windows"></iron-icon>
+            <iron-icon icon="arc:desktop-windows"></iron-icon>
           </div>
           <div class="description">
             <ul>
@@ -137,7 +144,7 @@
         <div>
           <div class="onboarding-image-page">
             <div class="image">
-              <iron-icon icon="build"></iron-icon>
+              <iron-icon icon="arc:build"></iron-icon>
             </div>
             <div class="description">
               <ul>
@@ -164,7 +171,7 @@
         <div class="onboarding-image-page">
           <div class="image">
             <iron-icon icon="arc:drive-color"></iron-icon>
-            <iron-icon icon="communication:import-export"></iron-icon>
+            <iron-icon icon="arc:import-export"></iron-icon>
           </div>
           <div class="description">
             <p>Save and share your data on Google Drive</p>
@@ -330,6 +337,7 @@
       </template>
     </app-analytics>
     <drop-file-importer></drop-file-importer>
+    <chrome-storage auto storage="local" name="drawerWidth" value="{{_drawerWidth}}" on-chrome-storage-read="_drawerWidthRead" value-as="Number"></chrome-storage>
   </template>
   <script src="bower_components/dexie-js/dist/dexie.min.js"></script>
   <script src="bower_components/har/build/har.js"></script>

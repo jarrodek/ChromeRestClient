@@ -128,3 +128,38 @@ paper-toolbar[xhrtoggle] > paper-toggle-button[feature="xhrtoggle"] {
   background-color: #FDD835;
   color: #000;
 }
+
+#drawerResizer {
+  position: absolute;
+  bottom: 0;
+  top: 0;
+  right: 0;
+  width: 3px;
+  background-color: transparent;
+  cursor: ew-resize;
+  transition: width 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+
+#drawerResizer:hover {
+  background-color: #BDBDBD;
+  width: 6px;
+}
+
+.app-name {
+  font-family: 'Roboto', 'Noto', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+.drawer-toggle-button {
+  display: inline-block !important;
+}
+
+.drawer-pin {
+  display: none;
+}
+.drawer-pin.visible {
+  display: inline-block;
+}

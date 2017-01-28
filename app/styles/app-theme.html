@@ -21,7 +21,7 @@
   --paper-toolbar-background: #00A2DF;
   --main-section-border-color: rgba(0, 0, 0, 0.12);
 
-  --hover-button-accent-color: #e91e63;
+  --hover-button-accent-color: #df0052;
 
   --action-button: {
     background-color: var(--primary-color);
@@ -35,37 +35,46 @@
     background-image: none;
     color: white;
   };
+
   --action-button-disabled: {
     background: #eaeaea;
     color: #a8a8a8;
     cursor: auto;
     pointer-events: none;
-  }
+  };
+
   --section-padding: {
     padding-left: 24px;
   };
+
   --section-title: {
     @apply(--paper-font-title);
     color: rgba(0, 0, 0, 0.75);
     padding-left: 24px;
   };
+
   --page-title-text: {
     @apply(--paper-font-headline);
     padding: 0 16px;
   };
+
   --paper-tab-ink: var(--primary-color);
   --paper-tabs-selection-bar-color: var(--primary-color);
 
   --paper-input-container-underline: {
-    background-color: var(--main-section-border-color);
+    background-color: rgba(0, 0, 0, 0.12);
   };
+
   --paper-icon-button: {
     transition: color cubic-bezier(0.4, 0, 1, 1) 100ms;
     color: var(--secondary-text-color);
   };
+
   --paper-icon-button-hover: {
     color: var(--dark-primary-color);
+    color: var(--hover-button-accent-color);
   };
+
   input::-webkit-input-placeholder {
     color: var(--paper-input-container-color, --secondary-text-color);
   }

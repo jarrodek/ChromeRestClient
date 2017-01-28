@@ -27,9 +27,13 @@
   // Selected environment for magic variables.
   app.variablesEnvironment = 'default';
   app.narrowLayout = false;
+  app.forceNarrowLayout = false;
   app.upgrading = false;
   app.usePouchDb = undefined;
   app.initialized = false;
+  app.listeners = {
+    'drawerResizer.track': '_drawerTrack'
+  };
   /**
    * Returns true when both parameteres are trully.
    *
@@ -43,7 +47,6 @@
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
     app.updateBranding();
-    //
   });
   // Called when current request changed.
   window.addEventListener('selected-request', (e) => {
@@ -86,11 +89,6 @@
   //called by the router to close a drawer (in mobile view) when changing route.
   app.closeDrawer = function() {
     app.$.paperDrawerPanel.closeDrawer();
-  };
-
-  // A handler called when data has been imported to the app.
-  app._dataImportedHandler = function() {
-    document.querySelector('arc-menu-controller').refreshProjects();
   };
   /**
    * Open search bar and notify opener about changes.
@@ -732,4 +730,65 @@
       element.opened = true;
     }
   });
+
+  /* Drawer width support */
+  app.drawerWidth = '360px';
+  app._drawerTrack = function(e) {
+    var newWidth;
+    switch (e.detail.state) {
+      case 'start':
+        app.$.paperDrawerPanel.$.drawer.classList.remove('transition-drawer');
+        app._drawerInitTransition = getComputedStyle(app.$.paperDrawerPanel.$.main)
+          .getPropertyValue('transition');
+        app.$.paperDrawerPanel.$.main.style.transition = 'left ease-in-out 0.01s';
+        app._drawerInitTrackWidth = Number(app.drawerWidth.replace('px', ''));
+        break;
+      case 'track':
+        newWidth = app._drawerInitTrackWidth + e.detail.dx;
+        if (newWidth <= 10) {
+          newWidth = 10;
+        }
+        app.drawerWidth = newWidth + 'px';
+        app.$.paperDrawerPanel.$.main.style.transition = 'left ease-in-out 0.01s';
+        break;
+      case 'end':
+        app.$.paperDrawerPanel.$.drawer.classList.add('transition-drawer');
+        app.$.paperDrawerPanel.$.main.style.transition = app._drawerInitTransition;
+        newWidth = app._drawerInitTrackWidth + e.detail.dx;
+        if (newWidth <= 10) {
+          newWidth = 10;
+        }
+        app._drawerWidth = newWidth;
+        delete app._drawerInitTrackWidth;
+        delete app._drawerInitTransition;
+        break;
+    }
+  };
+  app._drawerWidthRead = function(e) {
+    if (e.detail.value) {
+      app.set('drawerWidth', (e.detail.value + 'px'));
+    }
+  };
+
+  app._drawerToggle = function() {
+    if (app.narrowLayout) {
+      return;
+    }
+    app.forceNarrowLayout = !app.forceNarrowLayout;
+    app.async(function() {
+      app.$.paperDrawerPanel.closeDrawer();
+    }, 1);
+  };
+  // Pin drawer back to the app.
+  app._pinDrawer = function() {
+    app.forceNarrowLayout = false;
+  };
+
+  app._computePinDrawerClass = function(forceNarrowLayout, narrowLayout) {
+    var clazz = 'drawer-pin';
+    if (forceNarrowLayout && narrowLayout) {
+      clazz += ' visible';
+    }
+    return clazz;
+  };
 })(document, window);

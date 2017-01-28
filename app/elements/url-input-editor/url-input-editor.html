@@ -136,7 +136,7 @@ Altrought the history hash is not used in REST services and is used only in clie
               <input is="iron-input" type="text" value="{{item.value::input}}" placeholder="Param value" pattern="\S*"/>
               <paper-input-error>You may want to encode this value before sending it to the server</paper-input-error>
             </paper-input-container>
-            <paper-icon-button icon="close" title="Remove parameter" on-tap="_removeParam"></paper-icon-button>
+            <paper-icon-button icon="arc:close" title="Remove parameter" on-tap="_removeParam"></paper-icon-button>
           </div>
         </template>
         <paper-button raised on-tap="appendEmptyQueryParam">Add</paper-button>
