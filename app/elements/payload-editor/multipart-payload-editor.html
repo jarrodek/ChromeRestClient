@@ -1,0 +1,64 @@
+<!--
+@license
+Copyright 2016 Pawel Psztyc, The ARC team
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-fab-menu/paper-fab-menu.html">
+<link rel="import" href="../../bower_components/paper-fab-menu/paper-fab-menu-item.html">
+<link rel="import" href="multipart-icons.html">
+<link rel="import" href="file-form-item.html">
+<link rel="import" href="text-form-item.html">
+
+<!--
+The multipart form editor for the ARC's request panel.
+-->
+<dom-module id="multipart-payload-editor">
+  <template>
+    <style>
+    :host {
+      display: block;
+      position: relative;
+      /* Add button */
+      padding-bottom: 80px;
+    }
+
+    paper-fab-menu {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+    }
+
+    paper-textarea {
+      min-width: 200px;
+    }
+    </style>
+    <p>When using this form you will send a data as a "multipart/form-data". <a href="https://www.ietf.org/rfc/rfc2388.txt" target="_blank">Learn more.</a></p>
+    <template is="dom-repeat" id="filesList" items="{{formData}}" observe="files">
+      <template is="dom-if" if="[[item.file]]">
+        <file-form-item file="{{item}}"></file-form-item>
+      </template>
+      <template is="dom-if" if="[[item.text]]">
+        <text-form-item item="{{item}}"></text-form-item>
+        <!--  -->
+      </template>
+        <!-- <paper-icon-button icon="arc:close" title="Remove file" on-tap="_removeFile"></paper-icon-button> -->
+    </template>
+    <paper-fab-menu color="#FF5722" icon="mpi:add">
+      <paper-fab-menu-item color="#FF8A65" tooltip="Add file" icon="mpi:insert-drive-file" on-tap="appendEmptyFile"></paper-fab-menu-item>
+      <paper-fab-menu-item color="#FF8A65" tooltip="Add text" icon="mpi:short-text" on-tap="appendEmptyText"></paper-fab-menu-item>
+    </paper-fab-menu>
+  </template>
+</dom-module>
+<script src="multipart-payload-editor.js"></script>

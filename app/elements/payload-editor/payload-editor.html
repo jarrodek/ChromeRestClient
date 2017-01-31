@@ -14,6 +14,10 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 -->
+
+<link rel="import" href="multipart-payload-editor.html">
+
+
 <dom-module id="payload-editor">
   <template>
     <style>
@@ -109,7 +113,7 @@ the License.
         <paper-badge class$="[[_computeFileBageClass(filesCount)]]" label="[[filesCount]]"></paper-badge>
       </paper-tab>
     </paper-tabs>
-    <iron-pages selected="{{tabSelected}}">
+    <iron-pages selected="{{tabSelected}}" selected-attribute="opened">
       <section>
         <div hidden$="[[!withForm]]" class="encoder-buttons">
           <paper-button title="Encodes payload to x-www-form-urlencoded data" on-tap="encodePaylod">encode payload</paper-button>
@@ -145,8 +149,9 @@ the License.
           </div>
         </div>
       </section>
-      <section class="files-list">
-        <label class="params-title">Files to append to the form data request</label>
+      <multipart-payload-editor></multipart-payload-editor>
+      <!-- <section class="files-list"> -->
+        <!-- <label class="params-title">Files to append to the form data request</label>
         <template is="dom-repeat" id="filesList" items="{{filesList}}" observe="files">
           <div class="form-row">
             <input type="file" multiple hidden on-change="_fileObjectChanged"/>
@@ -169,8 +174,8 @@ the License.
         <paper-button raised on-tap="appendEmptyFile" class="add-param-button">Add another file</paper-button>
         <div class="warning" hidden$="[[!hasFiles]]">
           <iron-icon icon="arc:info"></iron-icon> <span>The</span> <b>Content-Type</b> <span>header will be finally changed to "multipart/form-data" during the request.</span>
-        </div>
-      </section>
+        </div> -->
+      <!-- </section> -->
     </iron-pages>
   </template>
   <script src="payload-editor.js"></script>

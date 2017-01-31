@@ -1,0 +1,20 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+
+<dom-module id="text-form-item">
+  <template>
+    <style>
+    :host {
+      display: block;
+    }
+    </style>
+    <div>
+      <paper-input label="Content type" value="{{item.contentType}}"></paper-input>
+    </div>
+    <div class="row">
+      <paper-input label="Field name" value="{{file.name}}"></paper-input>
+      <paper-textarea label="Field value" value="{{item.value}}"></paper-textarea>
+    </div>
+  </template>
+  <script src="text-form-item.js"></script>
+</dom-module>
