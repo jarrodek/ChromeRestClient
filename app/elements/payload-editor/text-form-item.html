@@ -1,19 +1,62 @@
+<!--
+@license
+Copyright 2016 Pawel Psztyc, The ARC team
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../bower_components/paper-autocomplete/paper-autocomplete.html">
+<link rel="import" href="payload-form-item-behavior.html">
 
 <dom-module id="text-form-item">
   <template>
     <style>
     :host {
       display: block;
+      @apply(--layout-vertical);
+      @apply(--layout-flex);
+    }
+
+    .mime-selector {
+      position: relative;
+    }
+
+    .value-selector {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+    }
+
+    paper-textarea {
+      @apply(--layout-flex);
+      margin-left: 12px;
+    }
+
+    .mime-selector paper-input {
+      max-width: 200px;
     }
     </style>
-    <div>
-      <paper-input label="Content type" value="{{item.contentType}}"></paper-input>
+    <div class="mime-selector">
+      <paper-input id="mimeInput" error-message="Content type is required" required auto-validate label="Content type" value="{{contentType}}"></paper-input>
+      <paper-autocomplete target="[[_mimeInput]]" source="[[suggestions]]" open-on-focus></paper-autocomplete>
     </div>
-    <div class="row">
-      <paper-input label="Field name" value="{{file.name}}"></paper-input>
-      <paper-textarea label="Field value" value="{{item.value}}"></paper-textarea>
+    <div class="value-selector">
+      <paper-input label="Field name" error-message="The name is required" required auto-validate value="{{name}}"></paper-input>
+      <paper-textarea label="Field value" value="{{value}}"></paper-textarea>
+      <paper-icon-button icon="arc:close" title="Remove form parameter" on-tap="removeItem"></paper-icon-button>
     </div>
   </template>
   <script src="text-form-item.js"></script>

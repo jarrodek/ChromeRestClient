@@ -19,14 +19,6 @@ Polymer({
         return [];
       }
     },
-
-    /**
-     * Index for filename counter in files editor.
-     */
-    _fileListIndex: {
-      type: Number,
-      value: 0
-    },
     /**
      * Number of files selected by the user.
      */
@@ -40,12 +32,17 @@ Polymer({
     hasFiles: {
       type: Boolean,
       computed: '_computeHasFiles(filesCount)'
+    },
+
+    page: {
+      type: Number,
+      value: 0
     }
   },
 
-  listeners: {
-    'remove-item': '_onItemRemove'
-  },
+  observers: [
+    '_pageChanged(page)'
+  ],
 
   _openedChanged: function(opened) {
     if (opened) {
@@ -67,13 +64,8 @@ Polymer({
 
   /** Append new file form row  */
   appendEmptyFile: function() {
-    var fileName = 'formData';
-    if (this._fileListIndex) {
-      fileName += this._fileListIndex;
-    }
-    this._fileListIndex++;
     var item = {
-      name: fileName,
+      name: '',
       files: [],
       file: true
     };
@@ -113,6 +105,59 @@ Polymer({
 
   _computeHasFiles: function(no) {
     return !!no;
+  },
+
+  _onItemRemove: function(e) {
+    var index = this.$.filesList.indexForElement(e.target);
+    if (!index && index !== 0) {
+      return;
+    }
+    var removed = this.splice('formData', index, 1);
+    var name = removed[0].name;
+    if (!name) {
+      return;
+    }
+    this.$.formData.removeField(name);
+  },
+
+  _togglePage: function() {
+    this.page = this.page === 0 ? 1 : 0;
+  },
+
+  _pageChanged: function(page) {
+    if (page === 0) {
+      this.$.formData.clear();
+      this.messagePreview = undefined;
+    } else {
+      this._setFormData();
+      this.messagePreview = this.$.formData.generateMessagePreview();
+    }
+  },
+
+  _setFormData: function() {
+    var form = this.formData;
+    if (!form.length) {
+      return;
+    }
+    form.forEach((item) => this._updateFormData(item));
+  },
+
+  _updateFormData: function(obj) {
+    var value;
+    var contentType;
+    if (obj.file) {
+      if (obj.files.length === 1) {
+        value = obj.files[0];
+      } else {
+        value = obj.files;
+      }
+    } else {
+      value = obj.value;
+      contentType = obj.contentType;
+    }
+    this.$.formData.setField(obj.name, value, {
+      contentType: contentType
+    });
   }
 
 });

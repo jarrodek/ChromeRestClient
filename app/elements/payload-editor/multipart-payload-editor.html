@@ -17,6 +17,8 @@ the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-fab-menu/paper-fab-menu.html">
 <link rel="import" href="../../bower_components/paper-fab-menu/paper-fab-menu-item.html">
+<link rel="import" href="../multipart-form-data/multipart-form-data.html">
+
 <link rel="import" href="multipart-icons.html">
 <link rel="import" href="file-form-item.html">
 <link rel="import" href="text-form-item.html">
@@ -43,22 +45,55 @@ The multipart form editor for the ARC's request panel.
     paper-textarea {
       min-width: 200px;
     }
+
+    text-form-item,
+    file-form-item {
+      padding: 16px 12px;
+      border-bottom: 1px #FFECB3 solid;
+    }
+
+    .header {
+      @apply(--layout-horizontal);
+    }
+
+    .info {
+      @apply(--paper-font-body1);
+      @apply(--layout-flex);
+      color: rgba(0, 0, 0, 0.54);
+    }
+
+    code {
+      @apply(--paper-font-code1);
+      white-space: pre-line;
+      overflow: auto;
+    }
     </style>
-    <p>When using this form you will send a data as a "multipart/form-data". <a href="https://www.ietf.org/rfc/rfc2388.txt" target="_blank">Learn more.</a></p>
-    <template is="dom-repeat" id="filesList" items="{{formData}}" observe="files">
-      <template is="dom-if" if="[[item.file]]">
-        <file-form-item file="{{item}}"></file-form-item>
-      </template>
-      <template is="dom-if" if="[[item.text]]">
-        <text-form-item item="{{item}}"></text-form-item>
-        <!--  -->
-      </template>
-        <!-- <paper-icon-button icon="arc:close" title="Remove file" on-tap="_removeFile"></paper-icon-button> -->
-    </template>
-    <paper-fab-menu color="#FF5722" icon="mpi:add">
-      <paper-fab-menu-item color="#FF8A65" tooltip="Add file" icon="mpi:insert-drive-file" on-tap="appendEmptyFile"></paper-fab-menu-item>
-      <paper-fab-menu-item color="#FF8A65" tooltip="Add text" icon="mpi:short-text" on-tap="appendEmptyText"></paper-fab-menu-item>
-    </paper-fab-menu>
+    <div class="header">
+      <p class="info">When using this form you will send the data as a "multipart/form-data". <a href="https://www.ietf.org/rfc/rfc2388.txt" target="_blank">Learn more.</a></p>
+      <paper-button on-tap="_togglePage">preview message</paper-button>
+    </div>
+    <iron-pages selected="[[page]]">
+      <section>
+        <form is="iron-form" id="form">
+          <template is="dom-repeat" id="filesList" items="{{formData}}" observe="files">
+            <template is="dom-if" if="[[item.file]]">
+              <file-form-item name="{{item.name}}" value="{{item.files}}" on-remove-item = "_onItemRemove"></file-form-item>
+            </template>
+            <template is="dom-if" if="[[item.text]]">
+              <text-form-item name="{{item.name}}" value="{{item.value}}" content-type="{{item.contentType}}" on-remove-item = "_onItemRemove"></text-form-item>
+            </template>
+          </template>
+        </form>
+        <paper-fab-menu color="#FF5722" icon="mpi:add">
+          <paper-fab-menu-item tooltip-position="right" color="#FF8A65" tooltip="Add file" icon="mpi:insert-drive-file" on-tap="appendEmptyFile"></paper-fab-menu-item>
+          <paper-fab-menu-item tooltip-position="right" color="#FF8A65" tooltip="Add text" icon="mpi:short-text" on-tap="appendEmptyText"></paper-fab-menu-item>
+        </paper-fab-menu>
+      </section>
+      <section>
+        <code>[[messagePreview]]</code>
+      </section>
+    </iron-pages>
+    <multipart-form-data id="formData"></multipart-form-data>
   </template>
 </dom-module>
 <script src="multipart-payload-editor.js"></script>
