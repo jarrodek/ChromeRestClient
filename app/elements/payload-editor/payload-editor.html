@@ -164,31 +164,25 @@ the License.
           <code-mirror mode="application/json" theme="cm-arc" value="{{value}}" id="cm"></code-mirror>
         </section>
         <section class="params-list">
-          <div hidden$="[[!withForm]]">
-            <div class="encoder-buttons">
-              <paper-button title="Encodes payload to x-www-form-urlencoded data" on-tap="encodePaylod">encode payload</paper-button>
-              <paper-button title="Decodes payload to human readable form" on-tap="decodePaylod">decode payload</paper-button>
-            </div>
-            <label class="params-title">Form data for x-www-form-urlencoded parameters</label>
-            <template is="dom-repeat" id="valuesList" items="{{valuesList}}" on-dom-change="_onParamsRender">
-              <div class="form-row">
-                <paper-input-container class="param-name" no-label-float inline>
-                  <input is="iron-input" type="text" value="{{item.name::input}}" placeholder="Param name" />
-                </paper-input-container>
-                <paper-input-container class="param-value" no-label-float inline>
-                  <input is="iron-input" type="text" value="{{item.value::input}}" placeholder="Param value" />
-                </paper-input-container>
-                <paper-icon-button icon="arc:close" title="Remove param" on-tap="_removeParam"></paper-icon-button>
-              </div>
-            </template>
-            <paper-button raised on-tap="appendEmptyParam" class="add-param-button">Add another parameter</paper-button>
+
+          <div class="encoder-buttons">
+            <paper-button title="Encodes payload to x-www-form-urlencoded data" on-tap="encodePaylod">encode payload</paper-button>
+            <paper-button title="Decodes payload to human readable form" on-tap="decodePaylod">decode payload</paper-button>
           </div>
-          <div hidden$="[[withForm]]" class="form-info">
-            <div>
-              <p>This form is only applicable for the 'x-www-form-urlencoded' content type.</p>
-              <paper-button raised on-tap="_updateContentType" data-ct="application/x-www-form-urlencoded">Use x-www-form-urlencoded</paper-button>
+
+          <template is="dom-repeat" id="valuesList" items="{{valuesList}}" on-dom-change="_onParamsRender">
+            <div class="form-row">
+              <paper-input-container class="param-name" no-label-float inline>
+                <input is="iron-input" type="text" value="{{item.name::input}}" placeholder="Param name" />
+              </paper-input-container>
+              <paper-input-container class="param-value" no-label-float inline>
+                <input is="iron-input" type="text" value="{{item.value::input}}" placeholder="Param value" />
+              </paper-input-container>
+              <paper-icon-button icon="arc:close" title="Remove param" on-tap="_removeParam"></paper-icon-button>
             </div>
-          </div>
+          </template>
+          <paper-button raised on-tap="appendEmptyParam" class="add-param-button">Add another parameter</paper-button>
+
         </section>
         <multipart-payload-editor form-data="{{formData}}"></multipart-payload-editor>
       </iron-pages>
