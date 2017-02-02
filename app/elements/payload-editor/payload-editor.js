@@ -43,44 +43,23 @@ Polymer({
     /**
      * List of files to be send with the multipart/form-data request
      */
-    filesList: {
+    formData: {
       type: Array,
-      value: [],
       notify: true
-    },
-    /**
-     * If true form data is visible.
-     */
-    withForm: {
-      type: Boolean,
-      value: false,
-      computed: '_computeWithForm(contentType)'
-    },
-    /**
-     * Index for filename counter in files editor.
-     */
-    _fileListIndex: {
-      type: Number,
-      value: 0
-    },
-    /**
-     * Number of files selected by the user.
-     */
-    filesCount: {
-      type: Number,
-      computed: '_countFiles(filesList.*)'
-    },
-    /**
-     * True if file(s) has been selected.
-     */
-    hasFiles: {
-      type: Boolean,
-      computed: '_computeHasFiles(filesCount)'
     },
 
     opened: {
       type: Boolean,
       value: true
+    },
+    /**
+     * The source panel of the body value.
+     * It's a text representation of the `tabSelected` property.
+     */
+    bodySource: {
+      type: String,
+      notify: true,
+      readOnly: true
     }
   },
   observers: [
@@ -119,22 +98,6 @@ Polymer({
     };
     this.push('valuesList', item);
   },
-  /** Append new file form row  */
-  appendEmptyFile: function() {
-    var fileName = 'fileUpload';
-    if (this._fileListIndex) {
-      fileName += this._fileListIndex;
-    }
-    this._fileListIndex++;
-    var item = {
-      name: fileName,
-      files: []
-    };
-    if (!this.filesList) {
-      this.filesList = [];
-    }
-    this.push('filesList', item);
-  },
   /** Encode payload button press handler */
   encodePaylod: function() {
     var value = PayloadParser.encodeUrlEncoded(this.value);
@@ -166,9 +129,6 @@ Polymer({
       return;
     }
     this.$.cm.mode = ct;
-    // if (!this.withForm && this.tabSelected === 1) {
-    //   this.set('tabSelected', 0);
-    // }
     if (ct === 'application/x-www-form-urlencoded') {
       this.set('tabSelected', 1);
     } else if (ct.indexOf('multipart/form-data') !== -1) {
@@ -188,6 +148,7 @@ Polymer({
         this.updateValue();
         this.$.cm.editor.refresh();
         tabName = 'Raw tab';
+        this._setBodySource('raw');
         break;
       case 1:
         if (ct !== 'application/x-www-form-urlencoded') {
@@ -195,15 +156,18 @@ Polymer({
         }
         this.setFormValues();
         tabName = 'Form tab';
+        this._setBodySource('form');
         break;
       case 2:
         if (!ct || !ct.indexOf || ct.indexOf('multipart/form-data') === -1) {
           this.setContenTypeValue('multipart/form-data');
         }
         tabName = 'Files tab';
+        this._setBodySource('multipart');
         break;
       case 3:
         tabName = 'Raw file';
+        this._setBodySource('file');
         break;
     }
     if (this.isAttached) {
@@ -221,20 +185,12 @@ Polymer({
     this.set('valuesList', arr);
   },
 
-  /** Compute if form tab should be shown. */
-  _computeWithForm: function(contentType) {
-    return contentType && contentType.indexOf('x-www-form-urlencoded') !== -1;
-  },
-
   /** Remove element from the params form */
   _removeParam: function(e) {
     var index = this.$.valuesList.indexForElement(e.target);
     this.splice('valuesList', index, 1);
   },
-  _removeFile: function(e) {
-    var index = this.$.filesList.indexForElement(e.target);
-    this.splice('filesList', index, 1);
-  },
+
   /** called when valuesList deep changed. */
   _valuesListChanged: function(record) {
     // if path == 'valuesList' it means the object was initialized.
@@ -255,47 +211,7 @@ Polymer({
     row = row.pop();
     try {
       row.children[0].children[0].focus();
-    } catch (e) {
-
-    }
-  },
-  /**
-   * A handler to choose file button click.
-   * This function will find a proper input[type="file"] and programatically click on it to open
-   * file dialog.
-   */
-  _selectFile: function(e) {
-    var file = e.target.parentNode.querySelector('input[type="file"]');
-    if (!file) {
-      return;
-    }
-    file.click();
-  },
-  /**
-   * A handler to file change event for input[type="file"].
-   * This will update files array for corresponding `this.filesList` array object.
-   */
-  _fileObjectChanged: function(e) {
-    var index = this.$.filesList.indexForElement(e.target);
-    if (index >= 0) {
-      let files = Array.from(e.target.files);
-      this.set('filesList.' + index + '.files', files);
-    }
-  },
-  /** Count number of files choosen by the user */
-  _countFiles: function() {
-    var result = 0;
-    if (!this.filesList) {
-      return result;
-    }
-    this.filesList.forEach((item) => {
-      result += item.files.length;
-    });
-    return result;
-  },
-
-  _computeHasFiles: function(no) {
-    return !!no;
+    } catch (e) {}
   },
 
   _updateContentType: function(e) {

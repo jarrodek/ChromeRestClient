@@ -843,6 +843,8 @@
             return this.$.magicVariables.parse();
           })
           .then((result) => {
+            // TODO: apply magic variables to FormData
+            console.log(result);
             request.headers = result;
             this.$.magicVariables.value = request.payload;
             return this.$.magicVariables.parse();

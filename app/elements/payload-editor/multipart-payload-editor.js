@@ -15,6 +15,7 @@ Polymer({
      */
     formData: {
       type: Array,
+      notify: true,
       value: function() {
         return [];
       }
@@ -59,14 +60,6 @@ Polymer({
   },
 
   _ensureFormReady: function() {
-    var fd = this.formData;
-    if (!fd) {
-      this.set('formData', []);
-    }
-    if (fd.length) {
-      return;
-    }
-
     this.appendEmptyFile();
   },
 
@@ -78,7 +71,7 @@ Polymer({
       file: true
     };
     if (!this.formData) {
-      this.formData = [];
+      this.set('formData', []);
     }
     this.push('formData', item);
   },
@@ -91,7 +84,7 @@ Polymer({
       text: true
     };
     if (!this.formData) {
-      this.formData = [];
+      this.set('formData', []);
     }
     this.push('formData', item);
   },
@@ -158,7 +151,7 @@ Polymer({
 
   _setFormData: function() {
     var form = this.formData;
-    if (!form.length) {
+    if (!form || !form.length) {
       return;
     }
     form.forEach((item) => this._updateFormData(item));

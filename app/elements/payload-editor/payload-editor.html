@@ -44,11 +44,6 @@ the License.
       @apply(--layout-center);
     }
 
-    .files-list .form-row {
-      margin: 8px 0;
-    }
-
-    .file-trigger,
     .param-name {
       margin-right: 12px;
     }
@@ -57,35 +52,8 @@ the License.
       @apply(--layout-flex);
     }
 
-    .file-list-names {
-      @apply(--layout-flex);
-    }
-
-    .headers-list {
-      margin: 12px 0;
-    }
-
     .encoder-buttons {
       margin: 8px 0;
-    }
-
-    .warning {
-      @apply(--layout-horizontal);
-      @apply(--layout-flex);
-      @apply(--layout-center);
-      background-color: #E0E0E0;
-      padding: 8px 12px;
-      font-size: 13px;
-      margin: 12px 0;
-    }
-
-    .warning>* {
-      margin-right: 8px;
-    }
-
-    .warning iron-icon {
-      color: #9E9E9E;
-      margin-right: 12px;
     }
 
     .add-param-button {
@@ -100,16 +68,6 @@ the License.
 
     .form-info>div {
       @apply(--layout-vertical);
-    }
-
-    paper-tab>paper-badge {
-      --paper-badge-margin-left: 60px;
-      --paper-badge-margin-bottom: 0px;
-      --paper-badge-background: var(--paper-blue-500);
-    }
-
-    paper-badge.empty {
-      opacity: 0;
     }
 
     .title-header {
@@ -232,7 +190,7 @@ the License.
             </div>
           </div>
         </section>
-        <multipart-payload-editor></multipart-payload-editor>
+        <multipart-payload-editor form-data="{{formData}}"></multipart-payload-editor>
       </iron-pages>
     </iron-collapse>
   </template>
