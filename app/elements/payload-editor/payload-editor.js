@@ -76,13 +76,26 @@ Polymer({
     hasFiles: {
       type: Boolean,
       computed: '_computeHasFiles(filesCount)'
+    },
+
+    opened: {
+      type: Boolean,
+      value: true
     }
   },
   observers: [
-    '_updateTabsState(withForm)',
     '_valuesListChanged(valuesList.*)',
     '_valueChanged(value)'
   ],
+
+  attached: function() {
+    this.listen(window, 'content-type-changed', '_contentTypeHandler');
+  },
+
+  detached: function() {
+    this.unlisten(window, 'content-type-changed', '_contentTypeHandler');
+  },
+
   /**
    * Update headers array from form values to the HTTP string.
    */
@@ -148,15 +161,28 @@ Polymer({
    * Change CodeMirror mode on change.
    * Also, if the Content-Type is not x-www-form-urlencoded and form editor is shown hide it.
    */
-  _onContentTypeChanged: function() {
-    this.$.cm.mode = this.contentType;
-    if (!this.withForm && this.tabSelected === 1) {
+  _onContentTypeChanged: function(ct) {
+    if (!ct) {
+      return;
+    }
+    this.$.cm.mode = ct;
+    // if (!this.withForm && this.tabSelected === 1) {
+    //   this.set('tabSelected', 0);
+    // }
+    if (ct === 'application/x-www-form-urlencoded') {
+      this.set('tabSelected', 1);
+    } else if (ct.indexOf('multipart/form-data') !== -1) {
+      this.set('tabSelected', 2);
+    } else if (ct === 'application/octet-stream') {
+      this.set('tabSelected', 3);
+    } else {
       this.set('tabSelected', 0);
     }
   },
   /** Set value if has form */
   _selectedTabChanged: function() {
     var tabName;
+    var ct = this.contentType;
     switch (this.tabSelected) {
       case 0:
         this.updateValue();
@@ -164,11 +190,20 @@ Polymer({
         tabName = 'Raw tab';
         break;
       case 1:
+        if (ct !== 'application/x-www-form-urlencoded') {
+          this.setContenTypeValue('application/x-www-form-urlencoded');
+        }
         this.setFormValues();
         tabName = 'Form tab';
         break;
       case 2:
+        if (!ct || !ct.indexOf || ct.indexOf('multipart/form-data') === -1) {
+          this.setContenTypeValue('multipart/form-data');
+        }
         tabName = 'Files tab';
+        break;
+      case 3:
+        tabName = 'Raw file';
         break;
     }
     if (this.isAttached) {
@@ -191,10 +226,6 @@ Polymer({
     return contentType && contentType.indexOf('x-www-form-urlencoded') !== -1;
   },
 
-  /** Notify tabs resizer ehrn programatically number of tabs changed. */
-  _updateTabsState: function() {
-    this.$.tabs.notifyResize();
-  },
   /** Remove element from the params form */
   _removeParam: function(e) {
     var index = this.$.valuesList.indexForElement(e.target);
@@ -289,6 +320,48 @@ Polymer({
 
   _computeFileBageClass: function(cnt) {
     return cnt === 0 ? 'empty' : '';
+  },
+
+  // Toggles body panel.
+  toggle: function() {
+    this.opened = !this.opened;
+  },
+  // Computes class for the toggle's button icon.
+  _computeToggleIconClass: function(opened) {
+    var clazz = 'toggle-icon';
+    if (opened) {
+      clazz += ' opened';
+    }
+    return clazz;
+  },
+
+  _computeToggleLabel: function(opened) {
+    return opened ? 'Hide panel' : 'Show panel';
+  },
+
+  _contentTypeSelected: function(e) {
+    var ct = e.detail.item.dataset.type;
+    this.setContenTypeValue(ct);
+  },
+
+  _contentTypeHandler: function(e) {
+    var event = Polymer.dom(e);
+    if (event.rootTarget === this) {
+      return;
+    }
+    var ct = e.detail.value;
+    this.set('contentType', ct);
+  },
+
+  /**
+   * When chanding the editor it mey require to also change the content type header.
+   * This function updates Content-Type.
+   */
+  setContenTypeValue: function(ct) {
+    this.set('contentType', ct);
+    this.fire('content-type-changed', {
+      value: ct
+    });
   }
 });
 })();

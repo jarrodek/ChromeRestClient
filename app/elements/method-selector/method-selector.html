@@ -60,23 +60,6 @@ TODO: The list shouldn't be defined in the view. It should be stored in IDB or i
       <label>Custom method</label>
       <input id="customMethod" is="iron-input" type="text" value="{{method::input}}" placeholder="Method name">
     </paper-input-container>
-    <paper-dropdown-menu label="Custom content type" hidden$="{{!isPayload}}" no-label-float>
-      <paper-listbox class="dropdown-content" on-iron-select="_contentTypeSelected" selected="[[contentType]]" attr-for-selected="data-type">
-        <paper-item data-type="application/json">application/json</paper-item>
-        <paper-item data-type="application/xml">application/xml</paper-item>
-        <paper-item data-type="application/atom+xml">application/atom+xml</paper-item>
-        <paper-item data-type="multipart/form-data">multipart/form-data</paper-item>
-        <paper-item data-type="multipart/alternative">multipart/alternative</paper-item>
-        <paper-item data-type="multipart/mixed">multipart/mixed</paper-item>
-        <paper-item data-type="application/x-www-form-urlencoded">application/x-www-form-urlencoded</paper-item>
-        <paper-item data-type="application/base64">application/base64</paper-item>
-        <paper-item data-type="application/octet-stream">application/octet-stream</paper-item>
-        <paper-item data-type="text/plain">text/plain</paper-item>
-        <paper-item data-type="text/css">text/css</paper-item>
-        <paper-item data-type="text/html">text/html</paper-item>
-        <paper-item data-type="application/javascript">application/javascript</paper-item>
-      </paper-listbox>
-    </paper-dropdown-menu>
   </template>
   <script src="method-selector.js"></script>
 </dom-module>

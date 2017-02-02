@@ -27,10 +27,6 @@
       padding: 0 12px;
       position: relative;
 
-      --code-mirror-wrapper: {
-        /*border: 1px var(--main-section-border-color) solid;*/
-      }
-
       --code-mirror-editor: {
         z-index: 0;
       }
@@ -111,15 +107,12 @@
     code-mirror {
       border-bottom: 1px rgba(0, 0, 0, 0.14) solid;
     }
-
     </style>
-
     <div class="content">
       <paper-tabs selected="{{tabSelected}}">
-        <paper-tab>Raw headers [[usePouchDb]]</paper-tab>
+        <paper-tab>Headers</paper-tab>
         <paper-tab>Headers form</paper-tab>
         <paper-tab>Headers sets</paper-tab>
-        <paper-tab>Variables</paper-tab>
       </paper-tabs>
       <iron-pages selected="{{tabSelected}}">
         <code-mirror mode="http-headers" theme="cm-arc" on-change="valueChanged" value="{{headers}}" id="cm"></code-mirror>
@@ -146,7 +139,7 @@
           <paper-button class="add-button" on-tap="appendEmptyHeader">Add header</paper-button>
         </section>
         <headers-sets-selector is-payload="[[isPayload]]"></headers-sets-selector>
-        <variables-editor></variables-editor>
+
       </iron-pages>
     </div>
 

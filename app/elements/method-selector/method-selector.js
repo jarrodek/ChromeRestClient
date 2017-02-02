@@ -19,10 +19,6 @@ Polymer({
       reflectToAttribute: true,
       computed: '_computeIsPayload(method)'
     },
-    // Current content type header.
-    contentType: {
-      type: String
-    },
     methodMenuOpened: {
       type: Boolean,
       value: false
@@ -37,14 +33,6 @@ Polymer({
   observers: [
     '_dropdownMenuOpened(methodMenuOpened, method)'
   ],
-
-  attached: function() {
-    this.listen(window, 'content-type-changed', '_contentTypeHandler');
-  },
-
-  detached: function() {
-    this.unlisten(window, 'content-type-changed', '_contentTypeHandler');
-  },
 
   get standardMethods() {
     return ['get','post','put','delete','patch','head','connect','options', 'trace'];
@@ -76,23 +64,6 @@ Polymer({
         this.set('showCustom', true);
       }
     }
-  },
-
-  _contentTypeHandler: function(e) {
-    var event = Polymer.dom(e);
-    if (event.rootTarget === this) {
-      return;
-    }
-    var ct = e.detail.value;
-    this.set('contentType', ct);
-  },
-
-  _contentTypeSelected: function(e) {
-    var ct = e.detail.item.dataset.type;
-    this.set('contentType', ct);
-    this.fire('content-type-changed', {
-      value: ct
-    });
   }
 });
 })();

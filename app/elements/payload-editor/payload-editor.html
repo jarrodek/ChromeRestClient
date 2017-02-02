@@ -14,169 +14,227 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 -->
-
 <link rel="import" href="multipart-payload-editor.html">
-
-
 <dom-module id="payload-editor">
   <template>
     <style>
-      :host {
-        display: block;
-        padding: 0 12px;
-        position: relative;
+     :host {
+      display: block;
+      position: relative;
+      --code-mirror-wrapper: {
+        border: 1px var(--main-section-border-color) solid;
+      };
+      --code-mirror-editor: {
+        z-index: 0;
+      };
+    }
 
-        --code-mirror-wrapper: {
-          border: 1px var(--main-section-border-color) solid;
-        };
-        --code-mirror-editor: {
-          z-index: 0;
-        }
-        --paper-input-container-underline: {
-          background-color: var(--main-section-border-color);
-        }
-      }
-      input::-webkit-input-placeholder {
-        color: var(--paper-input-container-color, --secondary-text-color);
-      }
+    input::-webkit-input-placeholder {
+      color: var(--paper-input-container-color, --secondary-text-color);
+    }
 
-      .params-title {
-        @apply(--paper-font-caption);
-        color: #737373;
-      }
-      .form-row {
-        @apply(--layout-horizontal);
-        @apply(--layout-flex);
-        @apply(--layout-center);
-      }
-      .files-list .form-row {
-        margin: 8px 0;
-      }
-      .file-trigger,
-      .param-name {
-        margin-right: 12px;
-      }
-      .param-value {
-        @apply(--layout-flex);
-      }
-      .file-list-names {
-        @apply(--layout-flex);
-      }
-      .headers-list {
-        margin: 12px 0;
-      }
-      .encoder-buttons {
-        margin: 8px 0;
-      }
-      .warning {
-        @apply(--layout-horizontal);
-        @apply(--layout-flex);
-        @apply(--layout-center);
+    .params-title {
+      @apply(--paper-font-caption);
+      color: #737373;
+    }
 
-        background-color: #E0E0E0;
-        padding: 8px 12px;
-        font-size: 13px;
-        margin: 12px 0;
-      }
-      .warning > * {
-        margin-right: 8px;
-      }
-      .warning iron-icon {
-        color: #9E9E9E;
-        margin-right: 12px;
-      }
-      .add-param-button {
-        margin-top: 12px;
-      }
-      .form-info {
-        @apply(--layout-horizontal);
-        @apply(--layout-flex);
-        @apply(--layout-center-center);
-      }
-      .form-info > div {
-        @apply(--layout-vertical);
-      }
-      paper-tab > paper-badge {
-        --paper-badge-margin-left: 60px;
-        --paper-badge-margin-bottom: 0px;
-        --paper-badge-background: var(--paper-blue-500);
-      }
-      paper-badge.empty {
-        opacity: 0;
-      }
+    .form-row {
+      @apply(--layout-horizontal);
+      @apply(--layout-flex);
+      @apply(--layout-center);
+    }
+
+    .files-list .form-row {
+      margin: 8px 0;
+    }
+
+    .file-trigger,
+    .param-name {
+      margin-right: 12px;
+    }
+
+    .param-value {
+      @apply(--layout-flex);
+    }
+
+    .file-list-names {
+      @apply(--layout-flex);
+    }
+
+    .headers-list {
+      margin: 12px 0;
+    }
+
+    .encoder-buttons {
+      margin: 8px 0;
+    }
+
+    .warning {
+      @apply(--layout-horizontal);
+      @apply(--layout-flex);
+      @apply(--layout-center);
+      background-color: #E0E0E0;
+      padding: 8px 12px;
+      font-size: 13px;
+      margin: 12px 0;
+    }
+
+    .warning>* {
+      margin-right: 8px;
+    }
+
+    .warning iron-icon {
+      color: #9E9E9E;
+      margin-right: 12px;
+    }
+
+    .add-param-button {
+      margin-top: 12px;
+    }
+
+    .form-info {
+      @apply(--layout-horizontal);
+      @apply(--layout-flex);
+      @apply(--layout-center-center);
+    }
+
+    .form-info>div {
+      @apply(--layout-vertical);
+    }
+
+    paper-tab>paper-badge {
+      --paper-badge-margin-left: 60px;
+      --paper-badge-margin-bottom: 0px;
+      --paper-badge-background: var(--paper-blue-500);
+    }
+
+    paper-badge.empty {
+      opacity: 0;
+    }
+
+    .title-header {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      padding: 0 12px;
+    }
+
+    h2 {
+      @apply(--paper-font-subhead);
+      margin-right: 24px;
+      padding-bottom: 0;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .flex {
+      @apply(--layout-flex);
+    }
+
+    .toggle-button {
+      color: var(--response-status-view-toggle-icon-color, rgba(0, 0, 0, 0.54));
+      transition: color 0.25s linear;
+    }
+
+    .toggle-icon {
+      transform: rotateZ(0deg);
+      transition: transform 0.3s linear;
+    }
+
+    .toggle-icon.opened {
+      transform: rotateZ(-180deg);
+    }
+
+    .toggle-button:hover {
+      color: var(--response-status-view-toggle-icon-hover-color, rgba(0, 0, 0, 0.78));
+    }
+
+    iron-pages {
+      padding: 12px;
+      /*background-color: #FFFDE7;*/
+    }
+
+    paper-dropdown-menu {
+      margin-right: 12px;
+    }
+
+    paper-dropdown-menu.type {
+      /*background-color: #FFFDE7;*/
+      padding: 0 12px;
+    }
     </style>
-    <paper-tabs selected="{{tabSelected}}" id="tabs">
-      <paper-tab>Raw payload</paper-tab>
-      <paper-tab>Data form</paper-tab>
-      <paper-tab>
-        <span>Files</span>
-        <paper-badge class$="[[_computeFileBageClass(filesCount)]]" label="[[filesCount]]"></paper-badge>
-      </paper-tab>
-    </paper-tabs>
-    <iron-pages selected="{{tabSelected}}" selected-attribute="opened">
-      <section>
-        <div hidden$="[[!withForm]]" class="encoder-buttons">
-          <paper-button title="Encodes payload to x-www-form-urlencoded data" on-tap="encodePaylod">encode payload</paper-button>
-          <paper-button title="Decodes payload to human readable form" on-tap="decodePaylod">decode payload</paper-button>
-        </div>
-        <code-mirror mode="application/json" theme="cm-arc" value="{{value}}" id="cm"></code-mirror>
-        <!-- on-change="valueChanged" -->
-      </section>
-      <section class="params-list">
-        <div hidden$="[[!withForm]]">
-          <div class="encoder-buttons">
+    <header class="title-header">
+      <h2>Body</h2>
+      <paper-dropdown-menu class="type" label="Editor view" hidden$="[[!opened]]">
+        <paper-listbox class="dropdown-content" selected="{{tabSelected}}">
+          <paper-item>Text input</paper-item>
+          <paper-item>Form data (text form)</paper-item>
+          <paper-item>Multipart form data (form with files)</paper-item>
+          <paper-item>File</paper-item>
+        </paper-listbox>
+      </paper-dropdown-menu>
+      <paper-dropdown-menu label="Body content type" hidden$="[[!opened]]">
+        <paper-listbox class="dropdown-content" on-iron-select="_contentTypeSelected" selected="[[contentType]]" attr-for-selected="data-type">
+          <paper-item data-type="application/json">application/json</paper-item>
+          <paper-item data-type="application/xml">application/xml</paper-item>
+          <paper-item data-type="application/atom+xml">application/atom+xml</paper-item>
+          <paper-item data-type="multipart/form-data">multipart/form-data</paper-item>
+          <paper-item data-type="multipart/alternative">multipart/alternative</paper-item>
+          <paper-item data-type="multipart/mixed">multipart/mixed</paper-item>
+          <paper-item data-type="application/x-www-form-urlencoded">application/x-www-form-urlencoded</paper-item>
+          <paper-item data-type="application/base64">application/base64</paper-item>
+          <paper-item data-type="application/octet-stream">application/octet-stream</paper-item>
+          <paper-item data-type="text/plain">text/plain</paper-item>
+          <paper-item data-type="text/css">text/css</paper-item>
+          <paper-item data-type="text/html">text/html</paper-item>
+          <paper-item data-type="application/javascript">application/javascript</paper-item>
+        </paper-listbox>
+      </paper-dropdown-menu>
+      <span class="flex"></span>
+      <paper-button on-tap="toggle" class="toggle-button" title="Toggle payload panel">
+        <span>[[_computeToggleLabel(opened)]]</span>
+        <iron-icon icon="arc:expand-more" class$="[[_computeToggleIconClass(opened)]]"></iron-icon>
+      </paper-button>
+    </header>
+
+    <iron-collapse id="collapse" opened="[[opened]]">
+      <iron-pages selected="{{tabSelected}}" selected-attribute="opened">
+        <section>
+          <div hidden$="[[!withForm]]" class="encoder-buttons">
             <paper-button title="Encodes payload to x-www-form-urlencoded data" on-tap="encodePaylod">encode payload</paper-button>
             <paper-button title="Decodes payload to human readable form" on-tap="decodePaylod">decode payload</paper-button>
           </div>
-          <label class="params-title">Form data for x-www-form-urlencoded parameters</label>
-          <template is="dom-repeat" id="valuesList" items="{{valuesList}}" on-dom-change="_onParamsRender">
-            <div class="form-row">
-              <paper-input-container class="param-name" no-label-float inline>
-                <input is="iron-input" type="text" value="{{item.name::input}}" placeholder="Param name"/>
-              </paper-input-container>
-              <paper-input-container class="param-value" no-label-float inline>
-                <input is="iron-input" type="text" value="{{item.value::input}}" placeholder="Param value"/>
-              </paper-input-container>
-              <paper-icon-button icon="arc:close" title="Remove param" on-tap="_removeParam"></paper-icon-button>
+          <code-mirror mode="application/json" theme="cm-arc" value="{{value}}" id="cm"></code-mirror>
+        </section>
+        <section class="params-list">
+          <div hidden$="[[!withForm]]">
+            <div class="encoder-buttons">
+              <paper-button title="Encodes payload to x-www-form-urlencoded data" on-tap="encodePaylod">encode payload</paper-button>
+              <paper-button title="Decodes payload to human readable form" on-tap="decodePaylod">decode payload</paper-button>
             </div>
-          </template>
-          <paper-button raised on-tap="appendEmptyParam" class="add-param-button">Add another parameter</paper-button>
-        </div>
-        <div hidden$="[[withForm]]" class="form-info">
-          <div>
-            <p>This form is only applicable for the 'x-www-form-urlencoded' content type.</p>
-            <paper-button raised on-tap="_updateContentType" data-ct="application/x-www-form-urlencoded">Use x-www-form-urlencoded</paper-button>
+            <label class="params-title">Form data for x-www-form-urlencoded parameters</label>
+            <template is="dom-repeat" id="valuesList" items="{{valuesList}}" on-dom-change="_onParamsRender">
+              <div class="form-row">
+                <paper-input-container class="param-name" no-label-float inline>
+                  <input is="iron-input" type="text" value="{{item.name::input}}" placeholder="Param name" />
+                </paper-input-container>
+                <paper-input-container class="param-value" no-label-float inline>
+                  <input is="iron-input" type="text" value="{{item.value::input}}" placeholder="Param value" />
+                </paper-input-container>
+                <paper-icon-button icon="arc:close" title="Remove param" on-tap="_removeParam"></paper-icon-button>
+              </div>
+            </template>
+            <paper-button raised on-tap="appendEmptyParam" class="add-param-button">Add another parameter</paper-button>
           </div>
-        </div>
-      </section>
-      <multipart-payload-editor></multipart-payload-editor>
-      <!-- <section class="files-list"> -->
-        <!-- <label class="params-title">Files to append to the form data request</label>
-        <template is="dom-repeat" id="filesList" items="{{filesList}}" observe="files">
-          <div class="form-row">
-            <input type="file" multiple hidden on-change="_fileObjectChanged"/>
-            <paper-button raised on-tap="_selectFile" class="file-trigger">Choose files</paper-button>
-            <paper-input-container class="param-name" no-label-float inline>
-              <input is="iron-input" type="text" value="{{item.name::input}}" placeholder="Form param name"/>
-            </paper-input-container>
-            <div class="file-list-names">
-              <template is="dom-repeat" items="{{item.files}}" as="file" index-as="fileNo">
-                <div>
-                  <span>#{{fileNo}}</span>.
-                  <span>{{file.name}}</span>
-                  <span>({{file.size}} bytes)</span>
-                </div>
-              </template>
+          <div hidden$="[[withForm]]" class="form-info">
+            <div>
+              <p>This form is only applicable for the 'x-www-form-urlencoded' content type.</p>
+              <paper-button raised on-tap="_updateContentType" data-ct="application/x-www-form-urlencoded">Use x-www-form-urlencoded</paper-button>
             </div>
-            <paper-icon-button icon="arc:close" title="Remove file" on-tap="_removeFile"></paper-icon-button>
           </div>
-        </template>
-        <paper-button raised on-tap="appendEmptyFile" class="add-param-button">Add another file</paper-button>
-        <div class="warning" hidden$="[[!hasFiles]]">
-          <iron-icon icon="arc:info"></iron-icon> <span>The</span> <b>Content-Type</b> <span>header will be finally changed to "multipart/form-data" during the request.</span>
-        </div> -->
-      <!-- </section> -->
-    </iron-pages>
+        </section>
+        <multipart-payload-editor></multipart-payload-editor>
+      </iron-pages>
+    </iron-collapse>
   </template>
   <script src="payload-editor.js"></script>
 </dom-module>

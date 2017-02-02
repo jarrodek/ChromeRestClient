@@ -50,7 +50,17 @@ Polymer({
      */
     requestLoading: Boolean,
     // A message to display in the action bar.
-    statusMessage: String
+    statusMessage: String,
+
+    collapseOpened: {
+      type: Boolean,
+      value: true
+    },
+
+    selectedParameters: {
+      type: Number,
+      value: 0
+    }
   },
 
   observers: [
@@ -134,6 +144,23 @@ Polymer({
     if (historyPanel.opened) {
       historyPanel.opened = false;
     }
+  },
+
+  // Toggles body panel.
+  toggle: function() {
+    this.collapseOpened = !this.collapseOpened;
+  },
+  // Computes class for the toggle's button icon.
+  _computeToggleIconClass: function(opened) {
+    var clazz = 'toggle-icon';
+    if (opened) {
+      clazz += ' opened';
+    }
+    return clazz;
+  },
+
+  _computeToggleLabel: function(opened) {
+    return opened ? 'Hide panel' : 'Show panel';
   }
 });
 })();
