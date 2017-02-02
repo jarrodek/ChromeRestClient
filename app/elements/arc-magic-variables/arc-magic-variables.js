@@ -161,13 +161,14 @@ Polymer({
    * Apply magic variables to an object.
    */
   _applyObject: function(obj) {
-    var names = Object.getOwnPropertyNames(obj);
-    names.forEach((value) => {
+    var keys = Object.keys(obj);
+    for (let i = 0, len = keys.length; i < len; i++) {
+      var value = obj[keys[i]];
       if (typeof value === 'string') {
-        value = this._applyString(value);
-        return value;
+        obj[keys[i]] = this._applyString(value);
       }
-    });
+    }
+    return obj;
   },
   /**
    * Apply build-in random function.
