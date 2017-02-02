@@ -38,7 +38,8 @@ Polymer({
     hasFormData: {
       type: Boolean,
       value: false,
-      computed: '_computeHasFormData(formData.*)'
+      computed: '_computeHasFormData(formData.*)',
+      observer: '_hasFormDataChanged'
     },
 
     page: {
@@ -111,8 +112,17 @@ Polymer({
   },
 
   _computeHasFormData: function(record) {
-    console.log('_computeHasFormData', record);
     return !!(record && record.base && record.base.length);
+  },
+
+  _hasFormDataChanged: function(has) {
+    if (has && !this.boundary) {
+      this.$.formData.updateBoundary();
+    } else if (has) {
+      this.fire('content-type-changed', {
+        value: 'multipart/form-data; boundary=' + this.boundary
+      });
+    }
   },
 
   _computeHasFiles: function(no) {

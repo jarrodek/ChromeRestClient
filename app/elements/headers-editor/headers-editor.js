@@ -25,7 +25,6 @@ Polymer({
      */
     contentType: {
       type: String,
-      notify: true,
       observer: '_onContentTypeChanged'
     },
 
@@ -80,6 +79,14 @@ Polymer({
   listeners: {
     'iron-overlay-closed': '_headersSupportClosed',
     'headers-set-selected': '_headersSetSelected'
+  },
+
+  attached: function() {
+    this.listen(window, 'content-type-changed', '_contentTypeHandler');
+  },
+
+  detached: function() {
+    this.unlisten(window, 'content-type-changed', '_contentTypeHandler');
   },
 
   ready: function() {
@@ -259,10 +266,11 @@ Polymer({
     }
   },
 
-  _onContentTypeChanged: function() {
+  _onContentTypeChanged: function(old, newValue) {
     if (!this.isPayload || !this.contentType) {
       return;
     }
+    console.log('_onContentTypeChanged', old, newValue);
     var arr = this.headersToJSON(this.headers);
     var updated = false;
     var notChanged = false; //True when values are equal, no change needed.
@@ -534,6 +542,15 @@ Polymer({
       return false;
     }
     return true;
+  },
+
+  _contentTypeHandler: function(e) {
+    var event = Polymer.dom(e);
+    if (event.rootTarget === this) {
+      return;
+    }
+    var ct = e.detail.value;
+    this.set('contentType', ct);
   }
 });
 })();

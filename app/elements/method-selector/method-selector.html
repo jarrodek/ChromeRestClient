@@ -61,7 +61,7 @@ TODO: The list shouldn't be defined in the view. It should be stored in IDB or i
       <input id="customMethod" is="iron-input" type="text" value="{{method::input}}" placeholder="Method name">
     </paper-input-container>
     <paper-dropdown-menu label="Custom content type" hidden$="{{!isPayload}}" no-label-float>
-      <paper-listbox class="dropdown-content" selected="{{contentType}}" attr-for-selected="data-type">
+      <paper-listbox class="dropdown-content" on-iron-select="_contentTypeSelected" selected="[[contentType]]" attr-for-selected="data-type">
         <paper-item data-type="application/json">application/json</paper-item>
         <paper-item data-type="application/xml">application/xml</paper-item>
         <paper-item data-type="application/atom+xml">application/atom+xml</paper-item>

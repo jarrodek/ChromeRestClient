@@ -21,8 +21,8 @@ Polymer({
      */
     contentType: {
       type: String,
-      observer: '_onContentTypeChanged',
-      notify: true
+      observer: '_onContentTypeChanged'
+      // notify: true
     },
     /**
      * Currently selected tab.
@@ -273,6 +273,9 @@ Polymer({
       return;
     }
     this.contentType = ct;
+    this.fire('content-type-changed', {
+      value: ct
+    });
   },
 
   _valueChanged: function() {

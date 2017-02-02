@@ -21,8 +21,7 @@ Polymer({
     },
     // Current content type header.
     contentType: {
-      type: String,
-      notify: true
+      type: String
     },
     methodMenuOpened: {
       type: Boolean,
@@ -36,19 +35,20 @@ Polymer({
   },
 
   observers: [
-    // '_ensureContentType(isPayload)',
     '_dropdownMenuOpened(methodMenuOpened, method)'
   ],
+
+  attached: function() {
+    this.listen(window, 'content-type-changed', '_contentTypeHandler');
+  },
+
+  detached: function() {
+    this.unlisten(window, 'content-type-changed', '_contentTypeHandler');
+  },
 
   get standardMethods() {
     return ['get','post','put','delete','patch','head','connect','options', 'trace'];
   },
-
-  // _ensureContentType: function(isPayload) {
-  //   if (isPayload && !this.contentType) {
-  //     this.set('contentType', 'application/json');
-  //   }
-  // }
 
   // Compute if the tayload can carry a payload.
   _computeIsPayload: function(method) {
@@ -76,6 +76,23 @@ Polymer({
         this.set('showCustom', true);
       }
     }
+  },
+
+  _contentTypeHandler: function(e) {
+    var event = Polymer.dom(e);
+    if (event.rootTarget === this) {
+      return;
+    }
+    var ct = e.detail.value;
+    this.set('contentType', ct);
+  },
+
+  _contentTypeSelected: function(e) {
+    var ct = e.detail.item.dataset.type;
+    this.set('contentType', ct);
+    this.fire('content-type-changed', {
+      value: ct
+    });
   }
 });
 })();
