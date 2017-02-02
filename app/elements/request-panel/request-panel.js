@@ -4,7 +4,8 @@
     is: 'request-panel',
     behaviors: [
       ArcBehaviors.ArcFileExportBehavior,
-      ArcBehaviors.ArcControllerBehavior
+      ArcBehaviors.ArcControllerBehavior,
+      ArcBehaviors.ArcMagicVariablesRunnerBehavior
     ],
     properties: {
       /**
@@ -824,45 +825,6 @@
         request.payload = '';
       }
       return request;
-    },
-    // If turned on - apply magic variables to the request.
-    _applyMagicVariables: function(request) {
-      return new Promise((resolve) => {
-        chrome.storage.sync.get({'MAGICVARS_ENABLED': true}, (r) => {
-          if (!r.MAGICVARS_ENABLED) {
-            resolve(request);
-            return;
-          }
-          this.$.magicVariables.clear();
-          this.$.magicVariables.environment = this.currentEnvironment || 'default';
-          this.$.magicVariables.value = request.url;
-          this.$.magicVariables.parse()
-          .then((result) => {
-            request.url = result;
-            this.$.magicVariables.value = request.headers;
-            return this.$.magicVariables.parse();
-          })
-          .then((result) => {
-            // TODO: apply magic variables to FormData
-            console.log(result);
-            request.headers = result;
-            this.$.magicVariables.value = request.payload;
-            return this.$.magicVariables.parse();
-          })
-          .then((result) => {
-            this.$.magicVariables.clear();
-            request.payload = result;
-            resolve(request);
-          })
-          .catch((e) => {
-            this.fire('app-log', {
-              'message': ['Magic variables', e],
-              'level': 'error'
-            });
-            resolve(request);
-          });
-        });
-      });
     },
     /**
      * Find and apply cookies to this request.

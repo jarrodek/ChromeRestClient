@@ -27,6 +27,7 @@ app.use(function(req, res, next) {
     next();
     return;
   }
+  console.log('Has Multipart request');
   req.busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
     console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding +
       ', mimetype: ' + mimetype);
@@ -37,12 +38,13 @@ app.use(function(req, res, next) {
       console.log('File [' + fieldname + '] Finished');
     });
   });
-  req.busboy.on('field', function(fieldname, val
-    /*, fieldnameTruncated, valTruncated, encoding, mimetype*/
-  ) {
-    console.log('Field [' + fieldname + ']: value: ' + val);
+  req.busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated, encoding,
+    mimetype) {
+    console.log('Field [' + fieldname + ']: value: ' + val + ', mimetype: ' + mimetype);
   });
+
   req.busboy.on('finish', function() {
+    console.log('Multipart request finish');
     next();
   });
   req.pipe(req.busboy);

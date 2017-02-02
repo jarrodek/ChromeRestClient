@@ -17,6 +17,24 @@ Polymer({
       }
     }
   },
+
+  attached: function() {
+    this.listen(window, 'multipart-boundary-chnaged', '_onBoundaryChanged');
+  },
+
+  detached: function() {
+    this.unlisten(window, 'multipart-boundary-chnaged', '_onBoundaryChanged');
+  },
+
+  _onBoundaryChanged: function(e) {
+    var event = Polymer.dom(e);
+    if (event.rootTarget === this) {
+      return;
+    }
+    this.set('boundary', e.detail.value);
+    console.log('_onBoundaryChanged', e.detail.value);
+  },
+
   /**
    * Generates a new boundary and sets the correspondin value in the properties.
    */
@@ -27,6 +45,9 @@ Polymer({
     }
 
     this.set('boundary', boundary);
+    this.fire('multipart-boundary-chnaged', {
+      value: this.boundary
+    });
   },
 
   /**
@@ -42,7 +63,6 @@ Polymer({
    */
   setField: function(name, value, options) {
     options = options || {};
-    console.log('setField', name, value, options);
     var _item = {
       name: name,
       value: value,
@@ -108,15 +128,16 @@ Polymer({
    */
   generateMessage: function() {
     if (!this._items || !this._items.length) {
-      return;
+      return Promise.resolve();
     }
     if (!this.boundary) {
       this.updateBoundary();
     }
     var parts = [];
-    this._items.forEach(function(part) {
-      parts.push(this._getMessage(part));
-    }, this);
+    var items = this._items;
+    for (let i = 0, len = items.length; i < len; i++) {
+      parts.push(this._getMessage(items[i], i === len - 1));
+    }
 
     return Promise.all(parts)
     .then((buffers) => {
@@ -130,7 +151,7 @@ Polymer({
    */
   generateMessagePreview: function() {
     if (!this._items || !this._items.length) {
-      return;
+      return Promise.resolve();
     }
     if (!this.boundary) {
       this.updateBoundary();
@@ -161,7 +182,7 @@ Polymer({
     var message = this._getPartBody(part);
     var footer = '';
     if (lastPart) {
-      footer += this.boundary + '--';
+      footer += this.boundary + '--\r\n';
     }
     footer = this._stringToArrayBuffer(footer);
     return message.then((buffer) => {

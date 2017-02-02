@@ -87,96 +87,50 @@ Polymer({
   },
 
   _prepareRequest: function(opts) {
-    return new Promise((resolve, reject) => {
-      var init = {};
-      if (this.request.method) {
-        init.method = this.request.method;
-      }
-      if (this.request.headers) {
-        let headers = arc.app.headers.toJSON(this.request.headers);
-        let obj = new Headers();
-        let rejected = false;
-        headers.forEach((item) => {
-          if (rejected) {
-            return;
-          }
-          var name = item.name && item.name.trim();
-          if (!name) {
-            reject(new Error('Header name is invalid'));
-            return;
-          } else {
-            try {
-              obj.append(item.name, item.value);
-            } catch (e) {
-              this.fire('app-log', {
-                'message': e,
-                'level': 'error'
-              });
-              reject(e);
-              rejected = true;
-              return;
-            }
-          }
-        });
-        if (rejected) {
-          return;
-        }
-        init.headers = obj;
-      }
-
-      if (init.method !== 'GET' && init.method !== 'HEAD') {
-
-        if (this.request.files && this.request.files.length > 0) {
-          // create FormData from the form
-          let fd = new FormData();
-          let rejected = false;
-          this.request.files.forEach((field) => {
-            if (rejected) {
-              return;
-            }
-            field.files.forEach((file) => {
-              if (rejected) {
-                return;
-              }
-              try {
-                fd.append(field.name, file);
-              } catch (e) {
-                this.fire('app-log', {
-                  'message': e,
-                  'level': 'error'
-                });
-                rejected = true;
-                reject(e);
-                return;
-              }
+    var init = {};
+    if (this.request.method) {
+      init.method = this.request.method;
+    }
+    if (this.request.headers) {
+      let headers = arc.app.headers.toJSON(this.request.headers);
+      let obj = new Headers();
+      headers.forEach((item) => {
+        var name = item.name && item.name.trim();
+        if (!name) {
+          this.fire('app-log', {
+            'message': new Error('Header name is invalid'),
+            'level': 'error'
+          });
+        } else {
+          try {
+            obj.append(item.name, item.value);
+          } catch (e) {
+            this.fire('app-log', {
+              'message': e,
+              'level': 'error'
             });
-          });
-          if (rejected) {
-            return;
           }
-          let params = PayloadParser.stringToArray(this.request.payload);
-          params.forEach((pair) => {
-            if (rejected) {
-              return;
-            }
-            try {
-              fd.append(pair.name, pair.value);
-            } catch (e) {
-              this.fire('app-log', {
-                'message': e,
-                'level': 'error'
-              });
-              rejected = true;
-              reject(new Error('Request parameters are invalid.'));
-              return;
-            }
-          });
-          init.body = fd;
-        } else if (this.request.payload) {
-          init.body = this.request.payload;
         }
-      }
+      });
+      init.headers = obj;
+    }
 
+    let promise;
+    if (['GET', 'HEAD'].indexOf(init.method) === -1) {
+      if (this.request.bodySource === 'multipart') {
+        this.$.formData._items = this.request.formData;
+        promise = this.$.formData.generateMessage()
+        .then((buffer) => {
+          init.body = buffer;
+        });
+      } else {
+        init.body = this.request.payload;
+        promise = Promise.resolve();
+      }
+    } else {
+      promise = Promise.resolve();
+    }
+    return promise.then(() => {
       init.debug = false;
       if (this.request.auth) {
         init.auth = this.request.auth;
@@ -187,7 +141,7 @@ Polymer({
           init.timeout = tm;
         }
       }
-      resolve(init);
+      return init;
     });
   },
 

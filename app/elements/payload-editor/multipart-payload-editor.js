@@ -67,7 +67,7 @@ Polymer({
   appendEmptyFile: function() {
     var item = {
       name: '',
-      files: [],
+      value: [],
       file: true
     };
     if (!this.formData) {
@@ -96,10 +96,10 @@ Polymer({
       return result;
     }
     record.base.forEach((item) => {
-      if (!item.files) {
+      if (!item.value || !(item.value instanceof Array)) {
         return;
       }
-      result += item.files.length;
+      result += item.value.length;
     });
     return result;
   },
@@ -161,10 +161,10 @@ Polymer({
     var value;
     var contentType;
     if (obj.file) {
-      if (obj.files.length === 1) {
-        value = obj.files[0];
+      if (obj.value.length === 1) {
+        value = obj.value[0];
       } else {
-        value = obj.files;
+        value = obj.value;
       }
     } else {
       value = obj.value;
@@ -173,6 +173,7 @@ Polymer({
     this.$.formData.setField(obj.name, value, {
       contentType: contentType
     });
+
   },
 
   _computeToggleLabel: function(page) {
@@ -190,7 +191,17 @@ Polymer({
     this.fire('content-type-changed', {
       value: 'multipart/form-data; boundary=' + e.detail.value
     });
-  }
+  },
 
+  // _computeValue: function() {
+  //   this.debounce('body-value-gen', function() {
+  //     this.$.formData.clear();
+  //     this._setFormData();
+  //     this.$.formData.generateMessage()
+  //     .then((buffer) => {
+  //       console.log(buffer);
+  //     });
+  //   }, 50);
+  // }
 });
 })();

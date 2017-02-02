@@ -83,9 +83,9 @@ The multipart form editor for the ARC's request panel.
     <iron-pages selected="[[page]]">
       <section>
         <form is="iron-form" id="form">
-          <template is="dom-repeat" id="filesList" items="{{formData}}" observe="files">
+          <template is="dom-repeat" id="filesList" items="{{formData}}" observe="value">
             <template is="dom-if" if="[[item.file]]">
-              <file-form-item name="{{item.name}}" value="{{item.files}}" on-remove-item = "_onItemRemove"></file-form-item>
+              <file-form-item name="{{item.name}}" value="{{item.value}}" on-remove-item = "_onItemRemove"></file-form-item>
             </template>
             <template is="dom-if" if="[[item.text]]">
               <text-form-item name="{{item.name}}" value="{{item.value}}" content-type="{{item.contentType}}" on-remove-item = "_onItemRemove"></text-form-item>
