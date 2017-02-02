@@ -31,7 +31,14 @@ Polymer({
      */
     hasFiles: {
       type: Boolean,
+      value: false,
       computed: '_computeHasFiles(filesCount)'
+    },
+    // True if any form data has been added.
+    hasFormData: {
+      type: Boolean,
+      value: false,
+      computed: '_computeHasFormData(formData.*)'
     },
 
     page: {
@@ -103,6 +110,11 @@ Polymer({
     return result;
   },
 
+  _computeHasFormData: function(record) {
+    console.log('_computeHasFormData', record);
+    return !!(record && record.base && record.base.length);
+  },
+
   _computeHasFiles: function(no) {
     return !!no;
   },
@@ -157,6 +169,23 @@ Polymer({
     }
     this.$.formData.setField(obj.name, value, {
       contentType: contentType
+    });
+  },
+
+  _computeToggleLabel: function(page) {
+    return page === 0 ? 'preview message' : 'close preview';
+  },
+
+  _computeToggleIcon: function(page) {
+    return page === 0 ? 'arc:visibility' : 'arc:visibility-off';
+  },
+
+  _boundaryChanged: function(e) {
+    if (!e.detail.value) {
+      return;
+    }
+    this.fire('content-type-changed', {
+      value: 'multipart/form-data; boundary=' + e.detail.value
     });
   }
 

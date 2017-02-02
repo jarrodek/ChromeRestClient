@@ -67,10 +67,18 @@ The multipart form editor for the ARC's request panel.
       white-space: pre-line;
       overflow: auto;
     }
+
+    .toggle-preview-label {
+      margin-right: 8px;
+    }
+
+    .toggle-icon {
+      color: rgba(0, 0, 0, 0.87);
+    }
     </style>
     <div class="header">
       <p class="info">When using this form you will send the data as a "multipart/form-data". <a href="https://www.ietf.org/rfc/rfc2388.txt" target="_blank">Learn more.</a></p>
-      <paper-button on-tap="_togglePage">preview message</paper-button>
+      <paper-button hidden$="[[!hasFormData]]" on-tap="_togglePage"><span class="toggle-preview-label">[[_computeToggleLabel(page)]]</span><iron-icon class="toggle-icon" icon="[[_computeToggleIcon(page)]]"></iron-icon></paper-button>
     </div>
     <iron-pages selected="[[page]]">
       <section>
@@ -93,7 +101,7 @@ The multipart form editor for the ARC's request panel.
         <code>[[messagePreview]]</code>
       </section>
     </iron-pages>
-    <multipart-form-data id="formData"></multipart-form-data>
+    <multipart-form-data id="formData" on-boundary-changed="_boundaryChanged"></multipart-form-data>
   </template>
 </dom-module>
 <script src="multipart-payload-editor.js"></script>
