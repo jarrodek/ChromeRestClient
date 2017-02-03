@@ -136,7 +136,7 @@ class MultipartFormData {
     for (var i = 0; i < 24; i++) {
       boundary += Math.floor(Math.random() * 10).toString(16);
     }
-
+    console.log('setting generated boundary', boundary);
     this.boundary = boundary;
   }
 
@@ -297,6 +297,7 @@ class MultipartFormData {
     var message = this._getPartBody(part);
     return message.then((buffer) => {
       return Promise.resolve(this._bufferConcat(header, buffer));
+      // , this._stringToArrayBuffer('\r\n')
     });
   }
   /**

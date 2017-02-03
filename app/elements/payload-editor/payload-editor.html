@@ -184,8 +184,10 @@ the License.
           <paper-button raised on-tap="appendEmptyParam" class="add-param-button">Add another parameter</paper-button>
 
         </section>
-
-        <multipart-payload-editor form-data="{{formData}}" value="{{multipart}}"></multipart-payload-editor>
+        <section>
+          Multipat size: [[multipart._items.size]]
+          <multipart-payload-editor form-data="{{formData}}" value="{{multipart}}"></multipart-payload-editor>
+        </section>
       </iron-pages>
     </iron-collapse>
   </template>

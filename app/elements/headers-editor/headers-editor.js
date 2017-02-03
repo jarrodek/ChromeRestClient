@@ -247,6 +247,7 @@ Polymer({
   _detectContentType: function() {
     if (!this.headers && this.contentType) {
       this.set('contentType', null);
+      this._notifyContentType(null);
       return;
     }
     if (!this.headers) {
@@ -255,9 +256,17 @@ Polymer({
     var ct = this.getContentType(this.headers);
     if (!ct) {
       this.set('contentType', null);
+      this._notifyContentType(null);
       return;
     }
     this.set('contentType', ct);
+    this._notifyContentType(ct);
+  },
+
+  _notifyContentType: function(ct) {
+    this.fire('content-type-changed', {
+      value: ct
+    });
   },
 
   _isPayloadChanged: function() {
@@ -266,11 +275,11 @@ Polymer({
     }
   },
 
-  _onContentTypeChanged: function(old, newValue) {
+  _onContentTypeChanged: function() {
     if (!this.isPayload || !this.contentType) {
       return;
     }
-    console.log('_onContentTypeChanged', old, newValue);
+    // console.log('_onContentTypeChanged', old, newValue);
     var arr = this.headersToJSON(this.headers);
     var updated = false;
     var notChanged = false; //True when values are equal, no change needed.

@@ -391,10 +391,10 @@ class TestServer {
   _setMultipard() {
     app.post('/post', (req, res) => {
       console.log('Calling /post');
-      console.log(req.body, req.query);
       res.set('Connection', 'close');
       res.set('Content-Type', 'text/html');
       res.send('Post with success');
+
       // var busboy = new Busboy({
       //   headers: req.headers
       // });

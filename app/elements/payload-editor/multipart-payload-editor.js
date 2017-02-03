@@ -72,8 +72,21 @@ Polymer({
 
   ready: function() {
     if (this.value.boundary) {
-      this._notifyBoundary(this.value.boundary);
+      this.async(function() {
+        // So, the headers panel which should be notified about the change
+        // may not be ready and therefore the listeners might not be attached.
+        // Wait an arbitrary 500 ms and try then.
+        this._notifyBoundary(this.value.boundary);
+      }, 500);
     }
+  },
+
+  attached: function() {
+    this.listen(window, 'content-type-changed', '_onContentTypeChanged');
+  },
+
+  detached: function() {
+    this.listen(window, 'content-type-changed', '_onContentTypeChanged');
   },
 
   _openedChanged: function(opened) {
@@ -180,11 +193,14 @@ Polymer({
       return;
     }
     form.forEach((item) => this._updateFormData(item));
-    this.fire('value-changed', {
-      value: this.value
-    }, {
-      bubbles: false
-    });
+    // this.fire('value-changed', {
+    //   value: this.value
+    // }, {
+    //   bubbles: false
+    // });
+    var value = this.value;
+    this._setValue({});
+    this._setValue(value);
   },
 
   _updateFormData: function(obj) {
@@ -224,6 +240,7 @@ Polymer({
     this.fire('content-type-changed', {
       value: 'multipart/form-data; boundary=' + boundary
     });
+    this.__boundaryNotified = true;
   },
 
   _boundaryChnaged: function(e) {
@@ -235,7 +252,30 @@ Polymer({
   },
 
   _formDataChanged: function() {
+    if (!this.value) {
+      return;
+    }
+    this.value.clear();
     this._setFormData();
+  },
+
+  _onContentTypeChanged: function(e, detail) {
+    if (!this.value) {
+      return;
+    }
+    if (!detail.value || detail.value.toLowerCase().indexOf('boundary') === -1) {
+      return;
+    }
+    var match = detail.value.match(/boundary=(.*)/);
+    if (!match) {
+      return;
+    }
+    var boundary = match[1];
+    // There is possibility of concurrent job to update the data from generating a boudary
+    // in the multipart library, co update the field in next task.
+    this.async(function() {
+      this.value._boundary = boundary;
+    }, 1);
   }
 
   // _computeValue: function() {
