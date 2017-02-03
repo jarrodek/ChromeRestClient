@@ -47,13 +47,21 @@ Polymer({
       type: Array,
       notify: true
     },
+    /**
+     * A `MultipartFormData` instance. This should not be stored and contains a FormData
+     * associated with the `formData`.
+     */
+    multipart: {
+      type: Object,
+      notify: true
+    },
 
     opened: {
       type: Boolean,
       value: true
     },
     /**
-     * The source panel of the body value.
+     * The source editor of the body value.
      * It's a text representation of the `tabSelected` property.
      */
     bodySource: {

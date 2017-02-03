@@ -120,7 +120,7 @@ the License.
       </iron-collapse>
     </section>
 
-    <payload-editor hidden$="[[!isPayload]]" content-type="[[contentType]]" value="{{request.payload}}" form-data="{{request.formData}}" body-source="{{request.bodySource}}"></payload-editor>
+    <payload-editor hidden$="[[!isPayload]]" content-type="[[contentType]]" value="{{request.payload}}" multipart="{{request.multipart}}" form-data="{{request.formData}}" body-source="{{request.bodySource}}"></payload-editor>
 
     <div class="action-panel">
       <div class="status">[[statusMessage]]</div>

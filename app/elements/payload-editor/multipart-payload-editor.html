@@ -17,14 +17,14 @@ the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-fab-menu/paper-fab-menu.html">
 <link rel="import" href="../../bower_components/paper-fab-menu/paper-fab-menu-item.html">
-<link rel="import" href="../multipart-form-data/multipart-form-data.html">
 
 <link rel="import" href="multipart-icons.html">
 <link rel="import" href="file-form-item.html">
 <link rel="import" href="text-form-item.html">
-
+<script src="multipart-form-data.js"></script>
 <!--
 The multipart form editor for the ARC's request panel.
+
 -->
 <dom-module id="multipart-payload-editor">
   <template>
@@ -101,7 +101,6 @@ The multipart form editor for the ARC's request panel.
         <code>[[messagePreview]]</code>
       </section>
     </iron-pages>
-    <multipart-form-data id="formData" on-boundary-changed="_boundaryChanged"></multipart-form-data>
   </template>
 </dom-module>
 <script src="multipart-payload-editor.js"></script>

@@ -118,8 +118,7 @@ Polymer({
     let promise;
     if (['GET', 'HEAD'].indexOf(init.method) === -1) {
       if (this.request.bodySource === 'multipart') {
-        this.$.formData._items = this.request.formData;
-        promise = this.$.formData.generateMessage()
+        promise = this.request.multipart.generateMessage()
         .then((buffer) => {
           init.body = buffer;
         });

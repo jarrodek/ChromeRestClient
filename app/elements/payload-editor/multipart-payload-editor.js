@@ -1,5 +1,6 @@
 (function() {
 'use strict';
+/* global MultipartFormData */
 Polymer({
   is: 'multipart-payload-editor',
 
@@ -46,12 +47,34 @@ Polymer({
     page: {
       type: Number,
       value: 0
+    },
+    // Value of this form
+    value: {
+      type: Object,
+      readOnly: true,
+      notify: true,
+      value: function() {
+        return new MultipartFormData({
+          eventNode: this
+        });
+      }
     }
   },
 
   observers: [
-    '_pageChanged(page)'
+    '_pageChanged(page)',
+    '_formDataChanged(formData.*)'
   ],
+
+  listeners: {
+    'multipart-boundary-chnaged': '_boundaryChnaged'
+  },
+
+  ready: function() {
+    if (this.value.boundary) {
+      this._notifyBoundary(this.value.boundary);
+    }
+  },
 
   _openedChanged: function(opened) {
     if (opened) {
@@ -110,7 +133,7 @@ Polymer({
 
   _hasFormDataChanged: function(has) {
     if (has && !this.boundary) {
-      this.$.formData.updateBoundary();
+      this.value.updateBoundary();
     } else if (has) {
       this.fire('content-type-changed', {
         value: 'multipart/form-data; boundary=' + this.boundary
@@ -132,7 +155,7 @@ Polymer({
     if (!name) {
       return;
     }
-    this.$.formData.removeField(name);
+    this.value.delete(name);
   },
 
   _togglePage: function() {
@@ -141,11 +164,13 @@ Polymer({
 
   _pageChanged: function(page) {
     if (page === 0) {
-      this.$.formData.clear();
-      this.messagePreview = undefined;
+      if (this.value) {
+        this.value.clear();
+        this.messagePreview = undefined;
+      }
     } else {
       this._setFormData();
-      this.messagePreview = this.$.formData.generateMessagePreview();
+      this.messagePreview = this.value.generateMessagePreview();
     }
   },
 
@@ -155,9 +180,17 @@ Polymer({
       return;
     }
     form.forEach((item) => this._updateFormData(item));
+    this.fire('value-changed', {
+      value: this.value
+    }, {
+      bubbles: false
+    });
   },
 
   _updateFormData: function(obj) {
+    if (!obj || !obj.name) {
+      return;
+    }
     var value;
     var contentType;
     if (obj.file) {
@@ -170,10 +203,9 @@ Polymer({
       value = obj.value;
       contentType = obj.contentType;
     }
-    this.$.formData.setField(obj.name, value, {
-      contentType: contentType
+    this.value.set(obj.name, value, {
+      mime: contentType
     });
-
   },
 
   _computeToggleLabel: function(page) {
@@ -183,15 +215,28 @@ Polymer({
   _computeToggleIcon: function(page) {
     return page === 0 ? 'arc:visibility' : 'arc:visibility-off';
   },
+  /**
+   * Notifies content type header change when boundary change.
+   *
+   * @param {String} boundary New boudary.
+   */
+  _notifyBoundary: function(boundary) {
+    this.fire('content-type-changed', {
+      value: 'multipart/form-data; boundary=' + boundary
+    });
+  },
 
-  _boundaryChanged: function(e) {
+  _boundaryChnaged: function(e) {
     if (!e.detail.value) {
       return;
     }
-    this.fire('content-type-changed', {
-      value: 'multipart/form-data; boundary=' + e.detail.value
-    });
+    this.boundary = e.detail.value;
+    this._notifyBoundary(e.detail.value);
   },
+
+  _formDataChanged: function() {
+    this._setFormData();
+  }
 
   // _computeValue: function() {
   //   this.debounce('body-value-gen', function() {
