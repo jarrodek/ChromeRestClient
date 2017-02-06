@@ -21,7 +21,7 @@
     "HTML5-History-API": "devote/HTML5-History-API#latest",
     "dexie-js": "dfahlander/Dexie.js#latest",
     "har": "jarrodek/har#latest",
-    "socket-fetch": "advanced-rest-client/socket-fetch#^1.0.63",
+    "socket-fetch": "advanced-rest-client/socket-fetch#multipart",
     "chrome-app-filesystem": "advanced-rest-client/chrome-app-filesystem#master",
     "chrome-image": "advanced-rest-client/chrome-image#1.0.0",
     "code-mirror": "advanced-rest-client/code-mirror#master",
