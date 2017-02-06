@@ -253,7 +253,7 @@ class MultipartFormData {
     for (var value of this._items.values()) {
       parts.push(this._getMessage(value));
     }
-    parts.push(Promise.resolve(this._stringToArrayBuffer(this.boundary + '--')));
+    parts.push(Promise.resolve(this._stringToArrayBuffer('--' + this.boundary + '--')));
     return Promise.all(parts)
     .then((buffers) => {
       return this._bufferConcat(buffers);
@@ -275,7 +275,7 @@ class MultipartFormData {
     for (var value of this._items.values()) {
       parts.push(this._getMessagePreview(value));
     }
-    parts.push(this.boundary + '--');
+    parts.push('--' + this.boundary + '--');
     return parts.join('');
   }
 
@@ -358,7 +358,7 @@ class MultipartFormData {
    * @return {String} The header string. Note that then header will always end with new line.
    */
   _getHeader(part) {
-    var header = this.boundary + '\r\n';
+    var header = '--' + this.boundary + '\r\n';
     header += 'Content-Disposition: form-data; ';
     header += 'name="' + part.name + '"';
 
