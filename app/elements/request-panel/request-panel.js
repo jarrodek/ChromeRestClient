@@ -241,9 +241,9 @@
         case 'history':
           this.requestType = this.routeParams.type;
           this.set('historyId', decodeURIComponent(this.routeParams.historyId));
+          this._setPageTitle('Request');
           break;
         case 'drive':
-
           // This is not really a request. It ment to open a drive item.
           // Drive data will be called via /current route.
           let id = this.routeParams.driveId;

@@ -64,6 +64,10 @@ Set a `positionTarget` property to position the element on the input field.
       color: #fff;
     }
 
+    .iron-selected paper-item:focus .method.post {
+      color: rgb(33, 150, 243);
+    }
+
     .method.put {
       background: rgba(255, 165, 0, 0.24);
       color: rgb(255, 165, 0);
@@ -79,12 +83,20 @@ Set a `positionTarget` property to position the element on the input field.
       color: rgb(156, 39, 176);
     }
 
-    .url {
+    .name {
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
       font-size: 14px;
+      /*margin-right: 8px;*/
     }
+
+    /*.url {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      font-size: 12px;
+    }*/
 
     .group-header {
       font-weight: bold;
@@ -115,6 +127,15 @@ Set a `positionTarget` property to position the element on the input field.
     iron-list {
       flex: 1 1 auto;
     }
+
+    .iron-selected paper-item {
+      background-color: #FF9800;
+      color: #fff;
+    }
+
+    .iron-selected .method {
+      background-color: #fff;
+    }
     </style>
     <paper-progress hidden$="[[!querying]]" indeterminate></paper-progress>
 
@@ -125,10 +146,11 @@ Set a `positionTarget` property to position the element on the input field.
 
     <iron-list items="[[items]]" id="list" hidden$="[[!hasItems]]">
       <template>
-        <div data-index$="[[index]]" title$="[[item.name]] - [[item.url]]">
+        <div data-index$="[[index]]" title$="[[item.name]] - [[item.url]]" class$="[[_computeItemClass(item._id, selectedSaved)]]">
           <paper-item>
             <span class$="[[_computeMethodClass(item.method)]]">[[item.method]]</span>
-            <span class="url">[[item.name]]</span>
+            <span class="name">[[item.name]]</span>
+            <!-- <span class="url">[[item.url]]</span> -->
             <paper-ripple></paper-ripple>
           </paper-item>
         </div>

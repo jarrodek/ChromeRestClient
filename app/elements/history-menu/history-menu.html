@@ -64,6 +64,10 @@ Set a `positionTarget` property to position the element on the input field.
       color: #fff;
     }
 
+    .iron-selected paper-item:focus .method.post {
+      color: rgb(33, 150, 243);
+    }
+
     .method.put {
       background: rgba(255, 165, 0, 0.24);
       color: rgb(255, 165, 0);
@@ -115,6 +119,15 @@ Set a `positionTarget` property to position the element on the input field.
     iron-list {
       flex: 1 1 auto;
     }
+
+    .iron-selected paper-item {
+      background-color: #FF9800;
+      color: #fff;
+    }
+
+    .iron-selected .method {
+      background-color: #fff;
+    }
     </style>
     <paper-progress hidden$="[[!querying]]" indeterminate></paper-progress>
 
@@ -125,7 +138,7 @@ Set a `positionTarget` property to position the element on the input field.
 
     <iron-list items="[[items]]" id="list" hidden$="[[!hasItems]]">
       <template>
-        <div data-index$="[[index]]" title$="[[item.url]]">
+        <div data-index$="[[index]]" title$="[[item.url]]" class$="[[_computeItemClass(item._id, selectedHistory)]]">
           <div class="group-header" hidden$="[[!item.hasHeader]]">[[item.header]]</div>
           <paper-item>
             <span class$="[[_computeMethodClass(item.method)]]">[[item.method]]</span>

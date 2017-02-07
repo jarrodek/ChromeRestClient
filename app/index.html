@@ -25,7 +25,7 @@
           <paper-icon-button icon="arc:pin-drawer" class$="[[_computePinDrawerClass(forceNarrowLayout, narrowLayout)]]" on-tap="_pinDrawer" title="Pin drawer" alt="Pin drawer"></paper-icon-button>
         </paper-toolbar>
         <template is="dom-if" if="[[initialized]]">
-            <arc-menu-controller loading use-pouch-db="[[usePouchDb]]" with-toast="[[withToast]]" route="[[route]]" base-url="[[baseUrl]]"></arc-menu-controller>
+            <arc-menu-controller loading use-pouch-db="[[usePouchDb]]" with-toast="[[withToast]]" route="[[route]]" route-params="[[params]]"></arc-menu-controller>
         </template>
         <div id="drawerResizer"></div>
       </paper-scroll-header-panel>

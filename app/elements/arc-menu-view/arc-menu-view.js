@@ -7,19 +7,11 @@
        * Current route object.
        */
       route: String,
-      /**
-       * Apps base URL.
-       */
-      baseUrl: String,
+      routeParams: Object,
       /**
        * Remove history from view if set to true.
        */
       noHistory: {
-        type: Boolean,
-        value: false
-      },
-      /** Is the app has been authorized by the user. */
-      appAuthorized: {
         type: Boolean,
         value: false
       },

@@ -2,7 +2,6 @@
   'use strict';
 
   let app = document.querySelector('#app');
-  app.baseUrl = '/';
   app.pageTitle = '';
   /**
    * Because controllers do not have direct access to the toolbar it must keep relevant data in

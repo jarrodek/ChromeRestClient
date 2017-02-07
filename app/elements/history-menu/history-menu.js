@@ -6,6 +6,8 @@ Polymer({
   ],
 
   properties: {
+    routeParams: Object,
+    route: String,
     scrollTarget: {
       type: Object,
       value: function() {
@@ -16,8 +18,17 @@ Polymer({
     includeDocs: {
       type: Boolean,
       value: true
+    },
+
+    selectedHistory: {
+      type: String,
+      readOnly: true
     }
   },
+
+  observers: [
+    '_routeChanged(opened, route, routeParams.*)'
+  ],
 
   attached: function() {
     this.listen(window, 'history-object-changed', '_historyChanged');
@@ -198,6 +209,27 @@ Polymer({
         this.splice('items', index, 1);
       }
     });
-  }
+  },
 
+  _routeChanged: function(opened, route, record) {
+    if (!route || !record || !record.base || !this.items || !this.items.length) {
+      return;
+    }
+    if (record.base.type !== 'history') {
+      if (this.selectedHistory) {
+        this._setSelectedHistory(null);
+      }
+      return;
+    }
+    var id = decodeURIComponent(record.base.historyId);
+    this._setSelectedHistory(id);
+  },
+
+  _computeItemClass: function(_id, selectedHistory) {
+    var selected = _id === selectedHistory;
+    if (selected) {
+      return 'iron-selected';
+    }
+    return '';
+  }
 });

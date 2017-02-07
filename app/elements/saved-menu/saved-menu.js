@@ -6,13 +6,24 @@ Polymer({
   ],
 
   properties: {
+    routeParams: Object,
+    route: String,
     scrollTarget: {
       type: Object,
       value: function() {
         return this.$.list;
       }
+    },
+
+    selectedSaved: {
+      type: String,
+      readOnly: true
     }
   },
+
+  observers: [
+    '_routeChanged(opened, route, routeParams.*)'
+  ],
 
   attached: function() {
     this.listen(window, 'request-object-changed', '_savedChanged');
@@ -143,6 +154,28 @@ Polymer({
         this.splice('items', index, 1);
       }
     });
+  },
+
+  _routeChanged: function(opened, route, record) {
+    if (!route || !record || !record.base || !this.items || !this.items.length) {
+      return;
+    }
+    if (record.base.type !== 'saved') {
+      if (this.selectedSaved) {
+        this._setSelectedSaved(null);
+      }
+      return;
+    }
+    var id = decodeURIComponent(record.base.savedId);
+    this._setSelectedSaved(id);
+  },
+
+  _computeItemClass: function(_id, selectedSaved) {
+    var selected = _id === selectedSaved;
+    if (selected) {
+      return 'iron-selected';
+    }
+    return '';
   }
 
 });
