@@ -2,7 +2,8 @@ Polymer({
   is: 'history-menu',
 
   behaviors: [
-    ArcBehaviors.MenuListBehavior
+    ArcBehaviors.MenuListBehavior,
+    Polymer.IronResizableBehavior
   ],
 
   properties: {
@@ -18,6 +19,10 @@ Polymer({
       value: true
     }
   },
+
+  observers: [
+    '_notifyList(opened)'
+  ],
 
   attached: function() {
     this.listen(window, 'history-object-changed', '_historyChanged');
@@ -181,6 +186,14 @@ Polymer({
         this.splice('items', index, 1);
       }
     });
+  },
+
+  _notifyList: function(opened) {
+    if (opened && this.$.list) {
+      // console.log('notifyResize');
+      // this.$.list.notifyResize();
+      this.notifyResize();
+    }
   }
 
 });

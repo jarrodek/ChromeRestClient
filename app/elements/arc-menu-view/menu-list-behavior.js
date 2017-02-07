@@ -243,6 +243,7 @@ window.ArcBehaviors.MenuListBehaviorImpl = {
 
     db.allDocs(this.queryOptions)
     .then((response) => {
+      this._setQuerying(false);
       if (response && response.rows.length > 0) {
         // Set up pagination.
         this.queryOptions.startkey = response.rows[response.rows.length - 1].key;
@@ -256,7 +257,6 @@ window.ArcBehaviors.MenuListBehaviorImpl = {
           this.push('items', item);
         });
       }
-      this._setQuerying(false);
     })
     .catch((e) => {
       this._setQuerying(false);
