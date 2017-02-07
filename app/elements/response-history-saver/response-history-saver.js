@@ -9,8 +9,19 @@
      * 2) Insert new hostory data object to the datastore.
      */
     saveHistory: function(request, response) {
-      return this._saveHistoryData(request, response)
+      return this._preparePayload(request)
+      .then((payload) => {
+        request.payload = payload;
+      })
+      .then(() => this._saveHistoryData(request, response))
       .then(() => this._updateHistory(request, response));
+    },
+
+    _preparePayload: function(request) {
+      if (request.payload instanceof MultipartFormData) {
+        return request.payload.generateMessage();
+      }
+      return Promise.resolve(request.payload);
     },
 
     _saveHistoryData: function(req, res) {
@@ -47,11 +58,25 @@
           url = req.url;
         }
       }
+
+      let payload = req.payload;
+      let requestPayloadSize;
+
+      if (payload instanceof ArrayBuffer) {
+        requestPayloadSize = payload.byteLength;
+        let enc = new TextDecoder();
+        payload = enc.decode(payload);
+      } else if (payload instanceof Blob) {
+        requestPayloadSize = payload.size;
+        payload = '[file data]';
+      } else {
+        requestPayloadSize = arc.app.utils.calculateBytes(req.payload);
+      }
+
       let id = encodeURIComponent(url) + '/' + req.method + '/' + this.$.uuid.generate();
       // Add some data size calculations
       let responseHeadersSize = arc.app.utils.calculateBytes(responseHeaders);
       let responsePayloadSize = arc.app.utils.calculateBytes(res.rawBody);
-      let requestPayloadSize = arc.app.utils.calculateBytes(req.payload);
       let requestHeadersSize = arc.app.utils.calculateBytes(req.headers);
       var _doc = {
         _id: id,
@@ -97,6 +122,22 @@
       var today = this._getDayToday(rTime);
       var k = today + '/' + encodeURIComponent(req.url) + '/' + req.method;
 
+      var formData;
+      if (req.formData && req.formData.length) {
+        formData = req.formData.map((item) => {
+          if (item.file) {
+            item.value = [];
+          }
+          return item;
+        });
+      }
+
+      if (req.payload instanceof ArrayBuffer) {
+        req.payload = '';
+      } else if (req.payload instanceof Blob) {
+        req.payload = '';
+      }
+
       var db = new PouchDB('history-requests');
       return db.get(k)
       .then((r) => {
@@ -104,6 +145,7 @@
         r.headers = req.headers;
         r.method = req.method;
         r.payload = req.payload;
+        r.formData = formData;
         r.url = req.url;
         r.updated = rTime;
         return db.put(r)
@@ -126,7 +168,8 @@
           headers: req.headers,
           method: req.method,
           payload: req.payload,
-          url: req.url
+          url: req.url,
+          formData: formData
         };
         return db.put(_doc)
         .then((insertResult) => {

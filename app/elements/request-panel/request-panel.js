@@ -382,6 +382,7 @@
         name: r.name,
         payload: r.payload,
         url: r.url,
+        formData: r.formData,
         _id: r._id
       };
       this.set('request', base);
@@ -992,7 +993,13 @@
     _saveHistory: function() {
       chrome.storage.sync.get({'HISTORY_ENABLED': true}, (r) => {
         if (r.HISTORY_ENABLED) {
-          this.$.responseSaver.saveHistory(this.request, this.response)
+          let req = Object.assign({}, this.request);
+          if (this.bodySource === 'multipart') {
+            req.payload = this.multipartBody.clone();
+          } else if (this.bodySource === 'file') {
+            debugger;
+          }
+          this.$.responseSaver.saveHistory(req, this.response)
           .catch((e) => {
             this.fire('app-log', {'message': ['Unable save history.', e], 'level': 'error'});
           });
