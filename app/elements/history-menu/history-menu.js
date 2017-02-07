@@ -23,13 +23,30 @@ Polymer({
     this.listen(window, 'history-object-changed', '_historyChanged');
     this.listen(window, 'request-objects-deleted', '_historyDeleted');
     this.listen(window, 'data-imported', 'refresh');
+    this.listen(window, 'datastrores-destroyed', '_onDatabaseDestroy');
   },
 
   detached: function() {
     this.unlisten(window, 'history-object-changed', '_historyChanged');
     this.unlisten(window, 'request-objects-deleted', '_historyDeleted');
     this.unlisten(window, 'data-imported', 'refresh');
+    this.unlisten(window, 'datastrores-destroyed', '_onDatabaseDestroy');
   },
+
+  _onDatabaseDestroy: function(e) {
+    var databases = e.detail.datastores;
+    if (!databases || !databases.length) {
+      return;
+    }
+    if (databases.indexOf('history-requests') === -1) {
+      return;
+    }
+    var db = this._getDb();
+    db.close().then(() => {
+      this.refresh();
+    });
+  },
+
   /**
    * Accepts currently selected suggestion and enters it into a text field.
    */

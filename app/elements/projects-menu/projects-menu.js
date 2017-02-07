@@ -68,7 +68,12 @@ Polymer({
    * Refresh projects list and display new list.
    */
   refreshProjects: function() {
-    this.reset();
+    // this.reset();
+    delete this.queryOptions.startkey;
+    delete this.queryOptions.skip;
+    this._setQuerying(false);
+    this.set('items', []);
+    this.set('selectedItemIndex', -1);
     this._makeQuery();
   },
 
@@ -161,9 +166,7 @@ Polymer({
     }
     this.set('items', []);
     var db = this._getDb();
-    db.close().then(function() {
-      console.log('The legacy-projects database has been closed.');
-    });
+    db.close();
   },
 
   _projectsListChanged: function(record) {

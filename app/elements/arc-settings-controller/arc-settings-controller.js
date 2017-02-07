@@ -329,7 +329,7 @@ Polymer({
       message: 'Removing data from the store. This may take a while...'
     });
     this.deletingDatabases = true;
-    this._destroyList(dbs)
+    this._destroyList(Array.from(dbs))
     .then((errors) => {
       this.deletingDatabases = false;
       if (!errors || !errors.length) {

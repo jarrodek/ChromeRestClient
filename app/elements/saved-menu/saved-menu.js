@@ -18,12 +18,28 @@ Polymer({
     this.listen(window, 'request-object-changed', '_savedChanged');
     this.listen(window, 'request-objects-deleted', '_savedDeleted');
     this.listen(window, 'data-imported', '_refreshSaved');
+    this.listen(window, 'datastrores-destroyed', '_onDatabaseDestroy');
   },
 
   detached: function() {
     this.unlisten(window, 'history-object-changed', '_savedChanged');
     this.unlisten(window, 'request-objects-deleted', '_savedDeleted');
     this.unlisten(window, 'data-imported', '_refreshSaved');
+    this.unlisten(window, 'datastrores-destroyed', '_onDatabaseDestroy');
+  },
+
+  _onDatabaseDestroy: function(e) {
+    var databases = e.detail.datastores;
+    if (!databases || !databases.length) {
+      return;
+    }
+    if (databases.indexOf('saved-requests') === -1) {
+      return;
+    }
+    var db = this._getDb();
+    db.close().then(() => {
+      this.refresh();
+    });
   },
 
   _refreshSaved: function() {
@@ -95,7 +111,6 @@ Polymer({
     }
     var changedItem = Object.assign({}, e.detail.request);
     var id = e.detail.oldId || changedItem._id;
-    console.log('MENU old id', id, changedItem._id);
     var items = this.items;
     if (!items) {
       this.set('items', []);
@@ -109,10 +124,8 @@ Polymer({
       // items.push(changedItem);
       // items.sort(this._sortFunction);
       // this.set('items', items);
-      console.log('Pushing new');
       this.push('items', changedItem);
     } else {
-      console.log('Updating existing');
       this.set(['items', index], changedItem);
     }
   },
