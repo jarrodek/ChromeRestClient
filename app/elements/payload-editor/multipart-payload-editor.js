@@ -101,6 +101,7 @@ Polymer({
 
   /** Append new file form row  */
   appendEmptyFile: function() {
+    this.$.fabMenu.opened = false;
     var item = {
       name: '',
       value: [],
@@ -113,6 +114,7 @@ Polymer({
   },
 
   appendEmptyText: function() {
+    this.$.fabMenu.opened = false;
     var item = {
       name: '',
       value: '',
