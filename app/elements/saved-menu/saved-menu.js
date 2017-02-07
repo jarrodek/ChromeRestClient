@@ -90,6 +90,9 @@ Polymer({
   },
 
   _savedChanged: function(e) {
+    if (!this.opened) {
+      return;
+    }
     var changedItem = Object.assign({}, e.detail.request);
     var id = e.detail.oldId || changedItem._id;
     console.log('MENU old id', id, changedItem._id);
