@@ -84,8 +84,10 @@ window.ArcBehaviors.ArcMagicVariablesRunnerBehavior = {
   },
 
   _applyMagicVariablesPayload: function(request) {
-    if (request.bodySource === 'multipart') {
+    if (request.payload instanceof MultipartFormData) {
       return this._applyVariablesFormData(request);
+    } else if (typeof request.payload !== 'string') {
+      return Promise.resolve(request);
     }
 
     this.$.magicVariables.value = request.payload;
@@ -97,13 +99,39 @@ window.ArcBehaviors.ArcMagicVariablesRunnerBehavior = {
   },
 
   _applyVariablesFormData: function(request) {
-    var data = request.formData;
+    var data = [];
+    for (let part of request.payload.values()) {
+      // Value is instance of MultipartMessagePart
+      // Transform it to simple object
+      let obj = {
+        name: part.name,
+        orig: {
+          name: part.name // this won't be changed
+        }
+      };
+      if (!part.isFile) {
+        obj.value = part.value;
+        obj.mime = part.mime;
+      }
+      data.push(obj);
+    }
     if (!data || !data.length) {
       return Promise.resolve(request);
     }
     return this._applyVariablesFormDataArray(data)
     .then((results) => {
-      request.formData = results;
+      let body = request.payload;
+      results.forEach((result) => {
+        let part = body.getPart(result.orig.name);
+        body.delete(result.orig.name);
+        part.name = result.name;
+        if (!part.isFile) {
+          part.value = result.value;
+          part.mime = result.mime;
+        }
+        request.payload.setPart(result.name, part);
+      });
+      request.payload = body;
       return request;
     });
   },

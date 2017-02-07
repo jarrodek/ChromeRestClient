@@ -50,6 +50,7 @@
     "URI": true,
     "fixture": true,
     "expect": true,
-    "app": true
+    "app": true,
+    "MultipartFormData": true
   }
 }

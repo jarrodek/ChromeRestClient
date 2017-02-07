@@ -151,7 +151,15 @@
       assistantUrl: {
         type: String,
         readOnly: true
-      }
+      },
+      /**
+       * A multipart body is set when the multipart panel in the body editor is selected.
+       */
+      multipartBody: {
+        type: Object
+      },
+      // A source panel of the body (one of raw, form, multipart, file)
+      bodySource: String
     },
 
     observers: [
@@ -177,7 +185,8 @@
       'request-load-end': '_requestStatusChanged',
       'request-headers-sent': '_requestStatusChanged',
       'is-payload-changed': '_isPayloadChanged',
-      'iron-overlay-closed': '_dialogClosedHandler'
+      'iron-overlay-closed': '_dialogClosedHandler',
+      'body-source-changed': '_onBodySourceChanged'
     },
 
     attached: function() {
@@ -797,6 +806,11 @@
           }
         });
       };
+      if (this.bodySource === 'multipart') {
+        request.payload = this.multipartBody.clone();
+      } else if (this.bodySource === 'file') {
+        debugger;
+      }
       // A failsafe if there's an issue with the DB. It will give 2.5s to execute queries
       // and if code below do not return in that time the request will be executed
       // without applying variables, cookies etc
@@ -1089,8 +1103,8 @@
       });
     },
 
-    _onShortcutSend: function(e) {
-      console.log('_onShortcutSend', e);
+    _onBodySourceChanged: function(e) {
+      this.bodySource = e.detail.value;
     }
   });
 })();

@@ -60,6 +60,13 @@ Polymer({
     selectedParameters: {
       type: Number,
       value: 0
+    },
+    /**
+     * A multipart body is set when the multipart panel in the body editor is selected.
+     */
+    multipartBody: {
+      type: Object,
+      notify: true
     }
   },
 
