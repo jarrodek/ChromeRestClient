@@ -251,7 +251,20 @@ Polymer({
     this._notifyBoundary(e.detail.value);
   },
 
-  _formDataChanged: function() {
+  _formDataChanged: function(record) {
+    if (!record || !record.base || !record.base.length) {
+      return;
+    }
+    record.base.forEach((item) => {
+      if (!item.file) {
+        return;
+      }
+      for (let i = item.value.length - 1; i >= 0; i--) {
+        if (!(item.value[i] instanceof Blob)) {
+          item.value.splice(i, 1);
+        }
+      }
+    });
     if (!this.value) {
       return;
     }
