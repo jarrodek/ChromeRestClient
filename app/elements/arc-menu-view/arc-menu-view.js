@@ -141,6 +141,11 @@
           }
           logViewer.open();
           break;
+        case 'about-view':
+          this.fire('navigate', {
+            url: '/about'
+          });
+          break;
       }
     },
 
