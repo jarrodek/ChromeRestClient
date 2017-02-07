@@ -61,6 +61,11 @@ Polymer({
     notificationsEnabled: {
       type: Boolean,
       value: false
+    },
+
+    deletingDatabases: {
+      type: Boolean,
+      value: false
     }
   },
   observers: [
@@ -321,22 +326,62 @@ Polymer({
       dbs.push('legacy-projects');
     }
     StatusNotification.notify({
-      message: 'Removing data from the store...'
+      message: 'Removing data from the store. This may take a while...'
     });
-    var p = dbs.map((db) => new PouchDB(db).destroy());
-    Promise.all(p)
-    .then(() => {
-      StatusNotification.notify({
-        message: 'Data cleared'
+    this.deletingDatabases = true;
+    this._destroyList(dbs)
+    .then((errors) => {
+      this.deletingDatabases = false;
+      if (!errors || !errors.length) {
+        StatusNotification.notify({
+          message: 'Data cleared from the database'
+        });
+      } else {
+        StatusNotification.notify({
+          message: 'Not all data has been removed. Error occurred.'
+        });
+        this.fire('app-log', {
+          'message': ['Delete database error: ', errors.join('\n')],
+          'level': 'error'
+        });
+      }
+      this.fire('datastrores-destroyed', {
+        datastores: dbs
       });
+    });
+  },
+
+  _destroyList: function(list, errors) {
+    if (!list || !list.length) {
+      return Promise.resolve(errors);
+    }
+    var db = list.shift();
+    return new PouchDB(db).close()
+    .then(() => {
+      return this._doDestroy(db);
+    })
+    .then(() => {
+      return new PouchDB(db);
+    })
+    .then(() => {
+      return this._destroyList(list, errors);
     })
     .catch((e) => {
-      StatusNotification.notify({
-        message: 'Data clear error: ' + e.message
-      });
+      errors = errors || [];
+      errors.push(e.message);
+      return this._destroyList(list, errors);
     });
-    this.fire('datastrores-destroyed', {
-      datastores: dbs
+  },
+
+  _doDestroy: function(dbName) {
+    return new Promise((resolve, reject) => {
+      let request = window.indexedDB.deleteDatabase('_pouch_' + dbName);
+      request.onsuccess = () => {
+        resolve();
+      };
+      request.onerror = () => {
+        reject(new Error('Unable to delete ' + dbName));
+      };
     });
   }
 });

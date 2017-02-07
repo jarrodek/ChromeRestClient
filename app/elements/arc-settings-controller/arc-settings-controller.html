@@ -182,7 +182,8 @@ the License.
                 <div>Clear stored data</div>
                 <!-- <div secondary>This will remove all data stored by the application. This can't be undo unless the export file has been created.</div> -->
               </paper-item-body>
-              <iron-icon icon="arc:arrow-drop-down" class="nav-away-icon" item-icon></iron-icon>
+              <iron-icon icon="arc:arrow-drop-down" class="nav-away-icon" item-icon hidden$="[[deletingDatabases]]"></iron-icon>
+              <paper-spinner item-icon active hidden$="[[!deletingDatabases]]"></paper-spinner>
             </paper-item>
           </paper-material>
 
@@ -326,7 +327,7 @@ the License.
             <paper-checkbox id="deleteSavedOption" on-iron-change="_deleteSavedChanged" name="saved-requests" checked>Saved requests (will also delete projects)</paper-checkbox>
             <paper-checkbox id="deleteProjectsOption" name="legacy-projects" checked>Projects</paper-checkbox>
             <paper-checkbox name="history-requests" checked>Requests history</paper-checkbox>
-            <paper-checkbox name="history-data" checked>History data stored for performance analysis</paper-checkbox>
+            <!-- <paper-checkbox name="history-data" checked>History data stored for performance analysis</paper-checkbox> -->
             <paper-checkbox name="cookies" checked>Cookies</paper-checkbox>
             <paper-checkbox name="auth-data" checked>Saved passwords</paper-checkbox>
             <paper-checkbox name="url-history" checked>URLs history (autofill data)</paper-checkbox>
