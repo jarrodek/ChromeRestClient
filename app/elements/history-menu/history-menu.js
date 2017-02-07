@@ -135,6 +135,9 @@ Polymer({
   },
 
   _historyChanged: function(e) {
+    if (!this.opened) {
+      return;
+    }
     var id = e.detail.id;
     var items = this.items;
     if (!items) {
