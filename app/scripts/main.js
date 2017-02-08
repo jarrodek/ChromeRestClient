@@ -61,7 +61,7 @@
   // event fired when the app is initialized and can remove loader.
   window.addEventListener('ArcInitialized', function() {
     document.querySelector('arc-loader-screen').close();
-    app.runTutorials();
+    // app.runTutorials();
     app.initialized = true;
   });
   window.addEventListener('WebComponentsReady', function() {
@@ -457,17 +457,17 @@
     });
   });
 
-  app.runTutorials = () => {
-    /// XHR toggle tutorial
-    chrome.storage.sync.get({'tutorials': []}, (r) => {
-      if (r.tutorials.indexOf('xhrElementTutorial') !== -1) {
-        app.$.xhrProxyTutorial.parentNode.removeChild(app.$.xhrProxyTutorial);
-        delete app.$.xhrProxyTutorial;
-        return;
-      }
-      app.$.xhrProxyTutorial.target = app.$.xhrToggle;
-    });
-  };
+  // app.runTutorials = () => {
+  //   /// XHR toggle tutorial
+  //   chrome.storage.sync.get({'tutorials': []}, (r) => {
+  //     if (r.tutorials.indexOf('xhrElementTutorial') !== -1) {
+  //       app.$.xhrProxyTutorial.parentNode.removeChild(app.$.xhrProxyTutorial);
+  //       delete app.$.xhrProxyTutorial;
+  //       return;
+  //     }
+  //     app.$.xhrProxyTutorial.target = app.$.xhrToggle;
+  //   });
+  // };
 
   app._closeXhrTutorial = () => {
     app.$.xhrProxyTutorial.hide();
