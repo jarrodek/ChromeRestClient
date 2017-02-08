@@ -115,126 +115,111 @@
     <onboarding-tutorial id="onboarding" auto>
       <onboarding-page>
         <div class="welcome-message">
-          <p class="c1">Welcome to new</p>
+          <p class="c1">Thank you for choosing</p>
           <p class="c2">Advanced REST Client</p>
-          <p class="c3">Let's walk through some recent changes</p>
+          <p class="c3">Let's walk through some key features</p>
         </div>
       </onboarding-page>
       <onboarding-page>
-        <h2>The app is now desktop app!</h2>
-        <div class="onboarding-image-page">
-          <div class="image">
-            <iron-icon icon="arc:desktop-windows"></iron-icon>
-          </div>
-          <div class="description">
-            <ul>
-              <li><b>much faster</b> thanks to Polymer framework</li>
-              <li><b>more secure</b> thanks to Content Security Policy environment</li>
-              <li><b>more reliable</b> because code base has been rewritten</li>
-              <li>and <b>more powerful</b> because the app is using sockets instead of XHR</li>
-            </ul>
-            <div class="info-button">
-              <paper-button on-tap="followLink" data-href="http://restforchrome.blogspot.co.uk/2016/04/new-advanced-rest-client-chrome-app.html" raised>Learn more</paper-button>
-            </div>
-          </div>
-        </div>
-      </onboarding-page>
-      <onboarding-page>
-        <h2>You can do more with ARC</h2>
         <div>
+          <h2>Google Drive sharing</h2>
           <div class="onboarding-image-page">
             <div class="image">
-              <iron-icon icon="arc:build"></iron-icon>
+              <iron-icon icon="arc:drive-color"></iron-icon>
             </div>
             <div class="description">
-              <ul>
-                <li>override User-Agent without using additional extensions</li>
-                <li>set any header with the request</li>
-                <li>read all headers in response</li>
-                <li>you have more control over the request</li>
-                <li>get all you can from the HTTP spec</li>
-              </ul>
-              <div class="info-button">
-                <paper-button on-tap="followLink" data-href="http://restforchrome.blogspot.co.uk/2016/04/arc-version-release-5-and-6.html" raised>Learn more</paper-button>
+              <div>
+                <p>Save and share your data on Google Drive.</p>
+                <p>You can export your data to file and share it with others.</p>
+                <div class="info-button">
+                  <paper-button on-tap="followLink" data-href="http://restforchrome.blogspot.co.uk/2016/04/data-sharing-options-in-new-advanced.html" raised>Learn more</paper-button>
+                </div>
               </div>
             </div>
           </div>
-          <p class="tutorial-additional-info">
-            Transport is now based on sockets so there are no limitations related to XHR or Fetch specification.
-            The app will send to the server only the data that you provide in the request form.<br/>
-            You can use predefined set of headers in the headers editor to imitate browser behavior.
-          </p>
         </div>
       </onboarding-page>
       <onboarding-page>
-        <h2>Google Drive integration and sharing</h2>
-        <div class="onboarding-image-page">
-          <div class="image">
-            <iron-icon icon="arc:drive-color"></iron-icon>
-            <iron-icon icon="arc:import-export"></iron-icon>
-          </div>
-          <div class="description">
-            <p>Save and share your data on Google Drive</p>
-            <p>Once you share request data with your team, they can easly use this data on their own machines.</p>
-            <p>You can also import and export projects and requests to file and share the file with anyone.</p>
-            <p>* more sharing options coming soon</p>
-            <div class="info-button">
-              <paper-button on-tap="followLink" data-href="http://restforchrome.blogspot.co.uk/2016/04/data-sharing-options-in-new-advanced.html" raised>Learn more</paper-button>
+        <div>
+          <h2>You can do more with ARC</h2>
+          <div class="onboarding-image-page">
+            <div class="image">
+              <iron-image src="/assets/headers.png"></iron-image>
+            </div>
+            <div class="description">
+              <div>
+                <p>Override User-Agent without using additional extensions</p>
+                <p>Set any header with the request</p>
+                <p>Read all headers in response</p>
+                <div class="info-button">
+                  <paper-button on-tap="followLink" data-href="http://restforchrome.blogspot.co.uk/2016/04/arc-version-release-5-and-6.html" raised>Learn more</paper-button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </onboarding-page>
       <onboarding-page>
-        <h2>ARC beta program</h2>
-        <div class="onboarding-image-page">
-          <div class="image">
-            <iron-image src="assets/beta-icon.png"></iron-image>
-          </div>
-          <div class="description">
-            <p class="beta-info">
-              Introducing ARC beta program. Now you can get new features earlier! <br/>
-              Help us test new features and influence app's development by giving us early feedback.</p>
-            <paper-button on-tap="followLink" data-href="http://restforchrome.blogspot.co.uk/2016/03/join-advanced-rest-client-beta-program.html" raised>sign up for beta program</paper-button>
+        <div>
+          <h2>ARC beta program</h2>
+          <div class="onboarding-image-page">
+            <div class="image">
+              <iron-image src="assets/beta-icon.png"></iron-image>
+            </div>
+            <div class="description">
+              <div>
+                <p class="beta-info">
+                  Help us test new features and influence app's development by giving us early feedback.</p>
+                <paper-button on-tap="followLink" data-href="http://restforchrome.blogspot.co.uk/2016/03/join-advanced-rest-client-beta-program.html" raised>sign up for beta program</paper-button>
+              </div>
+            </div>
           </div>
         </div>
       </onboarding-page>
       <onboarding-page>
-        <h2>Privacy</h2>
-        <div class="onboarding-image-page">
-          <div class="image">
-            <iron-icon icon="arc:shield"></iron-icon>
-            <paper-button on-tap="followLink" data-href="https://docs.google.com/document/d/1BzrKQ0NxFXuDIe2zMA-0SZBNU0P46MHr4GftZmoLUQU/edit" raised>Privacy policy</paper-button>
-          </div>
-          <div class="description">
-            <p>
-              The app is collecting anonymous usage statistics to provide better quality.<br/>
-              Data that you provide in the app like URL, headers and payload are stored locally and only you have control over this data.
-            </p>
-            <p>Data the app is using and how:</p>
-            <ul>
-              <li>Any access tokens provided by you or generated by the app are stored in local history along with the request.</li>
-              <li>Google Drive file ID of opened by the app file are stored in the local history.</li>
-              <li>You settings are synced between your profiles (if you are signed in to Chrome) using Google Sync service for Chrome Apps.</li>
-              <li>The app collects critical errors generated by the app and send them to Google Analytics. Data included in the report contains information about the exception itself (error message) and intentionally will not collect any user or user provided data.</li>
-            </ul>
-            <p>
-              You can turn off Google Analytics and local history in application settings.
-            </p>
+        <div>
+          <h2>Privacy</h2>
+          <div class="onboarding-image-page">
+            <div class="image">
+              <iron-icon icon="arc:shield"></iron-icon>
+              <paper-button on-tap="followLink" data-href="https://docs.google.com/document/d/1BzrKQ0NxFXuDIe2zMA-0SZBNU0P46MHr4GftZmoLUQU/edit" raised>Privacy policy</paper-button>
+            </div>
+            <div class="description">
+              <div>
+                <p>
+                  To provide better quality the app is collecting anonymous usage statistics.
+                </p>
+                <p>Data the app is using and how:</p>
+                <ul>
+                  <li>Any access tokens provided by you or generated by the app are stored in local history along with the request.</li>
+                  <li>Google Drive file ID of opened by the app file is stored in the local history.</li>
+                  <li>You settings are synced between your profiles (if you are signed in to Chrome) using Google Sync service for Chrome Apps.</li>
+                  <li>The app collects critical errors generated by the app and send them to Google Analytics. Data included in the report contains information about the exception itself (error message) and intentionally will not collect any user or user provided data.</li>
+                </ul>
+                <p>
+                  You can turn off Google Analytics and local history in application settings.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </onboarding-page>
       <onboarding-page id="onboardingNotifications">
-        <h2>Be notified about update</h2>
-        <div class="onboarding-image-page">
-          <div class="image">
-            <iron-icon icon="arc:notifications-active"></iron-icon>
-          </div>
-          <div class="description">
-            <p class="beta-info">
-              Beta, Dev and Canary channel users can be notified when new versions is released.
-              You'll receive a notification on your desktop when the app udpate itseld so you can test the changes right away.
-            </p>
-            <paper-button on-tap="enableNotifications" id="enableNotify" raised>Enable notifications</paper-button>
+        <div>
+          <h2>Be notified about update</h2>
+          <div class="onboarding-image-page">
+            <div class="image">
+              <iron-icon icon="arc:notifications-active"></iron-icon>
+            </div>
+            <div class="description">
+              <div>
+                <p class="beta-info">
+                  Beta, Dev and Canary channel users can be notified when new versions is released.
+                  You'll receive a notification on your desktop when the app udpate itseld so you can test the changes right away.
+                </p>
+                <paper-button on-tap="enableNotifications" id="enableNotify" raised>Enable notifications</paper-button>
+              </div>
+            </div>
           </div>
         </div>
       </onboarding-page>
