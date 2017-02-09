@@ -222,7 +222,8 @@ arc.bg.recordSession = () => {
   arc.bg.getAninimizedId().then((aid) => {
     let d = new Date();
     // let url = 'http://localhost:8080/analytics/record';
-    let url = 'http://api.chromerestclient.com/analytics/record';
+    // let url = 'http://api.chromerestclient.com/analytics/record';
+    let url = 'https://advancedrestclient-1155.appspot.com/analytics/record';
     let data = new FormData();
     data.append('aid', aid); // anonymousId
     data.append('t', d.getTime()); // time
