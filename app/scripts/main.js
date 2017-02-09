@@ -730,6 +730,24 @@
     }
   });
 
+  /* REQUEST NAME CHANGE WHEN PROJECT ENABLED */
+  window.addEventListener('request-object-changed', (e) => {
+    var oldId = e.detail.oldId;
+    if (app.selectedRequest === oldId || app.selectedRequest === e.detail.request._id) {
+      app.async(function() {
+        let id = e.detail.request._id;
+        app.set('selectedRequest', null);
+        app.set('selectedRequest', id);
+        for (var i = 0, len = app.projectEndpoints.length; i < len; i++) {
+          if (app.projectEndpoints[i]._id === id) {
+            app.pageTitle = app.projectEndpoints[i].name;
+            break;
+          }
+        }
+      }, 1);
+    }
+  });
+
   /* Drawer width support */
   app.drawerWidth = '360px';
   app._drawerTrack = function(e) {

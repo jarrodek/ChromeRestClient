@@ -41,8 +41,8 @@
               <template is="dom-if" if="[[projectEndpoints.length]]">
                 <paper-dropdown-menu label="Project endpoints" horizontal-align="left">
                   <paper-menu selected="[[selectedRequest]]" attr-for-selected="data-id" class="dropdown-content" on-iron-select="_onFeatureProjectEndpoints">
-                    <template is="dom-repeat" items="{{projectEndpoints}}">
-                      <paper-item data-id$="[[item.id]]">[[item.name]]</paper-item>
+                    <template is="dom-repeat" items="[[projectEndpoints]]">
+                      <paper-item data-id$="[[item._id]]">[[item.name]]</paper-item>
                     </template>
                   </paper-menu>
                 </paper-dropdown-menu>

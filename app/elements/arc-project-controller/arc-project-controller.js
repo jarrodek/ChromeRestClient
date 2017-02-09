@@ -159,33 +159,12 @@ Polymer({
     e.stopPropagation();
 
     if (this.usePouchDb) {
-      let event = this.fire('request-name-change', {
+      this.fire('request-name-change', {
         'dbName': 'saved-requests',
         'name': e.detail.item.name,
-        'id': e.detail.item.id
+        'id': e.detail.item._id
       });
-      let updatedId = e.detail.item.id;
-      if (event.detail.error) {
-        console.error(event.detail.message);
-        return;
-      }
-      event.detail.result
-      .then((request) => {
-        let index = this.requests.findIndex((i) => i._id === updatedId);
-        if (index === -1) {
-          console.error('Unable to find index.');
-          return;
-        }
-        this.set('requests.' + index + '._rev', request._rev);
-        this.set('requests.' + index + '._id', request._id);
-        this.set('requests.' + index + '.id', request._id);
-      })
-      .catch((e) => {
-        StatusNotification.notify({
-          message: e.message
-        });
-      });
-
+      // Item will be updated by related-requests element.
       return;
     }
     var request = e.detail.item;
