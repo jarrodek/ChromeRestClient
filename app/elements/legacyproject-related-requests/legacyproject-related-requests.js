@@ -30,11 +30,22 @@
     },
 
     _requestObjectChanged: function(e) {
+      var request = e.detail.request;
+      if (!request || !request.legacyProject || request.legacyProject !== this.projectId) {
+        return; // not related.
+      }
       var items = this.relatedRequests;
       if (!items || !items.length) {
+        this.set('relatedRequests', [request]);
         return;
       }
       var oldId = e.detail.oldId;
+      if (request._id === oldId) {
+        // that's new request.
+        this.push('relatedRequests', request);
+        return;
+      }
+
       for (let i = 0, len = items.length; i < len; i++) {
         if (items[i]._id === oldId) {
           this.set(['relatedRequests', i], e.detail.request);
