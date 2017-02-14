@@ -13,7 +13,6 @@
       }
       --table-base-cell: {
         padding-right: 16px;
-        padding-left: 56px;
         position: relative;
         height: 100%;
       }
@@ -25,8 +24,8 @@
       }
       --table-name-column: {
         @apply(--table-base-cell);
-        min-width: 120px;
-        max-width: 120px;
+        min-width: 220px;
+        max-width: 220px;
         padding-left: 40px;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -34,7 +33,6 @@
       }
       --table-name-value: {
         @apply(--table-name-column);
-        padding-left: 56px;
         height: initial;
         min-height: 24px;
         -webkit-user-select: text;
@@ -47,7 +45,6 @@
       }
       --table-method-value: {
         @apply(--table-method-column);
-        padding-left: 56px;
         height: auto;
         -webkit-user-select: text;
         cursor: text;
@@ -61,7 +58,6 @@
       ;
       --table-url-value: {
         @apply(--table-url-column);
-        padding-left: 56px;
         height: auto;
         -webkit-user-select: text;
         cursor: text;
@@ -72,7 +68,6 @@
       }
       --table-action-value: {
         @apply(--table-action-column);
-        padding-left: 56px;
         padding-right: 16px;
         height: auto;
       }
