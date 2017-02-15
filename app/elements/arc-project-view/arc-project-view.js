@@ -9,8 +9,21 @@ Polymer({
     project: {
       type: Object
     },
-    requests: Array
+    requests: Array,
+    // Selected by the user elements on the lists
+    currentSelection: {
+      type: Array,
+      notify: true
+    },
+    optionsState: {
+      type: Number,
+      value: 0
+    }
   },
+
+  observers: [
+    '_observeSelection(hasSelection)'
+  ],
 
   // Handler to export ptoject click.
   exportProject: function() {
@@ -54,5 +67,29 @@ Polymer({
     this.fire('delete', {
       project: this.project
     });
+  },
+
+  _computeOptionsTableClass: function(optionsState) {
+    var clazz = 'table-options';
+    clazz += (optionsState === 0 ? ' inactive' : '');
+    return clazz;
+  },
+
+  _observeSelection: function(hasSelection) {
+    if (hasSelection) {
+      this.optionsState = 1;
+    } else {
+      this.optionsState = 0;
+    }
+  },
+
+  _deleteSelected: function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!this.currentSelection || !this.currentSelection.length) {
+      this.$.noSelectionToast.open();
+      return;
+    }
+    this.fire('delete-selected');
   }
 });

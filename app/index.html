@@ -97,8 +97,8 @@
             <arc-data-io-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="dataimport"></arc-data-io-controller>
             <arc-settings-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="settings"></arc-settings-controller>
             <arc-about-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="about"></arc-about-controller>
-            <arc-project-controller use-pouch-db="[[usePouchDb]]" requests="{{currentRequests}}" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="project" route-params="[[params]]">
-              <arc-project-view requests="[[currentRequests]]"></arc-project-view>
+            <arc-project-controller use-pouch-db="[[usePouchDb]]" requests="{{currentRequests}}" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="project" route-params="[[params]]" current-selection="{{projectRequestsSelection}}">
+              <arc-project-view current-selection="{{projectRequestsSelection}}" requests="[[currentRequests]]"></arc-project-view>
             </arc-project-controller>
           </iron-pages>
         </div>
@@ -272,7 +272,7 @@
     <app-pouchdb-collate></app-pouchdb-collate>
     <app-logger></app-logger>
     <app-db-upgrade-1016></app-db-upgrade-1016>
-    <legacyproject-related-requests project-id="[[selectedProject]]" related-requests="{{projectEndpoints}}"></legacyproject-related-requests>
+    <legacyproject-related-requests all-data project-id="[[selectedProject]]" related-requests="{{projectEndpoints}}"></legacyproject-related-requests>
     <arc-definitions></arc-definitions>
     <request-model></request-model>
     <project-model></project-model>

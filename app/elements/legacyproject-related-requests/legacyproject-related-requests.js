@@ -40,18 +40,20 @@
         return;
       }
       var oldId = e.detail.oldId;
-      if (request._id === oldId) {
-        // that's new request.
-        this.push('relatedRequests', request);
-        return;
-      }
-
+      var updated = false;
       for (let i = 0, len = items.length; i < len; i++) {
         if (items[i]._id === oldId) {
-          this.set(['relatedRequests', i], e.detail.request);
+          items[i] = e.detail.request;
+          updated = true;
           break;
         }
       }
+      if (!updated) {
+        // new request
+        items.push(request);
+      }
+      items = this.__processData(items);
+      this.set('relatedRequests', items);
     },
 
     _query: function(projectId) {
@@ -118,6 +120,15 @@
       if (!result.length) {
         return [];
       }
+      result.sort((a, b) => {
+        if (a.projectOrder > b.projectOrder) {
+          return 1;
+        }
+        if (a.projectOrder < b.projectOrder) {
+          return -1;
+        }
+        return 0;
+      });
       return result.map((i) => {
         i.id = i._id;
         return i;
