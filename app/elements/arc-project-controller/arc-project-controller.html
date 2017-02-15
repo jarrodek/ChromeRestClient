@@ -5,8 +5,16 @@
     <style>
       :host {
         display: block;
+        position: relative;
+      }
+
+      paper-progress {
+        width: 100%;
+        position: absolute;
+        top: 0;
       }
     </style>
+    <paper-progress indeterminate hidden$="[[!loadingData]]"></paper-progress>
     <content id="children"></content>
     <arc-request-object-model id="requestModel" on-data-ready="_requestReady"></arc-request-object-model>
     <arc-project-object-model auto="[[_computeAuto(usePouchDb)]]" id="project" on-data-ready="_projectReady" on-error="_projectError" on-save="_projectSaved"></arc-project-object-model>

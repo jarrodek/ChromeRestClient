@@ -30,7 +30,14 @@ Polymer({
       notify: true
     },
     usePouchDb: Boolean,
-    projectId: String
+    projectId: String,
+    // True when loading data from the datastore.
+    loadingData: {
+      type: Boolean,
+      value: false,
+      readOnly: true,
+      notify: true
+    }
   },
 
   listeners: {
@@ -38,7 +45,7 @@ Polymer({
     'saved-list-item-name-changed': '_requestNameChanged',
     'delete': '_deleteRequested',
     'export': 'exportProject',
-    'project-related-requests-read': '_cancelEvent',
+    'project-related-requests-read': '_projectsRelatedRead',
     'project-name-changed': '_projectNameChangedInView',
     'dom-order-changed': '_updateItemsOrder',
     'saved-list-item-open': '_onOpenRequested',
@@ -48,7 +55,8 @@ Polymer({
 
   observers: [
     '_prepareProjectNew(opened, usePouchDb, routeParams.projectId)',
-    '_projectChanged(project.*)'
+    '_projectChanged(project.*)',
+    '_setLoaderState(opened)'
   ],
 
   onShow: function() {
@@ -403,9 +411,10 @@ Polymer({
     });
   },
 
-  _cancelEvent: function(e) {
+  _projectsRelatedRead: function(e) {
     e.preventDefault();
     e.stopPropagation();
+    this._setLoadingData(false);
   },
 
   _projectChanged: function() {
@@ -492,6 +501,12 @@ Polymer({
       });
       console.error(e);
     });
+  },
+
+  _setLoaderState: function(opened) {
+    if (opened) {
+      this._setLoadingData(true);
+    }
   }
 });
 })();

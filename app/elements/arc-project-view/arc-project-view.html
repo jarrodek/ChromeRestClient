@@ -122,7 +122,7 @@
       <paper-tooltip for="exportProject">Export project to file</paper-tooltip>
       <paper-tooltip for="deleteProject">Delete project and associated requests</paper-tooltip>
     </section>
-    <section class="requests-info">
+    <section class="requests-info" hidden$="[[loadingData]]">
       <h2>Associated request</h2>
       <div class="status-bar">
         <section class$="[[_computeOptionsTableClass(optionsState)]]">

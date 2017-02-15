@@ -6,18 +6,28 @@ Polymer({
    * @param {Object} project Project object to be deleted
    */
   properties: {
+
     project: {
       type: Object
     },
+
     requests: Array,
+
     // Selected by the user elements on the lists
     currentSelection: {
       type: Array,
       notify: true
     },
+
     optionsState: {
       type: Number,
       value: 0
+    },
+
+    // Set by controller, true when querying the datastore for data.
+    loadingData: {
+      type: Boolean,
+      value: false
     }
   },
 
