@@ -38,7 +38,7 @@
           <div class="title toolbar-hide">
             <span>[[pageTitle]]</span>
             <div class="project-endpoints" feature="projectEndpoints">
-              <template is="dom-if" if="[[projectEndpoints.length]]">
+              <template is="dom-if" if="[[_canShowProjectSelector(route, projectEndpoints.length)]]">
                 <paper-dropdown-menu label="Project endpoints" horizontal-align="left">
                   <paper-menu selected="[[selectedRequest]]" attr-for-selected="data-id" class="dropdown-content" on-iron-select="_onFeatureProjectEndpoints">
                     <template is="dom-repeat" items="[[projectEndpoints]]">

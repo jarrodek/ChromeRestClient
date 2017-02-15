@@ -43,6 +43,7 @@
   app.canRender = (status, dataSource, elementIsRequestPanel) => {
     return status && dataSource && elementIsRequestPanel === 'true';
   };
+  app._canShowProjectSelector = (route, count) => route === 'request' && count > 0;
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
     app.updateBranding();
