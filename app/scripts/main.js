@@ -809,4 +809,6 @@
     }
     return clazz;
   };
+  // Computes `active` flag for the legacy project related requests
+  app._processProjectRequests = (route) => route === 'request';
 })(document, window);

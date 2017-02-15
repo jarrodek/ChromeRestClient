@@ -14,11 +14,15 @@
       },
       // If true then a request object will contain all data. Otherwise only name and id.
       allData: Boolean,
-      _lastReadProjectId: String
+      _lastReadProjectId: String,
+      // If set to false the database query will be disabled on project id change.
+      active: {
+        type: Boolean
+      }
     },
 
     observers: [
-      '_query(projectId)'
+      '_query(active, projectId)'
     ],
 
     attached: function() {
@@ -56,8 +60,8 @@
       this.set('relatedRequests', items);
     },
 
-    _query: function(projectId) {
-      if (!projectId) {
+    _query: function(active, projectId) {
+      if (!active || !projectId) {
         return;
       }
       // if (projectId === this._lastReadProjectId) {

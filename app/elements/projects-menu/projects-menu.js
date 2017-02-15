@@ -101,6 +101,7 @@ Polymer({
     if (!place) {
       return;
     }
+    console.log('_acceptSelection', place);
     page(place);
   },
 
