@@ -1,0 +1,19 @@
+<dom-module id="projects-menu-requests">
+  <template>
+    <style>
+    :host {
+      display: block;
+    }
+
+    paper-item {
+      padding-left: 28px;
+    }
+    </style>
+    <paper-spinner active="[[querying]]" hidden$="[[!querying]]"></paper-spinner>
+    <template is="dom-repeat" items="[[requests]]">
+      <paper-item data-index$="[[index]]">[[item.name]]</paper-item>
+    </template>
+    <legacyproject-related-requests querying="{{querying}}" active="[[opened]]" all-data project-id="[[projectId]]" related-requests="{{requests}}"></legacyproject-related-requests>
+  </template>
+  <script src="projects-menu-requests.js"></script>
+</dom-module>

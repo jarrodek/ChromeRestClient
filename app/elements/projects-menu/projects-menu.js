@@ -60,7 +60,7 @@ Polymer({
       this._makeQuery();
       return;
     } else if (opened) {
-      this.$.list.notifyResize();
+      // this.$.list.notifyResize();
     }
   },
 
@@ -88,21 +88,36 @@ Polymer({
     e.stopPropagation();
     var path = e.path;
     var place;
+    var toggleOpenAction = false;
+    var elm;
     while (path.length) {
-      var elm = path.shift();
+      elm = path.shift();
       if (elm.nodeType !== 1) {
         continue;
       }
-      if (elm.dataset && elm.dataset.place) {
-        place = elm.dataset.place;
-        break;
+
+      if (elm.dataset) {
+        if (elm.dataset.place) {
+          place = elm.dataset.place;
+          break;
+        } else if (elm.dataset.open) {
+          toggleOpenAction = true;
+          break;
+        }
       }
     }
-    if (!place) {
+    if (!place && !toggleOpenAction) {
       return;
     }
-    console.log('_acceptSelection', place);
+    if (toggleOpenAction) {
+      return this._toggle(elm);
+    }
     page(place);
+  },
+
+  _toggle: function(elm) {
+    var list = elm.querySelector('projects-menu-requests');
+    list.opened = !list.opened;
   },
 
   _getDb: function() {
@@ -188,7 +203,7 @@ Polymer({
         return item._id;
       });
       this._findEmptyProjects(projectIds);
-      this.$.list.notifyResize();
+      // this.$.list.notifyResize();
     }.bind(this), 200);
 
   },

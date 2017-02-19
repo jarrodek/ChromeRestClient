@@ -18,6 +18,14 @@
       // If set to false the database query will be disabled on project id change.
       active: {
         type: Boolean
+      },
+
+      // If true then it's making query to the datastore.
+      querying: {
+        type: Boolean,
+        value: false,
+        notify: true,
+        readOnly: true
       }
     },
 
@@ -68,6 +76,8 @@
       //   return;
       // }
       // console.time('Related request query');
+
+      this._setQuerying(true);
       this._lastReadProjectId = projectId;
       var db = new PouchDB('saved-requests');
 
@@ -90,6 +100,7 @@
         })
         .then((r) => this.__processData(r))
         .then((r) => {
+          this._setQuerying(false);
           this.set('relatedRequests', r);
           // console.timeEnd('Related request query');
           this.fire('project-related-requests-read', {
@@ -98,6 +109,7 @@
           });
         })
         .catch((e) => {
+          this._setQuerying(false);
           this.fire('app-log', {
             'message': ['Query for project\'s related requests', e],
             'level': 'error'
