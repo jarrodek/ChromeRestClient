@@ -293,6 +293,17 @@ Polymer({
     this.fire('body-source-changed', {
       value: value
     });
+  },
+
+  _computeContentTypeSelectorHidden: function(opened, tabSelected) {
+    if (!opened) {
+      return true;
+    }
+    if (tabSelected === 2) {
+      return true;
+    }
+
+    return false;
   }
 });
 })();

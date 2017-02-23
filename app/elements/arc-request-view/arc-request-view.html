@@ -38,11 +38,15 @@ the License.
 
     .url-input {
       position: relative;
+      @apply(--layout-horizontal);
+    }
+
+    url-input-editor {
+      @apply(--layout-flex);
     }
 
     h2 {
       @apply(--paper-font-subhead);
-      margin-right: 24px;
       font-weight: 500;
     }
 
@@ -87,6 +91,12 @@ the License.
     .params-section,
     payload-editor {
       margin-top: 20px;
+      margin-bottom: 20px;
+      border-bottom: 1px rgba(0, 162, 223, 0.24) solid;
+    }
+
+    .params-section {
+      padding-bottom: 20px;
     }
 
     .params-header {
@@ -94,25 +104,31 @@ the License.
       @apply(--layout-center);
       padding: 0 12px;
     }
+
+    .main-action-buttons {
+      @apply(--layout);
+      @apply(--layout-center);
+    }
     </style>
     <div class="url-input">
       <url-input-editor id="urlInputEditor" url="{{masterUrl}}" suggesions-opened="_urlSuggestionsOpened"></url-input-editor>
+      <div class="main-action-buttons">
+        <paper-button raised class="action-button" hidden$="[[requestLoading]]" on-tap="_sendRequest">send</paper-button>
+        <paper-button raised class="action-button" hidden$="[[!requestLoading]]"on-tap="_abortRequest">abort</paper-button>
+      </div>
     </div>
     <method-selector method="{{request.method}}" is-payload="{{isPayload}}" content-type="[[contentType]]"></method-selector>
     <section class="params-section">
       <header class="params-header">
         <h2>Parameters</h2>
+        <paper-icon-button icon="arc:expand-more" id="toggleParameters" on-tap="toggle" class="toggle-button" class$="[[_computeToggleIconClass(collapseOpened)]]"></paper-icon-button>
+        <paper-tooltip for="toggleParameters" animation-delay="100" position="right" offset="0">[[_computeToggleLabel(collapseOpened)]]</paper-tooltip>
+      </header>
+      <iron-collapse opened="[[collapseOpened]]">
         <paper-tabs selected="{{selectedParameters}}">
           <paper-tab hidden$="[[!collapseOpened]]">Headers</paper-tab>
           <paper-tab hidden$="[[!collapseOpened]]">Variables</paper-tab>
         </paper-tabs>
-        <span class="flex"></span>
-        <paper-button on-tap="toggle" class="toggle-button" title="Toggle parameters panel">
-          <span>[[_computeToggleLabel(collapseOpened)]]</span>
-          <iron-icon icon="arc:expand-more" class$="[[_computeToggleIconClass(collapseOpened)]]"></iron-icon>
-        </paper-button>
-      </header>
-      <iron-collapse opened="[[collapseOpened]]">
         <iron-pages selected="[[selectedParameters]]">
           <headers-editor is-payload="{{isPayload}}" content-type="[[contentType]]" headers="{{requestHeaders}}" on-headers-changed="_headersChanged"></headers-editor>
           <variables-editor></variables-editor>
@@ -121,12 +137,9 @@ the License.
     </section>
 
     <payload-editor hidden$="[[!isPayload]]" content-type="[[contentType]]" value="{{request.payload}}" multipart="{{multipartBody}}" form-data="{{request.formData}}"></payload-editor>
-
     <div class="action-panel">
       <div class="status">[[statusMessage]]</div>
       <paper-progress indeterminate hidden$="[[!requestLoading]]"></paper-progress>
-      <paper-button raised class="action-button" hidden$="[[requestLoading]]" on-tap="_sendRequest">send</paper-button>
-      <paper-button raised class="action-button" hidden$="[[!requestLoading]]"on-tap="_abortRequest">abort</paper-button>
     </div>
   </template>
   <script src="arc-request-view.js"></script>

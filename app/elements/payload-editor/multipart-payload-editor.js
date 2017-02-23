@@ -118,7 +118,7 @@ Polymer({
     var item = {
       name: '',
       value: '',
-      contentType: 'text/plain',
+      contentType: '', //text/plain
       text: true
     };
     if (!this.formData) {

@@ -76,9 +76,14 @@ the License.
       padding: 0 12px;
     }
 
+    .panel-options {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      margin-top: 20px;
+    }
+
     h2 {
       @apply(--paper-font-subhead);
-      margin-right: 24px;
       padding-bottom: 0;
       margin-bottom: 6px;
       font-weight: 500;
@@ -108,7 +113,6 @@ the License.
 
     iron-pages {
       padding: 12px;
-      /*background-color: #FFFDE7;*/
     }
 
     paper-dropdown-menu {
@@ -116,12 +120,17 @@ the License.
     }
 
     paper-dropdown-menu.type {
-      /*background-color: #FFFDE7;*/
       padding: 0 12px;
+      min-width: 320px;
     }
     </style>
     <header class="title-header">
       <h2>Body</h2>
+      <paper-icon-button icon="arc:expand-more" id="toggleParameters" on-tap="toggle" class="toggle-button" class$="[[_computeToggleIconClass(opened)]]"></paper-icon-button>
+      <paper-tooltip for="toggleParameters" animation-delay="100" position="right" offset="0">[[_computeToggleLabel(opened)]]</paper-tooltip>
+    </header>
+
+    <section class="panel-options">
       <paper-dropdown-menu class="type" label="Editor view" hidden$="[[!opened]]">
         <paper-listbox class="dropdown-content" selected="{{tabSelected}}">
           <paper-item>Text input</paper-item>
@@ -130,7 +139,7 @@ the License.
           <paper-item>File</paper-item>
         </paper-listbox>
       </paper-dropdown-menu>
-      <paper-dropdown-menu label="Body content type" hidden$="[[!opened]]">
+      <paper-dropdown-menu label="Body content type" hidden$="[[_computeContentTypeSelectorHidden(opened, tabSelected)]]">
         <paper-listbox class="dropdown-content" on-iron-select="_contentTypeSelected" selected="[[contentType]]" attr-for-selected="data-type">
           <paper-item data-type="application/json">application/json</paper-item>
           <paper-item data-type="application/xml">application/xml</paper-item>
@@ -147,12 +156,7 @@ the License.
           <paper-item data-type="application/javascript">application/javascript</paper-item>
         </paper-listbox>
       </paper-dropdown-menu>
-      <span class="flex"></span>
-      <paper-button on-tap="toggle" class="toggle-button" title="Toggle payload panel">
-        <span>[[_computeToggleLabel(opened)]]</span>
-        <iron-icon icon="arc:expand-more" class$="[[_computeToggleIconClass(opened)]]"></iron-icon>
-      </paper-button>
-    </header>
+    </section>
 
     <iron-collapse id="collapse" opened="[[opened]]">
       <iron-pages selected="{{tabSelected}}" selected-attribute="opened">
