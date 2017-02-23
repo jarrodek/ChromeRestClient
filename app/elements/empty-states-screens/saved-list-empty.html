@@ -1,0 +1,48 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="empty-states-shared-styles.html">
+
+<dom-module id="saved-list-empty">
+  <template>
+    <style include="empty-states-shared-styles">
+    paper-material {
+      background-color: #fff;
+    }
+
+    paper-material {
+      padding: 24px;
+      max-width: 380px;
+      background-color: #f6f7ff;
+    }
+
+    .icon {
+      @apply(--layout-vertical);
+      @apply(--layout-center);
+    }
+
+    .actions {
+      @apply(--layout-horizontal);
+      @apply(--layout-end-justified);
+    }
+
+    paper-button {
+      background-color: rgb(61, 158, 255);
+      color: #fff;
+    }
+    </style>
+
+    <paper-material elevation="1">
+      <div class="icon">
+        <iron-icon icon="arc:save"></iron-icon>
+      </div>
+      <h1 class="empty">You don't have saved requests</h1>
+      <p class="info">Save a request using the  <span class="code">[[_computeA11yCommand('s')]]</span> keys on the request screen. You can also open a file from Google Drive.</p>
+      <div class="actions">
+        <paper-button raised on-tap="openDrive">Opeb from Google Drive</paper-button>
+      </div>
+    </paper-material>
+  </template>
+  <script src="saved-list-empty.js"></script>
+</dom-module>

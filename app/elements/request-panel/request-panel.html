@@ -19,19 +19,48 @@
     .cookie-monster {
       margin-left: 24px;
     }
+
+    .cookie-exchange-banner h2 {
+      @apply(--paper-font-headline);
+    }
+
     .cookie-exchange-banner p {
+      @apply(--paper-font-body1);
+    }
+
+    .cookie-exchange-banner iron-icon {
+      width: 16px;
+      height: 16px;
+      margin-left: 8px;
+      color: rgba(0, 0, 0, 0.54);
+    }
+
+    .cookie-exchange-banner p.action {
       @apply(--paper-font-body2);
     }
+
+    .cookie-exchange-banner paper-material {
+      padding: 24px;
+      background-color: #FBE9E7;
+      max-width: 640px;
+      margin: 20px auto;
+    }
+
     .inherit {
       color: inherit !important;
       background-color: inherit !important;
+      text-decoration: inherit !important;
+    }
+
+    .inherit paper-button {
+      background-color: #fff;
     }
 
     .status-bar {
       position: fixed;
       height: 40px;
       bottom: 0;
-      left: 256px;
+      left: 0;
       right: 0;
       background-color: #eee;
       @apply(--layout-horizontal);
@@ -109,7 +138,6 @@
     .env-info {
       color: rgba(0, 0, 0, 0.54);
     }
-
     </style>
     <div class="content" assistant$="[[exporeAssistantActive]]">
       <div class="request-area">
@@ -117,17 +145,22 @@
         <template is="dom-if" if="[[hasResponse]]">
           <arc-response-view opened="[[opened]]" response="[[response]]" request="[[activeRequest]]"></arc-response-view>
         </template>
-        <arc-save-dialog-view id="saveRequestUi"></arc-save-dialog-view>
+
         <div class="cookie-exchange-banner" hidden$="[[!showCookieBanner]]">
-          <h2>
-            Missing cookies?
-            <img src="/assets/cookie-monster.png" width="166" height="112" class="cookie-monster"/>
-          </h2>
-          <p>The app is not able to read cookies set in Chrome browser. If you authenticated yourself in a Chrome tab cookies are not transfered automatically.</p>
-          <p>Install ARC cookie exchange extension and synchronize cookies between the app and Chrome.</p>
-          <a href="https://chrome.google.com/webstore/detail/apcedakaoficjlofohhcmkkljehnmebp" class="inherit" target="_blank">
-            <paper-button raised>Install ARC cookie exchange</paper-button>
-          </a>
+          <paper-material elevation="1">
+            <h2>
+              Missing cookies?
+            </h2>
+            <p class="action">Install ARC cookie exchange extension and synchronize cookies between the app and Chrome.</p>
+            <p>The app is not able to read cookies set in Chrome browser. If you authenticated yourself in a Chrome tab cookies are not transfered automatically.</p>
+
+            <a href="https://chrome.google.com/webstore/detail/apcedakaoficjlofohhcmkkljehnmebp" class="inherit" target="_blank">
+              <paper-button raised>
+                Install ARC cookie exchange
+                <iron-icon icon="arc:open-in-new"></iron-icon>
+              </paper-button>
+            </a>
+          </paper-material>
         </div>
         <arc-request-error-view hidden$=[[!isError]] message="[[errorMessage]]"></arc-request-error-view>
       </div>
@@ -140,7 +173,8 @@
           times="[[analysedTimes]]"
           sizes="[[analysedSizes]]"
           statuses="[[analysedStatuses]]"
-          presence="[[presenceInfo]]"></request-data-explorer>
+          presence="[[presenceInfo]]"
+          assistant-enabled="[[apiAssistantEnabled]]"></request-data-explorer>
       </div>
     </div>
 
@@ -155,11 +189,11 @@
       </div>
     </div>
 
-    <chrome-storage auto id="latest" type="local" name="latestRequest" value="{{request}}" on-read="_latestLoaded"></chrome-storage>
+    <chrome-storage auto id="latest" type="local" name="latestRequest" value="{{request}}" on-chrome-storage-read="_latestLoaded"></chrome-storage>
     <arc-socket-request id="socket" on-ready="_responseReady" on-error="_onRequestError"></arc-socket-request>
     <arc-xhr-request id="xhr" on-ready="_responseReady" on-error="_onRequestError" connected="{{xhrConnected}}"></arc-xhr-request>
     <arc-magic-variables id="magicVariables" scope="[[project.id]]"></arc-magic-variables>
-    <cookie-storage use-pouch-db="true" id="cookieJar" url="[[request.url]]" cookie="{{requestCookie}}" response-headers="[[response.headers]]"></cookie-storage>
+    <cookie-storage use-pouch-db="true" id="cookieJar" url="[[request.url]]"></cookie-storage>
     <cookie-exchange external-id="apcedakaoficjlofohhcmkkljehnmebp" id="cookieExchange"></cookie-exchange>
     <auth-data-saver id="authSaver"
       on-resend-auth-request="_resendAuthRequest"
@@ -186,7 +220,8 @@
       sizes="{{analysedSizes}}"
       presence="{{presenceInfo}}"
       statuses="{{analysedStatuses}}"
-      on-request-stats-analysed="_requestsStatsAnalysed"></request-stats-analyser>
+      on-request-stats-analysed="_requestsStatsAnalysed"
+      enabled="{{apiAssistantEnabled}}"></request-stats-analyser>
     <paper-toast text="Your request has been saved. Add SHIFT key to display save dialog."
       id="requestSavedFastToast"></paper-toast>
     <paper-toast text="Request has been saved" id="requestSavedToast"></paper-toast>

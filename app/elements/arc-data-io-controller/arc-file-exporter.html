@@ -13,7 +13,11 @@ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
---><!--
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<!--
 The `arc-file-exporter` element is a helper element for `arc-data-import-controller`
 that is responsible for file export.
 
@@ -23,55 +27,81 @@ Example:
 
 @group Controller Elements
 @element arc-file-exporter
---><html><head></head><body><dom-module id="arc-file-exporter">
+-->
+<dom-module id="arc-file-exporter">
   <template>
     <style>
     :host {
+      display: block;
+    }
+
+    #exportForm {
       @apply(--layout-vertical);
     }
 
-    h2 {
-      @apply(--section-title);
+    #exportForm paper-checkbox {
+      margin: 12px 0px;
     }
 
-    .padding-section {
-      @apply(--section-padding);
+    .actions {
+      margin: 24px 0;
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
     }
 
-    .action-button {
+    .action-button:not([disabled]) {
       @apply(--action-button);
     }
 
-    .action-button:hover {
-      @apply(--action-button-hover);
+    p.description {
+      @apply(--paper-font-body2);
     }
 
-    p {
-      @apply(--paper-font-caption);
+    p.info {
+      @apply(--paper-font-body1);
+      color: rgba(0, 0, 0, 0.54);
     }
     </style>
-    <h2 class="section-title">Export to file</h2>
-    <template is="dom-if" if="{{loading}}">
-      <div class="padding-section">
-        <paper-spinner active="true" alt="Preparing data"></paper-spinner>
-      </div>
-    </template>
-    <template is="dom-if" if="{{!loading}}">
-      <template is="dom-if" if="{{!dataReady}}">
-        <div class="padding-section">
-          <p>Prepare data to export first and wait until ready.</p>
-          <paper-button class="action-button" on-transitionend="_prepareDataClick">Prepare data to export</paper-button>
+
+    <iron-pages selected="[[selectedPage]]">
+      <section>
+        <p class="description">What to include in the export file?</p>
+        <form is="iron-form" id="exportForm">
+          <paper-checkbox name="saved" checked disabled="[[preparing]]">Saved requests and projects</paper-checkbox>
+          <paper-checkbox name="history" checked disabled="[[preparing]]">Requests history</paper-checkbox>
+          <paper-checkbox name="cookies" checked disabled="[[preparing]]">Cookies</paper-checkbox>
+          <paper-checkbox name="auth" checked disabled="[[preparing]]">Saved passwords</paper-checkbox>
+          <paper-checkbox name="history-url" checked disabled="[[preparing]]">URLs history (autofill data)</paper-checkbox>
+          <paper-checkbox name="websocket" checked disabled="[[preparing]]">Web sockets history</paper-checkbox>
+          <paper-checkbox name="headers-sets" checked disabled="[[preparing]]">Headers sets</paper-checkbox>
+          <paper-checkbox name="variables" checked disabled="[[preparing]]">Variables and environments</paper-checkbox>
+        </form>
+        <div class="actions">
+          <paper-button class="action-button" on-tap="_prepareDataClick" disabled="[[preparing]]">Prepare data to export</paper-button>
+          <paper-spinner active="[[preparing]]" alt="Preparing data"></paper-spinner>
         </div>
-      </template>
-      <template is="dom-if" if="{{dataReady}}">
-        <div class="padding-section" id="dataDownload2">
-          <p>Click on a button below to download your data.</p>
-          <paper-button raised="true" class="action-button" on-tap="_saveData">Download file</paper-button>
-          <paper-button on-tap="_cancelExport">Cancel</paper-button>
+        <p class="info">Depending on the amount of your local data this process can take up to a minute.</p>
+      </section>
+      <section>
+        <p class="description">Your data is ready.</p>
+        <paper-button raised class="action-button" on-tap="_saveData">Download file</paper-button>
+        <paper-button class="action-button" on-tap="_exportDriveFlow">Export to Google Drive</paper-button>
+        <paper-button on-tap="_cancelExport">Cancel</paper-button>
+      </section>
+      <section>
+        <p class="description">Export your data to Google Drive.</p>
+        <div hidden$="[[authenticated]]">
+          <p class="info" hidden$="[[!checkingAuth]]">Checking access rights to Google Drive.</p>
+          <drive-authorize-app hidden$="[[checkingAuth]]"></drive-authorize-app>
         </div>
-      </template>
-    </template>
+        <paper-input label="Export file name" value="{{fileSuggestedName}}" required auto-validate disabled="[[exporting]]"></paper-input>
+        <div class="actions">
+          <paper-button class="action-button" on-tap="_exportDataDrive" disabled="[[exporting]]">Export to Google Drive</paper-button>
+          <paper-button on-tap="_cancelExport" disabled="[[exporting]]">Cancel</paper-button>
+          <paper-spinner active="[[exporting]]" alt="Exporting data"></paper-spinner>
+        </div>
+      </section>
+    </iron-pages>
   </template>
 </dom-module>
 <script src="arc-file-exporter.js"></script>
-</body></html>

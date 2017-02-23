@@ -65,7 +65,12 @@ Polymer({
         return this.$.output;
       }
     },
-    raw: String
+    raw: String,
+    // Performance check helper.
+    _parserMarkCount: {
+      type: Number,
+      value: 0
+    }
   },
 
   behaviors: [
@@ -80,14 +85,15 @@ Polymer({
   },
   // Called when `json` property changed. It starts parsing the data.
   _changed: function() {
-    // if (!this.json) {
-    //   return;
-    // }
 
     this._setIsError(false);
     this.$.output.innerText = '';
+    var json = this.json;
+    if (json === undefined) {
+      return;
+    }
 
-    if (this.json === null) {
+    if (json === null) {
       let html = '<div class="prettyPrint"><span class="nullValue">null';
       html += '</span></div>';
       this.$.output.innerHTML = html;
@@ -95,13 +101,14 @@ Polymer({
       return;
     }
 
-    if (this.json === false) {
+    if (json === false) {
       let html = '<div class="prettyPrint"><span class="booleanValue">false';
       html += '</span></div>';
       this.$.output.innerHTML = html;
       this._setShowOutput(true);
       return;
     }
+    window.performance.mark('mark_start_json_parser_worker');
 
     this._setWorking(true);
     if (!this._worker) {
@@ -110,8 +117,9 @@ Polymer({
       worker.addEventListener('error', this._workerErrorHandler);
       this._worker = worker;
     }
+
     this._worker.postMessage({
-      json: this.json,
+      json: json,
       raw: this.raw
     });
   },
@@ -125,6 +133,10 @@ Polymer({
     } else {
       this.$.output.innerHTML = data.message;
     }
+    window.performance.mark('mark_end_json_parser_worker');
+    this._parserMarkCount++;
+    window.performance.measure('measure_json_parser_' + this._parserMarkCount,
+      'mark_start_json_parser_worker', 'mark_end_json_parser_worker');
   },
   // Called when workr error received.
   _workerError: function() {

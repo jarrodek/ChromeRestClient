@@ -70,12 +70,11 @@
         this.signinAwares[0].$.revokeRequest.generateRequest();
       })
       .catch((e) => {
-        var e = new CustomEvent('app-log', {detail: {
+        let event = new CustomEvent('app-log', {detail: {
           'message': ['Token revoke error.', e],
           'level': 'error'
         }});
-        document.dispatchEvent(e);
-        //this.fire('error', e);
+        document.dispatchEvent(event);
       });
     },
 
@@ -312,12 +311,14 @@
       if (!this.scopes && chrome.runtime.getManifest) {
         this.set('scopes', chrome.runtime.getManifest().oauth2.scopes);
       }
+      this.signIn(false);
     },
 
     attached: function() {
       chrome.identity.onSignInChanged.addListener(this._signInChanged);
       AuthEngine.attachSigninAware(this);
     },
+
     detached: function() {
       chrome.identity.onSignInChanged.removeListener(this._signInChanged);
       AuthEngine.detachSigninAware(this);

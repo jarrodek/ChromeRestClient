@@ -1,115 +1,163 @@
+<link rel="import" href="../dom-reorderer/dom-reorderer.html">
+<link rel="import" href="../project-list-items/project-list-items.html">
+
 <dom-module id="arc-project-view">
   <template>
     <style>
-      :host {
-        display: block;
-        padding: 0 16px;
-
-        --table-list-item: {
-          @apply(--paper-font-menu);
-          overflow: visible;
-          height: 48px;
-          color: rgba(0, 0, 0, 0.87);
-          border-bottom: 1px rgba(0, 0, 0, 0.12) solid;
-        }
-
-        --table-base-cell: {
-          padding-right: 16px;
-          padding-left: 56px;
-          position: relative;
-          height: 100%;
-        }
-        --table-checkbox-column: {
-          padding-left: 16px;
-        }
-
-        --table-checkbox-value: {
-          @apply(--table-checkbox-column);
-        }
-
-        --table-name-column: {
-          @apply(--table-base-cell);
-          min-width: 120px;
-          max-width: 120px;
-          padding-left: 40px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        --table-name-value: {
-          @apply(--table-name-column);
-          padding-left: 56px;
-          height: initial;
-          min-height: 24px;
-          -webkit-user-select: text;
-          cursor: text;
-        }
-
-        --table-method-column: {
-          @apply(--table-base-cell);
-          min-width: 100px;
-          max-width: 100px;
-        }
-
-        --table-method-value: {
-          @apply(--table-method-column);
-          padding-left: 56px;
-          height: auto;
-          -webkit-user-select: text;
-          cursor: text;
-        }
-
-        --table-url-column: {
-          @apply(--table-base-cell);
-          @apply(--layout-flex);
-          text-overflow: ellipsis;
-          overflow: hidden;
-        }
-        ;
-        --table-url-value: {
-          @apply(--table-url-column);
-          padding-left: 56px;
-          height: auto;
-          -webkit-user-select: text;
-          cursor: text;
-        }
-
-        --table-action-column: {
-          @apply(--table-base-cell);
-          padding-right: 24px;
-        }
-
-        --table-action-value: {
-          @apply(--table-action-column);
-          padding-left: 56px;
-          padding-right: 16px;
-          height: auto;
-        }
-        
+     :host {
+      display: block;
+      --table-list-item: {
+        @apply(--paper-font-menu);
+        overflow: visible;
+        height: 48px;
+        color: rgba(0, 0, 0, 0.87);
+        border-bottom: 1px rgba(0, 0, 0, 0.12) solid;
       }
-      .project-info {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
+      --table-base-cell: {
+        padding-right: 16px;
+        position: relative;
+        height: 100%;
       }
-      .requests-info {}
+      --table-checkbox-column: {
+        padding-left: 16px;
+      }
+      --table-checkbox-value: {
+        @apply(--table-checkbox-column);
+      }
+      --table-name-column: {
+        @apply(--table-base-cell);
+        min-width: 220px;
+        max-width: 220px;
+        padding-left: 40px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      --table-name-value: {
+        @apply(--table-name-column);
+        height: initial;
+        min-height: 24px;
+        -webkit-user-select: text;
+        cursor: text;
+      }
+      --table-method-column: {
+        @apply(--table-base-cell);
+        min-width: 100px;
+        max-width: 100px;
+      }
+      --table-method-value: {
+        @apply(--table-method-column);
+        height: auto;
+        -webkit-user-select: text;
+        cursor: text;
+      }
+      --table-url-column: {
+        @apply(--table-base-cell);
+        @apply(--layout-flex);
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+      ;
+      --table-url-value: {
+        @apply(--table-url-column);
+        height: auto;
+        -webkit-user-select: text;
+        cursor: text;
+      }
+      --table-action-column: {
+        @apply(--table-base-cell);
+        padding-right: 24px;
+      }
+      --table-action-value: {
+        @apply(--table-action-column);
+        padding-right: 16px;
+        height: auto;
+      }
+    }
+
+    h2 {
+      @apply(--paper-font-subhead);
+      padding: 0 16px;
+    }
+
+    .selected-counter {
+      @apply(--paper-font-subhead);
+      color: var(--paper-blue-700);
+      font-weight: 300;
+    }
+
+    .project-info {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      padding: 0 16px;
+    }
+
+    .requests-info {}
+
+    .no-requests {
+      @apply(--paper-font-body1);
+    }
+
+    .table-options {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      padding-left: 10px;
+    }
+
+    .table-options .hiddable {
+      opacity: 1;
+      transition: opacity 0.2s cubic-bezier(0.47, 0, 0.75, 0.72);
+    }
+
+    .table-options.inactive .hiddable {
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .selected-actions {
+      @apply(--layout-horizontal);
+      padding-right: 16px;
+      color: rgba(0, 0, 0, .57);
+    }
+
+    .requests-info {
+      margin-top: 40px;
+    }
+
+    .status-bar paper-checkbox {
+      margin-left: 4px;
+    }
     </style>
-
     <section class="project-info">
-      <paper-input noLabelFloat value="{{project.name}}"></paper-input>
-      <paper-icon-button icon="file-download" id="exportProject" on-tap="exportProject"></paper-icon-button>
-      <paper-icon-button icon="delete" id="deleteProject" on-tap="deleteProject"></paper-icon-button>
+      <paper-input noLabelFloat value="{{project.name}}" on-change="_projectNameChanged"></paper-input>
+      <paper-icon-button icon="arc:file-download" id="exportProject" on-tap="exportProject"></paper-icon-button>
+      <paper-icon-button icon="arc:delete" id="deleteProject" on-tap="deleteProject"></paper-icon-button>
       <paper-tooltip for="exportProject">Export project to file</paper-tooltip>
       <paper-tooltip for="deleteProject">Delete project and associated requests</paper-tooltip>
     </section>
-
-    <section class="requests-info">
+    <section class="requests-info" hidden$="[[loadingData]]">
       <h2>Associated request</h2>
-      <template is="dom-repeat" items="{{requests}}" id="requestList">
-        <arc-saved-list-item no-check can-delete request="{{item}}"></arc-saved-list-item>
+      <div class="status-bar">
+        <section class$="[[_computeOptionsTableClass(optionsState)]]">
+          <paper-checkbox class="toggle" id="toggleAll" checked="{{toggleSelectAll}}"></paper-checkbox>
+          <paper-tooltip for="toggleAll" animation-delay="100" position="right" offset="0">Select / deselect all</paper-tooltip>
+          <span class="selected-counter hiddable">[[currentSelection.length]] item selected</span>
+          <div class="selected-actions">
+            <paper-icon-button class="hiddable" icon="arc:delete" id="deleteSelected" on-tap="_deleteSelected"></paper-icon-button>
+            <paper-tooltip position="left" for="deleteSelected">Delete selected</paper-tooltip>
+          </div>
+        </section>
+      </div>
+      <project-list-items
+        items="[[requests]]"
+        selected-items="{{currentSelection}}"
+        has-selection="{{hasSelection}}"
+        select-all="[[toggleSelectAll]]"></project-list-items>
+      <template is="dom-if" if="[[_isEmptyArray(requests)]]">
+        <p class="no-requests">This project has no requests associated with it.</p>
+        <paper-button raised on-tap="_deleteEmptyProject">Delete this project</paper-button>
       </template>
     </section>
-
     <paper-dialog id="projectDeleteDialog" on-iron-overlay-closed="onDeleteDialogResult">
       <h2>Delete project</h2>
       <p>This will remove the project and all request data associated with the project.</p>
@@ -118,6 +166,7 @@
         <paper-button dialog-confirm autofocus>Delete</paper-button>
       </div>
     </paper-dialog>
+    <paper-toast text="Select request first." id="noSelectionToast"></paper-toast>
   </template>
   <script src="arc-project-view.js"></script>
 </dom-module>

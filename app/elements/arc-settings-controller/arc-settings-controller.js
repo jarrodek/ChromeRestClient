@@ -61,6 +61,11 @@ Polymer({
     notificationsEnabled: {
       type: Boolean,
       value: false
+    },
+
+    deletingDatabases: {
+      type: Boolean,
+      value: false
     }
   },
   observers: [
@@ -138,7 +143,7 @@ Polymer({
    */
   _onStorageChanged: function(changes) {
     var keys = Object.keys(changes);
-    var accepted = ['HISTORY_ENABLED', 'MAGICVARS_ENABLED'];
+    var accepted = ['HISTORY_ENABLED', 'MAGICVARS_ENABLED', 'apiAssistant'];
     keys.forEach(function(key) {
       if (accepted.indexOf(key) !== -1 && this.values[key] !== changes[key].newValue) {
         this.set('values.' + key, changes[key].newValue);
@@ -177,195 +182,6 @@ Polymer({
     tutorial.open();
   },
 
-  historyClearClick: function() {
-    this.$.historyClearDialog.open();
-  },
-
-  passwordsClearClick: function() {
-    this.$.passwordsClearDialog.open();
-  },
-
-  cookiesClearClick: function() {
-    this.$.cookieClearDialog.open();
-  },
-
-  onClearDialogResult: function(e) {
-    if (e.detail.canceled || !e.detail.confirmed) {
-      return;
-    }
-    var p;
-    /* global app */
-    if (app.usePouchDb) {
-      p = this._clearHistory();
-    } else {
-      p = this._clearHistoryLegacy();
-    }
-    p.then(() => {
-      StatusNotification.notify({
-        message: 'History has been cleared'
-      });
-    });
-    this.fire('send-analytics', {
-      type: 'event',
-      category: 'Settings usage',
-      action: 'Clear history',
-      label: 'true'
-    });
-  },
-
-  _clearHistoryLegacy: function() {
-    var _db;
-    return arc.app.db.idb.open().then((db) => {
-      _db = db;
-      return db.requestObject.where('type').equals('history').delete();
-    })
-    .then(() => {
-      _db.close();
-      this.fire('request-objects-cleared', {
-        type: 'history'
-      });
-    })
-    .catch((e) => {
-      this.fire('app-log', {
-        'message': ['Unable to clear history.', e],
-        'level': 'error'
-      });
-      StatusNotification.notify({
-        message: 'Unable to clear history. ' + e.message
-      });
-      throw e;
-    });
-  },
-
-  _clearHistory: function() {
-    var db = new PouchDB('history-requests');
-    return db.destroy()
-    .catch((e) => {
-      StatusNotification.notify({
-        message: 'Unable to clear history. ' + e.message
-      });
-      this.fire('app-log', {
-        message: ['Error deleting database', e],
-        level: e
-      });
-      console.error(e);
-    })
-    .then(() => {
-      this.fire('request-objects-cleared', {
-        type: 'history'
-      });
-    });
-  },
-
-  onClearPasswordsResult: function(e) {
-    if (e.detail.canceled || !e.detail.confirmed) {
-      return;
-    }
-    var p;
-    /* global app */
-    if (app.usePouchDb) {
-      p = this._clearPasswords();
-    } else {
-      p = this._clearPasswordsLegacy();
-    }
-    p.then(() => {
-      StatusNotification.notify({
-        message: 'Passwords has been cleared'
-      });
-    });
-  },
-
-  _clearPasswordsLegacy: function() {
-    var _db;
-    return arc.app.db.idb.open()
-    .then((db) => {
-      _db = db;
-      return db.table('basicAuth').clear();
-    })
-    .then(() => {
-      _db.close();
-    })
-    .catch((e) => {
-      this.fire('app-log', {
-        'message': ['Error to clear passwords.', e],
-        'level': 'error'
-      });
-      StatusNotification.notify({
-        message: 'Unable to clear passwords data. ' + e.message
-      });
-      throw e;
-    });
-  },
-
-  _clearPasswords: function() {
-    var db = new PouchDB('auth-data');
-    return db.destroy()
-    .catch((e) => {
-      StatusNotification.notify({
-        message: 'Unable to clear passwords data. ' + e.message
-      });
-      this.fire('app-log', {
-        message: ['Error deleting database', e],
-        level: e
-      });
-      console.error(e);
-    });
-  },
-
-  onClearCookiesResult: function(e) {
-    if (e.detail.canceled || !e.detail.confirmed) {
-      return;
-    }
-    var p;
-    /* global app */
-    if (app.usePouchDb) {
-      p = this._clearCookies();
-    } else {
-      p = this._clearCookiesLegacy();
-    }
-    p.then(() => {
-      StatusNotification.notify({
-        message: 'Cookies data has been cleared'
-      });
-    });
-  },
-
-  _clearCookiesLegacy: function() {
-    var _db;
-    return arc.app.db.idb.open().then((db) => {
-      _db = db;
-      return db.table('cookies').clear();
-    })
-    .then(() => {
-      _db.close();
-    })
-    .catch((e) => {
-      this.fire('app-log', {
-        'message': ['Error clearing cookies storage.', e],
-        'level': 'error'
-      });
-      StatusNotification.notify({
-        message: 'Unable to clear cookies store'
-      });
-      throw e;
-    });
-  },
-
-  _clearCookies: function() {
-    var db = new PouchDB('cookies');
-    return db.destroy()
-    .catch((e) => {
-      StatusNotification.notify({
-        message: 'Unable to clear cookies data. ' + e.message
-      });
-      this.fire('app-log', {
-        message: ['Error deleting database', e],
-        level: e
-      });
-      console.error(e);
-    });
-  },
-
   _gaSettingTapped: function() {
     this.fire('analytics-permitted-change', {
       permitted: Boolean(this.gaEnabled)
@@ -383,25 +199,21 @@ Polymer({
       chrome.permissions.remove({permissions: ['notifications']});
     }
   },
-
+  // Handler to click on the "show tutorial" action.
   _showAddToDesktopTutotial: function() {
     this.$.addShortcutsToDesktop.open();
   },
-
-  _openApps: function() {
-    window.open('chrome://apps');
-  },
-
-  computeTimeoutLabel(requestDefaultTimeout) {
+  // Computes label for the timeout settings control.
+  computeTimeoutLabel: function(requestDefaultTimeout) {
     return requestDefaultTimeout > 0 ?
       `Timeout request after ${requestDefaultTimeout} seconds`  : 'No timeout';
   },
-
+  // Computes magic variables switch button label.
   computeMvLabel: function(mvEnabled) {
     return mvEnabled > 0 ?
       'Enabled'  : 'Disabled';
   },
-
+  // Shows internall sub-page
   _showPage: function(e) {
     var path = e.path;
     var page = null;
@@ -430,10 +242,31 @@ Polymer({
     .open('https://docs.google.com/document/d/1BzrKQ0NxFXuDIe2zMA-0SZBNU0P46MHr4GftZmoLUQU/edit');
   },
 
-  dumpClick: function() {
+  _exportDataRequested: function() {
+    this.$.exportDataDialog.open();
+  },
+
+  _onExportDataDialogResult: function(e) {
+    if (e.detail.canceled || !e.detail.confirmed) {
+      return;
+    }
+    var clear = this.$.exportForm.serialize();
+    var dbs = Object.keys(clear);
+    if (dbs.length === 8) {
+      dbs = 'all';
+    }
+
+    this._exportData(dbs);
+  },
+
+  _exportData: function(sources) {
+    StatusNotification.notify({
+      message: 'Preparing data. Wait a sec...'
+    });
     arc.app.importer.prepareExport({
-      type: 'all'
-    }).then((data) => {
+      type: sources
+    })
+    .then((data) => {
       this.exportContent = data;
       var date = new Date();
       var day = date.getDate();
@@ -448,7 +281,8 @@ Polymer({
         action: 'Click',
         label: 'Export saved as file'
       });
-    }).catch((e) => {
+    })
+    .catch((e) => {
       this.fire('app-log', {
         'message': ['Export data.', e],
         'level': 'error'
@@ -457,6 +291,97 @@ Polymer({
         message: 'Unable to export data :(',
         timeout: StatusNotification.TIME_MEDIUM
       });
+    });
+  },
+
+  /**
+   * Handler to be called on clear data action.
+   * Opens the settings & confirmation dialog.
+   */
+  clearDatastore: function() {
+    this.$.clearDatastoreDialog.open();
+  },
+  /**
+   * Handler to be called when the user selects to delete requests data.
+   * It will select and disable "projects" option as required when clearing the requests.
+   * If the state is deselected then the "clear projects" option will become active again.
+   */
+  _deleteSavedChanged: function(e) {
+    this.$.deleteProjectsOption.disabled = e.target.checked;
+    if (e.target.checked) {
+      this.$.deleteProjectsOption.checked = true;
+    }
+  },
+  /**
+   * Handler to be called when the clear data dialog has been closed.
+   * It it's not canceled then it will clear (destroy) selected datastores.
+   */
+  _onClearDatastoreDialogResult: function(e) {
+    if (e.detail.canceled || !e.detail.confirmed) {
+      return;
+    }
+    var clear = this.$.clearForm.serialize();
+    var dbs = Object.keys(clear);
+    if (dbs.indexOf('saved-requests') !== -1) {
+      dbs.push('legacy-projects');
+    }
+    StatusNotification.notify({
+      message: 'Removing data from the store. This may take a while...'
+    });
+    this.deletingDatabases = true;
+    this._destroyList(Array.from(dbs))
+    .then((errors) => {
+      this.deletingDatabases = false;
+      if (!errors || !errors.length) {
+        StatusNotification.notify({
+          message: 'Data cleared from the database'
+        });
+      } else {
+        StatusNotification.notify({
+          message: 'Not all data has been removed. Error occurred.'
+        });
+        this.fire('app-log', {
+          'message': ['Delete database error: ', errors.join('\n')],
+          'level': 'error'
+        });
+      }
+      this.fire('datastrores-destroyed', {
+        datastores: dbs
+      });
+    });
+  },
+
+  _destroyList: function(list, errors) {
+    if (!list || !list.length) {
+      return Promise.resolve(errors);
+    }
+    var db = list.shift();
+    return new PouchDB(db).close()
+    .then(() => {
+      return this._doDestroy(db);
+    })
+    .then(() => {
+      return new PouchDB(db);
+    })
+    .then(() => {
+      return this._destroyList(list, errors);
+    })
+    .catch((e) => {
+      errors = errors || [];
+      errors.push(e.message);
+      return this._destroyList(list, errors);
+    });
+  },
+
+  _doDestroy: function(dbName) {
+    return new Promise((resolve, reject) => {
+      let request = window.indexedDB.deleteDatabase('_pouch_' + dbName);
+      request.onsuccess = () => {
+        resolve();
+      };
+      request.onerror = () => {
+        reject(new Error('Unable to delete ' + dbName));
+      };
     });
   }
 });

@@ -25,18 +25,15 @@ the License.
       }
       </style>
       <arc-menu-view
+        loading="[[loading]]"
         with-toast="[[withToast]]"
         selected-project="[[selectedProject]]"
-        app-authorized="[[appAuthorized]]"
         route="[[route]]"
-        base-url="[[baseUrl]]"
+        route-params="[[routeParams]]"
         projects="[[projects]]"
         no-history="[[noHistory]]"
-        on-navigate="_navigateRequested"
-        on-authorize-requested="_authRequested"
-        on-signout-requested="_signOutRequested"></arc-menu-view>
+        on-navigate="_navigateRequested"></arc-menu-view>
       <arc-project-object-model id="model" data="{{projects}}"></arc-project-object-model>
-      <chrome-signin-aware id="auth" is-authorized="{{appAuthorized}}"></chrome-signin-aware>
     </template>
   </dom-module>
   <script src="arc-menu-controller.js"></script>

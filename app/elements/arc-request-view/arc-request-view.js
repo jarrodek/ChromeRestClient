@@ -57,6 +57,21 @@ Polymer({
     '_requestChanged(request, request.*)'
   ],
 
+  attached: function() {
+    this.listen(window, 'restore-request', '_onRequestRestore');
+  },
+
+  detached: function() {
+    this.unlisten(window, 'restore-request', '_onRequestRestore');
+    this.opened = undefined;
+    this.request = undefined;
+    this.masterUrl = undefined;
+    this.contentType = undefined;
+    this.requestHeaders = undefined;
+    this.requestLoading = undefined;
+    this.statusMessage = undefined;
+  },
+
   _requestChanged: function() {
     if (!this.opened) {
       return;
@@ -101,6 +116,24 @@ Polymer({
 
   _abortRequest: function() {
     this.fire('abort');
+  },
+
+  _onRequestRestore: function(e) {
+    this.set('request', e.detail.request);
+    page('/request/current');
+  },
+
+  _urlSuggestionsOpened: function(e) {
+    if (!e.detail.value) {
+      return;
+    }
+    var historyPanel = this.$$('history-context-panel');
+    if (!historyPanel) {
+      throw new Error('history-context-panel not available.');
+    }
+    if (historyPanel.opened) {
+      historyPanel.opened = false;
+    }
   }
 });
 })();

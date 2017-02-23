@@ -21,11 +21,11 @@ the License.
         display: block;
       }
       arc-response-status-view {
-        border: 1px var(--main-section-border-color) solid;
+        /*border: 1px var(--main-section-border-color) solid;*/
         margin: 0 12px;
       }
       arc-response-payload-view {
-        border: 1px var(--main-section-border-color) solid;
+        /*border: 1px var(--main-section-border-color) solid;*/
         margin: 12px;
       }
       .empty-info {
@@ -49,7 +49,7 @@ the License.
       redirect-timings="[[_computeRedirectTimings(response.redirects)]]"></arc-response-status-view>
     <template is="dom-if" if="[[hasResponse]]">
       <template is="dom-if" if="[[!isError]]">
-        <arc-response-payload-view id="payloadView" payload="[[response.body]]" raw="[[response.rawBody]]" headers="[[response.headers]]"></arc-response-payload-view>
+        <arc-response-payload-view payload="[[response.body]]" raw="[[response.rawBody]]" headers="[[response.headers]]"></arc-response-payload-view>
       </template>
       <template is="dom-if" if="[[isError]]">
         <arc-request-error-view message="[[response.error.message]]"></arc-request-error-view>

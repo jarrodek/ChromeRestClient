@@ -136,6 +136,13 @@ Polymer({
     '_projectSelectedRequestChanged(selectedRequest)'
   ],
 
+  detached: function() {
+    this._setIsError(false);
+    this.showCookieBanner = false;
+    this.set('request', undefined);
+    this._setResponse(undefined);
+  },
+
   onShow: function() {
     this._setPageTitle('Request');
     this._prepareRequest();

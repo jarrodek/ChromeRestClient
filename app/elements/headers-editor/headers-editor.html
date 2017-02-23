@@ -28,14 +28,14 @@
       position: relative;
 
       --code-mirror-wrapper: {
-        border: 1px var(--main-section-border-color) solid;
+        /*border: 1px var(--main-section-border-color) solid;*/
       }
 
       --code-mirror-editor: {
         z-index: 0;
       }
       --paper-input-container-underline: {
-        background-color: var(--main-section-border-color);
+        border-bottom-color: rgba(0, 0, 0, 0.24);
       }
       --paper-autocomplete: {
         top: 32px;
@@ -70,8 +70,9 @@
     }
 
     .headers-list {
-      margin: 12px 0;
+      margin: 12px;
       position: relative;
+      border-bottom: 1px rgba(0, 0, 0, 0.14) solid;
     }
 
     .CodeMirror-hints {
@@ -103,13 +104,12 @@
       color: #dd2c00;
     }
 
-    headers-editor-status {
-      /*border-top: 1px rgba(0, 0, 0, 0.36) solid;*/
-      border: 1px rgba(0, 0, 0, 0.14) solid;
-    }
-
     .add-button {
       color: var(--primary-color);
+    }
+
+    code-mirror {
+      border-bottom: 1px rgba(0, 0, 0, 0.14) solid;
     }
 
     </style>
@@ -124,7 +124,6 @@
       <iron-pages selected="{{tabSelected}}">
         <code-mirror mode="http-headers" theme="cm-arc" on-change="valueChanged" value="{{headers}}" id="cm"></code-mirror>
         <section class="headers-list">
-          <label class="headers-title">HTTP headers</label>
           <div class="headers-form">
             <template is="dom-repeat" id="headersList" items="{{headersList}}" on-dom-change="_onHeadersFormRender">
               <div class="form-row">
@@ -137,9 +136,9 @@
                   <paper-input-error>Header value should not be empty</paper-input-error>
                 </paper-input-container>
                 <div class="edit-header">
-                  <paper-icon-button icon="image:edit" title="Edit header value" on-tap="_openHeaderSupport"></paper-icon-button>
+                  <paper-icon-button icon="arc:edit" title="Edit header value" on-tap="_openHeaderSupport"></paper-icon-button>
                 </div>
-                <paper-icon-button icon="close" title="Remove header" on-tap="_removeHeader"></paper-icon-button>
+                <paper-icon-button icon="arc:close" title="Remove header" on-tap="_removeHeader"></paper-icon-button>
                 <paper-autocomplete on-query="_queryHeaderName" on-selected="_onHeaderNameSelected"></paper-autocomplete>
               </div>
             </template>

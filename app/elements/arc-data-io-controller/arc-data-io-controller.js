@@ -33,15 +33,18 @@ Polymer({
     _showFileExport: {
       type: Boolean,
       value: true,
-      computed: '_canShowFileExport(_fileImporting)'
+      computed: '_canShowFileExport(hasImportData)'
     },
-    /** `true` if server import / export options should be visible */
-    _showServerOptions: {
+    hasImportData: {
       type: Boolean,
-      value: true,
-      computed: '_canShowServerSection(_fileImporting, _fileExporting)'
+      value: false,
+      reflectToAttribute: true
     },
-    authorized: Boolean
+    isDriveImport: {
+      type: Boolean,
+      value: false,
+      reflectToAttribute: true
+    }
   },
   /**
    * Ping server for session state on show.
@@ -63,49 +66,6 @@ Polymer({
    */
   _canShowFileExport: function(_fileImporting) {
     return !_fileImporting;
-  },
-  /**
-   * to be removed?
-   */
-  _canShowServerSection: function(_fileImporting, _fileExporting) {
-    return !_fileImporting && !_fileExporting;
-  },
-  /**
-   * Perform a data import.
-   */
-  _importFileData: function(e) {
-    this._setLoading(true);
-
-    arc.app.importer.saveFileData(e.detail.data)
-    .then(() => {
-      StatusNotification.notify({
-        message: 'Data saved',
-        timeout: StatusNotification.TIME_SHORT
-      });
-      this.fire('data-imported');
-      this._setLoading(false);
-    })
-    .catch((cause) => {
-      console.error('Import data error', cause);
-      this.fire('app-log', {'message': ['Data import error: ', cause], 'level': 'error'});
-      StatusNotification.notify({
-        message: 'Unable to import data. ' + cause.message,
-        timeout: StatusNotification.TIME_SHORT
-      });
-      this.fire('send-analytics', {
-        type: 'exception',
-        description: 'arc-data-import-controller' + cause.message,
-        fatal: false
-      });
-      this._setLoading(false);
-    });
-
-    this.fire('send-analytics', {
-      type: 'event',
-      category: 'Settings usage',
-      action: 'Import data',
-      label: 'From file'
-    });
   }
 });
 })();

@@ -2,24 +2,12 @@
   'use strict';
 
   let app = document.querySelector('#app');
-  app.baseUrl = '/';
   app.pageTitle = '';
-  /**
-   * Because controllers do not have direct access to the toolbar it must keep relevant data in
-   * the main object if it must to be accessible to the toolbar.
-   * This is an array of requests related to the currently opened project.
-   *
-   * TODO:50 In future releases controllers should not keep their data in the toolbar. New design
-   * should keep all releted to the controller data in the main workspace window.
-   */
-  app.projectEndpoints = [];
   /**
    * The same as above.
    */
   app.selectedRequest = null;
-  app.selectedProject = undefined;
-  app.upgrading = false;
-  app.usePouchDb = false;
+  app.selectedProject = null;
   app.gaCustomDimensions = [];
   app.appVersion = arc.app.utils.appVer;
   app.appId = chrome.runtime && chrome.runtime.id ? chrome.runtime.id : 'not-in-chrome-app';
@@ -29,34 +17,54 @@
   // Selected environment for magic variables.
   app.variablesEnvironment = 'default';
   app.narrowLayout = false;
+  app.forceNarrowLayout = false;
+  app.upgrading = false;
+  app.usePouchDb = undefined;
+  app.initialized = false;
+  app.listeners = {
+    'drawerResizer.track': '_drawerTrack'
+  };
+  /**
+   * Returns true when both parameteres are trully.
+   *
+   * The `template` will always render `arc-request-controller` and it's children even if in a
+   * moment it should be turned off.
+   * The app will wait until upgrade script finish and the set up the `initialized` flag.
+   */
+  app.canRender = (status, dataSource, elementIsRequestPanel) => {
+    return status && dataSource && elementIsRequestPanel === 'true';
+  };
+  // Open current project details page
+  app.openProjectDetails = () => {
+    page(`/project/${app.selectedProject}/edit`);
+  };
+  app._computeHideProjectLink = (selectedProject, route) =>
+    !(selectedProject && route === 'request');
+  app._canShowProjectSelector = (route, count) => route === 'request' && count > 0;
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
     app.updateBranding();
-    app.runTutorials();
   });
   // Called when current request changed.
   window.addEventListener('selected-request', (e) => {
-    app.selectedRequest = e.detail.id;
-  });
-  // Called when current project changed
-  window.addEventListener('selected-project', (e) => {
-    app.set('selectedProject', e.detail.id);
-    if (!app.selectedProject) {
-      app.projectEndpoints = [];
-    }
+    app.selectedRequest = e.detail.id ? e.detail.id : null;
   });
   // event fired when the app is initialized and can remove loader.
   window.addEventListener('ArcInitialized', function() {
     document.querySelector('arc-loader-screen').close();
+    // app.runTutorials();
+    app.initialized = true;
   });
   window.addEventListener('WebComponentsReady', function() {
-    // console.log('Components are ready');
-    // event will be handled in elements/routing.html
-    if (app.upgrading) {
-      return;
-    }
     app.initAnalytics();
-    app.initRouting();
+    // if (app.upgrading) {
+    //   return;
+    // }
+    // app.initAnalytics();
+    // app.initRouting();
+  });
+  window.addEventListener('selected-project', (e) => {
+    app.selectedProject = e.detail.id;
   });
   app.initRouting = () => {
     if (app.routingInitialized) {
@@ -75,11 +83,6 @@
   app.closeDrawer = function() {
     app.$.paperDrawerPanel.closeDrawer();
   };
-
-  // A handler called when data has been imported to the app.
-  app._dataImportedHandler = function() {
-    app.$.appMenu.refreshProjects();
-  };
   /**
    * Open search bar and notify opener about changes.
    */
@@ -91,11 +94,6 @@
     var searchFn = function(e) {
       //inform controller about search action
       app._featureCalled('search', e);
-      // Array.from(document.querySelectorAll('[search-query]')).forEach((ctrl) => {
-      //   if (ctrl.onSearch) {
-      //     ctrl.onSearch();
-      //   }
-      // });
     };
     var blurFn = function(e) {
       let input = document.querySelector('#mainSearchInput');
@@ -113,11 +111,6 @@
 
   document.body.addEventListener('page-title-changed', (e) => {
     app.pageTitle = e.detail.title;
-  });
-
-  document.body.addEventListener('restore-request', (e) => {
-    app.set('request', e.detail.request);
-    page('/request/current');
   });
 
   /**
@@ -141,7 +134,6 @@
       bar.removeAttribute(feature);
     }
     app.featuresMapping.clear();
-    app.projectEndpoints = [];
   });
   app._featureCalled = (feature, event) => {
     if (!app.featuresMapping.has(feature)) {
@@ -175,9 +167,6 @@
   app._onFeatureDrive = (e) => {
     app._featureCalled('drive', e);
   };
-  app._onFeatureProjectEndpoints = (e) => {
-    app._featureCalled('projectEndpoints', e.detail.item.dataset.id);
-  };
   app._onFeatureBack = (e) => {
     app._featureCalled('back', e);
   };
@@ -187,21 +176,37 @@
   // called when any component want to change request link.
   document.body.addEventListener('action-link-change', (e) => {
     var url = e.detail.url;
-    if (app.request.url && url.indexOf('/') === 0) {
+    var setUrl = function(url) {
+      if (app.usePouchDb) {
+        let panel = document.querySelector('request-panel');
+        panel.set('request.url', url);
+      } else {
+        app.set('request.url', url);
+      }
+    };
+    var getUrl = function() {
+      if (app.usePouchDb) {
+        return document.querySelector('request-panel').request.url;
+      } else {
+        return app.get('request.url');
+      }
+    };
+    var currentUrl = getUrl();
+    if (currentUrl && url.indexOf('/') === 0) {
       var parser;
       try {
-        parser = new URL(app.request.url);
+        parser = new URL(currentUrl);
         url = parser.origin + url;
-        app.set('request.url', url);
+        setUrl(url);
       } catch (e) {
         console.log('URL parse error', e);
         this.fire('app-log', {
           message: e
         });
-        app.set('request.url', url);
+        setUrl(url);
       }
     } else {
-      app.set('request.url', url);
+      setUrl(url);
     }
     app.scrollPageToTop();
   });
@@ -211,7 +216,7 @@
     arc.app.clipboard.write(data);
   });
   document.body.addEventListener('project-saved', () => {
-    app.$.appMenu.refreshProjects();
+    document.querySelector('arc-menu-controller').refreshProjects();
   });
 
   app.onSave = (e, detail) => {
@@ -273,6 +278,18 @@
     chrome.runtime.getBackgroundPage(function(bg) {
       bg.arc.bg.openWindow();
     });
+  };
+
+  app.onSend = () => {
+    if (app.route !== 'request') {
+      return;
+    }
+    var panel = document.querySelector('request-panel');
+    if (!panel) {
+      console.warn('The request panel is undefined');
+      return;
+    }
+    panel.sendRequest();
   };
 
   app.textSearchBarOpened = () => {
@@ -430,15 +447,17 @@
     });
   });
 
-  app.runTutorials = () => {
-    /// XHR toggle tutorial
-    chrome.storage.sync.get({'tutorials': []}, (r) => {
-      if (r.tutorials.indexOf('xhrElementTutorial') !== -1) {
-        return;
-      }
-      app.$.xhrProxyTutorial.target = app.$.xhrToggle;
-    });
-  };
+  // app.runTutorials = () => {
+  //   /// XHR toggle tutorial
+  //   chrome.storage.sync.get({'tutorials': []}, (r) => {
+  //     if (r.tutorials.indexOf('xhrElementTutorial') !== -1) {
+  //       app.$.xhrProxyTutorial.parentNode.removeChild(app.$.xhrProxyTutorial);
+  //       delete app.$.xhrProxyTutorial;
+  //       return;
+  //     }
+  //     app.$.xhrProxyTutorial.target = app.$.xhrToggle;
+  //   });
+  // };
 
   app._closeXhrTutorial = () => {
     app.$.xhrProxyTutorial.hide();
@@ -506,7 +525,10 @@
       document.querySelector('app-upgrade-screen').finished = true;
       return;
     }
-    target.target.initScript();
+    arc.app.db.idb.open()
+    .then(() => {
+      target.target.initScript();
+    });
   };
   app._dbUpgradeReady = (e) => {
     app.fire('use-pouch-db');
@@ -523,6 +545,7 @@
       if (elm) {
         elm.finished = true;
       }
+      app.initRouting();
       return;
     }
     var target = e.target;
@@ -550,13 +573,30 @@
   app._upgradeStatus = (e) => {
     app.fire('app-upgrade-screen-log', e.detail);
   };
-
+  app._requestPanelInitiallized = () => {
+    if (app.route !== 'request') {
+      return;
+    }
+    var elm = document.querySelector('request-panel');
+    if (!elm) {
+      return;
+    }
+    elm.opened = true;
+  };
   app._mainPageSelected = (e) => {
     if (app.route !== 'request') {
       return;
     }
     var elm = e.detail.item.querySelector('*:not(template)');
-    elm.opened = true;
+    if (!elm) {
+      elm = document.querySelector('request-panel');
+    }
+    if (!elm) {
+      return;
+    }
+    if (!elm.opened) {
+      elm.opened = true;
+    }
   };
   app._mainPageDeselected = (e) => {
     var elm = e.detail.item.querySelector('*:not(template)');
@@ -573,7 +613,7 @@
       });
       return;
     }
-    ctrl.selectFile();
+    ctrl.opened = true;
   });
 
   app.initAnalytics = () => {
@@ -665,4 +705,81 @@
   window.addEventListener('variables-environment-changed', (e) => {
     app.variablesEnvironment = e.detail.env;
   });
+  /* File import by drag'n'drop */
+  document.body.addEventListener('dragenter', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    var element = document.querySelector('drop-file-importer');
+    if (!element) {
+      return;
+    }
+    if (element.opened) {
+      element.opened = false;
+    } else {
+      element.opened = true;
+    }
+  });
+
+  /* Drawer width support */
+  app.drawerWidth = '360px';
+  app._drawerTrack = function(e) {
+    var newWidth;
+    switch (e.detail.state) {
+      case 'start':
+        app.$.paperDrawerPanel.$.drawer.classList.remove('transition-drawer');
+        app._drawerInitTransition = getComputedStyle(app.$.paperDrawerPanel.$.main)
+          .getPropertyValue('transition');
+        app.$.paperDrawerPanel.$.main.style.transition = 'left ease-in-out 0.01s';
+        app._drawerInitTrackWidth = Number(app.drawerWidth.replace('px', ''));
+        break;
+      case 'track':
+        newWidth = app._drawerInitTrackWidth + e.detail.dx;
+        if (newWidth <= 10) {
+          newWidth = 10;
+        }
+        app.drawerWidth = newWidth + 'px';
+        app.$.paperDrawerPanel.$.main.style.transition = 'left ease-in-out 0.01s';
+        break;
+      case 'end':
+        app.$.paperDrawerPanel.$.drawer.classList.add('transition-drawer');
+        app.$.paperDrawerPanel.$.main.style.transition = app._drawerInitTransition;
+        newWidth = app._drawerInitTrackWidth + e.detail.dx;
+        if (newWidth <= 10) {
+          newWidth = 10;
+        }
+        app._drawerWidth = newWidth;
+        delete app._drawerInitTrackWidth;
+        delete app._drawerInitTransition;
+        break;
+    }
+  };
+  app._drawerWidthRead = function(e) {
+    if (e.detail.value) {
+      app.set('drawerWidth', (e.detail.value + 'px'));
+    }
+  };
+
+  app._drawerToggle = function() {
+    if (app.narrowLayout) {
+      return;
+    }
+    app.forceNarrowLayout = !app.forceNarrowLayout;
+    app.async(function() {
+      app.$.paperDrawerPanel.closeDrawer();
+    }, 1);
+  };
+  // Pin drawer back to the app.
+  app._pinDrawer = function() {
+    app.forceNarrowLayout = false;
+  };
+
+  app._computePinDrawerClass = function(forceNarrowLayout, narrowLayout) {
+    var clazz = 'drawer-pin';
+    if (forceNarrowLayout && narrowLayout) {
+      clazz += ' visible';
+    }
+    return clazz;
+  };
+  // Computes `active` flag for the legacy project related requests
+  app._processProjectRequests = (route) => route === 'request';
 })(document, window);

@@ -142,6 +142,7 @@ class TestServer {
     this._setErrors();
     this._setEmptyResponses();
     this._setNtlm();
+    this._seStatusCodes();
   }
 
   _setMain() {
@@ -201,6 +202,18 @@ class TestServer {
     });
     app.get('/json/2', (req, res) => {
       var json = fs.readFileSync('./tasks/test-data/json2.json', 'utf8');
+      // res.status(200).send('OK');
+      res.set('Content-Type', 'application/json');
+      res.send(json);
+    });
+    app.get('/json/3', (req, res) => {
+      var json = fs.readFileSync('./tasks/test-data/quicker-response-export.json', 'utf8');
+      // res.status(200).send('OK');
+      res.set('Content-Type', 'application/json');
+      res.send(json);
+    });
+    app.get('/json/4', (req, res) => {
+      var json = fs.readFileSync('./tasks/test-data/slow-response-export.json', 'utf8');
       // res.status(200).send('OK');
       res.set('Content-Type', 'application/json');
       res.send(json);
@@ -545,6 +558,19 @@ class TestServer {
       res.set('Content-Type', 'application/json');
       res.send(response);
       res.end();
+    });
+  }
+
+  _seStatusCodes() {
+    app.get('/status', (req, res) => {
+      let params = req.query;
+      let status = params.status ? parseInt(params.status) : 200;
+      let statusText = params.text || 200;
+      if (status !== status) {
+        status = 200;
+      }
+      res.statusMessage = statusText;
+      res.status(status).end();
     });
   }
 }

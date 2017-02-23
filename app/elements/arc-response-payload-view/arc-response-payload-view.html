@@ -77,7 +77,7 @@ the License.
             <p>The response was empty</p>
           </arc-error-message>
         </div>
-        <paper-tabs selected="{{selectedTab}}" id="tabs">
+        <paper-tabs selected="{{selectedTab}}" id="tabs" hidden$="[[isEmpty]]">
           <paper-tab hidden$="[[!isRaw]]">Raw</paper-tab>
           <paper-tab hidden$="[[!isParsed]]">Parsed</paper-tab>
           <paper-tab hidden$="[[!isJson]]">JSON</paper-tab>
@@ -85,23 +85,23 @@ the License.
           <paper-tab hidden$="[[!isImage]]">Image</paper-tab>
           <paper-tab hidden$="[[!isBinary]]">Binary</paper-tab>
         </paper-tabs>
-        <iron-pages selected="{{selectedTab}}">
+        <iron-pages selected="{{selectedTab}}" hidden$="[[isEmpty]]">
           <section hidden$="[[!isRaw]]">
             <div class="actions-panel">
-              <paper-icon-button title="Copy content to clipboard" icon="content-copy" data-source="raw" on-tap="_clipboardCopy"></paper-icon-button>
-              <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
-              <paper-icon-button title="Preview response" icon="visibility" on-tap="_togglePreviewResponse"></paper-icon-button>
-              <paper-icon-button title="Wrap or unwrap text" icon="editor:wrap-text" toggles on-tap="_toggleTextWrap"></paper-icon-button>
+              <paper-icon-button title="Copy content to clipboard" icon="arc:content-copy" data-source="raw" on-tap="_clipboardCopy"></paper-icon-button>
+              <paper-icon-button title="Save content to file" icon="arc:archive" on-tap="_saveFile"></paper-icon-button>
+              <paper-icon-button title="Preview response" icon="arc:visibility" on-tap="_togglePreviewResponse"></paper-icon-button>
+              <paper-icon-button title="Wrap or unwrap text" icon="arc:wrap-text" toggles on-tap="_toggleTextWrap"></paper-icon-button>
             </div>
             <div id="rawContent" class="raw-content" hidden$="[[contentPreview]]"></div>
           </section>
           <section hidden$="[[!isParsed]]">
             <div class="actions-panel">
-              <paper-icon-button title="Copy content to clipboard" icon="content-copy" data-source="parsed" on-tap="_clipboardCopy"></paper-icon-button>
-              <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
-              <paper-icon-button title="Preview response" icon="visibility" on-tap="_togglePreviewResponse"></paper-icon-button>
+              <paper-icon-button title="Copy content to clipboard" icon="arc:content-copy" data-source="parsed" on-tap="_clipboardCopy"></paper-icon-button>
+              <paper-icon-button title="Save content to file" icon="arc:archive" on-tap="_saveFile"></paper-icon-button>
+              <paper-icon-button title="Preview response" icon="arc:visibility" on-tap="_togglePreviewResponse"></paper-icon-button>
               <paper-menu-button horizontal-align="right">
-                <paper-icon-button icon="code" class="dropdown-trigger"></paper-icon-button>
+                <paper-icon-button icon="arc:code" class="dropdown-trigger"></paper-icon-button>
                 <paper-menu class="dropdown-content" on-iron-select="_codeForceMenuAction">
                   <paper-item data-action="json">Open as JSON</paper-item>
                   <paper-item data-action="xml">Open as XML</paper-item>
@@ -112,23 +112,23 @@ the License.
           </section>
           <section hidden$="[[!isJson]]">
             <div class="actions-panel">
-              <paper-icon-button title="Copy content to clipboard" icon="content-copy" data-source="json" on-tap="_clipboardCopy"></paper-icon-button>
-              <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
+              <paper-icon-button title="Copy content to clipboard" icon="arc:content-copy" data-source="json" on-tap="_clipboardCopy"></paper-icon-button>
+              <paper-icon-button title="Save content to file" icon="arc:archive" on-tap="_saveFile"></paper-icon-button>
             </div>
             <json-viewer id="jsonViewer" raw="[[raw]]"></json-viewer>
           </section>
           <section hidden$="[[!isXml]]">
             <div class="actions-panel">
-              <paper-icon-button title="Copy content to clipboard" icon="content-copy" data-source="xml" on-tap="_clipboardCopy"></paper-icon-button>
-              <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
-              <paper-icon-button title="Preview response" icon="visibility" on-tap="_togglePreviewResponse"></paper-icon-button>
+              <paper-icon-button title="Copy content to clipboard" icon="arc:content-copy" data-source="xml" on-tap="_clipboardCopy"></paper-icon-button>
+              <paper-icon-button title="Save content to file" icon="arc:archive" on-tap="_saveFile"></paper-icon-button>
+              <paper-icon-button title="Preview response" icon="arc:visibility" on-tap="_togglePreviewResponse"></paper-icon-button>
             </div>
             <xml-viewer id="xmlViewer" hidden$="[[contentPreview]]"></xml-viewer>
           </section>
           <section hidden$="[[!isImage]]">
             <div class="actions-panel">
-              <paper-icon-button title="Copy content to clipboard" icon="content-copy" data-source="image" on-tap="_clipboardCopy"></paper-icon-button>
-              <paper-icon-button title="Save content to file" icon="archive" on-tap="_saveFile"></paper-icon-button>
+              <paper-icon-button title="Copy content to clipboard" icon="arc:content-copy" data-source="image" on-tap="_clipboardCopy"></paper-icon-button>
+              <paper-icon-button title="Save content to file" icon="arc:archive" on-tap="_saveFile"></paper-icon-button>
             </div>
             <chrome-image id="imageViewer"></chrome-image>
           </section>

@@ -26,10 +26,29 @@ the License.
         display: block;
         --iron-image-width: 400px;
         background: #F5F5F5;
+        padding-bottom: 40px;
+        height: auto !important;
+
+        --paper-item-body-secondary: {
+          overflow: inherit;
+          text-overflow: inherit;
+          white-space: normal;
+        };
+
+        --paper-input-container-underline: {
+          border-bottom-color: rgba(0, 0, 0, 0.24);
+        }
       }
 
       paper-material {
         background-color: #fff;
+        margin: 0 16px;
+      }
+
+      paper-material,
+      h2 {
+        max-width: 620px;
+        width: 100%;
       }
 
       .help-icon {
@@ -53,12 +72,7 @@ the License.
       #addShortcutsToDesktop .onboarding-image-page .description {
         @apply(--layout-center);
       }
-      .single-page-item {
-        background-color: #fff;
-      }
-      .single-page-item > paper-item-body > div {
-        margin-left: 56px;
-      }
+
       .single-page-description {
         @apply(--paper-font-body1);
         color: var(--paper-grey-600);
@@ -70,10 +84,10 @@ the License.
         @apply(--paper-font-body1);
         @apply(--layout-horizontal);
         @apply(--layout-center);
-        padding-left: 16px;
         height: 48px;
         color: var(--accent-color);
         margin: 0;
+        padding-left: 32px;
       }
       paper-material {
         margin: 8px 0;
@@ -87,215 +101,281 @@ the License.
       .link {
         cursor: pointer;
       }
-      </style>
-      <neon-animated-pages selected="{{page}}"
-       entry-animation="slide-from-right-animation"
-       exit-animation="slide-left-animation">
-        <neon-animatable>
-          <section>
-            <paper-material elevation="1">
-              <h2 class="subhead">Stored data</h2>
-              <paper-item>
-                <paper-item-body two-line="">
-                  <div>Collect history</div>
-                  <div secondary="true">Save requests made by the app for future use</div>
-                </paper-item-body>
-                <paper-toggle-button checked="{{values.HISTORY_ENABLED}}"></paper-toggle-button>
-              </paper-item>
-              <paper-item on-tap="historyClearClick">
-                <paper-item-body>
-                  <div>Clear history</div>
-                </paper-item-body>
-              </paper-item>
-              <paper-item>
-                <paper-item-body two-line="">
-                  <div>Collect cookies</div>
-                  <div secondary>Save received cookies and send them back as would browser do</div>
-                </paper-item-body>
-                <paper-toggle-button checked="{{values.useCookieStorage}}"></paper-toggle-button>
-              </paper-item>
-              <paper-item on-tap="cookiesClearClick">
-                <paper-item-body>
-                  <div>Clear cookies</div>
-                </paper-item-body>
-              </paper-item>
-              <paper-item on-tap="passwordsClearClick">
-                <paper-item-body two-line="">
-                  <div>Clear password</div>
-                  <div secondary="true">Remove passwords saved for basic authentication.</div>
-                </paper-item-body>
-              </paper-item>
-              <paper-item on-tap="dumpClick">
-                <paper-item-body two-line>
-                  <div>Save your data to file</div>
-                  <div secondary="true">Save history, saved requests and projects data to file.</div>
-                </paper-item-body>
-              </paper-item>
-            </paper-material>
-            <paper-material elevation="1">
-              <h2 class="subhead">Request behavior</h2>
-              <paper-item data-page="2" on-tap="_showPage">
-                <paper-item-body two-line>
-                  <div>
-                    Magic variables
-                  </div>
-                  <div secondary>[[computeMvLabel(values.MAGICVARS_ENABLED)]]</div>
-                </paper-item-body>
-              </paper-item>
-              <paper-item data-page="1" on-tap="_showPage">
-                <paper-item-body two-line>
-                  <div>
-                    Request timeout
-                  </div>
-                  <div secondary>[[computeTimeoutLabel(values.requestDefaultTimeout)]]</div>
-                </paper-item-body>
-                <paper-ripple></paper-ripple>
-              </paper-item>
-            </paper-material>
-            <paper-material elevation="1">
-              <h2 class="subhead">Account and user data</h2>
-              <paper-item>
-                <paper-item-body two-line>
-                  <div>Sign in or out from Google Services.</div>
-                  <div secondary>
-                    This is required to save or open files from Google Drive.
-                  </div>
-                </paper-item-body>
-                <chrome-signin></chrome-signin>
-              </paper-item>
-              <paper-item class="link" on-tap="openPrivacyPolicy">
-                <paper-item-body>
-                  <div>Privacy policy</div>
-                </paper-item-body>
-              </paper-item>
-            </paper-material>
-            <paper-material elevation="1">
-              <h2 class="subhead">Other</h2>
-              <paper-item>
-                <paper-item-body two-line>
-                  <div>
-                    Send anonymous usage data
-                  </div>
-                  <div secondary="true">None of your data are sent to the server. It helps making an ARC better when you provide usage statistics. Please, leave it enabled if you can.</div>
-                </paper-item-body>
-                <paper-toggle-button on-tap="_gaSettingTapped" checked="{{gaEnabled}}"></paper-toggle-button>
-              </paper-item>
-              <paper-item hidden$="[[!showNotifications]]">
-                <paper-item-body>
-                  <div>
-                    Show notification when app is updated
-                  </div>
-                </paper-item-body>
-                <paper-toggle-button on-tap="_notificationsTapped" checked="{{notificationsEnabled}}"></paper-toggle-button>
-              </paper-item>
-              <paper-item on-tap="_showAddToDesktopTutotial">
-                <paper-item-body>
-                  <div>
-                    Add shortcut to desktop
-                  </div>
-                </paper-item-body>
-              </paper-item>
-              <paper-item on-tap="showTutorial">
-                <paper-item-body>
-                  <div>Show tutorial</div>
-                </paper-item-body>
-              </paper-item>
 
-            </paper-material>
-          </section>
-        </neon-animatable>
-        <neon-animatable>
-          <paper-item class="single-page-item">
-            <paper-item-body>
-              <div>Request timeout</div>
-            </paper-item-body>
-            <paper-input-container no-label-float inline>
-              <input is="iron-input" type="number" value="{{values.requestDefaultTimeout::input}}" placeholder="Timeout" pattern="[0-9]*"/>
-              <paper-input-error>Enter time as a number</paper-input-error>
-              <div suffix>seconds</div>
-            </paper-input-container>
-          </paper-item>
-          <p class="single-page-description">
-            When set to "0" (zero) then the request will never timeout. If the server does not close the connection and sends no response then the request will never end.
-          </p>
-          <p class="single-page-description">
-            Set the value to positive number to set the time (in seconds) after which the request will timeout.
-          </p>
-        </neon-animatable>
-        <neon-animatable>
-          <paper-item class="single-page-item">
-            <paper-item-body>
-              <div>Magic variables</div>
-            </paper-item-body>
-            <paper-toggle-button checked="{{values.MAGICVARS_ENABLED}}"></paper-toggle-button>
-          </paper-item>
-          <p class="single-page-description">
-            Magic variables helps you dynamically alter the request just before sending it to the server.
-          </p>
-          <p class="single-page-description">
-            At the moment there are two types of build-in Magic Variables:
-          </p>
+      #exportDataDialog,
+      #clearDatastoreDialog {
+        min-width: 480px;
+      }
+
+      #clearForm,
+      #exportForm {
+        @apply(--layout-vertical);
+      }
+
+      #clearForm paper-checkbox,
+      #exportForm paper-checkbox {
+        margin: 12px 0px;
+      }
+
+      .main-settings {
+        @apply(--layout-vertical);
+        @apply(--layout-center);
+        @apply(--layout-start-justified);
+      }
+
+      .inner-settings {
+        padding-top: 40px;
+        @apply(--layout-vertical);
+        @apply(--layout-center);
+      }
+
+      iron-icon {
+        color: rgba(0, 0, 0, 0.34);
+        width: 18px;
+        height: 18px;
+      }
+
+      .nav-away-icon {
+        transform: rotate(-90deg);
+      }
+
+      .button-margin {
+        border-right: 1px #f5f5f5 solid;
+        margin-right: 12px;
+      }
+      </style>
+      <iron-pages selected="{{page}}">
+
+        <section class="main-settings">
+          <h2 class="subhead">Stored data</h2>
+          <paper-material elevation="1">
+            <paper-item>
+              <paper-item-body two-line>
+                <div>Collect history</div>
+                <div secondary>Save requests made by the app for future use</div>
+              </paper-item-body>
+              <paper-toggle-button checked="{{values.HISTORY_ENABLED}}"></paper-toggle-button>
+            </paper-item>
+            <paper-item>
+              <paper-item-body two-line>
+                <div>Collect cookies</div>
+                <div secondary>Save received cookies and send them back as would browser do</div>
+              </paper-item-body>
+              <paper-toggle-button checked="{{values.useCookieStorage}}"></paper-toggle-button>
+            </paper-item>
+            <paper-item>
+              <paper-item-body two-line>
+                <div>History analysis</div>
+                <div secondary>Performs history analysis on historical request data. It shows the history charts in the request panel.</div>
+              </paper-item-body>
+              <paper-toggle-button checked="{{values.apiAssistant}}"></paper-toggle-button>
+            </paper-item>
+            <paper-item on-tap="_exportDataRequested">
+              <paper-item-body two-line>
+                <div>Save stored data to file</div>
+                <div secondary>Save history, saved requests and projects data to file.</div>
+              </paper-item-body>
+              <iron-icon icon="arc:arrow-drop-down" class="nav-away-icon" item-icon></iron-icon>
+            </paper-item>
+            <paper-item on-tap="clearDatastore">
+              <paper-item-body>
+                <div>Clear stored data</div>
+                <!-- <div secondary>This will remove all data stored by the application. This can't be undo unless the export file has been created.</div> -->
+              </paper-item-body>
+              <iron-icon icon="arc:arrow-drop-down" class="nav-away-icon" item-icon hidden$="[[deletingDatabases]]"></iron-icon>
+              <paper-spinner item-icon active hidden$="[[!deletingDatabases]]"></paper-spinner>
+            </paper-item>
+          </paper-material>
+
+          <h2 class="subhead">Request behavior</h2>
+          <paper-material elevation="1">
+            <paper-item data-page="2" on-tap="_showPage">
+              <paper-item-body two-line>
+                <div>
+                  Magic variables
+                </div>
+                <div secondary>[[computeMvLabel(values.MAGICVARS_ENABLED)]]</div>
+              </paper-item-body>
+              <iron-icon icon="arc:arrow-drop-down" class="nav-away-icon" item-icon></iron-icon>
+            </paper-item>
+            <paper-item data-page="1" on-tap="_showPage">
+              <paper-item-body two-line>
+                <div>
+                  Request timeout
+                </div>
+                <div secondary>[[computeTimeoutLabel(values.requestDefaultTimeout)]]</div>
+              </paper-item-body>
+              <iron-icon icon="arc:arrow-drop-down" class="nav-away-icon" item-icon></iron-icon>
+            </paper-item>
+          </paper-material>
+
+          <h2 class="subhead">Account and privacy</h2>
+          <paper-material elevation="1">
+            <paper-item>
+              <paper-item-body two-line class="button-margin">
+                <div>Sign in or out from Google Services.</div>
+                <div secondary>
+                  This is required to save or open files from Google Drive.
+                </div>
+              </paper-item-body>
+              <chrome-signin></chrome-signin>
+            </paper-item>
+            <paper-item>
+              <paper-item-body two-line>
+                <div>
+                  Send anonymous usage data
+                </div>
+                <div secondary="true">Make the ARC better by providing anonymous usage statistics.</div>
+              </paper-item-body>
+              <paper-toggle-button on-tap="_gaSettingTapped" checked="{{gaEnabled}}"></paper-toggle-button>
+            </paper-item>
+            <paper-item class="link" on-tap="openPrivacyPolicy">
+              <paper-item-body>
+                <div>Privacy policy</div>
+              </paper-item-body>
+              <iron-icon icon="arc:open-in-new" item-icon></iron-icon>
+            </paper-item>
+
+          </paper-material>
+
+          <h2 class="subhead">Other</h2>
+          <paper-material elevation="1">
+            <paper-item hidden$="[[!showNotifications]]">
+              <paper-item-body>
+                <div>
+                  Show notification when app is updated
+                </div>
+              </paper-item-body>
+              <paper-toggle-button on-tap="_notificationsTapped" checked="{{notificationsEnabled}}"></paper-toggle-button>
+            </paper-item>
+            <paper-item on-tap="_showAddToDesktopTutotial">
+              <paper-item-body>
+                <div>
+                  Add shortcut to desktop
+                </div>
+              </paper-item-body>
+              <iron-icon icon="arc:arrow-drop-down" class="nav-away-icon" item-icon></iron-icon>
+            </paper-item>
+            <paper-item on-tap="showTutorial">
+              <paper-item-body>
+                <div>Show tutorial</div>
+              </paper-item-body>
+              <iron-icon icon="arc:arrow-drop-down" class="nav-away-icon" item-icon></iron-icon>
+            </paper-item>
+          </paper-material>
+        </section>
+
+        <section class="inner-settings">
+
+          <paper-material elevation="1">
+            <paper-item>
+              <paper-item-body>
+                <div>Request timeout</div>
+              </paper-item-body>
+              <paper-input-container no-label-float inline>
+                <input is="iron-input" type="number" value="{{values.requestDefaultTimeout::input}}" placeholder="Timeout" pattern="[0-9]*"/>
+                <paper-input-error>Enter time as a number</paper-input-error>
+                <div suffix>seconds</div>
+              </paper-input-container>
+            </paper-item>
+            <p class="single-page-description">
+              When set to "0" (zero) then the request will never timeout. If the server does not close the connection and sends no response then the request will never end.
+            </p>
+            <p class="single-page-description">
+              Set the value to positive number to set the time (in seconds) after which the request will timeout.
+            </p>
+          </paper-material>
+
+        </section>
+        <section class="inner-settings">
+
+          <paper-material elevation="1">
+            <paper-item>
+              <paper-item-body>
+                <div>Magic variables</div>
+              </paper-item-body>
+              <paper-toggle-button checked="{{values.MAGICVARS_ENABLED}}"></paper-toggle-button>
+            </paper-item>
+            <p class="single-page-description">
+              Magic variables helps you dynamically alter the request just before sending it to the server. You can place them into the URL, headers list or in payload.
+            </p>
+            <p class="single-page-description">
+              Predefined variables are:
+            </p>
             <ul class="single-page-description">
               <li><b>${random}</b><br/>It generates random number from 0 to maximum number your computer can get.</li>
               <li><b>${now}</b><br/>Inserts current time (in miliseconds).</li>
             </ul>
-          <p class="single-page-description">
-            You can place Magic Variables in the URL, headers list or in payload.
-          </p>
-          <p class="single-page-description">
-            You can also group generated "${random}" values and reuse them on different places. For example you can add "${random:1}" to the URL and add the same Magic Variable to the headers or to payload. In this case the same generated number will be inserted in place of Magic Variable.<br/>
-            Basic syntax for magic variables is:<br/>
-            ${random:[group_number]} where the [group_number] is an identifier that you can use to recall the same variable later.
-          </p>
-          <p class="single-page-description">Learn more about MagicVariables on a blog post: <a href="http://restforchrome.blogspot.co.uk/2012/11/introduce-magic-variables.html" target="_blank">Introduce: Magic Variables</a></p>
-        </neon-animatable>
-      </neon-animated-pages>
-
-      <paper-dialog id="historyClearDialog" on-iron-overlay-closed="onClearDialogResult">
-        <h2>Clear history</h2>
+            <p class="single-page-description">
+              You can also group generated "${random}" values and reuse them on different places. For example you can add "${random:1}" to the URL and add the same Magic Variable to the headers or to payload. In this case the same generated number will be inserted in place of Magic Variable.<br/>
+              Basic syntax for magic variables is:<br/>
+              ${random:[group_number]} where the [group_number] is an identifier that you can use to recall the same variable later.
+            </p>
+            <p class="single-page-description">Learn more about MagicVariables on a blog post: <a href="http://restforchrome.blogspot.co.uk/2012/11/introduce-magic-variables.html" target="_blank">Introduce: Magic Variables</a></p>
+          </paper-material>
+          <h2 class="subhead">Custom variables</h2>
+          <paper-material elevation="1">
+            <variables-editor></variables-editor>
+          </paper-material>
+        </section>
+      </iron-pages>
+      <paper-dialog id="clearDatastoreDialog" on-iron-overlay-closed="_onClearDatastoreDialogResult">
+        <h2>Clear stored data</h2>
         <paper-dialog-scrollable>
-          <p>This will remove all data from the history store. Would you like to continue?</p>
+          <p>What to remove?</p>
+          <form is="iron-form" id="clearForm">
+            <paper-checkbox id="deleteSavedOption" on-iron-change="_deleteSavedChanged" name="saved-requests" checked>Saved requests (will also delete projects)</paper-checkbox>
+            <paper-checkbox id="deleteProjectsOption" name="legacy-projects" checked>Projects</paper-checkbox>
+            <paper-checkbox name="history-requests" checked>Requests history</paper-checkbox>
+            <paper-checkbox name="history-data" checked>History data stored for performance analysis</paper-checkbox>
+            <paper-checkbox name="cookies" checked>Cookies</paper-checkbox>
+            <paper-checkbox name="auth-data" checked>Saved passwords</paper-checkbox>
+            <paper-checkbox name="url-history" checked>URLs history (autofill data)</paper-checkbox>
+            <paper-checkbox name="websocket-url-history" checked>Web sockets history</paper-checkbox>
+          </form>
         </paper-dialog-scrollable>
         <div class="buttons">
-          <paper-button dialog-dismiss="">Cancel</paper-button>
-          <paper-button dialog-confirm="" autofocus="">Clear</paper-button>
+          <paper-button dialog-dismiss>Cancel</paper-button>
+          <paper-button dialog-confirm autofocus>Remove</paper-button>
         </div>
       </paper-dialog>
-      <paper-dialog id="passwordsClearDialog" on-iron-overlay-closed="onClearPasswordsResult">
-        <h2>Clear saved passwords</h2>
+      <paper-dialog id="exportDataDialog" on-iron-overlay-closed="_onExportDataDialogResult">
+        <h2>Data export</h2>
         <paper-dialog-scrollable>
-          <p>This will remove all saved passwords for basic authentication.</p>
+          <p>What to include in the export file?</p>
+          <form is="iron-form" id="exportForm">
+            <paper-checkbox name="saved" checked>Saved requests and projects</paper-checkbox>
+            <paper-checkbox name="history" checked>Requests history</paper-checkbox>
+            <paper-checkbox name="cookies" checked>Cookies</paper-checkbox>
+            <paper-checkbox name="auth" checked>Saved passwords</paper-checkbox>
+            <paper-checkbox name="history-url" checked>URLs history (autofill data)</paper-checkbox>
+            <paper-checkbox name="websocket" checked>Web sockets history</paper-checkbox>
+            <paper-checkbox name="headers-sets" checked>Headers sets</paper-checkbox>
+            <paper-checkbox name="variables" checked>Variables and environments</paper-checkbox>
+          </form>
         </paper-dialog-scrollable>
         <div class="buttons">
-          <paper-button dialog-dismiss="">Cancel</paper-button>
-          <paper-button dialog-confirm="" autofocus="">Remove</paper-button>
-        </div>
-      </paper-dialog>
-      <paper-dialog id="cookieClearDialog" on-iron-overlay-closed="onClearCookiesResult">
-        <h2>Clear cookie storage</h2>
-        <paper-dialog-scrollable>
-          <p>This will remove all cookies received from endpoints.</p>
-        </paper-dialog-scrollable>
-        <div class="buttons">
-          <paper-button dialog-dismiss="">Cancel</paper-button>
-          <paper-button dialog-confirm="" autofocus="">Remove</paper-button>
+          <paper-button dialog-dismiss>Cancel</paper-button>
+          <paper-button dialog-confirm autofocus>Export</paper-button>
         </div>
       </paper-dialog>
       <onboarding-tutorial id="addShortcutsToDesktop">
         <onboarding-page>
-          <h2>Adding app's shortcuts</h2>
-          <div class="onboarding-image-page">
-            <div class="image">
-              <iron-image src="/assets/create-shortcut.gif"></iron-image>
-            </div>
-            <div class="description">
-              <ul>
-                <li>Got to
-                  <mark>chrome://apps</mark>
-                </li>
-                <li>Right click on ARC (this app)</li>
-                <li>Select "Create shortcut..."</li>
-              </ul>
+          <div>
+            <h2>Adding app's shortcuts</h2>
+            <div class="onboarding-image-page">
+              <div class="image">
+                <iron-image src="/assets/create-shortcut.gif"></iron-image>
+              </div>
+              <div class="description">
+                <ul>
+                  <li>Got to
+                    <mark>chrome://apps</mark>
+                  </li>
+                  <li>Right click on ARC (this app)</li>
+                  <li>Select "Create shortcut..."</li>
+                </ul>
+              </div>
             </div>
           </div>
         </onboarding-page>

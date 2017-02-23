@@ -23,15 +23,19 @@
     :host > ::content > * {
       margin-top: 20px;
       padding: 0 24px;
+      flex: 1 1 auto;
       @apply(--tutorial-font);
       @apply(--tutorial-content-font);
     }
     :host > ::content > *:first-child {
       margin-top: 24px;
+      @apply(--layout-vertical);
+      @apply(--layout-flex);
     }
     :host > ::content .onboarding-image-page {
       @apply(--layout-horizontal);
       @apply(--layout-flex);
+      @apply(--layout-center-center);
     }
     :host > ::content .onboarding-image-page .image {
       @apply(--layout-vertical);
@@ -50,12 +54,19 @@
     :host > ::content .onboarding-image-page .description {
       @apply(--layout-vertical);
       @apply(--layout-flex);
+      @apply(--layout-center-center);
+      height: 100%;
+    }
+    :host > ::content .onboarding-image-page .description > div {
+      overflow: auto;
+      padding: 20px 0;
     }
     :host > ::content li {
       margin: 12px 0;
     }
     :host > ::content .info-button {
-      align-self: flex-end;
+      /*align-self: flex-end;*/
+      /*margin-left: 12px;*/
     }
     :host > ::content .tutorial-additional-info{
       margin-top: 40px;

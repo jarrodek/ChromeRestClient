@@ -132,7 +132,10 @@
         reflectToAttribute: true
       },
       // Selected environment for variables.
-      currentEnvironment: String,
+      currentEnvironment: {
+        type: String,
+        value: 'default'
+      },
       hasSelectedEnvironment: {
         type: Boolean,
         value: false,
@@ -151,7 +154,7 @@
     },
 
     observers: [
-      '_routeChanged(routeParams)',
+      '_routeChanged(routeParams, requestControllerOpened)',
       '_requestNameChanged(request.name)',
       '_projectEndpointsChanged(currentProjectEndpoints.*)',
       '_projectIdChanged(projectId)',
@@ -172,7 +175,8 @@
       'request-first-byte-received': '_requestStatusChanged',
       'request-load-end': '_requestStatusChanged',
       'request-headers-sent': '_requestStatusChanged',
-      'is-payload-changed': '_isPayloadChanged'
+      'is-payload-changed': '_isPayloadChanged',
+      'iron-overlay-closed': '_dialogClosedHandler'
     },
 
     attached: function() {
@@ -193,7 +197,7 @@
 
     onShow: function() {
       this._setPageTitle('Request');
-      this._routeChanged();
+      // this._routeChanged();
     },
 
     onHide: function() {
@@ -213,11 +217,11 @@
       this.set('savedId', e.detail);
     },
 
-    _computeControllerOpened(opened) {
+    _computeControllerOpened(opened, type) {
       if (!opened) {
         return false;
       }
-      if (!this.routeParams || !this.routeParams.type) {
+      if (!type) {
         return false;
       }
       return true;
@@ -237,6 +241,7 @@
         case 'history':
           this.requestType = this.routeParams.type;
           this.set('historyId', decodeURIComponent(this.routeParams.historyId));
+          this._setPageTitle('Request');
           break;
         case 'drive':
           // This is not really a request. It ment to open a drive item.
@@ -407,6 +412,9 @@
       this.fire('selected-request', {
         id: id
       });
+      if (decodeURIComponent(this.routeParams.savedId) !== id) {
+        this.set('routeParams.savedId', id);
+      }
       if (!id) {
         return;
       }
@@ -438,33 +446,33 @@
       this.fire('selected-project', {
         id: id
       });
-      if (!id) {
-        return;
-      }
-      var event = this.fire('project-read', {
-        id: id
-      });
-      if (event.detail.error) {
-        console.error(event.detail.message);
-        return;
-      }
-      event.detail.result.then((result) => {
-        console.info('Setting project data', result);
-        this.set('currentProjectData', result);
-      })
-      .catch((e) => {
-        if (e.status === 404) {
-          this.set('request.legacyProject', null);
-          this.set('proxyRequest.legacyProject', null);
-          this.set('projectId', undefined);
-          this.fire('app-log', {
-            'message': ['Project is not in database.', e],
-            'level': 'warn'
-          });
-        } else {
-          console.error('Unable restore project', e);
-        }
-      });
+      // if (!id) {
+      //   return;
+      // }
+      // var event = this.fire('project-read', {
+      //   id: id
+      // });
+      // if (event.detail.error) {
+      //   console.error(event.detail.message);
+      //   return;
+      // }
+      // event.detail.result.then((result) => {
+      //   // console.info('Setting project data', result);
+      //   this.set('currentProjectData', result);
+      // })
+      // .catch((e) => {
+      //   if (e.status === 404) {
+      //     this.set('request.legacyProject', null);
+      //     this.set('proxyRequest.legacyProject', null);
+      //     this.set('projectId', undefined);
+      //     this.fire('app-log', {
+      //       'message': ['Project is not in database.', e],
+      //       'level': 'warn'
+      //     });
+      //   } else {
+      //     console.error('Unable restore project', e);
+      //   }
+      // });
     },
 
     onXhrtoggle: function(e) {
@@ -549,9 +557,9 @@
       if ((isDrive || isSaved) && opts.source === 'shortcut' && !opts.shift) {
         return this._saveCurrent();
       }
-
-      var ui = this.$.saveRequestUi;
-      ui.reset();
+      var ui = document.createElement('arc-save-dialog-view');
+      // ui.reset();
+      ui.noCancelOnOutsideClick = true;
       ui.isDrive = isDrive;
       if (isSaved || isDrive) {
         if (this.request._id) {
@@ -564,7 +572,8 @@
         ui.projectId = this.projectId;
       }
       ui.usePouchDb = true;
-      ui.open();
+      Polymer.dom(this.root).appendChild(ui);
+      ui.opened = true;
       this.fire('send-analytics', {
         'type': 'event',
         'category': 'Engagement',
@@ -598,6 +607,19 @@
       this.$.requestSaver.currentIsDrive = isDrive;
       this.$.requestSaver.currentIsSaved = isSaved;
       this.$.requestSaver.save();
+    },
+
+    _dialogClosedHandler: function(e) {
+      e = Polymer.dom(e);
+      if (e.rootTarget.nodeName !== 'ARC-SAVE-DIALOG-VIEW') {
+        return;
+      }
+      var root = Polymer.dom(this.root);
+      var dialog = root.querySelector('arc-save-dialog-view');
+      if (!dialog) {
+        return;
+      }
+      root.removeChild(dialog);
     },
 
     _requestSavedHandler: function(e, detail) {
@@ -829,6 +851,7 @@
             return this.$.magicVariables.parse();
           })
           .then((result) => {
+            this.$.magicVariables.clear();
             request.payload = result;
             resolve(request);
           })
@@ -873,6 +896,7 @@
           this.$.cookieJar.getCookies()
           .then(() => {
             let cookie = this.$.cookieJar.cookie;
+            this.$.cookieJar.reset();
             if (!cookie) {
               resolve(request);
               return;
@@ -1003,7 +1027,10 @@
 
     _saveCookies: function() {
       this.$.cookieJar.response = this.response;
-      this.$.cookieJar.store();
+      this.$.cookieJar.store()
+      .then(() => {
+        this.$.cookieJar.reset();
+      });
     },
 
     /** Called then transport not finished the request because of error. */
@@ -1086,11 +1113,23 @@
      * the assistant so it can perform a search only if the URL is final.
      */
     _urlInputChanged: function(e) {
-      this._setAssistantUrl(e.detail.url);
+      window.requestAnimationFrame(() => {
+        this._setAssistantUrl(e.detail.url);
+      });
     },
 
     _wholeRequestChanged: function(request) {
-      this._setAssistantUrl(request.url);
+      if (!request) {
+        this._setAssistantUrl(undefined);
+        return;
+      }
+      window.requestAnimationFrame(() => {
+        this._setAssistantUrl(request.url);
+      });
+    },
+
+    _onShortcutSend: function(e) {
+      console.log('_onShortcutSend', e);
     }
   });
 })();

@@ -45,18 +45,17 @@
       var request = detail.request;
       var requestId = detail.id;
       if (!request || !request._id || !request._rev) {
-        if (!detail.id) {
+        if (!requestId) {
           e.detail.error = true;
           e.detail.message = 'You must set either request object or request id.';
           return;
-        }
-        if (!requestId) {
-          requestId = request._id;
         }
         request = null;
       }
       var db = this._getDb(detail.dbName);
       var p;
+      var oldRev;
+      var oldId = requestId;
       if (!request) {
         p = db.get(requestId);
       } else {
@@ -69,21 +68,23 @@
         return db.remove(r._id, r._rev);
       })
       .then(() => {
-        let r = request;
-        let id = encodeURIComponent(r.name) + '/' + encodeURIComponent(r.url) + '/' + r.method;
-        if (this.saveToProject) {
-          id += '/' + r.legacyProject;
+        let id = encodeURIComponent(request.name) + '/' + encodeURIComponent(request.url) +
+          '/' + request.method;
+        if (request.legacyProject) {
+          id += '/' + request.legacyProject;
         }
-        r._id = id;
-        delete r._rev;
-        return db.put(r);
+        request._id = id;
+        oldRev = request._rev;
+        delete request._rev;
+        return db.put(request);
       })
       .then((insertResult) => {
-        var oldRev = request._rev;
+
         request._rev = insertResult.rev;
         this.fire('request-object-changed', {
           request: request,
-          oldRev: oldRev
+          oldRev: oldRev,
+          oldId: oldId
         });
         return request;
       })
@@ -121,6 +122,7 @@
       } else {
         p = Promise.resolve(request);
       }
+
       e.detail.result = p
       .then((r) => {
         request = Object.assign({}, r, request);
@@ -130,18 +132,21 @@
       .then((insertResult) => {
 
         if (!insertResult.ok) {
-          var e = new Error('Insert result is not OK.');
+          let _event = new Error('Insert result is not OK.');
           this.fire('error', {
-            error: e
+            error: _event
           });
-          return Promise.reject(e);
+          return Promise.reject(_event);
         }
 
-        var oldRev = request._rev;
+        var oldRev = e.detail.originalRev || request._rev || insertResult.rev;
+        var oldId = e.detail.originalId || request._id || insertResult.id;
         request._rev = insertResult.rev;
+        request._id = insertResult.id;
         this.fire('request-object-changed', {
           request: request,
-          oldRev: oldRev
+          oldRev: oldRev,
+          oldId: oldId
         });
         return request;
       })

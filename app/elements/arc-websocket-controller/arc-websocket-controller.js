@@ -22,7 +22,8 @@ Polymer({
     connected: {
       type: Boolean,
       readOnly: true,
-      value: false
+      value: false,
+      observer: '_connectedChanged'
     },
     /**
      * Tru if the socket is disconnected (`connect` is false) but the component is trying to
@@ -43,10 +44,23 @@ Polymer({
      * Last used URL.
      */
     lastSocketUrl: {
-      type: String,
-      value: 'ws://echo.websocket.org'
+      type: String
     },
-    noRetry: Boolean
+    noRetry: Boolean,
+    // True when the elemnt has been initialized.
+    isReady: {
+      type: Boolean,
+      value: false
+    },
+    loadingHistory: {
+      type: Boolean,
+      value: false
+    }
+  },
+
+  ready: function() {
+    this.isReady = true;
+    this.$.store.read();
   },
 
   onShow: function() {
@@ -55,6 +69,11 @@ Polymer({
   onHide: function() {
     this._setPageTitle('');
   },
+
+  listeners: {
+    'socket-url-change': '_onUrlChangeRequested'
+  },
+
   /**
    * Message received handler.
    */
@@ -93,7 +112,7 @@ Polymer({
     this.$.socket.url = url;
     this._setConnecting(true);
     this.$.socket.open();
-    this.lastSocketUrl = this.$.socket.url;
+    // this.lastSocketUrl = this.$.socket.url;
     this.fire('send-analytics', {
       type: 'event',
       category: 'Web sockets',
@@ -152,13 +171,62 @@ Polymer({
   },
 
   _restoredHandler: function() {
-    if (this.lastSocketUrl) {
-      this.$.view.url = this.lastSocketUrl;
-    }
+    // if (this.lastSocketUrl) {
+    //   this.$.view.url = this.lastSocketUrl;
+    // }
   },
 
   _autoReconnectChanged: function(e) {
     this.noRetry = !e.detail.value;
+  },
+
+  _connectedChanged: function(isConnected) {
+    if (!isConnected) {
+      return;
+    }
+    var url = this.lastSocketUrl;
+    if (!url) {
+      return;
+    }
+    var event = this.fire('websocket-url-history-object-read', {
+      url: url
+    });
+    event.detail.result.then((doc) => {
+      if (!doc) {
+        doc = {
+          _id: url,
+          cnt: 1,
+          time: Date.now()
+        };
+      } else {
+        doc.cnt++;
+        doc.time = Date.now();
+      }
+      this.fire('websocket-url-history-object-change', {
+        item: doc
+      });
+      this._appendHistoryItem(doc);
+    });
+  },
+
+  _onUrlChangeRequested: function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var url = e.detail.url;
+    this.lastSocketUrl = url;
+    this._connect(e);
+  },
+
+  _canShowEmptyScreen: function(connected, hasHistoryData, loadingHistory) {
+    return !connected && !hasHistoryData && !loadingHistory;
+  },
+
+  _appendHistoryItem: function(item) {
+    var element = this.$$('websocket-history-view');
+    if (!element) {
+      return;
+    }
+    element.appendHistoryItem(item);
   }
 });
 })();

@@ -1,0 +1,41 @@
+<dom-module id="websocket-history-view">
+  <template>
+    <style>
+    :host {
+      display: none;
+    }
+
+    :host([has-data]) {
+      @apply(--layout-vertical);
+      height: 100%;
+      margin: 0 24px;
+    }
+
+    iron-list {
+      @apply(--layout-flex);
+    }
+
+    h3 {
+      @apply(--paper-font-subhead);
+    }
+
+    date-time {
+      font-size: 14px;
+      color: rgba(0,0,0,0.54);
+      margin-right: 12px;
+    }
+    </style>
+    <h3>Prevoius connections</h3>
+    <iron-list items="[[data]]" id="list">
+      <template>
+        <paper-item>
+          <paper-item-body>
+            <span><date-time date="[[item.time]]"></date-time>[[item._id]]</span>
+          </paper-item-body>
+          <paper-button >connect</paper-button>
+        </paper-item>
+      </template>
+    </iron-list>
+  </template>
+  <script src="websocket-history-view.js"></script>
+</dom-module>

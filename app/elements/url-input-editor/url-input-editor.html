@@ -29,6 +29,7 @@ Altrought the history hash is not used in REST services and is used only in clie
       on-send="_sendAction"></url-input-editor>
 
 -->
+<!-- <link rel="import" href="../history-context-panel/history-context-panel.html"> -->
 <dom-module id="url-input-editor">
   <template>
     <style>
@@ -120,6 +121,7 @@ Altrought the history hash is not used in REST services and is used only in clie
           <paper-item data-action="decParamsAction">Decode URL</paper-item>
         </paper-menu>
       </paper-menu-button>
+      <!-- <history-context-panel target="masterUrl"></history-context-panel> -->
     </div>
     <div class="detailed" opened$="{{detailed}}" on-input="updateUrl">
       <paper-input label="Path" value="{{pathValue}}" class="path-input" auto-validate pattern="\S*"
@@ -136,14 +138,13 @@ Altrought the history hash is not used in REST services and is used only in clie
               <input is="iron-input" type="text" value="{{item.value::input}}" placeholder="Param value" pattern="\S*"/>
               <paper-input-error>You may want to encode this value before sending it to the server</paper-input-error>
             </paper-input-container>
-            <paper-icon-button icon="close" title="Remove parameter" on-tap="_removeParam"></paper-icon-button>
+            <paper-icon-button icon="arc:close" title="Remove parameter" on-tap="_removeParam"></paper-icon-button>
           </div>
         </template>
         <paper-button raised on-tap="appendEmptyQueryParam">Add</paper-button>
       </div>
       <paper-input label="Hash" value="{{anchorValue}}" class="anchor-input"></paper-input>
     </div>
-    <iron-a11y-keys id="a11y" target="{{this.$.masterUrl}}" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
     <paper-autocomplete vertical-offset="-8" horizontal-offset="24" target="[[masterUrlElement]]" id="autocomplete" loader on-query="_queryUrlHistory" opened="{{suggesionsOpened}}" on-selected="_onSuggestionSelected"></paper-autocomplete>
     <arc-historyurl-model id="model" on-data-ready="_setSuggestions"></arc-historyurl-model>
     <paper-toast text="Entered URL is invalid." id="invalidUrlToast"></paper-toast>

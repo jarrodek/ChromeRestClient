@@ -19,24 +19,30 @@ the License.
 <dom-module id="arc-request-view">
   <template>
     <style include="shared-styles">
-      :host {
-        display: block;
-      }
-      .action-panel {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        @apply(--layout-end-justified);
-        margin: 12px;
-      }
-      .action-panel > * {
-        margin-left: 12px;
-      }
-      .status {
-        @apply(--layout-flex);
-        color: #757575;
-      }
+    :host {
+      display: block;
+    }
+    .action-panel {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      @apply(--layout-end-justified);
+      margin: 12px;
+    }
+    .action-panel > * {
+      margin-left: 12px;
+    }
+    .status {
+      @apply(--layout-flex);
+      color: #757575;
+    }
+
+    .url-input {
+      position: relative;
+    }
     </style>
-    <url-input-editor url="{{masterUrl}}"></url-input-editor>
+    <div class="url-input">
+      <url-input-editor id="urlInputEditor" url="{{masterUrl}}" suggesions-opened="_urlSuggestionsOpened"></url-input-editor>
+    </div>
     <method-selector method="{{request.method}}" is-payload="{{isPayload}}" content-type="{{contentType}}"></method-selector>
     <headers-editor is-payload="{{isPayload}}" content-type="{{contentType}}" headers="{{requestHeaders}}" on-headers-changed="_headersChanged"></headers-editor>
     <payload-editor hidden$="{{!isPayload}}" content-type="{{contentType}}" value="{{request.payload}}" files-list="{{request.files}}"></payload-editor>

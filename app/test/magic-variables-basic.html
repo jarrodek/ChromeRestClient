@@ -47,11 +47,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         };
         var errorFn = (e) => {
           basic.removeEventListener('error', errorFn);
-          console.info(e);
           expect(e).to.not.exist;
           done();
         };
-        console.log(basic);
         basic.addEventListener('parsed', clb);
         basic.addEventListener('error', errorFn);
         basic.clear();
@@ -65,7 +63,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         basic.parse().catch((e) => {
           // Exit promise.
           window.setTimeout(() => {
-            console.info(e);
             expect(e).to.not.exist;
             done();
           }, 0);
@@ -92,7 +89,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var errorFn = (e) => {
           basic.removeEventListener('error', errorFn);
           window.setTimeout(() => {
-            console.info(e);
             expect(e).to.not.exist;
             done();
           }, 0);
@@ -109,7 +105,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         basic.value = str;
         basic.parse().catch((e) => {
           window.setTimeout(() => {
-            console.info(e);
             expect(e).to.not.exist;
             done();
           }, 0);
@@ -188,7 +183,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var errorFn = (e) => {
           basic.removeEventListener('error', errorFn);
           window.setTimeout(() => {
-            console.info(e);
             expect(e).to.not.exist;
             done();
           }, 0);
@@ -224,7 +218,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var errorFn = (e) => {
           basic.removeEventListener('error', errorFn);
           window.setTimeout(() => {
-            console.info(e);
             expect(e).to.not.exist;
             done();
           }, 0);

@@ -158,10 +158,11 @@ Polymer({
 
   _navigateItem: function() {
     var url;
+    var id  = encodeURIComponent(this.request.id || this.request._id);
     if (this.isHistory) {
-      url = 'request/history/' + (this.request.id || this.request._id);
+      url = 'request/history/' + id;
     } else {
-      url = 'request/saved/' + (this.request.id || this.request._id);
+      url = 'request/saved/' + id;
     }
     page(url);
   },

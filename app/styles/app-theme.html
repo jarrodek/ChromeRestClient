@@ -17,9 +17,11 @@
 
   --paper-menu-background-color: #fff;
   --menu-link-color: #111111;
-  --paper-toolbar-color: #737373;
-  --paper-toolbar-background: var(--google-grey-300);
-  --main-section-border-color: var(--google-grey-300);
+  --paper-toolbar-color: #ffffff;
+  --paper-toolbar-background: #00A2DF;
+  --main-section-border-color: rgba(0, 0, 0, 0.12);
+
+  --hover-button-accent-color: #df0052;
 
   --action-button: {
     background-color: var(--primary-color);
@@ -33,37 +35,47 @@
     background-image: none;
     color: white;
   };
+
   --action-button-disabled: {
     background: #eaeaea;
     color: #a8a8a8;
     cursor: auto;
     pointer-events: none;
-  }
+  };
+
   --section-padding: {
     padding-left: 24px;
   };
+
   --section-title: {
     @apply(--paper-font-title);
     color: rgba(0, 0, 0, 0.75);
     padding-left: 24px;
   };
+
   --page-title-text: {
     @apply(--paper-font-headline);
     padding: 0 16px;
   };
+
   --paper-tab-ink: var(--primary-color);
   --paper-tabs-selection-bar-color: var(--primary-color);
 
   --paper-input-container-underline: {
-    background-color: var(--main-section-border-color);
+    /*background-color: rgba(0, 0, 0, 0.12);*/
+    border-color: rgba(0, 0, 0, 0.12);
   };
+
   --paper-icon-button: {
     transition: color cubic-bezier(0.4, 0, 1, 1) 100ms;
     color: var(--secondary-text-color);
   };
+
   --paper-icon-button-hover: {
     color: var(--dark-primary-color);
+    color: var(--hover-button-accent-color);
   };
+
   input::-webkit-input-placeholder {
     color: var(--paper-input-container-color, --secondary-text-color);
   }
@@ -113,7 +125,48 @@ body {
 }
 .content,
 #pages {
+  min-height: 100%;
   height: 100%;
+}
+
+paper-toolbar paper-icon-button {
+  color: rgba(255, 255, 255, 0.87);
+}
+
+paper-toolbar paper-icon-button:hover {
+  color: var(--hover-button-accent-color);
+}
+
+paper-toolbar paper-dropdown-menu {
+  color: rgba(255, 255, 255, 0.87);
+  --paper-input-container-label: {
+    color: white;
+  }
+  --paper-input-container-focus-color: #fff;
+  --paper-input-container-label-focus: {
+    color: white;
+  }
+  --paper-input-container-label-floating: {
+    color: white;
+  }
+  --paper-input-container-input: {
+    color: white;
+  }
+  --paper-dropdown-menu-icon: {
+    color: white;
+  }
+  --paper-input-container-color: #fff;
+  --paper-dropdown-menu-input: {
+    color: white;
+  }
+}
+
+paper-toolbar paper-toggle-button {
+  --paper-toggle-button-checked-bar-color: #e91e63;
+  --paper-toggle-button-checked-button-color: #e91e63;
+  --paper-toggle-button-checked-ink-color: #e91e63;
+  --paper-toggle-button-label-color: #fff;
+  margin-right: 24px;
 }
 
 .main-toolbar .title {
@@ -121,6 +174,12 @@ body {
   @apply(--layout-center);
   pointer-events: bounding-box !important;
 }
+
+.main-toolbar paper-icon-button
+.main-toolbar paper-button {
+  pointer-events: auto !important;
+}
+
 .project-endpoints {
   margin-left: 20px;
 }
@@ -129,8 +188,8 @@ body {
 
 .welcome-message {
   @apply(--layout-vertical);
-  @apply(--layout-center);
-  margin-top: 60px;
+  @apply(--layout-center-center);
+  /*margin-top: 60px;*/
 }
 .welcome-message .c1 {
   @apply(--tutorial-font);

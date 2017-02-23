@@ -5,6 +5,8 @@
     is: 'request-data-explorer',
 
     properties: {
+      // Sets API assistant state. If false it will display "enable assistant" message.
+      assistantEnabled: Boolean,
       opened: {
         type: Boolean,
         notify: true,
@@ -59,62 +61,94 @@
     },
 
     observers: [
-      '_hasTotals(presence.times.totals, times.labels, times.totals.length)',
-      '_hasTtfb(presence.times.ttfb, times.labels, times.ttfb.length)',
-      '_hasConnects(presence.times.connects, times.labels, times.connects.length)',
-      '_hasSsl(presence.times.ssl, times.labels, times.ssl.length)',
-      '_hasSents(presence.times.sents, times.labels, times.sents.length)',
-      '_hasReceivings(presence.times.receiveds, times.labels, times.receiveds.length)',
-      '_hasRequestBody(presence.sizes.request.body, sizes.request.bLabels, ' +
+      '_hasTotals(opened, presence.times.totals, times.labels, times.totals.length)',
+      '_hasTtfb(opened, presence.times.ttfb, times.labels, times.ttfb.length)',
+      '_hasConnects(opened, presence.times.connects, times.labels, times.connects.length)',
+      '_hasSsl(opened, presence.times.ssl, times.labels, times.ssl.length)',
+      '_hasSents(opened, presence.times.sents, times.labels, times.sents.length)',
+      '_hasReceivings(opened, presence.times.receiveds, times.labels, times.receiveds.length)',
+      '_hasRequestBody(opened, presence.sizes.request.body, sizes.request.bLabels, ' +
         'sizes.request.body.length)',
-      '_hasResponseBody(presence.sizes.response.body, sizes.response.bLabels, ' +
+      '_hasResponseBody(opened, presence.sizes.response.body, sizes.response.bLabels, ' +
         'sizes.response.body.length)',
-      '_hasRequestHeaders(presence.sizes.request.headers, sizes.request.hLabels, ' +
+      '_hasRequestHeaders(opened, presence.sizes.request.headers, sizes.request.hLabels, ' +
         'sizes.request.headers.length)',
-      '_hasResponseHeaders(presence.sizes.response.headers, sizes.response.hLabels, ' +
+      '_hasResponseHeaders(opened, presence.sizes.response.headers, sizes.response.hLabels, ' +
         'sizes.response.headers.length)',
-      '_hasStatuses(presence.statuses, statuses.labels.length)'
+      '_hasStatuses(opened, presence.statuses, statuses.labels.length)'
     ],
 
-    _hasTotals: function(hasData, labels) {
+    _hasTotals: function(opened, hasData, labels) {
+      if (!opened) {
+        this._updateTimeChart('totalTimes', true, [], []);
+        return;
+      }
       this.async(function() {
         this._updateTimeChart('totalTimes', hasData, labels, this.times.totals);
       }, 400);
     },
-    _hasTtfb: function(hasData, labels) {
+    _hasTtfb: function(opened, hasData, labels) {
+      if (!opened) {
+        this._updateTimeChart('timeToFirstByte', true, [], []);
+        return;
+      }
       this.async(function() {
         this._updateTimeChart('timeToFirstByte', hasData, labels, this.times.ttfb);
       }, 700);
     },
-    _hasConnects: function(hasData, labels) {
+    _hasConnects: function(opened, hasData, labels) {
+      if (!opened) {
+        this._updateTimeChart('connectTime', true, [], []);
+        return;
+      }
       this.async(function() {
         this._updateTimeChart('connectTime', hasData, labels, this.times.connects);
       }, 1000);
     },
-    _hasSsl: function(hasData, labels) {
+    _hasSsl: function(opened, hasData, labels) {
+      if (!opened) {
+        this._updateTimeChart('sslTime', true, [], []);
+        return;
+      }
       this.async(function() {
         this._updateTimeChart('sslTime', hasData, labels, this.times.ssl);
       }, 1300);
     },
-    _hasSents: function(hasData, labels) {
+    _hasSents: function(opened, hasData, labels) {
+      if (!opened) {
+        this._updateTimeChart('sendTime', true, [], []);
+        return;
+      }
       this.async(function() {
         this._updateTimeChart('sendTime', hasData, labels, this.times.sents);
       }, 1600);
     },
-    _hasReceivings: function(hasData, labels) {
+    _hasReceivings: function(opened, hasData, labels) {
+      if (!opened) {
+        this._updateTimeChart('receivingTime', true, [], []);
+        return;
+      }
       this.async(function() {
         this._updateTimeChart('receivingTime', hasData, labels, this.times.receiveds);
       }, 1900);
     },
 
-    _hasRequestBody: function(hasData, labels) {
+    _hasRequestBody: function(opened, hasData, labels) {
+      if (!opened) {
+        this._updateSizeChart('requestPayloadSizes', true, [], [], true);
+        return;
+      }
       this.async(function() {
         this._updateSizeChart('requestPayloadSizes', hasData, labels, this.sizes.request.body,
           true);
       }, 2200);
     },
 
-    _hasResponseBody: function(hasData, labels) {
+    _hasResponseBody: function(opened, hasData, labels) {
+      if (!opened) {
+        this._updateSizeChart('responsePayloadSizes', true, [], [], true);
+        return;
+      }
       this.async(function() {
         this._updateSizeChart('responsePayloadSizes', hasData, labels, this.sizes.response.body,
           false);
@@ -122,14 +156,22 @@
 
     },
 
-    _hasRequestHeaders: function(hasData, labels) {
+    _hasRequestHeaders: function(opened, hasData, labels) {
+      if (!opened) {
+        this._updateSizeChart('requestHeaderSizes', true, [], [], true);
+        return;
+      }
       this.async(function() {
         this._updateSizeChart('requestHeaderSizes', hasData, labels, this.sizes.request.headers,
           true);
       }, 2800);
     },
 
-    _hasResponseHeaders: function(hasData, labels) {
+    _hasResponseHeaders: function(opened, hasData, labels) {
+      if (!opened) {
+        this._updateSizeChart('responseHeaderSizes', true, [], [], true);
+        return;
+      }
       this.async(function() {
         this._updateSizeChart('responseHeaderSizes', hasData, labels, this.sizes.response.headers,
           false);
@@ -259,6 +301,10 @@
 
     _close: function() {
       this.opened = false;
+    },
+
+    _enableAssistant: function() {
+      arc.app.settings.saveConfig('apiAssistant', true);
     }
   });
 })();

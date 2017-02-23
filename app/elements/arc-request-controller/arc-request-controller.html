@@ -76,7 +76,7 @@ This approach have some implications.
       </a>
     </div>
     <arc-request-error-view hidden$=[[!isError]] message="[[errorMessage]]"></arc-request-error-view>
-    <chrome-storage auto id="latest" type="local" name="latestRequest" value="{{request}}"  value-as="RequestLocalObject" on-read="_latestLoaded"></chrome-storage>
+    <chrome-storage auto id="latest" type="local" name="latestRequest" value="{{request}}"  value-as="RequestLocalObject" on-chrome-storage-read="_latestLoaded"></chrome-storage>
     <arc-socket-request id="socket" on-ready="_responseReady" on-error="_onRequestError"></arc-socket-request>
     <arc-xhr-request id="xhr" on-ready="_responseReady" on-error="_onRequestError" connected="{{xhrConnected}}"></arc-xhr-request>
     <arc-historyurl-model id="historyurlModel" on-save="_historyUrlSaved" on-error="_historyUrlSaveError"></arc-historyurl-model>
@@ -98,7 +98,7 @@ This approach have some implications.
         <p>The endpoint requires a username and password</p>
         <paper-input label="login" type="text" id="authDialogLogin"></paper-input>
         <paper-input label="password" type="password" id="authDialogPassword">
-          <paper-icon-button suffix on-tap="authTogglePassword" icon="visibility" alt="Show password icon" title="Show password"></paper-icon-button>
+          <paper-icon-button suffix on-tap="authTogglePassword" icon="arc:visibility" alt="Show password icon" title="Show password"></paper-icon-button>
         </paper-input>
       </paper-dialog-scrollable>
       <div class="buttons">

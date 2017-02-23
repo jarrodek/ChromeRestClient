@@ -15,7 +15,7 @@ License for the specific language governing permissions and limitations under
 the License.
 -->
 <link rel="import" href="../arc-request-object-model/arc-request-object-model.html">
-<link rel="import" href="../arc-saved-list-view/arc-saved-list-empty.html">
+<link rel="import" href="../empty-states-screens/saved-list-empty.html">
 <link rel="import" href="../arc-saved-list-view/arc-saved-list-view.html">
 <link rel="import" href="../saved-panel/saved-panel.html">
 <!--
@@ -52,7 +52,7 @@ the License.
     </style>
     <paper-progress indeterminate hidden$="[[!querying]]"></paper-progress>
     <template is="dom-if" if="[[_computePouchDbView(opened, usePouchDb)]]">
-      <saved-panel querying="{{querying}}" on-querying-changed="_onQueryingChanged"></saved-panel>
+      <saved-panel querying="{{querying}}" on-querying-changed="_onQueryingChanged" opened="[[opened]]"></saved-panel>
     </template>
     <template is="dom-if" if="[[_computeLegacyView(opened, usePouchDb)]]" restamp="true">
       <template is="dom-if" if="{{hasListData}}">
@@ -74,7 +74,7 @@ the License.
             <h2>New saved requests lists</h2>
             <div class="onboarding-image-page">
               <div class="image">
-                <iron-icon icon="save"></iron-icon>
+                <iron-icon icon="arc:save"></iron-icon>
               </div>
               <div class="description">
                 <ul>
@@ -91,7 +91,7 @@ the License.
       </template>
     </template>
     <template is="dom-if" if="{{isEmpty}}">
-      <arc-saved-list-empty on-open-drive="openDrive" search-term="[[searchQuery]]"></arc-saved-list-empty>
+      <saved-list-empty on-open-drive="openDrive" search-term="[[searchQuery]]"></saved-list-empty>
     </template>
     <iron-meta id="meta" key="usePouchDb"></iron-meta>
     <arc-request-object-model id="model" on-data-ready="_dataRead" search-term="[[searchQuery]]" on-error="_dbError" request-type="saved" limit="[[limit]]" offset="[[offset]]" sort-by="[[sortBy]]" direction=[[sortDirection]]></arc-request-object-model>

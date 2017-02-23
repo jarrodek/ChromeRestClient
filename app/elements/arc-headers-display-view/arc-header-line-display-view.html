@@ -24,58 +24,56 @@ And because of it the user can't properly paste headers into notepad / headers i
 
 This element will imitate paper-item but without using flex layout.
 -->
-<html>
-  <head></head>
-  <body>
-    <dom-module id="arc-header-line-display-view">
-      <template>
-        <style>
-          :host {
-            @apply(--paper-font-subhead);
-            min-height: 24px;
-            padding: 0 16px;
-            display: block;
-            -webkit-user-select: text;
-          }
-           :host(.iron-selected) {
-            font-weight: var(--paper-item-selected-weight, bold);
-            @apply(--paper-item-selected);
-          }
-           :host([disabled]) {
-            color: var(--paper-item-disabled-color, --disabled-text-color);
-            @apply(--paper-item-disabled);
-          }
-           :host(:focus) {
-            position: relative;
-            outline: 0;
-            @apply(--paper-item-focused);
-          }
-          :host(:focus):before {
-            @apply(--layout-fit);
-            content: '';
-            background: currentColor;
-            opacity: var(--dark-divider-opacity);
-            pointer-events: none;
-            @apply(--paper-item-focused-before);
-          }
+<dom-module id="arc-header-line-display-view">
+  <template>
+    <style>
+     :host {
+      @apply(--paper-font-code1);
+      min-height: 20px;
+      padding: 0 16px;
+      display: block;
+      -webkit-user-select: text;
+    }
 
-          .header-name {
-            @apply(--paper-font-body2);
-            padding-right: 8px;
-            text-transform: capitalize;
-          }
+     :host(.iron-selected) {
+      font-weight: var(--paper-item-selected-weight, bold);
+      @apply(--paper-item-selected);
+    }
 
-          .header-value {
-            @apply(--paper-font-body1);
-            @apply(--layout-flex);
-            word-break: break-all;
-          }
+     :host([disabled]) {
+      color: var(--paper-item-disabled-color, --disabled-text-color);
+      @apply(--paper-item-disabled);
+    }
 
-        </style>
-        <span class="header-name">{{headerName}}:</span>
-        <arc-header-value-display-view class="header-value" value="[[headerValue]]"></arc-header-value-display-view>
-      </template>
-    </dom-module>
-    <script src="arc-header-line-display-view.js"></script>
-  </body>
-</html>
+     :host(:focus) {
+      position: relative;
+      outline: 0;
+      @apply(--paper-item-focused);
+    }
+
+     :host(:focus):before {
+      @apply(--layout-fit);
+      content: '';
+      background: currentColor;
+      opacity: var(--dark-divider-opacity);
+      pointer-events: none;
+      @apply(--paper-item-focused-before);
+    }
+
+    .header-name {
+      @apply(--paper-font-code1);
+      padding-right: 8px;
+      text-transform: capitalize;
+    }
+
+    .header-value {
+      @apply(--paper-font-code1);
+      @apply(--layout-flex);
+      word-break: break-all;
+    }
+    </style>
+    <span class="header-name">{{headerName}}:</span>
+    <arc-header-value-display-view class="header-value" value="[[headerValue]]"></arc-header-value-display-view>
+  </template>
+</dom-module>
+<script src="arc-header-line-display-view.js"></script>

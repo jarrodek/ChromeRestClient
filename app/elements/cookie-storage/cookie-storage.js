@@ -48,6 +48,14 @@ Polymer({
     // jscs:enable
   },
 
+  reset: function() {
+    this.uri = undefined;
+    this.cookie = undefined;
+    this.cookies = undefined;
+    this.response = undefined;
+    this.expired = undefined;
+  },
+
   /**
    * Extracts cookies from `this.responseHeaders` and if any cookies are there it stores them
    * in the datastore.
@@ -63,7 +71,7 @@ Polymer({
     var usePouchDb = document.createElement('iron-meta').byKey('usePouchDb');
     this.extract();
     if (usePouchDb) {
-      this._storePouchDb()
+      return this._storePouchDb()
       .then(() => this._removeExpiredPouchDb());
     } else {
       this._store();
@@ -318,7 +326,7 @@ Polymer({
     });
 
     var db = this._getDb();
-    db.allDocs({keys: keys})
+    return db.allDocs({keys: keys})
     .then((r) => {
       let cookies = r.rows.filter((i) => {
         if (i.error) {
@@ -330,9 +338,6 @@ Polymer({
         return true;
       });
       return Promise.all(cookies.map((i) => db.remove(i.id, i.value.rev)));
-    })
-    .then((r) => {
-      console.info('Expired cookies deleted', r);
     })
     .catch((e) => {
       this.fire('app-log', {

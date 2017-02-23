@@ -167,8 +167,12 @@ Polymer({
 
   _payloadChanged: function() {
     this._resetTabs();
-    this._setParsedMode(undefined);
     var payload = this.payload;
+    if (payload === undefined) {
+      this.$.xmlViewer.xml = '';
+      this.$.raw = undefined;
+      return;
+    }
     if (payload === null || payload === false) {
       this._displayJSON(payload);
       return;

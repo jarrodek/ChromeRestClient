@@ -4,26 +4,17 @@
 
     properties: {
       /**
-       * Current route object.
+       * Current route string.
        */
       route: String,
       /**
-       * Apps base URL.
+       * Route parameters
        */
-      baseUrl: String,
-      /**
-       * A list of projects
-       */
-      projects: Array,
+      routeParams: Object,
       /**
        * Remove history from view if set to true.
        */
       noHistory: {
-        type: Boolean,
-        value: false
-      },
-      /** Is the app has been authorized by the user. */
-      appAuthorized: {
         type: Boolean,
         value: false
       },
@@ -35,20 +26,30 @@
         reflectToAttribute: true
       },
 
-      hasProjects: {
-        type: Boolean,
-        computed: '_computeHasProjects(projects.length)'
-      },
-
       selectedProject: String,
       isRequest: {
         type: Boolean,
         reflectToAttribute: true
-      }
+      },
+      // It will display a loader when set to true
+      loading: Boolean,
+      // True if the history quick access panel is opened.
+      historyOpened: {
+        type: Boolean,
+        value: false
+      },
+      // True if the saved quick access panel is opened.
+      savedOpened: {
+        type: Boolean,
+        value: false
+      },
+      // True if the projects list panel is opened.
+      projectsOpened: {
+        type: Boolean
+      },
     },
 
     observers: [
-      'selectedProjectChanged(selectedProject)',
       '_routeChanged(route)'
     ],
 
@@ -56,48 +57,30 @@
       this.isRequest = route === 'request';
     },
 
-    _computeHasProjects: function(length) {
-      return !!length;
-    },
-
     _itemTap: function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
       e = Polymer.dom(e);
-      var place = e.localTarget.dataset.place;
+      var path = e.path;
+      var place;
+      while (true) {
+        var _node = path.shift();
+        if (_node && (_node === this || _node === document.body)) {
+          break;
+        } else if (_node && _node.dataset && _node.dataset.place) {
+          place = _node.dataset.place;
+          break;
+        }
+      }
+      if (!place) {
+        return;
+      }
       if (place) {
         this.fire('navigate', {
           url: place
         });
       }
-    },
-
-    /**
-     * Sort projects by name.
-     */
-    computeSort: function() {
-      return function(a, b) {
-        if (a.name > b.name) {
-          return 1;
-        }
-        if (a.name < b.name) {
-          return -1;
-        }
-        if (a.name === b.name) {
-          return 0;
-        }
-      };
-    },
-    /**
-     * Request app authorization.
-     * Can be calle only if the user hasn't authorized the app.
-     */
-    _onAuth: function() {
-      this.fire('authorize-requested');
-    },
-    /**
-     * Request to sign out from the app.
-     */
-    _onSignOut: function() {
-      this.fire('signout-requested');
     },
     /**
      * Opens an issue tracker - new issue report.
@@ -153,20 +136,39 @@
           }
           logViewer.open();
           break;
+        case 'about-view':
+          this.fire('navigate', {
+            url: '/about'
+          });
+          break;
       }
     },
 
-    _computeProjectSelected: function(pId, selected) {
-      return pId === selected;
+    // Computes class for the toggle's button icon.
+    _computeToggleIconClass: function(opened) {
+      var clazz = 'toggle-icon';
+      if (opened) {
+        clazz += ' opened';
+      }
+      return clazz;
     },
 
-    selectedProjectChanged: function(selectedProject) {
-      if (!selectedProject) {
-        return;
-      }
-      if (!this.$.projectsSubmenu.opened) {
-        this.$.projectsSubmenu.opened = true;
-      }
+    _toggleHistoryOpened: function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.historyOpened = !this.historyOpened;
+    },
+
+    _toggleSavedOpened: function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.savedOpened = !this.savedOpened;
+    },
+
+    _toggleProjectsOpened: function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.projectsOpened = !this.projectsOpened;
     }
   });
 })();

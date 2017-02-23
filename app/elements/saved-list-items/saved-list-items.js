@@ -218,6 +218,24 @@
 
     _computeProjectClass: function(id) {
       return id ? '' : 'invisible';
+    },
+
+    _computeMethodClass: function(method) {
+      if (!method) {
+        return;
+      }
+      method = method.toLowerCase();
+      var clazz = 'method ';
+      switch (method) {
+        case 'get':
+        case 'post':
+        case 'put':
+        case 'delete':
+        case 'patch':
+          clazz += method;
+          break;
+      }
+      return clazz;
     }
   });
 })();

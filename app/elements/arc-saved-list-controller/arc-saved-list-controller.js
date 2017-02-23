@@ -19,10 +19,6 @@ Polymer({
     ArcBehaviors.RequestsListControllerBehavior
   ],
 
-  observers: [
-    '_openedChanged(opened,usePouchDb)'
-  ],
-
   /**
    * Resets current query and perform a new query with new criteria.
    */
@@ -93,24 +89,14 @@ Polymer({
   },
 
   warnClearAll: function() {
-    var panel = this.$$('saved-panel');
-    panel.warnClearAll();
+    if (this.usePouchDb) {
+      this.warnClearAllPouchDb();
+    }
   },
 
-  _openedChanged: function(opened, usePouchDb) {
-    if (!usePouchDb) {
-      return;
-    }
-    var p1 = this.$$('saved-panel');
-    if (!opened) {
-      if (p1) {
-        p1.savedData = [];
-      }
-    } else {
-      if (p1) {
-        p1.refresh();
-      }
-    }
+  warnClearAllPouchDb: function() {
+    var panel = this.$$('saved-panel');
+    panel.warnClearAll();
   },
 
   _pouchDbQuery: function() {

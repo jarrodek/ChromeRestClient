@@ -1,6 +1,7 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../history-panel/request-details-drawer.html">
 <link rel="import" href="../saved-list-items/saved-list-items.html">
+<link rel="import" href="../empty-states-screens/saved-list-empty.html">
 <link rel="import" href="../delete-revertable-behavior/delete-revertable-behavior.html">
 <dom-module id="saved-drive-panel">
   <template>
@@ -76,7 +77,7 @@
       </div>
     </paper-drawer-panel>
     <template is="dom-if" if="{{isEmpty}}">
-      <arc-saved-list-empty search-term="[[searchQuery]]"></arc-saved-list-empty>
+      <saved-list-empty search-term="[[searchQuery]]"></saved-list-empty>
     </template>
     <paper-toast text="Select request first." id="noSelectionToast"></paper-toast>
     <paper-progress indeterminate hidden$="[[!querying]]"></paper-progress>

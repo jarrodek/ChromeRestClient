@@ -27,11 +27,6 @@ Polymer({
     ArcBehaviors.RequestsListControllerBehavior
   ],
 
-  observers: [
-    '_queryPagePouchDbChanged(queryPagePouchDb)',
-    '_openedChanged(opened,queryPagePouchDb)'
-  ],
-
   get view() {
     return Polymer.dom(this.root).querySelector('arc-history-list-view');
   },
@@ -58,6 +53,19 @@ Polymer({
     view.closeDetailsPanel();
   },
 
+
+  /**
+   * Resets current query and perform a new query with new criteria.
+   */
+  onSearch: function() {
+    if (this.usePouchDb) {
+      return this._pouchDbQuery();
+    }
+    this.resetQuery();
+    this._setIsSearch(true);
+    this.queryPage();
+  },
+
   _computePouchDbView: function(opened, usePouchDb) {
     return !!(opened && usePouchDb);
   },
@@ -68,35 +76,6 @@ Polymer({
 
   _onQueryingChanged: function(e, detail) {
     this._setQuerying(detail.value);
-    this._queryingpdbinternall = detail.value;
-    if (!detail.value) {
-      this.set('queryPagePouchDb', false);
-    }
-  },
-
-  _queryPagePouchDbChanged: function(queryPagePouchDb) {
-    if (this._queryingpdbinternall === undefined) {
-      return;
-    }
-    var panel = this.$$('history-panel');
-    if (!panel) {
-      return;
-    }
-    this.listData = panel.historyData;
-    if (queryPagePouchDb) {
-      if (this.searchQuery) {
-        panel.searchQuery = this.searchQuery;
-      } else {
-        panel.searchQuery = undefined;
-        panel.refresh();
-      }
-    } else {
-      if (!panel.historyData.length) {
-        this._setIsEmpty(true);
-      } else {
-        this._setIsEmpty(false);
-      }
-    }
   },
 
   _getDb: function() {
@@ -109,10 +88,12 @@ Polymer({
     }
     var db = this._getDb();
     var p = e.detail.items.map((i) => db.remove(i));
-    Promise.all(p).then(() => {
+    Promise.all(p)
+    .then(() => {
       var panel = this.$$('history-panel');
       panel.refresh();
-    }).catch((e) => {
+    })
+    .catch((e) => {
       StatusNotification.notify({
         message: 'Error deleting entries. ' + e.message
       });
@@ -146,8 +127,22 @@ Polymer({
     });
   },
 
+  _pouchDbQuery: function() {
+    var p1 = this.$$('history-panel');
+    p1.searchQuery = this.searchQuery;
+  },
+
   warnClearAll: function() {
-    this.$.dataClearDialog.opened = true;
+    if (this.usePouchDb) {
+      this.warnClearAllPouchDb();
+    } else {
+      this.$.dataClearDialog.opened = true;
+    }
+  },
+
+  warnClearAllPouchDb: function() {
+    var panel = this.$$('history-panel');
+    panel.warnClearAll();
   },
 
   onClearDialogResult: function(e, detail) {
@@ -177,25 +172,5 @@ Polymer({
   _onItemOpenRequested: function(e, detail) {
     var url = 'request/history/' + encodeURIComponent(detail.id);
     page(url);
-  },
-
-  _openedChanged: function(opened, queryPagePouchDb) {
-    if (!queryPagePouchDb) {
-      return;
-    }
-    this.debounce('refresh-history', () => {
-      var panel = this.$$('history-panel');
-      if (!panel) {
-        return;
-      }
-      if (!opened) {
-        panel.historyData = [];
-      } else {
-        if (!panel.historyData.length) {
-          panel.refresh();
-        }
-      }
-    }, 1);
-
   }
 });

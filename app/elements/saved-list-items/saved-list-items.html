@@ -6,9 +6,11 @@
 <link rel="import" href="../../bower_components/paper-styles/typography.html">
 <link rel="import" href="../../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../styles/shared-styles.html">
+
 <dom-module id="saved-list-items">
   <template>
-    <style>
+    <style include="shared-styles">
      :host {
       display: block;
       height: 100vh;
@@ -53,8 +55,27 @@
     }
 
     .method {
-      margin-right: 8px;
-      @apply(--history-list-items-method);
+      @apply(--method-display-box);
+    }
+
+    .method.get {
+      @apply(--method-display-box-get);
+    }
+
+    .method.post {
+      @apply(--method-display-box-post);
+    }
+
+    .method.put {
+      @apply(--method-display-box-put);
+    }
+
+    .method.delete {
+      @apply(--method-display-box-delete);
+    }
+
+    .method.patch {
+      @apply(--method-display-box-patch);
     }
 
     .url {
@@ -117,7 +138,7 @@
               <span class="name" on-tap="_editName">[[item.name]]</span>
             </div>
             <div class="data-column">
-              <span class="method">[[item.method]]</span>
+              <span class$="[[_computeMethodClass(item.method)]]">[[item.method]]</span>
               <span class="url" title$="[[item.url]]">[[item.url]]</span>
             </div>
             <div class="action-column">
