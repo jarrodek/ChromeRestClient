@@ -4,9 +4,12 @@
 
     properties: {
       /**
-       * Current route object.
+       * Current route string.
        */
       route: String,
+      /**
+       * Route parameters
+       */
       routeParams: Object,
       /**
        * Remove history from view if set to true.

@@ -17,7 +17,6 @@
     <iron-meta id="meta" key="usePouchDb" value="{{usePouchDb}}"></iron-meta>
     <arc-loader-screen id="appLOader" opened></arc-loader-screen>
     <paper-drawer-panel responsive-width="1000px" id="paperDrawerPanel" force-narrow="{{forceNarrowLayout}}" narrow="{{narrowLayout}}" drawer-width="[[drawerWidth]]" disable-edge-swipe disable-swipe>
-
       <paper-scroll-header-panel drawer>
         <paper-toolbar class="main-toolbar">
           <paper-icon-button icon="arc:menu" paper-drawer-toggle class="drawer-toggle-button" on-tap="_drawerToggle" title="Toggle drawer" alt="Drawer toggle icon"></paper-icon-button>
@@ -37,17 +36,10 @@
           <paper-icon-button feature="back" on-tap="_onFeatureBack" class="toolbar-hide" icon="arc:arrow-back" title="Back"></paper-icon-button>
           <div class="title toolbar-hide">
             <span>[[pageTitle]]</span>
-            <div class="project-endpoints" feature="projectEndpoints">
-              <template is="dom-if" if="[[projectEndpoints.length]]">
-                <paper-dropdown-menu label="Project endpoints" horizontal-align="left">
-                  <paper-menu selected="[[selectedRequest]]" attr-for-selected="data-id" class="dropdown-content" on-iron-select="_onFeatureProjectEndpoints">
-                    <template is="dom-repeat" items="[[projectEndpoints]]">
-                      <paper-item data-id$="[[item._id]]">[[item.name]]</paper-item>
-                    </template>
-                  </paper-menu>
-                </paper-dropdown-menu>
-              </template>
-            </div>
+            <span hidden$="[[_computeHideProjectLink(selectedProject, route)]]">
+              <paper-icon-button icon="arc:collections-bookmark" on-tap="openProjectDetails"></paper-icon-button>
+              <paper-tooltip animation-delay="100" position="bottom" offset="0">Project details</paper-tooltip>
+            </span>
           </div>
           <paper-toggle-button id="xhrToggle" feature="xhrtoggle" on-change="_onFeatureXhrToggle" class="toolbar-hide xhr-switch" title="Use XHR instead of socket">Use XHR</paper-toggle-button>
           <paper-icon-button id="openFeature" feature="open" on-tap="_onFeatureOpen" class="toolbar-hide" icon="arc:folder-open" title="Open"></paper-icon-button>
@@ -97,8 +89,8 @@
             <arc-data-io-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="dataimport"></arc-data-io-controller>
             <arc-settings-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="settings"></arc-settings-controller>
             <arc-about-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="about"></arc-about-controller>
-            <arc-project-controller use-pouch-db="[[usePouchDb]]" requests="{{currentRequests}}" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="project" route-params="[[params]]">
-              <arc-project-view requests="[[currentRequests]]"></arc-project-view>
+            <arc-project-controller use-pouch-db="[[usePouchDb]]" requests="{{currentRequests}}" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="project" route-params="[[params]]" current-selection="{{projectRequestsSelection}}" loading-data="{{loadingProjectRelatedData}}">
+              <arc-project-view current-selection="{{projectRequestsSelection}}" loading-data="[[loadingProjectRelatedData]]" requests="[[currentRequests]]"></arc-project-view>
             </arc-project-controller>
           </iron-pages>
         </div>
@@ -243,18 +235,6 @@
     </paper-toast>
     <arc-log-viewer></arc-log-viewer>
     <search-bar id="content-search-bar" on-iron-overlay-opened="textSearchBarOpened"></search-bar>
-    <!-- <element-tutorial id="xhrProxyTutorial">
-      <div tutorial>
-        <p>You can proxy the request through Chrome instead of the app.</p>
-        <p>Enable XHR proxy if you have issues with:</p>
-        <ul>
-          <li>expired certificates</li>
-          <li><b>proxy and vpn</b> connections</li>
-        </ul>
-        <paper-button raised class="tutorial-button" on-tap="_closeXhrTutorial">Got it</paper-button>
-      </div>
-    </element-tutorial> -->
-
     <!-- Elements on new app -->
     <arc-database id="savedRequests" store="saved-requests"></arc-database>
     <arc-database id="historyRequests" store="history-requests"></arc-database>
@@ -265,14 +245,9 @@
     <arc-database id="environments" store="environments"></arc-database>
     <arc-database id="authData" store="auth-data"></arc-database>
     <arc-database id="cookieData" store="cookies"></arc-database>
-
-    <!-- <app-pouchdb-quick-search id="q" include-docs adapter="idb" db-name="harIndex" on-data="_qdbResults"
-      highlighting highlighting-pre="<mark>"
-      highlighting-post="</mark>"></app-pouchdb-quick-search> -->
     <app-pouchdb-collate></app-pouchdb-collate>
     <app-logger></app-logger>
     <app-db-upgrade-1016></app-db-upgrade-1016>
-    <legacyproject-related-requests project-id="[[selectedProject]]" related-requests="{{projectEndpoints}}"></legacyproject-related-requests>
     <arc-definitions></arc-definitions>
     <request-model></request-model>
     <project-model></project-model>

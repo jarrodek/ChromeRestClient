@@ -5,14 +5,22 @@
     <style>
       :host {
         display: block;
+        position: relative;
+      }
+
+      paper-progress {
+        width: 100%;
+        position: absolute;
+        top: 0;
       }
     </style>
+    <paper-progress indeterminate hidden$="[[!loadingData]]"></paper-progress>
     <content id="children"></content>
     <arc-request-object-model id="requestModel" on-data-ready="_requestReady"></arc-request-object-model>
     <arc-project-object-model auto="[[_computeAuto(usePouchDb)]]" id="project" on-data-ready="_projectReady" on-error="_projectError" on-save="_projectSaved"></arc-project-object-model>
     <arc-request-object-model auto="[[_computeAuto(usePouchDb)]]" id="requestSaveModel" on-error="_requestSaveError" on-save="_requestSaved"></arc-request-object-model>
     <arc-request-object-model auto="[[_computeAuto(usePouchDb)]]" id="restoreRequestModel" on-error="_requestSaveError" on-save="_requestRestored"></arc-request-object-model>
-    <legacyproject-related-requests all-data project-id="[[projectId]]" related-requests="{{requests}}"></legacyproject-related-requests>
+    <legacyproject-related-requests active="[[opened]]" all-data project-id="[[projectId]]" related-requests="{{requests}}"></legacyproject-related-requests>
   </template>
   <script src="arc-project-controller.js"></script>
 </dom-module>

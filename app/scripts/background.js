@@ -222,18 +222,13 @@ arc.bg.recordSession = () => {
   arc.bg.getAninimizedId().then((aid) => {
     let d = new Date();
     // let url = 'http://localhost:8080/analytics/record';
-    // let url = 'http://api.chromerestclient.com/analytics/record';
     let url = 'https://advancedrestclient-1155.appspot.com/analytics/record';
     let data = new FormData();
     data.append('aid', aid); // anonymousId
-    data.append('t', d.getTime()); // time
     data.append('tz', d.getTimezoneOffset()); //timezone
-    var headers = new Headers();
-    headers.append('x-api-version', '2');
     fetch(url, {
       method: 'POST',
-      body: data,
-      headers: headers
+      body: data
     }).catch(() => {});
   });
 };

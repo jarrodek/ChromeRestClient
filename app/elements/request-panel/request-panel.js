@@ -443,33 +443,33 @@
       this.fire('selected-project', {
         id: id
       });
-      if (!id) {
-        return;
-      }
-      var event = this.fire('project-read', {
-        id: id
-      });
-      if (event.detail.error) {
-        console.error(event.detail.message);
-        return;
-      }
-      event.detail.result.then((result) => {
-        // console.info('Setting project data', result);
-        this.set('currentProjectData', result);
-      })
-      .catch((e) => {
-        if (e.status === 404) {
-          this.set('request.legacyProject', null);
-          this.set('proxyRequest.legacyProject', null);
-          this.set('projectId', undefined);
-          this.fire('app-log', {
-            'message': ['Project is not in database.', e],
-            'level': 'warn'
-          });
-        } else {
-          console.error('Unable restore project', e);
-        }
-      });
+      // if (!id) {
+      //   return;
+      // }
+      // var event = this.fire('project-read', {
+      //   id: id
+      // });
+      // if (event.detail.error) {
+      //   console.error(event.detail.message);
+      //   return;
+      // }
+      // event.detail.result.then((result) => {
+      //   // console.info('Setting project data', result);
+      //   this.set('currentProjectData', result);
+      // })
+      // .catch((e) => {
+      //   if (e.status === 404) {
+      //     this.set('request.legacyProject', null);
+      //     this.set('proxyRequest.legacyProject', null);
+      //     this.set('projectId', undefined);
+      //     this.fire('app-log', {
+      //       'message': ['Project is not in database.', e],
+      //       'level': 'warn'
+      //     });
+      //   } else {
+      //     console.error('Unable restore project', e);
+      //   }
+      // });
     },
 
     onXhrtoggle: function(e) {

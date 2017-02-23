@@ -4,19 +4,10 @@
   let app = document.querySelector('#app');
   app.pageTitle = '';
   /**
-   * Because controllers do not have direct access to the toolbar it must keep relevant data in
-   * the main object if it must to be accessible to the toolbar.
-   * This is an array of requests related to the currently opened project.
-   *
-   * TODO:50 In future releases controllers should not keep their data in the toolbar. New design
-   * should keep all releted to the controller data in the main workspace window.
-   */
-  app.projectEndpoints = [];
-  /**
    * The same as above.
    */
   app.selectedRequest = null;
-  app.selectedProject = undefined;
+  app.selectedProject = null;
   app.gaCustomDimensions = [];
   app.appVersion = arc.app.utils.appVer;
   app.appId = chrome.runtime && chrome.runtime.id ? chrome.runtime.id : 'not-in-chrome-app';
@@ -43,20 +34,20 @@
   app.canRender = (status, dataSource, elementIsRequestPanel) => {
     return status && dataSource && elementIsRequestPanel === 'true';
   };
+  // Open current project details page
+  app.openProjectDetails = () => {
+    page(`/project/${app.selectedProject}/edit`);
+  };
+  app._computeHideProjectLink = (selectedProject, route) =>
+    !(selectedProject && route === 'request');
+  app._canShowProjectSelector = (route, count) => route === 'request' && count > 0;
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
     app.updateBranding();
   });
   // Called when current request changed.
   window.addEventListener('selected-request', (e) => {
-    app.selectedRequest = e.detail.id;
-  });
-  // Called when current project changed
-  window.addEventListener('selected-project', (e) => {
-    app.set('selectedProject', e.detail.id);
-    if (!app.selectedProject) {
-      app.projectEndpoints = [];
-    }
+    app.selectedRequest = e.detail.id ? e.detail.id : null;
   });
   // event fired when the app is initialized and can remove loader.
   window.addEventListener('ArcInitialized', function() {
@@ -71,6 +62,9 @@
     // }
     // app.initAnalytics();
     // app.initRouting();
+  });
+  window.addEventListener('selected-project', (e) => {
+    app.selectedProject = e.detail.id;
   });
   app.initRouting = () => {
     if (app.routingInitialized) {
@@ -140,7 +134,6 @@
       bar.removeAttribute(feature);
     }
     app.featuresMapping.clear();
-    app.projectEndpoints = [];
   });
   app._featureCalled = (feature, event) => {
     if (!app.featuresMapping.has(feature)) {
@@ -173,9 +166,6 @@
   };
   app._onFeatureDrive = (e) => {
     app._featureCalled('drive', e);
-  };
-  app._onFeatureProjectEndpoints = (e) => {
-    app._featureCalled('projectEndpoints', e.detail.item.dataset.id);
   };
   app._onFeatureBack = (e) => {
     app._featureCalled('back', e);
@@ -730,24 +720,6 @@
     }
   });
 
-  /* REQUEST NAME CHANGE WHEN PROJECT ENABLED */
-  window.addEventListener('request-object-changed', (e) => {
-    var oldId = e.detail.oldId;
-    if (app.selectedRequest === oldId || app.selectedRequest === e.detail.request._id) {
-      app.async(function() {
-        let id = e.detail.request._id;
-        app.set('selectedRequest', null);
-        app.set('selectedRequest', id);
-        for (var i = 0, len = app.projectEndpoints.length; i < len; i++) {
-          if (app.projectEndpoints[i]._id === id) {
-            app.pageTitle = app.projectEndpoints[i].name;
-            break;
-          }
-        }
-      }, 1);
-    }
-  });
-
   /* Drawer width support */
   app.drawerWidth = '360px';
   app._drawerTrack = function(e) {
@@ -808,4 +780,6 @@
     }
     return clazz;
   };
+  // Computes `active` flag for the legacy project related requests
+  app._processProjectRequests = (route) => route === 'request';
 })(document, window);
