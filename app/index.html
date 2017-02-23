@@ -36,6 +36,10 @@
           <paper-icon-button feature="back" on-tap="_onFeatureBack" class="toolbar-hide" icon="arc:arrow-back" title="Back"></paper-icon-button>
           <div class="title toolbar-hide">
             <span>[[pageTitle]]</span>
+            <span hidden$="[[_computeHideProjectLink(selectedProject, route)]]">
+              <paper-icon-button icon="arc:collections-bookmark" on-tap="openProjectDetails"></paper-icon-button>
+              <paper-tooltip animation-delay="100" position="bottom" offset="0">Project details</paper-tooltip>
+            </span>
           </div>
           <paper-toggle-button id="xhrToggle" feature="xhrtoggle" on-change="_onFeatureXhrToggle" class="toolbar-hide xhr-switch" title="Use XHR instead of socket">Use XHR</paper-toggle-button>
           <paper-icon-button id="openFeature" feature="open" on-tap="_onFeatureOpen" class="toolbar-hide" icon="arc:folder-open" title="Open"></paper-icon-button>

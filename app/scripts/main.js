@@ -7,7 +7,7 @@
    * The same as above.
    */
   app.selectedRequest = null;
-  app.selectedProject = undefined;
+  app.selectedProject = null;
   app.gaCustomDimensions = [];
   app.appVersion = arc.app.utils.appVer;
   app.appId = chrome.runtime && chrome.runtime.id ? chrome.runtime.id : 'not-in-chrome-app';
@@ -34,6 +34,11 @@
   app.canRender = (status, dataSource, elementIsRequestPanel) => {
     return status && dataSource && elementIsRequestPanel === 'true';
   };
+  // Open current project details page
+  app.openProjectDetails = () => {
+    page(`/project/${app.selectedProject}/edit`);
+  };
+  app._computeHideProjectLink = (selectedProject, route) => !(selectedProject && route === 'request');
   app._canShowProjectSelector = (route, count) => route === 'request' && count > 0;
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
@@ -41,7 +46,7 @@
   });
   // Called when current request changed.
   window.addEventListener('selected-request', (e) => {
-    app.selectedRequest = e.detail.id;
+    app.selectedRequest = e.detail.id ? e.detail.id : null;
   });
   // event fired when the app is initialized and can remove loader.
   window.addEventListener('ArcInitialized', function() {
@@ -56,6 +61,9 @@
     // }
     // app.initAnalytics();
     // app.initRouting();
+  });
+  window.addEventListener('selected-project', (e) => {
+    app.selectedProject = e.detail.id;
   });
   app.initRouting = () => {
     if (app.routingInitialized) {
