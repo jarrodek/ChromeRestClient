@@ -22,15 +22,19 @@ Polymer({
       type: Boolean,
       value: true
     },
+    // ID of the selected project.
     selectedProject: String,
     /**
      * Route parameters
      */
-    routeParams: Object
+    routeParams: Object,
+    // True when the items in the project list has been initialized.
+    __initialized: Boolean
   },
 
   observers: [
-    'selectedProjectChanged(selectedProject)'
+    'selectedProjectChanged(selectedProject)',
+    '_checkRequireOpenItems(selectedProject, __initialized)'
   ],
 
   attached: function() {
@@ -201,5 +205,22 @@ Polymer({
     if (!this.opened) {
       this.set('opened', true);
     }
+  },
+  /**
+   * Opens the request list associated with the project if project is
+   * selected in the route and the list is not opened.
+   */
+  _checkRequireOpenItems: function(pid) {
+    if (!pid) {
+      return;
+    }
+    var panel = this.$$(`projects-menu-requests[project-id="${pid}"]`);
+    if (!panel.opened) {
+      panel.opened = true;
+    }
+  },
+  // Called when dom-repeat renders list.
+  _itemsRendered: function() {
+    this.__initialized = true;
   }
 });

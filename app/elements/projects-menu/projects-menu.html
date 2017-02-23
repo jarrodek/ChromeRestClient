@@ -142,7 +142,7 @@ Set a `positionTarget` property to position the element on the input field.
       <p class="empty-info" hidden$="[[hasItems]]">Use <span class="code">[[_computeA11yCommand('s')]]</span> to save current request in a project.</p>
     </div>
     <!-- data-place$="/request/project/[[item._id]]" -->
-    <template is="dom-repeat" items="[[items]]">
+    <template is="dom-repeat" items="[[items]]" on-dom-change="_itemsRendered">
       <div class="totally-unescessary-wrapper-but-yet-required-to-handle-events-properly" data-open="true">
         <paper-item selected$="[[_computeProjectSelected(item._id, selectedProject)]]" class="project-item">
           <iron-icon icon="arc:collections-bookmark" class="project-icon"></iron-icon>
@@ -151,7 +151,7 @@ Set a `positionTarget` property to position the element on the input field.
           <paper-ripple></paper-ripple>
         </paper-item>
         <paper-tooltip for="project-icon-[[index]]" animation-delay="100" position="left" offset="0">Project details</paper-tooltip>
-        <projects-menu-requests project-id="[[item._id]]" route-params="[[routeParams]]" route="[[route]]"></projects-menu-requests>
+        <projects-menu-requests project-id$="[[item._id]]" route-params="[[routeParams]]" route="[[route]]"></projects-menu-requests>
       </div>
     </template>
   </template>
