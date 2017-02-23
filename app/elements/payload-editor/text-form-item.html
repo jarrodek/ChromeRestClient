@@ -46,16 +46,21 @@ the License.
     }
 
     .mime-selector paper-input {
-      max-width: 200px;
+      max-width: 360px;
+    }
+
+    .name-field {
+      max-width: 360px;
+      @apply(--layout-flex);
     }
     </style>
     <div class="mime-selector">
-      <paper-input id="mimeInput" label="Content type (Optional)" value="{{contentType}}"></paper-input>
+      <paper-input id="mimeInput" label="Content type (Optional)" value="{{contentType}}" no-label-float></paper-input>
       <paper-autocomplete target="[[_mimeInput]]" source="[[suggestions]]" open-on-focus></paper-autocomplete>
     </div>
     <div class="value-selector">
-      <paper-input label="Field name" error-message="The name is required" required auto-validate value="{{name}}"></paper-input>
-      <paper-textarea label="Field value" value="{{value}}"></paper-textarea>
+      <paper-input class="name-field" label="Field name" error-message="The name is required" required auto-validate value="{{name}}" no-label-float></paper-input>
+      <paper-textarea label="Field value" value="{{value}}"  no-label-float></paper-textarea>
       <paper-icon-button icon="arc:close" title="Remove form parameter" on-tap="removeItem"></paper-icon-button>
     </div>
   </template>

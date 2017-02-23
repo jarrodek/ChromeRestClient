@@ -19,14 +19,14 @@
       <div>
         <p>ARC proxy extension will help you in some cases where the app can't handle requests properly:</p>
         <ul>
-          <li>Certificates errors - app can't connect to the endpoint with invalid certificate</li>
-          <li>Cookies - network session is separated from the Chrome and cookies can't be read by the app</li>
+          <li><b>Certificates errors</b> - app can't connect to the endpoint with invalid certificate</li>
+          <li><b>Cookies</b> - network session is separated from the Chrome and cookies can't be read by the app</li>
         </ul>
         <p>Installing the extension the app will get access to the cookies stored by Chrome. Also the app will be able to make XHR connection from Chrome so it will be possible to make a connection to invalid certificate (you must accept the certificate in Chrome tab).</p>
         <p>However, making an XHR connection you will:</p>
         <ul>
           <li>Not be able to set or read some headers (like Cookie, Referrer)</li>
-          <li>Not have an controll over headers set by the browser (Referrer, User-Agent, etc)</li>
+          <li>Do not have controll over headers set by the browser (Referrer, User-Agent, etc)</li>
           <li>Lose information about request timings</li>
           <li>Lose information about redirects</li>
         </ul>

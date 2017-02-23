@@ -182,7 +182,8 @@ the License.
                 <div>Clear stored data</div>
                 <!-- <div secondary>This will remove all data stored by the application. This can't be undo unless the export file has been created.</div> -->
               </paper-item-body>
-              <iron-icon icon="arc:arrow-drop-down" class="nav-away-icon" item-icon></iron-icon>
+              <iron-icon icon="arc:arrow-drop-down" class="nav-away-icon" item-icon hidden$="[[deletingDatabases]]"></iron-icon>
+              <paper-spinner item-icon active hidden$="[[!deletingDatabases]]"></paper-spinner>
             </paper-item>
           </paper-material>
 
@@ -360,19 +361,21 @@ the License.
       </paper-dialog>
       <onboarding-tutorial id="addShortcutsToDesktop">
         <onboarding-page>
-          <h2>Adding app's shortcuts</h2>
-          <div class="onboarding-image-page">
-            <div class="image">
-              <iron-image src="/assets/create-shortcut.gif"></iron-image>
-            </div>
-            <div class="description">
-              <ul>
-                <li>Got to
-                  <mark>chrome://apps</mark>
-                </li>
-                <li>Right click on ARC (this app)</li>
-                <li>Select "Create shortcut..."</li>
-              </ul>
+          <div>
+            <h2>Adding app's shortcuts</h2>
+            <div class="onboarding-image-page">
+              <div class="image">
+                <iron-image src="/assets/create-shortcut.gif"></iron-image>
+              </div>
+              <div class="description">
+                <ul>
+                  <li>Got to
+                    <mark>chrome://apps</mark>
+                  </li>
+                  <li>Right click on ARC (this app)</li>
+                  <li>Select "Create shortcut..."</li>
+                </ul>
+              </div>
             </div>
           </div>
         </onboarding-page>

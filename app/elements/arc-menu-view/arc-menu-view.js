@@ -4,22 +4,17 @@
 
     properties: {
       /**
-       * Current route object.
+       * Current route string.
        */
       route: String,
       /**
-       * Apps base URL.
+       * Route parameters
        */
-      baseUrl: String,
+      routeParams: Object,
       /**
        * Remove history from view if set to true.
        */
       noHistory: {
-        type: Boolean,
-        value: false
-      },
-      /** Is the app has been authorized by the user. */
-      appAuthorized: {
         type: Boolean,
         value: false
       },
@@ -140,6 +135,11 @@
             return;
           }
           logViewer.open();
+          break;
+        case 'about-view':
+          this.fire('navigate', {
+            url: '/about'
+          });
           break;
       }
     },

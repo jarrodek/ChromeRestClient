@@ -97,12 +97,14 @@
       })
       .then((data) => {
         let execTime = performance.now() - startTime;
+        db.close();
         return {
           data: data,
           time: execTime
         };
       })
       .catch((e) => {
+        db.close();
         throw e;
       });
     }

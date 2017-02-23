@@ -51,6 +51,10 @@ the License.
       margin-right: 12px;
     }
 
+    .file-trigger {
+      color: #FF5722;
+    }
+
     .param-value {
       @apply(--layout-flex);
     }
@@ -72,12 +76,21 @@ the License.
     .files-list span {
       margin-right: 8px;
     }
+
+    .name-field {
+      max-width: 360px;
+      @apply(--layout-flex);
+    }
+
+    .error {
+      color: #F44336;
+    }
     </style>
     <div class="file-row">
       <div class="controls">
-        <paper-input error-message="The name is required" label="Field name" required auto-validate value="{{name}}"></paper-input>
+        <paper-input error-message="The name is required" label="Field name" required auto-validate value="{{name}}" class="name-field"></paper-input>
         <paper-button raised on-tap="_selectFile" class="file-trigger">Choose files</paper-button>
-        <span class="files-counter-message" hidden$="[[hasFiles]]">No files selected</span>
+        <span class="files-counter-message" hidden$="[[hasFiles]]"><iron-icon class="error" icon="arc:info-outline"></iron-icon> No files selected</span>
         <span class="files-counter-message" hidden$="[[!hasFiles]]">[[value.length]] file(s) selected <a href="#" on-tap="_toggleFilesList">Details.</a></span>
         <paper-icon-button icon="arc:close" title="Remove file" on-tap="removeItem"></paper-icon-button>
       </div>

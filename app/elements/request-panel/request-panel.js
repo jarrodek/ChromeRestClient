@@ -251,9 +251,9 @@
         case 'history':
           this.requestType = this.routeParams.type;
           this.set('historyId', decodeURIComponent(this.routeParams.historyId));
+          this._setPageTitle('Request');
           break;
         case 'drive':
-
           // This is not really a request. It ment to open a drive item.
           // Drive data will be called via /current route.
           let id = this.routeParams.driveId;
@@ -423,6 +423,9 @@
       this.fire('selected-request', {
         id: id
       });
+      if (decodeURIComponent(this.routeParams.savedId) !== id) {
+        this.set('routeParams.savedId', id);
+      }
       if (!id) {
         return;
       }
@@ -454,33 +457,33 @@
       this.fire('selected-project', {
         id: id
       });
-      if (!id) {
-        return;
-      }
-      var event = this.fire('project-read', {
-        id: id
-      });
-      if (event.detail.error) {
-        console.error(event.detail.message);
-        return;
-      }
-      event.detail.result.then((result) => {
-        // console.info('Setting project data', result);
-        this.set('currentProjectData', result);
-      })
-      .catch((e) => {
-        if (e.status === 404) {
-          this.set('request.legacyProject', null);
-          this.set('proxyRequest.legacyProject', null);
-          this.set('projectId', undefined);
-          this.fire('app-log', {
-            'message': ['Project is not in database.', e],
-            'level': 'warn'
-          });
-        } else {
-          console.error('Unable restore project', e);
-        }
-      });
+      // if (!id) {
+      //   return;
+      // }
+      // var event = this.fire('project-read', {
+      //   id: id
+      // });
+      // if (event.detail.error) {
+      //   console.error(event.detail.message);
+      //   return;
+      // }
+      // event.detail.result.then((result) => {
+      //   // console.info('Setting project data', result);
+      //   this.set('currentProjectData', result);
+      // })
+      // .catch((e) => {
+      //   if (e.status === 404) {
+      //     this.set('request.legacyProject', null);
+      //     this.set('proxyRequest.legacyProject', null);
+      //     this.set('projectId', undefined);
+      //     this.fire('app-log', {
+      //       'message': ['Project is not in database.', e],
+      //       'level': 'warn'
+      //     });
+      //   } else {
+      //     console.error('Unable restore project', e);
+      //   }
+      // });
     },
 
     onXhrtoggle: function(e) {

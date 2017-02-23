@@ -32,13 +32,13 @@ The multipart form editor for the ARC's request panel.
       display: block;
       position: relative;
       /* Add button */
-      padding-bottom: 80px;
+      padding-bottom: 120px;
     }
 
     paper-fab-menu {
       position: absolute;
       bottom: 20px;
-      left: 20px;
+      left: 0px;
     }
 
     paper-textarea {
@@ -47,8 +47,7 @@ The multipart form editor for the ARC's request panel.
 
     text-form-item,
     file-form-item {
-      padding: 16px 12px;
-      border-bottom: 1px #FFECB3 solid;
+      margin-bottom: 8px;
     }
 
     .header {
@@ -75,10 +74,10 @@ The multipart form editor for the ARC's request panel.
       color: rgba(0, 0, 0, 0.87);
     }
     </style>
-    <div class="header">
+    <!-- <div class="header">
       <p class="info">When using this form you will send the data as a "multipart/form-data". <a href="https://www.ietf.org/rfc/rfc2388.txt" target="_blank">Learn more.</a></p>
       <paper-button hidden$="[[!hasFormData]]" on-tap="_togglePage"><span class="toggle-preview-label">[[_computeToggleLabel(page)]]</span><iron-icon class="toggle-icon" icon="[[_computeToggleIcon(page)]]"></iron-icon></paper-button>
-    </div>
+    </div> -->
     <iron-pages selected="[[page]]">
       <section>
         <form is="iron-form" id="form">
