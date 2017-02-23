@@ -38,7 +38,8 @@
   app.openProjectDetails = () => {
     page(`/project/${app.selectedProject}/edit`);
   };
-  app._computeHideProjectLink = (selectedProject, route) => !(selectedProject && route === 'request');
+  app._computeHideProjectLink = (selectedProject, route) =>
+    !(selectedProject && route === 'request');
   app._canShowProjectSelector = (route, count) => route === 'request' && count > 0;
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
