@@ -22,6 +22,8 @@ the License.
 <link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../arc-menu-view/menu-list-behavior.html">
+<link rel="import" href="projects-menu-requests.html">
+
 <!--
 The panel displays an ARC history data (last entries) when the user focus (or otherwise trigger
 action) on the URL field.
@@ -35,62 +37,10 @@ Set a `positionTarget` property to position the element on the input field.
     :host {
       display: block;
       background-color: #f7f7f7;
+      overflow: auto;
       @apply(--layout-flex);
       @apply(--layout-vertical);
       @apply(--projects-menu);
-    }
-
-    .method {
-      margin-right: 8px;
-      display: block;
-      background: rgba(128, 128, 128, 0.24);
-      color: rgb(128, 128, 128);
-      padding: 2px 6px;
-      border-radius: 2px;
-      font-size: 13px;
-    }
-
-    .method.get {
-      background: rgba(0, 128, 0, 0.24);
-      color: rgb(0, 128, 0);
-    }
-
-    .method.post {
-      background: rgba(33, 150, 243, 0.24);
-      color: rgb(33, 150, 243);
-    }
-
-    paper-item:focus .method.post {
-      color: #fff;
-    }
-
-    .method.put {
-      background: rgba(255, 165, 0, 0.24);
-      color: rgb(255, 165, 0);
-    }
-
-    .method.delete {
-      background: rgba(244, 67, 54, 0.24);
-      color: rgb(244, 67, 54);
-    }
-
-    .method.patch {
-      background: rgba(156, 39, 176, 0.24);
-      color: rgb(156, 39, 176);
-    }
-
-    .url {
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      font-size: 14px;
-    }
-
-    .group-header {
-      font-weight: bold;
-      border-bottom: 1px solid #ddd;
-      color: rgba(0, 0, 0, 0.54);
-      padding: 12px 16px;
     }
 
     paper-progress {
@@ -123,6 +73,14 @@ Set a `positionTarget` property to position the element on the input field.
 
     .edit-project-icon {
       display: none;
+      width: 32px;
+      height: 32px;
+    }
+
+    .project-item {
+      /*font-size: 13px;*/
+      @apply(--paper-font-menu);
+      min-height: 36px;
     }
 
     .project-item:hover .edit-project-icon {
@@ -130,24 +88,23 @@ Set a `positionTarget` property to position the element on the input field.
     }
 
     .project-item[selected] {
-      background-color: #FF9800;
-      color: #fff;
+      background-color: rgba(255, 152, 0, 0.24);
     }
 
     paper-item.project-item {
       --paper-item-focused: {
-        background-color: #FF9800;
+        background-color: rgba(255, 152, 0, 0.24);
       }
     }
 
     paper-item.project-item[focused],
     paper-item.project-item:focus {
-      background-color: #FF9800;
+      background-color: rgba(255, 152, 0, 0.24);
     }
 
     paper-item.project-item[focused] paper-icon-button,
     paper-item.project-item[selected] paper-icon-button{
-      color: #fff;
+      color: #f57c00;
     }
 
     paper-item.project-item[focused] paper-icon-button:hover,
@@ -168,23 +125,15 @@ Set a `positionTarget` property to position the element on the input field.
       text-align: center;
     }
 
-    paper-menu-button {
-      padding: 0;
-    }
-
-    .empty-request-icon {
+    .project-icon {
       width: 16px;
       height: 16px;
-      color: orange;
+      color: #757575;
       margin-right: 4px;
     }
 
-    .project-item[selected] .empty-request-icon {
-      color: #fff;
-    }
-
-    iron-list {
-      flex: 1 1 auto;
+    .project-item[selected] .project-icon {
+      color: #F57C00;
     }
     </style>
     <paper-progress hidden$="[[!querying]]" indeterminate></paper-progress>
@@ -193,95 +142,19 @@ Set a `positionTarget` property to position the element on the input field.
       <p class="empty-info">No projects here</p>
       <p class="empty-info" hidden$="[[hasItems]]">Use <span class="code">[[_computeA11yCommand('s')]]</span> to save current request in a project.</p>
     </div>
-
-    <iron-list items="[[items]]" id="list" hidden$="[[!hasItems]]">
-      <template>
-        <div data-place$="/request/project/[[item._id]]" title$="[[item.name]]">
-          <paper-item selected$="[[_computeProjectSelected(item._id, selectedProject)]]" class="project-item">
-            <iron-icon hidden$="[[!item.isEmpty]]" icon="arc:warning" class="empty-request-icon" title="This project has no requests"></iron-icon>
-            <div class="project-name">[[item.name]]</div>
-            <paper-icon-button class="edit-project-icon" data-place$="/project/[[item._id]]/edit" icon="arc:mode-edit" alt="Edit project"></paper-icon-button>
-            <paper-ripple></paper-ripple>
-          </paper-item>
-        </div>
-      </template>
-    </iron-list>
-
-    <script id="emptyProjectsProcess" type="javascript/worker">
-    var Processor = {
-      findEmptyProjects: function(projectIds) {
-        var request = indexedDB.open('_pouch_saved-requests');
-        request.onerror = function(event) {
-          self.postMessage({
-            error: true,
-            message: 'Can\'t open database.'
-          });
-        };
-        request.onsuccess = (event) => {
-          let db = event.target.result;
-          if (!db.objectStoreNames.contains('document-store')) {
-            self.postMessage({
-              error: true,
-              message: 'The database is not initialized.'
-            });
-            return;
-          }
-          let transaction = db.transaction(['document-store'], 'readonly');
-          let objectStore = transaction.objectStore('document-store');
-          let keyRequest = objectStore.openCursor();
-          let keys = [];
-          keyRequest.onsuccess = (event) => {
-            var cursor = event.target.result;
-            if(cursor) {
-              if (cursor.value.deletedOrLocal !== '0') {
-                cursor.continue();
-                return;
-              }
-              keys[keys.length] = cursor.key;
-              cursor.continue();
-            } else {
-              Processor.processEmptyData(projectIds, keys);
-            }
-          };
-        };
-      },
-
-      processEmptyData: function(projectIds, keys) {
-        if (!keys || !keys.length) {
-          self.postMessage({
-            result: []
-          });
-          return;
-        }
-        var emptyIds = [];
-        projectIds.forEach((pId) => {
-          let hasRequest = false;
-          for (var i = keys.length - 1; i >= 0; i--) {
-            let key = keys[i];
-            if (key && key.indexOf(pId) !== -1) {
-              // request for given project ID exists
-              if (!hasRequest) {
-                // so the project is not empty
-                hasRequest = true;
-              }
-              // reduce the array for given key so it will iterate less
-              // in next loop
-              keys.splice(i, 1);
-            }
-          }
-          if (!hasRequest) {
-            emptyIds[emptyIds.length] = pId;
-          }
-        });
-        self.postMessage({
-          result: emptyIds
-        });
-      }
-    };
-    self.onmessage = function(e) {
-      Processor.findEmptyProjects(e.data.projects);
-    };
-    </script>
+    <!-- data-place$="/request/project/[[item._id]]" -->
+    <template is="dom-repeat" items="[[items]]" on-dom-change="_itemsRendered">
+      <div class="totally-unescessary-wrapper-but-yet-required-to-handle-events-properly" data-open="true">
+        <paper-item selected$="[[_computeProjectSelected(item._id, selectedProject)]]" class="project-item">
+          <iron-icon icon="arc:collections-bookmark" class="project-icon"></iron-icon>
+          <div class="project-name">[[item.name]]</div>
+          <paper-icon-button  id$="project-icon-[[index]]" class="edit-project-icon" data-place$="/project/[[item._id]]/edit" icon="arc:chevron-right" alt="Edit project"></paper-icon-button>
+          <paper-ripple></paper-ripple>
+        </paper-item>
+        <paper-tooltip for="project-icon-[[index]]" animation-delay="100" position="left" offset="0">Project details</paper-tooltip>
+        <projects-menu-requests project-id$="[[item._id]]" route-params="[[routeParams]]" route="[[route]]"></projects-menu-requests>
+      </div>
+    </template>
   </template>
   <script src="projects-menu.js"></script>
 </dom-module>

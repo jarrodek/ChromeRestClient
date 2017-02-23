@@ -9,7 +9,6 @@ addons:
     packages:
       - google-chrome-stable
       - g++-4.8
-  sauce_connect: true
 before_script:
 #  - npm install -g bower polylint web-component-tester
 #  - bower install

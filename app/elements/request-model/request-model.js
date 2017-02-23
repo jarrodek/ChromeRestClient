@@ -45,20 +45,17 @@
       var request = detail.request;
       var requestId = detail.id;
       if (!request || !request._id || !request._rev) {
-        if (!detail.id) {
+        if (!requestId) {
           e.detail.error = true;
           e.detail.message = 'You must set either request object or request id.';
           return;
-        }
-        if (!requestId) {
-          requestId = request._id;
         }
         request = null;
       }
       var db = this._getDb(detail.dbName);
       var p;
       var oldRev;
-      var oldId = request._id;
+      var oldId = requestId;
       if (!request) {
         p = db.get(requestId);
       } else {

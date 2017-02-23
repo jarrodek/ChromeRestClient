@@ -76,7 +76,7 @@ This approach have some implications.
       </a>
     </div>
     <arc-request-error-view hidden$=[[!isError]] message="[[errorMessage]]"></arc-request-error-view>
-    <chrome-storage auto id="latest" type="local" name="latestRequest" value="{{request}}"  value-as="RequestLocalObject" on-read="_latestLoaded"></chrome-storage>
+    <chrome-storage auto id="latest" type="local" name="latestRequest" value="{{request}}"  value-as="RequestLocalObject" on-chrome-storage-read="_latestLoaded"></chrome-storage>
     <arc-socket-request id="socket" on-ready="_responseReady" on-error="_onRequestError"></arc-socket-request>
     <arc-xhr-request id="xhr" on-ready="_responseReady" on-error="_onRequestError" connected="{{xhrConnected}}"></arc-xhr-request>
     <arc-historyurl-model id="historyurlModel" on-save="_historyUrlSaved" on-error="_historyUrlSaveError"></arc-historyurl-model>

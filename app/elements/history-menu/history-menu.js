@@ -6,6 +6,8 @@ Polymer({
   ],
 
   properties: {
+    routeParams: Object,
+    route: String,
     scrollTarget: {
       type: Object,
       value: function() {
@@ -16,20 +18,46 @@ Polymer({
     includeDocs: {
       type: Boolean,
       value: true
+    },
+
+    selectedHistory: {
+      type: String,
+      readOnly: true
     }
   },
+
+  observers: [
+    '_routeChanged(opened, route, routeParams.*)'
+  ],
 
   attached: function() {
     this.listen(window, 'history-object-changed', '_historyChanged');
     this.listen(window, 'request-objects-deleted', '_historyDeleted');
     this.listen(window, 'data-imported', 'refresh');
+    this.listen(window, 'datastrores-destroyed', '_onDatabaseDestroy');
   },
 
   detached: function() {
     this.unlisten(window, 'history-object-changed', '_historyChanged');
     this.unlisten(window, 'request-objects-deleted', '_historyDeleted');
     this.unlisten(window, 'data-imported', 'refresh');
+    this.unlisten(window, 'datastrores-destroyed', '_onDatabaseDestroy');
   },
+
+  _onDatabaseDestroy: function(e) {
+    var databases = e.detail.datastores;
+    if (!databases || !databases.length) {
+      return;
+    }
+    if (databases.indexOf('history-requests') === -1) {
+      return;
+    }
+    var db = this._getDb();
+    db.close().then(() => {
+      this.refresh();
+    });
+  },
+
   /**
    * Accepts currently selected suggestion and enters it into a text field.
    */
@@ -135,6 +163,9 @@ Polymer({
   },
 
   _historyChanged: function(e) {
+    if (!this.opened) {
+      return;
+    }
     var id = e.detail.id;
     var items = this.items;
     if (!items) {
@@ -178,6 +209,27 @@ Polymer({
         this.splice('items', index, 1);
       }
     });
-  }
+  },
 
+  _routeChanged: function(opened, route, record) {
+    if (!route || !record || !record.base || !this.items || !this.items.length) {
+      return;
+    }
+    if (record.base.type !== 'history') {
+      if (this.selectedHistory) {
+        this._setSelectedHistory(null);
+      }
+      return;
+    }
+    var id = decodeURIComponent(record.base.historyId);
+    this._setSelectedHistory(id);
+  },
+
+  _computeItemClass: function(_id, selectedHistory) {
+    var selected = _id === selectedHistory;
+    if (selected) {
+      return 'iron-selected';
+    }
+    return '';
+  }
 });
