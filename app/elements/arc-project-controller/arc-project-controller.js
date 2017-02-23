@@ -30,20 +30,33 @@ Polymer({
       notify: true
     },
     usePouchDb: Boolean,
-    projectId: String
+    projectId: String,
+    // True when loading data from the datastore.
+    loadingData: {
+      type: Boolean,
+      value: false,
+      readOnly: true,
+      notify: true
+    }
   },
 
   listeners: {
     'name-changed': '_requestNameChanged',
+    'saved-list-item-name-changed': '_requestNameChanged',
     'delete': '_deleteRequested',
     'export': 'exportProject',
-    'project-related-requests-read': '_cancelEvent',
-    'project-name-changed': '_projectNameChangedInView'
+    'project-related-requests-read': '_projectsRelatedRead',
+    'project-name-changed': '_projectNameChangedInView',
+    'dom-order-changed': '_updateItemsOrder',
+    'saved-list-item-open': '_onOpenRequested',
+    'saved-list-item-delete': '_onDeleteRequested',
+    'delete-selected': '_deleteSelected'
   },
 
   observers: [
     '_prepareProjectNew(opened, usePouchDb, routeParams.projectId)',
-    '_projectChanged(project.*)'
+    '_projectChanged(project.*)',
+    '_setLoaderState(opened)'
   ],
 
   onShow: function() {
@@ -159,33 +172,12 @@ Polymer({
     e.stopPropagation();
 
     if (this.usePouchDb) {
-      let event = this.fire('request-name-change', {
+      this.fire('request-name-change', {
         'dbName': 'saved-requests',
         'name': e.detail.item.name,
-        'id': e.detail.item.id
+        'id': e.detail.item._id
       });
-      let updatedId = e.detail.item.id;
-      if (event.detail.error) {
-        console.error(event.detail.message);
-        return;
-      }
-      event.detail.result
-      .then((request) => {
-        let index = this.requests.findIndex((i) => i._id === updatedId);
-        if (index === -1) {
-          console.error('Unable to find index.');
-          return;
-        }
-        this.set('requests.' + index + '._rev', request._rev);
-        this.set('requests.' + index + '._id', request._id);
-        this.set('requests.' + index + '.id', request._id);
-      })
-      .catch((e) => {
-        StatusNotification.notify({
-          message: e.message
-        });
-      });
-
+      // Item will be updated by related-requests element.
       return;
     }
     var request = e.detail.item;
@@ -275,6 +267,15 @@ Polymer({
   _onDocumentsRestored: function(response) {
     var docs = response.rows.map((i) => i.doc);
     var res = this.requests.concat(docs);
+    res.sort((a, b) => {
+      if (a.projectOrder > b.projectOrder) {
+        return 1;
+      }
+      if (a.projectOrder < b.projectOrder) {
+        return -1;
+      }
+      return 0;
+    });
     this.set('requests', res);
     this.fire('request-objects-restored', {
       items: docs,
@@ -410,9 +411,10 @@ Polymer({
     });
   },
 
-  _cancelEvent: function(e) {
+  _projectsRelatedRead: function(e) {
     e.preventDefault();
     e.stopPropagation();
+    this._setLoadingData(false);
   },
 
   _projectChanged: function() {
@@ -421,6 +423,90 @@ Polymer({
       return console.error('The project controller view couldn\'t be found.');
     }
     view.project = this.project;
+  },
+
+  _updateItemsOrder: function() {
+    var items = this.requests;
+    var update = [];
+    items.forEach((i, index) => {
+      if (i.projectOrder !== index) {
+        i.projectOrder = index;
+        update.push(i);
+      }
+    });
+
+    var promises = update.map((i) => this._updateItem(i));
+    Promise.all(promises)
+    .catch((e) => {
+      StatusNotification.notify({
+        message: 'Unable to update order. ' + e.message
+      });
+    });
+  },
+
+  _updateItem: function(item) {
+    var event = this.fire('request-object-change', {
+      dbName: 'saved-requests',
+      request: item
+    });
+
+    if (!event.detail.result) {
+      let msg = event.detail.message || 'Model not found';
+      return Promise.reject(new Error(msg));
+    }
+    return event.detail.result;
+  },
+
+  _onOpenRequested: function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var url = 'request/saved/' + encodeURIComponent(e.detail.item._id);
+    page(url);
+  },
+
+  _onDeleteRequested: function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.deleteItems([e.detail.item]);
+  },
+
+  _deleteSelected: function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!this.currentSelection || !this.currentSelection.length) {
+      return;
+    }
+    this.deleteItems(this.currentSelection);
+  },
+
+  deleteItems: function(items) {
+    this._deleteRevertable('saved-requests', items)
+    .then((res) => {
+      let items = res.map((i) => i.id);
+      this.fire('request-objects-deleted', {
+        items: items,
+        type: 'saved'
+      });
+      var data = this.requests;
+      data = data.filter((i) => items.indexOf(i._id) === -1);
+      this.set('requests', data);
+    })
+    .catch((e) => {
+      StatusNotification.notify({
+        message: 'Unable to deleting entries. ' + e.message
+      });
+      this.fire('app-log', {
+        message: ['Error deleting entries', e],
+        level: e
+      });
+      console.error(e);
+    });
+  },
+
+  _setLoaderState: function(opened) {
+    if (opened) {
+      this._setLoadingData(true);
+    }
   }
 });
 })();

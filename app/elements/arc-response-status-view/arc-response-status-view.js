@@ -20,9 +20,13 @@ Polymer({
     // Raw HTTP message sent to the server.
     httpMessage: {
       type: String,
-      value: function() {
-        return 'Message wasn\'t sent';
-      }
+      observer: '_httpMessageChanged'
+    },
+    // Computed value, true when source HTTP message is not set.
+    hasHttpMessage: {
+      type: Boolean,
+      value: false,
+      readOnly: true
     },
     responseError: Object,
     // Calculated to be true if responseError object is set.
@@ -225,6 +229,12 @@ Polymer({
       clazz += ' opened';
     }
     return clazz;
+  },
+
+  // Computes if `statusMessage` is set.
+  _httpMessageChanged: function(message) {
+    var status = !!message;
+    this._setHasHttpMessage(status);
   }
 });
 })();

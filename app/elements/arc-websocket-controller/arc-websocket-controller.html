@@ -53,8 +53,7 @@
       type="local"
       name="lastSocket"
       value="{{lastSocketUrl}}"
-      on-load="_restoredHandler"
-      on-load-empty="_restoredHandler"></chrome-storage>
+      on-chrome-storage-read="_restoredHandler"></chrome-storage>
   </template>
   <script src="arc-websocket-controller.js"></script>
 </dom-module>

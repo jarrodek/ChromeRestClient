@@ -5,7 +5,7 @@
     is: 'arc-menu-controller',
     properties: {
       route: String,
-      baseUrl: String,
+      routeParams: Object,
       _historyObserver: {
         type: Function,
         value: function() {
@@ -40,7 +40,6 @@
       }
     },
 
-
     /**
      * User clicked on a navigation element.
      */
@@ -56,7 +55,7 @@
         chrome.storage.onChanged.addListener(this._historyObserver);
       } catch (e) {
         this.fire('app-log', {
-          'message': ['Error setting up storage listener'. e],
+          'message': ['Error setting up storage listener'.e],
           'level': 'error'
         });
         this.fire('send-analytics', {
@@ -66,7 +65,6 @@
         });
       }
     },
-
 
     _updateHistoryStatus: function() {
       try {
@@ -81,7 +79,10 @@
         });
       } catch (e) {
         var msg = 'Error setting up storage listener';
-        this.fire('app-log', {'message': [msg, e], 'level': 'warning'});
+        this.fire('app-log', {
+          'message': [msg, e],
+          'level': 'warning'
+        });
         this.fire('send-analytics', {
           type: 'exception',
           description: 'arc-menu:' + e.message,

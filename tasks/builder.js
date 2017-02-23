@@ -40,21 +40,21 @@ var Builder = {
   buildCanary: (opts, done) => {
     Builder.target = 'canary';
     Builder.targetDir = 'canary';
-    Builder.workingBranch = 'develop';
+    Builder.workingBranch = 'canary';
     Builder._build(opts, done);
   },
 
   buildDev: (opts, done) => {
     Builder.target = 'dev';
     Builder.targetDir = 'dev';
-    Builder.workingBranch = 'develop';
+    Builder.workingBranch = 'dev';
     Builder._build(opts, done);
   },
 
   buildBeta: (opts, done) => {
     Builder.target = opts.isHotfix ? 'beta-hotfix' : 'beta-release';
     Builder.targetDir = 'beta';
-    Builder.workingBranch = 'develop';
+    Builder.workingBranch = 'beta';
     Builder._build(opts, done);
   },
 
@@ -111,7 +111,7 @@ var Builder = {
     return shell.exec('git add -A');
   },
   _gitCommit: () => {
-    return shell.exec(`git commit -m "${Builder.commitMessage}"`);
+    return shell.exec(`git commit -S -m "${Builder.commitMessage}"`);
   },
   _gitPush: () => {
     return shell.exec(`git push origin ${Builder.workingBranch}`);
