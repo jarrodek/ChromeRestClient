@@ -28,7 +28,7 @@ Polymer({
   ],
 
   listeners: {
-    'tap': '_itepTap'
+    'tap': '_itemTap'
   },
 
   _queryRequests: function(opened, projectId) {
@@ -45,7 +45,7 @@ Polymer({
     }
   },
 
-  _itepTap: function(e) {
+  _itemTap: function(e) {
     e.preventDefault();
     e.stopPropagation();
     var index;

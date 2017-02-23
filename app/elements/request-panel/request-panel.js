@@ -412,6 +412,9 @@
       this.fire('selected-request', {
         id: id
       });
+      if (decodeURIComponent(this.routeParams.savedId) !== id) {
+        this.set('routeParams.savedId', id);
+      }
       if (!id) {
         return;
       }
