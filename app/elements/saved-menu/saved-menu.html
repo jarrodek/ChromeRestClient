@@ -77,7 +77,6 @@ Set a `positionTarget` property to position the element on the input field.
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
-      font-size: 14px;
     }
 
     .group-header {
@@ -114,6 +113,8 @@ Set a `positionTarget` property to position the element on the input field.
       font-size: 14px;
       min-height: 36px;
       cursor: pointer;
+      @apply(--paper-font-menu);
+      font-weight: 400;
     }
 
     .iron-selected paper-item {
