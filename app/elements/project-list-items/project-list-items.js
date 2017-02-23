@@ -93,12 +93,12 @@
       'role': 'list'
     },
 
-    _computeRowClass: function(selected) {
-      var clazz = 'history-item';
-      if (selected) {
-        clazz += ' selected';
+    _computeRowClass: function(id, record) {
+      if (!record || !record.base || !record.base.length) {
+        return;
       }
-      return clazz;
+      var index = record.base.findIndex((i) => i._id === id);
+      return index !== -1 ? 'selected' : '';
     },
 
     _deleteItem: function(e) {

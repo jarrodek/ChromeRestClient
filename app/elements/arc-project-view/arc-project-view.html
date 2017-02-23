@@ -6,7 +6,6 @@
     <style>
      :host {
       display: block;
-      padding: 0 16px;
       --table-list-item: {
         @apply(--paper-font-menu);
         overflow: visible;
@@ -76,9 +75,21 @@
       }
     }
 
+    h2 {
+      @apply(--paper-font-subhead);
+      padding: 0 16px;
+    }
+
+    .selected-counter {
+      @apply(--paper-font-subhead);
+      color: var(--paper-blue-700);
+      font-weight: 300;
+    }
+
     .project-info {
       @apply(--layout-horizontal);
       @apply(--layout-center);
+      padding: 0 16px;
     }
 
     .requests-info {}
@@ -91,12 +102,6 @@
       @apply(--layout-horizontal);
       @apply(--layout-center);
       padding-left: 10px;
-    }
-
-    h3 {
-      @apply(--page-title-text);
-      color: var(--paper-blue-700);
-      font-weight: 300;
     }
 
     .table-options .hiddable {
@@ -114,6 +119,14 @@
       padding-right: 16px;
       color: rgba(0, 0, 0, .57);
     }
+
+    .requests-info {
+      margin-top: 40px;
+    }
+
+    .status-bar paper-checkbox {
+      margin-left: 4px;
+    }
     </style>
     <section class="project-info">
       <paper-input noLabelFloat value="{{project.name}}" on-change="_projectNameChanged"></paper-input>
@@ -127,7 +140,8 @@
       <div class="status-bar">
         <section class$="[[_computeOptionsTableClass(optionsState)]]">
           <paper-checkbox class="toggle" id="toggleAll" checked="{{toggleSelectAll}}"></paper-checkbox>
-          <h3 class="hiddable">[[currentSelection.length]] item selected</h3>
+          <paper-tooltip for="toggleAll" animation-delay="100" position="right" offset="0">Select / deselect all</paper-tooltip>
+          <span class="selected-counter hiddable">[[currentSelection.length]] item selected</span>
           <div class="selected-actions">
             <paper-icon-button class="hiddable" icon="arc:delete" id="deleteSelected" on-tap="_deleteSelected"></paper-icon-button>
             <paper-tooltip position="left" for="deleteSelected">Delete selected</paper-tooltip>
