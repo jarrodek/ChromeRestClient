@@ -37,62 +37,10 @@ Set a `positionTarget` property to position the element on the input field.
     :host {
       display: block;
       background-color: #f7f7f7;
+      overflow: auto;
       @apply(--layout-flex);
       @apply(--layout-vertical);
       @apply(--projects-menu);
-    }
-
-    .method {
-      margin-right: 8px;
-      display: block;
-      background: rgba(128, 128, 128, 0.24);
-      color: rgb(128, 128, 128);
-      padding: 2px 6px;
-      border-radius: 2px;
-      font-size: 13px;
-    }
-
-    .method.get {
-      background: rgba(0, 128, 0, 0.24);
-      color: rgb(0, 128, 0);
-    }
-
-    .method.post {
-      background: rgba(33, 150, 243, 0.24);
-      color: rgb(33, 150, 243);
-    }
-
-    paper-item:focus .method.post {
-      color: #fff;
-    }
-
-    .method.put {
-      background: rgba(255, 165, 0, 0.24);
-      color: rgb(255, 165, 0);
-    }
-
-    .method.delete {
-      background: rgba(244, 67, 54, 0.24);
-      color: rgb(244, 67, 54);
-    }
-
-    .method.patch {
-      background: rgba(156, 39, 176, 0.24);
-      color: rgb(156, 39, 176);
-    }
-
-    .url {
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      font-size: 14px;
-    }
-
-    .group-header {
-      font-weight: bold;
-      border-bottom: 1px solid #ddd;
-      color: rgba(0, 0, 0, 0.54);
-      padding: 12px 16px;
     }
 
     paper-progress {
@@ -125,6 +73,13 @@ Set a `positionTarget` property to position the element on the input field.
 
     .edit-project-icon {
       display: none;
+      width: 32px;
+      height: 32px;
+    }
+
+    .project-item {
+      font-size: 14px;
+      min-height: 36px;
     }
 
     .project-item:hover .edit-project-icon {
@@ -133,7 +88,6 @@ Set a `positionTarget` property to position the element on the input field.
 
     .project-item[selected] {
       background-color: rgba(255, 152, 0, 0.24);
-      /*color: #fff;*/
     }
 
     paper-item.project-item {
@@ -149,7 +103,7 @@ Set a `positionTarget` property to position the element on the input field.
 
     paper-item.project-item[focused] paper-icon-button,
     paper-item.project-item[selected] paper-icon-button{
-      color: #fff;
+      color: #f57c00;
     }
 
     paper-item.project-item[focused] paper-icon-button:hover,
@@ -170,23 +124,15 @@ Set a `positionTarget` property to position the element on the input field.
       text-align: center;
     }
 
-    paper-menu-button {
-      padding: 0;
-    }
-
-    .empty-request-icon {
+    .project-icon {
       width: 16px;
       height: 16px;
-      color: orange;
+      color: #757575;
       margin-right: 4px;
     }
 
-    .project-item[selected] .empty-request-icon {
-      color: #fff;
-    }
-
-    iron-list {
-      flex: 1 1 auto;
+    .project-item[selected] .project-icon {
+      color: #F57C00;
     }
     </style>
     <paper-progress hidden$="[[!querying]]" indeterminate></paper-progress>
@@ -199,90 +145,14 @@ Set a `positionTarget` property to position the element on the input field.
     <template is="dom-repeat" items="[[items]]">
       <div class="totally-unescessary-wrapper-but-yet-required-to-handle-events-properly" data-open="true">
         <paper-item selected$="[[_computeProjectSelected(item._id, selectedProject)]]" class="project-item" title$="[[item.name]]">
-          <iron-icon hidden$="[[!item.isEmpty]]" icon="arc:warning" class="empty-request-icon" title="This project has no requests"></iron-icon>
+          <iron-icon icon="arc:collections-bookmark" class="project-icon"></iron-icon>
           <div class="project-name">[[item.name]]</div>
-          <paper-icon-button class="edit-project-icon" data-place$="/project/[[item._id]]/edit" icon="arc:mode-edit" alt="Edit project"></paper-icon-button>
+          <paper-icon-button class="edit-project-icon" data-place$="/project/[[item._id]]/edit" icon="arc:chevron-right" alt="Edit project"></paper-icon-button>
           <paper-ripple></paper-ripple>
         </paper-item>
-        <projects-menu-requests project-id="[[item._id]]"></projects-menu-requests>
+        <projects-menu-requests project-id="[[item._id]]" route-params="[[routeParams]]" route="[[route]]"></projects-menu-requests>
       </div>
     </template>
-
-    <script id="emptyProjectsProcess" type="javascript/worker">
-    var Processor = {
-      findEmptyProjects: function(projectIds) {
-        var request = indexedDB.open('_pouch_saved-requests');
-        request.onerror = function(event) {
-          self.postMessage({
-            error: true,
-            message: 'Can\'t open database.'
-          });
-        };
-        request.onsuccess = (event) => {
-          let db = event.target.result;
-          if (!db.objectStoreNames.contains('document-store')) {
-            self.postMessage({
-              error: true,
-              message: 'The database is not initialized.'
-            });
-            return;
-          }
-          let transaction = db.transaction(['document-store'], 'readonly');
-          let objectStore = transaction.objectStore('document-store');
-          let keyRequest = objectStore.openCursor();
-          let keys = [];
-          keyRequest.onsuccess = (event) => {
-            var cursor = event.target.result;
-            if(cursor) {
-              if (cursor.value.deletedOrLocal !== '0') {
-                cursor.continue();
-                return;
-              }
-              keys[keys.length] = cursor.key;
-              cursor.continue();
-            } else {
-              Processor.processEmptyData(projectIds, keys);
-            }
-          };
-        };
-      },
-
-      processEmptyData: function(projectIds, keys) {
-        if (!keys || !keys.length) {
-          self.postMessage({
-            result: []
-          });
-          return;
-        }
-        var emptyIds = [];
-        projectIds.forEach((pId) => {
-          let hasRequest = false;
-          for (var i = keys.length - 1; i >= 0; i--) {
-            let key = keys[i];
-            if (key && key.indexOf(pId) !== -1) {
-              // request for given project ID exists
-              if (!hasRequest) {
-                // so the project is not empty
-                hasRequest = true;
-              }
-              // reduce the array for given key so it will iterate less
-              // in next loop
-              keys.splice(i, 1);
-            }
-          }
-          if (!hasRequest) {
-            emptyIds[emptyIds.length] = pId;
-          }
-        });
-        self.postMessage({
-          result: emptyIds
-        });
-      }
-    };
-    self.onmessage = function(e) {
-      Processor.findEmptyProjects(e.data.projects);
-    };
-    </script>
   </template>
   <script src="projects-menu.js"></script>
 </dom-module>

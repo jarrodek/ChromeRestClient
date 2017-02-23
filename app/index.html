@@ -36,17 +36,6 @@
           <paper-icon-button feature="back" on-tap="_onFeatureBack" class="toolbar-hide" icon="arc:arrow-back" title="Back"></paper-icon-button>
           <div class="title toolbar-hide">
             <span>[[pageTitle]]</span>
-            <div class="project-endpoints" feature="projectEndpoints">
-              <template is="dom-if" if="[[_canShowProjectSelector(route, projectEndpoints.length)]]">
-                <paper-dropdown-menu label="Project endpoints" horizontal-align="left">
-                  <paper-menu selected="[[selectedRequest]]" attr-for-selected="data-id" class="dropdown-content" on-iron-select="_onFeatureProjectEndpoints">
-                    <template is="dom-repeat" items="[[projectEndpoints]]">
-                      <paper-item data-id$="[[item._id]]">[[item.name]]</paper-item>
-                    </template>
-                  </paper-menu>
-                </paper-dropdown-menu>
-              </template>
-            </div>
           </div>
           <paper-toggle-button id="xhrToggle" feature="xhrtoggle" on-change="_onFeatureXhrToggle" class="toolbar-hide xhr-switch" title="Use XHR instead of socket">Use XHR</paper-toggle-button>
           <paper-icon-button id="openFeature" feature="open" on-tap="_onFeatureOpen" class="toolbar-hide" icon="arc:folder-open" title="Open"></paper-icon-button>
@@ -242,18 +231,6 @@
     </paper-toast>
     <arc-log-viewer></arc-log-viewer>
     <search-bar id="content-search-bar" on-iron-overlay-opened="textSearchBarOpened"></search-bar>
-    <!-- <element-tutorial id="xhrProxyTutorial">
-      <div tutorial>
-        <p>You can proxy the request through Chrome instead of the app.</p>
-        <p>Enable XHR proxy if you have issues with:</p>
-        <ul>
-          <li>expired certificates</li>
-          <li><b>proxy and vpn</b> connections</li>
-        </ul>
-        <paper-button raised class="tutorial-button" on-tap="_closeXhrTutorial">Got it</paper-button>
-      </div>
-    </element-tutorial> -->
-
     <!-- Elements on new app -->
     <arc-database id="savedRequests" store="saved-requests"></arc-database>
     <arc-database id="historyRequests" store="history-requests"></arc-database>
@@ -264,14 +241,9 @@
     <arc-database id="environments" store="environments"></arc-database>
     <arc-database id="authData" store="auth-data"></arc-database>
     <arc-database id="cookieData" store="cookies"></arc-database>
-
-    <!-- <app-pouchdb-quick-search id="q" include-docs adapter="idb" db-name="harIndex" on-data="_qdbResults"
-      highlighting highlighting-pre="<mark>"
-      highlighting-post="</mark>"></app-pouchdb-quick-search> -->
     <app-pouchdb-collate></app-pouchdb-collate>
     <app-logger></app-logger>
     <app-db-upgrade-1016></app-db-upgrade-1016>
-    <legacyproject-related-requests active="[[_processProjectRequests(route)]]" all-data project-id="[[selectedProject]]" related-requests="{{projectEndpoints}}"></legacyproject-related-requests>
     <arc-definitions></arc-definitions>
     <request-model></request-model>
     <project-model></project-model>

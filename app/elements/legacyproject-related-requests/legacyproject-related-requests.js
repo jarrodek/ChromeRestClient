@@ -35,10 +35,16 @@
 
     attached: function() {
       this.listen(window, 'request-object-changed', '_requestObjectChanged');
+      this.listen(window, 'request-object-deleted', '_requestObjectDeleted');
+      this.listen(window, 'request-objects-deleted', '_requestObjectsDeleted');
+      this.listen(window, 'request-objects-restored', '_requestObjectsRestored');
     },
 
     detached: function() {
       this.unlisten(window, 'request-object-changed', '_requestObjectChanged');
+      this.unlisten(window, 'request-object-deleted', '_requestObjectDeleted');
+      this.unlisten(window, 'request-objects-deleted', '_requestObjectsDeleted');
+      this.unlisten(window, 'request-objects-restored', '_requestObjectsRestored');
     },
 
     _requestObjectChanged: function(e) {
@@ -64,6 +70,67 @@
         // new request
         items.push(request);
       }
+      items = this.__processData(items);
+      this.set('relatedRequests', items);
+    },
+
+    _requestObjectDeleted: function(e) {
+      if (!e.detail.id) {
+        return;
+      }
+      this._checkDeleted([e.detail.id]);
+    },
+
+    _requestObjectsDeleted: function(e) {
+      var ids = e.detail.items;
+      if (!ids || !ids.length) {
+        return;
+      }
+      this._checkDeleted(ids);
+    },
+
+    _checkDeleted: function(ids) {
+      var items = this.relatedRequests;
+      if (!items || !items.length) {
+        return;
+      }
+      for (let i = items.length - 1; i >= 0; i--) {
+        if (~ids.indexOf(items[i]._id)) {
+          this.splice('relatedRequests', i, 1);
+        }
+      }
+    },
+
+    _requestObjectsRestored: function(e) {
+      if (e.detail.type !== 'saved') {
+        return;
+      }
+      var pid = this.projectId;
+      if (!pid) {
+        return;
+      }
+      var restoredItem = e.detail.items;
+      var items = this.relatedRequests;
+      var currentProjectsItems = restoredItem.filter((item) => {
+        if (item.legacyProject === pid) {
+          let has = false;
+          for (let i = 0, len = items.length; i < len; i++) {
+            if (items[i]._id === item._id) {
+              has = true;
+              break;
+            }
+          }
+          return !has;
+        }
+        return false;
+      });
+      if (!currentProjectsItems.length) {
+        return;
+      }
+      if (!items) {
+        items = [];
+      }
+      items = items.concat(currentProjectsItems);
       items = this.__processData(items);
       this.set('relatedRequests', items);
     },

@@ -23,11 +23,13 @@ Polymer({
       value: true
     },
     selectedProject: String,
-    route: String
+    /**
+     * Route parameters
+     */
+    routeParams: Object
   },
 
   observers: [
-    '_projectsListChanged(items.*)',
     'selectedProjectChanged(selectedProject)'
   ],
 
@@ -183,70 +185,6 @@ Polymer({
     this.set('items', []);
     var db = this._getDb();
     db.close();
-  },
-
-  _projectsListChanged: function(record) {
-    if (!record || !record.base) {
-      return;
-    }
-    if (record.path !== 'items.splices') {
-      // Only when adding to the list
-      return;
-    }
-    // Debounce the work since it will be called on each item insert (which is in a loop).
-    this.debounce('items-list-changed-handler', function() {
-      let items = this.items;
-      if (!items || !items.length) {
-        return;
-      }
-      var projectIds = items.map((item) => {
-        return item._id;
-      });
-      this._findEmptyProjects(projectIds);
-      // this.$.list.notifyResize();
-    }.bind(this), 200);
-
-  },
-  /**
-   * The function will iterate over the request object keys and check
-   * if projects has any request that exists.
-   * If it doesn't exists it will mark it as a project without request.
-   *
-   * @param {Array<String>} projectIds A list of project IDs.
-   */
-  _findEmptyProjects: function(projectIds) {
-    this.debounce('find-empty-projects', function() {
-      if (!this._processEmptyWorker) {
-        var blob = new Blob([this.$.emptyProjectsProcess.textContent]);
-        this._processEmptyWorkerUrl = window.URL.createObjectURL(blob);
-        this._processEmptyWorker = new Worker(this._processEmptyWorkerUrl);
-        this._processEmptyWorker.onmessage =
-          this._processWorkerResponse.bind(this);
-      }
-      this._processEmptyWorker.postMessage({
-        projects: projectIds
-      });
-    }, 1500);
-  },
-  // Processes the response form the web worker.
-  _processWorkerResponse: function(e) {
-    var data = e.data;
-    if (data.error) {
-      return console.error(data.message);
-    }
-    this._setEmptyProjects(data.result);
-  },
-  // Updates the list of items and sets the `isEmpty` property.
-  _setEmptyProjects: function(ids) {
-    if (!ids || !ids.length) {
-      return;
-    }
-    var list = this.items;
-    list.forEach((item, i) => {
-      if (ids.indexOf(item._id) !== -1) {
-        this.set(['items', i, 'isEmpty'], true);
-      }
-    });
   },
 
   _computeProjectSelected: function(pId, selected) {

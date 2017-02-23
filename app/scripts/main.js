@@ -4,15 +4,6 @@
   let app = document.querySelector('#app');
   app.pageTitle = '';
   /**
-   * Because controllers do not have direct access to the toolbar it must keep relevant data in
-   * the main object if it must to be accessible to the toolbar.
-   * This is an array of requests related to the currently opened project.
-   *
-   * TODO:50 In future releases controllers should not keep their data in the toolbar. New design
-   * should keep all releted to the controller data in the main workspace window.
-   */
-  app.projectEndpoints = [];
-  /**
    * The same as above.
    */
   app.selectedRequest = null;
@@ -51,13 +42,6 @@
   // Called when current request changed.
   window.addEventListener('selected-request', (e) => {
     app.selectedRequest = e.detail.id;
-  });
-  // Called when current project changed
-  window.addEventListener('selected-project', (e) => {
-    app.set('selectedProject', e.detail.id);
-    if (!app.selectedProject) {
-      app.projectEndpoints = [];
-    }
   });
   // event fired when the app is initialized and can remove loader.
   window.addEventListener('ArcInitialized', function() {
@@ -141,7 +125,6 @@
       bar.removeAttribute(feature);
     }
     app.featuresMapping.clear();
-    app.projectEndpoints = [];
   });
   app._featureCalled = (feature, event) => {
     if (!app.featuresMapping.has(feature)) {
@@ -174,9 +157,6 @@
   };
   app._onFeatureDrive = (e) => {
     app._featureCalled('drive', e);
-  };
-  app._onFeatureProjectEndpoints = (e) => {
-    app._featureCalled('projectEndpoints', e.detail.item.dataset.id);
   };
   app._onFeatureBack = (e) => {
     app._featureCalled('back', e);
@@ -728,24 +708,6 @@
       element.opened = false;
     } else {
       element.opened = true;
-    }
-  });
-
-  /* REQUEST NAME CHANGE WHEN PROJECT ENABLED */
-  window.addEventListener('request-object-changed', (e) => {
-    var oldId = e.detail.oldId;
-    if (app.selectedRequest === oldId || app.selectedRequest === e.detail.request._id) {
-      app.async(function() {
-        let id = e.detail.request._id;
-        app.set('selectedRequest', null);
-        app.set('selectedRequest', id);
-        for (var i = 0, len = app.projectEndpoints.length; i < len; i++) {
-          if (app.projectEndpoints[i]._id === id) {
-            app.pageTitle = app.projectEndpoints[i].name;
-            break;
-          }
-        }
-      }, 1);
     }
   });
 

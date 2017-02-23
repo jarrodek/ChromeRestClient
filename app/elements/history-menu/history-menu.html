@@ -22,6 +22,7 @@ the License.
 <link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../arc-menu-view/menu-list-behavior.html">
+<link rel="import" href="../../styles/shared-styles.html">
 <!--
 The panel displays an ARC history data (last entries) when the user focus (or otherwise trigger
 action) on the URL field.
@@ -31,7 +32,7 @@ Set a `positionTarget` property to position the element on the input field.
 -->
 <dom-module id="history-menu">
   <template>
-    <style>
+    <style include="shared-styles">
     :host {
       display: block;
       background-color: #f7f7f7;
@@ -41,23 +42,27 @@ Set a `positionTarget` property to position the element on the input field.
     }
 
     .method {
-      margin-right: 8px;
-      display: block;
-      background: rgba(128, 128, 128, 0.24);
-      color: rgb(128, 128, 128);
-      padding: 2px 6px;
-      border-radius: 2px;
-      font-size: 13px;
+      @apply(--method-display-box);
     }
 
     .method.get {
-      background: rgba(0, 128, 0, 0.24);
-      color: rgb(0, 128, 0);
+      @apply(--method-display-box-get);
     }
 
     .method.post {
-      background: rgba(33, 150, 243, 0.24);
-      color: rgb(33, 150, 243);
+      @apply(--method-display-box-post);
+    }
+
+    .method.put {
+      @apply(--method-display-box-put);
+    }
+
+    .method.delete {
+      @apply(--method-display-box-delete);
+    }
+
+    .method.patch {
+      @apply(--method-display-box-patch);
     }
 
     paper-item:focus .method.post {
@@ -66,21 +71,6 @@ Set a `positionTarget` property to position the element on the input field.
 
     .iron-selected paper-item:focus .method.post {
       color: rgb(33, 150, 243);
-    }
-
-    .method.put {
-      background: rgba(255, 165, 0, 0.24);
-      color: rgb(255, 165, 0);
-    }
-
-    .method.delete {
-      background: rgba(244, 67, 54, 0.24);
-      color: rgb(244, 67, 54);
-    }
-
-    .method.patch {
-      background: rgba(156, 39, 176, 0.24);
-      color: rgb(156, 39, 176);
     }
 
     .url {
@@ -118,6 +108,12 @@ Set a `positionTarget` property to position the element on the input field.
 
     iron-list {
       flex: 1 1 auto;
+    }
+
+    paper-item {
+      font-size: 14px;
+      min-height: 36px;
+      cursor: pointer;
     }
 
     .iron-selected paper-item {

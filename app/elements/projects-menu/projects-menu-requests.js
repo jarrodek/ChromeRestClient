@@ -9,7 +9,18 @@ Polymer({
       observer: '_openedChanged'
     },
     requests: Array,
-    querying: Boolean
+    querying: Boolean,
+    /**
+     * Current route string.
+     */
+    routeSavedId: {
+      type: String,
+      computed: '_computeRouteSavedId(routeParams.savedId)'
+    },
+    /**
+     * Route parameters
+     */
+    routeParams: Object
   },
 
   observers: [
@@ -37,8 +48,18 @@ Polymer({
   _itepTap: function(e) {
     e.preventDefault();
     e.stopPropagation();
-
-    var index = e.path[0].dataset.index;
+    var index;
+    var path = Array.from(e.path);
+    while (!index) {
+      let elm = path.shift();
+      if (!elm) {
+        break;
+      }
+      if (elm.dataset && elm.dataset.index) {
+        index = elm.dataset.index;
+        break;
+      }
+    }
     if (!index) {
       return;
     }
@@ -53,5 +74,44 @@ Polymer({
 
     var url = 'request/saved/' + encodeURIComponent(value._id);
     page(url);
+  },
+
+  /**
+   * Compytes CSS class name for the HTTP method label.
+   *
+   * @param {String} method an HTTP method name.
+   * @return {String} CSS class name always starting with the `method` class.
+   */
+  _computeMethodClass: function(method) {
+    if (!method) {
+      return;
+    }
+    method = method.toLowerCase();
+    var clazz = 'method ';
+    switch (method) {
+      case 'get':
+      case 'post':
+      case 'put':
+      case 'delete':
+      case 'patch':
+        clazz += method;
+        break;
+    }
+    return clazz;
+  },
+
+  _computeSelectedClass: function(id, routeSavedId) {
+    if (!id || !routeSavedId) {
+      return;
+    }
+    if (routeSavedId !== id) {
+      return;
+    }
+
+    return 'iron-selected';
+  },
+
+  _computeRouteSavedId: function(savedId) {
+    return decodeURIComponent(savedId);
   }
 });

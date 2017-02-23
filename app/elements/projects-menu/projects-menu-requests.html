@@ -1,17 +1,77 @@
+<!--
+@license
+Copyright 2016 Pawel Psztyc, The ARC team
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../styles/shared-styles.html">
+
 <dom-module id="projects-menu-requests">
   <template>
-    <style>
+    <style include="shared-styles">
     :host {
       display: block;
     }
 
     paper-item {
-      padding-left: 28px;
+      padding-left: 32px;
+      min-height: 36px;
+      cursor: pointer;
+    }
+
+    .method {
+      @apply(--method-display-box);
+    }
+
+    .method.get {
+      @apply(--method-display-box-get);
+    }
+
+    .method.post {
+      @apply(--method-display-box-post);
+    }
+
+    .method.put {
+      @apply(--method-display-box-put);
+    }
+
+    .method.delete {
+      @apply(--method-display-box-delete);
+    }
+
+    .method.patch {
+      @apply(--method-display-box-patch);
+    }
+
+    .name {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      font-size: 14px;
+    }
+
+    paper-spinner {
+      margin-top: 8px;
+      margin-left: 32px;
     }
     </style>
     <paper-spinner active="[[querying]]" hidden$="[[!querying]]"></paper-spinner>
     <template is="dom-repeat" items="[[requests]]">
-      <paper-item data-index$="[[index]]">[[item.name]]</paper-item>
+      <paper-item data-index$="[[index]]" title$="[[item.url]]" class$="[[_computeSelectedClass(item._id, routeSavedId)]]">
+        <span class$="[[_computeMethodClass(item.method)]]">[[item.method]]</span>
+        <span class="name">[[item.name]]</span>
+      </paper-item>
     </template>
     <legacyproject-related-requests querying="{{querying}}" active="[[opened]]" all-data project-id="[[projectId]]" related-requests="{{requests}}"></legacyproject-related-requests>
   </template>
