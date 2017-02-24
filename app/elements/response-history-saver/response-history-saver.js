@@ -2,6 +2,8 @@
   'use strict';
   Polymer({
     is: 'response-history-saver',
+
+    behaviors: [FileBehaviors.WebFilesystemBehavior],
     /**
      * 1) Check if object exissts as a history object. If identical object exists,
      * override it (update time). If not create new hostory object.
@@ -148,22 +150,42 @@
         });
       }
 
+      var file;
       if (req.payload instanceof ArrayBuffer) {
+        file = new Blob([req.payload]);
         req.payload = '';
       } else if (req.payload instanceof Blob) {
+        file = req.payload;
         req.payload = '';
       }
 
+      if (file) {
+        req.bodyFile = this.$.uuid.generate();
+      }
+
+      return this._writeHistoryItem(k, req, rTime, formData)
+      .then(() => {
+        if (!file) {
+          return;
+        }
+        this.filename = req.bodyFile;
+        this.content = file;
+        this.write();
+      });
+    },
+
+    _writeHistoryItem: function(key, request, time, formData) {
       var db = new PouchDB('history-requests');
-      return db.get(k)
+      return db.get(key)
       .then((r) => {
         //cookie: test=${authToken}
-        r.headers = req.headers;
-        r.method = req.method;
-        r.payload = req.payload;
+        r.headers = request.headers;
+        r.method = request.method;
+        r.payload = request.payload;
         r.formData = formData;
-        r.url = req.url;
-        r.updated = rTime;
+        r.bodyFile = request.bodyFile;
+        r.url = request.url;
+        r.updated = time;
         return db.put(r)
         .then((insertResult) => {
           r._rev = insertResult.rev;
@@ -178,14 +200,15 @@
           throw e;
         }
         let _doc = {
-          _id: k,
-          created: rTime,
-          updated: rTime,
-          headers: req.headers,
-          method: req.method,
-          payload: req.payload,
-          url: req.url,
-          formData: formData
+          _id: key,
+          created: time,
+          updated: time,
+          headers: request.headers,
+          method: request.method,
+          payload: request.payload,
+          url: request.url,
+          formData: formData,
+          bodyFile: request.bodyFile
         };
         return db.put(_doc)
         .then((insertResult) => {
@@ -207,7 +230,7 @@
      *
      * @return {Number} Timestamp to the day.
      */
-    _getDayToday(timestamp) {
+    _getDayToday: function(timestamp) {
       var d = new Date(timestamp);
       var tCheck = d.getTime();
       if (tCheck !== tCheck) {

@@ -385,7 +385,8 @@
         payload: r.payload,
         url: r.url,
         formData: r.formData,
-        _id: r._id
+        _id: r._id,
+        bodyFile: r.bodyFile
       };
       this.set('request', base);
     },
@@ -1113,6 +1114,8 @@
         this._setAssistantUrl(undefined);
         return;
       }
+
+      this._assignBodyFile(request);
       window.requestAnimationFrame(() => {
         this._setAssistantUrl(request.url);
       });
@@ -1120,6 +1123,19 @@
 
     _onBodySourceChanged: function(e) {
       this.bodySource = e.detail.value;
+    },
+
+    // Reads the saved in local filesystem file if the request was saved with a file.
+    _assignBodyFile: function(request) {
+      if (!request.bodyFile) {
+        return;
+      }
+      this.$.localFs.filename = request.bodyFile;
+      this.$.localFs.read();
+    },
+
+    _bodyFileRead: function(e) {
+      console.log(e.detail.content);
     }
   });
 })();
