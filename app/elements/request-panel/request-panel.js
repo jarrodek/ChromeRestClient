@@ -13,7 +13,7 @@
        */
       toolbarFeatures: {
         type: Array,
-        value: ['clearAll', 'loader', 'save', 'projectEndpoints', 'xhrtoggle']
+        value: ['clearAll', 'loader', 'save', 'xhrtoggle']
       },
       // Current request data.
       request: {
@@ -159,7 +159,9 @@
         type: Object
       },
       // A source panel of the body (one of raw, form, multipart, file)
-      bodySource: String
+      bodySource: String,
+      // If set, the body is a file to send.
+      bodyFile: Object
     },
 
     observers: [
@@ -813,7 +815,7 @@
       if (this.bodySource === 'multipart') {
         request.payload = this.multipartBody.clone();
       } else if (this.bodySource === 'file') {
-        debugger;
+        request.payload = this.bodyFile;
       }
       // A failsafe if there's an issue with the DB. It will give 2.5s to execute queries
       // and if code below do not return in that time the request will be executed
@@ -999,8 +1001,11 @@
           let req = Object.assign({}, this.request);
           if (this.bodySource === 'multipart') {
             req.payload = this.multipartBody.clone();
-          } else if (this.bodySource === 'file') {
-            debugger;
+          } else {
+            delete req.formData;
+          }
+          if (this.bodySource === 'file') {
+            req.payload = this.bodyFile;
           }
           this.$.responseSaver.saveHistory(req, this.response)
           .catch((e) => {

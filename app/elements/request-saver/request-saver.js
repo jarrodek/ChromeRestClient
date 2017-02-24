@@ -223,6 +223,7 @@
     },
 
     _saveDrive: function(request, name) {
+      debugger;
       var ctrl = document.body.querySelector('arc-drive-controller');
       if (!ctrl) {
         //this.fire('app-log', {'message': ['Drive controller not found!'], 'level': 'error'});

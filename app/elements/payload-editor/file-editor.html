@@ -1,0 +1,63 @@
+<dom-module id="file-editor">
+  <template>
+    <style>
+    :host {
+      display: block;
+      padding: 12px 0
+    }
+
+    .controls {
+      @apply(--layout-horizontal);
+      @apply(--layout-flex);
+      @apply(--layout-center);
+    }
+
+    .controls > *:not(:last-child) {
+      margin-right: 12px;
+    }
+
+    .file-trigger {
+      margin-right: 12px;
+    }
+
+    .file-trigger {
+      color: #FF5722;
+    }
+
+    .param-value {
+      @apply(--layout-flex);
+    }
+
+    .file-list-names {
+      @apply(--layout-flex);
+    }
+
+    .files-counter-message {
+      color: rgba(0, 0, 0, 0.74);
+      @apply(--layout-flex);
+      @apply(--paper-font-body1);
+    }
+
+    .files-list {
+      @apply(--paper-font-body1);
+    }
+
+    .files-list span {
+      margin-right: 8px;
+    }
+
+    .error {
+      color: #F44336;
+    }
+    </style>
+
+    <div class="controls">
+      <paper-button raised on-tap="_selectFile" class="file-trigger">Choose a file</paper-button>
+      <span class="files-counter-message" hidden$="[[hasFile]]"><iron-icon class="error" icon="arc:info-outline"></iron-icon> No files selected</span>
+      <span class="files-counter-message" hidden$="[[!hasFile]]">[[value.name]] ([[value.size]] bytes)</span>
+      <paper-icon-button icon="arc:close" hidden$="[[!hasFile]]" title="Clear file" on-tap="removeFile"></paper-icon-button>
+    </div>
+    <input type="file" hidden on-change="_fileObjectChanged" />
+  </template>
+  <script src="file-editor.js"></script>
+</dom-module>

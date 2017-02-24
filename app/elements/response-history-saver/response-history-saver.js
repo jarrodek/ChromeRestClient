@@ -10,6 +10,7 @@
      */
     saveHistory: function(request, response) {
       return this._preparePayload(request)
+      .catch(() => '')
       .then((payload) => {
         request.payload = payload;
       })
@@ -20,8 +21,23 @@
     _preparePayload: function(request) {
       if (request.payload instanceof MultipartFormData) {
         return request.payload.generateMessage();
+      } else if (request.payload instanceof Blob) {
+        return this._readBlob(request.payload);
       }
       return Promise.resolve(request.payload);
+    },
+
+    _readBlob: function(blob) {
+      return new Promise((resolve, reject) => {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          resolve(e.target.result);
+        };
+        reader.onerror = function() {
+          reject(new Error('Unable to read blob.'));
+        };
+        reader.readAsArrayBuffer(blob);
+      });
     },
 
     _saveHistoryData: function(req, res) {
