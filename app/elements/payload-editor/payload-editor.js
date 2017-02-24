@@ -66,8 +66,14 @@ Polymer({
      */
     bodySource: {
       type: String,
-      notify: true,
-      readOnly: true
+      readOnly: true,
+      observer: '_bodySourceChanged'
+    },
+
+    // A file to send as a payload.
+    file: {
+      type: Object,
+      notify: true
     }
   },
   observers: [
@@ -178,6 +184,7 @@ Polymer({
         this._setBodySource('file');
         break;
     }
+
     if (this.isAttached) {
       this.fire('send-analytics', {
         type: 'event',
@@ -286,6 +293,23 @@ Polymer({
     this.fire('content-type-changed', {
       value: ct
     });
+  },
+
+  _bodySourceChanged: function(value) {
+    this.fire('body-source-changed', {
+      value: value
+    });
+  },
+
+  _computeContentTypeSelectorHidden: function(opened, tabSelected) {
+    if (!opened) {
+      return true;
+    }
+    if (tabSelected === 2) {
+      return true;
+    }
+
+    return false;
   }
 });
 })();

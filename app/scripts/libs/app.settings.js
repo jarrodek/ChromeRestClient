@@ -46,7 +46,7 @@ arc.app.settings.getConfig = function() {
       'MAGICVARS_ENABLED': true,
       'useCookieStorage': true,
       'requestDefaultTimeout': 30,
-      'apiAssistant': true
+      'apiAssistant': false
     };
     try {
       chrome.storage.sync.get(values, function(result) {

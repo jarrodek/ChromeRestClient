@@ -115,33 +115,48 @@ Polymer({
       init.headers = obj;
     }
 
-    let promise;
     if (['GET', 'HEAD'].indexOf(init.method) === -1) {
-      if (this.request.bodySource === 'multipart') {
-        promise = this.request.multipart.generateMessage()
-        .then((buffer) => {
-          init.body = buffer;
-        });
-      } else {
-        init.body = this.request.payload;
-        promise = Promise.resolve();
-      }
-    } else {
-      promise = Promise.resolve();
+      init.body = this.request.payload;
     }
-    return promise.then(() => {
-      init.debug = false;
-      if (this.request.auth) {
-        init.auth = this.request.auth;
+    init.debug = false;
+    if (this.request.auth) {
+      init.auth = this.request.auth;
+    }
+    if ('timeout' in opts) {
+      var tm = opts.timeout;
+      if (tm > 0) {
+        init.timeout = tm;
       }
-      if ('timeout' in opts) {
-        var tm = opts.timeout;
-        if (tm > 0) {
-          init.timeout = tm;
-        }
-      }
-      return init;
-    });
+    }
+    return init;
+    // let promise;
+    // if (['GET', 'HEAD'].indexOf(init.method) === -1) {
+    // if (this.request.bodySource === 'multipart') {
+    //   promise = this.request.multipart.generateMessage()
+    //   .then((buffer) => {
+    //     init.body = buffer;
+    //   });
+    // } else {
+    //   init.body = this.request.payload;
+    //   promise = Promise.resolve();
+    // }
+    //
+    // } else {
+    //   promise = Promise.resolve();
+    // }
+    // return promise.then(() => {
+    //   init.debug = false;
+    //   if (this.request.auth) {
+    //     init.auth = this.request.auth;
+    //   }
+    //   if ('timeout' in opts) {
+    //     var tm = opts.timeout;
+    //     if (tm > 0) {
+    //       init.timeout = tm;
+    //     }
+    //   }
+    //   return init;
+    // });
   },
 
   _processResponse: function(response) {

@@ -6,24 +6,51 @@ Polymer({
   ],
 
   properties: {
+    routeParams: Object,
+    route: String,
     scrollTarget: {
       type: Object,
       value: function() {
         return this.$.list;
       }
+    },
+
+    selectedSaved: {
+      type: String,
+      readOnly: true
     }
   },
+
+  observers: [
+    '_routeChanged(opened, route, routeParams.*)'
+  ],
 
   attached: function() {
     this.listen(window, 'request-object-changed', '_savedChanged');
     this.listen(window, 'request-objects-deleted', '_savedDeleted');
     this.listen(window, 'data-imported', '_refreshSaved');
+    this.listen(window, 'datastrores-destroyed', '_onDatabaseDestroy');
   },
 
   detached: function() {
     this.unlisten(window, 'history-object-changed', '_savedChanged');
     this.unlisten(window, 'request-objects-deleted', '_savedDeleted');
     this.unlisten(window, 'data-imported', '_refreshSaved');
+    this.unlisten(window, 'datastrores-destroyed', '_onDatabaseDestroy');
+  },
+
+  _onDatabaseDestroy: function(e) {
+    var databases = e.detail.datastores;
+    if (!databases || !databases.length) {
+      return;
+    }
+    if (databases.indexOf('saved-requests') === -1) {
+      return;
+    }
+    var db = this._getDb();
+    db.close().then(() => {
+      this.refresh();
+    });
   },
 
   _refreshSaved: function() {
@@ -90,9 +117,11 @@ Polymer({
   },
 
   _savedChanged: function(e) {
+    if (!this.opened) {
+      return;
+    }
     var changedItem = Object.assign({}, e.detail.request);
     var id = e.detail.oldId || changedItem._id;
-    console.log('MENU old id', id, changedItem._id);
     var items = this.items;
     if (!items) {
       this.set('items', []);
@@ -106,10 +135,8 @@ Polymer({
       // items.push(changedItem);
       // items.sort(this._sortFunction);
       // this.set('items', items);
-      console.log('Pushing new');
       this.push('items', changedItem);
     } else {
-      console.log('Updating existing');
       this.set(['items', index], changedItem);
     }
   },
@@ -127,6 +154,28 @@ Polymer({
         this.splice('items', index, 1);
       }
     });
+  },
+
+  _routeChanged: function(opened, route, record) {
+    if (!route || !record || !record.base || !this.items || !this.items.length) {
+      return;
+    }
+    if (record.base.type !== 'saved') {
+      if (this.selectedSaved) {
+        this._setSelectedSaved(null);
+      }
+      return;
+    }
+    var id = decodeURIComponent(record.base.savedId);
+    this._setSelectedSaved(id);
+  },
+
+  _computeItemClass: function(_id, selectedSaved) {
+    var selected = _id === selectedSaved;
+    if (selected) {
+      return 'iron-selected';
+    }
+    return '';
   }
 
 });

@@ -101,6 +101,7 @@ Polymer({
 
   /** Append new file form row  */
   appendEmptyFile: function() {
+    this.$.fabMenu.opened = false;
     var item = {
       name: '',
       value: [],
@@ -113,10 +114,11 @@ Polymer({
   },
 
   appendEmptyText: function() {
+    this.$.fabMenu.opened = false;
     var item = {
       name: '',
       value: '',
-      contentType: 'text/plain',
+      contentType: '', //text/plain
       text: true
     };
     if (!this.formData) {
@@ -251,7 +253,20 @@ Polymer({
     this._notifyBoundary(e.detail.value);
   },
 
-  _formDataChanged: function() {
+  _formDataChanged: function(record) {
+    if (!record || !record.base || !record.base.length) {
+      return;
+    }
+    record.base.forEach((item) => {
+      if (!item.file) {
+        return;
+      }
+      for (let i = item.value.length - 1; i >= 0; i--) {
+        if (!(item.value[i] instanceof Blob)) {
+          item.value.splice(i, 1);
+        }
+      }
+    });
     if (!this.value) {
       return;
     }

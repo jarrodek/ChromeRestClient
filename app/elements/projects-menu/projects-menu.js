@@ -22,13 +22,19 @@ Polymer({
       type: Boolean,
       value: true
     },
+    // ID of the selected project.
     selectedProject: String,
-    route: String
+    /**
+     * Route parameters
+     */
+    routeParams: Object,
+    // True when the items in the project list has been initialized.
+    __initialized: Boolean
   },
 
   observers: [
-    '_projectsListChanged(items.*)',
-    'selectedProjectChanged(selectedProject)'
+    'selectedProjectChanged(selectedProject)',
+    '_checkRequireOpenItems(selectedProject, __initialized)'
   ],
 
   attached: function() {
@@ -60,7 +66,7 @@ Polymer({
       this._makeQuery();
       return;
     } else if (opened) {
-      this.$.list.notifyResize();
+      // this.$.list.notifyResize();
     }
   },
 
@@ -68,7 +74,12 @@ Polymer({
    * Refresh projects list and display new list.
    */
   refreshProjects: function() {
-    this.reset();
+    // this.reset();
+    delete this.queryOptions.startkey;
+    delete this.queryOptions.skip;
+    this._setQuerying(false);
+    this.set('items', []);
+    this.set('selectedItemIndex', -1);
     this._makeQuery();
   },
 
@@ -83,20 +94,36 @@ Polymer({
     e.stopPropagation();
     var path = e.path;
     var place;
+    var toggleOpenAction = false;
+    var elm;
     while (path.length) {
-      var elm = path.shift();
+      elm = path.shift();
       if (elm.nodeType !== 1) {
         continue;
       }
-      if (elm.dataset && elm.dataset.place) {
-        place = elm.dataset.place;
-        break;
+
+      if (elm.dataset) {
+        if (elm.dataset.place) {
+          place = elm.dataset.place;
+          break;
+        } else if (elm.dataset.open) {
+          toggleOpenAction = true;
+          break;
+        }
       }
     }
-    if (!place) {
+    if (!place && !toggleOpenAction) {
       return;
     }
+    if (toggleOpenAction) {
+      return this._toggle(elm);
+    }
     page(place);
+  },
+
+  _toggle: function(elm) {
+    var list = elm.querySelector('projects-menu-requests');
+    list.opened = !list.opened;
   },
 
   _getDb: function() {
@@ -161,73 +188,7 @@ Polymer({
     }
     this.set('items', []);
     var db = this._getDb();
-    db.close().then(function() {
-      console.log('The legacy-projects database has been closed.');
-    });
-  },
-
-  _projectsListChanged: function(record) {
-    if (!record || !record.base) {
-      return;
-    }
-    if (record.path !== 'items.splices') {
-      // Only when adding to the list
-      return;
-    }
-    // Debounce the work since it will be called on each item insert (which is in a loop).
-    this.debounce('items-list-changed-handler', function() {
-      let items = this.items;
-      if (!items || !items.length) {
-        return;
-      }
-      var projectIds = items.map((item) => {
-        return item._id;
-      });
-      this._findEmptyProjects(projectIds);
-      this.$.list.notifyResize();
-    }.bind(this), 200);
-
-  },
-  /**
-   * The function will iterate over the request object keys and check
-   * if projects has any request that exists.
-   * If it doesn't exists it will mark it as a project without request.
-   *
-   * @param {Array<String>} projectIds A list of project IDs.
-   */
-  _findEmptyProjects: function(projectIds) {
-    this.debounce('find-empty-projects', function() {
-      if (!this._processEmptyWorker) {
-        var blob = new Blob([this.$.emptyProjectsProcess.textContent]);
-        this._processEmptyWorkerUrl = window.URL.createObjectURL(blob);
-        this._processEmptyWorker = new Worker(this._processEmptyWorkerUrl);
-        this._processEmptyWorker.onmessage =
-          this._processWorkerResponse.bind(this);
-      }
-      this._processEmptyWorker.postMessage({
-        projects: projectIds
-      });
-    }, 1500);
-  },
-  // Processes the response form the web worker.
-  _processWorkerResponse: function(e) {
-    var data = e.data;
-    if (data.error) {
-      return console.error(data.message);
-    }
-    this._setEmptyProjects(data.result);
-  },
-  // Updates the list of items and sets the `isEmpty` property.
-  _setEmptyProjects: function(ids) {
-    if (!ids || !ids.length) {
-      return;
-    }
-    var list = this.items;
-    list.forEach((item, i) => {
-      if (ids.indexOf(item._id) !== -1) {
-        this.set(['items', i, 'isEmpty'], true);
-      }
-    });
+    db.close();
   },
 
   _computeProjectSelected: function(pId, selected) {
@@ -244,5 +205,22 @@ Polymer({
     if (!this.opened) {
       this.set('opened', true);
     }
+  },
+  /**
+   * Opens the request list associated with the project if project is
+   * selected in the route and the list is not opened.
+   */
+  _checkRequireOpenItems: function(pid) {
+    if (!pid) {
+      return;
+    }
+    var panel = this.$$(`projects-menu-requests[project-id="${pid}"]`);
+    if (!panel.opened) {
+      panel.opened = true;
+    }
+  },
+  // Called when dom-repeat renders list.
+  _itemsRendered: function() {
+    this.__initialized = true;
   }
 });

@@ -81,7 +81,6 @@ Polymer({
       delete requestObject.driveId;
     }
 
-    this._setErrorMessage(null);
     this.viewSelected = 0;
     var exportObj = arc.app.importer.createExportObject({
       requests: [requestObject],
@@ -118,7 +117,6 @@ Polymer({
    */
   _restoreDefaulView: function() {
     this.viewSelected = 0;
-    this._setErrorMessage(null);
   },
   /**
    * This function is called by the request panel.

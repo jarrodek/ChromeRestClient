@@ -21,7 +21,6 @@ the License.
 <link rel="import" href="multipart-icons.html">
 <link rel="import" href="file-form-item.html">
 <link rel="import" href="text-form-item.html">
-<script src="multipart-form-data.js"></script>
 <!--
 The multipart form editor for the ARC's request panel.
 
@@ -33,13 +32,13 @@ The multipart form editor for the ARC's request panel.
       display: block;
       position: relative;
       /* Add button */
-      padding-bottom: 80px;
+      padding-bottom: 120px;
     }
 
     paper-fab-menu {
       position: absolute;
       bottom: 20px;
-      left: 20px;
+      left: 0px;
     }
 
     paper-textarea {
@@ -48,8 +47,7 @@ The multipart form editor for the ARC's request panel.
 
     text-form-item,
     file-form-item {
-      padding: 16px 12px;
-      border-bottom: 1px #FFECB3 solid;
+      margin-bottom: 8px;
     }
 
     .header {
@@ -76,10 +74,10 @@ The multipart form editor for the ARC's request panel.
       color: rgba(0, 0, 0, 0.87);
     }
     </style>
-    <div class="header">
+    <!-- <div class="header">
       <p class="info">When using this form you will send the data as a "multipart/form-data". <a href="https://www.ietf.org/rfc/rfc2388.txt" target="_blank">Learn more.</a></p>
       <paper-button hidden$="[[!hasFormData]]" on-tap="_togglePage"><span class="toggle-preview-label">[[_computeToggleLabel(page)]]</span><iron-icon class="toggle-icon" icon="[[_computeToggleIcon(page)]]"></iron-icon></paper-button>
-    </div>
+    </div> -->
     <iron-pages selected="[[page]]">
       <section>
         <form is="iron-form" id="form">
@@ -92,7 +90,7 @@ The multipart form editor for the ARC's request panel.
             </template>
           </template>
         </form>
-        <paper-fab-menu color="#FF5722" icon="mpi:add">
+        <paper-fab-menu color="#FF5722" icon="mpi:add" id="fabMenu">
           <paper-fab-menu-item tooltip-position="right" color="#FF8A65" tooltip="Add file" icon="mpi:insert-drive-file" on-tap="appendEmptyFile"></paper-fab-menu-item>
           <paper-fab-menu-item tooltip-position="right" color="#FF8A65" tooltip="Add text" icon="mpi:short-text" on-tap="appendEmptyText"></paper-fab-menu-item>
         </paper-fab-menu>

@@ -114,6 +114,9 @@
       transition: width 300ms ease-in-out;
       width: 100%;
       margin-bottom: 48px;
+      max-width: 1200px;
+      margin-bottom: 48px;
+      margin: 20px auto;
     }
 
     .content[assistant] .request-area {
@@ -142,7 +145,13 @@
     </style>
     <div class="content" assistant$="[[exporeAssistantActive]]">
       <div class="request-area">
-        <arc-request-view request-loading="[[requestLoading]]" opened="{{opened}}" request="{{request}}" content-type="{{contentType}}"></arc-request-view>
+        <arc-request-view
+          request-loading="[[requestLoading]]"
+          opened="{{opened}}"
+          request="{{request}}"
+          multipart-body="{{multipartBody}}"
+          content-type="{{contentType}}"
+          body-file="{{bodyFile}}"></arc-request-view>
         <template is="dom-if" if="[[hasResponse]]">
           <arc-response-view opened="[[opened]]" response="[[response]]" request="[[activeRequest]]"></arc-response-view>
         </template>
@@ -190,7 +199,7 @@
       </div>
     </div>
 
-    <chrome-storage auto id="latest" type="local" name="latestRequest" value="{{request}}" on-read="_latestLoaded"></chrome-storage>
+    <chrome-storage auto id="latest" type="local" name="latestRequest" value="{{request}}" on-chrome-storage-read="_latestLoaded"></chrome-storage>
     <arc-socket-request id="socket" on-ready="_responseReady" on-error="_onRequestError"></arc-socket-request>
     <arc-xhr-request id="xhr" on-ready="_responseReady" on-error="_onRequestError" connected="{{xhrConnected}}"></arc-xhr-request>
     <arc-magic-variables id="magicVariables" scope="[[project.id]]"></arc-magic-variables>

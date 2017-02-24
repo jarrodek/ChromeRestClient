@@ -25,7 +25,7 @@ the License.
     <style>
      :host {
       display: block;
-      height: 100%;
+      height: calc(100vh - 64px); /* 64px is a toolbar */
       background-color: #EEEEEE;
       @apply(--layout-vertical);
 
@@ -125,26 +125,26 @@ the License.
           <span class="flex">History</span>
           <paper-icon-button icon="arc:expand-more" title="Toogle history quick list" class$="[[_computeToggleIconClass(historyOpened)]]" on-tap="_toggleHistoryOpened"></paper-icon-button>
         </paper-item>
-        <history-menu hidden$="[[!historyOpened]]" opened="[[historyOpened]]"></history-menu>
+        <history-menu hidden$="[[!historyOpened]]" opened="[[historyOpened]]" route-params="[[routeParams]]" route="[[route]]"></history-menu>
       </template>
       <paper-item data-route="saved" data-place="saved">
         <span class="flex">Saved</span>
         <paper-icon-button icon="arc:expand-more" title="Toogle saved quick list" class$="[[_computeToggleIconClass(savedOpened)]]" on-tap="_toggleSavedOpened"></paper-icon-button>
       </paper-item>
-      <saved-menu hidden$="[[!savedOpened]]" opened="[[savedOpened]]"></saved-menu>
+      <saved-menu hidden$="[[!savedOpened]]" opened="[[savedOpened]]" route-params="[[routeParams]]" route="[[route]]"></saved-menu>
 
       <paper-item on-tap="_toggleProjectsOpened" title="Toogle projects list">
         <span class="flex">Projects</span>
         <paper-icon-button icon="arc:expand-more" class$="[[_computeToggleIconClass(projectsOpened)]]"></paper-icon-button>
       </paper-item>
-      <projects-menu hidden$="[[!projectsOpened]]" opened="{{projectsOpened}}" selected-project="[[selectedProject]]"></projects-menu>
+      <projects-menu hidden$="[[!projectsOpened]]" opened="{{projectsOpened}}" selected-project="[[selectedProject]]" route-params="[[routeParams]]" route="[[route]]"></projects-menu>
     </iron-selector>
 
     <section class="bottom-menu" id="bottomMenu" on-tap="_itemTap">
       <div class="icon-buttons">
         <div class="visible-icons">
-          <paper-icon-button icon="arc:settings" data-route="settings" data-place$="[[baseUrl]]settings" title="Settings"></paper-icon-button>
-          <paper-icon-button icon="arc:import-export" data-route="dataimport" data-place$="[[baseUrl]]dataimport" title="Import / Export options"></paper-icon-button>
+          <paper-icon-button icon="arc:settings" data-route="settings" data-place="/settings" title="Settings"></paper-icon-button>
+          <paper-icon-button icon="arc:import-export" data-route="dataimport" data-place="/dataimport" title="Import / Export options"></paper-icon-button>
           <paper-icon-button icon="arc:bug-report" title="File a bug report" on-tap="newIssueReport"></paper-icon-button>
           <paper-icon-button icon="arc:open-in-new" title="Open new window" on-tap="openNewWindow"></paper-icon-button>
         </div>
@@ -159,9 +159,9 @@ the License.
               <iron-icon icon="arc:list" item-icon title="See log collected by the app"></iron-icon>
               Logs
             </paper-icon-item>
-            <paper-icon-item data-action="view-logs">
+            <paper-icon-item data-action="about-view">
               <iron-icon icon="arc:info" item-icon title="See app information and changelog"></iron-icon>
-              About the ARC
+              About ARC
             </paper-icon-item>
           </paper-menu>
         </paper-menu-button>

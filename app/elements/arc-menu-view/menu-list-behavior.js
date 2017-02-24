@@ -121,7 +121,10 @@ window.ArcBehaviors.MenuListBehaviorImpl = {
 
   observers: [
     '_updateQueryOptions(includeDocs, queryOptions)',
-    '_resetOnClosed(opened)'
+    '_resetOnClosed(opened)',
+    '_notifyList(opened)',
+    '_notifyList(hasItems)',
+    '_notifyList(querying)'
   ],
 
   listeners: {
@@ -233,9 +236,9 @@ window.ArcBehaviors.MenuListBehaviorImpl = {
       return;
     }
     this._setQuerying(true);
-    if (!this.items) {
-      this.set('items', []);
-    }
+    // if (!this.items) {
+    //   this.set('items', []);
+    // }
 
     // if (!this.opened) {
     //   this.opened = true;
@@ -243,6 +246,7 @@ window.ArcBehaviors.MenuListBehaviorImpl = {
 
     db.allDocs(this.queryOptions)
     .then((response) => {
+      this._setQuerying(false);
       if (response && response.rows.length > 0) {
         // Set up pagination.
         this.queryOptions.startkey = response.rows[response.rows.length - 1].key;
@@ -252,11 +256,15 @@ window.ArcBehaviors.MenuListBehaviorImpl = {
         let res = response.rows.map((i) => useDocs ? i.doc : i.id);
         // Ask elements to process the results.
         res = this._processResults(res);
-        res.forEach((item) => {
-          this.push('items', item);
-        });
+
+        if (!this.items || this.items.length === 0) {
+          this.set('items', res);
+        } else {
+          res.forEach((item) => {
+            this.push('items', item);
+          });
+        }
       }
-      this._setQuerying(false);
     })
     .catch((e) => {
       this._setQuerying(false);
@@ -364,10 +372,17 @@ window.ArcBehaviors.MenuListBehaviorImpl = {
     }
     cmd += key;
     return cmd;
+  },
+
+  _notifyList: function(state) {
+    if (state) {
+      this.notifyResize();
+    }
   }
 };
 window.ArcBehaviors.MenuListBehavior = [
   window.Polymer.IronScrollTargetBehavior,
+  window.Polymer.IronResizableBehavior,
   window.ArcBehaviors.MenuListBehaviorImpl
 ];
 })();

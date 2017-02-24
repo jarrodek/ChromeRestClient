@@ -13,7 +13,7 @@
        */
       toolbarFeatures: {
         type: Array,
-        value: ['clearAll', 'loader', 'save', 'projectEndpoints', 'xhrtoggle']
+        value: ['clearAll', 'loader', 'save', 'xhrtoggle']
       },
       // Current request data.
       request: {
@@ -151,7 +151,17 @@
       assistantUrl: {
         type: String,
         readOnly: true
-      }
+      },
+      /**
+       * A multipart body is set when the multipart panel in the body editor is selected.
+       */
+      multipartBody: {
+        type: Object
+      },
+      // A source panel of the body (one of raw, form, multipart, file)
+      bodySource: String,
+      // If set, the body is a file to send.
+      bodyFile: Object
     },
 
     observers: [
@@ -177,7 +187,8 @@
       'request-load-end': '_requestStatusChanged',
       'request-headers-sent': '_requestStatusChanged',
       'is-payload-changed': '_isPayloadChanged',
-      'iron-overlay-closed': '_dialogClosedHandler'
+      'iron-overlay-closed': '_dialogClosedHandler',
+      'body-source-changed': '_onBodySourceChanged'
     },
 
     attached: function() {
@@ -242,9 +253,9 @@
         case 'history':
           this.requestType = this.routeParams.type;
           this.set('historyId', decodeURIComponent(this.routeParams.historyId));
+          this._setPageTitle('Request');
           break;
         case 'drive':
-
           // This is not really a request. It ment to open a drive item.
           // Drive data will be called via /current route.
           let id = this.routeParams.driveId;
@@ -373,6 +384,7 @@
         name: r.name,
         payload: r.payload,
         url: r.url,
+        formData: r.formData,
         _id: r._id
       };
       this.set('request', base);
@@ -413,6 +425,9 @@
       this.fire('selected-request', {
         id: id
       });
+      if (decodeURIComponent(this.routeParams.savedId) !== id) {
+        this.set('routeParams.savedId', id);
+      }
       if (!id) {
         return;
       }
@@ -444,33 +459,33 @@
       this.fire('selected-project', {
         id: id
       });
-      if (!id) {
-        return;
-      }
-      var event = this.fire('project-read', {
-        id: id
-      });
-      if (event.detail.error) {
-        console.error(event.detail.message);
-        return;
-      }
-      event.detail.result.then((result) => {
-        // console.info('Setting project data', result);
-        this.set('currentProjectData', result);
-      })
-      .catch((e) => {
-        if (e.status === 404) {
-          this.set('request.legacyProject', null);
-          this.set('proxyRequest.legacyProject', null);
-          this.set('projectId', undefined);
-          this.fire('app-log', {
-            'message': ['Project is not in database.', e],
-            'level': 'warn'
-          });
-        } else {
-          console.error('Unable restore project', e);
-        }
-      });
+      // if (!id) {
+      //   return;
+      // }
+      // var event = this.fire('project-read', {
+      //   id: id
+      // });
+      // if (event.detail.error) {
+      //   console.error(event.detail.message);
+      //   return;
+      // }
+      // event.detail.result.then((result) => {
+      //   // console.info('Setting project data', result);
+      //   this.set('currentProjectData', result);
+      // })
+      // .catch((e) => {
+      //   if (e.status === 404) {
+      //     this.set('request.legacyProject', null);
+      //     this.set('proxyRequest.legacyProject', null);
+      //     this.set('projectId', undefined);
+      //     this.fire('app-log', {
+      //       'message': ['Project is not in database.', e],
+      //       'level': 'warn'
+      //     });
+      //   } else {
+      //     console.error('Unable restore project', e);
+      //   }
+      // });
     },
 
     onXhrtoggle: function(e) {
@@ -797,6 +812,11 @@
           }
         });
       };
+      if (this.bodySource === 'multipart') {
+        request.payload = this.multipartBody.clone();
+      } else if (this.bodySource === 'file') {
+        request.payload = this.bodyFile;
+      }
       // A failsafe if there's an issue with the DB. It will give 2.5s to execute queries
       // and if code below do not return in that time the request will be executed
       // without applying variables, cookies etc
@@ -978,7 +998,16 @@
     _saveHistory: function() {
       chrome.storage.sync.get({'HISTORY_ENABLED': true}, (r) => {
         if (r.HISTORY_ENABLED) {
-          this.$.responseSaver.saveHistory(this.request, this.response)
+          let req = Object.assign({}, this.request);
+          if (this.bodySource === 'multipart') {
+            req.payload = this.multipartBody.clone();
+          } else {
+            delete req.formData;
+          }
+          if (this.bodySource === 'file') {
+            req.payload = this.bodyFile;
+          }
+          this.$.responseSaver.saveHistory(req, this.response)
           .catch((e) => {
             this.fire('app-log', {'message': ['Unable save history.', e], 'level': 'error'});
           });
@@ -1089,8 +1118,8 @@
       });
     },
 
-    _onShortcutSend: function(e) {
-      console.log('_onShortcutSend', e);
+    _onBodySourceChanged: function(e) {
+      this.bodySource = e.detail.value;
     }
   });
 })();
