@@ -68,6 +68,12 @@ Polymer({
       type: String,
       readOnly: true,
       observer: '_bodySourceChanged'
+    },
+
+    // A file to send as a payload.
+    file: {
+      type: Object,
+      notify: true
     }
   },
   observers: [

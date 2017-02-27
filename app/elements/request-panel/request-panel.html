@@ -145,7 +145,13 @@
     </style>
     <div class="content" assistant$="[[exporeAssistantActive]]">
       <div class="request-area">
-        <arc-request-view request-loading="[[requestLoading]]" opened="{{opened}}" request="{{request}}" multipart-body="{{multipartBody}}" content-type="{{contentType}}"></arc-request-view>
+        <arc-request-view
+          request-loading="[[requestLoading]]"
+          opened="{{opened}}"
+          request="{{request}}"
+          multipart-body="{{multipartBody}}"
+          content-type="{{contentType}}"
+          body-file="{{bodyFile}}"></arc-request-view>
         <template is="dom-if" if="[[hasResponse]]">
           <arc-response-view opened="[[opened]]" response="[[response]]" request="[[activeRequest]]"></arc-response-view>
         </template>
@@ -226,6 +232,7 @@
       statuses="{{analysedStatuses}}"
       on-request-stats-analysed="_requestsStatsAnalysed"
       enabled="{{apiAssistantEnabled}}"></request-stats-analyser>
+    <chrome-local-filesystem id="localFs" on-file-read="_bodyFileRead"></chrome-local-filesystem>
     <paper-toast text="Your request has been saved. Add SHIFT key to display save dialog."
       id="requestSavedFastToast"></paper-toast>
     <paper-toast text="Request has been saved" id="requestSavedToast"></paper-toast>

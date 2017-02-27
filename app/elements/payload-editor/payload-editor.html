@@ -15,6 +15,8 @@ License for the specific language governing permissions and limitations under
 the License.
 -->
 <link rel="import" href="multipart-payload-editor.html">
+<link rel="import" href="file-editor.html">
+
 <dom-module id="payload-editor">
   <template>
     <style>
@@ -23,10 +25,12 @@ the License.
       position: relative;
       --code-mirror-wrapper: {
         border: 1px var(--main-section-border-color) solid;
-      };
+      }
+      ;
       --code-mirror-editor: {
         z-index: 0;
-      };
+      }
+      ;
     }
 
     input::-webkit-input-placeholder {
@@ -129,7 +133,6 @@ the License.
       <paper-icon-button icon="arc:expand-more" id="toggleParameters" on-tap="toggle" class="toggle-button" class$="[[_computeToggleIconClass(opened)]]"></paper-icon-button>
       <paper-tooltip for="toggleParameters" animation-delay="100" position="right" offset="0">[[_computeToggleLabel(opened)]]</paper-tooltip>
     </header>
-
     <section class="panel-options">
       <paper-dropdown-menu class="type" label="Editor view" hidden$="[[!opened]]">
         <paper-listbox class="dropdown-content" selected="{{tabSelected}}">
@@ -157,7 +160,6 @@ the License.
         </paper-listbox>
       </paper-dropdown-menu>
     </section>
-
     <iron-collapse id="collapse" opened="[[opened]]">
       <iron-pages selected="{{tabSelected}}" selected-attribute="opened">
         <section>
@@ -168,12 +170,10 @@ the License.
           <code-mirror mode="application/json" theme="cm-arc" value="{{value}}" id="cm"></code-mirror>
         </section>
         <section class="params-list">
-
           <div class="encoder-buttons">
             <paper-button title="Encodes payload to x-www-form-urlencoded data" on-tap="encodePaylod">encode payload</paper-button>
             <paper-button title="Decodes payload to human readable form" on-tap="decodePaylod">decode payload</paper-button>
           </div>
-
           <template is="dom-repeat" id="valuesList" items="{{valuesList}}" on-dom-change="_onParamsRender">
             <div class="form-row">
               <paper-input-container class="param-name" no-label-float inline>
@@ -186,10 +186,12 @@ the License.
             </div>
           </template>
           <paper-button raised on-tap="appendEmptyParam" class="add-param-button">Add another parameter</paper-button>
-
         </section>
         <section>
           <multipart-payload-editor form-data="{{formData}}" value="{{multipart}}"></multipart-payload-editor>
+        </section>
+        <section>
+          <file-editor value="{{file}}"></file-editor>
         </section>
       </iron-pages>
     </iron-collapse>
