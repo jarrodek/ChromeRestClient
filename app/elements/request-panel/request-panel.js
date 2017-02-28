@@ -386,7 +386,7 @@
         url: r.url,
         formData: r.formData,
         _id: r._id,
-        bodyFile: r.bodyFile
+        file: r.file
       };
       this.set('request', base);
     },
@@ -1127,15 +1127,17 @@
 
     // Reads the saved in local filesystem file if the request was saved with a file.
     _assignBodyFile: function(request) {
-      if (!request.bodyFile) {
+      if (!request.file) {
         return;
       }
-      this.$.localFs.filename = request.bodyFile;
+      this.$.localFs.filename = request.file.name;
       this.$.localFs.read();
     },
 
     _bodyFileRead: function(e) {
-      console.log(e.detail.content);
+      var properties = this.request.file.properties || {};
+      var file = new File([e.detail.content], properties.name || 'unnamed');
+      this.set('bodyFile', file);
     }
   });
 })();
