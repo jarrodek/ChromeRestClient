@@ -13,7 +13,7 @@
        */
       toolbarFeatures: {
         type: Array,
-        value: ['clearAll', 'loader', 'save', 'projectEndpoints', 'xhrtoggle']
+        value: ['clearAll', 'loader', 'save', 'xhrtoggle']
       },
       // Current request data.
       request: {
@@ -159,7 +159,9 @@
         type: Object
       },
       // A source panel of the body (one of raw, form, multipart, file)
-      bodySource: String
+      bodySource: String,
+      // If set, the body is a file to send.
+      bodyFile: Object
     },
 
     observers: [
@@ -383,7 +385,8 @@
         payload: r.payload,
         url: r.url,
         formData: r.formData,
-        _id: r._id
+        _id: r._id,
+        file: r.file
       };
       this.set('request', base);
     },
@@ -813,7 +816,7 @@
       if (this.bodySource === 'multipart') {
         request.payload = this.multipartBody.clone();
       } else if (this.bodySource === 'file') {
-        debugger;
+        request.payload = this.bodyFile;
       }
       // A failsafe if there's an issue with the DB. It will give 2.5s to execute queries
       // and if code below do not return in that time the request will be executed
@@ -999,8 +1002,11 @@
           let req = Object.assign({}, this.request);
           if (this.bodySource === 'multipart') {
             req.payload = this.multipartBody.clone();
-          } else if (this.bodySource === 'file') {
-            debugger;
+          } else {
+            delete req.formData;
+          }
+          if (this.bodySource === 'file') {
+            req.payload = this.bodyFile;
           }
           this.$.responseSaver.saveHistory(req, this.response)
           .catch((e) => {
@@ -1108,6 +1114,8 @@
         this._setAssistantUrl(undefined);
         return;
       }
+
+      this._assignBodyFile(request);
       window.requestAnimationFrame(() => {
         this._setAssistantUrl(request.url);
       });
@@ -1115,6 +1123,21 @@
 
     _onBodySourceChanged: function(e) {
       this.bodySource = e.detail.value;
+    },
+
+    // Reads the saved in local filesystem file if the request was saved with a file.
+    _assignBodyFile: function(request) {
+      if (!request.file) {
+        return;
+      }
+      this.$.localFs.filename = request.file.name;
+      this.$.localFs.read();
+    },
+
+    _bodyFileRead: function(e) {
+      var properties = this.request.file.properties || {};
+      var file = new File([e.detail.content], properties.name || 'unnamed');
+      this.set('bodyFile', file);
     }
   });
 })();

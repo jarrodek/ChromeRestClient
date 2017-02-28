@@ -2,6 +2,8 @@
   'use strict';
   Polymer({
     is: 'response-history-saver',
+
+    behaviors: [FileBehaviors.WebFilesystemBehavior],
     /**
      * 1) Check if object exissts as a history object. If identical object exists,
      * override it (update time). If not create new hostory object.
@@ -10,18 +12,53 @@
      */
     saveHistory: function(request, response) {
       return this._preparePayload(request)
-      .then((payload) => {
-        request.payload = payload;
-      })
+      .catch(() => '')
       .then(() => this._saveHistoryData(request, response))
       .then(() => this._updateHistory(request, response));
     },
 
     _preparePayload: function(request) {
       if (request.payload instanceof MultipartFormData) {
-        return request.payload.generateMessage();
+        return request.payload.generateMessage()
+        .then((buffer) => {
+          return this._prepareMultipart(request.payload)
+          .then((properties) => {
+            request.multipart = properties;
+            request.payload = buffer;
+            return request;
+          });
+        });
+      } else if (request.payload instanceof Blob) {
+        return this._readBlob(request.payload)
+        .then((blob) => {
+          let file = request.payload;
+          let fileProperties = {
+            name: file.name,
+            size: file.size,
+            type: file.type
+          };
+          request.payload = blob;
+          request.file = {
+            name: this.$.uuid.generate(),
+            properties: fileProperties
+          };
+          return request;
+        });
       }
-      return Promise.resolve(request.payload);
+      return Promise.resolve(request);
+    },
+
+    _readBlob: function(blob) {
+      return new Promise((resolve, reject) => {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          resolve(e.target.result);
+        };
+        reader.onerror = function() {
+          reject(new Error('Unable to read blob.'));
+        };
+        reader.readAsArrayBuffer(blob);
+      });
     },
 
     _saveHistoryData: function(req, res) {
@@ -122,54 +159,90 @@
       var today = this._getDayToday(rTime);
       var k = today + '/' + encodeURIComponent(req.url) + '/' + req.method;
 
-      var formData;
-      if (req.formData && req.formData.length) {
-        formData = req.formData.map((item) => {
-          if (item.file) {
-            item.value = [];
-          }
-          return item;
-        });
-      }
-
-      if (req.payload instanceof ArrayBuffer) {
+      var file;
+      if (!req.multipart && req.payload instanceof ArrayBuffer) {
+        file = new Blob([req.payload]);
         req.payload = '';
       } else if (req.payload instanceof Blob) {
+        file = req.payload;
+        req.payload = '';
+      } else if (req.multipart) {
+        file = req.multipart.map((arr, i) => {
+          let item = arr[1];
+          if (!item.isFile) {
+            return;
+          }
+          let buffer = item.buffer;
+          delete req.multipart[i][1].buffer;
+          return {
+            name: item.cacheName,
+            buffer: buffer
+          };
+        })
+        .filter((i) => !!i);
         req.payload = '';
       }
 
-      var db = new PouchDB('history-requests');
-      return db.get(k)
-      .then((r) => {
-        //cookie: test=${authToken}
-        r.headers = req.headers;
-        r.method = req.method;
-        r.payload = req.payload;
-        r.formData = formData;
-        r.url = req.url;
-        r.updated = rTime;
-        return db.put(r)
-        .then((insertResult) => {
-          r._rev = insertResult.rev;
-          this.fire('history-object-changed', {
-            id: r._id,
-            rev: r._rev,
-            item: r
+      return this._writeHistoryItem(k, req, rTime)
+      .then((doc) => {
+        if (!file) {
+          return;
+        }
+        if (file instanceof Array) {
+          let promises = [];
+          file.forEach((i) => {
+            promises.push(this._writeCacheFile(i.buffer, i.name, doc._id));
           });
+          return Promise.all(promises);
+        } else {
+          return this._writeCacheFile(file, req.file.name, doc._id);
+        }
+      });
+    },
+
+    _writeCacheFile: function(content, name, dbEntryId) {
+      this.filename = name;
+      this.content = content;
+      this.write();
+      return this.writeFileCacheInfo(name, dbEntryId);
+    },
+
+    _writeHistoryItem: function(key, request, time) {
+      var db = new PouchDB('history-requests');
+      return db.get(key)
+      .then((_doc) => {
+        _doc.headers = request.headers;
+        _doc.method = request.method;
+        _doc.payload = request.payload;
+        _doc.multipart = request.multipart;
+        _doc.url = request.url;
+        _doc.updated = time;
+        _doc.file = request.file;
+        return db.put(_doc)
+        .then((insertResult) => {
+          _doc._rev = insertResult.rev;
+          this.fire('history-object-changed', {
+            id: _doc._id,
+            rev: _doc._rev,
+            item: _doc
+          });
+          return _doc;
         });
-      }).catch((e) => {
+      })
+      .catch((e) => {
         if (e.status !== 404) {
           throw e;
         }
         let _doc = {
-          _id: k,
-          created: rTime,
-          updated: rTime,
-          headers: req.headers,
-          method: req.method,
-          payload: req.payload,
-          url: req.url,
-          formData: formData
+          _id: key,
+          created: time,
+          updated: time,
+          headers: request.headers,
+          method: request.method,
+          payload: request.payload,
+          url: request.url,
+          multipart: request.multipart,
+          file: request.file
         };
         return db.put(_doc)
         .then((insertResult) => {
@@ -179,6 +252,7 @@
             rev: _doc._rev,
             item: _doc
           });
+          return _doc;
         });
       })
       .catch((e) => {
@@ -191,7 +265,7 @@
      *
      * @return {Number} Timestamp to the day.
      */
-    _getDayToday(timestamp) {
+    _getDayToday: function(timestamp) {
       var d = new Date(timestamp);
       var tCheck = d.getTime();
       if (tCheck !== tCheck) {
@@ -202,6 +276,69 @@
       d.setMinutes(0);
       d.setHours(0);
       return d.getTime();
+    },
+
+    writeFileCacheInfo: function(fileName, requestId) {
+      var db = new PouchDB('file-history-cache');
+      db.put({
+        _id: encodeURIComponent(requestId) + fileName,
+        source: 'history'
+      });
+    },
+
+    _prepareMultipart: function(multipart) {
+      var promises = [];
+      for (let item of multipart.entries()) {
+        let name = item[0];
+        let itemValue = item[1];
+        if (itemValue.isFile) {
+          let fileValue = itemValue.value;
+          if (fileValue instanceof Array) {
+            for (let i = 0, len = fileValue.length; i < len; i++) {
+              promises.push(this._blobFromMultipart(name, fileValue[i]));
+            }
+          } else {
+            promises.push(this._blobFromMultipart(name, fileValue));
+          }
+        } else {
+          promises.push([name, {
+            isFile: false,
+            mime: itemValue.mime,
+            value: itemValue.value
+          }]);
+        }
+      }
+      return Promise.all(promises);
+      // .then((data) => {
+      //   let result = {};
+      //   data.forEach((item) => {
+      //     result[item[0]] = item[1];
+      //   });
+      //   return result;
+      // });
+    },
+
+    _blobFromMultipart: function(fieldName, blob) {
+      var result = {
+        name: blob.name,
+        size: blob.size,
+        type: blob.type,
+        isFile: true,
+        cacheName: this.$.uuid.generate(),
+        buffer: blob
+      };
+      return Promise.resolve([
+        fieldName,
+        result
+      ]);
+      // return this._readBlob(blob).
+      // then((buffer) => {
+      //   result.buffer = buffer;
+      //   return [
+      //     fieldName,
+      //     result
+      //   ];
+      // });
     }
   });
 })();

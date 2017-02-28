@@ -67,6 +67,12 @@ Polymer({
     multipartBody: {
       type: Object,
       notify: true
+    },
+
+    // A file to send as a payload.
+    bodyFile: {
+      type: Object,
+      notify: true
     }
   },
 
@@ -138,19 +144,6 @@ Polymer({
   _onRequestRestore: function(e) {
     this.set('request', e.detail.request);
     page('/request/current');
-  },
-
-  _urlSuggestionsOpened: function(e) {
-    if (!e.detail.value) {
-      return;
-    }
-    var historyPanel = this.$$('history-context-panel');
-    if (!historyPanel) {
-      throw new Error('history-context-panel not available.');
-    }
-    if (historyPanel.opened) {
-      historyPanel.opened = false;
-    }
   },
 
   // Toggles body panel.
