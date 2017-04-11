@@ -51,6 +51,7 @@
     "fixture": true,
     "expect": true,
     "app": true,
-    "MultipartFormData": true
+    "MultipartFormData": true,
+    "FileBehaviors": true
   }
 }

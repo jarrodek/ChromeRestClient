@@ -15,22 +15,24 @@ License for the specific language governing permissions and limitations under
 the License.
 -->
 <link rel="import" href="../../styles/shared-styles.html">
-
 <dom-module id="arc-request-view">
   <template>
     <style include="shared-styles">
-    :host {
+     :host {
       display: block;
     }
+
     .action-panel {
       @apply(--layout-horizontal);
       @apply(--layout-center);
       @apply(--layout-end-justified);
       margin: 12px;
     }
-    .action-panel > * {
+
+    .action-panel>* {
       margin-left: 12px;
     }
+
     .status {
       @apply(--layout-flex);
       color: #757575;
@@ -70,22 +72,13 @@ the License.
       color: rgba(0, 0, 0, 0.78);
     }
 
-    paper-tab {
-      flex: inherit;
-    }
-
     .flex {
       @apply(--layout-flex);
     }
 
-    paper-tabs {
-      margin: 0 12px;
-    }
-
     headers-editor,
-    variables-editor,
-    paper-tab.iron-selected {
-      /*background-color: rgba(225, 245, 254, 0.54);*/
+    variables-editor {
+      margin: 0 12px;
     }
 
     .params-section,
@@ -114,7 +107,7 @@ the License.
       <url-input-editor id="urlInputEditor" url="{{masterUrl}}"></url-input-editor>
       <div class="main-action-buttons">
         <paper-button raised class="action-button" hidden$="[[requestLoading]]" on-tap="_sendRequest">send</paper-button>
-        <paper-button raised class="action-button" hidden$="[[!requestLoading]]"on-tap="_abortRequest">abort</paper-button>
+        <paper-button raised class="action-button" hidden$="[[!requestLoading]]" on-tap="_abortRequest">abort</paper-button>
       </div>
     </div>
     <method-selector method="{{request.method}}" is-payload="{{isPayload}}" content-type="[[contentType]]"></method-selector>
@@ -135,9 +128,7 @@ the License.
         </iron-pages>
       </iron-collapse>
     </section>
-
     <payload-editor hidden$="[[!isPayload]]" content-type="[[contentType]]" value="{{request.payload}}" file="{{bodyFile}}" multipart="{{multipartBody}}" form-data="{{request.formData}}"></payload-editor>
-
     <div class="action-panel">
       <div class="status">[[statusMessage]]</div>
       <paper-progress indeterminate hidden$="[[!requestLoading]]"></paper-progress>

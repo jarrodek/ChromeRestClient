@@ -188,7 +188,8 @@
       'request-headers-sent': '_requestStatusChanged',
       'is-payload-changed': '_isPayloadChanged',
       'iron-overlay-closed': '_dialogClosedHandler',
-      'body-source-changed': '_onBodySourceChanged'
+      'body-source-changed': '_onBodySourceChanged',
+      'multipart-data-read': '_onMultipartDataReady'
     },
 
     attached: function() {
@@ -377,6 +378,7 @@
         return;
       }
       var base = {
+        _id: r._id,
         type: r.type,
         headers: r.headers,
         legacyProject: r.legacyProject,
@@ -384,8 +386,7 @@
         name: r.name,
         payload: r.payload,
         url: r.url,
-        formData: r.formData,
-        _id: r._id,
+        multipart: r.multipart,
         file: r.file
       };
       this.set('request', base);
@@ -1138,6 +1139,12 @@
       var properties = this.request.file.properties || {};
       var file = new File([e.detail.content], properties.name || 'unnamed');
       this.set('bodyFile', file);
+    },
+
+    _onMultipartDataReady: function(e) {
+      console.log('_onMultipartDataReady', e.detail);
+
+      this.set('request.formData', e.detail.value);
     }
   });
 })();

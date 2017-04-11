@@ -168,12 +168,12 @@
         req.payload = '';
       } else if (req.multipart) {
         file = req.multipart.map((arr, i) => {
-          let item = arr[1];
+          let item = arr.data;
           if (!item.isFile) {
             return;
           }
           let buffer = item.buffer;
-          delete req.multipart[i][1].buffer;
+          delete req.multipart[i].data.buffer;
           return {
             name: item.cacheName,
             buffer: buffer
@@ -308,14 +308,17 @@
           }]);
         }
       }
-      return Promise.all(promises);
-      // .then((data) => {
-      //   let result = {};
-      //   data.forEach((item) => {
-      //     result[item[0]] = item[1];
-      //   });
-      //   return result;
-      // });
+      return Promise.all(promises)
+      .then((data) => {
+        let result = [];
+        data.forEach((item) => {
+          result.push({
+            name: item[0],
+            data: item[1]
+          });
+        });
+        return result;
+      });
     },
 
     _blobFromMultipart: function(fieldName, blob) {

@@ -26,7 +26,6 @@
       display: block;
       padding: 0 12px;
       position: relative;
-
       --code-mirror-editor: {
         z-index: 0;
       }
@@ -44,11 +43,6 @@
 
     input::-webkit-input-placeholder {
       color: var(--paper-input-container-color, --secondary-text-color);
-    }
-
-    .headers-title {
-      @apply(--paper-font-caption);
-      color: #737373;
     }
 
     .form-row {
@@ -80,11 +74,6 @@
       max-height: 20em;
       margin-top: 60px;
       margin-left: 20px;
-    }
-
-    .CodeMirror-hint.iron-selected {
-      /*background: #08f;
-        color: white;*/
     }
 
     .form-row .edit-header {
@@ -139,15 +128,11 @@
           <paper-button class="add-button" on-tap="appendEmptyHeader">Add header</paper-button>
         </section>
         <headers-sets-selector is-payload="[[isPayload]]"></headers-sets-selector>
-
       </iron-pages>
     </div>
-
     <headers-editor-status hidden$="[[!displayStatus]]" headers-size="[[headersSize]]" valid$="[[valid]]" error-message="[[headersErrorMessage]]"></headers-editor-status>
-
     <headers-validator headers="[[headers]]" valid="{{valid}}" is-payload="[[isPayload]]" error-message="{{headersErrorMessage}}"></headers-validator>
     <bytes-counter value="[[headers]]" bytes="{{headersSize}}"></bytes-counter>
-
     <content-type-support></content-type-support>
     <authorization-support></authorization-support>
     <wsse-support></wsse-support>
