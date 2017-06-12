@@ -121,14 +121,16 @@ the License.
         <paper-tabs selected="{{selectedParameters}}">
           <paper-tab hidden$="[[!collapseOpened]]">Headers</paper-tab>
           <paper-tab hidden$="[[!collapseOpened]]">Variables</paper-tab>
+          <paper-tab hidden$="[[!_computePayloadTabVisible(collapseOpened, isPayload)]]">Body</paper-tab>
         </paper-tabs>
         <iron-pages selected="[[selectedParameters]]">
           <headers-editor is-payload="{{isPayload}}" content-type="[[contentType]]" headers="{{requestHeaders}}" on-headers-changed="_headersChanged"></headers-editor>
           <variables-editor></variables-editor>
+          <payload-editor content-type="[[contentType]]" value="{{request.payload}}" file="{{bodyFile}}" multipart="{{multipartBody}}" form-data="{{request.formData}}"></payload-editor>
         </iron-pages>
       </iron-collapse>
     </section>
-    <payload-editor hidden$="[[!isPayload]]" content-type="[[contentType]]" value="{{request.payload}}" file="{{bodyFile}}" multipart="{{multipartBody}}" form-data="{{request.formData}}"></payload-editor>
+
     <div class="action-panel">
       <div class="status">[[statusMessage]]</div>
       <paper-progress indeterminate hidden$="[[!requestLoading]]"></paper-progress>
