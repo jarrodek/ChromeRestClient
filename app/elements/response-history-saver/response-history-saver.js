@@ -2,8 +2,6 @@
   'use strict';
   Polymer({
     is: 'response-history-saver',
-
-    behaviors: [FileBehaviors.WebFilesystemBehavior],
     /**
      * 1) Check if object exissts as a history object. If identical object exists,
      * override it (update time). If not create new hostory object.
@@ -21,27 +19,13 @@
       if (request.payload instanceof MultipartFormData) {
         return request.payload.generateMessage()
         .then((buffer) => {
-          return this._prepareMultipart(request.payload)
-          .then((properties) => {
-            request.multipart = properties;
-            request.payload = buffer;
-            return request;
-          });
+          request.payload = buffer;
+          return request;
         });
       } else if (request.payload instanceof Blob) {
         return this._readBlob(request.payload)
         .then((blob) => {
-          let file = request.payload;
-          let fileProperties = {
-            name: file.name,
-            size: file.size,
-            type: file.type
-          };
           request.payload = blob;
-          request.file = {
-            name: this.$.uuid.generate(),
-            properties: fileProperties
-          };
           return request;
         });
       }
@@ -101,11 +85,10 @@
 
       if (payload instanceof ArrayBuffer) {
         requestPayloadSize = payload.byteLength;
-        let enc = new TextDecoder();
-        payload = enc.decode(payload);
+        payload = '';
       } else if (payload instanceof Blob) {
         requestPayloadSize = payload.size;
-        payload = '[file data]';
+        payload = '';
       } else {
         requestPayloadSize = arc.app.utils.calculateBytes(req.payload);
       }
@@ -122,7 +105,7 @@
         created: new Date(res.stats.startTime).getTime(),
         request: {
           headers: req.headers,
-          payload: req.payload,
+          payload: payload,
           url: req.url,
           method: req.method,
         },
@@ -159,52 +142,14 @@
       var today = this._getDayToday(rTime);
       var k = today + '/' + encodeURIComponent(req.url) + '/' + req.method;
 
-      var file;
       if (!req.multipart && req.payload instanceof ArrayBuffer) {
-        file = new Blob([req.payload]);
         req.payload = '';
       } else if (req.payload instanceof Blob) {
-        file = req.payload;
         req.payload = '';
       } else if (req.multipart) {
-        file = req.multipart.map((arr, i) => {
-          let item = arr.data;
-          if (!item.isFile) {
-            return;
-          }
-          let buffer = item.buffer;
-          delete req.multipart[i].data.buffer;
-          return {
-            name: item.cacheName,
-            buffer: buffer
-          };
-        })
-        .filter((i) => !!i);
         req.payload = '';
       }
-
-      return this._writeHistoryItem(k, req, rTime)
-      .then((doc) => {
-        if (!file) {
-          return;
-        }
-        if (file instanceof Array) {
-          let promises = [];
-          file.forEach((i) => {
-            promises.push(this._writeCacheFile(i.buffer, i.name, doc._id));
-          });
-          return Promise.all(promises);
-        } else {
-          return this._writeCacheFile(file, req.file.name, doc._id);
-        }
-      });
-    },
-
-    _writeCacheFile: function(content, name, dbEntryId) {
-      this.filename = name;
-      this.content = content;
-      this.write();
-      return this.writeFileCacheInfo(name, dbEntryId);
+      return this._writeHistoryItem(k, req, rTime);
     },
 
     _writeHistoryItem: function(key, request, time) {
@@ -214,10 +159,9 @@
         _doc.headers = request.headers;
         _doc.method = request.method;
         _doc.payload = request.payload;
-        _doc.multipart = request.multipart;
         _doc.url = request.url;
         _doc.updated = time;
-        _doc.file = request.file;
+
         return db.put(_doc)
         .then((insertResult) => {
           _doc._rev = insertResult.rev;
@@ -240,9 +184,7 @@
           headers: request.headers,
           method: request.method,
           payload: request.payload,
-          url: request.url,
-          multipart: request.multipart,
-          file: request.file
+          url: request.url
         };
         return db.put(_doc)
         .then((insertResult) => {
@@ -276,14 +218,6 @@
       d.setMinutes(0);
       d.setHours(0);
       return d.getTime();
-    },
-
-    writeFileCacheInfo: function(fileName, requestId) {
-      var db = new PouchDB('file-history-cache');
-      db.put({
-        _id: encodeURIComponent(requestId) + fileName,
-        source: 'history'
-      });
     },
 
     _prepareMultipart: function(multipart) {
@@ -320,28 +254,5 @@
         return result;
       });
     },
-
-    _blobFromMultipart: function(fieldName, blob) {
-      var result = {
-        name: blob.name,
-        size: blob.size,
-        type: blob.type,
-        isFile: true,
-        cacheName: this.$.uuid.generate(),
-        buffer: blob
-      };
-      return Promise.resolve([
-        fieldName,
-        result
-      ]);
-      // return this._readBlob(blob).
-      // then((buffer) => {
-      //   result.buffer = buffer;
-      //   return [
-      //     fieldName,
-      //     result
-      //   ];
-      // });
-    }
   });
 })();

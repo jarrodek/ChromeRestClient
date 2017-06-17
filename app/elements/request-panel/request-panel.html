@@ -232,7 +232,6 @@
       statuses="{{analysedStatuses}}"
       on-request-stats-analysed="_requestsStatsAnalysed"
       enabled="{{apiAssistantEnabled}}"></request-stats-analyser>
-    <multipart-file-restorer multipart="[[request.multipart]]"></multipart-file-restorer>
     <chrome-local-filesystem id="localFs" on-file-read="_bodyFileRead"></chrome-local-filesystem>
     <paper-toast text="Your request has been saved. Add SHIFT key to display save dialog."
       id="requestSavedFastToast"></paper-toast>

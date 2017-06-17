@@ -73,11 +73,14 @@ Polymer({
     bodyFile: {
       type: Object,
       notify: true
-    }
+    },
+
+    isPayload: Boolean
   },
 
   observers: [
-    '_requestChanged(request, request.*)'
+    '_requestChanged(request, request.*)',
+    '_isPayloadChanged(isPayload)'
   ],
 
   attached: function() {
@@ -161,6 +164,17 @@ Polymer({
 
   _computeToggleLabel: function(opened) {
     return opened ? 'Hide panel' : 'Show panel';
+  },
+
+  _computePayloadTabVisible: function(collapseOpened, isPayload) {
+    return collapseOpened && isPayload;
+  },
+
+  _isPayloadChanged: function(isPayload) {
+    if (!isPayload && this.selectedParameters === 2) {
+      this.selectedParameters = 0;
+    }
+    this.$$('paper-tabs').notifyResize();
   }
 });
 })();

@@ -55,11 +55,6 @@ Polymer({
       type: Object,
       notify: true
     },
-
-    opened: {
-      type: Boolean,
-      value: true
-    },
     /**
      * The source editor of the body value.
      * It's a text representation of the `tabSelected` property.
@@ -249,27 +244,6 @@ Polymer({
     }
   },
 
-  _computeFileBageClass: function(cnt) {
-    return cnt === 0 ? 'empty' : '';
-  },
-
-  // Toggles body panel.
-  toggle: function() {
-    this.opened = !this.opened;
-  },
-  // Computes class for the toggle's button icon.
-  _computeToggleIconClass: function(opened) {
-    var clazz = 'toggle-icon';
-    if (opened) {
-      clazz += ' opened';
-    }
-    return clazz;
-  },
-
-  _computeToggleLabel: function(opened) {
-    return opened ? 'Hide panel' : 'Show panel';
-  },
-
   _contentTypeSelected: function(e) {
     var ct = e.detail.item.dataset.type;
     this.setContenTypeValue(ct);
@@ -301,14 +275,10 @@ Polymer({
     });
   },
 
-  _computeContentTypeSelectorHidden: function(opened, tabSelected) {
-    if (!opened) {
-      return true;
-    }
+  _computeContentTypeSelectorHidden: function(tabSelected) {
     if (tabSelected === 2) {
       return true;
     }
-
     return false;
   }
 });

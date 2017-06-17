@@ -188,8 +188,7 @@
       'request-headers-sent': '_requestStatusChanged',
       'is-payload-changed': '_isPayloadChanged',
       'iron-overlay-closed': '_dialogClosedHandler',
-      'body-source-changed': '_onBodySourceChanged',
-      'multipart-data-read': '_onMultipartDataReady'
+      'body-source-changed': '_onBodySourceChanged'
     },
 
     attached: function() {
@@ -1115,8 +1114,6 @@
         this._setAssistantUrl(undefined);
         return;
       }
-
-      this._assignBodyFile(request);
       window.requestAnimationFrame(() => {
         this._setAssistantUrl(request.url);
       });
@@ -1124,27 +1121,6 @@
 
     _onBodySourceChanged: function(e) {
       this.bodySource = e.detail.value;
-    },
-
-    // Reads the saved in local filesystem file if the request was saved with a file.
-    _assignBodyFile: function(request) {
-      if (!request.file) {
-        return;
-      }
-      this.$.localFs.filename = request.file.name;
-      this.$.localFs.read();
-    },
-
-    _bodyFileRead: function(e) {
-      var properties = this.request.file.properties || {};
-      var file = new File([e.detail.content], properties.name || 'unnamed');
-      this.set('bodyFile', file);
-    },
-
-    _onMultipartDataReady: function(e) {
-      console.log('_onMultipartDataReady', e.detail);
-
-      this.set('request.formData', e.detail.value);
     }
   });
 })();

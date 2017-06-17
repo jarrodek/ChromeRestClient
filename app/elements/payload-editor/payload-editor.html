@@ -97,24 +97,6 @@ the License.
       @apply(--layout-flex);
     }
 
-    .toggle-button {
-      color: var(--response-status-view-toggle-icon-color, rgba(0, 0, 0, 0.54));
-      transition: color 0.25s linear;
-    }
-
-    .toggle-icon {
-      transform: rotateZ(0deg);
-      transition: transform 0.3s linear;
-    }
-
-    .toggle-icon.opened {
-      transform: rotateZ(-180deg);
-    }
-
-    .toggle-button:hover {
-      color: var(--response-status-view-toggle-icon-hover-color, rgba(0, 0, 0, 0.78));
-    }
-
     iron-pages {
       padding: 12px;
     }
@@ -128,13 +110,9 @@ the License.
       min-width: 320px;
     }
     </style>
-    <header class="title-header">
-      <h2>Body</h2>
-      <paper-icon-button icon="arc:expand-more" id="toggleParameters" on-tap="toggle" class="toggle-button" class$="[[_computeToggleIconClass(opened)]]"></paper-icon-button>
-      <paper-tooltip for="toggleParameters" animation-delay="100" position="right" offset="0">[[_computeToggleLabel(opened)]]</paper-tooltip>
-    </header>
+
     <section class="panel-options">
-      <paper-dropdown-menu class="type" label="Editor view" hidden$="[[!opened]]">
+      <paper-dropdown-menu class="type" label="Editor view">
         <paper-listbox class="dropdown-content" selected="{{tabSelected}}">
           <paper-item>Text input</paper-item>
           <paper-item>Form data (text form)</paper-item>
@@ -142,7 +120,7 @@ the License.
           <paper-item>File</paper-item>
         </paper-listbox>
       </paper-dropdown-menu>
-      <paper-dropdown-menu label="Body content type" hidden$="[[_computeContentTypeSelectorHidden(opened, tabSelected)]]">
+      <paper-dropdown-menu label="Body content type" hidden$="[[_computeContentTypeSelectorHidden(tabSelected)]]">
         <paper-listbox class="dropdown-content" on-iron-select="_contentTypeSelected" selected="[[contentType]]" attr-for-selected="data-type">
           <paper-item data-type="application/json">application/json</paper-item>
           <paper-item data-type="application/xml">application/xml</paper-item>
@@ -160,7 +138,7 @@ the License.
         </paper-listbox>
       </paper-dropdown-menu>
     </section>
-    <iron-collapse id="collapse" opened="[[opened]]">
+
       <iron-pages selected="{{tabSelected}}" selected-attribute="opened">
         <section>
           <div hidden$="[[!withForm]]" class="encoder-buttons">
@@ -194,7 +172,7 @@ the License.
           <file-editor value="{{file}}"></file-editor>
         </section>
       </iron-pages>
-    </iron-collapse>
+
   </template>
   <script src="payload-editor.js"></script>
 </dom-module>
