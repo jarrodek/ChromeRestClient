@@ -44,7 +44,9 @@
     "app-analytics": "advanced-rest-client/app-analytics#^1.0.5",
     "chart.js": "^2.3.0",
     "date-time": "advanced-rest-client/date-time#^0.1.2",
-    "paper-fab-menu": "advanced-rest-client/paper-fab-menu#^2.0.6"
+    "paper-fab-menu": "advanced-rest-client/paper-fab-menu#^2.0.6",
+    "headers-editor": "advanced-rest-client/headers-editor#^0.1.2",
+    "http-method-selector": "advanced-rest-client/http-method-selector#^0.1.1"
   },
   "devDependencies": {
     "web-component-tester": "*",
