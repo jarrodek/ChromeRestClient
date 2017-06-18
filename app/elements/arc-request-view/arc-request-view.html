@@ -15,6 +15,9 @@ License for the specific language governing permissions and limitations under
 the License.
 -->
 <link rel="import" href="../../styles/shared-styles.html">
+<link rel="import" href="../../bower_components/headers-editor/headers-editor.html">
+<link rel="import" href="../../bower_components/http-method-selector/http-method-selector.html">
+<link rel="import" href="../variables-editor/variables-editor.html">
 <dom-module id="arc-request-view">
   <template>
     <style include="shared-styles">
@@ -110,7 +113,7 @@ the License.
         <paper-button raised class="action-button" hidden$="[[!requestLoading]]" on-tap="_abortRequest">abort</paper-button>
       </div>
     </div>
-    <method-selector method="{{request.method}}" is-payload="{{isPayload}}" content-type="[[contentType]]"></method-selector>
+    <http-method-selector method="{{request.method}}" is-payload="{{isPayload}}"></http-method-selector>
     <section class="params-section">
       <header class="params-header">
         <h2>Parameters</h2>
