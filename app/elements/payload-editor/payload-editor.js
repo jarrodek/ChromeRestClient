@@ -244,11 +244,6 @@ Polymer({
     }
   },
 
-  _contentTypeSelected: function(e) {
-    var ct = e.detail.item.dataset.type;
-    this.setContenTypeValue(ct);
-  },
-
   _contentTypeHandler: function(e) {
     var event = Polymer.dom(e);
     if (event.rootTarget === this) {

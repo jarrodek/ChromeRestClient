@@ -14,6 +14,7 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 -->
+<link rel="import" href="../../bower_components/content-type-selector/content-type-selector.html">
 <link rel="import" href="multipart-payload-editor.html">
 <link rel="import" href="file-editor.html">
 
@@ -120,58 +121,42 @@ the License.
           <paper-item>File</paper-item>
         </paper-listbox>
       </paper-dropdown-menu>
-      <paper-dropdown-menu label="Body content type" hidden$="[[_computeContentTypeSelectorHidden(tabSelected)]]">
-        <paper-listbox class="dropdown-content" on-iron-select="_contentTypeSelected" selected="[[contentType]]" attr-for-selected="data-type">
-          <paper-item data-type="application/json">application/json</paper-item>
-          <paper-item data-type="application/xml">application/xml</paper-item>
-          <paper-item data-type="application/atom+xml">application/atom+xml</paper-item>
-          <paper-item data-type="multipart/form-data">multipart/form-data</paper-item>
-          <paper-item data-type="multipart/alternative">multipart/alternative</paper-item>
-          <paper-item data-type="multipart/mixed">multipart/mixed</paper-item>
-          <paper-item data-type="application/x-www-form-urlencoded">application/x-www-form-urlencoded</paper-item>
-          <paper-item data-type="application/base64">application/base64</paper-item>
-          <paper-item data-type="application/octet-stream">application/octet-stream</paper-item>
-          <paper-item data-type="text/plain">text/plain</paper-item>
-          <paper-item data-type="text/css">text/css</paper-item>
-          <paper-item data-type="text/html">text/html</paper-item>
-          <paper-item data-type="application/javascript">application/javascript</paper-item>
-        </paper-listbox>
-      </paper-dropdown-menu>
+      <content-type-selector hidden$="[[_computeContentTypeSelectorHidden(tabSelected)]]" selected="{{contentType}}"></content-type-selector>
     </section>
 
-      <iron-pages selected="{{tabSelected}}" selected-attribute="opened">
-        <section>
-          <div hidden$="[[!withForm]]" class="encoder-buttons">
-            <paper-button title="Encodes payload to x-www-form-urlencoded data" on-tap="encodePaylod">encode payload</paper-button>
-            <paper-button title="Decodes payload to human readable form" on-tap="decodePaylod">decode payload</paper-button>
+    <iron-pages selected="{{tabSelected}}" selected-attribute="opened">
+      <section>
+        <div hidden$="[[!withForm]]" class="encoder-buttons">
+          <paper-button title="Encodes payload to x-www-form-urlencoded data" on-tap="encodePaylod">encode payload</paper-button>
+          <paper-button title="Decodes payload to human readable form" on-tap="decodePaylod">decode payload</paper-button>
+        </div>
+        <code-mirror mode="application/json" theme="cm-arc" value="{{value}}" id="cm"></code-mirror>
+      </section>
+      <section class="params-list">
+        <div class="encoder-buttons">
+          <paper-button title="Encodes payload to x-www-form-urlencoded data" on-tap="encodePaylod">encode payload</paper-button>
+          <paper-button title="Decodes payload to human readable form" on-tap="decodePaylod">decode payload</paper-button>
+        </div>
+        <template is="dom-repeat" id="valuesList" items="{{valuesList}}" on-dom-change="_onParamsRender">
+          <div class="form-row">
+            <paper-input-container class="param-name" no-label-float inline>
+              <input is="iron-input" type="text" value="{{item.name::input}}" placeholder="Param name" />
+            </paper-input-container>
+            <paper-input-container class="param-value" no-label-float inline>
+              <input is="iron-input" type="text" value="{{item.value::input}}" placeholder="Param value" />
+            </paper-input-container>
+            <paper-icon-button icon="arc:close" title="Remove param" on-tap="_removeParam"></paper-icon-button>
           </div>
-          <code-mirror mode="application/json" theme="cm-arc" value="{{value}}" id="cm"></code-mirror>
-        </section>
-        <section class="params-list">
-          <div class="encoder-buttons">
-            <paper-button title="Encodes payload to x-www-form-urlencoded data" on-tap="encodePaylod">encode payload</paper-button>
-            <paper-button title="Decodes payload to human readable form" on-tap="decodePaylod">decode payload</paper-button>
-          </div>
-          <template is="dom-repeat" id="valuesList" items="{{valuesList}}" on-dom-change="_onParamsRender">
-            <div class="form-row">
-              <paper-input-container class="param-name" no-label-float inline>
-                <input is="iron-input" type="text" value="{{item.name::input}}" placeholder="Param name" />
-              </paper-input-container>
-              <paper-input-container class="param-value" no-label-float inline>
-                <input is="iron-input" type="text" value="{{item.value::input}}" placeholder="Param value" />
-              </paper-input-container>
-              <paper-icon-button icon="arc:close" title="Remove param" on-tap="_removeParam"></paper-icon-button>
-            </div>
-          </template>
-          <paper-button raised on-tap="appendEmptyParam" class="add-param-button">Add another parameter</paper-button>
-        </section>
-        <section>
-          <multipart-payload-editor form-data="{{formData}}" value="{{multipart}}"></multipart-payload-editor>
-        </section>
-        <section>
-          <file-editor value="{{file}}"></file-editor>
-        </section>
-      </iron-pages>
+        </template>
+        <paper-button raised on-tap="appendEmptyParam" class="add-param-button">Add another parameter</paper-button>
+      </section>
+      <section>
+        <multipart-payload-editor form-data="{{formData}}" value="{{multipart}}"></multipart-payload-editor>
+      </section>
+      <section>
+        <file-editor value="{{file}}"></file-editor>
+      </section>
+    </iron-pages>
 
   </template>
   <script src="payload-editor.js"></script>
