@@ -24,7 +24,7 @@
     "socket-fetch": "advanced-rest-client/socket-fetch#multipart",
     "chrome-app-filesystem": "advanced-rest-client/chrome-app-filesystem#master",
     "chrome-image": "advanced-rest-client/chrome-image#1.0.0",
-    "code-mirror": "advanced-rest-client/code-mirror#master",
+    "code-mirror": "advanced-rest-client/code-mirror#1.1.2",
     "lodash": "jarrodek/lodash#^4.6.2",
     "uri.js": "medialize/URI.js#^1.17.0",
     "zlib": "imaya/zlib.js#^0.2.0",
