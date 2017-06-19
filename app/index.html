@@ -229,7 +229,7 @@
         <paper-button dialog-dismiss>Close</paper-button>
       </div>
     </paper-dialog>
-    <network-state online="{{online}}" on-network-state="_networkStateChanged"></network-state>
+    <network-state online="{{online}}" on-network-state-changed="_networkStateChanged"></network-state>
     <paper-toast id="offlineToast" class="fit-bottom offline-toast" text="You are now offline. Can't make new requests." duration="-1">
       <paper-button on-tap="closeOfflineMessage">close</paper-button>
     </paper-toast>

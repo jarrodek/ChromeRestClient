@@ -28,7 +28,7 @@
     "lodash": "jarrodek/lodash#^4.6.2",
     "uri.js": "medialize/URI.js#^1.17.0",
     "zlib": "imaya/zlib.js#^0.2.0",
-    "paper-autocomplete": "advanced-rest-client/paper-autocomplete#1.0.16",
+    "paper-autocomplete": "advanced-rest-client/paper-autocomplete#^1.0.16",
     "cookie-parser": "advanced-rest-client/cookie-parser#^1.0.2",
     "crypto-js": "^3.1.6",
     "web-socket": "advanced-rest-client/web-socket#^1.0.5",
@@ -48,7 +48,9 @@
     "content-type-selector": "advanced-rest-client/content-type-selector#^0.1.1",
     "headers-parser-behavior": "advanced-rest-client/headers-parser-behavior#^0.1.1",
     "headers-editor": "advanced-rest-client/headers-editor#^0.1.2",
-    "http-method-selector": "advanced-rest-client/http-method-selector#^0.1.1"
+    "http-method-selector": "advanced-rest-client/http-method-selector#^0.1.1",
+    "payload-editor": "advanced-rest-client/payload-editor#^0.1.1",
+    "network-state": "advanced-rest-client/network-state#^0.1.1"
   },
   "devDependencies": {
     "web-component-tester": "*",
@@ -57,7 +59,9 @@
   "ignore": [],
   "main": "app/index.html",
   "resolutions": {
-    "lodash": "^4.6.2"
+    "lodash": "^4.6.2",
+    "app-pouchdb": "^1.0.0",
+    "app-storage": "~1.0.0"
   },
   "version": "9.14.64"
 }

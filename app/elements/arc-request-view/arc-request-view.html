@@ -17,6 +17,7 @@ the License.
 <link rel="import" href="../../styles/shared-styles.html">
 <link rel="import" href="../../bower_components/headers-editor/headers-editor.html">
 <link rel="import" href="../../bower_components/http-method-selector/http-method-selector.html">
+<link rel="import" href="../../bower_components/payload-editor/payload-editor.html">
 <link rel="import" href="../variables-editor/variables-editor.html">
 <dom-module id="arc-request-view">
   <template>
@@ -129,7 +130,7 @@ the License.
         <iron-pages selected="[[selectedParameters]]">
           <headers-editor is-payload="{{isPayload}}" content-type="[[contentType]]" headers="{{requestHeaders}}" on-headers-changed="_headersChanged"></headers-editor>
           <variables-editor></variables-editor>
-          <payload-editor content-type="[[contentType]]" value="{{request.payload}}" file="{{bodyFile}}" multipart="{{multipartBody}}" form-data="{{request.formData}}"></payload-editor>
+          <payload-editor content-type="[[contentType]]" value="{{request.payload}}"></payload-editor>
         </iron-pages>
       </iron-collapse>
     </section>
