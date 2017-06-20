@@ -80,7 +80,8 @@ Polymer({
 
   observers: [
     '_requestChanged(request, request.*)',
-    '_isPayloadChanged(isPayload)'
+    '_isPayloadChanged(isPayload)',
+    '_refreshPayload(selectedParameters)'
   ],
 
   attached: function() {
@@ -171,10 +172,16 @@ Polymer({
   },
 
   _isPayloadChanged: function(isPayload) {
-    if (!isPayload && this.selectedParameters === 2) {
+    if (!isPayload && this.selectedParameters === 1) {
       this.selectedParameters = 0;
     }
     this.$$('paper-tabs').notifyResize();
+  },
+
+  _refreshPayload: function(selectedParameters) {
+    if (selectedParameters === 1) {
+      this.$$('payload-editor').refresh();
+    }
   }
 });
 })();

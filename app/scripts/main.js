@@ -51,8 +51,7 @@
   });
   // event fired when the app is initialized and can remove loader.
   window.addEventListener('ArcInitialized', function() {
-    document.querySelector('arc-loader-screen').close();
-    // app.runTutorials();
+    document.querySelector('arc-loader-screen').opened = false;
     app.initialized = true;
   });
   window.addEventListener('WebComponentsReady', function() {

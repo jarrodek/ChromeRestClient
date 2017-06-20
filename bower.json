@@ -50,7 +50,13 @@
     "headers-editor": "advanced-rest-client/headers-editor#^0.1.2",
     "http-method-selector": "advanced-rest-client/http-method-selector#^0.1.1",
     "payload-editor": "advanced-rest-client/payload-editor#^0.1.1",
-    "network-state": "advanced-rest-client/network-state#^0.1.1"
+    "network-state": "advanced-rest-client/network-state#^0.1.1",
+    "arc-loader-screen": "advanced-rest-client/arc-loader-screen#^0.1.1",
+    "text-search-behavior": "advanced-rest-client/text-search-behavior#^0.1.2",
+    "json-viewer": "advanced-rest-client/json-viewer#^0.1.7",
+    "prism-highlight": "advanced-rest-client/prism-highlight#^2.0.4",
+    "xml-viewer": "advanced-rest-client/xml-viewer#^0.1.5",
+    "response-view": "advanced-rest-client/response-view#^0.1.10"
   },
   "devDependencies": {
     "web-component-tester": "*",
