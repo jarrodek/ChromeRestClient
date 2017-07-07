@@ -218,41 +218,6 @@
       d.setMinutes(0);
       d.setHours(0);
       return d.getTime();
-    },
-
-    _prepareMultipart: function(multipart) {
-      var promises = [];
-      for (let item of multipart.entries()) {
-        let name = item[0];
-        let itemValue = item[1];
-        if (itemValue.isFile) {
-          let fileValue = itemValue.value;
-          if (fileValue instanceof Array) {
-            for (let i = 0, len = fileValue.length; i < len; i++) {
-              promises.push(this._blobFromMultipart(name, fileValue[i]));
-            }
-          } else {
-            promises.push(this._blobFromMultipart(name, fileValue));
-          }
-        } else {
-          promises.push([name, {
-            isFile: false,
-            mime: itemValue.mime,
-            value: itemValue.value
-          }]);
-        }
-      }
-      return Promise.all(promises)
-      .then((data) => {
-        let result = [];
-        data.forEach((item) => {
-          result.push({
-            name: item[0],
-            data: item[1]
-          });
-        });
-        return result;
-      });
-    },
+    }
   });
 })();
