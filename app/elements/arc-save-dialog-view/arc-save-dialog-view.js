@@ -48,8 +48,7 @@ Polymer({
     /**
      * List of available projects
      */
-    projects: Array,
-    usePouchDb: Boolean
+    projects: Array
   },
   listeners: {
     'iron-overlay-opened': '_updateProjects'
@@ -109,11 +108,7 @@ Polymer({
   },
 
   _updateProjects: function() {
-    if (this.usePouchDb) {
-      this._queryProjects();
-    } else {
-      this.$.projects.query();
-    }
+    this._queryProjects();
   },
 
   _queryProjects: function() {
@@ -124,7 +119,7 @@ Polymer({
       });
       return;
     }
-    
+
     e.detail.result
     .then((result) => {
       result.sort((a, b) => {

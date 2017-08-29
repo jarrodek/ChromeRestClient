@@ -48,8 +48,7 @@ Polymer({
     canDelete: {
       type: Boolean,
       value: false
-    },
-    usePouchDb: Boolean
+    }
   },
 
   behaviors: [

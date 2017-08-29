@@ -74,12 +74,7 @@
       <paper-checkbox checked="{{selected}}"></paper-checkbox>
     </div>
     <div class="name-column" on-tap="_editName" hidden$="[[isHistory]]">{{request.name}}</div>
-    <template is="dom-if" if="[[usePouchDb]]" restamp="true">
-      <div class="name-column" hidden$="[[!isHistory]]">[[computeHistoryTime(request.created)]]</div>
-    </template>
-    <template is="dom-if" if="[[!usePouchDb]]" restamp="true">
-      <div class="name-column" hidden$="[[!isHistory]]">[[computeHistoryTime(request.har.pages.*, 'startedDateTime')]]</div>
-    </template>
+    <div class="name-column" hidden$="[[!isHistory]]">[[computeHistoryTime(request.created)]]</div>
     <div class="method-column">{{request.method}}</div>
     <div class="url-column">{{request.url}}</div>
     <div class="type-column">

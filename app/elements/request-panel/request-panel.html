@@ -140,50 +140,7 @@
       color: rgba(0, 0, 0, 0.54);
     }
     </style>
-    <div class="content" assistant$="[[exporeAssistantActive]]">
-      <div class="request-area">
-        <arc-request-view
-          request-loading="[[requestLoading]]"
-          opened="{{opened}}"
-          request="{{request}}"
-          multipart-body="{{multipartBody}}"
-          content-type="{{contentType}}"
-          body-file="{{bodyFile}}"></arc-request-view>
-        <template is="dom-if" if="[[hasResponse]]">
-          <arc-response-view opened="[[opened]]" response="[[response]]" request="[[activeRequest]]"></arc-response-view>
-        </template>
-
-        <div class="cookie-exchange-banner" hidden$="[[!showCookieBanner]]">
-          <paper-material elevation="1">
-            <h2>
-              Missing cookies?
-            </h2>
-            <p class="action">Install ARC cookie exchange extension and synchronize cookies between the app and Chrome.</p>
-            <p>The app is not able to read cookies set in Chrome browser. If you authenticated yourself in a Chrome tab cookies are not transfered automatically.</p>
-
-            <a href="https://chrome.google.com/webstore/detail/apcedakaoficjlofohhcmkkljehnmebp" class="inherit" target="_blank">
-              <paper-button raised>
-                Install ARC cookie exchange
-                <iron-icon icon="arc:open-in-new"></iron-icon>
-              </paper-button>
-            </a>
-          </paper-material>
-        </div>
-        <arc-request-error-view hidden$=[[!isError]] message="[[errorMessage]]"></arc-request-error-view>
-      </div>
-      <div class="data-explorer-area">
-        <request-data-explorer
-          id="dataExplorer"
-          has-any-data="[[analyserHasData]]"
-          opened="{{exporeAssistantActive}}"
-          medians="[[analysedMedians]]"
-          times="[[analysedTimes]]"
-          sizes="[[analysedSizes]]"
-          statuses="[[analysedStatuses]]"
-          presence="[[presenceInfo]]"
-          assistant-enabled="[[apiAssistantEnabled]]"></request-data-explorer>
-      </div>
-    </div>
+    
 
     <div class="status-bar">
       <div class="status-message">[[statusMessage]]</div>
@@ -198,38 +155,24 @@
 
     <chrome-storage auto id="latest" type="local" name="latestRequest" value="{{request}}" on-chrome-storage-read="_latestLoaded"></chrome-storage>
     <arc-socket-request id="socket" on-ready="_responseReady" on-error="_onRequestError"></arc-socket-request>
-    <arc-xhr-request id="xhr" on-ready="_responseReady" on-error="_onRequestError" connected="{{xhrConnected}}"></arc-xhr-request>
-    <arc-magic-variables id="magicVariables" scope="[[project.id]]"></arc-magic-variables>
-    <cookie-storage use-pouch-db="true" id="cookieJar" url="[[request.url]]"></cookie-storage>
-    <!-- cookie-exchange have to be keept in Chrome main app since it is chrome app specific element. -->
-    <cookie-exchange external-id="apcedakaoficjlofohhcmkkljehnmebp" id="cookieExchange"></cookie-exchange>
-    <auth-data-saver id="authSaver"
+    <!-- SET <arc-xhr-request id="xhr" on-ready="_responseReady" on-error="_onRequestError" connected="{{xhrConnected}}"></arc-xhr-request> -->
+    <!-- SET <arc-magic-variables id="magicVariables" scope="[[project.id]]"></arc-magic-variables> -->
+    <!-- SET <cookie-storage use-pouch-db="true" id="cookieJar" url="[[request.url]]"></cookie-storage> -->
+    <!-- SET <cookie-exchange external-id="apcedakaoficjlofohhcmkkljehnmebp" id="cookieExchange"></cookie-exchange> -->
+    <!-- <auth-data-saver id="authSaver"
       on-resend-auth-request="_resendAuthRequest"
       headers="{{request.headers}}"
-      url="[[request.url]]"></auth-data-saver>
-    <response-history-saver id="responseSaver"></response-history-saver>
-    <install-proxy-dialog id="proxyDialog"></install-proxy-dialog>
+      url="[[request.url]]"></auth-data-saver> -->
+    <!-- SET <response-history-saver id="responseSaver"></response-history-saver> -->
+    <!-- SET <install-proxy-dialog id="proxyDialog"></install-proxy-dialog> -->
     <paper-toast id="clearRollback" duration="5000" text="Request cleared"
       on-iron-overlay-closed="_clearUndoClear">
       <paper-button on-tap="_undoClear" class="yellow-button">Undo</paper-button>
     </paper-toast>
     <uuid-generator id="uuid"></uuid-generator>
-    <url-history-saver id="urlHistory"></url-history-saver>
-    <request-saver id="requestSaver" request="[[request]]" on-request-saved="_requestSavedHandler"
-      on-error="_requestSaveErrorHandler"></request-saver>
-    <request-stats-analyser id="historyAnalyser"
-      request="[[request]]"
-      response="[[response]]"
-      url="[[assistantUrl]]"
-      method="[[request.method]]"
-      has-any-data="{{analyserHasData}}"
-      medians="{{analysedMedians}}"
-      times="{{analysedTimes}}"
-      sizes="{{analysedSizes}}"
-      presence="{{presenceInfo}}"
-      statuses="{{analysedStatuses}}"
-      on-request-stats-analysed="_requestsStatsAnalysed"
-      enabled="{{apiAssistantEnabled}}"></request-stats-analyser>
+    <!-- SET <url-history-saver id="urlHistory"></url-history-saver> -->
+    <!-- SET <request-saver id="requestSaver" request="[[request]]" on-request-saved="_requestSavedHandler"
+      on-error="_requestSaveErrorHandler"></request-saver> -->
     <paper-toast text="Your request has been saved. Add SHIFT key to display save dialog."
       id="requestSavedFastToast"></paper-toast>
     <paper-toast text="Request has been saved" id="requestSavedToast"></paper-toast>

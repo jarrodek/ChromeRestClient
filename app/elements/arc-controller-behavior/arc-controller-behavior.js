@@ -94,10 +94,7 @@ window.ArcBehaviors.ArcControllerBehaviorImpl = {
       notify: true,
       value: false
     },
-    // If set, the controller will use pouch db as a database connector and new database schema.
-    usePouchDb: {
-      type: Boolean
-    }
+
   },
   /**
    * A handler to be called when the controller selection change.

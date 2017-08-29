@@ -29,7 +29,6 @@ Polymer({
       type: Array,
       notify: true
     },
-    usePouchDb: Boolean,
     projectId: String,
     // True when loading data from the datastore.
     loadingData: {
@@ -54,7 +53,7 @@ Polymer({
   },
 
   observers: [
-    '_prepareProjectNew(opened, usePouchDb, routeParams.projectId)',
+    '_prepareProject(opened, routeParams.projectId)',
     '_projectChanged(project.*)',
     '_setLoaderState(opened)'
   ],
@@ -67,28 +66,13 @@ Polymer({
     this._setPageTitle('');
     this.projectId = undefined;
   },
-  // prepare project data to show.
-  _prepareProject: function() {
-    if (!this.opened || !this.routeParams) {
-      return;
-    }
-    if (this.usePouchDb) {
-      return;
-    }
-    var projectId = Number(this.routeParams.projectId);
-    if (projectId !== projectId) {
-      // NaN !== NaN
-      return;
-    }
-    this.$.project.objectId = projectId;
-  },
 
   _getDb: function() {
     return new PouchDB('legacy-projects');
   },
 
-  _prepareProjectNew: function(opened, usePouchDb, projectId) {
-    if (!opened || !usePouchDb || !projectId) {
+  _prepareProject: function(opened, projectId) {
+    if (!opened || !projectId) {
       return;
     }
     this.requests = [];
@@ -126,10 +110,6 @@ Polymer({
     this.set('requests', requests);
   },
 
-  _computeAuto: function(usePouchDb) {
-    return usePouchDb === false;
-  },
-
   _projectError: function(e) {
     this.fire('app-log', {'message': ['Project ctrl', e], 'level': 'error'});
   },
@@ -144,12 +124,8 @@ Polymer({
     e.stopPropagation();
 
     this.project = e.detail.project;
-    if (this.usePouchDb) {
-      this.cancelDebouncer('project-name-change-request');
-      this.debounce('project-name-change-request', this._pouchNameChanged.bind(this), 250);
-      return;
-    }
-    this.$.project.save();
+    this.cancelDebouncer('project-name-change-request');
+    this.debounce('project-name-change-request', this._pouchNameChanged.bind(this), 250);
   },
 
   _pouchNameChanged: function() {
@@ -171,20 +147,11 @@ Polymer({
     e.preventDefault();
     e.stopPropagation();
 
-    if (this.usePouchDb) {
-      this.fire('request-name-change', {
-        'dbName': 'saved-requests',
-        'name': e.detail.item.name,
-        'id': e.detail.item._id
-      });
-      // Item will be updated by related-requests element.
-      return;
-    }
-    var request = e.detail.item;
-    if (!request) {
-      return;
-    }
-    this.$.requestSaveModel.data = request;
+    this.fire('request-name-change', {
+      'dbName': 'saved-requests',
+      'name': e.detail.item.name,
+      'id': e.detail.item._id
+    });
   },
 
   _requestSaveError: function(e) {
@@ -284,92 +251,7 @@ Polymer({
   },
 
   _deleteRequested: function(e, data) {
-    if (this.usePouchDb) {
-      this._deleteRequestedNew(e, data);
-      return;
-    }
-
-    if (data.request) {
-      // delete request
-      let requestId = data.request.id;
-      this.$.requestSaveModel.auto = false;
-      this.$.requestSaveModel.data = data.request;
-      this.$.requestSaveModel.remove()
-      .then(() => {
-        this.$.requestSaveModel.auto = true;
-        var all = this.requests;
-        for (var i = all.length - 1; i >= 0; i--) {
-          if (all[i].id === requestId) {
-            this.splice('requests', i, 1);
-            break;
-          }
-        }
-        this.removedRequestCopy = data.request;
-        StatusNotification.notify({
-          message: 'Request deleted.',
-          timeout: StatusNotification.TIME_MEDIUM,
-          actionName: 'Revert'
-        }, function() {
-          this._revertDeletedRequest();
-        }.bind(this));
-      })
-      .catch((e) => {
-        this.fire('app-log', {'message': ['Request delete', e], 'level': 'error'});
-        StatusNotification.notify({
-          message: 'Unable to delete the request. ' + e.message
-        });
-        this.fire('send-analytics', {
-          type: 'exception',
-          description: e.detail.message,
-          fatal: false
-        });
-      });
-
-      this.fire('send-analytics', {
-        type: 'event',
-        category: 'Data delete',
-        action: 'Delete project\'s request',
-        label: 'Project controller'
-      });
-    } else if (data.project) {
-      // delete project
-      var requestToRemove = data.project.requestIds;
-      this.$.requestSaveModel.auto = false;
-      this.$.requestSaveModel.objectId = requestToRemove;
-      this.$.requestSaveModel.remove()
-      .then(() => {
-        this.$.requestSaveModel.auto = true;
-        this.$.project.auto = false;
-        return this.$.project.remove();
-      })
-      .then(() => {
-        this.$.project.auto = true;
-        this.async(() => {
-          StatusNotification.notify({
-            message: 'Project deleted. '
-          });
-          arc.app.router.redirect('/');
-        });
-      })
-      .catch((e) => {
-        this.fire('app-log', {'message': ['Deleting project::', e], 'level': 'error'});
-        StatusNotification.notify({
-          message: 'Unable to delete the project. ' + e.message
-        });
-        this.fire('send-analytics', {
-          type: 'exception',
-          description: e.detail.message,
-          fatal: false
-        });
-      });
-
-      this.fire('send-analytics', {
-        type: 'event',
-        category: 'Data delete',
-        action: 'Delete project',
-        label: 'Project view'
-      });
-    }
+    this._deleteRequestedNew(e, data);
   },
 
   _revertDeletedRequest: function() {

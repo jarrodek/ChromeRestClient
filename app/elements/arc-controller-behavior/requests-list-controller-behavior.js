@@ -56,9 +56,7 @@
       toolbarFeatures: {
         type: Array,
         value: ['search', 'clearAll', 'export']
-      },
-
-      queryPagePouchDb: Boolean
+      }
     },
     observers: [
       '_sortChanged(sortBy, sortDirection)'
@@ -67,9 +65,6 @@
       this._setTitle();
       this.searchQuery = '';
       this.isShowing = true;
-
-      /* global app */
-      this.usePouchDb = app.usePouchDb;
       this.queryPage();
     },
     onHide: function() {
@@ -82,16 +77,7 @@
       this.resetView();
     },
     queryPage: function() {
-      if (!this.isShowing) {
-        return;
-      }
-      if (this.$.meta.byKey('usePouchDb')) {
-        this.set('queryPagePouchDb', true);
-        return;
-      } else {
-        this._setQuerying(true);
-        this.$.model.query();
-      }
+      console.warn('Remove me?');
     },
 
     _dataRead: function(e) {

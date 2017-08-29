@@ -14,7 +14,6 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 -->
-<link rel="import" href="../arc-request-object-model/arc-request-object-model.html">
 <link rel="import" href="../empty-states-screens/saved-list-empty.html">
 <link rel="import" href="../arc-history-list-view/arc-history-list-view.html">
 <link rel="import" href="../history-panel/history-panel.html">
@@ -43,41 +42,12 @@ the License.
     }
     </style>
     <paper-progress indeterminate hidden$="[[!querying]]"></paper-progress>
-    <template is="dom-if" if="[[_computePouchDbView(opened, usePouchDb)]]" restamp="true">
-      <history-panel
-        opened="[[opened]]"
-        on-history-panel-delete-items="_onItemDeleteRequested"
-        on-history-panel-export-items="_onItemExportRequested"
-        on-history-panel-open-item="_onItemOpenRequested"
-        on-querying-changed="_onQueryingChanged"></history-panel>
-    </template>
-    <template is="dom-if" if="[[_computeLegacyView(opened, usePouchDb)]]" restamp="true">
-      <template is="dom-if" if="{{hasListData}}">
-        <arc-history-list-view use-pouch-db="[[usePouchDb]]" querying="[[querying]]" is-history sort="{{sortBy}}" dir="{{sortDirection}}" requests="{{listData}}" on-clear-data="_clearDataStore" on-export-requested="_onExportRequested" on-delete-requested="_onDeleteRequested" on-content-scroll="_viewScrolling" querying="[[querying]]"></arc-history-list-view>
-        <onboarding-tutorial id="history" auto>
-          <onboarding-page>
-            <h2>New history list</h2>
-            <div class="onboarding-image-page">
-              <div class="image">
-                <iron-icon icon="arc:history"></iron-icon>
-              </div>
-              <div class="description">
-                <ul>
-                  <li>Double click on an item to see request details</li>
-                  <li>Select items to export them to file or to delete them</li>
-                  <li>When clearing the history all saved and asssociated with a project requests won't be deleted</li>
-                  <li>Now you can sort the history by time, HTTP method or the URL</li>
-                  <li>and seach the history in the top bar</li>
-                </ul>
-              </div>
-            </div>
-          </onboarding-page>
-        </onboarding-tutorial>
-      </template>
-      <template is="dom-if" if="{{!hasListData}}">
-        <saved-list-empty on-open-drive="openDrive"></saved-list-empty>
-      </template>
-    </template>
+    <history-panel
+      opened="[[opened]]"
+      on-history-panel-delete-items="_onItemDeleteRequested"
+      on-history-panel-export-items="_onItemExportRequested"
+      on-history-panel-open-item="_onItemOpenRequested"
+      on-querying-changed="_onQueryingChanged"></history-panel>
 
     <paper-dialog id="dataClearDialog" on-iron-overlay-closed="onClearDialogResult">
       <h2>Clear history</h2>
@@ -87,10 +57,6 @@ the License.
         <paper-button dialog-confirm autofocus>Clear</paper-button>
       </div>
     </paper-dialog>
-    <iron-meta id="meta" key="usePouchDb"></iron-meta>
-    <arc-request-object-model id="model" search-term="[[searchQuery]]" on-data-ready="_dataRead" on-error="_dbError" request-type="history" limit="[[limit]]" offset="[[offset]]" sort-by="[[sortBy]]" direction=[[sortDirection]]></arc-request-object-model>
-    <arc-request-object-model id="saveModel" auto on-save="_requestSaved" request-type="history"></arc-request-object-model>
-    <arc-request-object-model id="deleteModel" on-deleted="_selectedRemoved" on-error="_selectedRemoveError" request-type="history"></arc-request-object-model>
   </template>
 </dom-module>
 <script src="arc-history-list-controller.js"></script>

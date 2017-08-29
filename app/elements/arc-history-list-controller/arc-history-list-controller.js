@@ -16,9 +16,7 @@ Polymer({
     isHistory: {
       type: Boolean,
       value: true
-    },
-
-    usePouchDb: Boolean
+    }
   },
 
   behaviors: [
@@ -53,25 +51,11 @@ Polymer({
     view.closeDetailsPanel();
   },
 
-
   /**
    * Resets current query and perform a new query with new criteria.
    */
   onSearch: function() {
-    if (this.usePouchDb) {
-      return this._pouchDbQuery();
-    }
-    this.resetQuery();
-    this._setIsSearch(true);
-    this.queryPage();
-  },
-
-  _computePouchDbView: function(opened, usePouchDb) {
-    return !!(opened && usePouchDb);
-  },
-
-  _computeLegacyView: function(opened, usePouchDb) {
-    return !!(opened && !usePouchDb);
+    return this._pouchDbQuery();
   },
 
   _onQueryingChanged: function(e, detail) {
@@ -133,14 +117,6 @@ Polymer({
   },
 
   warnClearAll: function() {
-    if (this.usePouchDb) {
-      this.warnClearAllPouchDb();
-    } else {
-      this.$.dataClearDialog.opened = true;
-    }
-  },
-
-  warnClearAllPouchDb: function() {
     var panel = this.$$('history-panel');
     panel.warnClearAll();
   },

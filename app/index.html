@@ -70,18 +70,9 @@
             on-iron-select="_mainPageSelected"
             on-iron-deselect="_mainPageDeselected">
             <section data-route="request" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent">
-              <template is="dom-if" if="[[canRender(initialized, usePouchDb, 'true')]]" on-dom-change="_requestPanelInitiallized">
-                <request-panel narrow-layout="[[narrowLayout]]" route-params="{{params}}" with-toast="[[withToast]]"></request-panel>
-              </template>
-              <template is="dom-if" if="[[canRender(initialized,usePouchDb,'false')]]">
-                <arc-request-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" request-loading="{{requestLoading}}" has-response="{{hasResponse}}" opened="{{requestOpened}}" request="{{request}}" response="{{response}}" active-request="{{activeRequest}}" route-params="[[params]]">
-                  <arc-request-view on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" request-loading="[[requestLoading]]" opened="{{requestOpened}}" request="{{request}}"></arc-request-view>
-                  <template is="dom-if" if="[[hasResponse]]">
-                    <arc-response-view opened="[[requestOpened]]" response="[[response]]" request="[[activeRequest]]"></arc-response-view>
-                  </template>
-                  <arc-save-dialog-view on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" id="saveRequestUi"></arc-save-dialog-view>
-                </arc-request-controller>
-              </template>
+              <request-panel></request-panel>
+              <chrome-xhr-request></chrome-xhr-request>
+              <authorization-data-saver></authorization-data-saver>
             </section>
             <arc-websocket-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="socket"></arc-websocket-controller>
             <arc-history-list-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" main on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" search-query="[[searchTerm]]" data-route="history"></arc-history-list-controller>
@@ -96,7 +87,6 @@
         </div>
       </paper-scroll-header-panel>
     </paper-drawer-panel>
-    <!-- <user-provider id="userProvider" authorized="{{appAuthorized}}" profile-image="{{profileUrl}}"></user-provider> -->
     <arc-drive-controller restore-on-file id="driveController" with-backdrop></arc-drive-controller>
     <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('s', 'true')]]" on-keys-pressed="onSaveShift"></iron-a11y-keys>
     <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('s')]]" on-keys-pressed="onSave"></iron-a11y-keys>
@@ -247,7 +237,6 @@
     <arc-database id="cookieData" store="cookies"></arc-database>
     <app-pouchdb-collate></app-pouchdb-collate>
     <app-logger></app-logger>
-    <app-db-upgrade-1016></app-db-upgrade-1016>
     <arc-definitions></arc-definitions>
     <request-model></request-model>
     <project-model></project-model>
@@ -298,34 +287,27 @@
     </app-analytics>
     <drop-file-importer></drop-file-importer>
     <chrome-storage auto storage="local" name="drawerWidth" value="{{_drawerWidth}}" on-chrome-storage-read="_drawerWidthRead" value-as="Number"></chrome-storage>
+    <variables-evaluator></variables-evaluator>
+    <variables-manager></variables-manager>
+    <request-saver></request-saver>
+    <cookie-exchange external-id="apcedakaoficjlofohhcmkkljehnmebp"></cookie-exchange>
+    <cookie-jar></cookie-jar>
+    <response-history-saver></response-history-saver>
+    <url-history-saver></url-history-saver>
   </template>
-  <script src="bower_components/dexie-js/dist/dexie.min.js"></script>
   <script src="bower_components/har/build/har.js"></script>
   <script src="bower_components/lodash/lodash.js"></script>
-  <!-- <script src="bower_components/uri.js/src/URI.min.js"></script> -->
-  <!-- <script src="bower_components/cookie-parser/cookie-parser.js"></script> -->
   <script src="scripts/libs/app.router.js"></script>
   <script src="scripts/libs/app.utils.js"></script>
   <script src="scripts/libs/app.types.js"></script>
   <script src="scripts/libs/app.headers.js"></script>
-  <script src="scripts/libs/app.idb.js"></script>
-  <script src="scripts/libs/app.idb.schema.js"></script>
   <script src="scripts/libs/app.js"></script>
   <script src="scripts/libs/app.settings.js"></script>
   <script src="scripts/libs/app.drive.js"></script>
   <script src="scripts/libs/app.importer.js"></script>
   <script src="scripts/libs/app.analytics.js"></script>
   <script src="scripts/libs/app.notifications.js"></script>
-  <script src="scripts/libs/app.payload.parser.js"></script>
-  <script src="scripts/libs/app.clipboard.js"></script>
-  <!-- build:js scripts/code-mirror-custom.js -->
-  <script src="scripts/code-mirror/mode/headers/headers.js"></script>
-  <script src="scripts/code-mirror/addon/hint/http-headers.js"></script>
-  <script src="scripts/code-mirror/addon/hint/show-hint.js"></script>
-  <!-- endbuild-->
   <script src="scripts/main.js"></script>
-  <!-- <script src="test/chance.js"></script>
-  <script src="test/mock-data.js"></script> -->
 </body>
 
 </html>

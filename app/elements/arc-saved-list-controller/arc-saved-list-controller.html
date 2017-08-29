@@ -14,7 +14,6 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 -->
-<link rel="import" href="../arc-request-object-model/arc-request-object-model.html">
 <link rel="import" href="../empty-states-screens/saved-list-empty.html">
 <link rel="import" href="../arc-saved-list-view/arc-saved-list-view.html">
 <link rel="import" href="../saved-panel/saved-panel.html">
@@ -51,52 +50,10 @@ the License.
     }
     </style>
     <paper-progress indeterminate hidden$="[[!querying]]"></paper-progress>
-    <template is="dom-if" if="[[_computePouchDbView(opened, usePouchDb)]]">
-      <saved-panel querying="{{querying}}" on-querying-changed="_onQueryingChanged" opened="[[opened]]"></saved-panel>
-    </template>
-    <template is="dom-if" if="[[_computeLegacyView(opened, usePouchDb)]]" restamp="true">
-      <template is="dom-if" if="{{hasListData}}">
-        <arc-saved-list-view
-          requests="{{listData}}"
-          querying="[[querying]]"
-          search-term="[[searchQuery]]"
-          is-search="[[isSearch]]"
-          sort="{{sortBy}}"
-          dir="{{sortDirection}}"
-          on-name-changed="_requestNameChanged"
-          on-clear-data="_clearDataStore"
-          on-export-requested="_onExportRequested"
-          on-delete-requested="_onDeleteRequested"
-          on-content-scroll="_viewScrolling"
-          on-open-drive="openDrive"></arc-saved-list-view>
-        <onboarding-tutorial id="saved" auto>
-          <onboarding-page>
-            <h2>New saved requests lists</h2>
-            <div class="onboarding-image-page">
-              <div class="image">
-                <iron-icon icon="arc:save"></iron-icon>
-              </div>
-              <div class="description">
-                <ul>
-                  <li>Open Google Drive files created by the app.</li>
-                  <li>Double click on an item to see request details</li>
-                  <li>Select items to export them to file or to delete them</li>
-                  <li>Now you can sort the data by name-column, HTTP method or the URL</li>
-                  <li>and seach the list in the top header</li>
-                </ul>
-              </div>
-            </div>
-          </onboarding-page>
-        </onboarding-tutorial>
-      </template>
-    </template>
+    <saved-panel querying="{{querying}}" on-querying-changed="_onQueryingChanged" opened="[[opened]]"></saved-panel>
     <template is="dom-if" if="{{isEmpty}}">
       <saved-list-empty on-open-drive="openDrive" search-term="[[searchQuery]]"></saved-list-empty>
     </template>
-    <iron-meta id="meta" key="usePouchDb"></iron-meta>
-    <arc-request-object-model id="model" on-data-ready="_dataRead" search-term="[[searchQuery]]" on-error="_dbError" request-type="saved" limit="[[limit]]" offset="[[offset]]" sort-by="[[sortBy]]" direction=[[sortDirection]]></arc-request-object-model>
-    <arc-request-object-model id="saveModel" auto on-save="_requestSaved" request-type="saved"></arc-request-object-model>
-    <arc-request-object-model id="deleteModel" on-deleted="_selectedRemoved" on-error="_selectedRemoveError" request-type="saved"></arc-request-object-model>
   </template>
 </dom-module>
 <script src="arc-saved-list-controller.js"></script>

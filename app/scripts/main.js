@@ -19,7 +19,6 @@
   app.narrowLayout = false;
   app.forceNarrowLayout = false;
   app.upgrading = false;
-  app.usePouchDb = undefined;
   app.initialized = false;
   app.listeners = {
     'drawerResizer.track': '_drawerTrack'
@@ -31,8 +30,8 @@
    * moment it should be turned off.
    * The app will wait until upgrade script finish and the set up the `initialized` flag.
    */
-  app.canRender = (status, dataSource, elementIsRequestPanel) => {
-    return status && dataSource && elementIsRequestPanel === 'true';
+  app.canRender = (status, elementIsRequestPanel) => {
+    return status && elementIsRequestPanel === 'true';
   };
   // Open current project details page
   app.openProjectDetails = () => {
@@ -56,11 +55,7 @@
   });
   window.addEventListener('WebComponentsReady', function() {
     app.initAnalytics();
-    // if (app.upgrading) {
-    //   return;
-    // }
-    // app.initAnalytics();
-    // app.initRouting();
+    app.initRouting();
   });
   window.addEventListener('selected-project', (e) => {
     app.selectedProject = e.detail.id;
@@ -176,19 +171,11 @@
   document.body.addEventListener('action-link-change', (e) => {
     var url = e.detail.url;
     var setUrl = function(url) {
-      if (app.usePouchDb) {
-        let panel = document.querySelector('request-panel');
-        panel.set('request.url', url);
-      } else {
-        app.set('request.url', url);
-      }
+      let panel = document.querySelector('request-panel');
+      panel.set('request.url', url);
     };
     var getUrl = function() {
-      if (app.usePouchDb) {
-        return document.querySelector('request-panel').request.url;
-      } else {
-        return app.get('request.url');
-      }
+      return document.querySelector('request-panel').request.url;
     };
     var currentUrl = getUrl();
     if (currentUrl && url.indexOf('/') === 0) {
@@ -484,94 +471,6 @@
     return cmd;
   };
 
-  // called when the database upgrade element request database upgrade.
-  // It will register source int the app._dbUpgrades array
-  // and run upgrade screen.
-  window.addEventListener('database-upgrades-needed', (e) => app._onDatabaseUpgradeRequired(e));
-  window.addEventListener('app-initialize-upgrade', () => app._initUpgrades());
-  window.addEventListener('database-upgrades-ready', (e) => app._dbUpgradeReady(e));
-  window.addEventListener('database-upgrades-status', (e) => app._upgradeStatus(e));
-  window.addEventListener('database-upgrades-long-task', (e) => app._upgradeHeavyDuty(e));
-  window.addEventListener('database-upgrade-error', (e) => app._upgradeStatus(e));
-  window.addEventListener('app-upgrade-screen-coninue-errored', () => app._continueErrored());
-  window.addEventListener('app-upgrade-screen-closed', () => {
-    app.initRouting();
-  });
-  app._onDatabaseUpgradeRequired = (e) => {
-    if (!app._dbUpgrades) {
-      app._dbUpgrades = [];
-      app.launchUpgradeScreen();
-      app.upgrading = true;
-    }
-    app._dbUpgrades.push({
-      target: e.target,
-      id: e.value
-    });
-  };
-
-  app.launchUpgradeScreen = () => {
-    var el = document.createElement('app-upgrade-screen');
-    document.body.appendChild(el);
-    el.opened = true;
-  };
-  app._initUpgrades = () => {
-    if (!app._dbUpgrades || !app._dbUpgrades.length) {
-      document.querySelector('app-upgrade-screen').finished = true;
-      return;
-    }
-    var target = app._dbUpgrades[0];
-    if (!target) {
-      document.querySelector('app-upgrade-screen').finished = true;
-      return;
-    }
-    arc.app.db.idb.open()
-    .then(() => {
-      target.target.initScript();
-    });
-  };
-  app._dbUpgradeReady = (e) => {
-    app.fire('use-pouch-db');
-    app.set('usePouchDb', true);
-    app._upgradeReady(e);
-    app.push('gaCustomDimensions', {
-      index: 4,
-      value: 'PouchDb'
-    });
-  };
-  app._upgradeReady = (e) => {
-    if (!app._dbUpgrades || !app._dbUpgrades.length) {
-      let elm = document.querySelector('app-upgrade-screen');
-      if (elm) {
-        elm.finished = true;
-      }
-      app.initRouting();
-      return;
-    }
-    var target = e.target;
-    var index = app._dbUpgrades.findIndex((i) => i.target === target);
-    if (index === -1) {
-      return;
-    }
-    app._dbUpgrades.splice(index, 1);
-    if (!app._dbUpgrades.length) {
-      document.querySelector('app-upgrade-screen').finished = true;
-      app.initRouting();
-    } else {
-      app._initUpgrades();
-    }
-  };
-  app._upgradeHeavyDuty = () => {
-    document.querySelector('app-upgrade-screen').heavyDuty = true;
-  };
-  app._continueErrored = () => {
-    // Current updrage script errored.
-    // continue with next or exit if there's no more upgrades.
-    app._dbUpgrades.shift();
-    app._initUpgrades();
-  };
-  app._upgradeStatus = (e) => {
-    app.fire('app-upgrade-screen-log', e.detail);
-  };
   app._requestPanelInitiallized = () => {
     if (app.route !== 'request') {
       return;

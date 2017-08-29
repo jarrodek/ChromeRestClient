@@ -5,8 +5,6 @@ Polymer({
   is: 'arc-saved-list-controller',
 
   properties: {
-    usePouchDb: Boolean,
-
     toolbarFeatures: {
       type: Array,
       value: ['search', 'clearAll', 'export']
@@ -23,12 +21,8 @@ Polymer({
    * Resets current query and perform a new query with new criteria.
    */
   onSearch: function() {
-    if (this.usePouchDb) {
-      return this._pouchDbQuery();
-    }
-    this.resetQuery();
-    this._setIsSearch(true);
-    this.queryPage();
+    var p1 = this.$$('saved-panel');
+    p1.searchQuery = this.searchQuery;
   },
 
   get view() {
@@ -75,33 +69,14 @@ Polymer({
     view.closeDetailsPanel();
   },
 
-  _computePouchDbView: function(opened, usePouchDb) {
-    return !!(opened && usePouchDb);
-  },
-
-  _computeLegacyView: function(opened, usePouchDb) {
-    return !!(opened && !usePouchDb);
-  },
-
   _onQueryingChanged: function(e, detail) {
     this._setQuerying(detail.value);
     this._setIsEmpty(false);
   },
 
   warnClearAll: function() {
-    if (this.usePouchDb) {
-      this.warnClearAllPouchDb();
-    }
-  },
-
-  warnClearAllPouchDb: function() {
     var panel = this.$$('saved-panel');
     panel.warnClearAll();
-  },
-
-  _pouchDbQuery: function() {
-    var p1 = this.$$('saved-panel');
-    p1.searchQuery = this.searchQuery;
   }
 });
 })();
