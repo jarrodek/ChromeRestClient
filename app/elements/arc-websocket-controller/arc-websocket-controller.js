@@ -188,8 +188,10 @@ Polymer({
     if (!url) {
       return;
     }
-    var event = this.fire('websocket-url-history-object-read', {
+    var event = this.fire('websocket-url-history-read', {
       url: url
+    }, {
+      cancelable: true
     });
     event.detail.result.then((doc) => {
       if (!doc) {
@@ -202,8 +204,10 @@ Polymer({
         doc.cnt++;
         doc.time = Date.now();
       }
-      this.fire('websocket-url-history-object-change', {
+      this.fire('websocket-url-history-changed', {
         item: doc
+      }, {
+        cancelable: true
       });
       this._appendHistoryItem(doc);
     });

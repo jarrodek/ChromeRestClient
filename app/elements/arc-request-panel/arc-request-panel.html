@@ -1,0 +1,32 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/request-panel/request-panel.html">
+<link rel="import" href="../../bower_components/chrome-xhr-request/chrome-xhr-request.html">
+<link rel="import" href="../../bower_components/chrome-socket-request/chrome-socket-request.html">
+<link rel="import" href="../../bower_components/install-proxy-dialog/install-proxy-dialog.html">
+<link rel="import" href="../../bower_components/request-save-dialog/request-save-dialog.html">
+<link rel="import" href="../../bower_components/chrome-storage/chrome-storage.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<dom-module id="arc-request-panel">
+  <template>
+    <style>
+    :host {
+      @apply --layout-vertical;
+      @apply --arc-request-panel;
+    }
+
+    request-panel {
+      @apply --layout-flex;
+    }
+    </style>
+    <request-panel request="{{request}}"></request-panel>
+    <chrome-storage id="latest" type="local" name="latestRequest" value="[[request]]" on-chrome-storage-read="_latestLoaded"></chrome-storage>
+
+    <chrome-xhr-request connected="{{hasProxyInstalled}}" extension-id="apcedakaoficjlofohhcmkkljehnmebp"></chrome-xhr-request>
+    <chrome-socket-request></chrome-socket-request>
+    <authorization-data-saver></authorization-data-saver>
+    <install-proxy-dialog></install-proxy-dialog>
+    <request-save-dialog on-save-request="_saveRequestDialogHandler"></request-save-dialog>
+    <paper-toast id="errorToast"></paper-toast>
+  </template>
+  <script src="arc-request-panel.js"></script>
+</dom-module>

@@ -16,6 +16,8 @@ the License.
 -->
 <link rel="import" href="../drop-file-importer/arc-import-behavior.html">
 <link rel="import" href="../drive-file-picker/drive-file-picker.html">
+<link rel="import" href="../../bower_components/error-message/error-message.html">
+
 
 <!--
 The `arc-file-importer` element is a helper element for `arc-data-import-controller`
@@ -55,9 +57,9 @@ Example:
     </template>
 
     <div class="error" hidden$="[[!isImportError]]">
-      <arc-error-message>
+      <error-message>
         <p>[[importError]]</p>
-      </arc-error-message>
+      </error-message>
     </div>
 
     <div class="drive-import" hidden$="[[!isDriveImport]]">

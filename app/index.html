@@ -69,11 +69,7 @@
             selected="[[route]]"
             on-iron-select="_mainPageSelected"
             on-iron-deselect="_mainPageDeselected">
-            <section data-route="request" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent">
-              <request-panel></request-panel>
-              <chrome-xhr-request></chrome-xhr-request>
-              <authorization-data-saver></authorization-data-saver>
-            </section>
+            <arc-request-panel data-route="request" route-params="{{params}}" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent"></arc-request-panel>
             <arc-websocket-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="socket"></arc-websocket-controller>
             <arc-history-list-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" main on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" search-query="[[searchTerm]]" data-route="history"></arc-history-list-controller>
             <arc-saved-list-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" search-query="[[searchTerm]]" data-route="saved"></arc-saved-list-controller>
@@ -238,10 +234,6 @@
     <app-pouchdb-collate></app-pouchdb-collate>
     <app-logger></app-logger>
     <arc-definitions></arc-definitions>
-    <request-model></request-model>
-    <project-model></project-model>
-    <url-history-model></url-history-model>
-    <websocket-url-history-model></websocket-url-history-model>
     <!-- UUID generator is used in data importer. It has reference to element's id. -->
     <uuid-generator id="uuid"></uuid-generator>
 
@@ -295,7 +287,6 @@
     <response-history-saver></response-history-saver>
     <url-history-saver></url-history-saver>
   </template>
-  <script src="bower_components/har/build/har.js"></script>
   <script src="bower_components/lodash/lodash.js"></script>
   <script src="scripts/libs/app.router.js"></script>
   <script src="scripts/libs/app.utils.js"></script>

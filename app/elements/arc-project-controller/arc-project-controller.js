@@ -14,8 +14,7 @@ Polymer({
      * Route params passed from the router.
      */
     routeParams: {
-      type: Object,
-      observer: '_prepareProject'
+      type: Object
     },
     toolbarFeatures: {
       type: Array,
@@ -67,7 +66,7 @@ Polymer({
     this.projectId = undefined;
   },
 
-  _getDb: function() {
+  get db() {
     return new PouchDB('legacy-projects');
   },
 
@@ -76,14 +75,8 @@ Polymer({
       return;
     }
     this.requests = [];
-    var event = this.fire('project-read', {
-      id: projectId
-    });
-    if (event.detail.error) {
-      console.error(event.detail.message);
-      return;
-    }
-    event.detail.result.then((result) => {
+    this.db.get(projectId)
+    .then((result) => {
       this.set('project', result);
     });
     this.set('projectId', projectId);
@@ -129,14 +122,14 @@ Polymer({
   },
 
   _pouchNameChanged: function() {
-    var event = this.fire('project-name-change', {
-      projectId: this.projectId,
+    var event = this.fire('project-name-changed', {
       project: this.project,
       name: this.project.name
+    }, {
+      cancelable: true
     });
     if (event.detail.error) {
-      console.error(event.detail.message);
-      return;
+      throw new Error(event.detail.message);
     }
     event.detail.result.then((result) => {
       this.project._rev = result._rev;
@@ -147,10 +140,12 @@ Polymer({
     e.preventDefault();
     e.stopPropagation();
 
-    this.fire('request-name-change', {
-      'dbName': 'saved-requests',
+    this.fire('request-name-changed', {
+      'type': 'saved-requests',
       'name': e.detail.item.name,
       'id': e.detail.item._id
+    }, {
+      cancelable: true
     });
   },
 
@@ -182,24 +177,24 @@ Polymer({
     if (this.requests && this.requests.length) {
       requests = this.requests.map((i) => i._id);
     }
-    var event = this.fire('request-objects-delete', {
+    var event = this.fire('request-objects-deleted', {
       dbName: 'saved-requests',
       items: requests
+    }, {
+      cancelable: true
     });
 
     if (event.detail.error) {
-      console.error(event.detail.message);
-      return;
+      throw new Error(event.detail.message);
     }
     event.detail.result
     .then(() => {
-      let e = this.fire('project-object-delete', {
+      let e = this.fire('project-object-deleted', {
         id: this.project._id,
         rev: this.project._rev
+      }, {
+        cancelable: true
       });
-      if (e.detail.error) {
-        throw e.detail.message;
-      }
       return e.detail.result;
     })
     .then(() => {
@@ -327,9 +322,11 @@ Polymer({
   },
 
   _updateItem: function(item) {
-    var event = this.fire('request-object-change', {
+    var event = this.fire('request-object-changed', {
       dbName: 'saved-requests',
       request: item
+    }, {
+      cancelable: true
     });
 
     if (!event.detail.result) {
@@ -368,6 +365,8 @@ Polymer({
       this.fire('request-objects-deleted', {
         items: items,
         type: 'saved'
+      }, {
+        cancelable: true
       });
       var data = this.requests;
       data = data.filter((i) => items.indexOf(i._id) === -1);

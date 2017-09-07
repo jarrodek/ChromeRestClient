@@ -264,11 +264,11 @@ Polymer({
 
   _queryUrlHistory: function(e) {
     var value = e.detail.value;
-    let event = this.fire('websocket-url-history-object-query', {
+    let event = this.fire('websocket-url-history-query', {
       q: value
     });
     if (!event.detail.result) {
-      return;
+      throw new Error('Query not handled');
     }
     event.detail.result.then((data) => {
       var suggestions = data.map((item) => item._id);

@@ -1,4 +1,5 @@
 <link rel="import" href="arc-import-behavior.html">
+<link rel="import" href="../../bower_components/error-message/error-message.html">
 
 <dom-module id="drop-file-importer">
   <template>
@@ -82,9 +83,9 @@
         <p class="info">In case of big files it can take a while...</p>
       </div>
       <div class="error" hidden$="[[!isImportError]]">
-        <arc-error-message>
+        <error-message>
           <p>[[importError]]</p>
-        </arc-error-message>
+        </error-message>
       </div>
       <arc-import-data-table-view
         hidden$="[[_computeHidePreviewTable(isImportData, importing, isImportError)]]"

@@ -417,14 +417,15 @@
       e.preventDefault();
       e.stopPropagation();
 
-      let event = this.fire('request-name-change', {
-        'dbName': 'saved-requests',
-        'name': e.detail.item.name,
-        'request': e.detail.item
+      let event = this.fire('request-name-changed', {
+        type: 'saved-requests',
+        name: e.detail.item.name,
+        request: e.detail.item
+      }, {
+        cancelable: true
       });
       if (event.detail.error) {
-        console.error(event.detail.message);
-        return;
+        throw new Error(event.detail.message);
       }
       event.detail.result
       .then((request) => {

@@ -1,6 +1,8 @@
 <script src="web-socket-message.js"></script>
 
 <link rel="import" href="../empty-states-screens/websockets-empty-history.html">
+<link rel="import" href="../../bower_components/arc-models/websocket-url-history-model.html">
+
 
 <dom-module id="arc-websocket-controller">
   <template>
@@ -54,6 +56,7 @@
       name="lastSocket"
       value="{{lastSocketUrl}}"
       on-chrome-storage-read="_restoredHandler"></chrome-storage>
+    <websocket-url-history-model></websocket-url-history-model>
   </template>
   <script src="arc-websocket-controller.js"></script>
 </dom-module>

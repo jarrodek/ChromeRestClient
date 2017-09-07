@@ -206,7 +206,7 @@
   });
 
   app.onSave = (e, detail) => {
-    var ctrl = document.querySelector('arc-request-controller, request-panel');
+    var ctrl = document.querySelector('arc-request-panel');
     ctrl.onSave({
       source: 'shortcut',
       shift: detail.keyboardEvent.shiftKey

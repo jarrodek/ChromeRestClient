@@ -38,10 +38,10 @@ Polymer({
 
   _queryHistory: function() {
     this._setLoading(true);
-    var event = this.fire('websocket-url-history-object-query-history');
+    var event = this.fire('websocket-url-history-list');
     if (!event.detail.result) {
       this._setLoading(false);
-      return;
+      throw new Error('Query not handled');
     }
     event.detail.result
     .then((data) => {
