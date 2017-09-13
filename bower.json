@@ -52,7 +52,9 @@
     "fetch": "advanced-rest-client/fetch#2.1.0-arc",
     "request-save-dialog": "advanced-rest-client/request-save-dialog#^0.1.1",
     "error-message": "advanced-rest-client/error-message#^0.1.1",
-    "arc-models": "advanced-rest-client/arc-models#^0.1.1"
+    "arc-models": "advanced-rest-client/arc-models#^0.1.1",
+    "arc-data-export": "advanced-rest-client/arc-data-export#^0.1.1",
+    "project-details": "advanced-rest-client/project-details#^0.1.1"
   },
   "devDependencies": {
     "web-component-tester": "*",

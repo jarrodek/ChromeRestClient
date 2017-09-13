@@ -392,7 +392,7 @@
           let items = res.map((i) => i.id);
           this.fire('request-objects-deleted', {
             items: items,
-            type: 'history'
+            type: 'history-requests'
           });
           var data = this.historyData;
           data = data.filter((i) => items.indexOf(i._id) === -1);
