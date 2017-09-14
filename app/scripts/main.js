@@ -12,8 +12,6 @@
   app.appVersion = arc.app.utils.appVer;
   app.appId = chrome.runtime && chrome.runtime.id ? chrome.runtime.id : 'not-in-chrome-app';
   app.analyticsDisabled = false;
-  // Will be set to true when toas has been opened.
-  app.withToast = false;
   // Selected environment for magic variables.
   app.variablesEnvironment = 'default';
   app.narrowLayout = false;
@@ -342,22 +340,10 @@
     if (cls) {
       document.body.classList.add(cls);
       Polymer.updateStyles();
-      if (channel === 'canary') {
-        chrome.storage.local.get({'showCanaryWarning': true}, (r) => {
-          if (r.showCanaryWarning) {
-            app.$.canaryInfo.open();
-          }
-        });
-      }
     }
     if (channel === 'stable') {
       var elm = app.$.onboardingNotifications;
       elm.parentNode.removeChild(elm);
-    }
-  };
-  app._canaryInfoClosed = () => {
-    if (app.$.canaryMemoDontShow.checked) {
-      chrome.storage.local.set({'showCanaryWarning': false});
     }
   };
   /**
@@ -578,28 +564,6 @@
     app.set('analyticsDisabled', !permitted);
   });
 
-  // Toast show UI animation.
-  window.addEventListener('iron-announce', (e) => {
-    var target = e.target;
-    if (!target) {
-      return;
-    }
-    if (target.nodeName === 'PAPER-TOAST') {
-      app.currentToast = target;
-      app.set('withToast', true);
-    }
-  });
-  // Toast close UI animation.
-  window.addEventListener('iron-overlay-closed', (e) => {
-    if (!app.currentToast) {
-      return;
-    }
-    if (app.currentToast !== e.target) {
-      return;
-    }
-    app.set('withToast', false);
-    app.currentToast = undefined;
-  });
   window.addEventListener('variables-environment-changed', (e) => {
     app.variablesEnvironment = e.detail.env;
   });
@@ -680,4 +644,24 @@
   };
   // Computes `active` flag for the legacy project related requests
   app._processProjectRequests = (route) => route === 'request';
+
+  window.addEventListener('logs-requested', function() {
+    var logViewer = document.querySelector('arc-log-viewer');
+    if (!logViewer) {
+      throw new Error('Log viewer not available.');
+    }
+    logViewer.open();
+  });
+
+  window.addEventListener('app-new-window', function() {
+    chrome.runtime.getBackgroundPage(function(bg) {
+      bg.arc.bg.openWindow();
+    });
+  });
+
+  window.addEventListener('app-version', function(e) {
+    // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
+    e.detail.version = chrome.runtime.getManifest().version_name;
+    //jscs:enable requireCamelCaseOrUpperCaseIdentifiers
+  });
 })(document, window);

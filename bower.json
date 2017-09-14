@@ -26,7 +26,6 @@
     "file-reader": "advanced-rest-client/file-reader#^1.0.3",
     "chrome-storage": "advanced-rest-client/chrome-storage#^1.0.2",
     "arc-definitions": "advanced-rest-client/arc-definitions#^1.0.3",
-    "arc-database": "advanced-rest-client/arc-database#^1.0.4",
     "app-pouchdb-quick-search": "advanced-rest-client/app-pouchdb-quick-search#^1.0.4",
     "app-pouchdb-collate": "advanced-rest-client/app-pouchdb-collate#^1.0.1",
     "app-logger": "advanced-rest-client/app-logger#~0.0.2",
@@ -54,7 +53,8 @@
     "error-message": "advanced-rest-client/error-message#^0.1.1",
     "arc-models": "advanced-rest-client/arc-models#^0.1.1",
     "arc-data-export": "advanced-rest-client/arc-data-export#^0.1.1",
-    "project-details": "advanced-rest-client/project-details#^0.1.1"
+    "project-details": "advanced-rest-client/project-details#^0.1.1",
+    "arc-menu": "advanced-rest-client/arc-menu#^0.1.1"
   },
   "devDependencies": {
     "web-component-tester": "*",

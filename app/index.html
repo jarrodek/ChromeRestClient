@@ -12,7 +12,7 @@
   <link rel="import" href="elements/elements.html">
   <link rel="import" href="bower_components/arc-data-export/arc-data-export.html">
   <link rel="import" href="bower_components/project-details/project-details.html">
-
+  <link rel="import" href="bower_components/arc-menu/arc-menu.html">
   <style is="custom-style" include="shared-styles"></style>
 </head>
 <body>
@@ -27,7 +27,7 @@
           <paper-icon-button icon="arc:pin-drawer" class$="[[_computePinDrawerClass(forceNarrowLayout, narrowLayout)]]" on-tap="_pinDrawer" title="Pin drawer" alt="Pin drawer"></paper-icon-button>
         </paper-toolbar>
         <template is="dom-if" if="[[initialized]]">
-            <arc-menu-controller loading use-pouch-db="[[usePouchDb]]" with-toast="[[withToast]]" route="[[route]]" route-params="[[params]]"></arc-menu-controller>
+          <arc-menu selected-request="" route-base="[[route]]"></arc-menu>
         </template>
         <div id="drawerResizer"></div>
       </paper-scroll-header-panel>
@@ -92,6 +92,7 @@
     <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('f')]]" on-keys-pressed="onSearch"></iron-a11y-keys>
     <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('n')]]" on-keys-pressed="onNewWindow"></iron-a11y-keys>
     <iron-a11y-keys target="[[document.body]]" keys="[[_computeA11yButtons('r')]]" on-keys-pressed="onSend"></iron-a11y-keys>
+
     <onboarding-tutorial id="onboarding" auto>
       <onboarding-page>
         <div class="welcome-message">
@@ -204,19 +205,7 @@
         </div>
       </onboarding-page>
     </onboarding-tutorial>
-    <paper-dialog id="canaryInfo" on-iron-overlay-closed="_canaryInfoClosed">
-      <h2>You are using the cannary channel</h2>
-      <paper-dialog-scrollable>
-        This version is not for production and it's daily build of the app.<br/>
-        Probably it is not working and you shouldn't use it unless you know what you are doing.
-        <div>
-          <paper-checkbox id="canaryMemoDontShow">Don't show this message in future</paper-checkbox>
-        </div>
-      </paper-dialog-scrollable>
-      <div class="buttons">
-        <paper-button dialog-dismiss>Close</paper-button>
-      </div>
-    </paper-dialog>
+
     <network-state online="{{online}}" on-network-state-changed="_networkStateChanged"></network-state>
     <paper-toast id="offlineToast" class="fit-bottom offline-toast" text="You are now offline. Can't make new requests." duration="-1">
       <paper-button on-tap="closeOfflineMessage">close</paper-button>
@@ -224,16 +213,7 @@
     <arc-log-viewer></arc-log-viewer>
     <search-bar id="content-search-bar" on-iron-overlay-opened="textSearchBarOpened"></search-bar>
     <!-- Elements on new app -->
-    <arc-database id="savedRequests" store="saved-requests"></arc-database>
-    <arc-database id="historyRequests" store="history-requests"></arc-database>
-    <arc-database id="projects" store="legacy-projects"></arc-database>
-    <arc-database id="logs" store="logs"></arc-database>
-    <arc-database id="history-data" store="history-data"></arc-database>
-    <arc-database id="variables" store="variables"></arc-database>
-    <arc-database id="environments" store="environments"></arc-database>
-    <arc-database id="authData" store="auth-data"></arc-database>
-    <arc-database id="cookieData" store="cookies"></arc-database>
-    <app-pouchdb-collate></app-pouchdb-collate>
+    
     <app-logger></app-logger>
     <arc-definitions></arc-definitions>
     <!-- UUID generator is used in data importer. It has reference to element's id. -->
