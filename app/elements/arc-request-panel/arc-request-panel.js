@@ -28,6 +28,8 @@ Polymer({
      * If set the panel will use the XHR proxy to send the request
      */
     useXhr: Boolean,
+    // Currently selected project.
+    projectId: String
   },
 
   listeners: {
@@ -38,7 +40,8 @@ Polymer({
     '_routeChnaged(routeParams, opened)',
     '_openedChanged(opened)',
     '_proxyRequestChanged(proxyRequest.*)',
-    '_requestChanged(request.*)'
+    '_requestChanged(request.*)',
+    '_projectIdChanged(projectId)'
   ],
 
   _routeChnaged: function(route, opened) {
@@ -203,6 +206,9 @@ Polymer({
       payload: data.payload,
       url: data.url
     };
+    if (data.legacyProject !== this.projectId) {
+      this.set('projectId', data.legacyProject);
+    }
     this.set('request', base);
   },
   // Restores latest request from local storage.
@@ -353,6 +359,12 @@ Polymer({
       });
       this.$.errorToast.text = 'Unable to save current request. ' + cause.message;
       this.$.errorToast.opened = true;
+    });
+  },
+
+  _projectIdChanged: function(id) {
+    this.fire('selected-project-changed', {
+      value: id
     });
   }
 });

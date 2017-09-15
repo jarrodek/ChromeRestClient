@@ -4,7 +4,7 @@
   let app = document.querySelector('#app');
   app.pageTitle = '';
   /**
-   * The same as above.
+   * Selected request database ID
    */
   app.selectedRequest = null;
   app.selectedProject = null;
@@ -20,6 +20,38 @@
   app.initialized = false;
   app.listeners = {
     'drawerResizer.track': '_drawerTrack'
+  };
+  app.observers = [
+    '_routeChanged(route, params.*)'
+  ];
+  app._routeChanged = function(route, paramsRecord) {
+    var params = paramsRecord && paramsRecord.base;
+    switch (route) {
+      case 'request':
+        if (!params || !params.type) {
+          return;
+        }
+        var id;
+        if (params.type === 'history') {
+          id = params.historyId;
+        } else if (params.type === 'saved') {
+          id = params.savedId;
+        } else {
+          throw new Error('ID not handled!');
+        }
+        app.selectedRequest = decodeURIComponent(id);
+        return;
+      case 'project':
+        if (!params) {
+          return;
+        }
+        app.fire('selected-project-changed', {
+          value: params.projectId
+        });
+        break;
+      default:
+        app.selectedRequest = undefined;
+    }
   };
   /**
    * Returns true when both parameteres are trully.
@@ -55,8 +87,8 @@
     app.initAnalytics();
     app.initRouting();
   });
-  window.addEventListener('selected-project', (e) => {
-    app.selectedProject = e.detail.id;
+  window.addEventListener('selected-project-changed', (e) => {
+    app.selectedProject = e.detail.value;
   });
   app.initRouting = () => {
     if (app.routingInitialized) {

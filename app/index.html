@@ -27,7 +27,7 @@
           <paper-icon-button icon="arc:pin-drawer" class$="[[_computePinDrawerClass(forceNarrowLayout, narrowLayout)]]" on-tap="_pinDrawer" title="Pin drawer" alt="Pin drawer"></paper-icon-button>
         </paper-toolbar>
         <template is="dom-if" if="[[initialized]]">
-          <arc-menu selected-request="" route-base="[[route]]"></arc-menu>
+          <arc-menu selected-request="[[selectedRequest]]" route-base="[[route]]"></arc-menu>
         </template>
         <div id="drawerResizer"></div>
       </paper-scroll-header-panel>
@@ -213,7 +213,7 @@
     <arc-log-viewer></arc-log-viewer>
     <search-bar id="content-search-bar" on-iron-overlay-opened="textSearchBarOpened"></search-bar>
     <!-- Elements on new app -->
-    
+
     <app-logger></app-logger>
     <arc-definitions></arc-definitions>
     <!-- UUID generator is used in data importer. It has reference to element's id. -->
