@@ -24,6 +24,7 @@
   app.observers = [
     '_routeChanged(route, params.*)'
   ];
+
   app._routeChanged = function(route, paramsRecord) {
     var params = paramsRecord && paramsRecord.base;
     switch (route) {
@@ -48,6 +49,10 @@
         app.fire('selected-project-changed', {
           value: params.projectId
         });
+        break;
+      case 'socket':
+        app.pageTitle = 'Socket';
+        app.selectedRequest = undefined;
         break;
       default:
         app.selectedRequest = undefined;
