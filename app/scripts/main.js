@@ -231,11 +231,6 @@
     }
     app.scrollPageToTop();
   });
-  // called when any component want to write to clipboard.
-  document.body.addEventListener('clipboard-write', (e) => {
-    var data = e.detail.data;
-    arc.app.clipboard.write(data);
-  });
   document.body.addEventListener('project-saved', () => {
     document.querySelector('arc-menu-controller').refreshProjects();
   });

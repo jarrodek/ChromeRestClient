@@ -136,12 +136,31 @@ Polymer({
     }
   },
 
+  _ensureDate: function(time) {
+    if (time instanceof Date) {
+      return time;
+    } else if (Number.isInteger(time)) {
+      return new Date(time);
+    } else {
+      try {
+        let d = new Date(time);
+        if (Number.isNaN(d.getDate())) {
+          return new Date();
+        } else {
+          return d;
+        }
+      } catch (e) {
+        return new Date();
+      }
+    }
+  },
+
   computeHistoryTime: function(change, path) {
     var date;
     if (path) {
-      date = Object.ensureDate({}, 'date', this.get(path, change.base[change.base.length - 1]));
+      date = this._ensureDate(this.get(path, change.base[change.base.length - 1]));
     } else {
-      date = Object.ensureDate({}, 'date', change);
+      date = this._ensureDate(change);
     }
 
     var options = {
