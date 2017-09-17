@@ -582,13 +582,6 @@
       index: 5,
       value: channel
     });
-
-    arc.app.analytics.getChannelName().then((channel) => {
-      app.push('gaCustomDimensions', {
-        index: 3,
-        value: channel
-      });
-    });
   };
 
   window.addEventListener('analytics-permitted-change', (e) => {
