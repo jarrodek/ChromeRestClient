@@ -263,32 +263,39 @@ Polymer({
     StatusNotification.notify({
       message: 'Preparing data. Wait a sec...'
     });
-    arc.app.importer.prepareExport({
-      type: sources
-    })
-    .then((data) => {
-      this.exportContent = data;
-      var date = new Date();
-      var day = date.getDate();
-      var year = date.getFullYear();
-      var month = date.getMonth() + 1;
-      this.fileSuggestedName = 'arc-export-' + day + '-' + month + '-' + year + '-all.json';
-      this.exportMime = 'json';
-      this.exportData();
-      this.fire('send-analytics', {
-        type: 'event',
-        category: 'Engagement',
-        action: 'Click',
-        label: 'Export saved as file'
-      });
-    })
-    .catch((e) => {
-      this.fire('app-log', {
-        'message': ['Export data.', e],
-        'level': 'error'
-      });
+
+    var date = new Date();
+    var day = date.getDate();
+    var year = date.getFullYear();
+    var month = date.getMonth() + 1;
+
+    var event = this.fire('export-user-data', {
+      type: sources,
+      file: 'arc-export-' + day + '-' + month + '-' + year + '-all.json'
+    }, {
+      cancelable: true,
+      composed: true
+    });
+
+    if (!event.defaultPrevented) {
       StatusNotification.notify({
         message: 'Unable to export data :(',
+        timeout: StatusNotification.TIME_MEDIUM
+      });
+      throw new Error('Export element not found.');
+    }
+    
+    this.fire('send-analytics', {
+      type: 'event',
+      category: 'Engagement',
+      action: 'Click',
+      label: 'Export saved as file'
+    });
+
+    event.detail.result.then(data => {
+      console.log(data);
+      StatusNotification.notify({
+        message: 'Implement me!',
         timeout: StatusNotification.TIME_MEDIUM
       });
     });
