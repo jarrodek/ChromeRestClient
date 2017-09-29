@@ -10,16 +10,25 @@
   <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
   <link rel="import" href="bower_components/font-roboto-local/roboto.html">
   <link rel="import" href="elements/elements.html">
-  <link rel="import" href="bower_components/arc-data-export/arc-data-export.html">
   <link rel="import" href="bower_components/project-details/project-details.html">
   <link rel="import" href="bower_components/arc-menu/arc-menu.html">
   <link rel="import" href="elements/arc-about/arc-about.html">
   <link rel="import" href="bower_components/websocket-panel/websocket-panel.html">
+  <link rel="import" href="bower_components/chrome-file-export/chrome-file-export.html">
+  <link rel="import" href="bower_components/arc-chrome-settings/arc-chrome-settings.html">
+  <link rel="import" href="bower_components/arc-settings-panel/arc-settings-panel.html">
+  <link rel="import" href="bower_components/saved-requests-panel/saved-requests-panel.html">
+  <link rel="import" href="bower_components/history-panel/history-panel.html">
+  <link rel="import" href="bower_components/google-drive-browser/google-drive-browser.html">
+  <link rel="import" href="bower_components/paper-toast/paper-toast.html">
+  <link rel="import" href="bower_components/arc-data-import/arc-data-import.html">
+  <link rel="import" href="bower_components/arc-data-export/arc-data-export.html">
+  <link rel="import" href="bower_components/data-import-export-panel/data-import-export-panel.html">
+
   <style is="custom-style" include="shared-styles"></style>
 </head>
 <body>
   <template is="dom-bind" id="app">
-    <iron-meta id="meta" key="usePouchDb" value="{{usePouchDb}}"></iron-meta>
     <arc-loader-screen id="appLOader" opened></arc-loader-screen>
     <paper-drawer-panel responsive-width="1000px" id="paperDrawerPanel" force-narrow="{{forceNarrowLayout}}" narrow="{{narrowLayout}}" drawer-width="[[drawerWidth]]" disable-edge-swipe disable-swipe>
       <paper-scroll-header-panel drawer>
@@ -72,17 +81,16 @@
             class="mainPages"
             attr-for-selected="data-route"
             selected-attribute="opened"
-            selected="[[route]]"
-            on-iron-select="_mainPageSelected"
-            on-iron-deselect="_mainPageDeselected">
-            <arc-request-panel data-route="request" route-params="{{params}}" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent"></arc-request-panel>
-            <websocket-panel on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="socket"></websocket-panel>
-            <arc-history-list-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" main on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" search-query="[[searchTerm]]" data-route="history"></arc-history-list-controller>
-            <arc-saved-list-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" search-query="[[searchTerm]]" data-route="saved"></arc-saved-list-controller>
-            <arc-data-io-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="dataimport"></arc-data-io-controller>
-            <arc-settings-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="settings"></arc-settings-controller>
-            <arc-about on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="about"></arc-about>
-            <project-details on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="project" project-id="[[params.projectId]]" attr-for-opened="opened"></project-details>
+            selected="[[route]]">
+            <arc-request-panel data-route="request" route-params="{{params}}"></arc-request-panel>
+            <websocket-panel data-route="socket"></websocket-panel>
+            <history-panel data-route="history"></history-panel>
+            <saved-requests-panel data-route="saved"></saved-requests-panel>
+            <data-import-export-panel data-route="dataimport" api-key="592877543090-6tqu3mbhcbc3437cfj5f0ahjtui5tjac.apps.googleusercontent.com"></data-import-export-panel>
+            <arc-settings-panel data-route="settings"></arc-settings-panel>
+            <arc-about data-route="about"></arc-about>
+            <project-details data-route="project" project-id="[[params.projectId]]" attr-for-opened="opened"></project-details>
+            <google-drive-browser data-route="drive" attr-for-opened="opened" api-key="592877543090-6tqu3mbhcbc3437cfj5f0ahjtui5tjac.apps.googleusercontent.com" access-token="[[accessToken]]" on-drive-file-picker-data="_openDriveRequest"></google-drive-browser>
           </iron-pages>
         </div>
       </paper-scroll-header-panel>
@@ -209,17 +217,25 @@
     </onboarding-tutorial>
 
     <network-state online="{{online}}" on-network-state-changed="_networkStateChanged"></network-state>
+    <paper-toast id="errorToast" duration="5000"></paper-toast>
     <paper-toast id="offlineToast" class="fit-bottom offline-toast" text="You are now offline. Can't make new requests." duration="-1">
       <paper-button on-tap="closeOfflineMessage">close</paper-button>
     </paper-toast>
     <arc-log-viewer></arc-log-viewer>
     <search-bar id="content-search-bar" on-iron-overlay-opened="textSearchBarOpened"></search-bar>
     <!-- Elements on new app -->
-
     <app-logger></app-logger>
     <arc-definitions></arc-definitions>
     <!-- UUID generator is used in data importer. It has reference to element's id. -->
     <uuid-generator id="uuid"></uuid-generator>
+
+    <chrome-signin-aware
+      id="signInAware"
+      is-authorized="{{appAuthorized}}"
+      signed-in="{{chromeSignedIn}}"
+      access-token="{{accessToken}}"
+      on-chrome-signin-aware-success="_chromeSignin"
+      on-chrome-signin-aware-signed-out="_chromeSignout"></google-signin-aware>
 
     <app-analytics
       tracking-id="UA-18021184-6"
@@ -271,6 +287,9 @@
     <response-history-saver></response-history-saver>
     <url-history-saver></url-history-saver>
     <arc-data-export></arc-data-export>
+    <arc-data-import></arc-data-import>
+    <chrome-file-export></chrome-file-export>
+    <arc-chrome-settings></arc-chrome-settings>
   </template>
   <script src="bower_components/lodash/lodash.js"></script>
   <script src="scripts/libs/app.router.js"></script>

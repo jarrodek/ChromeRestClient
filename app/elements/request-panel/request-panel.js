@@ -3,7 +3,7 @@
   Polymer({
     is: 'request-panel',
     behaviors: [
-      ArcBehaviors.ArcFileExportBehavior,
+      // ArcBehaviors.ArcFileExportBehavior,
       ArcBehaviors.ArcControllerBehavior,
       ArcBehaviors.ArcMagicVariablesRunnerBehavior
     ],

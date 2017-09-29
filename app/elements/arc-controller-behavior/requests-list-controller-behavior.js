@@ -62,13 +62,10 @@
       '_sortChanged(sortBy, sortDirection)'
     ],
     onShow: function() {
-      this._setTitle();
       this.searchQuery = '';
       this.isShowing = true;
-      this.queryPage();
     },
     onHide: function() {
-      this._setPageTitle('');
       this.searchQuery = '';
       this.isShowing = false;
       window.setTimeout(function() {
@@ -76,6 +73,7 @@
       }.bind(this), 250);
       this.resetView();
     },
+    
     queryPage: function() {
       console.warn('Remove me?');
     },
@@ -104,16 +102,35 @@
       if (!items) {
         return;
       }
-      this.exportContent = arc.app.importer.createExportObject({
-        requests: items
+
+      var event = this.fire('export-create-object', {
+        types: {
+          requests: items
+        }
+      }, {
+        cancelable: true,
+        composed: true
       });
+      if (!event.defaultPrevented) {
+        throw new Error('Export module not found.');
+      }
       var date = new Date();
       var day = date.getDate();
       var year = date.getFullYear();
       var month = date.getMonth() + 1;
-      this.fileSuggestedName = 'arc-export-' + day + '-' + month + '-' + year + '-export.json';
-      this.exportMime = 'json';
-      this.exportData();
+      var file = 'arc-export-' + day + '-' + month + '-' + year + '-export.json';
+
+      var exportData = event.detail.result;
+      event = this.fire('export-data', {
+        data: exportData,
+        type: 'application/json',
+        file: file
+      }, {
+        cancelable: true
+      });
+      if (!event.defaultPrevented) {
+        throw new Error('Export module not found.');
+      }
       this.fire('send-analytics', {
         type: 'event',
         category: 'Data export',
@@ -171,7 +188,6 @@
         this.set('listData', []);
         this.$.model.data = null;
         this.resetQuery();
-        this.queryPage();
         return;
       }
       this.removedCopy.forEach((item) => {
@@ -222,8 +238,6 @@
       if (!this.isShowing) {
         return;
       }
-      this.resetQuery();
-      this.queryPage();
       this.fire('send-analytics', {
         type: 'event',
         category: 'Engagement',

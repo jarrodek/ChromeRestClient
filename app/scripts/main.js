@@ -38,7 +38,7 @@
         } else if (params.type === 'saved') {
           id = params.savedId;
         } else {
-          throw new Error('ID not handled!');
+          throw new Error('ID not handled!', params);
         }
         app.selectedRequest = decodeURIComponent(id);
         return;
@@ -49,9 +49,22 @@
         app.fire('selected-project-changed', {
           value: params.projectId
         });
+        app.pageTitle = 'Project details';
         break;
       case 'socket':
         app.pageTitle = 'Socket';
+        app.selectedRequest = undefined;
+        break;
+      case 'settings':
+        app.pageTitle = 'Settings';
+        app.selectedRequest = undefined;
+        break;
+      case 'history':
+        app.pageTitle = 'History';
+        app.selectedRequest = undefined;
+        break;
+      case 'saved':
+        app.pageTitle = 'Saved request';
         app.selectedRequest = undefined;
         break;
       default:
@@ -323,15 +336,11 @@
       console.warn('Search bar was not available in document.');
       return;
     }
-    // if (!searchBar.opened) {
-    //   return;
-    // }
     var detail = e.detail;
     var top = detail.height - detail.y;
     if (top < 0) {
       top = 0;
     }
-    // top = top + 'px';
     if (searchBar.style.top === top + 'px') {
       return;
     }
@@ -343,14 +352,7 @@
       return;
     }
     searchBar.style.top = top;
-    // console.log('paper-header-transform', top);
   });
-
-  app._cancelEvent = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-  };
   /**
    * Updates body class depending on a channel release.
    * TODO: update dev and beta branding.
@@ -451,29 +453,6 @@
     });
   });
 
-  // app.runTutorials = () => {
-  //   /// XHR toggle tutorial
-  //   chrome.storage.sync.get({'tutorials': []}, (r) => {
-  //     if (r.tutorials.indexOf('xhrElementTutorial') !== -1) {
-  //       app.$.xhrProxyTutorial.parentNode.removeChild(app.$.xhrProxyTutorial);
-  //       delete app.$.xhrProxyTutorial;
-  //       return;
-  //     }
-  //     app.$.xhrProxyTutorial.target = app.$.xhrToggle;
-  //   });
-  // };
-
-  app._closeXhrTutorial = () => {
-    app.$.xhrProxyTutorial.hide();
-    chrome.storage.sync.get({'tutorials': []}, (r) => {
-      if (r.tutorials.indexOf('xhrElementTutorial') !== -1) {
-        return;
-      }
-      r.tutorials.push('xhrElementTutorial');
-      chrome.storage.sync.set(r);
-    });
-  };
-
   app._computeA11yButtons = (key, hasShift) => {
     var isMac = navigator.platform.indexOf('Mac') !== -1;
     var cmd = '';
@@ -499,38 +478,11 @@
     }
     elm.opened = true;
   };
-  app._mainPageSelected = (e) => {
-    if (app.route !== 'request') {
-      return;
-    }
-    var elm = e.detail.item.querySelector('*:not(template)');
-    if (!elm) {
-      elm = document.querySelector('request-panel');
-    }
-    if (!elm) {
-      return;
-    }
-    if (!elm.opened) {
-      elm.opened = true;
-    }
-  };
-  app._mainPageDeselected = (e) => {
-    var elm = e.detail.item.querySelector('*:not(template)');
-    if (!elm || elm.nodeName !== 'REQUEST-PANEL') {
-      return;
-    }
-    elm.opened = false;
-  };
-  window.addEventListener('open-drive-selector', () => {
-    let ctrl = document.body.querySelector('arc-drive-controller');
-    if (!ctrl) {
-      StatusNotification.notify({
-        message: 'Drive controller not found.'
-      });
-      return;
-    }
-    ctrl.opened = true;
-  });
+  function openDriveSelector() {
+    page('/drive');
+  }
+  window.addEventListener('open-drive-selector', openDriveSelector);
+  window.addEventListener('pick-google-drive-item', openDriveSelector);
 
   app.initAnalytics = () => {
     chrome.storage.local.get({
@@ -584,7 +536,7 @@
     });
   };
 
-  window.addEventListener('analytics-permitted-change', (e) => {
+  window.addEventListener('analytics-permitted-changed', (e) => {
     var permitted = e.detail.permitted;
     app.set('analyticsDisabled', !permitted);
   });
@@ -688,5 +640,49 @@
     // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
     e.detail.version = chrome.runtime.getManifest().version_name;
     //jscs:enable requireCamelCaseOrUpperCaseIdentifiers
+  });
+
+  app.notifyError = function(message) {
+    app.$.errorToast.text = message;
+    app.$.errorToast.opened = true;
+  };
+
+  app._openDriveRequest = function(e) {
+    var response;
+    try {
+      response = JSON.parse(e.detail.content);
+    } catch (e) {
+      app.notifyError('This is not a JSON file. ' + e.message);
+      return;
+    }
+    var obj = arc.app.importer.normalizeRequest(response);
+    obj.type = 'google-drive';
+    obj.driveId = e.detail.diveId;
+    this.$$('arc-request-panel').request = obj;
+    page('/request/current');
+  };
+
+  app._chromeSignin = function(e) {
+    app.fire('google-signin-success', {
+      scope: e.target.scope,
+      token: e.detail.token
+    });
+  };
+  app._chromeSignout = function(e) {
+    app.fire('google-signout', {
+      scope: e.target.scope
+    });
+  };
+  window.addEventListener('google-autorize', function(e) {
+    var scope = e.detail.scope;
+    app.$.signInAware.scope = scope;
+    if (app.$.signInAware.needAdditionalAuth) {
+      app.$.signInAware.signIn();
+    } else {
+      app.fire('google-signin-success', {
+        scope: scope,
+        token: app.$.signInAware.accessToken
+      });
+    }
   });
 })(document, window);

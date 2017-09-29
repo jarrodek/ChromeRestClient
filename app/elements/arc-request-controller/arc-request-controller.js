@@ -4,7 +4,7 @@
 Polymer({
   is: 'arc-request-controller',
   behaviors: [
-    ArcBehaviors.ArcFileExportBehavior,
+    // ArcBehaviors.ArcFileExportBehavior,
     ArcBehaviors.ArcControllerBehavior
   ],
   properties: {

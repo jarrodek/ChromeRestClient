@@ -35,6 +35,7 @@ window.addEventListener('initializeRouting', function() {
           screenName = 'Edit project';
         }
         break;
+      case 'drive': screenName = 'Drive selector'; break;
     }
     var event = new CustomEvent('send-analytics', {
       detail: {
@@ -116,6 +117,9 @@ window.addEventListener('initializeRouting', function() {
     app.params = ctx.params;
     app.route = 'project';
   });
+  arc.app.router.register('/drive', function() {
+    app.route = 'drive';
+  });
   window.page = arc.app.router.redirect;
   arc.app.router.start();
 
@@ -138,6 +142,7 @@ window.addEventListener('initializeRouting', function() {
       case 'request':
         url = '/request/' + params.type + '/' + encodeURIComponent(params.id);
         break;
+      case 'drive': url = '/drive'; break;
     }
     if (url) {
       arc.app.router.redirect(url);
