@@ -125,15 +125,6 @@ Polymer({
     this.set('request', {
       method: 'GET'
     });
-    this._changeTitle('Request');
-  },
-
-  _changeTitle: function(title) {
-    this.fire('page-title-changed', {
-      title: title
-    }, {
-      cancelable: true
-    });
   },
   /**
    * Restores saved in the datastore request data.

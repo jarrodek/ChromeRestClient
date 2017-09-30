@@ -2,12 +2,11 @@
   'use strict';
 
   let app = document.querySelector('#app');
-  app.pageTitle = '';
+  app.pageTitle = 'Request';
   /**
    * Selected request database ID
    */
   app.selectedRequest = null;
-  app.selectedProject = null;
   app.gaCustomDimensions = [];
   app.appVersion = arc.app.utils.appVer;
   app.appId = chrome.runtime && chrome.runtime.id ? chrome.runtime.id : 'not-in-chrome-app';
@@ -23,6 +22,7 @@
     var params = paramsRecord && paramsRecord.base;
     switch (route) {
       case 'request':
+        app.pageTitle = 'Request';
         if (!params || !params.type) {
           return;
         }
@@ -80,23 +80,6 @@
         app.selectedRequest = undefined;
     }
   };
-  /**
-   * Returns true when both parameteres are trully.
-   *
-   * The `template` will always render `arc-request-controller` and it's children even if in a
-   * moment it should be turned off.
-   * The app will wait until upgrade script finish and the set up the `initialized` flag.
-   */
-  app.canRender = (status, elementIsRequestPanel) => {
-    return status && elementIsRequestPanel === 'true';
-  };
-  // Open current project details page
-  app.openProjectDetails = () => {
-    page(`/project/${app.selectedProject}/edit`);
-  };
-  app._computeHideProjectLink = (selectedProject, route) =>
-    !(selectedProject && route === 'request');
-  app._canShowProjectSelector = (route, count) => route === 'request' && count > 0;
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
     app.updateBranding();
@@ -113,9 +96,6 @@
   window.addEventListener('WebComponentsReady', function() {
     app.initAnalytics();
     app.initRouting();
-  });
-  window.addEventListener('selected-project-changed', (e) => {
-    app.selectedProject = e.detail.value;
   });
   app.initRouting = () => {
     if (app.routingInitialized) {
@@ -134,11 +114,6 @@
   app.closeDrawer = function() {
     app.$.paperDrawerPanel.closeDrawer();
   };
-
-  document.body.addEventListener('page-title-changed', (e) => {
-    app.pageTitle = e.detail.title;
-  });
-
   /**
    * Read more about requesting features in ArcHasToolbarBehavior behavior file.
    * Also change main.css in features section.

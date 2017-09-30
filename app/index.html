@@ -49,13 +49,7 @@
         <!-- Main Toolbar -->
         <paper-toolbar id="mainToolbar" class="main-toolbar">
           <paper-icon-button class="toolbar-hide" icon="arc:menu" paper-drawer-toggle title="Toggle drawer" alt="Drawer toggle icon"></paper-icon-button>
-          <div class="title toolbar-hide">
-            <span>[[pageTitle]]</span>
-            <span hidden$="[[_computeHideProjectLink(selectedProject, route)]]">
-              <paper-icon-button icon="arc:collections-bookmark" on-tap="openProjectDetails"></paper-icon-button>
-              <paper-tooltip animation-delay="100" position="bottom" offset="0">Project details</paper-tooltip>
-            </span>
-          </div>
+          <div class="title">[[pageTitle]]</div>
           <paper-toggle-button id="xhrToggle" feature="xhrtoggle" on-change="_onFeatureXhrToggle" class="toolbar-hide xhr-switch" title="Use XHR instead of socket">Use XHR</paper-toggle-button>
           <paper-icon-button id="saveFeature" feature="save" on-tap="_onFeatureSave" class="toolbar-hide" icon="arc:save" title="Save"></paper-icon-button>
           <paper-icon-button id="clearallFeature" feature="clearAll" on-tap="_onFeatureClearAll" class="toolbar-hide" icon="arc:clear-all"></paper-icon-button>
