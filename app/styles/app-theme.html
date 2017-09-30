@@ -237,10 +237,7 @@
   };
 
   --response-view: {
-    margin-bottom: 20px;
-    max-width: 900px;
-    margin-left: 16px;
-    margin-right: 12px;
+    margin-bottom: 20px
   };
 
   --request-form-panels: {
@@ -262,6 +259,13 @@
 
   --paper-checkbox-label: {
     @apply --arc-font-body1;
+  };
+
+  --request-editor: {
+    max-width: 1100px;
+  };
+  --response-view: {
+    max-width: 1100px;
   };
 
   /* Projects panel */
@@ -343,7 +347,6 @@
 
   /* Request status bar */
   --arc-status-bar: {
-    height: 56px;
     border-top: 1px #E0E0E0 solid;
   }
 }
@@ -392,54 +395,6 @@ paper-toolbar paper-icon-button {
 paper-toolbar paper-icon-button:hover {
   color: var(--hover-button-accent-color);
 }
-
-paper-toolbar paper-dropdown-menu {
-  color: rgba(255, 255, 255, 0.87);
-  --paper-input-container-label: {
-    color: white;
-  }
-  --paper-input-container-focus-color: #fff;
-  --paper-input-container-label-focus: {
-    color: white;
-  }
-  --paper-input-container-label-floating: {
-    color: white;
-  }
-  --paper-input-container-input: {
-    color: white;
-  }
-  --paper-dropdown-menu-icon: {
-    color: white;
-  }
-  --paper-input-container-color: #fff;
-  --paper-dropdown-menu-input: {
-    color: white;
-  }
-}
-
-paper-toolbar paper-toggle-button {
-  --paper-toggle-button-checked-bar-color: #e91e63;
-  --paper-toggle-button-checked-button-color: #e91e63;
-  --paper-toggle-button-checked-ink-color: #e91e63;
-  --paper-toggle-button-label-color: #fff;
-  margin-right: 24px;
-}
-
-.main-toolbar .title {
-  @apply(--layout-horizontal);
-  @apply(--layout-center);
-  pointer-events: bounding-box !important;
-}
-
-.main-toolbar paper-icon-button
-.main-toolbar paper-button {
-  pointer-events: auto !important;
-}
-
-.project-endpoints {
-  margin-left: 20px;
-}
-
 /* onboarding */
 
 .welcome-message {
