@@ -31,12 +31,12 @@
       @apply --error-toast;
     }
     </style>
-    <request-panel request="{{request}}"></request-panel>
+    <request-panel request="{{request}}" xhr-extension on-request-clear-state="clearRequest" on-request-save-state="_saveHandler" on-request-use-xhr-changed="_xhrChanged"></request-panel>
     <chrome-storage id="latest" type="local" name="latestRequest" value="[[request]]" on-chrome-storage-read="_latestLoaded"></chrome-storage>
 
     <chrome-xhr-request connected="{{hasProxyInstalled}}" extension-id="apcedakaoficjlofohhcmkkljehnmebp"></chrome-xhr-request>
     <chrome-socket-request></chrome-socket-request>
-    
+
     <install-proxy-dialog></install-proxy-dialog>
     <bottom-sheet id="requestEditorContainer" with-backdrop on-iron-overlay-opened="_resizeEditorSheetContent">
       <saved-request-editor id="requestEditor" on-cancel-request-edit="_cancelRequestEdit" on-save-request="_saveRequestEdit"></saved-request-detail>

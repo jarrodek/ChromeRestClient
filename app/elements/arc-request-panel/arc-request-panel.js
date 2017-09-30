@@ -101,12 +101,14 @@ Polymer({
     });
   },
   /**
-   * Called when the user checked the "Use XHR" button in the toolbar.
+   * Handler for the XHR change event
    */
-  onXhrtoggle: function(e) {
-    var requested = e.detail.target.checked;
+  _xhrChanged: function(e) {
+    var requested = e.detail.value;
+    e.preventDefault();
+    e.stopPropagation();
+
     if (!this.hasProxyInstalled && requested) {
-      e.detail.target.checked = false;
       this.$$('install-proxy-dialog').opened = true;
       return;
     }
@@ -119,12 +121,17 @@ Polymer({
     });
   },
   /**
-   * Called when the user click on the "clear all" button.
+   * Clears the request state
    */
-  onClearAll: function() {
+  clearRequest: function(e) {
     this.set('request', {
       method: 'GET'
     });
+    this.projectId = undefined;
+    if (e && e.preventDefault) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
   },
   /**
    * Restores saved in the datastore request data.
@@ -231,6 +238,14 @@ Polymer({
     this.debounce('request-store', function() {
       this.$.latest.store();
     }, 100);
+  },
+  /**
+   * Handler for the save event from the request editor.
+   */
+  _saveHandler: function(e) {
+    this.onSave({});
+    e.preventDefault();
+    e.stopPropagation();
   },
 
   onSave: function(opts) {
