@@ -54,6 +54,9 @@ Polymer({
         let id = decodeURIComponent(this.routeParams.savedId || this.routeParams.historyId);
         this._restoreRequestData(id, route.type);
         break;
+      case 'current':
+      case 'drive':
+        return;
       default:
         this.restoreLatest();
         break;

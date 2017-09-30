@@ -34,19 +34,13 @@
           case 'current':
             app.selectedRequest = undefined;
             return;
+          case 'drive':
+            app.selectedRequest = undefined;
+            return app.openDriveItem(params.driveId);
           default:
             app.selectedRequest = undefined;
             console.error('ID not handled!', params);
             throw new Error('ID not handled!');
-        }
-        if (params.type === 'history') {
-          id = params.historyId;
-        } else if (params.type === 'saved') {
-          id = params.savedId;
-        } else if (params.type === 'restore') {
-          return;
-        } else {
-
         }
         app.selectedRequest = decodeURIComponent(id);
         return;
@@ -409,6 +403,9 @@
     if (data.requests.length !== 1) {
       return false;
     }
+    if (data.projects && data.projects.length === 0) {
+      delete data.projects;
+    }
     if (Object.keys(data).length === 4) {
       return true;
     }
@@ -444,6 +441,21 @@
   window.addEventListener('on-process-incoming-data', function(e) {
     processIcomingData(e.detail.data);
   });
+
+  /**
+   * Opens a request from the Google Drive.
+   * This action support integration with Drive UI, action "open with".
+   */
+  app.openDriveItem = function(id) {
+    Polymer.RenderStatus.afterNextRender(app, function() {
+      app.fire('navigate', {
+        base: 'drive'
+      });
+      var picker = document.querySelector('google-drive-browser');
+      picker._isOpened = true;
+      picker._downloadFile(id);
+    });
+  };
 
   /**
    * Handles opening a file from Google Drive.
