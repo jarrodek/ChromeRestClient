@@ -24,7 +24,7 @@
   <link rel="import" href="bower_components/arc-data-import/arc-data-import.html">
   <link rel="import" href="bower_components/arc-data-export/arc-data-export.html">
   <link rel="import" href="bower_components/data-import-export-panel/data-import-export-panel.html">
-
+  <link rel="import" href="bower_components/search-bar/search-bar.html">
   <style is="custom-style" include="shared-styles"></style>
 </head>
 <body>
@@ -47,8 +47,6 @@
         <!-- Main Toolbar -->
         <paper-toolbar id="mainToolbar" class="main-toolbar">
           <paper-icon-button class="toolbar-hide" icon="arc:menu" paper-drawer-toggle title="Toggle drawer" alt="Drawer toggle icon"></paper-icon-button>
-          <paper-icon-button feature="back" on-tap="_onFeatureBack" class="toolbar-hide" icon="arc:arrow-back" title="Back"></paper-icon-button>
-
           <div class="title toolbar-hide">
             <span>[[pageTitle]]</span>
             <span hidden$="[[_computeHideProjectLink(selectedProject, route)]]">
@@ -56,23 +54,12 @@
               <paper-tooltip animation-delay="100" position="bottom" offset="0">Project details</paper-tooltip>
             </span>
           </div>
-
           <paper-toggle-button id="xhrToggle" feature="xhrtoggle" on-change="_onFeatureXhrToggle" class="toolbar-hide xhr-switch" title="Use XHR instead of socket">Use XHR</paper-toggle-button>
-          <paper-icon-button id="openFeature" feature="open" on-tap="_onFeatureOpen" class="toolbar-hide" icon="arc:folder-open" title="Open"></paper-icon-button>
           <paper-icon-button id="saveFeature" feature="save" on-tap="_onFeatureSave" class="toolbar-hide" icon="arc:save" title="Save"></paper-icon-button>
-          <paper-icon-button id="exportFeature" feature="export" on-tap="_onFeatureExport" class="toolbar-hide" icon="arc:import-export" title="Export list"></paper-icon-button>
           <paper-icon-button id="clearallFeature" feature="clearAll" on-tap="_onFeatureClearAll" class="toolbar-hide" icon="arc:clear-all"></paper-icon-button>
-          <paper-icon-button id="driveFeature" feature="drive" on-tap="_onFeatureDrive" class="toolbar-hide" icon="arc:drive"></paper-icon-button>
-          <paper-tooltip for="openFeature" offset="0" animation-delay="100">Open</paper-tooltip>
           <paper-tooltip for="saveFeature" offset="0" animation-delay="100">Save</paper-tooltip>
-          <paper-tooltip for="exportFeature" offset="0" animation-delay="100">Export list</paper-tooltip>
           <paper-tooltip for="clearallFeature" offset="0" animation-delay="100">Clear all</paper-tooltip>
           <paper-tooltip for="driveFeature" offset="0" animation-delay="100">Open from Google Drive</paper-tooltip>
-
-          <div id="search-bar" feature="search" class="toolbar-hide" mode="search">
-            <paper-icon-button icon="arc:search" title="Search" on-tap="openSearch"></paper-icon-button>
-            <input is="iron-input" type="search" value="{{searchTerm::input}}" class="flex main-search-input" id="mainSearchInput"></input>
-          </div>
         </paper-toolbar>
         <!-- Main Content -->
         <div class="content">
@@ -195,32 +182,11 @@
           </div>
         </div>
       </onboarding-page>
-      <onboarding-page id="onboardingNotifications">
-        <div>
-          <h2>Be notified about update</h2>
-          <div class="onboarding-image-page">
-            <div class="image">
-              <iron-icon icon="arc:notifications-active"></iron-icon>
-            </div>
-            <div class="description">
-              <div>
-                <p class="beta-info">
-                  Beta, Dev and Canary channel users can be notified when new versions is released.
-                  You'll receive a notification on your desktop when the app udpate itseld so you can test the changes right away.
-                </p>
-                <paper-button on-tap="enableNotifications" id="enableNotify" raised>Enable notifications</paper-button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </onboarding-page>
     </onboarding-tutorial>
 
     <network-state online="{{online}}" on-network-state-changed="_networkStateChanged"></network-state>
     <paper-toast id="errorToast" duration="5000"></paper-toast>
-    <paper-toast id="offlineToast" class="fit-bottom offline-toast" text="You are now offline. Can't make new requests." duration="-1">
-      <paper-button on-tap="closeOfflineMessage">close</paper-button>
-    </paper-toast>
+    <paper-toast id="offlineToast" class="offline-toast" text="You are now offline. Can't make new requests."></paper-toast>
     <arc-log-viewer></arc-log-viewer>
     <search-bar id="content-search-bar" on-iron-overlay-opened="textSearchBarOpened"></search-bar>
     <!-- Elements on new app -->
@@ -301,6 +267,7 @@
   <script src="scripts/libs/app.importer.js"></script>
   <script src="scripts/libs/app.notifications.js"></script>
   <script src="scripts/main.js"></script>
+  <script src="scripts/libs/drawer-resize.js"></script>
 </body>
 
 </html>

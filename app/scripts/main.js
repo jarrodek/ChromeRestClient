@@ -12,15 +12,9 @@
   app.appVersion = arc.app.utils.appVer;
   app.appId = chrome.runtime && chrome.runtime.id ? chrome.runtime.id : 'not-in-chrome-app';
   app.analyticsDisabled = false;
-  // Selected environment for magic variables.
-  app.variablesEnvironment = 'default';
-  app.narrowLayout = false;
-  app.forceNarrowLayout = false;
   app.upgrading = false;
   app.initialized = false;
-  app.listeners = {
-    'drawerResizer.track': '_drawerTrack'
-  };
+
   app.observers = [
     '_routeChanged(route, params.*)'
   ];
@@ -33,12 +27,27 @@
           return;
         }
         var id;
+        switch (params.type) {
+          case 'history': id = params.historyId; break;
+          case 'saved': id = params.savedId; break;
+          case 'restore':
+          case 'latest':
+          case 'current':
+            app.selectedRequest = undefined;
+            return;
+          default:
+            app.selectedRequest = undefined;
+            console.error('ID not handled!', params);
+            throw new Error('ID not handled!');
+        }
         if (params.type === 'history') {
           id = params.historyId;
         } else if (params.type === 'saved') {
           id = params.savedId;
+        } else if (params.type === 'restore') {
+          return;
         } else {
-          throw new Error('ID not handled!', params);
+
         }
         app.selectedRequest = decodeURIComponent(id);
         return;
@@ -125,31 +134,6 @@
   app.closeDrawer = function() {
     app.$.paperDrawerPanel.closeDrawer();
   };
-  /**
-   * Open search bar and notify opener about changes.
-   */
-  app.openSearch = () => {
-    var bar = document.querySelector('#search-bar');
-    bar.setAttribute('show', true);
-    bar.parentNode.setAttribute('mode', 'search');
-    var input = document.querySelector('#mainSearchInput');
-    var searchFn = function(e) {
-      //inform controller about search action
-      app._featureCalled('search', e);
-    };
-    var blurFn = function(e) {
-      let input = document.querySelector('#mainSearchInput');
-      input.removeEventListener('blur', blurFn);
-      input.removeEventListener('search', searchFn);
-      let bar = e.target.parentNode;
-      bar.removeAttribute('show', true);
-      bar.parentNode.removeAttribute('mode', 'search');
-    };
-
-    input.addEventListener('search', searchFn);
-    input.addEventListener('blur', blurFn);
-    input.focus();
-  };
 
   document.body.addEventListener('page-title-changed', (e) => {
     app.pageTitle = e.detail.title;
@@ -194,23 +178,11 @@
       });
     }
   };
-  app._onFeatureOpen = (e) => {
-    app._featureCalled('open', e);
-  };
   app._onFeatureSave = (e) => {
     app._featureCalled('save', e);
   };
-  app._onFeatureExport = (e) => {
-    app._featureCalled('export', e);
-  };
   app._onFeatureClearAll = (e) => {
     app._featureCalled('clearAll', e);
-  };
-  app._onFeatureDrive = (e) => {
-    app._featureCalled('drive', e);
-  };
-  app._onFeatureBack = (e) => {
-    app._featureCalled('back', e);
   };
   app._onFeatureXhrToggle = (e) => {
     app._featureCalled('xhrtoggle', e);
@@ -243,9 +215,6 @@
       setUrl(url);
     }
     app.scrollPageToTop();
-  });
-  document.body.addEventListener('project-saved', () => {
-    document.querySelector('arc-menu-controller').refreshProjects();
   });
 
   app.onSave = (e, detail) => {
@@ -281,19 +250,14 @@
   // Called when ctrl/command + F combination has been pressed.
   app.onSearch = () => {
     if (app.route !== 'request') {
-      app.openSearch();
       return;
     }
-    var searchBar = document.querySelector('#content-search-bar');
-    if (!searchBar) {
-      console.warn('Search bar was not available in document.');
-      return;
-    }
+    var searchBar = document.getElementById('content-search-bar');
     if (searchBar.opened) {
       searchBar.focusInput();
     } else {
       searchBar.style.top = app.mainHeaderTop;
-      searchBar.open();
+      searchBar.opened = true;
       app.fire('send-analytics', {
         type: 'event',
         category: 'Shortcats usage',
@@ -313,7 +277,7 @@
     if (app.route !== 'request') {
       return;
     }
-    var panel = document.querySelector('request-panel');
+    var panel = document.querySelector('arc-request-panel');
     if (!panel) {
       console.warn('The request panel is undefined');
       return;
@@ -322,7 +286,7 @@
   };
 
   app.textSearchBarOpened = () => {
-    var searchBar = document.querySelector('#content-search-bar');
+    var searchBar = document.getElementById('content-search-bar');
     if (!searchBar) {
       console.warn('Search bar was not available in document.');
       return;
@@ -331,9 +295,8 @@
   };
 
   window.addEventListener('paper-header-transform', function(e) {
-    var searchBar = Polymer.dom(document).querySelector('#content-search-bar');
-    if (!searchBar) {
-      console.warn('Search bar was not available in document.');
+    var searchBar = document.getElementById('content-search-bar');
+    if (!searchBar.opened) {
       return;
     }
     var detail = e.detail;
@@ -345,12 +308,6 @@
       return;
     }
     app.mainHeaderTop = top + 'px';
-    app.fire('iron-signal', {name: 'main-header-transform', data: {
-      top: top
-    }});
-    if (!searchBar.opened) {
-      return;
-    }
     searchBar.style.top = top;
   });
   /**
@@ -375,10 +332,6 @@
       document.body.classList.add(cls);
       Polymer.updateStyles();
     }
-    if (channel === 'stable') {
-      var elm = app.$.onboardingNotifications;
-      elm.parentNode.removeChild(elm);
-    }
   };
   /**
    * Used by elements to open a browser window/tab.
@@ -392,25 +345,6 @@
     }
   };
   /**
-   * Enable desktop notifications permission for the app.
-   * This function can't use promise since a notification request must be made as a result
-   * of user gesture (like click).
-   *
-   * @param {Function} callback A callback function with the result.
-   */
-  app.enableNotifications = (callback) => {
-    chrome.permissions.request({permissions: ['notifications']}, (granted) => {
-      if (callback && typeof callback === 'function') {
-        callback(granted);
-      } else {
-        // from tutorial.
-        if (granted) {
-          app.$.enableNotify.setAttribute('hidden', true);
-        }
-      }
-    });
-  };
-  /**
    * Handler called to network state change event.
    * This will display toase then the device is offline and close the message when it
    * comes back online.
@@ -418,16 +352,10 @@
   app._networkStateChanged = (e) => {
     var online = e.detail.online;
     if (online) {
-      app.$.offlineToast.close();
+      app.$.offlineToast.opened = false;
     } else {
-      app.$.offlineToast.open();
+      app.$.offlineToast.opened = true;
     }
-  };
-  /**
-   * Force close offline message.
-   */
-  app.closeOfflineMessage = () => {
-    app.$.offlineToast.close();
   };
 
   window.addEventListener('error', (e) => {
@@ -468,16 +396,6 @@
     return cmd;
   };
 
-  app._requestPanelInitiallized = () => {
-    if (app.route !== 'request') {
-      return;
-    }
-    var elm = document.querySelector('request-panel');
-    if (!elm) {
-      return;
-    }
-    elm.opened = true;
-  };
   function openDriveSelector() {
     page('/drive');
   }
@@ -541,13 +459,11 @@
     app.set('analyticsDisabled', !permitted);
   });
 
-  window.addEventListener('variables-environment-changed', (e) => {
-    app.variablesEnvironment = e.detail.env;
-  });
   /* File import by drag'n'drop */
   document.body.addEventListener('dragenter', (e) => {
     e.stopPropagation();
     e.preventDefault();
+    console.log('aaaaaa');
     var element = document.querySelector('drop-file-importer');
     if (!element) {
       return;
@@ -558,69 +474,6 @@
       element.opened = true;
     }
   });
-
-  /* Drawer width support */
-  app.drawerWidth = '360px';
-  app._drawerTrack = function(e) {
-    var newWidth;
-    switch (e.detail.state) {
-      case 'start':
-        app.$.paperDrawerPanel.$.drawer.classList.remove('transition-drawer');
-        app._drawerInitTransition = getComputedStyle(app.$.paperDrawerPanel.$.main)
-          .getPropertyValue('transition');
-        app.$.paperDrawerPanel.$.main.style.transition = 'left ease-in-out 0.01s';
-        app._drawerInitTrackWidth = Number(app.drawerWidth.replace('px', ''));
-        break;
-      case 'track':
-        newWidth = app._drawerInitTrackWidth + e.detail.dx;
-        if (newWidth <= 10) {
-          newWidth = 10;
-        }
-        app.drawerWidth = newWidth + 'px';
-        app.$.paperDrawerPanel.$.main.style.transition = 'left ease-in-out 0.01s';
-        break;
-      case 'end':
-        app.$.paperDrawerPanel.$.drawer.classList.add('transition-drawer');
-        app.$.paperDrawerPanel.$.main.style.transition = app._drawerInitTransition;
-        newWidth = app._drawerInitTrackWidth + e.detail.dx;
-        if (newWidth <= 10) {
-          newWidth = 10;
-        }
-        app._drawerWidth = newWidth;
-        delete app._drawerInitTrackWidth;
-        delete app._drawerInitTransition;
-        break;
-    }
-  };
-  app._drawerWidthRead = function(e) {
-    if (e.detail.value) {
-      app.set('drawerWidth', (e.detail.value + 'px'));
-    }
-  };
-
-  app._drawerToggle = function() {
-    if (app.narrowLayout) {
-      return;
-    }
-    app.forceNarrowLayout = !app.forceNarrowLayout;
-    app.async(function() {
-      app.$.paperDrawerPanel.closeDrawer();
-    }, 1);
-  };
-  // Pin drawer back to the app.
-  app._pinDrawer = function() {
-    app.forceNarrowLayout = false;
-  };
-
-  app._computePinDrawerClass = function(forceNarrowLayout, narrowLayout) {
-    var clazz = 'drawer-pin';
-    if (forceNarrowLayout && narrowLayout) {
-      clazz += ' visible';
-    }
-    return clazz;
-  };
-  // Computes `active` flag for the legacy project related requests
-  app._processProjectRequests = (route) => route === 'request';
 
   window.addEventListener('logs-requested', function() {
     var logViewer = document.querySelector('arc-log-viewer');
@@ -647,19 +500,46 @@
     app.$.errorToast.opened = true;
   };
 
-  app._openDriveRequest = function(e) {
-    var response;
-    try {
-      response = JSON.parse(e.detail.content);
-    } catch (e) {
-      app.notifyError('This is not a JSON file. ' + e.message);
-      return;
+  function isSingleRequest(data) {
+    if (!data.requests || !data.requests.length) {
+      return false;
     }
-    var obj = arc.app.importer.normalizeRequest(response);
-    obj.type = 'google-drive';
-    obj.driveId = e.detail.diveId;
-    this.$$('arc-request-panel').request = obj;
-    page('/request/current');
+    if (data.requests.length !== 1) {
+      return false;
+    }
+    if (Object.keys(data).length === 4) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Handles opening a file from Google Drive.
+   * Normalizes content to the import object and opens import panel
+   * if the data is import data or a request if import data contains single
+   * request.
+   */
+  app._openDriveRequest = function(e) {
+    var event = app.fire('import-normalize', {
+      content: e.detail.content
+    }, {
+      cancelable: true
+    });
+    event.detail.result.then((data) => {
+      if (isSingleRequest(data)) {
+        let obj = data.requests[0];
+        obj.type = 'google-drive';
+        obj.driveId = e.detail.diveId;
+        document.body.querySelector('arc-request-panel').request = obj;
+        page('/request/current');
+      } else {
+        let panel = document.body.querySelector('data-import-export-panel');
+        panel.importObject = data;
+        panel.importPage = 3;
+        page('/dataimport');
+      }
+    })
+    .catch(cause => app.notifyError(cause.message));
   };
 
   app._chromeSignin = function(e) {

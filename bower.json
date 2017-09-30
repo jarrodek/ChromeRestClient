@@ -20,9 +20,7 @@
     "chrome-app-filesystem": "advanced-rest-client/chrome-app-filesystem#^1.1.4",
     "lodash": "jarrodek/lodash#^4.6.2",
     "zlib": "imaya/zlib.js#^0.2.0",
-    "paper-autocomplete": "advanced-rest-client/paper-autocomplete#^1.0.16",
     "crypto-js": "^3.1.6",
-    "web-socket": "advanced-rest-client/web-socket#^1.0.5",
     "file-reader": "advanced-rest-client/file-reader#^1.0.3",
     "chrome-storage": "advanced-rest-client/chrome-storage#^1.0.2",
     "arc-definitions": "advanced-rest-client/arc-definitions#^1.0.3",
@@ -34,7 +32,6 @@
     "date-time": "advanced-rest-client/date-time#^0.1.2",
     "network-state": "advanced-rest-client/network-state#^0.1.1",
     "arc-loader-screen": "advanced-rest-client/arc-loader-screen#^0.1.1",
-    "text-search-behavior": "advanced-rest-client/text-search-behavior#^0.1.2",
     "response-view": "advanced-rest-client/response-view#^0.1.10",
     "request-panel": "advanced-rest-client/request-panel#^0.1.1",
     "request-saver": "advanced-rest-client/request-saver#^0.1.0",
@@ -64,7 +61,10 @@
     "google-drive-browser": "advanced-rest-client/google-drive-browser#^0.1.1",
     "arc-data-import": "advanced-rest-client/arc-data-import#^0.1.1",
     "data-import-export-panel": "advanced-rest-client/data-import-export-panel#^0.1.1",
-    "history-panel": "advanced-rest-client/history-panel#^0.1.1"
+    "history-panel": "advanced-rest-client/history-panel#^0.1.1",
+    "search-bar": "advanced-rest-client/search-bar#^0.1.1",
+    "bottom-sheet": "advanced-rest-client/bottom-sheet#^1.0.4",
+    "saved-request-detail": "advanced-rest-client/saved-request-detail#^0.1.1"
   },
   "devDependencies": {
     "web-component-tester": "*",
@@ -73,9 +73,7 @@
   "ignore": [],
   "main": "app/index.html",
   "resolutions": {
-    "lodash": "^4.6.2",
-    "app-pouchdb": "^1.0.0",
-    "app-storage": "~1.0.0"
+    "lodash": "^4.6.2"
   },
   "version": "9.14.64"
 }

@@ -204,7 +204,8 @@ Polymer({
       method: data.method,
       name: data.name,
       payload: data.payload,
-      url: data.url
+      url: data.url,
+      description: data.description
     };
     if (data.legacyProject !== this.projectId) {
       this.set('projectId', data.legacyProject);
@@ -259,20 +260,23 @@ Polymer({
       return this._saveCurrent();
     }
 
-    var ui = this.$$('request-save-dialog');
-    ui.noCancelOnOutsideClick = true;
-    ui.isDrive = isDrive;
-    if (isSaved || isDrive) {
-      if (this.request._id) {
-        ui.isSaved = true;
-      }
-      ui.name = this.request.name;
-    }
-    if (this.projectId) {
-      ui.isProject = true;
-      ui.projectId = this.projectId;
-    }
-    ui.opened = true;
+    this.$.requestEditor.request = this.request;
+    this.$.requestEditorContainer.opened = true;
+
+    // var ui = this.$$('request-save-dialog');
+    // ui.noCancelOnOutsideClick = true;
+    // ui.isDrive = isDrive;
+    // if (isSaved || isDrive) {
+    //   if (this.request._id) {
+    //     ui.isSaved = true;
+    //   }
+    //   ui.name = this.request.name;
+    // }
+    // if (this.projectId) {
+    //   ui.isProject = true;
+    //   ui.projectId = this.projectId;
+    // }
+    // ui.opened = true;
     this.fire('send-analytics', {
       'type': 'event',
       'category': 'Engagement',
@@ -281,22 +285,45 @@ Polymer({
     });
   },
 
+  _resizeEditorSheetContent: function() {
+    this.$.requestEditor.notifyResize();
+  },
+
+  _cancelRequestEdit: function() {
+    this.$.requestEditorContainer.opened = false;
+    this.$.requestEditor.request = undefined;
+  },
+
   _saveCurrent: function() {
     var opts = {
       isDrive: this.request.type === 'google-drive',
       projectId: this.projectId
     };
-    this._dispatchSaveRequest(opts);
-  },
-
-  _saveRequestDialogHandler: function(e) {
-    this._dispatchSaveRequest(e.detail);
-  },
-
-  _dispatchSaveRequest: function(opts) {
     var data = Object.assign({}, this.proxyRequest, this.request);
-    if (opts.name) {
-      data.name = opts.name;
+    this._dispatchSaveRequest(opts, data);
+    this.fire('send-analytics', {
+      'type': 'event',
+      'category': 'Engagement',
+      'action': 'Click',
+      'label': 'Save express'
+    });
+  },
+
+  /**
+   * Prepares a detail object for the `save-request-data` event.
+   *
+   * @param {Object} opts Map of saving request options returned from save
+   *                      panel / dialog
+   * @param {Object} request The request object to update.
+   * @return {Object} Event's detail object.
+   */
+  _prepareSaveRequestEvent: function(opts, request) {
+    var data = Object.assign({}, request);
+    data.name = opts.name;
+    if (opts.description) {
+      data.description = opts.description;
+    } else if (data.description) {
+      delete data.description;
     }
     if (opts.override === false || opts.type === 'history') {
       delete data._id;
@@ -304,17 +331,25 @@ Polymer({
     }
     var detail = {
       request: data,
-      opts: {
-        drive: opts.isDrive ? true : false
-      }
+      opts: opts
     };
-    if (opts.isProject) {
-      if (opts.projectIsNew) {
-        detail.opts.projectName = opts.projectName;
-      } else {
-        detail.opts.projectId = opts.projectId;
-      }
-    }
+    detail.opts.drive = opts.isDrive ? true : false;
+    delete opts.isDrive;
+    return detail;
+  },
+
+  /**
+   * Dispatches the event to save request data in the data store.
+   * @param {CustomEvent} e The `save-request` event dispatched from the editor.
+   */
+  _saveRequestEdit: function(e) {
+    this.$.requestEditorContainer.opened = false;
+    this.$.requestEditor.request = undefined;
+    this._dispatchSaveRequest(e.detail, e.detail.request);
+  },
+
+  _dispatchSaveRequest: function(opts, data) {
+    var detail = this._prepareSaveRequestEvent(opts, data);
 
     var event = this.fire('save-request-data', detail, {
       cancelable: true,
@@ -331,11 +366,20 @@ Polymer({
       });
       this.$.errorToast.text = message;
       this.$.errorToast.opened = true;
-      return;
+      return Promise.reject(new Error('Save event not handled'));
     }
+
+    // if (opts.isProject) {
+    //   if (opts.projectIsNew) {
+    //     detail.opts.projectName = opts.projectName;
+    //   } else {
+    //     detail.opts.projectId = opts.projectId;
+    //   }
+    // }
 
     return event.detail.result
     .then(request => {
+      this.$.savedOk.opened = true;
       if (request.legacyProject && request.legacyProject !== this.projectId) {
         this.set('projectId', request.legacyProject);
       } else if (!request.legacyProject && this.projectId) {
@@ -361,7 +405,9 @@ Polymer({
       this.$.errorToast.opened = true;
     });
   },
-
+  /**
+   * Inform other elements that the project ID changed.
+   */
   _projectIdChanged: function(id) {
     this.fire('selected-project-changed', {
       value: id

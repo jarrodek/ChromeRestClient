@@ -8,8 +8,7 @@ Polymer({
   is: 'arc-drive-controller',
   behaviors: [
     Polymer.IronOverlayBehavior,
-    Polymer.IronResizableBehavior,
-    ArcBehaviors.ListControllerBehavior
+    Polymer.IronResizableBehavior
   ],
   hostAttributes: {
     'role': 'dialog',
