@@ -13,6 +13,6 @@ Polymer({
   },
 
   showLicensing: function() {
-    this.$.licensingDialog.open();
+    this.fire('display-license');
   }
 });

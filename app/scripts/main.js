@@ -11,7 +11,6 @@
   app.appVersion = arc.app.utils.appVer;
   app.appId = chrome.runtime && chrome.runtime.id ? chrome.runtime.id : 'not-in-chrome-app';
   app.analyticsDisabled = false;
-  app.upgrading = false;
   app.initialized = false;
 
   app.observers = [
@@ -113,54 +112,6 @@
   //called by the router to close a drawer (in mobile view) when changing route.
   app.closeDrawer = function() {
     app.$.paperDrawerPanel.closeDrawer();
-  };
-  /**
-   * Read more about requesting features in ArcHasToolbarBehavior behavior file.
-   * Also change main.css in features section.
-   */
-  app.featuresMapping = new Map();
-  document.body.addEventListener('request-toolbar-features', (e) => {
-    app.featuresMapping.clear();
-    var list = e.detail.features;
-    var bar = document.querySelector('#mainToolbar');
-    list.forEach((feature) => {
-      bar.setAttribute(feature, true);
-      app.featuresMapping.set(feature, e.target);
-    });
-  });
-  document.body.addEventListener('release-toolbar-features', () => {
-    var bar = document.querySelector('#mainToolbar');
-    var keys = app.featuresMapping.keys();
-    for (let feature of keys) {
-      bar.removeAttribute(feature);
-    }
-    app.featuresMapping.clear();
-  });
-  app._featureCalled = (feature, event) => {
-    if (!app.featuresMapping.has(feature)) {
-      console.warn('Feature "%s" has been called without the mapping', feature);
-      return;
-    }
-    var src = app.featuresMapping.get(feature);
-    var name = feature[0].toUpperCase() + feature.substr(1);
-    var fnName = 'on' + name;
-    if (!(fnName in src)) {
-      console.warn(`Function ${fnName} is undefined for ${src.nodeName}`);
-    } else {
-      src[fnName]({
-        detail: event,
-        source: 'feature'
-      });
-    }
-  };
-  app._onFeatureSave = (e) => {
-    app._featureCalled('save', e);
-  };
-  app._onFeatureClearAll = (e) => {
-    app._featureCalled('clearAll', e);
-  };
-  app._onFeatureXhrToggle = (e) => {
-    app._featureCalled('xhrtoggle', e);
   };
   // called when any component want to change request link.
   document.body.addEventListener('action-link-change', (e) => {
@@ -434,14 +385,6 @@
     app.set('analyticsDisabled', !permitted);
   });
 
-  window.addEventListener('logs-requested', function() {
-    var logViewer = document.querySelector('arc-log-viewer');
-    if (!logViewer) {
-      throw new Error('Log viewer not available.');
-    }
-    logViewer.open();
-  });
-
   window.addEventListener('app-new-window', function() {
     chrome.runtime.getBackgroundPage(function(bg) {
       bg.arc.bg.openWindow();
@@ -492,7 +435,7 @@
         let panel = document.body.querySelector('data-import-export-panel');
         panel.importObject = data;
         panel.importPage = 3;
-        page('/dataimport');
+        app.openImportExport();
       }
     })
     .catch(cause => app.notifyError(cause.message));
@@ -538,4 +481,60 @@
       });
     }
   });
+
+  /* Navigation from main app chrome */
+  app.openLogs = function() {
+    var logViewer = document.querySelector('arc-log-viewer');
+    if (!logViewer) {
+      throw new Error('Log viewer not available.');
+    }
+    logViewer.open();
+  };
+  document.body.addEventListener('logs-requested', app.openLogs);
+  /**
+   * Opens about app page
+   */
+  app.openAbout = function() {
+    app.fire('navigate', {
+      base: 'about'
+    });
+  };
+
+  /**
+   * Opens an issue tracker - new issue report.
+   */
+  app.openIssueReport = function() {
+    var appVersion = app.appVersion;
+    var message = 'Your description here\n\n';
+    message += '## Expected outcome\nWhat should happen?\n\n';
+    message += '## Actual outcome\nWhat happened?\n\n';
+    message += `## Versions\nApp: ${appVersion}\n`;
+    message += `Platform: ${navigator.appVersion}\n\n`;
+    message += '## Steps to reproduce\n1. \n2. \n3. ';
+    message = encodeURIComponent(message);
+    window.open('https://github.com/jarrodek/ChromeRestClient/issues/new?body=' + message);
+  };
+  /**
+   * Opens the import / export panel
+   */
+  app.openImportExport = function() {
+    app.fire('navigate', {
+      base: 'dataimport'
+    });
+  };
+  /**
+   * Opens the settings panel.
+   */
+  app.openSettings = function() {
+    app.fire('navigate', {
+      base: 'settings'
+    });
+  };
+
+  app.openLicense = function() {
+    var dialog = document.querySelector('arc-license-dialog');
+    dialog.opened = true;
+  };
+  document.body.addEventListener('display-license', app.openLicense);
+
 })(document, window);
