@@ -295,11 +295,14 @@ Polymer({
   },
 
   _saveCurrent: function() {
+    var data = Object.assign({}, this.proxyRequest, this.request);
     var opts = {
       isDrive: this.request.type === 'google-drive',
-      projectId: this.projectId
+      projectId: this.projectId,
+      name: data.name,
+      description: data.description
     };
-    var data = Object.assign({}, this.proxyRequest, this.request);
+
     this._dispatchSaveRequest(opts, data);
     this.fire('send-analytics', {
       'type': 'event',
@@ -319,7 +322,9 @@ Polymer({
    */
   _prepareSaveRequestEvent: function(opts, request) {
     var data = Object.assign({}, request);
-    data.name = opts.name;
+    if (opts.name) {
+      data.name = opts.name;
+    }
     if (opts.description) {
       data.description = opts.description;
     } else if (data.description) {
