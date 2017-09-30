@@ -459,22 +459,6 @@
     app.set('analyticsDisabled', !permitted);
   });
 
-  /* File import by drag'n'drop */
-  document.body.addEventListener('dragenter', (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    console.log('aaaaaa');
-    var element = document.querySelector('drop-file-importer');
-    if (!element) {
-      return;
-    }
-    if (element.opened) {
-      element.opened = false;
-    } else {
-      element.opened = true;
-    }
-  });
-
   window.addEventListener('logs-requested', function() {
     var logViewer = document.querySelector('arc-log-viewer');
     if (!logViewer) {
@@ -513,23 +497,20 @@
     return false;
   }
 
-  /**
-   * Handles opening a file from Google Drive.
-   * Normalizes content to the import object and opens import panel
-   * if the data is import data or a request if import data contains single
-   * request.
-   */
-  app._openDriveRequest = function(e) {
+  function processIcomingData(data, opts) {
+    opts = opts || {};
     var event = app.fire('import-normalize', {
-      content: e.detail.content
+      content: data
     }, {
       cancelable: true
     });
     event.detail.result.then((data) => {
       if (isSingleRequest(data)) {
         let obj = data.requests[0];
-        obj.type = 'google-drive';
-        obj.driveId = e.detail.diveId;
+        if (opts.diveId) {
+          obj.type = 'google-drive';
+          obj.driveId = opts.diveId;
+        }
         document.body.querySelector('arc-request-panel').request = obj;
         page('/request/current');
       } else {
@@ -540,6 +521,23 @@
       }
     })
     .catch(cause => app.notifyError(cause.message));
+  }
+
+  window.addEventListener('on-process-incoming-data', function(e) {
+    processIcomingData(e.detail.data);
+  });
+
+  /**
+   * Handles opening a file from Google Drive.
+   * Normalizes content to the import object and opens import panel
+   * if the data is import data or a request if import data contains single
+   * request.
+   */
+  app._openDriveRequest = function(e) {
+    var opts = {
+      diveId: e.detail.diveId
+    };
+    processIcomingData(e.detail.content, opts);
   };
 
   app._chromeSignin = function(e) {
