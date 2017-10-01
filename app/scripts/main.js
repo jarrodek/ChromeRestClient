@@ -12,6 +12,8 @@
   app.appId = chrome.runtime && chrome.runtime.id ? chrome.runtime.id : 'not-in-chrome-app';
   app.analyticsDisabled = false;
   app.initialized = false;
+  // True if the user is signed in to Chrome browser and can authorize the app.
+  app.chromeSignedIn = false;
 
   app.observers = [
     '_routeChanged(route, params.*)'
@@ -317,6 +319,9 @@
   };
 
   function openDriveSelector() {
+    if (!app.chromeSignedIn) {
+      return app.openChromeSigninInfo();
+    }
     page('/drive');
   }
   window.addEventListener('open-drive-selector', openDriveSelector);
@@ -442,11 +447,23 @@
     processIcomingData(e.detail.data);
   });
 
+  app.openChromeSigninInfo = function() {
+    var node = document.querySelector('chrome-not-signedin-view');
+    if (!node) {
+      node = document.createElement('chrome-not-signedin-view');
+      document.body.appendChild(node);
+    }
+    node.opened = true;
+  };
+
   /**
    * Opens a request from the Google Drive.
    * This action support integration with Drive UI, action "open with".
    */
   app.openDriveItem = function(id) {
+    if (!app.chromeSignedIn) {
+      return app.openChromeSigninInfo();
+    }
     Polymer.RenderStatus.afterNextRender(app, function() {
       app.fire('navigate', {
         base: 'drive'

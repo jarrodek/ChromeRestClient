@@ -1,4 +1,13 @@
 <link rel="import" href="../../bower_components/error-message/error-message.html">
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<!--
+A dialog with information that the user must be signed into the Chrome to
+perform an action.
+
+-->
 <dom-module id="chrome-not-signedin-view">
   <template>
     <style>
@@ -29,15 +38,19 @@
       @apply(--layout-end-justified);
     }
     </style>
-    <h2 class="flex">Not signed in to Chrome</h2>
-    <error-message>
-      <p>To have access to Google Drive from this app you need to be signed in to Chrome (so the app will receive access token).</p>
-      <p>Go to settings and press "Sign in to Chrome" button. Then follow Chrome instructions.</p>
-      <paper-button raised on-tap="_learnMore">Learn more</paper-button>
-    </error-message>
-    <div class="buttons">
-      <paper-button dialog-dismiss="" on-tap="close">Close</paper-button>
-    </div>
+    <paper-dialog opened="{{opened}}">
+      <h2>Not signed in to Chrome</h2>
+      <paper-dialog-scrollable>
+        <error-message>
+          <p>Sign in to Chrome before calling this acction</p>
+          <p>Before you can authorize the application with Googole you must be signed in to Chrome. After set up, try again.</p>
+        </error-message>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss on-tap="_learnMore">Learn more</paper-button>
+        <paper-button dialog-dismiss>Close</paper-button>
+      </div>
+    </paper-dialog>
   </template>
   <script src="chrome-not-signedin-view.js"></script>
 </dom-module>
