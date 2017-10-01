@@ -82,8 +82,5 @@
   },
   "ignore": [],
   "main": "app/index.html",
-  "resolutions": {
-    "lodash": "^4.6.2"
-  },
-  "version": "9.14.64"
+  "version": "10.0.0"
 }

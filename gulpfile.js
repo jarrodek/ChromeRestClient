@@ -62,7 +62,7 @@ try {
 } catch (err) {}
 
 var buildHelpMessage = `Usage:
-gulp build --target <TARGET> [--hotfix] [--build-only] [--publish]
+gulp build --target <TARGET> [--hotfix]
 
 Targets:
   canary          Build a canary (daily) release
@@ -75,23 +75,15 @@ Options:
                   system (during version bump) See tasks/bump-version.js for more info.
                   Bu default it's full release.
 
-  --build-only    Don't push changes to git and don't publish the app in the store. It
-                  overrides --publish and prevent script from publishing the app.
-
-  --publish       If set the script will publish the app. You'll be asked to log in to your
-                  Google account during the process. By detault the app is not published.
-                  Note that the app will be uploaded to the store but not published even if
-                  --publish is not set.
-
 Description:
   Build the app, update git repository and publish the app in the store.
 
 Examples:
-  gulp build --target canary --publish
-  This will build canary release, push changes to the git repository and publish the app.
+  gulp build --target canary
+  This will build canary release.
 
-  gulp build --target beta --hotfix --build-only
-  This will only build beta release as a hotfix (only minor number will increase).
+  gulp build --target beta --hotfix
+  This will build beta release as a hotfix.
 `;
 
 var build = (done) => {
@@ -103,13 +95,8 @@ var build = (done) => {
   }
   var Builder = require('./tasks/builder.js');
   var options = {
-    isHotfix: params.hotfix || false,
-    buildOnly: params['build-only'] || false,
-    publish: params.publish || false
+    isHotfix: params.hotfix || false
   };
-  if (options.buildOnly && options.publish) {
-    options.publish = false;
-  }
 
   switch (params.target) {
     case 'canary':
@@ -119,18 +106,7 @@ var build = (done) => {
       Builder.buildDev(options, done);
       break;
     case 'beta':
-      if (!options.isHotfix) {
-        let confirm = require('confirm-simple');
-        confirm('Upgrade the version major version?', ['ok', 'cancel'] , (ok) => {
-          if (!ok) {
-            done();
-          } else {
-            Builder.buildBeta(options, done);
-          }
-        });
-      } else {
-        Builder.buildBeta(options, done);
-      }
+      Builder.buildBeta(options, done);
       break;
     case 'stable':
       Builder.buildStable(options, done);
