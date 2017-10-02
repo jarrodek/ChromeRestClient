@@ -3,24 +3,6 @@
 
 /* global app */
 window.addEventListener('initializeRouting', function() {
-
-  function mayStopController(ctx, next) {
-    var ctrl = document.querySelector('#pages [opened]');
-    if (!ctrl || !ctrl.mayStop) {
-      next();
-      return;
-    }
-    Promise.resolve(ctrl.mayStop())
-    .then((may) => {
-      if (may) {
-        next();
-      }
-    })
-    .catch(() => {
-      next();
-    });
-  }
-
   // Middleware
   function scrollToTop(ctx, next) {
     app.scrollPageToTop();
@@ -53,6 +35,7 @@ window.addEventListener('initializeRouting', function() {
           screenName = 'Edit project';
         }
         break;
+      case 'drive': screenName = 'Drive selector'; break;
     }
     var event = new CustomEvent('send-analytics', {
       detail: {
@@ -65,7 +48,7 @@ window.addEventListener('initializeRouting', function() {
     next();
   }
   // Routes
-  arc.app.router.middle(mayStopController, scrollToTop, closeDrawer, sendScreen);
+  arc.app.router.middle(scrollToTop, closeDrawer, sendScreen);
   arc.app.router.register('/', function() {
     var params = {
       'type': 'restore'
@@ -134,8 +117,39 @@ window.addEventListener('initializeRouting', function() {
     app.params = ctx.params;
     app.route = 'project';
   });
+  arc.app.router.register('/drive', function() {
+    app.route = 'drive';
+  });
   window.page = arc.app.router.redirect;
   arc.app.router.start();
+
+  window.addEventListener('navigate', function(e) {
+    let params = e.detail;
+    var url;
+    switch (params.base) {
+      case 'default': url = '/'; break;
+      case 'history': url = '/history'; break;
+      case 'settings': url = '/settings'; break;
+      case 'about': url = '/about'; break;
+      case 'socket': url = '/socket'; break;
+      case 'saved': url = '/saved'; break;
+      case 'dataimport': url = '/dataimport'; break;
+      case 'project':
+        if (params.id) {
+          url = '/project/' + params.id;
+        }
+        break;
+      case 'request':
+        url = '/request/' + params.type + '/' + encodeURIComponent(params.id);
+        break;
+      case 'drive': url = '/drive'; break;
+    }
+    if (url) {
+      arc.app.router.redirect(url);
+    } else {
+      throw new Error('The route is not handled correctly', params);
+    }
+  });
 
   let event = new Event('ArcInitialized');
   window.dispatchEvent(event);

@@ -1,0 +1,321 @@
+<link rel="import" href="../../bower_components/openable-panel-behavior/openable-panel-behavior.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+
+<dom-module id="arc-about">
+  <template>
+    <style>
+    :host {
+      display: block;
+    }
+    .padding-section {
+      @apply(--section-padding);
+      padding-right: 24px;
+    }
+
+    .licenseText {
+      white-space: pre-line;
+    }
+
+    h1 {
+      @apply(--page-title-text);
+    }
+
+    .about-section {
+      @apply(--page-section-container);
+    }
+
+    .about-row {
+      @apply(--paper-font-body1);
+      padding: 8px 0;
+    }
+
+    a {
+      margin-left: 8px;
+    }
+
+    h2 {
+      @apply(--page-section-title);
+    }
+
+    .changelog {
+      @apply(--page-section-item-simple);
+    }
+
+    .versionField {
+      margin-right: 8px;
+    }
+
+    paper-dialog-scrollable {
+      min-width: 600px;
+      min-height: 400px;
+    }
+    .paper-font-title {
+      @apply(--paper-font-title);
+    }
+    .paper-font-body1 {
+      @apply(--paper-font-body1);
+    }
+    li > iron-icon {
+      color: #F57C00;
+    }
+    </style>
+    <section class="about-section padding-section">
+      <div class="about-row">
+        <span class="versionField"><span>Application version: </span><span id="appVersion">{{version}}</span></span>
+      </div>
+      <div class="about-row">
+        Copyright © 2012 Paweł Psztyć (Poland || UK)
+      </div>
+      <div class="about-row">
+        Source code at
+        <a href="https://github.com/jarrodek/ChromeRestClient" target="_blank">GitHub</a> under Apache License (for open source projects) or CC-BY-4.0 (for not open source or commercial projects).
+      </div>
+      <div class="about-row">
+        Report issues at
+        <a target="_blank" href="https://github.com/jarrodek/ChromeRestClient/issues?utm_source=ARC&amp;utm_medium=InsideApplication&amp;utm_campaign=About">app issue list</a> (thanks!).
+      </div>
+      <div class="about-row">
+        More information about the app on <a target="_blank" href="http://restforchrome.blogspot.com/?utm_source=ARC&amp;utm_medium=InsideApplication&amp;utm_campaign=About">ARC's Blog</a>
+      </div>
+      <div class="about-row">
+        <paper-button raised="true" on-tap="showLicensing">Licensing information</paper-button>
+      </div>
+    </section>
+    <section class="about-section padding-section">
+      <h2>Changelog</h2>
+      <div class="changelog">
+        <p class="paper-font-title">Version 9</p>
+        <ul class="paper-font-body1">
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/919" target="_blank">#919</a>: The app will now accept legacy data import.</li>
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/680" target="_blank">#680</a>: Now the app sends the request when using command+R combination on mac and ctrl+R on normal systems.</li>
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/666" target="_blank">#666</a>: Project menu items now use all available item space as a clickable element.</li>
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/925" target="_blank">#925</a>: Google Drive items now will be restored properly.</li>
+          <li>Settings panel redesign. Now it follows material design guidelines.</li>
+          <li>Added option to disable API assistant (the history analysis) in settings.</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>Redesigned the "clear data" UI and flow. Now you can choose which data you want to remove.</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>Completely new import / export system. Now you can choose which data you want to export. Also fixed issues related to data import / export.</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>The app now can export / import data from Google Drive. Share your data with your team using Google Drive as a backend.</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>The response status panel is now minimized by default to display response data without passing the headers section and to hide (possibly) sensitive data in the response headers.</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>Websockets history now will be recorded and available to recall when accessing the Websockets screen. Also, added autofill when focusing / typing into the websocket URL.</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>Added warning information to the projects view to inform you if a project has no requests associated with it.</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>Now after focusing on the URL panel a quick history listing will be displayed as a suggestion. When input change regular autofill will appear</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>History, saved and projects now are also available in the left navigation panel under expandable menu items. Regular full screen support for corresponging views is still available.</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>Left hand side navigation now can be hidden. It can be restored when clicking on "menu" icon.</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>Now requests in projects can be ordered. Ordering options are available on the edit project screen.</li>
+          <li>Updates styles for the main UI regions.</li>
+        </ul>
+
+        <p class="paper-font-title">Version 8</p>
+        <ul class="paper-font-body1">
+          <li><iron-icon icon="arc:new-releases"></iron-icon>Upgraded application database schema. It will support better performance while listing/querying history and saved requests data.</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>Added request history explorer. When selecting saved/history request the app will automatically bring history data and present it on a charts</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>Added status message to the request action bar. And the action bar. Now it will inform the user when request headers has been sent and when first byte of message arrived</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>New headers sets. Now you can define own headers sets and access them in the request panel. Headers sets is a way to easily insert predefined set of headers into the request headers form.</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>Variables editor and environment manager. Now you can create variables and organize them using environments. Select an anvironment and all variables defined in it will be applied to the request.</li>
+          <li>File import / export format has changed. Though, the app will support old file format.</li>
+          <li>History now will becomed a timeline of request made in the past. Each section in the timeline is a day when a request occured. Each request is now counded once per day.</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon>Now CTRL/command + S will automatically save the request if it's already saved (in project or in saved list). To bring save dialog add SHIFT key to the combination.</li>
+          <li>When using sockets now socket URL will handle ENTER key properly by making a connection. Also added toast with error message when something is wrong. The error message will contain message directly from web socket.</li>
+          <li>Projects are now deprecated. They will be changed in future releases into new form. However app will support them for at least a year.</li>
+          <li>Current databae changes supports future chamges in the app. Become a beta tester to have early access to new functionalities and to give early feedback on app changes. Read <a target="_blank" href="https://restforchrome.blogspot.co.uk/2016/03/join-advanced-rest-client-beta-program.html">this blog post</a> for more information.</li>
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/805" target="_blank">#805</a>: Parsed JSON view should display commas. Now it will be possible to copy part of the JSON string as a valid JSON object.</li>
+          <li>Fixed (finally!) issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/234" target="_blank">#234</a>: JSON tab does not handle numbers above 15 digits long. Now the JSON tab display warning about wrong format but also display real value.</li>
+        </ul>
+
+        <p class="paper-font-title">10/6/2016</p>
+        <ul class="paper-font-body1">
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/812" target="_blank">#812</a>: Number in tabs is not alligned</li>
+          <li>Removed unused observer and console print</li>
+          <li>Added new export options in htistory / saved list and in settings</li>
+          <li>Errors will automatically print trace information into the console. <a href="https://github.com/jarrodek/ChromeRestClient/wiki/debugging" target="_blank">Read more about debugging</a></li>
+        </ul>
+
+        <p class="paper-font-title">9/20/2016</p>
+        <ul class="paper-font-body1">
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/676" target="_blank">#676</a>: cant preview html response</li>
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/769" target="_blank">#769</a>: Make "Clear All" icon more obvious</li>
+        </ul>
+
+        <p class="paper-font-title">9/6/2016</p>
+        <ul class="paper-font-body1">
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/770" target="_blank">#770</a>: ctrl+f opens find dialog on mac</li>
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/779" target="_blank">#779</a>: Charset in answer's Content-Type header ignoring. Default encoding is non-UTF-8</li>
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/771" target="_blank">#771</a>: it is not support the Host header</li>
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/789" target="_blank">#789</a>: Fail to build the app due to without arc.json</li>
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/778" target="_blank">#778</a>: Double response on any requested endpoint</li>
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/791" target="_blank">#791</a>: Add privacy policy statement to the app</li>
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/792" target="_blank">#792</a>: Two tutorials shows at the same time</li>
+          <li>Minor stability improvements</li>
+        </ul>
+        <p class="paper-font-title">7/25/2016</p>
+        <ul class="paper-font-body1">
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/711" target="_blank">#711</a>: WebSocket Reconnect handling should be a setting.</li>
+          <li>Fixed issue with Google Drive picker dialog.</li>
+        </ul>
+        <p class="paper-font-title">7/19/2016</p>
+        <ul class="paper-font-body1">
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/701" target="_blank">#701</a>: Cookies are not distroyed.</li>
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/726" target="_blank">#726</a>: 404 Not found on Drive integration page.</li>
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/725" target="_blank">#725</a>: fixed saving file to Google Drive</li>
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/704" target="_blank">#704</a>: the app is handlig binary files properly</li>
+        </ul>
+        <p class="paper-font-title">6/15/2016</p>
+        <ul class="paper-font-body1">
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/705" target="_blank">#705</a>: The app will handle "null" and true/false JSON responses correctly.</li>
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/688" target="_blank">#688</a>: Redirections are now handled as described in the HTTP spec.</li>
+        </ul>
+
+        <p class="paper-font-title">5/12/2016</p>
+        <ul class="paper-font-body1">
+          <li>Added NTLM authentication.</li>
+          <li>Added Chrome cookie synchronization using <a href="https://chrome.google.com/webstore/detail/apcedakaoficjlofohhcmkkljehnmebp" class="inherit" target="_blank">ARC cookie exchange</a> extension.</li>
+        </ul>
+        <p class="paper-font-title">4/29/2016</p>
+        <ul class="paper-font-body1">
+          <li>Many bugfixes and stability improvements.</li>
+          <li>Added more detailed network errors.</li>
+        </ul>
+        <p class="paper-font-title">4/27/2016</p>
+        <ul class="paper-font-body1">
+          <li>Fixed issue when there was no status message in the respone.</li>
+          <li>Added timings view to the app.</li>
+        </ul>
+        <p class="paper-font-title">4/20/2016</p>
+        <ul class="paper-font-body1">
+          <li>Added internal cookie storage to keep sessions in the app.</li>
+          <li>Added validation to the URL fields when the URL is not valid</li>
+          <li>Fixed MacOS shortcuts commands</li>
+          <li>Many bug fixes</li>
+        </ul>
+        <p class="paper-font-title">3/31/2016</p>
+        <ul class="paper-font-body1">
+          <li>The parsed view now parses response ~10 times faster</li>
+          <li>Replaced code highlightng with Prism js</li>
+          <li>Added desktop notifications for beta, dev and cannary channels</li>
+        </ul>
+        <p class="paper-font-title">3/24/2016</p>
+        <ul class="paper-font-body1">
+          <li>Created a new Chrome app</li>
+          <li>Changed framework from GWT to Polymer</li>
+          <li>Rewritted code base from java to javascript</li>
+        </ul>
+        <p class="paper-font-title">1/12/2016</p>
+        <ul class="paper-font-body1">
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/347" target="_blank">#347</a>: Headers copy and paste with one line</li>
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/349" target="_blank">#349</a>: Unexpected token ... in drive.js</li>
+          <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/348" target="_blank">#348</a>: fetch API: URL scheme "chrome-extension" is not supported.</li>
+        </ul>
+        <p class="paper-font-title">12/29/2015</p>
+        <ul class="paper-font-body1">
+          <li>Changed settings view</li>
+          <li>Changed about view</li>
+          <li>Changed response status view</li>
+          <li>Improved startup time</li>
+          <li>Changed direct messaging system (messages from app developer)</li>
+          <li>Fixed Google Drive integration</li>
+          <li>Replaced localStorage with chrome.storage</li>
+          <li>User settings now are syncing between app instances (if the user is logged in to Chrome)</li>
+          <li>Removed shortcut settings</li>
+          <li>Removed encoding drop-down. <a href="http://restforchrome.blogspot.co.uk/2016/01/encoding-drop-down-removal-from-app.html" target="_blank">Learn more</a>
+          </li>
+        </ul>
+        <p class="paper-font-title">12/4/2015</p>
+        <ul class="paper-font-body1">
+          <li>Fixed several issues from the issue tracker.</li>
+          <li>Made some UI changes</li>
+          <li>Changed URL widget</li>
+          <li>Changes in headers panel widget</li>
+        </ul>
+        <p class="paper-font-title">11/30/2015</p>
+        <ul class="paper-font-body1">
+          <li>Fixed Google Drive integration</li>
+          <li>Added Google File Picker</li>
+          <li>Removed app name from the main view</li>
+          <li>Changed font to Roboto</li>
+        </ul>
+        <p class="paper-font-title">5/4/2013</p>
+        <ul class="paper-font-body1">
+          <li>Added ability to export history data as JSON file recognizable by the app</li>
+          <li>"Save request dialog" will open only once pressing CTRL+S couple of times.</li>
+          <li>
+            Fixed
+            <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=174">Issue 174</a> : If-Modified-Since format now follow RFC.
+          </li>
+          <li>
+            Fixed
+            <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=177">Issue 177</a> : New Feature Request for improved linkifying to suit Django + TastyPie.
+          </li>
+          <li>Added CodeMirror support for payload panel (experimental - enable it in setting page).</li>
+          <li>Improvements in CodeMirror headers support - enabled autocomplete feature, better code highlighting</li>
+          <li>CodeMirror upgrade to v3.12</li>
+          <li>Added "options page" to app's manifest. Right click on the app icon to enter options page.</li>
+        </ul>
+        <p class="paper-font-title">4/11/2013</p>
+        <ul class="paper-font-body1">
+          <li>
+            Fixed
+            <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=155">Issue 155</a> : Default "Content-Type" header can't be saved
+          </li>
+          <li>Changed JSON response view</li>
+        </ul>
+        <p class="paper-font-title">2/23/2013</p>
+        <ul class="paper-font-body1">
+          <li>Added hide option for response headers.</li>
+          <li>Added options menu for URL panel (hover URL and then setting icon).
+          </li>
+        </ul>
+        <p class="paper-font-title">1/2/2013</p>
+        <ul class="paper-font-body1">
+          <li>
+            Fixed
+            <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=137">Issue 137</a>: Escaping ⟨ ⟩ in header response.
+          </li>
+          <li>Link to "open in JSON tab" is now always visible in "Parsed" tab.
+          </li>
+        </ul>
+        <p class="paper-font-title">12/22/2012</p>
+        <ul class="paper-font-body1">
+          <li>Fixed issue with handling error during app definition download.</li>
+          <li>Added support for networks where contact to app server is impossible.
+          </li>
+          <li>Fixed Haved and History view when there is no items.</li>
+        </ul>
+        <p class="paper-font-title">12/15/2012</p>
+        <ul class="paper-font-body1">
+          <li>
+            Fixed
+            <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=129">Issue 129</a> : Allow deletion and renaming of projects
+          </li>
+          <li>
+            Fixed
+            <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=121">Issue 121</a> : Project are not exporting
+          </li>
+          <li>
+            Fixed
+            <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=121">Issue 132</a> : User-Agent changes persists. (Chrome &gt;= beta)
+          </li>
+          <li>Header of the request view now include a request name (if any).</li>
+        </ul>
+        <p class="paper-font-title">12/09/2012</p>
+        <ul class="paper-font-body1">
+          <li>
+            Fixed
+            <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=129">Issue 129</a> : Combobox to select requests in project always selects the first item
+          </li>
+          <li>
+            Fixed
+            <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=128">Issue 128</a> : Mutlipart Boundary not sent in request body when file is not attach using mutlipart/form-data
+          </li>
+          <li>
+            Fixed
+            <a href="http://code.google.com/p/chrome-rest-client/issues/detail?id=117">Issue 117</a> : How do you delete a project ?
+          </li>
+          <li>When multipart/form-data is selected as a content-type the app will parse payload data from the form tab in proper way (including boundary section)</li>
+          <li>When response content-type header is javascript you will be able to open result in JSON tab (link on the top of the "parsed" tab). Facebook API do not set right JSON header and response is parsed as a JavaScript.</li>
+        </ul>
+      </div>
+    </section>
+  </template>
+  <script src="arc-about.js"></script>
+</dom-module>

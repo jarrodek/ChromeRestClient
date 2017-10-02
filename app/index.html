@@ -10,11 +10,44 @@
   <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
   <link rel="import" href="bower_components/font-roboto-local/roboto.html">
   <link rel="import" href="elements/elements.html">
+  <link rel="import" href="bower_components/project-details/project-details.html">
+  <link rel="import" href="bower_components/arc-menu/arc-menu.html">
+  <link rel="import" href="elements/arc-about/arc-about.html">
+  <link rel="import" href="bower_components/websocket-panel/websocket-panel.html">
+  <link rel="import" href="bower_components/chrome-file-export/chrome-file-export.html">
+  <link rel="import" href="bower_components/arc-chrome-settings/arc-chrome-settings.html">
+  <link rel="import" href="bower_components/arc-settings-panel/arc-settings-panel.html">
+  <link rel="import" href="bower_components/saved-requests-panel/saved-requests-panel.html">
+  <link rel="import" href="bower_components/history-panel/history-panel.html">
+  <link rel="import" href="bower_components/google-drive-browser/google-drive-browser.html">
+  <link rel="import" href="bower_components/paper-toast/paper-toast.html">
+  <link rel="import" href="bower_components/arc-data-import/arc-data-import.html">
+  <link rel="import" href="bower_components/arc-data-export/arc-data-export.html">
+  <link rel="import" href="bower_components/data-import-export-panel/data-import-export-panel.html">
+  <link rel="import" href="bower_components/search-bar/search-bar.html">
+  <link rel="import" href="bower_components/drop-file-importer/drop-file-importer.html">
+  <link rel="import" href="bower_components/authorization-data-saver/authorization-data-saver.html">
+  <link rel="import" href="bower_components/cookie-jar/cookie-jar.html">
+  <link rel="import" href="bower_components/response-history-saver/response-history-saver.html">
+  <link rel="import" href="bower_components/url-history-saver/url-history-saver.html">
+  <link rel="import" href="bower_components/variables-manager/variables-manager.html">
+  <link rel="import" href="bower_components/variables-evaluator/variables-evaluator.html">
+  <link rel="import" href="bower_components/request-saver/request-saver.html">
+  <link rel="import" href="bower_components/cookie-exchange/cookie-exchange.html">
+  <link rel="import" href="bower_components/arc-loader-screen/arc-loader-screen.html">
+  <link rel="import" href="bower_components/arc-definitions/arc-definitions.html">
+  <link rel="import" href="bower_components/network-state/network-state.html">
+  <link rel="import" href="bower_components/uuid-generator/uuid-generator.html">
+  <link rel="import" href="bower_components/arc-icons/arc-icons.html">
+  <link rel="import" href="bower_components/iron-image/iron-image.html">
+  <link rel="import" href="bower_components/paper-scroll-header-panel/paper-scroll-header-panel.html">
+  <link rel="import" href="bower_components/arc-license-dialog/arc-license-dialog.html">
+  <link rel="import" href="bower_components/arc-models/project-model.html">
+  <link rel="import" href="elements/chrome-not-signedin-view/chrome-not-signedin-view.html">
   <style is="custom-style" include="shared-styles"></style>
 </head>
 <body>
   <template is="dom-bind" id="app">
-    <iron-meta id="meta" key="usePouchDb" value="{{usePouchDb}}"></iron-meta>
     <arc-loader-screen id="appLOader" opened></arc-loader-screen>
     <paper-drawer-panel responsive-width="1000px" id="paperDrawerPanel" force-narrow="{{forceNarrowLayout}}" narrow="{{narrowLayout}}" drawer-width="[[drawerWidth]]" disable-edge-swipe disable-swipe>
       <paper-scroll-header-panel drawer>
@@ -24,7 +57,7 @@
           <paper-icon-button icon="arc:pin-drawer" class$="[[_computePinDrawerClass(forceNarrowLayout, narrowLayout)]]" on-tap="_pinDrawer" title="Pin drawer" alt="Pin drawer"></paper-icon-button>
         </paper-toolbar>
         <template is="dom-if" if="[[initialized]]">
-            <arc-menu-controller loading use-pouch-db="[[usePouchDb]]" with-toast="[[withToast]]" route="[[route]]" route-params="[[params]]"></arc-menu-controller>
+          <arc-menu selected-request="[[selectedRequest]]" route-base="[[route]]"></arc-menu>
         </template>
         <div id="drawerResizer"></div>
       </paper-scroll-header-panel>
@@ -33,31 +66,40 @@
         <!-- Main Toolbar -->
         <paper-toolbar id="mainToolbar" class="main-toolbar">
           <paper-icon-button class="toolbar-hide" icon="arc:menu" paper-drawer-toggle title="Toggle drawer" alt="Drawer toggle icon"></paper-icon-button>
-          <paper-icon-button feature="back" on-tap="_onFeatureBack" class="toolbar-hide" icon="arc:arrow-back" title="Back"></paper-icon-button>
-          <div class="title toolbar-hide">
-            <span>[[pageTitle]]</span>
-            <span hidden$="[[_computeHideProjectLink(selectedProject, route)]]">
-              <paper-icon-button icon="arc:collections-bookmark" on-tap="openProjectDetails"></paper-icon-button>
-              <paper-tooltip animation-delay="100" position="bottom" offset="0">Project details</paper-tooltip>
-            </span>
-          </div>
-          <paper-toggle-button id="xhrToggle" feature="xhrtoggle" on-change="_onFeatureXhrToggle" class="toolbar-hide xhr-switch" title="Use XHR instead of socket">Use XHR</paper-toggle-button>
-          <paper-icon-button id="openFeature" feature="open" on-tap="_onFeatureOpen" class="toolbar-hide" icon="arc:folder-open" title="Open"></paper-icon-button>
-          <paper-icon-button id="saveFeature" feature="save" on-tap="_onFeatureSave" class="toolbar-hide" icon="arc:save" title="Save"></paper-icon-button>
-          <paper-icon-button id="exportFeature" feature="export" on-tap="_onFeatureExport" class="toolbar-hide" icon="arc:import-export" title="Export list"></paper-icon-button>
-          <paper-icon-button id="clearallFeature" feature="clearAll" on-tap="_onFeatureClearAll" class="toolbar-hide" icon="arc:clear-all"></paper-icon-button>
-          <paper-icon-button id="driveFeature" feature="drive" on-tap="_onFeatureDrive" class="toolbar-hide" icon="arc:drive"></paper-icon-button>
-          <paper-tooltip for="openFeature" offset="0" animation-delay="100">Open</paper-tooltip>
-          <paper-tooltip for="saveFeature" offset="0" animation-delay="100">Save</paper-tooltip>
-          <paper-tooltip for="exportFeature" offset="0" animation-delay="100">Export list</paper-tooltip>
-          <paper-tooltip for="clearallFeature" offset="0" animation-delay="100">Clear all</paper-tooltip>
-          <paper-tooltip for="driveFeature" offset="0" animation-delay="100">Open from Google Drive</paper-tooltip>
-
-          <div id="search-bar" feature="search" class="toolbar-hide" mode="search">
-            <paper-icon-button icon="arc:search" title="Search" on-tap="openSearch"></paper-icon-button>
-            <input is="iron-input" type="search" value="{{searchTerm::input}}" class="flex main-search-input" id="mainSearchInput"></input>
-          </div>
-          <!--<paper-icon-button icon="arc:more-vert"></paper-icon-button> -->
+          <div class="title">[[pageTitle]]</div>
+          <paper-menu-button horizontal-align="right">
+            <paper-icon-button icon="arc:more-vert" class="dropdown-trigger"></paper-icon-button>
+            <paper-menu class="dropdown-content">
+              <paper-icon-item on-tap="openAbout">
+                <iron-icon item-icon icon="arc:info-outline"></iron-icon>
+                About
+              </paper-icon-item>
+              <paper-icon-item on-tap="openLicense">
+                <span item-icon></span>
+                License
+              </paper-icon-item>
+              <paper-icon-item on-tap="openSettings">
+                <iron-icon item-icon icon="arc:settings"></iron-icon>
+                Preferences
+              </paper-icon-item>
+              <paper-icon-item on-tap="openImportExport">
+                <iron-icon item-icon icon="arc:import-export"></iron-icon>
+                Import and export data
+              </paper-icon-item>
+              <paper-icon-item on-tap="onNewWindow">
+                <iron-icon item-icon icon="arc:open-in-new"></iron-icon>
+                New window
+              </paper-icon-item>
+              <paper-icon-item on-tap="openIssueReport">
+                <iron-icon item-icon icon="arc:bug-report"></iron-icon>
+                Report an issue
+              </paper-icon-item>
+              <paper-icon-item on-tap="openLogs">
+                <iron-icon item-icon icon="arc:list"></iron-icon>
+                Open console logs
+              </paper-icon-item>
+            </paper-menu>
+          </paper-menu-button>
         </paper-toolbar>
         <!-- Main Content -->
         <div class="content">
@@ -66,37 +108,20 @@
             class="mainPages"
             attr-for-selected="data-route"
             selected-attribute="opened"
-            selected="[[route]]"
-            on-iron-select="_mainPageSelected"
-            on-iron-deselect="_mainPageDeselected">
-            <section data-route="request" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent">
-              <template is="dom-if" if="[[canRender(initialized, usePouchDb, 'true')]]" on-dom-change="_requestPanelInitiallized">
-                <request-panel narrow-layout="[[narrowLayout]]" route-params="{{params}}" with-toast="[[withToast]]"></request-panel>
-              </template>
-              <template is="dom-if" if="[[canRender(initialized,usePouchDb,'false')]]">
-                <arc-request-controller on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" request-loading="{{requestLoading}}" has-response="{{hasResponse}}" opened="{{requestOpened}}" request="{{request}}" response="{{response}}" active-request="{{activeRequest}}" route-params="[[params]]">
-                  <arc-request-view on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" request-loading="[[requestLoading]]" opened="{{requestOpened}}" request="{{request}}"></arc-request-view>
-                  <template is="dom-if" if="[[hasResponse]]">
-                    <arc-response-view opened="[[requestOpened]]" response="[[response]]" request="[[activeRequest]]"></arc-response-view>
-                  </template>
-                  <arc-save-dialog-view on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" id="saveRequestUi"></arc-save-dialog-view>
-                </arc-request-controller>
-              </template>
-            </section>
-            <arc-websocket-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="socket"></arc-websocket-controller>
-            <arc-history-list-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" main on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" search-query="[[searchTerm]]" data-route="history"></arc-history-list-controller>
-            <arc-saved-list-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" search-query="[[searchTerm]]" data-route="saved"></arc-saved-list-controller>
-            <arc-data-io-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="dataimport"></arc-data-io-controller>
-            <arc-settings-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="settings"></arc-settings-controller>
-            <arc-about-controller use-pouch-db="[[usePouchDb]]" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="about"></arc-about-controller>
-            <arc-project-controller use-pouch-db="[[usePouchDb]]" requests="{{currentRequests}}" on-iron-deselect="_cancelEvent" on-iron-select="_cancelEvent" data-route="project" route-params="[[params]]" current-selection="{{projectRequestsSelection}}" loading-data="{{loadingProjectRelatedData}}">
-              <arc-project-view current-selection="{{projectRequestsSelection}}" loading-data="[[loadingProjectRelatedData]]" requests="[[currentRequests]]"></arc-project-view>
-            </arc-project-controller>
+            selected="[[route]]">
+            <arc-request-panel data-route="request" route-params="{{params}}"></arc-request-panel>
+            <websocket-panel data-route="socket"></websocket-panel>
+            <history-panel data-route="history"></history-panel>
+            <saved-requests-panel data-route="saved"></saved-requests-panel>
+            <data-import-export-panel data-route="dataimport" api-key="592877543090-6tqu3mbhcbc3437cfj5f0ahjtui5tjac.apps.googleusercontent.com"></data-import-export-panel>
+            <arc-settings-panel data-route="settings"></arc-settings-panel>
+            <arc-about data-route="about"></arc-about>
+            <project-details data-route="project" project-id="[[params.projectId]]" attr-for-opened="opened"></project-details>
+            <google-drive-browser data-route="drive" attr-for-opened="opened" api-key="592877543090-6tqu3mbhcbc3437cfj5f0ahjtui5tjac.apps.googleusercontent.com" access-token="[[accessToken]]" on-drive-file-picker-data="_openDriveRequest"></google-drive-browser>
           </iron-pages>
         </div>
       </paper-scroll-header-panel>
     </paper-drawer-panel>
-    <!-- <user-provider id="userProvider" authorized="{{appAuthorized}}" profile-image="{{profileUrl}}"></user-provider> -->
     <arc-drive-controller restore-on-file id="driveController" with-backdrop></arc-drive-controller>
     <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('s', 'true')]]" on-keys-pressed="onSaveShift"></iron-a11y-keys>
     <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('s')]]" on-keys-pressed="onSave"></iron-a11y-keys>
@@ -104,6 +129,7 @@
     <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('f')]]" on-keys-pressed="onSearch"></iron-a11y-keys>
     <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('n')]]" on-keys-pressed="onNewWindow"></iron-a11y-keys>
     <iron-a11y-keys target="[[document.body]]" keys="[[_computeA11yButtons('r')]]" on-keys-pressed="onSend"></iron-a11y-keys>
+    <arc-license-dialog></arc-license-dialog>
     <onboarding-tutorial id="onboarding" auto>
       <onboarding-page>
         <div class="welcome-message">
@@ -196,65 +222,26 @@
           </div>
         </div>
       </onboarding-page>
-      <onboarding-page id="onboardingNotifications">
-        <div>
-          <h2>Be notified about update</h2>
-          <div class="onboarding-image-page">
-            <div class="image">
-              <iron-icon icon="arc:notifications-active"></iron-icon>
-            </div>
-            <div class="description">
-              <div>
-                <p class="beta-info">
-                  Beta, Dev and Canary channel users can be notified when new versions is released.
-                  You'll receive a notification on your desktop when the app udpate itseld so you can test the changes right away.
-                </p>
-                <paper-button on-tap="enableNotifications" id="enableNotify" raised>Enable notifications</paper-button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </onboarding-page>
     </onboarding-tutorial>
-    <paper-dialog id="canaryInfo" on-iron-overlay-closed="_canaryInfoClosed">
-      <h2>You are using the cannary channel</h2>
-      <paper-dialog-scrollable>
-        This version is not for production and it's daily build of the app.<br/>
-        Probably it is not working and you shouldn't use it unless you know what you are doing.
-        <div>
-          <paper-checkbox id="canaryMemoDontShow">Don't show this message in future</paper-checkbox>
-        </div>
-      </paper-dialog-scrollable>
-      <div class="buttons">
-        <paper-button dialog-dismiss>Close</paper-button>
-      </div>
-    </paper-dialog>
-    <network-state online="{{online}}" on-network-state="_networkStateChanged"></network-state>
-    <paper-toast id="offlineToast" class="fit-bottom offline-toast" text="You are now offline. Can't make new requests." duration="-1">
-      <paper-button on-tap="closeOfflineMessage">close</paper-button>
-    </paper-toast>
+
+    <network-state online="{{online}}" on-network-state-changed="_networkStateChanged"></network-state>
+    <paper-toast id="errorToast" duration="5000"></paper-toast>
+    <paper-toast id="offlineToast" class="offline-toast" text="You are now offline. Can't make new requests."></paper-toast>
     <arc-log-viewer></arc-log-viewer>
     <search-bar id="content-search-bar" on-iron-overlay-opened="textSearchBarOpened"></search-bar>
     <!-- Elements on new app -->
-    <arc-database id="savedRequests" store="saved-requests"></arc-database>
-    <arc-database id="historyRequests" store="history-requests"></arc-database>
-    <arc-database id="projects" store="legacy-projects"></arc-database>
-    <arc-database id="logs" store="logs"></arc-database>
-    <arc-database id="history-data" store="history-data"></arc-database>
-    <arc-database id="variables" store="variables"></arc-database>
-    <arc-database id="environments" store="environments"></arc-database>
-    <arc-database id="authData" store="auth-data"></arc-database>
-    <arc-database id="cookieData" store="cookies"></arc-database>
-    <app-pouchdb-collate></app-pouchdb-collate>
     <app-logger></app-logger>
-    <app-db-upgrade-1016></app-db-upgrade-1016>
     <arc-definitions></arc-definitions>
-    <request-model></request-model>
-    <project-model></project-model>
-    <url-history-model></url-history-model>
-    <websocket-url-history-model></websocket-url-history-model>
     <!-- UUID generator is used in data importer. It has reference to element's id. -->
     <uuid-generator id="uuid"></uuid-generator>
+
+    <chrome-signin-aware
+      id="signInAware"
+      is-authorized="{{appAuthorized}}"
+      signed-in="{{chromeSignedIn}}"
+      access-token="{{accessToken}}"
+      on-chrome-signin-aware-success="_chromeSignin"
+      on-chrome-signin-aware-signed-out="_chromeSignout"></google-signin-aware>
 
     <app-analytics
       tracking-id="UA-18021184-6"
@@ -298,34 +285,26 @@
     </app-analytics>
     <drop-file-importer></drop-file-importer>
     <chrome-storage auto storage="local" name="drawerWidth" value="{{_drawerWidth}}" on-chrome-storage-read="_drawerWidthRead" value-as="Number"></chrome-storage>
+    <variables-evaluator></variables-evaluator>
+    <variables-manager></variables-manager>
+    <request-saver></request-saver>
+    <cookie-exchange external-id="apcedakaoficjlofohhcmkkljehnmebp"></cookie-exchange>
+    <cookie-jar></cookie-jar>
+    <response-history-saver></response-history-saver>
+    <url-history-saver></url-history-saver>
+    <arc-data-export></arc-data-export>
+    <arc-data-import></arc-data-import>
+    <chrome-file-export></chrome-file-export>
+    <arc-chrome-settings></arc-chrome-settings>
+    <authorization-data-saver></authorization-data-saver>
+    <project-model></project-model>
   </template>
-  <script src="bower_components/dexie-js/dist/dexie.min.js"></script>
-  <script src="bower_components/har/build/har.js"></script>
-  <script src="bower_components/lodash/lodash.js"></script>
-  <!-- <script src="bower_components/uri.js/src/URI.min.js"></script> -->
-  <!-- <script src="bower_components/cookie-parser/cookie-parser.js"></script> -->
   <script src="scripts/libs/app.router.js"></script>
   <script src="scripts/libs/app.utils.js"></script>
-  <script src="scripts/libs/app.types.js"></script>
-  <script src="scripts/libs/app.headers.js"></script>
-  <script src="scripts/libs/app.idb.js"></script>
-  <script src="scripts/libs/app.idb.schema.js"></script>
-  <script src="scripts/libs/app.js"></script>
-  <script src="scripts/libs/app.settings.js"></script>
   <script src="scripts/libs/app.drive.js"></script>
-  <script src="scripts/libs/app.importer.js"></script>
-  <script src="scripts/libs/app.analytics.js"></script>
   <script src="scripts/libs/app.notifications.js"></script>
-  <script src="scripts/libs/app.payload.parser.js"></script>
-  <script src="scripts/libs/app.clipboard.js"></script>
-  <!-- build:js scripts/code-mirror-custom.js -->
-  <script src="scripts/code-mirror/mode/headers/headers.js"></script>
-  <script src="scripts/code-mirror/addon/hint/http-headers.js"></script>
-  <script src="scripts/code-mirror/addon/hint/show-hint.js"></script>
-  <!-- endbuild-->
   <script src="scripts/main.js"></script>
-  <!-- <script src="test/chance.js"></script>
-  <script src="test/mock-data.js"></script> -->
+  <script src="scripts/libs/drawer-resize.js"></script>
 </body>
 
 </html>

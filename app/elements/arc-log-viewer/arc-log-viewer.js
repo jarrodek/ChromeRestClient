@@ -24,8 +24,7 @@ Polymer({
   },
 
   behaviors: [
-    Polymer.PaperDialogBehavior,
-    ArcBehaviors.ArcFileExportBehavior
+    Polymer.PaperDialogBehavior
   ],
 
   observers: [
@@ -144,10 +143,16 @@ Polymer({
   },
 
   exportLogs: function() {
-    this.exportContent = this.logs;
-    this.fileSuggestedName = 'arc-log-export.json';
-    this.exportMime = 'json';
-    this.exportData();
+    var event = this.fire('export-data', {
+      data: this.logs,
+      type: 'application/json',
+      file: 'arc-log-export.json'
+    }, {
+      cancelable: true
+    });
+    if (!event.defaultPrevented) {
+      throw new Error('Export module not found.');
+    }
     this.fire('send-analytics', {
       type: 'event',
       category: 'Data export',
