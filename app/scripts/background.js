@@ -1,10 +1,5 @@
 'use strict';
 /**
- * Global object for error reporting.
- * The analytics.js file will get the data from here and report errors to the GA.
- */
-var pendingAnalytics = [];
-/**
  * Advanced Rest Client namespace.
  *
  * @namespace
@@ -58,19 +53,6 @@ arc.bg.onLaunched = (lunchData) => {
     }
   }
   arc.bg.openWindow(url);
-};
-/**
- * Handler called when the app is installed or updated.
- */
-arc.bg.onInstalled = (details) => {
-  switch (details.reason) {
-    case 'install':
-      
-      break;
-    case 'update':
-      arc.bg.notifyBetaUpdate();
-      break;
-  }
 };
 arc.bg.uuid = function() {
   // jscs:disable
@@ -135,21 +117,6 @@ arc.bg.releaseChannel = () => {
     release = 'stable';
   }
   return release;
-};
-/**
- * If the beta channel, notify user about new version.
- */
-arc.bg.notifyBetaUpdate = () => {
-  var channel = arc.bg.releaseChannel();
-  if (!channel || channel === 'stable') {
-    return;
-  }
-  arc.bg.notifications.canNotify()
-    .then((granted) => {
-      if (granted) {
-        arc.bg.notifications.displayUpdate(channel);
-      }
-    });
 };
 /**
  * To ensure anynomous app usage the app is using browser's build in crypto functions.
@@ -226,81 +193,9 @@ arc.bg.recordSession = () => {
   });
 };
 /**
- * Notifications support.
- *
- * @namespace
- */
-arc.bg.notifications = {};
-/**
- * Checks if the app have permissions to show notifications.
- *
- * @return {!Promise} Fulfilled promise when state is determined.
- */
-arc.bg.notifications.canNotify = () => {
-  return new Promise((resolve) => {
-    chrome.permissions.contains({
-      permissions: ['notifications']
-    }, (granted) => {
-      resolve(granted);
-    });
-  });
-};
-/**
- * Listen for notifications events.
- */
-arc.bg.notifications.listen = () => {
-  arc.bg.notifications.canNotify()
-    .then((granted) => {
-      if (granted) {
-        chrome.notifications.onClicked.addListener(arc.bg.notifications.onClicked);
-        chrome.notifications.onButtonClicked.addListener(arc.bg.notifications.onButtonClicked);
-      }
-    });
-};
-arc.bg.notifications.onClicked = (notificationId) => {
-  switch (notificationId) {
-    case 'beta-update':
-    case 'dev-update':
-    case 'canary-update':
-      arc.bg.openWindow();
-      break;
-  }
-  chrome.notifications.clear(notificationId);
-};
-arc.bg.notifications.onButtonClicked = (notificationId, buttonIndex) => {
-  switch (notificationId) {
-    case 'beta-update':
-    case 'dev-update':
-    case 'canary-update':
-      if (buttonIndex === 0) {
-        arc.bg.openWindow();
-      }
-      break;
-  }
-  chrome.notifications.clear(notificationId);
-};
-arc.bg.notifications.displayUpdate = (channel) => {
-  var msg = `Test ${channel} channel now and give feedback before stable release.`;
-  var opts = {
-    type: 'basic',
-    iconUrl: 'assets/arc_icon_128.png',
-    title: 'Advanced REST Client updated',
-    message: msg,
-    buttons: [{
-      title: 'Open app'
-    }, {
-      title: 'Close'
-    }],
-    isClickable: true
-  };
-  chrome.notifications.create(`${channel}-update`, opts);
-};
-/**
  * Listens for the app launching then creates the window.
  *
  * @see http://developer.chrome.com/apps/app.runtime.html
  * @see http://developer.chrome.com/apps/app.window.html
  */
 chrome.app.runtime.onLaunched.addListener(arc.bg.onLaunched);
-chrome.runtime.onInstalled.addListener(arc.bg.onInstalled);
-arc.bg.notifications.listen();
