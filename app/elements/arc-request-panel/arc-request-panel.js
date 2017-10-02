@@ -185,9 +185,7 @@ Polymer({
           description: 'Can\'t restore request of a type: ' + type + ' (ArcRequestPanel)',
           fatal: true
         });
-        StatusNotification.notify({
-          message: 'Can\'t restore request data. Type is unknown.'
-        });
+        this.$.typeMissingToast.opened = true;
         return;
     }
 
@@ -203,9 +201,7 @@ Polymer({
         'level': 'error'
       });
       console.error('Can\'t restore request data', e);
-      StatusNotification.notify({
-        message: 'Request do not exists in local database.'
-      });
+      this.$.missingRequestToast.opened = true;
     });
   },
   /**
