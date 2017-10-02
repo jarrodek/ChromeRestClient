@@ -33,7 +33,8 @@ Polymer({
   },
 
   listeners: {
-    'transport-request': '_onTransportRequested'
+    'transport-request': '_onTransportRequested',
+    'abort-request': '_abortHandler'
   },
 
   observers: [
@@ -101,6 +102,24 @@ Polymer({
     panel.send(e.detail)
     .catch(cause => {
       console.error(cause);
+    });
+  },
+  /**
+   * Aborts the request.
+   */
+  _abortHandler: function() {
+    var panel;
+    if (this.useXhr) {
+      panel = this.$$('chrome-xhr-request');
+    } else {
+      panel = this.$$('chrome-socket-request');
+    }
+    panel.abort();
+    this.fire('url-history-store', {
+      value: this.request.url
+    }, {
+      cancelable: true,
+      composed: true
     });
   },
   /**
@@ -271,21 +290,6 @@ Polymer({
 
     this.$.requestEditor.request = this.request;
     this.$.requestEditorContainer.opened = true;
-
-    // var ui = this.$$('request-save-dialog');
-    // ui.noCancelOnOutsideClick = true;
-    // ui.isDrive = isDrive;
-    // if (isSaved || isDrive) {
-    //   if (this.request._id) {
-    //     ui.isSaved = true;
-    //   }
-    //   ui.name = this.request.name;
-    // }
-    // if (this.projectId) {
-    //   ui.isProject = true;
-    //   ui.projectId = this.projectId;
-    // }
-    // ui.opened = true;
     this.fire('send-analytics', {
       'type': 'event',
       'category': 'Engagement',
