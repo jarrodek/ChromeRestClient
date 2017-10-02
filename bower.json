@@ -39,7 +39,7 @@
     "url-history-saver": "advanced-rest-client/url-history-saver#^0.1.1",
     "chrome-socket-request": "advanced-rest-client/chrome-socket-request#^0.0.X",
     "install-proxy-dialog": "advanced-rest-client/install-proxy-dialog#^0.1.1",
-    "fetch": "advanced-rest-client/fetch#2.1.0-arc",
+    "fetch": "advanced-rest-client/fetch#arc",
     "request-save-dialog": "advanced-rest-client/request-save-dialog#^0.1.1",
     "error-message": "advanced-rest-client/error-message#^0.1.1",
     "arc-models": "advanced-rest-client/arc-models#^0.1.1",
@@ -83,5 +83,8 @@
   },
   "ignore": [],
   "main": "app/index.html",
-  "version": "10.0.0"
+  "version": "10.0.0",
+  "resolutions": {
+    "fetch": "arc"
+  }
 }
