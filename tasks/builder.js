@@ -15,6 +15,8 @@ const merge = require('merge-stream');
 // const concat = require('concatenate-files');
 const zipFolder = require('zip-folder');
 // const uploader = require('./cws-uploader.js');
+var decomment = require('decomment');
+var minify = require('html-minifier').minify;
 
 var Builder = {
   target: 'canary',
@@ -75,18 +77,6 @@ var Builder = {
     Builder.commitMessage = `${buildName} build at ${date} to version ${Builder.version}`;
 
     return Builder._buildPackage()
-    // .then(buildPath => {
-      // if (opts.buildOnly) {
-      //   return Promise.resolve();
-      // }
-      // return Builder._uploadPackage(buildPath);
-    // })
-    // .then(() => {
-    //   if (opts.buildOnly || !opts.publish) {
-    //     return Promise.resolve();
-    //   }
-    //   return Builder._publishPackage();
-    // })
     .then(() => {
       console.log(`Finished job.`);
       done();
@@ -97,37 +87,10 @@ var Builder = {
     });
   },
 
-  // _gitCommitAndPush: () => {
-  //   if (Builder._gitAddAll().code !== 0) {
-  //     throw new Error('Unable to add all files to commit');
-  //   }
-  //   if (Builder._gitCommit().code !== 0) {
-  //     throw new Error('Unable to commit git repository');
-  //   }
-  //   if (Builder._gitPush().code !== 0) {
-  //     throw new Error('Unable to push changes');
-  //   }
-  // },
-
   _buildPackage: function() {
     return Builder._copyApp()
     .then(() => Builder._createPackage());
   },
-  // /**
-  //  * Upload the package to CWS.
-  //  */
-  // _uploadPackage: (buildPath) => {
-  //   return Builder.uploader.auth()
-  //   .then(() => Builder.uploader.uploadItem(buildPath, Builder.targetDir));
-  // },
-  // /**
-  //  * Publish package after it has been uploaded.
-  //  If it is done in the same run it does not require
-  //  * another auth.
-  //  */
-  // _publishPackage: () => {
-  //   return Builder.uploader.publishTarget(Builder.targetDir);
-  // },
 
   get buildTarget() {
     return path.join('build', Builder.targetDir);
@@ -252,7 +215,6 @@ var Builder = {
         if (err) {
           return reject(err);
         }
-        debugger;
         let jsFile = 'index.js';
         var targetHtml = path.join(targetDir, 'index.html');
         var targetJs = path.join(targetDir, jsFile);
@@ -261,10 +223,19 @@ var Builder = {
           jsFileName: jsFile,
           scriptInHead: false
         });
-        fs.writeFileSync(targetHtml, output.html, 'utf-8');
-        fs.writeFileSync(targetJs, output.js, 'utf-8');
+        let html = decomment.html(output.html);
+        console.log('Minify HTML');
+        html = minify(html, {
+          collapseWhitespace: true
+        });
+        console.log('Removing comments from JavaScript');
+        let js = decomment(output.js);
+        fs.writeFileSync(targetHtml, html, 'utf-8');
+        fs.writeFileSync(targetJs, js, 'utf-8');
         console.log('Saved in ', targetHtml, targetJs);
         resolve();
+        // index.html 832 kB -> 777
+        // index.js 4.3 MB -> 3.3
       });
     });
   },
@@ -377,9 +348,7 @@ gulp.task('copy', () => {
   ]).pipe(gulp.dest(path.join(dest, 'assets')));
 
   var scripts = gulp.src([
-    'app/scripts/**',
-    // '!app/scripts/libs',
-    // '!app/scripts/libs/*'
+    'app/scripts/**'
   ]).pipe(gulp.dest(path.join(dest, 'scripts')));
 
   var styles = gulp.src([
