@@ -7,7 +7,7 @@
 <link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../../bower_components/saved-request-editor/saved-request-editor.html">
 <link rel="import" href="../../bower_components/bottom-sheet/bottom-sheet.html">
-
+<link rel="import" href="../../bower_components/cookie-exchange-banner/cookie-exchange-banner.html">
 <dom-module id="arc-request-panel">
   <template>
     <style>
@@ -32,6 +32,10 @@
     }
     </style>
     <request-panel request="{{request}}" xhr-extension on-request-clear-state="clearRequest" on-request-save-state="_saveHandler" on-request-use-xhr-changed="_xhrChanged"></request-panel>
+    <template is="dom-if" if="[[cookieBanner]]" restamp="true">
+      <cookie-exchange-banner on-close="_closeCookieBanner"></cookie-exchange-banner>
+    </template>
+
     <chrome-storage id="latest" type="local" name="latestRequest" value="[[request]]" on-chrome-storage-read="_latestLoaded"></chrome-storage>
 
     <chrome-xhr-request connected="{{hasProxyInstalled}}" extension-id="apcedakaoficjlofohhcmkkljehnmebp"></chrome-xhr-request>

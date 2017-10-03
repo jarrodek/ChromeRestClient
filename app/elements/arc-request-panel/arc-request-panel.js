@@ -29,12 +29,15 @@ Polymer({
      */
     useXhr: Boolean,
     // Currently selected project.
-    projectId: String
+    projectId: String,
+    // True to display cookie exchange instalkl banner.
+    cookieBanner: Boolean
   },
 
   listeners: {
     'transport-request': '_onTransportRequested',
-    'abort-request': '_abortHandler'
+    'abort-request': '_abortHandler',
+    'request-clear-state': '_clear'
   },
 
   observers: [
@@ -44,6 +47,18 @@ Polymer({
     '_requestChanged(request.*)',
     '_projectIdChanged(projectId)'
   ],
+
+  attached: function() {
+    this.listen(window, 'report-response', '_reportRequestHandler');
+  },
+
+  detached: function() {
+    this.unlisten(window, 'report-response', '_reportRequestHandler');
+  },
+
+  _clear: function() {
+    this.cookieBanner = false;
+  },
 
   _routeChnaged: function(route, opened) {
     if (!opened || !route || !route.type) {
@@ -87,6 +102,9 @@ Polymer({
   },
 
   _onTransportRequested: function(e) {
+    if (this.cookieBanner) {
+      this.cookieBanner = false;
+    }
     this.fire('url-history-store', {
       value: this.request.url
     }, {
@@ -426,5 +444,18 @@ Polymer({
     this.fire('selected-project-changed', {
       value: id
     });
+  },
+  /**
+   * Handles `report-response` custom event and displays cookie banner
+   * if the response needs authorization.
+   */
+  _reportRequestHandler: function(e) {
+    if (e.detail.auth) {
+      this.cookieBanner = true;
+    }
+  },
+  // Closes cookie banner upon user request.
+  _closeCookieBanner: function() {
+    this.cookieBanner = false;
   }
 });
