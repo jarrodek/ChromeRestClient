@@ -401,12 +401,12 @@ gulp.task('copy', () => {
   // copy webworkers used in bower_components
   var webWorkers = gulp.src([
     'app/bower_components/socket-fetch/decompress-worker.js'
-  ]).pipe(gulp.dest(path.join(dest, 'elements')));
+  ]).pipe(gulp.dest(path.join(dest, 'bower_components', 'socket-fetch')));
 
   // zlib library need to placed folder up relativelly to decompress-worker
-  // var zlibLibrary = gulp.src([
-  //   'app/bower_components/zlib/bin/zlib_and_gzip.min.js'
-  // ]).pipe(gulp.dest(path.join(dest, 'zlib', 'bin')));
+  var zlibLibrary = gulp.src([
+    'app/bower_components/zlib/bin/zlib_and_gzip.min.js'
+  ]).pipe(gulp.dest(path.join(dest, 'bower_components', 'zlib', 'bin')));
 
   var bowerDeps = [
     // 'chrome-platform-analytics/google-analytics-bundle.js',
@@ -424,7 +424,7 @@ gulp.task('copy', () => {
   return merge(
       app, bower, webWorkers, assets, scripts, styles,
       /*, codeMirror*/
-      /*zlibLibrary,*/ dependencies
+      zlibLibrary, dependencies
     )
     .pipe($.size({
       title: 'copy'
