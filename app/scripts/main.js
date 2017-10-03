@@ -8,7 +8,6 @@
    */
   app.selectedRequest = null;
   app.gaCustomDimensions = [];
-  app.appVersion = arc.app.utils.appVer;
   app.appId = chrome.runtime && chrome.runtime.id ? chrome.runtime.id : 'not-in-chrome-app';
   app.analyticsDisabled = false;
   app.initialized = false;
@@ -327,55 +326,18 @@
   window.addEventListener('open-drive-selector', openDriveSelector);
   window.addEventListener('pick-google-drive-item', openDriveSelector);
 
-  app.initAnalytics = () => {
-    chrome.storage.local.get({
-      'google-analytics.analytics.tracking-permitted': true,
-      'google-analytics.analytics.settings-transferred': false
-    }, (data) => {
-      if (data['google-analytics.analytics.settings-transferred']) {
-        return;
-      }
-      app.async(() => {
-        if (data['google-analytics.analytics.tracking-permitted'] === 'false' ||
-          data['google-analytics.analytics.tracking-permitted'] === false) {
-          app.analyticsDisabled = true;
-        } else {
-          app.analyticsDisabled = false;
-        }
-      }, 2000);
-      chrome.storage.local.set({'google-analytics.analytics.settings-transferred': true}, () => {});
-    });
-    var appVersion = arc.app.utils.appVer;
-    var chromeVer = arc.app.utils.chromeVersion;
-    var manifest = (chrome.runtime && chrome.runtime.getManifest) ?
-      chrome.runtime.getManifest() : null;
-    // jscs:disable
-    var manifestName = manifest ? manifest.version_name : '(not set)';
-    // jscs:enable
-    var channel = null;
-    if (manifestName === '(not set)') {
-      channel = 'not a chrome env';
-    } else if (manifestName.indexOf('canary') !== -1) {
-      channel = 'canary';
-    } else if (manifestName.indexOf('dev') !== -1) {
-      channel = 'dev';
-    } else if (manifestName.indexOf('beta') !== -1) {
-      channel = 'beta';
-    } else {
-      channel = 'stable';
-    }
-
+  app.initAnalytics = function() {
     app.push('gaCustomDimensions', {
       index: 1,
-      value: chromeVer
+      value: arc.app.utils.chromeVersion
     });
     app.push('gaCustomDimensions', {
       index: 2,
-      value: appVersion
+      value: arc.app.utils.appVer
     });
     app.push('gaCustomDimensions', {
       index: 5,
-      value: channel
+      value: arc.app.utils.releaseChannel
     });
   };
 
@@ -391,9 +353,7 @@
   });
 
   window.addEventListener('app-version', function(e) {
-    // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
-    e.detail.version = chrome.runtime.getManifest().version_name;
-    //jscs:enable requireCamelCaseOrUpperCaseIdentifiers
+    e.detail.version = arc.app.utils.appVer;
   });
 
   app.notifyError = function(message) {
@@ -540,7 +500,7 @@
    * Opens an issue tracker - new issue report.
    */
   app.openIssueReport = function() {
-    var appVersion = app.appVersion;
+    var appVersion = arc.app.utils.appVer;
     var message = 'Your description here\n\n';
     message += '## Expected outcome\nWhat should happen?\n\n';
     message += '## Actual outcome\nWhat happened?\n\n';
