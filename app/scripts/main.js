@@ -499,14 +499,21 @@
     });
   };
   window.addEventListener('google-autorize', function(e) {
+    var aware = app.$.signInAware;
     var scope = e.detail.scope;
-    app.$.signInAware.scope = scope;
-    if (app.$.signInAware.needAdditionalAuth) {
-      app.$.signInAware.signIn();
+    if (!aware.signedIn) {
+      app.fire('google-signout', {
+        scope: scope
+      });
+      return app.openChromeSigninInfo();
+    }
+    aware.scope = scope;
+    if (aware.needAdditionalAuth) {
+      aware.signIn();
     } else {
       app.fire('google-signin-success', {
         scope: scope,
-        token: app.$.signInAware.accessToken
+        token: aware.accessToken
       });
     }
   });
