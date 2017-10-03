@@ -520,7 +520,7 @@
 
   /* Navigation from main app chrome */
   app.openLogs = function() {
-    var logViewer = document.querySelector('arc-log-viewer');
+    var logViewer = document.querySelector('app-log-viewer');
     if (!logViewer) {
       throw new Error('Log viewer not available.');
     }

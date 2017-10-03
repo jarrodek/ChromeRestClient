@@ -50,6 +50,7 @@
   <link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
   <link rel="import" href="bower_components/paper-item/paper-icon-item.html">
   <link rel="import" href="bower_components/iron-icon/iron-icon.html">
+  <link rel="import" href="bower_components/app-log-viewer/app-log-viewer.html">
 
   <style is="custom-style" include="shared-styles"></style>
 </head>
@@ -141,14 +142,10 @@
     <network-state online="{{online}}" on-network-state-changed="_networkStateChanged"></network-state>
     <paper-toast id="errorToast" duration="5000"></paper-toast>
     <paper-toast id="offlineToast" class="offline-toast" text="You are now offline. Can't make new requests."></paper-toast>
-    <arc-log-viewer></arc-log-viewer>
-    <search-bar id="content-search-bar" on-iron-overlay-opened="textSearchBarOpened"></search-bar>
-    <!-- Elements on new app -->
+    <app-log-viewer></app-log-viewer>
     <app-logger></app-logger>
+    <search-bar id="content-search-bar" on-iron-overlay-opened="textSearchBarOpened"></search-bar>
     <arc-definitions></arc-definitions>
-    <!-- UUID generator is used in data importer. It has reference to element's id. -->
-    <uuid-generator id="uuid"></uuid-generator>
-
     <chrome-signin-aware
       id="signInAware"
       is-authorized="{{appAuthorized}}"
