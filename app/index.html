@@ -117,13 +117,13 @@
             selected-attribute="opened"
             selected="[[route]]">
             <arc-request-panel data-route="request" route-params="{{params}}"></arc-request-panel>
-            <websocket-panel data-route="socket"></websocket-panel>
-            <history-panel data-route="history"></history-panel>
-            <saved-requests-panel data-route="saved"></saved-requests-panel>
+            <websocket-panel attr-for-opened="opened" data-route="socket"></websocket-panel>
+            <history-panel attr-for-opened="opened" data-route="history"></history-panel>
+            <saved-requests-panel attr-for-opened="opened" data-route="saved"></saved-requests-panel>
             <data-import-export-panel data-route="dataimport" api-key="592877543090-6tqu3mbhcbc3437cfj5f0ahjtui5tjac.apps.googleusercontent.com"></data-import-export-panel>
             <arc-settings-panel data-route="settings"></arc-settings-panel>
             <arc-about data-route="about"></arc-about>
-            <project-details data-route="project" project-id="[[params.projectId]]" attr-for-opened="opened"></project-details>
+            <project-details attr-for-opened="opened" data-route="project" project-id="[[params.projectId]]" attr-for-opened="opened"></project-details>
             <google-drive-browser data-route="drive" attr-for-opened="opened" api-key="592877543090-6tqu3mbhcbc3437cfj5f0ahjtui5tjac.apps.googleusercontent.com" access-token="[[accessToken]]" on-drive-file-picker-data="_openDriveRequest"></google-drive-browser>
           </iron-pages>
         </div>
