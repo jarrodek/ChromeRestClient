@@ -408,18 +408,13 @@ gulp.task('copy', () => {
     'app/bower_components/zlib/bin/zlib_and_gzip.min.js'
   ]).pipe(gulp.dest(path.join(dest, 'bower_components', 'zlib', 'bin')));
 
-  var bowerDeps = [
-    // 'chrome-platform-analytics/google-analytics-bundle.js',
-    // 'dexie-js/dist/dexie.min.js',
-    // 'har/build/har.js',
-    // 'lodash/lodash.js',
-    // 'uri.js/src/URI.js',
+  var prismDeps = [
     'prism/prism.js',
     'prism/plugins/autolinker/prism-autolinker.min.js'
   ];
   var dependencies = gulp.src([
-    `app/bower_components/{${bowerDeps.join(',')}}`,
-  ]).pipe(gulp.dest(path.join(dest, 'bower_components')));
+    `app/bower_components/{${prismDeps.join(',')}}`,
+  ]).pipe(gulp.dest(path.join(dest, 'bower_components', 'prism')));
 
   return merge(
       app, bower, webWorkers, assets, scripts, styles,
