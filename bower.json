@@ -72,11 +72,14 @@
     "paper-drawer-panel": "PolymerElements/paper-drawer-panel#<2",
     "iron-a11y-keys": "PolymerElements/iron-a11y-keys#<2",
     "paper-button": "PolymerElements/paper-button#<2",
-    "iron-image": "PolymerElements/iron-image#<2",
     "paper-toast": "PolymerElements/paper-toast#<2",
     "arc-license-dialog": "advanced-rest-client/arc-license-dialog#^0.1.1",
     "cookie-exchange-banner": "advanced-rest-client/cookie-exchange-banner#^0.1.0",
-    "arc-onboarding": "advanced-rest-client/arc-onboarding#^0.1.1"
+    "arc-onboarding": "advanced-rest-client/arc-onboarding#^0.1.1",
+    "paper-dialog-behavior": "PolymerElements/paper-dialog-behavior#<2",
+    "arc-icons": "advanced-rest-client/arc-icons#^1.0.23",
+    "iron-flex-layout": "PolymerElements/iron-flex-layout#<2",
+    "paper-styles": "PolymerElements/paper-styles#<2"
   },
   "devDependencies": {
     "web-component-tester": "*",
