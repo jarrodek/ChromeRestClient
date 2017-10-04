@@ -2,6 +2,7 @@
   "name": "advanced-rest-client",
   "description": "The web developers helper program to create and test custom HTTP requests.",
   "homepage": "https://advancedrestclient.com/",
+  "version": "10.0.2",
   "keywords": [
     "chrome",
     "REST",
@@ -87,7 +88,6 @@
   },
   "ignore": [],
   "main": "app/index.html",
-  "version": "10.0.1",
   "resolutions": {
     "fetch": "arc"
   }
