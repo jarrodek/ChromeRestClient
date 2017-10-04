@@ -128,22 +128,14 @@
         </div>
       </paper-scroll-header-panel>
     </paper-drawer-panel>
-    <arc-drive-controller restore-on-file id="driveController" with-backdrop></arc-drive-controller>
-    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('s', 'true')]]" on-keys-pressed="onSaveShift"></iron-a11y-keys>
-    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('s')]]" on-keys-pressed="onSave"></iron-a11y-keys>
-    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('o')]]" on-keys-pressed="onOpen"></iron-a11y-keys>
-    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('f')]]" on-keys-pressed="onSearch"></iron-a11y-keys>
-    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('n')]]" on-keys-pressed="onNewWindow"></iron-a11y-keys>
-    <iron-a11y-keys target="[[document.body]]" keys="[[_computeA11yButtons('r')]]" on-keys-pressed="onSend"></iron-a11y-keys>
+    <drop-file-importer></drop-file-importer>
     <arc-license-dialog></arc-license-dialog>
     <arc-onboarding></arc-onboarding>
-    <network-state online="{{online}}" on-network-state-changed="_networkStateChanged"></network-state>
+    <app-log-viewer></app-log-viewer>
     <paper-toast id="errorToast" duration="5000"></paper-toast>
     <paper-toast id="offlineToast" class="offline-toast" text="You are now offline. Can't make new requests."></paper-toast>
-    <app-log-viewer></app-log-viewer>
-    <app-logger></app-logger>
     <search-bar id="content-search-bar" on-iron-overlay-opened="textSearchBarOpened"></search-bar>
-    <arc-definitions></arc-definitions>
+    <!-- Non UI (logic) elements -->
     <chrome-signin-aware
       id="signInAware"
       is-authorized="{{appAuthorized}}"
@@ -151,7 +143,6 @@
       access-token="{{accessToken}}"
       on-chrome-signin-aware-success="_chromeSignin"
       on-chrome-signin-aware-signed-out="_chromeSignout"></chrome-signin-aware>
-
     <app-analytics
       tracking-id="UA-18021184-6"
       app-name="ARC"
@@ -192,9 +183,17 @@
         <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
       </template>
     </app-analytics>
-    <drop-file-importer></drop-file-importer>
+    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('s', 'true')]]" on-keys-pressed="onSaveShift"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('s')]]" on-keys-pressed="onSave"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('o')]]" on-keys-pressed="onOpen"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('f')]]" on-keys-pressed="onSearch"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('n')]]" on-keys-pressed="onNewWindow"></iron-a11y-keys>
+    <iron-a11y-keys target="[[document.body]]" keys="[[_computeA11yButtons('r')]]" on-keys-pressed="onSend"></iron-a11y-keys>
+    <network-state online="{{online}}" on-network-state-changed="_networkStateChanged"></network-state>
+    <app-logger></app-logger>
+    <arc-definitions></arc-definitions>
     <chrome-storage auto storage="local" name="drawerWidth" value="{{_drawerWidth}}" on-chrome-storage-read="_drawerWidthRead" value-as="Number"></chrome-storage>
-    <variables-evaluator></variables-evaluator>
+    <variables-evaluator no-before-request></variables-evaluator>
     <variables-manager></variables-manager>
     <request-saver></request-saver>
     <cookie-exchange external-id="apcedakaoficjlofohhcmkkljehnmebp"></cookie-exchange>
