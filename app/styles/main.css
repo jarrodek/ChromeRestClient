@@ -26,97 +26,11 @@ body {
 body .loader {
   display: none;
 }
+
 body[unresolved] .loader {
   display: flex;
   height: 100%;
   align-items: center;
-}
-.loader .spinner {
-  margin: 100px auto 0;
-  width: 70px;
-  text-align: center;
-}
-
-.loader .spinner > div {
-  width: 18px;
-  height: 18px;
-  background-color: #00A1DF;
-
-  border-radius: 100%;
-  display: inline-block;
-  animation: sk-bouncedelay 1.4s infinite ease-in-out both;
-}
-
-.loader .spinner .bounce1 {
-  animation-delay: -0.32s;
-}
-
-.loader .spinner .bounce2 {
-  animation-delay: -0.16s;
-}
-
-@keyframes sk-bouncedelay {
-  0%, 80%, 100% {
-    transform: scale(0);
-  } 40% {
-    transform: scale(1.0);
-  }
-}
-
-/* Search bar states */
-
-paper-toolbar[mode="search"] .toolbar-hide {
-  display: none !important;
-}
-
-paper-toolbar[mode="search"] .toolbar-hide[mode~=search] {
-  display: flex !important;
-  flex: 1;
-}
-
-#mainSearchInput {
-  display: none;
-  background-color: transparent;
-  outline: none;
-  border: none;
-  font-size: 24px;
-  font-weight: 300;
-  font-family: Roboto, sans-serif;
-}
-
-paper-toolbar[mode="search"] #mainSearchInput {
-  display: initial;
-}
-
-/* Requesting features in main toolbar. */
-
-paper-toolbar > *[feature] {
-  display: none;
-}
-paper-toolbar[back] > paper-icon-button[feature="back"],
-paper-toolbar[search] > div[feature="search"],
-paper-toolbar[open] > paper-icon-button[feature="open"],
-paper-toolbar[save] > paper-icon-button[feature="save"],
-paper-toolbar[export] > paper-icon-button[feature="export"],
-paper-toolbar[clearAll] > paper-icon-button[feature="clearAll"],
-paper-toolbar[drive] > paper-icon-button[feature="drive"],
-paper-toolbar[projectEndpoints] > div[feature="projectEndpoints"] {
-  display: initial;
-}
-paper-toolbar[back] > paper-icon-button[feature="back"] {
-  margin-right: 16px;
-}
-body paper-toolbar[back] > paper-icon-button[paper-drawer-toggle] {
-  display: none;
-}
-paper-toolbar[xhrtoggle] > paper-toggle-button[feature="xhrtoggle"] {
-  display: flex;
-}
-
-
-.tutorial-button {
-  background-color: #fff;
-  color: #00A1DF;
 }
 
 .mainPages > * {

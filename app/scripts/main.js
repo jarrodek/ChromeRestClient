@@ -2,45 +2,78 @@
   'use strict';
 
   let app = document.querySelector('#app');
-  app.pageTitle = '';
+  app.pageTitle = 'Request';
   /**
-   * The same as above.
+   * Selected request database ID
    */
   app.selectedRequest = null;
-  app.selectedProject = null;
   app.gaCustomDimensions = [];
-  app.appVersion = arc.app.utils.appVer;
   app.appId = chrome.runtime && chrome.runtime.id ? chrome.runtime.id : 'not-in-chrome-app';
   app.analyticsDisabled = false;
-  // Will be set to true when toas has been opened.
-  app.withToast = false;
-  // Selected environment for magic variables.
-  app.variablesEnvironment = 'default';
-  app.narrowLayout = false;
-  app.forceNarrowLayout = false;
-  app.upgrading = false;
-  app.usePouchDb = undefined;
   app.initialized = false;
-  app.listeners = {
-    'drawerResizer.track': '_drawerTrack'
+  // True if the user is signed in to Chrome browser and can authorize the app.
+  app.chromeSignedIn = false;
+
+  app.observers = [
+    '_routeChanged(route, params.*)'
+  ];
+
+  app._routeChanged = function(route, paramsRecord) {
+    var params = paramsRecord && paramsRecord.base;
+    switch (route) {
+      case 'request':
+        app.pageTitle = 'Request';
+        if (!params || !params.type) {
+          return;
+        }
+        var id;
+        switch (params.type) {
+          case 'history': id = params.historyId; break;
+          case 'saved': id = params.savedId; break;
+          case 'restore':
+          case 'latest':
+          case 'current':
+            app.selectedRequest = undefined;
+            return;
+          case 'drive':
+            app.selectedRequest = undefined;
+            return app.openDriveItem(params.driveId);
+          default:
+            app.selectedRequest = undefined;
+            console.error('ID not handled!', params);
+            throw new Error('ID not handled!');
+        }
+        app.selectedRequest = decodeURIComponent(id);
+        return;
+      case 'project':
+        if (!params) {
+          return;
+        }
+        app.fire('selected-project-changed', {
+          value: params.projectId
+        });
+        app.pageTitle = 'Project details';
+        break;
+      case 'socket':
+        app.pageTitle = 'Socket';
+        app.selectedRequest = undefined;
+        break;
+      case 'settings':
+        app.pageTitle = 'Settings';
+        app.selectedRequest = undefined;
+        break;
+      case 'history':
+        app.pageTitle = 'History';
+        app.selectedRequest = undefined;
+        break;
+      case 'saved':
+        app.pageTitle = 'Saved request';
+        app.selectedRequest = undefined;
+        break;
+      default:
+        app.selectedRequest = undefined;
+    }
   };
-  /**
-   * Returns true when both parameteres are trully.
-   *
-   * The `template` will always render `arc-request-controller` and it's children even if in a
-   * moment it should be turned off.
-   * The app will wait until upgrade script finish and the set up the `initialized` flag.
-   */
-  app.canRender = (status, dataSource, elementIsRequestPanel) => {
-    return status && dataSource && elementIsRequestPanel === 'true';
-  };
-  // Open current project details page
-  app.openProjectDetails = () => {
-    page(`/project/${app.selectedProject}/edit`);
-  };
-  app._computeHideProjectLink = (selectedProject, route) =>
-    !(selectedProject && route === 'request');
-  app._canShowProjectSelector = (route, count) => route === 'request' && count > 0;
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
     app.updateBranding();
@@ -51,20 +84,12 @@
   });
   // event fired when the app is initialized and can remove loader.
   window.addEventListener('ArcInitialized', function() {
-    document.querySelector('arc-loader-screen').close();
-    // app.runTutorials();
+    document.querySelector('arc-loader-screen').opened = false;
     app.initialized = true;
   });
   window.addEventListener('WebComponentsReady', function() {
     app.initAnalytics();
-    // if (app.upgrading) {
-    //   return;
-    // }
-    // app.initAnalytics();
-    // app.initRouting();
-  });
-  window.addEventListener('selected-project', (e) => {
-    app.selectedProject = e.detail.id;
+    app.initRouting();
   });
   app.initRouting = () => {
     if (app.routingInitialized) {
@@ -83,113 +108,15 @@
   app.closeDrawer = function() {
     app.$.paperDrawerPanel.closeDrawer();
   };
-  /**
-   * Open search bar and notify opener about changes.
-   */
-  app.openSearch = () => {
-    var bar = document.querySelector('#search-bar');
-    bar.setAttribute('show', true);
-    bar.parentNode.setAttribute('mode', 'search');
-    var input = document.querySelector('#mainSearchInput');
-    var searchFn = function(e) {
-      //inform controller about search action
-      app._featureCalled('search', e);
-    };
-    var blurFn = function(e) {
-      let input = document.querySelector('#mainSearchInput');
-      input.removeEventListener('blur', blurFn);
-      input.removeEventListener('search', searchFn);
-      let bar = e.target.parentNode;
-      bar.removeAttribute('show', true);
-      bar.parentNode.removeAttribute('mode', 'search');
-    };
-
-    input.addEventListener('search', searchFn);
-    input.addEventListener('blur', blurFn);
-    input.focus();
-  };
-
-  document.body.addEventListener('page-title-changed', (e) => {
-    app.pageTitle = e.detail.title;
-  });
-
-  /**
-   * Read more about requesting features in ArcHasToolbarBehavior behavior file.
-   * Also change main.css in features section.
-   */
-  app.featuresMapping = new Map();
-  document.body.addEventListener('request-toolbar-features', (e) => {
-    app.featuresMapping.clear();
-    var list = e.detail.features;
-    var bar = document.querySelector('#mainToolbar');
-    list.forEach((feature) => {
-      bar.setAttribute(feature, true);
-      app.featuresMapping.set(feature, e.target);
-    });
-  });
-  document.body.addEventListener('release-toolbar-features', () => {
-    var bar = document.querySelector('#mainToolbar');
-    var keys = app.featuresMapping.keys();
-    for (let feature of keys) {
-      bar.removeAttribute(feature);
-    }
-    app.featuresMapping.clear();
-  });
-  app._featureCalled = (feature, event) => {
-    if (!app.featuresMapping.has(feature)) {
-      console.warn('Feature "%s" has been called without the mapping', feature);
-      return;
-    }
-    var src = app.featuresMapping.get(feature);
-    var name = feature[0].toUpperCase() + feature.substr(1);
-    var fnName = 'on' + name;
-    if (!(fnName in src)) {
-      console.warn(`Function ${fnName} is undefined for ${src.nodeName}`);
-    } else {
-      src[fnName]({
-        detail: event,
-        source: 'feature'
-      });
-    }
-  };
-  app._onFeatureOpen = (e) => {
-    app._featureCalled('open', e);
-  };
-  app._onFeatureSave = (e) => {
-    app._featureCalled('save', e);
-  };
-  app._onFeatureExport = (e) => {
-    app._featureCalled('export', e);
-  };
-  app._onFeatureClearAll = (e) => {
-    app._featureCalled('clearAll', e);
-  };
-  app._onFeatureDrive = (e) => {
-    app._featureCalled('drive', e);
-  };
-  app._onFeatureBack = (e) => {
-    app._featureCalled('back', e);
-  };
-  app._onFeatureXhrToggle = (e) => {
-    app._featureCalled('xhrtoggle', e);
-  };
   // called when any component want to change request link.
   document.body.addEventListener('action-link-change', (e) => {
     var url = e.detail.url;
     var setUrl = function(url) {
-      if (app.usePouchDb) {
-        let panel = document.querySelector('request-panel');
-        panel.set('request.url', url);
-      } else {
-        app.set('request.url', url);
-      }
+      let panel = document.querySelector('request-panel');
+      panel.set('request.url', url);
     };
     var getUrl = function() {
-      if (app.usePouchDb) {
-        return document.querySelector('request-panel').request.url;
-      } else {
-        return app.get('request.url');
-      }
+      return document.querySelector('request-panel').request.url;
     };
     var currentUrl = getUrl();
     if (currentUrl && url.indexOf('/') === 0) {
@@ -210,17 +137,9 @@
     }
     app.scrollPageToTop();
   });
-  // called when any component want to write to clipboard.
-  document.body.addEventListener('clipboard-write', (e) => {
-    var data = e.detail.data;
-    arc.app.clipboard.write(data);
-  });
-  document.body.addEventListener('project-saved', () => {
-    document.querySelector('arc-menu-controller').refreshProjects();
-  });
 
   app.onSave = (e, detail) => {
-    var ctrl = document.querySelector('arc-request-controller, request-panel');
+    var ctrl = document.querySelector('arc-request-panel');
     ctrl.onSave({
       source: 'shortcut',
       shift: detail.keyboardEvent.shiftKey
@@ -252,19 +171,14 @@
   // Called when ctrl/command + F combination has been pressed.
   app.onSearch = () => {
     if (app.route !== 'request') {
-      app.openSearch();
       return;
     }
-    var searchBar = document.querySelector('#content-search-bar');
-    if (!searchBar) {
-      console.warn('Search bar was not available in document.');
-      return;
-    }
+    var searchBar = document.getElementById('content-search-bar');
     if (searchBar.opened) {
       searchBar.focusInput();
     } else {
       searchBar.style.top = app.mainHeaderTop;
-      searchBar.open();
+      searchBar.opened = true;
       app.fire('send-analytics', {
         type: 'event',
         category: 'Shortcats usage',
@@ -284,7 +198,7 @@
     if (app.route !== 'request') {
       return;
     }
-    var panel = document.querySelector('request-panel');
+    var panel = document.querySelector('arc-request-panel');
     if (!panel) {
       console.warn('The request panel is undefined');
       return;
@@ -293,7 +207,7 @@
   };
 
   app.textSearchBarOpened = () => {
-    var searchBar = document.querySelector('#content-search-bar');
+    var searchBar = document.getElementById('content-search-bar');
     if (!searchBar) {
       console.warn('Search bar was not available in document.');
       return;
@@ -302,39 +216,21 @@
   };
 
   window.addEventListener('paper-header-transform', function(e) {
-    var searchBar = Polymer.dom(document).querySelector('#content-search-bar');
-    if (!searchBar) {
-      console.warn('Search bar was not available in document.');
+    var searchBar = document.getElementById('content-search-bar');
+    if (!searchBar.opened) {
       return;
     }
-    // if (!searchBar.opened) {
-    //   return;
-    // }
     var detail = e.detail;
     var top = detail.height - detail.y;
     if (top < 0) {
       top = 0;
     }
-    // top = top + 'px';
     if (searchBar.style.top === top + 'px') {
       return;
     }
     app.mainHeaderTop = top + 'px';
-    app.fire('iron-signal', {name: 'main-header-transform', data: {
-      top: top
-    }});
-    if (!searchBar.opened) {
-      return;
-    }
     searchBar.style.top = top;
-    // console.log('paper-header-transform', top);
   });
-
-  app._cancelEvent = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-  };
   /**
    * Updates body class depending on a channel release.
    * TODO: update dev and beta branding.
@@ -356,22 +252,6 @@
     if (cls) {
       document.body.classList.add(cls);
       Polymer.updateStyles();
-      if (channel === 'canary') {
-        chrome.storage.local.get({'showCanaryWarning': true}, (r) => {
-          if (r.showCanaryWarning) {
-            app.$.canaryInfo.open();
-          }
-        });
-      }
-    }
-    if (channel === 'stable') {
-      var elm = app.$.onboardingNotifications;
-      elm.parentNode.removeChild(elm);
-    }
-  };
-  app._canaryInfoClosed = () => {
-    if (app.$.canaryMemoDontShow.checked) {
-      chrome.storage.local.set({'showCanaryWarning': false});
     }
   };
   /**
@@ -386,25 +266,6 @@
     }
   };
   /**
-   * Enable desktop notifications permission for the app.
-   * This function can't use promise since a notification request must be made as a result
-   * of user gesture (like click).
-   *
-   * @param {Function} callback A callback function with the result.
-   */
-  app.enableNotifications = (callback) => {
-    chrome.permissions.request({permissions: ['notifications']}, (granted) => {
-      if (callback && typeof callback === 'function') {
-        callback(granted);
-      } else {
-        // from tutorial.
-        if (granted) {
-          app.$.enableNotify.setAttribute('hidden', true);
-        }
-      }
-    });
-  };
-  /**
    * Handler called to network state change event.
    * This will display toase then the device is offline and close the message when it
    * comes back online.
@@ -412,16 +273,10 @@
   app._networkStateChanged = (e) => {
     var online = e.detail.online;
     if (online) {
-      app.$.offlineToast.close();
+      app.$.offlineToast.opened = false;
     } else {
-      app.$.offlineToast.open();
+      app.$.offlineToast.opened = true;
     }
-  };
-  /**
-   * Force close offline message.
-   */
-  app.closeOfflineMessage = () => {
-    app.$.offlineToast.close();
   };
 
   window.addEventListener('error', (e) => {
@@ -447,29 +302,6 @@
     });
   });
 
-  // app.runTutorials = () => {
-  //   /// XHR toggle tutorial
-  //   chrome.storage.sync.get({'tutorials': []}, (r) => {
-  //     if (r.tutorials.indexOf('xhrElementTutorial') !== -1) {
-  //       app.$.xhrProxyTutorial.parentNode.removeChild(app.$.xhrProxyTutorial);
-  //       delete app.$.xhrProxyTutorial;
-  //       return;
-  //     }
-  //     app.$.xhrProxyTutorial.target = app.$.xhrToggle;
-  //   });
-  // };
-
-  app._closeXhrTutorial = () => {
-    app.$.xhrProxyTutorial.hide();
-    chrome.storage.sync.get({'tutorials': []}, (r) => {
-      if (r.tutorials.indexOf('xhrElementTutorial') !== -1) {
-        return;
-      }
-      r.tutorials.push('xhrElementTutorial');
-      chrome.storage.sync.set(r);
-    });
-  };
-
   app._computeA11yButtons = (key, hasShift) => {
     var isMac = navigator.platform.indexOf('Mac') !== -1;
     var cmd = '';
@@ -485,301 +317,220 @@
     return cmd;
   };
 
-  // called when the database upgrade element request database upgrade.
-  // It will register source int the app._dbUpgrades array
-  // and run upgrade screen.
-  window.addEventListener('database-upgrades-needed', (e) => app._onDatabaseUpgradeRequired(e));
-  window.addEventListener('app-initialize-upgrade', () => app._initUpgrades());
-  window.addEventListener('database-upgrades-ready', (e) => app._dbUpgradeReady(e));
-  window.addEventListener('database-upgrades-status', (e) => app._upgradeStatus(e));
-  window.addEventListener('database-upgrades-long-task', (e) => app._upgradeHeavyDuty(e));
-  window.addEventListener('database-upgrade-error', (e) => app._upgradeStatus(e));
-  window.addEventListener('app-upgrade-screen-coninue-errored', () => app._continueErrored());
-  window.addEventListener('app-upgrade-screen-closed', () => {
-    app.initRouting();
-  });
-  app._onDatabaseUpgradeRequired = (e) => {
-    if (!app._dbUpgrades) {
-      app._dbUpgrades = [];
-      app.launchUpgradeScreen();
-      app.upgrading = true;
+  function openDriveSelector() {
+    if (!app.chromeSignedIn) {
+      return app.openChromeSigninInfo();
     }
-    app._dbUpgrades.push({
-      target: e.target,
-      id: e.value
-    });
-  };
+    page('/drive');
+  }
+  window.addEventListener('open-drive-selector', openDriveSelector);
+  window.addEventListener('pick-google-drive-item', openDriveSelector);
 
-  app.launchUpgradeScreen = () => {
-    var el = document.createElement('app-upgrade-screen');
-    document.body.appendChild(el);
-    el.opened = true;
-  };
-  app._initUpgrades = () => {
-    if (!app._dbUpgrades || !app._dbUpgrades.length) {
-      document.querySelector('app-upgrade-screen').finished = true;
-      return;
-    }
-    var target = app._dbUpgrades[0];
-    if (!target) {
-      document.querySelector('app-upgrade-screen').finished = true;
-      return;
-    }
-    arc.app.db.idb.open()
-    .then(() => {
-      target.target.initScript();
-    });
-  };
-  app._dbUpgradeReady = (e) => {
-    app.fire('use-pouch-db');
-    app.set('usePouchDb', true);
-    app._upgradeReady(e);
-    app.push('gaCustomDimensions', {
-      index: 4,
-      value: 'PouchDb'
-    });
-  };
-  app._upgradeReady = (e) => {
-    if (!app._dbUpgrades || !app._dbUpgrades.length) {
-      let elm = document.querySelector('app-upgrade-screen');
-      if (elm) {
-        elm.finished = true;
-      }
-      app.initRouting();
-      return;
-    }
-    var target = e.target;
-    var index = app._dbUpgrades.findIndex((i) => i.target === target);
-    if (index === -1) {
-      return;
-    }
-    app._dbUpgrades.splice(index, 1);
-    if (!app._dbUpgrades.length) {
-      document.querySelector('app-upgrade-screen').finished = true;
-      app.initRouting();
-    } else {
-      app._initUpgrades();
-    }
-  };
-  app._upgradeHeavyDuty = () => {
-    document.querySelector('app-upgrade-screen').heavyDuty = true;
-  };
-  app._continueErrored = () => {
-    // Current updrage script errored.
-    // continue with next or exit if there's no more upgrades.
-    app._dbUpgrades.shift();
-    app._initUpgrades();
-  };
-  app._upgradeStatus = (e) => {
-    app.fire('app-upgrade-screen-log', e.detail);
-  };
-  app._requestPanelInitiallized = () => {
-    if (app.route !== 'request') {
-      return;
-    }
-    var elm = document.querySelector('request-panel');
-    if (!elm) {
-      return;
-    }
-    elm.opened = true;
-  };
-  app._mainPageSelected = (e) => {
-    if (app.route !== 'request') {
-      return;
-    }
-    var elm = e.detail.item.querySelector('*:not(template)');
-    if (!elm) {
-      elm = document.querySelector('request-panel');
-    }
-    if (!elm) {
-      return;
-    }
-    if (!elm.opened) {
-      elm.opened = true;
-    }
-  };
-  app._mainPageDeselected = (e) => {
-    var elm = e.detail.item.querySelector('*:not(template)');
-    if (!elm || elm.nodeName !== 'REQUEST-PANEL') {
-      return;
-    }
-    elm.opened = false;
-  };
-  window.addEventListener('open-drive-selector', () => {
-    let ctrl = document.body.querySelector('arc-drive-controller');
-    if (!ctrl) {
-      StatusNotification.notify({
-        message: 'Drive controller not found.'
-      });
-      return;
-    }
-    ctrl.opened = true;
-  });
-
-  app.initAnalytics = () => {
-    chrome.storage.local.get({
-      'google-analytics.analytics.tracking-permitted': true,
-      'google-analytics.analytics.settings-transferred': false
-    }, (data) => {
-      if (data['google-analytics.analytics.settings-transferred']) {
-        return;
-      }
-      app.async(() => {
-        if (data['google-analytics.analytics.tracking-permitted'] === 'false' ||
-          data['google-analytics.analytics.tracking-permitted'] === false) {
-          app.analyticsDisabled = true;
-        } else {
-          app.analyticsDisabled = false;
-        }
-      }, 2000);
-      chrome.storage.local.set({'google-analytics.analytics.settings-transferred': true}, () => {});
-    });
-    var appVersion = arc.app.utils.appVer;
-    var chromeVer = arc.app.utils.chromeVersion;
-    var manifest = (chrome.runtime && chrome.runtime.getManifest) ?
-      chrome.runtime.getManifest() : null;
-    // jscs:disable
-    var manifestName = manifest ? manifest.version_name : '(not set)';
-    // jscs:enable
-    var channel = null;
-    if (manifestName === '(not set)') {
-      channel = 'not a chrome env';
-    } else if (manifestName.indexOf('canary') !== -1) {
-      channel = 'canary';
-    } else if (manifestName.indexOf('dev') !== -1) {
-      channel = 'dev';
-    } else if (manifestName.indexOf('beta') !== -1) {
-      channel = 'beta';
-    } else {
-      channel = 'stable';
-    }
-
+  app.initAnalytics = function() {
     app.push('gaCustomDimensions', {
       index: 1,
-      value: chromeVer
+      value: arc.app.utils.chromeVersion
     });
     app.push('gaCustomDimensions', {
       index: 2,
-      value: appVersion
+      value: arc.app.utils.appVer
     });
     app.push('gaCustomDimensions', {
       index: 5,
-      value: channel
-    });
-
-    arc.app.analytics.getChannelName().then((channel) => {
-      app.push('gaCustomDimensions', {
-        index: 3,
-        value: channel
-      });
+      value: arc.app.utils.releaseChannel
     });
   };
 
-  window.addEventListener('analytics-permitted-change', (e) => {
+  window.addEventListener('analytics-permitted-changed', (e) => {
     var permitted = e.detail.permitted;
     app.set('analyticsDisabled', !permitted);
   });
 
-  // Toast show UI animation.
-  window.addEventListener('iron-announce', (e) => {
-    var target = e.target;
-    if (!target) {
-      return;
-    }
-    if (target.nodeName === 'PAPER-TOAST') {
-      app.currentToast = target;
-      app.set('withToast', true);
-    }
+  window.addEventListener('app-new-window', function() {
+    chrome.runtime.getBackgroundPage(function(bg) {
+      bg.arc.bg.openWindow();
+    });
   });
-  // Toast close UI animation.
-  window.addEventListener('iron-overlay-closed', (e) => {
-    if (!app.currentToast) {
-      return;
-    }
-    if (app.currentToast !== e.target) {
-      return;
-    }
-    app.set('withToast', false);
-    app.currentToast = undefined;
+
+  window.addEventListener('app-version', function(e) {
+    e.detail.version = arc.app.utils.appVer;
   });
-  window.addEventListener('variables-environment-changed', (e) => {
-    app.variablesEnvironment = e.detail.env;
-  });
-  /* File import by drag'n'drop */
-  document.body.addEventListener('dragenter', (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    var element = document.querySelector('drop-file-importer');
-    if (!element) {
-      return;
+
+  app.notifyError = function(message) {
+    app.$.errorToast.text = message;
+    app.$.errorToast.opened = true;
+  };
+
+  function isSingleRequest(data) {
+    if (!data.requests || !data.requests.length) {
+      return false;
     }
-    if (element.opened) {
-      element.opened = false;
+    if (data.requests.length !== 1) {
+      return false;
+    }
+    if (data.projects && data.projects.length === 0) {
+      delete data.projects;
+    }
+    if (Object.keys(data).length === 4) {
+      return true;
+    }
+    return false;
+  }
+
+  function processIcomingData(data, opts) {
+    opts = opts || {};
+    var event = app.fire('import-normalize', {
+      content: data
+    }, {
+      cancelable: true
+    });
+    event.detail.result.then((data) => {
+      if (isSingleRequest(data)) {
+        let obj = data.requests[0];
+        if (opts.diveId) {
+          obj.type = 'google-drive';
+          obj.driveId = opts.diveId;
+        }
+        document.body.querySelector('arc-request-panel').request = obj;
+        page('/request/current');
+      } else {
+        let panel = document.body.querySelector('data-import-export-panel');
+        panel.importObject = data;
+        panel.importPage = 3;
+        app.openImportExport();
+      }
+    })
+    .catch(cause => app.notifyError(cause.message));
+  }
+
+  window.addEventListener('on-process-incoming-data', function(e) {
+    processIcomingData(e.detail.data);
+  });
+
+  app.openChromeSigninInfo = function() {
+    var node = document.querySelector('chrome-not-signedin-view');
+    if (!node) {
+      node = document.createElement('chrome-not-signedin-view');
+      document.body.appendChild(node);
+    }
+    node.opened = true;
+  };
+
+  /**
+   * Opens a request from the Google Drive.
+   * This action support integration with Drive UI, action "open with".
+   */
+  app.openDriveItem = function(id) {
+    if (!app.chromeSignedIn) {
+      return app.openChromeSigninInfo();
+    }
+    Polymer.RenderStatus.afterNextRender(app, function() {
+      app.fire('navigate', {
+        base: 'drive'
+      });
+      var picker = document.querySelector('google-drive-browser');
+      picker._isOpened = true;
+      picker._downloadFile(id);
+    });
+  };
+
+  /**
+   * Handles opening a file from Google Drive.
+   * Normalizes content to the import object and opens import panel
+   * if the data is import data or a request if import data contains single
+   * request.
+   */
+  app._openDriveRequest = function(e) {
+    var opts = {
+      diveId: e.detail.diveId
+    };
+    processIcomingData(e.detail.content, opts);
+  };
+
+  app._chromeSignin = function(e) {
+    app.fire('google-signin-success', {
+      scope: e.target.scope,
+      token: e.detail.token
+    });
+  };
+  app._chromeSignout = function(e) {
+    app.fire('google-signout', {
+      scope: e.target.scope
+    });
+  };
+  window.addEventListener('google-autorize', function(e) {
+    var aware = app.$.signInAware;
+    var scope = e.detail.scope;
+    if (!aware.signedIn) {
+      app.fire('google-signout', {
+        scope: scope
+      });
+      return app.openChromeSigninInfo();
+    }
+    aware.scope = scope;
+    if (aware.needAdditionalAuth) {
+      aware.signIn();
     } else {
-      element.opened = true;
+      app.fire('google-signin-success', {
+        scope: scope,
+        token: aware.accessToken
+      });
     }
   });
 
-  /* Drawer width support */
-  app.drawerWidth = '360px';
-  app._drawerTrack = function(e) {
-    var newWidth;
-    switch (e.detail.state) {
-      case 'start':
-        app.$.paperDrawerPanel.$.drawer.classList.remove('transition-drawer');
-        app._drawerInitTransition = getComputedStyle(app.$.paperDrawerPanel.$.main)
-          .getPropertyValue('transition');
-        app.$.paperDrawerPanel.$.main.style.transition = 'left ease-in-out 0.01s';
-        app._drawerInitTrackWidth = Number(app.drawerWidth.replace('px', ''));
-        break;
-      case 'track':
-        newWidth = app._drawerInitTrackWidth + e.detail.dx;
-        if (newWidth <= 10) {
-          newWidth = 10;
-        }
-        app.drawerWidth = newWidth + 'px';
-        app.$.paperDrawerPanel.$.main.style.transition = 'left ease-in-out 0.01s';
-        break;
-      case 'end':
-        app.$.paperDrawerPanel.$.drawer.classList.add('transition-drawer');
-        app.$.paperDrawerPanel.$.main.style.transition = app._drawerInitTransition;
-        newWidth = app._drawerInitTrackWidth + e.detail.dx;
-        if (newWidth <= 10) {
-          newWidth = 10;
-        }
-        app._drawerWidth = newWidth;
-        delete app._drawerInitTrackWidth;
-        delete app._drawerInitTransition;
-        break;
+  /* Navigation from main app chrome */
+  app.openLogs = function() {
+    var logViewer = document.querySelector('app-log-viewer');
+    if (!logViewer) {
+      throw new Error('Log viewer not available.');
     }
+    logViewer.open();
   };
-  app._drawerWidthRead = function(e) {
-    if (e.detail.value) {
-      app.set('drawerWidth', (e.detail.value + 'px'));
-    }
+  document.body.addEventListener('logs-requested', app.openLogs);
+  /**
+   * Opens about app page
+   */
+  app.openAbout = function() {
+    app.fire('navigate', {
+      base: 'about'
+    });
   };
 
-  app._drawerToggle = function() {
-    if (app.narrowLayout) {
-      return;
-    }
-    app.forceNarrowLayout = !app.forceNarrowLayout;
-    app.async(function() {
-      app.$.paperDrawerPanel.closeDrawer();
-    }, 1);
+  /**
+   * Opens an issue tracker - new issue report.
+   */
+  app.openIssueReport = function() {
+    var appVersion = arc.app.utils.appVer;
+    var message = 'Your description here\n\n';
+    message += '## Expected outcome\nWhat should happen?\n\n';
+    message += '## Actual outcome\nWhat happened?\n\n';
+    message += `## Versions\nApp: ${appVersion}\n`;
+    message += `Platform: ${navigator.appVersion}\n\n`;
+    message += '## Steps to reproduce\n1. \n2. \n3. ';
+    message = encodeURIComponent(message);
+    window.open('https://github.com/jarrodek/ChromeRestClient/issues/new?body=' + message);
   };
-  // Pin drawer back to the app.
-  app._pinDrawer = function() {
-    app.forceNarrowLayout = false;
+  /**
+   * Opens the import / export panel
+   */
+  app.openImportExport = function() {
+    app.fire('navigate', {
+      base: 'dataimport'
+    });
+  };
+  /**
+   * Opens the settings panel.
+   */
+  app.openSettings = function() {
+    app.fire('navigate', {
+      base: 'settings'
+    });
   };
 
-  app._computePinDrawerClass = function(forceNarrowLayout, narrowLayout) {
-    var clazz = 'drawer-pin';
-    if (forceNarrowLayout && narrowLayout) {
-      clazz += ' visible';
-    }
-    return clazz;
+  app.openLicense = function() {
+    var dialog = document.querySelector('arc-license-dialog');
+    dialog.opened = true;
   };
-  // Computes `active` flag for the legacy project related requests
-  app._processProjectRequests = (route) => route === 'request';
+  document.body.addEventListener('display-license', app.openLicense);
+
 })(document, window);
