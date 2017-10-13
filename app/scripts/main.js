@@ -557,4 +557,8 @@
     });
   };
 
+  app._openTerminationMessage = function() {
+    window.open('https://restforchrome.blogspot.com/2017/10/termination-of-chrome-apps-arc-native.html');
+  };
+
 })(document, window);
