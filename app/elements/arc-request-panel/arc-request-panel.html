@@ -1,0 +1,53 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/request-panel/request-panel.html">
+<link rel="import" href="../../bower_components/chrome-xhr-request/chrome-xhr-request.html">
+<link rel="import" href="../../bower_components/chrome-socket-request/chrome-socket-request.html">
+<link rel="import" href="../../bower_components/install-proxy-dialog/install-proxy-dialog.html">
+<link rel="import" href="../../bower_components/chrome-storage/chrome-storage.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower_components/saved-request-editor/saved-request-editor.html">
+<link rel="import" href="../../bower_components/bottom-sheet/bottom-sheet.html">
+<link rel="import" href="../../bower_components/cookie-exchange-banner/cookie-exchange-banner.html">
+<dom-module id="arc-request-panel">
+  <template>
+    <style>
+    :host {
+      @apply --layout-vertical;
+      @apply --arc-request-panel;
+    }
+
+    request-panel {
+      @apply --layout-flex;
+    }
+
+    #requestEditorContainer {
+      min-width: 40%;
+      max-width: 60%;
+      left: 20%;
+    }
+
+    .error-toast {
+      @apply --error-toast;
+    }
+    </style>
+    <request-panel request="{{request}}" xhr-extension on-request-clear-state="clearRequest" on-request-save-state="_saveHandler" on-request-use-xhr-changed="_xhrChanged"></request-panel>
+    <template is="dom-if" if="[[cookieBanner]]" restamp="true">
+      <cookie-exchange-banner on-close="_closeCookieBanner"></cookie-exchange-banner>
+    </template>
+
+    <chrome-storage id="latest" type="local" name="latestRequest" value="[[request]]" on-chrome-storage-read="_latestLoaded"></chrome-storage>
+
+    <chrome-xhr-request connected="{{hasProxyInstalled}}" extension-id="apcedakaoficjlofohhcmkkljehnmebp"></chrome-xhr-request>
+    <chrome-socket-request></chrome-socket-request>
+
+    <install-proxy-dialog></install-proxy-dialog>
+    <bottom-sheet id="requestEditorContainer" with-backdrop on-iron-overlay-opened="_resizeEditorSheetContent">
+      <saved-request-editor id="requestEditor" on-cancel-request-edit="_cancelRequestEdit" on-save-request="_saveRequestEdit"></saved-request-detail>
+    </bottom-sheet>
+    <paper-toast id="errorToast" class="error-toast"></paper-toast>
+    <paper-toast text="The request has been saved" id="savedOk"></paper-toast>
+    <paper-toast text="Can't restore request data. The type is unknown." id="typeMissingToast"></paper-toast>
+    <paper-toast text="Request do not exists in local database." id="missingRequestToast"></paper-toast>
+  </template>
+  <script src="arc-request-panel.js"></script>
+</dom-module>

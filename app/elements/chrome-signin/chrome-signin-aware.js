@@ -424,7 +424,9 @@
 
     _isAuthorizedChanged: function(isAuthorized) {
       if (isAuthorized) {
-        this.fire('chrome-signin-aware-success');
+        this.fire('chrome-signin-aware-success', {
+          token: this.accessToken
+        });
       } else {
         this.fire('chrome-signin-aware-signed-out');
         AuthEngine.setTokenData(null);

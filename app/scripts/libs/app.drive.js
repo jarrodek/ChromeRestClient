@@ -262,130 +262,54 @@ window.drive.file._getPayload = function(config) {
   body += `${content}${cd}`;
   return body;
 };
-//
-// /**
-//  * Update content of the file.
-//  *
-//  * @param {String} fileId Google Drive file id.
-//  * @param {String|Object} content Content to be saved in the file. Anything else then String
-//  *            will be passed to JSON.stringify function.
-//  * @param {Function} callback A callback function to be called after patch.
-//  */
-// arc.app.drive.updateFile = function(fileId, content, callback) {
-//   try {
-//     if (typeof content !== 'string') {
-//       content = JSON.stringify(content);
-//     }
-//     let metadata = {
-//       'mimeType': appMimeType
-//     };
-//     let metaString = JSON.stringify(metadata);
-//     let payload = btoa(unescape(encodeURIComponent(content)));
-//     let multipartRequestBody = `${delimiter}Content-Type: application/json\r\n\r\n${metaString}`;
-//     multipartRequestBody += `${delimiter}Content-Type: ${appMimeType}\r\n`;
-//     multipartRequestBody += `Content-Transfer-Encoding: base64\r\n\r\n${payload}${closeDelim}`;
-//
-//     let request = gapi.client.request({
-//       'path': `/upload/drive/v2/files/${fileId}`,
-//       'method': 'PUT',
-//       'params': {
-//         'uploadType': 'multipart'
-//       },
-//       'headers': {
-//         'Content-Type': `multipart/mixed; boundary="${boundary}"`
-//       },
-//       'body': multipartRequestBody
-//     });
-//     request.execute(callback);
-//   } catch (e) {
-//     callback({
-//       'error': e
-//     });
-//   }
-// };
-// /**
-//  * Get Google Drive file metadata.
-//  *
-//  * @param {String} fileId Google Drive file id.
-//  * @param {Function} callback A callback function to be called.
-//  */
-// arc.app.drive.getFileMeta = function(fileId, callback) {
-//   let request = gapi.client.request({
-//     'path': `/drive/v2/files/${fileId}`,
-//     'method': 'GET',
-//     'params': {
-//       'fields': 'downloadUrl,title,etag'
-//     }
-//   });
-//   request.execute(function(resp) {
-//     callback(resp);
-//   });
-// };
-// /**
-//  * Get file contents from Google Drive.
-//  *
-//  * @param {String} downloadUrl File's download URL (received from the API)
-//  * @param {Function} callback A callback function to be called.
-//  */
-// arc.app.drive.getFile = function(downloadUrl, callback) {
-//   let accessToken = gapi.auth.getToken().access_token;
-//   if (!accessToken) {
-//     console.warn('Access token is not available. Call rejected');
-//     callback.call(this, {
-//       'error': 'Not authorized'
-//     });
-//     return;
-//   }
-//   let xhr = new XMLHttpRequest();
-//   xhr.open('GET', downloadUrl);
-//   xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
-//   xhr.onload = function() {
-//     callback.call(arc, xhr.responseText);
-//   };
-//   xhr.onerror = function(e) {
-//     callback.call(arc, e);
-//   };
-//   xhr.send();
-// };
-// arc.app.drive.listFiles = function(mimeType, nextPageToken, query, callback) {
-//   let accessToken = gapi.auth.getToken().access_token;
-//   if (!accessToken) {
-//     console.warn('Access token is not available. Call rejected');
-//     callback.call(this, {
-//       'error': 'Not authorized'
-//     });
-//     return;
-//   }
-//   let q = `mimeType="${mimeType}" and trashed = false`;
-//   if (query) {
-//     q += ` and title contains '${query}'`;
-//   }
-//   let params = {
-//     'q': q,
-//     'maxResults': 50,
-//     'fields': 'items(createdDate,iconLink,id,title),nextLink,nextPageToken'
-//   };
-//   if (nextPageToken !== null) {
-//     params.pageToken = nextPageToken;
-//   }
-//   //application/restclient+data
-//   //TODO:30 why do I need it here?
-//   if (accessToken) {
-//     gapi.auth.setToken({
-//       'access_token': accessToken
-//     });
-//   }
-//   try {
-//     var request = gapi.client.request({
-//       'path': '/drive/v2/files',
-//       'method': 'GET',
-//       'params': params
-//     });
-//     request.execute(callback);
-//   } catch (e) {
-//     callback.call(this, {
-//       'error': e
-//     });
-//   }
-// };
+
+/**
+ * Supports `drive-request-save` that is send from request saver element.
+ */
+window.addEventListener('drive-request-save', function(e) {
+  e.preventDefault();
+
+  var request = e.detail.request;
+  var fileName = e.detail.fileName;
+  var driveId;
+  if (request.driveId) {
+    driveId = request.driveId;
+    delete request.driveId;
+  }
+  var promise;
+  var config = {
+    resource: {
+      name: fileName + '.arc',
+    },
+    media: {
+      mimeType: 'application/json',
+      body: request
+    }
+  };
+  if (driveId) {
+    promise = window.drive.file.update(driveId, config);
+  } else {
+    config.resource.description = request.description || 'Advanced REST client export file.';
+    promise = window.drive.file.create(config);
+  }
+  e.detail.result = promise;
+});
+
+window.addEventListener('google-drive-data-save', function(e) {
+  e.preventDefault();
+  var content = e.detail.content;
+  var type = e.detail.contentType;
+  var fileName = e.detail.file;
+  var config = {
+    resource: {
+      name: fileName,
+      description: 'Advanced REST client data export file.'
+    },
+    media: {
+      mimeType: type || 'application/json',
+      body: content
+    }
+  };
+  e.detail.result = window.drive.file.create(config);
+});
 }());

@@ -1,8 +1,9 @@
 Polymer({
   is: 'chrome-not-signedin-view',
 
-  close: function() {
-    this.fire('cancel');
+  properties: {
+    // Set to open the dialog
+    opened: Boolean
   },
 
   _learnMore: function() {
