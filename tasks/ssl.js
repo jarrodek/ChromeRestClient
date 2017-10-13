@@ -23,7 +23,13 @@ app.use(bodyParser.urlencoded({
 })); // for parsing application/x-www-form-urlencoded
 app.use(busboy());
 app.use(function(req, res, next) {
-  if (!req.is('multipart/*') || !req.busboy) {
+  if (!req.is('multipart/*')) {
+    console.log('Not a multipart.');
+    next();
+    return;
+  }
+  if (!req.busboy) {
+    console.log('What\'s busboy?');
     next();
     return;
   }
@@ -139,7 +145,7 @@ class TestServer {
     this._setPost();
     this._setPut();
     this._setDelete();
-    this._setMultipard();
+    this._setMultipart();
     this._setRedirect();
     this._setErrors();
     this._setEmptyResponses();
@@ -388,7 +394,7 @@ class TestServer {
     });
   }
 
-  _setMultipard() {
+  _setMultipart() {
     app.post('/post', (req, res) => {
       console.log('Calling /post');
       res.set('Connection', 'close');

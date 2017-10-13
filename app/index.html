@@ -49,6 +49,8 @@
   <link rel="import" href="bower_components/paper-item/paper-icon-item.html">
   <link rel="import" href="bower_components/iron-icon/iron-icon.html">
   <link rel="import" href="bower_components/app-log-viewer/app-log-viewer.html">
+  <link rel="import" href="bower_components/arc-messages-service/arc-messages-service.html">
+  <link rel="import" href="bower_components/arc-info-messages/arc-info-messages.html">
 
   <style is="custom-style" include="shared-styles"></style>
 </head>
@@ -73,6 +75,12 @@
         <paper-toolbar id="mainToolbar" class="main-toolbar">
           <paper-icon-button class="toolbar-hide" icon="arc:menu" paper-drawer-toggle title="Toggle drawer" alt="Drawer toggle icon"></paper-icon-button>
           <div class="title">[[pageTitle]]</div>
+          <template is="dom-if" if="[[newMessages]]">
+            <span>
+              <paper-icon-button icon="arc:info-outline" on-tap="_openInfoCenter"></paper-icon-button>
+              <paper-tooltip animation-delay="200">See what's new in the app</paper-tooltip>
+            </span>
+          </template>
           <paper-menu-button horizontal-align="right">
             <paper-icon-button icon="arc:more-vert" class="dropdown-trigger"></paper-icon-button>
             <paper-menu class="dropdown-content">
@@ -104,6 +112,10 @@
                 <iron-icon item-icon icon="arc:list"></iron-icon>
                 Open console logs
               </paper-icon-item>
+              <paper-icon-item on-tap="_openInfoCenter">
+                <iron-icon item-icon icon="arc:info-outline"></iron-icon>
+                What's new
+              </paper-icon-item>
             </paper-menu>
           </paper-menu-button>
         </paper-toolbar>
@@ -124,6 +136,7 @@
             <arc-about data-route="about"></arc-about>
             <project-details attr-for-opened="opened" data-route="project" project-id="[[params.projectId]]" attr-for-opened="opened"></project-details>
             <google-drive-browser data-route="drive" attr-for-opened="opened" api-key="592877543090-6tqu3mbhcbc3437cfj5f0ahjtui5tjac.apps.googleusercontent.com" access-token="[[accessToken]]" on-drive-file-picker-data="_openDriveRequest"></google-drive-browser>
+            <arc-info-messages data-route="messages" messages="[[appMessages]]" on-close="_closeInfoCenter"></arc-info-messages>
           </iron-pages>
         </div>
       </paper-scroll-header-panel>
@@ -206,6 +219,7 @@
     <arc-chrome-settings></arc-chrome-settings>
     <authorization-data-saver></authorization-data-saver>
     <project-model></project-model>
+    <arc-messages-service platform="chrome" on-unread-changed="_unreadMessagesChanged" messages="{{appMessages}}"></arc-messages-service>
   </template>
   <script src="scripts/libs/app.router.js"></script>
   <script src="scripts/libs/app.utils.js"></script>

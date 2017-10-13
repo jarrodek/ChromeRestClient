@@ -36,6 +36,7 @@ window.addEventListener('initializeRouting', function() {
         }
         break;
       case 'drive': screenName = 'Drive selector'; break;
+      case 'messages': screenName = 'Messages center'; break;
     }
     var event = new CustomEvent('send-analytics', {
       detail: {
@@ -120,6 +121,9 @@ window.addEventListener('initializeRouting', function() {
   arc.app.router.register('/drive', function() {
     app.route = 'drive';
   });
+  arc.app.router.register('/messages', function() {
+    app.route = 'messages';
+  });
   window.page = arc.app.router.redirect;
   arc.app.router.start();
 
@@ -128,12 +132,6 @@ window.addEventListener('initializeRouting', function() {
     var url;
     switch (params.base) {
       case 'default': url = '/'; break;
-      case 'history': url = '/history'; break;
-      case 'settings': url = '/settings'; break;
-      case 'about': url = '/about'; break;
-      case 'socket': url = '/socket'; break;
-      case 'saved': url = '/saved'; break;
-      case 'dataimport': url = '/dataimport'; break;
       case 'project':
         if (params.id) {
           url = '/project/' + params.id;
@@ -142,7 +140,14 @@ window.addEventListener('initializeRouting', function() {
       case 'request':
         url = '/request/' + params.type + '/' + encodeURIComponent(params.id);
         break;
+      case 'history': url = '/history'; break;
+      case 'settings': url = '/settings'; break;
+      case 'about': url = '/about'; break;
+      case 'socket': url = '/socket'; break;
+      case 'saved': url = '/saved'; break;
+      case 'dataimport': url = '/dataimport'; break;
       case 'drive': url = '/drive'; break;
+      case 'messages': url = '/messages'; break;
     }
     if (url) {
       arc.app.router.redirect(url);

@@ -533,4 +533,28 @@
   };
   document.body.addEventListener('display-license', app.openLicense);
 
+  app._unreadMessagesChanged = function(e) {
+    var state = !!(e.detail.value && e.detail.value.length > 0);
+    app.set('newMessages', state);
+  };
+
+  app._openInfoCenter = function() {
+    var service = document.querySelector('arc-messages-service');
+    service.readMessages();
+    app.fire('navigate', {
+      base: 'messages'
+    });
+    window.setTimeout(function() {
+      service.unread.forEach((item, i) => {
+        service.set(['unread', i, 'read'], 1);
+      });
+    }, 5000);
+  };
+
+  app._closeInfoCenter = function() {
+    app.fire('navigate', {
+      base: 'default'
+    });
+  };
+
 })(document, window);

@@ -28,7 +28,7 @@
     "network-state": "advanced-rest-client/network-state#^0.1.1",
     "arc-loader-screen": "advanced-rest-client/arc-loader-screen#^0.1.1",
     "response-view": "advanced-rest-client/response-view#^0.1.10",
-    "request-panel": "advanced-rest-client/request-panel#^0.1.1",
+    "request-panel": "advanced-rest-client/request-panel#^0.2.1",
     "request-saver": "advanced-rest-client/request-saver#^0.1.0",
     "variables-manager": "advanced-rest-client/variables-manager#^0.1.8",
     "variables-evaluator": "advanced-rest-client/variables-evaluator#^0.1.5",
@@ -80,7 +80,9 @@
     "paper-dialog-behavior": "PolymerElements/paper-dialog-behavior#<2",
     "arc-icons": "advanced-rest-client/arc-icons#^1.0.23",
     "iron-flex-layout": "PolymerElements/iron-flex-layout#<2",
-    "paper-styles": "PolymerElements/paper-styles#<2"
+    "paper-styles": "PolymerElements/paper-styles#<2",
+    "arc-messages-service": "advanced-rest-client/arc-messages-service#^0.1.3",
+    "arc-info-messages": "advanced-rest-client/arc-info-messages#^0.1.1"
   },
   "devDependencies": {
     "web-component-tester": "*",
