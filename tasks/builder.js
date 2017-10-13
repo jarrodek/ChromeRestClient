@@ -372,6 +372,20 @@ gulp.task('copy', () => {
     'app/bower_components/socket-fetch/decompress-worker.js'
   ]).pipe(gulp.dest(path.join(dest, 'bower_components', 'socket-fetch')));
 
+  var messagingWorkers = gulp.src([
+    'app/bower_components/arc-messages-service/arc-messages-service-worker.js'
+  ]).pipe(gulp.dest(path.join(dest, 'bower_components', 'arc-messages-service')));
+
+  var prismHighlightWorkers = gulp.src([
+    'app/bower_components/prism-highlight/workers/prism-modes.js',
+    'app/bower_components/prism-highlight/workers/prism-worker.js'
+  ]).pipe(gulp.dest(path.join(dest, 'bower_components', 'prism-highlight', 'workers')));
+
+  //bower_components/prism-highlight/workers/prism-modes.js
+  //bower_components/prism-highlight/workers/prism-worker.js
+  //'bower_components/prism/prism.js',
+  // 'bower_components/prism/plugins/autolinker/prism-autolinker.min.js',
+
   // zlib library need to placed folder up relativelly to decompress-worker
   var zlibLibrary = gulp.src([
     'app/bower_components/zlib/bin/zlib_and_gzip.min.js'
@@ -388,7 +402,7 @@ gulp.task('copy', () => {
   return merge(
       app, bower, webWorkers, assets, scripts, styles,
       /*, codeMirror*/
-      zlibLibrary, dependencies
+      zlibLibrary, dependencies, messagingWorkers
     )
     .pipe($.size({
       title: 'copy'
