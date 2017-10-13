@@ -1,8 +1,7 @@
 'use strict';
 
 const gulp = require('gulp');
-const Bump = require('./bump-version.js');
-const shell = require('shelljs');
+const {ManifestProcessor} = require('./manifest-version.js');
 const path = require('path');
 const crisper = require('crisper');
 const fs = require('fs');
@@ -16,20 +15,24 @@ const merge = require('merge-stream');
 // const concat = require('concatenate-files');
 const zipFolder = require('zip-folder');
 // const uploader = require('./cws-uploader.js');
+var decomment = require('decomment');
+var minify = require('html-minifier').minify;
 
 var Builder = {
-  commitMessage: '',
-  workingBranch: 'develop',
   target: 'canary',
   targetDir: 'canary',
   version: '0.0.0.0',
 
-  get uploader() {
-    if (!Builder._uploader) {
-      Builder._uploader = require('./cws-uploader.js');
-    }
-    return Builder._uploader;
+  get bower() {
+    return JSON.parse(fs.readFileSync('./bower.json', 'utf8'));
   },
+
+  // get uploader() {
+  //   if (!Builder._uploader) {
+  //     Builder._uploader = require('./cws-uploader.js');
+  //   }
+  //   return Builder._uploader;
+  // },
   /**
    * Build a canary release.
    * 1. Bump version
@@ -40,112 +43,53 @@ var Builder = {
   buildCanary: (opts, done) => {
     Builder.target = 'canary';
     Builder.targetDir = 'canary';
-    Builder.workingBranch = 'canary';
-    Builder._build(opts, done);
+    if (!done) {
+      return new Promise(resolve => {
+        Builder._build(opts, resolve);
+      });
+    } else {
+      Builder._build(opts, done);
+    }
   },
 
   buildDev: (opts, done) => {
     Builder.target = 'dev';
     Builder.targetDir = 'dev';
-    Builder.workingBranch = 'dev';
     Builder._build(opts, done);
   },
 
   buildBeta: (opts, done) => {
     Builder.target = opts.isHotfix ? 'beta-hotfix' : 'beta-release';
     Builder.targetDir = 'beta';
-    Builder.workingBranch = 'beta';
     Builder._build(opts, done);
   },
 
   buildStable: (opts, done) => {
     Builder.target = opts.isHotfix ? 'stable-hotfix' : 'stable-release';
     Builder.targetDir = 'stable';
-    Builder.workingBranch = 'develop';
     Builder._build(opts, done);
   },
 
   _build: function(opts, done) {
-    var version = Bump.bump({
-      target: Builder.target
-    });
-    Builder.version = version;
+    Builder.version = Builder.bower.version;
     var date = new Date().toGMTString();
-    var buildName = Builder.target[0].toUpperCase() + Builder.target.substr(1);
-    Builder.commitMessage = `${buildName} build at ${date} to version ${version}`;
+    var buildName = Builder.target[0].toUpperCase() + Builder.target;
+    Builder.commitMessage = `${buildName} build at ${date} to version ${Builder.version}`;
 
-    if (!opts.buildOnly) {
-      try {
-        Builder._gitCommitAndPush();
-      } catch (e) {
-        console.error('Unable push changes to git repository. Task terminated.');
-        done();
-        return;
-      }
-    }
-
-    Builder._buildPackage()
-    .then((buildPath) => {
-      if (opts.buildOnly) {
-        return Promise.resolve();
-      }
-      return Builder._uploadPackage(buildPath);
-    })
-    .then(() => {
-      if (opts.buildOnly || !opts.publish) {
-        return Promise.resolve();
-      }
-      return Builder._publishPackage();
-    })
+    return Builder._buildPackage()
     .then(() => {
       console.log(`Finished job.`);
       done();
     })
     .catch((e) => {
-      console.error('Error Building canary', e);
+      console.error('Error Building the app', e);
       done();
     });
-  },
-
-  _gitAddAll: () => {
-    return shell.exec('git add -A');
-  },
-  _gitCommit: () => {
-    return shell.exec(`git commit -S -m "${Builder.commitMessage}"`);
-  },
-  _gitPush: () => {
-    return shell.exec(`git push origin ${Builder.workingBranch}`);
-  },
-
-  _gitCommitAndPush: () => {
-    if (Builder._gitAddAll().code !== 0) {
-      throw new Error('Unable to add all files to commit');
-    }
-    if (Builder._gitCommit().code !== 0) {
-      throw new Error('Unable to commit git repository');
-    }
-    if (Builder._gitPush().code !== 0) {
-      throw new Error('Unable to push changes');
-    }
   },
 
   _buildPackage: function() {
     return Builder._copyApp()
     .then(() => Builder._createPackage());
-  },
-  /**
-   * Upload the package to CWS.
-   */
-  _uploadPackage: (buildPath) => {
-    return Builder.uploader.auth()
-    .then(() => Builder.uploader.uploadItem(buildPath, Builder.targetDir));
-  },
-  /**
-   * Publish package after it has been uploaded. If it is done in the same run it does not require
-   * another auth.
-   */
-  _publishPackage: () => {
-    return Builder.uploader.publishTarget(Builder.targetDir);
   },
 
   get buildTarget() {
@@ -255,7 +199,7 @@ var Builder = {
     console.log('Vulcanizing');
     return new Promise((resolve, reject) => {
       let targetDir = Builder.buildTarget;
-      let source = path.join('app', 'elements', 'elements.html');
+      let source = path.join('app', 'index.html');
       let vulcan = new Vulcanize({
         inlineScripts: true,
         inlineCss: true,
@@ -266,23 +210,32 @@ var Builder = {
           // path.join('bower_components', 'font-roboto', 'roboto.html')
         ]
       });
-      console.log('Processing elements.html');
+      console.log('Processing ', source, 'file');
       vulcan.process(source, function(err, inlinedHtml) {
         if (err) {
           return reject(err);
         }
-        let jsFile = 'elements.js';
-        var targetHtml = path.join(targetDir, 'elements', 'elements.html');
-        var targetJs = path.join(targetDir, 'elements', jsFile);
+        let jsFile = 'index.js';
+        var targetHtml = path.join(targetDir, 'index.html');
+        var targetJs = path.join(targetDir, jsFile);
         let output = crisper({
           source: inlinedHtml,
           jsFileName: jsFile,
           scriptInHead: false
         });
-        fs.writeFileSync(targetHtml, output.html, 'utf-8');
-        fs.writeFileSync(targetJs, output.js, 'utf-8');
+        let html = decomment.html(output.html);
+        console.log('Minify HTML');
+        html = minify(html, {
+          collapseWhitespace: true
+        });
+        console.log('Removing comments from JavaScript');
+        let js = decomment(output.js);
+        fs.writeFileSync(targetHtml, html, 'utf-8');
+        fs.writeFileSync(targetJs, js, 'utf-8');
         console.log('Saved in ', targetHtml, targetJs);
         resolve();
+        // index.html 832 kB -> 777
+        // index.js 4.3 MB -> 3.3
       });
     });
   },
@@ -308,43 +261,11 @@ var Builder = {
   },
   //combine all manifest dependecies into one file
   _processManifest: () => {
-    return new Promise((resolve, reject) => {
-      let dest = Builder.buildTarget;
-      let manifestFile = path.join(dest, 'manifest.json');
-      fs.readFile(manifestFile, (err, data) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        data = JSON.parse(data);
-        let targetName = Builder.targetDir;
-        //jscs:disable requireCamelCaseOrUpperCaseIdentifiers
-        //write new path to manifest
-        if (targetName === 'canary') {
-          data.name += ' - canary';
-          data.short_name += ' - canary';
-        } else if (targetName === 'dev') {
-          data.name += ' - dev';
-          data.short_name += ' - dev';
-        } else if (targetName === 'beta') {
-          data.name += ' - beta';
-          data.short_name += ' - beta';
-        }
-        let cwsConfig = Builder.uploader.config;
-        data.oauth2.client_id = cwsConfig[targetName].clientId;
-        //jscs:enable requireCamelCaseOrUpperCaseIdentifiers
-        delete data.key;
-        data = JSON.stringify(data, null, 2);
-        fs.writeFile(manifestFile, data, 'utf8', (err) => {
-          if (err) {
-            console.error('Error building background page dependencies file.', err);
-            reject(err);
-            return;
-          }
-          resolve();
-        });
-      });
-    });
+    var dest = Builder.buildTarget;
+    var channel = Builder.targetDir;
+    var processor = new ManifestProcessor(dest, channel);
+    processor.updateManifest();
+    return Promise.resolve();
   },
   /**
    * Create a package
@@ -427,11 +348,7 @@ gulp.task('copy', () => {
   ]).pipe(gulp.dest(path.join(dest, 'assets')));
 
   var scripts = gulp.src([
-    'app/scripts/**',
-    // '!app/scripts/libs',
-    // '!app/scripts/libs/*',
-    '!app/scripts/code-mirror',
-    '!app/scripts/code-mirror/**'
+    'app/scripts/**'
   ]).pipe(gulp.dest(path.join(dest, 'scripts')));
 
   var styles = gulp.src([
@@ -452,32 +369,40 @@ gulp.task('copy', () => {
 
   // copy webworkers used in bower_components
   var webWorkers = gulp.src([
-    'app/bower_components/socket-fetch/decompress-worker.js',
-    'app/bower_components/arc-definitions/definitions.json'
-  ]).pipe(gulp.dest(path.join(dest, 'elements')));
+    'app/bower_components/socket-fetch/decompress-worker.js'
+  ]).pipe(gulp.dest(path.join(dest, 'bower_components', 'socket-fetch')));
+
+  var messagingWorkers = gulp.src([
+    'app/bower_components/arc-messages-service/arc-messages-service-worker.js'
+  ]).pipe(gulp.dest(path.join(dest, 'bower_components', 'arc-messages-service')));
+
+  var prismHighlightWorkers = gulp.src([
+    'app/bower_components/prism-highlight/workers/prism-modes.js',
+    'app/bower_components/prism-highlight/workers/prism-worker.js'
+  ]).pipe(gulp.dest(path.join(dest, 'bower_components', 'prism-highlight', 'workers')));
+
+  //bower_components/prism-highlight/workers/prism-modes.js
+  //bower_components/prism-highlight/workers/prism-worker.js
+  //'bower_components/prism/prism.js',
+  // 'bower_components/prism/plugins/autolinker/prism-autolinker.min.js',
 
   // zlib library need to placed folder up relativelly to decompress-worker
   var zlibLibrary = gulp.src([
     'app/bower_components/zlib/bin/zlib_and_gzip.min.js'
-  ]).pipe(gulp.dest(path.join(dest, 'zlib', 'bin')));
+  ]).pipe(gulp.dest(path.join(dest, 'bower_components', 'zlib', 'bin')));
 
-  var bowerDeps = [
-    'chrome-platform-analytics/google-analytics-bundle.js',
-    'dexie-js/dist/dexie.min.js',
-    'har/build/har.js',
-    'lodash/lodash.js',
-    'uri.js/src/URI.js',
+  var prismDeps = [
     'prism/prism.js',
     'prism/plugins/autolinker/prism-autolinker.min.js'
   ];
   var dependencies = gulp.src([
-    `app/bower_components/{${bowerDeps.join(',')}}`,
-  ]).pipe(gulp.dest(path.join(dest, 'bower_components')));
+    `app/bower_components/{${prismDeps.join(',')}}`,
+  ]).pipe(gulp.dest(path.join(dest, 'bower_components', 'prism')));
 
   return merge(
       app, bower, webWorkers, assets, scripts, styles,
       /*, codeMirror*/
-      zlibLibrary, dependencies
+      zlibLibrary, dependencies, messagingWorkers
     )
     .pipe($.size({
       title: 'copy'
@@ -486,8 +411,8 @@ gulp.task('copy', () => {
 
 gulp.task('processIndex', () => {
   let targetDir = Builder.buildTarget;
-  // var targetHtml = path.join(targetDir, 'index.html');
-  return gulp.src('./app/index.html')
+  var targetHtml = path.join(targetDir, 'index.html');
+  return gulp.src(targetHtml)
     .pipe(usemin({
       css: [],
       html: [],

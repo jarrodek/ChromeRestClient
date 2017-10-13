@@ -23,10 +23,17 @@ app.use(bodyParser.urlencoded({
 })); // for parsing application/x-www-form-urlencoded
 app.use(busboy());
 app.use(function(req, res, next) {
-  if (!req.is('multipart/*') || !req.busboy) {
+  if (!req.is('multipart/*')) {
+    console.log('Not a multipart.');
     next();
     return;
   }
+  if (!req.busboy) {
+    console.log('What\'s busboy?');
+    next();
+    return;
+  }
+  console.log('Has Multipart request');
   req.busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
     console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding +
       ', mimetype: ' + mimetype);
@@ -37,12 +44,13 @@ app.use(function(req, res, next) {
       console.log('File [' + fieldname + '] Finished');
     });
   });
-  req.busboy.on('field', function(fieldname, val
-    /*, fieldnameTruncated, valTruncated, encoding, mimetype*/
-  ) {
-    console.log('Field [' + fieldname + ']: value: ' + val);
+  req.busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated, encoding,
+    mimetype) {
+    console.log('Field [' + fieldname + ']: value: ' + val + ', mimetype: ' + mimetype);
   });
+
   req.busboy.on('finish', function() {
+    console.log('Multipart request finish');
     next();
   });
   req.pipe(req.busboy);
@@ -137,7 +145,7 @@ class TestServer {
     this._setPost();
     this._setPut();
     this._setDelete();
-    this._setMultipard();
+    this._setMultipart();
     this._setRedirect();
     this._setErrors();
     this._setEmptyResponses();
@@ -386,13 +394,13 @@ class TestServer {
     });
   }
 
-  _setMultipard() {
+  _setMultipart() {
     app.post('/post', (req, res) => {
       console.log('Calling /post');
-      console.log(req.body, req.query);
       res.set('Connection', 'close');
       res.set('Content-Type', 'text/html');
       res.send('Post with success');
+
       // var busboy = new Busboy({
       //   headers: req.headers
       // });
