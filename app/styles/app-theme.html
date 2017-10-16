@@ -225,17 +225,20 @@
 
   --code-mirror: {
     background-color: var(--arc-code-mirror-background-color, #f5f2f0);
+    font-family: inherit;
   };
 
   --code-mirror-editor: {
     background-color: var(--arc-code-mirror-background-color, #f5f2f0);
     z-index: 0;
     display: block;
+    font-family: inherit;
   };
 
   --code-mirror-wrapper: {
     display: block;
     height: 100%;
+    @apply --arc-font-code1;
   };
 
   --response-view: {
