@@ -13,7 +13,7 @@
   app.initialized = false;
   // True if the user is signed in to Chrome browser and can authorize the app.
   app.chromeSignedIn = false;
-
+  app.appVersion = arc.app.utils.appVer;
   app.observers = [
     '_routeChanged(route, params.*)'
   ];

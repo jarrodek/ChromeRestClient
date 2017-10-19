@@ -41,9 +41,9 @@ window.addEventListener('initializeRouting', function() {
     var event = new CustomEvent('send-analytics', {
       detail: {
         type: 'screenview',
-        name: screenName,
-        bubbles: true
-      }
+        name: screenName
+      },
+      bubbles: true
     });
     document.dispatchEvent(event);
     next();
