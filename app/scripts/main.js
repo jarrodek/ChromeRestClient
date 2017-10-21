@@ -13,7 +13,7 @@
   app.initialized = false;
   // True if the user is signed in to Chrome browser and can authorize the app.
   app.chromeSignedIn = false;
-
+  app.appVersion = arc.app.utils.appVer;
   app.observers = [
     '_routeChanged(route, params.*)'
   ];
@@ -560,5 +560,38 @@
   app._openTerminationMessage = function() {
     window.open('https://restforchrome.blogspot.com/2017/10/termination-of-chrome-apps-arc-native.html');
   };
+
+  var clipboard = {
+    write: function(data) {
+      chrome.permissions.contains({
+        permissions: ['clipboardWrite']
+      }, (status) => {
+        if (status) {
+          clipboard._write(data);
+        } else {
+          chrome.permissions.request({
+            permissions: ['clipboardWrite']
+          }, (granted) => {
+            if (granted) {
+              clipboard._write(data);
+            }
+          });
+        }
+      });
+    },
+    _write: function(data) {
+      var clipboardholder = document.createElement('textarea');
+      document.body.appendChild(clipboardholder);
+      clipboardholder.value = data;
+      clipboardholder.select();
+      document.execCommand('copy');
+      clipboardholder.parentNode.removeChild(clipboardholder);
+    }
+  };
+
+  window.addEventListener('content-copy', function(e) {
+    clipboard.write(e.detail.value);
+    e.preventDefault();
+  });
 
 })(document, window);
