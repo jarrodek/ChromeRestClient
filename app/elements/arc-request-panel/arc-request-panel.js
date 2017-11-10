@@ -174,6 +174,15 @@ Polymer({
     }
   },
   /**
+   * Sends the request from the shortcut manager.
+   * TODO: It uses private APIs and it shouldn't.
+   */
+  sendRequest: function() {
+    var panel = this.$$('request-panel');
+    var editor = panel.$$('request-editor');
+    editor._sendRequest();
+  },
+  /**
    * Restores saved in the datastore request data.
    * @param {String} id ID of the record
    * @param {String} type Type of the stored data. Can be `saved`, `history` or
