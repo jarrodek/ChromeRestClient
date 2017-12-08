@@ -190,16 +190,16 @@ Polymer({
    */
   _restoreRequestData: function(id, type) {
     type = type || 'saved';
-    var dbName;
+    var eventType;
     switch (type) {
       case 'saved':
-        dbName = 'saved-requests';
+        eventType = 'saved-requests';
         break;
       case 'history':
-        dbName = 'history-requests';
+        eventType = 'history-requests';
         break;
       case 'drive':
-        dbName = 'saved-requests';
+        eventType = 'saved-requests';
         break;
       default:
         this.fire('app-log', {
@@ -216,11 +216,17 @@ Polymer({
         return;
     }
 
-    var db = new PouchDB(dbName);
-    return db.get(id)
-    .then((r) => {
-      r.type = type;
-      this.set('proxyRequest', r);
+    var event = this.fire('request-object-read', {
+      id: id,
+      type: eventType
+    }, {
+      cancelable: true
+    });
+
+    return event.detail.result
+    .then(result => {
+      result.type = type;
+      this.set('proxyRequest', result);
     })
     .catch((e) => {
       this.fire('app-log', {
