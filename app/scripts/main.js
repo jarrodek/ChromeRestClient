@@ -594,4 +594,9 @@
     e.preventDefault();
   });
 
+  // variables editor drawer
+  window.addEventListener('open-variables-editor', function() {
+    app.$.environmentsDrawer.opened = true;
+  });
+
 })(document, window);
