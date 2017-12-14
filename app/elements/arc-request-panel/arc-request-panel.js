@@ -164,10 +164,14 @@ Polymer({
    * Clears the request state
    */
   clearRequest: function(e) {
-    this.set('request', {
+    this.set('proxyRequest', {
       method: 'GET'
     });
     this.projectId = undefined;
+    this.fire('navigate', {
+      base: 'request',
+      type: 'current'
+    });
     if (e && e.preventDefault) {
       e.preventDefault();
       e.stopPropagation();
