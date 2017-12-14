@@ -33,13 +33,13 @@
           case 'restore':
           case 'latest':
           case 'current':
-            app.selectedRequest = undefined;
+            app.selectedRequest = '';
             return;
           case 'drive':
-            app.selectedRequest = undefined;
+            app.selectedRequest = '';
             return app.openDriveItem(params.driveId);
           default:
-            app.selectedRequest = undefined;
+            app.selectedRequest = '';
             console.error('ID not handled!', params);
             throw new Error('ID not handled!');
         }

@@ -138,7 +138,10 @@ window.addEventListener('initializeRouting', function() {
         }
         break;
       case 'request':
-        url = '/request/' + params.type + '/' + encodeURIComponent(params.id);
+        url = '/request/' + params.type;
+        if (params.id) {
+          url += '/' + encodeURIComponent(params.id);
+        }
         break;
       case 'history': url = '/history'; break;
       case 'settings': url = '/settings'; break;
