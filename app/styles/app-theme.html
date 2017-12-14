@@ -221,7 +221,7 @@
     @apply --arc-font-common-code;
   };
 
-  --arc-code-mirror-background-color: var(--code-mirror-background-color, #f5f2f0);
+  --arc-code-mirror-background-color: #EFEBE9;
 
   --code-mirror: {
     background-color: var(--arc-code-mirror-background-color, #f5f2f0);
@@ -358,45 +358,22 @@
   /* Request status bar */
   --arc-status-bar: {
     border-top: 1px #E0E0E0 solid;
-  }
+  };
 
   --arc-info-messages: {
     margin: 0px 24px;
     max-width: 900px;
-  }
-}
+  };
 
-.canary-channel paper-toolbar {
-  --paper-toolbar-color: rgba(0,0,0,0.87);
-  --paper-toolbar-background: var(--paper-orange-500);
-}
-.canary-channel paper-icon-button {
-  --paper-icon-button: {
-    color: rgba(0,0,0,0.87);
-    transition: color cubic-bezier(0.4, 0, 1, 1) 100ms;
-  }
-}
-.dev-channel paper-toolbar {
-  --paper-toolbar-color: rgba(255,255,255,0.87);
-  --paper-toolbar-background: var(--paper-deep-purple-500);
-}
-.dev-channel paper-icon-button {
-  --paper-icon-button: {
-    color: rgba(0,0,0,0.87);
-    transition: color cubic-bezier(0.4, 0, 1, 1) 100ms;
-  }
-}
-.beta-channel paper-toolbar {
-}
-.beta-channel paper-icon-button {
+  --variables-drawer-editor-background-color: #ECEFF1;
+  --variables-preview-overlay-background-color: #fff;
+
+  --body-json-editor-action-button: {
+    margin-top: 32px;
+  };
 }
 
 /* General styles */
-
-body {
-  @apply(--layout-fullbleed);
-  @apply(--layout-vertical);
-}
 .content,
 #pages {
   min-height: 100%;

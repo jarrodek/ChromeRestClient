@@ -2,7 +2,7 @@
   "name": "advanced-rest-client",
   "description": "The web developers helper program to create and test custom HTTP requests.",
   "homepage": "https://advancedrestclient.com/",
-  "version": "10.0.11",
+  "version": "10.0.12",
   "keywords": [
     "chrome",
     "REST",
@@ -82,7 +82,8 @@
     "iron-flex-layout": "PolymerElements/iron-flex-layout#<2",
     "paper-styles": "PolymerElements/paper-styles#<2",
     "arc-messages-service": "advanced-rest-client/arc-messages-service#^0.1.3",
-    "arc-info-messages": "advanced-rest-client/arc-info-messages#^0.1.1"
+    "arc-info-messages": "advanced-rest-client/arc-info-messages#^0.1.1",
+    "variables-drawer-editor": "advanced-rest-client/variables-drawer-editor#^0.1.1"
   },
   "devDependencies": {
     "web-component-tester": "*",

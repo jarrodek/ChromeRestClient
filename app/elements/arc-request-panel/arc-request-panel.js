@@ -164,10 +164,14 @@ Polymer({
    * Clears the request state
    */
   clearRequest: function(e) {
-    this.set('request', {
+    this.set('proxyRequest', {
       method: 'GET'
     });
     this.projectId = undefined;
+    this.fire('navigate', {
+      base: 'request',
+      type: 'current'
+    });
     if (e && e.preventDefault) {
       e.preventDefault();
       e.stopPropagation();
@@ -190,16 +194,16 @@ Polymer({
    */
   _restoreRequestData: function(id, type) {
     type = type || 'saved';
-    var dbName;
+    var eventType;
     switch (type) {
       case 'saved':
-        dbName = 'saved-requests';
+        eventType = 'saved-requests';
         break;
       case 'history':
-        dbName = 'history-requests';
+        eventType = 'history-requests';
         break;
       case 'drive':
-        dbName = 'saved-requests';
+        eventType = 'saved-requests';
         break;
       default:
         this.fire('app-log', {
@@ -216,11 +220,17 @@ Polymer({
         return;
     }
 
-    var db = new PouchDB(dbName);
-    return db.get(id)
-    .then((r) => {
-      r.type = type;
-      this.set('proxyRequest', r);
+    var event = this.fire('request-object-read', {
+      id: id,
+      type: eventType
+    }, {
+      cancelable: true
+    });
+
+    return event.detail.result
+    .then(result => {
+      result.type = type;
+      this.set('proxyRequest', result);
     })
     .catch((e) => {
       this.fire('app-log', {
@@ -250,6 +260,9 @@ Polymer({
       url: data.url,
       description: data.description
     };
+    if (data.multipart) {
+      this._restoreMultipart(base, data.multipart);
+    }
     if (data.legacyProject !== this.projectId) {
       this.set('projectId', data.legacyProject);
     }
@@ -466,5 +479,40 @@ Polymer({
   // Closes cookie banner upon user request.
   _closeCookieBanner: function() {
     this.cookieBanner = false;
+  },
+  /**
+   * Restores a multipart object.
+   * @param {Object} base Request object
+   * @param {Array} data Multipart data
+   */
+  _restoreMultipart: function(base, data) {
+    var fd = new FormData();
+    data.forEach(part => {
+      let name = part.name;
+      let value;
+      if (part.isFile) {
+        try {
+          value = this._dataURLtoBlob(part.value);
+        } catch (e) {
+          value = '';
+        }
+      } else {
+        value = part.value;
+      }
+      fd.append(name, value);
+    });
+    base.payload = fd;
+  },
+
+  _dataURLtoBlob: function(dataurl) {
+    var arr = dataurl.split(',');
+    var mime = arr[0].match(/:(.*?);/)[1];
+    var bstr = atob(arr[1]);
+    var n = bstr.length;
+    var u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], {type: mime});
   }
 });

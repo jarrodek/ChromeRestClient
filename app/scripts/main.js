@@ -33,13 +33,13 @@
           case 'restore':
           case 'latest':
           case 'current':
-            app.selectedRequest = undefined;
+            app.selectedRequest = '';
             return;
           case 'drive':
-            app.selectedRequest = undefined;
+            app.selectedRequest = '';
             return app.openDriveItem(params.driveId);
           default:
-            app.selectedRequest = undefined;
+            app.selectedRequest = '';
             console.error('ID not handled!', params);
             throw new Error('ID not handled!');
         }
@@ -558,7 +558,8 @@
   };
 
   app._openTerminationMessage = function() {
-    window.open('https://restforchrome.blogspot.com/2017/11/moving-data-from-advanced-rest-client.html');
+    window
+    .open('https://install.advancedrestclient.com/');
   };
 
   var clipboard = {
@@ -592,6 +593,11 @@
   window.addEventListener('content-copy', function(e) {
     clipboard.write(e.detail.value);
     e.preventDefault();
+  });
+
+  // variables editor drawer
+  window.addEventListener('open-variables-editor', function() {
+    app.$.environmentsDrawer.opened = true;
   });
 
 })(document, window);
