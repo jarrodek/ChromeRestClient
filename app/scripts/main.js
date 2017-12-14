@@ -559,7 +559,7 @@
 
   app._openTerminationMessage = function() {
     window
-    .open('https://restforchrome.blogspot.com/2017/11/moving-data-from-advanced-rest-client.html');
+    .open('https://install.advancedrestclient.com/');
   };
 
   var clipboard = {
