@@ -79,10 +79,12 @@
     "paper-dialog-behavior": "PolymerElements/paper-dialog-behavior#<2",
     "arc-icons": "advanced-rest-client/arc-icons#^1.0.23",
     "iron-flex-layout": "PolymerElements/iron-flex-layout#<2",
+    "font-roboto-local": "PolymerElements/font-roboto-local#<2",
     "paper-styles": "PolymerElements/paper-styles#<2",
     "arc-messages-service": "advanced-rest-client/arc-messages-service#^0.1.3",
     "arc-info-messages": "advanced-rest-client/arc-info-messages#^0.1.1",
-    "variables-drawer-editor": "advanced-rest-client/variables-drawer-editor#^0.1.1"
+    "variables-drawer-editor": "advanced-rest-client/variables-drawer-editor#^0.1.1",
+    "files-payload-editor": "advanced-rest-client/files-payload-editor#<2"
   },
   "devDependencies": {
     "web-component-tester": "*",
@@ -92,7 +94,6 @@
   "main": "app/index.html",
   "resolutions": {
     "fetch": "arc",
-    "files-payload-editor": "^0.1.4",
     "paper-icon-button": "<2",
     "iron-icon": "<2",
     "paper-button": "<2",
