@@ -92,6 +92,16 @@
   "ignore": [],
   "main": "app/index.html",
   "resolutions": {
-    "fetch": "arc"
+    "fetch": "arc",
+    "files-payload-editor": "^0.1.4",
+    "paper-icon-button": "<2",
+    "iron-icon": "<2",
+    "paper-button": "<2",
+    "arc-icons": "<2",
+    "iron-flex-layout": "<2",
+    "paper-styles": "<2",
+    "iron-validatable-behavior": "<2",
+    "polymer": "^1.9.2",
+    "webcomponentsjs": "^0.7.24"
   }
 }
