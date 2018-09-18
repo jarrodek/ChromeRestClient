@@ -14,7 +14,6 @@
   "private": true,
   "dependencies": {
     "neon-elements": "PolymerElements/neon-elements#^1.0.0",
-    "font-roboto-local": "PolymerElements/font-roboto-local#latest",
     "chrome-app-filesystem": "advanced-rest-client/chrome-app-filesystem#^1.1.4",
     "file-reader": "advanced-rest-client/file-reader#^1.0.3",
     "chrome-storage": "advanced-rest-client/chrome-storage#^1.0.2",
