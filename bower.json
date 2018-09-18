@@ -2,7 +2,7 @@
   "name": "advanced-rest-client",
   "description": "The web developers helper program to create and test custom HTTP requests.",
   "homepage": "https://advancedrestclient.com/",
-  "version": "10.0.12",
+  "version": "10.0.13",
   "keywords": [
     "chrome",
     "REST",
