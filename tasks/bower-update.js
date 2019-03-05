@@ -6,7 +6,6 @@ const runSequence = require('run-sequence');
 const fs = require('fs');
 
 class BowerUpdate {
-
   postInstall() {
     return this.crisper()
     .then(() => this.fixPolymerImports())
@@ -24,19 +23,17 @@ class BowerUpdate {
   // Fixes a roboto font issues and deprecated files errors
   fixPolymerImports() {
     console.log('Fixing polymer imports.');
-    var files = [
+    const files = [
       'app/bower_components/font-roboto/roboto.html',
       // 'app/bower_components/iron-flex-layout/classes/iron-flex-layout.html',
       'app/bower_components/iron-flex-layout/classes/iron-flex-layout.js',
       // 'app/bower_components/iron-flex-layout/classes/iron-shadow-flex-layout.html',
       'app/bower_components/iron-flex-layout/classes/iron-shadow-flex-layout.js',
     ];
-    var promises = [];
-    var fn = (file) => {
+    const promises = [];
+    const fn = (file) => {
       return this.writeEmptyFile(file)
-      /*.then(() => {
-        console.log(`File ${file} has been overriten.`);
-      })*/.catch((e) => {
+      .catch((e) => {
         console.warn(`File ${file} can be processed to be overriten.`, e);
       });
     };
@@ -44,7 +41,7 @@ class BowerUpdate {
       try {
         let p = fn(file);
         promises.push(p);
-      } catch(e) {
+      } catch (e) {
         console.log(e);
       }
     });

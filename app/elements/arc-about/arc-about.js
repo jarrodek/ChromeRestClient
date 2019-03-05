@@ -1,8 +1,6 @@
 Polymer({
   is: 'arc-about',
 
-  behaviors: [ArcBehaviors.OpenablePanelBehavior],
-
   properties: {
     version: {
       type: String,

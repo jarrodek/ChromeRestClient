@@ -4,7 +4,7 @@
  *
  * @namespace
  */
-var arc = arc || {};
+const arc = {};
 /**
  * ARC background page namespace.
  *
@@ -19,9 +19,9 @@ arc.bg.openWindow = (url) => {
   if (!url) {
     url = 'index.html';
   }
-  var all = chrome.app.window.getAll();
-  var length = all.length;
-  var id = 'arc-window-' + length;
+  const all = chrome.app.window.getAll();
+  const length = all.length;
+  const id = 'arc-window-' + length;
   chrome.app.window.create(
     url, {
       id: id,
@@ -40,7 +40,7 @@ arc.bg.openWindow = (url) => {
  * Depending on launch data it will open window in default view or requested view.
  */
 arc.bg.onLaunched = (lunchData) => {
-  var url = 'index.html';
+  let url = 'index.html';
   if (lunchData && lunchData.id) {
     switch (lunchData.id) {
       case 'google_drive_open':
@@ -57,15 +57,15 @@ arc.bg.onLaunched = (lunchData) => {
 arc.bg.uuid = function() {
   // jscs:disable
   /* jshint ignore:start */
-  var lut = [];
-  for (var i = 0; i < 256; i++) {
+  const lut = [];
+  for (let i = 0; i < 256; i++) {
     lut[i] = (i < 16 ? '0' : '') + (i).toString(16);
   }
-  var fn = function() {
-    var d0 = Math.random() * 0xffffffff | 0;
-    var d1 = Math.random() * 0xffffffff | 0;
-    var d2 = Math.random() * 0xffffffff | 0;
-    var d3 = Math.random() * 0xffffffff | 0;
+  const fn = function() {
+    const d0 = Math.random() * 0xffffffff | 0;
+    const d1 = Math.random() * 0xffffffff | 0;
+    const d2 = Math.random() * 0xffffffff | 0;
+    const d3 = Math.random() * 0xffffffff | 0;
     return lut[d0 & 0xff] + lut[d0 >> 8 & 0xff] + lut[d0 >> 16 & 0xff] +
       lut[d0 >> 24 & 0xff] + '-' + lut[d1 & 0xff] + lut[d1 >> 8 & 0xff] + '-' +
       lut[d1 >> 16 & 0x0f | 0x40] + lut[d1 >> 24 & 0xff] + '-' + lut[d2 & 0x3f | 0x80] +
@@ -102,11 +102,11 @@ arc.bg.getAppAnonumousId = () => {
   });
 };
 arc.bg.releaseChannel = () => {
-  var manifest = chrome.runtime.getManifest();
+  const manifest = chrome.runtime.getManifest();
   // jscs:disable
-  var manifestName = manifest.version_name;
+  const manifestName = manifest.version_name;
   // jscs:enable
-  var release = null;
+  let release;
   if (manifestName.indexOf('beta') !== -1) {
     release = 'beta';
   } else if (manifestName.indexOf('dev') !== -1) {
@@ -185,7 +185,7 @@ arc.bg.recordSession = () => {
     let url = 'https://advancedrestclient-1155.appspot.com/analytics/record';
     let data = new FormData();
     data.append('aid', aid); // anonymousId
-    data.append('tz', d.getTimezoneOffset()); //timezone
+    data.append('tz', d.getTimezoneOffset()); // timezone
     fetch(url, {
       method: 'POST',
       body: data

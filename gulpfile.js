@@ -1,12 +1,11 @@
 'use strict';
 
-var gulp = require('gulp');
-var minimist = require('minimist');
-var conventionalChangelog = require('gulp-conventional-changelog');
-var fs = require('fs');
+const gulp = require('gulp');
+const minimist = require('minimist');
+const conventionalChangelog = require('gulp-conventional-changelog');
 require('./tasks/dev-server.js');
 
-var Cli = {
+const Cli = {
   getParams: (defaults) => {
     return minimist(process.argv.slice(2), defaults);
   },
@@ -37,12 +36,12 @@ var Cli = {
 };
 // Lint JavaScript files
 gulp.task('lint', function() {
-  var lint = require('./tasks/lint.js');
+  const lint = require('./tasks/lint.js');
   return lint();
 });
 // tasks to be prformed when bower is updated.
 gulp.task('bower-update', (done) => {
-  var bu = require('./tasks/bower-update.js');
+  const bu = require('./tasks/bower-update.js');
   bu.postInstall()
   .then(() => {
     console.log('Project builded after bower update.');
@@ -61,7 +60,7 @@ try {
   require('require-dir')('tasks');
 } catch (err) {}
 
-var buildHelpMessage = `Usage:
+const buildHelpMessage = `Usage:
 gulp build --target <TARGET> [--hotfix]
 
 Targets:
@@ -86,15 +85,15 @@ Examples:
   This will build beta release as a hotfix.
 `;
 
-var build = (done) => {
-  var params = Cli.getParams(Cli.buildOptions);
+const build = (done) => {
+  const params = Cli.getParams(Cli.buildOptions);
   if (params.help) {
     console.log(buildHelpMessage);
     done();
     return;
   }
-  var Builder = require('./tasks/builder.js');
-  var options = {
+  const Builder = require('./tasks/builder.js');
+  const options = {
     isHotfix: params.hotfix || false
   };
 
@@ -121,8 +120,8 @@ var build = (done) => {
   }
 };
 
-var publish = (done) => {
-  var params = Cli.getParams(Cli.publishTarget);
+const publish = (done) => {
+  const params = Cli.getParams(Cli.publishTarget);
   switch (params.target) {
     case 'canary':
     case 'dev':
@@ -167,15 +166,15 @@ var publish = (done) => {
 gulp.task('build', build);
 gulp.task('publish', publish);
 
-var testServer = () => {
-  let srv = require('./tasks/ssl.js');
+const testServer = () => {
+  const srv = require('./tasks/ssl.js');
   srv.create();
 };
 gulp.task('test-server', testServer);
 gulp.task('srv', testServer);
 
 gulp.task('test', function(done) {
-  var analyzer = require('./tasks/tree-analyzer.js');
+  const analyzer = require('./tasks/tree-analyzer.js');
   analyzer.analyseDependencies().then(() => done()).catch((e) => {
     console.error('An error occured', Object.getOwnPropertyNames(e));
     console.error(e.message);

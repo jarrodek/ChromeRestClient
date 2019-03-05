@@ -1,0 +1,381 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymer/lib/elements/custom-style.html">
+<link rel="import" href="../bower_components/shadycss/apply-shim.html">
+<link rel="import" href="../bower_components/font-roboto-local/roboto.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/arc-icons/arc-icons.html">
+<link rel="import" href="../bower_components/arc-menu/arc-menu.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-pouchdb/pouchdb.html">
+<link rel="import" href="../bower_components/arc-models/project-model.html">
+<link rel="import" href="../bower_components/arc-models/rest-api-model.html">
+<link rel="import" href="../bower_components/arc-models/host-rules-model.html">
+<link rel="import" href="../bower_components/arc-models/request-model.html">
+<link rel="import" href="../bower_components/arc-models/auth-data-model.html">
+<link rel="import" href="../bower_components/arc-models/url-history-model.html">
+<link rel="import" href="../bower_components/arc-models/websocket-url-history-model.html">
+<link rel="import" href="../bower_components/arc-models/variables-model.html">
+<link rel="import" href="../bower_components/arc-models/url-indexer.html">
+<link rel="import" href="../bower_components/response-history-saver/response-history-saver.html">
+<link rel="import" href="../bower_components/arc-data-export/arc-data-export.html">
+<link rel="import" href="../bower_components/arc-data-import/arc-data-import.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/authorization-data-saver/authorization-data-saver.html">
+<link rel="import" href="../bower_components/variables-manager/variables-manager.html">
+<link rel="import" href="../bower_components/variables-evaluator/variables-evaluator.html">
+<link rel="import" href="../bower_components/arc-definitions/arc-definitions.html">
+<link rel="import" href="../bower_components/app-analytics/app-analytics.html">
+<link rel="import" href="../bower_components/app-analytics/app-analytics-custom.html">
+<link rel="import" href="../bower_components/arc-messages-service/arc-messages-service.html">
+<link rel="import" href="../bower_components/arc-info-messages/arc-info-messages.html">
+<link rel="import" href="../bower_components/paper-styles/typography.html">
+<link rel="import" href="../bower_components/paper-styles/color.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../bower_components/uuid-generator/uuid-generator.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../bower_components/headers-parser-behavior/headers-parser-behavior.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tab.html">
+<link rel="import" href="../bower_components/request-hooks-logic/request-hooks-logic.html">
+<link rel="import" href="../bower_components/arc-request-logic/arc-request-logic.html">
+<!-- <link rel="import" href="../bower_components/oauth-authorization/oauth1-authorization.html"> -->
+<link rel="import" href="../bower_components/environment-selector/environment-selector.html">
+<link rel="import" href="../bower_components/arc-app-mixin/arc-app-mixin.html">
+<link rel="import" href="../bower_components/arc-request-workspace/arc-request-workspace.html">
+<link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
+<link rel="import" href="../bower_components/saved-request-editor/saved-request-editor.html">
+<link rel="import" href="../bower_components/saved-request-detail/saved-request-detail.html">
+<link rel="import" href="../bower_components/bottom-sheet/bottom-sheet.html">
+<link rel="import" href="../bower_components/http-code-snippets/http-code-snippets.html">
+<dom-module id="arc-chrome">
+  <template>
+    <style>
+      :host {
+      display: block;
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+      @apply --layout-fit;
+      --app-drawer-width: 320px;
+    }
+    [hidden] {
+      display: none !important;
+    }
+    .mainPages {
+      padding: 0px 24px;
+      box-sizing: border-box;
+    }
+    .mainPages,
+    .mainPages > * {
+      background-color: var(--primary-background-color, #fff);
+    }
+    .mainPages {
+      min-height: 100%;
+    }
+    .mainPages > * {
+      min-height: calc(100vh - 64px);
+      box-sizing: border-box;
+      padding: 4px;
+    }
+    .mainPages,
+    app-header {
+      border-left: 1px var(--arc-layout-divider-color, #BDBDBD) solid;
+    }
+    google-drive-browser {
+      height: calc(100vh - 64px);
+    }
+    apic-electron {
+      padding-top: 24px;
+    }
+    app-toolbar {
+      background-color: var(--arc-toolbar-background-color);
+      color: var(--arc-toolbar-color);
+    }
+    .env-container {
+      @apply --layout-horizontal;
+      @apply --layout-center;
+      @apply --arc-font-body1;
+      color: var(--arc-env-container-color);
+    }
+    environment-selector {
+      margin-left: 8px;
+      max-width: 120px;
+      --paper-input-container-input-color: var(--arc-toolbar-environment-selector-input-color);
+    }
+    .api-version-selector {
+      --paper-input-container-input-color: var(--arc-toolbar-api-version-selector-color);
+      --paper-input-container-color: var(--arc-toolbar-api-version-selector-label-color);
+    }
+    .var-panel {
+      max-width: calc(100vw - var(--app-drawer-width, 0) - 32px);
+      max-height: calc(100vh - 64px - 32px);
+      background-color: var(--arc-toolbar-variables-panel-background, #fff);
+      color: var(--arc-toolbar-variables-panel-color);
+    }
+    arc-info-messages {
+      min-width: 320px;
+      position: relative;
+      background-color: white;
+      padding: 0 12px;
+      box-sizing: border-box;
+    }
+    arc-menu {
+      color: var(--arc-menu-color);
+      width: 320px;
+      background-color: var(--arc-menu-background-color, #fff);
+      --paper-item-body-secondary-color: var(--arc-menu-paper-item-body-secondary-color);
+      --paper-item: {
+        border-left: none;
+        border-right: none;
+        padding: 0 15px;
+      }
+    }
+    .api-navigation {
+      width: 320px;
+      height: 100%;
+      color: var(--arc-menu-color);
+      background-color: var(--arc-menu-background-color, #fff);
+      --paper-tab-content-unselected_-_color: var(--arc-menu-tabs-color-unselected);
+    }
+    api-navigation,
+    .api-navigation-loader {
+      height: calc(100vh - 72px);
+      background-color: var(--arc-menu-background-color, inherit);
+      --paper-tab-content-unselected_-_color: var(--arc-menu-tabs-color-unselected);
+    }
+    .api-navigation-loader {
+      @apply --layout-vertical;
+      @apply --layout-center;
+    }
+    .powered-by {
+      padding: 12px 0px;
+      border-top: 1px rgba(0,0,0,0.24) solid;
+      margin: 8px 12px 0 12px;
+    }
+    a img {
+      text-underline: none;
+    }
+    a.attribution {
+      display: inline-block;
+      width: 177px;
+      margin-left: 24px;
+      fill: var(--arc-menu-color);
+    }
+    .nav-action-button {
+      background-color: var(--arc-toolbar-action-button-background-color, #fff);
+    }
+    paper-icon-button[active] {
+      color: var(--arc-toolbar-paper-icon-button-active-color, var(--accent-color));
+    }
+    .nav-notification-button {
+      @apply --navigation-notification-button;
+    }
+    .nav-notification-button:hover {
+      @apply --navigation-notification-button-hover;
+    }
+    .nav-notification-button[active] {
+      @apply --navigation-notification-button-active;
+    }
+    .toolbar-button {
+      background-color: var(--arc-toolbar-button-background-color, #fff);
+      color: var(--arc-toolbar-button-color, inherit);
+    }
+    app-drawer-layout:not([narrow]) [drawer-toggle] {
+      display: none;
+    }
+    app-drawer {
+      z-index: 0;
+    }
+    :host([narrow-layout]) app-drawer {
+      z-index: 1;
+    }
+    .info-center-drawer {
+      --app-drawer-width: 640px;
+    }
+    </style>
+    <!-- Database support -->
+    <auth-data-model></auth-data-model>
+    <project-model></project-model>
+    <rest-api-model></rest-api-model>
+    <host-rules-model></host-rules-model>
+    <url-history-model></url-history-model>
+    <request-model id="requestModel"></request-model>
+    <authorization-data-saver></authorization-data-saver>
+    <websocket-url-history-model></websocket-url-history-model>
+    <variables-model></variables-model>
+    <url-indexer></url-indexer>
+    <!-- Data import / export -->
+    <arc-data-export app-version="[[appVersion]]" electron-cookies></arc-data-export>
+    <arc-data-import></arc-data-import>
+    <!-- Request logic -->
+    <oauth1-authorization></oauth1-authorization>
+    <arc-request-logic variables-disabled="[[_computeVariablesDisabled(config.systemVariablesEnabled, config.appVariablesEnabled)]]"></arc-request-logic>
+    <request-hooks-logic></request-hooks-logic>
+    <template is="dom-if" if="[[historyEnabled]]" restamp="true">
+      <response-history-saver></response-history-saver>
+    </template>
+    <electron-http-transport follow-redirects$=[[config.followRedirects]] request-timeout$="[[config.requestDefaultTimeout]]" native-transport$="[[config.nativeTransport]]" validate-certificates$="[[config.validateCertificates]]" sent-message-limit$="[[config.sentMessageLimit]]"></electron-http-transport>
+    <variables-manager system-variables="[[sysVars]]" sys-variables-disabled="[[_computeVarDisabled(config.systemVariablesEnabled)]]" app-variables-disabled="[[_computeVarDisabled(config.appVariablesEnabled)]]"></variables-manager>
+    <variables-evaluator no-before-request></variables-evaluator>
+    <!-- Info center -->
+    <arc-messages-service platform="electron" on-unread-changed="_unreadMessagesChanged" messages="{{appMessages}}" id="msgService"></arc-messages-service>
+    <!-- Helper components -->
+    <web-url-input id="webUrlInput" purpose="web-session" on-open-web-url="_openWebUrlHandler"></web-url-input>
+    <!-- Application views -->
+    <app-drawer-layout fullbleed narrow="{{narrowLayout}}" force-narrow="[[appMenuDisabled]]" responsive-width="980px">
+      <app-drawer slot="drawer" align="start">
+        <template is="dom-if" if="[[isApiConsole]]">
+          <div class="api-navigation">
+            <api-navigation aware="apic" summary endpoints-opened hidden$="[[apiProcessing]]" selected="[[apiSelected]]" selected-type="[[apiSelectedType]]"></api-navigation>
+            <template is="dom-if" if="[[apiProcessing]]">
+              <div class="api-navigation-loader">
+                <p>Loading the API</p>
+              </div>
+            </template>
+            <div class="powered-by">
+              <a href="https://github.com/mulesoft/api-console" class="attribution" target="_blank">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 818.9 148">
+                  <defs><style>.cls-1{}.cls-2{font-size:60px;font-family:OpenSans, Open Sans;}</style></defs><path class="cls-1" d="M436.08,12.57a61.79,61.79,0,1,0,62.08,61.79A62,62,0,0,0,436.08,12.57Zm0,118.8a56.63,56.63,0,1,1,56.63-56.63A56.63,56.63,0,0,1,436.09,131.36Z"/><path class="cls-1" d="M420.34,102.08a28.4,28.4,0,0,1-15.87-25.84,29.25,29.25,0,0,1,4.89-16.29l20.42,30.43h12.34l20.42-30.43a29.25,29.25,0,0,1,4.89,16.29,28.55,28.55,0,0,1-14,24.87l3.93,15.06a46.47,46.47,0,0,0,2.45-81.29L436.08,71.47,412.6,34.75A46.47,46.47,0,0,0,416.45,117Z"/><polygon class="cls-1" points="544.97 80.8 529.71 48.31 521.79 48.31 521.79 100.53 529.71 100.53 529.71 65.62 542.03 91.08 547.9 91.08 559.93 65.62 559.93 100.53 567.85 100.53 567.85 48.31 559.93 48.31 544.97 80.8"/><path class="cls-1" d="M597.61,86c0,5.73-3.53,8.29-7.7,8.29s-7.48-2.5-7.48-8.29V63.34h-7.48V87.11c0,4.19.88,7.71,3.74,10.5a12.93,12.93,0,0,0,9.17,3.37,13.28,13.28,0,0,0,9.9-4.18v3.74h7.34V63.34h-7.48Z"/><path class="cls-1" d="M619.75,89.83V48.31h-7.48v42c0,5.51,3.08,10.27,10.2,10.27h4.62V94.16h-3.3C620.77,94.16,619.75,92.68,619.75,89.83Z"/><path class="cls-1" d="M645.07,62.91c-9.54,0-15.77,7-15.77,19,0,14.16,7.41,19.07,16.73,19.07,6.53,0,10.12-2,13.93-5.79L655.2,90.7a11.08,11.08,0,0,1-9,3.81c-6.09,0-9.46-4-9.46-10.41h24.13V80.8C660.85,70.24,655.05,62.91,645.07,62.91Zm-8.36,16a11.79,11.79,0,0,1,1-5.06,7.77,7.77,0,0,1,7.41-4.69,7.66,7.66,0,0,1,7.34,4.69,11.62,11.62,0,0,1,1,5.06Z"/><path class="cls-1" d="M697.78,74.93c-2.2-2-4.91-3.15-9.76-3.89l-5.94-.88a11.67,11.67,0,0,1-5.87-2.42,6.24,6.24,0,0,1-2-4.84c0-4.62,3.37-8.15,9.54-8.15,4.4,0,8.14,1,11.37,4l5.06-5c-4.47-4.18-9.31-5.94-16.21-5.94-10.86,0-17.46,6.23-17.46,15.33,0,4.25,1.25,7.55,3.82,10,2.27,2.12,5.64,3.59,9.9,4.18l6.16.89c3.09.44,4.4,1,5.73,2.2a7,7,0,0,1,2.05,5.43c0,5.06-4,8-10.78,8-5.36,0-9.54-1.17-13.35-5l-5.28,5.21c5,5.06,10.64,6.9,18.48,6.9C694.18,101,702,95.25,702,85.65,702,81.16,700.63,77.43,697.78,74.93Z"/><path class="cls-1" d="M721.76,62.91a14.88,14.88,0,0,0-11.08,4.4c-3.52,3.66-4.4,8.36-4.4,14.6s.88,11,4.4,14.67a14.88,14.88,0,0,0,11.08,4.4,15,15,0,0,0,11.15-4.4c3.52-3.66,4.4-8.36,4.4-14.67s-.88-10.94-4.4-14.6A15,15,0,0,0,721.76,62.91Zm5.5,29.19a7.65,7.65,0,0,1-5.5,2.2,7.44,7.44,0,0,1-5.42-2.2c-2.28-2.27-2.57-6.17-2.57-10.2s.29-7.92,2.57-10.2a7.39,7.39,0,0,1,5.42-2.13,7.6,7.6,0,0,1,5.5,2.13c2.27,2.27,2.57,6.16,2.57,10.2S729.54,89.83,727.27,92.1Z"/><path class="cls-1" d="M744.88,58.29V64h-4.26v5.73h4.26v30.81h7.48V69.73h7.41V64h-7.41V58.65c0-2.71,1.31-4.33,4.1-4.33h3.31V47.94h-4.7C748.1,47.94,744.88,52.93,744.88,58.29Z"/><path class="cls-1" d="M776.12,52.71h-7.48V64h-4.26v5.73h4.26V90.19c0,5.36,3.22,10.35,10.19,10.35h4.47V94.16h-3.08c-2.78,0-4.11-1.62-4.11-4.33V69.73h7.19V64h-7.19Z"/><path class="cls-1" d="M792.58,58.48a4,4,0,0,0-2.14-2.11,4.11,4.11,0,0,0-3.11,0,4.07,4.07,0,0,0-1.29.84,4,4,0,0,0-.87,1.26,3.86,3.86,0,0,0-.32,1.58,3.94,3.94,0,0,0,.32,1.6,4,4,0,0,0,.87,1.28,4,4,0,0,0,1.29.84,4.19,4.19,0,0,0,3.11,0,3.92,3.92,0,0,0,1.28-.84,4.1,4.1,0,0,0,.87-1.28,4,4,0,0,0,.32-1.6A3.86,3.86,0,0,0,792.58,58.48Zm-.66,2.94a3.34,3.34,0,0,1-.7,1.09,3.25,3.25,0,0,1-1,.72,3.19,3.19,0,0,1-1.3.26,3.24,3.24,0,0,1-2.36-1,3.35,3.35,0,0,1-.7-1.09,3.64,3.64,0,0,1-.25-1.37,3.54,3.54,0,0,1,.25-1.34,3.26,3.26,0,0,1,3.06-2.06,3.21,3.21,0,0,1,1.3.26,3.26,3.26,0,0,1,1.74,1.8,3.52,3.52,0,0,1,.25,1.34A3.62,3.62,0,0,1,791.92,61.42Z"/><path class="cls-1" d="M790.42,60a1.14,1.14,0,0,0,.35-.93,1.23,1.23,0,0,0-.4-1,1.92,1.92,0,0,0-1.24-.33h-1.81v4.68H788v-2h.77l1.28,2h.78l-1.34-2.07A1.59,1.59,0,0,0,790.42,60Zm-1.61-.19H788V58.32h1l.37,0a1,1,0,0,1,.33.1.63.63,0,0,1,.24.21A.68.68,0,0,1,790,59a.79.79,0,0,1-.1.43.61.61,0,0,1-.27.23,1.19,1.19,0,0,1-.39.09Z"/><text class="cls-2" transform="translate(19 91.93)">Powered by</text></svg>
+              </a>
+            </div>
+          </div>
+        </template>
+        <template is="dom-if" if="[[!isApiConsole]]">
+          <arc-menu rest-api draggable-enabled="[[config.draggableEnabled]]" allow-popup="[[popupMenuExperimentEnabled]]" list-type="[[config.viewListType]]" history-enabled="[[historyEnabled]]" hide-history="[[menuConfig.hideHistory]]" hide-saved="[[menuConfig.hideSaved]]" hide-projects="[[menuConfig.hideProjects]]" hide-apis="[[menuConfig.hideApis]]" on-popup-menu="_popupMenuHandler"></arc-menu>
+        </template>
+      </app-drawer>
+      <app-drawer slot="drawer" align="end" opened="{{messageCenterOpened}}" class="info-center-drawer">
+        <arc-info-messages messages="[[appMessages]]" on-close="closeInfoCenter"></arc-info-messages>
+      </app-drawer>
+      <app-header-layout has-scrolling-region id="scrollingRegion">
+        <app-header slot="header" fixed shadow scroll-target="scrollingRegion">
+          <app-toolbar>
+            <paper-icon-button icon="arc:menu" drawer-toggle title="Toggle application menu" hidden$="[[appMenuDisabled]]"></paper-icon-button>
+            <template is="dom-if" if="[[renderBackButton]]">
+              <paper-icon-button icon="arc:arrow-back" on-click="_backHandler" title="Go back to main screen"></paper-icon-button>
+            </template>
+            <div main-title></div>
+            <template is="dom-if" if="[[newMessages]]">
+              <paper-icon-button class="nav-notification-button" icon="arc:info-outline" on-click="openInfoCenter" toggles active="[[messageCenterOpened]]" title="See what's new in the app"></paper-icon-button>
+            </template>
+            <template is="dom-if" if="[[hasAppUpdate]]">
+              <paper-icon-button icon="arc:file-download" class="nav-notification-button" on-click="updateInstall" title="Restart and install update"></paper-icon-button>
+            </template>
+            <!-- API console related toolbar options -->
+            <template is="dom-if" if="[[isApiConsole]]">
+              <template is="dom-if" if="[[!apiIsSaved]]">
+                <template is="dom-if" if="[[canSaveApi]]">
+                  <paper-button class="toolbar-button" raised on-click="_saveApi">Save API</paper-button>
+                </template>
+              </template>
+              <template is="dom-if" if="[[apiIsSaved]]">
+                <template is="dom-if" if="[[apiMultiVersionVersion]]">
+                  <paper-dropdown-menu label="API version" class="api-version-selector">
+                    <paper-listbox id="apiVersionSelector" slot="dropdown-content" selected="[[apiVersion]]" attr-for-selected="data-version" on-selected-changed="_apiVersionMenuChanged">
+                      <template is="dom-repeat" items="[[apiVersions]]">
+                        <paper-item data-version$="[[item]]">[[item]]</paper-item>
+                      </template>
+                    </paper-listbox>
+                  </paper-dropdown-menu>
+                </template>
+                <template is="dom-if" if="[[!apiVersionSaved]]">
+                  <template is="dom-if" if="[[canSaveApi]]">
+                    <paper-button class="toolbar-button" raised on-click="_saveApi">Save API version</paper-button>
+                  </template>
+                </template>
+                <paper-menu-button vertical-align="top" horizontal-align="auto">
+                  <paper-icon-button icon="arc:more-vert" slot="dropdown-trigger"></paper-icon-button>
+                  <paper-listbox slot="dropdown-content" on-selected-changed="_apiActionMenuChanged">
+                    <paper-item data-action="delete">Delete API</paper-item>
+                    <template is="dom-if" if="[[apiMultiVersionVersion]]">
+                      <paper-item data-action="delete-version">Delete version</paper-item>
+                    </template>
+                    <!-- <paper-item data-action="save-oas">Save as OAS</paper-item>
+                    <paper-item data-action="save-raml">Save as RAML</paper-item> -->
+                    <!-- <paper-item data-action="upload-exchange">Upload to Exchange</paper-item> -->
+                  </paper-listbox>
+                </paper-menu-button>
+              </template>
+            </template>
+            <!-- Environment toolbar controls -->
+            <template is="dom-if" if="[[!isApiConsole]]">
+              <div class="env-container">
+                <span class="env-label">Environment:</span>
+                <environment-selector no-label-float></environment-selector>
+                <paper-icon-button class="var-info-button" id="varToggleButton" icon="arc:info-outline" title="Open variables list" active="{{_variablesOverlayOpened}}" toggles></paper-icon-button>
+                <variables-preview-overlay class="var-panel" position-target="[[_variablesButton]]" dynamic-align horizontal-align="auto" vertical-align="auto" vertical-offset="44" on-open-variables-editor="_variablesOpenRequest" on-iron-overlay-closed="_variablesPreviewClosed" opened="[[_variablesOverlayOpened]]"></variables-preview-overlay>
+              </div>
+            </template>
+          </app-toolbar>
+        </app-header>
+        <iron-pages class="mainPages" attr-for-selected="data-route" selected-attribute="opened" selected="[[page]]">
+          <arc-request-workspace data-route="request" id="workspace" draggable-enabled="[[config.draggableEnabled]]" oauth2-redirect-uri="[[_oauth2redirectUri]]" narrow="[[narrow]]"></arc-request-workspace>
+          <websocket-panel data-route="socket"></websocket-panel>
+          <history-panel data-route="history" list-type="[[config.viewListType]]"></history-panel>
+          <saved-requests-panel data-route="saved" list-type="[[config.viewListType]]"></saved-requests-panel>
+          <import-panel data-route="data-import" access-token="[[driveAccessToken]]"></import-panel>
+          <export-panel data-route="data-export"></export-panel>
+          <arc-settings-panel data-route="settings">
+            <arc-electron-experiment-settings popup-menu-experiment-enabled="{{popupMenuExperimentEnabled}}" data-title="Experiments"></arc-electron-experiment-settings>
+          </arc-settings-panel>
+          <about-arc-electron data-route="about" app-version="[[appVersion]]"></about-arc-electron>
+          <project-details data-route="project" id="projectDetails"></project-details>
+          <google-drive-browser data-route="drive" access-token="[[driveAccessToken]]" on-drive-file-picker-data="_openDriveRequest"></google-drive-browser>
+          <cookie-manager data-route="cookie-manager"></cookie-manager>
+          <apic-electron data-route="api-console" data-page="docs" aware="apic" id="apic" selected="[[apiSelected]]" selected-type="[[apiSelectedType]]" handle-navigation-events inline-methods narrow="[[narrow]]" redirect-uri="[[_oauth2redirectUri]]" scroll-target="[[_scrollTarget]]" saved="{{apiIsSaved}}" versions="{{apiVersions}}" api-version="{{apiVersion}}" can-save="{{canSaveApi}}" version-saved="{{apiVersionSaved}}" multi-version="{{apiMultiVersionVersion}}" api-processing="{{apiProcessing}}"></apic-electron>
+          <rest-apis-list-panel data-route="rest-projects" render-explore></rest-apis-list-panel>
+          <exchange-search-panel data-route="exchange-search" scroll-target="[[_scrollTarget]]" anypoint-auth columns="auto" exchange-redirect-uri="https://auth.advancedrestclient.com/oauth-popup.html" exchange-client-id="59KaqF90hLgZMJec" force-oauth-events></exchange-search-panel>
+          <host-rules-editor data-route="hosts-rules"></host-rules-editor>
+          <themes-panel data-route="themes-panel" add-enabled></themes-panel>
+        </iron-pages>
+      </app-header-layout>
+    </app-drawer-layout>
+    <iron-media-query query="(max-width: 700px)" query-matches="{{narrow}}"></iron-media-query>
+    <!-- Components loded lazily -->
+    <variables-drawer-editor id="environmentsDrawer" with-backdrop></variables-drawer-editor>
+    <!-- Google Analytics -->
+    <template is="dom-if" if="[[telemetry]]" restamp="true">
+      <app-analytics tracking-id="UA-18021184-6" app-name="ARC-electon" app-id="[[appId]]" app-version="[[appVersion]]" data-source="electron-app">
+        <template is="dom-repeat" items="[[gaCustomMetrics]]">
+          <app-analytics-custom type="metric" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+        </template>
+        <template is="dom-repeat" items="[[gaCustomDimensions]]">
+          <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+        </template>
+      </app-analytics>
+      <app-analytics tracking-id="UA-18021184-14" app-name="ARC-electon" app-id="[[appId]]" app-version="[[appVersion]]" data-source="electron-app">
+        <template is="dom-repeat" items="[[gaCustomMetrics]]">
+          <app-analytics-custom type="metric" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+        </template>
+        <template is="dom-repeat" items="[[gaCustomDimensions]]">
+          <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+        </template>
+      </app-analytics>
+      <app-analytics tracking-id="UA-71458341-2" app-name="ARC-electon" app-id="[[appId]]" app-version="[[appVersion]]" data-source="electron-app">
+        <template is="dom-repeat" items="[[gaCustomMetrics]]">
+          <app-analytics-custom type="metric" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+        </template>
+        <template is="dom-repeat" items="[[gaCustomDimensions]]">
+          <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+        </template>
+      </app-analytics>
+    </template>
+    <arc-license-dialog></arc-license-dialog>
+    <api-candidates-dialog></api-candidates-dialog>
+    <arc-onboarding></arc-onboarding>
+    <paper-toast id="errorToast" duration="5000"></paper-toast>
+  </template>
+  <script src="arc-chrome.js"></script>
+</dom-module>
