@@ -1,0 +1,102 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-dialog-behavior/paper-dialog-behavior.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<dom-module id="install-proxy-dialog">
+  <template>
+    <style>
+    :host {
+      display: block;
+      margin: 24px 40px;
+      -webkit-overflow-scrolling: touch;
+      background: var(--paper-dialog-background-color, #fff);
+      color: var(--paper-dialog-color, --primary-text-color);
+      @apply --arc-font-body1;
+      @apply --shadow-elevation-16dp;
+      @apply --paper-dialog;
+      @apply --install-proxy-dialog;
+    }
+
+    .action-button-container {
+      @apply --layout-vertical;
+      @apply --layout-center-center;
+    }
+
+    .inherit {
+      color: inherit !important;
+      background-color: inherit !important;
+      text-decoration: none;
+    }
+
+    .dialog>* {
+      margin-top: 20px;
+      padding: 0 24px;
+      @apply --arc-font-body1;
+    }
+
+    .dialog>*:first-child {
+      margin-top: 24px;
+    }
+
+    .dialog>*:last-child {
+      margin-bottom: 24px;
+    }
+
+    .dialog>h2 {
+      position: relative;
+      margin: 0;
+      @apply --arc-font-title;
+      @apply --paper-dialog-title;
+    }
+
+    .dialog>.buttons {
+      position: relative;
+      padding: 8px 8px 8px 24px;
+      margin: 0;
+      margin-bottom: 24px;
+      color: var(--paper-dialog-button-color, --primary-color);
+      @apply --layout-horizontal;
+      @apply --layout-end-justified;
+    }
+
+    paper-button {
+      @apply --action-button;
+    }
+
+    paper-button:hover {
+      @apply --action-button-hover;
+    }
+    </style>
+    <div class="dialog">
+      <h2>ARC proxy extension</h2>
+      <div>
+        <p>ARC proxy extension will help you in some cases where the app can't handle requests properly:</p>
+        <ul>
+          <li><b>Certificates errors</b> - app can't connect to the endpoint with invalid certificate</li>
+          <li><b>Cookies</b> - network session is separated from the Chrome and cookies can't be read by the app</li>
+        </ul>
+        <p>
+          After installing the extension the app will get access to the cookies
+          stored by Chrome. Also the app will be able to make XHR connection
+          from Chrome so it will be possible to make a connection to invalid
+          certificates (you must accept the certificate in a Chrome tab).
+        </p>
+        <p>However, you will:</p>
+        <ul>
+          <li>Not be able to set or read some headers (like Cookie, Referrer)</li>
+          <li>Do not have control over headers set by the browser (Referrer, User-Agent, etc)</li>
+          <li>Lose information about request timings</li>
+          <li>Lose information about redirects</li>
+        </ul>
+        <div class="action-button-container">
+          <a class="inherit" href="[[extensionUrl]]" target="_blank">
+            <paper-button raised on-click="_buttonTap">Install ARC proxy extension</paper-button>
+          </a>
+        </div>
+      </div>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Close</paper-button>
+      </div>
+    </div>
+  </template>
+  <script src="install-proxy-dialog.js"></script>
+</dom-module>
