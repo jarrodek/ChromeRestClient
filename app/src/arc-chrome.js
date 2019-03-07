@@ -422,8 +422,8 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
     }));
   }
 
-  _proxyConnectedChanged(value) {
-    this.hasProxyInstalled = value;
+  _proxyConnectedChanged(e) {
+    this.hasProxyInstalled = e.detail.value;
   }
 
   registerProxyMessageHandler(handler) {
