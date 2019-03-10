@@ -1,12 +1,66 @@
-<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/arc-settings-panel-mixin/arc-settings-panel-mixin.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../../bower_components/arc-icons/arc-icons.html">
+<link rel="import" href="../../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
 
 <dom-module id="about-arc-chrome">
   <template>
     <style>
     :host {
       display: block;
+      @apply --arc-font-body1;
+      @apply --about-arc;
     }
+    h1 {
+      @apply --arc-font-display1;
+      @apply --about-arc-title;
+    }
+    .title-section {
+      @apply --layout-vertical;
+      @apply --layout-center-center;
+      @apply --about-arc-title-containe;
+    }
+    .hero {
+      @apply --layout-horizontal;
+      @apply --layout-center;
+    }
+    .logo-container {
+      @apply --about-arc-logo-container;
+    }
+    .logo {
+      width: 128px;
+      height: 128px;
+      @apply --about-arc-logo-image;
+    }
+    .app-title {
+      margin-left: 24px;
+      @apply --about-arc-title-container;
+    }
+    .version-meta {
+      @apply --layout-horizontal;
+      @apply --layout-center;
+      @apply --arc-font-body2;
+      font-size: 18px;
+      color: var(--about-arc-version-label-color, rgba(0, 0, 0, 0.74));
+      @apply --about-arc-version-container;
+    }
+    .version {
+      margin-right: 12px;
+      display: inline-block;
+      padding-right: 12px;
+      border-right: 1px var(--about-arc-version-section-border-right-color, rgba(0, 0, 0, 0.14)) solid;
+      @apply --about-arc-version-label;
+    }
+
     .padding-section {
       @apply --section-padding;
       padding-right: 24px;
@@ -62,31 +116,61 @@
       color: #F57C00;
     }
     </style>
-    <section class="about-section padding-section">
-      <div class="about-row">
-        <span class="versionField"><span>Application version: </span><span id="appVersion">{{appVersion}}</span></span>
+    <section class="title-section">
+      <div class="hero">
+        <div class="logo-container">
+          <iron-icon class="logo" icon="arc:arc-icon-arrows"></iron-icon>
+        </div>
+        <div class="app-title">
+          <h1>Advanced REST Client for Google Chrome</h1>
+        </div>
       </div>
-      <div class="about-row">
-        Copyright © 2012 Paweł Psztyć (Poland || USA)
-      </div>
-      <div class="about-row">
-        Source code at
-        <a href="https://github.com/jarrodek/ChromeRestClient" target="_blank">GitHub</a> under Apache License (for open source projects) or CC-BY-4.0 (for not open source or commercial projects).
-      </div>
-      <div class="about-row">
-        Report issues at
-        <a target="_blank" href="https://github.com/jarrodek/ChromeRestClient/issues?utm_source=ARC&amp;utm_medium=InsideApplication&amp;utm_campaign=About">app issue list</a> (thanks!).
-      </div>
-      <div class="about-row">
-        More information about the app on <a target="_blank" href="http://restforchrome.blogspot.com/?utm_source=ARC&amp;utm_medium=InsideApplication&amp;utm_campaign=About">ARC's Blog</a>
-      </div>
-      <div class="about-row">
+
+      <div class="version-meta">
+        <p class="version">Version: [[appVersion]]</p>
+
         <paper-button raised="true" on-tap="showLicensing">Licensing information</paper-button>
       </div>
     </section>
-    <section class="about-section padding-section">
+
+    <section class="author-line">
+      <p>Coded by Pawel Psztyc</p>
+      <div class="branding">
+        With great support of MuleSoft, a Salesforce company.
+      </div>
+    </section>
+
+    <section class="changelog">
       <h2>Changelog</h2>
       <div class="changelog">
+        <p class="paper-font-title">Version 11.0.0</p>
+        <ul class="paper-font-body1">
+          <li><iron-icon icon="arc:new-releases"></iron-icon> Reinitializing project for Google Chrome as a separate application to Desktop Client. It is still recommended to use Desktop client for more features.</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon> Redesigned workspace experience: workspace and tabs!</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon> Experiment settings: Enable drag and drop to move requests between history/saved/project/workspace</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon> Adding cookie manager</li>
+          <li><iron-icon icon="arc:new-releases"></iron-icon> Adding hosts editor (OS-like hosts definitions)</li>
+          <li>Upgraded components to Polymer 2.0; Components now use Web Components specification v1.</li>
+          <li>Redesigned navigation: Default screen is now workspace screen; other screens are sub-pages; Deprecating "Saved" and added message to the menu; Navigation lists now comes with 3 size settings: default, comfortable, and compact (sounds like Gmail to you?). Change it in Settings &gt; View.</li>
+          <li>New settings panel</li>
+          <li>Variables are now part of the application main toolbar instead of a request</li>
+          <li>Redesign of data models</li>
+          <li>Redesign of import / export logic. Now export also includes internal entity ID that will be restored when importing back to the application. Conflicts are resolved to new accept incoming data.</li>
+          <li>Projects now can be opened to the workspace with option to replace workspace requests with project requests</li>
+          <li>Removed headers sets - sorry, almost no one was using it</li>
+          <li>Added code examples to the request options</li>
+          <li>Request now can be saved in more than one project</li>
+          <li>Redesigned "save" dialogs and added request details dialog with stored metadata</li>
+          <li>When restoring workspace state latest response is also restored</li>
+          <li>Added global setting to set OAuth2 redirect URI. This value is used when requesting OAuth2 token. The redirect page do not need to do anything but has to exist (valid URL).</li>
+          <li>New export to Drive flow - now it includes choosing directories where to put the file</li>
+          <li>Drawer cannot be resized anymore</li>
+          <li>Added authorization options in request editor</li>
+          <li>Web Sockets panel is not a sub page accessible via "more" menu (top left hand side of the app)</li>
+          <li>Chrome proxy extension is now a global option instead of request's</li>
+          <li>Added request detail dialog in the request context options</li>
+          <li>Added option to export request to a file/Google drive from request editor view</li>
+        </ul>
         <p class="paper-font-title">Version 10.0.12</p>
         <ul class="paper-font-body1">
           <li>Fixed issue <a href="https://github.com/jarrodek/ChromeRestClient/issues/1109" target="_blank">#1109</a>: Always show "Unable to save current request. unknown" while saving "multipart/form-data"</li>
