@@ -133,7 +133,8 @@ export class SocketTransport {
     this._processResponse(e.detail);
   }
 
-  _errorHandler(cause, id, request, response) {
+  _errorHandler(e) {
+    let {error, id, request, response} = e.detail;
     debugger;
     this._removeConnectionHandlers();
     if (this.connection.aborted) {
@@ -144,8 +145,156 @@ export class SocketTransport {
     }
     const data = Object.assign({}, response, {
       isError: true,
-      error: cause
+      error
     });
     this._processResponse(id, data, request);
+  }
+
+  _processResponse(data) {
+    const {id, request, response} = data;
+    const {sentHttpMessage, stats, error, redirects, auth} = response;
+    const detail = {
+      isXhr: false,
+      request
+    };
+    const redirectsInfo = this._processRedirects(redirects);
+    if (redirectsInfo.timings.length) {
+      detail.redirectsTiming = redirectsInfo.timings;
+      detail.redirects = redirectsInfo.redirects;
+    }
+    if (error && typeof error !== 'function') {
+      detail.isError = true;
+      detail.error = error;
+    } else {
+      const statsInfo = this._cleanTimings(stats);
+      detail.isError = false;
+      detail.response = response;
+      detail.sentHttpMessage = sentHttpMessage;
+      detail.loadingTime = this._computeLoadingTime(statsInfo);
+      detail.timing = statsInfo;
+      detail.auth = auth;
+      delete detail.response.sentHttpMessage;
+      delete detail.request.sentHttpMessage;
+    }
+    detail.id = id;
+    this._beforeResponse(detail);
+  }
+  /**
+   * Processes redirects data from the socket library.
+   * @param {Set} set A set of redirects
+   * @return {Object} Map of arrays of timings and redirects information.
+   */
+  _processRedirects(set) {
+    const result = {
+      timings: [],
+      redirects: []
+    };
+    if (!set) {
+      return result;
+    }
+    set.forEach((item) => {
+      result.redirects.push(item);
+      result.timings.push(item.stats);
+      delete item.stats;
+    });
+    return result;
+  }
+  /**
+   * Computes a request / response loading time from the stats object
+   * @param {Objject} stats A stats property of the socket client response.
+   * @return {Number} A time to full response in miliseconds. 0 if stats unavailable.
+   */
+  _computeLoadingTime(stats) {
+    if (!stats) {
+      return 0;
+    }
+    let value = 0;
+    if (stats.dns && stats.dns > 0) {
+      value += stats.dns;
+    }
+    if (stats.connect && stats.connect > 0) {
+      value += stats.connect;
+    }
+    if (stats.receive && stats.receive > 0) {
+      value += stats.receive;
+    }
+    if (stats.send && stats.send > 0) {
+      value += stats.send;
+    }
+    if (stats.ssl && stats.ssl > 0) {
+      value += stats.ssl;
+    }
+    if (stats.wait && stats.wait > 0) {
+      value += stats.wait;
+    }
+    return value;
+  }
+  /**
+   * Creates HAR 1.2 object from timing data
+   * @param {Object} stats
+   * @return {Object}
+   */
+  _cleanTimings(stats) {
+    const result = {
+      dns: stats.dns || -1,
+      connect: stats.connect || -1,
+      receive: stats.receive || -1,
+      send: stats.send || -1,
+      ssl: stats.ssl || -1,
+      wait: stats.wait || -1
+    };
+    return result;
+  }
+  /**
+   * Dispatches `response-ready` event with request data.
+   * If the event is not caneled then it dispatches `report-response`
+   * event.
+   *
+   * @param {Object} detail The request detail
+   */
+  _beforeResponse(detail) {
+    const e = new CustomEvent('response-ready', {
+      composed: true,
+      bubbles: true,
+      cancelable: true,
+      detail
+    });
+    document.body.dispatchEvent(e);
+    if (e.defaultPrevented) {
+      return;
+    }
+    this._reportResponse(e.detail);
+  }
+  /**
+   * Fires the `report-response` custom event with immutable response data.
+   * @param {Object} detail The event detail object.
+   */
+  _reportResponse(detail) {
+    detail = this._prepareTransportObject(detail);
+    const e = new CustomEvent('report-response', {
+      composed: true,
+      bubbles: true,
+      cancelable: false,
+      detail
+    });
+    document.body.dispatchEvent(e);
+  }
+
+  /**
+   * Creates an immutable `detail` object for the `report-response` custom
+   * event.
+   * @param {Object} detail
+   * @return {Object} Immutable object.
+   */
+  _prepareTransportObject(detail) {
+    const configuration = {};
+    Object.keys(detail).forEach((key) => {
+      configuration[key] = {
+        value: detail[key],
+        writable: false,
+        enumerable: true
+      };
+    });
+    return Object.create(Object.prototype, configuration);
   }
 }

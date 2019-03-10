@@ -137,7 +137,7 @@ export class RequestBase extends EventTarget {
   /**
    * Decompresses received body if `content-encoding` header is set.
    *
-   * @param {Buffer} body A body buffer to decompress.
+   * @param {Uint8Array} body A body buffer to decompress.
    * @return {Promise} Promise resilved to parsed body
    */
   _decompress(body) {
@@ -166,33 +166,18 @@ export class RequestBase extends EventTarget {
    * @return {Promise} Promise resolved to decompressed buffer.
    */
   _inflate(body) {
-    body = Buffer.from(body);
-    return new Promise((resolve, reject) => {
-      zlib.inflate(body, (err, buffer) => {
-        if (err) {
-          reject(new Error(err.message || err));
-        } else {
-          resolve(buffer);
-        }
-      });
-    });
+    /* global Zlib */
+    const inflate = new Zlib.Inflate(body);
+    return Promise.resolve(inflate.decompress());
   }
   /**
    * Decompress body with ZLib.
-   * @param {Buffer} body Received response payload
+   * @param {Uint8Array} body Received response payload
    * @return {Promise} Promise resolved to decompressed buffer.
    */
   _gunzip(body) {
-    body = Buffer.from(body);
-    return new Promise((resolve, reject) => {
-      zlib.gunzip(body, (err, buffer) => {
-        if (err) {
-          reject(new Error(err.message || err));
-        } else {
-          resolve(buffer);
-        }
-      });
-    });
+    const inflate = new Zlib.Gunzip(body);
+    return Promise.resolve(inflate.decompress());
   }
   /**
    * Decompress Brotli.
@@ -200,9 +185,8 @@ export class RequestBase extends EventTarget {
    * @return {Promise} Promise resolved to decompressed buffer.
    */
   _brotli(body) {
-    body = Buffer.from(body);
-    const {decompress: decompressBrotli} = require('iltorb');
-    return decompressBrotli(body);
+    /* global BrotliDecompress */
+    return Promise.resolve(BrotliDecompress(body));
   }
   /**
    * Reports response when redirected.
