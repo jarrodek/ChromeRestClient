@@ -435,6 +435,12 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
       this._proxyMessageHandler(e);
     }
   }
+
+  _navMenuSelect(e) {
+    const {page} = e.detail.item.dataset;
+    this.page = page;
+    e.target.selected = undefined;
+  }
 }
 
 window.customElements.define('arc-chrome', ArcChrome);

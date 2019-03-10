@@ -227,7 +227,7 @@
     <arc-data-export app-version="[[appVersion]]" electron-cookies></arc-data-export>
     <arc-data-import></arc-data-import>
     <!-- Request logic -->
-    <arc-request-logic variables-disabled="[[!config.appVariablesEnabled]]"></arc-request-logic>
+    <arc-request-logic variables-disabled="[[_computeVarDisabled(config.appVariablesEnabled)]]"></arc-request-logic>
     <request-hooks-logic></request-hooks-logic>
     <template is="dom-if" if="[[historyEnabled]]" restamp="true">
       <response-history-saver></response-history-saver>
@@ -264,6 +264,19 @@
               <paper-icon-button class="var-info-button" id="varToggleButton" icon="arc:info-outline" title="Open variables list" active="{{_variablesOverlayOpened}}" toggles></paper-icon-button>
               <variables-preview-overlay class="var-panel" position-target="[[_variablesButton]]" dynamic-align horizontal-align="auto" vertical-align="auto" vertical-offset="44" on-open-variables-editor="_variablesOpenRequest" on-iron-overlay-closed="_variablesPreviewClosed" opened="[[_variablesOverlayOpened]]"></variables-preview-overlay>
             </div>
+
+            <paper-menu-button dynamic-align>
+              <paper-icon-button icon="arc:more-vert" slot="dropdown-trigger"></paper-icon-button>
+              <paper-listbox slot="dropdown-content" on-iron-select="_navMenuSelect">
+                <paper-item data-page="socket">Web socket</paper-item>
+                <paper-item data-page="data-import">Data import</paper-item>
+                <paper-item data-page="data-export">Data export</paper-item>
+                <paper-item data-page="host-rules">Host rules</paper-item>
+                <paper-item data-page="cookie-manager">Cookies manager</paper-item>
+                <paper-item data-page="settings">Settings</paper-item>
+                <paper-item data-page="about">About</paper-item>
+              </paper-listbox>
+            </paper-menu-button>
           </app-toolbar>
         </app-header>
         <iron-pages class="mainPages" attr-for-selected="data-route" selected-attribute="opened" selected="[[page]]">
