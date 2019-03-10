@@ -61,6 +61,9 @@
 <link rel="import" href="../bower_components/bottom-sheet/bottom-sheet.html">
 <link rel="import" href="../bower_components/http-code-snippets/http-code-snippets.html">
 <link rel="import" href="../elements/chrome-connect/chrome-connect.html">
+<link rel="import" href="../elements/chrome-signin/chrome-signin.html">
+<link rel="import" href="../elements/chrome-not-signedin-view/chrome-not-signedin-view.html">
+
 <dom-module id="arc-chrome">
   <template>
     <style>
@@ -271,6 +274,7 @@
                 <paper-item data-page="socket">Web socket</paper-item>
                 <paper-item data-page="data-import">Data import</paper-item>
                 <paper-item data-page="data-export">Data export</paper-item>
+                <paper-item data-page="drive">Open from Google Drive</paper-item>
                 <paper-item data-page="host-rules">Host rules</paper-item>
                 <paper-item data-page="cookie-manager">Cookies manager</paper-item>
                 <paper-item data-page="settings">Settings</paper-item>
@@ -333,6 +337,13 @@
     <arc-onboarding></arc-onboarding>
     <install-proxy-dialog></install-proxy-dialog>
     <chrome-connect extension-id="apcedakaoficjlofohhcmkkljehnmebp" on-message="_onProxyMessage" on-connected-changed="_proxyConnectedChanged"></chrome-connect>
+    <chrome-signin-aware
+      id="signInAware"
+      is-authorized="{{appAuthorized}}"
+      signed-in="{{chromeSignedIn}}"
+      access-token="{{driveAccessToken}}"
+      on-chrome-signin-aware-success="_chromeSignin"
+      on-chrome-signin-aware-signed-out="_chromeSignout"></chrome-signin-aware>
     <paper-toast id="errorToast" duration="5000"></paper-toast>
   </template>
   <script src="arc-chrome.js"></script>

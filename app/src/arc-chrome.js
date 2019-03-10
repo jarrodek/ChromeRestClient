@@ -85,7 +85,16 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
       /**
        * Google Analytics client ID parameter.
        */
-      gaCid: String
+      gaCid: String,
+      /**
+       * True if the user is signed into Chrome.
+       * Some features are not available when user is not signed in.
+       */
+      chromeSignedIn: Boolean,
+      /**
+       * Google access token for Drive.
+       */
+      driveAccessToken: String
     };
   }
 
@@ -106,6 +115,7 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
     // this._processErrorHandler = this._processErrorHandler.bind(this);
     // this._exchangeAssetHandler = this._exchangeAssetHandler.bind(this);
     this.openWorkspace = this.openWorkspace.bind(this);
+    this._googleAuthRequest = this._googleAuthRequest.bind(this);
   }
 
   connectedCallback() {
@@ -119,11 +129,13 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
     // this.addEventListener('process-exchange-asset-data', this._exchangeAssetHandler);
     this.addEventListener('request-workspace-append', this.openWorkspace);
     window.addEventListener('workspace-open-project-requests', this.openWorkspace);
+    window.addEventListener('google-autorize', this._googleAuthRequest);
     Polymer.RenderStatus.afterNextRender(this, () => {
       this._variablesButton = this.shadowRoot.querySelector('#varToggleButton');
       this._scrollTarget = this.$.scrollingRegion.$.contentContainer;
     });
   }
+
   _routeDataChanged(page, changeRecord) {
     const params = changeRecord.base;
     switch (page) {
@@ -207,7 +219,7 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
   initApplication() {
     Polymer.RenderStatus.afterNextRender(this, () => this.initSettings({}));
     Polymer.RenderStatus.afterNextRender(this, () => this.updateStyles({}));
-    // Polymer.RenderStatus.afterNextRender(this, () => this._requestAuthToken(false));
+    Polymer.RenderStatus.afterNextRender(this, () => this._requestAuthToken(false));
     const hash = location.hash.substr(1);
     if (hash) {
       this.page = hash;
@@ -501,6 +513,96 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
     Polymer.RenderStatus.afterNextRender(this, () => {
       this._telemetryScreen();
     });
+  }
+
+  _chromeSignin(e) {
+    this.dispatchEvent(new CustomEvent('google-signin-success', {
+      bubbles: true,
+      composed: true,
+      detail: {
+        scope: e.target.scope,
+        token: e.detail.token
+      }
+    }));
+  }
+
+  _chromeSignout(e) {
+    this.dispatchEvent(new CustomEvent('google-signout', {
+      bubbles: true,
+      composed: true,
+      detail: {
+        scope: e.target.scope
+      }
+    }));
+  }
+
+  openChromeSigninInfo() {
+    let node = document.querySelector('chrome-not-signedin-view');
+    if (!node) {
+      node = document.createElement('chrome-not-signedin-view');
+      document.body.appendChild(node);
+    }
+    node.opened = true;
+  }
+
+  _googleAuthRequest(e) {
+    const aware = this.$.signInAware;
+    const scope = e.detail.scope;
+    if (!aware.signedIn) {
+      this.dispatchEvent(new CustomEvent('google-signout', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          scope
+        }
+      }));
+      this.openChromeSigninInfo();
+      return;
+    }
+    aware.scope = scope;
+    if (aware.needAdditionalAuth) {
+      aware.signIn();
+    } else {
+      this.dispatchEvent(new CustomEvent('google-signin-success', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          scope,
+          token: aware.accessToken
+        }
+      }));
+    }
+  }
+
+  _requestAuthToken(interactive, scope) {
+    const aware = this.$.signInAware;
+    if (interactive) {
+      if (!aware.signedIn) {
+        this.dispatchEvent(new CustomEvent('google-signout', {
+          bubbles: true,
+          composed: true,
+          detail: {
+            scope
+          }
+        }));
+        this.openChromeSigninInfo();
+        return;
+      }
+    }
+    aware.signIn(interactive);
+  }
+
+  _openDriveRequest(e) {
+    const file = new Blob([e.detail.content], {type: 'application/json'});
+    this.dispatchEvent(new CustomEvent('import-process-file', {
+      bubbles: true,
+      composed: true,
+      cancelable: true,
+      detail: {
+        file,
+        diveId: e.detail.diveId
+      }
+    }));
   }
 }
 
