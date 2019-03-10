@@ -302,8 +302,8 @@
     <!-- Components loded lazily -->
     <variables-drawer-editor id="environmentsDrawer" with-backdrop></variables-drawer-editor>
     <!-- Google Analytics -->
-    <template is="dom-if" if="[[telemetry]]" restamp="true">
-      <app-analytics tracking-id="UA-18021184-6" app-name="ARC-electon" app-id="[[appId]]" app-version="[[appVersion]]" data-source="electron-app">
+    <template is="dom-if" if="[[gaCid]]" restamp="true">
+      <app-analytics tracking-id="UA-18021184-6" app-name="ARC-electon" app-id="[[appId]]" app-version="[[appVersion]]" data-source="electron-app" client-id="[[gaCid]]">
         <template is="dom-repeat" items="[[gaCustomMetrics]]">
           <app-analytics-custom type="metric" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
         </template>
@@ -311,7 +311,7 @@
           <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
         </template>
       </app-analytics>
-      <app-analytics tracking-id="UA-18021184-14" app-name="ARC-electon" app-id="[[appId]]" app-version="[[appVersion]]" data-source="electron-app">
+      <app-analytics tracking-id="UA-18021184-14" app-name="ARC-electon" app-id="[[appId]]" app-version="[[appVersion]]" data-source="electron-app" client-id="[[gaCid]]">
         <template is="dom-repeat" items="[[gaCustomMetrics]]">
           <app-analytics-custom type="metric" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
         </template>
@@ -319,7 +319,7 @@
           <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
         </template>
       </app-analytics>
-      <app-analytics tracking-id="UA-71458341-2" app-name="ARC-electon" app-id="[[appId]]" app-version="[[appVersion]]" data-source="electron-app">
+      <app-analytics tracking-id="UA-71458341-2" app-name="ARC-electon" app-id="[[appId]]" app-version="[[appVersion]]" data-source="electron-app" client-id="[[gaCid]]">
         <template is="dom-repeat" items="[[gaCustomMetrics]]">
           <app-analytics-custom type="metric" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
         </template>

@@ -81,13 +81,18 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
       proxyEnabled: {
         type: Boolean,
         observer: '_proxyChanged'
-      }
+      },
+      /**
+       * Google Analytics client ID parameter.
+       */
+      gaCid: String
     };
   }
 
   static get observers() {
     return [
-      '_routeDataChanged(page, routeParams.*)'
+      '_routeDataChanged(page, routeParams.*)',
+      '_telemetryChanged(telemetry)'
     ];
   }
 
@@ -440,6 +445,62 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
     const {page} = e.detail.item.dataset;
     this.page = page;
     e.target.selected = undefined;
+  }
+
+  _telemetryChanged(telemetry) {
+    if (!telemetry) {
+      return;
+    }
+    this._restoreGa();
+  }
+
+  _restoreGa() {
+    return this._restoreGaChrome()
+    .then((data) => {
+      if (!data['ga.cid']) {
+        return this._restoreGaIdb();
+      }
+      return {
+        cid: data['ga.cid']
+      };
+    })
+    .then((data) => {
+      if (!data || !data.cid) {
+        this._generateGaCid();
+      } else {
+        this.gaCid = data.cid;
+        Polymer.RenderStatus.afterNextRender(this, () => {
+          this._telemetryScreen();
+        });
+      }
+    });
+  }
+
+  _restoreGaChrome() {
+    return new Promise((resolve) => {
+      chrome.storage.sync.get('ga.cid', (r) => resolve(r));
+    });
+  }
+
+  _restoreGaIdb() {
+    return new Promise((resolve) => {
+      const db = new PouchDB('analytics-meta');
+      db.get('metadata').then((r) => resolve(r))
+      .catch(() => resolve());
+    });
+  }
+
+  _generateGaCid() {
+    const gen = document.createElement('uuid-generator');
+    const cid = gen.generate();
+    const storeObj = {
+      'ga.cid': cid
+    };
+    chrome.storage.sync.set(storeObj, () => {});
+    this.gaCid = cid;
+    Polymer.RenderStatus.afterNextRender(this, () => {
+      this._telemetryScreen();
+    });
   }
 }
 
