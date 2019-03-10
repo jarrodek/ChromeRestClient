@@ -12,7 +12,8 @@ const babel = require('@babel/core');
 class ArcChromePrepare {
   run() {
     return this.copyZlib()
-    .then(() => this.copyBrotli());
+    .then(() => this.copyBrotli())
+    .then(() => this.copyJexl());
   }
   /**
    * Coppies z-lib library to the application folder.
@@ -86,6 +87,19 @@ class ArcChromePrepare {
     return new Promise((resolve, reject) => {
       stream.on('end', resolve);
       stream.on('error', reject);
+    });
+  }
+
+  copyJexl() {
+    const file = path.join('tasks', 'jexl-import.js');
+    const dir = path.join('app', 'scripts', 'libs', 'jexl');
+    return fs.emptyDir(dir)
+    .then(() => this.nodeToBrowser(file))
+    .then((code) => this.babelify(code))
+    .then((content) => this.uglyContent(content))
+    .then((content) => {
+      const dest = path.join(dir, 'jexl.min.js');
+      return fs.writeFile(dest, content, 'utf8');
     });
   }
 }
