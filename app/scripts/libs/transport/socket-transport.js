@@ -16,10 +16,14 @@ export class SocketTransport {
   }
 
   run(appConfig, hosts) {
-    const opts = this._prepareRequestOptions(appConfig, hosts);
-    const connection = this._prepareRequest(opts);
-    return connection.send()
-    .catch((cause) => this._errorHandler(cause));
+    try {
+      const opts = this._prepareRequestOptions(appConfig, hosts);
+      const connection = this._prepareRequest(opts);
+      return connection.send()
+      .catch((cause) => this._onError(cause));
+    } catch (e) {
+      this._onError(e);
+    }
   }
 
   _prepareRequestOptions(opts, hosts) {
@@ -133,9 +137,21 @@ export class SocketTransport {
     this._processResponse(e.detail);
   }
 
+  _onError(error) {
+    const data = {
+      id: this.requestId,
+      request: this.request,
+      response: {
+        isError: true,
+        error,
+      }
+    };
+    this._processResponse(data);
+  }
+
   _errorHandler(e) {
-    let {error, id, request, response} = e.detail;
-    debugger;
+    let {id, request, response} = e.detail;
+    const {error} = response;
     this._removeConnectionHandlers();
     if (this.connection.aborted) {
       return;
@@ -143,11 +159,16 @@ export class SocketTransport {
     if (!response) {
       response = {};
     }
-    const data = Object.assign({}, response, {
+    response = Object.assign({}, response, {
       isError: true,
       error
     });
-    this._processResponse(id, data, request);
+    const data = {
+      id,
+      request,
+      response
+    };
+    this._processResponse(data);
   }
 
   _processResponse(data) {
