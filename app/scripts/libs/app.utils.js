@@ -40,48 +40,48 @@ arc.app.utils._chromeVersion = null;
  *
  * @type {String} A full version or `(not set)` is can't find.
  */
-Object.defineProperty(arc.app.utils, 'chromeVersion', {
-  enumerable: true,
-
-  get: function() {
-    if (arc.app.utils._chromeVersion) {
-      return arc.app.utils._chromeVersion;
-    }
-    var raw = navigator.userAgent.match(/Chrom[e|ium]\/([0-9\.]+)/);
-    arc.app.utils._chromeVersion = raw ? raw[1] : '(not set)';
-    return arc.app.utils._chromeVersion;
-  },
-
-  set: function() {
-    throw new Error('appVer can\'t be overrited.');
-  }
-});
-arc.app.utils._appVer = null;
+// Object.defineProperty(arc.app.utils, 'chromeVersion', {
+//   enumerable: true,
+//
+//   get: function() {
+//     if (arc.app.utils._chromeVersion) {
+//       return arc.app.utils._chromeVersion;
+//     }
+//     var raw = navigator.userAgent.match(/Chrom[e|ium]\/([0-9\.]+)/);
+//     arc.app.utils._chromeVersion = raw ? raw[1] : '(not set)';
+//     return arc.app.utils._chromeVersion;
+//   },
+//
+//   set: function() {
+//     throw new Error('appVer can\'t be overrited.');
+//   }
+// });
+// arc.app.utils._appVer = null;
 /**
  * Get ARC version from the manifest file.
  *
  * @type {String} An ARC version.
  */
-Object.defineProperty(arc.app.utils, 'appVer', {
-  enumerable: true,
-
-  get: function() {
-    if (arc.app.utils._appVer) {
-      return arc.app.utils._appVer;
-    }
-    if (!chrome || !chrome.runtime || !chrome.runtime.getManifest) {
-      //testing
-      arc.app.utils._appVer = 'app-test';
-    } else {
-      arc.app.utils._appVer = chrome.runtime.getManifest().version;
-    }
-    return arc.app.utils._appVer;
-  },
-
-  set: function() {
-    throw new Error('appVer can\'t be overrited.');
-  }
-});
+// Object.defineProperty(arc.app.utils, 'appVer', {
+//   enumerable: true,
+//
+//   get: function() {
+//     if (arc.app.utils._appVer) {
+//       return arc.app.utils._appVer;
+//     }
+//     if (!chrome || !chrome.runtime || !chrome.runtime.getManifest) {
+//       //testing
+//       arc.app.utils._appVer = 'app-test';
+//     } else {
+//       arc.app.utils._appVer = chrome.runtime.getManifest().version;
+//     }
+//     return arc.app.utils._appVer;
+//   },
+//
+//   set: function() {
+//     throw new Error('appVer can\'t be overrited.');
+//   }
+// });
 arc.app.utils._releaseChannel = null;
 /**
  * Get release channel name.

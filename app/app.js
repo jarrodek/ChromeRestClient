@@ -108,14 +108,38 @@ class ArcInit {
   /**
    * Sets up the application properties.
    *
-   * @param {ArcElectron} app App electron element.
+   * @param {ArcChrome} app App Chrome element.
    */
   _setupApp(app) {
     // console.info('Initializing ARC app');
     // app.componentsDir = this.initConfig.appComponents;
-    // app.appVersion = versionInfo.appVersion;
-    // app.browserVersion = versionInfo.chrome;
+    /* global chrome */
+    app.appVersion = chrome.runtime.getManifest().version;
+    app.appId = chrome.runtime.id;
+    app.browserVersion = this.getChromeVersion();
+    app.appChannel = this.getReleaseChannel();
     app.initApplication();
+  }
+
+  getChromeVersion() {
+    const raw = navigator.userAgent.match(/Chrom[e|ium]\/([0-9\.]+)/);
+    return raw ? raw[1] : '(not set)';
+  }
+
+  getReleaseChannel() {
+    const manifest = chrome.runtime.getManifest();
+    const manifestName = manifest.version_name;
+    let release;
+    if (manifestName.indexOf('beta') !== -1) {
+      release = 'beta';
+    } else if (manifestName.indexOf('dev') !== -1) {
+      release = 'dev';
+    } else if (manifestName.indexOf('canary') !== -1) {
+      release = 'canary';
+    } else {
+      release = 'stable';
+    }
+    return release;
   }
   /**
    * Reports fatal application error.

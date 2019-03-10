@@ -1,5 +1,5 @@
 /**
- * Main component for ARC electron app.
+ * Main component for ARC Chrome app.
  *
  * @appliesMixin ArcComponents.ArcAppMixin
  */
@@ -116,6 +116,7 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
     // this._exchangeAssetHandler = this._exchangeAssetHandler.bind(this);
     this.openWorkspace = this.openWorkspace.bind(this);
     this._googleAuthRequest = this._googleAuthRequest.bind(this);
+    this.openLicense = this.openLicense.bind(this);
   }
 
   connectedCallback() {
@@ -130,6 +131,7 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
     this.addEventListener('request-workspace-append', this.openWorkspace);
     window.addEventListener('workspace-open-project-requests', this.openWorkspace);
     window.addEventListener('google-autorize', this._googleAuthRequest);
+    window.addEventListener('display-license', this.openLicense);
     Polymer.RenderStatus.afterNextRender(this, () => {
       this._variablesButton = this.shadowRoot.querySelector('#varToggleButton');
       this._scrollTarget = this.$.scrollingRegion.$.contentContainer;
@@ -155,6 +157,7 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
   _pageChanged(page) {
     let id;
     let path;
+    let isLocal;
     switch (page) {
       case 'request':
         id = 'arc-request-workspace';
@@ -177,8 +180,8 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
         path = 'arc-settings-panel/arc-settings-panel';
         break;
       case 'about':
-        id = 'about-arc-electron';
-        path = 'about-arc-electron/about-arc-electron';
+        isLocal = true;
+        id = 'about-arc-chrome';
         break;
       case 'socket':
         id = 'websocket-panel';
@@ -212,8 +215,13 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
     if (cls) {
       return;
     }
-    this._loadComponent(path)
-    .catch((cmp) => this._reportComponentLoadingError(cmp));
+    let p;
+    if (isLocal) {
+      p = this._loadLocalComponent(id);
+    } else {
+      p = this._loadComponent(path);
+    }
+    p.catch((cmp) => this._reportComponentLoadingError(cmp));
   }
 
   initApplication() {
@@ -232,14 +240,14 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
     }
     const {id, type} = params;
     if (!type || !this.$.workspace.addEmptyRequest) {
-      this.log.info('arc-electron(app)::_setupRequest::Missing use case implementation?');
+      this.log.info('arc-chrome(app)::_setupRequest::Missing use case implementation?');
       return;
     }
     if (!type || type === 'new') {
       if (this.$.workspace.addEmptyRequest) {
         this.$.workspace.addEmptyRequest();
       } else {
-        this.log.info('arc-electron(app)::_setupRequest::Missing use case implementation?');
+        this.log.info('arc-chrome(app)::_setupRequest::Missing use case implementation?');
       }
       return;
     }
@@ -603,6 +611,18 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
         diveId: e.detail.diveId
       }
     }));
+  }
+
+  /**
+   * Opens license dialog.
+   */
+  openLicense() {
+    this._loadComponent('arc-license-dialog/arc-license-dialog')
+    .then(() => {
+      const node = this.shadowRoot.querySelector('arc-license-dialog');
+      node.opened = true;
+    })
+    .catch((cmp) => this._reportComponentLoadingError(cmp));
   }
 }
 

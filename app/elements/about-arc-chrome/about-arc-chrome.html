@@ -1,15 +1,14 @@
-<!-- <link rel="import" href="../../bower_components/openable-panel-behavior/openable-panel-behavior.html"> -->
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 
-<dom-module id="arc-about">
+<dom-module id="about-arc-chrome">
   <template>
     <style>
     :host {
       display: block;
     }
     .padding-section {
-      @apply(--section-padding);
+      @apply --section-padding;
       padding-right: 24px;
     }
 
@@ -18,15 +17,15 @@
     }
 
     h1 {
-      @apply(--page-title-text);
+      @apply --page-title-text;
     }
 
     .about-section {
-      @apply(--page-section-container);
+      @apply --page-section-container;
     }
 
     .about-row {
-      @apply(--paper-font-body1);
+      @apply --paper-font-body1;
       padding: 8px 0;
     }
 
@@ -35,11 +34,11 @@
     }
 
     h2 {
-      @apply(--page-section-title);
+      @apply --page-section-title;
     }
 
     .changelog {
-      @apply(--page-section-item-simple);
+      @apply --page-section-item-simple;
     }
 
     .versionField {
@@ -50,19 +49,22 @@
       min-width: 600px;
       min-height: 400px;
     }
+
     .paper-font-title {
-      @apply(--paper-font-title);
+      @apply --paper-font-title;
     }
+
     .paper-font-body1 {
-      @apply(--paper-font-body1);
+      @apply --paper-font-body1;
     }
+
     li > iron-icon {
       color: #F57C00;
     }
     </style>
     <section class="about-section padding-section">
       <div class="about-row">
-        <span class="versionField"><span>Application version: </span><span id="appVersion">{{version}}</span></span>
+        <span class="versionField"><span>Application version: </span><span id="appVersion">{{appVersion}}</span></span>
       </div>
       <div class="about-row">
         Copyright © 2012 Paweł Psztyć (Poland || USA)
@@ -376,5 +378,5 @@
       </div>
     </section>
   </template>
-  <script src="arc-about.js"></script>
+  <script src="about-arc-chrome.js"></script>
 </dom-module>

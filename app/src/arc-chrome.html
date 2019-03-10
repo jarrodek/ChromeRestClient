@@ -227,7 +227,7 @@
     <variables-model></variables-model>
     <url-indexer></url-indexer>
     <!-- Data import / export -->
-    <arc-data-export app-version="[[appVersion]]" electron-cookies></arc-data-export>
+    <arc-data-export app-version="[[appVersion]]"></arc-data-export>
     <arc-data-import></arc-data-import>
     <!-- Request logic -->
     <arc-request-logic variables-disabled="[[_computeVarDisabled(config.appVariablesEnabled)]]"></arc-request-logic>
@@ -239,7 +239,7 @@
     <variables-manager sys-variables-disabled app-variables-disabled="[[_computeVarDisabled(config.appVariablesEnabled)]]"></variables-manager>
     <variables-evaluator no-before-request></variables-evaluator>
     <!-- Info center -->
-    <arc-messages-service platform="electron" on-unread-changed="_unreadMessagesChanged" messages="{{appMessages}}" id="msgService"></arc-messages-service>
+    <arc-messages-service platform="chrome" on-unread-changed="_unreadMessagesChanged" messages="{{appMessages}}" id="msgService"></arc-messages-service>
     <!-- Helper components -->
     <web-url-input id="webUrlInput" purpose="web-session" on-open-web-url="_openWebUrlHandler"></web-url-input>
     <!-- Application views -->
@@ -291,7 +291,7 @@
           <import-panel data-route="data-import" access-token="[[driveAccessToken]]"></import-panel>
           <export-panel data-route="data-export"></export-panel>
           <arc-settings-panel data-route="settings" system-variables-disabled></arc-settings-panel>
-          <about-arc-electron data-route="about" app-version="[[appVersion]]"></about-arc-electron>
+          <about-arc-chrome data-route="about" app-version="[[appVersion]]"></about-arc-chrome>
           <project-details data-route="project" id="projectDetails"></project-details>
           <google-drive-browser data-route="drive" access-token="[[driveAccessToken]]" on-drive-file-picker-data="_openDriveRequest"></google-drive-browser>
           <cookie-manager data-route="cookie-manager"></cookie-manager>
@@ -307,7 +307,7 @@
     <variables-drawer-editor id="environmentsDrawer" with-backdrop></variables-drawer-editor>
     <!-- Google Analytics -->
     <template is="dom-if" if="[[gaCid]]" restamp="true">
-      <app-analytics tracking-id="UA-18021184-6" app-name="ARC-electon" app-id="[[appId]]" app-version="[[appVersion]]" data-source="electron-app" client-id="[[gaCid]]">
+      <app-analytics tracking-id="UA-18021184-6" app-name="ARC-electon" app-id="[[appId]]" app-version="[[appVersion]]" data-source="chrome-app" client-id="[[gaCid]]">
         <template is="dom-repeat" items="[[gaCustomMetrics]]">
           <app-analytics-custom type="metric" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
         </template>
@@ -315,7 +315,7 @@
           <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
         </template>
       </app-analytics>
-      <app-analytics tracking-id="UA-18021184-14" app-name="ARC-electon" app-id="[[appId]]" app-version="[[appVersion]]" data-source="electron-app" client-id="[[gaCid]]">
+      <app-analytics tracking-id="UA-18021184-14" app-name="ARC-electon" app-id="[[appId]]" app-version="[[appVersion]]" data-source="chrome-app" client-id="[[gaCid]]">
         <template is="dom-repeat" items="[[gaCustomMetrics]]">
           <app-analytics-custom type="metric" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
         </template>
@@ -323,7 +323,7 @@
           <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
         </template>
       </app-analytics>
-      <app-analytics tracking-id="UA-71458341-2" app-name="ARC-electon" app-id="[[appId]]" app-version="[[appVersion]]" data-source="electron-app" client-id="[[gaCid]]">
+      <app-analytics tracking-id="UA-71458341-2" app-name="ARC-electon" app-id="[[appId]]" app-version="[[appVersion]]" data-source="chrome-app" client-id="[[gaCid]]">
         <template is="dom-repeat" items="[[gaCustomMetrics]]">
           <app-analytics-custom type="metric" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
         </template>

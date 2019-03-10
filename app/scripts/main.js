@@ -14,66 +14,6 @@
   // True if the user is signed in to Chrome browser and can authorize the app.
   app.chromeSignedIn = false;
   app.appVersion = arc.app.utils.appVer;
-  app.observers = [
-    '_routeChanged(route, params.*)'
-  ];
-
-  app._routeChanged = function(route, paramsRecord) {
-    const params = paramsRecord && paramsRecord.base;
-    switch (route) {
-      case 'request':
-        app.pageTitle = 'Request';
-        if (!params || !params.type) {
-          return;
-        }
-        let id;
-        switch (params.type) {
-          case 'history': id = params.historyId; break;
-          case 'saved': id = params.savedId; break;
-          case 'restore':
-          case 'latest':
-          case 'current':
-            app.selectedRequest = '';
-            return;
-          case 'drive':
-            app.selectedRequest = '';
-            return app.openDriveItem(params.driveId);
-          default:
-            app.selectedRequest = '';
-            console.error('ID not handled!', params);
-            throw new Error('ID not handled!');
-        }
-        app.selectedRequest = decodeURIComponent(id);
-        return;
-      case 'project':
-        if (!params) {
-          return;
-        }
-        app.fire('selected-project-changed', {
-          value: params.projectId
-        });
-        app.pageTitle = 'Project details';
-        break;
-      case 'socket':
-        app.pageTitle = 'Socket';
-        app.selectedRequest = undefined;
-        break;
-      case 'settings':
-        app.pageTitle = 'Settings';
-        app.selectedRequest = undefined;
-        break;
-      case 'history':
-        app.pageTitle = 'History';
-        app.selectedRequest = undefined;
-        break;
-      case 'saved':
-        app.pageTitle = 'Saved request';
-        app.selectedRequest = undefined;
-        break;
-      default:
-        app.selectedRequest = undefined;
-    }
-  };
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
     app.updateBranding();
