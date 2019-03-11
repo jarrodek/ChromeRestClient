@@ -4,6 +4,7 @@ import {ArcChromeTransport} from './scripts/libs/transport/request-transport.js'
 import {CookieStore} from './scripts/libs/cookie-store.js';
 import {DriveFactory} from './scripts/libs/drive-factory.js';
 import {FileFactory} from './scripts/libs/file-factory.js';
+import hotkeys from './scripts/libs/hotkeys.esm.js';
 /**
  * Class responsible for initializing the main ARC elements
  * and setup base options.
@@ -23,6 +24,7 @@ class ArcInit {
     this.cookieStore.observe();
     this.drive.observe();
     this.file.observe();
+    this.setupKeyboard();
   }
   /**
    * Reference to the main application window.
@@ -213,6 +215,36 @@ class ArcInit {
         console.error(`Unable to load theme definition for ${theme}.`);
         resolve();
       }, true);
+    });
+  }
+
+  setupKeyboard() {
+    hotkeys('ctrl+s, command+s', () => {
+      this.app.saveOpened({
+        source: 'shortcut'
+      });
+    });
+    hotkeys('ctrl+shift+s, command+shift+s', () => {
+      this.app.saveOpened();
+    });
+    hotkeys('ctrl+w, command+w', (e) => {
+      e.preventDefault();
+      this.app.closeActiveTab();
+    });
+    hotkeys('ctrl+enter, command+enter', () => {
+      this.app.sendCurrentTab();
+    });
+    hotkeys('ctrl+t, command+t', () => {
+      this.app.newRequestTab();
+    });
+    hotkeys('ctrl+o, command+o', () => {
+      this.app.openSaved();
+    });
+    hotkeys('ctrl+,, command+,', () => {
+      this.app.openSettings();
+    });
+    hotkeys('ctrl+d, command+d', () => {
+      this.app.openDrivePicker();
     });
   }
 }

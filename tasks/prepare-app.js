@@ -13,7 +13,8 @@ class ArcChromePrepare {
   run() {
     return this.copyZlib()
     .then(() => this.copyBrotli())
-    .then(() => this.copyJexl());
+    .then(() => this.copyJexl())
+    .then(() => this.copyHotkeys());
   }
   /**
    * Coppies z-lib library to the application folder.
@@ -101,6 +102,12 @@ class ArcChromePrepare {
       const dest = path.join(dir, 'jexl.min.js');
       return fs.writeFile(dest, content, 'utf8');
     });
+  }
+
+  copyHotkeys() {
+    const src = path.join('node_modules', 'hotkeys-js', 'dist', 'hotkeys.esm.js');
+    const dest = path.join('app', 'scripts', 'libs', 'hotkeys.esm.js');
+    return fs.copy(src, dest);
   }
 }
 

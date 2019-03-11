@@ -624,6 +624,13 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
     })
     .catch((cmp) => this._reportComponentLoadingError(cmp));
   }
+
+  /**
+   * @TODO: Move it to app mixin.
+   */
+  closeActiveTab() {
+    this.workspace.closeActiveTab();
+  }
 }
 
 window.customElements.define('arc-chrome', ArcChrome);
