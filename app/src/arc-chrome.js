@@ -4,6 +4,7 @@
  * @appliesMixin ArcComponents.ArcAppMixin
  */
 class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
+  /* global chrome, ArcComponents */
   static get is() {
     return 'arc-chrome';
   }
@@ -206,6 +207,10 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
       case 'saved':
         id = 'saved-requests-panel';
         path = 'saved-requests-panel/saved-requests-panel';
+        break;
+      case 'themes-panel':
+        id = 'themes-panel';
+        path = 'themes-panel/themes-panel';
         break;
       default:
         console.error(`The base route ${page} is not recognized`);

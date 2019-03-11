@@ -66,7 +66,7 @@ export class ArcPreferences {
     }
     e.preventDefault();
     e.stopPropagation();
-    let name = e.detail.name;
+    let {name} = e.detail;
     if (!name) {
       e.detail.result = Promise.reject(new Error('Name is not set.'));
       return;

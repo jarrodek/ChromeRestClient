@@ -4,6 +4,7 @@ import {ArcChromeTransport} from './scripts/libs/transport/request-transport.js'
 import {CookieStore} from './scripts/libs/cookie-store.js';
 import {DriveFactory} from './scripts/libs/drive-factory.js';
 import {FileFactory} from './scripts/libs/file-factory.js';
+import {ThemesManager} from './scripts/libs/themes-manager.js';
 import hotkeys from './scripts/libs/hotkeys.esm.js';
 /**
  * Class responsible for initializing the main ARC elements
@@ -16,6 +17,7 @@ class ArcInit {
     this.cookieStore = new CookieStore();
     this.drive = new DriveFactory();
     this.file = new FileFactory();
+    this.themes = new ThemesManager();
   }
 
   listen() {
@@ -24,6 +26,7 @@ class ArcInit {
     this.cookieStore.observe();
     this.drive.observe();
     this.file.observe();
+    this.themes.observe();
     this.setupKeyboard();
   }
   /**
@@ -57,10 +60,11 @@ class ArcInit {
       return this._createApp(config);
     })
     .then(() => {
-      return this.loadTheme(appConfig.theme)
+      return this.themes.loadTheme(appConfig.theme)
       // Theme is not a fatal error
-      .catch(() => {
-        console.warn('Theme import error');
+      .catch((cause) => {
+        console.warn('Theme import error', cause);
+        console.info('Using unstyled ARC.');
       });
     })
     .then(() => this.removeLoader())
@@ -170,52 +174,6 @@ class ArcInit {
     setTimeout(() => {
       loader.parentNode.removeChild(loader);
     }, 150);
-  }
-
-  loadTheme(theme) {
-    const defaultTheme = 'arc-electron-default-theme';
-    if (!theme) {
-      theme = defaultTheme;
-    }
-    return this._loadTheme(theme)
-    .catch((cause) => {
-      console.warn(cause);
-      return this._loadTheme(defaultTheme);
-    });
-  }
-
-  _loadTheme(theme) {
-    const url = `bower_components/${theme}/${theme}.html`;
-    return new Promise((resolve) => {
-      // Apparently Polymer handles imports with `<custom-styles>`
-      // automatically and inserts it into the head section
-      const nodes = document.head.children;
-      let removeNextCustomStyle = false;
-      let linkNode;
-      for (let i = 0, len = nodes.length; i < len; i++) {
-        const node = nodes[i];
-        if (node.nodeName === 'LINK' && node.rel === 'import' &&
-          node.href && node.href.indexOf('theme') !== -1) {
-          removeNextCustomStyle = true;
-          linkNode = node;
-          continue;
-        }
-        if (removeNextCustomStyle && node.nodeName === 'CUSTOM-STYLE') {
-          node.parentNode.removeChild(node);
-          linkNode.parentNode.removeChild(linkNode);
-          break;
-        }
-      }
-      Polymer.importHref(url, () => {
-        Polymer.RenderStatus.afterNextRender(this, () => {
-          Polymer.updateStyles({});
-          resolve();
-        });
-      }, () => {
-        console.error(`Unable to load theme definition for ${theme}.`);
-        resolve();
-      }, true);
-    });
   }
 
   setupKeyboard() {
