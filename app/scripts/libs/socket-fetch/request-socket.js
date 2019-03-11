@@ -843,6 +843,14 @@ export class RequestSocket extends RequestBase {
           this.__bodyChunk = data;
           return;
         }
+        if (this._chunkSize === 0) {
+          data = data.subarray(2);
+          if (data.byteLength === 0) {
+            this._reportResponse();
+            return;
+          }
+          continue;
+        }
         if (!this._chunkSize) {
           this._reportResponse();
           return;
@@ -856,11 +864,11 @@ export class RequestSocket extends RequestBase {
         this._rawBody = PayloadSupport.concatBuffers(this._rawBody, sliced);
       }
       this._chunkSize -= size;
-      // if (data.length === 0) {
-      //   // this.logger.warn('Next chunk will start with CRLF!');
-      //   return;
-      // }
-      // data = data.subarray(size + 2); // + CR
+      if (data.length === 0) {
+        // this.logger.warn('Next chunk will start with CRLF!');
+        return;
+      }
+      data = data.subarray(size + 2); // + CR
       // if (data.length === 0) {
       //   // this.logger.info('No more data here. Waiting for new chunk');
       //   return;
