@@ -34,6 +34,7 @@ import {BasicAuth} from './auth/basic.js';
  * ```
  */
 export class RequestSocket extends RequestBase {
+  /* global chrome */
   /**
    * Constructs the request from ARC's request object
    *
@@ -238,7 +239,7 @@ export class RequestSocket extends RequestBase {
         chrome.sockets.tcp.connect(this.socketId, host, port, (connectResult) => {
           if (chrome.runtime.lastError) {
             this.logger.log(chrome.runtime.lastError);
-            reject(new Error(chrome.runtime.lastError));
+            reject(new Error(chrome.runtime.lastError.message));
             return;
           }
           if (connectResult !== 0) {
@@ -276,7 +277,7 @@ export class RequestSocket extends RequestBase {
       chrome.sockets.tcp.secure(this.socketId, (secureResult) => {
         if (chrome.runtime.lastError) {
           this.logger.log(chrome.runtime.lastError);
-          reject(new Error(chrome.runtime.lastError));
+          reject(new Error(chrome.runtime.lastError.message));
           return;
         }
         if (secureResult !== 0) {
