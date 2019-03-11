@@ -157,6 +157,6 @@ export class PayloadSupport {
       tmp.set(new Uint8Array(buffer), pointer);
       pointer += buffer.byteLength;
     });
-    return tmp.buffer;
+    return tmp;
   }
 }
