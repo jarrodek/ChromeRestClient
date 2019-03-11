@@ -416,13 +416,15 @@ export class DriveFactory {
       return this._createParents(parents, accessToken, result);
     }
     return this.createFolder(parent.name, accessToken)
-    .then((id) => {
-      parent.id = id;
-      result.push(parent);
-      if (!this.cachedFolders) {
-        this.cachedFolders = [];
+    .then((response) => {
+      if (response.id) {
+        parent.id = response.id;
+        result.push(parent);
+        if (!this.cachedFolders) {
+          this.cachedFolders = [];
+        }
+        this.cachedFolders.push(parent);
       }
-      this.cachedFolders.push(parent);
       return this._createParents(parents, accessToken, result);
     });
   }
