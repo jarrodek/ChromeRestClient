@@ -167,7 +167,7 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
         id = 'project-details';
         path = 'project-details/project-details';
         break;
-      case 'hosts-rules':
+      case 'host-rules':
         id = 'host-rules-editor';
         path = 'host-rules-editor/host-rules-editor';
         break;
