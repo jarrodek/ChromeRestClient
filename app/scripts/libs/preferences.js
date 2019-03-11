@@ -1,4 +1,5 @@
 export class ArcPreferences {
+  /* global chrome */
   constructor() {
     this._readHandler = this._readHandler.bind(this);
     this._changeHandler = this._changeHandler.bind(this);
