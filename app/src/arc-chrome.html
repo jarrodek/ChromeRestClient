@@ -60,10 +60,12 @@
 <link rel="import" href="../bower_components/saved-request-detail/saved-request-detail.html">
 <link rel="import" href="../bower_components/bottom-sheet/bottom-sheet.html">
 <link rel="import" href="../bower_components/http-code-snippets/http-code-snippets.html">
+<link rel="import" href="../bower_components/cookie-parser/cookie-parser.html">
 <link rel="import" href="../elements/chrome-connect/chrome-connect.html">
 <link rel="import" href="../elements/chrome-signin/chrome-signin.html">
 <link rel="import" href="../elements/chrome-not-signedin-view/chrome-not-signedin-view.html">
-
+<link rel="import" href="../elements/cookie-exchange/cookie-exchange.html">
+<link rel="import" href="../elements/cookie-jar/cookie-jar.html">
 <dom-module id="arc-chrome">
   <template>
     <style>
@@ -337,6 +339,8 @@
     <arc-onboarding></arc-onboarding>
     <install-proxy-dialog></install-proxy-dialog>
     <chrome-connect extension-id="apcedakaoficjlofohhcmkkljehnmebp" on-message="_onProxyMessage" on-connected-changed="_proxyConnectedChanged"></chrome-connect>
+    <cookie-exchange external-id="apcedakaoficjlofohhcmkkljehnmebp"></cookie-exchange>
+    <cookie-jar></cookie-jar>
     <chrome-signin-aware
       id="signInAware"
       is-authorized="{{appAuthorized}}"

@@ -69,7 +69,8 @@
     "fetch": "advanced-rest-client/fetch#arc",
     "file-reader": "advanced-rest-client/file-reader#^2.0.0",
     "arc-electron-payload-processor": "advanced-rest-client/arc-electron-payload-processor#^0.2.1",
-    "arc-electron-default-theme": "advanced-rest-client/arc-electron-default-theme#^2.0.0"
+    "arc-electron-default-theme": "advanced-rest-client/arc-electron-default-theme#^2.0.0",
+    "cookie-parser": "advanced-rest-client/cookie-parser#^2.0.0"
   },
   "devDependencies": {},
   "ignore": [],

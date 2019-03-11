@@ -1,6 +1,7 @@
 import {WorkspaceState} from './scripts/libs/workspace-state.js';
 import {ArcPreferences} from './scripts/libs/preferences.js';
 import {ArcChromeTransport} from './scripts/libs/transport/request-transport.js';
+import {CookieStore} from './scripts/libs/cookie-store.js';
 /**
  * Class responsible for initializing the main ARC elements
  * and setup base options.
@@ -9,11 +10,13 @@ class ArcInit {
   constructor() {
     this.prefs = new ArcPreferences();
     this.transport = new ArcChromeTransport();
+    this.cookieStore = new CookieStore();
   }
 
   listen() {
     this.prefs.observe();
     this.transport.observe();
+    this.cookieStore.observe();
   }
   /**
    * Reference to the main application window.
