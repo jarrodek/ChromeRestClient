@@ -1,0 +1,51 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../../bower_components/arc-settings-panel-mixin/arc-settings-panel-mixin.html">
+<link rel="import" href="../../bower_components/arc-settings-panel-mixin/arc-settings-panel-styles.html">
+<dom-module id="arc-chrome-experiment-settings">
+  <template>
+    <style include="arc-settings-panel-styles">
+    :host {
+      display: block;
+      @apply --arc-request-settings-panel;
+    }
+
+    .panel-title {
+      font-size: var(--arc-font-subhead-font-size);
+      font-weight: var(--arc-font-subhead-font-weight);
+      line-height: var(--arc-font-subhead-line-height);
+    }
+
+    .experiments-info {
+      margin: 16px 0;
+    }
+    </style>
+    <h2 class="panel-title">Experiments</h2>
+    <p class="experiments-info">Experimental features may be removed without notification.</p>
+
+    <div class="card">
+      <!-- <paper-item class="clickable" on-click="_toggleOption">
+        <paper-item-body two-line>
+          <div>Popup menu</div>
+          <div secondary>Allows to popup applicaiton menu to it's own window</div>
+        </paper-item-body>
+        <paper-toggle-button tabindex="-1" checked="{{popupMenuExperimentEnabled}}" on-click="_cancelEvent"></paper-toggle-button>
+      </paper-item> -->
+
+      <paper-item class="clickable" on-click="_toggleOption">
+        <paper-item-body two-line>
+          <div>
+            Drag and drop support
+          </div>
+          <div secondary>Enables request and project data drag and drop between different views</div>
+        </paper-item-body>
+        <paper-toggle-button tabindex="-1" checked="{{draggableEnabled}}" on-click="_cancelEvent"></paper-toggle-button>
+      </paper-item>
+    </div>
+  </template>
+  <script src="arc-chrome-experiment-settings.js"></script>
+</dom-module>

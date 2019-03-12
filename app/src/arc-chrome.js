@@ -636,6 +636,26 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
   closeActiveTab() {
     this.workspace.closeActiveTab();
   }
+
+  /**
+   * Handler for `popup-menu`. Sends command to the IO process.
+   * IO process informs windows to hide the menu.
+   * @param {CustomEvent} e
+   */
+  _popupMenuHandler(e) {
+    const {type} = e.detail;
+    let sizing;
+    const menu = this.shadowRoot.querySelector('arc-menu');
+    if (menu) {
+      const rect = menu.getBoundingClientRect();
+      sizing = {
+        height: rect.height,
+        width: rect.width
+      };
+    }
+    console.log('POPUP MENU DETATCH', type, sizing);
+    // ipcRenderer.send('popup-app-menu', type, sizing);
+  }
 }
 
 window.customElements.define('arc-chrome', ArcChrome);

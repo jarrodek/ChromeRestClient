@@ -67,6 +67,7 @@
 <link rel="import" href="../elements/chrome-not-signedin-view/chrome-not-signedin-view.html">
 <link rel="import" href="../elements/cookie-exchange/cookie-exchange.html">
 <link rel="import" href="../elements/cookie-jar/cookie-jar.html">
+<link rel="import" href="../elements/arc-chrome-experiment-settings/arc-chrome-experiment-settings.html">
 <dom-module id="arc-chrome">
   <template>
     <style>
@@ -248,7 +249,16 @@
     <!-- Application views -->
     <app-drawer-layout fullbleed narrow="{{narrowLayout}}" force-narrow="[[appMenuDisabled]]" responsive-width="980px">
       <app-drawer slot="drawer" align="start">
-        <arc-menu draggable-enabled="[[config.draggableEnabled]]" allow-popup="[[popupMenuExperimentEnabled]]" list-type="[[config.viewListType]]" history-enabled="[[historyEnabled]]" hide-history="[[menuConfig.hideHistory]]" hide-saved="[[menuConfig.hideSaved]]" hide-projects="[[menuConfig.hideProjects]]" hide-apis on-popup-menu="_popupMenuHandler"></arc-menu>
+        <arc-menu
+          draggable-enabled="[[config.draggableEnabled]]"
+          allow-popup="[[popupMenuExperimentEnabled]]"
+          list-type="[[config.viewListType]]"
+          history-enabled="[[historyEnabled]]"
+          hide-history="[[menuConfig.hideHistory]]"
+          hide-saved="[[menuConfig.hideSaved]]"
+          hide-projects="[[menuConfig.hideProjects]]"
+          hide-apis
+          on-popup-menu="_popupMenuHandler"></arc-menu>
       </app-drawer>
       <app-drawer slot="drawer" align="end" opened="{{messageCenterOpened}}" class="info-center-drawer">
         <arc-info-messages messages="[[appMessages]]" on-close="closeInfoCenter"></arc-info-messages>
@@ -294,7 +304,9 @@
           <saved-requests-panel data-route="saved" list-type="[[config.viewListType]]"></saved-requests-panel>
           <import-panel data-route="data-import" access-token="[[driveAccessToken]]"></import-panel>
           <export-panel data-route="data-export"></export-panel>
-          <arc-settings-panel data-route="settings" system-variables-disabled></arc-settings-panel>
+          <arc-settings-panel data-route="settings" system-variables-disabled>
+            <arc-chrome-experiment-settings popup-menu-experiment-enabled="{{popupMenuExperimentEnabled}}" data-title="Experiments"></arc-chrome-experiment-settings>
+          </arc-settings-panel>
           <about-arc-chrome data-route="about" app-version="[[appVersion]]"></about-arc-chrome>
           <project-details data-route="project" id="projectDetails"></project-details>
           <google-drive-browser data-route="drive" access-token="[[driveAccessToken]]" on-drive-file-picker-data="_openDriveRequest"></google-drive-browser>
