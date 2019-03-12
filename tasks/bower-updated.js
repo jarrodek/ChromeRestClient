@@ -1,5 +1,5 @@
 const gulp = require('gulp');
-const crisper = require('gulp-crisper');
+const crisper = require('@advanced-rest-client/gulp-crisper');
 const fs = require('fs-extra');
 
 class BowerUpdated {
