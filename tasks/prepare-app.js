@@ -14,7 +14,8 @@ class ArcChromePrepare {
     return this.copyZlib()
     .then(() => this.copyBrotli())
     .then(() => this.copyJexl())
-    .then(() => this.copyHotkeys());
+    .then(() => this.copyHotkeys())
+    .then(() => this.copyAmf());
   }
   /**
    * Coppies z-lib library to the application folder.
@@ -108,6 +109,17 @@ class ArcChromePrepare {
     const src = path.join('node_modules', 'hotkeys-js', 'dist', 'hotkeys.esm.js');
     const dest = path.join('app', 'scripts', 'libs', 'hotkeys.esm.js');
     return fs.copy(src, dest);
+  }
+
+  copyAmf() {
+    const file = path.join('tasks', 'amf-import.js');
+    return this.nodeToBrowser(file)
+    // .then((code) => this.babelify(code))
+    // .then((content) => this.uglyContent(content))
+    .then((content) => {
+      const dest = path.join('app', 'scripts', 'libs', 'amf.min.js');
+      return fs.writeFile(dest, content, 'utf8');
+    });
   }
 }
 
