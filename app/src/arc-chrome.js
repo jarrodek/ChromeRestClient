@@ -456,16 +456,6 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
     this.hasProxyInstalled = e.detail.value;
   }
 
-  registerProxyMessageHandler(handler) {
-    this._proxyMessageHandler = handler;
-  }
-
-  _onProxyMessage(e) {
-    if (this._proxyMessageHandler) {
-      this._proxyMessageHandler(e);
-    }
-  }
-
   _navMenuSelect(e) {
     const {page} = e.detail.item.dataset;
     this.page = page;

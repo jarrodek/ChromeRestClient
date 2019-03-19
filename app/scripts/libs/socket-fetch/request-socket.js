@@ -118,7 +118,8 @@ export class RequestSocket extends RequestBase {
     .then((message) => this.writeMessage(message))
     .catch((cause) => {
       this.abort();
-      throw cause;
+      this._errorRequest({message: cause.message});
+      // throw cause;
     });
   }
 
@@ -422,52 +423,6 @@ export class RequestSocket extends RequestBase {
   _addSocketListeners() {
     chrome.sockets.tcp.onReceive.addListener(this._onSocketData);
     chrome.sockets.tcp.onReceiveError.addListener(this._onSocketError);
-    // let received = false;
-    // socket.on('data', (data) => {
-    //   if (!received) {
-    //     let now = performance.now();
-    //     this.stats.firstReceiveTime = now;
-    //     this.emit('firstbyte', this.id);
-    //     received = true;
-    //   }
-    //   data = Buffer.from(data);
-    //   try {
-    //     this._processSocketMessage(data);
-    //   } catch (e) {
-    //     this._errorRequest({
-    //       message: e.message || 'Unknown error occurred'
-    //     });
-    //     return;
-    //   }
-    // });
-    // socket.once('timeout', () => {
-    //   this.state = RequestSocket.DONE;
-    //   this._errorRequest(new Error('Connection timeout.'));
-    // });
-    // socket.on('end', () => {
-    //   socket.removeAllListeners('timeout');
-    //   socket.removeAllListeners('error');
-    //   this.stats.lastReceivedTime = performance.now();
-    //   if (this.state !== RequestSocket.DONE) {
-    //     if (!this._response) {
-    //       // The parser havn't found the end of message so there was no message!
-    //       this._errorRequest(
-    //         new Error('Connection closed without sending a data'));
-    //     } else {
-    //       // There is an issue with the response. Size missmatch? Anyway,
-    //       // it tries to create a response from current data.
-    //       this.emit('loadend', this.id);
-    //       this._publishResponse({
-    //         includeRedirects: true
-    //       });
-    //     }
-    //   }
-    // });
-    // socket.once('error', (err) => {
-    //   socket.removeAllListeners('timeout');
-    //   this._errorRequest(err);
-    // });
-    // return socket;
   }
 
   _removeSocketListeners() {
@@ -929,9 +884,18 @@ export class RequestSocket extends RequestBase {
     super.abort();
     this.state = RequestSocket.DONE;
     if (this.socketId) {
-      chrome.sockets.tcp.disconnect(this.socketId, () => {});
+      this._disconnect();
     }
     this.clearTimeout();
     this._removeSocketListeners();
+  }
+
+  _disconnect() {
+    return new Promise((resolve) => {
+      chrome.sockets.tcp.disconnect(this.socketId, () => {
+        this.socketId = undefined;
+        resolve();
+      });
+    });
   }
 }

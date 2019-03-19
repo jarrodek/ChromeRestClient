@@ -118,8 +118,27 @@ export class WorkspaceState {
   }
 
   storeState(state) {
+    if (!state) {
+      return;
+    }
+    this._cleanupState(state);
     return this.getStore()
     .then((db) => this._storeState(db, state));
+  }
+
+  _cleanupState(state) {
+    if (!state.requests) {
+      state.requests = [];
+    }
+    for (let i = 0, len = state.requests.length; i < len; i++) {
+      const request = state.requests[i];
+      if (request._responseError && request._responseError instanceof Error) {
+        request._responseError = {
+          message: request._responseError.message,
+          stack: request._responseError.stack
+        };
+      }
+    }
   }
 
   _storeState(db, state) {

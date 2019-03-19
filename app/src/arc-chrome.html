@@ -278,7 +278,7 @@
               <span class="env-label">Environment:</span>
               <environment-selector no-label-float></environment-selector>
               <paper-icon-button class="var-info-button" id="varToggleButton" icon="arc:info-outline" title="Open variables list" active="{{_variablesOverlayOpened}}" toggles></paper-icon-button>
-              <variables-preview-overlay class="var-panel" position-target="[[_variablesButton]]" dynamic-align horizontal-align="auto" vertical-align="auto" vertical-offset="44" on-open-variables-editor="_variablesOpenRequest" on-iron-overlay-closed="_variablesPreviewClosed" opened="[[_variablesOverlayOpened]]"></variables-preview-overlay>
+              <variables-preview-overlay class="var-panel" position-target="[[_variablesButton]]" dynamic-align horizontal-align="auto" vertical-align="auto" vertical-offset="44" on-open-variables-editor="_variablesOpenRequest" on-iron-overlay-closed="_variablesPreviewClosed" opened="[[_variablesOverlayOpened]]" masked-values></variables-preview-overlay>
             </div>
 
             <paper-menu-button dynamic-align>
@@ -352,7 +352,7 @@
     <api-candidates-dialog></api-candidates-dialog>
     <arc-onboarding></arc-onboarding>
     <install-proxy-dialog></install-proxy-dialog>
-    <chrome-connect extension-id="apcedakaoficjlofohhcmkkljehnmebp" on-message="_onProxyMessage" on-connected-changed="_proxyConnectedChanged"></chrome-connect>
+    <chrome-connect extension-id="apcedakaoficjlofohhcmkkljehnmebp" on-connected-changed="_proxyConnectedChanged"></chrome-connect>
     <cookie-exchange external-id="apcedakaoficjlofohhcmkkljehnmebp"></cookie-exchange>
     <cookie-jar></cookie-jar>
     <chrome-signin-aware

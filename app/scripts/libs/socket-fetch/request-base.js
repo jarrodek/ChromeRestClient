@@ -239,11 +239,11 @@ export class RequestBase extends EventTarget {
     }
     const detail = {
       id: this.id,
-      location: location,
-      returnValue: true
+      location: location
     };
-    this.dispatchEvent(new CustomEvent('beforeredirect', {detail}));
-    if (!detail.returnValue) {
+    const ev = new CustomEvent('beforeredirect', {detail});
+    this.dispatchEvent(ev);
+    if (ev.defaultPrevented) {
       this._publishResponse({
         includeRedirects: true
       });
@@ -263,6 +263,7 @@ export class RequestBase extends EventTarget {
       this.redirects.add(response);
       return this._cleanUpRedirect();
     })
+    .then(() => this._disconnect())
     .then(() => {
       if (!responseCookies) {
         return;
@@ -291,6 +292,8 @@ export class RequestBase extends EventTarget {
       });
     });
   }
+
+  _disconnect() {}
   /**
    * Create a `Response` object.
    *

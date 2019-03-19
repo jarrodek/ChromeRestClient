@@ -59,6 +59,12 @@ class ArcInit {
    * @return {Promise}
    */
   initApp(state) {
+    if (!state) {
+      state = {
+        index: 0
+      };
+      console.warn('State object is empty. There is an issue with background page.');
+    }
     this.workspaceState = new WorkspaceState(String(state.index));
     this.workspaceState.listen();
     let appConfig;
@@ -97,7 +103,6 @@ class ArcInit {
       app.config = config;
       this._setupApp(app);
       document.body.appendChild(app);
-      app.registerProxyMessageHandler(this.transport.onProxyMessage.bind(this.transport));
       this.created = true;
     });
   }

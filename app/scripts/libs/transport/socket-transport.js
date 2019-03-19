@@ -15,15 +15,31 @@ export class SocketTransport {
     this._errorHandler = this._errorHandler.bind(this);
   }
 
+  set onend(callback) {
+    this.__endHandler = callback;
+  }
+
+  get onend() {
+    return this.__endHandler;
+  }
+
   run(appConfig, hosts) {
     try {
       const opts = this._prepareRequestOptions(appConfig, hosts);
       const connection = this._prepareRequest(opts);
+      this.connection = connection;
       return connection.send()
       .catch((cause) => this._onError(cause));
     } catch (e) {
       this._onError(e);
     }
+  }
+
+  abort() {
+    if (!this.connection) {
+      return;
+    }
+    this.connection.abort();
   }
 
   _prepareRequestOptions(opts, hosts) {
@@ -52,7 +68,6 @@ export class SocketTransport {
     conn.addEventListener('headersreceived', this._headersReceivedHandler);
     conn.addEventListener('load', this._loadHandler);
     conn.addEventListener('error', this._errorHandler);
-    this.connection = conn;
     return conn;
   }
 
@@ -151,11 +166,15 @@ export class SocketTransport {
 
   _errorHandler(e) {
     let {id, request, response} = e.detail;
-    const {error} = response;
-    this._removeConnectionHandlers();
-    if (this.connection.aborted) {
-      return;
+    let error;
+    if (e.detail.error) {
+      error = e.detail.error;
+    } else if (response && response.error) {
+      error = response.error;
+    } else {
+      error = new Error('Undetected error :(');
     }
+    this._removeConnectionHandlers();
     if (!response) {
       response = {};
     }
@@ -199,6 +218,10 @@ export class SocketTransport {
     }
     detail.id = id;
     this._beforeResponse(detail);
+    if (this.onend) {
+      this.onend();
+      this.__endHandler = undefined;
+    }
   }
   /**
    * Processes redirects data from the socket library.

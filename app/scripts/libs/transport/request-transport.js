@@ -19,6 +19,20 @@ export class ArcChromeTransport {
     window.addEventListener('host-rules-deleted', this._ruleDeleted);
   }
 
+  observeXhr() {
+    if (this.__xhrProxy) {
+      return;
+    }
+    const proxy = document.createElement('chrome-connect');
+    proxy.extensionId = 'apcedakaoficjlofohhcmkkljehnmebp';
+    document.body.appendChild(proxy);
+    this.__xhrProxy = proxy;
+  }
+
+  get xhrProxy() {
+    return this.__xhrProxy;
+  }
+
   _transportHandler(e) {
     let appConfig;
     return this._readConfig()
@@ -38,15 +52,21 @@ export class ArcChromeTransport {
   }
 
   proxyRequest(request, appConfig) {
-    const runner = new ChromeProxyTransport(request);
+    const runner = new ChromeProxyTransport(request, this.xhrProxy);
     this._connections[request.id] = runner;
     runner.run(appConfig);
+    runner.onend = () => {
+      delete this._connections[request.id];
+    };
   }
 
   socketRequest(request, appConfig, hosts) {
     const runner = new SocketTransport(request);
     this._connections[request.id] = runner;
     runner.run(appConfig, hosts);
+    runner.onend = () => {
+      delete this._connections[request.id];
+    };
   }
 
   /**
@@ -76,10 +96,6 @@ export class ArcChromeTransport {
     });
   }
 
-  onProxyMessage(e) {
-    console.log(e);
-  }
-
   _abortHandler(e) {
     const id = e.detail.id;
     const info = this._connections[id];
@@ -87,8 +103,8 @@ export class ArcChromeTransport {
       return;
     }
     e.preventDefault();
-    info.connection.abort();
-    info.aborted = true;
+    info.abort();
+    delete this._connections[id];
   }
 
   _readConfig() {
