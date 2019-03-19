@@ -15,6 +15,7 @@ before_script:
   - sleep 3
   - npm i -g bower web-component-tester
   - bower i
+  - ln -s app/bower_components bower_components
 script:
   - wct
 node_js:

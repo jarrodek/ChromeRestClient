@@ -72,7 +72,9 @@
     "arc-electron-default-theme": "advanced-rest-client/arc-electron-default-theme#^2.0.0",
     "cookie-parser": "advanced-rest-client/cookie-parser#^2.0.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "web-component-tester": "^6.5.0"
+  },
   "ignore": [],
   "main": "app/index.html",
   "resolutions": {
