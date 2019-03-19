@@ -5,7 +5,7 @@ import {CookieStore} from './scripts/libs/cookie-store.js';
 import {DriveFactory} from './scripts/libs/drive-factory.js';
 import {FileFactory} from './scripts/libs/file-factory.js';
 import {ThemesManager} from './scripts/libs/themes-manager.js';
-import {AmfService} from './scripts/libs/amf-service.js';
+// import {AmfService} from './scripts/libs/amf-service.js';
 import {ArcContextMenu} from './scripts/libs/context-actions.js';
 import hotkeys from './scripts/libs/hotkeys.esm.js';
 /**
@@ -20,7 +20,7 @@ class ArcInit {
     this.drive = new DriveFactory();
     this.file = new FileFactory();
     this.themes = new ThemesManager();
-    this.amfService = new AmfService();
+    // this.amfService = new AmfService();
     this.contextMenu = new ArcContextMenu();
   }
 
@@ -32,7 +32,7 @@ class ArcInit {
     this.drive.observe();
     this.file.observe();
     this.themes.observe();
-    this.amfService.observe();
+    // this.amfService.observe();
     this.contextMenu.observe();
     this.contextMenu.registerDefaultActions();
     this.setupKeyboard();
