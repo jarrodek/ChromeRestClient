@@ -61,13 +61,13 @@
 <link rel="import" href="../bower_components/bottom-sheet/bottom-sheet.html">
 <link rel="import" href="../bower_components/http-code-snippets/http-code-snippets.html">
 <link rel="import" href="../bower_components/cookie-parser/cookie-parser.html">
-<link rel="import" href="../bower_components/arc-onboarding/arc-onboarding.html">
 <link rel="import" href="../elements/chrome-connect/chrome-connect.html">
 <link rel="import" href="../elements/chrome-signin/chrome-signin.html">
 <link rel="import" href="../elements/chrome-not-signedin-view/chrome-not-signedin-view.html">
 <link rel="import" href="../elements/cookie-exchange/cookie-exchange.html">
 <link rel="import" href="../elements/cookie-jar/cookie-jar.html">
 <link rel="import" href="../elements/arc-chrome-experiment-settings/arc-chrome-experiment-settings.html">
+<link rel="import" href="../elements//chrome-onboarding/chrome-onboarding.html">
 <dom-module id="arc-chrome">
   <template>
     <style>
@@ -293,6 +293,7 @@
                 <paper-item data-page="settings">Settings</paper-item>
                 <paper-item data-page="themes-panel">Themes</paper-item>
                 <paper-item data-page="about">About</paper-item>
+                <paper-item data-action="openTutorial">Open oboarding dialog</paper-item>
               </paper-listbox>
             </paper-menu-button>
           </app-toolbar>
@@ -350,7 +351,7 @@
     </template>
     <arc-license-dialog></arc-license-dialog>
     <api-candidates-dialog></api-candidates-dialog>
-    <arc-onboarding></arc-onboarding>
+    <chrome-onboarding></chrome-onboarding>
     <install-proxy-dialog></install-proxy-dialog>
     <chrome-connect extension-id="apcedakaoficjlofohhcmkkljehnmebp" on-connected-changed="_proxyConnectedChanged"></chrome-connect>
     <cookie-exchange external-id="apcedakaoficjlofohhcmkkljehnmebp"></cookie-exchange>

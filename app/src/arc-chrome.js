@@ -459,8 +459,12 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
   }
 
   _navMenuSelect(e) {
-    const {page} = e.detail.item.dataset;
-    this.page = page;
+    const {page, action} = e.detail.item.dataset;
+    if (page) {
+      this.page = page;
+    } else {
+      this[action]();
+    }
     e.target.selected = undefined;
   }
 
@@ -665,6 +669,11 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
   notifyError(message) {
     this.$.errorToast.text = message;
     this.$.errorToast.opened = true;
+  }
+
+  openTutorial() {
+    const dialog = this.shadowRoot.querySelector('chrome-onboarding');
+    dialog.opened = true;
   }
 }
 
