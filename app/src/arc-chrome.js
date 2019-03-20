@@ -118,6 +118,7 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
     this.openWorkspace = this.openWorkspace.bind(this);
     this._googleAuthRequest = this._googleAuthRequest.bind(this);
     this.openLicense = this.openLicense.bind(this);
+    this._signinError = this._signinError.bind(this);
   }
 
   connectedCallback() {
@@ -133,6 +134,7 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
     window.addEventListener('workspace-open-project-requests', this.openWorkspace);
     window.addEventListener('google-autorize', this._googleAuthRequest);
     window.addEventListener('display-license', this.openLicense);
+    window.addEventListener('chrome-signin-aware-error', this._signinError);
     Polymer.RenderStatus.afterNextRender(this, () => {
       this._variablesButton = this.shadowRoot.querySelector('#varToggleButton');
       this._scrollTarget = this.$.scrollingRegion.$.contentContainer;
@@ -565,6 +567,14 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
     aware.scope = scope;
     if (aware.needAdditionalAuth) {
       aware.signIn();
+    } else if (!aware.isAuthorized) {
+      this.dispatchEvent(new CustomEvent('google-signout', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          scope
+        }
+      }));
     } else {
       this.dispatchEvent(new CustomEvent('google-signin-success', {
         bubbles: true,
@@ -575,6 +585,11 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
         }
       }));
     }
+  }
+
+  _signinError(e) {
+    const {message} = e.detail;
+    this.notifyError(message);
   }
 
   _requestAuthToken(interactive, scope) {
@@ -645,6 +660,11 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
     }
     console.log('POPUP MENU DETATCH', type, sizing);
     // ipcRenderer.send('popup-app-menu', type, sizing);
+  }
+
+  notifyError(message) {
+    this.$.errorToast.text = message;
+    this.$.errorToast.opened = true;
   }
 }
 
