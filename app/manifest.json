@@ -5,7 +5,7 @@
   "description": "The web developers helper program to create and test custom HTTP requests.",
   "version": "11.0.0",
   "version_name": "11.0.0-beta",
-  "minimum_chrome_version": "49",
+  "minimum_chrome_version": "70",
   "author": "Pawel Psztyc",
   "icons": {
     "16": "assets/arc_icon_16.png",
@@ -47,14 +47,6 @@
       "scripts": [
         "scripts/background.js"
       ]
-    }
-  },
-  "url_handlers": {
-    "google_drive_open": {
-      "matches": [
-        "https://api.chromerestclient.com/GDrive.html*"
-      ],
-      "title": "Open from Google Drive"
     }
   },
   "sandbox": {
