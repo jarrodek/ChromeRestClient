@@ -1,9 +1,0 @@
-{
-  "customAttrAssign": ["/\\$?=/"],
-  "collapseWhitespace": true,
-  "ignoreCustomFragments": ["=\"{{.*?}}\""],
-  "removeAttributeQuotes": true,
-  "removeComments": true,
-  "minifyCSS": false,
-  "collapseWhitespace": true
-}

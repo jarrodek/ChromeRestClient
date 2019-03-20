@@ -14,66 +14,6 @@
   // True if the user is signed in to Chrome browser and can authorize the app.
   app.chromeSignedIn = false;
   app.appVersion = arc.app.utils.appVer;
-  app.observers = [
-    '_routeChanged(route, params.*)'
-  ];
-
-  app._routeChanged = function(route, paramsRecord) {
-    var params = paramsRecord && paramsRecord.base;
-    switch (route) {
-      case 'request':
-        app.pageTitle = 'Request';
-        if (!params || !params.type) {
-          return;
-        }
-        var id;
-        switch (params.type) {
-          case 'history': id = params.historyId; break;
-          case 'saved': id = params.savedId; break;
-          case 'restore':
-          case 'latest':
-          case 'current':
-            app.selectedRequest = '';
-            return;
-          case 'drive':
-            app.selectedRequest = '';
-            return app.openDriveItem(params.driveId);
-          default:
-            app.selectedRequest = '';
-            console.error('ID not handled!', params);
-            throw new Error('ID not handled!');
-        }
-        app.selectedRequest = decodeURIComponent(id);
-        return;
-      case 'project':
-        if (!params) {
-          return;
-        }
-        app.fire('selected-project-changed', {
-          value: params.projectId
-        });
-        app.pageTitle = 'Project details';
-        break;
-      case 'socket':
-        app.pageTitle = 'Socket';
-        app.selectedRequest = undefined;
-        break;
-      case 'settings':
-        app.pageTitle = 'Settings';
-        app.selectedRequest = undefined;
-        break;
-      case 'history':
-        app.pageTitle = 'History';
-        app.selectedRequest = undefined;
-        break;
-      case 'saved':
-        app.pageTitle = 'Saved request';
-        app.selectedRequest = undefined;
-        break;
-      default:
-        app.selectedRequest = undefined;
-    }
-  };
   // Event fired when all components has been initialized.
   app.addEventListener('dom-change', function() {
     app.updateBranding();
@@ -87,10 +27,12 @@
     document.querySelector('arc-loader-screen').opened = false;
     app.initialized = true;
   });
+
   window.addEventListener('WebComponentsReady', function() {
     app.initAnalytics();
     app.initRouting();
   });
+
   app.initRouting = () => {
     if (app.routingInitialized) {
       console.warn('Routing is already initialized.');
@@ -100,34 +42,34 @@
     let event = new Event('initializeRouting');
     window.dispatchEvent(event);
   };
-  //When changin route this will scroll page top. This is called from router.
+  // When changin route this will scroll page top. This is called from router.
   app.scrollPageToTop = function() {
     app.$.headerPanelMain.scrollToTop(true);
   };
-  //called by the router to close a drawer (in mobile view) when changing route.
+  // called by the router to close a drawer (in mobile view) when changing route.
   app.closeDrawer = function() {
     app.$.paperDrawerPanel.closeDrawer();
   };
   // called when any component want to change request link.
   document.body.addEventListener('action-link-change', (e) => {
-    var url = e.detail.url;
-    var setUrl = function(url) {
-      let panel = document.querySelector('request-panel');
+    let url = e.detail.url;
+    const setUrl = function(url) {
+      const panel = document.querySelector('request-panel');
       panel.set('request.url', url);
     };
-    var getUrl = function() {
+    const getUrl = function() {
       return document.querySelector('request-panel').request.url;
     };
-    var currentUrl = getUrl();
+    const currentUrl = getUrl();
     if (currentUrl && url.indexOf('/') === 0) {
-      var parser;
+      let parser;
       try {
         parser = new URL(currentUrl);
         url = parser.origin + url;
         setUrl(url);
       } catch (e) {
         console.log('URL parse error', e);
-        this.fire('app-log', {
+        app.fire('app-log', {
           message: e
         });
         setUrl(url);
@@ -139,12 +81,12 @@
   });
 
   app.onSave = (e, detail) => {
-    var ctrl = document.querySelector('arc-request-panel');
+    const ctrl = document.querySelector('arc-request-panel');
     ctrl.onSave({
       source: 'shortcut',
       shift: detail.keyboardEvent.shiftKey
     });
-    var label = 'Save';
+    let label = 'Save';
     if (detail.keyboardEvent.shiftKey) {
       label += ' (shift)';
     }
@@ -173,7 +115,7 @@
     if (app.route !== 'request') {
       return;
     }
-    var searchBar = document.getElementById('content-search-bar');
+    const searchBar = document.getElementById('content-search-bar');
     if (searchBar.opened) {
       searchBar.focusInput();
     } else {
@@ -198,7 +140,7 @@
     if (app.route !== 'request') {
       return;
     }
-    var panel = document.querySelector('arc-request-panel');
+    const panel = document.querySelector('arc-request-panel');
     if (!panel) {
       console.warn('The request panel is undefined');
       return;
@@ -207,7 +149,7 @@
   };
 
   app.textSearchBarOpened = () => {
-    var searchBar = document.getElementById('content-search-bar');
+    const searchBar = document.getElementById('content-search-bar');
     if (!searchBar) {
       console.warn('Search bar was not available in document.');
       return;
@@ -216,12 +158,12 @@
   };
 
   window.addEventListener('paper-header-transform', function(e) {
-    var searchBar = document.getElementById('content-search-bar');
+    const searchBar = document.getElementById('content-search-bar');
     if (!searchBar.opened) {
       return;
     }
-    var detail = e.detail;
-    var top = detail.height - detail.y;
+    const detail = e.detail;
+    let top = detail.height - detail.y;
     if (top < 0) {
       top = 0;
     }
@@ -237,11 +179,11 @@
    */
   app.updateBranding = () => {
     if (!chrome.runtime.getManifest) {
-      //tests
+      // tests
       return;
     }
-    var channel = arc.app.utils.releaseChannel;
-    var cls = null;
+    const channel = arc.app.utils.releaseChannel;
+    let cls;
     if (channel === 'canary') {
       cls = 'canary-channel';
     } else if (channel === 'dev') {
@@ -269,9 +211,11 @@
    * Handler called to network state change event.
    * This will display toase then the device is offline and close the message when it
    * comes back online.
+   *
+   * @param {CustomEvent} e
    */
   app._networkStateChanged = (e) => {
-    var online = e.detail.online;
+    const online = e.detail.online;
     if (online) {
       app.$.offlineToast.opened = false;
     } else {
@@ -283,7 +227,7 @@
     if (!e.detail || !e.detail.message) {
       return;
     }
-    var message = '[Window]' + e.detail.message;
+    const message = '[Window]' + e.detail.message;
     app.fire('send-analytics', {
       type: 'exception',
       description: message,
@@ -303,8 +247,8 @@
   });
 
   app._computeA11yButtons = (key, hasShift) => {
-    var isMac = navigator.platform.indexOf('Mac') !== -1;
-    var cmd = '';
+    const isMac = navigator.platform.indexOf('Mac') !== -1;
+    let cmd = '';
     if (isMac) {
       cmd += 'meta+';
     } else {
@@ -327,6 +271,7 @@
   window.addEventListener('pick-google-drive-item', openDriveSelector);
 
   app.initAnalytics = function() {
+    debugger
     app.push('gaCustomDimensions', {
       index: 1,
       value: arc.app.utils.chromeVersion
@@ -342,7 +287,7 @@
   };
 
   window.addEventListener('analytics-permitted-changed', (e) => {
-    var permitted = e.detail.permitted;
+    const permitted = e.detail.permitted;
     app.set('analyticsDisabled', !permitted);
   });
 
@@ -379,7 +324,7 @@
 
   function processIcomingData(data, opts) {
     opts = opts || {};
-    var event = app.fire('import-normalize', {
+    const event = app.fire('import-normalize', {
       content: data
     }, {
       cancelable: true
@@ -400,7 +345,7 @@
         app.openImportExport();
       }
     })
-    .catch(cause => app.notifyError(cause.message));
+    .catch((cause) => app.notifyError(cause.message));
   }
 
   window.addEventListener('on-process-incoming-data', function(e) {
@@ -408,7 +353,7 @@
   });
 
   app.openChromeSigninInfo = function() {
-    var node = document.querySelector('chrome-not-signedin-view');
+    let node = document.querySelector('chrome-not-signedin-view');
     if (!node) {
       node = document.createElement('chrome-not-signedin-view');
       document.body.appendChild(node);
@@ -419,16 +364,19 @@
   /**
    * Opens a request from the Google Drive.
    * This action support integration with Drive UI, action "open with".
+   *
+   * @param {String} id
    */
   app.openDriveItem = function(id) {
     if (!app.chromeSignedIn) {
-      return app.openChromeSigninInfo();
+      app.openChromeSigninInfo();
+      return;
     }
     Polymer.RenderStatus.afterNextRender(app, function() {
       app.fire('navigate', {
         base: 'drive'
       });
-      var picker = document.querySelector('google-drive-browser');
+      const picker = document.querySelector('google-drive-browser');
       picker._isOpened = true;
       picker._downloadFile(id);
     });
@@ -439,9 +387,10 @@
    * Normalizes content to the import object and opens import panel
    * if the data is import data or a request if import data contains single
    * request.
+   * @param {EventCustom} e
    */
   app._openDriveRequest = function(e) {
-    var opts = {
+    const opts = {
       diveId: e.detail.diveId
     };
     processIcomingData(e.detail.content, opts);
@@ -459,8 +408,8 @@
     });
   };
   window.addEventListener('google-autorize', function(e) {
-    var aware = app.$.signInAware;
-    var scope = e.detail.scope;
+    const aware = app.$.signInAware;
+    const scope = e.detail.scope;
     if (!aware.signedIn) {
       app.fire('google-signout', {
         scope: scope
@@ -480,7 +429,7 @@
 
   /* Navigation from main app chrome */
   app.openLogs = function() {
-    var logViewer = document.querySelector('app-log-viewer');
+    const logViewer = document.querySelector('app-log-viewer');
     if (!logViewer) {
       throw new Error('Log viewer not available.');
     }
@@ -500,8 +449,8 @@
    * Opens an issue tracker - new issue report.
    */
   app.openIssueReport = function() {
-    var appVersion = arc.app.utils.appVer;
-    var message = 'Your description here\n\n';
+    const appVersion = arc.app.utils.appVer;
+    let message = 'Your description here\n\n';
     message += '## Expected outcome\nWhat should happen?\n\n';
     message += '## Actual outcome\nWhat happened?\n\n';
     message += `## Versions\nApp: ${appVersion}\n`;
@@ -528,18 +477,18 @@
   };
 
   app.openLicense = function() {
-    var dialog = document.querySelector('arc-license-dialog');
+    const dialog = document.querySelector('arc-license-dialog');
     dialog.opened = true;
   };
   document.body.addEventListener('display-license', app.openLicense);
 
   app._unreadMessagesChanged = function(e) {
-    var state = !!(e.detail.value && e.detail.value.length > 0);
+    const state = !!(e.detail.value && e.detail.value.length > 0);
     app.set('newMessages', state);
   };
 
   app._openInfoCenter = function() {
-    var service = document.querySelector('arc-messages-service');
+    const service = document.querySelector('arc-messages-service');
     service.readMessages();
     app.fire('navigate', {
       base: 'messages'
@@ -562,7 +511,7 @@
     .open('https://install.advancedrestclient.com/');
   };
 
-  var clipboard = {
+  const clipboard = {
     write: function(data) {
       chrome.permissions.contains({
         permissions: ['clipboardWrite']
@@ -581,7 +530,7 @@
       });
     },
     _write: function(data) {
-      var clipboardholder = document.createElement('textarea');
+      const clipboardholder = document.createElement('textarea');
       document.body.appendChild(clipboardholder);
       clipboardholder.value = data;
       clipboardholder.select();
@@ -599,5 +548,4 @@
   window.addEventListener('open-variables-editor', function() {
     app.$.environmentsDrawer.opened = true;
   });
-
 })(document, window);

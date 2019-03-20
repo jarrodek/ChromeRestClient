@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<!-- arctest.app@gmail.com -->
+
+
+  <link rel="import" href="bower_components/arc-onboarding/arc-onboarding.html">
+  
+</head>
+<body>
+  <template is="dom-bind" id="app">
+    <arc-loader-screen id="appLOader" opened></arc-loader-screen>
+    <paper-drawer-panel responsive-width="1000px" id="paperDrawerPanel" force-narrow="{{forceNarrowLayout}}" narrow="{{narrowLayout}}" drawer-width="[[drawerWidth]]" disable-edge-swipe disable-swipe>
+      <paper-scroll-header-panel drawer>
+        <paper-toolbar class="main-toolbar">
+          <paper-icon-button icon="arc:menu" paper-drawer-toggle class="drawer-toggle-button" on-tap="_drawerToggle" title="Toggle drawer" alt="Drawer toggle icon"></paper-icon-button>
+          <div class="app-name flex">ARC</div>
+          <paper-icon-button icon="arc:pin-drawer" class$="[[_computePinDrawerClass(forceNarrowLayout, narrowLayout)]]" on-tap="_pinDrawer" title="Pin drawer" alt="Pin drawer"></paper-icon-button>
+        </paper-toolbar>
+        <template is="dom-if" if="[[initialized]]">
+          <arc-menu selected-request="[[selectedRequest]]" route-base="[[route]]" history-opened saved-opened></arc-menu>
+          <div class="termination-banner" on-tap="_openTerminationMessage">
+            Install new ARC with new features!
+          </div>
+        </template>
+        <div id="drawerResizer"></div>
+      </paper-scroll-header-panel>
+      <!-- Main Area -->
+      <paper-scroll-header-panel main id="headerPanelMain">
+        <!-- Main Toolbar -->
+        <paper-toolbar id="mainToolbar" class="main-toolbar">
+          <paper-icon-button class="toolbar-hide" icon="arc:menu" paper-drawer-toggle title="Toggle drawer" alt="Drawer toggle icon"></paper-icon-button>
+          <div class="title">[[pageTitle]]</div>
+          <template is="dom-if" if="[[newMessages]]">
+            <span>
+              <paper-icon-button icon="arc:info-outline" on-tap="_openInfoCenter"></paper-icon-button>
+              <paper-tooltip animation-delay="200">See what's new in the app</paper-tooltip>
+            </span>
+          </template>
+          <paper-menu-button horizontal-align="right">
+            <paper-icon-button icon="arc:more-vert" class="dropdown-trigger"></paper-icon-button>
+            <paper-menu class="dropdown-content">
+              <paper-icon-item on-tap="openAbout">
+                <iron-icon item-icon icon="arc:info-outline"></iron-icon>
+                About
+              </paper-icon-item>
+              <paper-icon-item on-tap="openLicense">
+                <span item-icon></span>
+                License
+              </paper-icon-item>
+              <paper-icon-item on-tap="openSettings">
+                <iron-icon item-icon icon="arc:settings"></iron-icon>
+                Preferences
+              </paper-icon-item>
+              <paper-icon-item on-tap="openImportExport">
+                <iron-icon item-icon icon="arc:import-export"></iron-icon>
+                Import and export data
+              </paper-icon-item>
+              <paper-icon-item on-tap="onNewWindow">
+                <iron-icon item-icon icon="arc:open-in-new"></iron-icon>
+                New window
+              </paper-icon-item>
+              <paper-icon-item on-tap="openIssueReport">
+                <iron-icon item-icon icon="arc:bug-report"></iron-icon>
+                Report an issue
+              </paper-icon-item>
+              <paper-icon-item on-tap="openLogs">
+                <iron-icon item-icon icon="arc:list"></iron-icon>
+                Open console logs
+              </paper-icon-item>
+              <paper-icon-item on-tap="_openInfoCenter">
+                <iron-icon item-icon icon="arc:info-outline"></iron-icon>
+                What's new
+              </paper-icon-item>
+            </paper-menu>
+          </paper-menu-button>
+        </paper-toolbar>
+        <!-- Main Content -->
+        <div class="content">
+          <!-- iron-pages -->
+          <iron-pages id="pages"
+            class="mainPages"
+            attr-for-selected="data-route"
+            selected-attribute="opened"
+            selected="[[route]]">
+            <arc-request-panel data-route="request" route-params="{{params}}"></arc-request-panel>
+            <websocket-panel attr-for-opened="opened" data-route="socket"></websocket-panel>
+            <history-panel attr-for-opened="opened" data-route="history"></history-panel>
+            <saved-requests-panel attr-for-opened="opened" data-route="saved"></saved-requests-panel>
+            <data-import-export-panel data-route="dataimport" api-key="592877543090-6tqu3mbhcbc3437cfj5f0ahjtui5tjac.apps.googleusercontent.com"></data-import-export-panel>
+            <arc-settings-panel data-route="settings"></arc-settings-panel>
+            <arc-about data-route="about"></arc-about>
+            <project-details attr-for-opened="opened" data-route="project" project-id="[[params.projectId]]" attr-for-opened="opened"></project-details>
+            <google-drive-browser data-route="drive" attr-for-opened="opened" api-key="592877543090-6tqu3mbhcbc3437cfj5f0ahjtui5tjac.apps.googleusercontent.com" access-token="[[accessToken]]" on-drive-file-picker-data="_openDriveRequest"></google-drive-browser>
+            <arc-info-messages data-route="messages" messages="[[appMessages]]" on-close="_closeInfoCenter"></arc-info-messages>
+          </iron-pages>
+        </div>
+      </paper-scroll-header-panel>
+    </paper-drawer-panel>
+    <variables-drawer-editor id="environmentsDrawer" with-backdrop></variables-drawer-editor>
+    <drop-file-importer></drop-file-importer>
+    <arc-license-dialog></arc-license-dialog>
+    <arc-onboarding></arc-onboarding>
+    <app-log-viewer></app-log-viewer>
+    <paper-toast id="errorToast" duration="5000"></paper-toast>
+    <paper-toast id="offlineToast" class="offline-toast" text="You are now offline. Can't make new requests."></paper-toast>
+    <search-bar id="content-search-bar" on-iron-overlay-opened="textSearchBarOpened"></search-bar>
+    <!-- Non UI (logic) elements -->
+    <chrome-signin-aware
+      id="signInAware"
+      is-authorized="{{appAuthorized}}"
+      signed-in="{{chromeSignedIn}}"
+      access-token="{{accessToken}}"
+      on-chrome-signin-aware-success="_chromeSignin"
+      on-chrome-signin-aware-signed-out="_chromeSignout"></chrome-signin-aware>
+    <app-analytics
+      tracking-id="UA-18021184-6"
+      app-name="ARC"
+      app-id="[[appId]]"
+      app-version="[[appVersion]]"
+      disable-tracking="{{analyticsDisabled}}"
+      data-source="chrome-app">
+      <template is="dom-repeat" items="[[gaCustomMetrics]]">
+        <app-analytics-custom type="metric" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+      </template>
+      <template is="dom-repeat" items="[[gaCustomDimensions]]">
+        <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+      </template>
+    </app-analytics>
+    <app-analytics tracking-id="UA-18021184-14"
+      app-name="ARC"
+      app-id="[[appId]]"
+      app-version="[[appVersion]]"
+      data-source="chrome-app"
+      disable-tracking="{{analyticsDisabled}}">
+      <template is="dom-repeat" items="[[gaCustomMetrics]]">
+        <app-analytics-custom type="metric" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+      </template>
+      <template is="dom-repeat" items="[[gaCustomDimensions]]">
+        <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+      </template>
+    </app-analytics>
+    <app-analytics tracking-id="UA-71458341-2"
+      app-name="ARC"
+      app-id="[[appId]]"
+      app-version="[[appVersion]]"
+      data-source="chrome-app"
+      disable-tracking="{{analyticsDisabled}}">
+      <template is="dom-repeat" items="[[gaCustomMetrics]]">
+        <app-analytics-custom type="metric" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+      </template>
+      <template is="dom-repeat" items="[[gaCustomDimensions]]">
+        <app-analytics-custom type="dimension" index="[[item.index]]" value="[[item.value]]"></app-analytics-custom>
+      </template>
+    </app-analytics>
+    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('s', 'true')]]" on-keys-pressed="onSaveShift"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('s')]]" on-keys-pressed="onSave"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('o')]]" on-keys-pressed="onOpen"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('f')]]" on-keys-pressed="onSearch"></iron-a11y-keys>
+    <iron-a11y-keys target="{{document.body}}" keys="[[_computeA11yButtons('n')]]" on-keys-pressed="onNewWindow"></iron-a11y-keys>
+    <iron-a11y-keys target="[[document.body]]" keys="[[_computeA11yButtons('r')]]" on-keys-pressed="onSend"></iron-a11y-keys>
+    <network-state online="{{online}}" on-network-state-changed="_networkStateChanged"></network-state>
+    <app-logger></app-logger>
+    <arc-definitions></arc-definitions>
+    <variables-evaluator no-before-request></variables-evaluator>
+    <variables-manager></variables-manager>
+    <request-saver></request-saver>
+    <cookie-exchange external-id="apcedakaoficjlofohhcmkkljehnmebp"></cookie-exchange>
+    <cookie-jar></cookie-jar>
+    <response-history-saver></response-history-saver>
+    <url-history-saver></url-history-saver>
+    <arc-data-export></arc-data-export>
+    <arc-data-import></arc-data-import>
+    <chrome-file-export></chrome-file-export>
+    <arc-chrome-settings></arc-chrome-settings>
+    <authorization-data-saver></authorization-data-saver>
+    <project-model></project-model>
+    <request-model></request-model>
+    <arc-messages-service platform="chrome" on-unread-changed="_unreadMessagesChanged" messages="{{appMessages}}"></arc-messages-service>
+  </template>
+  <script src="scripts/libs/app.router.js"></script>
+  <script src="scripts/libs/app.utils.js"></script>
+  <script src="scripts/libs/app.drive.js"></script>
+  <script src="scripts/main.js"></script>
+  <script src="scripts/libs/drawer-resize.js"></script>
+</body>
+
+</html>

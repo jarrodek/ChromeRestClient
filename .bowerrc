@@ -2,6 +2,6 @@
   "analytics": true,
   "directory": "app/bower_components/",
   "scripts": {
-    "postinstall": "gulp bower-update"
+    "postinstall": "node tasks/bower-updated.js"
   }
 }

@@ -3,9 +3,9 @@
   "name": "Advanced REST client",
   "short_name": "ARC",
   "description": "The web developers helper program to create and test custom HTTP requests.",
-  "version": "10.0.13",
-  "version_name": "10.0.13-stable",
-  "minimum_chrome_version": "49",
+  "version": "11.0.0",
+  "version_name": "11.0.0-beta",
+  "minimum_chrome_version": "70",
   "author": "Pawel Psztyc",
   "icons": {
     "16": "assets/arc_icon_16.png",
@@ -38,8 +38,7 @@
     "client_id": "10525470235-vtm8ckt9v43r1gbbjqhp01tnnr0ol41j.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/drive.file",
-      "https://www.googleapis.com/auth/drive.install",
-      "https://www.googleapis.com/auth/drive.metadata.readonly"
+      "https://www.googleapis.com/auth/drive.install"
     ]
   },
   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCcwog3RvKBNlbE9nxa06ruwxAKR2kauzTVWYN4e1uFK8g3ScGxqG08gvuzgbOlbIO0TNHXdkJzf6DY0EPH0w8wUYDNlyav4DToaB2pdJAjcHOPsvUwktc0N0Y6ABrnreww23ZvNfqHuF0+u/Zzn3vGEFjHIcG2LGMXgP3R0QgdDQIDAQAB",
@@ -48,14 +47,6 @@
       "scripts": [
         "scripts/background.js"
       ]
-    }
-  },
-  "url_handlers": {
-    "google_drive_open": {
-      "matches": [
-        "https://api.chromerestclient.com/GDrive.html*"
-      ],
-      "title": "Open from Google Drive"
     }
   },
   "sandbox": {

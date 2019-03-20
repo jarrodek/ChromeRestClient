@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+  <title>cookie-manager test</title>
+  <script src="../../bower_components/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="../../bower_components/web-component-tester/browser.js"></script>
+  <link rel="import" href="../../bower_components/polymer/polymer-element.html">
+  <link rel="import" href="../../bower_components/cookie-parser/cookie-parser.html">
+  <link rel="import" href="../../elements/cookie-jar/cookie-jar.html">
+</head>
+
+<body>
+
+  <test-fixture id="basic">
+    <template>
+      <cookie-jar></cookie-jar>
+    </template>
+  </test-fixture>
+
+  <script>
+  suite('getCookies()', function() {
+    let element;
+    setup(function() {
+      element = fixture('basic');
+    });
+
+    function handler(e) {
+      e.detail.result = Promise.resolve();
+    }
+
+    teardown(() => {
+      element.removeEventListener('session-cookie-list-domain', handler);
+    });
+
+    test('Dispatches "session-cookie-list-domain" event', () => {
+      const spy = sinon.spy();
+      element.addEventListener('session-cookie-list-domain', spy);
+      element.getCookies();
+      assert.isTrue(spy.called);
+    });
+
+    test('Has url property', () => {
+      const url = 'test-url';
+      const spy = sinon.spy();
+      element.addEventListener('session-cookie-list-domain', spy);
+      element.getCookies(url);
+      assert.equal(spy.args[0][0].detail.url, url);
+    });
+
+    test('Returns "result" property', () => {
+      element.addEventListener('session-cookie-list-domain', handler);
+      const result = element.getCookies('test');
+      assert.typeOf(result.then, 'function');
+    });
+  });
+  </script>
+</body>
+
+</html>

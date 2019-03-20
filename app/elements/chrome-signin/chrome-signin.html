@@ -1,14 +1,10 @@
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="chrome-signin-aware.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
-<link rel="import" href="../../bower_components/font-roboto-local/roboto.html">
 <link rel="import" href="../../bower_components/paper-ripple/paper-ripple.html">
-<link rel="import" href="../../bower_components/paper-material/paper-material.html">
-<link rel="import" href="../../bower_components/iron-flex-layout/classes/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="google-icons.html">
-<!--
-TODO: if exporting this element don't forget to set dependencies.
--->
 <dom-module id="chrome-signin">
   <template>
     <style>
@@ -76,6 +72,7 @@ TODO: if exporting this element don't forget to set dependencies.
       vertical-align: middle;
       padding-right: .8em;
     }
+
     /*
  * Dark Theme
  */
@@ -105,6 +102,7 @@ TODO: if exporting this element don't forget to set dependencies.
     :host([noink]) .theme-dark.signedIn-true.additionalAuth-false:focus {
       background: #aaa;
     }
+
     /*
  * Light Theme
  */
@@ -135,6 +133,7 @@ TODO: if exporting this element don't forget to set dependencies.
     :host([noink]) .theme-light.signedIn-true.additionalAuth-false:focus {
       background: #aaa;
     }
+
     /*
  * Icon Only Width
  */
@@ -142,6 +141,7 @@ TODO: if exporting this element don't forget to set dependencies.
     .width-iconOnly .buttonText {
       display: none;
     }
+
     /*
  * Tall Height
  */
@@ -156,6 +156,7 @@ TODO: if exporting this element don't forget to set dependencies.
       height: 30px;
       margin: 8px;
     }
+
     /*
  * Short Height
  */
@@ -169,6 +170,7 @@ TODO: if exporting this element don't forget to set dependencies.
       height: 16px;
       margin: 3px;
     }
+
     /*
  * Branding
  */
@@ -230,6 +232,7 @@ TODO: if exporting this element don't forget to set dependencies.
     .brand-google-plus.theme-dark #ripple {
       color: #c43828;
     }
+
     /* Light Theme */
 
     .brand-google-plus.theme-light {
@@ -256,14 +259,18 @@ TODO: if exporting this element don't forget to set dependencies.
     }
 
     .button-container {
-      @apply(--layout-relative);
-      @apply(--layout-horizontal);
-      @apply(--layout-center-center);
+      @apply --layout-relative;
+      @apply --layout-horizontal;
+      @apply --layout-center-center;
+    }
+
+    .card {
+      @apply --shadow-elevation-2dp;
     }
     </style>
     <chrome-signin-aware id="aware" access-token="{{accessToken}}" scopes="{{scopes}}" signed-in="{{signedIn}}" is-authorized="{{isAuthorized}}" need-additional-auth="{{needAdditionalAuth}}"></chrome-signin-aware>
     <template is="dom-if" if="{{raised}}">
-      <paper-material hidden$="[[!signedIn]]" id="shadow" class="fit" elevation="2" animated></paper-material>
+      <div hidden$="[[!signedIn]]" id="shadow" class="fit card" animated></div>
     </template>
     <div id="button" hidden$="[[!signedIn]]" class$="[[_computeButtonClass(height, width, theme, isAuthorized, _brand, needAdditionalAuth)]]">
       <paper-ripple id="ripple" class="fit"></paper-ripple>
