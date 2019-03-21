@@ -2,9 +2,11 @@ const {ArcBuilder} = require('./arc-builder.js');
 
 class BetaBuilder extends ArcBuilder {
   constructor() {
-    super();
-    this.channel = 'beta';
+    super({
+      clientId: '10525470235-8jdqrmhel42n3cpr5qjib9p683inp93u.apps.googleusercontent.com',
+      channel: 'beta'
+    });
   }
 }
 
-new BetaBuilder().build();
+module.exports.BetaBuilder = BetaBuilder;

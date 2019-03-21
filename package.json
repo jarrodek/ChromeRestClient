@@ -13,6 +13,7 @@
     "babel-plugin-minify-mangle-names": "^0.5.0",
     "babel-preset-env": "^1.7.0",
     "browserify": "^16.2.3",
+    "chrome-webstore-upload": "^0.2.2",
     "crisper": "^2.0.1",
     "fs-extra": "^7.0.1",
     "gulp": "^4.0.0",
@@ -28,6 +29,6 @@
     "zlibjs": "^0.3.1"
   },
   "engines": {
-    "node" : ">=10.15.3" 
+    "node": ">=10.15.3"
   }
 }

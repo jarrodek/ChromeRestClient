@@ -13,16 +13,20 @@ if (major < 10) {
 }
 
 class ArcBuilder {
-  constructor() {
+  constructor(opts) {
+    this.clientId = opts.clientId;
+    if (!this.clientId) {
+      throw new Error('Client ID is not set.');
+    }
+    if (!opts.channel) {
+      throw new Error('channel is not set.');
+    }
     this.base = path.join(__dirname, '..', '..');
     this.appDir = path.join(this.base, 'app');
     this.buildBase = path.join(this.base, 'build');
     this.distBase = path.join(this.base, 'dist');
     this.manifestFile = path.join(this.appDir, 'manifest.json');
-  }
-
-  get defaultChannel() {
-    return 'stable';
+    this.channel = opts.channel;
   }
 
   set channel(value) {
@@ -48,9 +52,6 @@ class ArcBuilder {
   }
 
   build() {
-    if (!this.channel) {
-      this.channel = this.defaultChannel;
-    }
     return this.ensureBranding()
     .then(() => this.ensureBuildDir())
     .then(() => this.ensureDistdDir())
@@ -60,7 +61,8 @@ class ArcBuilder {
     .then(() => this.updateDistManifest())
     .then(() => this.zipApp())
     .then(() => {
-      console.log('Build complete');
+      console.log('Build complete.');
+      return this.bundlePath;
     })
     .catch((cause) => {
       console.error(cause);
@@ -99,6 +101,7 @@ class ArcBuilder {
   }
 
   copyApp() {
+    console.log('Copying application files to build directory...');
     return fs.copy(this.appDir, this.buildBase, {
       filter: this._copyFilter.bind(this)
     });
@@ -170,19 +173,24 @@ class ArcBuilder {
   }
 
   applyBranding() {
+    console.log('Applying branding...');
     return fs.copy(this.brandingPath, path.join(this.buildBase, 'assets'), {
       overwrite: true
     });
   }
 
   updateDistManifest() {
+    console.log('Updating manifest file...');
     const data = this.manifest;
     delete data.key;
+    data.oauth2.client_id = this.clientId;
+    data.version_name = data.version + '-' + this.channel;
     const file = path.join(this.buildBase, 'manifest.json');
     return fs.outputJson(file, data);
   }
 
   zipApp() {
+    console.log('Creating zip file...');
     return fs.remove(this.bundlePath)
     .then(() => fs.readdir(this.buildBase, {withFileTypes: true}))
     .then((files) => this._bundle(files));
@@ -195,12 +203,11 @@ class ArcBuilder {
         zlib: {level: 9}
       });
       archive.on('error', function(err) {
+        console.error(err);
         reject(err);
       });
       output.on('close', function() {
         console.log('Package size: ' + archive.pointer() + ' bytes');
-      });
-      output.on('end', function() {
         resolve();
       });
       archive.on('warning', function(err) {

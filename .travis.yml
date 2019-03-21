@@ -1,4 +1,5 @@
 language: node_js
+node_js: 10
 sudo: required
 dist: trusty
 addons:
@@ -18,8 +19,13 @@ before_script:
   - ln -s app/bower_components bower_components
 script:
   - wct
-node_js:
-  - stable
 env:
   global:
     - "CXX='g++-4.8'"
+after_success:
+  - if: branch =~ /^release\/beta$/
+    node tasks/release-beta.js
+  - if: branch = master
+    node tasks/release-stable.js
+  - if: branch = develop
+    node tasks/release-dev.js
