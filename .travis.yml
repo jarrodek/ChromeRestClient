@@ -10,6 +10,9 @@ addons:
     packages:
       - google-chrome-stable
       - g++-4.8
+env:
+  global:
+    - "CXX='g++-4.8'"
 before_script:
   - 'export DISPLAY=:99.0'
   - sh -e /etc/init.d/xvfb start
@@ -17,13 +20,10 @@ before_script:
   - npm i -g bower web-component-tester
   - bower i
   - ln -s app/bower_components bower_components
-script:
-  - wct
-env:
-  global:
-    - "CXX='g++-4.8'"
 jobs:
   include:
+    - stage: Test
+      script: wct
     - if: branch = master
       stage: Stable release
       script: node tasks/release-stable.js
