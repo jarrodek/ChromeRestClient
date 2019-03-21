@@ -20,6 +20,7 @@ cache:
     - $HOME/.npm
 install:
   - npm i -g bower web-component-tester
+  - npm i
   - bower i
 before_script:
   - ln -s app/bower_components bower_components
