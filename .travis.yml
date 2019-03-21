@@ -22,10 +22,14 @@ script:
 env:
   global:
     - "CXX='g++-4.8'"
-after_success:
-  - if: branch =~ /^release\/beta$/
-    node tasks/release-beta.js
-  - if: branch = master
-    node tasks/release-stable.js
-  - if: branch = develop
-    node tasks/release-dev.js
+jobs:
+  include:
+    - if: branch = master
+      stage: Stable release
+      script: node tasks/release-stable.js
+    - if: branch = develop
+      stage: Dev release
+      script: node tasks/release-dev.js
+    - if: branch =~ /^release\/beta$/
+      stage: Beta release
+      script: node tasks/release-beta.js
