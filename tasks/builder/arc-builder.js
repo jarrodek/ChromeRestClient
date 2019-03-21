@@ -184,7 +184,14 @@ class ArcBuilder {
     const data = this.manifest;
     delete data.key;
     data.oauth2.client_id = this.clientId;
+
+    const version = data.version;
+    data.version = version;
     data.version_name = data.version + '-' + this.channel;
+
+    data.name += '-' + this.channel;
+    data.short_name += '-' + this.channel;
+
     const file = path.join(this.buildBase, 'manifest.json');
     return fs.outputJson(file, data);
   }
