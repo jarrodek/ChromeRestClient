@@ -1,0 +1,87 @@
+<!--
+@license
+Copyright 2018 The Advanced REST client authors <arc@mulesoft.com>
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/api-console/api-console.html">
+<link rel="import" href="../../bower_components/raml-aware/raml-aware.html">
+<link rel="import" href="../../bower_components/amf-helper-mixin/amf-helper-mixin.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower_components/arc-file-drop-mixin/arc-file-drop-mixin.html">
+<dom-module id="apic-chrome">
+  <template>
+    <style>
+    :host {
+      display: block;
+      @apply --apic-chrome;
+    };
+
+    paper-spinner {
+      margin-left: 8px;
+    }
+
+    .error-toast {
+      background-color: var(--warning-primary-color, #FF7043);
+      color: var(--warning-contrast-color, #fff);
+      @apply --error-toast;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .loader {
+      height: 100%;
+      font-size: 16px;
+      @apply --layout-vertical;
+      @apply --layout-center-center;
+    }
+    .drop-target {
+      display: none;
+    }
+
+    :host([dragging]) .drop-target {
+      display: block;
+      @apply --layout-fit;
+      @apply --layout-vertical;
+      @apply --layout-center;
+      background-color: #fff;
+      border: 4px var(--drop-file-importer-header-background-color, var(--primary-color)) solid;
+    }
+    </style>
+    <raml-aware scope="apic" raml="[[amfModel]]"></raml-aware>
+    <api-documentation
+      data-route="api-console"
+      data-page="docs"
+      aware="apic"
+      selected="[[selected]]"
+      selected-type="[[selectedType]]"
+      handle-navigation-events
+      inline-methods
+      redirect-uri="https://auth.advancedrestclient.com/oauth-popup.html"
+      narrow="[[narrow]]"
+      scroll-target="[[scrollTarget]]"
+      hidden$="[[apiProcessing]]"></api-documentation>
+    <template is="dom-if" if="[[apiProcessing]]">
+      <div class="loader">
+        <p class="wait-message">Preparing your API experience</p>
+        <paper-progress indeterminate></paper-progress>
+      </div>
+    </template>
+    <paper-toast id="errorToast" class="error-toast" duration="5000"></paper-toast>
+    <section class="drop-target">
+      <p class="drop-message">Drop API file here</p>
+    </section>
+  </template>
+  <script src="apic-chrome.js"></script>
+</dom-module>

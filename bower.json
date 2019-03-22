@@ -70,7 +70,10 @@
     "file-reader": "advanced-rest-client/file-reader#^2.0.0",
     "arc-electron-payload-processor": "advanced-rest-client/arc-electron-payload-processor#^0.2.1",
     "arc-electron-default-theme": "advanced-rest-client/arc-electron-default-theme#^2.0.0",
-    "cookie-parser": "advanced-rest-client/cookie-parser#^2.0.0"
+    "cookie-parser": "advanced-rest-client/cookie-parser#^2.0.0",
+    "api-console": "mulesoft/api-console#^5.0.0",
+    "api-candidates-dialog": "advanced-rest-client/api-candidates-dialog#^2.0.0",
+    "exchange-search-panel": "advanced-rest-client/exchange-search-panel#^2.0.0"
   },
   "devDependencies": {
     "web-component-tester": "^6.5.0"

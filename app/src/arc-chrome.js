@@ -25,6 +25,10 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
           return console;
         }
       },
+      /**
+       * When true it is rendering API console view.
+       */
+      isApiConsole: {type: Boolean, value: false, readOnly: true},
 
       _variablesOverlayOpened: {
         type: Boolean,
@@ -110,11 +114,11 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
     super();
     this._openExternalHandler = this._openExternalHandler.bind(this);
     this._copyContentHandler = this._copyContentHandler.bind(this);
-    // this._apiDataHandler = this._apiDataHandler.bind(this);
-    // this._processStartHandler = this._processStartHandler.bind(this);
-    // this._processStopHandler = this._processStopHandler.bind(this);
-    // this._processErrorHandler = this._processErrorHandler.bind(this);
-    // this._exchangeAssetHandler = this._exchangeAssetHandler.bind(this);
+    this._apiDataHandler = this._apiDataHandler.bind(this);
+    this._processStartHandler = this._processStartHandler.bind(this);
+    this._processStopHandler = this._processStopHandler.bind(this);
+    this._processErrorHandler = this._processErrorHandler.bind(this);
+    this._exchangeAssetHandler = this._exchangeAssetHandler.bind(this);
     this.openWorkspace = this.openWorkspace.bind(this);
     this._googleAuthRequest = this._googleAuthRequest.bind(this);
     this.openLicense = this.openLicense.bind(this);
@@ -125,11 +129,11 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
     super.connectedCallback();
     window.addEventListener('open-external-url', this._openExternalHandler);
     window.addEventListener('content-copy', this._copyContentHandler);
-    // window.addEventListener('process-loading-start', this._processStartHandler);
-    // window.addEventListener('process-loading-stop', this._processStopHandler);
-    // window.addEventListener('process-error', this._processErrorHandler);
-    // window.addEventListener('api-data-ready', this._apiDataHandler);
-    // this.addEventListener('process-exchange-asset-data', this._exchangeAssetHandler);
+    window.addEventListener('process-loading-start', this._processStartHandler);
+    window.addEventListener('process-loading-stop', this._processStopHandler);
+    window.addEventListener('process-error', this._processErrorHandler);
+    window.addEventListener('api-data-ready', this._apiDataHandler);
+    this.addEventListener('process-exchange-asset-data', this._exchangeAssetHandler);
     this.addEventListener('request-workspace-append', this.openWorkspace);
     window.addEventListener('workspace-open-project-requests', this.openWorkspace);
     window.addEventListener('google-autorize', this._googleAuthRequest);
@@ -213,6 +217,14 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
       case 'themes-panel':
         id = 'themes-panel';
         path = 'themes-panel/themes-panel';
+        break;
+      case 'api-console':
+        id = 'api-console';
+        path = 'api-console/api-console';
+        break;
+      case 'exchange-search':
+        id = 'exchange-search-panel';
+        path = 'exchange-search-panel/exchange-search-panel';
         break;
       default:
         console.error(`The base route ${page} is not recognized`);
@@ -406,6 +418,9 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
    * Handler for the "back" icon click in main navigation.
    */
   _backHandler() {
+    if (this.isApiConsole) {
+      this._setIsApiConsole(false);
+    }
     this.openWorkspace();
   }
 
@@ -674,6 +689,166 @@ class ArcChrome extends ArcComponents.ArcAppMixin(Polymer.Element) {
   openTutorial() {
     const dialog = this.shadowRoot.querySelector('chrome-onboarding');
     dialog.opened = true;
+  }
+
+  /**
+   * Handler for `process-loading-start` custom event.
+   * Renders toast with message.
+   * @param {CustomEvent} e
+   */
+  _processStartHandler(e) {
+    const {id, message, indeterminate} = e.detail;
+    if (!id) {
+      console.warn('Invalid use of `process-loading-start` event');
+      return;
+    }
+    const toast = document.createElement('paper-toast');
+    toast.dataset.processId = id;
+    if (indeterminate) {
+      toast.duration = 0;
+    }
+    const container = document.createElement('div');
+    container.style.display = 'flex';
+    container.style.flexDirection = 'row';
+    container.style.alignItems = 'center';
+    const label = document.createElement('span');
+    label.innerText = message;
+    label.style.flex = 1;
+    label.style.flexBasis = '0.000000001px';
+    container.appendChild(label);
+    const spinner = document.createElement('paper-spinner');
+    spinner.active = true;
+    container.appendChild(spinner);
+    toast.appendChild(container);
+    document.body.appendChild(toast);
+    toast.opened = true;
+  }
+  /**
+   * Handler for `process-loading-stop` custom event.
+   * Removes previously set toast
+   * @param {CustomEvent} e
+   */
+  _processStopHandler(e) {
+    const {id} = e.detail;
+    if (!id) {
+      console.warn('Invalid use of `process-loading-stop` event');
+      return;
+    }
+    const node = document.body.querySelector(`[data-process-id="${id}"]`);
+    if (!node) {
+      return;
+    }
+    node.opened = false;
+    node.addEventListener('iron-overlay-closed', function f() {
+      node.removeEventListener('iron-overlay-closed', f);
+      node.parentNode.removeChild(node);
+    });
+  }
+  /**
+   * Handler for `process-error` custom event.
+   * Removes previously set progress toasts and adds new with error.
+   * @param {CustomEvent} e
+   */
+  _processErrorHandler(e) {
+    const nodes = document.body.querySelector(`[data-process-id]`);
+    for (let i = nodes.length - 1; i >= 0; i--) {
+      nodes[i].parentNode.removeChild(nodes[i]);
+    }
+    this.notifyError(e.detail.message);
+  }
+
+  _exchangeAssetHandler(e) {
+    if (e.defaultPrevented) {
+      return;
+    }
+    e.preventDefault();
+    const asset = e.detail;
+    let file;
+    const types = ['fat-raml', 'raml', 'oas'];
+    for (let i = 0, len = asset.files.length; i < len; i++) {
+      if (types.indexOf(asset.files[i].classifier) !== -1) {
+        file = asset.files[i];
+        break;
+      }
+    }
+    if (!file || !file.externalLink) {
+      this.notifyError('RAML data not found in the asset.');
+      return;
+    }
+    return this._loadApic()
+    .then(() => this._dispatchExchangeApiEvent(file))
+    .then((e) => {
+      if (!e.defaultPrevented) {
+        this.notifyError('API data processor not found.');
+      } else {
+        this._setIsApiConsole(true);
+        this.apiProcessing = true;
+        this._dispatchNavigate({
+          base: 'api-console'
+        });
+        return e.detail.result;
+      }
+    })
+    .then((api) => {
+      this._setApiData(api.model, api.type.type);
+    })
+    .catch((cause) => {
+      this.notifyError(cause.message);
+    });
+  }
+
+  _dispatchExchangeApiEvent(file) {
+    const e = new CustomEvent('api-process-link', {
+      bubbles: true,
+      composed: true,
+      cancelable: true,
+      detail: {
+        url: file.externalLink,
+        mainFile: file.mainFile,
+        md5: file.md5,
+        packaging: file.packaging
+      }
+    });
+    this.dispatchEvent(e);
+    return e;
+  }
+
+  _loadApic() {
+    return new Promise((resolve, reject) => {
+      Polymer.importHref('elements/apic-chrome/apic-chrome.html', () => {
+        this._loadingSources = false;
+        resolve();
+      }, () => {
+        this._loadingSources = false;
+        this._reportComponentLoadingError('apic-electron');
+        reject();
+      }, true);
+    });
+  }
+
+  _setApiData(api, type) {
+    return this._loadApic()
+    .then(() => {
+      this.$.apic.amf = api;
+      this.$.apic.apiType = type;
+      this._setIsApiConsole(true);
+      this.apiSelected = undefined;
+      this.apiSelectedType = undefined;
+      Polymer.RenderStatus.afterNextRender(this, () => {
+        this.apiSelected = 'summary';
+        this.apiSelectedType = 'summary';
+      });
+    });
+  }
+
+  _apiDataHandler(e) {
+    const {model, type} = e.detail;
+    this._setApiData(model, type.type)
+    .then(() => {
+      this._dispatchNavigate({
+        base: 'api-console'
+      });
+    });
   }
 }
 
